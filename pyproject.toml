@@ -1,0 +1,24 @@
+[tool.towncrier]
+package = "pulp-galaxy"
+filename = "CHANGES.rst"
+directory = "CHANGES/"
+title_format = "{version} ({project_date})"
+template = "CHANGES/.TEMPLATE.rst"
+issue_format = "`#{issue} <https://pulp.plan.io/issues/{issue}>`_"
+
+
+[tool.black]
+line-length = 100
+target-version = ["py36", "py37"]
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.venv
+  | _build
+  | build
+  | dist
+  | migrations
+)/
+'''
+

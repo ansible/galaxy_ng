@@ -1,0 +1,32 @@
+# This config represents the latest values used when running the plugin-template. Any settings that
+# were not present before running plugin-template have been added with their default values.
+
+additional_plugins: []
+black: true
+check_commit_message: true
+cherry_pick_automation: false
+coverage: false
+deploy_client_to_pypi: true
+deploy_client_to_rubygems: true
+deploy_daily_client_to_pypi: true
+deploy_daily_client_to_rubygems: true
+deploy_to_pypi: true
+docs_test: true
+plugin_app_label: galaxy
+plugin_camel: PulpGalaxy
+plugin_camel_short: Galaxy
+plugin_caps: PULP_GALAXY
+plugin_caps_short: GALAXY
+plugin_dash: pulp-galaxy
+plugin_dash_short: galaxy
+plugin_name: pulp_galaxy
+plugin_snake: pulp_galaxy
+pulp_settings: null
+pulpcore_branch: master
+pydocstyle: true
+pypi_username: null
+stable_branch: null
+test_bindings: true
+test_performance: false
+travis_notifications: null
+
