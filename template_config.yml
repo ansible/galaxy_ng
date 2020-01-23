@@ -6,11 +6,11 @@ black: true
 check_commit_message: true
 cherry_pick_automation: false
 coverage: false
-deploy_client_to_pypi: true
-deploy_client_to_rubygems: true
-deploy_daily_client_to_pypi: true
-deploy_daily_client_to_rubygems: true
-deploy_to_pypi: true
+deploy_client_to_pypi: false
+deploy_client_to_rubygems: false
+deploy_daily_client_to_pypi: false
+deploy_daily_client_to_rubygems: false
+deploy_to_pypi: false
 docs_test: true
 plugin_app_label: galaxy
 plugin_camel: PulpGalaxy
@@ -26,7 +26,7 @@ pulpcore_branch: master
 pydocstyle: true
 pypi_username: null
 stable_branch: null
-test_bindings: true
+test_bindings: false
 test_performance: false
 travis_notifications: null
 
