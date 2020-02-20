@@ -2,7 +2,10 @@
 
 from setuptools import find_packages, setup
 
-requirements = ["pulpcore>=3.0.0rc7"]
+requirements = [
+    "pulpcore>=3.1.1",
+    "pulp-ansible>=0.2.0b8",
+]
 
 setup(
     name="pulp-galaxy",
