@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('company', models.CharField(blank=True, max_length=64)),
                 ('email', models.CharField(blank=True, max_length=256)),
-                ('avatar_url', models.CharField(blank=True, max_length=256)),
+                ('avatar_url', models.URLField(blank=True, max_length=256)),
                 ('description', models.CharField(blank=True, max_length=256)),
                 ('resources', models.TextField(blank=True)),
             ],
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=32)),
-                ('url', models.CharField(max_length=256)),
+                ('url', models.URLField(max_length=256)),
                 ('namespace', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='links', to='galaxy.Namespace')),
             ],
         ),

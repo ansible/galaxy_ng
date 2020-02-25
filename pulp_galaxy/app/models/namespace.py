@@ -29,10 +29,10 @@ class Namespace(models.Model):
 
     # Fields
 
-    name = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=64, unique=True, blank=False)
     company = models.CharField(max_length=64, blank=True)
     email = models.CharField(max_length=256, blank=True)
-    avatar_url = models.CharField(max_length=256, blank=True)
+    avatar_url = models.URLField(max_length=256, blank=True)
     description = models.CharField(max_length=256, blank=True)
     resources = models.TextField(blank=True)
 
@@ -66,7 +66,7 @@ class NamespaceLink(models.Model):
 
     # Fields
     name = models.CharField(max_length=32)
-    url = models.CharField(max_length=256)
+    url = models.URLField(max_length=256)
 
     # References
     namespace = models.ForeignKey(
