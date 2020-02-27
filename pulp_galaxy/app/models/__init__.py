@@ -1,6 +1,5 @@
 from .auth import (
     Group,
-    GroupManager,
     User,
 )
 from .collectionimport import (
@@ -14,7 +13,6 @@ from .namespace import (
 
 __all__ = (
     'Group',
-    'GroupManager',
     'User',
     'CollectionImport',
     'Namespace',

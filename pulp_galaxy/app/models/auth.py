@@ -3,12 +3,14 @@ from django.contrib.auth import models as auth_models
 
 __all__ = (
     'SYSTEM_SCOPE',
+    'RH_PARTNER_ENGINEER_GROUP',
     'User',
     'Group',
 )
 
 
 SYSTEM_SCOPE = 'system'
+RH_PARTNER_ENGINEER_GROUP = f'{SYSTEM_SCOPE}:partner-engineers'
 
 
 class User(auth_models.AbstractUser):
