@@ -9,3 +9,9 @@ X_PULP_API_HOST = "localhost"
 X_PULP_API_PORT = 8000
 X_PULP_API_USER = "admin"
 X_PULP_API_PASSWORD = "admin"
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "pulp_galaxy.app.api.pagination.LimitOffsetPagination",
+    "dynaconf_merge": True,
+}
