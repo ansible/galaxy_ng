@@ -1,15 +1,15 @@
-# from .collection import (
-#     CollectionDetailSerializer,
-#     CollectionListSerializer,
-#     CollectionVersionSerializer,
-#     CertificationSerializer,
-#     CollectionVersionDetailSerializer,
-#     CollectionVersionBaseSerializer,
-# )
-# from .imports import (
-#     ImportTaskDetailSerializer,
-#     ImportTaskListSerializer,
-# )
+from .collection import (
+    CollectionDetailSerializer,
+    CollectionListSerializer,
+    CollectionVersionSerializer,
+    CertificationSerializer,
+    CollectionVersionDetailSerializer,
+    CollectionVersionBaseSerializer,
+)
+from .imports import (
+    ImportTaskDetailSerializer,
+    ImportTaskListSerializer,
+)
 from .namespace import (
     NamespaceSerializer,
     NamespaceSummarySerializer,
@@ -28,8 +28,8 @@ __all__ = (
     # 'CertificationSerializer',
     # 'CollectionVersionDetailSerializer',
     # 'CollectionVersionBaseSerializer',
-    # 'ImportTaskDetailSerializer',
-    # 'ImportTaskListSerializer',
+    'ImportTaskDetailSerializer',
+    'ImportTaskListSerializer',
     'NamespaceSerializer',
     'NamespaceSummarySerializer',
     'NamespaceUpdateSerializer',
