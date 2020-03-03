@@ -5,6 +5,7 @@ from setuptools import find_packages, setup
 requirements = [
     "pulpcore>=3.1.1",
     "pulp-ansible>=0.2.0b8",
+    "django-prometheus>=2.0.0"
 ]
 
 setup(
