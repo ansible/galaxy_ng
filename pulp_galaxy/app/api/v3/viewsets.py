@@ -43,14 +43,14 @@ class CollectionViewSet(viewsets.GenericViewSet):
         })
 
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
-        response = api.list(prefix=settings.API_PATH_PREFIX, **params)
+        response = api.list(prefix=settings.X_PULP_API_PREFIX, **params)
         return self.paginator.paginate_proxy_response(response.results, response.count)
 
     def retrieve(self, request, *args, **kwargs):
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
 
         response = api.get(
-            prefix=settings.API_PATH_PREFIX,
+            prefix=settings.X_PULP_API_PREFIX,
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name']
         )
@@ -73,7 +73,7 @@ class CollectionViewSet(viewsets.GenericViewSet):
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
 
         response = api.put(
-            prefix=settings.API_PATH_PREFIX,
+            prefix=settings.X_PULP_API_PREFIX,
             namespace=namespace,
             name=name,
             collection=collection,
@@ -96,7 +96,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
 
         api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())
         response = api.list(
-            prefix=settings.API_PATH_PREFIX,
+            prefix=settings.X_PULP_API_PREFIX,
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name'],
             **params,
@@ -111,7 +111,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
     def retrieve(self, request, *args, **kwargs):
         api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())
         response = api.get(
-            prefix=settings.API_PATH_PREFIX,
+            prefix=settings.X_PULP_API_PREFIX,
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name'],
             version=self.kwargs['version'],
@@ -132,7 +132,7 @@ class CollectionImportViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk):
         api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
-        response = api.get(prefix=settings.API_PATH_PREFIX, id=pk)
+        response = api.get(prefix=settings.X_PULP_API_PREFIX, id=pk)
         return Response(response.to_dict())
 
 
@@ -161,7 +161,7 @@ class CollectionArtifactUploadView(views.APIView):
         url = '{host}/{prefix}/{path}'.format(
             host=api.configuration.host,
             path='v3/artifacts/collections/',
-            prefix=settings.API_PATH_PREFIX
+            prefix=settings.X_PULP_API_PREFIX
         )
         headers = {}
         headers.update(api.default_headers)

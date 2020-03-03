@@ -5,5 +5,5 @@ from pulp_galaxy.app.api import urls as api_urls
 
 app_name = "galaxy"
 urlpatterns = [
-    path(settings.X_GALAXY_API_ROOT, include(api_urls)),
+    path(f"{settings.API_PATH_PREFIX}/", include(api_urls)),
 ]

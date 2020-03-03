@@ -181,7 +181,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         certification = serializer.validated_data.get('certification')
 
         response = api.set_certified(
-            prefix=settings.API_PATH_PREFIX,
+            prefix=settings.X_PULP_API_PREFIX,
             namespace=namespace,
             name=name,
             version=version,
@@ -220,7 +220,7 @@ class CollectionImportViewSet(viewsets.GenericViewSet):
 
         results = []
         for task in page:
-            task_info = api.get(prefix=settings.API_PATH_PREFIX, id=str(task.pk))
+            task_info = api.get(prefix=settings.X_PULP_API_PREFIX, id=str(task.pk))
             data = serializers.ImportTaskListSerializer(task_info, context={'task_obj': task}).data
             results.append(data)
         return self.get_paginated_response(results)
@@ -228,6 +228,6 @@ class CollectionImportViewSet(viewsets.GenericViewSet):
     def retrieve(self, request, *args, **kwargs):
         api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
         task = self.get_object()
-        task_info = api.get(prefix=settings.API_PATH_PREFIX, id=self.kwargs['task_id'])
+        task_info = api.get(prefix=settings.X_PULP_API_PREFIX, id=self.kwargs['task_id'])
         data = serializers.ImportTaskDetailSerializer(task_info, context={'task_obj': task}).data
         return Response(data)
