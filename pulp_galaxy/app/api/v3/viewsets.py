@@ -6,16 +6,14 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import StreamingHttpResponse, HttpResponseRedirect
 
-from rest_framework import views
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework.settings import api_settings
 
 import galaxy_pulp
 import requests
 
+from pulp_galaxy.app.api import base as api_base
 from pulp_galaxy.app.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
 from pulp_galaxy.app.common import pulp
 from pulp_galaxy.app.common import metrics
@@ -27,10 +25,10 @@ from pulp_galaxy.app import constants
 log = logging.getLogger(__name__)
 
 
-class CollectionViewSet(viewsets.GenericViewSet):
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + \
-        [permissions.IsNamespaceOwnerOrPartnerEngineer]
-
+class CollectionViewSet(api_base.GenericViewSet):
+    permission_classes = api_base.GALAXY_PERMISSION_CLASSES + [
+        permissions.IsNamespaceOwnerOrPartnerEngineer,
+    ]
     serializer_class = CollectionSerializer
 
     def list(self, request, *args, **kwargs):
@@ -82,7 +80,7 @@ class CollectionViewSet(viewsets.GenericViewSet):
         return Response(response.to_dict())
 
 
-class CollectionVersionViewSet(viewsets.GenericViewSet):
+class CollectionVersionViewSet(api_base.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)
@@ -128,7 +126,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         return request.build_absolute_uri(relative_url)
 
 
-class CollectionImportViewSet(viewsets.ViewSet):
+class CollectionImportViewSet(api_base.ViewSet):
 
     def retrieve(self, request, pk):
         api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
@@ -136,10 +134,11 @@ class CollectionImportViewSet(viewsets.ViewSet):
         return Response(response.to_dict())
 
 
-class CollectionArtifactUploadView(views.APIView):
-    # permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
-    #     permissions.IsNamespaceOwner,
-    # ]
+class CollectionArtifactUploadView(api_base.APIView):
+
+    permission_classes = api_base.GALAXY_PERMISSION_CLASSES + [
+        permissions.IsNamespaceOwner
+    ]
 
     def post(self, request, *args, **kwargs):
         metrics.collection_import_attempts.inc()
@@ -220,7 +219,7 @@ class CollectionArtifactUploadView(views.APIView):
         return post_params
 
 
-class CollectionArtifactDownloadView(views.APIView):
+class CollectionArtifactDownloadView(api_base.APIView):
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 

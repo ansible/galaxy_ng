@@ -2,7 +2,6 @@ import galaxy_pulp
 from django.conf import settings
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
-from rest_framework import viewsets
 from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
@@ -10,17 +9,16 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from pulp_galaxy.app import models
+from pulp_galaxy.app.api import base as api_base
 from pulp_galaxy.app.api import permissions
 from pulp_galaxy.app.api.ui import serializers
 from pulp_galaxy.app.common import pulp
 from pulp_galaxy.app import constants
 
 
-class CollectionViewSet(viewsets.ViewSet):
+class CollectionViewSet(api_base.ViewSet):
     lookup_url_kwarg = 'collection'
     lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+'
-
-    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)
@@ -123,7 +121,7 @@ class CollectionViewSet(viewsets.ViewSet):
         return namespaces
 
 
-class CollectionVersionViewSet(viewsets.GenericViewSet):
+class CollectionVersionViewSet(api_base.GenericViewSet):
     lookup_url_kwarg = 'version'
     lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+/[0-9A-Za-z.+-]+'
 
@@ -163,7 +161,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         methods=["PUT"],
         detail=True,
         url_path="certified",
-        permission_classes=api_settings.DEFAULT_PERMISSION_CLASSES + [
+        permission_classes=api_base.GALAXY_PERMISSION_CLASSES + [
             permissions.IsPartnerEngineer
         ],
         serializer_class=serializers.CertificationSerializer
@@ -203,7 +201,7 @@ class CollectionImportFilter(filterset.FilterSet):
         fields = ['namespace', 'name', 'version']
 
 
-class CollectionImportViewSet(viewsets.GenericViewSet):
+class CollectionImportViewSet(api_base.GenericViewSet):
     lookup_field = 'task_id'
     queryset = models.CollectionImport.objects.all()
 

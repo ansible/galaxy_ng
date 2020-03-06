@@ -3,6 +3,8 @@
 API_PATH_PREFIX = "api/galaxy"
 
 
+# FIXME(cutwater): To be removed after viewsets stop proxying API requests
+#                  to pulp_ansible.
 X_PULP_API_HOST = "localhost"
 X_PULP_API_PORT = 8000
 X_PULP_API_USER = "admin"
@@ -10,10 +12,16 @@ X_PULP_API_PASSWORD = "admin"
 X_PULP_API_PREFIX = "pulp_ansible/galaxy/automation-hub/api"
 
 
-REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "pulp_galaxy.app.api.pagination.LimitOffsetPagination",
-    "dynaconf_merge": True,
-}
+GALAXY_PAGINATION_CLASS = "pulp_galaxy.app.api.pagination.LimitOffsetPagination"
+GALAXY_AUTHENTICATION_CLASSES = [
+    "rest_framework.authentication.SessionAuthentication",
+    "rest_framework.authentication.BasicAuthentication",
+    # "pulp_galaxy.app.auth.auth.RHIdentityAuthentication",
+]
+GALAXY_PERMISSION_CLASSES = [
+    'rest_framework.permissions.IsAuthenticated',
+#    'pulp_galaxy.app.auth.auth.RHEntitlementRequired',
+]
 
 PULP_CONTENT_HOST = "pulp-content"
 PULP_CONTENT_PORT = 24816

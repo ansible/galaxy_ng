@@ -2,13 +2,12 @@ from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 
 from rest_framework import mixins
-from rest_framework import viewsets
 from rest_framework import status
-from rest_framework.settings import api_settings
 from rest_framework.response import Response
 
 from pulp_galaxy.app import models
 from pulp_galaxy.app.api import permissions
+from pulp_galaxy.app.api import base as api_base
 from pulp_galaxy.app.api.ui import serializers
 from pulp_galaxy.app.auth import auth
 from pulp_galaxy.app.models import auth as auth_models
@@ -46,15 +45,14 @@ class NamespaceViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    api_base.GenericViewSet,
 ):
     lookup_field = "name"
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+    permission_classes = api_base.GALAXY_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwnerOrPartnerEngineer,
     ]
 
     filter_backends = (DjangoFilterBackend,)
-
     filterset_class = NamespaceFilter
 
     def create(self, request, *args, **kwargs):

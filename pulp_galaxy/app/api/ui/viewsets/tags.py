@@ -1,10 +1,10 @@
 import galaxy_pulp
-from rest_framework import viewsets
 
 from pulp_galaxy.app.common import pulp
+from pulp_galaxy.app.api import base as api_base
 
 
-class TagsViewSet(viewsets.GenericViewSet):
+class TagsViewSet(api_base.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)
