@@ -35,4 +35,4 @@ class CollectionImport(models.Model):
         ordering = ['-task_id']
 
     def get_absolute_url(self):
-        return reverse('api:v3:collection-imports', args=[str(self.task_id)])
+        return reverse('galaxy:api:v3:collection-import', args=[str(self.task_id)])

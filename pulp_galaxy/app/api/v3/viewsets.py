@@ -5,6 +5,7 @@ from urllib import parse as urlparse
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import StreamingHttpResponse, HttpResponseRedirect
+from django.urls import reverse
 
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.generics import get_object_or_404
@@ -42,7 +43,8 @@ class CollectionViewSet(api_base.GenericViewSet):
 
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
         response = api.list(prefix=settings.X_PULP_API_PREFIX, **params)
-        return self.paginator.paginate_proxy_response(response.results, response.count)
+        data = list(map(self._fix_item_urls, response.results))
+        return self.paginator.paginate_proxy_response(data, response.count)
 
     def retrieve(self, request, *args, **kwargs):
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
@@ -52,6 +54,7 @@ class CollectionViewSet(api_base.GenericViewSet):
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name']
         )
+        response = self._fix_item_urls(response)
 
         return Response(response)
 
@@ -79,6 +82,26 @@ class CollectionViewSet(api_base.GenericViewSet):
 
         return Response(response.to_dict())
 
+    @staticmethod
+    def _fix_item_urls(data):
+        namespace = data['namespace']
+        name = data['name']
+        highest_version = data['highest_version']['version']
+
+        data['href'] = reverse(
+            'galaxy:api:v3:collection',
+            kwargs=dict(namespace=namespace, name=name)
+        )
+        data['versions_url'] = reverse(
+            'galaxy:api:v3:collection-version-list',
+            kwargs=dict(namespace=namespace, name=name)
+        )
+        data['highest_version']['href'] = reverse(
+            'galaxy:api:v3:collection-version',
+            kwargs=dict(namespace=namespace, name=name, version=highest_version)
+        )
+        return data
+
 
 class CollectionVersionViewSet(api_base.GenericViewSet):
 
@@ -104,6 +127,7 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
         if not response.results:
             raise NotFound()
 
+        self._fix_list_urls(response.results)
         return self.paginator.paginate_proxy_response(response.results, response.count)
 
     def retrieve(self, request, *args, **kwargs):
@@ -114,6 +138,7 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
             name=self.kwargs['name'],
             version=self.kwargs['version'],
         )
+        self._fix_retrieve_url(response)
         response['download_url'] = self._transform_pulp_url(request, response['download_url'])
         return Response(response)
 
@@ -124,6 +149,31 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
         # Build relative URL by stripping scheme and netloc
         relative_url = urlparse.urlunsplit(('', '') + urlparts[2:])
         return request.build_absolute_uri(relative_url)
+
+    def _fix_list_urls(self, data):
+        namespace = self.kwargs['namespace']
+        name = self.kwargs['name']
+
+        for item in data:
+            version = item['version']
+            item['href'] = reverse(
+                'galaxy:api:v3:collection-version',
+                kwargs=dict(namespace=namespace, name=name, version=version)
+            )
+
+    def _fix_retrieve_url(self, data):
+        namespace = self.kwargs['namespace']
+        name = self.kwargs['name']
+        version = self.kwargs['version']
+
+        data['href'] = reverse(
+            'galaxy:api:v3:collection-version',
+            kwargs=dict(namespace=namespace, name=name, version=version)
+        )
+        data['collection'] = reverse(
+            'galaxy:api:v3:collection',
+            kwargs=dict(namespace=namespace, name=name)
+        )
 
 
 class CollectionImportViewSet(api_base.ViewSet):
@@ -194,7 +244,7 @@ class CollectionArtifactUploadView(api_base.APIView):
         log.info('Publishing of artifact %s to namespace=%s by user=%s created pulp import task_id=%s', # noqa
                  data['file'].name, namespace, request.user, task_detail.id)
 
-        models.CollectionImport.objects.create(
+        import_obj = models.CollectionImport.objects.create(
             task_id=task_detail.id,
             created_at=task_detail.created_at,
             namespace=namespace,
@@ -203,7 +253,10 @@ class CollectionArtifactUploadView(api_base.APIView):
         )
 
         metrics.collection_import_successes.inc()
-        return Response(data=upload_response_data, status=upload_response.status)
+        return Response(
+            data={'task': import_obj.get_absolute_url()},
+            status=upload_response.status
+        )
 
     @staticmethod
     def _prepare_post_params(data):

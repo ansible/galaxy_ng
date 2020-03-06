@@ -19,4 +19,4 @@ class SlashApiRedirectView(views.APIView):
     This is a workaround for https://github.com/ansible/ansible/issues/62073.
     This can be removed when ansible-galaxy stops appending '/api' to the url."""
     def get(self, request):
-        return HttpResponseRedirect(reverse('api:root'), status=307)
+        return HttpResponseRedirect(reverse('galaxy:api:root'), status=307)
