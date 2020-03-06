@@ -46,6 +46,12 @@ else
 fi
 
 
+if [ -e $TRAVIS_BUILD_DIR/../pulp_ansible ]; then
+  PULP_ANSIBLE=./pulp_ansible
+else
+  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@master
+fi
+
 if [ -n "$TRAVIS_TAG" ]; then
   # Install the plugin only and use published PyPI packages for the rest
   cat > vars/vars.yaml << VARSYAML
@@ -54,8 +60,10 @@ images:
   - galaxy_ng-${TAG}:
       image_name: galaxy_ng
       tag: $TAG
+      pulpcore: pulpcore
       plugins:
         - ./galaxy_ng
+        - pulp_ansible
 VARSYAML
 else
   cat > vars/vars.yaml << VARSYAML
@@ -67,12 +75,14 @@ images:
       pulpcore: ./pulpcore
       plugins:
         - ./galaxy_ng
+        - $PULP_ANSIBLE
 VARSYAML
 fi
 ansible-playbook -v build.yaml
 
 cd $TRAVIS_BUILD_DIR/../pulp-operator
 # Tell pulp-perator to deploy our image
+# NOTE: With k3s 1.17, $TAG must be quoted. So that 3.0 does not become 3.
 cat > deploy/crds/pulpproject_v1alpha1_pulp_cr.yaml << CRYAML
 apiVersion: pulpproject.org/v1alpha1
 kind: Pulp
