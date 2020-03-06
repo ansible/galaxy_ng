@@ -278,9 +278,9 @@ class CollectionArtifactDownloadView(api_base.APIView):
 
         # NOTE(cutwater): Using urllib3 because it's already a dependency of pulp_galaxy
         url = 'http://{host}:{port}/{prefix}/automation-hub/{filename}'.format(
-            host=settings.PULP_CONTENT_HOST,
-            port=settings.PULP_CONTENT_PORT,
-            prefix=settings.PULP_CONTENT_PATH_PREFIX.strip('/'),
+            host=settings.X_PULP_CONTENT_HOST,
+            port=settings.X_PULP_CONTENT_PORT,
+            prefix=settings.X_PULP_CONTENT_PATH_PREFIX.strip('/'),
             filename=self.kwargs['filename'],
         )
         response = requests.get(url, stream=True, allow_redirects=False)
