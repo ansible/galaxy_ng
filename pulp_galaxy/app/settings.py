@@ -8,6 +8,7 @@ AUTH_USER_MODEL = 'galaxy.user'
 # Local rest framework settings
 # -----------------------------
 
+GALAXY_EXCEPTION_HANDLER = "pulp_galaxy.app.api.exceptions.exception_handler"
 GALAXY_PAGINATION_CLASS = "pulp_galaxy.app.api.pagination.LimitOffsetPagination"
 GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
