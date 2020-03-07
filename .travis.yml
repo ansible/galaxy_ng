@@ -17,7 +17,6 @@ python:
 env:
   matrix:
     - TEST=pulp
-    - TEST=docs
 services:
   - postgresql
   - redis-server
