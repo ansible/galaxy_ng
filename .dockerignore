@@ -1,0 +1,9 @@
+# Git
+.git/
+
+# Python
+venv/
+.venv/
+*.egg-info/
+pip-wheel-metadata/
+**/__pycache__/
