@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 
-from pulp_galaxy.app.api import base as api_base
-from pulp_galaxy.app.api import permissions
-from pulp_galaxy.app.api.ui import serializers
+from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api import permissions
+from galaxy_ng.app.api.ui import serializers
 
 
 class CurrentUserViewSet(api_base.GenericViewSet):

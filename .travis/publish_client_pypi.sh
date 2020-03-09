@@ -15,7 +15,7 @@ django-admin runserver 24817 >> ~/django_runserver.log 2>&1 &
 sleep 5
 
 cd "${TRAVIS_BUILD_DIR}"
-export REPORTED_VERSION=$(http :24817/pulp/api/v3/status/ | jq --arg plugin pulp_galaxy -r '.versions[] | select(.component == $plugin) | .version')
+export REPORTED_VERSION=$(http :24817/pulp/api/v3/status/ | jq --arg plugin galaxy_ng -r '.versions[] | select(.component == $plugin) | .version')
 export DESCRIPTION="$(git describe --all --exact-match `git rev-parse HEAD`)"
 if [[ $DESCRIPTION == 'tags/'$REPORTED_VERSION ]]; then
   export VERSION=${REPORTED_VERSION}
@@ -37,8 +37,8 @@ cd
 git clone https://github.com/pulp/pulp-openapi-generator.git
 cd pulp-openapi-generator
 
-./generate.sh pulp_galaxy python $VERSION
-cd pulp_galaxy-client
+./generate.sh galaxy_ng python $VERSION
+cd galaxy_ng-client
 python setup.py sdist bdist_wheel --python-tag py3
 twine check dist/* || exit 1
 twine upload dist/* -u pulp -p $PYPI_PASSWORD

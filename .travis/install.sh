@@ -51,22 +51,22 @@ if [ -n "$TRAVIS_TAG" ]; then
   cat > vars/vars.yaml << VARSYAML
 ---
 images:
-  - pulp_galaxy-${TAG}:
-      image_name: pulp_galaxy
+  - galaxy_ng-${TAG}:
+      image_name: galaxy_ng
       tag: $TAG
       plugins:
-        - ./pulp_galaxy
+        - ./galaxy_ng
 VARSYAML
 else
   cat > vars/vars.yaml << VARSYAML
 ---
 images:
-  - pulp_galaxy-${TAG}:
-      image_name: pulp_galaxy
+  - galaxy_ng-${TAG}:
+      image_name: galaxy_ng
       tag: $TAG
       pulpcore: ./pulpcore
       plugins:
-        - ./pulp_galaxy
+        - ./galaxy_ng
 VARSYAML
 fi
 ansible-playbook -v build.yaml
@@ -84,7 +84,7 @@ spec:
     access_mode: "ReadWriteOnce"
     # We have a little over 40GB free on Travis VMs/instances
     size: "40Gi"
-  image: pulp_galaxy
+  image: galaxy_ng
   tag: $TAG
   database_connection:
     username: pulp

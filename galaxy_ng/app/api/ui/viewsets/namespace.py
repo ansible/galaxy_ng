@@ -5,12 +5,12 @@ from rest_framework import mixins
 from rest_framework import status
 from rest_framework.response import Response
 
-from pulp_galaxy.app import models
-from pulp_galaxy.app.api import permissions
-from pulp_galaxy.app.api import base as api_base
-from pulp_galaxy.app.api.ui import serializers
-from pulp_galaxy.app.auth import auth
-from pulp_galaxy.app.models import auth as auth_models
+from galaxy_ng.app import models
+from galaxy_ng.app.api import permissions
+from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.auth import auth
+from galaxy_ng.app.models import auth as auth_models
 
 
 RH_PE_ACCOUNT_SCOPE = 'system:partner-engineers'

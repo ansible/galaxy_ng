@@ -5,9 +5,9 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, SlugRelatedField
 
-from pulp_galaxy.app import models
-from pulp_galaxy.app.models import auth as auth_models
-from pulp_galaxy.app.auth import auth
+from galaxy_ng.app import models
+from galaxy_ng.app.models import auth as auth_models
+from galaxy_ng.app.auth import auth
 
 
 class NamespaceLinkSerializer(ModelSerializer):

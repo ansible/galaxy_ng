@@ -1,7 +1,7 @@
 import galaxy_pulp
 
-from pulp_galaxy.app.common import pulp
-from pulp_galaxy.app.api import base as api_base
+from galaxy_ng.app.common import pulp
+from galaxy_ng.app.api import base as api_base
 
 
 class TagsViewSet(api_base.GenericViewSet):

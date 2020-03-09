@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-from pulp_galaxy.app.models import Namespace
-from pulp_galaxy.app.models.auth import SYSTEM_SCOPE
+from galaxy_ng.app.models import Namespace
+from galaxy_ng.app.models.auth import SYSTEM_SCOPE
 
 
 class IsPartnerEngineer(BasePermission):

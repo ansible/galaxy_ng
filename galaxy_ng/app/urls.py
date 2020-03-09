@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import include, path
 
-from pulp_galaxy.app.api import urls as api_urls
+from galaxy_ng.app.api import urls as api_urls
 
 app_name = "galaxy"
 urlpatterns = [

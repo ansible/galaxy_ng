@@ -44,8 +44,8 @@ if [ "$TEST" = 'bindings' ]; then
 
   ./generate.sh pulpcore python
   pip install ./pulpcore-client
-  ./generate.sh pulp_galaxy python
-  pip install ./pulp_galaxy-client
+  ./generate.sh galaxy_ng python
+  pip install ./galaxy_ng-client
 
   python $TRAVIS_BUILD_DIR/.travis/test_bindings.py
 
@@ -62,13 +62,13 @@ if [ "$TEST" = 'bindings' ]; then
   gem install --both ./pulpcore_client-0.gem
   cd ..
 
-  rm -rf ./pulp_galaxy-client
+  rm -rf ./galaxy_ng-client
 
-  ./generate.sh pulp_galaxy ruby
+  ./generate.sh galaxy_ng ruby
 
-  cd pulp_galaxy-client
-  gem build pulp_galaxy_client
-  gem install --both ./pulp_galaxy_client-0.gem
+  cd galaxy_ng-client
+  gem build galaxy_ng_client
+  gem install --both ./galaxy_ng_client-0.gem
   cd ..
 
   ruby $TRAVIS_BUILD_DIR/.travis/test_bindings.rb
@@ -88,7 +88,7 @@ cat unittest_requirements.txt | $CMD_STDIN_PREFIX bash -c "cat > /tmp/test_requi
 $CMD_PREFIX pip3 install -r /tmp/test_requirements.txt
 
 # Run unit tests.
-$CMD_PREFIX bash -c "PULP_DATABASES__default__USER=postgres django-admin test --noinput /usr/local/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/pulp_galaxy/tests/unit/"
+$CMD_PREFIX bash -c "PULP_DATABASES__default__USER=postgres django-admin test --noinput /usr/local/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/galaxy_ng/tests/unit/"
 
 # Note: This function is in the process of being merged into after_failure
 show_logs_and_return_non_zero() {
@@ -107,9 +107,9 @@ set -u
 if [[ "$TEST" == "performance" ]]; then
   echo "--- Performance Tests ---"
   if [[ -z ${PERFORMANCE_TEST+x} ]]; then
-    pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 pulp_galaxy.tests.performance || show_logs_and_return_non_zero
+    pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance || show_logs_and_return_non_zero
   else
-    pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 pulp_galaxy.tests.performance.test_$PERFORMANCE_TEST || show_logs_and_return_non_zero
+    pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance.test_$PERFORMANCE_TEST || show_logs_and_return_non_zero
   fi
   exit
 fi
@@ -117,7 +117,7 @@ fi
 if [ -f $FUNC_TEST_SCRIPT ]; then
     $FUNC_TEST_SCRIPT
 else
-    pytest -v -r sx --color=yes --pyargs pulp_galaxy.tests.functional || show_logs_and_return_non_zero
+    pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional || show_logs_and_return_non_zero
 fi
 
 if [ -f $POST_SCRIPT ]; then

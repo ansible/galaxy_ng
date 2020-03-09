@@ -5,7 +5,7 @@ import django.contrib.auth.validators
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
-import pulp_galaxy.app.models.auth
+import galaxy_ng.app.models.auth
 
 
 class Migration(migrations.Migration):
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
             },
             bases=('auth.group',),
             managers=[
-                ('objects', pulp_galaxy.app.models.auth.GroupManager()),
+                ('objects', galaxy_ng.app.models.auth.GroupManager()),
             ],
         ),
         migrations.CreateModel(

@@ -4,7 +4,7 @@ import mimetypes
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, _get_error_details
 
-from pulp_galaxy.app.api.utils import parse_collection_filename
+from galaxy_ng.app.api.utils import parse_collection_filename
 
 logger = logging.getLogger(__name__)
 

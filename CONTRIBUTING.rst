@@ -1,13 +1,13 @@
 Contributing
 ============
 
-To contribute to the ``pulp-galaxy`` package follow this process:
+To contribute to the ``galaxy-ng`` package follow this process:
 
 1. Clone the GitHub repo
 2. Make a change
 3. Make sure all tests passed
 4. Add a file into CHANGES folder (Changelog update).
-5. Commit changes to own ``pulp_galaxy`` clone
+5. Commit changes to own ``galaxy-ng`` clone
 6. Make pull request from github page for your clone against master branch
 
 

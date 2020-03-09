@@ -115,7 +115,7 @@ fi
 
 pip install ansible
 
-cd pulp_galaxy
+cd galaxy_ng
 
 if [ -f $POST_BEFORE_INSTALL ]; then
     $POST_BEFORE_INSTALL

@@ -8,12 +8,12 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
-from pulp_galaxy.app import models
-from pulp_galaxy.app.api import base as api_base
-from pulp_galaxy.app.api import permissions
-from pulp_galaxy.app.api.ui import serializers
-from pulp_galaxy.app.common import pulp
-from pulp_galaxy.app import constants
+from galaxy_ng.app import models
+from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api import permissions
+from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.common import pulp
+from galaxy_ng.app import constants
 
 
 class CollectionViewSet(api_base.ViewSet):

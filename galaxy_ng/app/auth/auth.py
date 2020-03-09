@@ -7,7 +7,7 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import BasePermission
 
-from pulp_galaxy.app.models.auth import Group, User
+from galaxy_ng.app.models.auth import Group, User
 
 
 RH_ACCOUNT_SCOPE = 'rh-identity-account'

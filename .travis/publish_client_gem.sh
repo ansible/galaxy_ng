@@ -17,7 +17,7 @@ django-admin runserver 24817 >> ~/django_runserver.log 2>&1 &
 sleep 5
 
 cd $TRAVIS_BUILD_DIR
-export REPORTED_VERSION=$(http :24817/pulp/api/v3/status/ | jq --arg plugin pulp_galaxy -r '.versions[] | select(.component == $plugin) | .version')
+export REPORTED_VERSION=$(http :24817/pulp/api/v3/status/ | jq --arg plugin galaxy_ng -r '.versions[] | select(.component == $plugin) | .version')
 export DESCRIPTION="$(git describe --all --exact-match `git rev-parse HEAD`)"
 if [[ $DESCRIPTION == 'tags/'$REPORTED_VERSION ]]; then
   export VERSION=${REPORTED_VERSION}
@@ -28,7 +28,7 @@ else
   export VERSION=${REPORTED_VERSION}${EPOCH}
 fi
 
-export response=$(curl --write-out %{http_code} --silent --output /dev/null https://rubygems.org/gems/pulp_galaxy_client/versions/$VERSION)
+export response=$(curl --write-out %{http_code} --silent --output /dev/null https://rubygems.org/gems/galaxy_ng_client/versions/$VERSION)
 
 if [ "$response" == "200" ];
 then
@@ -39,8 +39,8 @@ cd
 git clone https://github.com/pulp/pulp-openapi-generator.git
 cd pulp-openapi-generator
 
-./generate.sh pulp_galaxy ruby $VERSION
-cd pulp_galaxy-client
-gem build pulp_galaxy_client
-GEM_FILE="$(ls | grep pulp_galaxy_client-)"
+./generate.sh galaxy_ng ruby $VERSION
+cd galaxy_ng-client
+gem build galaxy_ng_client
+GEM_FILE="$(ls | grep galaxy_ng_client-)"
 gem push ${GEM_FILE}

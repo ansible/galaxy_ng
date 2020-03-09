@@ -14,13 +14,13 @@ from rest_framework.response import Response
 import galaxy_pulp
 import requests
 
-from pulp_galaxy.app.api import base as api_base
-from pulp_galaxy.app.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
-from pulp_galaxy.app.common import pulp
-from pulp_galaxy.app.common import metrics
-from pulp_galaxy.app.api import permissions
-from pulp_galaxy.app import models
-from pulp_galaxy.app import constants
+from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
+from galaxy_ng.app.common import pulp
+from galaxy_ng.app.common import metrics
+from galaxy_ng.app.api import permissions
+from galaxy_ng.app import models
+from galaxy_ng.app import constants
 
 
 log = logging.getLogger(__name__)
@@ -276,7 +276,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
-        # NOTE(cutwater): Using urllib3 because it's already a dependency of pulp_galaxy
+        # NOTE(cutwater): Using urllib3 because it's already a dependency of galaxy_ng
         url = 'http://{host}:{port}/{prefix}/automation-hub/{filename}'.format(
             host=settings.X_PULP_CONTENT_HOST,
             port=settings.X_PULP_CONTENT_PORT,

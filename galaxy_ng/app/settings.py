@@ -8,16 +8,16 @@ AUTH_USER_MODEL = 'galaxy.user'
 # Local rest framework settings
 # -----------------------------
 
-GALAXY_EXCEPTION_HANDLER = "pulp_galaxy.app.api.exceptions.exception_handler"
-GALAXY_PAGINATION_CLASS = "pulp_galaxy.app.api.pagination.LimitOffsetPagination"
+GALAXY_EXCEPTION_HANDLER = "galaxy_ng.app.api.exceptions.exception_handler"
+GALAXY_PAGINATION_CLASS = "galaxy_ng.app.api.pagination.LimitOffsetPagination"
 GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
     "rest_framework.authentication.BasicAuthentication",
-    # "pulp_galaxy.app.auth.auth.RHIdentityAuthentication",
+    # "galaxy_ng.app.auth.auth.RHIdentityAuthentication",
 ]
 GALAXY_PERMISSION_CLASSES = [
     'rest_framework.permissions.IsAuthenticated',
-#    'pulp_galaxy.app.auth.auth.RHEntitlementRequired',
+#    'galaxy_ng.app.auth.auth.RHEntitlementRequired',
 ]
 
 

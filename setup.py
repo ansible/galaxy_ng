@@ -29,5 +29,5 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ),
-    entry_points={"pulpcore.plugin": ["pulp_galaxy = pulp_galaxy:default_app_config"]},
+    entry_points={"pulpcore.plugin": ["galaxy_ng = galaxy_ng:default_app_config"]},
 )
