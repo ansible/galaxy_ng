@@ -5,6 +5,9 @@ set -o errexit
 set -o pipefail
 
 
+GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
+
+
 _wait_tcp_port() {
   local -r host="$1"
   local -r port="$2"
@@ -30,9 +33,10 @@ _wait_tcp_port() {
 run_api() {
   exec gunicorn \
     --bind '0.0.0.0:8000' \
-    --workers 4 \
-    --reload \
+    --workers "${GUNICORN_WORKERS}" \
+    --access-logfile - \
     'pulpcore.app.wsgi:application'
+
 }
 
 run_resource_manager() {
@@ -52,7 +56,7 @@ run_content_app() {
   exec gunicorn \
     --bind '0.0.0.0:24816' \
     --worker-class 'aiohttp.GunicornWebWorker' \
-    --workers 2 \
+    --workers "${GUNICORN_WORKERS}" \
     --access-logfile - \
     'pulpcore.content:server'
 }
