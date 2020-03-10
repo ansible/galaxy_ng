@@ -1,4 +1,4 @@
-# pulp-galaxy
+# Galaxy NG
 
 A Pulp plugin to support hosting your own galaxy.
 
