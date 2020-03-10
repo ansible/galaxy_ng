@@ -2,7 +2,7 @@
 #                  2. Rename API_PATH_PREFIX to GALAXY_API_ROOT
 API_PATH_PREFIX = "api/galaxy"
 
-AUTH_USER_MODEL = 'galaxy.user'
+AUTH_USER_MODEL = 'galaxy.User'
 
 
 # Local rest framework settings
