@@ -16,22 +16,26 @@ from .namespace import (
     NamespaceUpdateSerializer
 )
 
-# from .current_user import (
-#     CurrentUserSerializer
-# )
+from .current_user import (
+    CurrentUserSerializer
+)
 
 
 __all__ = (
-    # 'CollectionDetailSerializer',
-    # 'CollectionListSerializer',
-    # 'CollectionVersionSerializer',
-    # 'CertificationSerializer',
-    # 'CollectionVersionDetailSerializer',
-    # 'CollectionVersionBaseSerializer',
+    # collection
+    'CollectionDetailSerializer',
+    'CollectionListSerializer',
+    'CollectionVersionSerializer',
+    'CertificationSerializer',
+    'CollectionVersionDetailSerializer',
+    'CollectionVersionBaseSerializer',
+    # imports
     'ImportTaskDetailSerializer',
     'ImportTaskListSerializer',
+    # namespace
     'NamespaceSerializer',
     'NamespaceSummarySerializer',
     'NamespaceUpdateSerializer',
-    # 'CurrentUserSerializer'
+    # current_user
+    'CurrentUserSerializer'
 )

@@ -64,7 +64,7 @@ class NamespaceViewSet(
                 if not account.isdigit():
                     return Response(status=status.HTTP_400_BAD_REQUEST)
                 group, _ = auth_models.Group.objects.get_or_create_identity(
-                        auth.RH_ACCOUNT_SCOPE, account)
+                    auth.RH_ACCOUNT_SCOPE, account)
                 groups.append(group.name)
         request.data['groups'] = groups
 
@@ -81,7 +81,7 @@ class NamespaceViewSet(
             scope, account_id = account.split(':')
             if account_id.isdigit():
                 group, _ = auth_models.Group.objects.get_or_create_identity(
-                        scope, account_id)
+                    scope, account_id)
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         if RH_PE_ACCOUNT_SCOPE not in request.data['groups']:

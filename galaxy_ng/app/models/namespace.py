@@ -1,6 +1,5 @@
 from django.db import models
 from django.db import transaction
-from django.urls import reverse
 
 from . import auth as auth_models
 

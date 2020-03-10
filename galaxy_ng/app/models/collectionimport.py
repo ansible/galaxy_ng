@@ -1,5 +1,4 @@
 from django.db import models
-from django.db import transaction
 from django.urls import reverse
 
 from .namespace import Namespace

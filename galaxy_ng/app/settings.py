@@ -17,7 +17,7 @@ GALAXY_AUTHENTICATION_CLASSES = [
 ]
 GALAXY_PERMISSION_CLASSES = [
     'rest_framework.permissions.IsAuthenticated',
-#    'galaxy_ng.app.auth.auth.RHEntitlementRequired',
+    # 'galaxy_ng.app.auth.auth.RHEntitlementRequired',
 ]
 
 

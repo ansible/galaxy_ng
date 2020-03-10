@@ -6,7 +6,6 @@ from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api import base as api_base
