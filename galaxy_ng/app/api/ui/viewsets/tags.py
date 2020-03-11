@@ -1,10 +1,13 @@
 import galaxy_pulp
 
+from pulp_ansible.app.serializers import TagSerializer
+
 from galaxy_ng.app.common import pulp
 from galaxy_ng.app.api import base as api_base
 
 
 class TagsViewSet(api_base.GenericViewSet):
+    serializer_class = TagSerializer
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)

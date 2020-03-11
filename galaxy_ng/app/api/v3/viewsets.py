@@ -15,6 +15,7 @@ import galaxy_pulp
 import requests
 
 from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api.ui import serializers
 from galaxy_ng.app.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
 from galaxy_ng.app.common import pulp
 from galaxy_ng.app.common import metrics
@@ -104,6 +105,7 @@ class CollectionViewSet(api_base.GenericViewSet):
 
 
 class CollectionVersionViewSet(api_base.GenericViewSet):
+    serializer_class = serializers.CollectionVersionSerializer
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)

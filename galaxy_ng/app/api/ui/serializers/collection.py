@@ -2,13 +2,14 @@ import logging
 
 from rest_framework import serializers
 
+from .base import Serializer
 from .namespace import NamespaceSummarySerializer
 
 
 log = logging.getLogger(__name__)
 
 
-class ContentSummarySerializer(serializers.Serializer):
+class ContentSummarySerializer(Serializer):
 
     def to_representation(self, contents):
         summary = {"role": [], "module": [], "playbook": [], "plugin": []}
@@ -30,18 +31,18 @@ class ContentSummarySerializer(serializers.Serializer):
             return "plugin"
 
 
-class ContentSerializer(serializers.Serializer):
+class ContentSerializer(Serializer):
     name = serializers.CharField()
     content_type = serializers.CharField()
     description = serializers.CharField()
 
 
-class CollectionVersionSummarySerializer(serializers.Serializer):
+class CollectionVersionSummarySerializer(Serializer):
     version = serializers.CharField()
     created = serializers.CharField()
 
 
-class CollectionMetadataSerializer(serializers.Serializer):
+class CollectionMetadataSerializer(Serializer):
     dependencies = serializers.JSONField()
     contents = serializers.JSONField()
 
@@ -60,7 +61,7 @@ class CollectionMetadataSerializer(serializers.Serializer):
         return [tag['name'] for tag in metadata['tags']]
 
 
-class CollectionVersionBaseSerializer(serializers.Serializer):
+class CollectionVersionBaseSerializer(Serializer):
     id = serializers.UUIDField()
     namespace = serializers.CharField()
     name = serializers.CharField()
@@ -80,7 +81,7 @@ class CollectionVersionSerializer(CollectionVersionBaseSerializer):
     )
 
 
-class CertificationSerializer(serializers.Serializer):
+class CertificationSerializer(Serializer):
     certification = serializers.ChoiceField(
         ['certified', 'not_certified', 'needs_review'])
 
@@ -89,7 +90,7 @@ class CollectionVersionDetailSerializer(CollectionVersionSerializer):
     docs_blob = serializers.JSONField()
 
 
-class _CollectionSerializer(serializers.Serializer):
+class _CollectionSerializer(Serializer):
     id = serializers.UUIDField()
     namespace = serializers.SerializerMethodField()
     name = serializers.CharField()

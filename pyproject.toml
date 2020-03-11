@@ -1,5 +1,5 @@
 [tool.towncrier]
-package = "pulp-galaxy"
+package = "galaxy-ng"
 filename = "CHANGES.rst"
 directory = "CHANGES/"
 title_format = "{version} ({project_date})"

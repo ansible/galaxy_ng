@@ -63,6 +63,7 @@ images:
       pulpcore: pulpcore
       plugins:
         - ./galaxy_ng
+        - ./galaxy_ng/bindings/galaxy-pulp
         - pulp_ansible
 VARSYAML
 else
@@ -75,6 +76,7 @@ images:
       pulpcore: ./pulpcore
       plugins:
         - ./galaxy_ng
+        - ./galaxy_ng/bindings/galaxy-pulp
         - $PULP_ANSIBLE
 VARSYAML
 fi

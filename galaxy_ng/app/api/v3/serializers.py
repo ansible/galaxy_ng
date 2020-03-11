@@ -4,18 +4,19 @@ import mimetypes
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, _get_error_details
 
+from galaxy_ng.app.api.ui.serializers.base import Serializer
 from galaxy_ng.app.api.utils import parse_collection_filename
 
 logger = logging.getLogger(__name__)
 
 
-class CollectionSerializer(serializers.Serializer):
+class CollectionSerializer(Serializer):
     name = serializers.CharField(required=True)
     namespace = serializers.CharField(required=True)
     deprecated = serializers.BooleanField(required=False)
 
 
-class CollectionUploadSerializer(serializers.Serializer):
+class CollectionUploadSerializer(Serializer):
     """
     A serializer for the Collection One Shot Upload API.
     """
