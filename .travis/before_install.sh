@@ -24,7 +24,7 @@ if [[ -n $(echo -e $COMMIT_MSG | grep -P "Required PR:.*" | grep -v "https") ]];
   exit 1
 fi
 
-if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ -z "$TRAVIS_TAG" -a "$TRAVIS_BRANCH" != "master"]
+if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ -z "$TRAVIS_TAG" -a "$TRAVIS_BRANCH" != "master" ]
 then
   export PULP_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulpcore\/pull\/(\d+)' | awk -F'/' '{print $7}')
   export PULP_SMASH_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp-smash\/pull\/(\d+)' | awk -F'/' '{print $7}')
@@ -46,18 +46,17 @@ pip install -r dev_requirements.txt
 # check the commit message
 ./.travis/check_commit.sh
 
-# run black separately from flake8 to get a diff
-black --check --diff .
+
 
 # Lint code.
-flake8 --config flake8.cfg
+#flake8 --config flake8.cfg
 
 cd ..
 git clone --depth=1 https://github.com/pulp/ansible-pulp.git
 if [ -n "$PULP_ROLES_PR_NUMBER" ]; then
   cd ansible-pulp
-  git fetch --depth=1 origin +refs/pull/$PULP_ROLES_PR_NUMBER/merge
-  git checkout FETCH_HEAD
+  git fetch --depth=1 origin pull/$PULP_ROLES_PR_NUMBER/head:$PULP_ROLES_PR_NUMBER
+  git checkout $PULP_ROLES_PR_NUMBER
   cd ..
 fi
 
@@ -65,8 +64,8 @@ fi
 git clone --depth=1 https://github.com/pulp/pulp-operator.git
 if [ -n "$PULP_OPERATOR_PR_NUMBER" ]; then
   cd pulp-operator
-  git fetch --depth=1 origin +refs/pull/$PULP_OPERATOR_PR_NUMBER/merge
-  git checkout FETCH_HEAD
+  git fetch --depth=1 origin pull/$PULP_OPERATOR_PR_NUMBER/head:$PULP_OPERATOR_PR_NUMBER
+  git checkout $PULP_OPERATOR_PR_NUMBER
   RELEASE_VERSION=v0.9.0
   curl -LO https://github.com/operator-framework/operator-sdk/releases/download/${RELEASE_VERSION}/operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu
   chmod +x operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu && sudo mkdir -p /usr/local/bin/ && sudo cp operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu /usr/local/bin/operator-sdk && rm operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu
@@ -77,8 +76,8 @@ fi
 git clone https://github.com/pulp/pulp-openapi-generator.git
 if [ -n "$PULP_BINDINGS_PR_NUMBER" ]; then
   cd pulp-openapi-generator
-  git fetch origin +refs/pull/$PULP_BINDINGS_PR_NUMBER/merge
-  git checkout FETCH_HEAD
+  git fetch origin pull/$PULP_BINDINGS_PR_NUMBER/head:$PULP_BINDINGS_PR_NUMBER
+  git checkout $PULP_BINDINGS_PR_NUMBER
   cd ..
 fi
 
@@ -87,8 +86,8 @@ git clone --depth=1 https://github.com/pulp/pulpcore.git --branch master
 
 if [ -n "$PULP_PR_NUMBER" ]; then
   cd pulpcore
-  git fetch --depth=1 origin +refs/pull/$PULP_PR_NUMBER/merge
-  git checkout FETCH_HEAD
+  git fetch --depth=1 origin pull/$PULP_PR_NUMBER/head:$PULP_PR_NUMBER
+  git checkout $PULP_PR_NUMBER
   cd ..
 fi
 
@@ -102,8 +101,8 @@ if [ -z "$TRAVIS_TAG" ]; then
 
   if [ -n "$PULP_SMASH_PR_NUMBER" ]; then
     cd pulp-smash
-    git fetch --depth=1 origin +refs/pull/$PULP_SMASH_PR_NUMBER/merge
-    git checkout FETCH_HEAD
+    git fetch --depth=1 origin pull/$PULP_SMASH_PR_NUMBER/head:$PULP_SMASH_PR_NUMBER
+    git checkout $PULP_SMASH_PR_NUMBER
     cd ..
   fi
 

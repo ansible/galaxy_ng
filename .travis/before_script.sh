@@ -31,6 +31,8 @@ else
     sed "s/localhost/$(hostname)/g" ../pulpcore/.travis/pulp-smash-config.json > ~/.config/pulp_smash/settings.json
 fi
 
+
+
 if [[ "$TEST" == 'pulp' || "$TEST" == 'performance' ]]; then
     # Many tests require pytest/mock, but users do not need them at runtime
     # (or to add plugins on top of pulpcore or pulp container images.)

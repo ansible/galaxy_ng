@@ -17,7 +17,7 @@ class NamespaceLinkSerializer(ModelSerializer):
 
 
 class NamespaceSerializer(ModelSerializer):
-    links = NamespaceLinkSerializer(many=True, required=False)
+    links = NamespaceLinkSerializer(many=True, required=False, read_only=True)
     groups = SlugRelatedField(
         many=True,
         slug_field='name',

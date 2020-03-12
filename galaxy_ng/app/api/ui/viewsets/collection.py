@@ -2,6 +2,7 @@ import galaxy_pulp
 from django.conf import settings
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
@@ -123,6 +124,7 @@ class CollectionViewSet(api_base.ViewSet):
 class CollectionVersionViewSet(api_base.GenericViewSet):
     lookup_url_kwarg = 'version'
     lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+/[0-9A-Za-z.+-]+'
+    serializer_class = serializers.CollectionVersionSerializer
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)
@@ -144,6 +146,8 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
         data = serializers.CollectionVersionSerializer(response.results, many=True).data
         return self.paginator.paginate_proxy_response(data, response.count)
 
+    @swagger_auto_schema(operation_summary="Retrieve collection version",
+                         responses={200: serializers.CollectionVersionDetailSerializer})
     def retrieve(self, request, *args, **kwargs):
         namespace, name, version = self.kwargs['version'].split('/')
 
@@ -203,6 +207,7 @@ class CollectionImportFilter(filterset.FilterSet):
 class CollectionImportViewSet(api_base.GenericViewSet):
     lookup_field = 'task_id'
     queryset = models.CollectionImport.objects.all()
+    serializer_class = serializers.ImportTaskListSerializer
 
     filter_backends = [DjangoFilterBackend]
     filterset_class = CollectionImportFilter
@@ -222,6 +227,8 @@ class CollectionImportViewSet(api_base.GenericViewSet):
             results.append(data)
         return self.get_paginated_response(results)
 
+    @swagger_auto_schema(operation_summary="Retrieve collection import",
+                         responses={200: serializers.ImportTaskDetailSerializer})
     def retrieve(self, request, *args, **kwargs):
         api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
         task = self.get_object()

@@ -9,9 +9,9 @@ requirements = [
 ]
 
 setup(
-    name="pulp-galaxy",
+    name="galaxy-ng",
     version="0.1.0a1",
-    description="pulp-galaxy plugin for the Pulp Project",
+    description="galaxy-ng plugin for the Pulp Project",
     license="GPLv2+",
     author="AUTHOR",
     author_email="author@email.here",
