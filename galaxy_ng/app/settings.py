@@ -1,9 +1,9 @@
-# FIXME(cutwater): 1. Rename GALAXY_API_ROOT in pulp-ansible to ANSIBLE_API_ROOT
-#                  2. Rename API_PATH_PREFIX to GALAXY_API_ROOT
-API_PATH_PREFIX = "api/galaxy"
 
 AUTH_USER_MODEL = 'galaxy.User'
 
+# FIXME(cutwater): 1. Rename GALAXY_API_ROOT in pulp-ansible to ANSIBLE_API_ROOT
+#                  2. Rename API_PATH_PREFIX to GALAXY_API_ROOT
+GALAXY_API_PATH_PREFIX = "/api/galaxy"
 
 # Local rest framework settings
 # -----------------------------
@@ -34,4 +34,4 @@ X_PULP_API_PREFIX = "pulp_ansible/galaxy/automation-hub/api"
 
 X_PULP_CONTENT_HOST = "pulp-content"
 X_PULP_CONTENT_PORT = 24816
-X_PULP_CONTENT_PATH_PREFIX = f"/{API_PATH_PREFIX}/v3/artifacts/collections/"
+X_PULP_CONTENT_PATH_PREFIX = f"/{GALAXY_API_PATH_PREFIX}/v3/artifacts/collections/"

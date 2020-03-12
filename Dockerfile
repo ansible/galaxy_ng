@@ -43,16 +43,14 @@ COPY --from=bindings /local/galaxy-pulp /tmp/galaxy-pulp
 
 RUN mkdir -p /var/run/pulp \
         /var/lib/pulp/tmp \
-    && chmod 755 /entrypoint
-
-RUN python3 -m venv /venv \
+    && chmod 755 /entrypoint \
+    && python3 -m venv /venv \
     && source /venv/bin/activate \
-    && pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir /tmp/galaxy-pulp \
-    && rm -rf /tmp/galaxy-pulp \
-    && pip install --no-cache-dir -e /app \
+    && pip install --no-cache --upgrade pip \
+    && pip install --no-cache /tmp/galaxy-pulp \
+    && pip install --no-cache --editable /app \
     && PULP_CONTENT_ORIGIN=x django-admin collectstatic \
-    && chmod 0755 /entrypoint
+    && rm -rf /tmp/galaxy-pulp
 
 
 ENV PATH="/venv/bin:${PATH}"
