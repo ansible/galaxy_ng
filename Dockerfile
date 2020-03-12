@@ -38,25 +38,24 @@ RUN dnf -y install \
     && dnf -y clean all
 
 COPY . /app
-COPY docker/entrypoint.sh /entrypoint
 COPY --from=bindings /local/galaxy-pulp /tmp/galaxy-pulp
 
 RUN mkdir -p /var/run/pulp \
-        /var/lib/pulp/tmp \
-    && chmod 755 /entrypoint
-
-RUN python3 -m venv /venv \
+             /var/lib/pulp/tmp \
+    && python3 -m venv /venv \
     && source /venv/bin/activate \
-    && pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir /tmp/galaxy-pulp \
-    && rm -rf /tmp/galaxy-pulp \
-    && pip install --no-cache-dir -e /app \
+    && pip install --no-cache --upgrade pip \
+    && pip install --no-cache /tmp/galaxy-pulp \
+    && pip install --no-cache --editable /app \
     && PULP_CONTENT_ORIGIN=x django-admin collectstatic \
-    && chmod 0755 /entrypoint
-
+    && rm -rf /tmp/galaxy-pulp \
+    && chmod 0755 /app/docker/entrypoint.sh \
+                  /app/docker/scripts/*.sh \
+    && mv /app/docker/entrypoint.sh /entrypoint.sh \
+    && mv /app/docker/scripts/*.sh /usr/local/bin
 
 ENV PATH="/venv/bin:${PATH}"
 
 VOLUME [ "/var/lib/pulp/artifact", "/var/lib/pulp/tmp" ]
 
-ENTRYPOINT [ "/entrypoint" ]
+ENTRYPOINT [ "/entrypoint.sh" ]

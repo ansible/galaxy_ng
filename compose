@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+
+declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng}"
+declare -xr COMPOSE_FILE="${COMPOSE_FILE:-dev/docker-compose.yml}"
+
+declare -xr COMPOSE_CONTEXT=".."
+
+
+exec docker-compose "$@"

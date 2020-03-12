@@ -5,9 +5,6 @@ set -o errexit
 set -o pipefail
 
 
-GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
-
-
 _wait_tcp_port() {
   local -r host="$1"
   local -r port="$2"
@@ -30,66 +27,29 @@ _wait_tcp_port() {
   return 1
 }
 
-run_api() {
-  exec gunicorn \
-    --bind '0.0.0.0:8000' \
-    --workers "${GUNICORN_WORKERS}" \
-    --access-logfile - \
-    'pulpcore.app.wsgi:application'
-
-}
-
-run_resource_manager() {
-  exec rq worker \
-    -n 'resource-manager' \
-    -w 'pulpcore.tasking.worker.PulpWorker' \
-    -c 'pulpcore.rqconfig'
-}
-
-run_worker() {
-  exec rq worker \
-    -w 'pulpcore.tasking.worker.PulpWorker' \
-    -c 'pulpcore.rqconfig'
-}
-
-run_content_app() {
-  exec gunicorn \
-    --bind '0.0.0.0:24816' \
-    --worker-class 'aiohttp.GunicornWebWorker' \
-    --workers "${GUNICORN_WORKERS}" \
-    --access-logfile - \
-    'pulpcore.content:server'
-}
-
 run_service() {
-  local cmd
-  case "$1" in
-    'api')
-      cmd='run_api'
-      ;;
-    'resource-manager')
-      cmd='run_resource_manager'
-      ;;
-    'worker')
-      cmd='run_worker'
-      ;;
-    'content-app')
-      cmd='run_content_app'
-      ;;
-    *)
-      echo "ERROR: Unexpected argument '$1'." >&2
-      return 1
-      ;;
-    esac
+  if [[ "$#" -eq 0 ]]; then
+    echo '[error]: Missing service name parameter.' >&2
+    exit 1
+  fi
+
+  service_name="$1"; shift
+  service_path="/usr/local/bin/start-${service_name}.sh"
+
+  if [[ ! -x "${service_path}" ]]; then
+    echo "[error]: Unable to execute service '${service_name}'." >&2
+    exit 1
+  fi
 
   _wait_tcp_port "${PULP_DB_HOST:-localhost}" "${PULP_DB_PORT:-5432}"
-  pip install -e "/app" >/dev/null
+  pip install --no-deps --editable "/app" >/dev/null
   django-admin migrate
-  ${cmd}
+
+  exec "${service_path}" "$@"
 }
 
 run_manage() {
-  pip install -e "/app" >/dev/null
+  pip install --no-deps --editable "/app" >/dev/null
   exec django-admin "$@"
 }
 

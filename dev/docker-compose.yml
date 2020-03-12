@@ -1,0 +1,83 @@
+---
+version: "3.7"
+
+services:
+  api:
+    build:
+      context: "${COMPOSE_CONTEXT}"
+    image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
+    command: ['run', 'api-reload']
+    ports:
+      - "5001:8000"
+    env_file:
+      - './common/galaxy_ng.env'
+      - './automation-hub/galaxy_ng.env'
+    volumes:
+      - "./common/settings.py:/etc/pulp/settings.py"
+      - "${COMPOSE_CONTEXT}:/app"
+      - "pulp_artifact:/var/lib/pulp/artifact"
+    depends_on:
+      - postgres
+      - redis
+
+  resource-manager:
+    image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
+    command: ['run', 'resource-manager']
+    env_file:
+      - './common/galaxy_ng.env'
+      - './automation-hub/galaxy_ng.env'
+    volumes:
+      - "./common/settings.py:/etc/pulp/settings.py"
+      - "${COMPOSE_CONTEXT}:/app"
+      - "pulp_artifact:/var/lib/pulp/artifact"
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
+    command: ['run', 'worker']
+    env_file:
+      - './common/galaxy_ng.env'
+      - './automation-hub/galaxy_ng.env'
+    volumes:
+      - "./common/settings.py:/etc/pulp/settings.py"
+      - "${COMPOSE_CONTEXT}:/app"
+      - "pulp_artifact:/var/lib/pulp/artifact"
+    depends_on:
+      - postgres
+      - redis
+
+  content-app:
+    image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
+    command: ['run', 'content-app']
+    env_file:
+      - './common/galaxy_ng.env'
+      - './automation-hub/galaxy_ng.env'
+    volumes:
+      - "./common/settings.py:/etc/pulp/settings.py"
+      - "${COMPOSE_CONTEXT}:/app"
+      - "pulp_artifact:/var/lib/pulp/artifact"
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: "postgres:11"
+    ports:
+      - "5432:5432"
+    env_file:
+      - './common/postgres.env'
+    volumes:
+      - "pg_data:/var/lib/postgresql/data"
+
+  redis:
+    image: "redis:5"
+    volumes:
+      - "redis_data:/data"
+
+
+volumes:
+  pulp_artifact: {}
+  pg_data: {}
+  redis_data: {}

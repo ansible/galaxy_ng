@@ -1,0 +1,78 @@
+[
+  {
+    "model": "galaxy.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$150000$vXTo97UaVlfZ$bNjCGFaiVoeapwmK/Hk5KZUxojmB76v4f/a1iy+Uu5c=",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "admin@example.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2020-01-01T00:00:00.000Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "system:partner-engineers",
+      "permissions": []
+    }
+  },
+  {
+    "model": "core.repository",
+    "pk": "20ab43ad-24ee-4868-8127-88a9ab590317",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:19.071Z",
+      "pulp_last_updated": "2020-03-12T15:56:19.072Z",
+      "pulp_type": "ansible.ansible",
+      "name": "automation-hub",
+      "description": null,
+      "next_version": 1
+    }
+  },
+  {
+    "model": "core.repositoryversion",
+    "pk": "5b85e28b-aced-4497-90f7-01ff19567223",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:19.075Z",
+      "pulp_last_updated": "2020-03-12T15:56:19.075Z",
+      "repository": "20ab43ad-24ee-4868-8127-88a9ab590317",
+      "number": 0,
+      "complete": true,
+      "base_version": null
+    }
+  },
+  {
+    "model": "core.basedistribution",
+    "pk": "64bbf7a5-841a-4b0b-a17b-70cc1e6eea16",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:23.436Z",
+      "pulp_last_updated": "2020-03-12T15:56:23.436Z",
+      "pulp_type": "ansible.ansible",
+      "name": "automation-hub",
+      "base_path": "automation-hub",
+      "content_guard": null,
+      "remote": null
+    }
+  },
+  {
+    "model": "ansible.ansiblerepository",
+    "pk": "20ab43ad-24ee-4868-8127-88a9ab590317",
+    "fields": {}
+  },
+  {
+    "model": "ansible.ansibledistribution",
+    "pk": "64bbf7a5-841a-4b0b-a17b-70cc1e6eea16",
+    "fields": {
+      "repository": "20ab43ad-24ee-4868-8127-88a9ab590317",
+      "repository_version": null
+    }
+  }
+]
