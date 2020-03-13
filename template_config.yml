@@ -4,7 +4,7 @@
 additional_plugins:
 - { name: pulp_ansible, branch: master }
 black: false
-check_commit_message: true
+check_commit_message: false
 cherry_pick_automation: false
 coverage: false
 deploy_client_to_pypi: false
