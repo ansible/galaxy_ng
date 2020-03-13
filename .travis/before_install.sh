@@ -44,7 +44,7 @@ fi
 pip install -r dev_requirements.txt
 
 # check the commit message
-./.travis/check_commit.sh
+#./.travis/check_commit.sh
 
 
 
