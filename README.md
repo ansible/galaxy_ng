@@ -10,6 +10,9 @@ Our mission is to help organizations share Ansible automation and promote a cult
 
 For more information, please see the [documentation](docs/index.rst) or the [Pulp project page](https://pulpproject.org/).
 
+## OpenAPI Spec
+
+View the latest version of the spec by [clicking here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/ansible/galaxy_ng/master/openapi/openapi.yaml).
 
 ### Creating your development environment
 
