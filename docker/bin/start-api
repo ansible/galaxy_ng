@@ -8,7 +8,7 @@ readonly GUNICORN='/venv/bin/gunicorn'
 readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 
 readonly BIND_HOST='0.0.0.0'
-readonly BIND_PORT=8000
+readonly BIND_PORT=${GUNICORN_PORT:-8000}
 readonly APP_MODULE='pulpcore.app.wsgi:application'
 
 
