@@ -36,9 +36,9 @@ $ ./compose run --rm -e PULP_FIXTURE_DIRS='["/app/dev/automation-hub"]' \
 >     api manage loaddata initial_data.json
 ```
 
-#### 4. Import initial data (manually)
+#### 5. Import initial data (manually)
 
-4.1. Create superuser.
+5.1. Create superuser.
 
 Default username and password used for development environment is `admin` \ `admin`.
 
@@ -60,7 +60,7 @@ Bypass password validation and create user anyway? [y/N]: y
 Superuser created successfully.
 ```
 
-4.2. Create `pulp_ansible` repository and distribution
+5.2. Create `pulp_ansible` repository and distribution
 
 Open django shell.
 
@@ -78,7 +78,7 @@ Execute the following code:
 >>> # Press <CTRL+D> to exit.
 ```
 
-### 5. Start services
+### 6. Start services
 
 In background:
 
