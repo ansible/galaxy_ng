@@ -96,3 +96,15 @@ In foreground:
 ```console
 $ ./compose up
 ```
+
+### Additional development adjustments
+
+- Assign user to the `system:partner-engineers` group:
+
+```python console
+>>> from galaxy_ng.app.models.auth import User, Group
+>>> user = User.objects.get(username="ansible-insights")
+>>> pe_group = Group.objects.get(name="system:partner-engineers")
+>>> user.groups.add(pe_group)
+>>> user.save()
+```
