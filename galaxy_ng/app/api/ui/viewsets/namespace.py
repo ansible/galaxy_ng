@@ -3,11 +3,11 @@ from django_filters.rest_framework import filterset, DjangoFilterBackend
 
 from rest_framework import mixins
 from rest_framework import viewsets
-
 from rest_framework.settings import api_settings
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api import permissions
+from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.ui import serializers
 
 
@@ -41,10 +41,10 @@ class NamespaceViewSet(
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    api_base.GenericViewSet,
 ):
     lookup_field = "name"
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+    permission_classes = api_base.GALAXY_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwnerOrPartnerEngineer,
     ]
 
