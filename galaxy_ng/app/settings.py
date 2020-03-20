@@ -32,6 +32,5 @@ X_PULP_API_USER = "admin"
 X_PULP_API_PASSWORD = "admin"
 X_PULP_API_PREFIX = "pulp_ansible/galaxy/automation-hub/api"
 
-X_PULP_CONTENT_HOST = "pulp-content"
+X_PULP_CONTENT_HOST = "localhost"
 X_PULP_CONTENT_PORT = 24816
-X_PULP_CONTENT_PATH_PREFIX = f"/{GALAXY_API_PATH_PREFIX}/v3/artifacts/collections/"
