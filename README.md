@@ -4,7 +4,7 @@
 
 A Pulp plugin to support hosting your very own Ansible Galaxy.
 
-This is a brand new take on Ansible Galaxy, so it will look and feel a bit different than the current [galaxy.ansible.com web site](https://galaxy.ansible.com). Over time we expect to migrate the web site to this code base, so for now you're looking into the future, and you have an opportunity to help shape that future. 
+This is a brand new take on Ansible Galaxy, so it will look and feel a bit different than the current [galaxy.ansible.com web site](https://galaxy.ansible.com). Over time we expect to migrate the web site to this code base, so for now you're looking into the future, and you have an opportunity to help shape that future.
 
 Our mission is to help organizations share Ansible automation and promote a culture of collaboration around Ansible automation development. We'll be providing features that make it easy to create, discover, use and distribute Ansible automation content.
 
@@ -67,7 +67,7 @@ Superuser created successfully.
 
 5.2. Create `pulp_ansible` repository and distribution
 
-Open django shell.
+Open Django shell.
 
 ```console
 $ ./compose run --rm api manage shell
@@ -100,6 +100,8 @@ $ ./compose up
 ### Additional development adjustments
 
 - Assign user to the `system:partner-engineers` group:
+
+through Django shell (`./compose run --rm api manage shell`), use the following commands
 
 ```python console
 >>> from galaxy_ng.app.models.auth import User, Group
