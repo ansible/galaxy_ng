@@ -285,7 +285,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
         url = 'http://{host}:{port}/{prefix}/automation-hub/{filename}'.format(
             host=settings.X_PULP_CONTENT_HOST,
             port=settings.X_PULP_CONTENT_PORT,
-            prefix=settings.X_PULP_CONTENT_PATH_PREFIX.strip('/'),
+            prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
             filename=self.kwargs['filename'],
         )
         response = requests.get(url, stream=True, allow_redirects=False)

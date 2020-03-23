@@ -51,6 +51,8 @@ services:
   content-app:
     image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
     command: ['run', 'content-app']
+    ports:
+      - "24816:24816"
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
