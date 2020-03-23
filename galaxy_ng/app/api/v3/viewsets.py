@@ -19,6 +19,7 @@ from galaxy_ng.app.api.ui import serializers
 from galaxy_ng.app.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
 from galaxy_ng.app.common import pulp
 from galaxy_ng.app.common import metrics
+from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 from galaxy_ng.app.api import permissions
 from galaxy_ng.app import models
 from galaxy_ng.app import constants
@@ -191,6 +192,8 @@ class CollectionArtifactUploadView(api_base.APIView):
     permission_classes = api_base.GALAXY_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwner
     ]
+
+    parser_classes = [AnsibleGalaxy29MultiPartParser]
 
     def post(self, request, *args, **kwargs):
         metrics.collection_import_attempts.inc()
