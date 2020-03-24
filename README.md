@@ -110,3 +110,56 @@ through Django shell (`./compose run --rm api manage shell`), use the following 
 >>> user.groups.add(pe_group)
 >>> user.save()
 ```
+
+## Pulp 3 Installer
+
+#### 1. Clone the GitHub repos
+
+```console
+$ git clone https://github.com/ansible/galaxy_ng.git
+$ git clone https://github.com/pulp/pulplift.git
+```
+
+#### 2. Install pulplift requirements
+
+- Ansible 2.5+
+- Vagrant 1.8+
+- Vagrant provider plugin (follow [vagrant](
+  https://www.vagrantup.com/docs/providers/installation.html) instructions)
+  - libvirt and virtualbox supported
+- Enabled virtualization in BIOS
+
+#### 3. Setup pulplift
+
+```console
+$ cd pulplift
+$ git submodule update --init
+$ cp example.dev-config.yml local.dev-config.yml
+```
+
+Uncomment `pulp-ansible` and `galaxy-ng` on `local.dev-config.yml`:
+```yaml
+pulp_install_plugins:
+  pulp-ansible:
+    source_dir: "/home/vagrant/devel/pulp_ansible"
+  galaxy-ng:
+    source_dir: "/home/vagrant/devel/galaxy_ng"
+```
+
+#### 4. Choose a box
+
+`local.dev-config.yml` only works with source boxes.
+
+```
+pulp3-source-centos7               not created (libvirt)
+pulp3-source-centos7-fips          not created (libvirt)
+pulp3-source-centos8-stream        not created (libvirt)
+pulp3-source-debian10              not created (libvirt)
+pulp3-source-fedora30              not created (libvirt)
+pulp3-source-fedora31              not created (libvirt)
+```
+
+You can then spin up your development environment
+```console
+$ vagrant up pulp3-source-fedora31
+```
