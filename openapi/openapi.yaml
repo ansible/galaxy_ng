@@ -184,7 +184,6 @@ paths:
                   format: binary
               required:
                 - file
-                - sha256
       responses:
         '202':
           $ref: '#/components/responses/CollectionImportAccepted'
