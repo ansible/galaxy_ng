@@ -2,11 +2,22 @@
 
 from setuptools import find_packages, setup
 
-requirements = [
+# NOTE(cutwater): Because bindings are statically generated, requirements list
+#   from pulp-galaxy/setup.py has to be copied here and manually maintained.
+galaxy_pulp_requirements = [
+    "urllib3 >= 1.15",
+    "six >= 1.10",
+    "certifi",
+    "python-dateutil"
+]
+
+requirements = galaxy_pulp_requirements + [
     "pulpcore>=3.1.1",
     "pulp-ansible>=0.2.0b8",
     "django-prometheus>=2.0.0"
 ]
+
+
 
 setup(
     name="galaxy-ng",
