@@ -127,7 +127,14 @@ $ git clone https://github.com/pulp/pulplift.git
 - Vagrant provider plugin (follow [vagrant](
   https://www.vagrantup.com/docs/providers/installation.html) instructions)
   - libvirt and virtualbox supported
+- [Vagrant sshfs plugin](https://github.com/dustymabe/vagrant-sshfs#install-plugin) if using libvirt
 - Enabled virtualization in BIOS
+
+#### Quick install requirements on Fedora
+```
+sudo dnf install ansible vagrant-libvirt vagrant-sshfs @virtualization
+sudo virt-host-validate
+```
 
 #### 3. Setup pulplift
 
@@ -137,13 +144,15 @@ $ git submodule update --init
 $ cp example.dev-config.yml local.dev-config.yml
 ```
 
-Uncomment `pulp-ansible` and `galaxy-ng` on `local.dev-config.yml`:
+Uncomment `pulp-ansible`, `pulp-container` and `galaxy-ng` on `local.dev-config.yml`:
 ```yaml
 pulp_install_plugins:
   pulp-ansible:
     source_dir: "/home/vagrant/devel/pulp_ansible"
   galaxy-ng:
     source_dir: "/home/vagrant/devel/galaxy_ng"
+  pulp-container:
+    source_dir: "/home/vagrant/devel/pulp_container"
 ```
 
 #### 4. Choose a box
