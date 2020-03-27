@@ -5,69 +5,74 @@ set -o errexit
 set -o pipefail
 
 
-_wait_tcp_port() {
-  local -r host="$1"
-  local -r port="$2"
+readonly WITH_MIGRATIONS="${WITH_MIGRATIONS:-0}"
+readonly WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-0}"
 
-  local attempts=6
-  local timeout=1
 
-  echo "[debug]: Waiting for port tcp://${host}:${port}"
-  while [ $attempts -gt 0 ]; do
-    timeout 1 /bin/bash -c ">/dev/tcp/${host}/${port}" &>/dev/null && return 0 || :
-
-    echo "[debug]: Waiting ${timeout} seconds more..."
-    sleep $timeout
-
-    timeout=$(( $timeout * 2 ))
-    attempts=$(( $attempts - 1 ))
-  done
-
-  echo "[error]: Port tcp://${host}:${port} is not available"
-  return 1
+log_message() {
+    echo "$@" >&2
 }
+
+
+install_local_deps() {
+    pip install --no-cache --no-deps --editable "/app" >/dev/null
+}
+
 
 run_service() {
-  if [[ "$#" -eq 0 ]]; then
-    echo '[error]: Missing service name parameter.' >&2
-    exit 1
-  fi
+    if [[ "$#" -eq 0 ]]; then
+        log_message 'ERROR: Missing service name parameter.'
+        exit 1
+    fi
 
-  service_name="$1"; shift
-  service_path="/usr/local/bin/start-${service_name}.sh"
+    service_name="$1"; shift
+    service_path="/usr/local/bin/start-${service_name}"
 
-  if [[ ! -x "${service_path}" ]]; then
-    echo "[error]: Unable to execute service '${service_name}'." >&2
-    exit 1
-  fi
+    if [[ ! -x "${service_path}" ]]; then
+        log_message "ERROR: Unable to execute service '${service_name}'."
+        exit 1
+    fi
 
-  _wait_tcp_port "${PULP_DB_HOST:-localhost}" "${PULP_DB_PORT:-5432}"
-  pip install --no-deps --editable "/app" >/dev/null
-  django-admin migrate
+    wait-for-tcp "${PULP_DB_HOST:-localhost}" "${PULP_DB_PORT:-5432}"
+    wait-for-tcp "${PULP_REDIS_HOST:-localhost}" "${PULP_REDIS_PORT:-6379}"
 
-  exec "${service_path}" "$@"
+    if [[ "$WITH_DEV_INSTALL" -eq "1" ]]; then
+        install_local_deps
+    fi
+
+    if [[ "${WITH_MIGRATIONS}" -eq "1" ]]; then
+        django-admin migrate
+    else
+        wait-for-migrations
+    fi
+
+    exec "${service_path}" "$@"
 }
+
 
 run_manage() {
-  pip install --no-deps --editable "/app" >/dev/null
-  exec django-admin "$@"
+    if [[ "$WITH_DEV_INSTALL" -eq "1" ]]; then
+        install_local_deps
+    fi
+    exec django-admin "$@"
 }
 
-main() {
-  if [[ "$#" -eq 0 ]]; then
-    exec "/bin/bash"
-  fi
 
-  case "$1" in
-    'run')
-      run_service "${@:2}"
-      ;;
-    'manage')
-      run_manage "${@:2}"
-      ;;
-    *)
-      exec "$@"
-      ;;
+main() {
+    if [[ "$#" -eq 0 ]]; then
+        exec "/bin/bash"
+    fi
+
+    case "$1" in
+        'run')
+            run_service "${@:2}"
+            ;;
+        'manage')
+            run_manage "${@:2}"
+            ;;
+        *)
+            exec "$@"
+            ;;
     esac
 }
 
