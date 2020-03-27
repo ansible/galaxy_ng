@@ -10,13 +10,14 @@ services:
     ports:
       - "5001:8000"
     environment:
-      - 'WITH_DEV_INSTALL=1'
+      - "WITH_DEV_INSTALL=1"
+      - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
-      - "${COMPOSE_CONTEXT}:/app:z"
+      - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp_artifact:/var/lib/pulp/artifact"
     depends_on:
       - postgres
@@ -26,13 +27,13 @@ services:
     image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
     command: ['run', 'resource-manager']
     environment:
-      - 'WITH_DEV_INSTALL=1'
+      - "WITH_DEV_INSTALL=1"
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
-      - "${COMPOSE_CONTEXT}:/app:z"
+      - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp_artifact:/var/lib/pulp/artifact"
     depends_on:
       - postgres
@@ -42,13 +43,13 @@ services:
     image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
     command: ['run', 'worker']
     environment:
-      - 'WITH_DEV_INSTALL=1'
+      - "WITH_DEV_INSTALL=1"
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
-      - "${COMPOSE_CONTEXT}:/app:z"
+      - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp_artifact:/var/lib/pulp/artifact"
     depends_on:
       - postgres
@@ -60,13 +61,13 @@ services:
     ports:
       - "24816:24816"
     environment:
-      - 'WITH_DEV_INSTALL=1'
+      - "WITH_DEV_INSTALL=1"
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
-      - "${COMPOSE_CONTEXT}:/app:z"
+      - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp_artifact:/var/lib/pulp/artifact"
     depends_on:
       - postgres
