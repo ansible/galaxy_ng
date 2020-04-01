@@ -9,6 +9,8 @@ services:
     command: ['run', 'api-reload']
     ports:
       - "5001:8000"
+    environment:
+      - 'WITH_DEV_INSTALL=1'
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
@@ -23,6 +25,8 @@ services:
   resource-manager:
     image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
     command: ['run', 'resource-manager']
+    environment:
+      - 'WITH_DEV_INSTALL=1'
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
@@ -37,6 +41,8 @@ services:
   worker:
     image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
     command: ['run', 'worker']
+    environment:
+      - 'WITH_DEV_INSTALL=1'
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
@@ -53,6 +59,8 @@ services:
     command: ['run', 'content-app']
     ports:
       - "24816:24816"
+    environment:
+      - 'WITH_DEV_INSTALL=1'
     env_file:
       - './common/galaxy_ng.env'
       - './automation-hub/galaxy_ng.env'
