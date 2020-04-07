@@ -19,7 +19,7 @@ GUNICORN_OPTIONS=(
   --access-logfile -
 )
 
-if [[ -n "$GUNICORN_FORWARDED_ALLOW_IPS" ]]; then
+if [[ -n "${GUNICORN_FORWARDED_ALLOW_IPS}" ]]; then
     GUNICORN_OPTIONS+=(--forwarded-allow-ips "${GUNICORN_FORWARDED_ALLOW_IPS}")
 fi
 
