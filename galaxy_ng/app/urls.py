@@ -8,4 +8,5 @@ API_PATH_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip('/')
 app_name = "galaxy"
 urlpatterns = [
     path(f"{API_PATH_PREFIX}/", include(api_urls)),
+    path('', include('django_prometheus.urls')),
 ]
