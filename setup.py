@@ -14,9 +14,9 @@ galaxy_pulp_requirements = [
 requirements = galaxy_pulp_requirements + [
     "pulpcore>=3.1.1",
     "pulp-ansible>=0.2.0b8",
-    "django-prometheus>=2.0.0"
+    "django-prometheus>=2.0.0",
+    "django-storages[boto3]",
 ]
-
 
 
 setup(
