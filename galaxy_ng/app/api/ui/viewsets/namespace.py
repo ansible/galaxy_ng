@@ -1,9 +1,6 @@
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
-
 from rest_framework import mixins
-from rest_framework import viewsets
-from rest_framework.settings import api_settings
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api import permissions
@@ -44,9 +41,14 @@ class NamespaceViewSet(
     api_base.GenericViewSet,
 ):
     lookup_field = "name"
-    permission_classes = api_base.GALAXY_PERMISSION_CLASSES + [
-        permissions.IsNamespaceOwnerOrPartnerEngineer,
-    ]
+
+    def get_permissions(self):
+        permission_list = super().get_permissions()
+        if self.request.method == 'POST':
+            permission_list.append(permissions.IsPartnerEngineer())
+        elif self.request.method == 'PUT':
+            permission_list.append(permissions.IsNamespaceOwnerOrPartnerEngineer())
+        return permission_list
 
     filter_backends = (DjangoFilterBackend,)
 
