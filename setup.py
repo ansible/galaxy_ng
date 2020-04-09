@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 from setuptools import find_packages, setup
+import setuptools.command.build_py
+import tarfile
+import urllib.request
 
 # NOTE(cutwater): Because bindings are statically generated, requirements list
 #   from pulp-galaxy/setup.py has to be copied here and manually maintained.
@@ -18,6 +21,28 @@ requirements = galaxy_pulp_requirements + [
     "django-prometheus>=2.0.0",
     "django-storages[boto3]",
 ]
+
+
+class BuildPyCommand(setuptools.command.build_py.build_py):
+    """Custom build command."""
+
+    def run(self):
+        print('Downloading UI static files')
+
+        download_url = 'https://github.com/ansible/ansible-hub-ui/' + \
+            'releases/latest/download/automation-hub-ui-dist.tar.gz'
+
+        filename, headers = urllib.request.urlretrieve(
+            download_url,
+            'automation-hub-ui-dist.tar.gz'
+        )
+
+        print('Extracting ' + filename)
+        tarfile.open(filename).extractall(
+            path='galaxy_ng/app/static/galaxy_ng'
+        )
+
+        setuptools.command.build_py.build_py.run(self)
 
 
 setup(
@@ -42,4 +67,7 @@ setup(
         "Programming Language :: Python :: 3.7",
     ),
     entry_points={"pulpcore.plugin": ["galaxy_ng = galaxy_ng:default_app_config"]},
+    cmdclass={
+        'build_py': BuildPyCommand,
+    },
 )
