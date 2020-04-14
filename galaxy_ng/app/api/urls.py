@@ -1,9 +1,12 @@
+from django.conf import settings
 from django.urls import include, path
 
 from . import views
 from .ui import urls as ui_urls
 from .v3 import urls as v3_urls
 from .v3 import viewsets as v3_viewsets
+
+DEFAULT_DISTRIBUTION_BASE_PATH = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH.strip('/')
 
 app_name = "api"
 urlpatterns = [
@@ -33,7 +36,7 @@ urlpatterns = [
     # use the hard coded 'default' distro (ie, 'automation-hub')
     path("v3/",
          include(v3_urls, namespace='default_distribution'),
-         {'path': 'golden-distro-base-path'}),
+         {'path': DEFAULT_DISTRIBUTION_BASE_PATH}),
 
     # This path is to redirect requests to /api/automation-hub/api/
     # to /api/automation-hub/
