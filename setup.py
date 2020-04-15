@@ -4,6 +4,7 @@ from setuptools import find_packages, setup
 import setuptools.command.build_py
 import tarfile
 import urllib.request
+from galaxy_ng.app.common import version
 
 # NOTE(cutwater): Because bindings are statically generated, requirements list
 #   from pulp-galaxy/setup.py has to be copied here and manually maintained.
@@ -47,7 +48,7 @@ class BuildPyCommand(setuptools.command.build_py.build_py):
 
 setup(
     name="galaxy-ng",
-    version="0.1.0a1",
+    version=version.get_git_version(),
     description="galaxy-ng plugin for the Pulp Project",
     license="GPLv2+",
     author="AUTHOR",
