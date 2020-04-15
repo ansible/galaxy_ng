@@ -27,6 +27,7 @@ RUN set -ex; \
         python3-devel \
         libpq \
         libpq-devel \
+        git \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \

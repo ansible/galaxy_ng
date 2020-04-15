@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 import setuptools.command.build_py
 import tarfile
 import urllib.request
-from galaxy_ng.app.common import version
+from galaxy_ng import version
 
 # NOTE(cutwater): Because bindings are statically generated, requirements list
 #   from pulp-galaxy/setup.py has to be copied here and manually maintained.
