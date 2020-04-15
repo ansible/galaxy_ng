@@ -49,6 +49,7 @@ jobs:
       provider: pypi
       server: https://test.pypi.org/legacy/
       user: "__token__"
+      skip_cleanup: true
       password:
         secure: f2B1zw+pyieLUyHYXVP4TCTcmIBdThtUHnNH1Iio1I6xiFW3M+1lJr5DgK9XMQxZObkcvQ/HsDqp92czUjmqUzVZaN1jMyUQC0Cw56Qpy5jwJja62f3Sy2tPBs2PsOyYZ6LqQQqgSd3O1YfLlpykWqvNTRBvnMmyvSo/S2jPQv3z0BX6en3oKHpvVvSQjKBWOVyhe+wlJ+jL3lmmNwGXbee4Fri+pmdcQE3YmBzPaaxXAPoHpIZxWKQOmP7WYDSnuKtcMdT5CfPd57nkNl+kw6Et/DBCiGRSPPNVycPqgUjevl68BXA5+osJcKf0twoXXCnWV0nMQ5KTxhV8UF95OTs2wcj4595dNL+2FMntO3T47KBy1PcbqP7XfDrHLQC44dTISv+/FGbkbQmYwP+00j8jTADMlAXDT0WQmhRc8JsTLcOpnlu5h+rZykS6+HbeimIy2zsV5xdylai1RrsFHyAvb+RghkWKQPvj5fBajIA8vEC43kQuEbNyVpgfTxWx3bmchJXk8sWciU908Me7FHn/WLjLs0frEe03WJcu4KBoinUHSFMhSDFm74ypyUgQJRdlzx4Ji3yY/sPfQpOyCUbotuk6J99oLVlh2qJ0spslnwaBqxIWMEe4Zawd27PFcWmnU6yuMkCEtgkU4V7NTUNwSTX5yvYH4Gdn0R6CSVo=
       on:
