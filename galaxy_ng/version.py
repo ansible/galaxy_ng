@@ -15,7 +15,7 @@ def get_git_version():
         # TODO(cutwater): Replace `.decode('utf-8')` call with subprocess
         # parameter `encoding` after dropping Python 2.7 support.
         tag_info = subprocess.check_output([
-            'git', 'describe', '--always', '--match', TAG_PREFIX + '*']
+            'git', 'describe', '--tags', '--always', '--match', TAG_PREFIX + '*']
         ).decode('utf-8').strip()
     except subprocess.CalledProcessError:
         warnings.warn('Cannot determine git version string.')
