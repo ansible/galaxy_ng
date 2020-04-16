@@ -1,10 +1,10 @@
 [tool.towncrier]
-package = "galaxy-ng"
+package = "galaxy_ng"
 filename = "CHANGES.rst"
 directory = "CHANGES/"
 title_format = "{version} ({project_date})"
 template = "CHANGES/.TEMPLATE.rst"
-issue_format = "`#{issue} <https://pulp.plan.io/issues/{issue}>`_"
+issue_format = "`#{issue} <https://github.com/ansible/galaxy_ng/issues/{issue}>`_"
 
 
 [tool.black]
