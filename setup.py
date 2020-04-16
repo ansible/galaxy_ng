@@ -24,17 +24,18 @@ requirements = galaxy_pulp_requirements + [
 ]
 
 
+UI_DOWNLOAD_URL = 'https://github.com/ansible/ansible-hub-ui/' + \
+    'releases/latest/download/automation-hub-ui-dist.tar.gz'
+
+
 class BuildPyCommand(setuptools.command.build_py.build_py):
     """Custom build command."""
 
     def run(self):
         print('Downloading UI static files')
 
-        download_url = 'https://github.com/ansible/ansible-hub-ui/' + \
-            'releases/latest/download/automation-hub-ui-dist.tar.gz'
-
         filename, headers = urllib.request.urlretrieve(
-            download_url,
+            UI_DOWNLOAD_URL,
             'automation-hub-ui-dist.tar.gz'
         )
 
