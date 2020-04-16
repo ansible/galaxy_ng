@@ -1,5 +1,4 @@
 import subprocess
-import warnings
 
 TAG_PREFIX = 'v'
 
@@ -18,8 +17,7 @@ def get_git_version():
             'git', 'describe', '--tags', '--always', '--match', TAG_PREFIX + '*']
         ).decode('utf-8').strip()
     except subprocess.CalledProcessError:
-        warnings.warn('Cannot determine git version string.')
-        return '0.0.0'
+        raise RuntimeError('Cannot determine git version string.')
 
     if '-' in tag_info:
         chunks = tag_info.lstrip(TAG_PREFIX).rsplit('-', 2)

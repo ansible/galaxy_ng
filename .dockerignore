@@ -1,6 +1,3 @@
-# Git
-.git/
-
 # Python
 venv/
 .venv/

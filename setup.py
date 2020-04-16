@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-from setuptools import find_packages, setup
 import setuptools.command.build_py
 import tarfile
 import urllib.request
+
 from galaxy_ng import version
+from setuptools import find_packages, setup
 
 # NOTE(cutwater): Because bindings are statically generated, requirements list
 #   from pulp-galaxy/setup.py has to be copied here and manually maintained.
@@ -48,7 +49,7 @@ class BuildPyCommand(setuptools.command.build_py.build_py):
 
 
 setup(
-    name="galaxy-ng",
+    name="ansible-galaxy-ng",
     version=version.get_git_version(),
     description="galaxy-ng plugin for the Pulp Project",
     license="GPLv2+",
