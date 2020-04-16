@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+import setuptools.command.build_py
+import tarfile
+import urllib.request
+
+from galaxy_ng import version
 from setuptools import find_packages, setup
 
 # NOTE(cutwater): Because bindings are statically generated, requirements list
@@ -20,9 +25,32 @@ requirements = galaxy_pulp_requirements + [
 ]
 
 
+UI_DOWNLOAD_URL = 'https://github.com/ansible/ansible-hub-ui/' + \
+    'releases/latest/download/automation-hub-ui-dist.tar.gz'
+
+
+class BuildPyCommand(setuptools.command.build_py.build_py):
+    """Custom build command."""
+
+    def run(self):
+        print('Downloading UI static files')
+
+        filename, headers = urllib.request.urlretrieve(
+            UI_DOWNLOAD_URL,
+            'automation-hub-ui-dist.tar.gz'
+        )
+
+        print('Extracting ' + filename)
+        tarfile.open(filename).extractall(
+            path='galaxy_ng/app/static/galaxy_ng'
+        )
+
+        setuptools.command.build_py.build_py.run(self)
+
+
 setup(
     name="galaxy-ng",
-    version="0.1.0a1",
+    version=version.get_git_version(),
     description="galaxy-ng plugin for the Pulp Project",
     license="GPLv2+",
     author="AUTHOR",
@@ -42,4 +70,7 @@ setup(
         "Programming Language :: Python :: 3.7",
     ),
     entry_points={"pulpcore.plugin": ["galaxy_ng = galaxy_ng:default_app_config"]},
+    cmdclass={
+        'build_py': BuildPyCommand,
+    },
 )
