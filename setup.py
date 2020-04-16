@@ -49,7 +49,7 @@ class BuildPyCommand(setuptools.command.build_py.build_py):
 
 
 setup(
-    name="ansible-galaxy-ng",
+    name="galaxy-ng",
     version=version.get_git_version(),
     description="galaxy-ng plugin for the Pulp Project",
     license="GPLv2+",
