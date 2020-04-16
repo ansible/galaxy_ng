@@ -29,27 +29,35 @@ RUN set -ex; \
         libpq-devel \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
-    && rm -f /var/lib/rpm/__db.*
+    && rm -f /var/lib/rpm/__db.* \
+    \
+    && python3 -m venv /venv
 
+ENV PATH="/venv/bin:${PATH}" \
+    VIRTUAL_ENV="/venv"
+
+# Install python requirements
+COPY ./release_requirements.txt /tmp/requirements.txt
+
+RUN set -ex; \
+    pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir --requirement /tmp/requirements.txt
+
+# Install application
 COPY . /app
 
 RUN set -ex; \
-    mkdir -p /var/run/pulp \
-             /var/lib/pulp/tmp \
-    && python3 -m venv /venv \
-    && source /venv/bin/activate \
-    && pip install --no-cache --upgrade pip \
-    && pip install --no-cache --editable /app \
+    pip install --no-cache-dir --editable /app \
     && PULP_CONTENT_ORIGIN=x django-admin collectstatic
 
+# Finalize installation
 RUN set -ex; \
     mkdir -p /var/lib/pulp/artifact \
              /var/lib/pulp/tmp \
     && chown -R ${USER_NAME}:${USER_GROUP} \
         /app \
         /venv \
-        /var/lib/pulp/artifact \
-        /var/lib/pulp/tmp \
+        /var/lib/pulp \
     && chmod -R 0775 /var/lib/pulp \
                      /app/docker/entrypoint.sh \
                      /app/docker/bin/* \
@@ -57,6 +65,5 @@ RUN set -ex; \
     && mv /app/docker/bin/* /usr/local/bin
 
 USER "${USER_NAME}"
-ENV PATH="/venv/bin:${PATH}"
 VOLUME [ "/var/lib/pulp/artifact", "/var/lib/pulp/tmp" ]
 ENTRYPOINT [ "/entrypoint.sh" ]

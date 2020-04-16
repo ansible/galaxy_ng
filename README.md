@@ -111,6 +111,16 @@ through Django shell (`./compose run --rm api manage shell`), use the following 
 >>> user.save()
 ```
 
+### Project dependencies
+
+Production images are built from locked dependencies list stored in `release_requirements.txt`.
+In order to update requirements list you may run `pip-compile` tool provided by
+`pip-tools` python package:
+
+```console
+$ pip-compile -o release_requirements.txt
+```
+
 ## Pulp 3 Installer
 
 #### 1. Clone the GitHub repos
