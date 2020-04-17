@@ -4,9 +4,9 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-
 readonly WITH_MIGRATIONS="${WITH_MIGRATIONS:-0}"
 readonly WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-0}"
+readonly DEV_SOURCE_PATH="${DEV_SOURCE_PATH:-}"
 
 
 log_message() {
@@ -14,8 +14,20 @@ log_message() {
 }
 
 
+# TODO(cutwater): This function should be moved to entrypoint hooks.
 install_local_deps() {
-    pip install --no-cache --no-deps --editable "/app" >/dev/null
+    local src_path_list
+    IFS=':' read -ra src_path_list <<< "$DEV_SOURCE_PATH"
+
+    for item in "${src_path_list[@]}"; do
+        src_path="/src/${item}"
+        if [[ -d "$src_path" ]]; then
+            log_message "Installing path ${item} in editable mode."
+            pip install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
+        else
+            log_message "WARNING: Source path ${item} is not a directory."
+        fi
+    done
 }
 
 
