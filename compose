@@ -1,7 +1,17 @@
 #!/bin/bash
 
+source .compose.env
+
+if [ -z "$COMPOSE_PROFILE" ]
+then
+      echo "\$COMPOSE_PROFILE must be set to standalone or insights"
+      exit 1
+fi
+
 set -o nounset
 set -o errexit
+
+echo "Compose Profile $COMPOSE_PROFILE"
 
 declare -xr DEV_SOURCE_PATH=${DEV_SOURCE_PATH:-galaxy_ng}
 
@@ -11,4 +21,4 @@ declare -xr COMPOSE_FILE="${COMPOSE_FILE:-dev/docker-compose.yml}"
 declare -xr COMPOSE_CONTEXT=".."
 
 
-exec docker-compose "$@"
+exec docker-compose -f dev/docker-compose.yml -f dev/docker-compose-override.$COMPOSE_PROFILE.yml "$@"

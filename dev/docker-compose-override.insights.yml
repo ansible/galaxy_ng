@@ -1,0 +1,13 @@
+---
+version: "3.7"
+
+services:
+  api:
+    env_file:
+      - './automation-hub/galaxy_ng_insights.env'
+  resource-manager:
+      - './automation-hub/galaxy_ng_insights.env'
+  worker:
+      - './automation-hub/galaxy_ng_insights.env'
+  content-app:
+      - './automation-hub/galaxy_ng_insights.env'
