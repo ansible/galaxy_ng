@@ -38,11 +38,13 @@ ENV PATH="/venv/bin:${PATH}" \
     VIRTUAL_ENV="/venv"
 
 # Install python requirements
-COPY ./release_requirements.txt /tmp/requirements.txt
+COPY ./cloudwatch_requirements.txt /tmp/cloudwatch_requirements.txt
+COPY ./release_requirements.txt /tmp/release_requirements.txt
 
 RUN set -ex; \
     pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir --requirement /tmp/requirements.txt
+    && pip install --no-cache-dir --requirement /tmp/cloudwatch_requirements.txt \
+    && pip install --no-cache-dir --requirement /tmp/release_requirements.txt
 
 # Install application
 COPY . /app

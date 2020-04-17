@@ -1,4 +1,5 @@
 #!/bin/bash
+# TODO(cutwater): Merge to `start-api` script. Add GUNICORN_RELOAD option.
 
 set -o errexit
 set -o nounset
@@ -6,15 +7,21 @@ set -o nounset
 
 readonly GUNICORN='/venv/bin/gunicorn'
 readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
+readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
 
 readonly BIND_HOST='0.0.0.0'
 readonly BIND_PORT=8000
 readonly APP_MODULE='pulpcore.app.wsgi:application'
 
+GUNICORN_OPTIONS=(
+  --bind "${BIND_HOST}:${BIND_PORT}"
+  --workers "${GUNICORN_WORKERS}"
+  --access-logfile -
+  --reload
+)
 
-exec "${GUNICORN}" \
-  --bind "${BIND_HOST}:${BIND_PORT}" \
-  --workers "${GUNICORN_WORKERS}" \
-  --access-logfile - \
-  --reload \
-  "${APP_MODULE}"
+if [[ -n "${GUNICORN_LOGGER_CLASS}" ]]; then
+    GUNICORN_OPTIONS+=(--logger-class "${GUNICORN_LOGGER_CLASS}")
+fi
+
+exec "${GUNICORN}" "${GUNICORN_OPTIONS[@]}" "${APP_MODULE}"
