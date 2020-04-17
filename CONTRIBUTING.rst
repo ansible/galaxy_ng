@@ -1,14 +1,17 @@
 Contributing
 ============
 
-To contribute to the ``galaxy-ng`` package follow this process:
+Contribution Process
+*********************
+
+To contribute to the ``galaxy_ng`` project, we ask that you follow these steps:
 
 1. Clone the GitHub repo
 2. Make a change
-3. Make sure all tests passed
-4. Add a file into CHANGES folder (Changelog update).
-5. Commit changes to own ``galaxy-ng`` clone
-6. Make pull request from github page for your clone against master branch
+3. Make sure all tests pass
+4. Add a file to CHANGES folder (view changelog-update_).
+5. Commit changes to your ``galaxy_ng`` clone
+6. Make a pull request from your clone against the master branch
 
 
 .. _changelog-update:
