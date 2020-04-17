@@ -6,8 +6,11 @@ services:
     env_file:
       - './automation-hub/galaxy_ng_insights.env'
   resource-manager:
+    env_file:
       - './automation-hub/galaxy_ng_insights.env'
   worker:
+    env_file:
       - './automation-hub/galaxy_ng_insights.env'
   content-app:
+    env_file:
       - './automation-hub/galaxy_ng_insights.env'

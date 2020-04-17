@@ -14,7 +14,6 @@ services:
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
-      - './automation-hub/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
@@ -30,7 +29,6 @@ services:
       - "WITH_DEV_INSTALL=1"
     env_file:
       - './common/galaxy_ng.env'
-      - './automation-hub/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
@@ -46,7 +44,6 @@ services:
       - "WITH_DEV_INSTALL=1"
     env_file:
       - './common/galaxy_ng.env'
-      - './automation-hub/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
@@ -64,7 +61,6 @@ services:
       - "WITH_DEV_INSTALL=1"
     env_file:
       - './common/galaxy_ng.env'
-      - './automation-hub/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
