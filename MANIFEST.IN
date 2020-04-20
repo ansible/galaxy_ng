@@ -1,1 +1,3 @@
 recursive-include galaxy_ng/app/static/galaxy_ng *
+include LICENSE
+include galaxy_ng/app/webserver_snippets/*
