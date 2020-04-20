@@ -1,6 +1,8 @@
 #!/bin/bash
 
+set -o allexport
 source .compose.env
+set +o allexport
 
 if [[ -z "$COMPOSE_PROFILE" ]]
 then
