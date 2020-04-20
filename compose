@@ -1,14 +1,26 @@
 #!/bin/bash
 
+set -o allexport
+source .compose.env
+set +o allexport
+
+if [[ -z "$COMPOSE_PROFILE" ]]
+then
+    echo "ERROR: the \$COMPOSE_PROFILE environment variable must be set."
+    echo "The the easiest way to to this is to create a .compose.env file by running '\$ cp .compose.env.example .compose.env'"
+    exit 1
+fi
+
 set -o nounset
 set -o errexit
+
+echo "Compose Profile $COMPOSE_PROFILE"
 
 declare -xr DEV_SOURCE_PATH=${DEV_SOURCE_PATH:-galaxy_ng}
 
 declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng}"
-declare -xr COMPOSE_FILE="${COMPOSE_FILE:-dev/docker-compose.yml}"
 
 declare -xr COMPOSE_CONTEXT=".."
 
 
-exec docker-compose "$@"
+exec docker-compose -f dev/docker-compose.yml -f dev/docker-compose-override.$COMPOSE_PROFILE.yml "$@"

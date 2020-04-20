@@ -87,6 +87,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.compose.env
 
 # Spyder project settings
 .spyderproject
@@ -104,4 +105,3 @@ venv.bak/
 # Editors
 .vscode/
 .idea/
-
