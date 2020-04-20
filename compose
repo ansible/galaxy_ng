@@ -2,10 +2,11 @@
 
 source .compose.env
 
-if [ -z "$COMPOSE_PROFILE" ]
+if [[ -z "$COMPOSE_PROFILE" ]]
 then
-      echo "\$COMPOSE_PROFILE must be set to standalone or insights"
-      exit 1
+    echo "ERROR: the \$COMPOSE_PROFILE environment variable must be set."
+    echo "The the easiest way to to this is to create a .compose.env file by running '\$ cp .compose.env.example .compose.env'"
+    exit 1
 fi
 
 set -o nounset
