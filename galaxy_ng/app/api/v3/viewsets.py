@@ -22,6 +22,9 @@ log = logging.getLogger(__name__)
 
 
 class CollectionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionViewSet):
+    # permission_classes = api_base.GALAXY_PERMISSION_CLASSES + [
+    #    permissions.IsNamespaceOwnerOrPartnerEngineer,
+    # ]
     pass
 
 
