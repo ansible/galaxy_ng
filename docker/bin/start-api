@@ -7,6 +7,7 @@ set -o nounset
 readonly GUNICORN='/venv/bin/gunicorn'
 readonly GUNICORN_FORWARDED_ALLOW_IPS="${GUNICORN_FORWARDED_ALLOW_IPS:-}"
 readonly GUNICORN_WORKERS="${GUNICORN_WORKERS:-4}"
+readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
 
 readonly BIND_HOST='0.0.0.0'
 readonly BIND_PORT=${GUNICORN_PORT:-8000}
@@ -21,6 +22,10 @@ GUNICORN_OPTIONS=(
 
 if [[ -n "${GUNICORN_FORWARDED_ALLOW_IPS}" ]]; then
     GUNICORN_OPTIONS+=(--forwarded-allow-ips "${GUNICORN_FORWARDED_ALLOW_IPS}")
+fi
+
+if [[ -n "${GUNICORN_LOGGER_CLASS}" ]]; then
+    GUNICORN_OPTIONS+=(--logger-class "${GUNICORN_LOGGER_CLASS}")
 fi
 
 exec "${GUNICORN}" "${GUNICORN_OPTIONS[@]}" "${APP_MODULE}"
