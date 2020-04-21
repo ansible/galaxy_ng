@@ -33,7 +33,7 @@ docutils==0.15.2          # via botocore
 drf-nested-routers==0.91  # via pulpcore
 drf-yasg==1.17.1          # via pulpcore
 dynaconf==2.2.3           # via pulpcore
-galaxy-importer==0.1.8    # via pulp-ansible
+galaxy-importer==0.2.0    # via pulp-ansible
 gunicorn==20.0.4          # via pulpcore
 idna-ssl==1.1.0           # via aiohttp
 idna==2.9                 # via idna-ssl, requests, yarl
