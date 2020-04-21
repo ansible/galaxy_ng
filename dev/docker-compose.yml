@@ -27,6 +27,7 @@ services:
     command: ['run', 'resource-manager']
     environment:
       - "WITH_DEV_INSTALL=1"
+      - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
@@ -42,6 +43,7 @@ services:
     command: ['run', 'worker']
     environment:
       - "WITH_DEV_INSTALL=1"
+      - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
@@ -59,6 +61,7 @@ services:
       - "24816:24816"
     environment:
       - "WITH_DEV_INSTALL=1"
+      - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
