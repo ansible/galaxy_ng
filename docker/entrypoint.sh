@@ -30,6 +30,23 @@ install_local_deps() {
     done
 }
 
+process_init_files() {
+    local file
+    for file; do
+        case "$file" in
+            *.sh)
+                if [[ -x "$file" ]]; then
+                    log_message "$0: running $file"
+                    "$file"
+                else
+                    log_message "$0: sourcing $file"
+                    source "$file"
+                fi
+                ;;
+            *) log_message "$0: ignoring $file" ;;
+        esac
+    done
+}
 
 run_service() {
     if [[ "$#" -eq 0 ]]; then
@@ -57,6 +74,8 @@ run_service() {
     else
         wait-for-migrations
     fi
+
+    process_init_files /entrypoints.d/*
 
     exec "${service_path}" "$@"
 }
