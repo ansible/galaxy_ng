@@ -173,7 +173,7 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
             'galaxy:api:v3:collection-version',
             kwargs=dict(namespace=namespace, name=name, version=version)
         )
-        data['collection'] = reverse(
+        data['collection']['href'] = reverse(
             'galaxy:api:v3:collection',
             kwargs=dict(namespace=namespace, name=name)
         )
