@@ -8,7 +8,7 @@ aiodns==2.0.0             # via pulpcore
 aiofiles==0.4.0           # via pulpcore
 aiohttp==3.6.2            # via pulpcore
 ansible-lint==4.2.0       # via galaxy-importer
-ansible==2.9.6            # via ansible-lint, galaxy-importer
+ansible==2.9.7            # via ansible-lint, galaxy-importer
 async-timeout==3.0.1      # via aiohttp
 attrs==19.3.0             # via aiohttp, galaxy-importer
 backoff==1.10.0           # via pulpcore
