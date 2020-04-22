@@ -57,6 +57,7 @@ setup(
     author_email="author@email.here",
     url="http://example.com/",
     python_requires=">=3.6",
+    setup_requires=['wheel'],
     install_requires=requirements,
     include_package_data=True,
     packages=find_packages(exclude=["tests", "tests.*"]),
