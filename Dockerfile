@@ -67,6 +67,7 @@ RUN set -ex; \
     && chmod -R 0775 /var/lib/pulp \
                      /app/docker/entrypoint.sh \
                      /app/docker/bin/* \
+                     /tmp/ansible \
     && mv /app/docker/entrypoint.sh /entrypoint.sh \
     && mv /app/ansible.cfg /etc/ansible/ansible.cfg \
     && mv /app/docker/bin/* /usr/local/bin
