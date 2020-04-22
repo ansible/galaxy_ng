@@ -56,16 +56,21 @@ RUN set -ex; \
 RUN set -ex; \
     mkdir -p /var/lib/pulp/artifact \
              /var/lib/pulp/tmp \
+             /tmp/ansible \
+             /etc/ansible \
     && chown -R ${USER_NAME}:${USER_GROUP} \
         /app \
         /venv \
         /var/lib/pulp \
+        /tmp/ansible \
+        /etc/ansible \
     && chmod -R 0775 /var/lib/pulp \
                      /app/docker/entrypoint.sh \
                      /app/docker/bin/* \
     && mv /app/docker/entrypoint.sh /entrypoint.sh \
+    && mv /app/ansible.cfg /etc/ansible/ansible.cfg \
     && mv /app/docker/bin/* /usr/local/bin
 
 USER "${USER_NAME}"
-VOLUME [ "/var/lib/pulp/artifact", "/var/lib/pulp/tmp" ]
+VOLUME [ "/var/lib/pulp/artifact", "/var/lib/pulp/tmp", "/tmp/ansible" ]
 ENTRYPOINT [ "/entrypoint.sh" ]
