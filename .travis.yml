@@ -30,7 +30,7 @@ addons:
   postgresql: '9.6'
 jobs:
   include:
-  - stage: test
+  - stage: test and deploy
     before_install: .travis/before_install.sh
     install: .travis/install.sh
     before_script: .travis/before_script.sh
@@ -44,10 +44,9 @@ jobs:
       - sudo kubectl logs -l app=pulp-content --tail=10000
       - sudo kubectl logs -l app=pulp-resource-manager --tail=10000
       - sudo kubectl logs -l app=pulp-worker --tail=10000
-  - stage: Release to PyPI
-    if: tag IS NOT blank
     deploy:
       provider: pypi
+      distributions: "bdist_wheel"
       user: "__token__"
       skip_cleanup: true
       password:
