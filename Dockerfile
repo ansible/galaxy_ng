@@ -58,6 +58,7 @@ RUN set -ex; \
              /var/lib/pulp/tmp \
              /tmp/ansible \
              /etc/ansible \
+             /entrypoints.d \
     && chown -R ${USER_NAME}:${USER_GROUP} \
         /app \
         /venv \
