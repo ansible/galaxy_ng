@@ -1,11 +1,12 @@
 from django.http import HttpResponseRedirect
 
-from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from galaxy_ng.app.api import base as api_base
 
-class ApiRootView(views.APIView):
+
+class ApiRootView(api_base.APIView):
     def get(self, request):
         data = {
             "available_versions": {"v3": "v3/"},
@@ -13,7 +14,7 @@ class ApiRootView(views.APIView):
         return Response(data)
 
 
-class SlashApiRedirectView(views.APIView):
+class SlashApiRedirectView(api_base.APIView):
     """Redirect requests to /api/automation-hub/api/ to /api/automation-hub/
 
     This is a workaround for https://github.com/ansible/ansible/issues/62073.
