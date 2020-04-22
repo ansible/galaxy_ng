@@ -1,11 +1,38 @@
 #!/usr/bin/env python3
 
-import setuptools.command.build_py
+import os
+import tempfile
 import tarfile
 import urllib.request
+from distutils import log
+
+from setuptools.command.build_py import build_py as _BuildPyCommand
+from setuptools import find_packages, setup
 
 from galaxy_ng import __version__
-from setuptools import find_packages, setup
+
+
+class BuildPyCommand(_BuildPyCommand):
+    """Custom build command."""
+
+    UI_DOWNLOAD_URL = (
+        'https://github.com/ansible/ansible-hub-ui/releases'
+        '/latest/download/automation-hub-ui-dist.tar.gz'
+    )
+
+    def run(self):
+        target_dir = os.path.join(self.build_lib, 'galaxy_ng/app/static/galaxy_ng')
+
+        with tempfile.NamedTemporaryFile() as download_file:
+            log.info(f'Downloading UI distribution {download_file.name}')
+            urllib.request.urlretrieve(self.UI_DOWNLOAD_URL, filename=download_file.name)
+
+            log.info(f'Extracting UI static files')
+            with tarfile.open(fileobj=download_file) as tfp:
+                tfp.extractall(target_dir)
+
+        super().run()
+
 
 # NOTE(cutwater): Because bindings are statically generated, requirements list
 #   from pulp-galaxy/setup.py has to be copied here and manually maintained.
@@ -23,30 +50,6 @@ requirements = galaxy_pulp_requirements + [
     "django-prometheus>=2.0.0",
     "django-storages[boto3]",
 ]
-
-
-UI_DOWNLOAD_URL = 'https://github.com/ansible/ansible-hub-ui/' + \
-    'releases/latest/download/automation-hub-ui-dist.tar.gz'
-
-
-class BuildPyCommand(setuptools.command.build_py.build_py):
-    """Custom build command."""
-
-    def run(self):
-        print('Downloading UI static files')
-
-        filename, headers = urllib.request.urlretrieve(
-            UI_DOWNLOAD_URL,
-            'automation-hub-ui-dist.tar.gz'
-        )
-
-        print('Extracting ' + filename)
-        tarfile.open(filename).extractall(
-            path='galaxy_ng/app/static/galaxy_ng'
-        )
-
-        setuptools.command.build_py.build_py.run(self)
-
 
 setup(
     name="galaxy-ng",
