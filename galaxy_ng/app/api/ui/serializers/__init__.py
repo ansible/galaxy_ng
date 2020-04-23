@@ -20,6 +20,10 @@ from .current_user import (
     CurrentUserSerializer
 )
 
+from .user import (
+    UserSerializer
+)
+
 
 __all__ = (
     # collection
@@ -37,5 +41,7 @@ __all__ = (
     'NamespaceSummarySerializer',
     'NamespaceUpdateSerializer',
     # current_user
-    'CurrentUserSerializer'
+    'CurrentUserSerializer',
+    # user
+    'UserSerializer',
 )

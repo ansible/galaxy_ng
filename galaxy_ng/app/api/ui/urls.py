@@ -8,6 +8,7 @@ router = routers.SimpleRouter()
 router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
 router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='my-namespaces')
 router.register('collections', viewsets.CollectionViewSet, basename='collections')
+router.register('users', viewsets.UserViewSet, basename='users')
 router.register('collection-versions',
                 viewsets.CollectionVersionViewSet, basename='collection-versions')
 router.register(
