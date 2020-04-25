@@ -16,12 +16,9 @@ from .namespace import (
     NamespaceUpdateSerializer
 )
 
-from .current_user import (
-    CurrentUserSerializer
-)
-
 from .user import (
-    UserSerializer
+    UserSerializer,
+    CurrentUserSerializer
 )
 
 

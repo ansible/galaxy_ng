@@ -1,13 +1,10 @@
-from rest_framework.serializers import (
-    ModelSerializer,
-    CharField
-)
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from galaxy_ng.app.models import auth as auth_models
 
 
-class GroupSerializer(ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = auth_models.Group
@@ -17,8 +14,8 @@ class GroupSerializer(ModelSerializer):
         )
 
 
-class UserSerializer(ModelSerializer):
-    password_confirm = CharField(write_only=True, allow_blank=True, required=False)
+class UserSerializer(serializers.ModelSerializer):
+    password_confirm = serializers.CharField(write_only=True, allow_blank=True, required=False)
 
     class Meta:
         model = auth_models.User
@@ -61,3 +58,7 @@ class UserSerializer(ModelSerializer):
         representation['groups'] = \
             GroupSerializer(instance.groups.all(), many=True).data
         return representation
+
+
+class CurrentUserSerializer(serializers.Serializer):
+    is_partner_engineer = serializers.BooleanField()
