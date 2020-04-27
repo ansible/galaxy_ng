@@ -23,5 +23,5 @@ urlpatterns = [
     path('', include(router.urls)),
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve
     # to look up values with an ID
-    path('me/', viewsets.CurrentUserViewSet.as_view({'get': 'retrieve'}))
+    path('me/', viewsets.CurrentUserViewSet.as_view({'get': 'retrieve', 'put': 'update'}))
 ]

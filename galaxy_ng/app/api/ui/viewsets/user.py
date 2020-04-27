@@ -1,5 +1,6 @@
 from rest_framework import mixins
 from rest_framework.response import Response
+from rest_framework.exceptions import NotAuthenticated
 
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.api import permissions
@@ -23,12 +24,18 @@ class UserViewSet(
         return auth_models.User.objects.all()
 
 
-class CurrentUserViewSet(api_base.GenericViewSet):
+class CurrentUserViewSet(
+    api_base.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+):
     serializer_class = serializers.CurrentUserSerializer
+    model = auth_models.User
 
-    def retrieve(self, request, *args, **kwargs):
-        data = serializers.CurrentUserSerializer({
-            'is_partner_engineer': permissions.IsPartnerEngineer().has_permission(request, self)
-        }).data
-
-        return Response(data)
+    def get_object(self):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated()
+        obj, created = self.model.objects.get_or_create(
+            pk=self.request.user.pk
+        )
+        return obj

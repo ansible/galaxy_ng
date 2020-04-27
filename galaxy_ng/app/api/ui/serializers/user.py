@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from galaxy_ng.app.api import permissions
 
 from galaxy_ng.app.models import auth as auth_models
 
@@ -34,6 +35,8 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def validate_password(self, password):
+        if not password:
+            return
         if len(password) <= 10:
             raise ValidationError(detail={
                 'password': "Password must be 10+ characters long"})
@@ -60,5 +63,18 @@ class UserSerializer(serializers.ModelSerializer):
         return representation
 
 
-class CurrentUserSerializer(serializers.Serializer):
-    is_partner_engineer = serializers.BooleanField()
+class CurrentUserSerializer(UserSerializer):
+    is_partner_engineer = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        model = auth_models.User
+        fields = UserSerializer.Meta.fields + ('is_partner_engineer',)
+        extra_kwargs = dict(
+            groups={'read_only': True},
+            **UserSerializer.Meta.extra_kwargs
+        )
+
+    def get_is_partner_engineer(self, obj):
+        return (
+            obj.groups.filter(name=permissions.IsPartnerEngineer.GROUP_NAME).exists()
+        )
