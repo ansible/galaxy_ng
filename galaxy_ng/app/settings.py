@@ -19,6 +19,7 @@ AUTH_USER_MODEL = 'galaxy.User'
 # FIXME(cutwater): 1. Rename GALAXY_API_ROOT in pulp-ansible to ANSIBLE_API_ROOT
 #                  2. Rename API_PATH_PREFIX to GALAXY_API_ROOT
 GALAXY_API_PATH_PREFIX = "/api/galaxy"
+STATIC_URL = "/static/"
 
 # Local rest framework settings
 # -----------------------------
