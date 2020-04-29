@@ -1,7 +1,7 @@
+from django.contrib.auth import password_validation
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-from galaxy_ng.app.api import permissions
 
+from galaxy_ng.app.api import permissions
 from galaxy_ng.app.models import auth as auth_models
 
 
@@ -16,8 +16,6 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password_confirm = serializers.CharField(write_only=True, allow_blank=True, required=False)
-
     class Meta:
         model = auth_models.User
         fields = (
@@ -28,39 +26,44 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'groups',
             'password',
-            'password_confirm'
         )
         extra_kwargs = {
             'password': {'write_only': True, 'allow_blank': True, 'required': False}
         }
 
     def validate_password(self, password):
-        if not password:
-            return
-        if len(password) <= 10:
-            raise ValidationError(detail={
-                'password': "Password must be 10+ characters long"})
-        if password != self.initial_data['password_confirm']:
-            raise ValidationError(detail={
-                'password': "Passwords do no match"})
-        return password
+        if password:
+            password_validation.validate_password(password)
+            return password
 
     def update(self, instance, data):
+        # password doesn't get set the same as other data, so delete it
+        # before the serializer saves
         if 'password' in data:
-            if data['password']:
-                instance.set_password(data['password'])
-
-            # password doesn't get set the same as other data, so delete it
-            # before the serializer saves
-            del data['password']
+            print(data)
+            password = data.pop('password')
+            print(password)
+            print(data)
+            if password:
+                instance.set_password(password)
 
         return super().update(instance, data)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['groups'] = \
-            GroupSerializer(instance.groups.all(), many=True).data
+        representation['groups'] = GroupSerializer(instance.groups.all(), many=True).data
         return representation
+
+    def to_internal_value(self, data):
+        groups = data.get('groups')
+        if groups:
+            new_groups = []
+            groups = GroupSerializer(data=groups, many=True)
+            groups.is_valid(raise_exception=True)
+            for group in groups.validated_data:
+                new_groups.append(group['id'])
+            data['groups'] = new_groups
+        return super().to_internal_value(data)
 
 
 class CurrentUserSerializer(UserSerializer):
