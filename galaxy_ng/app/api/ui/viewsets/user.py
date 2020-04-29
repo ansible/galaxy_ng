@@ -1,5 +1,4 @@
 from rest_framework import mixins
-from rest_framework.exceptions import NotAuthenticated
 from rest_framework import permissions as drf_permissions
 
 from galaxy_ng.app.models import auth as auth_models
@@ -15,7 +14,9 @@ class UserViewSet(
     mixins.UpdateModelMixin,
     api_base.GenericViewSet,
 ):
-    permission_classes = [permissions.IsPartnerEngineer]
+    permission_classes = [
+        permissions.IsPartnerEngineer,
+        permissions.RestrictOnCloudDeployments]
 
     def get_serializer_class(self):
         return serializers.UserSerializer
@@ -31,7 +32,9 @@ class CurrentUserViewSet(
 ):
     serializer_class = serializers.CurrentUserSerializer
     model = auth_models.User
-    permission_classes = [drf_permissions.IsAuthenticated]
+    permission_classes = [
+        drf_permissions.IsAuthenticated,
+        permissions.RestrictUnsafeOnCloudDeployments]
 
     def get_object(self):
         obj, created = self.model.objects.get_or_create(

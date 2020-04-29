@@ -2,6 +2,8 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.models.auth import SYSTEM_SCOPE
+from django.conf import settings
+from galaxy_ng.app.constants import DeploymentMode
 
 
 class IsPartnerEngineer(BasePermission):
@@ -51,3 +53,15 @@ class IsNamespaceOwnerOrPartnerEngineer(BasePermission):
             return True
         return IsNamespaceOwnerOrReadOnly().has_object_permission(
             request, view, obj)
+
+
+class RestrictOnCloudDeployments(BasePermission):
+    def has_permission(self, request, view):
+        return settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value
+
+
+class RestrictUnsafeOnCloudDeployments(RestrictOnCloudDeployments):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return super().has_permission(request, view)

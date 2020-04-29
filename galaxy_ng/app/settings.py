@@ -34,6 +34,8 @@ GALAXY_PERMISSION_CLASSES = [
     'rest_framework.permissions.IsAuthenticated',
     # 'galaxy_ng.app.auth.auth.RHEntitlementRequired',
 ]
+# set to 'insights' for cloud.redhat.com deployments
+GALAXY_DEPLOYMENT_MODE = 'standalone'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
