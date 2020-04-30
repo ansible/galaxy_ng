@@ -49,7 +49,7 @@ pip install -r dev_requirements.txt
 
 
 # Lint code.
-#flake8 --config flake8.cfg
+#flake8 --config .flake8
 
 cd ..
 git clone --depth=1 https://github.com/pulp/ansible-pulp.git
