@@ -15,7 +15,7 @@ urlpatterns = [
     # A set of galaxy v3 API urls per Distribution.base_path
     # which is essentially per Repository
     path("content/<str:path>/v3/",
-         include(v3_urls, namespace='per_distribution')),
+         include(v3_urls, namespace='per-distribution')),
 
     path("content/<str:path>/",
          v3_viewsets.ApiRootView.as_view(),
@@ -35,7 +35,7 @@ urlpatterns = [
     # the base_path of the Distribution. For the default case,
     # use the hard coded 'default' distro (ie, 'automation-hub')
     path("v3/",
-         include(v3_urls, namespace='default_distribution'),
+         include(v3_urls, namespace='default-distribution'),
          {'path': DEFAULT_DISTRIBUTION_BASE_PATH}),
 
     # This path is to redirect requests to /api/automation-hub/api/
