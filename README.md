@@ -35,6 +35,8 @@ The following is a simple quickstart for installing a local Galaxy server. It re
 
 3. Create a playbook called `install.yml` that contains the following:
 
+    * **Warning**: please change the `pulp_default_admin_password`  (Initial password for the Pulp admin).
+
     ```
     - hosts: all
       vars:
@@ -43,13 +45,9 @@ The following is a simple quickstart for installing a local Galaxy server. It re
           content_origin: "http://{{ ansible_fqdn }}"
         pulp_default_admin_password: password
         pulp_install_plugins:
-          pulp-ansible:
-            source_dir: "git+https://github.com/pulp/pulp_ansible.git#egg=pulp-ansible"
-          galaxy-ng:
-            source_dir: "git+https://github.com/ansible/galaxy_ng.git#egg=galaxy-ng"
-          pulp-container:
-            source_dir: "git+https://github.com/pulp/pulp_container.git#egg=pulp-container"
-        pulp_source_dir: "git+https://github.com/pulp/pulpcore.git@3.3.0#egg=pulpcore"
+          pulp-ansible: {}
+          galaxy-ng: {}
+          pulp-container: {}
       roles:
         - pulp-database
         - pulp-workers
