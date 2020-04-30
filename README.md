@@ -49,7 +49,7 @@ The following is a simple quickstart for installing a local Galaxy server. It re
             source_dir: "git+https://github.com/ansible/galaxy_ng.git#egg=galaxy-ng"
           pulp-container:
             source_dir: "git+https://github.com/pulp/pulp_container.git#egg=pulp-container"
-        pulp_source_dir: "git+https://github.com/pulp/pulpcore.git#egg=pulpcore"
+        pulp_source_dir: "git+https://github.com/pulp/pulpcore.git@3.3.0#egg=pulpcore"
       roles:
         - pulp-database
         - pulp-workers
