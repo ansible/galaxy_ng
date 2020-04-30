@@ -34,7 +34,7 @@ urlpatterns = [
         name='collection-artifact-upload'
     ),
     path(
-        'artifacts/collections/<str:filename>',
+        'artifacts/collections/<str:path>/<str:filename>',
         viewsets.CollectionArtifactDownloadView.as_view(),
         name='collection-artifact-download'
     ),
