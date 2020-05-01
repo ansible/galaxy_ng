@@ -53,4 +53,10 @@ urlpatterns = [
         viewsets.CollectionArtifactDownloadView.as_view(),
         name='collection-artifact-download'
     ),
+    path(
+        'collections/<str:namespace>/<str:name>/versions/<str:version>/move/'
+        '<str:source_path>/<str:dest_path>/',
+        viewsets.CollectionVersionMoveViewSet.as_view({'post': 'move_content'}),
+        name='collection-version-move',
+    ),
 ]

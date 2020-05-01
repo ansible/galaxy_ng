@@ -191,6 +191,28 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
+  '/v3/collections/{namespace}/{name}/versions/{version}/move/{source_path}/{destination_path}':
+    parameters: #tag
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+      - $ref: '#/components/parameters/SemanticVersion'
+      - $ref: '#/components/parameters/DistributionBasePath'
+      - $ref: '#/components/parameters/DistributionBasePath'
+    post:
+      summary: >
+        Queues tasks to move CollectionVersion
+        from source Repository to destination Repository
+        using the Repository DistributionBasePath.
+      operationId: moveCollectionVersion
+      tags:
+        - Collections
+      parameters: []
+      responses:
+        '202':
+          $ref: '#/components/responses/CollectionVersionMove'
+        'default':
+          $ref: '#/components/responses/Errors'
+
   # -------------------------------------
   # Artifacts
   # -------------------------------------
@@ -732,6 +754,19 @@ components:
           required:
             - data
 
+    CollectionVersionMoveResult: #tag
+      description: 'Task ids for moving a CollectionVersion'
+      type: object
+      properties:
+        add_task_id:
+          description: 'Task id for task to add CollectionVersion to Repository'
+          type: string
+        remove_task_id:
+          description: 'Task id for task to remove CollectionVersion from Repository'
+          type: string
+        version:
+          $ref: '#/components/schemas/SemanticVersion'
+
     # -------------------------------------
     # Schemas: Errors
     # -------------------------------------
@@ -1180,6 +1215,16 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CollectionVersionArtifact'
+
+    CollectionVersionMove: #tag
+      description: >
+        Response containing task ids for
+        adding the CollectionVersion to a destination Repository
+        and removing the CollectionVersion from a source Repository.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionMoveResult'
 
     CollectionImportAccepted:
       description: >
