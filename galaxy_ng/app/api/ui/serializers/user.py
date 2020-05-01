@@ -36,17 +36,23 @@ class UserSerializer(serializers.ModelSerializer):
             password_validation.validate_password(password)
             return password
 
-    def update(self, instance, data):
+    def _set_password(self, instance, data):
         # password doesn't get set the same as other data, so delete it
         # before the serializer saves
         if 'password' in data:
-            print(data)
             password = data.pop('password')
-            print(password)
-            print(data)
             if password:
                 instance.set_password(password)
+        return instance
 
+    def create(self, data):
+        instance = super().create(data)
+        instance = self._set_password(instance, data)
+        instance.save()
+        return instance
+
+    def update(self, instance, data):
+        instance = self._set_password(instance, data)
         return super().update(instance, data)
 
     def to_representation(self, instance):
@@ -57,12 +63,13 @@ class UserSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         groups = data.get('groups')
         if groups:
-            new_groups = []
-            groups = GroupSerializer(data=groups, many=True)
-            groups.is_valid(raise_exception=True)
-            for group in groups.validated_data:
-                new_groups.append(group['id'])
-            data['groups'] = new_groups
+            id_list = []
+            for group in groups:
+                if 'id' not in group:
+                    raise serializers.ValidationError(
+                        detail={'groups': 'List of dicts that contain at least an "id" key'})
+                id_list.append(group['id'])
+            data['groups'] = id_list
         return super().to_internal_value(data)
 
 
