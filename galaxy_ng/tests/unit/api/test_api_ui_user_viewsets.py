@@ -85,12 +85,14 @@ class TestUiNamespaceViewSet(BaseTestCase):
             response = method_call(url, new_user_data, format='json')
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-            errorMessages = set([])
+            error_messages = set([])
             for err in response.data['errors']:
-                errorMessages.add(err['code'])
+                error_messages.add(err['code'])
 
-            for msg in ['password_too_short', 'password_too_common', 'password_entirely_numeric']:
-                self.assertTrue(msg in errorMessages)
+            desired_errors = set(
+                ['password_too_short', 'password_too_common', 'password_entirely_numeric'])
+
+            self.assertEqual(error_messages, desired_errors)
 
             # set valid user
             new_user_data['password'] = 'trekkie4Lyfe1701'
