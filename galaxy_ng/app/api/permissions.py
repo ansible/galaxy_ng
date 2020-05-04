@@ -60,6 +60,11 @@ class RestrictOnCloudDeployments(BasePermission):
         return settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value
 
 
+class RestrictOnStandaloneDeployments(BasePermission):
+    def has_permission(self, request, view):
+        return settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value
+
+
 class RestrictUnsafeOnCloudDeployments(RestrictOnCloudDeployments):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:

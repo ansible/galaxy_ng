@@ -9,6 +9,7 @@ router = routers.SimpleRouter()
 # TODO: Replace with a RedirectView
 router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
 router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='my-namespaces')
+router.register('my-synclists', viewsets.MySyncListViewSet, basename='my-synclists')
 router.register('collections', viewsets.CollectionViewSet, basename='collections')
 router.register('users', viewsets.UserViewSet, basename='users')
 router.register('collection-versions',
@@ -19,6 +20,7 @@ router.register(
     basename='collection-imports',
 )
 router.register('tags', viewsets.TagsViewSet, basename='tags')
+router.register('synclists', viewsets.SyncListViewSet, basename='synclists')
 
 auth_views = [
     path("login/", views.LoginView.as_view(), name="auth-login"),
