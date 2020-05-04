@@ -17,6 +17,7 @@ router.register(
     basename='collection-imports',
 )
 router.register('tags', viewsets.TagsViewSet, basename='tags')
+router.register('synclists', viewsets.SyncListViewSet, basename='synclists')
 
 app_name = "ui"
 urlpatterns = [
