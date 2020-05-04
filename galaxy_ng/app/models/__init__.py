@@ -10,6 +10,9 @@ from .namespace import (
     NamespaceLink,
 )
 
+from .synclist import (
+    SyncList,
+)
 
 __all__ = (
     'Group',
@@ -17,4 +20,5 @@ __all__ = (
     'CollectionImport',
     'Namespace',
     'NamespaceLink',
+    'SyncList',
 )
