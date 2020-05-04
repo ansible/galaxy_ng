@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+
 from rest_framework import mixins
 from rest_framework import permissions as drf_permissions
 
@@ -14,15 +16,18 @@ class UserViewSet(
     mixins.UpdateModelMixin,
     api_base.GenericViewSet,
 ):
-    permission_classes = [
-        permissions.IsPartnerEngineer,
-        permissions.RestrictOnCloudDeployments]
 
     def get_serializer_class(self):
         return serializers.UserSerializer
 
     def get_queryset(self):
         return auth_models.User.objects.all()
+
+    def get_permissions(self):
+        permission_list = super().get_permissions()
+        permission_list.append(permissions.IsPartnerEngineer())
+        permission_list.append(permissions.RestrictOnCloudDeployments())
+        return permission_list
 
 
 class CurrentUserViewSet(
@@ -32,12 +37,13 @@ class CurrentUserViewSet(
 ):
     serializer_class = serializers.CurrentUserSerializer
     model = auth_models.User
-    permission_classes = [
-        drf_permissions.IsAuthenticated,
-        permissions.RestrictUnsafeOnCloudDeployments]
+
+    def get_permissions(self):
+        permission_list = super().get_permissions()
+        permission_list.append(drf_permissions.IsAuthenticated())
+        permission_list.append(permissions.RestrictUnsafeOnCloudDeployments())
+        return permission_list
 
     def get_object(self):
-        obj, created = self.model.objects.get_or_create(
-            pk=self.request.user.pk
-        )
+        obj = get_object_or_404(self.model, pk=self.request.user.pk)
         return obj

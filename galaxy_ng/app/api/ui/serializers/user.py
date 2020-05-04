@@ -39,10 +39,9 @@ class UserSerializer(serializers.ModelSerializer):
     def _set_password(self, instance, data):
         # password doesn't get set the same as other data, so delete it
         # before the serializer saves
-        if 'password' in data:
-            password = data.pop('password')
-            if password:
-                instance.set_password(password)
+        password = data.pop('password', None)
+        if password:
+            instance.set_password(password)
         return instance
 
     def create(self, data):
