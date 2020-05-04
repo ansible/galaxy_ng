@@ -314,6 +314,76 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
+  # -------------------------------------
+  # UI: Authentication
+  # -------------------------------------
+
+  "/_ui/auth/login/":
+    post:
+      summary: "Login (UI)"
+      operationId: authLoginUi
+      description: "Sign in with username and password."
+      tags:
+        - 'UI: Authhentication'
+      requestBody:
+        $ref: '#/components/requestBodies/LoginCredentials'
+      responses:
+        '204':
+          description: "User signed in successfully."
+        '400':
+          description: "Invalid username or password."
+        'default':
+          $ref: '#/components/responses/Errors'
+
+  /_ui/auth/logout/:
+    post:
+      summary: "Logout (UI)"
+      operationId: authLogoutUi
+      description: "Log out current user."
+      tags:
+        - 'UI: Authhentication'
+      responses:
+        '204':
+          description: "User signed out successfully."
+
+  /_ui/auth/token/:
+    get:
+      summary: "Get Auth Token (UI)"
+      operationId: getAuthTokenUi
+      tags:
+        - 'UI: Authhentication'
+      responses:
+        '200':
+          $ref: '#/components/responses/Token'
+        '404':
+          description: "User does not have a token."
+        'default':
+          $ref: '#/components/responses/Errors'
+
+    post:
+      summary: "Issue Auth Token (UI)"
+      operationId: issueAuthTokenUi
+      description: "Create a new authentication token. Any existing token is revoked."
+      tags:
+        - 'UI: Authhentication'
+      responses:
+        '200':
+          $ref: '#/components/responses/Token'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+    delete:
+      summary: "Revoke Auth Token (UI)"
+      operationId: revokeAuthTokenUi
+      description: "Revoke authentication token if it exists."
+      tags:
+        - 'UI: Authhentication'
+      responses:
+        '204':
+          description: "Token has been revoked."
+        'default':
+          $ref: '#/components/responses/Errors'
+
 components:
   schemas:
     Author:
@@ -599,7 +669,6 @@ components:
                 $ref: '#/components/schemas/CollectionUi'
           required:
             - data
-
 
     # -------------------------------------
     # Schemas: Errors
@@ -952,6 +1021,30 @@ components:
           required:
             - data
 
+    # -------------------------------------
+    # Schemas: Auth
+    # -------------------------------------
+
+    LoginCredentials:
+      title: "LoginCredentials"
+      description: "Username and password"
+      type: object
+      properties:
+        username:
+          description: "User name"
+          type: string
+        password:
+          description: "User password"
+          type: string
+
+    Token:
+      title: "Token"
+      description: "Authentication token"
+      type: object
+      properties:
+        token:
+          description: "Token string"
+          type: string
 
   parameters:
 
@@ -1058,6 +1151,13 @@ components:
           schema:
             $ref: '#/components/schemas/Namespace'
 
+    LoginCredentials:
+      description: A Login body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginCredentials'
+
   responses:
     Errors:
       description: 'Errors'
@@ -1120,3 +1220,9 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UsersPage'
+
+    Token:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'

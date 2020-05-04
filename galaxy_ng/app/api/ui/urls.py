@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework import routers
 
+from . import views
 from . import viewsets
 
 
@@ -18,9 +19,18 @@ router.register(
 )
 router.register('tags', viewsets.TagsViewSet, basename='tags')
 
+auth_views = [
+    path('login/', views.LoginView.as_view(), name='auth-login'),
+    path('logout/', views.LogoutView.as_view(), name='auth-logout'),
+    path('token', views.TokenView.as_view(), name='auth-token'),
+]
+
 app_name = "ui"
 urlpatterns = [
     path('', include(router.urls)),
+
+    path('auth/', include(auth_views)),
+
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve
     # to look up values with an ID
     path(
