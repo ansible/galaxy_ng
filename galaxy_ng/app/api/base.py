@@ -42,3 +42,7 @@ class ViewSet(LocalSettingsMixin, viewsets.ViewSet):
 
 class GenericViewSet(LocalSettingsMixin, viewsets.GenericViewSet):
     pass
+
+
+class ModelViewSet(LocalSettingsMixin, viewsets.ModelViewSet):
+    pass
