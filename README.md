@@ -71,7 +71,7 @@ The following is a simple quickstart for installing a local Galaxy server. It re
    The following provides an example of how to start playbook execution. It assumes an inventory file called `hosts` exists in the current directory and contains the target host(s) where Galaxy server is to be installed: 
 
     ``` 
-    $ ansible-playbook install.yaml -i hosts
+    $ ansible-playbook install.yml -i hosts
     ``` 
 
 For more information about Pulp Installer, view the [Pulp Installer Docs](https://pulp-ansible.readthedocs.io/en/latest/installation.html)
