@@ -35,6 +35,26 @@ GALAXY_PERMISSION_CLASSES = [
     'rest_framework.permissions.IsAuthenticated',
     # 'galaxy_ng.app.auth.auth.RHEntitlementRequired',
 ]
+# set to 'insights' for cloud.redhat.com deployments
+GALAXY_DEPLOYMENT_MODE = 'standalone'
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 9,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 
 # Compatibility settings
