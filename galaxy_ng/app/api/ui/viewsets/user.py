@@ -18,6 +18,7 @@ class UserViewSet(
 ):
     serializer_class = serializers.UserSerializer
     model = auth_models.User
+    queryset = auth_models.User.objects.all()
 
     def get_permissions(self):
         return super().get_permissions() + [
