@@ -16,7 +16,7 @@ COMMIT_MSG=$(git log --format=%B --no-merges -1)
 export COMMIT_MSG
 
 if [ -f $PRE_BEFORE_INSTALL ]; then
-    $PRE_BEFORE_INSTALL
+  source $PRE_BEFORE_INSTALL
 fi
 
 if [[ -n $(echo -e $COMMIT_MSG | grep -P "Required PR:.*" | grep -v "https") ]]; then
@@ -26,70 +26,54 @@ fi
 
 if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ -z "$TRAVIS_TAG" -a "$TRAVIS_BRANCH" != "master" ]
 then
-  export PULP_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulpcore\/pull\/(\d+)' | awk -F'/' '{print $7}')
+  export PULPCORE_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulpcore\/pull\/(\d+)' | awk -F'/' '{print $7}')
   export PULP_SMASH_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp-smash\/pull\/(\d+)' | awk -F'/' '{print $7}')
-  export PULP_ROLES_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/ansible-pulp\/pull\/(\d+)' | awk -F'/' '{print $7}')
-  export PULP_BINDINGS_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp-openapi-generator\/pull\/(\d+)' | awk -F'/' '{print $7}')
-  export PULP_OPERATOR_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp-operator\/pull\/(\d+)' | awk -F'/' '{print $7}')
+  export PULP_OPENAPI_GENERATOR_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp-openapi-generator\/pull\/(\d+)' | awk -F'/' '{print $7}')
+  export PULP_ANSIBLE_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp_ansible\/pull\/(\d+)' | awk -F'/' '{print $7}')
 else
-  export PULP_PR_NUMBER=
+  export PULPCORE_PR_NUMBER=
   export PULP_SMASH_PR_NUMBER=
-  export PULP_ROLES_PR_NUMBER=
-  export PULP_BINDINGS_PR_NUMBER=
-  export PULP_OPERATOR_PR_NUMBER=
+  export PULP_OPENAPI_GENERATOR_PR_NUMBER=
+  export PULP_ANSIBLE_PR_NUMBER=
 fi
 
 # dev_requirements contains tools needed for flake8, etc.
 # So install them here rather than in install.sh
 pip install -r dev_requirements.txt
 
-# check the commit message
-#./.travis/check_commit.sh
+
 
 
 
 # Lint code.
-#flake8 --config .flake8
+# flake8 --config flake8.cfg
+
+# check for imports from pulpcore that aren't pulpcore.plugin
+./.travis/check_pulpcore_imports.sh
 
 cd ..
-git clone --depth=1 https://github.com/pulp/ansible-pulp.git
-if [ -n "$PULP_ROLES_PR_NUMBER" ]; then
-  cd ansible-pulp
-  git fetch --depth=1 origin pull/$PULP_ROLES_PR_NUMBER/head:$PULP_ROLES_PR_NUMBER
-  git checkout $PULP_ROLES_PR_NUMBER
-  cd ..
-fi
-
-
-git clone --depth=1 https://github.com/pulp/pulp-operator.git
-if [ -n "$PULP_OPERATOR_PR_NUMBER" ]; then
-  cd pulp-operator
-  git fetch --depth=1 origin pull/$PULP_OPERATOR_PR_NUMBER/head:$PULP_OPERATOR_PR_NUMBER
-  git checkout $PULP_OPERATOR_PR_NUMBER
-  RELEASE_VERSION=v0.9.0
-  curl -LO https://github.com/operator-framework/operator-sdk/releases/download/${RELEASE_VERSION}/operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu
-  chmod +x operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu && sudo mkdir -p /usr/local/bin/ && sudo cp operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu /usr/local/bin/operator-sdk && rm operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu
-  sudo operator-sdk build --image-builder=docker quay.io/pulp/pulp-operator:latest
-  cd ..
-fi
 
 git clone https://github.com/pulp/pulp-openapi-generator.git
-if [ -n "$PULP_BINDINGS_PR_NUMBER" ]; then
+if [ -n "$PULP_OPENAPI_GENERATOR_PR_NUMBER" ]; then
   cd pulp-openapi-generator
-  git fetch origin pull/$PULP_BINDINGS_PR_NUMBER/head:$PULP_BINDINGS_PR_NUMBER
-  git checkout $PULP_BINDINGS_PR_NUMBER
+  git fetch origin pull/$PULP_OPENAPI_GENERATOR_PR_NUMBER/head:$PULP_OPENAPI_GENERATOR_PR_NUMBER
+  git checkout $PULP_OPENAPI_GENERATOR_PR_NUMBER
   cd ..
 fi
 
+cd pulp-openapi-generator
+sed -i -e 's/localhost:24817/pulp/g' generate.sh
+sed -i -e 's/:24817/pulp/g' generate.sh
+cd ..
 
 git clone --depth=1 https://github.com/pulp/pulpcore.git --branch master
 
-if [ -n "$PULP_PR_NUMBER" ]; then
-  cd pulpcore
-  git fetch --depth=1 origin pull/$PULP_PR_NUMBER/head:$PULP_PR_NUMBER
-  git checkout $PULP_PR_NUMBER
-  cd ..
+cd pulpcore
+if [ -n "$PULPCORE_PR_NUMBER" ]; then
+  git fetch --depth=1 origin pull/$PULPCORE_PR_NUMBER/head:$PULPCORE_PR_NUMBER
+  git checkout $PULPCORE_PR_NUMBER
 fi
+cd ..
 
 
 
@@ -112,10 +96,25 @@ if [ -z "$TRAVIS_TAG" ]; then
 fi
 
 
-pip install ansible
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch master
+if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
+  cd pulp_ansible
+  git fetch --depth=1 origin pull/$PULP_ANSIBLE_PR_NUMBER/head:$PULP_ANSIBLE_PR_NUMBER
+  git checkout $PULP_ANSIBLE_PR_NUMBER
+  cd ..
+fi
+
+# Intall requirements for ansible playbooks
+pip install docker netaddr boto3
+
+# Install ansible with the boto3 tags to dict fix
+# There is a PR for this issue:
+# https://github.com/ansible-collections/amazon.aws/pull/37
+# Be aware, that the code will have moved to that collection with upcoming releases of ansible
+pip install git+https://github.com/mdellweg/ansible.git@fix_boto3_tags_dict
 
 cd galaxy_ng
 
 if [ -f $POST_BEFORE_INSTALL ]; then
-    $POST_BEFORE_INSTALL
+  source $POST_BEFORE_INSTALL
 fi

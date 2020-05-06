@@ -9,14 +9,14 @@
 
 set -euv
 
-if [ "$TEST" = 'docs' ]; then
+if [ "$TEST" = "docs" ]; then
   pip install -r ../pulpcore/doc_requirements.txt
   pip install -r doc_requirements.txt
 fi
 
 pip install -r functest_requirements.txt
 
-cd $TRAVIS_BUILD_DIR/../pulpcore/containers/
+cd .travis
 
 # Although the tag name is not used outside of this script, we might use it
 # later. And it is nice to have a friendly identifier for it.
@@ -37,7 +37,7 @@ elif [ -n "$TRAVIS_PULL_REQUEST_BRANCH" ]; then
 # For push builds and hopefully cron builds
 elif [ -n "$TRAVIS_BRANCH" ]; then
   TAG=$(echo $TRAVIS_BRANCH | tr / _)
-  if [ "$TAG" = "master" ]; then
+  if [ "${TAG}" = "master" ]; then
     TAG=latest
   fi
 else
@@ -45,82 +45,58 @@ else
   TAG=$(git rev-parse --abbrev-ref HEAD | tr / _)
 fi
 
-
 if [ -e $TRAVIS_BUILD_DIR/../pulp_ansible ]; then
   PULP_ANSIBLE=./pulp_ansible
 else
   PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@master
 fi
 
+mkdir vars
 if [ -n "$TRAVIS_TAG" ]; then
   # Install the plugin only and use published PyPI packages for the rest
-  cat > vars/vars.yaml << VARSYAML
+  # Quoting ${TAG} ensures Ansible casts the tag as a string.
+  cat > vars/main.yaml << VARSYAML
 ---
-images:
-  - galaxy_ng-${TAG}:
-      image_name: galaxy_ng
-      tag: $TAG
-      pulpcore: pulpcore
-      plugins:
-        - ./galaxy_ng
-        - pulp_ansible
+image:
+  name: pulp
+  tag: "${TAG}"
+plugins:
+  - name: pulpcore
+    source: pulpcore
+  - name: galaxy_ng
+    source: ./galaxy_ng
+  - name: pulp_ansible
+    source: pulp_ansible
+services:
+  - name: pulp
+    image: "pulp:${TAG}"
+    volumes:
+      - ./settings:/etc/pulp
 VARSYAML
 else
-  cat > vars/vars.yaml << VARSYAML
+  cat > vars/main.yaml << VARSYAML
 ---
-images:
-  - galaxy_ng-${TAG}:
-      image_name: galaxy_ng
-      tag: $TAG
-      pulpcore: ./pulpcore
-      plugins:
-        - ./galaxy_ng
-        - $PULP_ANSIBLE
+image:
+  name: pulp
+  tag: "${TAG}"
+plugins:
+  - name: pulpcore
+    source: ./pulpcore
+  - name: galaxy_ng
+    source: ./galaxy_ng
+  - name: pulp_ansible
+    source: $PULP_ANSIBLE
+services:
+  - name: pulp
+    image: "pulp:${TAG}"
+    volumes:
+      - ./settings:/etc/pulp
 VARSYAML
 fi
-ansible-playbook -v build.yaml
 
-cd $TRAVIS_BUILD_DIR/../pulp-operator
-# Tell pulp-perator to deploy our image
-# NOTE: With k3s 1.17, $TAG must be quoted. So that 3.0 does not become 3.
-cat > deploy/crds/pulpproject_v1alpha1_pulp_cr.yaml << CRYAML
-apiVersion: pulpproject.org/v1alpha1
-kind: Pulp
-metadata:
-  name: example-pulp
-spec:
-  pulp_file_storage:
-    # k3s local-path requires this
-    access_mode: "ReadWriteOnce"
-    # We have a little over 40GB free on Travis VMs/instances
-    size: "40Gi"
-  image: galaxy_ng
-  tag: $TAG
-  database_connection:
-    username: pulp
-    password: pulp
-    admin_password: pulp
-CRYAML
+cat >> vars/main.yaml << VARSYAML
+pulp_settings: null
+VARSYAML
 
-# Install k3s, lightweight Kubernetes
-.travis/k3s-install.sh
-# Deploy pulp-operator, with the pulp containers, according to CRYAML
-sudo ./up.sh
-
-# Needed for the script below
-# Since it is being run during install rather than actual tests (unlike in
-# pulp-operator), and therefore does not trigger the equivalent after_failure
-# travis commands.
-show_logs_and_return_non_zero() {
-    readonly local rc="$?"
-
-    for containerlog in "pulp-api" "pulp-content" "pulp-resource-manager" "pulp-worker"
-    do
-      echo -en "travis_fold:start:$containerlog"'\\r'
-      sudo kubectl logs -l app=$containerlog --tail=10000
-      echo -en "travis_fold:end:$containerlog"'\\r'
-    done
-
-    return "${rc}"
-}
-.travis/pulp-operator-check-and-wait.sh || show_logs_and_return_non_zero
+ansible-playbook build_container.yaml
+ansible-playbook start_container.yaml

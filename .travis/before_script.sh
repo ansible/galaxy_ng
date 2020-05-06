@@ -9,39 +9,24 @@
 
 set -euv
 
+source .travis/utils.sh
+
 export PRE_BEFORE_SCRIPT=$TRAVIS_BUILD_DIR/.travis/pre_before_script.sh
 export POST_BEFORE_SCRIPT=$TRAVIS_BUILD_DIR/.travis/post_before_script.sh
 
-# Aliases for running commands in the pulp-api container.
-export PULP_API_POD=$(sudo kubectl get pods | grep -E -o "pulp-api-(\w+)-(\w+)")
-# Run a command
-export CMD_PREFIX="sudo kubectl exec $PULP_API_POD --"
-# Run a command, and pass STDIN
-export CMD_STDIN_PREFIX="sudo kubectl exec -i $PULP_API_POD --"
-
 if [[ -f $PRE_BEFORE_SCRIPT ]]; then
-    $PRE_BEFORE_SCRIPT
+  source $PRE_BEFORE_SCRIPT
 fi
 
-mkdir -p ~/.config/pulp_smash
+# Developers often want to know the final pulp config
+echo "PULP CONFIG:"
+tail -v -n +1 .travis/settings/settings.* ~/.config/pulp_smash/settings.json
 
-if [[ -f .travis/pulp-smash-config.json ]]; then
-    sed "s/localhost/$(hostname)/g" .travis/pulp-smash-config.json > ~/.config/pulp_smash/settings.json
-else
-    sed "s/localhost/$(hostname)/g" ../pulpcore/.travis/pulp-smash-config.json > ~/.config/pulp_smash/settings.json
-fi
-
-
-
-if [[ "$TEST" == 'pulp' || "$TEST" == 'performance' ]]; then
-    # Many tests require pytest/mock, but users do not need them at runtime
-    # (or to add plugins on top of pulpcore or pulp container images.)
-    # So install it here, rather than in the image Dockerfile.
-    $CMD_PREFIX pip3 install pytest mock
-    # Many functional tests require these
-    $CMD_PREFIX dnf install -yq lsof which dnf-plugins-core
+if [[ "$TEST" == 'pulp' || "$TEST" == 'performance' || "$TEST" == 's3' ]]; then
+  # Many functional tests require these
+  cmd_prefix dnf install -yq lsof which dnf-plugins-core
 fi
 
 if [[ -f $POST_BEFORE_SCRIPT ]]; then
-    $POST_BEFORE_SCRIPT
+  source $POST_BEFORE_SCRIPT
 fi
