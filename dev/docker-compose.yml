@@ -41,6 +41,11 @@ services:
   worker:
     image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
     command: ['run', 'worker']
+    devices: 
+      - "/dev/fuse:/dev/fuse"
+    ports:
+      - "8080:8080"
+      - "8081:8081"
     environment:
       - "WITH_DEV_INSTALL=1"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"

@@ -7,7 +7,8 @@ ARG USER_GROUP=galaxy
 ENV LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
     PULP_SETTINGS=/etc/pulp/settings.py \
-    DJANGO_SETTINGS_MODULE=pulpcore.app.settings
+    DJANGO_SETTINGS_MODULE=pulpcore.app.settings \
+    BUILDAH_ISOLATION=chroot
 
 RUN set -ex; \
     id --group "${USER_GROUP}" &>/dev/null \
@@ -21,19 +22,30 @@ RUN set -ex; \
 #   See also: https://bugzilla.redhat.com/show_bug.cgi?id=1680124#c6
 RUN set -ex; \
     touch /var/lib/rpm/* \
+    && dnf -y module disable container-tools \
+    && dnf -y install 'dnf-command(copr)' \
+    && dnf -y copr enable rhcontainerbot/container-selinux \
+    && dnf -y install wget \
+    && cd /etc/yum.repos.d/ \
+    && wget https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8/devel:kubic:libcontainers:stable.repo \
     && dnf -y install \
         gcc \
         glibc-langpack-en \
         python3-devel \
         libpq \
         libpq-devel \
+        fuse-overlayfs \
+        buildah \
+        podman \
+        slirp4netns \
+    && dnf -y reinstall shadow-utils \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \
     \
     && python3 -m venv /venv
 
-ENV PATH="/venv/bin:${PATH}" \
+ENV PATH="/venv/bin:/usr/bin:${PATH}" \
     VIRTUAL_ENV="/venv"
 
 # Install python requirements
