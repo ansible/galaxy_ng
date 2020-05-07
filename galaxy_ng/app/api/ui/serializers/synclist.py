@@ -32,8 +32,8 @@ class SyncListSerializer(serializers.ModelSerializer):
     )
 
     # collections = SyncListCollectionSerializer(many=True)
-    # collections = SyncListCollectionSummarySerializer(many=True)
-    collections = serializers.ListField(SyncListCollectionSummarySerializer())
+    collections = SyncListCollectionSummarySerializer(many=True)
+    # collections = serializers.ListField(SyncListCollectionSummarySerializer())
 
     groups = serializers.SlugRelatedField(
         many=True, slug_field="name", queryset=models.Group.objects.all()
