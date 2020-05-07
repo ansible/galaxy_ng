@@ -4,6 +4,8 @@ from rest_framework import serializers
 
 from pulp_ansible.app import models as pulp_ansible_models
 
+from drf_yasg import openapi
+
 from galaxy_ng.app import models
 
 log = logging.getLogger(__name__)
@@ -14,13 +16,24 @@ class SyncListCollectionSerializer(serializers.ModelSerializer):
         model = pulp_ansible_models.Collection
         fields = ["namespace", "name"]
 
+    def to_representation(self, instance):
+        return {'namespace': instance.namespace,
+                'name': instance.name}
+
+
+class SyncListCollectionSummarySerializer(serializers.Serializer):
+    namespace = serializers.CharField(max_length=64)
+    name = serializers.CharField(max_length=64)
+
 
 class SyncListSerializer(serializers.ModelSerializer):
     namespaces = serializers.SlugRelatedField(
         many=True, slug_field="name", queryset=models.Namespace.objects.all()
     )
 
-    collections = SyncListCollectionSerializer(many=True)
+    # collections = SyncListCollectionSerializer(many=True)
+    # collections = SyncListCollectionSummarySerializer(many=True)
+    collections = serializers.ListField(SyncListCollectionSummarySerializer())
 
     groups = serializers.SlugRelatedField(
         many=True, slug_field="name", queryset=models.Group.objects.all()
@@ -43,7 +56,6 @@ class SyncListSerializer(serializers.ModelSerializer):
             instance.collections.add(pulp_ansible_models.Collection.objects.get(**collection_data))
 
         for namespace_data in namespaces_data:
-
             instance.namespaces.add(namespace_data)
 
         instance.groups.set(groups_data)
