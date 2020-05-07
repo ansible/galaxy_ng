@@ -265,7 +265,7 @@ paths:
       - $ref: '#/components/parameters/DistributionBasePath'
     post:
       summary: Upload Collection Artifact To A Repository and Distribution
-      operationId: uploadCollectionArtifactToRepositoryAndDistribution
+      operationId: uploadCollectionArtifactToRepository
       tags:
         - Artifacts
         - PerDistribution
@@ -286,7 +286,7 @@ paths:
       - $ref: '#/components/parameters/DistributionBasePath'
     get:
       summary: List Collections In a Repository and Distribution
-      operationId: listCollectionsInARepositoryAndDistribution
+      operationId: listCollectionsInARepository
       parameters:
         - $ref: '#/components/parameters/PageOffset'
         - $ref: '#/components/parameters/PageLimit'
@@ -310,7 +310,7 @@ paths:
       - $ref: '#/components/parameters/CollectionName'
     get:
       summary: Get Collection In a Repository and Distribution
-      operationId: getCollectionInARepositoryAndDistribution
+      operationId: getCollectionInARepository
       tags:
         - Collections
         - PerDistribution
@@ -327,7 +327,7 @@ paths:
       - $ref: '#/components/parameters/CollectionName'
     get:
       summary: List Collection Versions In A Repository And Distribution
-      operationId: listCollectionVersionsInARepositoryAndDistribution
+      operationId: listCollectionVersionsInARepository
       tags:
         - Collections
         - PerDistribution
@@ -348,7 +348,7 @@ paths:
       - $ref: '#/components/parameters/SemanticVersion'
     get:
       summary: Get Collection Version In A Repository And Distribution
-      operationId: getCollectionVersionsInARepositoryAndDistribution
+      operationId: getCollectionVersionsInARepository
       tags:
         - Collections
         - PerDistribution
@@ -458,7 +458,7 @@ paths:
       - $ref: '#/components/parameters/DistributionBasePath'
     get:
       summary: Get Collection Import In A Repository And Distribution
-      operationId: getCollectionImportInARepositoryAndDistribution
+      operationId: getCollectionImportInARepository
       parameters:
         - $ref: '#/components/parameters/CollectionImportId'
       tags:
