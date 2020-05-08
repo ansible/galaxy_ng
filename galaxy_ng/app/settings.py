@@ -13,6 +13,11 @@ MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
+INSTALLED_APPS = [
+    'rest_framework.authtoken',
+    'dynaconf_merge',
+]
+
 
 AUTH_USER_MODEL = 'galaxy.User'
 
@@ -28,13 +33,15 @@ GALAXY_EXCEPTION_HANDLER = "galaxy_ng.app.api.exceptions.exception_handler"
 GALAXY_PAGINATION_CLASS = "galaxy_ng.app.api.pagination.LimitOffsetPagination"
 GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
-    "rest_framework.authentication.BasicAuthentication",
-    # "galaxy_ng.app.auth.auth.RHIdentityAuthentication",
+    "rest_framework.authentication.TokenAuthentication",
 ]
 GALAXY_PERMISSION_CLASSES = [
     'rest_framework.permissions.IsAuthenticated',
-    # 'galaxy_ng.app.auth.auth.RHEntitlementRequired',
 ]
+# Settings for insights mode
+# GALAXY_AUTHENTICATION_CLASSES = ["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
+# GALAXY_PERMISSION_CLASSES = ['galaxy_ng.app.auth.auth.RHEntitlementRequired']
+
 # set to 'insights' for cloud.redhat.com deployments
 GALAXY_DEPLOYMENT_MODE = 'standalone'
 
@@ -55,7 +62,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Compatibility settings
 # ----------------------

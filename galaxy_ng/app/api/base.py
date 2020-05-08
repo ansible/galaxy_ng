@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from rest_framework import generics
 from rest_framework import views
 from rest_framework import viewsets
 from rest_framework.settings import perform_import
@@ -37,6 +38,10 @@ class APIView(LocalSettingsMixin, views.APIView):
 
 
 class ViewSet(LocalSettingsMixin, viewsets.ViewSet):
+    pass
+
+
+class GenericAPIView(LocalSettingsMixin, generics.GenericAPIView):
     pass
 
 

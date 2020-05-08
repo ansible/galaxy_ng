@@ -1,3 +1,6 @@
+from .auth import (
+    LoginSerializer,
+)
 from .collection import (
     CollectionDetailSerializer,
     CollectionListSerializer,
@@ -23,6 +26,8 @@ from .user import (
 
 
 __all__ = (
+    # auth
+    'LoginSerializer',
     # collection
     'CollectionDetailSerializer',
     'CollectionListSerializer',
