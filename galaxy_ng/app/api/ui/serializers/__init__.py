@@ -23,7 +23,7 @@ from .user import (
 
 from .synclist import (
     SyncListSerializer,
-    SyncListCollectionSerializer,
+    SyncListCollectionSummarySerializer,
 )
 
 __all__ = (
@@ -47,5 +47,5 @@ __all__ = (
     'UserSerializer',
     # synclists
     'SyncListSerializer',
-    'SyncListCollectionSerializer',
+    'SyncListCollectionSummarySerializer',
 )

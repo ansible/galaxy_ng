@@ -9,12 +9,6 @@ from galaxy_ng.app import models
 log = logging.getLogger(__name__)
 
 
-class SyncListCollectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = pulp_ansible_models.Collection
-        fields = ["namespace", "name"]
-
-
 class SyncListCollectionSummarySerializer(serializers.Serializer):
     namespace = serializers.CharField(max_length=64)
     name = serializers.CharField(max_length=64)

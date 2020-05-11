@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 class SyncListViewSet(api_base.ModelViewSet):
     queryset = models.SyncList.objects.all()
     serializer_class = serializers.SyncListSerializer
-    swagger_schema = None
 
     def get_queryset(self):
         return models.SyncList.objects.all()
