@@ -1,9 +1,8 @@
-
 from django.urls import path
 
 from . import viewsets
 
-app_name = "v3"
+# app_name = "v3"
 urlpatterns = [
     path(
         'collections/',

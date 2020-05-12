@@ -9,24 +9,9 @@ from .v3 import viewsets as v3_viewsets
 DEFAULT_DISTRIBUTION_BASE_PATH = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH.strip('/')
 
 app_name = "api"
-urlpatterns = [
-    path("v3/_ui/", include(ui_urls)),
 
-    # A set of galaxy v3 API urls per Distribution.base_path
-    # which is essentially per Repository
-    path("content/<str:path>/v3/",
-         include(v3_urls, namespace='content')),
-
-    path("content/<str:path>/",
-         v3_viewsets.ApiRootView.as_view(),
-         name="content"),
-
-    # This can be removed when ansible-galaxy stops appending '/api' to the
-    # urls.
-    path("content/<str:path>/api/",
-         v3_viewsets.SlashApiRedirectPerDistroView.as_view(),
-         name="content-redirect"),
-
+v3_urlpatterns = [
+    path("_ui/", include(ui_urls)),
 
     # Set an instance of the v3 urls/viewsets at the same
     # url path as the former galaxy_api.api.v3.viewsets
@@ -34,9 +19,38 @@ urlpatterns = [
     # and pass in path param 'path' that actually means
     # the base_path of the Distribution. For the default case,
     # use the hard coded 'default' distro (ie, 'automation-hub')
-    path("v3/",
-         include(v3_urls, namespace='default-content'),
+    path("",
+         # include((v3_urls, app_name), namespace='default-content'),
+         include((v3_urls, app_name), namespace='default-content'),
          {'path': DEFAULT_DISTRIBUTION_BASE_PATH}),
+]
+
+content_v3_urlpatterns = [
+    # A set of galaxy v3 API urls per Distribution.base_path
+    # which is essentially per Repository
+    path("<str:path>/v3/",
+         # include((v3_urls, app_name))),
+         include(v3_urls)),
+]
+
+content_urlpatterns = [
+    path("content/",
+         include((content_v3_urlpatterns, app_name), namespace="v3")),
+
+    path("content/<str:path>/",
+         v3_viewsets.ApiRootView.as_view()),
+
+    # This can be removed when ansible-galaxy stops appending '/api' to the
+    # urls.
+    path("content/<str:path>/api/",
+         v3_viewsets.SlashApiRedirectPerDistroView.as_view(),
+         name="api-redirect"),
+]
+
+urlpatterns = [
+    path("v3/", include((v3_urlpatterns, app_name), namespace="v3")),
+
+    path("", include((content_urlpatterns, app_name), namespace='content')),
 
     # This path is to redirect requests to /api/automation-hub/api/
     # to /api/automation-hub/
