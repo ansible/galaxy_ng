@@ -10,7 +10,7 @@ from pulpcore.plugin.models import ContentArtifact
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 
 from galaxy_ng.app.api.base import LocalSettingsMixin, APIView
-from .serializers import GalaxyNGCollectionVersionSerializer
+from .serializers import CollectionVersionSerializer
 # from galaxy_ng.app.common import metrics
 
 # hmm, not sure what to do with this
@@ -27,7 +27,8 @@ class CollectionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionViewSet
 class CollectionVersionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionVersionViewSet):
     serializer_class = CollectionVersionSerializer
 
-    # Custom retrive so we can use the class serializer_class GalaxyNGCollectionVersionSerializer
+    # Custom retrive so we can use the class serializer_class
+    # galaxy_ng.app.api.v3.serializers.CollectionVersionSerializer
     # which is responsible for building the 'download_url'. The default pulp one doesn't
     # include the distro base_path which we need (https://pulp.plan.io/issues/6510)
     # so override this so we can use a different serializer
