@@ -67,7 +67,7 @@ class ApiRootView(APIView):
 
 
 class SlashApiRedirectPerDistroView(APIView):
-    reverse_url = 'galaxy:api:root-per-distro'
+    reverse_url = 'galaxy:api:content'
 
     def get(self, request, *args, **kwargs):
         return HttpResponseRedirect(reverse(self.reverse_url), status=307)

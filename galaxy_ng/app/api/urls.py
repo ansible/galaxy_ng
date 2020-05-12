@@ -15,17 +15,17 @@ urlpatterns = [
     # A set of galaxy v3 API urls per Distribution.base_path
     # which is essentially per Repository
     path("content/<str:path>/v3/",
-         include(v3_urls, namespace='per-distribution')),
+         include(v3_urls, namespace='content')),
 
     path("content/<str:path>/",
          v3_viewsets.ApiRootView.as_view(),
-         name="root-per-distro"),
+         name="content"),
 
     # This can be removed when ansible-galaxy stops appending '/api' to the
     # urls.
     path("content/<str:path>/api/",
          v3_viewsets.SlashApiRedirectPerDistroView.as_view(),
-         name="api-redirect"),
+         name="content-redirect"),
 
 
     # Set an instance of the v3 urls/viewsets at the same
@@ -35,7 +35,7 @@ urlpatterns = [
     # the base_path of the Distribution. For the default case,
     # use the hard coded 'default' distro (ie, 'automation-hub')
     path("v3/",
-         include(v3_urls, namespace='default-distribution'),
+         include(v3_urls, namespace='default-content'),
          {'path': DEFAULT_DISTRIBUTION_BASE_PATH}),
 
     # This path is to redirect requests to /api/automation-hub/api/
@@ -48,7 +48,8 @@ urlpatterns = [
 
     path("",
          views.ApiRootView.as_view(),
-         name="root-api"),
+         name="root"
+         ),
 
     # This can be removed when ansible-galaxy stops appending '/api' to the
     # urls.
