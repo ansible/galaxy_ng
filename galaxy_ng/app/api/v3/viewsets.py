@@ -25,7 +25,7 @@ class CollectionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionViewSet
 
 
 class CollectionVersionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionVersionViewSet):
-    serializer_class = GalaxyNGCollectionVersionSerializer
+    serializer_class = CollectionVersionSerializer
 
     # Custom retrive so we can use the class serializer_class GalaxyNGCollectionVersionSerializer
     # which is responsible for building the 'download_url'. The default pulp one doesn't

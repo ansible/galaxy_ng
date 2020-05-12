@@ -2,12 +2,14 @@ import logging
 
 from django.conf import settings
 
-from pulp_ansible.app.galaxy.v3.serializers import CollectionVersionSerializer
+from pulp_ansible.app.galaxy.v3.serializers import (
+    CollectionVersionSerializer as _CollectionVersionSerializer
+)
 
 log = logging.getLogger(__name__)
 
 
-class GalaxyNGCollectionVersionSerializer(CollectionVersionSerializer):
+class CollectionVersionSerializer(_CollectionVersionSerializer):
     def get_download_url(self, obj):
         """
         Get artifact download URL.
