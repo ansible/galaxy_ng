@@ -38,6 +38,6 @@ urlpatterns = [
     path(
         '',
         viewsets.ApiRootView.as_view(),
-        name='root-v3',
+        # name='root-v3',
     ),
 ]
