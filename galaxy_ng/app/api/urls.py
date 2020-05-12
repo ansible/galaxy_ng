@@ -38,19 +38,26 @@ content_urlpatterns = [
          include((content_v3_urlpatterns, app_name), namespace="v3")),
 
     path("content/<str:path>/",
-         v3_viewsets.ApiRootView.as_view()),
+         views.ApiRootView.as_view(),
+         name="root"),
 
     # This can be removed when ansible-galaxy stops appending '/api' to the
     # urls.
     path("content/<str:path>/api/",
-         v3_viewsets.SlashApiRedirectPerDistroView.as_view(),
-         name="api-redirect"),
+         views.ApiRedirectView.as_view(),
+         name="api-redirect",
+         kwargs={"reverse_url_name": "galaxy:api:content:root"}),
 ]
 
 urlpatterns = [
     path("v3/", include((v3_urlpatterns, app_name), namespace="v3")),
 
     path("", include((content_urlpatterns, app_name), namespace='content')),
+
+    path("",
+         views.ApiRootView.as_view(),
+         name="root",
+         ),
 
     # This path is to redirect requests to /api/automation-hub/api/
     # to /api/automation-hub/
@@ -60,14 +67,10 @@ urlpatterns = [
     # galaxy server urls to try to find the API root. So add a redirect from
     # "/api" to actual API root at "/".
 
-    path("",
-         views.ApiRootView.as_view(),
-         name="root"
-         ),
-
     # This can be removed when ansible-galaxy stops appending '/api' to the
     # urls.
     path("api/",
-         views.SlashApiRedirectView.as_view(),
-         name="api-redirect"),
+         views.ApiRedirectView.as_view(),
+         name="api-redirect",
+         kwargs={"reverse_url_name": "galaxy:api:root"}),
 ]

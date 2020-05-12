@@ -52,22 +52,3 @@ class CollectionImportViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionI
 
 class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionUploadViewSet):
     pass
-
-
-class ApiRootView(APIView):
-    def get(self, request, *args, **kwargs):
-        data = {
-            "location": "v3",
-            "viewset": self.__class__.__name__,
-            "distro_base_path": kwargs.get('path'),
-            "available_versions": {"v3": "v3/"},
-        }
-
-        return Response(data)
-
-
-class SlashApiRedirectPerDistroView(APIView):
-    reverse_url = 'galaxy:api:content'
-
-    def get(self, request, *args, **kwargs):
-        return HttpResponseRedirect(reverse(self.reverse_url), status=307)

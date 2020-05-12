@@ -2,7 +2,6 @@ from django.urls import path
 
 from . import viewsets
 
-# app_name = "v3"
 urlpatterns = [
     path(
         'collections/',
@@ -33,10 +32,5 @@ urlpatterns = [
         'artifacts/collections/',
         viewsets.CollectionUploadViewSet.as_view({'post': 'create'}),
         name='collection-artifact-upload'
-    ),
-    path(
-        '',
-        viewsets.ApiRootView.as_view(),
-        # name='root-v3',
     ),
 ]
