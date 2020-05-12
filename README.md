@@ -45,25 +45,38 @@ The following is a simple quickstart for installing a local Galaxy server. It re
         pulp_settings:
           secret_key: secret
           content_origin: "http://{{ ansible_fqdn }}"
+          x_pulp_api_host: "{{ pulp_api_host }}"
+          x_pulp_api_port: "{{ pulp_api_port }}" 
+          x_pulp_api_user: "admin"
+          x_pulp_api_password: "{{ pulp_default_admin_password }}"
+          x_pulp_api_prefix: "pulp_ansible/galaxy/automation-hub/api"
         pulp_default_admin_password: password
         pulp_install_plugins:
           pulp-ansible: {}
           galaxy-ng: {}
+            # source_dir: "git+https://github.com/ansible/galaxy_ng.git#egg=galaxy-ng"
           pulp-container: {}
+        pulp_source_dir: "git+https://github.com/pulp/pulpcore.git@3.3.0#egg=pulpcore"
+        pulp_api_workers: 4
       roles:
         - pulp-database
         - pulp-workers
         - pulp-resource-manager
         - pulp-webserver
         - pulp-content
+        - chouseknecht.ansible_galaxy_config
       environment:
         DJANGO_SETTINGS_MODULE: pulpcore.app.settings
     ```
 
-4. Install any Ansible role dependencies required by the Pulp installer. Execute the following command to download roles from [Community Galaxy](https://galaxy.ansible.com):
+4. Install Ansible role dependencies by running the following commands to download roles from [Community Galaxy](https://galaxy.ansible.com):
 
     ``` 
     $ ansible-galaxy install -r requirements.yml
+    ```
+    
+    ```
+    $ ansible-galaxy install chouseknecht.ansible_galaxy_config 
     ```
 
 5. Run the `install.yml` playbook
@@ -74,9 +87,9 @@ The following is a simple quickstart for installing a local Galaxy server. It re
     $ ansible-playbook install.yml -i hosts
     ``` 
 
-For more information about Pulp Installer, view the [Pulp Installer Docs](https://pulp-ansible.readthedocs.io/en/latest/installation.html)
+6. Access the server on port 80. For example, `http://127.0.0.1`. Login using "admin" as the username, and the value assigned to "pulp_default_admin_password" in your playbook as the password.
 
-For more information about Ansible playbooks, view the [Ansible docs site](https://docs.ansible.com)
+7. To setup a namespace and publish your fist collection, [view our user guide](https://github.com/ansible/galaxy_ng/wiki/Installation#uploading-a-collection).
 
 # License
 
