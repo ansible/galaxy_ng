@@ -1,16 +1,16 @@
 import logging
 
-from django.urls import reverse
-
-from django.http import HttpResponseRedirect
+from django.core.exceptions import ValidationError
 
 from rest_framework.response import Response
 
-from pulpcore.plugin.models import ContentArtifact
+from pulpcore.plugin.models import ContentArtifact, Task
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 
-from galaxy_ng.app.api.base import LocalSettingsMixin, APIView
-from .serializers import CollectionVersionSerializer
+from galaxy_ng.app.api.base import LocalSettingsMixin
+from galaxy_ng.app import models
+from .serializers import CollectionVersionSerializer, CollectionUploadSerializer
+
 # from galaxy_ng.app.common import metrics
 
 # hmm, not sure what to do with this
@@ -51,4 +51,45 @@ class CollectionImportViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionI
 
 
 class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionUploadViewSet):
-    pass
+    # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
+    # the import task and the collection artifact details
+    def create(self, request, path):
+
+        serializer = CollectionUploadSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        filename = data['filename']
+
+        try:
+            namespace = models.Namespace.objects.get(name=filename.namespace)
+        except models.Namespace.DoesNotExist:
+            raise ValidationError(
+                'Namespace "{0}" does not exist.'.format(filename.namespace)
+            )
+
+        self.check_object_permissions(request, namespace)
+
+        try:
+            response = super(CollectionUploadViewSet, self).create(request, path)
+        except ValidationError:
+            log.exception('Failed to publish artifact %s (namespace=%s, sha256=%s)',  # noqa
+                          data['file'].name, namespace, data.get('sha256'))
+            raise
+
+        task_href = response.data['task']
+
+        # icky, have to extract task id from the task_href url
+        task_id = task_href.strip("/").split("/")[-1]
+
+        task_detail = Task.objects.get(pk=task_id)
+
+        models.CollectionImport.objects.create(
+            task_id=task_detail.pulp_id,
+            created_at=task_detail.pulp_created,
+            namespace=namespace,
+            name=data['filename'].name,
+            version=data['filename'].version,
+        )
+
+        return response
