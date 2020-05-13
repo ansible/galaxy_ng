@@ -89,7 +89,7 @@ The following is a simple quickstart for installing a local Galaxy server. It re
 
 6. Access the server on port 80. For example, `http://127.0.0.1`. Login using "admin" as the username, and the value assigned to "pulp_default_admin_password" in your playbook as the password.
 
-7. To setup a namespace and publish your fist collection, [view our user guide](https://github.com/ansible/galaxy_ng/wiki/Installation#uploading-a-collection).
+7. To setup a namespace and publish your fist collection, [view our user guide](https://github.com/ansible/galaxy_ng/wiki/End-User-Installation#uploading-a-collection).
 
 # License
 
