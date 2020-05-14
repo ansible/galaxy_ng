@@ -20,9 +20,9 @@ class TestLoginViewsStandalone(APITestCase):
         super().setUp()
         self.client = APIClient()
 
-        self.login_url = reverse("galaxy:api:ui:auth-login")
-        self.logout_url = reverse("galaxy:api:ui:auth-logout")
-        self.me_url = reverse("galaxy:api:ui:me")
+        self.login_url = reverse("galaxy:api:v3:ui:auth-login")
+        self.logout_url = reverse("galaxy:api:v3:ui:auth-logout")
+        self.me_url = reverse("galaxy:api:v3:ui:me")
 
         self.users = [
             auth_models.User.objects.create_user(username="test1", password="test1-secret"),
@@ -132,8 +132,8 @@ class TestLoginViewsStandalone(APITestCase):
 class TestTokenViewStandalone(APITestCase):
     def setUp(self):
         super().setUp()
-        self.token_url = reverse("galaxy:api:ui:auth-token")
-        self.me_url = reverse("galaxy:api:ui:me")
+        self.token_url = reverse("galaxy:api:v3:ui:auth-token")
+        self.me_url = reverse("galaxy:api:v3:ui:me")
 
         self.user = auth_models.User.objects.create_user(username="test", password="test-secret")
 
