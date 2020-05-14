@@ -1,7 +1,11 @@
+"""API v3 URLs Configuration."""
+
 from django.urls import path
 
 from . import viewsets
 
+
+app_name = "v3"
 urlpatterns = [
     path(
         'collections/',
@@ -30,7 +34,12 @@ urlpatterns = [
     ),
     path(
         'artifacts/collections/',
-        viewsets.CollectionUploadViewSet.as_view({'post': 'create'}),
+        viewsets.CollectionArtifactUploadView.as_view(),
         name='collection-artifact-upload'
+    ),
+    path(
+        'artifacts/collections/<str:filename>',
+        viewsets.CollectionArtifactDownloadView.as_view(),
+        name='collection-artifact-download'
     ),
 ]
