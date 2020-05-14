@@ -40,7 +40,7 @@ jobs:
       - docker images
       - docker ps -a
       - docker logs pulp
-deploy:
+    deploy:
       provider: pypi
       distributions: "bdist_wheel"
       user: "__token__"
