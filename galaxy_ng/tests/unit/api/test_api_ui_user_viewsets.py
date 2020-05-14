@@ -25,8 +25,8 @@ class TestUiNamespaceViewSet(BaseTestCase):
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
-        self.user_url = reverse('galaxy:api:ui:users-list')
-        self.me_url = reverse('galaxy:api:ui:me')
+        self.user_url = reverse('galaxy:api:v3:ui:users-list')
+        self.me_url = reverse('galaxy:api:v3:ui:me')
 
     def test_user_list(self):
         self.client.force_authenticate(user=self.user)
