@@ -37,3 +37,9 @@ class CollectionImport(LifecycleModel, AutoDeleteObjPermsMixin):
 
     def get_absolute_url(self):
         return reverse('galaxy:api:content:collection-import', args=[str(self.task_id)])
+
+    def label(self):
+        return f"{self.namespace}.{self.name}"
+
+    def label_and_version(self):
+        return f"{self.namespace}.{self.name}-{self.version}"
