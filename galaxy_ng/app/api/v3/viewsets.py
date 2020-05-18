@@ -15,8 +15,15 @@ from rest_framework.exceptions import APIException, NotFound
 from pulpcore.plugin.models import ContentArtifact, Task
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 
-from galaxy_ng.app.api.base import LocalSettingsMixin, APIView
+from galaxy_ng.app.api.base import (
+    GALAXY_PERMISSION_CLASSES,
+    APIView,
+    LocalSettingsMixin,
+)
+
 from galaxy_ng.app import models
+from galaxy_ng.app.api import permissions
+
 from .serializers import CollectionVersionSerializer, CollectionUploadSerializer
 
 from galaxy_ng.app.common import metrics
@@ -29,10 +36,9 @@ log = logging.getLogger(__name__)
 
 
 class CollectionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionViewSet):
-    # permission_classes = api_base.GALAXY_PERMISSION_CLASSES + [
-    #    permissions.IsNamespaceOwnerOrPartnerEngineer,
-    # ]
-    pass
+    permission_classes = GALAXY_PERMISSION_CLASSES + [
+        permissions.IsNamespaceOwnerOrPartnerEngineer,
+    ]
 
 
 class CollectionVersionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionVersionViewSet):
@@ -62,6 +68,10 @@ class CollectionImportViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionI
 
 
 class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionUploadViewSet):
+    permission_classes = GALAXY_PERMISSION_CLASSES + [
+        permissions.IsNamespaceOwner
+    ]
+
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
     # the import task and the collection artifact details
     def create(self, request, path):
