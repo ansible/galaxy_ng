@@ -13,6 +13,7 @@ set -uv
 MATCHES=$(grep -n -r --include \*.py "from pulpcore.*import" . \
     | grep -v "tests\|plugin" \
     | grep -v "pulpcore.app.*viewsets" \
+    | grep -v "galaxy_ng/app/admin" \
     | grep -v "pulpcore\.app.*admin" \
     | grep -v "ProgressReportSerializer")
 
