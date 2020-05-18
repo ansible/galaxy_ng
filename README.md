@@ -59,11 +59,11 @@ The following is a simple quickstart for installing a local Galaxy server. It re
         pulp_source_dir: "git+https://github.com/pulp/pulpcore.git@3.3.0#egg=pulpcore"
         pulp_api_workers: 4
       roles:
-        - pulp-database
-        - pulp-workers
-        - pulp-resource-manager
-        - pulp-webserver
-        - pulp-content
+        - pulp_database
+        - pulp_workers
+        - pulp_resource_manager
+        - pulp_webserver
+        - pulp_content
         - chouseknecht.ansible_galaxy_config
       environment:
         DJANGO_SETTINGS_MODULE: pulpcore.app.settings
