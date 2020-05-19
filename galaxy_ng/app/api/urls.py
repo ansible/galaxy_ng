@@ -4,7 +4,6 @@ from django.urls import include, path
 from . import views
 from .ui import urls as ui_urls
 from .v3 import urls as v3_urls
-from .v3 import viewsets as v3_viewsets
 
 DEFAULT_DISTRIBUTION_BASE_PATH = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH.strip('/')
 

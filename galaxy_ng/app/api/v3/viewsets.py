@@ -1,18 +1,32 @@
 import logging
 
+import requests
+
 from django.core.exceptions import ValidationError
+
+
+from django.conf import settings
+from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.urls import reverse
 
 from rest_framework.response import Response
+from rest_framework.exceptions import APIException, NotFound
 
 from pulpcore.plugin.models import ContentArtifact, Task
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 
-from galaxy_ng.app.api.base import LocalSettingsMixin
+from galaxy_ng.app.api.base import (
+    GALAXY_PERMISSION_CLASSES,
+    APIView,
+    LocalSettingsMixin,
+)
+
 from galaxy_ng.app import models
+from galaxy_ng.app.api import permissions
+
 from .serializers import CollectionVersionSerializer, CollectionUploadSerializer
 
-# from galaxy_ng.app.common import metrics
+from galaxy_ng.app.common import metrics
 
 # hmm, not sure what to do with this
 # from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
@@ -22,7 +36,9 @@ log = logging.getLogger(__name__)
 
 
 class CollectionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionViewSet):
-    pass
+    permission_classes = GALAXY_PERMISSION_CLASSES + [
+        permissions.IsNamespaceOwnerOrPartnerEngineer,
+    ]
 
 
 class CollectionVersionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionVersionViewSet):
@@ -52,6 +68,10 @@ class CollectionImportViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionI
 
 
 class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionUploadViewSet):
+    permission_classes = GALAXY_PERMISSION_CLASSES + [
+        permissions.IsNamespaceOwner
+    ]
+
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
     # the import task and the collection artifact details
     def create(self, request, path):
@@ -100,8 +120,41 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
                                          'path': path})
 
         log.debug('import_obj_url: %s', import_obj_url)
-
         return Response(
             data={'task': import_obj_url},
             status=response.status_code
         )
+
+
+class CollectionArtifactDownloadView(APIView):
+    def get(self, request, *args, **kwargs):
+        metrics.collection_artifact_download_attempts.inc()
+
+        url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
+            host=settings.X_PULP_CONTENT_HOST,
+            port=settings.X_PULP_CONTENT_PORT,
+            prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
+            distro_base_path=self.kwargs['path'],
+            filename=self.kwargs['filename'],
+        )
+
+        response = requests.get(url, stream=True, allow_redirects=False)
+
+        if response.status_code == requests.codes.not_found:
+            metrics.collection_artifact_download_failures.labels(status=requests.codes.not_found).inc() # noqa
+            raise NotFound()
+
+        if response.status_code == requests.codes.found:
+            return HttpResponseRedirect(response.headers['Location'])
+
+        if response.status_code == requests.codes.ok:
+            metrics.collection_artifact_download_successes.inc()
+
+            return StreamingHttpResponse(
+                response.raw.stream(amt=4096),
+                content_type=response.headers['Content-Type']
+            )
+
+        metrics.collection_artifact_download_failures.labels(status=response.status_code).inc()
+        raise APIException('Unexpected response from content app. '
+                           f'Code: {response.status_code}.')

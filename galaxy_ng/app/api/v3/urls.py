@@ -33,4 +33,9 @@ urlpatterns = [
         viewsets.CollectionUploadViewSet.as_view({'post': 'create'}),
         name='collection-artifact-upload'
     ),
+    path(
+        'artifacts/collections/<str:path>/<str:filename>',
+        viewsets.CollectionArtifactDownloadView.as_view(),
+        name='collection-artifact-download'
+    ),
 ]
