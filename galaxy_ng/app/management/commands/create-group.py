@@ -1,14 +1,14 @@
-from galaxy_ng.app.models.auth import User, Group
+from galaxy_ng.app.models.auth import Group
 
 from django.contrib.auth import get_user_model
-from django.core.management import BaseCommand, CommandError
+from django.core.management import BaseCommand
 
 User = get_user_model()
 
 
 class Command(BaseCommand):
     """
-    Django management command for creating groups 
+    Django management command for creating groups
     """
 
     help = 'Create an access group, and optionally assign it to one or more users'
@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for group_name in options['groups']:
-            group, created = Group.objects.get_or_create(name=group_name) 
+            group, created = Group.objects.get_or_create(name=group_name)
             if created:
                 self.stdout.write("Created group '{}'".format(group_name))
             else:
@@ -35,7 +35,7 @@ class Command(BaseCommand):
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
                     self.stdout.write("User '{}' not found. Skipping.".format(username))
-                    continue 
+                    continue
                 user.groups.add(group)
                 user.save()
                 self.stdout.write("Assigned group '{}' to user '{}'".format(group_name, username))
