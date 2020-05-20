@@ -25,6 +25,7 @@ Release 4.3 (July 31, 2020)
 * Configure and manage content sync (`#22 <https://github.com/ansible/galaxy_ng/issues/22>`_)
 * Run ``ansible-test`` using pulp_container (`#6 <https://github.com/ansible/galaxy_ng/issues/6>`_)
 * Use repositories to facilitate the content promotion workflow (`20 <https://github.com/ansible/galaxy_ng/issues/20>`_)
+* Customizable branding (`196 <https://github.com/ansible/galaxy_ng/issues/196>`_)
 
 Release 4.4 (September 4, 2020)
 ```````````````````````````````
