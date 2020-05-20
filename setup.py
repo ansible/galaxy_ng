@@ -16,18 +16,18 @@ class BuildPyCommand(_BuildPyCommand):
     """Custom build command."""
 
     UI_DOWNLOAD_URL = (
-        'https://github.com/ansible/ansible-hub-ui/releases'
-        '/latest/download/automation-hub-ui-dist.tar.gz'
+        "https://github.com/ansible/ansible-hub-ui/releases"
+        "/latest/download/automation-hub-ui-dist.tar.gz"
     )
 
     def run(self):
-        target_dir = os.path.join(self.build_lib, 'galaxy_ng/app/static/galaxy_ng')
+        target_dir = os.path.join(self.build_lib, "galaxy_ng/app/static/galaxy_ng")
 
         with tempfile.NamedTemporaryFile() as download_file:
-            log.info(f'Downloading UI distribution {download_file.name}')
+            log.info(f"Downloading UI distribution {download_file.name}")
             urllib.request.urlretrieve(self.UI_DOWNLOAD_URL, filename=download_file.name)
 
-            log.info(f'Extracting UI static files')
+            log.info("Extracting UI static files")
             with tarfile.open(fileobj=download_file) as tfp:
                 tfp.extractall(target_dir)
 
@@ -36,12 +36,7 @@ class BuildPyCommand(_BuildPyCommand):
 
 # NOTE(cutwater): Because bindings are statically generated, requirements list
 #   from pulp-galaxy/setup.py has to be copied here and manually maintained.
-galaxy_pulp_requirements = [
-    "urllib3 >= 1.15",
-    "six >= 1.10",
-    "certifi",
-    "python-dateutil"
-]
+galaxy_pulp_requirements = ["urllib3 >= 1.15", "six >= 1.10", "certifi", "python-dateutil"]
 
 requirements = galaxy_pulp_requirements + [
     "Django~=2.2.3",
@@ -60,7 +55,7 @@ setup(
     author_email="author@email.here",
     url="http://example.com/",
     python_requires=">=3.6",
-    setup_requires=['wheel'],
+    setup_requires=["wheel"],
     install_requires=requirements,
     include_package_data=True,
     packages=find_packages(exclude=["tests", "tests.*"]),
@@ -74,7 +69,5 @@ setup(
         "Programming Language :: Python :: 3.7",
     ),
     entry_points={"pulpcore.plugin": ["galaxy_ng = galaxy_ng:default_app_config"]},
-    cmdclass={
-        'build_py': BuildPyCommand,
-    },
+    cmdclass={"build_py": BuildPyCommand},
 )
