@@ -24,7 +24,7 @@ from galaxy_ng.app.api.base import (
 from galaxy_ng.app import models
 from galaxy_ng.app.api import permissions
 
-from .serializers import CollectionVersionSerializer, CollectionUploadSerializer
+from galaxy_ng.app.api.v3.serializers import CollectionVersionSerializer, CollectionUploadSerializer
 
 from galaxy_ng.app.common import metrics
 
