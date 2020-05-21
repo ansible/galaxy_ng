@@ -18,10 +18,10 @@ View the latest version of the spec by [clicking here](https://petstore.swagger.
 
 ## Contributing
 
-* If you're interested in jumping in and helping out, view the [contributing guide](./CONTRIBUTING.rst).
-* To setup your development environment, [view instructions on our wiki](https://github.com/ansible/galaxy_ng/wiki).
+* If you're interested in jumping in and helping out, [view the contributing guide](https://github.com/ansible/galaxy_ng/wiki#contributing-to-galaxyng).
+* To setup your development environment, [view the development setup guide](https://github.com/ansible/galaxy_ng/wiki/Development-Setup).
 * Chat with us on irc.freenode.net: #ansible-galaxy
-* Found a bug or have a feature idea? Please file [open an issue](https://github.com/ansible/galaxy_ng/issues/new/choose) 
+* Found a bug or have a feature idea? Please [open an issue](https://github.com/ansible/galaxy_ng/issues/new/choose).
 
 ## Installation
 
