@@ -9,18 +9,12 @@ from rest_framework.test import APIClient, APITestCase
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app.models import auth as auth_models
 
+import logging
 
-STANDALONE_AUTH_SETTINGS = dict(
-    GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value,
-    GALAXY_PERMISSION_CLASSES=["rest_framework.permissions.IsAuthenticated"],
-    GALAXY_AUTHENTICATION_CLASSES=[
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
-    ],
-)
+LOG = logging.getLogger(__name__)
 
 
-@override_settings(**STANDALONE_AUTH_SETTINGS)
+@override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
 class TestLoginViewsStandalone(APITestCase):
     def setUp(self):
         super().setUp()
@@ -62,7 +56,7 @@ class TestLoginViewsStandalone(APITestCase):
 
     def test_login_invalid_password(self):
         response: Response = self.client.post(
-            self.login_url, data={"username": "test1", "password": "invalid"}
+            self.login_url, data={"username": "test1", "password": "invalid", }
         )
         self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
@@ -71,7 +65,7 @@ class TestLoginViewsStandalone(APITestCase):
 
     def test_login_wrong_password(self):
         response: Response = self.client.post(
-            self.login_url, data={"username": "test2", "password": "test1-secret"}
+            self.login_url, data={"username": "test2", "password": "test1-secret", }
         )
         self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
@@ -171,7 +165,7 @@ class TestLoginViewsStandalone(APITestCase):
         self.assertDictEqual(response.data, expected_response_data)
 
 
-@override_settings(**STANDALONE_AUTH_SETTINGS)
+@override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
 class TestTokenViewStandalone(APITestCase):
     def setUp(self):
         super().setUp()
