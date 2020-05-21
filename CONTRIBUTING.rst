@@ -8,10 +8,47 @@ To contribute to the ``galaxy_ng`` project, we ask that you follow these steps:
 
 1. Clone the GitHub repo
 2. Make a change
-3. Make sure all tests pass
+3. Make sure all tests pass (view running-tests_).
 4. Add a file to CHANGES folder (view changelog-update_).
 5. Commit changes to your ``galaxy_ng`` clone
 6. Make a pull request from your clone against the master branch
+
+
+.. _running-tests:
+
+Running tests
+*************
+
+The tests are divided into functional tests and unit tests.
+
+Functional tests
+----------------
+
+`pulp_smash <https://github.com/pulp/pulp-smash>`_ is a requirement for running functional tests.
+
+Functional tests have to be run in a container via the galaxy_ng django-manage tool called 'manage.py'.
+The `./compose.py` tools is used to launch the containers.
+
+To run functional tests::
+
+    ./compose run --rm api manage test galaxy_ng.tests.functional
+
+Unit tests
+----------
+
+Unit tests have to be run in a container via the galaxy_ng django-manage tool called 'manage.py'.
+The `./compose.py` tools is used to launch the containers.
+
+To run unit tests::
+
+    ./compose run --rm api manage test galaxy_ng.tests.unit
+
+Running all the tests
+---------------------
+
+To run functional and unit tests::
+
+    ./compose run --rm api manage test galaxy_ng.tests
 
 
 .. _changelog-update:
