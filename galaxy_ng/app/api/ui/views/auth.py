@@ -12,7 +12,7 @@ from rest_framework import status as http_code
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.permissions import RestrictOnCloudDeployments
-from galaxy_ng.app.api.ui.serializers import LoginSerializer
+from galaxy_ng.app.api.v3.serializers import LoginSerializer
 
 
 __all__ = (

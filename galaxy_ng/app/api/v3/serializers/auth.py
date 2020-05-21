@@ -1,6 +1,6 @@
 from rest_framework.serializers import CharField
 
-from .base import Serializer
+from galaxy_ng.app.api.ui.serializers.base import Serializer
 
 
 class LoginSerializer(Serializer):
