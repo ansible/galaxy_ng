@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 from django.contrib.auth.models import Permission
+from django.contrib.auth.hashers import make_password, check_password
 
 from .models import User, Group, Namespace, NamespaceLink, CollectionImport
 
@@ -28,6 +29,17 @@ class UserAdmin(admin.ModelAdmin):
         'date_joined',
     )
     raw_id_fields = ('groups', 'user_permissions')
+
+    def save_model(self, request, obj, form, change):
+        user_database = User.objects.get(pk=obj.pk)
+        # Check firs the case in which the password is not encoded,
+        # then check in the case that the password is encode
+        if not (check_password(form.data['password'], user_database.password)
+                or user_database.password == form.data['password']):
+            obj.password = make_password(obj.password)
+        else:
+            obj.password = user_database.password
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Group)
