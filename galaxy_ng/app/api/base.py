@@ -1,39 +1,36 @@
-from django.test.signals import setting_changed
+from django.conf import settings
 
 from rest_framework import generics
 from rest_framework import views
 from rest_framework import viewsets
-from rest_framework.settings import APISettings
+from rest_framework.settings import perform_import
 
 
-# NOTE: This code uses undocumented and internal class rest_framework.settings.APISettings.
-#       It must be eventually refactored.
-DEFAULT_SETTINGS = {
-    "GALAXY_EXCEPTION_HANDLER": "galaxy_ng.app.api.exceptions.exception_handler",
-    "GALAXY_PAGINATION_CLASS": "galaxy_ng.app.api.pagination.LimitOffsetPagination",
-    "GALAXY_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
-    ],
-    "GALAXY_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
-}
-IMPORT_STRINGS = [
-    "GALAXY_EXCEPTION_HANDLER",
-    "GALAXY_AUTHENTICATION_CLASSES",
-    "GALAXY_PERMISSION_CLASSES",
-    "GALAXY_PAGINATION_CLASS",
-]
-
-local_settings = APISettings(defaults=DEFAULT_SETTINGS, import_strings=IMPORT_STRINGS)
+GALAXY_EXCEPTION_HANDLER = perform_import(
+    settings.GALAXY_EXCEPTION_HANDLER,
+    'GALAXY_EXCEPTION_HANDLER'
+)
+GALAXY_AUTHENTICATION_CLASSES = perform_import(
+    settings.GALAXY_AUTHENTICATION_CLASSES,
+    'GALAXY_AUTHENTICATION_CLASSES'
+)
+GALAXY_PERMISSION_CLASSES = perform_import(
+    settings.GALAXY_PERMISSION_CLASSES,
+    'GALAXY_PERMISSION_CLASSES',
+)
+GALAXY_PAGINATION_CLASS = perform_import(
+    settings.GALAXY_PAGINATION_CLASS,
+    'GALAXY_PAGINATION_CLASS'
+)
 
 
 class LocalSettingsMixin:
-    authentication_classes = local_settings.GALAXY_AUTHENTICATION_CLASSES
-    permission_classes = local_settings.GALAXY_PERMISSION_CLASSES
-    pagination_class = local_settings.GALAXY_PAGINATION_CLASS
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
+    permission_classes = GALAXY_PERMISSION_CLASSES
+    pagination_class = GALAXY_PAGINATION_CLASS
 
     def get_exception_handler(self):
-        return local_settings.GALAXY_EXCEPTION_HANDLER
+        return GALAXY_EXCEPTION_HANDLER
 
 
 class APIView(LocalSettingsMixin, views.APIView):
@@ -50,11 +47,3 @@ class GenericAPIView(LocalSettingsMixin, generics.GenericAPIView):
 
 class GenericViewSet(LocalSettingsMixin, viewsets.GenericViewSet):
     pass
-
-
-def _reload_local_settings(**kwargs):
-    if kwargs["setting"] in DEFAULT_SETTINGS:
-        local_settings.reload()
-
-
-setting_changed.connect(_reload_local_settings)

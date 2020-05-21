@@ -164,9 +164,10 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
         methods=["PUT"],
         detail=True,
         url_path="certified",
-        permission_classes=api_base.local_settings.GALAXY_PERMISSION_CLASSES
-        + [permissions.IsPartnerEngineer],
-        serializer_class=serializers.CertificationSerializer,
+        permission_classes=api_base.GALAXY_PERMISSION_CLASSES + [
+            permissions.IsPartnerEngineer
+        ],
+        serializer_class=serializers.CertificationSerializer
     )
     def set_certified(self, request, *args, **kwargs):
         namespace, name, version = self.kwargs['version'].split('/')
