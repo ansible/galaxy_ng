@@ -16,7 +16,7 @@ from pulpcore.plugin.models import ContentArtifact, Task
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 
 from galaxy_ng.app.api.base import (
-    GALAXY_PERMISSION_CLASSES,
+    local_settings,
     APIView,
     LocalSettingsMixin,
 )
@@ -36,7 +36,7 @@ log = logging.getLogger(__name__)
 
 
 class CollectionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionViewSet):
-    permission_classes = GALAXY_PERMISSION_CLASSES + [
+    permission_classes = local_settings.GALAXY_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwnerOrPartnerEngineer,
     ]
 
@@ -68,7 +68,7 @@ class CollectionImportViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionI
 
 
 class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionUploadViewSet):
-    permission_classes = GALAXY_PERMISSION_CLASSES + [
+    permission_classes = local_settings.GALAXY_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwner
     ]
 
