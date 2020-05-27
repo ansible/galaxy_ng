@@ -346,44 +346,6 @@ paths:
         '204':
           description: "User signed out successfully."
 
-  /_ui/auth/token/:
-    get:
-      summary: "Get Auth Token (UI)"
-      operationId: getAuthTokenUi
-      tags:
-        - 'UI: Authhentication'
-      responses:
-        '200':
-          $ref: '#/components/responses/Token'
-        '404':
-          description: "User does not have a token."
-        'default':
-          $ref: '#/components/responses/Errors'
-
-    post:
-      summary: "Issue Auth Token (UI)"
-      operationId: issueAuthTokenUi
-      description: "Create a new authentication token. Any existing token is revoked."
-      tags:
-        - 'UI: Authhentication'
-      responses:
-        '200':
-          $ref: '#/components/responses/Token'
-        'default':
-          $ref: '#/components/responses/Errors'
-
-    delete:
-      summary: "Revoke Auth Token (UI)"
-      operationId: revokeAuthTokenUi
-      description: "Revoke authentication token if it exists."
-      tags:
-        - 'UI: Authhentication'
-      responses:
-        '204':
-          description: "Token has been revoked."
-        'default':
-          $ref: '#/components/responses/Errors'
-
   #
   # Sync lists
   #
@@ -1266,15 +1228,6 @@ components:
           description: "User password"
           type: string
 
-    Token:
-      title: "Token"
-      description: "Authentication token"
-      type: object
-      properties:
-        token:
-          description: "Token string"
-          type: string
-
   parameters:
 
     CollectionNamespaceName:
@@ -1501,10 +1454,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UsersPage'
-
-    Token:
-      description: 'Response containing a Token'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Token'

@@ -80,6 +80,41 @@ info:
 paths:
 
   # -------------------------------------
+  # Authentication
+  # -------------------------------------
+
+  /auth/token/:
+    post:
+      summary: "Issue Auth Token"
+      operationId: createAuthToken
+      description: "Create a new authentication token. Any existing token is revoked."
+      tags:
+        - 'Authentication'
+      security:
+        - TokenAuth: []
+        - BasicAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Token'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+    delete:
+      summary: "Revoke Auth Token"
+      operationId: deleteAuthToken
+      description: "Revoke authentication token if it exists."
+      security:
+        - TokenAuth: []
+        - BasicAuth: []
+      tags:
+        - 'Authentication'
+      responses:
+        '204':
+          description: "Token has been revoked."
+        'default':
+          $ref: '#/components/responses/Errors'
+
+  # -------------------------------------
   # Collections
   # -------------------------------------
 
@@ -234,6 +269,20 @@ paths:
           $ref: '#/components/responses/Errors'
 
 components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+
+    TokenAuth:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: |
+        Django Rest Framework (DRF) token authentication.
+        Passed in HTTP header as:
+          Authorization: Token <token>
+
   schemas:
     Author:
       description: 'Author of a collection or role'
@@ -841,6 +890,19 @@ components:
       type: string
       # TODO: This could in theory be an enum
 
+    # -------------------------------------
+    # Schemas: Authentication
+    # -------------------------------------
+
+    Token:
+      title: "Token"
+      description: "Authentication token"
+      type: object
+      properties:
+        token:
+          description: "Token string"
+          type: string
+
   parameters:
 
     CollectionNamespaceName:
@@ -1076,3 +1138,10 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+
+    Token:
+      description: 'Response containing a Token'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'

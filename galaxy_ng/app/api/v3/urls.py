@@ -1,6 +1,13 @@
 from django.urls import path
 
+from . import views
 from . import viewsets
+
+
+auth_urls = [
+    path("auth/token/", views.TokenView.as_view(), name="auth-token"),
+]
+
 
 urlpatterns = [
     path(

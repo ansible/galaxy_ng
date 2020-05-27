@@ -20,9 +20,8 @@ router.register(
 router.register('tags', viewsets.TagsViewSet, basename='tags')
 
 auth_views = [
-    path('login/', views.LoginView.as_view(), name='auth-login'),
-    path('logout/', views.LogoutView.as_view(), name='auth-logout'),
-    path('token/', views.TokenView.as_view(), name='auth-token'),
+    path("login/", views.LoginView.as_view(), name="auth-login"),
+    path("logout/", views.LogoutView.as_view(), name="auth-logout"),
 ]
 
 app_name = "ui"
