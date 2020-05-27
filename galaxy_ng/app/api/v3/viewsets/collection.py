@@ -83,7 +83,7 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
             locks.append(repository)
             kwargs["repository_pk"] = repository.pk
 
-        if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
+        if settings.GALAXY_REQUIRE_CONTENT_APPROVAL == 'True':
             return enqueue_with_reservation(import_collection, locks, kwargs=kwargs)
         return enqueue_with_reservation(import_and_auto_approve, locks, kwargs=kwargs)
 
