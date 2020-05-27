@@ -1,5 +1,9 @@
-from .namespace import NamespaceViewSet, MyNamespaceViewSet
+from .namespace import (
+    NamespaceViewSet,
+)
+
 from .collection import CollectionViewSet, CollectionVersionViewSet, CollectionImportViewSet
+from .my_namespace import MyNamespaceViewSet
 from .tags import TagsViewSet
 from .user import UserViewSet, CurrentUserViewSet
 

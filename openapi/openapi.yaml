@@ -268,6 +268,82 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
+  '/namespaces/':
+    get:
+      summary: List Namespaces
+      operationId: listNamespaces
+      parameters:
+        - $ref: '#/components/parameters/ResponseIncludeFields'
+        - $ref: '#/components/parameters/ResponseExcludeFields'
+      responses:
+        '200':
+          $ref: '#/components/responses/NamespaceList'
+        'default':
+          $ref: '#/components/responses/Errors'
+      tags:
+        - "Namespace"
+
+    post:
+      summary: Create Namespace
+      operationId: postNamespace
+
+      requestBody:
+        $ref: "#/components/requestBodies/Namespace"
+      responses:
+        '202':
+          $ref: '#/components/responses/Namespace'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Errors'
+      tags:
+        - "Namespace"
+
+    delete:
+      summary: "Delete a Namespace"
+      description: "Delete a Namespace if it exists."
+      operationId: deleteNamespace
+      responses:
+        "204":
+          description: "Namespace has been deleted."
+        'default':
+          $ref: '#/components/responses/Errors'
+      tags:
+        - "Namespace"
+
+  '/namespaces/{namespace_name}/':
+    parameters:
+      - $ref: '#/components/parameters/NamespaceName'
+
+    patch:
+      summary: Partially update a Namespace
+      description: ""
+      operationId: patchNamespace
+      requestBody:
+        $ref: "#/components/requestBodies/Namespace"
+      responses:
+        "200":
+          $ref: "#/components/responses/Namespace"
+        'default':
+          $ref: '#/components/responses/Errors'
+      tags:
+        - "Namespace"
+    put:
+      summary: Update a Namespace
+      description: "Update a Namespace"
+      operationId: putNamespace
+      requestBody:
+        $ref: "#/components/requestBodies/Namespace"
+      responses:
+        "200":
+          $ref: "#/components/responses/Namespace"
+        'default':
+          $ref: '#/components/responses/Errors'
+      tags:
+        - "Namespace"
+
 components:
   securitySchemes:
     BasicAuth:
@@ -720,6 +796,21 @@ components:
         - detail
         - status
 
+    GroupSummary:
+      title: 'Group summary'
+      description: 'Group name and id'
+      type: object
+      properties:
+        id:
+          title: Id
+          type: integer
+          readOnly: true
+        name:
+          minLength: 1
+          title: Name
+          type: string
+          readOnly: true
+
     # -------------------------------------
     # Schemas: Namespaces
     # -------------------------------------
@@ -758,6 +849,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NamespaceLink'
+        groups:
+          description: Namespace groups
+          items:
+            $ref: "#/components/schemas/GroupSummary"
+          type: array
 
     NamespaceLink:
       title: Namespace Link
@@ -939,6 +1035,13 @@ components:
       schema:
         type: string
 
+    NamespaceName:
+      description: "URI of Namespace. e.g.: /api/automation-hub/v3/namespaces/1/"
+      in: path
+      name: namespace_name
+      required: true
+      schema:
+        type: string
     PageLimit:
       description: 'Number of results to return per page.'
       in: query
@@ -959,6 +1062,23 @@ components:
         type: integer
         default: 0
         minimum: 0
+
+    ResponseIncludeFields:
+      name: fields
+      in: query
+      description: A list of fields to include in the response.
+      required: false
+      schema:
+        type: string
+
+    ResponseExcludeFields:
+      name: exclude_fields
+      in: query
+      description: A list of fields to exclude from the response.
+      required: false
+      schema:
+        type: string
+
 
     Search:
       description: 'Term to search for'
@@ -1111,6 +1231,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Namespace'
+
+    NamespaceList:
+      description: 'Response containing a page of Namespaces'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NamespacesPage'
 
     NotFound:
       description: 'Not Found (404)'

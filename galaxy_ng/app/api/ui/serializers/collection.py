@@ -3,7 +3,7 @@ import logging
 from rest_framework import serializers
 
 from .base import Serializer
-from .namespace import NamespaceSummarySerializer
+from galaxy_ng.app.api.v3.serializers.namespace import NamespaceSummarySerializer
 
 
 log = logging.getLogger(__name__)

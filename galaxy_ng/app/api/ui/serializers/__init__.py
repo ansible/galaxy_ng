@@ -13,10 +13,11 @@ from .imports import (
     ImportTaskDetailSerializer,
     ImportTaskListSerializer,
 )
+
 from .namespace import (
     NamespaceSerializer,
     NamespaceSummarySerializer,
-    NamespaceUpdateSerializer
+    NamespaceUpdateSerializer,
 )
 
 from .user import (
