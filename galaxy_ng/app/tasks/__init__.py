@@ -1,2 +1,2 @@
-from .publishing import publish  # noqa
-from .synchronizing import synchronize  # noqa
+from .publishing import import_and_auto_approve  # noqa: F401
+# from .synchronizing import synchronize  # noqa

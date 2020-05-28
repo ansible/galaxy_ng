@@ -30,6 +30,11 @@ STATIC_URL = "/static/"
 # created by the initial-data.json data fixture
 GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH = "automation-hub"
 
+# Require approval for incoming content,
+# currently using a certification flag,
+# later using a staging repository
+GALAXY_REQUIRE_CONTENT_APPROVAL = True
+
 # Local rest framework settings
 # -----------------------------
 

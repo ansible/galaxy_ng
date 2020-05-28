@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from rest_framework.exceptions import APIException, NotFound
 
 from pulpcore.plugin.models import ContentArtifact, Task
+from pulpcore.plugin.tasking import enqueue_with_reservation
+from pulp_ansible.app.tasks.collections import import_collection
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 
 from galaxy_ng.app.api.base import (
@@ -27,6 +29,7 @@ from galaxy_ng.app.api import permissions
 from galaxy_ng.app.api.v3.serializers import CollectionVersionSerializer, CollectionUploadSerializer
 
 from galaxy_ng.app.common import metrics
+from galaxy_ng.app.tasks import import_and_auto_approve
 
 # hmm, not sure what to do with this
 # from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
@@ -71,6 +74,18 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
     permission_classes = GALAXY_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwner
     ]
+
+    def _dispatch_import_collection_task(self, artifact_pk, repository=None, **kwargs):
+        """Dispatch a pulp task started on upload of collection version."""
+        locks = [str(artifact_pk)]
+        kwargs["artifact_pk"] = artifact_pk
+        if repository:
+            locks.append(repository)
+            kwargs["repository_pk"] = repository.pk
+
+        if settings.GALAXY_REQUIRE_CONTENT_APPROVAL == 'True':
+            return enqueue_with_reservation(import_collection, locks, kwargs=kwargs)
+        return enqueue_with_reservation(import_and_auto_approve, locks, kwargs=kwargs)
 
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
     # the import task and the collection artifact details
