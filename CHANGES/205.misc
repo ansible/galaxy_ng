@@ -1,0 +1,2 @@
+Travis CI: Verify that all commits in pull request reference at least one issue and
+have an appropriate change log record.
