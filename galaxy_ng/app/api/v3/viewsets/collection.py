@@ -47,6 +47,13 @@ class CollectionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionViewSet
 class CollectionVersionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionVersionViewSet):
     serializer_class = CollectionVersionSerializer
 
+    # FIXME(akl): This can be removed when we move to multiple repos for managing "certifiaction"
+    def get_queryset(self):
+        """
+        Returns a CollectionVersions queryset for specified distribution filtering on certification.
+        """
+        return super().get_queryset().filter(certification="certified")
+
     # Custom retrive so we can use the class serializer_class
     # galaxy_ng.app.api.v3.serializers.CollectionVersionSerializer
     # which is responsible for building the 'download_url'. The default pulp one doesn't
