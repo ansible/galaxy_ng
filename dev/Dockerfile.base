@@ -1,11 +1,9 @@
-# NOTE: This Dockerfile is currently used to build release images. So it is leaved as is.
-# It should be removed once migration to standalone Dockerfile for release images
-# is complete.
 FROM centos:8
 
 ARG USER_ID=1000
 ARG USER_NAME=galaxy
 ARG USER_GROUP=galaxy
+ARG COMPOSE_PROFILE
 
 ENV LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
@@ -25,6 +23,7 @@ RUN set -ex; \
 RUN set -ex; \
     touch /var/lib/rpm/* \
     && dnf -y install \
+        git \
         gcc \
         glibc-langpack-en \
         python3-devel \
@@ -39,8 +38,7 @@ RUN set -ex; \
 ENV PATH="/venv/bin:${PATH}" \
     VIRTUAL_ENV="/venv"
 
-# Install python requirements
-COPY ./requirements/requirements.insights.txt /tmp/requirements.txt
+COPY ./requirements/requirements.common.txt /tmp/requirements.txt
 
 RUN set -ex; \
     pip install --no-cache-dir --upgrade pip \
