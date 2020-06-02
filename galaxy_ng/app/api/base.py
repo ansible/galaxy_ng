@@ -47,3 +47,7 @@ class GenericAPIView(LocalSettingsMixin, generics.GenericAPIView):
 
 class GenericViewSet(LocalSettingsMixin, viewsets.GenericViewSet):
     pass
+
+
+class ModelViewSet(LocalSettingsMixin, viewsets.ModelViewSet):
+    pass

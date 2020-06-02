@@ -31,6 +31,9 @@ class CollectionVersionSerializer(_CollectionVersionSerializer):
 
         return download_url
 
+    class Meta(_CollectionVersionSerializer.Meta):
+        ref_name = "CollectionVersionWithDownloadUrlSerializer"
+
 
 class CollectionUploadSerializer(Serializer):
     """

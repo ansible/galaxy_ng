@@ -1,8 +1,16 @@
-from django.urls import path
+from django.urls import include, path
+
+from rest_framework import routers
 
 from . import views
 from . import viewsets
 
+router = routers.SimpleRouter()
+router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
+
+namespace_urls = [
+    path("", include(router.urls)),
+]
 
 auth_urls = [
     path("auth/token/", views.TokenView.as_view(), name="auth-token"),
