@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  ui:
+    environment:
+      - "DEPLOYMENT_MODE=${COMPOSE_PROFILE}"
+
+  insights_proxy:
+    image: "docker.io/redhatinsights/insights-proxy"
+    environment:
+      - "CUSTOM_CONF=true"
+      - "PLATFORM="
+    volumes:
+      - "${ANSIBLE_HUB_UI_PATH}/profiles/galaxy-ng-compose.js:/config/spandx.config.js"
+    security_opt:
+      - label:disable
+    ports:
+      - "1337:1337"
