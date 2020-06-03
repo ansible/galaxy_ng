@@ -48,7 +48,7 @@ def git_list_commits(commit_range):
 
 
 def git_commit_message(commit_sha):
-    cmd = ["git", "show", "--format=%B", commit_sha]
+    cmd = ["git", "show", "-s", "--format=%B", commit_sha]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, encoding="utf-8", check=True)
     return result.stdout
 
@@ -76,7 +76,7 @@ def check_commit(commit_sha, repo_slug):
     commit_message = git_commit_message(commit_sha)
     issue_labels = ISSUE_LABEL_REGEX.findall(commit_message)
     if not issue_labels:
-        no_issue_match = NO_ISSUE_REGEX.match(commit_message)
+        no_issue_match = NO_ISSUE_REGEX.search(commit_message)
         if not no_issue_match:
             LOG.error(f"Commit {commit_sha[:8]} has no issue attached")
             return False
