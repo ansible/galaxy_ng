@@ -46,17 +46,16 @@ The following is a simple quickstart for installing a local Galaxy server. It re
           secret_key: secret
           content_origin: "http://{{ ansible_fqdn }}"
           x_pulp_api_host: "{{ pulp_api_host }}"
-          x_pulp_api_port: "{{ pulp_api_port }}" 
+          x_pulp_api_port: "{{ pulp_api_port }}"
           x_pulp_api_user: "admin"
           x_pulp_api_password: "{{ pulp_default_admin_password }}"
           x_pulp_api_prefix: "pulp_ansible/galaxy/automation-hub/api"
+          galaxy_require_content_approval: "False"
         pulp_default_admin_password: password
         pulp_install_plugins:
           pulp-ansible: {}
           galaxy-ng: {}
-            # source_dir: "git+https://github.com/ansible/galaxy_ng.git#egg=galaxy-ng"
           pulp-container: {}
-        pulp_source_dir: "git+https://github.com/pulp/pulpcore.git@3.3.0#egg=pulpcore"
         pulp_api_workers: 4
       roles:
         - pulp_database
