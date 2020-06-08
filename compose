@@ -1,39 +1,46 @@
 #!/bin/bash
 
-set -o allexport
-source .compose.env
-set +o allexport
-
-if [[ -z "$COMPOSE_PROFILE" ]]
-then
-    echo "ERROR: the \$COMPOSE_PROFILE environment variable must be set."
-    echo "The the easiest way to to this is to create a .compose.env file by running '\$ cp .compose.env.example .compose.env'"
-    exit 1
-fi
-
-declare UI_OPTIONS=""
-
-if [[ -z "$ANSIBLE_HUB_UI_PATH" ]]
-then
-    echo "\$ANSIBLE_HUB_UI_PATH is unset."
-    echo "If you want to run the UI inside compose please set \$ANSIBLE_HUB_UI_PATH to the location of your local copy of https://github.com/ansible/ansible-hub-ui."
-else
-    UI_OPTIONS="-f dev/common/docker-compose-ui.yaml -f dev/$COMPOSE_PROFILE/docker-compose-ui.yaml"
-fi
-
 set -o nounset
 set -o errexit
 
-echo "Compose Profile $COMPOSE_PROFILE"
+if [[ -f '.compose.env' ]]; then
+  set -o allexport
+  source .compose.env
+  set +o allexport
+fi
+
+if [[ -z "${COMPOSE_PROFILE:-}" ]]; then
+  cat >&2 <<EOF
+ERROR: The \$COMPOSE_PROFILE environment variable MUST be set.
+       The the easiest way to to this is to create a .compose.env file by running:
+
+           \$ cp .compose.env.example .compose.env
+EOF
+  exit 1
+fi
+
+echo "INFO: Using compose profile ${COMPOSE_PROFILE}"
+
+compose_args=(
+  -f 'dev/docker-compose.yml'
+  -f "dev/${COMPOSE_PROFILE}/docker-compose.yml"
+)
+
+if [[ -z "${ANSIBLE_HUB_UI_PATH:-}" ]]; then
+    cat >&2 << EOF
+INFO: \$ANSIBLE_HUB_UI_PATH is unset.
+    If you want to run the UI inside compose please set \$ANSIBLE_HUB_UI_PATH
+    to the location of your local copy of https://github.com/ansible/ansible-hub-ui.
+EOF
+else
+    compose_args+=(
+      -f 'dev/common/docker-compose-ui.yaml'
+      -f "dev/${COMPOSE_PROFILE}/docker-compose-ui.yaml"
+    )
+fi
 
 declare -xr DEV_SOURCE_PATH=${DEV_SOURCE_PATH:-galaxy_ng}
-
 declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng}"
-
 declare -xr COMPOSE_CONTEXT=".."
 
-
-exec docker-compose \
-     -f dev/docker-compose.yml \
-     -f dev/$COMPOSE_PROFILE/docker-compose-override.yml \
-     $UI_OPTIONS "$@"
+exec docker-compose "${compose_args[@]}" "$@"

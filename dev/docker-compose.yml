@@ -2,10 +2,22 @@
 version: "3.7"
 
 services:
+  _base:
+    build:
+      context: "${COMPOSE_CONTEXT}"
+      dockerfile: "dev/Dockerfile.base"
+    image: "localhost/galaxy_ng/galaxy_ng:base"
+    entrypoint: "/bin/true"
+    tmpfs:
+      - "/var/lib/pulp/artifact"
+      - "/var/lib/pulp/tmp"
+      - "/tmp/ansible"
+
   api:
     build:
       context: "${COMPOSE_CONTEXT}"
-    image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
+      dockerfile: "dev/${COMPOSE_PROFILE}/Dockerfile"
+    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
     command: ['run', 'api-reload']
     ports:
       - "5001:8000"
@@ -18,12 +30,16 @@ services:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp_artifact:/var/lib/pulp/artifact"
+    tmpfs:
+      - "/var/lib/pulp/tmp:uid=1000,gid=1000"
+      - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
+      - _base
       - postgres
       - redis
 
   resource-manager:
-    image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
+    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
     command: ['run', 'resource-manager']
     environment:
       - "WITH_DEV_INSTALL=1"
@@ -34,12 +50,16 @@ services:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp_artifact:/var/lib/pulp/artifact"
+    tmpfs:
+      - "/var/lib/pulp/tmp:uid=1000,gid=1000"
+      - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
+      - _base
       - postgres
       - redis
 
   worker:
-    image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
+    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
     command: ['run', 'worker']
     environment:
       - "WITH_DEV_INSTALL=1"
@@ -50,12 +70,16 @@ services:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp_artifact:/var/lib/pulp/artifact"
+    tmpfs:
+      - "/var/lib/pulp/tmp:uid=1000,gid=1000"
+      - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
+      - _base
       - postgres
       - redis
 
   content-app:
-    image: "localhost/${COMPOSE_PROJECT_NAME}/galaxy_ng:latest"
+    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
     command: ['run', 'content-app']
     ports:
       - "24816:24816"
@@ -68,7 +92,11 @@ services:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp_artifact:/var/lib/pulp/artifact"
+    tmpfs:
+      - "/var/lib/pulp/tmp:uid=1000,gid=1000"
+      - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
+      - _base
       - postgres
       - redis
 
