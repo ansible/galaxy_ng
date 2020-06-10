@@ -44,8 +44,7 @@ from galaxy_ng.app.tasks import (
     remove_content_from_repository,
 )
 
-# hmm, not sure what to do with this
-# from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
+from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 
 
 log = logging.getLogger(__name__)
@@ -139,6 +138,7 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
     permission_classes = GALAXY_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwner
     ]
+    parser_classes = [AnsibleGalaxy29MultiPartParser]
 
     def _dispatch_import_collection_task(self, artifact_pk, repository=None, **kwargs):
         """Dispatch a pulp task started on upload of collection version."""
