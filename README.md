@@ -65,9 +65,12 @@ The following is a simple quickstart for installing a local Galaxy server. It re
         - pulp_resource_manager
         - pulp_webserver
         - pulp_content
-        - chouseknecht.ansible_galaxy_config
       environment:
         DJANGO_SETTINGS_MODULE: pulpcore.app.settings
+
+    - hosts: all
+      roles:
+        - chouseknecht.ansible_galaxy_config
     ```
 
 4. Install Ansible role dependencies by running the following commands to download roles from [Community Galaxy](https://galaxy.ansible.com):
