@@ -69,6 +69,8 @@ The following is a simple quickstart for installing a local Galaxy server. It re
         DJANGO_SETTINGS_MODULE: pulpcore.app.settings
 
     - hosts: all
+      vars:
+        pulp_default_admin_password: password
       roles:
         - chouseknecht.ansible_galaxy_config
     ```
