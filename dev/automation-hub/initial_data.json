@@ -1,5 +1,13 @@
 [
   {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "system:partner-engineers",
+      "permissions": []
+    }
+  },
+  {
     "model": "galaxy.user",
     "pk": 1,
     "fields": {
@@ -13,16 +21,8 @@
       "is_staff": true,
       "is_active": true,
       "date_joined": "2020-01-01T00:00:00.000Z",
-      "groups": [],
+      "groups": [1],
       "user_permissions": []
-    }
-  },
-  {
-    "model": "auth.group",
-    "pk": 1,
-    "fields": {
-      "name": "system:partner-engineers",
-      "permissions": []
     }
   },
   {
