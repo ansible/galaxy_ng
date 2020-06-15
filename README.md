@@ -35,13 +35,14 @@ The following is a simple quickstart for installing a local Galaxy server. It re
 
 2. Set your working directory to the `pulp_installer` directory.
 
-3. Create a playbook called `install.yml` that contains the following:
+3. Create a playbook called `install.yml` that contains either of the following:
 
     * **Warning**: please change the `pulp_default_admin_password`  (Initial password for the Pulp admin).
 
     ```
     - hosts: all
       vars:
+        pulp_install_source: pip
         pulp_settings:
           secret_key: secret
           content_origin: "http://{{ ansible_fqdn }}"
@@ -59,6 +60,44 @@ The following is a simple quickstart for installing a local Galaxy server. It re
           pulp-container:
             version: 2.0.0b2
         pulp_api_workers: 4
+      roles:
+        - pulp_database
+        - pulp_workers
+        - pulp_resource_manager
+        - pulp_webserver
+        - pulp_content
+      environment:
+        DJANGO_SETTINGS_MODULE: pulpcore.app.settings
+
+    - hosts: all
+      vars:
+        pulp_default_admin_password: password
+      roles:
+        - chouseknecht.ansible_galaxy_config
+    ```
+
+
+    ```
+    - hosts: all
+      vars:
+        pulp_install_source: packages
+        pulp_settings:
+          secret_key: secret
+          content_origin: "http://{{ ansible_fqdn }}"
+          x_pulp_api_host: "{{ pulp_api_host }}"
+          x_pulp_api_port: "{{ pulp_api_port }}"
+          x_pulp_api_user: "admin"
+          x_pulp_api_password: "{{ pulp_default_admin_password }}"
+          x_pulp_api_prefix: "pulp_ansible/galaxy/automation-hub/api"
+          galaxy_require_content_approval: "False"
+          pulp_token_auth_disabled: "True"
+        pulp_default_admin_password: password
+        pulp_install_plugins:
+          pulp-ansible: {}
+          galaxy-ng: {}
+          pulp-container: {}
+        pulp_api_workers: 4
+        pulp_pkg_repo: "<< HTTP PATH TO THE YUM REPO >>"
       roles:
         - pulp_database
         - pulp_workers
