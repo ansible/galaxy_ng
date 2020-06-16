@@ -2,6 +2,8 @@ import logging
 
 import requests
 
+import semantic_version
+
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 
@@ -28,7 +30,12 @@ from galaxy_ng.app.api.base import (
 from galaxy_ng.app import models
 from galaxy_ng.app.api import permissions
 
-from galaxy_ng.app.api.v3.serializers import CollectionVersionSerializer, CollectionUploadSerializer
+from galaxy_ng.app.api.v3.serializers import (
+    CollectionSerializer,
+    CollectionVersionSerializer,
+    CollectionVersionListSerializer,
+    CollectionUploadSerializer,
+)
 
 from galaxy_ng.app.common import metrics
 from galaxy_ng.app.tasks import (
@@ -44,13 +51,37 @@ from galaxy_ng.app.tasks import (
 log = logging.getLogger(__name__)
 
 
-class CollectionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionViewSet):
+class ViewNamespaceSerializerContextMixin:
+    def get_serializer_context(self):
+        """Inserts distribution path to a serializer context."""
+        context = super().get_serializer_context()
+
+        # view_namespace will be used by the serializers that need to return different hrefs
+        # depending on where in the urlconf they are.
+        # view_route is the url 'route' pattern, used to
+        # handle the special case /api/automation-hub/v3/collections/ not having
+        # a <str:path> in it's url
+        request = context.get("request", None)
+        context["view_namespace"] = None
+        if request:
+            context["view_namespace"] = request.resolver_match.namespace
+            context["view_route"] = request.resolver_match.route
+
+        return context
+
+
+class CollectionViewSet(LocalSettingsMixin,
+                        ViewNamespaceSerializerContextMixin,
+                        pulp_ansible_views.CollectionViewSet):
     permission_classes = GALAXY_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwnerOrPartnerEngineer,
     ]
+    serializer_class = CollectionSerializer
 
 
-class CollectionVersionViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionVersionViewSet):
+class CollectionVersionViewSet(LocalSettingsMixin,
+                               ViewNamespaceSerializerContextMixin,
+                               pulp_ansible_views.CollectionVersionViewSet):
     serializer_class = CollectionVersionSerializer
 
     # FIXME(akl): This can be removed when we move to multiple repos for managing "certifiaction"
@@ -59,6 +90,27 @@ class CollectionVersionViewSet(LocalSettingsMixin, pulp_ansible_views.Collection
         Returns a CollectionVersions queryset for specified distribution filtering on certification.
         """
         return super().get_queryset().filter(certification="certified")
+
+    # TODO: This is cut&paste from pulp_ansible_views.CollectionVersionViewSet.list, so
+    #       the serializer class can be overridden. Should be able to remove this
+    #       once pulp_ansible serializers use something like _get_href that names
+    #       url namespace into account
+    def list(self, request, *args, **kwargs):
+        """Returns paginated CollectionVersions list."""
+
+        queryset = self.filter_queryset(self.get_queryset())
+        queryset = sorted(
+            queryset, key=lambda obj: semantic_version.Version(obj.version), reverse=True
+        )
+
+        context = self.get_serializer_context()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = CollectionVersionListSerializer(page, many=True, context=context)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = CollectionVersionListSerializer(queryset, many=True, context=context)
+        return Response(serializer.data)
 
     # Custom retrive so we can use the class serializer_class
     # galaxy_ng.app.api.v3.serializers.CollectionVersionSerializer

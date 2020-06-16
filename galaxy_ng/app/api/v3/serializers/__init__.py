@@ -1,5 +1,7 @@
 from .collection import (
+    CollectionSerializer,
     CollectionVersionSerializer,
+    CollectionVersionListSerializer,
     CollectionUploadSerializer,
 )
 
@@ -13,7 +15,9 @@ from .group import (
 )
 
 __all__ = (
+    'CollectionSerializer',
     'CollectionVersionSerializer',
+    'CollectionVersionListSerializer',
     'CollectionUploadSerializer',
     'GroupSummarySerializer',
     'NamespaceSerializer',

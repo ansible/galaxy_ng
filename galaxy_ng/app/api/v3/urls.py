@@ -21,22 +21,22 @@ urlpatterns = [
     path(
         'collections/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
-        name='collection-list'
+        name='collections-list'
     ),
     path(
         'collections/<str:namespace>/<str:name>/',
         viewsets.CollectionViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
-        name='collection'
+        name='collections-detail'
     ),
     path(
         'collections/<str:namespace>/<str:name>/versions/',
         viewsets.CollectionVersionViewSet.as_view({'get': 'list'}),
-        name='collection-version-list',
+        name='collection-versions-list',
     ),
     path(
         'collections/<str:namespace>/<str:name>/versions/<str:version>/',
         viewsets.CollectionVersionViewSet.as_view({'get': 'retrieve'}),
-        name='collection-version',
+        name='collection-versions-detail',
     ),
     path(
         'imports/collections/<str:pk>/',
