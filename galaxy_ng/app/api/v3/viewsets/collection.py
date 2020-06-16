@@ -2,7 +2,7 @@ import logging
 
 import requests
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 
 from django.conf import settings
@@ -16,10 +16,12 @@ from pulpcore.plugin.models import ContentArtifact, Task
 from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.tasks.collections import import_collection
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
+from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
 
 from galaxy_ng.app.api.base import (
     GALAXY_PERMISSION_CLASSES,
     APIView,
+    ViewSet,
     LocalSettingsMixin,
 )
 
@@ -29,7 +31,11 @@ from galaxy_ng.app.api import permissions
 from galaxy_ng.app.api.v3.serializers import CollectionVersionSerializer, CollectionUploadSerializer
 
 from galaxy_ng.app.common import metrics
-from galaxy_ng.app.tasks import import_and_auto_approve
+from galaxy_ng.app.tasks import (
+    import_and_auto_approve,
+    add_content_to_repository,
+    remove_content_from_repository,
+)
 
 # hmm, not sure what to do with this
 # from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
@@ -180,3 +186,65 @@ class CollectionArtifactDownloadView(APIView):
         metrics.collection_artifact_download_failures.labels(status=response.status_code).inc()
         raise APIException('Unexpected response from content app. '
                            f'Code: {response.status_code}.')
+
+
+class CollectionVersionMoveViewSet(ViewSet):
+    permission_classes = GALAXY_PERMISSION_CLASSES + [
+        permissions.IsNamespaceOwner
+    ]
+
+    def move_content(self, request, *args, **kwargs):
+        """Remove content from source repo and add to destination repo.
+
+        Creates new RepositoryVersion of source repo without content included.
+        Creates new RepositoryVersion of destination repo with content included.
+        """
+
+        version_str = '-'.join([self.kwargs[key] for key in ('namespace', 'name', 'version')])
+        try:
+            collection_version = CollectionVersion.objects.get(
+                namespace=self.kwargs['namespace'],
+                name=self.kwargs['name'],
+                version=self.kwargs['version'],
+            )
+        except ObjectDoesNotExist:
+            raise NotFound(f'Collection {version_str} not found')
+
+        try:
+            src_repo = AnsibleDistribution.objects.get(
+                base_path=self.kwargs['source_path']).repository
+            dest_repo = AnsibleDistribution.objects.get(
+                base_path=self.kwargs['dest_path']).repository
+        except ObjectDoesNotExist:
+            raise NotFound(f'Repo(s) for moving collection {version_str} not found')
+
+        src_versions = CollectionVersion.objects.filter(pk__in=src_repo.latest_version().content)
+        if collection_version not in src_versions:
+            raise NotFound(f'Collection {version_str} not found in source repo')
+
+        dest_versions = CollectionVersion.objects.filter(pk__in=dest_repo.latest_version().content)
+        if collection_version in dest_versions:
+            raise APIException(f'Collection {version_str} already found in destination repo')
+
+        add_task = self._add_content(collection_version, dest_repo)
+        remove_task = self._remove_content(collection_version, src_repo)
+
+        return Response(
+            data={
+                'add_task_id': add_task.id,
+                'remove_task_id': remove_task.id,
+            },
+            status='202'
+        )
+
+    @staticmethod
+    def _add_content(collection_version, repo):
+        locks = [repo]
+        task_args = (collection_version.pk, repo.pk)
+        return enqueue_with_reservation(add_content_to_repository, locks, args=task_args)
+
+    @staticmethod
+    def _remove_content(collection_version, repo):
+        locks = [repo]
+        task_args = (collection_version.pk, repo.pk)
+        return enqueue_with_reservation(remove_content_from_repository, locks, args=task_args)

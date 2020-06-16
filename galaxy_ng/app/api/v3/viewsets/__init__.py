@@ -4,6 +4,7 @@ from .collection import (
     CollectionUploadViewSet,
     CollectionViewSet,
     CollectionVersionViewSet,
+    CollectionVersionMoveViewSet,
 )
 
 from .namespace import (
@@ -13,9 +14,10 @@ from .namespace import (
 
 __all__ = (
     'CollectionArtifactDownloadView',
+    'CollectionImportViewSet',
     'CollectionUploadViewSet',
     'CollectionViewSet',
     'CollectionVersionViewSet',
-    'CollectionImportViewSet',
+    'CollectionVersionMoveViewSet',
     'NamespaceViewSet',
 )
