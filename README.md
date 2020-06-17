@@ -62,6 +62,7 @@ The following is a simple quickstart for installing a local Galaxy server. It re
         pulp_api_workers: 4
       roles:
         - pulp_database
+        - pulp_redis
         - pulp_workers
         - pulp_resource_manager
         - pulp_webserver
