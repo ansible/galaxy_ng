@@ -1,9 +1,11 @@
 import galaxy_pulp
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action as drf_action
+from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion, Collection
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -121,45 +123,60 @@ class CollectionViewSet(api_base.ViewSet):
         return namespaces
 
 
+class CollectionVersionFilter(filterset.FilterSet):
+    repository = filters.CharFilter(field_name='repository', method='repo_filter')
+
+    def repo_filter(self, queryset, name, value):
+        try:
+            distro = AnsibleDistribution.objects.get(base_path=value)
+            repository_version = distro.repository.latest_version()
+            return queryset.filter(pk__in=repository_version.content)
+        except ObjectDoesNotExist:
+            return CollectionVersion.objects.none()
+
+    sort = OrderingFilter(
+        fields=(
+            ('pulp_created', 'pulp_created'),
+            ('namespace', 'namespace'),
+            ('name', 'collection'),
+            ('version', 'version'),
+        )
+    )
+
+    class Meta:
+        model = CollectionVersion
+        fields = ['namespace', 'name', 'version', 'certification', 'repository']
+
+
 class CollectionVersionViewSet(api_base.GenericViewSet):
     lookup_url_kwarg = 'version'
     lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+/[0-9A-Za-z.+-]+'
+    queryset = CollectionVersion.objects.all()
     serializer_class = serializers.CollectionVersionSerializer
+    filterset_class = CollectionVersionFilter
 
     def list(self, request, *args, **kwargs):
-        self.paginator.init_from_request(request)
-
-        params = self.request.query_params.dict()
-        params.update({
-            'offset': self.paginator.offset,
-            'limit': self.paginator.limit,
-        })
-
-        # pulp uses ordering, but the UI is standardized around sort
-        if params.get('sort'):
-            params['ordering'] = params.get('sort')
-            del params['sort']
-
-        api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-        response = api.list(exclude_fields='docs_blob', **params)
-
-        data = serializers.CollectionVersionSerializer(response.results, many=True).data
-        return self.paginator.paginate_proxy_response(data, response.count)
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(operation_summary="Retrieve collection version",
                          responses={200: serializers.CollectionVersionDetailSerializer})
     def retrieve(self, request, *args, **kwargs):
         namespace, name, version = self.kwargs['version'].split('/')
+        try:
+            collection_version = CollectionVersion.objects.get(
+                namespace=namespace,
+                collection=Collection.objects.get(name=name),
+                version=version,
+            )
+        except ObjectDoesNotExist:
+            raise NotFound(f'Collection version not found for: {self.kwargs["version"]}')
+        serializer = serializers.CollectionVersionDetailSerializer(collection_version)
+        return Response(serializer.data)
 
-        api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-        response = api.list(namespace=namespace, name=name, version=version, limit=1)
-
-        if not response.results:
-            raise NotFound()
-
-        data = serializers.CollectionVersionDetailSerializer(response.results[0]).data
-        return Response(data)
-
+    # TODO: remove set_certified() once UI changes approval from certification flag to repo move
     @drf_action(
         methods=["PUT"],
         detail=True,
