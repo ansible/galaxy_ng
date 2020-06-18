@@ -3,7 +3,7 @@ Roadmap
 
 **NOTE**: Future dates are estimated and subject to change.
 
-Release 4.2.0a (May 29 / June 12, 2020)
+Release 4.2.0a (Released)
 ```````````````````````````````````````
 * Install Galaxy on VMs using PyPi packages (`#51 <https://github.com/ansible/galaxy_ng/issues/51>`_)
 * Enable the UI to work outside of the SaaS environment (`#16 <https://github.com/ansible/galaxy_ng/issues/16>`_)
@@ -15,7 +15,7 @@ Release 4.2.0a (May 29 / June 12, 2020)
 
 
 
-Release 4.2.0b (July 31, 2020) 
+Release 4.2.0b (August 2020) 
 ``````````````````````````````
 * Surface content from multiple repositories (`#154 <https://github.com/ansible/galaxy_ng/issues/154>`_)
 * Support RPM based installation (`#145 <https://github.com/ansible/galaxy_ng/issues/145>`_)
@@ -27,7 +27,7 @@ Release 4.2.0b (July 31, 2020)
 * Use repositories to facilitate the content promotion workflow (`20 <https://github.com/ansible/galaxy_ng/issues/20>`_)
 * Customizable branding (`196 <https://github.com/ansible/galaxy_ng/issues/196>`_)
 
-Release 4.2.0rc (September 4, 2020)
+Release 4.2.0rc (September 2020)
 ```````````````````````````````````
 * For on-premise and SaaS, support Kubernetes/OpenShift operator deployments (`#183 <https://github.com/ansible/galaxy_ng/issues/183>`_)
 
