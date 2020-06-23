@@ -47,8 +47,8 @@ The following is a simple quickstart for installing a local Galaxy server. It re
         pulp_settings:
           secret_key: secret
           content_origin: "http://{{ ansible_fqdn }}"
-          x_pulp_api_host: "{{ pulp_api_host }}"
-          x_pulp_api_port: "{{ pulp_api_port }}"
+          x_pulp_api_host: 127.0.0.1
+          x_pulp_api_port: 24817
           x_pulp_api_user: "admin"
           x_pulp_api_password: "{{ pulp_default_admin_password }}"
           x_pulp_api_prefix: "pulp_ansible/galaxy/automation-hub/api"
@@ -61,12 +61,7 @@ The following is a simple quickstart for installing a local Galaxy server. It re
             version: 2.0.0b2
         pulp_api_workers: 4
       roles:
-        - pulp_database
-        - pulp_redis
-        - pulp_workers
-        - pulp_resource_manager
-        - pulp_webserver
-        - pulp_content
+        - pulp_all_services
       environment:
         DJANGO_SETTINGS_MODULE: pulpcore.app.settings
 
