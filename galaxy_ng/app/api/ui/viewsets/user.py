@@ -17,13 +17,14 @@ class UserFilter(filterset.FilterSet):
             ('username', 'username'),
             ('email', 'email'),
             ('first_name', 'first_name'),
+            ('last_name', 'last_name'),
             ('date_joined', 'date_joined')
         )
     )
 
     class Meta:
         model = auth_models.User
-        fields = ('username', 'email', 'first_name', 'date_joined')
+        fields = ('username', 'email', 'first_name', 'last_name', 'date_joined')
 
 
 class UserViewSet(
