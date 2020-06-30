@@ -25,6 +25,10 @@ from .user import (
     CurrentUserSerializer
 )
 
+from .synclist import (
+    SyncListSerializer,
+    SyncListCollectionSummarySerializer,
+)
 
 __all__ = (
     # auth
@@ -47,4 +51,7 @@ __all__ = (
     'CurrentUserSerializer',
     # user
     'UserSerializer',
+    # synclists
+    'SyncListSerializer',
+    'SyncListCollectionSummarySerializer',
 )
