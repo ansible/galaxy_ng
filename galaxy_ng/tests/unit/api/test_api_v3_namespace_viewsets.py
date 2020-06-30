@@ -2,13 +2,14 @@
 import logging
 
 from django.urls import reverse
-
+from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 from rest_framework import status
 
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api import permissions
 from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
+from galaxy_ng.app.api.v3.viewsets.namespace import INBOUND_REPO_NAME_FORMAT
 from galaxy_ng.app.constants import DeploymentMode
 
 from .base import BaseTestCase
@@ -93,3 +94,50 @@ class TestV3NamespaceViewSet(BaseTestCase):
             self.assertIn("description", data)
 
             self.assertEqual(len(data['groups']), self.admin_user.groups.all().count())
+
+    def test_namespace_api_creates_deletes_inbound_repo(self):
+        self.client.force_authenticate(user=self.admin_user)
+        ns1_name = "unittestnamespace1"
+        repo_name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=ns1_name)
+
+        with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
+            # Create namespace + repo
+            response = self.client.post(
+                self.ns_url,
+                {
+                    "name": ns1_name,
+                    "groups": [
+                        {
+                            "id": self.pe_group.id,
+                            "name": self.pe_group.name,
+                        },
+                    ],
+                },
+                format='json',
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(1, len(AnsibleRepository.objects.filter(name=repo_name)))
+            self.assertEqual(1, len(AnsibleDistribution.objects.filter(name=repo_name)))
+
+            # List namespace
+            response = self.client.get(self.ns_url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            namespaces = [item['name'] for item in response.data['data']]
+            self.assertIn(ns1_name, namespaces)
+            self.assertEqual(1, len(Namespace.objects.filter(name=ns1_name)))
+
+            # Delete namespace + repo
+            ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1_name})
+            response = self.client.delete(ns_detail_url)
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            self.assertEqual(0, len(AnsibleRepository.objects.filter(name=repo_name)))
+            self.assertEqual(0, len(AnsibleDistribution.objects.filter(name=repo_name)))
+            self.assertEqual(0, len(Namespace.objects.filter(name=ns1_name)))
+
+    def test_delete_namespace_no_error_if_no_repo_exist(self):
+        ns2_name = "unittestnamespace2"
+        self._create_namespace(ns2_name, groups=[self.pe_group])
+        ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns2_name})
+        with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
+            response = self.client.delete(ns_detail_url)
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
