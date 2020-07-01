@@ -57,12 +57,15 @@ class CollectionMetadataSerializer(Serializer):
     license = serializers.ListField(serializers.CharField())
     tags = serializers.SerializerMethodField()
 
-    def get_tags(self, metadata):
-        return [tag['name'] for tag in metadata['tags']]
+    def get_tags(self, collection_version):
+        # TODO(awcrosby): remove when galaxy_pulp no longer used in _ui
+        if isinstance(collection_version, dict):
+            return [tag['name'] for tag in collection_version['tags']]
+
+        return [tag.name for tag in collection_version.tags.all()]
 
 
 class CollectionVersionBaseSerializer(Serializer):
-    id = serializers.UUIDField()
     namespace = serializers.CharField()
     name = serializers.CharField()
     version = serializers.CharField()
