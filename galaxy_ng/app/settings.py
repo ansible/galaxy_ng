@@ -30,6 +30,10 @@ STATIC_URL = "/static/"
 # created by the initial-data.json data fixture
 GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH = "automation-hub"
 
+# The format for the name of the per account synclist, and the
+# associated repository, distribution, and distribution base_paths
+GALAXY_API_SYNCLIST_NAME_FORMAT = "{account_number}-synclist"
+
 # Require approval for incoming content,
 # currently using a certification flag,
 # later using a staging repository

@@ -1087,13 +1087,13 @@ components:
     SyncListPolicy:
       title: SyncList Policy
       description: >
-        SyncList policy can either add to a Repository (whitelist),
-        or it can exclude from a Repository (blacklist).
+        SyncList policy can either add to a Repository (include),
+        or it can exclude from a Repository (exclude).
       type: string
-      default: 'whitelist'
+      default: 'include'
       enum:
-        - 'blacklist'
-        - 'whitelist'
+        - 'exclude'
+        - 'include'
 
     Tag:
       description: 'Tag'

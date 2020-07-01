@@ -1,71 +1,35 @@
-
 import logging
 import pprint
 
 from django.urls import reverse
 
+
 from rest_framework import status as http_code
 
-from pulp_ansible.app import models as pulp_ansible_models
 
-from galaxy_ng.app.api import permissions
 from galaxy_ng.app.constants import DeploymentMode
-from galaxy_ng.app import models as galaxy_models
-from galaxy_ng.app.models import auth as auth_models
 
-from .base import BaseTestCase
+from .synclist_base import BaseSyncListViewSet
 
 log = logging.getLogger(__name__)
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-class TestUiMySyncListViewSet(BaseTestCase):
-    def setUp(self):
-        super().setUp()
-        self.admin_user = auth_models.User.objects.create(username='admin')
-        self.pe_group = auth_models.Group.objects.create(
-            name=permissions.IsPartnerEngineer.GROUP_NAME)
-        self.admin_user.groups.add(self.pe_group)
-        self.admin_user.save()
-
-        self.synclists_url = reverse('galaxy:api:v3:ui:my-synclists-list')
-        # self.me_url = reverse('galaxy:api:v3:ui:me')
-        self.group1 = auth_models.Group.objects.create(name='test1_group')
-        self.user1 = auth_models.User.objects.create_user(username="test1", password="test1-secret")
-        self.user1.groups.add(self.group1)
-        self.user1.save()
-        self.group1.user_set.add(self.user1)
-        self.group1.save()
-
-        self.user.groups.add(self.group1)
-        self.user.save()
-        log.debug('self.user: %s groups: %s', self.user, self.user.groups)
-        log.debug('self.user1: %s groups: %s', self.user1, self.user1.groups)
-        log.debug('self.group1: %s', self.group1)
-
-    def _create_repository(self, name):
-        repo = pulp_ansible_models.AnsibleRepository.objects.create(name='test_repo1')
-        return repo
-
-    def _create_synclist(
-        self, name, repository, collections=None, namespaces=None,
-        policy=None, users=None, groups=None,
-    ):
-        synclist = galaxy_models.SyncList.objects.create(name=name, repository=repository)
-        synclist.groups.set(groups)
-        return synclist
+# @override_settings(FIXTURE_DIRS=[os.path.join(os.path.dirname(__file__), "fixtures")])
+# class TestUiMySyncListViewSet(BaseTestCase):
+#     fixtures = ['my_synclists.json']
+class TestUiMySyncListViewSet(BaseSyncListViewSet):
+    url_name = 'galaxy:api:v3:ui:my-synclists-list'
 
     def test_my_synclist_create(self):
         repo = self._create_repository('test_post_repo')
         repo.save()
 
-        synclist_name = 'test_my_synclist_post'
         post_data = {
-            'name': synclist_name,
             'repository': repo.pulp_id,
             'collections': [],
             'namespaces': [],
-            'policy': 'whitelist',
+            'policy': 'include',
             'users': [],
             'groups': [],
         }
@@ -80,7 +44,7 @@ class TestUiMySyncListViewSet(BaseTestCase):
 
             self.assertIn('name', response.data)
             self.assertIn('repository', response.data)
-            self.assertEqual(response.data['name'], synclist_name)
+            self.assertEqual(response.data['name'], "test1_group-synclist")
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.post(self.synclists_url, post_data, format='json')
@@ -102,13 +66,11 @@ class TestUiMySyncListViewSet(BaseTestCase):
         ns1.save()
         ns2.save()
 
-        synclist_name = 'test_synclist_patch'
         post_data = {
-            'name': synclist_name,
             'repository': repo.pulp_id,
             'collections': [],
             'namespaces': [ns1_name, ns2_name],
-            'policy': 'whitelist',
+            'policy': 'include',
             'users': [self.user1.username],
             'groups': [self.group1.name],
         }
@@ -125,25 +87,13 @@ class TestUiMySyncListViewSet(BaseTestCase):
 
             self.assertIn('name', response.data)
             self.assertIn('repository', response.data)
-            self.assertEqual(response.data['name'], synclist_name)
-            self.assertEqual(response.data['policy'], "whitelist")
+            self.assertEqual(response.data['name'], "test_my_synclist_patch")
+            self.assertEqual(response.data['policy'], "include")
             self.assertIn(self.user1.username, response.data['users'])
             self.assertIn(self.group1.name, response.data['groups'])
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.patch(synclists_detail_url, post_data, format='json')
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-    def test_my_synclist_list_no_auth(self):
-        self.client.force_authenticate(user=None)
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.get(self.synclists_url)
-            log.debug('response: %s', response)
-
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.get(self.synclists_url)
             self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
     def test_my_synclist_list(self):
@@ -163,7 +113,7 @@ class TestUiMySyncListViewSet(BaseTestCase):
             self.assertEquals(len(data), 1)
             self.assertEquals(data[0]['groups'], [self.group1.name])
             self.assertEquals(data[0]['name'], "test_synclist1")
-            self.assertEquals(data[0]['policy'], "blacklist")
+            self.assertEquals(data[0]['policy'], "exclude")
             self.assertEquals(data[0]['repository'], repo1.pulp_id)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
@@ -209,7 +159,7 @@ class TestUiMySyncListViewSet(BaseTestCase):
             self.assertIn('name', response.data)
             self.assertIn('repository', response.data)
             self.assertEqual(response.data['name'], synclist_name)
-            self.assertEqual(response.data['policy'], "blacklist")
+            self.assertEqual(response.data['policy'], "exclude")
             self.assertEqual(response.data['collections'], [])
             self.assertEqual(response.data['namespaces'], [])
 

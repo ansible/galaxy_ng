@@ -1,0 +1,40 @@
+[
+  {
+    "model": "core.repository",
+    "pk": "be47fc18-87b9-46c0-aa7f-e38183e57e04",
+    "fields": {
+      "pulp_created": "2020-04-16T14:48:18.785Z",
+      "pulp_last_updated": "2020-06-03T18:56:43.178Z",
+      "pulp_type": "ansible.ansible",
+      "name": "automation-hub",
+      "description": "The default repository for automation-hub",
+      "next_version": 33
+    }
+  },
+  {
+    "model": "core.basedistribution",
+    "pk": "56c78e8a-d9e3-41aa-a496-6dc2939c51a9",
+    "fields": {
+      "pulp_created": "2020-04-16T14:50:03.484Z",
+      "pulp_last_updated": "2020-04-16T14:50:03.484Z",
+      "pulp_type": "ansible.ansible",
+      "name": "automation-hub",
+      "base_path": "automation-hub",
+      "content_guard": null,
+      "remote": null
+    }
+  },
+  {
+    "model": "ansible.ansibledistribution",
+    "pk": "56c78e8a-d9e3-41aa-a496-6dc2939c51a9",
+    "fields": {
+      "repository": "be47fc18-87b9-46c0-aa7f-e38183e57e04",
+      "repository_version": null
+    }
+  },
+  {
+    "model": "ansible.ansiblerepository",
+    "pk": "be47fc18-87b9-46c0-aa7f-e38183e57e04",
+    "fields": {}
+  }
+]
