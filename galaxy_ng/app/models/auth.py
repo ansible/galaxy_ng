@@ -35,3 +35,13 @@ class Group(auth_models.Group):
 
     class Meta:
         proxy = True
+
+    def account_number(self):
+        # maybe import galaxy_ng.app.auth.auth.RH_ACCOUNT_SCOPE if not circular
+        scope = 'rh-identity-account'
+        if self.name.startswith(scope):
+            account = self.name.replace(f"{scope}:", '', 1)
+            return account
+
+        # If not a rh-identity-scoped return full group name
+        return self.name
