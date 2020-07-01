@@ -1,20 +1,25 @@
+import logging
+
 from django.conf import settings
 from rest_access_policy import AccessPolicy
 
 from galaxy_ng.app import models
-from galaxy_ng.app import constants
 
 from galaxy_ng.app.access_control.statements import STANDALONE_STATEMENTS, INSIGHTS_STATEMENTS
 
+log = logging.getLogger(__name__)
+
+STATEMENTS = {'insights': INSIGHTS_STATEMENTS,
+              'standalone': STANDALONE_STATEMENTS}
+
 
 class AccessPolicyBase(AccessPolicy):
-    def get_policy_statements(self, request, view):
-        if (settings.GALAXY_DEPLOYMENT_MODE
-                == constants.DeploymentMode.INSIGHTS.value):
+    def _get_statements(self, deployment_mode):
+        return STATEMENTS[deployment_mode]
 
-            return INSIGHTS_STATEMENTS.get(self.NAME, [])
-        else:
-            return STANDALONE_STATEMENTS.get(self.NAME, [])
+    def get_policy_statements(self, request, view):
+        statements = self._get_statements(settings.GALAXY_DEPLOYMENT_MODE)
+        return statements.get(self.NAME, [])
 
     # used by insights access policy
     def has_rh_entitlements(self, request, view, permission):

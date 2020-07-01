@@ -47,6 +47,14 @@ INSIGHTS_STATEMENTS = {
             "condition": [
                 "has_model_perms:ansible.modify_ansible_repo_content",
                 "has_rh_entitlements"]
+        },
+        {
+            "action": "curate",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "has_model_perms:ansible.modify_ansible_repo_content",
+                "has_rh_entitlements"]
         }
     ],
     'CollectionRemoteViewSet': [
@@ -127,6 +135,14 @@ INSIGHTS_STATEMENTS = {
         },
         {
             "action": ["update", "partial_update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "has_model_or_obj_perms:galaxy.change_synclist",
+                "has_rh_entitlements"]
+        },
+        {
+            "action": ["curate"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": [

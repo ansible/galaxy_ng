@@ -42,7 +42,7 @@ class BaseTestCase(APITestCase):
 
     @staticmethod
     def _create_group(scope, name, users=None):
-        group = auth_models.Group.objects.create_identity(scope, name)
+        group, _ = auth_models.Group.objects.get_or_create_identity(scope, name)
         if isinstance(users, auth_models.User):
             users = [users]
         group.user_set.add(*users)

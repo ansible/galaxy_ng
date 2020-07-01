@@ -1,15 +1,11 @@
 import logging
 
-
 from rest_framework import status
 
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import DeploymentMode
 
-
 from .base import BaseTestCase, get_current_ui_url
-# from .x_rh_identity import user_x_rh_identity
-
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +23,8 @@ class TestUiNamespaceViewSet(BaseTestCase):
 
     def test_user_list(self):
         self.client.force_authenticate(user=self.user)
-
+        log.debug('self.client: %s', self.client)
+        log.debug('self.client.__dict__: %s', self.client.__dict__)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(self.user_url)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
