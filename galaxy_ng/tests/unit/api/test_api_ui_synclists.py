@@ -1,11 +1,8 @@
 import logging
 
-from django.test import override_settings
 from django.urls import reverse
 
 from rest_framework import status as http_code
-from rest_framework.response import Response
-from rest_framework.test import APIClient, APITestCase
 
 from pulp_ansible.app import models as pulp_ansible_models
 
@@ -39,7 +36,10 @@ class TestUiSynclistViewSet(BaseTestCase):
         repo = pulp_ansible_models.AnsibleRepository.objects.create(name='test_repo1')
         return repo
 
-    def _create_synclist(self, name, repository, collections=None, namespaces=None, policy=None, users=None, groups=None):
+    def _create_synclist(
+        self, name, repository, collections=None, namespaces=None,
+        policy=None, users=None, groups=None,
+    ):
         synclist = galaxy_models.SyncList.objects.create(name=name, repository=repository)
         return synclist
 
@@ -130,7 +130,7 @@ class TestUiSynclistViewSet(BaseTestCase):
         }
 
         synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
-                                      kwargs={"pk": synclist1.id})
+                                       kwargs={"pk": synclist1.id})
         self.client.force_authenticate(user=self.admin_user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             # should fail with auth now
@@ -150,7 +150,6 @@ class TestUiSynclistViewSet(BaseTestCase):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.patch(synclists_detail_url, post_data, format='json')
             self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
 
     def test_synclist_update_as_non_pe_group_user(self):
         repo = self._create_repository('test_post_repo')
@@ -179,7 +178,7 @@ class TestUiSynclistViewSet(BaseTestCase):
         }
 
         synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
-                                      kwargs={"pk": synclist1.id})
+                                       kwargs={"pk": synclist1.id})
         self.client.force_authenticate(user=self.user1)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
@@ -312,7 +311,6 @@ class TestUiSynclistViewSet(BaseTestCase):
             response = self.client.get(synclists_detail_url)
             self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
-
     def test_synclist_delete_as_pe_group_user(self):
         self.client.force_authenticate(user=self.admin_user)
         repo1 = self._create_repository(name="test_repo1")
@@ -334,7 +332,6 @@ class TestUiSynclistViewSet(BaseTestCase):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.delete(synclists_detail_url)
             self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
 
     def test_synclist_delete_as_non_pe_group_user(self):
         self.client.force_authenticate(user=self.user1)

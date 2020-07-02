@@ -2,7 +2,8 @@ import urllib
 
 from django.test import override_settings
 from django.urls import reverse
-from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection, CollectionVersion
+from pulp_ansible.app.models import (AnsibleDistribution, AnsibleRepository,
+                                     Collection, CollectionVersion)
 
 from galaxy_ng.app import models
 from galaxy_ng.app.constants import DeploymentMode

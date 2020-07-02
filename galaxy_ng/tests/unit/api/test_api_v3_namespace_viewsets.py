@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from galaxy_ng.app.models import auth as auth_models
-from galaxy_ng.app.models import Namespace, NamespaceLink
+from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api import permissions
 from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
 from galaxy_ng.app.constants import DeploymentMode
@@ -15,8 +15,14 @@ from .base import BaseTestCase
 
 log = logging.getLogger(__name__)
 
-# /api/automation-hub/v3/namespaces/	galaxy_ng.app.api.v3.viewsets.namespace.NamespaceViewSet	galaxy:api:v3:namespaces-list
-# /api/automation-hub/v3/namespaces/<name>/	galaxy_ng.app.api.v3.viewsets.namespace.NamespaceViewSet	galaxy:api:v3:namespaces-detail
+# /api/automation-hub/v3/namespaces/
+# galaxy_ng.app.api.v3.viewsets.namespace.NamespaceViewSet
+# galaxy:api:v3:namespaces-list
+
+# /api/automation-hub/v3/namespaces/<name>/
+# galaxy_ng.app.api.v3.viewsets.namespace.NamespaceViewSet
+# galaxy:api:v3:namespaces-detail
+
 
 class TestV3NamespaceViewSet(BaseTestCase):
     deployment_mode = DeploymentMode.STANDALONE.value
@@ -44,8 +50,8 @@ class TestV3NamespaceViewSet(BaseTestCase):
         self.client.force_authenticate(user=self.admin_user)
         ns1_name = "unittestnamespace1"
         ns2_name = "unittestnamespace2"
-        ns1 = self._create_namespace(ns1_name, groups=[self.pe_group])
-        ns2 = self._create_namespace(ns2_name, groups=[self.pe_group])
+        self._create_namespace(ns1_name, groups=[self.pe_group])
+        self._create_namespace(ns2_name, groups=[self.pe_group])
         with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
             response = self.client.get(self.ns_url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -87,4 +93,3 @@ class TestV3NamespaceViewSet(BaseTestCase):
             self.assertIn("description", data)
 
             self.assertEqual(len(data['groups']), self.admin_user.groups.all().count())
-

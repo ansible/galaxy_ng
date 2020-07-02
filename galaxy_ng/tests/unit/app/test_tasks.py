@@ -4,7 +4,7 @@ import tempfile
 from unittest import mock
 
 from django.test import TestCase
-from pulpcore.plugin.models import Artifact, Content, ContentArtifact
+from pulpcore.plugin.models import Artifact, ContentArtifact
 from pulp_ansible.app.models import Collection, CollectionVersion
 
 from galaxy_ng.app.tasks import import_and_auto_approve
