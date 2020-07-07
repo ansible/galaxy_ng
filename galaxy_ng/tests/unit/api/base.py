@@ -1,15 +1,25 @@
 from unittest import mock
 
 from django.conf import settings
+from django.urls import reverse
+
 from rest_framework.test import APIClient, APITestCase
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.models import auth as auth_models
 from guardian.shortcuts import assign_perm
+from galaxy_ng.app import constants
 
 
 API_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
+
+
+def get_current_ui_url(namespace, **kwargs):
+    return reverse('galaxy:api:ui:{version}:{namespace}'.format(
+        version=constants.UIAPIVersions.CURRENT.value,
+        namespace=namespace
+    ), **kwargs)
 
 
 class BaseTestCase(APITestCase):

@@ -1,17 +1,15 @@
 from django.urls import path, include
 from rest_framework import routers
 
-from galaxy_ng.app import constants
-
 from . import views
 from . import viewsets
 
+# TODO: remove this file once the UI has been updated to use the new versioned URLs
 
 router = routers.SimpleRouter()
 # TODO: Replace with a RedirectView
 router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
 router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='my-namespaces')
-router.register('my-synclists', viewsets.MySyncListViewSet, basename='my-synclists')
 router.register('collections', viewsets.CollectionViewSet, basename='collections')
 router.register('users', viewsets.UserViewSet, basename='users')
 router.register('collection-versions',
@@ -29,7 +27,8 @@ auth_views = [
     path("logout/", views.LogoutView.as_view(), name="auth-logout"),
 ]
 
-paths = [
+app_name = "old_ui"
+urlpatterns = [
     path('', include(router.urls)),
 
     path('auth/', include(auth_views)),
@@ -42,14 +41,3 @@ paths = [
         name='me'
     )
 ]
-app_name = "ui"
-
-urlpatterns = [
-    path('', viewsets.APIRootView.as_view({'get': 'list'}))
-]
-
-for version in constants.UIAPIVersions.ALL.value:
-    urlpatterns.append(path(
-        constants.UIAPIVersions.ALL.value[version],
-        include((paths, app_name), namespace=version)
-    ))

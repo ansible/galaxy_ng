@@ -11,13 +11,15 @@ from rest_framework.test import APIClient, APITestCase
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app.models import auth as auth_models
 
+from .base import get_current_ui_url
+
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
 class TestTokenViewStandalone(APITestCase):
     def setUp(self):
         super().setUp()
         self.token_url = reverse("galaxy:api:v3:auth-token")
-        self.me_url = reverse("galaxy:api:v3:ui:me")
+        self.me_url = get_current_ui_url("me")
 
         self.user = auth_models.User.objects.create_user(username="test", password="test-secret")
 

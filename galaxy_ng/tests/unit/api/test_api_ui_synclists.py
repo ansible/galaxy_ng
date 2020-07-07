@@ -1,7 +1,5 @@
 import logging
 
-from django.urls import reverse
-
 from rest_framework import status as http_code
 
 from pulp_ansible.app import models as pulp_ansible_models
@@ -10,7 +8,7 @@ from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app import models as galaxy_models
 from galaxy_ng.app.models import auth as auth_models
 
-from .base import BaseTestCase
+from .base import BaseTestCase, get_current_ui_url
 
 log = logging.getLogger(__name__)
 
@@ -29,8 +27,7 @@ class TestUiSynclistViewSet(BaseTestCase):
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
-        self.synclists_url = reverse('galaxy:api:v3:ui:synclists-list')
-        # self.me_url = reverse('galaxy:api:v3:ui:me')
+        self.synclists_url = get_current_ui_url('synclists-list')
         self.group1 = auth_models.Group.objects.create(name='test1_group')
         self.user1 = auth_models.User.objects.create_user(username="test1", password="test1-secret")
         self.user1.groups.add(self.group1)
@@ -139,8 +136,8 @@ class TestUiSynclistViewSet(BaseTestCase):
             }],
         }
 
-        synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url('synclists-detail',
+                                      kwargs={"pk": synclist1.id})
         self.client.force_authenticate(user=self.admin_user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             # should fail with auth now
@@ -185,8 +182,8 @@ class TestUiSynclistViewSet(BaseTestCase):
             'groups': [self.group1.name],
         }
 
-        synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url('synclists-detail',
+                                      kwargs={"pk": synclist1.id})
         self.client.force_authenticate(user=self.user1)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
@@ -275,7 +272,7 @@ class TestUiSynclistViewSet(BaseTestCase):
         synclist1 = self._create_synclist(name=synclist_name,
                                           repository=repo1)
         synclist1.save()
-        synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
+        synclists_detail_url = get_current_ui_url('synclists-detail',
                                        kwargs={"pk": synclist1.id})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
@@ -307,7 +304,7 @@ class TestUiSynclistViewSet(BaseTestCase):
                                           repository=repo1)
         synclist1.save()
 
-        synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
+        synclists_detail_url = get_current_ui_url('synclists-detail',
                                        kwargs={"pk": synclist1.id})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
@@ -326,7 +323,7 @@ class TestUiSynclistViewSet(BaseTestCase):
         synclist1 = self._create_synclist(name=synclist_name,
                                           repository=repo1)
         synclist1.save()
-        synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
+        synclists_detail_url = get_current_ui_url('synclists-detail',
                                        kwargs={"pk": synclist1.id})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
@@ -348,7 +345,7 @@ class TestUiSynclistViewSet(BaseTestCase):
         synclist1 = self._create_synclist(name=synclist_name,
                                           repository=repo1)
         synclist1.save()
-        synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
+        synclists_detail_url = get_current_ui_url('synclists-detail',
                                        kwargs={"pk": synclist1.id})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):

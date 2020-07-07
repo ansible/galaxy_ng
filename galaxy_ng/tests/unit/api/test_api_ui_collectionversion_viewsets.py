@@ -1,20 +1,19 @@
 import urllib
 
 from django.test import override_settings
-from django.urls import reverse
 from pulp_ansible.app.models import (AnsibleDistribution, AnsibleRepository,
                                      Collection, CollectionVersion)
 
 from galaxy_ng.app import models
 from galaxy_ng.app.constants import DeploymentMode
-from .base import BaseTestCase
+from .base import BaseTestCase, get_current_ui_url
 
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
 class TestUiCollectionVersionViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.versions_url = reverse('galaxy:api:v3:ui:collection-versions-list')
+        self.versions_url = get_current_ui_url('collection-versions-list')
         self.namespace = models.Namespace.objects.create(name='my_namespace')
         self.collection = Collection.objects.create(namespace=self.namespace, name='my_collection')
         self._create_version_in_repo('1.1.1', self._create_repo(name='repo1'))

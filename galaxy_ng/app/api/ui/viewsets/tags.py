@@ -6,10 +6,13 @@ from galaxy_ng.app.common import pulp
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
 
+from galaxy_ng.app.api.ui import versioning
+
 
 class TagsViewSet(api_base.GenericViewSet):
     serializer_class = TagSerializer
     permission_classes = [access_policy.TagsAccessPolicy]
+    versioning_class = versioning.UIVersioning
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)
