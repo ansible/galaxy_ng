@@ -13,7 +13,9 @@ class TestCreateGroupCommand(TestCase):
         userb.save()
 
     def test_command_output(self):
-        with self.assertRaisesMessage(CommandError, 'Error: the following arguments are required: groups'):
+        with self.assertRaisesMessage(
+            CommandError, 'Error: the following arguments are required: groups'
+        ):
             call_command('create-group')
 
     def test_add_group(self):
