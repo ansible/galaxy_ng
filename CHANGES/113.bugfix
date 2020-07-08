@@ -1,1 +1,0 @@
-Fixed collection version detail endpoint returning invalid format of a `collection` field.

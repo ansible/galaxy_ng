@@ -1,1 +1,0 @@
-Fix CollectionVersionViewSet so it filters based on "certification" status.
