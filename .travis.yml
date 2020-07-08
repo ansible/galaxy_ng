@@ -42,7 +42,7 @@ jobs:
       - docker logs pulp
     deploy:
       provider: pypi
-      distributions: "bdist_wheel"
+      distributions: "sdist bdist_wheel"
       user: "__token__"
       skip_cleanup: true
       password:

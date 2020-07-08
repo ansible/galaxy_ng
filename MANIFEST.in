@@ -1,1 +1,3 @@
 include galaxy_ng/app/webserver_snippets/*
+
+recursive-include galaxy_ng/app/static/ *

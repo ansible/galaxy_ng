@@ -6,32 +6,52 @@ import tarfile
 import urllib.request
 from distutils import log
 
+from setuptools import find_packages, setup, Command
 from setuptools.command.build_py import build_py as _BuildPyCommand
-from setuptools import find_packages, setup
+from setuptools.command.sdist import sdist as _SDistCommand
 
 from galaxy_ng import __version__
 
 
-class BuildPyCommand(_BuildPyCommand):
-    """Custom build command."""
-
+class PrepareStaticCommand(Command):
     UI_DOWNLOAD_URL = (
         "https://github.com/ansible/ansible-hub-ui/releases"
         "/latest/download/automation-hub-ui-dist.tar.gz"
     )
+    TARGET_DIR = "galaxy_ng/app/static/galaxy_ng"
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
 
     def run(self):
-        target_dir = os.path.join(self.build_lib, "galaxy_ng/app/static/galaxy_ng")
+        if os.path.exists(self.TARGET_DIR):
+            log.warn(f"Static directory {self.TARGET_DIR} already exists, skipping. ")
+            return
 
         with tempfile.NamedTemporaryFile() as download_file:
-            log.info(f"Downloading UI distribution {download_file.name}")
+            log.info(f"Downloading UI distribution to temporary file: {download_file.name}")
             urllib.request.urlretrieve(self.UI_DOWNLOAD_URL, filename=download_file.name)
 
-            log.info("Extracting UI static files")
+            log.info(f"Extracting UI static files to {self.TARGET_DIR}")
             with tarfile.open(fileobj=download_file) as tfp:
-                tfp.extractall(target_dir)
+                tfp.extractall(self.TARGET_DIR)
 
-        super().run()
+
+class SDistCommand(_SDistCommand):
+    def run(self):
+        self.run_command('prepare_static')
+        return super().run()
+
+
+class BuildPyCommand(_BuildPyCommand):
+    def run(self):
+        self.run_command('prepare_static')
+        return super().run()
 
 
 # NOTE(cutwater): Because bindings are statically generated, requirements list
@@ -68,5 +88,9 @@ setup(
         "Programming Language :: Python :: 3.7",
     ),
     entry_points={"pulpcore.plugin": ["galaxy_ng = galaxy_ng:default_app_config"]},
-    cmdclass={"build_py": BuildPyCommand},
+    cmdclass={
+        "prepare_static": PrepareStaticCommand,
+        "build_py": BuildPyCommand,
+        "sdist": SDistCommand,
+    },
 )
