@@ -13,7 +13,7 @@ Changelog
 
 .. towncrier release notes start
 
-4.2.0a9 (2020-07-07)
+4.2.0a9 (2020-07-08)
 ====================
 
 Features
@@ -39,6 +39,8 @@ Features
   `#187 <https://github.com/ansible/galaxy_ng/issues/187>`_
 - Enable the UI to be run as a container along with the rest of the development environment
   `#217 <https://github.com/ansible/galaxy_ng/issues/217>`_
+- Fix bug preventing links from being modified on namespaces.
+  `#277 <https://github.com/ansible/galaxy_ng/issues/277>`_
 
 
 Bugfixes
@@ -67,7 +69,7 @@ Bugfixes
 Misc
 ----
 
-- `#118 <https://github.com/ansible/galaxy_ng/issues/118>`_, `#130 <https://github.com/ansible/galaxy_ng/issues/130>`_, `#131 <https://github.com/ansible/galaxy_ng/issues/131>`_, `#205 <https://github.com/ansible/galaxy_ng/issues/205>`_, `#209 <https://github.com/ansible/galaxy_ng/issues/209>`_
+- `#118 <https://github.com/ansible/galaxy_ng/issues/118>`_, `#130 <https://github.com/ansible/galaxy_ng/issues/130>`_, `#131 <https://github.com/ansible/galaxy_ng/issues/131>`_, `#205 <https://github.com/ansible/galaxy_ng/issues/205>`_, `#209 <https://github.com/ansible/galaxy_ng/issues/209>`_, `#276 <https://github.com/ansible/galaxy_ng/issues/276>`_
 
 
 ----
