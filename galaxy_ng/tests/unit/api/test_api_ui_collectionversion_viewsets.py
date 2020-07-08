@@ -70,11 +70,13 @@ class TestUiCollectionVersionViewSet(BaseTestCase):
         self.assertEqual(response.data['meta']['count'], 1)
         self.assertEqual(response.data['data'][0]['version'], '1.1.2')
 
-    def test_sort(self):
+    def test_sort_and_repo_list(self):
         url = self._versions_url_with_params({'sort': 'pulp_created'})
         response = self.client.get(url)
         self.assertEqual(response.data['data'][0]['version'], '1.1.1')
+        self.assertEqual(response.data['data'][0]['repository_list'], ['repo1'])
 
         url = self._versions_url_with_params({'sort': '-pulp_created'})
         response = self.client.get(url)
         self.assertEqual(response.data['data'][0]['version'], '1.1.2')
+        self.assertEqual(response.data['data'][0]['repository_list'], ['repo2'])
