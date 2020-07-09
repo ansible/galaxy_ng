@@ -281,6 +281,12 @@ class CollectionVersionMoveViewSet(ViewSet):
         add_task = self._add_content(collection_version, dest_repo)
         remove_task = self._remove_content(collection_version, src_repo)
 
+        if (
+            settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value and
+            dest_repo == AnsibleRepository.objects.get(name='automation-hub')  # use constant or param
+        ):
+            dispatch_copy_to_org_repos(collection_version)
+
         return Response(
             data={
                 'add_task_id': add_task.id,
