@@ -28,8 +28,8 @@ def remove_content_from_repository(collection_version_pk, repository_pk):
         new_version.remove_content(qs)
 
 
-def dispatch_copy_to_org_repos(collection_version_pk):
-    """Starts tasks to copy CollectionVersion to org repos.
+def dispatch_tasks_to_org_repos(collection_version_pk, action):
+    """Starts tasks to add/remove CollectionVersion to/from org repos.
     Method to start tasks, not a task itself."""
 
     # get all org distros
@@ -44,11 +44,17 @@ def dispatch_copy_to_org_repos(collection_version_pk):
     except KeyError:
         pass
 
-    # filter out repos with this Collection in their denylist
-    # TODO ^
+    if action == 'remove':
+        for repo in org_repos:
+            locks = [repo]
+            task_args = (collection_version_pk, repo.pk)
+            enqueue_with_reservation(remove_content_from_repository, locks, args=task_args)
+    elif action == 'add':
+        # filter out repos with this Collection in their denylist
+        # TODO ^
 
-    # dispatch copy tasks
-    for repo in org_repos:
-        locks = [repo]
-        task_args = (collection_version_pk, repo.pk)
-        enqueue_with_reservation(add_content_to_repository, locks, args=task_args)
+        # dispatch copy tasks
+        for repo in org_repos:
+            locks = [repo]
+            task_args = (collection_version_pk, repo.pk)
+            enqueue_with_reservation(add_content_to_repository, locks, args=task_args)

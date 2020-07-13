@@ -285,7 +285,13 @@ class CollectionVersionMoveViewSet(ViewSet):
             settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value and
             dest_repo == AnsibleRepository.objects.get(name='automation-hub')  # use constant or param
         ):
-            dispatch_copy_to_org_repos(collection_version)
+            dispatch_tasks_to_org_repos(collection_version, action='add')
+
+        if (
+            settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value and
+            src_repo == AnsibleRepository.objects.get(name='automation-hub')  # use constant or param
+        ):
+            dispatch_tasks_to_org_repos(collection_version, action='remove')
 
         return Response(
             data={
