@@ -1,5 +1,6 @@
 import logging
 
+from pulp_ansible.app.models import CollectionVersion
 from rest_framework import serializers
 
 from .base import Serializer
@@ -70,18 +71,31 @@ class CollectionVersionBaseSerializer(Serializer):
     name = serializers.CharField()
     version = serializers.CharField()
     certification = serializers.ChoiceField(
-        ['certified', 'not_certified', 'needs_review'])
+        ['certified', 'not_certified', 'needs_review'],
+        required=True
+    )
+    metadata = CollectionMetadataSerializer(source='*')
+    contents = serializers.ListField(ContentSerializer())
 
     created_at = serializers.DateTimeField(source='pulp_created')
 
 
 class CollectionVersionSerializer(CollectionVersionBaseSerializer):
-    metadata = CollectionMetadataSerializer(source='*')
-    contents = serializers.ListField(ContentSerializer())
-    certification = serializers.ChoiceField(
-        ['certified', 'not_certified', 'needs_review'],
-        required=True
-    )
+    repository_list = serializers.SerializerMethodField()
+
+    def get_repository_list(self, collection_version):
+        """Repository list where content is in the latest RepositoryVersion."""
+
+        # get all repos where content exists in a RepositoryVersion
+        content = collection_version.content_ptr
+        all_repos = content.repositories.all().distinct()
+
+        qs = CollectionVersion.objects.filter(pk=collection_version.pk)
+        cv_in_repo_latest_version = []
+        for repo in all_repos:
+            if qs.filter(pk__in=repo.latest_version().content):
+                cv_in_repo_latest_version.append(repo.name)
+        return cv_in_repo_latest_version
 
 
 class CertificationSerializer(Serializer):
@@ -89,7 +103,7 @@ class CertificationSerializer(Serializer):
         ['certified', 'not_certified', 'needs_review'])
 
 
-class CollectionVersionDetailSerializer(CollectionVersionSerializer):
+class CollectionVersionDetailSerializer(CollectionVersionBaseSerializer):
     docs_blob = serializers.JSONField()
 
 
@@ -98,7 +112,7 @@ class _CollectionSerializer(Serializer):
     namespace = serializers.SerializerMethodField()
     name = serializers.CharField()
     download_count = serializers.IntegerField(default=0)
-    latest_version = CollectionVersionSerializer(source='*')
+    latest_version = CollectionVersionBaseSerializer(source='*')
     deprecated = serializers.BooleanField()
 
     def _get_namespace(self, obj):
