@@ -13,6 +13,25 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0a10 (2020-07-15)
+=====================
+
+Features
+--------
+
+- Release packages in sdist and wheel formats. Static assets are download and included automatically during package build process.
+  `#275 <https://github.com/ansible/galaxy_ng/issues/275>`_
+
+
+Misc
+----
+
+- `#288 <https://github.com/ansible/galaxy_ng/issues/288>`_
+
+
+----
+
+
 4.2.0a9 (2020-07-08)
 ====================
 
