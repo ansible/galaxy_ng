@@ -19,7 +19,7 @@ Release 4.2.0b (August 2020)
 ``````````````````````````````
 * Surface content from multiple repositories (`#154 <https://github.com/ansible/galaxy_ng/issues/154>`_)
 * Support RPM based installation (`#145 <https://github.com/ansible/galaxy_ng/issues/145>`_)
-* User permission model (RBAC) (`#21 <https://github.com/ansible/galaxy_ng/issues/21>`_)
+* User permission model (RBAC) (`#302 <https://github.com/ansible/galaxy_ng/issues/302>`_)
 * Surface collection dependency metadata (`#23 <https://github.com/ansible/galaxy_ng/issues/23>`_)
 * Sync content from c.rh.c and community (`#17 <https://github.com/ansible/galaxy_ng/issues/17>`_)
 * Configure and manage content sync (`#22 <https://github.com/ansible/galaxy_ng/issues/22>`_)
