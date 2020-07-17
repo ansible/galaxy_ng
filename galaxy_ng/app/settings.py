@@ -11,6 +11,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # END: Pulp standard middleware
     'django_prometheus.middleware.PrometheusAfterMiddleware',
+    'django_currentuser.middleware.ThreadLocalUserMiddleware',
 ]
 
 INSTALLED_APPS = [
@@ -46,9 +47,6 @@ GALAXY_PAGINATION_CLASS = "galaxy_ng.app.api.pagination.LimitOffsetPagination"
 GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
-]
-GALAXY_PERMISSION_CLASSES = [
-    'rest_framework.permissions.IsAuthenticated',
 ]
 # Settings for insights mode
 # GALAXY_AUTHENTICATION_CLASSES = ["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]

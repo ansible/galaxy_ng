@@ -20,14 +20,13 @@ from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
 
 from galaxy_ng.app.api.base import (
-    GALAXY_PERMISSION_CLASSES,
     APIView,
     ViewSet,
     LocalSettingsMixin,
 )
 
 from galaxy_ng.app import models
-from galaxy_ng.app.api import permissions
+from galaxy_ng.app.access_control import access_policy
 
 from galaxy_ng.app.api.v3.serializers import (
     CollectionSerializer,
@@ -72,9 +71,7 @@ class ViewNamespaceSerializerContextMixin:
 class CollectionViewSet(LocalSettingsMixin,
                         ViewNamespaceSerializerContextMixin,
                         pulp_ansible_views.CollectionViewSet):
-    permission_classes = GALAXY_PERMISSION_CLASSES + [
-        permissions.IsNamespaceOwnerOrPartnerEngineer,
-    ]
+    permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
 
 
@@ -82,6 +79,7 @@ class CollectionVersionViewSet(LocalSettingsMixin,
                                ViewNamespaceSerializerContextMixin,
                                pulp_ansible_views.CollectionVersionViewSet):
     serializer_class = CollectionVersionSerializer
+    permission_classes = [access_policy.CollectionAccessPolicy]
 
     # FIXME(akl): This can be removed when we move to multiple repos for managing "certifiaction"
     def get_queryset(self):
@@ -131,13 +129,11 @@ class CollectionVersionViewSet(LocalSettingsMixin,
 
 
 class CollectionImportViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionImportViewSet):
-    pass
+    permission_classes = [access_policy.CollectionAccessPolicy]
 
 
 class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionUploadViewSet):
-    permission_classes = GALAXY_PERMISSION_CLASSES + [
-        permissions.IsNamespaceOwner
-    ]
+    permission_classes = [access_policy.CollectionAccessPolicy]
     parser_classes = [AnsibleGalaxy29MultiPartParser]
 
     def _dispatch_import_collection_task(self, temp_file_pk, repository=None, **kwargs):
@@ -156,12 +152,15 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
 
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
     # the import task and the collection artifact details
-    def create(self, request, path):
 
+    def _get_data(self, request):
         serializer = CollectionUploadSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
-        data = serializer.validated_data
+        return serializer.validated_data
+
+    def create(self, request, path):
+        data = self._get_data(request)
         filename = data['filename']
 
         try:
@@ -209,6 +208,8 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
 
 
 class CollectionArtifactDownloadView(APIView):
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
@@ -243,9 +244,7 @@ class CollectionArtifactDownloadView(APIView):
 
 
 class CollectionVersionMoveViewSet(ViewSet):
-    permission_classes = GALAXY_PERMISSION_CLASSES + [
-        permissions.IsPartnerEngineer
-    ]
+    permission_classes = [access_policy.CollectionAccessPolicy]
 
     def move_content(self, request, *args, **kwargs):
         """Remove content from source repo and add to destination repo.

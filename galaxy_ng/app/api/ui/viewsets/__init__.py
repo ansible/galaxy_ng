@@ -8,6 +8,7 @@ from .my_synclist import MySyncListViewSet
 from .tags import TagsViewSet
 from .user import UserViewSet, CurrentUserViewSet
 from .synclist import SyncListViewSet
+from .group import GroupViewSet
 
 __all__ = (
     'NamespaceViewSet',
@@ -20,4 +21,5 @@ __all__ = (
     'CurrentUserViewSet',
     'UserViewSet',
     'SyncListViewSet',
+    'GroupViewSet'
 )

@@ -1,19 +1,24 @@
 from django.db import models
 
+from pulpcore.app.models import AutoDeleteObjPermsMixin
 from pulp_ansible.app.models import AnsibleRepository, Collection
+from django_lifecycle import LifecycleModel
 
-from . import auth as auth_models
+from galaxy_ng.app.access_control.mixins import GroupModelPermissionsMixin
+
 from . import namespace as namespace_models
 
 
-class SyncList(models.Model):
+class SyncList(LifecycleModel, GroupModelPermissionsMixin, AutoDeleteObjPermsMixin):
     POLICY_CHOICES = [
         ("blacklist", "blacklist"),
         ("whitelist", "whitelist"),
     ]
 
-    groups = models.ManyToManyField(auth_models.Group, related_name="synclists")
-    users = models.ManyToManyField(auth_models.User, related_name="synclists")
+    OWNER_PERMISSIONS = [
+        'galaxy.view_synclist',
+        'galaxy.update_synclist',
+    ]
 
     name = models.CharField(max_length=64, unique=True, blank=False)
     policy = models.CharField(max_length=64, choices=POLICY_CHOICES, default="blacklist")

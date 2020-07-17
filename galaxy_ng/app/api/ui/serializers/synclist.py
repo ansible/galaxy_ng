@@ -7,8 +7,8 @@ from rest_framework import serializers
 
 from pulp_ansible.app.models import Collection
 
-from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app import models
+from galaxy_ng.app.access_control.fields import GroupPermissionField
 
 
 log = logging.getLogger(__name__)
@@ -26,40 +26,13 @@ class SyncListSerializer(serializers.ModelSerializer):
 
     collections = SyncListCollectionSummarySerializer(many=True)
 
-    groups = serializers.SlugRelatedField(
-        many=True, slug_field="name", queryset=models.Group.objects.all()
-    )
-
-    users = serializers.SlugRelatedField(
-        many=True, slug_field="username", queryset=models.User.objects.all()
-    )
-
-    def _sanitize_groups(self, group_names):
-        """Ensure that the admin/pe group is in the list of groups"""
-        groups = [auth_models.RH_PARTNER_ENGINEER_GROUP]
-        for group_name in group_names:
-            if group_name == auth_models.RH_PARTNER_ENGINEER_GROUP:
-                continue
-            group = auth_models.Group.objects.get(name=group_name)
-            groups.append(group.name)
-
-        return groups
-
-    def to_internal_value(self, data):
-        groups = data.get('groups')
-        data['groups'] = self._sanitize_groups(groups)
-        return super().to_internal_value(data)
+    groups = GroupPermissionField()
 
     @transaction.atomic
     def create(self, validated_data):
         collections_data = validated_data.pop("collections")
 
         namespaces_data = validated_data.pop("namespaces")
-
-        users_data = validated_data.pop("users")
-
-        # All synclists are co-owned by the admin group
-        groups_data = validated_data.pop("groups")
 
         instance = models.SyncList.objects.create(**validated_data)
 
@@ -80,9 +53,6 @@ class SyncListSerializer(serializers.ModelSerializer):
 
         instance.namespaces.add(*namespaces_data)
 
-        instance.groups.set(groups_data)
-        instance.users.set(users_data)
-
         return instance
 
     @transaction.atomic
@@ -90,15 +60,6 @@ class SyncListSerializer(serializers.ModelSerializer):
         collections_data = validated_data.get("collections")
 
         namespaces_data = validated_data.get("namespaces")
-
-        users_data = validated_data.get("users")
-
-        if users_data:
-            instance.users.set(users_data)
-
-        groups_data = validated_data.get("groups")
-        if groups_data:
-            instance.groups.set(groups_data)
 
         instance.policy = validated_data.get("policy", instance.policy)
 
@@ -116,10 +77,9 @@ class SyncListSerializer(serializers.ModelSerializer):
                                   name=collection_data["name"],
                                   synclist=instance.name))
         instance.collections.set(new_collections)
-
         instance.namespaces.set(namespaces_data)
-
         instance.save()
+        instance.groups = validated_data.get('groups')
 
         return instance
 
@@ -132,6 +92,5 @@ class SyncListSerializer(serializers.ModelSerializer):
             "repository",
             "collections",
             "namespaces",
-            "users",
             "groups",
         ]

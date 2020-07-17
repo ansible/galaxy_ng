@@ -4,10 +4,12 @@ from pulp_ansible.app.serializers import TagSerializer
 
 from galaxy_ng.app.common import pulp
 from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.access_control import access_policy
 
 
 class TagsViewSet(api_base.GenericViewSet):
     serializer_class = TagSerializer
+    permission_classes = [access_policy.TagsAccessPolicy]
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)

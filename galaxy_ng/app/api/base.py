@@ -14,10 +14,6 @@ GALAXY_AUTHENTICATION_CLASSES = perform_import(
     settings.GALAXY_AUTHENTICATION_CLASSES,
     'GALAXY_AUTHENTICATION_CLASSES'
 )
-GALAXY_PERMISSION_CLASSES = perform_import(
-    settings.GALAXY_PERMISSION_CLASSES,
-    'GALAXY_PERMISSION_CLASSES',
-)
 GALAXY_PAGINATION_CLASS = perform_import(
     settings.GALAXY_PAGINATION_CLASS,
     'GALAXY_PAGINATION_CLASS'
@@ -26,7 +22,6 @@ GALAXY_PAGINATION_CLASS = perform_import(
 
 class LocalSettingsMixin:
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
-    permission_classes = GALAXY_PERMISSION_CLASSES
     pagination_class = GALAXY_PAGINATION_CLASS
 
     def get_exception_handler(self):

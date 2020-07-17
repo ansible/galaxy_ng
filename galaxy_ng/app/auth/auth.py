@@ -1,11 +1,9 @@
 import base64
 import json
 
-from django.conf import settings
 from django.db import transaction
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import BasePermission
 
 from galaxy_ng.app.models.auth import Group, User
 
@@ -78,20 +76,3 @@ class RHIdentityAuthentication(BaseAuthentication):
             return json.loads(json_string)
         except ValueError:
             raise AuthenticationFailed
-
-
-class RHEntitlementRequired(BasePermission):
-    """
-    Allows access if user has RedHat entitlement specified
-    in RH_ENTITLEMENT_REQUIRED settings parameter.
-    """
-
-    def has_permission(self, request, view):
-        if not isinstance(request.auth, dict):
-            return False
-        header = request.auth.get('rh_identity')
-        if not header:
-            return False
-        entitlements = header.get('entitlements', {})
-        entitlement = entitlements.get(settings.RH_ENTITLEMENT_REQUIRED, {})
-        return entitlement.get('is_entitled', False)

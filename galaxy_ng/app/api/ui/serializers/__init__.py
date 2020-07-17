@@ -14,15 +14,13 @@ from .imports import (
     ImportTaskListSerializer,
 )
 
-from .namespace import (
-    NamespaceSerializer,
-    NamespaceSummarySerializer,
-    NamespaceUpdateSerializer,
-)
-
 from .user import (
     UserSerializer,
-    CurrentUserSerializer
+    CurrentUserSerializer,
+)
+
+from .group import (
+    GroupSerializer
 )
 
 from .synclist import (
@@ -43,14 +41,11 @@ __all__ = (
     # imports
     'ImportTaskDetailSerializer',
     'ImportTaskListSerializer',
-    # namespace
-    'NamespaceSerializer',
-    'NamespaceSummarySerializer',
-    'NamespaceUpdateSerializer',
     # current_user
     'CurrentUserSerializer',
     # user
     'UserSerializer',
+    'GroupSerializer'
     # synclists
     'SyncListSerializer',
     'SyncListCollectionSummarySerializer',

@@ -4,8 +4,9 @@ from django.conf import settings
 from rest_framework.test import APIClient, APITestCase
 
 from galaxy_ng.app import models
-from galaxy_ng.app.auth import auth
+from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.models import auth as auth_models
+from guardian.shortcuts import assign_perm
 
 
 API_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
@@ -20,7 +21,7 @@ class BaseTestCase(APITestCase):
 
         # Permission mock
         patcher = mock.patch.object(
-            auth.RHEntitlementRequired, "has_permission", return_value=True
+            access_policy.AccessPolicyBase, "has_rh_entitlements", return_value=True
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -42,5 +43,41 @@ class BaseTestCase(APITestCase):
         namespace = models.Namespace.objects.create(name=name)
         if isinstance(groups, auth_models.Group):
             groups = [groups]
-        namespace.groups.add(*groups)
+
+        groups_to_add = {}
+        for group in groups:
+            groups_to_add[group] = ['galaxy.upload_to_namespace', 'galaxy.change_namespace']
+        namespace.groups = groups_to_add
         return namespace
+
+    @staticmethod
+    def _create_partner_engineer_group():
+        pe_perms = [
+            # namespaces
+            'galaxy.add_namespace',
+            'galaxy.change_namespace',
+            'galaxy.upload_to_namespace',
+
+            # collections
+            # TODO: add permissions for this
+            # 'ansible.move_collection',
+
+            # users
+            'galaxy.view_user',
+            'galaxy.delete_user',
+            'galaxy.add_user',
+            'galaxy.change_user',
+
+            # synclists
+            'galaxy.delete_synclist',
+            'galaxy.change_synclist',
+            'galaxy.view_synclist',
+            'galaxy.add_synclist',
+        ]
+        pe_group = auth_models.Group.objects.create(
+            name='partner-engineers')
+
+        for perm in pe_perms:
+            assign_perm(perm, pe_group)
+
+        return pe_group
