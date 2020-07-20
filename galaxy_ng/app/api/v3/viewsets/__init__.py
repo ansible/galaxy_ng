@@ -11,6 +11,10 @@ from .namespace import (
     NamespaceViewSet,
 )
 
+from .task import (
+    TaskViewSet,
+)
+
 
 __all__ = (
     'CollectionArtifactDownloadView',
@@ -20,4 +24,5 @@ __all__ = (
     'CollectionVersionViewSet',
     'CollectionVersionMoveViewSet',
     'NamespaceViewSet',
+    'TaskViewSet',
 )
