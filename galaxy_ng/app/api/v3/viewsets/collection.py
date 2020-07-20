@@ -16,7 +16,6 @@ from rest_framework.exceptions import APIException, NotFound
 
 from pulpcore.plugin.models import ContentArtifact, Task
 from pulpcore.plugin.tasking import enqueue_with_reservation
-from pulp_ansible.app.tasks.collections import import_collection
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
 
@@ -39,6 +38,7 @@ from galaxy_ng.app.api.v3.serializers import (
 
 from galaxy_ng.app.common import metrics
 from galaxy_ng.app.tasks import (
+    import_and_move_to_staging,
     import_and_auto_approve,
     add_content_to_repository,
     remove_content_from_repository,
@@ -149,7 +149,7 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
             kwargs["repository_pk"] = repository.pk
 
         if settings.GALAXY_REQUIRE_CONTENT_APPROVAL == 'True':
-            return enqueue_with_reservation(import_collection, locks, kwargs=kwargs)
+            return enqueue_with_reservation(import_and_move_to_staging, locks, kwargs=kwargs)
         return enqueue_with_reservation(import_and_auto_approve, locks, kwargs=kwargs)
 
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the

@@ -30,6 +30,9 @@ STATIC_URL = "/static/"
 # created by the initial-data.json data fixture
 GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH = "automation-hub"
 
+GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH = "staging"
+GALAXY_API_REJECTED_DISTRIBUTION_BASE_PATH = "rejected"
+
 # Require approval for incoming content,
 # currently using a certification flag,
 # later using a staging repository
