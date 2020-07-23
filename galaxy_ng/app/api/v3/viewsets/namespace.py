@@ -1,7 +1,9 @@
 import logging
 
+from django.db import transaction
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
+from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api import permissions
@@ -9,6 +11,8 @@ from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.v3 import serializers
 
 log = logging.getLogger(__name__)
+
+INBOUND_REPO_NAME_FORMAT = "inbound-{namespace_name}"
 
 
 class NamespaceFilter(filterset.FilterSet):
@@ -52,3 +56,27 @@ class NamespaceViewSet(api_base.ModelViewSet):
             permission_list.append(permissions.IsNamespaceOwnerOrPartnerEngineer())
 
         return permission_list
+
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        """Override to also create inbound pulp repository and distribution."""
+        name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=request.data['name'])
+        repo = AnsibleRepository.objects.create(name=name)
+        AnsibleDistribution.objects.create(name=name, base_path=name, repository=repo)
+        return super().create(request, *args, **kwargs)
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        """Override to also delete inbound pulp repository and distribution.
+        RepositoryVersion objects get deleted on delete of AnsibleRepository.
+        """
+        name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=kwargs['name'])
+        try:
+            AnsibleRepository.objects.get(name=name).delete()
+        except AnsibleRepository.DoesNotExist:
+            pass
+        try:
+            AnsibleDistribution.objects.get(name=name).delete()
+        except AnsibleDistribution.DoesNotExist:
+            pass
+        return super().destroy(request, *args, **kwargs)
