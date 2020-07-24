@@ -24,7 +24,7 @@ export PULP_SETTINGS=$TRAVIS_BUILD_DIR/.travis/settings/settings.py
 
 if [ "$TEST" = "docs" ]; then
   cd docs
-  make html
+  make PULP_URL="http://pulp" html
   cd ..
 
   if [ -f $POST_DOCS_TEST ]; then
@@ -72,6 +72,10 @@ fi
 
 cat unittest_requirements.txt | cmd_stdin_prefix bash -c "cat > /tmp/unittest_requirements.txt"
 cmd_prefix pip3 install -r /tmp/unittest_requirements.txt
+
+# check for any uncommitted migrations
+echo "Checking for uncommitted migrations..."
+cmd_prefix bash -c "django-admin makemigrations --check --dry-run"
 
 # Run unit tests.
 cmd_prefix bash -c "PULP_DATABASES__default__USER=postgres django-admin test --noinput /usr/local/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/galaxy_ng/tests/unit/"
