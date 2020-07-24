@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0a11 (2020-07-24)
+=====================
+
+Bugfixes
+--------
+
+- Fixed bug in auto certification parameter check, that caused all submitted content being automatically approved.
+  `#318 <https://github.com/ansible/galaxy_ng/issues/318>`_
+
+
+----
+
+
 4.2.0a10 (2020-07-15)
 =====================
 
