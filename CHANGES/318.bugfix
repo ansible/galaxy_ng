@@ -1,0 +1,1 @@
+Fixed bug in auto certification parameter check, that caused all submitted content being automatically approved.
