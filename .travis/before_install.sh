@@ -9,6 +9,9 @@
 
 set -mveuo pipefail
 
+mkdir .travis/vars || true
+echo "---" > .travis/vars/main.yaml
+
 export PRE_BEFORE_INSTALL=$TRAVIS_BUILD_DIR/.travis/pre_before_install.sh
 export POST_BEFORE_INSTALL=$TRAVIS_BUILD_DIR/.travis/post_before_install.sh
 
@@ -29,12 +32,12 @@ then
   export PULPCORE_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulpcore\/pull\/(\d+)' | awk -F'/' '{print $7}')
   export PULP_SMASH_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp-smash\/pull\/(\d+)' | awk -F'/' '{print $7}')
   export PULP_OPENAPI_GENERATOR_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp-openapi-generator\/pull\/(\d+)' | awk -F'/' '{print $7}')
-  export PULP_ANSIBLE_PR_NUMBER=$(echo $COMMIT_MSG | grep -oP 'Required\ PR:\ https\:\/\/github\.com\/pulp\/pulp_ansible\/pull\/(\d+)' | awk -F'/' '{print $7}')
+  echo $COMMIT_MSG | sed -n -e 's/.*CI Base Image:\s*\([-_/[:alnum:]]*:[-_[:alnum:]]*\).*/ci_base: "\1"/p' >> .travis/vars/main.yaml
 else
   export PULPCORE_PR_NUMBER=
   export PULP_SMASH_PR_NUMBER=
   export PULP_OPENAPI_GENERATOR_PR_NUMBER=
-  export PULP_ANSIBLE_PR_NUMBER=
+  export CI_BASE_IMAGE=
 fi
 
 # dev_requirements contains tools needed for flake8, etc.
@@ -95,14 +98,6 @@ if [ -z "$TRAVIS_TAG" ]; then
 
 fi
 
-
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch master
-if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
-  cd pulp_ansible
-  git fetch --depth=1 origin pull/$PULP_ANSIBLE_PR_NUMBER/head:$PULP_ANSIBLE_PR_NUMBER
-  git checkout $PULP_ANSIBLE_PR_NUMBER
-  cd ..
-fi
 
 # Intall requirements for ansible playbooks
 pip install docker netaddr boto3
