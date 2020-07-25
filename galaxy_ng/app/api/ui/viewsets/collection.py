@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action as drf_action
 from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion, Collection
 from rest_framework.exceptions import NotFound
@@ -161,8 +161,8 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @swagger_auto_schema(operation_summary="Retrieve collection version",
-                         responses={200: serializers.CollectionVersionDetailSerializer})
+    @extend_schema(summary="Retrieve collection version",
+                   responses={200: serializers.CollectionVersionDetailSerializer})
     def retrieve(self, request, *args, **kwargs):
         namespace, name, version = self.kwargs['version'].split('/')
         try:
@@ -244,8 +244,8 @@ class CollectionImportViewSet(api_base.GenericViewSet):
             results.append(data)
         return self.get_paginated_response(results)
 
-    @swagger_auto_schema(operation_summary="Retrieve collection import",
-                         responses={200: serializers.ImportTaskDetailSerializer})
+    @extend_schema(summary="Retrieve collection import",
+                   responses={200: serializers.ImportTaskDetailSerializer})
     def retrieve(self, request, *args, **kwargs):
         api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
         task = self.get_object()
