@@ -50,9 +50,9 @@ class NamespaceViewSet(api_base.ModelViewSet):
 
     def get_permissions(self):
         permission_list = super().get_permissions()
-        if self.request.method == 'POST':
+        if self.request and self.request.method == 'POST':
             permission_list.append(permissions.IsPartnerEngineer())
-        elif self.request.method == 'PUT':
+        elif self.request and self.request.method == 'PUT':
             permission_list.append(permissions.IsNamespaceOwnerOrPartnerEngineer())
 
         return permission_list
