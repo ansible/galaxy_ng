@@ -36,9 +36,10 @@ ecdsa==0.13.3             # via pulp-container
 et-xmlfile==1.0.1         # via openpyxl
 flake8==3.8.3             # via galaxy-importer
 future==0.18.2            # via pyjwkest
-galaxy-importer==0.2.4    # via pulp-ansible
+galaxy-importer==0.2.8rc1  # via pulp-ansible
 gunicorn==20.0.4          # via pulpcore
-idna==2.9                 # via requests, yarl
+idna-ssl==1.1.0           # via aiohttp
+idna==2.9                 # via idna-ssl, requests, yarl
 importlib-metadata==1.6.1  # via flake8, markdown
 inflection==0.5.0         # via drf-yasg
 itypes==1.2.0             # via coreapi
@@ -82,6 +83,8 @@ six==1.15.0               # via ansible-lint, bleach, cryptography, drf-yasg, ga
 sqlparse==0.3.1           # via django
 tablib[html,ods,xls,xlsx,yaml]==2.0.0  # via django-import-export
 toml==0.10.1              # via dynaconf
+typing-extensions==3.7.4.2  # via aiohttp
+typing==3.7.4.3           # via aiodns
 uritemplate==3.0.1        # via coreapi, drf-yasg
 urllib3==1.25.9           # via galaxy-ng (setup.py), requests
 webencodings==0.5.1       # via bleach
