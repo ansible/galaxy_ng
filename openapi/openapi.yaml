@@ -77,6 +77,14 @@ info:
     ```
 
 
+servers:
+  - url: 'http://127.0.0.1:5001/{galaxy_api_root}'
+    description: Example dev sandbox
+    variables:
+      galaxy_api_root:
+        default: api/automation-hub
+        description: The root of the API endpoints
+
 paths:
 
   # -------------------------------------
@@ -118,7 +126,7 @@ paths:
   # Collections
   # -------------------------------------
 
-  '/collections/':
+  '/v3/collections/':
     get:
       summary: List Collections
       operationId: listCollections
@@ -137,7 +145,7 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-  '/collections/{namespace}/{name}/':
+  '/v3/collections/{namespace}/{name}/':
     parameters:
       - $ref: '#/components/parameters/CollectionNamespaceName'
       - $ref: '#/components/parameters/CollectionName'
@@ -152,7 +160,7 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-  '/collections/{namespace}/{name}/versions/':
+  '/v3/collections/{namespace}/{name}/versions/':
     parameters:
       - $ref: '#/components/parameters/CollectionNamespaceName'
       - $ref: '#/components/parameters/CollectionName'
@@ -166,15 +174,11 @@ paths:
         - $ref: '#/components/parameters/PageLimit'
       responses:
         '200':
-          description: 'Response containing a page of CollectionVersions'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CollectionVersionsPage'
+          $ref: '#/components/responses/CollectionVersionList'
         'default':
           $ref: '#/components/responses/Errors'
 
-  '/collections/{namespace}/{name}/versions/{version}/':
+  '/v3/collections/{namespace}/{name}/versions/{version}/':
     parameters:
       - $ref: '#/components/parameters/CollectionNamespaceName'
       - $ref: '#/components/parameters/CollectionName'
@@ -217,30 +221,14 @@ paths:
   # Artifacts
   # -------------------------------------
 
-  '/artifacts/collections/':
+  '/v3/artifacts/collections/':
     post:
       summary: Upload Collection Artifact
       operationId: uploadCollectionArtifact
       tags:
         - Artifacts
       requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              description: >
-                A multipart/form encoded payload including the binary
-                collection artifact file contents and it's sha256 checksum.
-              type: object
-              properties:
-                sha256:
-                  description: 'The sha256 digest of the collection artifact file'
-                  type: string
-                file:
-                  description: 'The binary contents of a collection artifact'
-                  type: string
-                  format: binary
-              required:
-                - file
+        $ref: '#/components/requestBodies/ArtifactUpload'
       responses:
         '202':
           $ref: '#/components/responses/CollectionImportAccepted'
@@ -251,13 +239,13 @@ paths:
         default:
           $ref: '#/components/responses/Errors'
 
-
-  '/artifacts/collections/{filename}':
+  '/v3/artifacts/collections/{filename}':
     get:
       summary: Download Collection Artifact
       operationId: downloadCollectionArtifact
       tags:
         - Artifacts
+
       parameters:
         - $ref: '#/components/parameters/CollectionVersionArtifactFilename'
       responses:
@@ -272,11 +260,110 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
+  '/content/{distribution_base_path}/v3/artifacts/collections/':
+    parameters:
+      - $ref: '#/components/parameters/DistributionBasePath'
+    post:
+      summary: Upload Collection Artifact To A Repository and Distribution
+      operationId: uploadCollectionArtifactToRepository
+      tags:
+        - Artifacts
+        - PerDistribution
+      requestBody:
+        $ref: '#/components/requestBodies/ArtifactUpload'
+      responses:
+        '202':
+          $ref: '#/components/responses/CollectionImportAccepted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Errors'
+
+  '/content/{distribution_base_path}/v3/collections/':
+    parameters:
+      - $ref: '#/components/parameters/DistributionBasePath'
+    get:
+      summary: List Collections In a Repository and Distribution
+      operationId: listCollectionsInARepository
+      parameters:
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/SearchKeyword'
+        - $ref: '#/components/parameters/SearchName'
+        - $ref: '#/components/parameters/SearchNamespace'
+        - $ref: '#/components/parameters/SearchTag'
+      tags:
+        - Collections
+        - PerDistribution
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionList'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+  '/content/{distribution_base_path}/v3/collections/{namespace}/{name}/':
+    parameters:
+      - $ref: '#/components/parameters/DistributionBasePath'
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+    get:
+      summary: Get Collection In a Repository and Distribution
+      operationId: getCollectionInARepository
+      tags:
+        - Collections
+        - PerDistribution
+      responses:
+        '200':
+          $ref: '#/components/responses/Collection'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+  '/content/{distribution_base_path}/v3/collections/{namespace}/{name}/versions/':
+    parameters:
+      - $ref: '#/components/parameters/DistributionBasePath'
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+    get:
+      summary: List Collection Versions In A Repository And Distribution
+      operationId: listCollectionVersionsInARepository
+      tags:
+        - Collections
+        - PerDistribution
+      parameters:
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/PageLimit'
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionList'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+  '/content/{distribution_base_path}/v3/collections/{namespace}/{name}/versions/{version}/':
+    parameters:
+      - $ref: '#/components/parameters/DistributionBasePath'
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+      - $ref: '#/components/parameters/SemanticVersion'
+    get:
+      summary: Get Collection Version In A Repository And Distribution
+      operationId: getCollectionVersionsInARepository
+      tags:
+        - Collections
+        - PerDistribution
+      parameters: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersion'
+        'default':
+          $ref: '#/components/responses/Errors'
+
   # -------------------------------------
   # Imports
   # -------------------------------------
 
-  '/imports/collections/{import_id}/':
+  '/v3/imports/collections/{import_id}/':
     get:
       summary: Get Collection Import
       operationId: getCollectionImport
@@ -365,6 +452,23 @@ paths:
           $ref: '#/components/responses/Errors'
       tags:
         - "Namespace"
+    
+  '/content/{distribution_base_path}/v3/imports/collections/{import_id}/':
+    parameters:
+      - $ref: '#/components/parameters/DistributionBasePath'
+    get:
+      summary: Get Collection Import In A Repository And Distribution
+      operationId: getCollectionImportInARepository
+      parameters:
+        - $ref: '#/components/parameters/CollectionImportId'
+      tags:
+        - Imports
+        - PerDistribution
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionImport'
+        'default':
+          $ref: '#/components/responses/Errors'
 
 components:
   securitySchemes:
@@ -1077,6 +1181,16 @@ components:
       required: true
       schema:
         type: string
+        
+    DistributionBasePath:
+      description: 'The base_path of the pulp Distribution'
+      in: path
+      name: distribution_base_path
+      required: true
+      schema:
+        type: string
+      example: 'automation-hub'
+
     PageLimit:
       description: 'Number of results to return per page.'
       in: query
@@ -1172,6 +1286,25 @@ components:
         $ref: '#/components/schemas/SemanticVersion'
 
   requestBodies:
+    ArtifactUpload:
+      content:
+        multipart/form-data:
+          schema:
+            description: >
+              A multipart/form encoded payload including the binary
+              collection artifact file contents and it's sha256 checksum.
+            type: object
+            properties:
+              sha256:
+                description: 'The sha256 digest of the collection artifact file'
+                type: string
+              file:
+                description: 'The binary contents of a collection artifact'
+                type: string
+                format: binary
+            required:
+              - file
+
     Collection:
       description: 'A Collection body'
       content:
@@ -1185,6 +1318,9 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Namespace'
+
+
+
 
   responses:
 
@@ -1208,6 +1344,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CollectionVersion'
+
+    CollectionVersionList:
+      description: 'Response containing a page of CollectionVersions'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionsPage'
 
     CollectionVersionArtifact:
       description: 'Response containing a CollectionVersionArtifact'
