@@ -34,7 +34,7 @@ drf-yasg==1.17.1          # via pulpcore
 dynaconf==2.2.3           # via pulpcore
 et-xmlfile==1.0.1         # via openpyxl
 flake8==3.8.2             # via galaxy-importer
-galaxy-importer==0.2.8rc1  # via pulp-ansible
+galaxy-importer==0.2.8rc3  # via pulp-ansible
 gunicorn==20.0.4          # via pulpcore
 idna-ssl==1.1.0           # via aiohttp
 idna==2.9                 # via idna-ssl, requests, yarl
