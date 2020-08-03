@@ -33,6 +33,7 @@ content_v3_urlpatterns = [
     path("<str:path>/v3/",
          # include((v3_urls, app_name))),
          include(v3_urls)),
+    path("<str:path>/v3/", include(v3_urls.sync_urls)),
 ]
 
 content_urlpatterns = [

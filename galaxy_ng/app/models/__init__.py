@@ -5,6 +5,9 @@ from .auth import (
 from .collectionimport import (
     CollectionImport,
 )
+from .collectionsynctask import (
+    CollectionSyncTask
+)
 from .namespace import (
     Namespace,
     NamespaceLink,
@@ -18,6 +21,7 @@ __all__ = (
     'Group',
     'User',
     'CollectionImport',
+    'CollectionSyncTask',
     'Namespace',
     'NamespaceLink',
     'SyncList',

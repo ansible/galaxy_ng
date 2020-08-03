@@ -8,3 +8,7 @@ flake8-docstrings
 
 flake8-tuple
 flake8-quotes
+
+django-extensions
+ipython
+ipdb

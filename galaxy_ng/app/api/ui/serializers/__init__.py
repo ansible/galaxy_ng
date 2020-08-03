@@ -4,6 +4,7 @@ from .auth import (
 from .collection import (
     CollectionDetailSerializer,
     CollectionListSerializer,
+    CollectionRemoteSerializer,
     CollectionVersionSerializer,
     CertificationSerializer,
     CollectionVersionDetailSerializer,
@@ -36,6 +37,7 @@ __all__ = (
     # collection
     'CollectionDetailSerializer',
     'CollectionListSerializer',
+    'CollectionRemoteSerializer',
     'CollectionVersionSerializer',
     'CertificationSerializer',
     'CollectionVersionDetailSerializer',

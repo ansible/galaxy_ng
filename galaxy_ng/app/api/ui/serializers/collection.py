@@ -1,6 +1,6 @@
 import logging
 
-from pulp_ansible.app.models import CollectionVersion
+from pulp_ansible.app.models import CollectionVersion, CollectionRemote
 from rest_framework import serializers
 
 from .base import Serializer
@@ -41,6 +41,22 @@ class ContentSerializer(Serializer):
 class CollectionVersionSummarySerializer(Serializer):
     version = serializers.CharField()
     created = serializers.CharField()
+
+
+class CollectionRemoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CollectionRemote
+        fields = (
+            'name', 'url', 'auth_url', 'token',
+            'policy', 'requirements_file'
+        )
+
+    # TODO: Serialize following fields
+    #   groups
+    #   updated_at
+    #   created_at
+    #   last_sync_task:
+    #     {state, started_at, finished_at, error}
 
 
 class CollectionMetadataSerializer(Serializer):

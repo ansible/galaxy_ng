@@ -5,7 +5,12 @@ from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action as drf_action
-from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion, Collection
+from pulp_ansible.app.models import (
+    AnsibleDistribution,
+    CollectionVersion,
+    Collection,
+    CollectionRemote,
+)
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -252,3 +257,12 @@ class CollectionImportViewSet(api_base.GenericViewSet):
         task_info = api.get(prefix=settings.X_PULP_API_PREFIX, id=self.kwargs['task_id'])
         data = serializers.ImportTaskDetailSerializer(task_info, context={'task_obj': task}).data
         return Response(data)
+
+
+class CollectionRemoteViewSet(api_base.ModelViewSet):
+    queryset = CollectionRemote.objects.all()
+    serializer_class = serializers.CollectionRemoteSerializer
+
+    def get_permissions(self):
+        return super().get_permissions() + \
+            [permissions.RestrictOnCloudDeployments()]

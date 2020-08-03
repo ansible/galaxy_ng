@@ -16,6 +16,10 @@ auth_urls = [
     path("auth/token/", views.TokenView.as_view(), name="auth-token"),
 ]
 
+sync_urls = [
+    path("sync/", views.SyncView.as_view(), name="sync"),
+    path("sync/config/", views.SyncConfigView.as_view(), name="sync-config")
+]
 
 urlpatterns = [
     path(
