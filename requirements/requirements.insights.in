@@ -2,5 +2,3 @@ boto3
 logstash-formatter
 watchtower
 django-storages[boto3]
--e git+https://github.com/pulp/pulp_ansible.git@master#egg=pulp_ansible  # via galaxy-ng (setup.py)
--e git+https://github.com/pulp/pulpcore.git@master#egg=pulpcore  # via galaxy-ng (setup.py), pulp-ansible, pulp-container
