@@ -6,6 +6,7 @@
 #
 -e git+https://github.com/pulp/pulp_ansible.git@master#egg=pulp_ansible  # via -r requirements/requirements.standalone.in, galaxy-ng (setup.py)
 -e git+https://github.com/pulp/pulpcore.git@master#egg=pulpcore  # via -r requirements/requirements.standalone.in, galaxy-ng (setup.py), pulp-ansible, pulp-container
+-e git+https://github.com/pulp/pulp_container.git@master#egg=pulp_container  # via -r requirements/requirements.standalone.in, galaxy-ng (setup.py), pulp-ansible, pulp-container
 aiodns==2.0.0             # via pulpcore
 aiofiles==0.5.0           # via pulpcore
 aiohttp==3.6.2            # via pulpcore
@@ -55,7 +56,6 @@ openpyxl==3.0.4           # via tablib
 packaging==20.4           # via bleach, pulp-ansible
 prometheus-client==0.8.0  # via django-prometheus
 psycopg2==2.8.5           # via pulpcore
-pulp-container==2.0.0b2   # via -r requirements/requirements.standalone.in
 pycares==3.1.1            # via aiodns
 pycodestyle==2.6.0        # via flake8
 pycparser==2.20           # via cffi
