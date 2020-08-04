@@ -12,26 +12,23 @@ ansible==2.9.11           # via ansible-lint, galaxy-importer
 async-timeout==3.0.1      # via aiohttp
 attrs==19.3.0             # via aiohttp, galaxy-importer, jsonschema
 backoff==1.10.0           # via pulpcore
-bleach-whitelist==0.0.10  # via galaxy-importer
+bleach-whitelist==0.0.11  # via galaxy-importer
 bleach==3.1.5             # via galaxy-importer
 certifi==2020.6.20        # via galaxy-ng (setup.py), requests
 cffi==1.14.1              # via cryptography, pycares
 chardet==3.0.4            # via aiohttp, requests
 click==7.1.2              # via rq
-coreapi==2.3.3            # via drf-yasg
-coreschema==0.0.4         # via coreapi, drf-yasg
 cryptography==3.0         # via ansible
 defusedxml==0.6.0         # via odfpy
 diff-match-patch==20200713  # via django-import-export
-django-filter==2.2.0      # via pulpcore
-django-import-export==2.2.0  # via pulpcore
+django-filter==2.3.0      # via pulpcore
+django-import-export==2.3.0  # via pulpcore
 django-prometheus==2.0.0  # via galaxy-ng (setup.py)
-django==2.2.14            # via django-filter, django-import-export, drf-nested-routers, drf-spectacular, drf-yasg, galaxy-ng (setup.py), pulpcore
+django==2.2.15            # via django-filter, django-import-export, drf-nested-routers, drf-spectacular, galaxy-ng (setup.py), pulpcore
 djangorestframework-queryfields==1.0.0  # via pulpcore
-djangorestframework==3.10.3  # via drf-nested-routers, drf-spectacular, drf-yasg, pulpcore
+djangorestframework==3.10.3  # via drf-nested-routers, drf-spectacular, pulpcore
 drf-nested-routers==0.91  # via pulpcore
-drf-spectacular==0.9.12   # via galaxy-ng (setup.py)
-drf-yasg==1.17.1          # via pulpcore
+drf-spectacular==0.9.12   # via galaxy-ng (setup.py), pulpcore
 dynaconf==3.0.0           # via pulpcore
 et-xmlfile==1.0.1         # via openpyxl
 flake8==3.8.3             # via galaxy-importer
@@ -40,10 +37,9 @@ gunicorn==20.0.4          # via pulpcore
 idna-ssl==1.1.0           # via aiohttp
 idna==2.10                # via idna-ssl, requests, yarl
 importlib-metadata==1.7.0  # via flake8, jsonschema, markdown
-inflection==0.5.0         # via drf-spectacular, drf-yasg
-itypes==1.2.0             # via coreapi
+inflection==0.5.0         # via drf-spectacular
 jdcal==1.4.1              # via openpyxl
-jinja2==2.11.2            # via ansible, coreschema
+jinja2==2.11.2            # via ansible
 jsonschema==3.2.0         # via drf-spectacular
 markdown==3.2.2           # via galaxy-importer
 markuppy==1.14            # via tablib
@@ -52,11 +48,9 @@ mccabe==0.6.1             # via flake8
 multidict==4.7.6          # via aiohttp, yarl
 odfpy==1.4.1              # via tablib
 openpyxl==3.0.4           # via tablib
-packaging==20.4           # via bleach, drf-yasg, pulp-ansible
+packaging==20.4           # via bleach, pulp-ansible
 prometheus-client==0.8.0  # via django-prometheus
 psycopg2==2.8.5           # via pulpcore
-pulp-ansible==0.2.0b15    # via galaxy-ng (setup.py)
-pulpcore==3.5.0           # via galaxy-ng (setup.py), pulp-ansible
 pycares==3.1.1            # via aiodns
 pycodestyle==2.6.0        # via flake8
 pycparser==2.20           # via cffi
@@ -69,23 +63,23 @@ python-gnupg==0.4.6       # via pulpcore
 pytz==2020.1              # via django
 pyyaml==5.3.1             # via ansible, ansible-lint, drf-spectacular, galaxy-importer, pulp-ansible, pulpcore, tablib
 redis==3.5.3              # via pulpcore, rq
-requests==2.24.0          # via coreapi, galaxy-importer
-rq==1.4.3                 # via pulpcore
+requests==2.24.0          # via galaxy-importer
+rq==1.5.0                 # via pulpcore
 ruamel.yaml.clib==0.2.0   # via ruamel.yaml
-ruamel.yaml==0.16.10      # via ansible-lint, drf-yasg
+ruamel.yaml==0.16.10      # via ansible-lint
 semantic-version==2.8.5   # via galaxy-importer, pulp-ansible
-six==1.15.0               # via ansible-lint, bleach, cryptography, drf-yasg, galaxy-ng (setup.py), jsonschema, packaging, pyrsistent, python-dateutil
+six==1.15.0               # via ansible-lint, bleach, cryptography, galaxy-ng (setup.py), jsonschema, packaging, pyrsistent, python-dateutil
 sqlparse==0.3.1           # via django
 tablib[html,ods,xls,xlsx,yaml]==2.0.0  # via django-import-export
 typing-extensions==3.7.4.2  # via aiohttp, yarl
 typing==3.7.4.3           # via aiodns
-uritemplate==3.0.1        # via coreapi, drf-spectacular, drf-yasg
+uritemplate==3.0.1        # via drf-spectacular
 urllib3==1.25.10          # via galaxy-ng (setup.py), requests
 webencodings==0.5.1       # via bleach
-whitenoise==5.1.0         # via pulpcore
+whitenoise==5.2.0         # via pulpcore
 xlrd==1.2.0               # via tablib
 xlwt==1.3.0               # via tablib
-yarl==1.5.0               # via aiohttp
+yarl==1.5.1               # via aiohttp
 zipp==3.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

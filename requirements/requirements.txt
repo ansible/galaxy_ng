@@ -23,8 +23,8 @@ coreschema==0.0.4         # via coreapi, drf-yasg
 cryptography==2.9.2       # via ansible, pyjwt
 defusedxml==0.6.0         # via odfpy
 diff-match-patch==20181111  # via django-import-export
-django-filter==2.2.0      # via pulpcore
-django-import-export==2.0.2  # via pulpcore
+django-filter==2.3.0      # via pulpcore
+django-import-export==2.3.0  # via pulpcore
 django-prometheus==2.0.0  # via galaxy-ng (setup.py)
 django==2.2.13            # via django-filter, django-import-export, drf-nested-routers, drf-yasg, galaxy-ng (setup.py), pulpcore
 djangorestframework-queryfields==1.0.0  # via pulpcore
