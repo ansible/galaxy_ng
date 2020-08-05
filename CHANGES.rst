@@ -13,6 +13,14 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0a12 (2020-08-05)
+=====================
+
+Misc
+----
+
+- Updated pulpcore to 3.5.0.
+
 4.2.0a11 (2020-07-24)
 =====================
 

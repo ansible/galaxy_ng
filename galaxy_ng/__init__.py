@@ -1,3 +1,3 @@
-__version__ = "4.2.0a11"
+__version__ = "4.2.0a12"
 
 default_app_config = "galaxy_ng.app.PulpGalaxyPluginAppConfig"
