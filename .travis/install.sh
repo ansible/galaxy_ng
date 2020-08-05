@@ -45,11 +45,6 @@ else
   TAG=$(git rev-parse --abbrev-ref HEAD | tr / _)
 fi
 
-if [ -e $TRAVIS_BUILD_DIR/../pulp_ansible ]; then
-  PULP_ANSIBLE=./pulp_ansible
-else
-  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@master
-fi
 if [ -n "$TRAVIS_TAG" ]; then
   # Install the plugin only and use published PyPI packages for the rest
   # Quoting ${TAG} ensures Ansible casts the tag as a string.
@@ -62,8 +57,6 @@ plugins:
     source: pulpcore
   - name: galaxy_ng
     source: ./galaxy_ng
-  - name: pulp_ansible
-    source: pulp_ansible
 services:
   - name: pulp
     image: "pulp:${TAG}"
@@ -80,8 +73,6 @@ plugins:
     source: ./pulpcore
   - name: galaxy_ng
     source: ./galaxy_ng
-  - name: pulp_ansible
-    source: $PULP_ANSIBLE
 services:
   - name: pulp
     image: "pulp:${TAG}"
