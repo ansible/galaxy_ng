@@ -45,8 +45,9 @@ __all__ = (
     'CurrentUserSerializer',
     # user
     'UserSerializer',
-    'GroupSerializer'
-    # synclists
+    # group
+    'GroupSerializer',
+    # synclist
     'SyncListSerializer',
     'SyncListCollectionSummarySerializer',
 )

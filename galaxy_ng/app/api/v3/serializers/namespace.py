@@ -6,11 +6,8 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
-from guardian.shortcuts import assign_perm
 
 from galaxy_ng.app import models
-from galaxy_ng.app.models import auth as auth_models
-from galaxy_ng.app.api.v3.serializers.group import GroupSummarySerializer
 from galaxy_ng.app.access_control.fields import GroupPermissionField
 
 log = logging.getLogger(__name__)
@@ -56,7 +53,6 @@ class NamespaceSerializer(serializers.ModelSerializer):
             raise ValidationError(detail={
                 'name': "Name cannot begin with '_'"})
         return name
-
 
     @transaction.atomic
     def create(self, validated_data):
