@@ -18,10 +18,6 @@ if [[ -f $PRE_BEFORE_SCRIPT ]]; then
   source $PRE_BEFORE_SCRIPT
 fi
 
-# Developers should be able to reproduce the containers with this config
-echo "CI vars:"
-tail -v -n +1 .travis/vars/main.yaml
-
 # Developers often want to know the final pulp config
 echo "PULP CONFIG:"
 tail -v -n +1 .travis/settings/settings.* ~/.config/pulp_smash/settings.json
