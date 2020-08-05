@@ -24,9 +24,9 @@ cryptography==2.9.2       # via ansible, pyjwt
 defusedxml==0.6.0         # via odfpy
 diff-match-patch==20181111  # via django-import-export
 django-filter==2.2.0      # via pulpcore
-django-import-export==2.0.2  # via pulpcore
+django-import-export==2.2.0  # via pulpcore
 django-prometheus==2.0.0  # via galaxy-ng (setup.py)
-django==2.2.13            # via django-filter, django-import-export, drf-nested-routers, drf-yasg, galaxy-ng (setup.py), pulpcore
+django==2.2.15            # via django-filter, django-import-export, drf-nested-routers, drf-yasg, galaxy-ng (setup.py), pulpcore
 djangorestframework-queryfields==1.0.0  # via pulpcore
 djangorestframework==3.10.3  # via drf-nested-routers, drf-yasg, pulpcore
 drf-nested-routers==0.91  # via pulpcore
@@ -55,9 +55,9 @@ openpyxl==3.0.3           # via tablib
 packaging==20.4           # via bleach, drf-yasg, pulp-ansible
 prometheus-client==0.8.0  # via django-prometheus
 psycopg2==2.8.5           # via pulpcore
-pulp-ansible==0.2.0b13    # via galaxy-ng (setup.py)
-pulp-container==2.0.0b2   # via -r requirements/requirements.standalone.in
-pulpcore==3.4.1           # via galaxy-ng (setup.py), pulp-ansible, pulp-container
+pulp-ansible==0.2.0b15    # via galaxy-ng (setup.py)
+pulp-container==2.0.0b3   # via -r requirements/requirements.standalone.in
+pulpcore==3.5.0           # via galaxy-ng (setup.py), pulp-ansible, pulp-container
 pycares==3.1.1            # via aiodns
 pycodestyle==2.6.0        # via flake8
 pycparser==2.20           # via cffi
@@ -79,13 +79,14 @@ rq==1.4.2                 # via pulpcore
 ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via ansible-lint, drf-yasg
 semantic-version==2.8.5   # via galaxy-importer, pulp-ansible
-six==1.15.0               # via ansible-lint, bleach, cryptography, drf-yasg, galaxy-ng (setup.py), packaging, pyjwkest, python-dateutil
+six==1.15.0               # via ansible-lint, bleach, cryptography, drf-yasg, galaxy-ng (setup.py), packaging, pyjwkest, python-dateutil, url-normalize
 sqlparse==0.3.1           # via django
 tablib[html,ods,xls,xlsx,yaml]==2.0.0  # via django-import-export
 toml==0.10.1              # via dynaconf
 typing-extensions==3.7.4.2  # via aiohttp
 typing==3.7.4.3           # via aiodns
 uritemplate==3.0.1        # via coreapi, drf-yasg
+url-normalize==1.4.2      # via pulp-container
 urllib3==1.25.9           # via galaxy-ng (setup.py), requests
 webencodings==0.5.1       # via bleach
 whitenoise==5.1.0         # via pulpcore
