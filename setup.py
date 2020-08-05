@@ -63,6 +63,7 @@ requirements = galaxy_pulp_requirements + [
     "pulpcore~=3.5.0",
     "pulp-ansible>=0.2.0b13",
     "django-prometheus>=2.0.0",
+    "drf-spectacular",
 ]
 
 setup(
