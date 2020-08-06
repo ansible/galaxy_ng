@@ -242,7 +242,7 @@ class CollectionArtifactDownloadView(APIView):
 
 class CollectionVersionMoveViewSet(ViewSet):
     permission_classes = GALAXY_PERMISSION_CLASSES + [
-        permissions.IsNamespaceOwner
+        permissions.IsPartnerEngineer
     ]
 
     def move_content(self, request, *args, **kwargs):
