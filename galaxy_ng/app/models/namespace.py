@@ -1,7 +1,7 @@
 from django.db import models
 from django.db import transaction
 from django_lifecycle import LifecycleModel
-from pulpcore.app.models import AutoDeleteObjPermsMixin
+from pulpcore.plugin.models import AutoDeleteObjPermsMixin
 
 from galaxy_ng.app.access_control import mixins
 

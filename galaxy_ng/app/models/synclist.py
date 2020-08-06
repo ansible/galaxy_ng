@@ -1,6 +1,6 @@
 from django.db import models
 
-from pulpcore.app.models import AutoDeleteObjPermsMixin
+from pulpcore.plugin.models import AutoDeleteObjPermsMixin
 from pulp_ansible.app.models import AnsibleRepository, Collection
 from django_lifecycle import LifecycleModel
 

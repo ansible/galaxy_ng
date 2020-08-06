@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django_lifecycle import LifecycleModel
 
-from pulpcore.app.models import AutoDeleteObjPermsMixin
+from pulpcore.plugin.models import AutoDeleteObjPermsMixin
 from .namespace import Namespace
 
 
