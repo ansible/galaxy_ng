@@ -50,7 +50,6 @@ GALAXY_AUTHENTICATION_CLASSES = [
 ]
 # Settings for insights mode
 # GALAXY_AUTHENTICATION_CLASSES = ["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
-# GALAXY_PERMISSION_CLASSES = ['galaxy_ng.app.auth.auth.RHEntitlementRequired']
 
 # set to 'insights' for cloud.redhat.com deployments
 GALAXY_DEPLOYMENT_MODE = 'standalone'

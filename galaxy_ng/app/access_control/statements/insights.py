@@ -122,12 +122,18 @@ INSIGHTS_STATEMENTS = {
                 "has_rh_entitlements"]
         },
     ],
+    'TaskViewSet': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+    ],
     'TagViewSet': [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_rh_entitlements",
         },
     ],
     'GroupViewSet': [

@@ -103,6 +103,13 @@ STANDALONE_STATEMENTS = {
             "effect": "deny",
         },
     ],
+    'TaskViewSet': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+    ],
     'TagViewSet': [
         {
             "action": ["list", "retrieve"],

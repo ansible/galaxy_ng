@@ -80,6 +80,10 @@ class GroupAccessPolicy(AccessPolicyBase):
     NAME = 'GroupViewSet'
 
 
+class TaskAccessPolicy(AccessPolicyBase):
+    NAME = 'TaskViewSet'
+
+
 class LoginAccessPolicy(AccessPolicyBase):
     NAME = 'LoginView'
 
