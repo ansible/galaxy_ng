@@ -32,11 +32,24 @@ class TestTaskPublish(TestCase):
         content_artifact.save()
 
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
-    def test_import_and_auto_approve(self, mocked_import_collection):
+    @mock.patch('galaxy_ng.app.tasks.publishing.enqueue_with_reservation')
+    def test_import_and_auto_approve(self, mocked_enqueue, mocked_import):
+        inbound_repo = AnsibleRepository.objects.create(name='the_incoming_repo')
+        golden_repo = AnsibleRepository.objects.create(name='automation-hub')
+
         self.assertTrue(self.collection_version.certification == 'needs_review')
-        import_and_auto_approve(self.artifact.pk)
+        import_and_auto_approve(self.artifact.pk, repository_pk=inbound_repo.pk)
         self.collection_version.refresh_from_db()
         self.assertTrue(self.collection_version.certification == 'certified')
+        self.assertTrue(mocked_import.call_count == 1)
+        self.assertTrue(mocked_enqueue.call_count == 2)
+
+        # test cannot find golden repo
+        golden_repo.name = 'a_different_name_for_golden'
+        golden_repo.save()
+        golden_errmsg = 'Could not find golden repository: "automation-hub"'
+        with self.assertRaisesMessage(RuntimeError, golden_errmsg):
+            import_and_auto_approve(self.artifact.pk, repository_pk=inbound_repo.pk)
 
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
     @mock.patch('galaxy_ng.app.tasks.publishing.enqueue_with_reservation')
