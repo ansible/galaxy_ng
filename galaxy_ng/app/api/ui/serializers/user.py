@@ -75,10 +75,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class CurrentUserSerializer(UserSerializer):
     is_partner_engineer = serializers.SerializerMethodField()
+    model_permissions = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         model = auth_models.User
-        fields = UserSerializer.Meta.fields + ('is_partner_engineer',)
+        fields = UserSerializer.Meta.fields + ('is_partner_engineer', 'model_permissions')
         extra_kwargs = dict(
             groups={'read_only': True},
             **UserSerializer.Meta.extra_kwargs
@@ -86,8 +87,17 @@ class CurrentUserSerializer(UserSerializer):
 
     # TODO: Update UI to drop reliance on is_partner_engineer
     def get_is_partner_engineer(self, obj):
-        return obj.has_perms([
-            'galaxy.add_namespace',
-            'galaxy.update_namespace',
-            'ansible.move_collection'
-        ])
+        return True
+
+    def get_model_permissions(self, obj):
+        return {
+            "add_namespace": obj.has_perm('galaxy.add_namespace'),
+            "upload_to_namespace": obj.has_perm('galaxy.upload_to_namespace'),
+            "change_namespace": obj.has_perm('galaxy.change_namespace'),
+            # TODO: figure out permissions for certification
+            "move_collection": True,
+            "view_user": obj.has_perm('galaxy.view_user'),
+            "delete_user": obj.has_perm('galaxy.delete_user'),
+            "change_user": obj.has_perm('galaxy.change_user'),
+            "add_user": obj.has_perm('galaxy.add_user'),
+        }
