@@ -140,10 +140,12 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
     ]
     parser_classes = [AnsibleGalaxy29MultiPartParser]
 
-    def _dispatch_import_collection_task(self, artifact_pk, repository=None, **kwargs):
+    def _dispatch_import_collection_task(self, temp_file_pk, repository=None, **kwargs):
         """Dispatch a pulp task started on upload of collection version."""
-        locks = [str(artifact_pk)]
-        kwargs["artifact_pk"] = artifact_pk
+        locks = []
+
+        kwargs["temp_file_pk"] = temp_file_pk
+
         if repository:
             locks.append(repository)
             kwargs["repository_pk"] = repository.pk

@@ -73,5 +73,5 @@ RUN set -ex; \
     && mv /app/docker/bin/* /usr/local/bin
 
 USER "${USER_NAME}"
-VOLUME [ "/var/lib/pulp/artifact", "/var/lib/pulp/tmp", "/tmp/ansible" ]
+VOLUME [ "/var/lib/pulp", "/tmp/ansible" ]
 ENTRYPOINT [ "/entrypoint.sh" ]

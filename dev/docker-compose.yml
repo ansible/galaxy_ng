@@ -29,9 +29,8 @@ services:
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
-      - "pulp_artifact:/var/lib/pulp/artifact"
+      - "pulp:/var/lib/pulp"
     tmpfs:
-      - "/var/lib/pulp/tmp:uid=1000,gid=1000"
       - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
       - _base
@@ -49,9 +48,8 @@ services:
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
-      - "pulp_artifact:/var/lib/pulp/artifact"
+      - "pulp:/var/lib/pulp"
     tmpfs:
-      - "/var/lib/pulp/tmp:uid=1000,gid=1000"
       - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
       - _base
@@ -69,9 +67,8 @@ services:
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
-      - "pulp_artifact:/var/lib/pulp/artifact"
+      - "pulp:/var/lib/pulp"
     tmpfs:
-      - "/var/lib/pulp/tmp:uid=1000,gid=1000"
       - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
       - _base
@@ -91,9 +88,8 @@ services:
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
-      - "pulp_artifact:/var/lib/pulp/artifact"
+      - "pulp:/var/lib/pulp"
     tmpfs:
-      - "/var/lib/pulp/tmp:uid=1000,gid=1000"
       - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
       - _base
@@ -116,6 +112,6 @@ services:
 
 
 volumes:
-  pulp_artifact: {}
+  pulp: {}
   pg_data: {}
   redis_data: {}
