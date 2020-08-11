@@ -7,6 +7,11 @@ from . import viewsets
 
 router = routers.SimpleRouter()
 router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
+router.register('repositories', viewsets.GalaxyAnsibleRepositoryViewSet, basename='repositories')
+router.register('repositories/<str:pk>/versions', viewsets.GalaxyAnsibleRepositoryVersionViewSet,
+                basename='repository-versions')
+router.register('distributions',
+                viewsets.GalaxyAnsibleDistributionViewSet, basename='distributions')
 
 namespace_urls = [
     path("", include(router.urls)),

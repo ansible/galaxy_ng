@@ -7,8 +7,19 @@ from .collection import (
     CollectionVersionMoveViewSet,
 )
 
+
+from .distribution import (
+    GalaxyAnsibleDistributionViewSet,
+)
+
 from .namespace import (
     NamespaceViewSet,
+)
+
+
+from .repository import (
+    GalaxyAnsibleRepositoryViewSet,
+    GalaxyAnsibleRepositoryVersionViewSet,
 )
 
 from .task import (
@@ -23,6 +34,9 @@ __all__ = (
     'CollectionViewSet',
     'CollectionVersionViewSet',
     'CollectionVersionMoveViewSet',
+    'GalaxyAnsibleDistributionViewSet',
+    'GalaxyAnsibleRepositoryViewSet',
+    'GalaxyAnsibleRepositoryVersionViewSet',
     'NamespaceViewSet',
     'TaskViewSet',
 )
