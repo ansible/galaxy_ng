@@ -3,7 +3,16 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from galaxy_ng.app.models import auth as auth_models
-from galaxy_ng.app.api.ui import serializers as ui_serializers
+
+
+class GroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = auth_models.Group
+        fields = (
+            'id',
+            'name'
+        )
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -51,7 +60,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['groups'] = ui_serializers.GroupSerializer(
+        representation['groups'] = GroupSerializer(
             instance.groups.all(), many=True).data
         return representation
 
