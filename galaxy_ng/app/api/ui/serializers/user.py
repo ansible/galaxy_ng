@@ -87,7 +87,11 @@ class CurrentUserSerializer(UserSerializer):
 
     # TODO: Update UI to drop reliance on is_partner_engineer
     def get_is_partner_engineer(self, obj):
-        return True
+        return obj.has_perms([
+            'galaxy.add_namespace',
+            'galaxy.update_namespace',
+            'ansible.move_collection'
+        ])
 
     def get_model_permissions(self, obj):
         return {

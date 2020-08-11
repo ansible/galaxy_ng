@@ -76,10 +76,6 @@ class TagsAccessPolicy(AccessPolicyBase):
     NAME = 'TagViewSet'
 
 
-class GroupAccessPolicy(AccessPolicyBase):
-    NAME = 'GroupViewSet'
-
-
 class TaskAccessPolicy(AccessPolicyBase):
     NAME = 'TaskViewSet'
 

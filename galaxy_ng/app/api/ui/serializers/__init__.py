@@ -19,10 +19,6 @@ from .user import (
     CurrentUserSerializer,
 )
 
-from .group import (
-    GroupSerializer
-)
-
 from .synclist import (
     SyncListSerializer,
     SyncListCollectionSummarySerializer,
@@ -45,8 +41,6 @@ __all__ = (
     'CurrentUserSerializer',
     # user
     'UserSerializer',
-    # group
-    'GroupSerializer',
     # synclist
     'SyncListSerializer',
     'SyncListCollectionSummarySerializer',

@@ -117,31 +117,6 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
     ],
-    'GroupViewSet': [
-        {
-            "action": ["list", "retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.delete_group"
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.add_group"
-        },
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.update_group"
-        },
-    ],
     # LoginView, LogoutView and TokenView are all views instead of viewsets.
     # At the moment, DRF access policy doesn't seem to be able to correctly
     # determine the action for views, so we have to resort to using *
