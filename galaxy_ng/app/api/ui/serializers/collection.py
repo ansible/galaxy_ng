@@ -1,10 +1,12 @@
 import logging
 
-from pulp_ansible.app.models import CollectionVersion
+from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion
 from rest_framework import serializers
+import semantic_version
 
 from .base import Serializer
 from galaxy_ng.app.api.v3.serializers.namespace import NamespaceSummarySerializer
+from galaxy_ng.app.models import Namespace
 
 
 log = logging.getLogger(__name__)
@@ -70,14 +72,13 @@ class CollectionVersionBaseSerializer(Serializer):
     namespace = serializers.CharField()
     name = serializers.CharField()
     version = serializers.CharField()
+    created_at = serializers.DateTimeField(source='pulp_created')
     certification = serializers.ChoiceField(
         ['certified', 'not_certified', 'needs_review'],
         required=True
     )
     metadata = CollectionMetadataSerializer(source='*')
     contents = serializers.ListField(ContentSerializer())
-
-    created_at = serializers.DateTimeField(source='pulp_created')
 
 
 class CollectionVersionSerializer(CollectionVersionBaseSerializer):
@@ -139,3 +140,55 @@ class CollectionDetailSerializer(_CollectionSerializer):
     def get_all_versions(self, obj):
         return [CollectionVersionSummarySerializer(version).data
                 for version in self.context['all_versions']]
+
+
+class RepositoryCollectionVersionSummarySerializer(Serializer):
+    version = serializers.CharField()
+    created = serializers.CharField(source='pulp_created')
+
+
+class _RepositoryCollectionSerializer(Serializer):
+    id = serializers.UUIDField(source='pk')
+    namespace = serializers.SerializerMethodField()
+    name = serializers.CharField()
+    download_count = serializers.IntegerField(default=0)
+    latest_version = serializers.SerializerMethodField()
+    deprecated = serializers.BooleanField()
+
+    def get_namespace(self, obj):
+        namespace = Namespace.objects.get(name=obj.namespace)
+        return NamespaceSummarySerializer(namespace).data
+
+    def _get_versions_in_repo(self, obj):
+        repo_param = self.context['repository']
+        distro = AnsibleDistribution.objects.get(base_path=repo_param)
+        repository_version = distro.repository.latest_version()
+        collection_versions = CollectionVersion.objects.filter(collection=obj)
+
+        versions_in_repo = collection_versions.filter(pk__in=repository_version.content)
+        versions_in_repo = sorted(
+            versions_in_repo, key=lambda obj: semantic_version.Version(obj.version), reverse=True
+        )
+        return versions_in_repo
+
+    def _get_latest_version(self, obj):
+        versions_in_repo = self._get_versions_in_repo(obj)
+        return next(iter(versions_in_repo), None)
+
+
+class RepositoryCollectionListSerializer(_RepositoryCollectionSerializer):
+    def get_latest_version(self, obj):
+        version = self._get_latest_version(obj)
+        return CollectionVersionBaseSerializer(version).data
+
+
+class RepositoryCollectionDetailSerializer(_RepositoryCollectionSerializer):
+    all_versions = serializers.SerializerMethodField()
+
+    def get_all_versions(self, obj):
+        versions_in_repo = self._get_versions_in_repo(obj)
+        return RepositoryCollectionVersionSummarySerializer(versions_in_repo, many=True).data
+
+    def get_latest_version(self, obj):
+        version = self._get_latest_version(obj)
+        return CollectionVersionDetailSerializer(version).data

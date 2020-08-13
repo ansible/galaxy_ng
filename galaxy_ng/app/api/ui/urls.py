@@ -34,6 +34,17 @@ paths = [
 
     path('auth/', include(auth_views)),
 
+    path(
+        'repo/<str:repo_name>/',
+        viewsets.RepositoryCollectionViewSet.as_view({'get': 'list'}),
+        name='repo-collections-list'
+    ),
+    path(
+        'repo/<str:repo_name>/<str:namespace>/<str:name>/',
+        viewsets.RepositoryCollectionViewSet.as_view({'get': 'retrieve'}),
+        name='repo-collections-detail'
+    ),
+
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve
     # to look up values with an ID
     path(
@@ -41,6 +52,7 @@ paths = [
         viewsets.CurrentUserViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='me'
     )
+
 ]
 app_name = "ui"
 
