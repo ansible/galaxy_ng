@@ -38,20 +38,19 @@ STANDALONE_STATEMENTS = {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "can_upload_to_namespace"
+            "condition": "can_create_collection"
         },
         {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "is_namespace_owner"
+            "condition": "can_update_collection"
         },
         {
             "action": "move_content",
             "principal": "authenticated",
             "effect": "allow",
-            # TODO: Add move collection permission to pulp_ansible
-            "condition": "has_model_perms:ansible.move_collection"
+            "condition": "has_model_perms:ansible.modify_ansible_repo_content"
         }
     ],
     'UserViewSet': [

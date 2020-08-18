@@ -59,8 +59,7 @@ class BaseTestCase(APITestCase):
             'galaxy.upload_to_namespace',
 
             # collections
-            # TODO: add permissions for this
-            # 'ansible.move_collection',
+            'ansible.modify_ansible_repo_content',
 
             # users
             'galaxy.view_user',

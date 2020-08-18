@@ -32,21 +32,20 @@ INSIGHTS_STATEMENTS = {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["can_upload_to_namespace", "has_rh_entitlements"]
+            "condition": ["can_create_collection", "has_rh_entitlements"]
         },
         {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "is_namespace_owner"
+            "condition": "can_update_collection"
         },
         {
             "action": "move_content",
             "principal": "authenticated",
             "effect": "allow",
-            # TODO: Add move collection permission to pulp_ansible
             "condition": [
-                "has_model_perms:ansible.move_collection",
+                "has_model_perms:ansible.modify_ansible_repo_content",
                 "has_rh_entitlements"]
         }
     ],

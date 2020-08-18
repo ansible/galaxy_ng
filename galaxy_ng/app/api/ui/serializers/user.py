@@ -111,8 +111,7 @@ class CurrentUserSerializer(UserSerializer):
             "add_namespace": obj.has_perm('galaxy.add_namespace'),
             "upload_to_namespace": obj.has_perm('galaxy.upload_to_namespace'),
             "change_namespace": obj.has_perm('galaxy.change_namespace'),
-            # TODO: figure out permissions for certification
-            "move_collection": True,
+            "move_collection": obj.has_perm('ansible.modify_ansible_repo_content'),
             "view_user": obj.has_perm('galaxy.view_user'),
             "delete_user": obj.has_perm('galaxy.delete_user'),
             "change_user": obj.has_perm('galaxy.change_user'),

@@ -35,19 +35,14 @@ class NamespaceAccessPolicy(AccessPolicyBase):
 class CollectionAccessPolicy(AccessPolicyBase):
     NAME = 'CollectionViewSet'
 
-    def can_upload_to_namespace(self, request, view, permission):
-        namespace = None
+    def can_update_collection(self, request, view, permission):
+        collection = view.get_object()
+        namespace = models.Namespace.objects.get(name=collection.namespace)
+        return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
-        # hack to check if view is CollectionUploadViewSet without creating
-        # circular imports
-        has_get_data = getattr(view, '_get_data', None)
-        if has_get_data:
-            data = view._get_data(request)
-            namespace = models.Namespace.objects.get(name=data['filename'].namespace)
-        else:
-            collection = view.get_object()
-            namespace = models.Namespace.objects.get(name=collection.namespace)
-
+    def can_create_collection(self, request, view, permission):
+        data = view._get_data(request)
+        namespace = models.Namespace.objects.get(name=data['filename'].namespace)
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
 
