@@ -233,11 +233,6 @@ class CollectionImportViewSet(api_base.GenericViewSet):
 
     permission_classes = [access_policy.CollectionAccessPolicy]
 
-    def get_permissions(self):
-        return super().get_permissions() + [
-            (),
-        ]
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
