@@ -69,8 +69,12 @@ class UserSerializer(serializers.ModelSerializer):
         if groups:
             group_ids = []
             for group in groups:
+                group_filter = {}
+                for field in group:
+                    if field in ('id', 'name'):
+                        group_filter[field] = group[field]
                 try:
-                    group = auth_models.Group.objects.get(**group)
+                    group = auth_models.Group.objects.get(**group_filter)
                     group_ids.append(group.id)
                 except auth_models.Group.DoesNotExist:
                     raise ValidationError(detail={

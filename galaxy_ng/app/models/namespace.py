@@ -51,7 +51,7 @@ class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin, AutoDeleteObj
 
     class Meta:
         permissions = (
-            ('upload_to_namespace', 'Upload collections to namespace'),
+            ('upload_to_namespace', 'Can upload collections to namespace'),
         )
 
 

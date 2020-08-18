@@ -39,9 +39,12 @@ class GroupPermissionField(serializers.Field):
                     raise ValidationError(detail={
                         'groups': 'Permission {} does not exist'.format(perm)})
 
-            del group_data['object_permissions']
+            group_filter = {}
+            for field in group_data:
+                if field in ('id', 'name'):
+                    group_filter[field] = group_data[field]
             try:
-                group = auth_models.Group.objects.get(**group_data)
+                group = auth_models.Group.objects.get(**group_filter)
                 internal[group] = perms
             except auth_models.Group.DoesNotExist:
                 raise ValidationError(detail={
