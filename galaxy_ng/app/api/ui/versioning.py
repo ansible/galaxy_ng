@@ -10,4 +10,4 @@ class UIVersioning(versioning.NamespaceVersioning):
 
     # TODO: remove old_ui from list of acceptable versions. This is here to prevent
     # the legacy v3/_ui endpoints from breaking
-    allowed_versions = list(constants.UIAPIVersions.ALL.value.keys()) + ['old_ui']
+    allowed_versions = list(constants.ALL_UI_API_VERSION.keys()) + ['old_ui']

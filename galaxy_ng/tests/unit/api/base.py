@@ -17,7 +17,7 @@ API_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
 
 def get_current_ui_url(namespace, **kwargs):
     return reverse('galaxy:api:ui:{version}:{namespace}'.format(
-        version=constants.UIAPIVersions.CURRENT.value,
+        version=constants.CURRENT_UI_API_VERSION,
         namespace=namespace
     ), **kwargs)
 

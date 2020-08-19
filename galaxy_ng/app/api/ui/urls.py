@@ -48,8 +48,8 @@ urlpatterns = [
     path('', viewsets.APIRootView.as_view({'get': 'list'}))
 ]
 
-for version in constants.UIAPIVersions.ALL.value:
+for version in constants.ALL_UI_API_VERSION:
     urlpatterns.append(path(
-        constants.UIAPIVersions.ALL.value[version],
+        constants.ALL_UI_API_VERSION[version],
         include((paths, app_name), namespace=version)
     ))

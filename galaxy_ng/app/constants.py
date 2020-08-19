@@ -12,6 +12,5 @@ class DeploymentMode(enum.Enum):
     INSIGHTS = 'insights'
 
 
-class UIAPIVersions(enum.Enum):
-    CURRENT = 'v1'
-    ALL = {'v1': 'v1/'}
+CURRENT_UI_API_VERSION = 'v1'
+ALL_UI_API_VERSION = {'v1': 'v1/'}
