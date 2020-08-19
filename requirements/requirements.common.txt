@@ -38,7 +38,9 @@ et-xmlfile==1.0.1         # via openpyxl
 flake8==3.8.3             # via galaxy-importer
 galaxy-importer==0.2.7    # via pulp-ansible
 gunicorn==20.0.4          # via pulpcore
-idna==2.10                # via requests, yarl
+idna-ssl==1.1.0           # via aiohttp
+idna==2.10                # via idna-ssl, requests, yarl
+importlib-metadata==1.7.0  # via flake8, jsonschema, markdown
 inflection==0.5.0         # via drf-spectacular
 jdcal==1.4.1              # via openpyxl
 jinja2==2.11.2            # via ansible
@@ -75,6 +77,8 @@ semantic-version==2.8.5   # via galaxy-importer, pulp-ansible
 six==1.15.0               # via bleach, cryptography, galaxy-ng (setup.py), jsonschema, packaging, pyrsistent, python-dateutil
 sqlparse==0.3.1           # via django
 tablib[html,ods,xls,xlsx,yaml]==2.0.0  # via django-import-export
+typing-extensions==3.7.4.2  # via aiohttp, ansible-lint, yarl
+typing==3.7.4.3           # via aiodns
 uritemplate==3.0.1        # via drf-spectacular
 urllib3==1.25.10          # via galaxy-ng (setup.py), requests
 urlman==1.3.0             # via django-lifecycle
@@ -83,6 +87,7 @@ whitenoise==5.2.0         # via pulpcore
 xlrd==1.2.0               # via tablib
 xlwt==1.3.0               # via tablib
 yarl==1.5.1               # via aiohttp
+zipp==3.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
