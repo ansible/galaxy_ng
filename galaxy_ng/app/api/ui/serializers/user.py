@@ -102,8 +102,9 @@ class CurrentUserSerializer(UserSerializer):
     def get_is_partner_engineer(self, obj):
         return obj.has_perms([
             'galaxy.add_namespace',
-            'galaxy.update_namespace',
-            'ansible.move_collection'
+            'galaxy.change_namespace',
+            'galaxy.upload_to_namespace',
+            'ansible.modify_ansible_repo_content'
         ])
 
     def get_model_permissions(self, obj):
