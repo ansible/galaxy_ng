@@ -9,6 +9,7 @@ from galaxy_ng.app.models import auth as auth_models
 
 from .base import get_current_ui_url
 
+
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
 class TestLoginViewsStandalone(APITestCase):
     def setUp(self):

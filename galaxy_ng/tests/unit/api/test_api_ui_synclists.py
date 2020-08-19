@@ -136,8 +136,9 @@ class TestUiSynclistViewSet(BaseTestCase):
             }],
         }
 
-        synclists_detail_url = get_current_ui_url('synclists-detail',
-                                      kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'synclists-detail',
+            kwargs={"pk": synclist1.id})
         self.client.force_authenticate(user=self.admin_user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             # should fail with auth now
@@ -182,8 +183,9 @@ class TestUiSynclistViewSet(BaseTestCase):
             'groups': [self.group1.name],
         }
 
-        synclists_detail_url = get_current_ui_url('synclists-detail',
-                                      kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'synclists-detail',
+            kwargs={"pk": synclist1.id})
         self.client.force_authenticate(user=self.user1)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
@@ -272,8 +274,9 @@ class TestUiSynclistViewSet(BaseTestCase):
         synclist1 = self._create_synclist(name=synclist_name,
                                           repository=repo1)
         synclist1.save()
-        synclists_detail_url = get_current_ui_url('synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'synclists-detail',
+            kwargs={"pk": synclist1.id})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             response = self.client.get(synclists_detail_url)
@@ -304,8 +307,9 @@ class TestUiSynclistViewSet(BaseTestCase):
                                           repository=repo1)
         synclist1.save()
 
-        synclists_detail_url = get_current_ui_url('synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'synclists-detail',
+            kwargs={"pk": synclist1.id})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             response = self.client.get(synclists_detail_url)
@@ -323,8 +327,9 @@ class TestUiSynclistViewSet(BaseTestCase):
         synclist1 = self._create_synclist(name=synclist_name,
                                           repository=repo1)
         synclist1.save()
-        synclists_detail_url = get_current_ui_url('synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'synclists-detail',
+            kwargs={"pk": synclist1.id})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             log.debug('delete url: %s', synclists_detail_url)
@@ -345,8 +350,9 @@ class TestUiSynclistViewSet(BaseTestCase):
         synclist1 = self._create_synclist(name=synclist_name,
                                           repository=repo1)
         synclist1.save()
-        synclists_detail_url = get_current_ui_url('synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'synclists-detail',
+            kwargs={"pk": synclist1.id})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             log.debug('delete url: %s', synclists_detail_url)
