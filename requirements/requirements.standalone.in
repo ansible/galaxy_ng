@@ -1,1 +1,1 @@
--e git+https://github.com/pulp/pulp-container.git@master#egg=pulp-container  # via galaxy-ng (setup.py), pulp-ansible, pulp-container
+pulp-container~=2.0.0
