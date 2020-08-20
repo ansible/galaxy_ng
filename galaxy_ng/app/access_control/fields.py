@@ -19,7 +19,7 @@ class GroupPermissionField(serializers.Field):
 
         perms = group_data['object_permissions']
 
-        if type(perms) is not list:
+        if not isinstance(perms, list):
             raise ValidationError(detail={
                 'groups': 'object_permissions must be a list of strings'})
 
@@ -48,7 +48,7 @@ class GroupPermissionField(serializers.Field):
         return rep
 
     def to_internal_value(self, data):
-        if type(data) is not list:
+        if not isinstance(data, list):
             raise ValidationError(detail={
                 'groups': 'Groups must be a list of group objects'
             })
