@@ -81,13 +81,6 @@ class CollectionVersionViewSet(LocalSettingsMixin,
     serializer_class = CollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
 
-    # FIXME(akl): This can be removed when we move to multiple repos for managing "certifiaction"
-    def get_queryset(self):
-        """
-        Returns a CollectionVersions queryset for specified distribution filtering on certification.
-        """
-        return super().get_queryset().filter(certification="certified")
-
     # TODO: This is cut&paste from pulp_ansible_views.CollectionVersionViewSet.list, so
     #       the serializer class can be overridden. Should be able to remove this
     #       once pulp_ansible serializers use something like _get_href that names
