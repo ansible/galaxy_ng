@@ -12,7 +12,7 @@ from rest_framework.response import Response
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api import permissions
+from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers
 from galaxy_ng.app.common import pulp
 from galaxy_ng.app import constants
@@ -21,6 +21,7 @@ from galaxy_ng.app import constants
 class CollectionViewSet(api_base.ViewSet):
     lookup_url_kwarg = 'collection'
     lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+'
+    permission_classes = [access_policy.CollectionAccessPolicy]
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)
@@ -155,6 +156,8 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
     serializer_class = serializers.CollectionVersionSerializer
     filterset_class = CollectionVersionFilter
 
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -181,9 +184,6 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
         methods=["PUT"],
         detail=True,
         url_path="certified",
-        permission_classes=api_base.GALAXY_PERMISSION_CLASSES + [
-            permissions.IsPartnerEngineer
-        ],
         serializer_class=serializers.CertificationSerializer
     )
     def set_certified(self, request, *args, **kwargs):
@@ -230,6 +230,8 @@ class CollectionImportViewSet(api_base.GenericViewSet):
     filterset_class = CollectionImportFilter
 
     ordering_fields = ('created',)
+
+    permission_classes = [access_policy.CollectionAccessPolicy]
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

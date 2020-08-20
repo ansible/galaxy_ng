@@ -7,7 +7,6 @@ from rest_framework import status
 
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.models import Namespace
-from galaxy_ng.app.api import permissions
 from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
 from galaxy_ng.app.api.v3.viewsets.namespace import INBOUND_REPO_NAME_FORMAT
 from galaxy_ng.app.constants import DeploymentMode
@@ -31,8 +30,7 @@ class TestV3NamespaceViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.admin_user = auth_models.User.objects.create(username='admin')
-        self.pe_group = auth_models.Group.objects.create(
-            name=permissions.IsPartnerEngineer.GROUP_NAME)
+        self.pe_group = self._create_partner_engineer_group()
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
@@ -110,6 +108,10 @@ class TestV3NamespaceViewSet(BaseTestCase):
                         {
                             "id": self.pe_group.id,
                             "name": self.pe_group.name,
+                            "object_permissions": [
+                                'galaxy.upload_to_namespace',
+                                'galaxy.change_namespace'
+                            ]
                         },
                     ],
                 },
@@ -129,10 +131,13 @@ class TestV3NamespaceViewSet(BaseTestCase):
             # Delete namespace + repo
             ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1_name})
             response = self.client.delete(ns_detail_url)
-            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-            self.assertEqual(0, len(AnsibleRepository.objects.filter(name=repo_name)))
-            self.assertEqual(0, len(AnsibleDistribution.objects.filter(name=repo_name)))
-            self.assertEqual(0, len(Namespace.objects.filter(name=ns1_name)))
+
+            # Namespace deletion is currently disabled via access policy. If we re-enable it
+            # we can re-enable these tests
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            # self.assertEqual(0, len(AnsibleRepository.objects.filter(name=repo_name)))
+            # self.assertEqual(0, len(AnsibleDistribution.objects.filter(name=repo_name)))
+            # self.assertEqual(0, len(Namespace.objects.filter(name=ns1_name)))
 
     def test_delete_namespace_no_error_if_no_repo_exist(self):
         ns2_name = "unittestnamespace2"
@@ -140,4 +145,4 @@ class TestV3NamespaceViewSet(BaseTestCase):
         ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns2_name})
         with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
             response = self.client.delete(ns_detail_url)
-            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

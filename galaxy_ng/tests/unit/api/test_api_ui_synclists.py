@@ -6,7 +6,6 @@ from rest_framework import status as http_code
 
 from pulp_ansible.app import models as pulp_ansible_models
 
-from galaxy_ng.app.api import permissions
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app import models as galaxy_models
 from galaxy_ng.app.models import auth as auth_models
@@ -17,11 +16,16 @@ log = logging.getLogger(__name__)
 
 
 class TestUiSynclistViewSet(BaseTestCase):
+    default_owner_permissions = [
+        'change_synclist',
+        'view_synclist',
+        'delete_synclist'
+    ]
+
     def setUp(self):
         super().setUp()
         self.admin_user = auth_models.User.objects.create(username='admin')
-        self.pe_group = auth_models.Group.objects.create(
-            name=permissions.IsPartnerEngineer.GROUP_NAME)
+        self.pe_group = self._create_partner_engineer_group()
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
@@ -38,9 +42,14 @@ class TestUiSynclistViewSet(BaseTestCase):
 
     def _create_synclist(
         self, name, repository, collections=None, namespaces=None,
-        policy=None, users=None, groups=None,
+        policy=None, groups=None,
     ):
         synclist = galaxy_models.SyncList.objects.create(name=name, repository=repository)
+        if groups:
+            groups_to_add = {}
+            for group in groups:
+                groups_to_add[group] = self.default_owner_permissions
+            synclist.groups = groups_to_add
         return synclist
 
     def test_synclist_create_as_user(self):
@@ -54,7 +63,6 @@ class TestUiSynclistViewSet(BaseTestCase):
             'collections': [],
             'namespaces': [],
             'policy': 'whitelist',
-            'users': [],
             'groups': [],
         }
 
@@ -82,7 +90,6 @@ class TestUiSynclistViewSet(BaseTestCase):
             'collections': [],
             'namespaces': [],
             'policy': 'whitelist',
-            'users': [],
             'groups': [],
         }
 
@@ -125,8 +132,11 @@ class TestUiSynclistViewSet(BaseTestCase):
             'collections': [],
             'namespaces': [ns1_name, ns2_name],
             'policy': 'whitelist',
-            'users': [self.admin_user.username],
-            'groups': [self.pe_group.name],
+            'groups': [{
+                'name': self.pe_group.name,
+                'id': self.pe_group.id,
+                'object_permissions': self.default_owner_permissions
+            }],
         }
 
         synclists_detail_url = reverse('galaxy:api:v3:ui:synclists-detail',
@@ -144,8 +154,7 @@ class TestUiSynclistViewSet(BaseTestCase):
             self.assertIn('repository', response.data)
             self.assertEqual(response.data['name'], synclist_name)
             self.assertEqual(response.data['policy'], "whitelist")
-            self.assertIn(self.admin_user.username, response.data['users'])
-            self.assertIn(self.pe_group.name, response.data['groups'])
+            self.assertEqual(self.pe_group.name, response.data['groups'][0]['name'])
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.patch(synclists_detail_url, post_data, format='json')
@@ -173,7 +182,6 @@ class TestUiSynclistViewSet(BaseTestCase):
             'collections': [],
             'namespaces': [ns1_name, ns2_name],
             'policy': 'whitelist',
-            'users': [self.user1.username],
             'groups': [self.group1.name],
         }
 

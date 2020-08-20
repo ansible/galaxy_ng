@@ -8,7 +8,6 @@ from rest_framework import status as http_code
 
 from pulp_ansible.app import models as pulp_ansible_models
 
-from galaxy_ng.app.api import permissions
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app import models as galaxy_models
 from galaxy_ng.app.models import auth as auth_models
@@ -20,11 +19,16 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 
 class TestUiMySyncListViewSet(BaseTestCase):
+    default_owner_permissions = [
+        'change_synclist',
+        'view_synclist',
+        'delete_synclist'
+    ]
+
     def setUp(self):
         super().setUp()
         self.admin_user = auth_models.User.objects.create(username='admin')
-        self.pe_group = auth_models.Group.objects.create(
-            name=permissions.IsPartnerEngineer.GROUP_NAME)
+        self.pe_group = self._create_partner_engineer_group()
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
@@ -49,10 +53,14 @@ class TestUiMySyncListViewSet(BaseTestCase):
 
     def _create_synclist(
         self, name, repository, collections=None, namespaces=None,
-        policy=None, users=None, groups=None,
+        policy=None, groups=None,
     ):
         synclist = galaxy_models.SyncList.objects.create(name=name, repository=repository)
-        synclist.groups.set(groups)
+        if groups:
+            groups_to_add = {}
+            for group in groups:
+                groups_to_add[group] = self.default_owner_permissions
+            synclist.groups = groups_to_add
         return synclist
 
     def test_my_synclist_create(self):
@@ -66,7 +74,6 @@ class TestUiMySyncListViewSet(BaseTestCase):
             'collections': [],
             'namespaces': [],
             'policy': 'whitelist',
-            'users': [],
             'groups': [],
         }
 
@@ -75,12 +82,7 @@ class TestUiMySyncListViewSet(BaseTestCase):
             response = self.client.post(self.synclists_url, post_data, format='json')
             log.debug('response: %s', response)
 
-            self.assertEqual(response.status_code, http_code.HTTP_201_CREATED)
-            log.debug('response.data: %s', response.data)
-
-            self.assertIn('name', response.data)
-            self.assertIn('repository', response.data)
-            self.assertEqual(response.data['name'], synclist_name)
+            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.post(self.synclists_url, post_data, format='json')
@@ -109,8 +111,13 @@ class TestUiMySyncListViewSet(BaseTestCase):
             'collections': [],
             'namespaces': [ns1_name, ns2_name],
             'policy': 'whitelist',
-            'users': [self.user1.username],
-            'groups': [self.group1.name],
+            'groups': [
+                {
+                    'id': self.group1.id,
+                    'name': self.group1.name,
+                    'object_permissions': self.default_owner_permissions
+                },
+            ],
         }
 
         synclists_detail_url = reverse('galaxy:api:v3:ui:my-synclists-detail',
@@ -127,8 +134,15 @@ class TestUiMySyncListViewSet(BaseTestCase):
             self.assertIn('repository', response.data)
             self.assertEqual(response.data['name'], synclist_name)
             self.assertEqual(response.data['policy'], "whitelist")
-            self.assertIn(self.user1.username, response.data['users'])
-            self.assertIn(self.group1.name, response.data['groups'])
+
+            # Sort permission list for comparison
+            response.data['groups'][0]['object_permissions'].sort()
+            self.default_owner_permissions.sort()
+            self.assertEquals(response.data['groups'], [{
+                'name': self.group1.name,
+                'id': self.group1.id,
+                'object_permissions': self.default_owner_permissions
+            }])
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.patch(synclists_detail_url, post_data, format='json')
@@ -161,7 +175,15 @@ class TestUiMySyncListViewSet(BaseTestCase):
 
             self.assertIsInstance(data, list)
             self.assertEquals(len(data), 1)
-            self.assertEquals(data[0]['groups'], [self.group1.name])
+
+            # Sort permission list for comparison
+            data[0]['groups'][0]['object_permissions'].sort()
+            self.default_owner_permissions.sort()
+            self.assertEquals(data[0]['groups'], [{
+                'name': self.group1.name,
+                'id': self.group1.id,
+                'object_permissions': self.default_owner_permissions
+            }])
             self.assertEquals(data[0]['name'], "test_synclist1")
             self.assertEquals(data[0]['policy'], "blacklist")
             self.assertEquals(data[0]['repository'], repo1.pulp_id)
@@ -233,7 +255,7 @@ class TestUiMySyncListViewSet(BaseTestCase):
             response = self.client.delete(synclists_detail_url)
             log.debug('delete response: %s', response)
 
-            self.assertEqual(response.status_code, http_code.HTTP_204_NO_CONTENT)
+            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.delete(synclists_detail_url)

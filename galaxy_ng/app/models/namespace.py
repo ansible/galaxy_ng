@@ -1,13 +1,15 @@
 from django.db import models
 from django.db import transaction
+from django_lifecycle import LifecycleModel
+from pulpcore.plugin.models import AutoDeleteObjPermsMixin
 
-from . import auth as auth_models
+from galaxy_ng.app.access_control import mixins
 
 
 __all__ = ("Namespace", "NamespaceLink")
 
 
-class Namespace(models.Model):
+class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin, AutoDeleteObjPermsMixin):
     """
     A model representing Ansible content namespace.
 
@@ -35,9 +37,6 @@ class Namespace(models.Model):
     description = models.CharField(max_length=256, blank=True)
     resources = models.TextField(blank=True)
 
-    # References
-    groups = models.ManyToManyField(auth_models.Group, related_name="namespaces")
-
     def __str__(self):
         return self.name
 
@@ -50,8 +49,13 @@ class Namespace(models.Model):
             for link in links
         )
 
+    class Meta:
+        permissions = (
+            ('upload_to_namespace', 'Can upload collections to namespace'),
+        )
 
-class NamespaceLink(models.Model):
+
+class NamespaceLink(LifecycleModel):
     """
     A model representing a Namespace link.
 

@@ -7,7 +7,9 @@ from rest_framework.response import Response
 from rest_framework import status as http_code
 
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.permissions import RestrictOnCloudDeployments
+from galaxy_ng.app.access_control import access_policy
+
+
 from galaxy_ng.app.api.ui.serializers import LoginSerializer
 
 
@@ -29,7 +31,7 @@ class _CSRFSessionAuthentication(SessionAuthentication):
 class LoginView(api_base.GenericAPIView):
     serializer_class = LoginSerializer
     authentication_classes = (_CSRFSessionAuthentication,)
-    permission_classes = (RestrictOnCloudDeployments,)
+    permission_classes = [access_policy.LoginAccessPolicy]
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, *args, **kwargs):
@@ -51,7 +53,7 @@ class LoginView(api_base.GenericAPIView):
 
 
 class LogoutView(api_base.APIView):
-    permission_classes = (RestrictOnCloudDeployments,)
+    permission_classes = [access_policy.LogoutAccessPolicy]
 
     def post(self, request, *args, **kwargs):
         django_auth.logout(request)

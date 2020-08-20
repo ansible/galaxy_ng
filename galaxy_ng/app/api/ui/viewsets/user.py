@@ -3,10 +3,9 @@ from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 
 from rest_framework import mixins
-from rest_framework import permissions as drf_permissions
 
 from galaxy_ng.app.models import auth as auth_models
-from galaxy_ng.app.api import permissions
+from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers
 from galaxy_ng.app.api import base as api_base
 
@@ -40,12 +39,7 @@ class UserViewSet(
     queryset = auth_models.User.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = UserFilter
-
-    def get_permissions(self):
-        return super().get_permissions() + [
-            permissions.IsPartnerEngineer(),
-            permissions.RestrictOnCloudDeployments()
-        ]
+    permission_classes = [access_policy.UserAccessPolicy]
 
 
 class CurrentUserViewSet(
@@ -55,12 +49,7 @@ class CurrentUserViewSet(
 ):
     serializer_class = serializers.CurrentUserSerializer
     model = auth_models.User
-
-    def get_permissions(self):
-        return super().get_permissions() + [
-            drf_permissions.IsAuthenticated(),
-            permissions.RestrictUnsafeOnCloudDeployments()
-        ]
+    permission_classes = [access_policy.UserAccessPolicy]
 
     def get_object(self):
         return get_object_or_404(self.model, pk=self.request.user.pk)

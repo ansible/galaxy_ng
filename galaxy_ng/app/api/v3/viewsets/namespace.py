@@ -6,7 +6,7 @@ from django_filters.rest_framework import filterset, DjangoFilterBackend
 from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 
 from galaxy_ng.app import models
-from galaxy_ng.app.api import permissions
+from galaxy_ng.app.access_control.access_policy import NamespaceAccessPolicy
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.v3 import serializers
 
@@ -47,15 +47,13 @@ class NamespaceViewSet(api_base.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = NamespaceFilter
     swagger_schema = None
+    permission_classes = [NamespaceAccessPolicy]
 
-    def get_permissions(self):
-        permission_list = super().get_permissions()
-        if self.request and self.request.method == 'POST':
-            permission_list.append(permissions.IsPartnerEngineer())
-        elif self.request and self.request.method == 'PUT':
-            permission_list.append(permissions.IsNamespaceOwnerOrPartnerEngineer())
-
-        return permission_list
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return serializers.NamespaceSummarySerializer
+        else:
+            return self.serializer_class
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):

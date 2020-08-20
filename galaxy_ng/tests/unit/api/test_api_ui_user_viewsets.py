@@ -5,7 +5,6 @@ from django.urls import reverse
 from rest_framework import status
 
 from galaxy_ng.app.models import auth as auth_models
-from galaxy_ng.app.api import permissions
 from galaxy_ng.app.constants import DeploymentMode
 
 
@@ -20,8 +19,7 @@ class TestUiNamespaceViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.admin_user = auth_models.User.objects.create(username='admin')
-        self.pe_group = auth_models.Group.objects.create(
-            name=permissions.IsPartnerEngineer.GROUP_NAME)
+        self.pe_group = self._create_partner_engineer_group()
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
@@ -49,11 +47,19 @@ class TestUiNamespaceViewSet(BaseTestCase):
     def test_user_get(self):
         url = '{}{}/'.format(self.user_url, self.user.id)
 
+        # Users can view themselves
         self.client.force_authenticate(user=self.user)
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # But not other users
+        url = '{}{}/'.format(self.user_url, self.admin_user.id)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        url = '{}{}/'.format(self.user_url, self.user.id)
         self.client.force_authenticate(user=self.admin_user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)

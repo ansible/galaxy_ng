@@ -6,9 +6,9 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
+
 from galaxy_ng.app import models
-from galaxy_ng.app.models import auth as auth_models
-from galaxy_ng.app.api.v3.serializers.group import GroupSummarySerializer
+from galaxy_ng.app.access_control.fields import GroupPermissionField
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class NamespaceLinkSerializer(serializers.ModelSerializer):
 class NamespaceSerializer(serializers.ModelSerializer):
     links = NamespaceLinkSerializer(many=True, required=False)
 
-    groups = GroupSummarySerializer(many=True)
+    groups = GroupPermissionField()
 
     class Meta:
         model = models.Namespace
@@ -54,30 +54,11 @@ class NamespaceSerializer(serializers.ModelSerializer):
                 'name': "Name cannot begin with '_'"})
         return name
 
-    def to_internal_value(self, data):
-        groups = data.get('groups')
-        if groups:
-            new_groups = []
-            for group_data in groups:
-                try:
-                    auth_models.Group.objects.get(**group_data)
-                except auth_models.Group.DoesNotExist:
-                    raise ValidationError(detail={
-                        'groups': "Group name=%s, id=%s does not exist" % (group_data.get('name'),
-                                                                           group_data.get('id'))})
-                new_groups.append(group_data)
-            data['groups'] = new_groups
-
-        return super().to_internal_value(data)
-
     @transaction.atomic
     def create(self, validated_data):
         links_data = validated_data.pop('links', [])
-        groups_data = validated_data.pop('groups', None)
 
         instance = models.Namespace.objects.create(**validated_data)
-
-        ngs = auth_models.Group.objects.filter(name__in=[x['name'] for x in groups_data])
 
         # create NamespaceLink objects if needed
         new_links = []
@@ -85,9 +66,7 @@ class NamespaceSerializer(serializers.ModelSerializer):
             ns_link, created = models.NamespaceLink.objects.get_or_create(**link_data)
             new_links.append(ns_link)
 
-        instance.groups.set(ngs)
         instance.links.set(new_links)
-
         return instance
 
     @transaction.atomic
@@ -97,20 +76,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
         if links is not None:
             instance.set_links(links)
 
-        groups_data = validated_data.pop('groups', None)
-
-        new_groups = []
-        if groups_data is not None:
-            for group_data in groups_data:
-                new_groups.append(auth_models.Group.objects.get(**group_data))
-
-            instance.groups.clear()
-            instance.groups.set(new_groups)
-
         instance = super().update(instance, validated_data)
-
         instance.save()
-
         return instance
 
 
@@ -128,6 +95,7 @@ class NamespaceSummarySerializer(NamespaceSerializer):
             'email',
             'avatar_url',
             'description',
+            'groups',
         )
 
         read_only_fields = ('name', )
