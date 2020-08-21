@@ -10,7 +10,10 @@
 set -uv
 
 # check for imports not from pulpcore.plugin. exclude tests
-MATCHES=$(grep -n -r --include \*.py "from pulpcore.*import" . | grep -v "tests\|plugin")
+MATCHES=$(grep -n -r --include \*.py "from pulpcore.*import" . \
+    | grep -v "tests\|plugin" \
+    | grep -v "repository.*add_and_remove" \
+    | grep -v "pulpcore.app.*viewsets")
 
 if [ $? -ne 1 ]; then
   printf "\nERROR: Detected bad imports from pulpcore:\n"
