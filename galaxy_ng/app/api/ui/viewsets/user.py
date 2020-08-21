@@ -23,7 +23,15 @@ class UserFilter(filterset.FilterSet):
 
     class Meta:
         model = auth_models.User
-        fields = ('username', 'email', 'first_name', 'last_name', 'date_joined')
+        fields = {
+            'username': ['exact', 'contains', 'startswith'],
+            'email': ['exact', 'contains', 'startswith'],
+            'first_name': ['exact', 'contains', 'startswith'],
+            'last_name': ['exact', 'contains', 'startswith'],
+            'date_joined': ['exact'],
+            'groups__name': ['exact'],
+            'groups': ['exact']
+        }
 
 
 class UserViewSet(

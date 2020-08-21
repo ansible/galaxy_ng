@@ -85,3 +85,7 @@ class LogoutAccessPolicy(AccessPolicyBase):
 
 class TokenAccessPolicy(AccessPolicyBase):
     NAME = 'TokenView'
+
+
+class GroupAccessPolicy(AccessPolicyBase):
+    NAME = 'GroupViewSet'
