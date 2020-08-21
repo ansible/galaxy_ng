@@ -1,5 +1,4 @@
 from django.test import override_settings
-from django.urls import reverse
 
 from rest_framework import status as http_code
 from rest_framework.response import Response
@@ -8,6 +7,8 @@ from rest_framework.test import APIClient, APITestCase
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app.models import auth as auth_models
 
+from .base import get_current_ui_url
+
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
 class TestLoginViewsStandalone(APITestCase):
@@ -15,9 +16,9 @@ class TestLoginViewsStandalone(APITestCase):
         super().setUp()
         self.client = APIClient()
 
-        self.login_url = reverse("galaxy:api:v3:ui:auth-login")
-        self.logout_url = reverse("galaxy:api:v3:ui:auth-logout")
-        self.me_url = reverse("galaxy:api:v3:ui:me")
+        self.login_url = get_current_ui_url("auth-login")
+        self.logout_url = get_current_ui_url("auth-logout")
+        self.me_url = get_current_ui_url("me")
 
         self.users = [
             auth_models.User.objects.create_user(username="test1", password="test1-secret"),

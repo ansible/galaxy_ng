@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from galaxy_ng.app import models
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.api.ui import serializers, versioning
 from galaxy_ng.app.common import pulp
 from galaxy_ng.app import constants
 
@@ -22,6 +22,7 @@ class CollectionViewSet(api_base.ViewSet):
     lookup_url_kwarg = 'collection'
     lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+'
     permission_classes = [access_policy.CollectionAccessPolicy]
+    versioning_class = versioning.UIVersioning
 
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)
@@ -155,6 +156,7 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
     queryset = CollectionVersion.objects.all()
     serializer_class = serializers.CollectionVersionSerializer
     filterset_class = CollectionVersionFilter
+    versioning_class = versioning.UIVersioning
 
     permission_classes = [access_policy.CollectionAccessPolicy]
 
@@ -211,6 +213,7 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
 class CollectionImportFilter(filterset.FilterSet):
     namespace = filters.CharFilter(field_name='namespace__name')
     created = filters.DateFilter(field_name='created_at')
+    versioning_class = versioning.UIVersioning
 
     sort = OrderingFilter(
         fields=(('created_at', 'created'),)
@@ -228,6 +231,8 @@ class CollectionImportViewSet(api_base.GenericViewSet):
 
     filter_backends = [DjangoFilterBackend]
     filterset_class = CollectionImportFilter
+
+    versioning_class = versioning.UIVersioning
 
     ordering_fields = ('created',)
 

@@ -1,6 +1,5 @@
 import logging
 
-from django.urls import reverse
 
 from rest_framework import status
 
@@ -8,7 +7,7 @@ from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import DeploymentMode
 
 
-from .base import BaseTestCase
+from .base import BaseTestCase, get_current_ui_url
 # from .x_rh_identity import user_x_rh_identity
 
 
@@ -23,8 +22,8 @@ class TestUiNamespaceViewSet(BaseTestCase):
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
-        self.user_url = reverse('galaxy:api:v3:ui:users-list')
-        self.me_url = reverse('galaxy:api:v3:ui:me')
+        self.user_url = get_current_ui_url('users-list')
+        self.me_url = get_current_ui_url('me')
 
     def test_user_list(self):
         self.client.force_authenticate(user=self.user)

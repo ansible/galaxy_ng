@@ -2,8 +2,6 @@
 import logging
 import pprint
 
-from django.urls import reverse
-
 from rest_framework import status as http_code
 
 from pulp_ansible.app import models as pulp_ansible_models
@@ -12,7 +10,7 @@ from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app import models as galaxy_models
 from galaxy_ng.app.models import auth as auth_models
 
-from .base import BaseTestCase
+from .base import BaseTestCase, get_current_ui_url
 
 log = logging.getLogger(__name__)
 logging.getLogger().setLevel(logging.DEBUG)
@@ -32,8 +30,7 @@ class TestUiMySyncListViewSet(BaseTestCase):
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
-        self.synclists_url = reverse('galaxy:api:v3:ui:my-synclists-list')
-        # self.me_url = reverse('galaxy:api:v3:ui:me')
+        self.synclists_url = get_current_ui_url('my-synclists-list')
         self.group1 = auth_models.Group.objects.create(name='test1_group')
         self.user1 = auth_models.User.objects.create_user(username="test1", password="test1-secret")
         self.user1.groups.add(self.group1)
@@ -120,8 +117,9 @@ class TestUiMySyncListViewSet(BaseTestCase):
             ],
         }
 
-        synclists_detail_url = reverse('galaxy:api:v3:ui:my-synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'my-synclists-detail',
+            kwargs={"pk": synclist1.id})
         self.client.force_authenticate(user=self.user1)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             response = self.client.patch(synclists_detail_url, post_data, format='json')
@@ -217,8 +215,9 @@ class TestUiMySyncListViewSet(BaseTestCase):
                                           groups=[self.group1],)
         synclist1.save()
 
-        synclists_detail_url = reverse('galaxy:api:v3:ui:my-synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'my-synclists-detail',
+            kwargs={"pk": synclist1.id})
         log.debug('synclists_detail_url: %s', synclists_detail_url)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
@@ -247,8 +246,9 @@ class TestUiMySyncListViewSet(BaseTestCase):
                                           repository=repo1,
                                           groups=[self.group1])
         synclist1.save()
-        synclists_detail_url = reverse('galaxy:api:v3:ui:my-synclists-detail',
-                                       kwargs={"pk": synclist1.id})
+        synclists_detail_url = get_current_ui_url(
+            'my-synclists-detail',
+            kwargs={"pk": synclist1.id})
         log.debug('delete url: %s', synclists_detail_url)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):

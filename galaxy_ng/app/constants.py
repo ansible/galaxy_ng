@@ -10,3 +10,7 @@ class CertificationStatus(enum.Enum):
 class DeploymentMode(enum.Enum):
     STANDALONE = 'standalone'
     INSIGHTS = 'insights'
+
+
+CURRENT_UI_API_VERSION = 'v1'
+ALL_UI_API_VERSION = {'v1': 'v1/'}
