@@ -306,3 +306,10 @@ class CollectionImportViewSet(api_base.GenericViewSet):
         task_info = api.get(prefix=settings.X_PULP_API_PREFIX, id=self.kwargs['task_id'])
         data = serializers.ImportTaskDetailSerializer(task_info, context={'task_obj': task}).data
         return Response(data)
+
+
+class CollectionRemoteViewSet(api_base.ModelViewSet):
+    queryset = models.collectionremote.CollectionRemoteProxyModel.objects.filter(
+        name__in=['rh-certified', 'community']
+    )
+    serializer_class = serializers.CollectionRemoteSerializer

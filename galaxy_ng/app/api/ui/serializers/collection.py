@@ -7,7 +7,8 @@ import semantic_version
 from .base import Serializer
 from galaxy_ng.app.api.v3.serializers.namespace import NamespaceSummarySerializer
 from galaxy_ng.app.models import Namespace
-
+from galaxy_ng.app.access_control.fields import GroupPermissionField
+from galaxy_ng.app.models.collectionremote import CollectionRemoteProxyModel
 
 log = logging.getLogger(__name__)
 
@@ -192,3 +193,36 @@ class RepositoryCollectionDetailSerializer(_RepositoryCollectionSerializer):
     def get_latest_version(self, obj):
         version = self._get_latest_version(obj)
         return CollectionVersionDetailSerializer(version).data
+
+
+class CollectionRemoteSerializer(serializers.ModelSerializer):
+    last_sync_task = serializers.SerializerMethodField()
+    groups = GroupPermissionField()
+
+    class Meta:
+        model = CollectionRemoteProxyModel
+        fields = (
+            'name',
+            'url',
+            'auth_url',
+            'token',
+            'policy',
+            'requirements_file',
+            'pulp_created',
+            'pulp_last_updated',
+            'groups',
+            'last_sync_task'
+        )
+
+    def get_last_sync_task(self, obj):
+        """Gets last_sync_task from Pulp using remote->repository relation"""
+
+        # repository = obj.repository_set.last()
+        # sync_task = RepositorySyncTask.objects.get(repository=repository)
+
+        return {
+            "state": None,
+            "started_at": None,
+            "finished_at": None,
+            "error": None
+        }

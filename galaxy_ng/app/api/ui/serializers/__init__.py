@@ -10,6 +10,7 @@ from .collection import (
     CertificationSerializer,
     CollectionVersionDetailSerializer,
     CollectionVersionBaseSerializer,
+    CollectionRemoteSerializer,
 )
 from .imports import (
     ImportTaskDetailSerializer,
@@ -38,6 +39,7 @@ __all__ = (
     'CertificationSerializer',
     'CollectionVersionDetailSerializer',
     'CollectionVersionBaseSerializer',
+    'CollectionRemoteSerializer',
     # imports
     'ImportTaskDetailSerializer',
     'ImportTaskListSerializer',
