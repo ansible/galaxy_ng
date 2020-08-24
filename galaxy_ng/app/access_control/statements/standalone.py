@@ -140,4 +140,29 @@ STANDALONE_STATEMENTS = {
             "effect": "allow"
         }
     ],
+    'GroupViewSet': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.delete_group"
+        },
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.add_group"
+        },
+        {
+            "action": "update",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.update_group"
+        },
+    ],
 }

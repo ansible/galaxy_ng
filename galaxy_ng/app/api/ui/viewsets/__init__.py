@@ -9,6 +9,7 @@ from .tags import TagsViewSet
 from .user import UserViewSet, CurrentUserViewSet
 from .synclist import SyncListViewSet
 from .root import APIRootView
+from .group import GroupViewSet, GroupModelPermissionViewSet, GroupUserViewSet
 
 __all__ = (
     'NamespaceViewSet',
@@ -22,4 +23,7 @@ __all__ = (
     'UserViewSet',
     'SyncListViewSet',
     'APIRootView',
+    'GroupViewSet',
+    'GroupModelPermissionViewSet',
+    'GroupUserViewSet'
 )

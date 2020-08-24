@@ -135,4 +135,12 @@ INSIGHTS_STATEMENTS = {
             "effect": "allow",
         },
     ],
+    'GroupViewSet': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_rh_entitlements",
+        },
+    ]
 }

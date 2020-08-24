@@ -29,10 +29,44 @@ auth_views = [
     path("logout/", views.LogoutView.as_view(), name="auth-logout"),
 ]
 
+# Groups are subclassed from pulpcore and use nested viewsets, so router.register
+# unfortunately doesn't work
+group_paths = [
+    path(
+        "",
+        viewsets.GroupViewSet.as_view({'get': 'list', 'post': 'create'}),
+        name='groups'),
+    path(
+        "<str:pk>/",
+        viewsets.GroupViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}),
+        name='group-detail'),
+    path(
+        "<str:group_pk>/model-permissions/",
+        viewsets.GroupModelPermissionViewSet.as_view({
+            'get': 'list', 'post': 'create'}),
+        name='group-model-permissions'),
+    path(
+        "<str:group_pk>/model-permissions/<str:pk>/",
+        viewsets.GroupModelPermissionViewSet.as_view({
+            'get': 'retrieve', 'delete': 'destroy'}),
+        name='group-model-permissions-detail'),
+    path(
+        "<str:group_pk>/users/",
+        viewsets.GroupUserViewSet.as_view({
+            'get': 'list', 'post': 'create'}),
+        name='group-model-permissions'),
+    path(
+        "<str:group_pk>/users/<str:pk>/",
+        viewsets.GroupUserViewSet.as_view({
+            'delete': 'destroy'}),
+        name='group-model-permissions-detail'),
+]
+
 paths = [
     path('', include(router.urls)),
 
     path('auth/', include(auth_views)),
+    path('groups/', include(group_paths)),
 
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve
     # to look up values with an ID
