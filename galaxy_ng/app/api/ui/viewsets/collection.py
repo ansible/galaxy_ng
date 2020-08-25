@@ -4,7 +4,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import action as drf_action
 from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion, Collection
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
@@ -125,8 +124,84 @@ class CollectionViewSet(api_base.ViewSet):
         return namespaces
 
 
+# TODO(awcrosby): After "ui/collections/" endpoints stop being used by UI,
+# remove Collection*[ViewSet|Serializer] classes and replace with
+# RepositoryCollection*[ViewSet|Serializer] classes
+
+class RepositoryCollectionFilter(filterset.FilterSet):
+    """Support filtering collection list by namespace query param."""
+    versioning_class = versioning.UIVersioning
+
+    class Meta:
+        model = Collection
+        fields = ['namespace']
+
+
+class RepositoryCollectionViewSet(api_base.GenericViewSet):
+    filterset_class = RepositoryCollectionFilter
+    versioning_class = versioning.UIVersioning
+
+    def list(self, request, *args, **kwargs):
+        repo_name = self.kwargs['repo_name']
+        queryset = Collection.objects.all()
+        queryset = self.filter_queryset(queryset)
+        queryset = self._filter_by_repo(queryset, repo_name)
+        page = self.paginate_queryset(queryset)
+        data = serializers.RepositoryCollectionListSerializer(
+            page,
+            many=True,
+            context={
+                'repository': repo_name,
+            }
+        ).data
+        return self.get_paginated_response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        repo_name = self.kwargs['repo_name']
+        namespace = self.kwargs['namespace']
+        name = self.kwargs['name']
+
+        namespace_obj = get_object_or_404(models.Namespace, name=namespace)
+
+        collections = Collection.objects.filter(namespace=namespace, name=name)
+        if not collections:
+            raise NotFound(f'Collection not found for: {namespace}.{name}')
+
+        collection = self._filter_by_repo(collections, repo_name).first()
+        if not collection:
+            raise NotFound(f'Repository {repo_name} has no collection: {namespace}.{name}')
+
+        data = serializers.RepositoryCollectionDetailSerializer(
+            collection,
+            context={
+                'namespace': namespace_obj,
+                'repository': repo_name,
+            }
+        ).data
+        return Response(data)
+
+    @staticmethod
+    def _filter_by_repo(collections_queryset, repo_name):
+        """Filter for Collections that have CollectionVersions in a Repository."""
+        try:
+            distro = AnsibleDistribution.objects.get(base_path=repo_name)
+            repository_version = distro.repository.latest_version()
+            collection_versions = CollectionVersion.objects.all()
+            versions_in_repo = collection_versions.filter(pk__in=repository_version.content)
+            return collections_queryset.filter(versions__pk__in=versions_in_repo).distinct()
+        except ObjectDoesNotExist:
+            return Collection.objects.none()
+
+    @staticmethod
+    def _query_namespaces(names):
+        queryset = models.Namespace.objects.filter(name__in=names)
+        namespaces = {ns.name: ns for ns in queryset}
+        return namespaces
+
+
 class CollectionVersionFilter(filterset.FilterSet):
     repository = filters.CharFilter(field_name='repository', method='repo_filter')
+    versioning_class = versioning.UIVersioning
 
     def repo_filter(self, queryset, name, value):
         try:
@@ -173,41 +248,13 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
         try:
             collection_version = CollectionVersion.objects.get(
                 namespace=namespace,
-                collection=Collection.objects.get(name=name),
+                collection=Collection.objects.get(namespace=namespace, name=name),
                 version=version,
             )
         except ObjectDoesNotExist:
             raise NotFound(f'Collection version not found for: {self.kwargs["version"]}')
         serializer = serializers.CollectionVersionDetailSerializer(collection_version)
         return Response(serializer.data)
-
-    # TODO: remove set_certified() once UI changes approval from certification flag to repo move
-    @drf_action(
-        methods=["PUT"],
-        detail=True,
-        url_path="certified",
-        serializer_class=serializers.CertificationSerializer
-    )
-    def set_certified(self, request, *args, **kwargs):
-        namespace, name, version = self.kwargs['version'].split('/')
-        namespace_obj = get_object_or_404(models.Namespace, name=namespace)
-        self.check_object_permissions(request, namespace_obj)
-
-        api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())
-        serializer = serializers.CertificationSerializer(
-            data=request.data,
-            context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        certification = serializer.validated_data.get('certification')
-
-        response = api.set_certified(
-            prefix=settings.X_PULP_API_PREFIX,
-            namespace=namespace,
-            name=name,
-            version=version,
-            certification_info=galaxy_pulp.CertificationInfo(certification),
-        )
-        return Response(response)
 
 
 class CollectionImportFilter(filterset.FilterSet):
