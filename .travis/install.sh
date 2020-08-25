@@ -53,7 +53,7 @@ image:
   tag: "${TAG}"
 plugins:
   - name: pulpcore
-    source: pulpcore
+    source: pulpcore~=3.5.0
   - name: galaxy_ng
     source: ./galaxy_ng
 services:
