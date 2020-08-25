@@ -27,6 +27,10 @@ from .synclist import (
     SyncListCollectionSummarySerializer,
 )
 
+from .distribution import (
+    DistributionSerializer
+)
+
 __all__ = (
     # auth
     'LoginSerializer',
@@ -50,4 +54,6 @@ __all__ = (
     # synclist
     'SyncListSerializer',
     'SyncListCollectionSummarySerializer',
+    # distribution,
+    'DistributionSerializer'
 )

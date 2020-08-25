@@ -16,6 +16,7 @@ from .user import UserViewSet, CurrentUserViewSet
 from .synclist import SyncListViewSet
 from .root import APIRootView
 from .group import GroupViewSet, GroupModelPermissionViewSet, GroupUserViewSet
+from .distribution import DistributionViewSet
 
 __all__ = (
     'NamespaceViewSet',
@@ -34,4 +35,5 @@ __all__ = (
     'GroupViewSet',
     'GroupModelPermissionViewSet',
     'GroupUserViewSet'
+    'DistributionViewSet'
 )

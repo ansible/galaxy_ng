@@ -24,6 +24,7 @@ router.register(
 router.register('tags', viewsets.TagsViewSet, basename='tags')
 router.register('synclists', viewsets.SyncListViewSet, basename='synclists')
 router.register('remotes', viewsets.CollectionRemoteViewSet, basename='remotes')
+router.register('distributions', viewsets.DistributionViewSet, basename='distributions')
 
 auth_views = [
     path("login/", views.LoginView.as_view(), name="auth-login"),
