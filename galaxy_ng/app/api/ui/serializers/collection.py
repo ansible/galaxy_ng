@@ -8,7 +8,7 @@ from .base import Serializer
 from galaxy_ng.app.api.v3.serializers.namespace import NamespaceSummarySerializer
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.access_control.fields import GroupPermissionField
-from galaxy_ng.app.models.collectionremote import CollectionRemoteProxyModel
+from galaxy_ng.app.models.collectionremote import CollectionRemoteProxyModel, CollectionSyncTask
 
 log = logging.getLogger(__name__)
 
@@ -198,6 +198,8 @@ class RepositoryCollectionDetailSerializer(_RepositoryCollectionSerializer):
 class CollectionRemoteSerializer(serializers.ModelSerializer):
     last_sync_task = serializers.SerializerMethodField()
     groups = GroupPermissionField()
+    created_at = serializers.DateTimeField(source='pulp_created')
+    updated_at = serializers.DateTimeField(source='pulp_last_updated')
 
     class Meta:
         model = CollectionRemoteProxyModel
@@ -208,8 +210,8 @@ class CollectionRemoteSerializer(serializers.ModelSerializer):
             'token',
             'policy',
             'requirements_file',
-            'pulp_created',
-            'pulp_last_updated',
+            'created_at',
+            'updated_at',
             'groups',
             'last_sync_task'
         )
@@ -217,12 +219,17 @@ class CollectionRemoteSerializer(serializers.ModelSerializer):
     def get_last_sync_task(self, obj):
         """Gets last_sync_task from Pulp using remote->repository relation"""
 
-        # repository = obj.repository_set.last()
-        # sync_task = RepositorySyncTask.objects.get(repository=repository)
+        sync_task = CollectionSyncTask.objects.filter(
+            repository=obj.repository_set.last()
+        ).last()
+
+        if not sync_task:
+            # UI handles `null` as "no status"
+            return
 
         return {
-            "state": None,
-            "started_at": None,
-            "finished_at": None,
-            "error": None
+            "state": sync_task.task.state,
+            "started_at": sync_task.task.started_at,
+            "finished_at": sync_task.task.finished_at,
+            "error": sync_task.task.error
         }
