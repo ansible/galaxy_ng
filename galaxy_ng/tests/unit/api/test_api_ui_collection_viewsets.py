@@ -1,9 +1,13 @@
 import urllib
 
 from django.test import override_settings
-from pulp_ansible.app.models import (AnsibleDistribution, AnsibleRepository,
-                                     Collection, CollectionVersion)
-
+from pulp_ansible.app.models import (
+    AnsibleDistribution,
+    AnsibleRepository,
+    Collection,
+    CollectionVersion,
+    CollectionRemote
+)
 from galaxy_ng.app import models
 from galaxy_ng.app.constants import DeploymentMode
 from .base import BaseTestCase, get_current_ui_url
@@ -16,7 +20,7 @@ def _create_repo(name, **kwargs):
 
 
 def _create_remote(name, url, **kwargs):
-    return models.collectionremote.CollectionRemoteProxyModel.objects.create(
+    return CollectionRemote.objects.create(
         name=name, url=url, **kwargs
     )
 

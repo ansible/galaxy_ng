@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('core', '0042_rbac_for_tasks'),
         ('ansible', '0021_rename_role_remote'),
-        ('galaxy', '0005_collectionremoteproxymodel'),
+        ('galaxy', '0004_rbac'),
     ]
 
     operations = [

@@ -4,7 +4,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from drf_spectacular.utils import extend_schema
-from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion, Collection
+from pulp_ansible.app.models import (
+    AnsibleDistribution,
+    CollectionVersion,
+    Collection,
+    CollectionRemote,
+)
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -309,7 +314,7 @@ class CollectionImportViewSet(api_base.GenericViewSet):
 
 
 class CollectionRemoteViewSet(api_base.ModelViewSet):
-    queryset = models.collectionremote.CollectionRemoteProxyModel.objects.filter(
-        name__in=['rh-certified', 'community']
-    )
+    queryset = CollectionRemote.objects.filter(name__in=['rh-certified', 'community'])
     serializer_class = serializers.CollectionRemoteSerializer
+
+    permission_classes = [access_policy.CollectionRemoteAccessPolicy]

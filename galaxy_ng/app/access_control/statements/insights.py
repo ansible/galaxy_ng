@@ -49,6 +49,13 @@ INSIGHTS_STATEMENTS = {
                 "has_rh_entitlements"]
         }
     ],
+    'CollectionRemoteViewSet': [
+        {
+            "action": ["list"],
+            "principal": "authenticated",
+            "effect": "allow"
+        }
+    ],
     'UserViewSet': [
         {
             "action": ["retrieve"],

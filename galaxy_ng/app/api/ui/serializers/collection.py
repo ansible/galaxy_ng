@@ -1,14 +1,13 @@
 import logging
 
-from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion
+from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion, CollectionRemote
 from rest_framework import serializers
 import semantic_version
 
 from .base import Serializer
 from galaxy_ng.app.api.v3.serializers.namespace import NamespaceSummarySerializer
 from galaxy_ng.app.models import Namespace
-from galaxy_ng.app.access_control.fields import GroupPermissionField
-from galaxy_ng.app.models.collectionremote import CollectionRemoteProxyModel, CollectionSyncTask
+from galaxy_ng.app.models.collectionsync import CollectionSyncTask
 
 log = logging.getLogger(__name__)
 
@@ -197,12 +196,11 @@ class RepositoryCollectionDetailSerializer(_RepositoryCollectionSerializer):
 
 class CollectionRemoteSerializer(serializers.ModelSerializer):
     last_sync_task = serializers.SerializerMethodField()
-    groups = GroupPermissionField()
     created_at = serializers.DateTimeField(source='pulp_created')
     updated_at = serializers.DateTimeField(source='pulp_last_updated')
 
     class Meta:
-        model = CollectionRemoteProxyModel
+        model = CollectionRemote
         fields = (
             'name',
             'url',
@@ -212,7 +210,6 @@ class CollectionRemoteSerializer(serializers.ModelSerializer):
             'requirements_file',
             'created_at',
             'updated_at',
-            'groups',
             'last_sync_task'
         )
 
