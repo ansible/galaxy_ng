@@ -123,6 +123,10 @@ class CollectionVersionViewSet(LocalSettingsMixin,
         return Response(serializer.data)
 
 
+class CollectionVersionDocsViewSet(pulp_ansible_views.CollectionVersionDocsViewSet):
+    pass
+
+
 class CollectionImportViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionImportViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
 
