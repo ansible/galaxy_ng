@@ -53,6 +53,13 @@ STANDALONE_STATEMENTS = {
             "condition": "has_model_perms:ansible.modify_ansible_repo_content"
         }
     ],
+    'CollectionRemoteViewSet': [
+        {
+            "action": ["list"],
+            "principal": "authenticated",
+            "effect": "allow"
+        }
+    ],
     'UserViewSet': [
         {
             "action": ["list"],

@@ -46,6 +46,10 @@ class CollectionAccessPolicy(AccessPolicyBase):
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
 
+class CollectionRemoteAccessPolicy(AccessPolicyBase):
+    NAME = 'CollectionRemoteViewSet'
+
+
 class UserAccessPolicy(AccessPolicyBase):
     NAME = 'UserViewSet'
 

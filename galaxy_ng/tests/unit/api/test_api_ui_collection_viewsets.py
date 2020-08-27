@@ -1,18 +1,28 @@
 import urllib
 
 from django.test import override_settings
-from pulp_ansible.app.models import (AnsibleDistribution, AnsibleRepository,
-                                     Collection, CollectionVersion)
-
+from pulp_ansible.app.models import (
+    AnsibleDistribution,
+    AnsibleRepository,
+    Collection,
+    CollectionVersion,
+    CollectionRemote
+)
 from galaxy_ng.app import models
 from galaxy_ng.app.constants import DeploymentMode
 from .base import BaseTestCase, get_current_ui_url
 
 
-def _create_repo(name):
-    repo = AnsibleRepository.objects.create(name=name)
+def _create_repo(name, **kwargs):
+    repo = AnsibleRepository.objects.create(name=name, **kwargs)
     AnsibleDistribution.objects.create(name=name, base_path=name, repository=repo)
     return repo
+
+
+def _create_remote(name, url, **kwargs):
+    return CollectionRemote.objects.create(
+        name=name, url=url, **kwargs
+    )
 
 
 def _get_create_version_in_repo(namespace, collection, version, repo):
@@ -146,3 +156,23 @@ class TestUiCollectionViewSet(BaseTestCase):
     def test_detail_latest_version(self):
         response = self.client.get(self.repo1_collection1_detail_url)
         self.assertEqual(response.data['latest_version']['version'], '1.0.1')
+
+
+@override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
+class TestUiCollectionRemoteViewSet(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.remote_data = {
+            'name': 'rh-certified',
+            'url': 'https://rh-certified.test',
+            'token': 'fff67131-3f46-4c0d-a54a-2b0243bacae9',
+        }
+        self.remote = _create_remote(**self.remote_data)
+        self.repository = _create_repo(name='rh-certified-repo', remote=self.remote)
+
+    def test_get_remotes(self):
+        response = self.client.get(get_current_ui_url('remotes-list'))
+        self.assertEqual(response.data['meta']['count'], 1)
+
+        for key, value in self.remote_data.items():
+            self.assertEqual(response.data['data'][0][key], value)

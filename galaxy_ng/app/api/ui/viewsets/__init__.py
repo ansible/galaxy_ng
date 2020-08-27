@@ -2,8 +2,13 @@ from .namespace import (
     NamespaceViewSet,
 )
 
-from .collection import (CollectionViewSet, RepositoryCollectionViewSet,
-                         CollectionVersionViewSet, CollectionImportViewSet)
+from .collection import (
+    CollectionViewSet,
+    RepositoryCollectionViewSet,
+    CollectionVersionViewSet,
+    CollectionImportViewSet,
+    CollectionRemoteViewSet
+)
 from .my_namespace import MyNamespaceViewSet
 from .my_synclist import MySyncListViewSet
 from .tags import TagsViewSet
@@ -20,6 +25,7 @@ __all__ = (
     'RepositoryCollectionViewSet',
     'CollectionVersionViewSet',
     'CollectionImportViewSet',
+    'CollectionRemoteViewSet',
     'TagsViewSet',
     'CurrentUserViewSet',
     'UserViewSet',

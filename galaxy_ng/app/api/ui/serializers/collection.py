@@ -1,13 +1,13 @@
 import logging
 
-from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion
+from pulp_ansible.app.models import AnsibleDistribution, CollectionVersion, CollectionRemote
 from rest_framework import serializers
 import semantic_version
 
 from .base import Serializer
 from galaxy_ng.app.api.v3.serializers.namespace import NamespaceSummarySerializer
 from galaxy_ng.app.models import Namespace
-
+from galaxy_ng.app.models.collectionsync import CollectionSyncTask
 
 log = logging.getLogger(__name__)
 
@@ -192,3 +192,41 @@ class RepositoryCollectionDetailSerializer(_RepositoryCollectionSerializer):
     def get_latest_version(self, obj):
         version = self._get_latest_version(obj)
         return CollectionVersionDetailSerializer(version).data
+
+
+class CollectionRemoteSerializer(serializers.ModelSerializer):
+    last_sync_task = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(source='pulp_created')
+    updated_at = serializers.DateTimeField(source='pulp_last_updated')
+
+    class Meta:
+        model = CollectionRemote
+        fields = (
+            'name',
+            'url',
+            'auth_url',
+            'token',
+            'policy',
+            'requirements_file',
+            'created_at',
+            'updated_at',
+            'last_sync_task'
+        )
+
+    def get_last_sync_task(self, obj):
+        """Gets last_sync_task from Pulp using remote->repository relation"""
+
+        sync_task = CollectionSyncTask.objects.filter(
+            repository=obj.repository_set.last()
+        ).last()
+
+        if not sync_task:
+            # UI handles `null` as "no status"
+            return
+
+        return {
+            "state": sync_task.task.state,
+            "started_at": sync_task.task.started_at,
+            "finished_at": sync_task.task.finished_at,
+            "error": sync_task.task.error
+        }
