@@ -23,7 +23,7 @@ plugin_dash_short: galaxy
 plugin_name: galaxy_ng
 plugin_snake: galaxy_ng
 pulp_settings: null
-pulpcore_branch: master
+pulpcore_branch: "3.5"
 pulpcore_pip_version_specifier: ~=3.5.0
 pydocstyle: true
 pypi_username: null
