@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from django.conf import settings
 from django.http import HttpResponseRedirect, StreamingHttpResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 from rest_framework.response import Response
@@ -25,6 +26,7 @@ from galaxy_ng.app.api.base import (
     LocalSettingsMixin,
 )
 
+from galaxy_ng.app.api.v3.viewsets.namespace import INBOUND_REPO_NAME_FORMAT
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 
@@ -152,6 +154,24 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
 
         return serializer.validated_data
 
+    @staticmethod
+    def _check_path_matches_expected_repo(path, filename_ns):
+        """Reject if path does not match expected inbound format
+           containing filename namespace.
+
+        Examples:
+        Reject if path is "staging".
+        Reject if path does not start with "inbound-".
+        Reject if path is "inbound-alice" but filename namepace is "bob".
+        """
+
+        distro = get_object_or_404(AnsibleDistribution, base_path=path)
+        repo_name = distro.repository.name
+        if INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns) == repo_name:
+            return
+        raise APIException(
+            f'Path does not match: "{INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)}"')
+
     def create(self, request, path):
         data = self._get_data(request)
         filename = data['filename']
@@ -162,6 +182,8 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
             raise ValidationError(
                 'Namespace "{0}" does not exist.'.format(filename.namespace)
             )
+
+        self._check_path_matches_expected_repo(path, filename_ns=namespace.name)
 
         self.check_object_permissions(request, namespace)
 
