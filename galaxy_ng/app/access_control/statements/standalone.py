@@ -58,6 +58,12 @@ STANDALONE_STATEMENTS = {
             "action": ["list"],
             "principal": "authenticated",
             "effect": "allow"
+        },
+        {
+            "action": ["sync"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.update_ansible_remote"
         }
     ],
     'UserViewSet': [

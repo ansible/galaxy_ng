@@ -14,6 +14,10 @@ from .synclist import (
     SyncList,
 )
 
+from .collectionsync import (
+    CollectionSyncTask
+)
+
 __all__ = (
     'Group',
     'User',
@@ -21,4 +25,5 @@ __all__ = (
     'Namespace',
     'NamespaceLink',
     'SyncList',
+    'CollectionSyncTask'
 )

@@ -19,6 +19,11 @@ auth_urls = [
 
 urlpatterns = [
     path(
+        'sync/',
+        views.SyncRemoteView.as_view(),
+        name="sync"
+    ),
+    path(
         'collections/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
         name='collections-list'
