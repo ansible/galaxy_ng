@@ -14,6 +14,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from galaxy_ng.app.constants import VALID_DISTRO_NAMES
 from galaxy_ng.app import models
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
@@ -314,7 +315,7 @@ class CollectionImportViewSet(api_base.GenericViewSet):
 
 
 class CollectionRemoteViewSet(api_base.ModelViewSet):
-    queryset = CollectionRemote.objects.filter(name__in=['rh-certified', 'community'])
+    queryset = CollectionRemote.objects.filter(name__in=VALID_DISTRO_NAMES)
     serializer_class = serializers.CollectionRemoteSerializer
 
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]

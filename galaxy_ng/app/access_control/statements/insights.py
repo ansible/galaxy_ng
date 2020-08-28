@@ -51,9 +51,15 @@ INSIGHTS_STATEMENTS = {
     ],
     'CollectionRemoteViewSet': [
         {
-            "action": ["list"],
+            "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow"
+        },
+        {
+            "action": ["sync", "update", "partial_update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.change_collectionremote"
         }
     ],
     'UserViewSet': [

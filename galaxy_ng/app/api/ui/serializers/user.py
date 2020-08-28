@@ -104,7 +104,8 @@ class CurrentUserSerializer(UserSerializer):
             'galaxy.add_namespace',
             'galaxy.change_namespace',
             'galaxy.upload_to_namespace',
-            'ansible.modify_ansible_repo_content'
+            'ansible.modify_ansible_repo_content',
+            'ansible.change_collectionremote',
         ])
 
     def get_model_permissions(self, obj):
@@ -113,6 +114,7 @@ class CurrentUserSerializer(UserSerializer):
             "upload_to_namespace": obj.has_perm('galaxy.upload_to_namespace'),
             "change_namespace": obj.has_perm('galaxy.change_namespace'),
             "move_collection": obj.has_perm('ansible.modify_ansible_repo_content'),
+            "change_remote": obj.has_perm('ansible.change_collectionremote'),
             "view_user": obj.has_perm('galaxy.view_user'),
             "delete_user": obj.has_perm('galaxy.delete_user'),
             "change_user": obj.has_perm('galaxy.change_user'),
