@@ -212,6 +212,10 @@ class CollectionRemoteSerializer(serializers.ModelSerializer):
             'updated_at',
             'last_sync_task'
         )
+        extra_kwargs = {
+            'name': {'read_only': True},
+            'token': {'write_only': True},
+        }
 
     def get_last_sync_task(self, obj):
         """Gets last_sync_task from Pulp using remote->repository relation"""

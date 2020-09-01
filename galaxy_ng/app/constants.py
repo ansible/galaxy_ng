@@ -15,8 +15,6 @@ class DeploymentMode(enum.Enum):
 CURRENT_UI_API_VERSION = 'v1'
 ALL_UI_API_VERSION = {'v1': 'v1/'}
 
-VALID_DISTRO_NAMES = ("rh-certified", "community")
-
 COMMUNITY_DOMAINS = (
     'galaxy.ansible.com',
     'galaxy-dev.ansible.com',

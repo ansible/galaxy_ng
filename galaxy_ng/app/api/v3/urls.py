@@ -18,11 +18,11 @@ auth_urls = [
 
 # these are included in the base router so that they only appear under `content/<distro>/v3`
 sync_urls = [
-    # path(
-    #    "sync/",
-    #    SyncView...
-    #    name='sync'
-    # ),
+    path(
+        "sync/",
+        views.SyncRemoteView.as_view(),
+        name='sync'
+    ),
     path(
         "sync/config/",
         viewsets.SyncConfigViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
