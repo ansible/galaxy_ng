@@ -175,3 +175,11 @@ class TestUiCollectionRemoteViewSet(BaseTestCase):
 
         for key, value in self.remote_data.items():
             self.assertEqual(response.data['data'][0][key], value)
+
+        repository = response.data['data'][0]['repositories'][0]
+
+        self.assertEqual(repository['name'], 'rh-certified-repo')
+        self.assertEqual(repository['distributions'][0]['base_path'], 'rh-certified-repo')
+
+        # token is not visible in a GET
+        self.assertNotIn('token', response.data['data'][0])
