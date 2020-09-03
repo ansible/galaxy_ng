@@ -16,6 +16,19 @@ auth_urls = [
     path("auth/token/", views.TokenView.as_view(), name="auth-token"),
 ]
 
+# these are included in the base router so that they only appear under `content/<distro>/v3`
+sync_urls = [
+    path(
+        "sync/",
+        views.SyncRemoteView.as_view(),
+        name='sync'
+    ),
+    path(
+        "sync/config/",
+        viewsets.SyncConfigViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        name='sync-config'
+    )
+]
 
 urlpatterns = [
     path(

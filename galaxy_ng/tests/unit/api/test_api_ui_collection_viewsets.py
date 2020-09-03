@@ -165,7 +165,6 @@ class TestUiCollectionRemoteViewSet(BaseTestCase):
         self.remote_data = {
             'name': 'rh-certified',
             'url': 'https://rh-certified.test',
-            'token': 'fff67131-3f46-4c0d-a54a-2b0243bacae9',
         }
         self.remote = _create_remote(**self.remote_data)
         self.repository = _create_repo(name='rh-certified-repo', remote=self.remote)

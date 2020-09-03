@@ -82,6 +82,9 @@ class BaseTestCase(APITestCase):
             'galaxy.change_synclist',
             'galaxy.view_synclist',
             'galaxy.add_synclist',
+
+            # sync config
+            'ansible.change_collectionremote',
         ]
         pe_group = auth_models.Group.objects.create(
             name='partner-engineers')

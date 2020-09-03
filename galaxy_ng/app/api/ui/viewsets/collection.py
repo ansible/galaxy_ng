@@ -314,7 +314,7 @@ class CollectionImportViewSet(api_base.GenericViewSet):
 
 
 class CollectionRemoteViewSet(api_base.ModelViewSet):
-    queryset = CollectionRemote.objects.filter(name__in=['rh-certified', 'community'])
+    queryset = CollectionRemote.objects.all()
     serializer_class = serializers.CollectionRemoteSerializer
 
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]

@@ -16,6 +16,8 @@ from .task import (
     TaskViewSet,
 )
 
+from .sync import SyncConfigViewSet
+
 
 __all__ = (
     'CollectionArtifactDownloadView',
@@ -26,5 +28,6 @@ __all__ = (
     'CollectionVersionDocsViewSet',
     'CollectionVersionMoveViewSet',
     'NamespaceViewSet',
+    'SyncConfigViewSet',
     'TaskViewSet',
 )
