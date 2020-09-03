@@ -33,7 +33,7 @@ def parse_args():
 
 def process_requirements(requirements):
     for req in requirements:
-        if req.is_editable:
+        if req.requirement.startswith('git+'):
             continue
         package, version = req.requirement.split('==')
         yield '{prefix}/{package}:{version}.pypi'.format(
