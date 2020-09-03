@@ -39,6 +39,11 @@ urlpatterns = [
         name='collection-versions-detail',
     ),
     path(
+        'collections/<str:namespace>/<str:name>/versions/<str:version>/docs-blob/',
+        viewsets.CollectionVersionDocsViewSet.as_view({'get': 'retrieve'}),
+        name='collection-versions-detail-docs',
+    ),
+    path(
         'imports/collections/<str:pk>/',
         viewsets.CollectionImportViewSet.as_view({'get': 'retrieve'}),
         name='collection-import',
