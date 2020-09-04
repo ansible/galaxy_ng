@@ -28,7 +28,7 @@ class SyncConfigSerializer(CollectionRemoteSerializer):
         )
 
     def validate(self, data):
-        if not data['requirements_file'] and any(
+        if not data.get('requirements_file') and any(
             [domain in data['url'] for domain in COMMUNITY_DOMAINS]
         ):
             raise serializers.ValidationError(

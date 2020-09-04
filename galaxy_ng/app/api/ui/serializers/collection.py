@@ -289,8 +289,8 @@ class CollectionRemoteSerializer(serializers.ModelSerializer):
         """Gets last_sync_task from Pulp using remote->repository relation"""
 
         sync_task = CollectionSyncTask.objects.filter(
-            repository=obj.repository_set.last()
-        ).last()
+            repository=obj.repository_set.order_by('-pulp_last_updated').first()
+        ).first()
 
         if not sync_task:
             # UI handles `null` as "no status"
