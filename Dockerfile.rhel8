@@ -16,7 +16,7 @@ COPY requirements/requirements.insights.txt /tmp/requirements.txt
 # NOTE: en_US.UTF-8 locale is provided by glibc-langpack-en
 RUN set -ex; \
     DNF="dnf -y --disableplugin=subscription-manager" && \
-    INSTALL_PKGS="glibc-langpack-en libpq python36" && \
+    INSTALL_PKGS="glibc-langpack-en git-core libpq python36" && \
     INSTALL_PKGS_BUILD="gcc libpq-devel python36-devel" && \
     LANG=C ${DNF} install ${INSTALL_PKGS} ${INSTALL_PKGS_BUILD} && \
     python3 -m venv "${VIRTUAL_ENV}" && \
