@@ -57,7 +57,7 @@ packaging==20.4           # via bleach, pulp-ansible
 prometheus-client==0.8.0  # via django-prometheus
 psycopg2==2.8.5           # via pulpcore
 pulp-container==2.0.0     # via -r requirements/requirements.standalone.in
-git+https://github.com/pulp/pulp_ansible.git@master#egg=pulp_ansible  # via galaxy-ng (setup.py)
+pulp-ansible==0.3.0       # via galaxy-ng (setup.py)
 pulpcore==3.6.0           # via galaxy-ng (setup.py), pulp-ansible, pulp-container
 pycares==3.1.1            # via aiodns
 pycodestyle==2.6.0        # via flake8
