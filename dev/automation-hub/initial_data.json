@@ -174,5 +174,143 @@
       "repository": "787d4137-c9cf-4b26-b66a-aea0e3b6b433",
       "repository_version": null
     }
+  },
+  {
+    "model": "core.remote",
+    "pk": "80ae4b6b-bfb9-4831-aa0c-b43d32ce2fed",
+    "fields": {
+        "name": "Red Hat Certified",
+        "url": "https://cloud.redhat.com/api/automation-hub/v3/collections",
+        "pulp_created": "2020-03-12T15:56:19.071Z",
+        "pulp_last_updated": "2020-03-12T15:56:19.072Z",
+        "pulp_type": "ansible.ansible"
+    }
+  },
+  {
+    "model": "ansible.collectionremote",
+    "pk": "80ae4b6b-bfb9-4831-aa0c-b43d32ce2fed",
+    "fields": {
+        "auth_url": "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
+    }
+  },
+  {
+    "model": "core.repository",
+    "pk": "7eb27e4f-1847-49a2-ba37-a1c3198f923e",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:19.071Z",
+      "pulp_last_updated": "2020-03-12T15:56:19.072Z",
+      "pulp_type": "ansible.ansible",
+      "name": "rh-certified",
+      "description": "Red Hat Certified",
+      "next_version": 1,
+      "remote": "80ae4b6b-bfb9-4831-aa0c-b43d32ce2fed"
+    }
+  },
+  {
+    "model": "core.repositoryversion",
+    "pk": "a5091fcf-5df0-49b5-8ff0-d84086befec9",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:19.075Z",
+      "pulp_last_updated": "2020-03-12T15:56:19.075Z",
+      "repository": "7eb27e4f-1847-49a2-ba37-a1c3198f923e",
+      "number": 0,
+      "complete": true,
+      "base_version": null
+    }
+  },
+  {
+    "model": "core.basedistribution",
+    "pk": "a6e40994-3c01-4e0e-8213-a9aebbf463c9",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:23.436Z",
+      "pulp_last_updated": "2020-03-12T15:56:23.436Z",
+      "pulp_type": "ansible.ansible",
+      "name": "rh-certified",
+      "base_path": "rh-certified",
+      "content_guard": null,
+      "remote": null
+    }
+  },
+  {
+    "model": "ansible.ansiblerepository",
+    "pk": "7eb27e4f-1847-49a2-ba37-a1c3198f923e",
+    "fields": {}
+  },
+  {
+    "model": "ansible.ansibledistribution",
+    "pk": "a6e40994-3c01-4e0e-8213-a9aebbf463c9",
+    "fields": {
+      "repository": "7eb27e4f-1847-49a2-ba37-a1c3198f923e",
+      "repository_version": null
+    }
+  },
+  {
+    "model": "core.remote",
+    "pk": "c90feabd-5cb6-4bab-ad07-861f000e2d18",
+    "fields": {
+        "name": "Community",
+        "url": "https://galaxy.ansible.com/api/v2/collections",
+        "pulp_created": "2020-03-12T15:56:19.071Z",
+        "pulp_last_updated": "2020-03-12T15:56:19.072Z",
+        "pulp_type": "ansible.ansible"
+    }
+  },
+  {
+    "model": "ansible.collectionremote",
+    "pk": "c90feabd-5cb6-4bab-ad07-861f000e2d18",
+    "fields": {
+        "requirements_file": "collections:\n  -name: initial.name\n    server: initial.content.com\n    api_key: NotASecret\n"
+    }
+  },
+  {
+    "model": "core.repository",
+    "pk": "03cb7d21-b9ba-4749-b6d2-987a233d2ba3",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:19.071Z",
+      "pulp_last_updated": "2020-03-12T15:56:19.072Z",
+      "pulp_type": "ansible.ansible",
+      "name": "community",
+      "description": "Community",
+      "next_version": 1,
+      "remote": "c90feabd-5cb6-4bab-ad07-861f000e2d18"
+    }
+  },
+  {
+    "model": "core.repositoryversion",
+    "pk": "4a0c516c-fdd2-4f82-9537-711b98fc007e",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:19.075Z",
+      "pulp_last_updated": "2020-03-12T15:56:19.075Z",
+      "repository": "03cb7d21-b9ba-4749-b6d2-987a233d2ba3",
+      "number": 0,
+      "complete": true,
+      "base_version": null
+    }
+  },
+  {
+    "model": "core.basedistribution",
+    "pk": "76e116e1-bd44-4e9e-9f25-dce0b4dcad83",
+    "fields": {
+      "pulp_created": "2020-03-12T15:56:23.436Z",
+      "pulp_last_updated": "2020-03-12T15:56:23.436Z",
+      "pulp_type": "ansible.ansible",
+      "name": "community",
+      "base_path": "community",
+      "content_guard": null,
+      "remote": null
+    }
+  },
+  {
+    "model": "ansible.ansiblerepository",
+    "pk": "03cb7d21-b9ba-4749-b6d2-987a233d2ba3",
+    "fields": {}
+  },
+  {
+    "model": "ansible.ansibledistribution",
+    "pk": "76e116e1-bd44-4e9e-9f25-dce0b4dcad83",
+    "fields": {
+      "repository": "03cb7d21-b9ba-4749-b6d2-987a233d2ba3",
+      "repository_version": null
+    }
   }
 ]

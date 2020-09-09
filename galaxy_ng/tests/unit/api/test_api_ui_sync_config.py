@@ -1,3 +1,4 @@
+import logging
 from rest_framework import status
 from django.urls import reverse
 from django.test import override_settings
@@ -8,6 +9,8 @@ from pulp_ansible.app.models import (
 )
 from galaxy_ng.app.constants import DeploymentMode
 from .base import BaseTestCase
+
+log = logging.getLogger(__name__)
 
 
 def _create_repo(name, **kwargs):
@@ -60,6 +63,9 @@ class TestUiSyncConfigViewSet(BaseTestCase):
     def test_positive_get_config_sync_for_certified(self):
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.get(self.build_config_url(self.certified_remote.name))
+        log.debug('test_positive_get_config_sync_for_certified')
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
         self.assertEqual(response.data['name'], self.certified_remote.name)
         self.assertEqual(response.data['url'], self.certified_remote.url)
         self.assertEqual(response.data['requirements_file'], None)
@@ -67,6 +73,9 @@ class TestUiSyncConfigViewSet(BaseTestCase):
     def test_positive_get_config_sync_for_community(self):
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.get(self.build_config_url(self.community_remote.name))
+        log.debug('test_positive_get_config_sync_for_community')
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
         self.assertEqual(response.data['name'], self.community_remote.name)
         self.assertEqual(response.data['url'], self.community_remote.url)
         self.assertEqual(
@@ -87,6 +96,9 @@ class TestUiSyncConfigViewSet(BaseTestCase):
             },
             format='json'
         )
+        log.debug('test_positive_update_certified_repo_data')
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         updated = self.client.get(self.build_config_url(self.certified_remote.name))
@@ -103,10 +115,13 @@ class TestUiSyncConfigViewSet(BaseTestCase):
                 "name": "community",
                 "policy": "immediate",
                 "requirements_file": None,
-                "url": "https://galaxy.ansible.com",
+                "url": "https://galaxy.ansible.com/v3/collections",
             },
             format='json'
         )
+        log.debug('test_negative_update_community_repo_data_without_requirements_file')
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(
             'Syncing content from community domains without specifying a '
@@ -125,18 +140,26 @@ class TestUiSyncConfigViewSet(BaseTestCase):
                 "requirements_file": (
                     "collections:\n"
                     "  - name: foo.bar\n"
-                    "    server: foobar.content.com\n"
+                    "    server: https://foobar.content.com\n"
                     "    api_key: s3cr3tk3y\n"
                 ),
-                "url": "https://galaxy.ansible.com",
+                "url": "https://galaxy.ansible.com/v3/collections",
             },
             format='json'
         )
+
+        log.debug('test_positive_update_community_repo_data_with_requirements_file')
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('foobar.content.com', response.data['requirements_file'])
 
     def test_positive_syncing_returns_a_task_id(self):
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(self.build_sync_url(self.certified_remote.name))
+        log.debug('test_positive_syncing_returns_a_task_id')
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('task', response.data)
