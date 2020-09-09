@@ -79,6 +79,11 @@ paths = [
         viewsets.RepositoryCollectionViewSet.as_view({'get': 'retrieve'}),
         name='repo-collections-detail'
     ),
+    path(
+        "repo/<str:repo_name>/curate/",
+        viewsets.RepositoryCollectionViewSet.as_view({"post": "curate"}),
+        name="repo-collections-curate",
+    ),
 
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve
     # to look up values with an ID

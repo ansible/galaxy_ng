@@ -1,15 +1,21 @@
+import logging
 import galaxy_pulp
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from drf_spectacular.utils import extend_schema
+
+from pulpcore.plugin.viewsets import OperationPostponedResponse
+from pulpcore.plugin.tasking import enqueue_with_reservation
+
 from pulp_ansible.app.models import (
     AnsibleDistribution,
     CollectionVersion,
     Collection,
     CollectionRemote,
 )
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -20,6 +26,11 @@ from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers, versioning
 from galaxy_ng.app.common import pulp
 from galaxy_ng.app import constants
+
+from galaxy_ng.app.tasks.synclist import curate_all_synclist_repository
+
+
+log = logging.getLogger(__name__)
 
 
 class CollectionViewSet(api_base.ViewSet):
@@ -184,6 +195,19 @@ class RepositoryCollectionViewSet(api_base.GenericViewSet):
             }
         ).data
         return Response(data)
+
+    @action(detail=False, methods=["post"])
+    def curate(self, request, *args, **kwargs):
+        repo_name = self.kwargs["repo_name"]
+        locks = [repo_name]
+        task_args = (repo_name,)
+        task_kwargs = {}
+
+        curate_task = enqueue_with_reservation(
+            curate_all_synclist_repository, locks, args=task_args, kwargs=task_kwargs
+        )
+
+        return OperationPostponedResponse(curate_task, request)
 
     @staticmethod
     def _filter_by_repo(collections_queryset, repo_name):
