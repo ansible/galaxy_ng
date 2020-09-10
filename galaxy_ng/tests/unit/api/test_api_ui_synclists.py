@@ -1,367 +1,358 @@
 import logging
 
+from django.test import override_settings
 from rest_framework import status as http_code
 
-from pulp_ansible.app import models as pulp_ansible_models
+from guardian import shortcuts
 
-from galaxy_ng.app.constants import DeploymentMode
-from galaxy_ng.app import models as galaxy_models
 from galaxy_ng.app.models import auth as auth_models
 
-from .base import BaseTestCase, get_current_ui_url
+from . import base
+from . import rh_auth
+from .synclist_base import BaseSyncListViewSet, ACCOUNT_SCOPE
+
 
 log = logging.getLogger(__name__)
 
 
-class TestUiSynclistViewSet(BaseTestCase):
-    default_owner_permissions = [
-        'change_synclist',
-        'view_synclist',
-        'delete_synclist'
-    ]
+class BaseUiSynclistViewSet:
+    """Test SyncListViewSet as an admin / pe_group member"""
 
     def setUp(self):
         super().setUp()
-        self.admin_user = auth_models.User.objects.create(username='admin')
-        self.pe_group = self._create_partner_engineer_group()
-        self.admin_user.groups.add(self.pe_group)
-        self.admin_user.save()
+        self.account_number = "987654"
+        self.user = auth_models.User.objects.create(username="admin")
+        self.group = self._create_partner_engineer_group()
+        self.user.groups.add(self.group)
+        self.user.save()
 
-        self.synclists_url = get_current_ui_url('synclists-list')
-        self.group1 = auth_models.Group.objects.create(name='test1_group')
-        self.user1 = auth_models.User.objects.create_user(username="test1", password="test1-secret")
-        self.user1.groups.add(self.group1)
-        self.user1.save()
+        self.synclist_name = "test_synclist"
+        self.synclist = self._create_synclist(
+            name=self.synclist_name,
+            repository=self.repo,
+            upstream_repository=self.default_repo,
+            groups=[self.group],
+        )
 
-    def _create_repository(self, name):
-        repo = pulp_ansible_models.AnsibleRepository.objects.create(name='test_repo1')
-        return repo
+        self.synclist.save()
 
-    def _create_synclist(
-        self, name, repository, collections=None, namespaces=None,
-        policy=None, groups=None,
-    ):
-        synclist = galaxy_models.SyncList.objects.create(name=name, repository=repository)
-        if groups:
-            groups_to_add = {}
-            for group in groups:
-                groups_to_add[group] = self.default_owner_permissions
-            synclist.groups = groups_to_add
-        return synclist
+        self.client.force_authenticate(user=None)
 
-    def test_synclist_create_as_user(self):
-        repo = self._create_repository('test_post_repo')
-        repo.save()
-
-        synclist_name = 'test_synclist_post'
-        post_data = {
-            'name': synclist_name,
-            'repository': repo.pulp_id,
-            'collections': [],
-            'namespaces': [],
-            'policy': 'whitelist',
-            'groups': [],
+    def _group(self, user_group, perms=None):
+        perms = perms or self.default_owner_permissions
+        group = {
+            "id": user_group.id,
+            "name": user_group.name,
+            "object_permissions": perms,
         }
+        return group
+
+    def test_synclist_create(self):
+        new_synclist_name = "new_synclist"
+        post_data = {
+            "repository": self.repo.pulp_id,
+            "collections": [],
+            "namespaces": [],
+            "policy": "include",
+            "name": new_synclist_name,
+            "groups": [self._group(self.group)],
+        }
+
+        synclists_url = base.get_current_ui_url("synclists-list")
 
         self.client.force_authenticate(user=self.user)
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.post(self.synclists_url, post_data, format='json')
-            log.debug('response: %s', response)
-            log.debug('response.data: %s', response.data)
+        log.debug("self.synclist: %s", self.synclist)
 
-            # should fail with auth now
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        response = self.client.post(synclists_url, post_data, format="json")
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.post(self.synclists_url, post_data, format='json')
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        log.debug("response: %s", response)
+        log.debug("response.data: %s", response.data)
 
-    def test_synclist_create_as_pe_group(self):
-        repo = self._create_repository('test_post_repo')
-        repo.save()
+        self.assertEqual(response.status_code, http_code.HTTP_201_CREATED, msg=response.data)
 
-        synclist_name = 'test_synclist_post'
-        post_data = {
-            'name': synclist_name,
-            'repository': repo.pulp_id,
-            'collections': [],
-            'namespaces': [],
-            'policy': 'whitelist',
-            'groups': [],
-        }
-
-        self.client.force_authenticate(user=self.admin_user)
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.post(self.synclists_url, post_data, format='json')
-            log.debug('response: %s', response)
-
-            # should fail with auth now
-            self.assertEqual(response.status_code, http_code.HTTP_201_CREATED)
-            log.debug('response.data: %s', response.data)
-
-            self.assertIn('name', response.data)
-            self.assertIn('repository', response.data)
-            self.assertEqual(response.data['name'], synclist_name)
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.post(self.synclists_url, post_data, format='json')
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-    def test_synclist_update_as_pe_group_user(self):
-        repo = self._create_repository('test_post_repo')
-        repo.save()
-        synclist1 = self._create_synclist(name='test_synclist_patch',
-                                          repository=repo)
-
-        synclist1.save()
-
+    def test_synclist_update(self):
         ns1_name = "unittestnamespace1"
         ns2_name = "unittestnamespace2"
-        ns1 = self._create_namespace(ns1_name, groups=[self.pe_group])
-        ns2 = self._create_namespace(ns2_name, groups=[self.pe_group])
+        ns1 = self._create_namespace(ns1_name, groups=[self.group])
+        ns2 = self._create_namespace(ns2_name, groups=[self.group])
         ns1.save()
         ns2.save()
 
-        synclist_name = 'test_synclist_patch'
         post_data = {
-            'name': synclist_name,
-            'repository': repo.pulp_id,
-            'collections': [],
-            'namespaces': [ns1_name, ns2_name],
-            'policy': 'whitelist',
-            'groups': [{
-                'name': self.pe_group.name,
-                'id': self.pe_group.id,
-                'object_permissions': self.default_owner_permissions
-            }],
+            "repository": self.repo.pulp_id,
+            "collections": [],
+            "namespaces": [ns1_name, ns2_name],
+            "policy": "include",
+            "groups": [self._group(self.group)],
         }
 
-        synclists_detail_url = get_current_ui_url(
-            'synclists-detail',
-            kwargs={"pk": synclist1.id})
-        self.client.force_authenticate(user=self.admin_user)
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            # should fail with auth now
-            response = self.client.patch(synclists_detail_url, post_data, format='json')
-            log.debug('response: %s', response)
+        synclists_detail_url = base.get_current_ui_url(
+            "synclists-detail", kwargs={"pk": self.synclist.id}
+        )
 
-            self.assertEqual(response.status_code, http_code.HTTP_200_OK)
-            log.debug('response.data: %s', response.data)
+        response = self.client.patch(synclists_detail_url, post_data, format="json")
 
-            self.assertIn('name', response.data)
-            self.assertIn('repository', response.data)
-            self.assertEqual(response.data['name'], synclist_name)
-            self.assertEqual(response.data['policy'], "whitelist")
-            self.assertEqual(self.pe_group.name, response.data['groups'][0]['name'])
+        log.debug("response: %s", response)
+        log.debug("response.data: %s", response.data)
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.patch(synclists_detail_url, post_data, format='json')
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, http_code.HTTP_200_OK, msg=response.data)
+        self.assertIn("name", response.data)
+        self.assertIn("repository", response.data)
+        self.assertEqual(response.data["name"], self.synclist_name)
+        self.assertEqual(response.data["policy"], "include")
 
-    def test_synclist_update_as_non_pe_group_user(self):
-        repo = self._create_repository('test_post_repo')
-        repo.save()
-        synclist1 = self._create_synclist(name='test_synclist_patch',
-                                          repository=repo)
+    def test_synclist_list(self):
+        synclists_url = base.get_current_ui_url("synclists-list")
+        response = self.client.get(synclists_url)
 
-        synclist1.save()
+        log.debug("response.data: %s", response.data)
 
-        ns1_name = "unittestnamespace1"
-        ns2_name = "unittestnamespace2"
-        ns1 = self._create_namespace(ns1_name, groups=[self.pe_group])
-        ns2 = self._create_namespace(ns2_name, groups=[self.pe_group])
-        ns1.save()
-        ns2.save()
-
-        synclist_name = 'test_synclist_patch'
-        post_data = {
-            'name': synclist_name,
-            'repository': repo.pulp_id,
-            'collections': [],
-            'namespaces': [ns1_name, ns2_name],
-            'policy': 'whitelist',
-            'groups': [self.group1.name],
-        }
-
-        synclists_detail_url = get_current_ui_url(
-            'synclists-detail',
-            kwargs={"pk": synclist1.id})
-        self.client.force_authenticate(user=self.user1)
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            # should fail with auth now
-            response = self.client.patch(synclists_detail_url, post_data, format='json')
-            log.debug('response: %s', response)
-
-            log.debug('response.data: %s', response.data)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.patch(synclists_detail_url, post_data, format='json')
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-    def test_synclist_list_no_auth(self):
-        self.client.force_authenticate(user=None)
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.get(self.synclists_url)
-            log.debug('response: %s', response)
-
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.get(self.synclists_url)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-    def test_synclist_list_as_non_pe_group_user(self):
-        self.client.force_authenticate(user=self.user1)
-        repo1 = self._create_repository(name="test_repo1")
-        synclist1 = self._create_synclist(name='test_synclist1',
-                                          repository=repo1)
-
-        synclist1.save()
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.get(self.synclists_url)
-            log.debug('response.data: %s', response.data)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.get(self.synclists_url)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-
-    def test_synclist_list_as_pe_group_user(self):
-        self.client.force_authenticate(user=self.admin_user)
-        repo1 = self._create_repository(name="test_repo1")
-        synclist1 = self._create_synclist(name='test_synclist1',
-                                          repository=repo1)
-
-        synclist1.save()
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.get(self.synclists_url)
-            log.debug('response.data: %s', response.data)
-            self.assertEqual(response.status_code, http_code.HTTP_200_OK)
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.get(self.synclists_url)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, http_code.HTTP_200_OK, msg=response.data)
 
     def test_synclist_list_empty(self):
-        # self.client.force_authenticate(user=self.user)
+        synclists_url = base.get_current_ui_url("synclists-list")
 
-        self.client.force_authenticate(user=self.admin_user)
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.get(self.synclists_url)
-            self.assertEqual(response.status_code, http_code.HTTP_200_OK)
-            data = response.data['data']
-            # self.assertEqual(len(data), auth_models.User.objects.all().count())
-            log.debug('response(authed): %s', response)
-            log.debug('data: %s', data)
+        response = self.client.get(synclists_url)
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.get(self.synclists_url)
-            self.assertEqual(response.status_code, http_code.HTTP_200_OK)
-            log.debug('response(insights): %s', response)
+        log.debug("response: %s", response)
+        log.debug("data: %s", response.data)
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.get(self.synclists_url)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, http_code.HTTP_200_OK, msg=response.data)
 
-    def test_synclist_detail_as_pe_group_user(self):
-        self.client.force_authenticate(user=self.admin_user)
-        repo1 = self._create_repository(name="test_repo1")
-        synclist_name = 'test_synclist_post'
-        synclist1 = self._create_synclist(name=synclist_name,
-                                          repository=repo1)
-        synclist1.save()
-        synclists_detail_url = get_current_ui_url(
-            'synclists-detail',
-            kwargs={"pk": synclist1.id})
+    def test_synclist_detail(self):
+        synclists_detail_url = base.get_current_ui_url(
+            "synclists-detail", kwargs={"pk": self.synclist.id}
+        )
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.get(synclists_detail_url)
+        response = self.client.get(synclists_detail_url)
 
-            self.assertEqual(response.status_code, http_code.HTTP_200_OK)
-            log.debug('response.data: %s', response.data)
+        self.assertEqual(response.status_code, http_code.HTTP_200_OK, msg=response.data)
+        self.assertIn("name", response.data)
+        self.assertIn("repository", response.data)
+        self.assertEqual(response.data["name"], self.synclist_name)
+        self.assertEqual(response.data["policy"], "exclude")
+        self.assertEqual(response.data["collections"], [])
+        self.assertEqual(response.data["namespaces"], [])
 
-            data = response.data
-            import pprint
-            log.debug('data: %s', pprint.pformat(data))
+    def test_synclist_delete(self):
+        synclists_detail_url = base.get_current_ui_url(
+            "synclists-detail", kwargs={"pk": self.synclist.id}
+        )
 
-            self.assertIn('name', response.data)
-            self.assertIn('repository', response.data)
-            self.assertEqual(response.data['name'], synclist_name)
-            self.assertEqual(response.data['policy'], "blacklist")
-            self.assertEqual(response.data['collections'], [])
-            self.assertEqual(response.data['namespaces'], [])
+        log.debug("delete url: %s", synclists_detail_url)
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.get(synclists_detail_url)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        response = self.client.delete(synclists_detail_url)
 
-    def test_synclist_detail_as_non_pe_group_user(self):
-        self.client.force_authenticate(user=self.user1)
-        repo1 = self._create_repository(name="test_repo1")
-        synclist_name = 'test_synclist_post'
-        synclist1 = self._create_synclist(name=synclist_name,
-                                          repository=repo1)
-        synclist1.save()
+        log.debug("delete response: %s", response)
 
-        synclists_detail_url = get_current_ui_url(
-            'synclists-detail',
-            kwargs={"pk": synclist1.id})
+        self.assertEqual(response.status_code, http_code.HTTP_204_NO_CONTENT, msg=response.data)
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            response = self.client.get(synclists_detail_url)
-            log.debug('response.data: %s', response.data)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.get(synclists_detail_url)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+@override_settings(
+    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
+)
+class TestUiSynclistViewSetWithGroupPerms(BaseUiSynclistViewSet, BaseSyncListViewSet):
+    def setUp(self):
+        super().setUp()
 
-    def test_synclist_delete_as_pe_group_user(self):
-        self.client.force_authenticate(user=self.admin_user)
-        repo1 = self._create_repository(name="test_repo1")
-        synclist_name = 'test_synclist_post'
-        synclist1 = self._create_synclist(name=synclist_name,
-                                          repository=repo1)
-        synclist1.save()
-        synclists_detail_url = get_current_ui_url(
-            'synclists-detail',
-            kwargs={"pk": synclist1.id})
+        self.user = auth_models.User.objects.create_user(username="test1", password="test1-secret")
+        self.group = self._create_group_with_synclist_perms(
+            ACCOUNT_SCOPE, self.account_number, users=[self.user]
+        )
+        self.user.save()
+        self.group.save()
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            log.debug('delete url: %s', synclists_detail_url)
+        self.user.groups.add(self.group)
+        self.user.save()
 
-            response = self.client.delete(synclists_detail_url)
-            log.debug('delete response: %s', response)
+        self.synclist_name = "test_synclist"
+        self.synclist = self._create_synclist(
+            name=self.synclist_name,
+            repository=self.repo,
+            upstream_repository=self.default_repo,
+            groups=[self.group],
+        )
+        self.credentials()
+        self.client.force_authenticate(user=self.user)
 
-            self.assertEqual(response.status_code, http_code.HTTP_204_NO_CONTENT)
+    def credentials(self):
+        x_rh_identity = rh_auth.user_x_rh_identity(self.user.username, self.group.account_number())
+        self.client.credentials(HTTP_X_RH_IDENTITY=x_rh_identity)
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.delete(synclists_detail_url)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
-    def test_synclist_delete_as_non_pe_group_user(self):
-        self.client.force_authenticate(user=self.user1)
-        repo1 = self._create_repository(name="test_repo1")
-        synclist_name = 'test_synclist_post'
-        synclist1 = self._create_synclist(name=synclist_name,
-                                          repository=repo1)
-        synclist1.save()
-        synclists_detail_url = get_current_ui_url(
-            'synclists-detail',
-            kwargs={"pk": synclist1.id})
+class DeniedSynclistViewSet(BaseUiSynclistViewSet):
+    def setUp(self):
+        super().setUp()
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            log.debug('delete url: %s', synclists_detail_url)
+    def test_synclist_create(self):
+        post_data = {
+            "repository": self.repo.pulp_id,
+            "collections": [],
+            "namespaces": [],
+            "policy": "include",
+            "name": "new_synclist",
+            "groups": [self._group(self.group)],
+        }
 
-            response = self.client.delete(synclists_detail_url)
-            log.debug('delete response: %s', response)
+        synclists_url = base.get_current_ui_url("synclists-list")
+        response = self.client.post(synclists_url, post_data, format="json")
+        log.debug("response: %s", response)
+        log.debug("response.data:\n%s", response.json())
 
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            response = self.client.delete(synclists_detail_url)
-            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+    def test_synclist_detail(self):
+        synclists_detail_url = base.get_current_ui_url(
+            "synclists-detail", kwargs={"pk": self.synclist.id}
+        )
+
+        response = self.client.get(synclists_detail_url)
+        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
+
+    def test_synclist_list(self):
+        synclists_url = base.get_current_ui_url("synclists-list")
+        response = self.client.get(synclists_url)
+        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
+
+    def test_synclist_list_empty(self):
+        synclists_url = base.get_current_ui_url("synclists-list")
+        response = self.client.get(synclists_url)
+        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
+
+    def test_synclist_update(self):
+        post_data = {
+            "repository": self.repo.pulp_id,
+            "collections": [],
+            "namespaces": [],
+            "policy": "include",
+            "groups": [self._group(self.group)],
+        }
+
+        synclists_detail_url = base.get_current_ui_url(
+            "synclists-detail", kwargs={"pk": self.synclist.id}
+        )
+
+        response = self.client.patch(synclists_detail_url, post_data, format="json")
+
+        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
+
+    def test_synclist_delete(self):
+        synclists_detail_url = base.get_current_ui_url(
+            "synclists-detail", kwargs={"pk": self.synclist.id}
+        )
+
+        response = self.client.delete(synclists_detail_url)
+        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
+
+
+@override_settings(
+    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
+)
+class TestUiSynclistViewSetWithDefaultGroupPerms(DeniedSynclistViewSet, BaseSyncListViewSet):
+    def setUp(self):
+        super().setUp()
+
+        self.user = auth_models.User.objects.create_user(username="test1", password="test1-secret")
+        self.group = self._create_group(ACCOUNT_SCOPE, self.account_number, users=[self.user])
+        self.user.save()
+        self.group.save()
+
+        self.user.groups.add(self.group)
+        self.user.save()
+
+        self.synclist_name = "test_synclist"
+        self.synclist = self._create_synclist(
+            name=self.synclist_name,
+            repository=self.repo,
+            upstream_repository=self.default_repo,
+            groups=[self.group],
+        )
+
+        self.credentials()
+        self.client.force_authenticate(user=self.user)
+
+    def credentials(self):
+        x_rh_identity = rh_auth.user_x_rh_identity(self.user.username, self.group.account_number())
+        self.client.credentials(HTTP_X_RH_IDENTITY=x_rh_identity)
+
+    def test_synclist_detail(self):
+        synclists_detail_url = base.get_current_ui_url(
+            "synclists-detail", kwargs={"pk": self.synclist.id}
+        )
+
+        response = self.client.get(synclists_detail_url)
+
+        # If we created the synclist with group perms directly, we can GET detail
+        self.assertEqual(response.status_code, http_code.HTTP_200_OK, msg=response.data)
+        self.assertIn("name", response.data)
+        self.assertIn("repository", response.data)
+        self.assertEqual(response.data["name"], self.synclist_name)
+        self.assertEqual(response.data["policy"], "exclude")
+        self.assertEqual(response.data["collections"], [])
+        self.assertEqual(response.data["namespaces"], [])
+
+    def test_synclist_update(self):
+        ns1_name = "unittestnamespace1"
+        ns1 = self._create_namespace(ns1_name, groups=[self.group])
+        ns1.save()
+
+        post_data = {
+            "repository": self.repo.pulp_id,
+            "collections": [],
+            "namespaces": [ns1_name],
+            "policy": "include",
+            "groups": [self._group(self.group)],
+        }
+
+        synclists_detail_url = base.get_current_ui_url(
+            "synclists-detail", kwargs={"pk": self.synclist.id}
+        )
+
+        response = self.client.patch(synclists_detail_url, post_data, format="json")
+
+        log.debug("response: %s", response)
+        log.debug("response.data: %s", response.data)
+
+        # If we created the synclist with group perms directly, we can modify it
+        self.assertEqual(response.status_code, http_code.HTTP_200_OK, msg=response.data)
+        self.assertIn("name", response.data)
+        self.assertIn("repository", response.data)
+        self.assertEqual(response.data["name"], self.synclist_name)
+        self.assertEqual(response.data["policy"], "include")
+
+
+@override_settings(
+    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
+)
+class TestUiSynclistViewSetNoGroupPerms(DeniedSynclistViewSet, BaseSyncListViewSet):
+    def setUp(self):
+        super().setUp()
+
+        self.user = auth_models.User.objects.create_user(
+            username="test_user_noperms", password="test1-secret"
+        )
+        self.group = self._create_group(ACCOUNT_SCOPE, self.account_number, users=[self.user])
+        self.user.save()
+        self.group.save()
+
+        # Remove any group level perms
+        for perm in self.default_owner_permissions:
+            shortcuts.remove_perm(f"galaxy.{perm}", self.group)
+        self.group.save()
+
+        self.synclist_name = "test_synclist"
+        self.synclist = self._create_synclist(
+            name=self.synclist_name,
+            repository=self.repo,
+            upstream_repository=self.default_repo,
+            groups=[self.group],
+        )
+        for perm in self.default_owner_permissions:
+            shortcuts.remove_perm(f"galaxy.{perm}", self.group, self.synclist)
+
+        self.credentials()
+        self.client.force_authenticate(user=self.user)
+
+    def credentials(self):
+        x_rh_identity = rh_auth.user_x_rh_identity(self.user.username, self.group.account_number())
+        self.client.credentials(HTTP_X_RH_IDENTITY=x_rh_identity)
