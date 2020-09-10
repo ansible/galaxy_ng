@@ -17,7 +17,6 @@ class DistributionViewSet(
     model = pulp_models.AnsibleDistribution
     queryset = pulp_models.AnsibleDistribution.objects.exclude(
         name__startswith='inbound-').exclude(name__endswith='-synclist')
-    # TODO: add access policy
     permission_classes = [access_policy.DistributionAccessPolicy]
     versioning_class = versioning.UIVersioning
 
