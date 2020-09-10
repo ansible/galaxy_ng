@@ -178,4 +178,18 @@ STANDALONE_STATEMENTS = {
             "condition": "has_model_perms:galaxy.update_group"
         },
     ],
+    'DistributionViewSet': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+    ],
+    'MyDistributionViewSet': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+    ],
 }

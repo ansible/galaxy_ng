@@ -98,3 +98,11 @@ class TokenAccessPolicy(AccessPolicyBase):
 
 class GroupAccessPolicy(AccessPolicyBase):
     NAME = 'GroupViewSet'
+
+
+class DistributionAccessPolicy(AccessPolicyBase):
+    NAME = 'DistributionViewSet'
+
+
+class MyDistributionAccessPolicy(AccessPolicyBase):
+    NAME = 'MyDistributionViewSet'

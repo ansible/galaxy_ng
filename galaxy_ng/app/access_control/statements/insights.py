@@ -171,5 +171,20 @@ INSIGHTS_STATEMENTS = {
             "effect": "allow",
             "condition": "has_rh_entitlements",
         },
-    ]
+    ],
+    'DistributionViewSet': [
+        {
+            "action": ["*"],
+            "principal": "authenticated",
+            "effect": "deny",
+        },
+    ],
+    'MyDistributionViewSet': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_rh_entitlements",
+        },
+    ],
 }
