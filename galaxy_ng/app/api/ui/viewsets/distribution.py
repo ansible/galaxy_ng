@@ -5,6 +5,7 @@ from guardian.shortcuts import get_objects_for_user
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers, versioning
 from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app import models
 
 
 class DistributionViewSet(
@@ -14,18 +15,24 @@ class DistributionViewSet(
 ):
     serializer_class = serializers.DistributionSerializer
     model = pulp_models.AnsibleDistribution
-    queryset = pulp_models.AnsibleDistribution.objects.exclude(name__startswith='inbound-')
+    queryset = pulp_models.AnsibleDistribution.objects.exclude(
+        name__startswith='inbound-').exclude(name__endswith='-synclist')
     # TODO: add access policy
-    # permission_classes = [access_policy.UserAccessPolicy]
+    permission_classes = [access_policy.DistributionAccessPolicy]
     versioning_class = versioning.UIVersioning
 
-# TODO: add my distribution once I figure out how to link a synclist to a distribution
-# class MyDistributionViewSet(DistributionViewSet):
-#
-#     def get_queryset(self):
-#         synclists = get_objects_for_user(
-#             self.request.user,
-#             'galaxy.change_synclist',
-#             any_perm=True,
-#             klass=models.SyncList
-#         )
+
+class MyDistributionViewSet(DistributionViewSet):
+    permission_classes = [access_policy.MyDistributionAccessPolicy]
+
+    def get_queryset(self):
+        synclists = get_objects_for_user(
+            self.request.user,
+            'galaxy.change_synclist',
+            any_perm=True,
+            klass=models.SyncList
+        )
+
+        # TODO: find a better way query this data
+        return pulp_models.AnsibleDistribution.objects.filter(
+            name__in=synclists.values_list('name', flat=True))

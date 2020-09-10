@@ -12,7 +12,6 @@ class RepositorySerializer(serializers.ModelSerializer):
             'description',
             'pulp_id',
             'pulp_last_updated',
-            'content',
             'content_count'
         )
 
