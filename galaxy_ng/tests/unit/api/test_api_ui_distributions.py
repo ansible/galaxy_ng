@@ -1,5 +1,4 @@
 import logging
-import pprint
 
 from rest_framework import status as http_code
 
@@ -39,9 +38,11 @@ class TestUIDistributions(BaseTestCase):
         self.repo2_distro = self._create_distribution(self.repo2)
         self.inbound_distro = self._create_distribution(self.inbound_repo)
 
+        upstream_repo = self._create_repository('upstream')
         self.synclist = self._create_synclist(
             '123-synclist',
             self.synclist_repo,
+            upstream_repo,
             groups=[self.group]
         )
 
@@ -54,10 +55,11 @@ class TestUIDistributions(BaseTestCase):
         return repo
 
     def _create_synclist(
-        self, name, repository, collections=None, namespaces=None,
+        self, name, repository, upstream_repository, collections=None, namespaces=None,
         policy=None, groups=None,
     ):
-        synclist = galaxy_models.SyncList.objects.create(name=name, repository=repository)
+        synclist = galaxy_models.SyncList.objects.create(
+            name=name, repository=repository, upstream_repository=upstream_repository)
         if groups:
             groups_to_add = {}
             for group in groups:
