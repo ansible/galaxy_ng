@@ -19,12 +19,13 @@ from pulpcore.plugin.models import ContentArtifact, Task
 from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
-
 from galaxy_ng.app.api.base import (
     APIView,
     ViewSet,
     LocalSettingsMixin,
 )
+
+from galaxy_ng.app.constants import DeploymentMode
 
 from galaxy_ng.app.api.v3.viewsets.namespace import INBOUND_REPO_NAME_FORMAT
 from galaxy_ng.app import models
@@ -43,6 +44,7 @@ from galaxy_ng.app.tasks import (
     import_and_auto_approve,
     add_content_to_repository,
     remove_content_from_repository,
+    curate_all_synclist_repository,
 )
 
 from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
@@ -301,10 +303,26 @@ class CollectionVersionMoveViewSet(ViewSet):
         add_task = self._add_content(collection_version, dest_repo)
         remove_task = self._remove_content(collection_version, src_repo)
 
+        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
+            golden_repo = AnsibleDistribution.objects.get(
+                base_path=settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
+            ).repository
+
+            if dest_repo == golden_repo or src_repo == golden_repo:
+                repo_name = golden_repo.name
+                locks = [golden_repo]
+                task_args = (repo_name,)
+                task_kwargs = {}
+
+                curate_task = enqueue_with_reservation(
+                    curate_all_synclist_repository, locks, args=task_args, kwargs=task_kwargs
+                )
+
         return Response(
             data={
                 'add_task_id': add_task.id,
                 'remove_task_id': remove_task.id,
+                "curate_all_synclist_repository_task_id": curate_task.id,
             },
             status='202'
         )
