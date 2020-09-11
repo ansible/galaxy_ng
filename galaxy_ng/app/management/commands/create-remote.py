@@ -1,12 +1,18 @@
-from galaxy_ng.app.constants import COMMUNITY_DOMAINS
 import os
-from rest_framework.serializers import ValidationError
+
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils.text import slugify
-from django.core.management.base import BaseCommand, CommandError
-
-from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, CollectionRemote
+from pulp_ansible.app.models import (
+    AnsibleDistribution,
+    AnsibleRepository,
+    CollectionRemote,
+)
 from pulp_ansible.app.tasks.utils import parse_collections_requirements_file
+from rest_framework.serializers import ValidationError
+
+from galaxy_ng.app.constants import COMMUNITY_DOMAINS
 
 
 class Command(BaseCommand):
@@ -19,6 +25,8 @@ class Command(BaseCommand):
     $ create-remote community https://galaxy.ansible.com -r /tmp/reqs.yaml
 
     """
+
+    status_messages = []
 
     def load_requirements_file(self, requirements_file):
         """Loads  and validates the requirements file
@@ -34,6 +42,8 @@ class Command(BaseCommand):
             parse_collections_requirements_file(requirements_file)
         except ValidationError as e:
             raise CommandError("Error parsing requirements_file {}".format(str(e)))
+        else:
+            self.status_messages.append("requirements_file loaded and parsed")
 
         return requirements_file
 
@@ -98,7 +108,7 @@ class Command(BaseCommand):
         except IntegrityError as e:
             raise CommandError("Cannot create {} remote, error: {}".format(data["name"], str(e)))
         else:
-            self.stdout.write("Created new CollectionRemote {}".format(remote.name))
+            self.status_messages.append("Created new CollectionRemote {}".format(remote.name))
 
         return remote
 
@@ -115,7 +125,7 @@ class Command(BaseCommand):
 
         repository.remote = remote
         repository.save()
-        self.stdout.write(
+        self.status_messages.append(
             "{} Repository {}".format(
                 "Created new" if repo_created else "Associated existing",
                 repository.name,
@@ -145,7 +155,7 @@ class Command(BaseCommand):
         distribution.repository = repository
         distribution.remote = remote
         distribution.save()
-        self.stdout.write(
+        self.status_messages.append(
             "{} Distribution {}".format(
                 "Created new" if distro_created else "Associated existing",
                 distribution.name,
@@ -155,6 +165,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **data):
         data = self.validate(data)
-        remote = self.create_remote(data)
-        repository = self.create_repository(data, remote)
-        self.create_distribution(data, remote, repository)
+
+        with transaction.atomic():
+            remote = self.create_remote(data)
+            repository = self.create_repository(data, remote)
+            self.create_distribution(data, remote, repository)
+
+        # only outputs success messages if transaction is succesful
+        for message in self.status_messages:
+            self.stdout.write(message)
