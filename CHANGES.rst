@@ -13,6 +13,131 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0b1 (2020-09-11)
+====================
+
+Features
+--------
+
+- When subscribers modify their synclist or the golden repository versions changes, AH needs to add/remove content from the associated repositories.
+  `#17 <https://github.com/ansible/galaxy_ng/issues/17>`_
+- Configure and manage content sync and collection remotes
+  `#22 <https://github.com/ansible/galaxy_ng/issues/22>`_
+- Support auto-created inbound pulp repositories per namespace
+  `#37 <https://github.com/ansible/galaxy_ng/issues/37>`_
+- Migration to add repo and distro for existing namespaces
+  `#38 <https://github.com/ansible/galaxy_ng/issues/38>`_
+- Add OpenAPI spec for exposing pulp collection viewsets.
+  `#93 <https://github.com/ansible/galaxy_ng/issues/93>`_
+- After successful import move collection version from incoming repo to staging repo
+  `#117 <https://github.com/ansible/galaxy_ng/issues/117>`_
+- Remove v3 api CollectionVersion certified flag filter
+  `#120 <https://github.com/ansible/galaxy_ng/issues/120>`_
+- Move _ui/ to the same level as v3/ and add versions to it.
+  `#225 <https://github.com/ansible/galaxy_ng/issues/225>`_
+- Create default synclist and associated repository/distribution on login.
+  `#264 <https://github.com/ansible/galaxy_ng/issues/264>`_
+- When subscribers modify their synclist or the upstream repository versions changes, update the synclist repos.
+
+  Add /curate/ endpoints to synclists (POST /_ui/my-synclists/{pk}/curate/) to trigger curating
+  a synclist repo.
+
+  Add /curate/ endpoints to repositories (POST /content/<repo_name>/v3/collections/curate/
+  to trigger updating all synclists repos whose upstream_repository points to
+  /content/<repo_name>/
+
+  Add new tasks:
+
+  * curate_synclist_repository(synclist_pk)
+    * update synclist.repository based on synclist.policy, synclist.collections, and synclist.namespaces
+  * curate_all_synclist_repositoies(upstream_repository_name)
+    * Create a TaskGroup and create a curate_synclist_repository subtask for each synclist repo
+    * Also creates a GroupProgressReport for the TaskGroup
+      * Could be used to surface promotion status in UI
+
+  Note: When using curate_all_synclist_repositoies with a lot of synclist repositories, it is
+  recommended to enable multiple pulp workers.
+
+  For example, if using the galaxy_ng dev docker-compose tools:
+
+      $ ./compose up --scale worker=2
+  `#265 <https://github.com/ansible/galaxy_ng/issues/265>`_
+- When creating a synclist, ensure that the curated repo and distribution exists, and create them if needed.
+  `#267 <https://github.com/ansible/galaxy_ng/issues/267>`_
+- Add endpoints to manage Content Sync for community and rh-certified repositories.
+  `#282 <https://github.com/ansible/galaxy_ng/issues/282>`_
+- API: Update org repositories when new collection version published
+
+  For c.rh.c, when a collection version is promoted from the staging
+  repository to the published repository, the subscriber org repositories
+  must be updated with the new artifact.
+
+  The promotion event has to:
+      - Kick-off n number of tasks, where n is the number of synclist repos
+  `#285 <https://github.com/ansible/galaxy_ng/issues/285>`_
+- Add endpoint to get status of pulp tasks
+  `#295 <https://github.com/ansible/galaxy_ng/issues/295>`_
+- Implement RBAC.
+  - Adds DRF Access Policy to control permissions on DRF viewsets
+  - Adds Django Guardian for assigning permissions to objects
+  `#303 <https://github.com/ansible/galaxy_ng/issues/303>`_
+- Expose the pulp core groups api. Exposes:
+  - _ui/groups/ for listing and creating groups
+  - _ui/groups/<pk> for deleting groups
+  - _ui/groups/<pk>/model-permissions for listing and adding permissions to groups
+  - _ui/groups/<pk>/model-permissions/<pk> for removing permissions from groups
+  - _ui/groups/<pk>/users/ for listing and adding users to groups
+  - _ui/groups/<pk>/users/<pk> for removing users from groups
+  `#304 <https://github.com/ansible/galaxy_ng/issues/304>`_
+- Removal of existing permission system
+  - Viewsets no longer check to see if the user is in the system:partner-engineers group to determine if the user is an admin.
+  - Red Hat entitlements checks have been moved to DRF Access Policy
+  - Existing permission classes have been removed and replaced with DRF Access Policy permission classes.
+  `#305 <https://github.com/ansible/galaxy_ng/issues/305>`_
+- Add relevant user permissions to the _ui/me/ api for the UI to use.
+  `#306 <https://github.com/ansible/galaxy_ng/issues/306>`_
+- Use pulp repos to denote approved content on auto-approval
+  `#316 <https://github.com/ansible/galaxy_ng/issues/316>`_
+- Added Dockerfile.rhel8 for building docker images based on RHEL8.
+  `#362 <https://github.com/ansible/galaxy_ng/issues/362>`_
+- On publish check if inbound repo allows publishing
+  `#372 <https://github.com/ansible/galaxy_ng/issues/372>`_
+- Pin to pulpcore 3.6.0, pulp-ansible 0.2.0 and pulp-container 2.0.0
+  `#380 <https://github.com/ansible/galaxy_ng/issues/380>`_
+- Adds assign-permission management command for associating permissions to a group
+  `#389 <https://github.com/ansible/galaxy_ng/issues/389>`_
+- Add `distributions` and `my-distributions` endpoints to the UI api.
+  `#397 <https://github.com/ansible/galaxy_ng/issues/397>`_
+
+
+Bugfixes
+--------
+
+- Fix PATCH on my-synclists
+  `#269 <https://github.com/ansible/galaxy_ng/issues/269>`_
+- Fixed bug in auto certification parameter check, that caused all submitted content being automatically approved.
+  `#318 <https://github.com/ansible/galaxy_ng/issues/318>`_
+- Update requirements to use latest git versions of pulp*
+  `#330 <https://github.com/ansible/galaxy_ng/issues/330>`_
+- Update uses of pulp_ansible import_collection tasks to use PulpTemporaryFile
+  `#333 <https://github.com/ansible/galaxy_ng/issues/333>`_
+- chillout check_pulpcore_imports for a bit
+  `#387 <https://github.com/ansible/galaxy_ng/issues/387>`_
+- Add docs_blob to v3 api for collection versions
+  `#403 <https://github.com/ansible/galaxy_ng/issues/403>`_
+- Create namespaces on content sync
+  `#404 <https://github.com/ansible/galaxy_ng/issues/404>`_
+
+
+Misc
+----
+
+- `#297 <https://github.com/ansible/galaxy_ng/issues/297>`_, `#349 <https://github.com/ansible/galaxy_ng/issues/349>`_
+
+
+----
+
+
 4.2.0a10 (2020-07-15)
 =====================
 
