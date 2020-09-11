@@ -228,6 +228,7 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
 
 class CollectionArtifactDownloadView(APIView):
     permission_classes = [access_policy.CollectionAccessPolicy]
+    action = 'retrieve'
 
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
