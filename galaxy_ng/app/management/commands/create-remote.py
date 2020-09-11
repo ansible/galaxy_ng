@@ -127,10 +127,11 @@ class Command(BaseCommand):
         return repository
 
     def create_distribution(self, data, remote, repository):
-        distribution, distro_created = AnsibleDistribution.objects.get_or_create(
-            name=data["distribution"] or data["name"],
-            base_path=data["distribution"] or data["name"],
-        )
+        distro_name = data['distribution'] or data['name']
+        distribution, distro_created = AnsibleDistribution.objects.get_or_create(name=distro_name)
+
+        if not distribution.base_path:
+            distribution.base_path = distro_name
 
         distribution.repository = repository
         distribution.remote = remote
