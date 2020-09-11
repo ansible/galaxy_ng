@@ -7,10 +7,6 @@ from galaxy_ng.app.constants import COMMUNITY_DOMAINS
 class SyncConfigSerializer(CollectionRemoteSerializer):
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
-    policy = serializers.ChoiceField(
-        choices=CollectionRemote.POLICY_CHOICES,
-        default=CollectionRemote.ON_DEMAND
-    )
     token = serializers.CharField(allow_null=True, required=False, max_length=2000, write_only=True)
     name = serializers.CharField(read_only=True)
 
