@@ -33,12 +33,18 @@ class TestCreateRemoteCommand(TestCase):
             call_command('create-remote')
 
     def test_remote_already_exists(self):
-        with self.assertRaisesMessage(
-            CommandError,
-            'Cannot create test-remote remote, error: duplicate key value violates unique '
-            'constraint "core_remote_name_key"'
-        ):
-            call_command('create-remote', 'test-remote', 'https://test.remote/v3/collections')
+        out = StringIO()
+
+        call_command(
+            'create-remote',
+            'test-remote',
+            'https://test.remote/v3/collections',
+            stdout=out
+        )
+
+        self.assertIn('Updated existing CollectionRemote test-remote', out.getvalue())
+        self.assertIn('Created new Repository test-remote', out.getvalue())
+        self.assertIn('Created new Distribution test-remote', out.getvalue())
 
     def test_remote_created(self):
         out = StringIO()
@@ -55,8 +61,13 @@ class TestCreateRemoteCommand(TestCase):
     def test_associate_existing_entities(self):
         out = StringIO()
 
-        AnsibleRepository.objects.create(name='existing-repo')
-        AnsibleDistribution.objects.create(name='existing-distro', base_path='existing-distro')
+        existing_remote = CollectionRemote.objects.create(name='existing-remote')
+        existing_repository = AnsibleRepository.objects.create(
+            name='existing-repo', remote=existing_remote
+        )
+        AnsibleDistribution.objects.create(
+            name='existing-distro', base_path='existing-distro', repository=existing_repository
+        )
 
         call_command(
             'create-remote',

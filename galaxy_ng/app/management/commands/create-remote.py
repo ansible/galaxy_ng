@@ -2,7 +2,6 @@ import os
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.db.utils import IntegrityError
 from django.utils.text import slugify
 from pulp_ansible.app.models import (
     AnsibleDistribution,
@@ -97,18 +96,18 @@ class Command(BaseCommand):
         return data
 
     def create_remote(self, data):
-        try:
-            remote = CollectionRemote.objects.create(
-                name=data["name"],
-                url=data["url"],
-                auth_url=data["auth_url"],
-                token=data["token"],
-                requirements_file=data["requirements_file"]
+        remote, remote_created = CollectionRemote.objects.get_or_create(name=data["name"])
+
+        for arg in ('url', 'auth_url', 'token', 'requirements_file'):
+            if data[arg] is not None:
+                setattr(remote, arg, data[arg])
+        remote.save()
+        self.status_messages.append(
+            "{} CollectionRemote {}".format(
+                "Created new" if remote_created else "Updated existing",
+                remote.name
             )
-        except IntegrityError as e:
-            raise CommandError("Cannot create {} remote, error: {}".format(data["name"], str(e)))
-        else:
-            self.status_messages.append("Created new CollectionRemote {}".format(remote.name))
+        )
 
         return remote
 
@@ -116,12 +115,6 @@ class Command(BaseCommand):
         repository, repo_created = AnsibleRepository.objects.get_or_create(
             name=data["repository"] or data["name"]
         )
-        if repository.remote:
-            raise CommandError(
-                "Repository {} is already associated with a remote {}".format(
-                    repository.name, repository.remote.name
-                )
-            )
 
         repository.remote = remote
         repository.save()
@@ -138,19 +131,6 @@ class Command(BaseCommand):
             name=data["distribution"] or data["name"],
             base_path=data["distribution"] or data["name"],
         )
-        if distribution.repository:
-            raise CommandError(
-                "Distribution {} is already associated with a repository {}".format(
-                    distribution.name, distribution.repository.name
-                )
-            )
-
-        if distribution.remote:
-            raise CommandError(
-                "Distribution {} is already associated with a remote {}".format(
-                    distribution.name, distribution.remote.name
-                )
-            )
 
         distribution.repository = repository
         distribution.remote = remote
