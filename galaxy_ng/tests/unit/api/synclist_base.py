@@ -37,7 +37,7 @@ class BaseSyncListViewSet(base.BaseTestCase):
         self.repo = self._create_repository("test_post_repo")
         self.repo.save()
 
-        repo_name = "automation-hub"
+        repo_name = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
         self.default_repo, _ = pulp_ansible_models.AnsibleRepository.objects.get_or_create(
             name=repo_name
         )
