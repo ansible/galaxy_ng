@@ -304,6 +304,7 @@ class CollectionVersionMoveViewSet(ViewSet):
         add_task = self._add_content(collection_version, dest_repo)
         remove_task = self._remove_content(collection_version, src_repo)
 
+        curate_task_id = None
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             golden_repo = AnsibleDistribution.objects.get(
                 base_path=settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
@@ -318,12 +319,13 @@ class CollectionVersionMoveViewSet(ViewSet):
                 curate_task = enqueue_with_reservation(
                     curate_all_synclist_repository, locks, args=task_args, kwargs=task_kwargs
                 )
+                curate_task_id = curate_task.id
 
         return Response(
             data={
                 'add_task_id': add_task.id,
                 'remove_task_id': remove_task.id,
-                "curate_all_synclist_repository_task_id": curate_task.id,
+                "curate_all_synclist_repository_task_id": curate_task_id,
             },
             status='202'
         )
