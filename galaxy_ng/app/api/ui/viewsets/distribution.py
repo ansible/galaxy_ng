@@ -16,7 +16,8 @@ class DistributionViewSet(
     serializer_class = serializers.DistributionSerializer
     model = pulp_models.AnsibleDistribution
     queryset = pulp_models.AnsibleDistribution.objects.exclude(
-        name__startswith='inbound-').exclude(name__endswith='-synclist')
+        name__startswith='inbound-').exclude(
+            name__endswith='-synclist').order_by('name')
     permission_classes = [access_policy.DistributionAccessPolicy]
     versioning_class = versioning.UIVersioning
 
@@ -34,4 +35,4 @@ class MyDistributionViewSet(DistributionViewSet):
 
         # TODO: find a better way query this data
         return pulp_models.AnsibleDistribution.objects.filter(
-            name__in=synclists.values_list('name', flat=True))
+            name__in=synclists.values_list('name', flat=True)).order_by('name')

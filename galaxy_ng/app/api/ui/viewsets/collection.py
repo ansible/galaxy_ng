@@ -314,7 +314,7 @@ class CollectionImportViewSet(api_base.GenericViewSet):
 
 
 class CollectionRemoteViewSet(api_base.ModelViewSet):
-    queryset = CollectionRemote.objects.all()
+    queryset = CollectionRemote.objects.all().order_by('name')
     serializer_class = serializers.CollectionRemoteSerializer
 
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]
