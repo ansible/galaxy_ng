@@ -72,12 +72,12 @@ paths = [
     path('groups/', include(group_paths)),
 
     path(
-        'repo/<str:repo_name>/',
+        'repo/<str:path>/',
         viewsets.RepositoryCollectionViewSet.as_view({'get': 'list'}),
         name='repo-collections-list'
     ),
     path(
-        'repo/<str:repo_name>/<str:namespace>/<str:name>/',
+        'repo/<str:path>/<str:namespace>/<str:name>/',
         viewsets.RepositoryCollectionViewSet.as_view({'get': 'retrieve'}),
         name='repo-collections-detail'
     ),

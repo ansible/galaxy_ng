@@ -1,9 +1,12 @@
 import galaxy_pulp
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from drf_spectacular.utils import extend_schema
+from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_galaxy_views
+from pulp_ansible.app.viewsets import CollectionVersionFilter
 from pulp_ansible.app.models import (
     AnsibleDistribution,
     CollectionVersion,
@@ -133,75 +136,35 @@ class CollectionViewSet(api_base.ViewSet):
 # remove Collection*[ViewSet|Serializer] classes and replace with
 # RepositoryCollection*[ViewSet|Serializer] classes
 
-class RepositoryCollectionFilter(filterset.FilterSet):
-    """Support filtering collection list by namespace query param."""
+
+class RepositoryCollectionFilter(CollectionVersionFilter):
     versioning_class = versioning.UIVersioning
-
-    class Meta:
-        model = Collection
-        fields = ['namespace']
+    keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
 
 
-class RepositoryCollectionViewSet(api_base.GenericViewSet):
+class RepositoryCollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
+    """ Viewset that uses CollectionVersion to display data for Collection."""
+    versioning_class = versioning.UIVersioning
     filterset_class = RepositoryCollectionFilter
-    versioning_class = versioning.UIVersioning
 
-    def list(self, request, *args, **kwargs):
-        repo_name = self.kwargs['repo_name']
-        queryset = Collection.objects.all()
-        queryset = self.filter_queryset(queryset)
-        queryset = self._filter_by_repo(queryset, repo_name)
-        page = self.paginate_queryset(queryset)
-        data = serializers.RepositoryCollectionListSerializer(
-            page,
-            many=True,
-            context={
-                'repository': repo_name,
-            }
-        ).data
-        return self.get_paginated_response(data)
+    # TODO(awcrosby): remove once pulp_ansible is_highest param filters by repo
+    # https://pulp.plan.io/issues/7428
+    def get_queryset(self):
+        """
+        Overrides to not use is_highest param and
+        ensures one collection version per collection is returned.
+        """
+        distro_content = self.get_distro_content(self.kwargs["path"])
 
-    def retrieve(self, request, *args, **kwargs):
-        repo_name = self.kwargs['repo_name']
-        namespace = self.kwargs['namespace']
-        name = self.kwargs['name']
+        qs = CollectionVersion.objects.select_related("collection").filter(
+            pk__in=distro_content).distinct('collection')
+        return qs
 
-        namespace_obj = get_object_or_404(models.Namespace, name=namespace)
-
-        collections = Collection.objects.filter(namespace=namespace, name=name)
-        if not collections:
-            raise NotFound(f'Collection not found for: {namespace}.{name}')
-
-        collection = self._filter_by_repo(collections, repo_name).first()
-        if not collection:
-            raise NotFound(f'Repository {repo_name} has no collection: {namespace}.{name}')
-
-        data = serializers.RepositoryCollectionDetailSerializer(
-            collection,
-            context={
-                'namespace': namespace_obj,
-                'repository': repo_name,
-            }
-        ).data
-        return Response(data)
-
-    @staticmethod
-    def _filter_by_repo(collections_queryset, repo_name):
-        """Filter for Collections that have CollectionVersions in a Repository."""
-        try:
-            distro = AnsibleDistribution.objects.get(base_path=repo_name)
-            repository_version = distro.repository.latest_version()
-            collection_versions = CollectionVersion.objects.all()
-            versions_in_repo = collection_versions.filter(pk__in=repository_version.content)
-            return collections_queryset.filter(versions__pk__in=versions_in_repo).distinct()
-        except ObjectDoesNotExist:
-            return Collection.objects.none()
-
-    @staticmethod
-    def _query_namespaces(names):
-        queryset = models.Namespace.objects.filter(name__in=names)
-        namespaces = {ns.name: ns for ns in queryset}
-        return namespaces
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return serializers.RepositoryCollectionListSerializer
+        else:
+            return serializers.RepositoryCollectionDetailSerializer
 
 
 class CollectionVersionFilter(filterset.FilterSet):

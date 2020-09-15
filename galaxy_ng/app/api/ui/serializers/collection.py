@@ -154,22 +154,31 @@ class RepositoryCollectionVersionSummarySerializer(Serializer):
 
 
 class _RepositoryCollectionSerializer(Serializer):
+    """ Serializer for pulp_ansible CollectionViewSet.
+    Uses CollectionVersion object to serialize associated Collection data.
+    """
+
     id = serializers.UUIDField(source='pk')
     namespace = serializers.SerializerMethodField()
     name = serializers.CharField()
     download_count = serializers.IntegerField(default=0)
     latest_version = serializers.SerializerMethodField()
-    deprecated = serializers.BooleanField()
+    deprecated = serializers.SerializerMethodField()
 
     def get_namespace(self, obj):
         namespace = Namespace.objects.get(name=obj.namespace)
         return NamespaceSummarySerializer(namespace).data
 
+    def get_deprecated(self, obj):
+        return obj.collection.deprecated
+
+    # TODO(awcrosby): refactor once pulp_ansible is_highest param filters by repo
+    # https://pulp.plan.io/issues/7428
     def _get_versions_in_repo(self, obj):
-        repo_param = self.context['repository']
+        repo_param = self.context['path']
         distro = AnsibleDistribution.objects.get(base_path=repo_param)
         repository_version = distro.repository.latest_version()
-        collection_versions = CollectionVersion.objects.filter(collection=obj)
+        collection_versions = CollectionVersion.objects.filter(collection=obj.collection)
 
         versions_in_repo = collection_versions.filter(pk__in=repository_version.content)
         versions_in_repo = sorted(
@@ -177,6 +186,8 @@ class _RepositoryCollectionSerializer(Serializer):
         )
         return versions_in_repo
 
+    # TODO(awcrosby): refactor once pulp_ansible is_highest param filters by repo
+    # https://pulp.plan.io/issues/7428
     def _get_latest_version(self, obj):
         versions_in_repo = self._get_versions_in_repo(obj)
         return next(iter(versions_in_repo), None)
