@@ -28,6 +28,7 @@ def _create_remote(name, url, **kwargs):
 def _get_create_version_in_repo(namespace, collection, version, repo):
     collection_version, _ = CollectionVersion.objects.get_or_create(
         namespace=namespace,
+        name=collection.name,
         collection=collection,
         version=version,
     )
@@ -119,15 +120,15 @@ class TestUiCollectionViewSet(BaseTestCase):
         _get_create_version_in_repo(self.namespace, self.collection1, '1.0.0', self.repo2)
 
         self.repo1_list_url = get_current_ui_url(
-            'repo-collections-list', kwargs={'repo_name': 'repo1'})
+            'repo-collections-list', kwargs={'path': 'repo1'})
         self.repo2_list_url = get_current_ui_url(
-            'repo-collections-list', kwargs={'repo_name': 'repo2'})
+            'repo-collections-list', kwargs={'path': 'repo2'})
         self.repo3_list_url = get_current_ui_url(
-            'repo-collections-list', kwargs={'repo_name': 'repo3'})
+            'repo-collections-list', kwargs={'path': 'repo3'})
         self.repo1_collection1_detail_url = get_current_ui_url(
             'repo-collections-detail',
             kwargs={
-                'repo_name': 'repo1',
+                'path': 'repo1',
                 'namespace': namespace_name,
                 'name': collection1_name})
 
