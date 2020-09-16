@@ -13,6 +13,32 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0b2 (2020-09-16)
+====================
+
+Features
+--------
+
+- The task for curating content needs to be initiated whenever a new collection lands in the golden repository.
+  `#428 <https://github.com/ansible/galaxy_ng/issues/428>`_
+
+
+Bugfixes
+--------
+
+- Order remotes and distributions by name instead of last updated.
+  `#445 <https://github.com/ansible/galaxy_ng/issues/445>`_
+
+
+Misc
+----
+
+- `#430 <https://github.com/ansible/galaxy_ng/issues/430>`_, `#439 <https://github.com/ansible/galaxy_ng/issues/439>`_, `#449 <https://github.com/ansible/galaxy_ng/issues/449>`_, `#457 <https://github.com/ansible/galaxy_ng/issues/457>`_
+
+
+----
+
+
 4.2.0b1 (2020-09-11)
 ====================
 
