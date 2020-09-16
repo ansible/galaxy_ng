@@ -156,8 +156,14 @@ class RepositoryCollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
         """
         distro_content = self.get_distro_content(self.kwargs["path"])
 
-        qs = CollectionVersion.objects.select_related("collection").filter(
+        # isolate the use of distinct in separate database call to avoid
+        # postgres error on use of distinct and order_by in later calls
+        qs_distinct = CollectionVersion.objects.filter(
             pk__in=distro_content).distinct('collection')
+        collection_version_pks = [cv.pk for cv in qs_distinct]
+
+        qs = CollectionVersion.objects.select_related("collection").filter(
+            pk__in=collection_version_pks)
         return qs
 
     def get_serializer_class(self):
