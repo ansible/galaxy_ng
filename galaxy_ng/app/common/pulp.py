@@ -4,7 +4,8 @@ from galaxy_pulp import Configuration, ApiClient
 
 def get_configuration():
     config = Configuration(
-        host="http://{host}:{port}".format(
+        host="{proto}://{host}:{port}".format(
+            proto=settings.get('X_PULP_API_PROTO', 'http'),
             host=settings.X_PULP_API_HOST,
             port=settings.X_PULP_API_PORT
         ),
