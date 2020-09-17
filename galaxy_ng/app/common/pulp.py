@@ -11,9 +11,10 @@ def get_configuration():
         ),
         username=settings.X_PULP_API_USER,
         password=settings.X_PULP_API_PASSWORD,
-
     )
     config.safe_chars_for_path_param = '/'
+    if 'VERIFY_SSL' in settings:
+        config.verify_ssl = settings.VERIFY_SSL
     return config
 
 
