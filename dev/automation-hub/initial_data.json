@@ -32,7 +32,7 @@
       "pulp_created": "2020-03-12T15:56:19.071Z",
       "pulp_last_updated": "2020-03-12T15:56:19.072Z",
       "pulp_type": "ansible.ansible",
-      "name": "automation-hub",
+      "name": "published",
       "description": "Default repository, the source of downloads",
       "next_version": 1
     }
@@ -56,8 +56,8 @@
       "pulp_created": "2020-03-12T15:56:23.436Z",
       "pulp_last_updated": "2020-03-12T15:56:23.436Z",
       "pulp_type": "ansible.ansible",
-      "name": "automation-hub",
-      "base_path": "automation-hub",
+      "name": "published",
+      "base_path": "published",
       "content_guard": null,
       "remote": null
     }

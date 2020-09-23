@@ -27,9 +27,9 @@ AUTH_USER_MODEL = 'galaxy.User'
 GALAXY_API_PATH_PREFIX = "/api/galaxy"
 STATIC_URL = "/static/"
 
-# The default repo and distro is called 'automation-hub', as
-# created by the initial-data.json data fixture
-GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH = "automation-hub"
+# A client connection to /api/automation-hub/ is the same as a client connection
+# to /api/automation-hub/content/<GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH>/
+GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH = "published"
 
 GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH = "staging"
 GALAXY_API_REJECTED_DISTRIBUTION_BASE_PATH = "rejected"
