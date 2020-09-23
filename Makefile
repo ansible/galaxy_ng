@@ -8,14 +8,16 @@ help:             ## Show the help.
 	@echo "Targets:"
 	@fgrep "##" Makefile | fgrep -v fgrep
 
+# ANSIBLE_SKIP_CONFLICT_CHECK=1 tells pip/pip-compile to avoid
+# refusing to update ansbile 2.9 to ansible 2.10.
 
 .PHONY: requirements
 requirements:     ## Update python dependencies lock files (i.e. requirements.txt).
-	pip-compile -U -o requirements/requirements.common.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.common.txt \
 		setup.py
-	pip-compile -U -o requirements/requirements.standalone.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.standalone.txt \
 		setup.py requirements/requirements.standalone.in
-	pip-compile -U -o requirements/requirements.insights.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.insights.txt \
 		setup.py requirements/requirements.insights.in
 
 
