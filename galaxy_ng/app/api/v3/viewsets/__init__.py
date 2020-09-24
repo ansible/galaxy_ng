@@ -16,7 +16,10 @@ from .task import (
     TaskViewSet,
 )
 
-from .sync import SyncConfigViewSet
+from .sync import (
+    SyncConfigViewSet,
+    SyncTaskViewSet,
+)
 
 
 __all__ = (
@@ -29,5 +32,6 @@ __all__ = (
     'CollectionVersionMoveViewSet',
     'NamespaceViewSet',
     'SyncConfigViewSet',
+    'SyncTaskViewSet',
     'TaskViewSet',
 )

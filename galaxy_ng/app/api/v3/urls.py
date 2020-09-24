@@ -27,7 +27,13 @@ sync_urls = [
         "sync/config/",
         viewsets.SyncConfigViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='sync-config'
+    ),
+    path(
+        "sync/tasks/",
+        viewsets.SyncTaskViewSet.as_view({'get': 'list'}),
+        name='sync-list'
     )
+
 ]
 
 urlpatterns = [
