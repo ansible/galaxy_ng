@@ -1,1 +1,0 @@
-Set `ALLOWED_CONTENT_CHECKSUMS = ["sha224", "sha256", "sha384", "sha512"]` in settings.py to support FIPS compliance.

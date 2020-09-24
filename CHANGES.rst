@@ -13,6 +13,30 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0b3 (2020-09-24)
+====================
+
+Features
+--------
+
+- Allow a user to specify the protocol she wants to use to talk to the pulp backend. (ie. http vs. https)
+  `#464 <https://github.com/ansible/galaxy_ng/issues/464>`_
+- Upgrade to pulpcore 3.7.0 and allow for 3.8.0
+
+  Based on the API stability guidance at
+  https://docs.pulpproject.org/pulpcore/plugins/plugin-writer/concepts/index.html#plugin-api-stability-and-deprecation-policy
+  `#476 <https://github.com/ansible/galaxy_ng/issues/476>`_
+
+
+Misc
+----
+
+- `#474 <https://github.com/ansible/galaxy_ng/issues/474>`_
+
+
+----
+
+
 4.2.0b2 (2020-09-16)
 ====================
 
