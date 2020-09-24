@@ -76,6 +76,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+ALLOWED_CONTENT_CHECKSUMS = ["sha224", "sha256", "sha384", "sha512"]
+
 # Compatibility settings
 # ----------------------
 # FIXME(cutwater): To be removed after viewsets stop proxying API requests
