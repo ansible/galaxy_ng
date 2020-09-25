@@ -91,7 +91,7 @@ paths:
   # Authentication
   # -------------------------------------
 
-  /auth/token/:
+  /v3/auth/token/:
     post:
       summary: "Issue Auth Token"
       operationId: createAuthToken
