@@ -66,8 +66,10 @@ requirements = galaxy_pulp_requirements + [
     "drf-spectacular",
 ]
 
+package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
+
 setup(
-    name="galaxy-ng",
+    name=package_name,
     version=__version__,
     description="galaxy-ng plugin for the Pulp Project",
     license="GPLv2+",
