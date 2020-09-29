@@ -29,6 +29,7 @@ STATIC_URL = "/static/"
 
 # A client connection to /api/automation-hub/ is the same as a client connection
 # to /api/automation-hub/content/<GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH>/
+# with the exception of galaxy_ng.app.api.v3.viewsets.CollectionUploadViewSet
 GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH = "published"
 
 GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH = "staging"
