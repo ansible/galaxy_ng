@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from pulp_ansible import __version__ as pulp_ansible_version
+from galaxy_ng import __version__ as galaxy_ng_version
 from galaxy_ng.app.api import base as api_base
 
 
@@ -10,6 +12,9 @@ class ApiRootView(api_base.APIView):
     def get(self, request, *args, **kwargs):
         data = {
             "available_versions": {"v3": "v3/"},
+            "server_version": galaxy_ng_version,
+            "galaxy_ng_version": galaxy_ng_version,
+            "pulp_ansible_version": pulp_ansible_version,
         }
 
         if kwargs.get("path"):
