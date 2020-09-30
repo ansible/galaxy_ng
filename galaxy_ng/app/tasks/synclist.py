@@ -10,8 +10,7 @@ from pulpcore.plugin.models import (
     TaskGroup,
 )
 
-from pulpcore.app.tasks.repository import add_and_remove
-from pulpcore.plugin.tasking import enqueue_with_reservation
+from pulpcore.plugin.tasking import add_and_remove, enqueue_with_reservation
 
 from pulp_ansible.app.models import (
     AnsibleRepository,
