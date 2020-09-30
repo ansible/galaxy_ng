@@ -138,7 +138,7 @@ class CollectionUploadSerializer(Serializer):
         try:
             filename_tuple = parse_collection_filename(filename)
         except ValueError as exc:
-            errors['filename'] = _get_error_details(exc)
+            errors['filename'] = _get_error_details(exc, default_code='invalid')
             log.error('CollectionUploadSerializer validation of filename failed: %s',
                       errors['filename'])
             raise ValidationError(errors)
