@@ -161,6 +161,17 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
         return serializer.validated_data
 
     @staticmethod
+    def _get_path(kwargs, filename_ns):
+        """Use path from '/content/<path>/v3/' or
+           if user does not specify distribution base path
+           then use an inbound distribution based on filename namespace.
+        """
+        path = kwargs['path']
+        if kwargs.get('no_path_specified', None):
+            path = INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)
+        return path
+
+    @staticmethod
     def _check_path_matches_expected_repo(path, filename_ns):
         """Reject if path does not match expected inbound format
            containing filename namespace.
@@ -175,12 +186,14 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
         repo_name = distro.repository.name
         if INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns) == repo_name:
             return
-        raise APIException(
+        raise NotFound(
             f'Path does not match: "{INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)}"')
 
-    def create(self, request, path):
+    def create(self, request, *args, **kwargs):
         data = self._get_data(request)
         filename = data['filename']
+
+        path = self._get_path(kwargs, filename_ns=filename.namespace)
 
         try:
             namespace = models.Namespace.objects.get(name=filename.namespace)
@@ -299,7 +312,7 @@ class CollectionVersionMoveViewSet(ViewSet):
 
         dest_versions = CollectionVersion.objects.filter(pk__in=dest_repo.latest_version().content)
         if collection_version in dest_versions:
-            raise APIException(f'Collection {version_str} already found in destination repo')
+            raise NotFound(f'Collection {version_str} already found in destination repo')
 
         add_task = self._add_content(collection_version, dest_repo)
         remove_task = self._remove_content(collection_version, src_repo)

@@ -23,10 +23,14 @@ v3_urlpatterns = [
     # and pass in path param 'path' that actually means
     # the base_path of the Distribution. For the default case,
     # use the hard coded 'default' distro (ie, 'automation-hub')
-    path("",
-         # include((v3_urls, app_name), namespace='default-content'),
-         include((v3_urls, app_name), namespace='default-content'),
-         {'path': DEFAULT_DISTRIBUTION_BASE_PATH}),
+    path(
+        "",
+        include((v3_urls, app_name), namespace='default-content'),
+        {
+            'no_path_specified': True,
+            'path': DEFAULT_DISTRIBUTION_BASE_PATH,
+        }
+    ),
 ]
 
 content_v3_urlpatterns = [

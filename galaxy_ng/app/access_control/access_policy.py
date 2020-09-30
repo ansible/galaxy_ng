@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from rest_access_policy import AccessPolicy
+from rest_framework.exceptions import NotFound
 
 from galaxy_ng.app import models
 
@@ -47,7 +48,10 @@ class CollectionAccessPolicy(AccessPolicyBase):
 
     def can_create_collection(self, request, view, permission):
         data = view._get_data(request)
-        namespace = models.Namespace.objects.get(name=data['filename'].namespace)
+        try:
+            namespace = models.Namespace.objects.get(name=data['filename'].namespace)
+        except models.Namespace.DoesNotExist:
+            raise NotFound('Namespace in filename not found.')
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
 
