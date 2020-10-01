@@ -34,7 +34,7 @@ django-lifecycle==0.7.7   # via pulpcore
 django-prometheus==2.1.0  # via galaxy-ng (setup.py)
 django==2.2.16            # via django-currentuser, django-filter, django-guardian, django-import-export, django-lifecycle, djangorestframework, drf-nested-routers, drf-spectacular, galaxy-ng (setup.py), pulpcore
 djangorestframework-queryfields==1.0.0  # via pulpcore
-djangorestframework==3.11.1  # via drf-nested-routers, drf-spectacular, pulpcore
+djangorestframework==3.11.2  # via drf-nested-routers, drf-spectacular, pulpcore
 drf-access-policy==0.7.0  # via pulpcore
 drf-nested-routers==0.91  # via pulpcore
 drf-spectacular==0.9.13   # via galaxy-ng (setup.py), pulpcore
@@ -62,9 +62,9 @@ openpyxl==3.0.5           # via tablib
 packaging==20.4           # via ansible-base, bleach, pulp-ansible
 prometheus-client==0.8.0  # via django-prometheus
 psycopg2==2.8.6           # via pulpcore
-pulp-ansible==0.4.0       # via galaxy-ng (setup.py)
+pulp-ansible==0.4.1       # via galaxy-ng (setup.py)
 pulp-container==2.1.0     # via -r requirements/requirements.standalone.in
-pulpcore==3.7.0           # via galaxy-ng (setup.py), pulp-ansible, pulp-container
+pulpcore==3.7.1           # via galaxy-ng (setup.py), pulp-ansible, pulp-container
 pycares==3.1.1            # via aiodns
 pycodestyle==2.6.0        # via flake8
 pycparser==2.20           # via cffi
@@ -82,7 +82,7 @@ pytz==2020.1              # via django
 pyyaml==5.3.1             # via ansible-base, ansible-lint, drf-spectacular, galaxy-importer, pulp-ansible, pulpcore, tablib
 redis==3.5.3              # via pulpcore, rq
 requests==2.24.0          # via galaxy-importer, pyjwkest
-rich==7.0.0               # via ansible-lint
+rich==7.1.0               # via ansible-lint
 rq==1.5.2                 # via pulpcore
 ruamel.yaml.clib==0.2.2   # via ruamel.yaml
 ruamel.yaml==0.16.12      # via ansible-lint

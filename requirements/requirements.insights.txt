@@ -15,8 +15,8 @@ attrs==20.2.0             # via aiohttp, galaxy-importer, jsonschema
 backoff==1.10.0           # via pulpcore
 bleach-whitelist==0.0.11  # via galaxy-importer
 bleach==3.2.1             # via galaxy-importer
-boto3==1.15.4             # via -r requirements/requirements.insights.in, django-storages, watchtower
-botocore==1.18.4          # via boto3, s3transfer
+boto3==1.15.9             # via -r requirements/requirements.insights.in, django-storages, watchtower
+botocore==1.18.9          # via boto3, s3transfer
 certifi==2020.6.20        # via galaxy-ng (setup.py), requests
 cffi==1.14.3              # via cryptography, pycares
 chardet==3.0.4            # via aiohttp, requests
@@ -37,7 +37,7 @@ django-prometheus==2.1.0  # via galaxy-ng (setup.py)
 django-storages[boto3]==1.10.1  # via -r requirements/requirements.insights.in
 django==2.2.16            # via django-currentuser, django-filter, django-guardian, django-import-export, django-lifecycle, django-storages, djangorestframework, drf-nested-routers, drf-spectacular, galaxy-ng (setup.py), pulpcore
 djangorestframework-queryfields==1.0.0  # via pulpcore
-djangorestframework==3.11.1  # via drf-nested-routers, drf-spectacular, pulpcore
+djangorestframework==3.11.2  # via drf-nested-routers, drf-spectacular, pulpcore
 drf-access-policy==0.7.0  # via pulpcore
 drf-nested-routers==0.91  # via pulpcore
 drf-spectacular==0.9.13   # via galaxy-ng (setup.py), pulpcore
@@ -65,8 +65,8 @@ openpyxl==3.0.5           # via tablib
 packaging==20.4           # via ansible-base, bleach, pulp-ansible
 prometheus-client==0.8.0  # via django-prometheus
 psycopg2==2.8.6           # via pulpcore
-pulp-ansible==0.4.0       # via galaxy-ng (setup.py)
-pulpcore==3.7.0           # via galaxy-ng (setup.py), pulp-ansible
+pulp-ansible==0.4.1       # via galaxy-ng (setup.py)
+pulpcore==3.7.1           # via galaxy-ng (setup.py), pulp-ansible
 pycares==3.1.1            # via aiodns
 pycodestyle==2.6.0        # via flake8
 pycparser==2.20           # via cffi
@@ -81,7 +81,7 @@ pytz==2020.1              # via django
 pyyaml==5.3.1             # via ansible-base, ansible-lint, drf-spectacular, galaxy-importer, pulp-ansible, pulpcore, tablib
 redis==3.5.3              # via pulpcore, rq
 requests==2.24.0          # via galaxy-importer
-rich==7.0.0               # via ansible-lint
+rich==7.1.0               # via ansible-lint
 rq==1.5.2                 # via pulpcore
 ruamel.yaml.clib==0.2.2   # via ruamel.yaml
 ruamel.yaml==0.16.12      # via ansible-lint
