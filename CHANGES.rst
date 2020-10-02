@@ -13,6 +13,31 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0rc1 (2020-10-02)
+=====================
+
+Bugfixes
+--------
+
+- Make error return for upload filename parsing errors provides an error code 'invalid'
+  `#31 <https://github.com/ansible/galaxy_ng/issues/31>`_
+- Fixes missing collection documentation after syncing from cloud.redhat.com.
+  `#441 <https://github.com/ansible/galaxy_ng/issues/441>`_
+- Add missing RepositoryVersion to inbound repos created via migration
+  `#493 <https://github.com/ansible/galaxy_ng/issues/493>`_
+- On upload use filename namespace as distro when no distro specified
+  `#496 <https://github.com/ansible/galaxy_ng/issues/496>`_
+
+
+Misc
+----
+
+- `#390 <https://github.com/ansible/galaxy_ng/issues/390>`_, `#473 <https://github.com/ansible/galaxy_ng/issues/473>`_
+
+
+----
+
+
 4.2.0b3 (2020-09-24)
 ====================
 

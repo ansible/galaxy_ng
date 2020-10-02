@@ -1,1 +1,0 @@
-Make error return for upload filename parsing errors provides an error code 'invalid'
