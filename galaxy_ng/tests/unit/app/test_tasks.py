@@ -46,15 +46,12 @@ class TestTaskPublish(TestCase):
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
     @mock.patch('galaxy_ng.app.tasks.publishing.enqueue_with_reservation')
     def test_import_and_auto_approve(self, mocked_enqueue, mocked_import, mocked_get_created):
-        inbound_repo = AnsibleRepository.objects.create(name=staging_name)
+        inbound_repo = AnsibleRepository.objects.get(name=staging_name)
         golden_repo = AnsibleRepository.objects.create(name=golden_name)
 
         golden_dist = AnsibleDistribution(name=golden_name, base_path=golden_name)
-        staging_dist = AnsibleDistribution(name=staging_name, base_path=staging_name)
         golden_dist.repository = golden_repo
-        staging_dist.repository = inbound_repo
         golden_dist.save()
-        staging_dist.save()
 
         self.assertTrue(self.collection_version.certification == 'needs_review')
 
@@ -80,16 +77,12 @@ class TestTaskPublish(TestCase):
     def test_import_and_move_to_staging(self, mocked_enqueue, mocked_import, mocked_get_created):
         inbound_name = 'the_incoming_repo'
         inbound_repo = AnsibleRepository.objects.create(name=inbound_name)
-        staging_repo = AnsibleRepository.objects.create(name=staging_name)
         inbound_repo.save()
-        staging_repo.save()
+        staging_repo = AnsibleRepository.objects.get(name=staging_name)
 
         inbound_dist = AnsibleDistribution(name=inbound_name, base_path=inbound_name)
-        staging_dist = AnsibleDistribution(name=staging_name, base_path=staging_name)
         inbound_dist.repository = inbound_repo
-        staging_dist.repository = staging_repo
         inbound_dist.save()
-        staging_dist.save()
 
         mocked_get_created.return_value = [self.collection_version]
 
