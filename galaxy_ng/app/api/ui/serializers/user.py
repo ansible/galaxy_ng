@@ -126,5 +126,5 @@ class CurrentUserSerializer(UserSerializer):
             "add_user": obj.has_perm('galaxy.add_user'),
             "add_group": obj.has_perm('galaxy.add_group'),
             "delete_group": obj.has_perm('galaxy.delete_group'),
-            "update_group": obj.has_perm('galaxy.update_group'),
+            "change_group": obj.has_perm('galaxy.change_group'),
         }
