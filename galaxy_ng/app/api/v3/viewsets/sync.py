@@ -22,9 +22,12 @@ class SyncConfigViewSet(
         raise Http404
 
 
-class SyncTaskViewSet(mixins.ListModelMixin, api_base.GenericViewSet):
+class SyncTaskViewSet(api_base.ModelViewSet):
+    """List of Synchronization tasks spawned for collections."""
+
     serializer_class = SyncTaskSerializer
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]
+    model = CollectionSyncTask
 
     def get_queryset(self):
         distribution = AnsibleDistribution.objects.get(base_path=self.kwargs['path'])

@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from pulpcore.plugin.models import Task
 from pulp_ansible.app.models import CollectionRemote
 from pulp_ansible.app.viewsets import CollectionRemoteSerializer
@@ -45,7 +46,8 @@ class TaskSerializer(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField(source='pulp_last_updated')
     worker = serializers.SerializerMethodField()
 
-    def get_worker(self, obj) -> Dict[str, Any]:
+    @extend_schema_field(Dict[str, Any])
+    def get_worker(self, obj):
         return {
             'name': obj.worker.name,
             'missing': obj.worker.missing,
@@ -66,11 +68,6 @@ class TaskSerializer(serializers.ModelSerializer):
             'parent_task',
             'child_tasks',
         )
-
-
-# Recursively add self referenced serializer field
-TaskSerializer._declared_fields['child_tasks'] = TaskSerializer(many=True, read_only=True)
-TaskSerializer._declared_fields['parent_task'] = TaskSerializer(read_only=True)
 
 
 class SyncTaskSerializer(serializers.ModelSerializer):
