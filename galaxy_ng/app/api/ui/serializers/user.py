@@ -120,6 +120,7 @@ class CurrentUserSerializer(UserSerializer):
             "change_distribution": obj.has_perm('ansible.change_ansibledistribution'),
             "delete_distribution": obj.has_perm('ansible.delete_ansibledistribution'),
             "add_distribution": obj.has_perm('ansible.add_ansibledistribution'),
+            "view_distribution": obj.has_perm('ansible.view_ansibledistribution'),
             "view_user": obj.has_perm('galaxy.view_user'),
             "delete_user": obj.has_perm('galaxy.delete_user'),
             "change_user": obj.has_perm('galaxy.change_user'),
@@ -127,4 +128,5 @@ class CurrentUserSerializer(UserSerializer):
             "add_group": obj.has_perm('galaxy.add_group'),
             "delete_group": obj.has_perm('galaxy.delete_group'),
             "change_group": obj.has_perm('galaxy.change_group'),
+            "view_group": obj.has_perm('galaxy.view_group'),
         }
