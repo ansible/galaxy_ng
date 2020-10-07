@@ -26,6 +26,7 @@ AUTH_USER_MODEL = 'galaxy.User'
 #                  2. Rename API_PATH_PREFIX to GALAXY_API_ROOT
 GALAXY_API_PATH_PREFIX = "/api/galaxy"
 STATIC_URL = "/static/"
+ADMIN_SITE_URL = "automation-hub/admin/"
 
 # A client connection to /api/automation-hub/ is the same as a client connection
 # to /api/automation-hub/content/<GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH>/
