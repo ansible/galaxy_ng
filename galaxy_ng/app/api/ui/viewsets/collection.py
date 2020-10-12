@@ -92,7 +92,7 @@ class CollectionVersionFilter(filterset.FilterSet):
 
     class Meta:
         model = CollectionVersion
-        fields = ['namespace', 'name', 'version', 'certification', 'repository']
+        fields = ['namespace', 'name', 'version', 'repository']
 
 
 class CollectionVersionViewSet(api_base.GenericViewSet):

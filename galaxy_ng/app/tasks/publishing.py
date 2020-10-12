@@ -12,8 +12,6 @@ from .promotion import add_content_to_repository, remove_content_from_repository
 
 log = logging.getLogger(__name__)
 
-VERSION_CERTIFIED = "certified"
-
 GOLDEN_NAME = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 STAGING_NAME = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
 
@@ -91,9 +89,6 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        collection_version.certification = VERSION_CERTIFIED
-        collection_version.save()
-
         # enqueue task to add collection_version to golden repo
         add_task_args = (collection_version.pk, golden_repo.pk)
         enqueue_with_reservation(add_content_to_repository, add_locks, args=add_task_args)

@@ -11,9 +11,16 @@ from pulp_ansible.app.models import (
     Collection, CollectionVersion, AnsibleRepository, AnsibleDistribution
 )
 
-from galaxy_ng.app.tasks import import_and_auto_approve, import_and_move_to_staging
+from galaxy_ng.app.tasks import (
+    add_content_to_repository,
+    remove_content_from_repository,
+    import_and_auto_approve,
+    import_and_move_to_staging,
+)
+
 
 log = logging.getLogger(__name__)
+logging.getLogger().setLevel(logging.DEBUG)
 
 golden_name = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 staging_name = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
@@ -42,25 +49,52 @@ class TestTaskPublish(TestCase):
         )
         content_artifact.save()
 
+    def test_add_content_to_repository(self):
+        repo = AnsibleRepository.objects.get(name=staging_name)
+        repo_version_number = repo.latest_version().number
+
+        self.assertNotIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
+
+        add_content_to_repository(self.collection_version.pk, repo.pk)
+
+        self.assertEqual(repo_version_number + 1, repo.latest_version().number)
+        self.assertIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
+
+    def test_remove_content_from_repository(self):
+        repo = AnsibleRepository.objects.get(name=staging_name)
+        add_content_to_repository(self.collection_version.pk, repo.pk)
+
+        repo_version_number = repo.latest_version().number
+        self.assertIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
+
+        remove_content_from_repository(self.collection_version.pk, repo.pk)
+
+        self.assertEqual(repo_version_number + 1, repo.latest_version().number)
+        self.assertNotIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
+
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
     @mock.patch('galaxy_ng.app.tasks.publishing.enqueue_with_reservation')
     def test_import_and_auto_approve(self, mocked_enqueue, mocked_import, mocked_get_created):
         inbound_repo = AnsibleRepository.objects.get(name=staging_name)
-        golden_repo = AnsibleRepository.objects.create(name=golden_name)
 
+        golden_repo = AnsibleRepository.objects.create(name=golden_name)
         golden_dist = AnsibleDistribution(name=golden_name, base_path=golden_name)
         golden_dist.repository = golden_repo
         golden_dist.save()
-
-        self.assertTrue(self.collection_version.certification == 'needs_review')
 
         mocked_get_created.return_value = [self.collection_version]
 
         import_and_auto_approve(self.pulp_temp_file.pk, repository_pk=inbound_repo.pk)
 
-        self.collection_version.refresh_from_db()
-        self.assertTrue(self.collection_version.certification == 'certified')
         self.assertTrue(mocked_import.call_count == 1)
         self.assertTrue(mocked_enqueue.call_count == 2)
 
@@ -75,11 +109,10 @@ class TestTaskPublish(TestCase):
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
     @mock.patch('galaxy_ng.app.tasks.publishing.enqueue_with_reservation')
     def test_import_and_move_to_staging(self, mocked_enqueue, mocked_import, mocked_get_created):
-        inbound_name = 'the_incoming_repo'
-        inbound_repo = AnsibleRepository.objects.create(name=inbound_name)
-        inbound_repo.save()
         staging_repo = AnsibleRepository.objects.get(name=staging_name)
 
+        inbound_name = 'the_incoming_repo'
+        inbound_repo = AnsibleRepository.objects.create(name=inbound_name)
         inbound_dist = AnsibleDistribution(name=inbound_name, base_path=inbound_name)
         inbound_dist.repository = inbound_repo
         inbound_dist.save()

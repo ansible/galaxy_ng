@@ -40,9 +40,7 @@ GALAXY_API_REJECTED_DISTRIBUTION_BASE_PATH = "rejected"
 # associated repository, distribution, and distribution base_paths
 GALAXY_API_SYNCLIST_NAME_FORMAT = "{account_name}-synclist"
 
-# Require approval for incoming content,
-# currently using a certification flag,
-# later using a staging repository
+# Require approval for incoming content, which uses a staging repository
 GALAXY_REQUIRE_CONTENT_APPROVAL = True
 
 # Local rest framework settings
