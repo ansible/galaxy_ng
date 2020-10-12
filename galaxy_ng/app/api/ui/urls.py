@@ -72,13 +72,13 @@ paths = [
 
     path(
         'repo/<str:path>/',
-        viewsets.RepositoryCollectionViewSet.as_view({'get': 'list'}),
-        name='repo-collections-list'
+        viewsets.CollectionViewSet.as_view({'get': 'list'}),
+        name='collections-list'
     ),
     path(
         'repo/<str:path>/<str:namespace>/<str:name>/',
-        viewsets.RepositoryCollectionViewSet.as_view({'get': 'retrieve'}),
-        name='repo-collections-detail'
+        viewsets.CollectionViewSet.as_view({'get': 'retrieve'}),
+        name='collections-detail'
     ),
 
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve

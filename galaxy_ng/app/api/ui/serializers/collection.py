@@ -109,12 +109,12 @@ class CollectionVersionDetailSerializer(CollectionVersionBaseSerializer):
     docs_blob = serializers.JSONField()
 
 
-class RepositoryCollectionVersionSummarySerializer(Serializer):
+class CollectionVersionSummarySerializer(Serializer):
     version = serializers.CharField()
     created = serializers.CharField(source='pulp_created')
 
 
-class _RepositoryCollectionSerializer(Serializer):
+class _CollectionSerializer(Serializer):
     """ Serializer for pulp_ansible CollectionViewSet.
     Uses CollectionVersion object to serialize associated Collection data.
     """
@@ -154,18 +154,18 @@ class _RepositoryCollectionSerializer(Serializer):
         return next(iter(versions_in_repo), None)
 
 
-class RepositoryCollectionListSerializer(_RepositoryCollectionSerializer):
+class CollectionListSerializer(_CollectionSerializer):
     def get_latest_version(self, obj):
         version = self._get_latest_version(obj)
         return CollectionVersionBaseSerializer(version).data
 
 
-class RepositoryCollectionDetailSerializer(_RepositoryCollectionSerializer):
+class CollectionDetailSerializer(_CollectionSerializer):
     all_versions = serializers.SerializerMethodField()
 
     def get_all_versions(self, obj):
         versions_in_repo = self._get_versions_in_repo(obj)
-        return RepositoryCollectionVersionSummarySerializer(versions_in_repo, many=True).data
+        return CollectionVersionSummarySerializer(versions_in_repo, many=True).data
 
     def get_latest_version(self, obj):
         version = self._get_latest_version(obj)

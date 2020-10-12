@@ -23,15 +23,15 @@ from galaxy_ng.app.api.ui import serializers, versioning
 from galaxy_ng.app.common import pulp
 
 
-class RepositoryCollectionFilter(CollectionVersionFilter):
+class CollectionFilter(CollectionVersionFilter):
     versioning_class = versioning.UIVersioning
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
 
 
-class RepositoryCollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
+class CollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
     """ Viewset that uses CollectionVersion to display data for Collection."""
     versioning_class = versioning.UIVersioning
-    filterset_class = RepositoryCollectionFilter
+    filterset_class = CollectionFilter
 
     # TODO(awcrosby): remove once pulp_ansible is_highest param filters by repo
     # https://pulp.plan.io/issues/7428
@@ -54,9 +54,9 @@ class RepositoryCollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return serializers.RepositoryCollectionListSerializer
+            return serializers.CollectionListSerializer
         else:
-            return serializers.RepositoryCollectionDetailSerializer
+            return serializers.CollectionDetailSerializer
 
 
 class CollectionVersionFilter(filterset.FilterSet):
