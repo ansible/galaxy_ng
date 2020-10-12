@@ -45,11 +45,6 @@ class ContentSerializer(Serializer):
     description = serializers.CharField()
 
 
-class CollectionVersionSummarySerializer(Serializer):
-    version = serializers.CharField()
-    created = serializers.CharField()
-
-
 class CollectionMetadataSerializer(Serializer):
     dependencies = serializers.JSONField()
     contents = serializers.JSONField()
@@ -112,40 +107,6 @@ class CertificationSerializer(Serializer):
 
 class CollectionVersionDetailSerializer(CollectionVersionBaseSerializer):
     docs_blob = serializers.JSONField()
-
-
-class _CollectionSerializer(Serializer):
-    id = serializers.UUIDField()
-    namespace = serializers.SerializerMethodField()
-    name = serializers.CharField()
-    download_count = serializers.IntegerField(default=0)
-    latest_version = CollectionVersionBaseSerializer(source='*')
-    deprecated = serializers.BooleanField()
-
-    def _get_namespace(self, obj):
-        raise NotImplementedError
-
-    def get_namespace(self, obj):
-        namespace = self._get_namespace(obj)
-        return NamespaceSummarySerializer(namespace).data
-
-
-class CollectionListSerializer(_CollectionSerializer):
-    def _get_namespace(self, obj):
-        name = obj['namespace']
-        return self.context['namespaces'].get(name, None)
-
-
-class CollectionDetailSerializer(_CollectionSerializer):
-    latest_version = CollectionVersionDetailSerializer(source='*')
-    all_versions = serializers.SerializerMethodField()
-
-    def _get_namespace(self, obj):
-        return self.context['namespace']
-
-    def get_all_versions(self, obj):
-        return [CollectionVersionSummarySerializer(version).data
-                for version in self.context['all_versions']]
 
 
 class RepositoryCollectionVersionSummarySerializer(Serializer):
