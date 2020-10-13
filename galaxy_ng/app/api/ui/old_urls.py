@@ -10,6 +10,7 @@ router = routers.SimpleRouter()
 # TODO: Replace with a RedirectView
 router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
 router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='my-namespaces')
+router.register('collections', viewsets.CollectionViewSetDeprecated, basename='collections')
 router.register('users', viewsets.UserViewSet, basename='users')
 router.register('collection-versions',
                 viewsets.CollectionVersionViewSet, basename='collection-versions')
