@@ -60,8 +60,8 @@ def check_changelog_record(issue):
         return False
     if reconrds_count == 1:
         return True
-    LOG.info(f"Multiple change log records found for issue AAH-{issue}.")
-    return True
+    LOG.error(f"Multiple change log records found for issue AAH-{issue}.")
+    return False
 
 
 def check_issue_exists(issue):
