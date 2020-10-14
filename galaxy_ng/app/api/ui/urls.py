@@ -12,7 +12,6 @@ router = routers.SimpleRouter()
 router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
 router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='my-namespaces')
 router.register('my-synclists', viewsets.MySyncListViewSet, basename='my-synclists')
-router.register('collections', viewsets.CollectionViewSetDeprecated, basename='collections')
 router.register('users', viewsets.UserViewSet, basename='users')
 router.register('collection-versions',
                 viewsets.CollectionVersionViewSet, basename='collection-versions')
@@ -79,6 +78,17 @@ paths = [
     path(
         'repo/<str:path>/<str:namespace>/<str:name>/',
         viewsets.CollectionViewSet.as_view({'get': 'retrieve'}),
+        name='collections-detail'
+    ),
+
+    path(
+        'collections/',
+        viewsets.CollectionViewSetDeprecated.as_view({'get': 'list'}),
+        name='collections-list'
+    ),
+    path(
+        'collections/<str:namespace>/<str:name>/',
+        viewsets.CollectionViewSetDeprecated.as_view({'get': 'retrieve'}),
         name='collections-detail'
     ),
 
