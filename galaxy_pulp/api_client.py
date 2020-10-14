@@ -19,6 +19,7 @@ from multiprocessing.pool import ThreadPool
 import os
 import re
 import tempfile
+import logging
 
 # python 2 and python 3 compatibility library
 import six
@@ -28,6 +29,8 @@ from galaxy_pulp.configuration import Configuration
 import galaxy_pulp.models
 from galaxy_pulp import rest
 from galaxy_pulp.exceptions import ApiValueError
+
+log = logging.getLogger(__name__)
 
 
 class ApiClient(object):
@@ -67,6 +70,7 @@ class ApiClient(object):
 
     def __init__(self, configuration=None, header_name=None, header_value=None,
                  cookie=None, pool_threads=1):
+        log.debug('ApiClient init')
         if configuration is None:
             configuration = Configuration.get_default_copy()
         self.configuration = configuration
@@ -125,6 +129,7 @@ class ApiClient(object):
             _preload_content=True, _request_timeout=None, _host=None):
 
         config = self.configuration
+        log.debug('__call_api %s', resource_path)
 
         # header parameters
         header_params = header_params or {}
@@ -344,6 +349,8 @@ class ApiClient(object):
             If parameter async_req is False or missing,
             then the method will return the response directly.
         """
+        log.debug('call_api %s', resource_path)
+
         if not async_req:
             return self.__call_api(resource_path, method,
                                    path_params, query_params, header_params,

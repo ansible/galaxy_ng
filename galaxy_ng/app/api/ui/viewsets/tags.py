@@ -1,8 +1,6 @@
-import galaxy_pulp
-
+from pulp_ansible.app.models import Tag
 from pulp_ansible.app.serializers import TagSerializer
 
-from galaxy_ng.app.common import pulp
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
 
@@ -14,16 +12,12 @@ class TagsViewSet(api_base.GenericViewSet):
     permission_classes = [access_policy.TagsAccessPolicy]
     versioning_class = versioning.UIVersioning
 
+    queryset = Tag.objects.all()
+
     def list(self, request, *args, **kwargs):
-        self.paginator.init_from_request(request)
+        qs = self.filter_queryset(self.get_queryset())
 
-        params = self.request.query_params.dict()
-        params.update({
-            'offset': self.paginator.offset,
-            'limit': self.paginator.limit,
-        })
+        page = self.paginate_queryset(qs)
+        serializer = self.get_serializer(page, many=True)
 
-        api = galaxy_pulp.PulpTagsApi(pulp.get_client())
-        response = api.list(**params)
-
-        return self.paginator.paginate_proxy_response(response.results, response.count)
+        return self.get_paginated_response(serializer.data)

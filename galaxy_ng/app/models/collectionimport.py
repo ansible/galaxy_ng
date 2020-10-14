@@ -2,7 +2,10 @@ from django.db import models
 from django.urls import reverse
 from django_lifecycle import LifecycleModel
 
-from pulpcore.plugin.models import AutoDeleteObjPermsMixin
+from pulpcore.plugin.models import (
+    AutoDeleteObjPermsMixin,
+)
+from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from .namespace import Namespace
 
 
@@ -24,7 +27,13 @@ class CollectionImport(LifecycleModel, AutoDeleteObjPermsMixin):
     Relations:
         namespace: Reference to a namespace.
     """
-    task_id = models.UUIDField(primary_key=True)
+    # task_id = models.UUIDField(primary_key=True)
+    task_id = models.OneToOneField(PulpCollectionImport,
+                                   primary_key=True,
+                                   on_delete=models.CASCADE,
+                                   db_column='task_id',
+                                   related_name='galaxy_import')
+    # pulp_task = models.ForeignKey(Task, on_delete=models.CASCADE, default=task_id)
 
     created_at = models.DateTimeField()
 

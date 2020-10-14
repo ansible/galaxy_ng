@@ -108,19 +108,19 @@ class Configuration(object):
         """
         self.logger["package_logger"] = logging.getLogger("galaxy_pulp")
         self.logger["urllib3_logger"] = logging.getLogger("urllib3")
-        self.logger_format = '%(asctime)s %(levelname)s %(message)s'
+        # self.logger_format = '%(asctime)s %(levelname)s %(message)s'
         """Log format
         """
-        self.logger_stream_handler = None
+        # self.logger_stream_handler = None
         """Log stream handler
         """
-        self.logger_file_handler = None
+        # self.logger_file_handler = None
         """Log file handler
         """
-        self.logger_file = None
+        # self.logger_file = None
         """Debug file location
         """
-        self.debug = False
+        self.debug = True
         """Debug switch
         """
 
@@ -173,9 +173,9 @@ class Configuration(object):
             if k not in ('logger', 'logger_file_handler'):
                 setattr(result, k, copy.deepcopy(v, memo))
         # shallow copy of loggers
-        result.logger = copy.copy(self.logger)
+        # result.logger = copy.copy(self.logger)
         # use setters to configure loggers
-        result.logger_file = self.logger_file
+        # result.logger_file = self.logger_file
         result.debug = self.debug
         return result
 
@@ -227,13 +227,13 @@ class Configuration(object):
         :type: str
         """
         self.__logger_file = value
-        if self.__logger_file:
-            # If set logging file,
-            # then add file handler and remove stream handler.
-            self.logger_file_handler = logging.FileHandler(self.__logger_file)
-            self.logger_file_handler.setFormatter(self.logger_formatter)
-            for _, logger in six.iteritems(self.logger):
-                logger.addHandler(self.logger_file_handler)
+        # if self.__logger_file:
+        #     # If set logging file,
+        #     # then add file handler and remove stream handler.
+        #     self.logger_file_handler = logging.FileHandler(self.__logger_file)
+        #     self.logger_file_handler.setFormatter(self.logger_formatter)
+        #     for _, logger in six.iteritems(self.logger):
+        #         logger.addHandler(self.logger_file_handler)
 
     @property
     def debug(self):
@@ -254,15 +254,15 @@ class Configuration(object):
         self.__debug = value
         if self.__debug:
             # if debug status is True, turn on debug logging
-            for _, logger in six.iteritems(self.logger):
-                logger.setLevel(logging.DEBUG)
+            # for _, logger in six.iteritems(self.logger):
+            #     logger.setLevel(logging.DEBUG)
             # turn on httplib debug
             httplib.HTTPConnection.debuglevel = 1
         else:
             # if debug status is False, turn off debug logging,
             # setting log level to default `logging.WARNING`
-            for _, logger in six.iteritems(self.logger):
-                logger.setLevel(logging.WARNING)
+            # for _, logger in six.iteritems(self.logger):
+            #     logger.setLevel(logging.WARNING)
             # turn off httplib debug
             httplib.HTTPConnection.debuglevel = 0
 
@@ -286,8 +286,9 @@ class Configuration(object):
         :param value: The format string.
         :type: str
         """
-        self.__logger_format = value
-        self.logger_formatter = logging.Formatter(self.__logger_format)
+        pass
+        # self.__logger_format = value
+        # self.logger_formatter = logging.Formatter(self.__logger_format)
 
     def get_api_key_with_prefix(self, identifier):
         """Gets API key (with prefix if set).

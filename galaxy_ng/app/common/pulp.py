@@ -15,9 +15,13 @@ def get_configuration():
     config.safe_chars_for_path_param = '/'
     if 'VERIFY_SSL' in settings:
         config.verify_ssl = settings.VERIFY_SSL
+    config.debug = True
+
     return config
 
 
 def get_client():
     config = get_configuration()
+    #    import logging_tree
+    #    logging_tree.printout()
     return ApiClient(configuration=config)

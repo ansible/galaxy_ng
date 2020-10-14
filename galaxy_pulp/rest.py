@@ -56,6 +56,7 @@ class RESTClientObject(object):
         # maxsize is the number of requests to host that are allowed in parallel  # noqa: E501
         # Custom SSL certificates and client certificates: http://urllib3.readthedocs.io/en/latest/advanced-usage.html  # noqa: E501
 
+        logger.debug('Rest Client init')
         # cert_reqs
         if configuration.verify_ssl:
             cert_reqs = ssl.CERT_REQUIRED
@@ -130,6 +131,9 @@ class RESTClientObject(object):
         method = method.upper()
         assert method in ['GET', 'HEAD', 'DELETE', 'POST', 'PUT',
                           'PATCH', 'OPTIONS']
+
+        logger.debug("%s %s %s", method, url, query_params)
+        logger.debug("%s %s body:\n%s", method, url, body)
 
         if post_params and body:
             raise ApiValueError(
