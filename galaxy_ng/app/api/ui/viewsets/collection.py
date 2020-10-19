@@ -14,7 +14,6 @@ from pulp_ansible.app.models import (
     CollectionRemote,
 )
 from rest_framework.exceptions import NotFound
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from galaxy_ng.app import models
@@ -22,130 +21,17 @@ from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers, versioning
 from galaxy_ng.app.common import pulp
-from galaxy_ng.app import constants
 
 
-class CollectionViewSet(api_base.ViewSet):
-    lookup_url_kwarg = 'collection'
-    lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+'
-    permission_classes = [access_policy.CollectionAccessPolicy]
-    versioning_class = versioning.UIVersioning
-
-    def list(self, request, *args, **kwargs):
-        self.paginator.init_from_request(request)
-
-        params = {
-            'offset': self.paginator.offset,
-            'limit': self.paginator.limit,
-        }
-        for key, value in self.request.query_params.lists():
-            if key == 'keywords':
-                key = 'q'
-            if isinstance(value, list):
-                params[key] = ','.join(value)
-            else:
-                params[key] = value
-
-        api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-
-        response = api.list(
-            is_highest=True,
-            exclude_fields='docs_blob',
-            **params
-        )
-
-        namespaces = set(collection['namespace'] for collection in response.results)
-        namespaces = self._query_namespaces(namespaces)
-
-        data = serializers.CollectionListSerializer(
-            response.results, many=True,
-            context={'namespaces': namespaces}
-        ).data
-        return self.paginator.paginate_proxy_response(data, response.count)
-
-    def retrieve(self, request, *args, **kwargs):
-        namespace, name = self.kwargs['collection'].split('/')
-        namespace_obj = get_object_or_404(models.Namespace, name=namespace)
-
-        params_dict = self.request.query_params.dict()
-
-        version = params_dict.get('version', '')
-
-        api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-
-        params = {
-            'namespace': namespace,
-            'name': name,
-        }
-
-        if version == '':
-            params['is_highest'] = True
-            params['certification'] = constants.CertificationStatus.CERTIFIED.value
-        else:
-            params['version'] = version
-
-        response = api.list(**params)
-
-        if not response.results:
-            raise NotFound()
-
-        all_versions = api.list(
-            namespace=namespace,
-            name=name,
-            fields='version,id,pulp_created,artifact',
-            certification=constants.CertificationStatus.CERTIFIED.value
-        )
-
-        all_versions = [
-            {
-                'version': collection['version'],
-                'id': collection['id'],
-                'created': collection['pulp_created']
-            } for collection in all_versions.results
-        ]
-
-        collection = response.results[0]
-
-        data = serializers.CollectionDetailSerializer(
-            collection,
-            context={'namespace': namespace_obj, 'all_versions': all_versions}
-        ).data
-
-        return Response(data)
-
-    @property
-    def paginator(self):
-        """
-        The paginator instance associated with the view, or `None`.
-        """
-        if not hasattr(self, '_paginator'):
-            if self.pagination_class is None:
-                self._paginator = None
-            else:
-                self._paginator = self.pagination_class()
-        return self._paginator
-
-    @staticmethod
-    def _query_namespaces(names):
-        queryset = models.Namespace.objects.filter(name__in=names)
-        namespaces = {ns.name: ns for ns in queryset}
-        return namespaces
-
-
-# TODO(awcrosby): After "ui/collections/" endpoints stop being used by UI,
-# remove Collection*[ViewSet|Serializer] classes and replace with
-# RepositoryCollection*[ViewSet|Serializer] classes
-
-
-class RepositoryCollectionFilter(CollectionVersionFilter):
+class CollectionFilter(CollectionVersionFilter):
     versioning_class = versioning.UIVersioning
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
 
 
-class RepositoryCollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
+class CollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
     """ Viewset that uses CollectionVersion to display data for Collection."""
     versioning_class = versioning.UIVersioning
-    filterset_class = RepositoryCollectionFilter
+    filterset_class = CollectionFilter
 
     # TODO(awcrosby): remove once pulp_ansible is_highest param filters by repo
     # https://pulp.plan.io/issues/7428
@@ -168,9 +54,19 @@ class RepositoryCollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return serializers.RepositoryCollectionListSerializer
+            return serializers.CollectionListSerializer
         else:
-            return serializers.RepositoryCollectionDetailSerializer
+            return serializers.CollectionDetailSerializer
+
+
+# TODO: Remove when ui is updated and no longer uses this endpoint
+class CollectionViewSetDeprecated(CollectionViewSet):
+    """Temporary support of old /_ui/collections/ endpoint without use of
+    certification flag. This shows content from the 'published' repo."""
+
+    def get_queryset(self):
+        self.kwargs["path"] = 'published'
+        return super().get_queryset()
 
 
 class CollectionVersionFilter(filterset.FilterSet):

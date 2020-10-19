@@ -10,7 +10,6 @@ router = routers.SimpleRouter()
 # TODO: Replace with a RedirectView
 router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
 router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='my-namespaces')
-router.register('collections', viewsets.CollectionViewSet, basename='collections')
 router.register('users', viewsets.UserViewSet, basename='users')
 router.register('collection-versions',
                 viewsets.CollectionVersionViewSet, basename='collection-versions')
@@ -32,6 +31,17 @@ urlpatterns = [
     path('', include(router.urls)),
 
     path('auth/', include(auth_views)),
+
+    path(
+        'collections/',
+        viewsets.CollectionViewSetDeprecated.as_view({'get': 'list'}),
+        name='collections-list'
+    ),
+    path(
+        'collections/<str:namespace>/<str:name>/',
+        viewsets.CollectionViewSetDeprecated.as_view({'get': 'retrieve'}),
+        name='collections-detail'
+    ),
 
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve
     # to look up values with an ID

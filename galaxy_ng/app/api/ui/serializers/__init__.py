@@ -2,8 +2,6 @@ from .auth import (
     LoginSerializer,
 )
 from .collection import (
-    RepositoryCollectionDetailSerializer,
-    RepositoryCollectionListSerializer,
     CollectionDetailSerializer,
     CollectionListSerializer,
     CollectionVersionSerializer,
@@ -35,8 +33,6 @@ __all__ = (
     # auth
     'LoginSerializer',
     # collection
-    'RepositoryCollectionDetailSerializer',
-    'RepositoryCollectionListSerializer',
     'CollectionDetailSerializer',
     'CollectionListSerializer',
     'CollectionVersionSerializer',
