@@ -73,10 +73,6 @@ class CollectionVersionBaseSerializer(Serializer):
     name = serializers.CharField()
     version = serializers.CharField()
     created_at = serializers.DateTimeField(source='pulp_created')
-    certification = serializers.ChoiceField(
-        ['certified', 'not_certified', 'needs_review'],
-        required=True
-    )
     metadata = CollectionMetadataSerializer(source='*')
     contents = serializers.ListField(ContentSerializer())
 
@@ -98,11 +94,6 @@ class CollectionVersionSerializer(CollectionVersionBaseSerializer):
             if qs.filter(pk__in=repo.latest_version().content):
                 cv_in_repo_latest_version.append(repo.name)
         return cv_in_repo_latest_version
-
-
-class CertificationSerializer(Serializer):
-    certification = serializers.ChoiceField(
-        ['certified', 'not_certified', 'needs_review'])
 
 
 class CollectionVersionDetailSerializer(CollectionVersionBaseSerializer):
