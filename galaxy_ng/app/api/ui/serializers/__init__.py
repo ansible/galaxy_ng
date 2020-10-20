@@ -7,7 +7,6 @@ from .collection import (
     CollectionVersionSerializer,
     CollectionVersionDetailSerializer,
     CollectionVersionBaseSerializer,
-    CollectionRemoteSerializer,
 )
 from .imports import (
     ImportTaskDetailSerializer,
@@ -37,7 +36,6 @@ __all__ = (
     'CollectionVersionSerializer',
     'CollectionVersionDetailSerializer',
     'CollectionVersionBaseSerializer',
-    'CollectionRemoteSerializer',
     # imports
     'ImportTaskDetailSerializer',
     'ImportTaskListSerializer',
