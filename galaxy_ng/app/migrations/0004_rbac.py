@@ -58,6 +58,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('galaxy', '0003_inbound_repo_per_namespace'),
+        ('guardian', '0002_generic_permissions_index'),
     ]
 
     operations = [
