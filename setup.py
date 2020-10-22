@@ -61,7 +61,7 @@ galaxy_pulp_requirements = ["urllib3 >= 1.15", "six >= 1.10", "certifi", "python
 requirements = galaxy_pulp_requirements + [
     "Django~=2.2.3",
     "pulpcore>=3.7,<3.9",
-    "pulp-ansible~=0.4.1",
+    "pulp-ansible~=0.4.2",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
 ]
