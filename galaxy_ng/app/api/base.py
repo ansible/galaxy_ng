@@ -23,6 +23,7 @@ GALAXY_PAGINATION_CLASS = perform_import(
 class LocalSettingsMixin:
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
     pagination_class = GALAXY_PAGINATION_CLASS
+    permission_classes = 'must be implemented or exception raised'
 
     def get_exception_handler(self):
         return GALAXY_EXCEPTION_HANDLER

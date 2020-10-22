@@ -28,10 +28,11 @@ class CollectionFilter(CollectionVersionFilter):
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
 
 
-class CollectionViewSet(pulp_ansible_galaxy_views.CollectionViewSet):
+class CollectionViewSet(api_base.LocalSettingsMixin, pulp_ansible_galaxy_views.CollectionViewSet):
     """ Viewset that uses CollectionVersion to display data for Collection."""
     versioning_class = versioning.UIVersioning
     filterset_class = CollectionFilter
+    permission_classes = [access_policy.CollectionAccessPolicy]
 
     # TODO(awcrosby): remove once pulp_ansible is_highest param filters by repo
     # https://pulp.plan.io/issues/7428
