@@ -30,6 +30,7 @@ class MyDistributionViewSet(DistributionViewSet):
             self.request.user,
             'galaxy.change_synclist',
             any_perm=True,
+            accept_global_perms=False,
             klass=models.SyncList
         )
 
