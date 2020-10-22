@@ -1,15 +1,53 @@
 import logging
-
+from typing import Any, Dict, Optional
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
+from pulpcore.plugin.models import Task
 
-from galaxy_ng.app.api.ui.serializers.base import Serializer
+from galaxy_ng.app.models import CollectionSyncTask
+
 
 log = logging.getLogger(__name__)
 
 
-class TaskSerializer(Serializer):
+class TaskSerializer(serializers.ModelSerializer):
     pulp_id = serializers.UUIDField(source='pk')
     name = serializers.CharField()
     state = serializers.CharField()
     started_at = serializers.DateTimeField()
     finished_at = serializers.DateTimeField()
+    created_at = serializers.DateTimeField(source='pulp_created')
+    updated_at = serializers.DateTimeField(source='pulp_last_updated')
+    worker = serializers.SerializerMethodField()
+    repository = serializers.SerializerMethodField()
+
+    @extend_schema_field(Dict[str, Any])
+    def get_worker(self, obj):
+        return {
+            'name': obj.worker.name,
+            'missing': obj.worker.missing,
+            'last_heartbeat': obj.worker.last_heartbeat,
+        }
+
+    @extend_schema_field(Optional[str])
+    def get_repository(self, obj):
+        sync_task = CollectionSyncTask.objects.filter(task=obj).first()
+        if sync_task:
+            return sync_task.repository.name
+
+    class Meta:
+        model = Task
+        fields = (
+            'pulp_id',
+            'name',
+            'created_at',
+            'updated_at',
+            'finished_at',
+            'started_at',
+            'state',
+            'error',
+            'worker',
+            'parent_task',
+            'child_tasks',
+            'repository',
+        )
