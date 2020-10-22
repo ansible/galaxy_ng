@@ -1,6 +1,7 @@
 from .collection import (
     CollectionSerializer,
     CollectionVersionSerializer,
+    CollectionVersionDependencySerializer,
     CollectionVersionListSerializer,
     CollectionUploadSerializer,
 )
@@ -22,6 +23,7 @@ from .task import (
 __all__ = (
     'CollectionSerializer',
     'CollectionVersionSerializer',
+    'CollectionVersionDependencySerializer',
     'CollectionVersionListSerializer',
     'CollectionUploadSerializer',
     'GroupSummarySerializer',

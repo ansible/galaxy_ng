@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 
 from django.conf import settings
+from django.db import connection
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -30,6 +31,7 @@ from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.v3.serializers import (
     CollectionSerializer,
     CollectionVersionSerializer,
+    CollectionVersionDependencySerializer,
     CollectionVersionListSerializer,
     CollectionUploadSerializer,
 )
@@ -353,3 +355,83 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         locks = [repo]
         task_args = (collection_version.pk, repo.pk)
         return enqueue_with_reservation(remove_content_from_repository, locks, args=task_args)
+
+
+class CollectionVersionDependencyViewSet(api_base.LocalSettingsMixin,
+                                         pulp_ansible_views.CollectionVersionViewSet):
+    model = CollectionVersion
+    serializer_class = CollectionVersionDependencySerializer
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Returns the resolved Collection dependencies of the specified CollectionVersion.
+        """
+        serializer = self.get_serializer_class()(
+            self.get_object(),
+            context=self.get_serializer_context()
+        )
+
+        dependency_map = {}
+        resolved_deps = {}
+
+        # Initial dependencies
+        deps = serializer.data['dependencies']
+
+        while len(deps) > 0:
+            resolved_version_number = ''
+            new_dependencies = {}
+            current_dep = ''
+
+            for key in deps:
+                current_dep = key
+
+                # Add dependencies to dependency map
+                if key in resolved_deps and key in dependency_map:
+                    resolved_deps.pop(key)
+                    dependency_map[key].append(deps[key])
+                    deps[key] += ',' + ','.join(dependency_map[key])
+                else:
+                    if key in dependency_map:
+                        print('\t\ttest1')
+                        dependency_map[key].append(deps[key])
+                        deps[key] = ','.join(dependency_map[key])
+                    else:
+                        print('\t\ttest2')
+                        dependency_map[key] = [deps[key]]
+
+                # Build then run sql query based on deps to get the latest compatible version
+                namespace, name = key.split('.')
+                split_deps = deps[key].split(',')
+                sql = 'SELECT version, dependencies from ansible_collectionversion'
+                sql += f" WHERE namespace = '{namespace}' and name = '{name}'"
+                for d in split_deps:
+                    offset = 0
+                    if '>=' in d or '<=' in d:
+                        offset = 2
+                    if '=' in d or '>' in d or '<' in d:
+                        offset = 1
+                    operand = d[:offset]
+                    version = d[offset:]
+                    if offset > 0:
+                        sql += f" AND version {operand} '{version}'"
+                sql += ' ORDER BY version DESC LIMIT 1;'
+
+                with connection.cursor() as cursor:
+                    cursor.execute(sql)
+                    results = cursor.fetchone()
+                    if results is not None:
+                        resolved_version_number, new_dependencies = results
+                    else:
+                        resolved_version_number = False
+                        new_dependencies = {}
+
+            if resolved_version_number:
+                resolved_deps[key] = resolved_version_number
+            else:
+                resolved_deps[key] = f"Conflict! {deps}"
+            if len(new_dependencies) > 0:
+                deps.update(new_dependencies)
+            deps.pop(current_dep)
+
+        return Response(resolved_deps)

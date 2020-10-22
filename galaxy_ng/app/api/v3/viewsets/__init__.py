@@ -4,6 +4,7 @@ from .collection import (
     CollectionUploadViewSet,
     CollectionViewSet,
     CollectionVersionViewSet,
+    CollectionVersionDependencyViewSet,
     CollectionVersionDocsViewSet,
     CollectionVersionMoveViewSet,
 )
@@ -25,6 +26,7 @@ __all__ = (
     'CollectionUploadViewSet',
     'CollectionViewSet',
     'CollectionVersionViewSet',
+    'CollectionVersionDependencyViewSet',
     'CollectionVersionDocsViewSet',
     'CollectionVersionMoveViewSet',
     'NamespaceViewSet',

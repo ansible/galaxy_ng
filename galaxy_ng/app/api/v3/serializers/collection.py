@@ -17,6 +17,8 @@ from pulp_ansible.app.galaxy.v3.serializers import (
     CollectionVersionListSerializer as _CollectionVersionListSerializer,
 )
 
+from pulp_ansible.app.models import CollectionVersion
+
 log = logging.getLogger(__name__)
 
 
@@ -116,6 +118,27 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
         kwargs = {"path": self.context["path"], "namespace": obj.namespace,
                   "name": obj.name, "version": obj.version}
         return self._get_href("collection-versions-detail", **kwargs)
+
+
+class CollectionVersionDependencySerializer(_CollectionSerializer):
+    dependencies = serializers.JSONField()
+
+    class Meta:
+        fields = (
+            "dependencies",
+        )
+        model = CollectionVersion
+
+    def get_href(self, obj):
+        """Get href."""
+        kwargs = {
+            "path": self.context["path"],
+            "namespace": obj.namespace,
+            "name": obj.name,
+            "version": obj.version,
+        }
+
+        return self._get_href("collection-version-dependency", **kwargs)
 
 
 class CollectionUploadSerializer(Serializer):

@@ -195,6 +195,23 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
+  '/v3/collections/{namespace}/{name}/versions/{version}/dependencies/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+      - $ref: '#/components/parameters/SemanticVersion'
+    get:
+      summary: Get Collection Version Dependencies
+      operationId: getCollectionVersionDependencies
+      tags:
+        - Collections
+      parameters: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionDependencies'
+        'default':
+          $ref: '#/components/responses/Errors'
+
   '/v3/collections/{namespace}/{name}/versions/{version}/move/{source_path}/{destination_path}':
     parameters: #tag
       - $ref: '#/components/parameters/CollectionNamespaceName'
