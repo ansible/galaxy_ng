@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework import views
 from rest_framework import viewsets
 from rest_framework.settings import perform_import
@@ -20,10 +21,15 @@ GALAXY_PAGINATION_CLASS = perform_import(
 )
 
 
+class _MustImplementPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        raise NotImplementedError("subclass must implement permission_classes")
+
+
 class LocalSettingsMixin:
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
     pagination_class = GALAXY_PAGINATION_CLASS
-    permission_classes = 'must be implemented or exception raised'
+    permission_classes = [_MustImplementPermission]
 
     def get_exception_handler(self):
         return GALAXY_EXCEPTION_HANDLER
