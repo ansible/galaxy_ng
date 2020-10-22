@@ -2,8 +2,8 @@ import logging
 from typing import Any, Dict, Optional
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
+from pulpcore.app.serializers import ProgressReportSerializer
 from pulpcore.plugin.models import Task
-
 from galaxy_ng.app.models import CollectionSyncTask
 
 
@@ -20,6 +20,7 @@ class TaskSerializer(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField(source='pulp_last_updated')
     worker = serializers.SerializerMethodField()
     repository = serializers.SerializerMethodField()
+    progress_reports = ProgressReportSerializer(many=True, read_only=True)
 
     @extend_schema_field(Dict[str, Any])
     def get_worker(self, obj):
@@ -50,4 +51,5 @@ class TaskSerializer(serializers.ModelSerializer):
             'parent_task',
             'child_tasks',
             'repository',
+            'progress_reports',
         )
