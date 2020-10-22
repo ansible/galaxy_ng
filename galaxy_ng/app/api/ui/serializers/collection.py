@@ -2,8 +2,6 @@ import logging
 
 from pulp_ansible.app.models import (
     AnsibleDistribution,
-    AnsibleRepository,
-    CollectionRemote,
     CollectionVersion,
 )
 from rest_framework import serializers
@@ -12,7 +10,6 @@ import semantic_version
 from .base import Serializer
 from galaxy_ng.app.api.v3.serializers.namespace import NamespaceSummarySerializer
 from galaxy_ng.app.models import Namespace
-from galaxy_ng.app.models.collectionsync import CollectionSyncTask
 
 log = logging.getLogger(__name__)
 
@@ -161,109 +158,3 @@ class CollectionDetailSerializer(_CollectionSerializer):
     def get_latest_version(self, obj):
         version = self._get_latest_version(obj)
         return CollectionVersionDetailSerializer(version).data
-
-
-class AnsibleDistributionSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(source='pulp_created')
-    updated_at = serializers.DateTimeField(source='pulp_last_updated')
-
-    class Meta:
-        model = AnsibleDistribution
-        fields = (
-            'name',
-            'base_path',
-            'content_guard',
-            'created_at',
-            'updated_at',
-        )
-
-
-class AnsibleRepositorySerializer(serializers.ModelSerializer):
-    distributions = serializers.SerializerMethodField()
-    last_sync_task = serializers.SerializerMethodField()
-    created_at = serializers.DateTimeField(source='pulp_created')
-    updated_at = serializers.DateTimeField(source='pulp_last_updated')
-
-    class Meta:
-        model = AnsibleRepository
-        fields = (
-            'name',
-            'description',
-            'next_version',
-            'distributions',
-            'created_at',
-            'updated_at',
-            'last_sync_task',
-        )
-
-    def get_distributions(self, obj):
-        return [
-            AnsibleDistributionSerializer(distro).data
-            for distro in obj.ansible_ansibledistribution.all()
-        ]
-
-    def get_last_sync_task(self, obj):
-        sync_task = CollectionSyncTask.objects.filter(repository=obj).last()
-
-        if not sync_task:
-            # UI handles `null` as "no status"
-            return
-
-        return {
-            "task_id": sync_task.id,
-            "state": sync_task.task.state,
-            "started_at": sync_task.task.started_at,
-            "finished_at": sync_task.task.finished_at,
-            "error": sync_task.task.error
-        }
-
-
-class CollectionRemoteSerializer(serializers.ModelSerializer):
-    last_sync_task = serializers.SerializerMethodField()
-    created_at = serializers.DateTimeField(source='pulp_created')
-    updated_at = serializers.DateTimeField(source='pulp_last_updated')
-    repositories = serializers.SerializerMethodField()
-
-    class Meta:
-        model = CollectionRemote
-        fields = (
-            'name',
-            'url',
-            'auth_url',
-            'token',
-            'policy',
-            'requirements_file',
-            'created_at',
-            'updated_at',
-            'last_sync_task',
-            'repositories',
-        )
-        extra_kwargs = {
-            'name': {'read_only': True},
-            'token': {'write_only': True},
-        }
-
-    def get_repositories(self, obj):
-        return [
-            AnsibleRepositorySerializer(repo).data
-            for repo in obj.repository_set.all()
-        ]
-
-    def get_last_sync_task(self, obj):
-        """Gets last_sync_task from Pulp using remote->repository relation"""
-
-        sync_task = CollectionSyncTask.objects.filter(
-            repository=obj.repository_set.order_by('-pulp_last_updated').first()
-        ).first()
-
-        if not sync_task:
-            # UI handles `null` as "no status"
-            return
-
-        return {
-            "task_id": sync_task.id,
-            "state": sync_task.task.state,
-            "started_at": sync_task.task.started_at,
-            "finished_at": sync_task.task.finished_at,
-            "error": sync_task.task.error
-        }

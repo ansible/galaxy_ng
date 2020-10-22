@@ -20,6 +20,7 @@ from galaxy_ng.app import models
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers, versioning
+from galaxy_ng.app.api.v3.serializers.sync import CollectionRemoteSerializer
 from galaxy_ng.app.common import pulp
 
 
@@ -181,6 +182,6 @@ class CollectionImportViewSet(api_base.GenericViewSet):
 
 class CollectionRemoteViewSet(api_base.ModelViewSet):
     queryset = CollectionRemote.objects.all().order_by('name')
-    serializer_class = serializers.CollectionRemoteSerializer
+    serializer_class = CollectionRemoteSerializer
 
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]
