@@ -121,31 +121,21 @@ class _CollectionSerializer(Serializer):
     def get_deprecated(self, obj):
         return obj.collection.deprecated
 
-    # TODO(awcrosby): refactor once pulp_ansible is_highest param filters by repo
-    # https://pulp.plan.io/issues/7428
     def _get_versions_in_repo(self, obj):
-        repo_param = self.context['path']
-        distro = AnsibleDistribution.objects.get(base_path=repo_param)
+        distro = AnsibleDistribution.objects.get(base_path=self.context['path'])
         repository_version = distro.repository.latest_version()
-        collection_versions = CollectionVersion.objects.filter(collection=obj.collection)
-
-        versions_in_repo = collection_versions.filter(pk__in=repository_version.content)
-        versions_in_repo = sorted(
+        versions_in_repo = CollectionVersion.objects.filter(
+            pk__in=repository_version.content,
+            collection=obj.collection,
+        )
+        return sorted(
             versions_in_repo, key=lambda obj: semantic_version.Version(obj.version), reverse=True
         )
-        return versions_in_repo
-
-    # TODO(awcrosby): refactor once pulp_ansible is_highest param filters by repo
-    # https://pulp.plan.io/issues/7428
-    def _get_latest_version(self, obj):
-        versions_in_repo = self._get_versions_in_repo(obj)
-        return next(iter(versions_in_repo), None)
 
 
 class CollectionListSerializer(_CollectionSerializer):
     def get_latest_version(self, obj):
-        version = self._get_latest_version(obj)
-        return CollectionVersionBaseSerializer(version).data
+        return CollectionVersionBaseSerializer(obj).data
 
 
 class CollectionDetailSerializer(_CollectionSerializer):
@@ -156,5 +146,4 @@ class CollectionDetailSerializer(_CollectionSerializer):
         return CollectionVersionSummarySerializer(versions_in_repo, many=True).data
 
     def get_latest_version(self, obj):
-        version = self._get_latest_version(obj)
-        return CollectionVersionDetailSerializer(version).data
+        return CollectionVersionDetailSerializer(obj).data

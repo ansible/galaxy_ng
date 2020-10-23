@@ -35,25 +35,6 @@ class CollectionViewSet(api_base.LocalSettingsMixin, pulp_ansible_galaxy_views.C
     filterset_class = CollectionFilter
     permission_classes = [access_policy.CollectionAccessPolicy]
 
-    # TODO(awcrosby): remove once pulp_ansible is_highest param filters by repo
-    # https://pulp.plan.io/issues/7428
-    def get_queryset(self):
-        """
-        Overrides to not use is_highest param and
-        ensures one collection version per collection is returned.
-        """
-        distro_content = self.get_distro_content(self.kwargs["path"])
-
-        # isolate the use of distinct in separate database call to avoid
-        # postgres error on use of distinct and order_by in later calls
-        qs_distinct = CollectionVersion.objects.filter(
-            pk__in=distro_content).distinct('collection')
-        collection_version_pks = [cv.pk for cv in qs_distinct]
-
-        qs = CollectionVersion.objects.select_related("collection").filter(
-            pk__in=collection_version_pks)
-        return qs
-
     def get_serializer_class(self):
         if self.action == 'list':
             return serializers.CollectionListSerializer
