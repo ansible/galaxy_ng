@@ -5,6 +5,8 @@ from galaxy_ng.app import constants
 
 
 class APIRootView(api_base.ViewSet):
+    permission_classes = []
+
     def list(self, request, *args, **kwargs):
         return Response({
             'current_version': constants.CURRENT_UI_API_VERSION,

@@ -19,11 +19,7 @@ from pulpcore.plugin.models import ContentArtifact, Task
 from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
-from galaxy_ng.app.api.base import (
-    APIView,
-    ViewSet,
-    LocalSettingsMixin,
-)
+from galaxy_ng.app.api import base as api_base
 
 from galaxy_ng.app.constants import DeploymentMode
 
@@ -72,14 +68,14 @@ class ViewNamespaceSerializerContextMixin:
         return context
 
 
-class CollectionViewSet(LocalSettingsMixin,
+class CollectionViewSet(api_base.LocalSettingsMixin,
                         ViewNamespaceSerializerContextMixin,
                         pulp_ansible_views.CollectionViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
 
 
-class CollectionVersionViewSet(LocalSettingsMixin,
+class CollectionVersionViewSet(api_base.LocalSettingsMixin,
                                ViewNamespaceSerializerContextMixin,
                                pulp_ansible_views.CollectionVersionViewSet):
     serializer_class = CollectionVersionSerializer
@@ -125,15 +121,18 @@ class CollectionVersionViewSet(LocalSettingsMixin,
         return Response(serializer.data)
 
 
-class CollectionVersionDocsViewSet(pulp_ansible_views.CollectionVersionDocsViewSet):
-    pass
-
-
-class CollectionImportViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionImportViewSet):
+class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
+                                   pulp_ansible_views.CollectionVersionDocsViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
 
 
-class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionUploadViewSet):
+class CollectionImportViewSet(api_base.LocalSettingsMixin,
+                              pulp_ansible_views.CollectionImportViewSet):
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
+
+class CollectionUploadViewSet(api_base.LocalSettingsMixin,
+                              pulp_ansible_views.CollectionUploadViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
     parser_classes = [AnsibleGalaxy29MultiPartParser]
 
@@ -241,7 +240,7 @@ class CollectionUploadViewSet(LocalSettingsMixin, pulp_ansible_views.CollectionU
         )
 
 
-class CollectionArtifactDownloadView(APIView):
+class CollectionArtifactDownloadView(api_base.APIView):
     permission_classes = [access_policy.CollectionAccessPolicy]
     action = 'retrieve'
 
@@ -278,7 +277,7 @@ class CollectionArtifactDownloadView(APIView):
                            f'Code: {response.status_code}.')
 
 
-class CollectionVersionMoveViewSet(ViewSet):
+class CollectionVersionMoveViewSet(api_base.ViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
 
     def move_content(self, request, *args, **kwargs):

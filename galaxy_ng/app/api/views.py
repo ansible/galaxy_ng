@@ -9,6 +9,8 @@ from galaxy_ng.app.api import base as api_base
 
 
 class ApiRootView(api_base.APIView):
+    permission_classes = []
+
     def get(self, request, *args, **kwargs):
         data = {
             "available_versions": {"v3": "v3/"},
@@ -24,6 +26,8 @@ class ApiRootView(api_base.APIView):
 
 
 class ApiRedirectView(api_base.APIView):
+    permission_classes = []
+
     """Redirect requests to /api/automation-hub/api/ to /api/automation-hub/
 
     This is a workaround for https://github.com/ansible/ansible/issues/62073.
