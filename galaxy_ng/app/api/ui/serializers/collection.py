@@ -145,5 +145,7 @@ class CollectionDetailSerializer(_CollectionSerializer):
         versions_in_repo = self._get_versions_in_repo(obj)
         return CollectionVersionSummarySerializer(versions_in_repo, many=True).data
 
+    # TODO(awcrosby): rename field to "version_details" since with
+    # "version" query param this won't always be the latest version
     def get_latest_version(self, obj):
         return CollectionVersionDetailSerializer(obj).data
