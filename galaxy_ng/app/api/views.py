@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
@@ -9,7 +10,7 @@ from galaxy_ng.app.api import base as api_base
 
 
 class ApiRootView(api_base.APIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         data = {
@@ -26,7 +27,7 @@ class ApiRootView(api_base.APIView):
 
 
 class ApiRedirectView(api_base.APIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     """Redirect requests to /api/automation-hub/api/ to /api/automation-hub/
 
