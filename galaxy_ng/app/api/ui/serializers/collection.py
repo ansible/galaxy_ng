@@ -112,15 +112,10 @@ class _CollectionSerializer(Serializer):
     name = serializers.CharField()
     download_count = serializers.IntegerField(default=0)
     latest_version = serializers.SerializerMethodField()
-    deprecated = serializers.SerializerMethodField()
 
     def get_namespace(self, obj):
         namespace = Namespace.objects.get(name=obj.namespace)
         return NamespaceSummarySerializer(namespace).data
-
-    def get_deprecated(self, obj):
-        return False  # DEBUG
-        # return obj.collection.deprecated
 
     def _get_versions_in_repo(self, obj):
         path = self.context['request'].parser_context['kwargs']['path']
@@ -136,6 +131,8 @@ class _CollectionSerializer(Serializer):
 
 
 class CollectionListSerializer(_CollectionSerializer):
+    deprecated = serializers.BooleanField()
+
     def get_latest_version(self, obj):
         return CollectionVersionBaseSerializer(obj).data
 
