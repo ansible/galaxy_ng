@@ -18,7 +18,7 @@ certifi==2020.4.5.1       # via galaxy-ng (setup.py), requests
 cffi==1.14.0              # via cryptography, pycares
 chardet==3.0.4            # via aiohttp, requests
 click==7.1.2              # via dynaconf, rq
-cryptography==2.9.2       # via ansible
+cryptography==3.2       # via ansible
 defusedxml==0.6.0         # via odfpy
 diff-match-patch==20181111  # via django-import-export
 django-currentuser==0.5.1  # via pulpcore
