@@ -119,10 +119,12 @@ class _CollectionSerializer(Serializer):
         return NamespaceSummarySerializer(namespace).data
 
     def get_deprecated(self, obj):
-        return obj.collection.deprecated
+        return False  # DEBUG
+        # return obj.collection.deprecated
 
     def _get_versions_in_repo(self, obj):
-        distro = AnsibleDistribution.objects.get(base_path=self.context['path'])
+        path = self.context['request'].parser_context['kwargs']['path']
+        distro = AnsibleDistribution.objects.get(base_path=path)
         repository_version = distro.repository.latest_version()
         versions_in_repo = CollectionVersion.objects.filter(
             pk__in=repository_version.content,

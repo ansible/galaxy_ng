@@ -1,3 +1,5 @@
+from django.db.models import Q
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django_filters import filters
@@ -12,8 +14,10 @@ from pulp_ansible.app.models import (
     CollectionRemote,
 )
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
+from rest_framework import mixins
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+import semantic_version
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
@@ -27,7 +31,12 @@ class CollectionFilter(pulp_ansible_viewsets.CollectionVersionFilter):
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
 
 
-class CollectionViewSet(api_base.LocalSettingsMixin, pulp_ansible_galaxy_views.CollectionViewSet):
+class CollectionViewSet(
+    api_base.GenericViewSet,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    pulp_ansible_galaxy_views.AnsibleDistributionMixin,
+):
     """Viewset that uses CollectionVersion's within distribution to display data for Collection's.
 
     Collection list is filterable by CollectionFilter and includes latest CollectionVersion.
@@ -37,6 +46,33 @@ class CollectionViewSet(api_base.LocalSettingsMixin, pulp_ansible_galaxy_views.C
     versioning_class = versioning.UIVersioning
     filterset_class = CollectionFilter
     permission_classes = [access_policy.CollectionAccessPolicy]
+
+    def get_queryset(self):
+        """
+        Returns a CollectionVersions queryset for specified distribution.
+        """
+        distro_content = self.get_distro_content(self.kwargs["path"])
+
+        versions = CollectionVersion.objects.filter(pk__in=distro_content).values_list(
+            "collection_id",
+            "version",
+        )
+
+        collection_versions = {}
+        for collection_id, version in versions:
+            value = collection_versions.get(str(collection_id))
+            if not value or semantic_version.Version(version) > semantic_version.Version(value):
+                collection_versions[str(collection_id)] = version
+
+        if not collection_versions.items():
+            return CollectionVersion.objects.none()
+
+        query_params = Q()
+        for collection_id, version in collection_versions.items():
+            query_params |= Q(collection_id=collection_id, version=version)
+
+        collections = CollectionVersion.objects.select_related("collection").filter(query_params)
+        return collections
 
     def get_object(self):
         """Return CollectionVersion object, latest or via query param 'version'."""
