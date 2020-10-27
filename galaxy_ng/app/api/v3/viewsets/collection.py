@@ -8,10 +8,13 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 
 from django.conf import settings
-from django.db import connection
+from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+
+from functools import reduce
+from operator import __and__ as AND
 
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException, NotFound
@@ -393,18 +396,15 @@ class CollectionVersionDependencyViewSet(api_base.LocalSettingsMixin,
                     deps[key] += ',' + ','.join(dependency_map[key])
                 else:
                     if key in dependency_map:
-                        print('\t\ttest1')
                         dependency_map[key].append(deps[key])
                         deps[key] = ','.join(dependency_map[key])
                     else:
-                        print('\t\ttest2')
                         dependency_map[key] = [deps[key]]
 
                 # Build then run sql query based on deps to get the latest compatible version
                 namespace, name = key.split('.')
                 split_deps = deps[key].split(',')
-                sql = 'SELECT version, dependencies from ansible_collectionversion'
-                sql += f" WHERE namespace = '{namespace}' and name = '{name}'"
+                filters = []
                 for d in split_deps:
                     offset = 0
                     if '>=' in d or '<=' in d:
@@ -413,18 +413,32 @@ class CollectionVersionDependencyViewSet(api_base.LocalSettingsMixin,
                         offset = 1
                     operand = d[:offset]
                     version = d[offset:]
-                    if offset > 0:
-                        sql += f" AND version {operand} '{version}'"
-                sql += ' ORDER BY version DESC LIMIT 1;'
-
-                with connection.cursor() as cursor:
-                    cursor.execute(sql)
-                    results = cursor.fetchone()
-                    if results is not None:
-                        resolved_version_number, new_dependencies = results
+                    if '>=' == operand:
+                        filters.append(Q(version__gte=version))
+                    elif '<=' == operand:
+                        filters.append(Q(version__lte=version))
+                    elif '=' == operand:
+                        filters.append(Q(version__eq=version))
+                    elif '>' == operand:
+                        filters.append(Q(version__gt=version))
+                    elif '<' == operand:
+                        filters.append(Q(version__lt=version))
                     else:
-                        resolved_version_number = False
-                        new_dependencies = {}
+                        filters.append(Q(version__gt=0))
+
+                qs = CollectionVersion.objects.filter(
+                    reduce(AND, filters),
+                    namespace__in=[namespace],
+                    name__in=[name]
+                ).order_by('-version')[:1]
+
+                if qs:
+                    results = self.get_serializer_class()(qs[0])
+                    resolved_version_number = results.data['version']
+                    new_dependencies = results.data['dependencies']
+                else:
+                    resolved_version_number = False
+                    new_dependencies = []
 
             if resolved_version_number:
                 resolved_deps[key] = resolved_version_number

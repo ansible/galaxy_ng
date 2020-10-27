@@ -125,6 +125,7 @@ class CollectionVersionDependencySerializer(_CollectionSerializer):
 
     class Meta:
         fields = (
+            "version",
             "dependencies",
         )
         model = CollectionVersion
