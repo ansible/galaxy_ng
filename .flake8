@@ -2,10 +2,8 @@
 exclude =
     ./.eggs/*,
     ./build/*,
-    ./bindings/*,
     ./docs/*,
     ./dist/*
-    ./galaxy_pulp/*,
     ./galaxy_ng/tests/functional/*,
     */migrations/*,
 

@@ -54,11 +54,7 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
-# NOTE(cutwater): Because bindings are statically generated, requirements list
-#   from pulp-galaxy/setup.py has to be copied here and manually maintained.
-galaxy_pulp_requirements = ["urllib3 >= 1.15", "six >= 1.10", "certifi", "python-dateutil"]
-
-requirements = galaxy_pulp_requirements + [
+requirements = [
     "Django~=2.2.3",
     "pulpcore>=3.7,<3.9",
     "pulp-ansible~=0.4.2",

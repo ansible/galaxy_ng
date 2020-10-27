@@ -1,6 +1,5 @@
-import galaxy_pulp
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpResponse
+from django.http import Http404
 
 from rest_framework import exceptions
 from rest_framework.response import Response
@@ -42,27 +41,8 @@ def _handle_drf_api_exception(exc):
     return Response(data, status=exc.status_code, headers=headers)
 
 
-def _handle_api_client_exception(exc):
-    return HttpResponse(exc.body, status=exc.status, content_type=exc.headers['Content-Type'])
-
-
-def _handle_openapi_exception(exc, context=None):
-    error = {'status': 400,
-             'code': 'galaxy_pulp_api_error',
-             'detail': str(exc)}
-
-    data = {'errors': [error]}
-
-    return Response(data, status=400)
-
-
 def exception_handler(exc, context):
     """Custom exception handler."""
-    if isinstance(exc, galaxy_pulp.ApiException):
-        return _handle_api_client_exception(exc)
-
-    if isinstance(exc, galaxy_pulp.OpenApiException):
-        return _handle_openapi_exception(exc, context)
 
     if isinstance(exc, Http404):
         exc = exceptions.NotFound()
