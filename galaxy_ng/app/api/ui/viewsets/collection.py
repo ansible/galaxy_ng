@@ -1,9 +1,10 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from drf_spectacular.utils import extend_schema
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_galaxy_views
-from pulp_ansible.app.viewsets import CollectionVersionFilter
+from pulp_ansible.app import viewsets as pulp_ansible_viewsets
 from pulp_ansible.app.models import (
     AnsibleDistribution,
     CollectionVersion,
@@ -20,35 +21,41 @@ from galaxy_ng.app.api.ui import serializers, versioning
 from galaxy_ng.app.api.v3.serializers.sync import CollectionRemoteSerializer
 
 
-class CollectionFilter(CollectionVersionFilter):
+class CollectionFilter(pulp_ansible_viewsets.CollectionVersionFilter):
+    """pulp_ansible CollectionVersion filter for Collection viewset."""
     versioning_class = versioning.UIVersioning
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
 
 
 class CollectionViewSet(api_base.LocalSettingsMixin, pulp_ansible_galaxy_views.CollectionViewSet):
-    """ Viewset that uses CollectionVersion to display data for Collection."""
+    """Viewset that uses CollectionVersion's within distribution to display data for Collection's.
+
+    Collection list is filterable by CollectionFilter and includes latest CollectionVersion.
+
+    Collection detail includes CollectionVersion that is latest or via query param 'version'.
+    """
     versioning_class = versioning.UIVersioning
     filterset_class = CollectionFilter
     permission_classes = [access_policy.CollectionAccessPolicy]
 
-    # TODO(awcrosby): remove once pulp_ansible is_highest param filters by repo
-    # https://pulp.plan.io/issues/7428
-    def get_queryset(self):
-        """
-        Overrides to not use is_highest param and
-        ensures one collection version per collection is returned.
-        """
+    def get_object(self):
+        """Return CollectionVersion object, latest or via query param 'version'."""
+        version = self.request.query_params.get('version', None)
+
+        if not version:
+            queryset = self.get_queryset()
+            return get_object_or_404(
+                queryset, namespace=self.kwargs["namespace"], name=self.kwargs["name"]
+            )
+
         distro_content = self.get_distro_content(self.kwargs["path"])
-
-        # isolate the use of distinct in separate database call to avoid
-        # postgres error on use of distinct and order_by in later calls
-        qs_distinct = CollectionVersion.objects.filter(
-            pk__in=distro_content).distinct('collection')
-        collection_version_pks = [cv.pk for cv in qs_distinct]
-
-        qs = CollectionVersion.objects.select_related("collection").filter(
-            pk__in=collection_version_pks)
-        return qs
+        return get_object_or_404(
+            CollectionVersion.objects.all(),
+            pk__in=distro_content,
+            namespace=self.kwargs["namespace"],
+            name=self.kwargs["name"],
+            version=version,
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':
