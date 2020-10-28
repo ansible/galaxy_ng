@@ -1,6 +1,3 @@
-import galaxy_pulp
-
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
@@ -13,15 +10,14 @@ from pulp_ansible.app.models import (
     Collection,
     CollectionRemote,
 )
+from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
-from galaxy_ng.app import models
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers, versioning
 from galaxy_ng.app.api.v3.serializers.sync import CollectionRemoteSerializer
-from galaxy_ng.app.common import pulp
 
 
 class CollectionFilter(CollectionVersionFilter):
@@ -130,7 +126,9 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
 
 
 class CollectionImportFilter(filterset.FilterSet):
-    namespace = filters.CharFilter(field_name='namespace__name')
+    namespace = filters.CharFilter(field_name='galaxy_import__namespace__name')
+    name = filters.CharFilter(field_name='galaxy_import__name')
+    version = filters.CharFilter(field_name='galaxy_import__version')
     created = filters.DateFilter(field_name='created_at')
     versioning_class = versioning.UIVersioning
 
@@ -139,13 +137,16 @@ class CollectionImportFilter(filterset.FilterSet):
     )
 
     class Meta:
-        model = models.CollectionImport
-        fields = ['namespace', 'name', 'version']
+        model = PulpCollectionImport
+        fields = ['namespace',
+                  'name',
+                  'version']
 
 
-class CollectionImportViewSet(api_base.GenericViewSet):
+class CollectionImportViewSet(api_base.GenericViewSet,
+                              pulp_ansible_galaxy_views.CollectionImportViewSet):
     lookup_field = 'task_id'
-    queryset = models.CollectionImport.objects.all()
+    queryset = PulpCollectionImport.objects.prefetch_related("task", "galaxy_import").all()
     serializer_class = serializers.ImportTaskListSerializer
 
     filter_backends = [DjangoFilterBackend]
@@ -157,26 +158,25 @@ class CollectionImportViewSet(api_base.GenericViewSet):
 
     permission_classes = [access_policy.CollectionAccessPolicy]
 
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return serializers.ImportTaskListSerializer
+        else:
+            return serializers.ImportTaskDetailSerializer
+
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
+        qs = self.filter_queryset(self.get_queryset())
 
-        api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
+        page = self.paginate_queryset(qs)
+        serializer = self.get_serializer(page, many=True)
 
-        results = []
-        for task in page:
-            task_info = api.get(prefix=settings.X_PULP_API_PREFIX, id=str(task.pk))
-            data = serializers.ImportTaskListSerializer(task_info, context={'task_obj': task}).data
-            results.append(data)
-        return self.get_paginated_response(results)
+        return self.get_paginated_response(serializer.data)
 
     @extend_schema(summary="Retrieve collection import",
                    responses={200: serializers.ImportTaskDetailSerializer})
     def retrieve(self, request, *args, **kwargs):
-        api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
         task = self.get_object()
-        task_info = api.get(prefix=settings.X_PULP_API_PREFIX, id=self.kwargs['task_id'])
-        data = serializers.ImportTaskDetailSerializer(task_info, context={'task_obj': task}).data
+        data = serializers.ImportTaskDetailSerializer(task).data
         return Response(data)
 
 
