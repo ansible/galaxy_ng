@@ -22,13 +22,14 @@ class TaskSerializer(serializers.ModelSerializer):
     repository = serializers.SerializerMethodField()
     progress_reports = ProgressReportSerializer(many=True, read_only=True)
 
-    @extend_schema_field(Dict[str, Any])
+    @extend_schema_field(Optional[Dict[str, Any]])
     def get_worker(self, obj):
-        return {
-            'name': obj.worker.name,
-            'missing': obj.worker.missing,
-            'last_heartbeat': obj.worker.last_heartbeat,
-        }
+        if obj.worker:
+            return {
+                'name': obj.worker.name,
+                'missing': obj.worker.missing,
+                'last_heartbeat': obj.worker.last_heartbeat,
+            }
 
     @extend_schema_field(Optional[str])
     def get_repository(self, obj):
