@@ -129,11 +129,11 @@ class CollectionImportFilter(filterset.FilterSet):
     namespace = filters.CharFilter(field_name='galaxy_import__namespace__name')
     name = filters.CharFilter(field_name='galaxy_import__name')
     version = filters.CharFilter(field_name='galaxy_import__version')
-    created = filters.DateFilter(field_name='created_at')
+    created = filters.DateFilter(field_name='galaxy_import__created_at')
     versioning_class = versioning.UIVersioning
 
     sort = OrderingFilter(
-        fields=(('created_at', 'created'),)
+        fields=(('galaxy_import__created_at', 'created'),)
     )
 
     class Meta:
