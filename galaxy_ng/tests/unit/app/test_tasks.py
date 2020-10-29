@@ -10,13 +10,10 @@ from pulpcore.plugin.models import Artifact, PulpTemporaryFile, ContentArtifact
 from pulp_ansible.app.models import (
     Collection, CollectionVersion, AnsibleRepository, AnsibleDistribution
 )
+from pulp_ansible.app.tasks.copy import copy_content
 
-from galaxy_ng.app.tasks import (
-    # add_content_to_repository,
-    # remove_content_from_repository,
-    import_and_auto_approve,
-    import_and_move_to_staging,
-)
+from galaxy_ng.app.tasks import import_and_auto_approve, import_and_move_to_staging
+from galaxy_ng.app.tasks.promotion import _remove_content_from_repository
 
 
 log = logging.getLogger(__name__)
@@ -49,38 +46,59 @@ class TestTaskPublish(TestCase):
         )
         content_artifact.save()
 
-    # TODO test copy
-    # def test_add_content_to_repository(self):
-    #     repo = AnsibleRepository.objects.get(name=staging_name)
-    #     repo_version_number = repo.latest_version().number
-    # 
-    #     self.assertNotIn(
-    #         self.collection_version,
-    #         CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
-    # 
-    #     add_content_to_repository(self.collection_version.pk, repo.pk)
-    # 
-    #     self.assertEqual(repo_version_number + 1, repo.latest_version().number)
-    #     self.assertIn(
-    #         self.collection_version,
-    #         CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
+    def test_task_copy_content(self):
+        repo1 = AnsibleRepository.objects.get(name=staging_name)
+        repo1_version_number = repo1.latest_version().number
+        repo2 = AnsibleRepository.objects.get(name='rejected')
+        repo2_version_number = repo2.latest_version().number
 
-    # TODO test remove or remove wrapper
-    # def test_remove_content_from_repository(self):
-    #     repo = AnsibleRepository.objects.get(name=staging_name)
-    #     add_content_to_repository(self.collection_version.pk, repo.pk)
-    # 
-    #     repo_version_number = repo.latest_version().number
-    #     self.assertIn(
-    #         self.collection_version,
-    #         CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
-    # 
-    #     remove_content_from_repository(self.collection_version.pk, repo.pk)
-    # 
-    #     self.assertEqual(repo_version_number + 1, repo.latest_version().number)
-    #     self.assertNotIn(
-    #         self.collection_version,
-    #         CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
+        self.assertNotIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo1.latest_version().content))
+        self.assertNotIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo2.latest_version().content))
+
+        qs = CollectionVersion.objects.filter(pk=self.collection_version.pk)
+        with repo1.new_version() as new_version:
+            new_version.add_content(qs)
+
+        self.assertEqual(repo1_version_number + 1, repo1.latest_version().number)
+        self.assertIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo1.latest_version().content))
+
+        config = [{
+            'source_repo_version': repo1.latest_version().pk,
+            'dest_repo': repo2.pk,
+            'content': [self.collection_version.pk],
+        }]
+        copy_content(config)
+
+        self.assertEqual(repo2_version_number + 1, repo2.latest_version().number)
+        self.assertIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo2.latest_version().content))
+
+    def test_task_remove_content_from_repository(self):
+        repo = AnsibleRepository.objects.get(name=staging_name)
+        repo_version_number = repo.latest_version().number
+
+        qs = CollectionVersion.objects.filter(pk=self.collection_version.pk)
+        with repo.new_version() as new_version:
+            new_version.add_content(qs)
+
+        self.assertEqual(repo_version_number + 1, repo.latest_version().number)
+        self.assertIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
+
+        _remove_content_from_repository(self.collection_version.pk, repo.pk)
+
+        self.assertEqual(repo_version_number + 2, repo.latest_version().number)
+        self.assertNotIn(
+            self.collection_version,
+            CollectionVersion.objects.filter(pk__in=repo.latest_version().content))
 
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
