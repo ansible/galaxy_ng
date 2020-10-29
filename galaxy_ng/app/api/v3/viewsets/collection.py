@@ -19,6 +19,7 @@ from pulpcore.plugin.models import ContentArtifact, Task
 from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
+from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from galaxy_ng.app.api import base as api_base
 
 from galaxy_ng.app.constants import DeploymentMode
@@ -219,8 +220,10 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         task_detail = Task.objects.get(pk=task_id)
 
+        pulp_collection_import = PulpCollectionImport.objects.get(pk=task_id)
+
         models.CollectionImport.objects.create(
-            task_id=task_detail.pulp_id,
+            task_id=pulp_collection_import,
             created_at=task_detail.pulp_created,
             namespace=namespace,
             name=data['filename'].name,

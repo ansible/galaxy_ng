@@ -1,0 +1,1 @@
+Fix `"CollectionImport.task_id" must be a "CollectionImport" instance.` errors on import task.
