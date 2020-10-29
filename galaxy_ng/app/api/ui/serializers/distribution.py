@@ -16,7 +16,7 @@ class RepositorySerializer(serializers.ModelSerializer):
         )
 
     def get_content_count(self, repo):
-        return repo.content.count()
+        return repo.latest_version().content.count()
 
 
 class DistributionSerializer(serializers.ModelSerializer):
