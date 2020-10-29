@@ -39,8 +39,8 @@ from galaxy_ng.app.common import metrics
 from galaxy_ng.app.tasks import (
     import_and_move_to_staging,
     import_and_auto_approve,
-    add_content_to_repository,
-    remove_content_from_repository,
+    call_copy_task,
+    call_remove_task,
     curate_all_synclist_repository,
 )
 
@@ -316,8 +316,8 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         if collection_version in dest_versions:
             raise NotFound(f'Collection {version_str} already found in destination repo')
 
-        add_task = self._add_content(collection_version, dest_repo)
-        remove_task = self._remove_content(collection_version, src_repo)
+        copy_task = call_copy_task(collection_version, src_repo, dest_repo)
+        remove_task = call_remove_task(collection_version, src_repo)
 
         curate_task_id = None
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
@@ -338,21 +338,9 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
 
         return Response(
             data={
-                'add_task_id': add_task.id,
+                'copy_task_id': copy_task.id,
                 'remove_task_id': remove_task.id,
                 "curate_all_synclist_repository_task_id": curate_task_id,
             },
             status='202'
         )
-
-    @staticmethod
-    def _add_content(collection_version, repo):
-        locks = [repo]
-        task_args = (collection_version.pk, repo.pk)
-        return enqueue_with_reservation(add_content_to_repository, locks, args=task_args)
-
-    @staticmethod
-    def _remove_content(collection_version, repo):
-        locks = [repo]
-        task_args = (collection_version.pk, repo.pk)
-        return enqueue_with_reservation(remove_content_from_repository, locks, args=task_args)
