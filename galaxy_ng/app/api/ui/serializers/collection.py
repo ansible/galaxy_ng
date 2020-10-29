@@ -117,18 +117,6 @@ class _CollectionSerializer(Serializer):
         namespace = Namespace.objects.get(name=obj.namespace)
         return NamespaceSummarySerializer(namespace).data
 
-    def _get_versions_in_repo(self, obj):
-        path = self.context['request'].parser_context['kwargs']['path']
-        distro = AnsibleDistribution.objects.get(base_path=path)
-        repository_version = distro.repository.latest_version()
-        versions_in_repo = CollectionVersion.objects.filter(
-            pk__in=repository_version.content,
-            collection=obj.collection,
-        )
-        return sorted(
-            versions_in_repo, key=lambda obj: semantic_version.Version(obj.version), reverse=True
-        )
-
 
 class CollectionListSerializer(_CollectionSerializer):
     deprecated = serializers.BooleanField()
@@ -140,11 +128,20 @@ class CollectionListSerializer(_CollectionSerializer):
 class CollectionDetailSerializer(_CollectionSerializer):
     all_versions = serializers.SerializerMethodField()
 
-    def get_all_versions(self, obj):
-        versions_in_repo = self._get_versions_in_repo(obj)
-        return CollectionVersionSummarySerializer(versions_in_repo, many=True).data
-
-    # TODO(awcrosby): rename field to "version_details" since with
+    # TODO: rename field to "version_details" since with
     # "version" query param this won't always be the latest version
     def get_latest_version(self, obj):
         return CollectionVersionDetailSerializer(obj).data
+
+    def get_all_versions(self, obj):
+        path = self.context['request'].parser_context['kwargs']['path']
+        distro = AnsibleDistribution.objects.get(base_path=path)
+        repository_version = distro.repository.latest_version()
+        versions_in_repo = CollectionVersion.objects.filter(
+            pk__in=repository_version.content,
+            collection=obj.collection,
+        )
+        versions_in_repo = sorted(
+            versions_in_repo, key=lambda obj: semantic_version.Version(obj.version), reverse=True
+        )
+        return CollectionVersionSummarySerializer(versions_in_repo, many=True).data
