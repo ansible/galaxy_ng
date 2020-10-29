@@ -37,7 +37,7 @@ class ScopedErrorListSerializer(serializers.ListSerializer):
                 new_detail.append(new_err)
 
             exc.detail = new_detail
-            raise exc
+            raise
 
 
 class NamespaceLinkSerializer(serializers.ModelSerializer):
