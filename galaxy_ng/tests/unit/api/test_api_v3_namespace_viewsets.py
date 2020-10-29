@@ -36,6 +36,49 @@ class TestV3NamespaceViewSet(BaseTestCase):
 
         self.ns_url = reverse('galaxy:api:v3:namespaces-list')
 
+    def test_namespace_validation(self):
+        ns_name = "unittestnamespace"
+        ns1 = self._create_namespace(ns_name, groups=[self.pe_group])
+
+        ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1.name})
+
+        self.client.force_authenticate(user=self.admin_user)
+
+        with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
+            put_data = {
+                "name": ns1.name,
+                "groups": [],
+                "company": "Super duper long name that nobody in their right "
+                           "mind should really ever use for a name on anything anywhere.",
+                "avatar_url": "not a url",
+                "links": [
+                    {
+                        "name": "link name that is way way too long for anyone",
+                        "url": "not a url",
+                    },
+                    {
+                        "name": "link name that is way way too long for anyone",
+                        "url": "https://www.valid-url.com/happyface.jpg",
+                    }
+                ]
+            }
+            expected_error_fields = {'company', 'avatar_url', 'links__url', 'links__name'}
+            expected_error_codes = {'max_length', 'invalid'}
+
+            response = self.client.put(ns_detail_url, put_data, format='json')
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(len(response.data['errors']), 5)
+
+            received_error_fields = set()
+            received_error_codes = set()
+            for err in response.data['errors']:
+                received_error_codes.add(err['code'])
+                received_error_fields.add(err['source']['parameter'])
+
+            self.assertEqual(expected_error_codes, received_error_codes)
+            self.assertEqual(expected_error_fields, received_error_fields)
+
     def test_namespace_list_empty(self):
         self.client.force_authenticate(user=self.admin_user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):

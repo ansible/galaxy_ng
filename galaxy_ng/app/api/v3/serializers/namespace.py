@@ -2,6 +2,7 @@ import logging
 import re
 
 from django.db import transaction
+from django.core import validators
 
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
@@ -13,10 +14,52 @@ from galaxy_ng.app.access_control.fields import GroupPermissionField
 log = logging.getLogger(__name__)
 
 
+class ScopedErrorListSerializer(serializers.ListSerializer):
+    # Updates the list serializer to return error messages as "<childname>__<fieldname>"
+    # This is to accomodate for cases where a serializer has to validate a list of
+    # sub serializers. Normally error messages will just return the child's field name
+    # but this can lead to situations where it's not clear if an error is originating
+    # from the child or parent serializer when they share field names.
+    def run_validation(self, *args, **kwargs):
+        scoped_err_name = self.child.Meta.scoped_error_name
+
+        try:
+            return super().run_validation(*args, **kwargs)
+        except (ValidationError) as exc:
+            new_detail = []
+            # loop through list of errors
+            for err in exc.detail:
+                new_err = {}
+                # loop for fields in error
+                for field in err:
+                    new_err["{}__{}".format(scoped_err_name, field)] = err[field]
+
+                new_detail.append(new_err)
+
+            exc.detail = new_detail
+            raise
+
+
 class NamespaceLinkSerializer(serializers.ModelSerializer):
+    # Using a CharField instead of a URLField so that we can add a custom error
+    # message that includes the submitted URL
+    url = serializers.CharField(
+        max_length=256,
+        allow_blank=False
+    )
+
     class Meta:
         model = models.NamespaceLink
         fields = ('name', 'url')
+        list_serializer_class = ScopedErrorListSerializer
+        scoped_error_name = 'links'
+
+    # adds the URL to the error so the user can figure out which link the error
+    # message is for
+    def validate_url(self, url):
+        v = validators.URLValidator(message=f"'{url}' is not a valid url.")
+        v(url)
+        return url
 
 
 class NamespaceSerializer(serializers.ModelSerializer):
