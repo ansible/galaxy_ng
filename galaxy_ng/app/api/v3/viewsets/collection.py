@@ -1,5 +1,8 @@
 import logging
 
+from functools import reduce
+from operator import and_
+
 import requests
 
 import semantic_version
@@ -12,9 +15,6 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-
-from functools import reduce
-from operator import __and__ as AND
 
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException, NotFound
@@ -407,27 +407,26 @@ class CollectionVersionDependencyViewSet(api_base.LocalSettingsMixin,
                 filters = []
                 for d in split_deps:
                     offset = 0
-                    if '>=' in d or '<=' in d:
+                    if '>=' in d or '<=' in d or '==' in d:
                         offset = 2
-                    if '=' in d or '>' in d or '<' in d:
+                    if '=' in d or '>' in d or '<' in d or '*' in d:
                         offset = 1
                     operand = d[:offset]
                     version = d[offset:]
-                    if '>=' == operand:
-                        filters.append(Q(version__gte=version))
-                    elif '<=' == operand:
-                        filters.append(Q(version__lte=version))
-                    elif '=' == operand:
-                        filters.append(Q(version__eq=version))
-                    elif '>' == operand:
-                        filters.append(Q(version__gt=version))
-                    elif '<' == operand:
-                        filters.append(Q(version__lt=version))
-                    else:
-                        filters.append(Q(version__gt=0))
+                    queries = {
+                        '>=': Q(version__gte=version),
+                        '<=': Q(version__lte=version),
+                        '==': Q(version__eq=version),
+                        '=': Q(version__eq=version),
+                        '>': Q(version__gt=version),
+                        '<': Q(version__lt=version),
+                        '*': Q(version__gt='0.0.0'),
+                    }
+
+                    filters.append(queries[operand])
 
                 qs = CollectionVersion.objects.filter(
-                    reduce(AND, filters),
+                    reduce(and_, filters),
                     namespace__in=[namespace],
                     name__in=[name]
                 ).order_by('-version')[:1]
