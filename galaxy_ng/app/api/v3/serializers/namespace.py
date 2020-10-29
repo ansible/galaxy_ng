@@ -36,7 +36,6 @@ class ScopedErrorListSerializer(serializers.ListSerializer):
 
                 new_detail.append(new_err)
 
-            print(new_detail)
             exc.detail = new_detail
             raise exc
 
