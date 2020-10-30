@@ -51,7 +51,7 @@ def convert_namespace_groups_to_permissions(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('galaxy', '0011_collection_import_task_id_fk'),
+        ('galaxy', '0012_move_collections_by_certification'),
     ]
 
     operations = [
