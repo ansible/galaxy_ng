@@ -86,9 +86,9 @@ class NamespaceSerializer(serializers.ModelSerializer):
         if not name:
             raise ValidationError(detail={
                 'name': "Attribute 'name' is required"})
-        if not re.match(r'^[a-zA-Z0-9_]+$', name):
+        if not re.match(r'^[a-z0-9_]+$', name):
             raise ValidationError(detail={
-                'name': 'Name can only contain [A-Za-z0-9_]'})
+                'name': 'Name can only contain lower case letters, underscores and numbers'})
         if len(name) <= 2:
             raise ValidationError(detail={
                 'name': 'Name must be longer than 2 characters'})
