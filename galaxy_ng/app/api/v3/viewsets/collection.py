@@ -377,6 +377,7 @@ class CollectionVersionDependencyViewSet(api_base.LocalSettingsMixin,
 
         dependency_map = {}
         resolved_deps = {}
+        errors = {}
 
         # Initial dependencies
         deps = serializer.data['dependencies']
@@ -442,9 +443,18 @@ class CollectionVersionDependencyViewSet(api_base.LocalSettingsMixin,
             if resolved_version_number:
                 resolved_deps[key] = resolved_version_number
             else:
-                resolved_deps[key] = f"Conflict! {deps}"
+                errors[key] = {
+                    'reason': 'Conflict',
+                    'constraints': deps[key],
+                }
+
             if len(new_dependencies) > 0:
                 deps.update(new_dependencies)
             deps.pop(current_dep)
 
-        return Response(resolved_deps)
+        data = {'dependencies': resolved_deps}
+
+        if len(errors) > 0:
+            data['errors'] = errors
+
+        return Response(data)
