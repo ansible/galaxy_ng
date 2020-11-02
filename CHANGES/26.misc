@@ -1,2 +1,0 @@
-Added migration to distribute collection versions into appropriate repositories
-depending on the `certification` attribute.

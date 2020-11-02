@@ -13,6 +13,40 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0rc2 (2020-11-02)
+=====================
+
+Features
+--------
+
+- Support pulp_ansible collection deprecation edits
+  `AAH-76 <https://issues.redhat.com/browse/AAH-76>`_
+- Add staging and rejected repos via migration and remove from dev fixture
+  `#485 <https://github.com/ansible/galaxy_ng/issues/485>`_
+
+
+Bugfixes
+--------
+
+- Update error messages on namespace links so that they can be differentiated from error messages on namespaces.
+  `AAH-18 <https://issues.redhat.com/browse/AAH-18>`_
+- Fix my-distributions show only sycnlist distros with obj perms
+  `AAH-27 <https://issues.redhat.com/browse/AAH-27>`_
+- Fix sort=created on ui /imports/collections/
+  `AAH-98 <https://issues.redhat.com/browse/AAH-98>`_
+- Fix `"CollectionImport.task_id" must be a "CollectionImport" instance.` errors on import task.
+  `AAH-99 <https://issues.redhat.com/browse/AAH-99>`_
+
+
+Misc
+----
+
+- `AAH-17 <https://issues.redhat.com/browse/AAH-17>`_, `AAH-21 <https://issues.redhat.com/browse/AAH-21>`_, `AAH-26 <https://issues.redhat.com/browse/AAH-26>`_, `AAH-34 <https://issues.redhat.com/browse/AAH-34>`_, `AAH-44 <https://issues.redhat.com/browse/AAH-44>`_, `AAH-47 <https://issues.redhat.com/browse/AAH-47>`_, `AAH-81 <https://issues.redhat.com/browse/AAH-81>`_, `AAH-82 <https://issues.redhat.com/browse/AAH-82>`_, `AAH-90 <https://issues.redhat.com/browse/AAH-90>`_, `AAH-94 <https://issues.redhat.com/browse/AAH-94>`_, `AAH-105 <https://issues.redhat.com/browse/AAH-105>`_, `468 <https://github.com/ansible/galaxy_ng/issues/468>`_
+
+
+----
+
+
 4.2.0rc1 (2020-10-02)
 =====================
 
@@ -292,5 +326,3 @@ Misc
 
 
 ----
-
-
