@@ -24,6 +24,7 @@ services:
     environment:
       - "WITH_DEV_INSTALL=1"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
+      - "ACCOUNT_ENHANCED_METRICS=${ACCOUNT_ENHANCED_METRICS-False}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:

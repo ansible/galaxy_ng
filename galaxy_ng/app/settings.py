@@ -1,5 +1,17 @@
+import os
+
+
+PROMETHEUS_BEFORE_MIDDLEWARE = 'django_prometheus.middleware.PrometheusBeforeMiddleware'
+PROMETHEUS_AFTER_MIDDLEWARE = 'django_prometheus.middleware.PrometheusAfterMiddleware'
+PROM_ACCT_BEFORE = 'galaxy_ng.contrib.metrics_middleware.AccountEnhancedMetricsBeforeMiddleware'
+PROM_ACCT_AFTER = 'galaxy_ng.contrib.metrics_middleware.AccountEnhancedMetricsAfterMiddleware'
+ACCOUNT_ENHANCED_METRICS = os.environ.get('ACCOUNT_ENHANCED_METRICS', False) in (True, 'True')
+if ACCOUNT_ENHANCED_METRICS:
+    PROMETHEUS_BEFORE_MIDDLEWARE = PROM_ACCT_BEFORE
+    PROMETHEUS_AFTER_MIDDLEWARE = PROM_ACCT_AFTER
+
 MIDDLEWARE = [
-    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    PROMETHEUS_BEFORE_MIDDLEWARE,
     # BEGIN: Pulp standard middleware
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -10,7 +22,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # END: Pulp standard middleware
-    'django_prometheus.middleware.PrometheusAfterMiddleware',
+    PROMETHEUS_AFTER_MIDDLEWARE,
     'django_currentuser.middleware.ThreadLocalUserMiddleware',
 ]
 
