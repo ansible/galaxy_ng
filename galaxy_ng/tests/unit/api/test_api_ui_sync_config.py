@@ -92,7 +92,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
                 "name": "rh-certified",
                 "policy": "immediate",
                 "requirements_file": None,
-                "url": "https://updated.url.com",
+                "url": "https://updated.url.com/",
             },
             format='json'
         )
@@ -103,7 +103,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
 
         updated = self.client.get(self.build_config_url(self.certified_remote.name))
         self.assertEqual(updated.data["auth_url"], "https://auth.com")
-        self.assertEqual(updated.data["url"], "https://updated.url.com")
+        self.assertEqual(updated.data["url"], "https://updated.url.com/")
         self.assertIsNone(updated.data["requirements_file"])
 
     def test_negative_update_community_repo_data_without_requirements_file(self):
@@ -143,7 +143,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
                     "    server: https://foobar.content.com\n"
                     "    api_key: s3cr3tk3y\n"
                 ),
-                "url": "https://galaxy.ansible.com/v3/collections",
+                "url": "https://galaxy.ansible.com/v3/collections/",
             },
             format='json'
         )
