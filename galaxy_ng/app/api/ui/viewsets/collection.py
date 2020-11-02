@@ -1,3 +1,4 @@
+from django.db.models import Exists, OuterRef, Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django_filters import filters
@@ -6,14 +7,17 @@ from drf_spectacular.utils import extend_schema
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_galaxy_views
 from pulp_ansible.app import viewsets as pulp_ansible_viewsets
 from pulp_ansible.app.models import (
+    AnsibleCollectionDeprecated,
     AnsibleDistribution,
     CollectionVersion,
     Collection,
     CollectionRemote,
 )
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
+from rest_framework import mixins
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+import semantic_version
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
@@ -21,22 +25,58 @@ from galaxy_ng.app.api.ui import serializers, versioning
 from galaxy_ng.app.api.v3.serializers.sync import CollectionRemoteSerializer
 
 
-class CollectionFilter(pulp_ansible_viewsets.CollectionVersionFilter):
+class CollectionByCollectionVersionFilter(pulp_ansible_viewsets.CollectionVersionFilter):
     """pulp_ansible CollectionVersion filter for Collection viewset."""
     versioning_class = versioning.UIVersioning
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
+    deprecated = filters.BooleanFilter()
 
 
-class CollectionViewSet(api_base.LocalSettingsMixin, pulp_ansible_galaxy_views.CollectionViewSet):
+class CollectionViewSet(
+    api_base.GenericViewSet,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    pulp_ansible_galaxy_views.AnsibleDistributionMixin,
+):
     """Viewset that uses CollectionVersion's within distribution to display data for Collection's.
 
-    Collection list is filterable by CollectionFilter and includes latest CollectionVersion.
+    Collection list is filterable by FilterSet and includes latest CollectionVersion.
 
     Collection detail includes CollectionVersion that is latest or via query param 'version'.
     """
     versioning_class = versioning.UIVersioning
-    filterset_class = CollectionFilter
+    filterset_class = CollectionByCollectionVersionFilter
     permission_classes = [access_policy.CollectionAccessPolicy]
+
+    def get_queryset(self):
+        """Returns a CollectionVersions queryset for specified distribution."""
+        distro_content = self.get_distro_content(self.kwargs["path"])
+        repo_version = self.get_repository_version(self.kwargs["path"])
+
+        versions = CollectionVersion.objects.filter(pk__in=distro_content).values_list(
+            "collection_id",
+            "version",
+        )
+
+        collection_versions = {}
+        for collection_id, version in versions:
+            value = collection_versions.get(str(collection_id))
+            if not value or semantic_version.Version(version) > semantic_version.Version(value):
+                collection_versions[str(collection_id)] = version
+
+        if not collection_versions.items():
+            return CollectionVersion.objects.none()
+
+        query_params = Q()
+        for collection_id, version in collection_versions.items():
+            query_params |= Q(collection_id=collection_id, version=version)
+
+        deprecated_query = AnsibleCollectionDeprecated.objects.filter(
+            collection=OuterRef("collection"), repository_version=repo_version
+        )
+        version_qs = CollectionVersion.objects.select_related("collection").filter(query_params)
+        version_qs = version_qs.annotate(deprecated=Exists(deprecated_query))
+        return version_qs
 
     def get_object(self):
         """Return CollectionVersion object, latest or via query param 'version'."""
