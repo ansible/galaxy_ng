@@ -10,12 +10,15 @@ from galaxy_ng.app.models import CollectionSyncTask
 log = logging.getLogger(__name__)
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class BaseTaskSerializer(serializers.ModelSerializer):
     pulp_id = serializers.UUIDField(source='pk')
     name = serializers.CharField()
     state = serializers.CharField()
     started_at = serializers.DateTimeField()
     finished_at = serializers.DateTimeField()
+
+
+class TaskDetailSerializer(BaseTaskSerializer):
     created_at = serializers.DateTimeField(source='pulp_created')
     updated_at = serializers.DateTimeField(source='pulp_last_updated')
     worker = serializers.SerializerMethodField()
@@ -53,4 +56,16 @@ class TaskSerializer(serializers.ModelSerializer):
             'child_tasks',
             'repository',
             'progress_reports',
+        )
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = (
+            'pulp_id',
+            'name',
+            'state',
+            'started_at',
+            'finished_at',
         )
