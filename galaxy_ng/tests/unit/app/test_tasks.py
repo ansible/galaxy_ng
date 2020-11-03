@@ -93,7 +93,13 @@ class TestTaskPublish(TestCase):
 
         mocked_get_created.return_value = [self.collection_version]
 
-        import_and_auto_approve(self.pulp_temp_file.pk, repository_pk=inbound_repo.pk)
+        import_and_auto_approve(
+            self.pulp_temp_file.pk,
+            repository_pk=inbound_repo.pk,
+            expected_namespace='',
+            expected_name='',
+            expected_version='',
+        )
 
         self.assertTrue(mocked_import.call_count == 1)
         self.assertTrue(mocked_enqueue.call_count == 2)
@@ -103,7 +109,13 @@ class TestTaskPublish(TestCase):
         golden_repo.save()
         mocked_get_created.side_effect = AnsibleDistribution.DoesNotExist
         with self.assertRaises(AnsibleDistribution.DoesNotExist):
-            import_and_auto_approve(self.artifact.pk, repository_pk=inbound_repo.pk)
+            import_and_auto_approve(
+                self.artifact.pk,
+                repository_pk=inbound_repo.pk,
+                expected_namespace='',
+                expected_name='',
+                expected_version='',
+            )
 
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
@@ -119,7 +131,13 @@ class TestTaskPublish(TestCase):
 
         mocked_get_created.return_value = [self.collection_version]
 
-        import_and_move_to_staging(self.pulp_temp_file.pk, repository_pk=inbound_repo.pk)
+        import_and_move_to_staging(
+            self.pulp_temp_file.pk,
+            repository_pk=inbound_repo.pk,
+            expected_namespace='',
+            expected_name='',
+            expected_version='',
+        )
 
         self.assertTrue(mocked_import.call_count == 1)
         self.assertTrue(mocked_enqueue.call_count == 2)
@@ -129,4 +147,10 @@ class TestTaskPublish(TestCase):
         staging_repo.save()
         mocked_get_created.side_effect = AnsibleDistribution.DoesNotExist
         with self.assertRaises(AnsibleDistribution.DoesNotExist):
-            import_and_move_to_staging(self.pulp_temp_file.pk, repository_pk=inbound_repo.pk)
+            import_and_move_to_staging(
+                self.pulp_temp_file.pk,
+                repository_pk=inbound_repo.pk,
+                expected_namespace='',
+                expected_name='',
+                expected_version='',
+            )
