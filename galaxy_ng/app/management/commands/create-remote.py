@@ -47,8 +47,8 @@ class Command(BaseCommand):
         return requirements_file
 
     def valid_url(self, url):
-        if url.endswith("/"):
-            raise CommandError("url should not end with '/'")
+        if not url.endswith("/"):
+            raise CommandError("url should end with '/'")
         return url
 
     def add_arguments(self, parser):
@@ -57,11 +57,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "url",
             type=self.valid_url,
-            help=(
-                "Remote Feed URL, "
-                "Should not end with a '/', "
-                "should end in v2/collections or v3/collections"
-            )
+            help="Remote Feed URL, Should end with '/'"
         )
 
         # optional named arguments
