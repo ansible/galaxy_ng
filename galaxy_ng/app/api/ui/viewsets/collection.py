@@ -65,7 +65,11 @@ class CollectionViewSet(
                 collection_versions[str(collection_id)] = version
 
         if not collection_versions.items():
-            return CollectionVersion.objects.none()
+            return CollectionVersion.objects.none().annotate(
+                # AAH-122: annotated fields must exist in all the returned querysets
+                #          in order for filters to work.
+                deprecated=Exists(AnsibleCollectionDeprecated.objects)
+            )
 
         query_params = Q()
         for collection_id, version in collection_versions.items():
