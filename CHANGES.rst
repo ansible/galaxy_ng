@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0rc3 (2020-11-04)
+=====================
+
+Bugfixes
+--------
+
+- Add deprecated annotated field to empty queryset
+  `AAH-122 <https://issues.redhat.com/browse/AAH-122>`_
+
+
+----
+
+
 4.2.0rc2 (2020-11-02)
 =====================
 
