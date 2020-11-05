@@ -123,7 +123,7 @@ INSIGHTS_STATEMENTS = {
             "action": ["list"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_rh_entitlements"]
+            "condition": "has_rh_entitlements"
         },
         {
             "action": ["retrieve"],
