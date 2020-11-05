@@ -3,6 +3,16 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+DELETE_ORPHAN_GALAXY_COLLECTION_IMPORTS = """
+DELETE
+FROM galaxy_collectionimport
+WHERE task_id in
+    (SELECT task_id
+     FROM galaxy_collectionimport
+     WHERE task_id not in
+         (SELECT task_id
+          FROM ansible_collectionimport));
+"""
 
 class Migration(migrations.Migration):
 
@@ -11,6 +21,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL(sql=DELETE_ORPHAN_GALAXY_COLLECTION_IMPORTS,
+                          reverse_sql=migrations.RunSQL.noop),
         migrations.AlterField(
             model_name='collectionimport',
             name='task_id',
