@@ -27,7 +27,11 @@ class MySyncListViewSet(SyncListViewSet):
         Returns all synclists for the user.
         """
         return get_objects_for_user(
-            self.request.user, "galaxy.change_synclist", any_perm=True, klass=models.SyncList
+            self.request.user,
+            "galaxy.change_synclist",
+            any_perm=True,
+            accept_global_perms=False,
+            klass=models.SyncList,
         )
 
     @action(detail=True, methods=["post"])
