@@ -70,7 +70,7 @@ pycodestyle==2.6.0        # via flake8
 pycparser==2.20           # via cffi
 pycryptodomex==3.9.8      # via pyjwkest
 pyflakes==2.2.0           # via flake8
-pygments==2.7.1           # via rich
+pygments==2.7.1           # via rich, sdb
 pygtrie==2.3.3            # via pulpcore
 pyjwkest==1.4.2           # via pulp-container
 pyjwt[crypto]==1.7.1      # via pulp-container
@@ -86,8 +86,9 @@ rich==7.1.0               # via ansible-lint
 rq==1.5.2                 # via pulpcore
 ruamel.yaml.clib==0.2.2   # via ruamel.yaml
 ruamel.yaml==0.16.12      # via ansible-lint
+sdb==1.8                  # via -r requirements/requirements.standalone.in
 semantic-version==2.8.5   # via galaxy-importer, pulp-ansible
-six==1.15.0               # via bleach, cryptography, galaxy-ng (setup.py), jsonschema, packaging, pyjwkest, python-dateutil, url-normalize
+six==1.15.0               # via bleach, cryptography, galaxy-ng (setup.py), jsonschema, packaging, pyjwkest, python-dateutil, sdb, url-normalize
 sqlparse==0.3.1           # via django
 tablib[html,ods,xls,xlsx,yaml]==2.0.0  # via django-import-export
 typing-extensions==3.7.4.3  # via aiohttp, ansible-lint, rich, yarl

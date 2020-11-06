@@ -1,3 +1,5 @@
+import os
+
 MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     # BEGIN: Pulp standard middleware
@@ -91,3 +93,5 @@ X_PULP_API_PREFIX = "pulp_ansible/galaxy/automation-hub/api"
 
 X_PULP_CONTENT_HOST = "localhost"
 X_PULP_CONTENT_PORT = 24816
+
+os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]

@@ -21,9 +21,12 @@ services:
     command: ['run', 'api-reload']
     ports:
       - "5001:8000"
+      - "7899-7999:7899-7999" # default sdb ports
     environment:
       - "WITH_DEV_INSTALL=1"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
+      - "SDB_HOST=0.0.0.0"
+      - "SDB_PORT=7899"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
