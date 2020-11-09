@@ -80,7 +80,7 @@
     "pk": "80ae4b6b-bfb9-4831-aa0c-b43d32ce2fed",
     "fields": {
         "name": "Red Hat Certified",
-        "url": "https://cloud.redhat.com/api/automation-hub/v3/collections",
+        "url": "https://cloud.redhat.com/api/automation-hub/v3/collections/",
         "pulp_created": "2020-03-12T15:56:19.071Z",
         "pulp_last_updated": "2020-03-12T15:56:19.072Z",
         "pulp_type": "ansible.ansible"
@@ -149,7 +149,7 @@
     "pk": "c90feabd-5cb6-4bab-ad07-861f000e2d18",
     "fields": {
         "name": "Community",
-        "url": "https://galaxy.ansible.com/api/v2/collections",
+        "url": "https://galaxy.ansible.com/api/v2/collections/",
         "pulp_created": "2020-03-12T15:56:19.071Z",
         "pulp_last_updated": "2020-03-12T15:56:19.072Z",
         "pulp_type": "ansible.ansible"
@@ -159,7 +159,7 @@
     "model": "ansible.collectionremote",
     "pk": "c90feabd-5cb6-4bab-ad07-861f000e2d18",
     "fields": {
-        "requirements_file": "collections:\n  -name: initial.name\n    server: initial.content.com\n    api_key: NotASecret\n"
+        "requirements_file": "---\ncollections:\n  - name: namespace.collection_name \n    server: https://galaxy.ansible.com/"
     }
   },
   {
