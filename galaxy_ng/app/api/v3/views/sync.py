@@ -47,7 +47,7 @@ class SyncRemoteView(api_base.APIView):
             kwargs={
                 "remote_pk": remote.pk,
                 "repository_pk": distro.repository.pk,
-                "mirror": False
+                "mirror": True
             },
         )
 
