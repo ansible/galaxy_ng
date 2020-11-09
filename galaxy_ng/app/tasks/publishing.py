@@ -4,11 +4,10 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
 from pulpcore.plugin.models import Task
-from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, CollectionVersion
 from pulp_ansible.app.tasks.collections import import_collection
 
-from .promotion import add_content_to_repository, remove_content_from_repository
+from .promotion import call_copy_task, call_remove_task
 
 log = logging.getLogger(__name__)
 
@@ -55,20 +54,11 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
 
     inbound_repo = AnsibleRepository.objects.get(pk=inbound_repository_pk)
 
-    inbound_locks = [inbound_repo]
-    staging_locks = [staging_repo]
-
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        # enqueue task to add collection_version to staging repo
-        add_task_args = (collection_version.pk, staging_repo.pk)
-        enqueue_with_reservation(add_content_to_repository, staging_locks, args=add_task_args)
-
-        # enqueue task to remove collection_verion from inbound repo
-        remove_task_args = (collection_version.pk, inbound_repository_pk)
-        enqueue_with_reservation(remove_content_from_repository,
-                                 inbound_locks, args=remove_task_args)
+        call_copy_task(collection_version, inbound_repo, staging_repo)
+        call_remove_task(collection_version, inbound_repo)
 
 
 def import_and_auto_approve(temp_file_pk, **kwargs):
@@ -94,20 +84,11 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
 
     inbound_repo = AnsibleRepository.objects.get(pk=inbound_repository_pk)
 
-    remove_locks = [inbound_repo]
-    add_locks = [golden_repo]
-
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        # enqueue task to add collection_version to golden repo
-        add_task_args = (collection_version.pk, golden_repo.pk)
-        enqueue_with_reservation(add_content_to_repository, add_locks, args=add_task_args)
-
-        # enqueue task to remove collection_verion from inbound repo
-        remove_task_args = (collection_version.pk, inbound_repository_pk)
-        enqueue_with_reservation(remove_content_from_repository,
-                                 remove_locks, args=remove_task_args)
+        call_copy_task(collection_version, inbound_repo, golden_repo)
+        call_remove_task(collection_version, inbound_repo)
 
         log.info('Imported and auto approved collection artifact %s to repository %s',
                  collection_version.relative_path,

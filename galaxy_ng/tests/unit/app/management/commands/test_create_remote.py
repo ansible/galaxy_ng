@@ -12,7 +12,7 @@ from pulp_ansible.app.models import (
 REQUIREMENTS_FILE_STR = (
     "collections:\n"
     "  - name: initial.name\n"
-    "    server: https://initial.content.com/v3/collections\n"
+    "    server: https://initial.content.com/v3/collections/\n"
     "    api_key: NotASecret\n"
 )
 
@@ -23,7 +23,7 @@ class TestCreateRemoteCommand(TestCase):
         super().setUp()
         CollectionRemote.objects.create(
             name="test-remote",
-            url="https://test.remote/v3/collections"
+            url="https://test.remote/v3/collections/"
         )
 
     def test_command_output(self):
@@ -38,7 +38,7 @@ class TestCreateRemoteCommand(TestCase):
         call_command(
             'create-remote',
             'test-remote',
-            'https://test.remote/v3/collections',
+            'https://test.remote/v3/collections/',
             stdout=out
         )
 
@@ -48,7 +48,7 @@ class TestCreateRemoteCommand(TestCase):
 
     def test_remote_created(self):
         out = StringIO()
-        call_command('create-remote', 'new-remote', 'https://new.remote/v3/collections', stdout=out)
+        call_command('create-remote', 'new-remote', 'https://new.remote/', stdout=out)
 
         self.assertIn('Created new CollectionRemote new-remote', out.getvalue())
         self.assertIn('Created new Repository new-remote', out.getvalue())
@@ -72,7 +72,7 @@ class TestCreateRemoteCommand(TestCase):
         call_command(
             'create-remote',
             'new-remote-with-existing-entities',
-            'https://new.remote/v3/collections',
+            'https://new.remote/v3/collections/',
             '--repository', 'existing-repo',
             '--distribution', 'existing-distro',
             stdout=out
@@ -96,9 +96,9 @@ class TestCreateRemoteCommand(TestCase):
 
     def test_invalid_url(self):
         with self.assertRaisesMessage(
-            CommandError, "url should not end with '/'"
+            CommandError, "url should end with '/'"
         ):
-            call_command('create-remote', 'invalid-remote', 'https://invalid.url/foo/')
+            call_command('create-remote', 'invalid-remote', 'https://invalid.url/foo')
 
     def test_cannot_create_community_wo_requirements_file(self):
         with self.assertRaisesMessage(
@@ -106,14 +106,14 @@ class TestCreateRemoteCommand(TestCase):
             'Syncing content from community domains without specifying a '
             'requirements file is not allowed.'
         ):
-            call_command('create-remote', 'community', 'https://galaxy.ansible.com/v3/collections')
+            call_command('create-remote', 'community', 'https://galaxy.ansible.com/v3/collections/')
 
     def test_create_community_remote_with_requirements_file_str(self):
         out = StringIO()
         call_command(
             'create-remote',
             'community',
-            'https://galaxy.ansible.com/v3/collections',
+            'https://galaxy.ansible.com/v3/collections/',
             '-r', REQUIREMENTS_FILE_STR,
             stdout=out
         )
@@ -132,7 +132,7 @@ class TestCreateRemoteCommand(TestCase):
             CommandError,
             "Error parsing requirements_file"
         ):
-            call_command('create-remote', 'foo', 'https://bar.com', '-r', 'invalid_file_str')
+            call_command('create-remote', 'foo', 'https://bar.com/', '-r', 'invalid_file_str')
 
     def test_load_requirements_file_from_path(self):
         out = StringIO()
@@ -144,7 +144,7 @@ class TestCreateRemoteCommand(TestCase):
             call_command(
                 'create-remote',
                 'community-from-file',
-                'https://galaxy.ansible.com/v3/collections',
+                'https://galaxy.ansible.com/v3/collections/',
                 '-r', requirements_file.name,
                 stdout=out
             )

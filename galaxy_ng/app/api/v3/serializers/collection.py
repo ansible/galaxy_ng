@@ -53,14 +53,15 @@ class CollectionSerializer(_CollectionSerializer, HrefNamespaceMixin):
 
     def get_highest_version(self, obj):
         """Get a highest version and its link."""
+        collection = self.context["highest_versions"][obj.pk]
         kwargs = {
             "path": self.context["path"],
-            "namespace": obj.namespace,
-            "name": obj.name,
-            "version": obj.version,
+            "namespace": collection.namespace,
+            "name": collection.name,
+            "version": collection.version,
         }
         href = self._get_href("collection-versions-detail", **kwargs)
-        return {"href": href, "version": obj.version}
+        return {"href": href, "version": str(collection.version)}
 
 
 class CollectionRefSerializer(_CollectionRefSerializer, HrefNamespaceMixin):
