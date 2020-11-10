@@ -1,6 +1,7 @@
 import logging
 
 from django.db import transaction
+from django.db.utils import IntegrityError
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
@@ -9,6 +10,7 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control.access_policy import NamespaceAccessPolicy
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.v3 import serializers
+from galaxy_ng.app.exceptions import ConflictError
 
 log = logging.getLogger(__name__)
 
@@ -58,10 +60,16 @@ class NamespaceViewSet(api_base.ModelViewSet):
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Override to also create inbound pulp repository and distribution."""
-        name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=request.data['name'])
-        repo = AnsibleRepository.objects.create(name=name)
-        AnsibleDistribution.objects.create(name=name, base_path=name, repository=repo)
-        return super().create(request, *args, **kwargs)
+
+        try:
+            name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=request.data['name'])
+            repo = AnsibleRepository.objects.create(name=name)
+            AnsibleDistribution.objects.create(name=name, base_path=name, repository=repo)
+            return super().create(request, *args, **kwargs)
+        except IntegrityError as e:
+            raise ConflictError(detail={
+                'name': 'There is a conflict error: {}'.format(str(e))
+            })
 
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):

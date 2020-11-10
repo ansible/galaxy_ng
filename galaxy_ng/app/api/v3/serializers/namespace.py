@@ -106,6 +106,7 @@ class NamespaceSerializer(serializers.ModelSerializer):
         # create NamespaceLink objects if needed
         new_links = []
         for link_data in links_data:
+            link_data["namespace"] = instance
             ns_link, created = models.NamespaceLink.objects.get_or_create(**link_data)
             new_links.append(ns_link)
 
