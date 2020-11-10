@@ -136,7 +136,6 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
                               pulp_ansible_views.CollectionUploadViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
     parser_classes = [AnsibleGalaxy29MultiPartParser]
-    serializer_class = CollectionUploadSerializer
 
     def _dispatch_import_collection_task(self, temp_file_pk, repository=None, **kwargs):
         """Dispatch a pulp task started on upload of collection version."""

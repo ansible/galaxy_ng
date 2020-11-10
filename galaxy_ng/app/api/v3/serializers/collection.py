@@ -146,9 +146,6 @@ class CollectionUploadSerializer(Serializer):
 
         data.update({
             "filename": filename_tuple,
-            "expected_namespace": filename_tuple.namespace,
-            "expected_name": filename_tuple.name,
-            "expected_version": filename_tuple.version,
             "mimetype": (mimetypes.guess_type(filename)[0] or 'application/octet-stream')
         })
         return data
