@@ -3,6 +3,7 @@ import logging
 from django.db import transaction
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
+from rest_framework.exceptions import ValidationError
 from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 
 from galaxy_ng.app import models
@@ -58,6 +59,12 @@ class NamespaceViewSet(api_base.ModelViewSet):
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Override to also create inbound pulp repository and distribution."""
+
+        if models.Namespace.objects.filter(name=request.data['name']).exists():
+            raise ValidationError(detail={
+                'name': 'There is an existing namespace with the same name, choose a different name'
+            })
+
         name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=request.data['name'])
         repo = AnsibleRepository.objects.create(name=name)
         AnsibleDistribution.objects.create(name=name, base_path=name, repository=repo)
