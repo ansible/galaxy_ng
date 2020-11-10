@@ -71,7 +71,7 @@ class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer
         ]
 
     def get_last_sync_task_queryset(self, obj):
-        return CollectionSyncTask.objects.filter(repository=obj).last()
+        return CollectionSyncTask.objects.filter(repository=obj).first()
 
 
 class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemoteSerializer):
