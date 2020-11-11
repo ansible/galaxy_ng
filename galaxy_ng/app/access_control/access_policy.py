@@ -62,11 +62,9 @@ class CollectionRemoteAccessPolicy(AccessPolicyBase):
 class UserAccessPolicy(AccessPolicyBase):
     NAME = 'UserViewSet'
 
-    def is_current_user_or_has_perms(self, request, view, action, permission):
-        if (request.user.has_perm(permission)):
-            return True
 
-        return self.is_current_user(request, view, action)
+class MyUserAccessPolicy(AccessPolicyBase):
+    NAME = 'MyUserViewSet'
 
     def is_current_user(self, request, view, action):
         return request.user == view.get_object()
