@@ -28,9 +28,10 @@ class UserSerializer(serializers.ModelSerializer):
             'groups',
             'password',
             'date_joined',
-            'is_superuser',
+            'is_superuser'
         )
         extra_kwargs = {
+            'is_superuser': {'read_only': True},
             'date_joined': {'read_only': True},
             'password': {'write_only': True, 'allow_blank': True, 'required': False}
         }
@@ -39,6 +40,20 @@ class UserSerializer(serializers.ModelSerializer):
         if password:
             password_validation.validate_password(password)
             return password
+
+    def validate_groups(self, groups):
+        request_user = self.context['request'].user
+
+        if not request_user.has_perm('galaxy.change_group'):
+            authed_user_groups = request_user.groups.all()
+            for g in groups:
+                if not authed_user_groups.filter(pk=g.id).exists():
+                    raise ValidationError(detail={
+                        "groups": "'galaxy.change_group' permission is required to add"
+                                  " users to a group that the current user is not in."
+                    })
+
+        return groups
 
     def _set_password(self, instance, data):
         # password doesn't get set the same as other data, so delete it

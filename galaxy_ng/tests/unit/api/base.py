@@ -41,11 +41,13 @@ class BaseTestCase(APITestCase):
         return auth_models.User.objects.create(username=username)
 
     @staticmethod
-    def _create_group(scope, name, users=None):
+    def _create_group(scope, name, users=None, perms=[]):
         group, _ = auth_models.Group.objects.get_or_create_identity(scope, name)
         if isinstance(users, auth_models.User):
             users = [users]
         group.user_set.add(*users)
+        for p in perms:
+            assign_perm(p, group)
         return group
 
     @staticmethod
@@ -76,6 +78,12 @@ class BaseTestCase(APITestCase):
             'galaxy.delete_user',
             'galaxy.add_user',
             'galaxy.change_user',
+
+            # groups
+            'galaxy.view_group',
+            'galaxy.delete_group',
+            'galaxy.add_group',
+            'galaxy.change_group',
 
             # synclists
             'galaxy.delete_synclist',

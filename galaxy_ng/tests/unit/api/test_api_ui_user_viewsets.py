@@ -21,6 +21,66 @@ class TestUiNamespaceViewSet(BaseTestCase):
         self.user_url = get_current_ui_url('users-list')
         self.me_url = get_current_ui_url('me')
 
+    def test_user_can_only_create_users_with_their_groups(self):
+        user = auth_models.User.objects.create(username='haxor')
+        group = self._create_group('', 'test_group1', users=[user], perms=[
+            'galaxy.view_user',
+            'galaxy.delete_user',
+            'galaxy.add_user',
+            'galaxy.change_user',
+        ])
+        self.client.force_authenticate(user=user)
+
+        # Verify the user can't create new users with elevated permissions
+        new_user_data = {
+            'username': 'haxor_test1',
+            'password': 'cantTouchThis123',
+            'groups': [{
+                'id': self.pe_group.id,
+                'name': self.pe_group.name
+            }]
+        }
+
+        response = self.client.post(self.user_url, new_user_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['errors'][0]['source']['parameter'], 'groups')
+
+        # Verify the user can create new users with identical permissions
+        new_user_data = {
+            'username': 'haxor_test2',
+            'password': 'cantTouchThis123',
+            'groups': [{
+                'id': group.id,
+                'name': group.name
+            }]
+        }
+
+        response = self.client.post(self.user_url, new_user_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_user_can_create_users_with_right_perms(self):
+        user = auth_models.User.objects.create(username='haxor')
+        self._create_group('', 'test_group1', users=[user], perms=[
+            'galaxy.view_user',
+            'galaxy.delete_user',
+            'galaxy.add_user',
+            'galaxy.change_user',
+            'galaxy.change_group'
+        ])
+        self.client.force_authenticate(user=user)
+
+        new_user_data = {
+            'username': 'haxor_test3',
+            'password': 'cantTouchThis123',
+            'groups': [{
+                'id': self.pe_group.id,
+                'name': self.pe_group.name
+            }]
+        }
+
+        response = self.client.post(self.user_url, new_user_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_user_list(self):
         self.client.force_authenticate(user=self.user)
         log.debug('self.client: %s', self.client)
