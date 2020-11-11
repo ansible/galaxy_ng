@@ -77,7 +77,7 @@ STANDALONE_STATEMENTS = {
             "action": ["retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "is_current_user_or_has_perms:galaxy.view_user"
+            "condition": "has_model_perms:galaxy.view_user"
         },
         {
             "action": "destroy",
@@ -96,7 +96,15 @@ STANDALONE_STATEMENTS = {
             "action": ["update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "is_current_user_or_has_perms:galaxy.change_user"
+            "condition": "has_model_perms:galaxy.change_user"
+        },
+    ],
+    'MyUserViewSet': [
+        {
+            "action": ["retrieve", "update", "partial_update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "is_current_user"
         },
     ],
     'SyncListViewSet': [

@@ -43,11 +43,11 @@ class TestUiNamespaceViewSet(BaseTestCase):
     def test_user_get(self):
         url = '{}{}/'.format(self.user_url, self.user.id)
 
-        # Users can view themselves
+        # Users cannot view themselves on the users/ api
         self.client.force_authenticate(user=self.user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # But not other users
         url = '{}{}/'.format(self.user_url, self.admin_user.id)
@@ -181,3 +181,19 @@ class TestUiNamespaceViewSet(BaseTestCase):
 
         self._test_create_or_update(
             self.client.put, self.me_url, new_user_data, status.HTTP_200_OK, user)
+
+        new_user_data = {
+            'username': 'test2',
+            'first_name': 'First',
+            'last_name': 'Last',
+            'email': 'email@email.com',
+            'groups': [{
+                'id': self.pe_group.id,
+                'name': self.pe_group.name
+            }]
+        }
+
+        url = '{}{}/'.format(self.user_url, user.id)
+
+        response = self.client.put(url, new_user_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

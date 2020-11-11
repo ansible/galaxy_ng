@@ -58,7 +58,7 @@ class CurrentUserViewSet(
 ):
     serializer_class = serializers.CurrentUserSerializer
     model = auth_models.User
-    permission_classes = [access_policy.UserAccessPolicy]
+    permission_classes = [access_policy.MyUserAccessPolicy]
     versioning_class = versioning.UIVersioning
 
     def get_object(self):

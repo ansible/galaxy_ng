@@ -72,6 +72,13 @@ INSIGHTS_STATEMENTS = {
     ],
     'UserViewSet': [
         {
+            "action": ["*"],
+            "principal": "authenticated",
+            "effect": "deny",
+        },
+    ],
+    'MyUserViewSet': [
+        {
             "action": ["retrieve"],
             "principal": "authenticated",
             "effect": "allow",
