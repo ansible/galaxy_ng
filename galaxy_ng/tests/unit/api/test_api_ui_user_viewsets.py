@@ -4,7 +4,6 @@ from rest_framework import status
 
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import DeploymentMode
-from guardian.shortcuts import assign_perm
 
 from .base import BaseTestCase, get_current_ui_url
 
