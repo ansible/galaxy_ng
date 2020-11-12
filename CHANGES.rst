@@ -13,6 +13,29 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.0 (2020-11-12)
+==================
+
+Bugfixes
+--------
+
+- Fix URLs in remote fixtures for correct validation.
+  `AAH-12 <https://issues.redhat.com/browse/AAH-12>`_
+- Fix importer running ansible-test in local image build
+  `AAH-89 <https://issues.redhat.com/browse/AAH-89>`_
+- Fix my-synclist to show only synclists with obj permissions
+  `AAH-97 <https://issues.redhat.com/browse/AAH-97>`_
+
+
+Misc
+----
+
+- `AAH-131 <https://issues.redhat.com/browse/AAH-131>`_
+
+
+----
+
+
 4.2.0rc3 (2020-11-04)
 =====================
 
