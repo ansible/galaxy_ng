@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, Optional
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 from drf_spectacular.utils import extend_schema_field
 from pulpcore.app.serializers import ProgressReportSerializer
 from pulpcore.plugin.models import Task
@@ -10,20 +11,17 @@ from galaxy_ng.app.models import CollectionSyncTask
 log = logging.getLogger(__name__)
 
 
-class BaseTaskSerializer(serializers.ModelSerializer):
-    pulp_id = serializers.UUIDField(source='pk')
-    name = serializers.CharField()
-    state = serializers.CharField()
-    started_at = serializers.DateTimeField()
-    finished_at = serializers.DateTimeField()
-
-
-class TaskDetailSerializer(BaseTaskSerializer):
+class TaskSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(source='pulp_created')
     updated_at = serializers.DateTimeField(source='pulp_last_updated')
     worker = serializers.SerializerMethodField()
     repository = serializers.SerializerMethodField()
     progress_reports = ProgressReportSerializer(many=True, read_only=True)
+    pulp_id = serializers.UUIDField(source='pk')
+    name = serializers.CharField()
+    state = serializers.CharField()
+    started_at = serializers.DateTimeField()
+    finished_at = serializers.DateTimeField()
 
     @extend_schema_field(Optional[Dict[str, Any]])
     def get_worker(self, obj):
@@ -59,13 +57,26 @@ class TaskDetailSerializer(BaseTaskSerializer):
         )
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskSummarySerializer(TaskSerializer):
+    """TaskSerializer but without detail fields.
+
+    For use in /tasks/<str:pk>/ detail views."""
+    href = serializers.SerializerMethodField()
+
+    def get_href(self, obj):
+        return reverse(
+            'galaxy:api:v3:default-content:tasks-detail',
+            kwargs={"pk": str(obj.pulp_id)}
+        )
+
     class Meta:
         model = Task
         fields = (
             'pulp_id',
             'name',
+            'repository',
             'state',
             'started_at',
             'finished_at',
+            'href',
         )

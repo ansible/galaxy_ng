@@ -16,7 +16,7 @@ from .group import (
 
 from .task import (
     TaskSerializer,
-    TaskDetailSerializer,
+    TaskSummarySerializer,
 )
 
 
@@ -29,5 +29,5 @@ __all__ = (
     'NamespaceSerializer',
     'NamespaceSummarySerializer',
     'TaskSerializer',
-    'TaskDetailSerializer',
+    'TaskSummarySerializer',
 )

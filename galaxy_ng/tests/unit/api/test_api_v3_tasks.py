@@ -48,22 +48,42 @@ class TestUiTaskListViewSet(BaseTestCase):
     def build_task_url(self):
         return reverse('galaxy:api:v3:default-content:tasks-list')
 
+    def build_task_detail_url(self, pk):
+        return reverse('galaxy:api:v3:default-content:tasks-detail', kwargs={"pk": pk})
+
     def test_tasks_required_fields(self):
         # Spawn a task
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(self.build_sync_url(self.certified_remote.name))
-        log.debug('test_positive_syncing_returns_a_task_id')
+        log.debug('Spawn a task for testing tasks/ endpoint')
         log.debug('response: %s', response)
         log.debug('response.data: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('task', response.data)
 
-        # Ensure all required fields are present
+        # Ensure all required fields are present in list URL
         response = self.client.get(self.build_task_url())
         log.debug('response: %s', response)
         log.debug('response.data: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(response.data['meta']['count'], 0)
+        required_fields = (
+            'pulp_id',
+            'name',
+            'finished_at',
+            'started_at',
+            'state',
+            'repository',
+            'href',
+        )
+        for field in required_fields:
+            self.assertIn(field, response.data['data'][0])
+
+        # Test Detail URL
+        task_pk = response.data['data'][0]['pulp_id']
+        response = self.client.get(self.build_task_detail_url(task_pk))
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
         required_fields = (
             'pulp_id',
             'name',
@@ -80,4 +100,4 @@ class TestUiTaskListViewSet(BaseTestCase):
             'progress_reports',
         )
         for field in required_fields:
-            self.assertIn(field, response.data['data'][0])
+            self.assertIn(field, response.data)
