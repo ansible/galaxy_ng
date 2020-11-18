@@ -39,8 +39,13 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
     This task will not wait for the enqueued tasks to finish.
     """
     inbound_repository_pk = kwargs.get('repository_pk')
-    import_collection(temp_file_pk=temp_file_pk,
-                      repository_pk=inbound_repository_pk)
+    import_collection(
+        temp_file_pk=temp_file_pk,
+        repository_pk=inbound_repository_pk,
+        expected_namespace=kwargs['expected_namespace'],
+        expected_name=kwargs['expected_name'],
+        expected_version=kwargs['expected_version'],
+    )
 
     try:
         staging_repo = AnsibleDistribution.objects.get(name=STAGING_NAME).repository
@@ -64,7 +69,13 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
     manual approval action needs to occur.
     """
     inbound_repository_pk = kwargs.get('repository_pk')
-    import_collection(temp_file_pk=temp_file_pk, repository_pk=inbound_repository_pk)
+    import_collection(
+        temp_file_pk=temp_file_pk,
+        repository_pk=inbound_repository_pk,
+        expected_namespace=kwargs['expected_namespace'],
+        expected_name=kwargs['expected_name'],
+        expected_version=kwargs['expected_version'],
+    )
 
     try:
         golden_repo = AnsibleDistribution.objects.get(name=GOLDEN_NAME).repository
