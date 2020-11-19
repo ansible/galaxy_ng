@@ -189,3 +189,23 @@ class TestV3NamespaceViewSet(BaseTestCase):
         with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
             response = self.client.delete(ns_detail_url)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_conflict_error_if_already_exists(self):
+        """Ensure API returns 409-Conflict in case of existing namespace."""
+        ns3_name = "unittestnamespace3"
+        self._create_namespace(ns3_name, groups=[self.pe_group])
+        ns_list_url = reverse('galaxy:api:v3:namespaces-list')
+
+        self.client.force_authenticate(user=self.admin_user)
+
+        with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
+            post_data = {
+                "name": ns3_name,
+                "company": "A company name",
+                "email": "email@companyname.com",
+                "description": "A testing namespace",
+                "groups": [{"name": "system:partner-engineers"}],
+                "object_permissions": ["change_namespace", "upload_to_namespace"]
+            }
+            response = self.client.post(ns_list_url, post_data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
