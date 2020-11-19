@@ -1,7 +1,6 @@
 import logging
 
 from django.db import transaction
-from django.db.utils import IntegrityError
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
@@ -60,16 +59,20 @@ class NamespaceViewSet(api_base.ModelViewSet):
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Override to also create inbound pulp repository and distribution."""
+        name = request.data['name']
+        if models.Namespace.objects.filter(name=name).exists():
+            raise ConflictError(
+                detail={'name': f'A namespace named {name} already exists.'}
+            )
 
-        try:
-            name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=request.data['name'])
-            repo = AnsibleRepository.objects.create(name=name)
-            AnsibleDistribution.objects.create(name=name, base_path=name, repository=repo)
-            return super().create(request, *args, **kwargs)
-        except IntegrityError as e:
-            raise ConflictError(detail={
-                'name': 'There is a conflict error: {}'.format(str(e))
-            })
+        inbound_name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=name)
+        repo = AnsibleRepository.objects.create(name=inbound_name)
+        AnsibleDistribution.objects.create(
+            name=inbound_name,
+            base_path=inbound_name,
+            repository=repo
+        )
+        return super().create(request, *args, **kwargs)
 
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
