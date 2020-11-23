@@ -1,7 +1,7 @@
 # NOTE: This Dockerfile is currently used to build release images. So it is leaved as is.
 # It should be removed once migration to standalone Dockerfile for release images
 # is complete.
-FROM centos:8
+FROM docker.io/centos:8
 
 ARG USER_ID=1000
 ARG USER_NAME=galaxy
