@@ -14,10 +14,13 @@ from galaxy_ng import __version__
 
 
 class PrepareStaticCommand(Command):
-    UI_DOWNLOAD_URL = (
-        "https://github.com/ansible/ansible-hub-ui/releases"
-        "/latest/download/automation-hub-ui-dist.tar.gz"
-    )
+    if os.environ.get("ALTERNATE_UI_DOWNLOAD_URL"):
+        UI_DOWNLOAD_URL = os.environ.get("ALTERNATE_UI_DOWNLOAD_URL")
+    else:
+        UI_DOWNLOAD_URL = (
+            "https://github.com/ansible/ansible-hub-ui/releases"
+            "/latest/download/automation-hub-ui-dist.tar.gz"
+        )
     TARGET_DIR = "galaxy_ng/app/static/galaxy_ng"
 
     user_options = []
@@ -64,10 +67,11 @@ requirements = [
 ]
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
+version = os.environ.get("ALTERNATE_VERSION", __version__)
 
 setup(
     name=package_name,
-    version=__version__,
+    version=version,
     description="galaxy-ng plugin for the Pulp Project",
     license="GPLv2+",
     author="Red Hat, Inc.",
