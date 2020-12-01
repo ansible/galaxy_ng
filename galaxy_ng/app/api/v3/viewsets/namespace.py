@@ -1,6 +1,7 @@
 import logging
 
 from django.db import transaction
+from django.db.models import Q
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
@@ -36,7 +37,7 @@ class NamespaceFilter(filterset.FilterSet):
         keywords = self.request.query_params.getlist('keywords')
 
         for keyword in keywords:
-            queryset = queryset.filter(name=keyword)
+            queryset = queryset.filter(Q(name__icontains=keyword) | Q(company__icontains=keyword))
 
         return queryset
 
