@@ -1,19 +1,12 @@
-import logging
-
 from django.db import transaction
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
-from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.access_policy import NamespaceAccessPolicy
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.v3 import serializers
 from galaxy_ng.app.exceptions import ConflictError
-
-log = logging.getLogger(__name__)
-
-INBOUND_REPO_NAME_FORMAT = "inbound-{namespace_name}"
 
 
 class NamespaceFilter(filterset.FilterSet):
@@ -58,34 +51,11 @@ class NamespaceViewSet(api_base.ModelViewSet):
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
-        """Override to also create inbound pulp repository and distribution."""
+        """Override to validate for name duplication before serializer validation."""
         name = request.data['name']
         if models.Namespace.objects.filter(name=name).exists():
+            # Ensures error raised is 409, not 400.
             raise ConflictError(
                 detail={'name': f'A namespace named {name} already exists.'}
             )
-
-        inbound_name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=name)
-        repo = AnsibleRepository.objects.create(name=inbound_name)
-        AnsibleDistribution.objects.create(
-            name=inbound_name,
-            base_path=inbound_name,
-            repository=repo
-        )
         return super().create(request, *args, **kwargs)
-
-    @transaction.atomic
-    def destroy(self, request, *args, **kwargs):
-        """Override to also delete inbound pulp repository and distribution.
-        RepositoryVersion objects get deleted on delete of AnsibleRepository.
-        """
-        name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=kwargs['name'])
-        try:
-            AnsibleRepository.objects.get(name=name).delete()
-        except AnsibleRepository.DoesNotExist:
-            pass
-        try:
-            AnsibleDistribution.objects.get(name=name).delete()
-        except AnsibleDistribution.DoesNotExist:
-            pass
-        return super().destroy(request, *args, **kwargs)
