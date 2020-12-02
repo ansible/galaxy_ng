@@ -1,0 +1,36 @@
+auth_group:
+  query: "SELECT COUNT(*) as auth_group_count from auth_group"
+  master: true
+  metrics:
+    - auth_group_count:
+        usage: "GAUGE"
+        description: "Number of auth_groups"
+
+galaxy_user:
+  query: "SELECT COUNT(*) as count from galaxy_user"
+  master: true
+  metrics:
+    - count:
+        usage: "GAUGE"
+        description: "Number of galaxy_user"
+
+galaxy_namespace:
+  query: "SELECT COUNT(*) AS galaxy_namespace_count FROM galaxy_namespace"
+  metrics:
+    - namespace_count:
+        usage: "GAUGE"
+        description: "Number of galaxy namespaces"
+
+ansible_collection:
+  query: "SELECT COUNT(*) AS collection_count FROM ansible_collection"
+  metrics:
+    - collection_count:
+        usage: "GAUGE"
+        description: "Number of collections"
+
+ansible_collectionversion:
+  query: "SELECT COUNT(*) AS collectionversion_count FROM ansible_collectionversion"
+  metrics:
+    - collectionversion_count:
+        usage: "GAUGE"
+        description: "Number of collection versions"

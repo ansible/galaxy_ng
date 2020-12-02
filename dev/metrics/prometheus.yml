@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+  external_labels:
+    monitor: django-monitor
+
+rule_files:
+  - "django.rules.yml"
+
+scrape_configs:
+  - job_name: "django"
+    static_configs:
+      - targets: ["api:8000"]
+  - job_name: "postgres"
+    static_configs:
+      - targets: ["postgres_exporter:9187"]

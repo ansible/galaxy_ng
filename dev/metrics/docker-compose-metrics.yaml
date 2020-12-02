@@ -1,0 +1,43 @@
+version: '3.7'
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+
+services:
+  postgres_exporter:
+    image: wrouesnel/postgres_exporter
+    ports:
+      - '9187:9187'
+    volumes:
+      - './metrics/postgres_exporter/queries.yaml:/etc/postgres_exporter/queries.yaml'
+    environment:
+      DATA_SOURCE_NAME: "postgresql://galaxy_ng:galaxy_ng@postgres:5432/galaxy_ng?sslmode=disable"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    depends_on:
+      - postgres
+
+  prometheus:
+    image: prom/prometheus
+    env_file:
+      - './alikins/prometheus.env'
+    ports:
+      - '9090:9090'
+    volumes:
+      - './alikins/prometheus.yml/:/etc/prometheus/prometheus.yml'
+      - prometheus_data:/prometheus
+    depends_on:
+      - api
+      - postgres_exporter
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      GF_INSTALL_PLUGINS: "redis-datasource,grafana-piechart-panel,vonage-status-panel,natel-discrete-panel,briangann-gauge-panel"
+    ports:
+      - '3000:3000'
+    volumes:
+      # - ./docker/prometheus/:/etc/prometheus
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
