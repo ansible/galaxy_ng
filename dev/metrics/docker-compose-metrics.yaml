@@ -20,11 +20,11 @@ services:
   prometheus:
     image: prom/prometheus
     env_file:
-      - './alikins/prometheus.env'
+      - './metrics/prometheus.env'
     ports:
       - '9090:9090'
     volumes:
-      - './alikins/prometheus.yml/:/etc/prometheus/prometheus.yml'
+      - './metrics/prometheus.yml/:/etc/prometheus/prometheus.yml'
       - prometheus_data:/prometheus
     depends_on:
       - api
@@ -38,6 +38,7 @@ services:
       - '3000:3000'
     volumes:
       # - ./docker/prometheus/:/etc/prometheus
+      - './metrics/grafana/:/etc/grafana/'
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
