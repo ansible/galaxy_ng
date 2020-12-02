@@ -39,6 +39,18 @@ else
     )
 fi
 
+if [[ -z "${USE_METRICS:-}" ]]; then
+    cat >&2 << EOF
+INFO: \$USE_METRICS is unset.
+    If you want to run metrics (prometheus, grafana, etc) inside compose please set \$USE_METRICS=1.
+EOF
+else
+    compose_args+=(
+      -f 'dev/metrics/docker-compose-metrics.yaml'
+    )
+fi
+
+
 declare -xr DEV_SOURCE_PATH=${DEV_SOURCE_PATH:-galaxy_ng}
 declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng}"
 declare -xr COMPOSE_CONTEXT=".."
