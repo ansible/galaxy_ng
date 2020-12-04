@@ -1,16 +1,18 @@
 import logging
+import unittest
 
 from django.test import override_settings
+from django.conf import settings
 from rest_framework import status as http_code
 
 from guardian import shortcuts
 
 from galaxy_ng.app.models import auth as auth_models
+from galaxy_ng.app.constants import DeploymentMode
 
 from . import base
 from . import rh_auth
 from .synclist_base import BaseSyncListViewSet, ACCOUNT_SCOPE
-
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +22,9 @@ class BaseUiSynclistViewSet:
 
     def setUp(self):
         super().setUp()
+        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:
+            raise unittest.SkipTest("Skipping insights mode tests since we are in standalone mode.")
+
         self.account_number = "987654"
         self.user = auth_models.User.objects.create(username="admin")
         self.group = self._create_partner_engineer_group()
@@ -60,7 +65,6 @@ class BaseUiSynclistViewSet:
 
         synclists_url = base.get_current_ui_url("synclists-list")
 
-        self.client.force_authenticate(user=self.user)
         log.debug("self.synclist: %s", self.synclist)
 
         response = self.client.post(synclists_url, post_data, format="json")
@@ -102,6 +106,8 @@ class BaseUiSynclistViewSet:
         self.assertEqual(response.data["policy"], "include")
 
     def test_synclist_list(self):
+        log.debug('GALAXY_DEPLOYMENT_MODE: %s', settings.GALAXY_DEPLOYMENT_MODE)
+
         synclists_url = base.get_current_ui_url("synclists-list")
         response = self.client.get(synclists_url)
 
@@ -149,11 +155,13 @@ class BaseUiSynclistViewSet:
 
 
 @override_settings(
-    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
+    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"],
 )
 class TestUiSynclistViewSetWithGroupPerms(BaseUiSynclistViewSet, BaseSyncListViewSet):
     def setUp(self):
         super().setUp()
+        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:
+            raise unittest.SkipTest("Skipping insights mode tests since we are in standalone mode.")
 
         self.user = auth_models.User.objects.create_user(username="test1", password="test1-secret")
         self.group = self._create_group_with_synclist_perms(
@@ -172,12 +180,15 @@ class TestUiSynclistViewSetWithGroupPerms(BaseUiSynclistViewSet, BaseSyncListVie
             upstream_repository=self.default_repo,
             groups=[self.group],
         )
+
         self.credentials()
-        self.client.force_authenticate(user=self.user)
 
     def credentials(self):
         x_rh_identity = rh_auth.user_x_rh_identity(self.user.username, self.group.account_number())
+        log.debug('x_rh_identity: %s', x_rh_identity)
+
         self.client.credentials(HTTP_X_RH_IDENTITY=x_rh_identity)
+        log.debug('self.client.credentials: %s', self.client.credentials)
 
 
 class DeniedSynclistViewSet(BaseUiSynclistViewSet):
@@ -196,8 +207,6 @@ class DeniedSynclistViewSet(BaseUiSynclistViewSet):
 
         synclists_url = base.get_current_ui_url("synclists-list")
         response = self.client.post(synclists_url, post_data, format="json")
-        log.debug("response: %s", response)
-        log.debug("response.data:\n%s", response.json())
 
         self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
 
@@ -246,11 +255,13 @@ class DeniedSynclistViewSet(BaseUiSynclistViewSet):
 
 
 @override_settings(
-    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
+    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"],
 )
 class TestUiSynclistViewSetWithDefaultGroupPerms(DeniedSynclistViewSet, BaseSyncListViewSet):
     def setUp(self):
         super().setUp()
+        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:
+            raise unittest.SkipTest("Skipping insights mode tests since we are in standalone mode.")
 
         self.user = auth_models.User.objects.create_user(username="test1", password="test1-secret")
         self.group = self._create_group(ACCOUNT_SCOPE, self.account_number, users=[self.user])
@@ -269,7 +280,6 @@ class TestUiSynclistViewSetWithDefaultGroupPerms(DeniedSynclistViewSet, BaseSync
         )
 
         self.credentials()
-        self.client.force_authenticate(user=self.user)
 
     def credentials(self):
         x_rh_identity = rh_auth.user_x_rh_identity(self.user.username, self.group.account_number())
@@ -322,12 +332,13 @@ class TestUiSynclistViewSetWithDefaultGroupPerms(DeniedSynclistViewSet, BaseSync
 
 
 @override_settings(
-    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
+    GALAXY_AUTHENTICATION_CLASSES=["galaxy_ng.app.auth.auth.RHIdentityAuthentication"],
 )
 class TestUiSynclistViewSetNoGroupPerms(DeniedSynclistViewSet, BaseSyncListViewSet):
     def setUp(self):
         super().setUp()
-
+        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:
+            raise unittest.SkipTest("Skipping insights mode tests since we are in standalone mode.")
         self.user = auth_models.User.objects.create_user(
             username="test_user_noperms", password="test1-secret"
         )
