@@ -80,14 +80,5 @@ ALLOWED_CONTENT_CHECKSUMS = ["sha224", "sha256", "sha384", "sha512"]
 
 # Compatibility settings
 # ----------------------
-# FIXME(cutwater): To be removed after viewsets stop proxying API requests
-#                  to pulp_ansible.
-
-X_PULP_API_HOST = "localhost"
-X_PULP_API_PORT = 8000
-X_PULP_API_USER = "admin"
-X_PULP_API_PASSWORD = "admin"
-X_PULP_API_PREFIX = "pulp_ansible/galaxy/automation-hub/api"
-
 X_PULP_CONTENT_HOST = "localhost"
 X_PULP_CONTENT_PORT = 24816
