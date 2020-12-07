@@ -37,7 +37,7 @@ drf-spectacular==0.9.14   # via galaxy-ng (setup.py), pulpcore
 dynaconf==3.1.2           # via pulpcore
 et-xmlfile==1.0.1         # via openpyxl
 flake8==3.8.2             # via galaxy-importer
-galaxy-importer==0.2.11   # via galaxy-ng (setup.py), pulp-ansible
+galaxy-importer==0.2.12   # via galaxy-ng (setup.py), pulp-ansible
 gunicorn==20.0.4          # via pulpcore
 idna==2.9                 # via requests, yarl
 importlib-metadata==1.6.0  # via flake8, jsonschema, markdown
