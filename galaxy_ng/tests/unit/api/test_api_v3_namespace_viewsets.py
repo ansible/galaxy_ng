@@ -8,8 +8,7 @@ from rest_framework import status
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
-from galaxy_ng.app.api.v3.viewsets.namespace import INBOUND_REPO_NAME_FORMAT
-from galaxy_ng.app.constants import DeploymentMode
+from galaxy_ng.app.constants import DeploymentMode, INBOUND_REPO_NAME_FORMAT
 
 from .base import BaseTestCase
 
@@ -204,8 +203,14 @@ class TestV3NamespaceViewSet(BaseTestCase):
                 "company": "A company name",
                 "email": "email@companyname.com",
                 "description": "A testing namespace",
-                "groups": [{"name": "system:partner-engineers"}],
-                "object_permissions": ["change_namespace", "upload_to_namespace"]
+                "groups": [
+                    {
+                        "id": self.pe_group.id,
+                        "name": self.pe_group.name,
+                        "object_permissions": ["change_namespace", "upload_to_namespace"]
+                    }
+                ]
             }
             response = self.client.post(ns_list_url, post_data, format='json')
+            log.debug('namespace response: %s', response.data)
             self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
