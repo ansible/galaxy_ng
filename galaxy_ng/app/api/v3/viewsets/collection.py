@@ -22,9 +22,7 @@ from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from galaxy_ng.app.api import base as api_base
 
-from galaxy_ng.app.constants import DeploymentMode
-
-from galaxy_ng.app.api.v3.viewsets.namespace import INBOUND_REPO_NAME_FORMAT
+from galaxy_ng.app.constants import DeploymentMode, INBOUND_REPO_NAME_FORMAT
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 
