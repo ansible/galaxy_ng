@@ -34,7 +34,7 @@ def parse_collection_filename(filename):
     match = FILENAME_REGEXP.match(filename)
 
     if not match:
-        msg = "Invalid filename {filename}. Expected format: {namespace}-{name}-{version}.tar.gz"
+        msg = "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
         raise ValueError(msg.format(filename=filename))
 
     namespace, name, version = match.groups()
