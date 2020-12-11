@@ -44,13 +44,20 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_groups(self, groups):
         request_user = self.context['request'].user
 
+        group_set = set(groups)
+        instance_group_set = set()
+        if self.instance:
+            instance_group_set = set(list(self.instance.groups.all()))
+
+        group_difference = instance_group_set.symmetric_difference(group_set)
+
         if not request_user.has_perm('galaxy.change_group'):
             authed_user_groups = request_user.groups.all()
-            for g in groups:
+            for g in group_difference:
                 if not authed_user_groups.filter(pk=g.id).exists():
                     raise ValidationError(detail={
-                        "groups": "'galaxy.change_group' permission is required to add"
-                                  " users to a group that the current user is not in."
+                        "groups": "'galaxy.change_group' permission is required to change"
+                                  " a users group that the requesting user is not in."
                     })
 
         return groups
