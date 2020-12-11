@@ -1,5 +1,6 @@
 from django.db.models import Exists, OuterRef, Q
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
@@ -50,8 +51,12 @@ class CollectionViewSet(
 
     def get_queryset(self):
         """Returns a CollectionVersions queryset for specified distribution."""
-        distro_content = self.get_distro_content(self.kwargs["path"])
-        repo_version = self.get_repository_version(self.kwargs["path"])
+        path = self.kwargs.get('path')
+        if path is None:
+            raise Http404("Distribution base path is required")
+
+        distro_content = self.get_distro_content(path)
+        repo_version = self.get_repository_version(path)
 
         versions = CollectionVersion.objects.filter(pk__in=distro_content).values_list(
             "collection_id",
