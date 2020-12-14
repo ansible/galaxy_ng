@@ -53,8 +53,8 @@ class NamespaceViewSet(api_base.ModelViewSet):
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Override to validate for name duplication before serializer validation."""
-        name = request.data['name']
-        if models.Namespace.objects.filter(name=name).exists():
+        name = request.data.get('name')
+        if name and models.Namespace.objects.filter(name=name).exists():
             # Ensures error raised is 409, not 400.
             raise ConflictError(
                 detail={'name': f'A namespace named {name} already exists.'}

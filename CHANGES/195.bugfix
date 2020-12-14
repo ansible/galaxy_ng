@@ -1,0 +1,1 @@
+Fix KeyError lookup in namespace and collection viewset
