@@ -9,6 +9,7 @@ from drf_spectacular.views import (
     SpectacularJSONAPIView,
     SpectacularYAMLAPIView,
     SpectacularRedocView,
+    SpectacularSwaggerView,
 )
 
 API_PATH_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
@@ -42,8 +43,16 @@ urlpatterns.append(
 
 urlpatterns.append(
     path(
-        f"{API_PATH_PREFIX}/docs/",
-        SpectacularRedocView.as_view(url=f"{API_PATH_PREFIX}/v3/openapi.json?include_html=1"),
+        f"{API_PATH_PREFIX}/v3/redoc/",
+        SpectacularRedocView.as_view(),
         name="schema-redoc",
+    )
+)
+
+urlpatterns.append(
+    path(
+        f"{API_PATH_PREFIX}/v3/swagger-ui/",
+        SpectacularSwaggerView.as_view(url_name='schema'),
+        name='swagger-ui',
     )
 )
