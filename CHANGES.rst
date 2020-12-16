@@ -13,6 +13,33 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.1 (2020-12-16)
+==================
+
+Bugfixes
+--------
+
+- Fix NamespaceLink creation and Validation on duplicated name.
+  `AAH-132 <https://issues.redhat.com/browse/AAH-132>`_
+- API returns 409 in case of existing group with same name.
+  `AAH-152 <https://issues.redhat.com/browse/AAH-152>`_
+- The namespaces api now performs a partial match on namespace name and namespace company name when using the 'keywords' query parameter.
+  `AAH-166 <https://issues.redhat.com/browse/AAH-166>`_
+- Fix KeyError lookup in namespace and collection viewset
+  `AAH-195 <https://issues.redhat.com/browse/AAH-195>`_
+- Fix error in error msg when importing invalid filenames
+  `AAH-203 <https://issues.redhat.com/browse/AAH-203>`_
+
+
+Misc
+----
+
+- `AAH-139 <https://issues.redhat.com/browse/AAH-139>`_, `AAH-176 <https://issues.redhat.com/browse/AAH-176>`_, `AAH-177 <https://issues.redhat.com/browse/AAH-177>`_
+
+
+----
+
+
 4.2.0 (2020-11-12)
 ==================
 
