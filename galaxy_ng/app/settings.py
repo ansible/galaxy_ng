@@ -94,7 +94,8 @@ SPECTACULAR_SETTINGS = {
         "name": "GPLv2+",
         "url": "https://raw.githubusercontent.com/pulp/pulpcore/master/LICENSE",
     },
-    'PREPROCESSING_HOOKS': ['galaxy_ng.app.common.openapi.preprocess_exclude_pulp_endpoints',
+    'PREPROCESSING_HOOKS': ['galaxy_ng.app.common.openapi.preprocess_exclude_endpoints',
                             'galaxy_ng.app.common.openapi.preprocess_debug_logger'],
+    "COMPONENT_SPLIT_REQUEST": True,
     "dynaconf_merge": True,
 }

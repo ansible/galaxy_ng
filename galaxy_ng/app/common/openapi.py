@@ -16,10 +16,11 @@ def preprocess_debug_logger(endpoints, **kwargs):
     ]
 
 
-def preprocess_exclude_pulp_endpoints(endpoints, **kwargs):
+def preprocess_exclude_endpoints(endpoints, **kwargs):
     """Return an iterable of (path, path_regex, method, callback) with /pulp* endpoints removed"""
 
+    # FIXME: use list of regex patterns, etc
     return [
         (path, path_regex, method, callback) for path, path_regex, method, callback in endpoints
-        if not path.startswith('/pulp')
+        if not path.startswith('/pulp') and '/_ui/' not in path
     ]
