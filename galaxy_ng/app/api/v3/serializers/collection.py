@@ -128,6 +128,9 @@ class CollectionUploadSerializer(Serializer):
 
     sha256 = serializers.CharField(required=False, default=None)
 
+    class Meta():
+        ref_name = "CollectionUploadWithDownloadUrlSerializer"
+
     def to_internal_value(self, data):
         """Parse and validate collection filename."""
         data = super().to_internal_value(data)

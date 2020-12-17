@@ -40,6 +40,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
+        ref_name = "Task"
         fields = (
             'pulp_id',
             'name',
