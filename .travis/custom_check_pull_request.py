@@ -66,7 +66,10 @@ def check_changelog_record(issue):
 
 def check_issue_exists(issue):
     response = requests.head(JIRA_URL.format(issue=issue))
-    if not response.ok:
+    if response.status_code == 404:
+        # 200 is returned for logged in sessions
+        # 401 is for not authorized access on existing issue
+        # 404 is returned if issue is not found even for unlogged users.
         LOG.error(f"Referenced issue AAH-{issue} not found in Jira.")
         return False
     return True
