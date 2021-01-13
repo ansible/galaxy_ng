@@ -109,26 +109,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CurrentUserSerializer(UserSerializer):
-    is_partner_engineer = serializers.SerializerMethodField()
     model_permissions = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         model = auth_models.User
-        fields = UserSerializer.Meta.fields + ('is_partner_engineer', 'model_permissions')
+        fields = UserSerializer.Meta.fields + ('model_permissions',)
         extra_kwargs = dict(
             groups={'read_only': True},
             **UserSerializer.Meta.extra_kwargs
         )
-
-    # TODO: Update UI to drop reliance on is_partner_engineer
-    def get_is_partner_engineer(self, obj):
-        return obj.has_perms([
-            'galaxy.add_namespace',
-            'galaxy.change_namespace',
-            'galaxy.upload_to_namespace',
-            'ansible.modify_ansible_repo_content',
-            'ansible.change_collectionremote',
-        ])
 
     def get_model_permissions(self, obj):
         return {

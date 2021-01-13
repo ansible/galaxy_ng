@@ -80,18 +80,6 @@ paths = [
         viewsets.CollectionViewSet.as_view({'get': 'retrieve'}),
         name='collections-detail'
     ),
-
-    path(
-        'collections/',
-        viewsets.CollectionViewSetDeprecated.as_view({'get': 'list'}),
-        name='collections-list'
-    ),
-    path(
-        'collections/<str:namespace>/<str:name>/',
-        viewsets.CollectionViewSetDeprecated.as_view({'get': 'retrieve'}),
-        name='collections-detail'
-    ),
-
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve
     # to look up values with an ID
     path(

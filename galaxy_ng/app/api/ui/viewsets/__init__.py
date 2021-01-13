@@ -4,7 +4,6 @@ from .namespace import (
 
 from .collection import (
     CollectionViewSet,
-    CollectionViewSetDeprecated,
     CollectionVersionViewSet,
     CollectionImportViewSet,
     CollectionRemoteViewSet
@@ -23,7 +22,6 @@ __all__ = (
     'MyNamespaceViewSet',
     'MySyncListViewSet',
     'CollectionViewSet',
-    'CollectionViewSetDeprecated',
     'CollectionVersionViewSet',
     'CollectionImportViewSet',
     'CollectionRemoteViewSet',
