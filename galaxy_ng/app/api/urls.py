@@ -2,7 +2,6 @@ from django.conf import settings
 from django.urls import include, path
 
 from . import views
-from .ui import old_urls as unversiond_ui_urls
 from .ui import urls as ui_urls
 from .v3 import urls as v3_urls
 
@@ -12,8 +11,6 @@ app_name = "api"
 
 
 v3_urlpatterns = [
-    # TODO: remove _ui from v3 endpoint once the production UI is updated
-    path("_ui/", include((unversiond_ui_urls, app_name), namespace="old_ui")),
     path("", include(v3_urls.auth_urls)),
     path("", include(v3_urls.namespace_urls)),
 

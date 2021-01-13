@@ -219,13 +219,11 @@ class TestUiNamespaceViewSet(BaseTestCase):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             response = self.client.get(self.me_url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertFalse(response.data['is_partner_engineer'])
             self.assertEqual(response.data['username'], self.user.username)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(self.me_url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertFalse(response.data['is_partner_engineer'])
             self.assertEqual(response.data['username'], self.user.username)
 
     def test_me_update(self):

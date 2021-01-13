@@ -1,0 +1,1 @@
+Remove the legacy v3/_ui endpoints since they are no longer needed by the UI.

@@ -113,16 +113,6 @@ class CollectionViewSet(
             return serializers.CollectionDetailSerializer
 
 
-# TODO: Remove when ui is updated and no longer uses this endpoint
-class CollectionViewSetDeprecated(CollectionViewSet):
-    """Temporary support of old /_ui/collections/ endpoint without use of
-    certification flag. This shows content from the 'published' repo."""
-
-    def get_queryset(self):
-        self.kwargs["path"] = 'published'
-        return super().get_queryset()
-
-
 class CollectionVersionFilter(filterset.FilterSet):
     repository = filters.CharFilter(field_name='repository', method='repo_filter')
     versioning_class = versioning.UIVersioning
