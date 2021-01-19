@@ -59,7 +59,7 @@ class BuildPyCommand(_BuildPyCommand):
 
 requirements = [
     "pulp-ansible",
-    "django-prometheus>=2.0.0",
+    "django-prometheus",
 ]
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
