@@ -38,12 +38,8 @@ RUN set -ex; \
 ENV PATH="/venv/bin:${PATH}" \
     VIRTUAL_ENV="/venv"
 
-COPY ./requirements/requirements.common.txt /tmp/requirements.txt
-
 RUN set -ex; \
     pip install --no-cache-dir --upgrade pip
-
-# && pip install --no-cache-dir --requirement /tmp/requirements.txt
 
 # Install application
 COPY . /app
