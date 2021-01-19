@@ -45,7 +45,7 @@ RUN set -ex; \
 COPY . /app
 
 RUN set -ex; \
-    pip install --no-cache-dir --editable /app \
+    pip install --no-cache-dir --editable /app --constraint "/app/requirements/constraints.common.txt" \
     && PULP_CONTENT_ORIGIN=x django-admin collectstatic
 
 # Finalize installation
