@@ -78,3 +78,26 @@ api/runserver:    ## Runs api using django webserver for debugging
 	./compose stop api
 	# Run api using django runserver for debugging
 	./compose run --service-ports --use-aliases --name api --rm api manage runserver 0.0.0.0:8000
+
+# Version / bumpversion management
+
+# 'bumpversion path' to go from 4.1.0 -> 4.1.1
+dev/bumpversion-patch:
+	bump2version --verbose patch
+
+# 'bumpversion minor' to go from 4.1.1 -> 4.2.0
+dev/bumpversion-minor:
+	bump2version --verbose minor
+
+# 'bumpversion major' to go from 4.2.9 -> 5.0.0
+dev/bumpversion-major:
+	bump2version --verbose major
+
+# 'bumpversion build' to go from 5.3.7.a1 -> 5.3.7.a2
+dev/bumpversion-build:
+	bump2version --verbose build
+
+# 'bumpversion release' to from 5.3.7.a1 -> 5.3.7.b1
+# another 'bumpversion release' to from from 5.3.7.b1 -> 5.3.7
+dev/bumpversion-release:
+	bump2version --verbose release
