@@ -58,12 +58,8 @@ class BuildPyCommand(_BuildPyCommand):
 
 
 requirements = [
-    "Django~=2.2.3",
-    "galaxy-importer",
-    "pulpcore>=3.7,<3.9",
     "pulp-ansible",
     "django-prometheus>=2.0.0",
-    "drf-spectacular",
 ]
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
