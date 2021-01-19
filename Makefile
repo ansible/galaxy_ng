@@ -13,11 +13,11 @@ help:             ## Show the help.
 
 .PHONY: requirements
 requirements:     ## Update python dependencies lock files (i.e. requirements.txt).
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.common.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/constraints.common.txt \
 		setup.py
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.standalone.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/constraints.standalone.txt \
 		setup.py requirements/requirements.standalone.in
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.insights.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/constraints.insights.txt \
 		setup.py requirements/requirements.insights.in
 
 
