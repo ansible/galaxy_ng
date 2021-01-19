@@ -62,7 +62,7 @@ requirements = [
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
 # version = os.environ.get("ALTERNATE_VERSION", __version__)
-version = "4.3.0-dev"
+version = "4.3.0.dev"
 
 setup(
     name=package_name,
