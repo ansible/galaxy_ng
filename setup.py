@@ -10,8 +10,6 @@ from setuptools import find_packages, setup, Command
 from setuptools.command.build_py import build_py as _BuildPyCommand
 from setuptools.command.sdist import sdist as _SDistCommand
 
-from galaxy_ng import __version__
-
 
 class PrepareStaticCommand(Command):
     if os.environ.get("ALTERNATE_UI_DOWNLOAD_URL"):
@@ -63,7 +61,8 @@ requirements = [
 ]
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-version = os.environ.get("ALTERNATE_VERSION", __version__)
+# version = os.environ.get("ALTERNATE_VERSION", __version__)
+version = "4.3.0-dev"
 
 setup(
     name=package_name,

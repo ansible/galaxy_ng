@@ -29,3 +29,12 @@ docker/build:     ## Build all development images.
 .PHONY: docker/test
 docker/test:      ## Run unit tests.
 	./compose run api manage test galaxy_ng.tests.unit
+
+dev/bumpversion-patch:
+	bump2version --verbose patch
+
+dev/bumpversion-minor:
+	bump2version --verbose minor
+
+dev/bumpversion-major:
+	bump2version --verbose major
