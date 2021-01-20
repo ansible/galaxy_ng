@@ -35,29 +35,11 @@ fi
 
 cd ../pulp-openapi-generator
 
-./generate.sh pulpcore python
-pip install ./pulpcore-client
 ./generate.sh galaxy_ng python
 pip install ./galaxy_ng-client
-./generate.sh pulp_ansible python
-pip install ./pulp_ansible-client
 cd $TRAVIS_BUILD_DIR
 
 if [ "$TEST" = 'bindings' ]; then
-  python $TRAVIS_BUILD_DIR/.travis/test_bindings.py
-  cd ../pulp-openapi-generator
-  if [ ! -f $TRAVIS_BUILD_DIR/.travis/test_bindings.rb ]
-  then
-    exit
-  fi
-
-  rm -rf ./pulpcore-client
-
-  ./generate.sh pulpcore ruby 0
-  cd pulpcore-client
-  gem build pulpcore_client
-  gem install --both ./pulpcore_client-0.gem
-  cd ..
   rm -rf ./galaxy_ng-client
 
   ./generate.sh galaxy_ng ruby 0

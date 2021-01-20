@@ -82,3 +82,20 @@ ALLOWED_CONTENT_CHECKSUMS = ["sha224", "sha256", "sha384", "sha512"]
 # ----------------------
 X_PULP_CONTENT_HOST = "localhost"
 X_PULP_CONTENT_PORT = 24816
+
+# This is example of how to set this via enviroment variables via dynaconf
+# SPECTACULAR_SETTINGS__TITLE = "Automation Hub API __TITLE"
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Automation Hub API",
+    "DESCRIPTION": "Fetch, Upload, Organize, and Distribute Ansible Collections",
+    "VERSION": "v3",
+    "LICENSE": {
+        "name": "GPLv2+",
+        "url": "https://raw.githubusercontent.com/ansible/galaxy_ng/master/LICENSE",
+    },
+    'PREPROCESSING_HOOKS': ['galaxy_ng.app.common.openapi.preprocess_exclude_endpoints',
+                            'galaxy_ng.app.common.openapi.preprocess_debug_logger'],
+    "COMPONENT_SPLIT_REQUEST": True,
+    "dynaconf_merge": True,
+}
