@@ -4,11 +4,13 @@ ARG USER_ID=1000
 ARG USER_NAME=galaxy
 ARG USER_GROUP=galaxy
 ARG COMPOSE_PROFILE
+ARG LOCK_REQUIREMENTS
 
 ENV LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
     PULP_SETTINGS=/etc/pulp/settings.py \
-    DJANGO_SETTINGS_MODULE=pulpcore.app.settings
+    DJANGO_SETTINGS_MODULE=pulpcore.app.settings \
+    LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS}"
 
 RUN set -ex; \
     id --group "${USER_GROUP}" &>/dev/null \
@@ -42,7 +44,8 @@ COPY ./requirements/requirements.common.txt /tmp/requirements.txt
 
 RUN set -ex; \
     pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir --requirement /tmp/requirements.txt
+    && if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
+    pip install --no-cache-dir --requirement /tmp/requirements.txt; fi
 
 # Install application
 COPY . /app

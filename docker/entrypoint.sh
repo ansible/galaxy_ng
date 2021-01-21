@@ -7,6 +7,7 @@ set -o pipefail
 readonly WITH_MIGRATIONS="${WITH_MIGRATIONS:-0}"
 readonly WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-0}"
 readonly DEV_SOURCE_PATH="${DEV_SOURCE_PATH:-}"
+readonly LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}"
 
 
 log_message() {
@@ -23,7 +24,13 @@ install_local_deps() {
         src_path="/src/${item}"
         if [[ -d "$src_path" ]]; then
             log_message "Installing path ${item} in editable mode."
-            pip install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
+
+            if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then
+                pip install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
+            else
+                pip install --no-cache-dir --editable "$src_path" >/dev/null
+            fi
+
         else
             log_message "WARNING: Source path ${item} is not a directory."
         fi

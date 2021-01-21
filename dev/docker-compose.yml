@@ -6,6 +6,8 @@ services:
     build:
       context: "${COMPOSE_CONTEXT}"
       dockerfile: "dev/Dockerfile.base"
+      args:
+        LOCK_REQUIREMENTS: "${LOCK_REQUIREMENTS}"
     image: "localhost/galaxy_ng/galaxy_ng:base"
     entrypoint: "/bin/true"
     tmpfs:
@@ -17,12 +19,15 @@ services:
     build:
       context: "${COMPOSE_CONTEXT}"
       dockerfile: "dev/${COMPOSE_PROFILE}/Dockerfile"
+      args:
+        LOCK_REQUIREMENTS: "${LOCK_REQUIREMENTS}"
     image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
     command: ['run', 'api-reload']
     ports:
       - "5001:8000"
     environment:
       - "WITH_DEV_INSTALL=1"
+      - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
@@ -42,6 +47,7 @@ services:
     command: ['run', 'resource-manager']
     environment:
       - "WITH_DEV_INSTALL=1"
+      - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
@@ -61,6 +67,7 @@ services:
     command: ['run', 'worker']
     environment:
       - "WITH_DEV_INSTALL=1"
+      - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
@@ -82,6 +89,7 @@ services:
       - "24816:24816"
     environment:
       - "WITH_DEV_INSTALL=1"
+      - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
     env_file:
       - './common/galaxy_ng.env'
