@@ -1,4 +1,4 @@
-FROM {{ ci_base | default("pulp/pulp-ci:latest") }}
+FROM {{ ci_base | default("pulp/pulp-ci-centos:latest") }}
 
 {% if s3_test | default(false) %}
 # Hacking botocore (https://github.com/boto/botocore/pull/1990)
@@ -17,7 +17,7 @@ ADD {{ item.source }} {{ item.source }}
 {% endif %}
 RUN pip3 install {{ item.source }}
 RUN mkdir -p /etc/nginx/pulp/
-RUN ln /usr/local/lib/python3.7/site-packages/{{ item.name }}/app/webserver_snippets/nginx.conf /etc/nginx/pulp/{{ item.name }}.conf || true
+RUN ln /usr/local/lib/python3.6/site-packages/{{ item.name }}/app/webserver_snippets/nginx.conf /etc/nginx/pulp/{{ item.name }}.conf || true
 {% endfor %}
 
 ENTRYPOINT ["/init"]
