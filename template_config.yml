@@ -6,6 +6,7 @@ additional_plugins:
   name: pulp_ansible
 black: false
 check_commit_message: false
+check_manifest: true
 cherry_pick_automation: false
 coverage: false
 deploy_client_to_pypi: false
@@ -33,7 +34,6 @@ redmine_project: null
 stable_branch: null
 test_bindings: false
 test_performance: false
-test_s3: false
+test_s3: true
 travis_addtl_services: []
 travis_notifications: null
-

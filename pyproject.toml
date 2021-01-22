@@ -22,3 +22,27 @@ exclude = '''
 )/
 '''
 
+[tool.check-manifest]
+ignore = [
+    "CHANGES/**",
+    "HISTORY.rst",
+    "ROADMAP.rst",
+    "dev_requirements.txt",
+    "doc_requirements.txt",
+    "galaxy_ng/app/static/**",
+    "dev/**",
+    "Makefile",
+    "Dockerfile",
+    "Dockerfile.rhel8",
+    "docker/**",
+    ".dockerignore",
+    ".compose.env.example",
+    "compose",
+    ".flake8",
+    "ansible.cfg",
+    "openapi/**",
+    "template_config.yml",
+    ".travis/**",
+    ".travis.yml",
+    ".github/**"
+]

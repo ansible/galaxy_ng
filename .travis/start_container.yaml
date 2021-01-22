@@ -58,7 +58,7 @@
       become: true
 
     - name: "Create Pulp Bucket"
-      s3_bucket:
+      amazon.aws.s3_bucket:
         aws_access_key: "{{ minio_access_key }}"
         aws_secret_key: "{{ minio_secret_key }}"
         s3_url: "http://minio:9000"
@@ -80,6 +80,14 @@
         - name: "Output pulp container log"
           command: "docker logs pulp"
           failed_when: true
+
+    - name: "Set pulp password in .netrc"
+      copy:
+        dest: "~/.netrc"
+        content: |
+          machine pulp
+          login admin
+          password password
 
 - hosts: pulp
   gather_facts: false

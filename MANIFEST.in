@@ -1,3 +1,11 @@
 include galaxy_ng/app/webserver_snippets/*
 
-recursive-include galaxy_ng/app/static/ *
+recursive-include galaxy_ng/app/static *
+
+include CHANGES.rst
+include COMMITMENT
+include LICENSE
+include functest_requirements.txt
+include unittest_requirements.txt
+recursive-include requirements *.in
+recursive-include requirements *.txt

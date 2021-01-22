@@ -53,6 +53,9 @@ pip install -r dev_requirements.txt
 # Lint code.
 flake8
 
+# check for any files unintentionally left out of MANIFEST.in
+check-manifest
+
 # check for imports from pulpcore that aren't pulpcore.plugin
 ./.travis/check_pulpcore_imports.sh
 
@@ -110,13 +113,9 @@ if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
 fi
 
 # Intall requirements for ansible playbooks
-pip install docker netaddr boto3
+pip install docker netaddr boto3 ansible
 
-# Install ansible with the boto3 tags to dict fix
-# There is a PR for this issue:
-# https://github.com/ansible-collections/amazon.aws/pull/37
-# Be aware, that the code will have moved to that collection with upcoming releases of ansible
-pip install git+https://github.com/mdellweg/ansible.git@fix_boto3_tags_dict
+ansible-galaxy collection install amazon.aws
 
 cd galaxy_ng
 
