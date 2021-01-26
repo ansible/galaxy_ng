@@ -78,7 +78,20 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
     last_sync_task = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
-    token = serializers.CharField(allow_null=True, required=False, max_length=2000, write_only=True)
+    token = serializers.CharField(
+        allow_null=True,
+        required=False,
+        max_length=2000,
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+    password = serializers.CharField(
+        help_text="The password to be used for authentication when syncing.",
+        allow_null=True,
+        required=False,
+        style={'input_type': 'password'},
+        write_only=True
+    )
     name = serializers.CharField(read_only=True)
     repositories = serializers.SerializerMethodField()
 
@@ -96,7 +109,6 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'updated_at',
             'username',
             'password',
-            'proxy_url',
             'tls_validation',
             'client_key',
             'client_cert',
@@ -105,12 +117,11 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'repositories',
             'pulp_href',
             'download_concurrency',
+            'proxy_url',
         )
         extra_kwargs = {
             'name': {'read_only': True},
             'pulp_href': {'read_only': True},
-            'password': {'write_only': True},
-            'token': {'write_only': True},
             'client_key': {'write_only': True},
             'client_cert': {'write_only': True},
             'ca_cert': {'write_only': True},
