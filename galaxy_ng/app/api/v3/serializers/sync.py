@@ -77,6 +77,7 @@ class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer
 
 class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemoteSerializer):
     last_sync_task = serializers.SerializerMethodField()
+    write_only_fields = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
     proxy_url = serializers.URLField(
@@ -136,6 +137,7 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'proxy_url',
             'proxy_username',
             'proxy_password',
+            'write_only_fields'
         )
         extra_kwargs = {
             'name': {'read_only': True},
@@ -212,6 +214,15 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
                 }
             )
         return super().validate(data)
+
+    def get_write_only_fields(self, obj):
+        fields = []
+
+        for e in self.Meta.extra_kwargs:
+            if self.Meta.extra_kwargs[e].get('write_only', False):
+                fields.append({"name": e, "is_set": getattr(obj, e) is None})
+
+        return fields
 
     def get_repositories(self, obj):
         return [
