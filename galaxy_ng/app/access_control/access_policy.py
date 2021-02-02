@@ -238,6 +238,9 @@ class CollectionRemoteAccessPolicy(AccessPolicyBase):
 class UserAccessPolicy(AccessPolicyBase):
     NAME = 'UserViewSet'
 
+    def is_current_user(self, request, view, action):
+        return request.user == view.get_object()
+
 
 class MyUserAccessPolicy(AccessPolicyBase):
     NAME = 'MyUserViewSet'
