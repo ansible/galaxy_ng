@@ -143,8 +143,6 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'name': {'read_only': True},
             'pulp_href': {'read_only': True},
             'client_key': {'write_only': True},
-            'client_cert': {'write_only': True},
-            'ca_cert': {'write_only': True},
         }
 
     def to_representation(self, instance):
@@ -220,7 +218,7 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
 
         for e in self.Meta.extra_kwargs:
             if self.Meta.extra_kwargs[e].get('write_only', False):
-                fields.append({"name": e, "is_set": getattr(obj, e) is None})
+                fields.append({"name": e, "is_set": getattr(obj, e) is not None})
 
         return fields
 
