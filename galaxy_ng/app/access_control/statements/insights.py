@@ -90,7 +90,9 @@ INSIGHTS_STATEMENTS = {
             "action": ["list"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_perms:galaxy.view_synclist", "has_rh_entitlements"]
+            "condition": ["has_model_perms:galaxy.view_synclist",
+                          "has_rh_entitlements",
+                          "is_org_admin"]
         },
         {
             "action": ["retrieve"],
@@ -98,7 +100,8 @@ INSIGHTS_STATEMENTS = {
             "effect": "allow",
             "condition": [
                 "has_model_or_obj_perms:galaxy.view_synclist",
-                "has_rh_entitlements"]
+                "has_rh_entitlements",
+                "is_org_admin"]
         },
         {
             "action": ["destroy"],
@@ -106,7 +109,8 @@ INSIGHTS_STATEMENTS = {
             "effect": "allow",
             "condition": [
                 "has_model_perms:galaxy.delete_synclist",
-                "has_rh_entitlements"]
+                "has_rh_entitlements",
+                "is_org_admin"]
         },
         {
             "action": ["create"],
@@ -114,7 +118,8 @@ INSIGHTS_STATEMENTS = {
             "effect": "allow",
             "condition": [
                 "has_model_perms:galaxy.add_synclist",
-                "has_rh_entitlements"]
+                "has_rh_entitlements",
+                "is_org_admin"]
         },
         {
             "action": ["update", "partial_update"],

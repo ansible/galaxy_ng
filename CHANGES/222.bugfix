@@ -1,0 +1,5 @@
+Only show synclist toggles to org admin.
+
+
+ie, non org admin's should get 403 response
+when viewing synclist endpoints.

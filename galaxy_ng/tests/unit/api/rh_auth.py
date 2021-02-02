@@ -15,7 +15,8 @@ def user_x_rh_identity(username, account_number=None):
                 {"username": "%(username)s",
                 "email": "%(username)s",
                 "first_name": "%(title_username)s",
-                "last_name": "%(title_username)sington"
+                "last_name": "%(title_username)sington",
+                "is_org_admin": true
                 },
             "internal": {"org_id": "54321"}
             }
