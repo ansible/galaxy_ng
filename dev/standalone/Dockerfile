@@ -3,4 +3,6 @@ FROM localhost/galaxy_ng/galaxy_ng:base
 COPY requirements/requirements.standalone.txt /tmp/requirements.standalone.txt
 
 RUN set -ex; \
-    pip install --no-cache-dir --requirement /tmp/requirements.standalone.txt
+    if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
+    pip install --no-cache-dir --requirement /tmp/requirements.standalone.txt; \
+    fi
