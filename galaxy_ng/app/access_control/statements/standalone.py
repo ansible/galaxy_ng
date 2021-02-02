@@ -83,15 +83,19 @@ STANDALONE_STATEMENTS = {
             "action": "destroy",
             "principal": "*",
             "effect": "deny",
-            "condition": "is_current_user"
-
+            "condition": ["user_is_superuser"]
+        },
+        {
+            "action": "destroy",
+            "principal": "*",
+            "effect": "deny",
+            "condition": ["is_current_user"]
         },
         {
             "action": "destroy",
             "principal": "*",
             "effect": "allow",
             "condition": "has_model_perms:galaxy.delete_user"
-
         },
         {
             "action": "create",

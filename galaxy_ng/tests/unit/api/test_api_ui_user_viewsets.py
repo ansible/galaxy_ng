@@ -14,7 +14,8 @@ log = logging.getLogger(__name__)
 class TestUiUserViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.admin_user = auth_models.User.objects.create(username='admin')
+        self.admin_user = auth_models.User.objects.create(username='admin',
+                                                          is_superuser=True)
         self.pe_group = self._create_partner_engineer_group()
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
@@ -302,3 +303,55 @@ class TestUiUserViewSet(BaseTestCase):
 
         self.assertEqual(error['status'], '403')
         self.assertEqual(error['code'], 'permission_denied')
+
+    def test_superuser_can_not_be_deleted(self):
+        superuser = auth_models.User.objects.create(username='super_delete_me_test',
+                                                    is_superuser=True)
+        superuser.save()
+
+        user = auth_models.User.objects.create(username='user_trying_to_delete_superuser')
+        user.save()
+
+        group = self._create_group('', 'people_that_can_delete_users',
+                                   users=[user],
+                                   perms=[
+                                       'galaxy.view_user',
+                                       'galaxy.delete_user',
+                                       'galaxy.add_user',
+                                       'galaxy.change_user',
+                                       'galaxy.change_group'
+                                   ])
+
+        new_user_data = {
+            'username': 'user_trying_to_delete_superuser',
+            'first_name': 'Del',
+            'last_name': 'Sooperuuser',
+            'email': 'email@email.com',
+            'groups': [{
+                'id': group.id,
+                'name': group.name
+            }]
+        }
+
+        self._test_create_or_update(
+            self.client.put, self.me_url, new_user_data, status.HTTP_200_OK, user)
+
+        # try to delete a user that is_super_user
+        url = '{}{}/'.format(self.user_url, superuser.id)
+
+        client = APIClient(raise_request_exception=True)
+        client.force_authenticate(user=user)
+
+        response = client.delete(url, format='json')
+
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Try to delete 'admin' user
+        url = '{}{}/'.format(self.user_url, self.admin_user.id)
+        response = client.delete(url, format='json')
+
+        log.debug('response: %s', response)
+        log.debug('response.data: %s', response.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
