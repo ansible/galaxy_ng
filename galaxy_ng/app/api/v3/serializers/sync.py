@@ -9,6 +9,7 @@ from pulp_ansible.app.models import (
 
 from galaxy_ng.app.constants import COMMUNITY_DOMAINS
 from galaxy_ng.app.models.collectionsync import CollectionSyncTask
+from galaxy_ng.app.common.proxy_url import strip_auth_from_url, join_proxy_url
 
 
 class AnsibleDistributionSerializer(serializers.ModelSerializer):
@@ -78,6 +79,21 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
     last_sync_task = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
+    proxy_url = serializers.URLField(
+        help_text="The proxy url e.g: http://IP:PORT",
+        allow_null=True,
+        required=False,
+    )
+    proxy_username = serializers.CharField(
+        allow_null=True,
+        required=False
+    )
+    proxy_password = serializers.CharField(
+        allow_null=True,
+        required=False,
+        style={'input_type': 'password'},
+        write_only=True
+    )
     token = serializers.CharField(
         allow_null=True,
         required=False,
@@ -118,6 +134,8 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'pulp_href',
             'download_concurrency',
             'proxy_url',
+            'proxy_username',
+            'proxy_password',
         )
         extra_kwargs = {
             'name': {'read_only': True},
@@ -126,6 +144,61 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'client_cert': {'write_only': True},
             'ca_cert': {'write_only': True},
         }
+
+    def to_representation(self, instance):
+        """
+        Splits proxy_url field from DB in 3 fields for representation.
+        proxy_url, proxy_username, proxy_password (write-only)
+        """
+
+        data = super().to_representation(instance)
+
+        if instance.proxy_url is not None:
+            url, username, _ = strip_auth_from_url(instance.proxy_url)
+            data['proxy_url'] = url
+            data['proxy_username'] = username
+
+        return data
+
+    def save(self):
+        """
+        Rejoins 3 fields url, username, password back to proxy_url on DB.
+
+        If proxy_url is null or blank, the field is cleaned up in DB
+        regardless of username, password values.
+
+        If proxy, url, password or username is missing from the payload then
+        should be the same as the existing value in the DB or None.
+
+        If proxy username/password is set to null or blank, the fields are
+        cleaned up in DB.
+        """
+
+        empty = object()
+        proxy_url = self.validated_data.get('proxy_url', empty)
+        proxy_username = self.validated_data.get('proxy_username', empty)
+        proxy_password = self.validated_data.get('proxy_password', empty)
+
+        url_in_db, username_in_db, password_in_db = strip_auth_from_url(
+            self.instance.proxy_url
+        ) if self.instance.proxy_url else (None, None, None)
+
+        if proxy_url is empty:
+            proxy_url = url_in_db
+
+        if proxy_username is empty:
+            proxy_username = username_in_db
+
+        if proxy_password is empty:
+            proxy_password = password_in_db
+
+        self.validated_data['proxy_url'] = join_proxy_url(
+            proxy_url,
+            proxy_username,
+            proxy_password,
+        ) if proxy_url else None
+
+        super().save()
 
     def validate(self, data):
         if not data.get('requirements_file') and any(

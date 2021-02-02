@@ -165,3 +165,133 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         log.debug('response.data: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('task', response.data)
+
+    def test_sensitive_fields_are_not_exposed(self):
+        self.client.force_authenticate(user=self.admin_user)
+        api_url = self.build_config_url(self.certified_remote.name)
+        response = self.client.get(api_url)
+        self.assertNotIn('password', response.data)
+        self.assertNotIn('token', response.data)
+        self.assertNotIn('proxy_password', response.data)
+
+    def test_split_proxy_url_field(self):
+        self.client.force_authenticate(user=self.admin_user)
+
+        # ensure proxy_url is blank
+        api_url = self.build_config_url(self.certified_remote.name)
+        response = self.client.get(api_url)
+        self.assertIsNone(response.data['proxy_url'])
+        self.assertIsNone(response.data['proxy_username'])
+
+        data = {'name': response.data['name'], 'url': response.data['url']}
+
+        # PUT proxy url without auth
+        self.client.put(api_url, {'proxy_url': 'http://proxy.com:4242', **data}, format='json')
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://proxy.com:4242')
+        self.assertEqual(response.data['proxy_username'], None)
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://proxy.com:4242')
+
+        # PUT proxy url with only username
+        self.client.put(
+            api_url,
+            {'proxy_url': 'http://proxy.com:4242', 'proxy_username': 'User1', **data}, format='json'
+        )
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://proxy.com:4242')
+        self.assertEqual(response.data['proxy_username'], 'User1')
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://User1@proxy.com:4242')
+
+        # PUT proxy url with username and password
+        self.client.put(
+            api_url,
+            {
+                'proxy_url': 'http://proxy.com:4242',
+                'proxy_username': 'User1',
+                'proxy_password': 'MyPrecious42',
+                **data
+            },
+            format='json'
+        )
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://proxy.com:4242')
+        self.assertEqual(response.data['proxy_username'], 'User1')
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://User1:MyPrecious42@proxy.com:4242')
+
+        # Edit password
+        self.client.put(api_url, {'proxy_password': 'MyPrecious43', **data}, format='json')
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://proxy.com:4242')
+        self.assertEqual(response.data['proxy_username'], 'User1')
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://User1:MyPrecious43@proxy.com:4242')
+
+        # Edit username
+        self.client.put(api_url, {'proxy_username': 'User2', **data}, format='json')
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://proxy.com:4242')
+        self.assertEqual(response.data['proxy_username'], 'User2')
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://User2:MyPrecious43@proxy.com:4242')
+
+        # Edit url using IP
+        self.client.put(api_url, {'proxy_url': 'http://192.168.0.42:4242', **data}, format='json')
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://192.168.0.42:4242')
+        self.assertEqual(response.data['proxy_username'], 'User2')
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://User2:MyPrecious43@192.168.0.42:4242')
+
+        # Edit url without scheme
+        response = self.client.put(
+            api_url, {'proxy_url': '192.168.0.42:4242', **data}, format='json'
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['errors'][0]['detail'], 'Enter a valid URL.')
+
+        # Edit url
+        self.client.put(api_url, {'proxy_url': 'http://proxy2.com:4242', **data}, format='json')
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://proxy2.com:4242')
+        self.assertEqual(response.data['proxy_username'], 'User2')
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://User2:MyPrecious43@proxy2.com:4242')
+
+        # Cleanup password
+        self.client.put(api_url, {'proxy_password': None, **data}, format='json')
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://proxy2.com:4242')
+        self.assertEqual(response.data['proxy_username'], 'User2')
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://User2@proxy2.com:4242')
+
+        # Cleanup username even if password is set  (avoid http://:1234@...)
+        self.client.put(
+            api_url, {'proxy_password': '1234', 'proxy_username': None, **data}, format='json'
+        )
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], 'http://proxy2.com:4242')
+        self.assertEqual(response.data['proxy_username'], None)
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, 'http://proxy2.com:4242')
+
+        # Cleanup everything
+        self.client.put(api_url, {'proxy_url': None, **data}, format='json')
+        response = self.client.get(api_url)
+        self.assertEqual(response.data['proxy_url'], None)
+        self.assertEqual(response.data['proxy_username'], None)
+        self.assertNotIn('proxy_password', response.data)
+        instance = CollectionRemote.objects.get(pk=response.data['pk'])
+        self.assertEqual(instance.proxy_url, None)
