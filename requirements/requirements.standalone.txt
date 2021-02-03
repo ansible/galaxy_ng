@@ -33,7 +33,7 @@ django-guardian==2.3.0    # via pulpcore
 django-import-export==2.3.0  # via pulpcore
 django-lifecycle==0.7.7   # via pulpcore
 django-prometheus==2.1.0  # via galaxy-ng (setup.py)
-django==2.2.16            # via django-currentuser, django-filter, django-guardian, django-import-export, django-lifecycle, djangorestframework, drf-nested-routers, drf-spectacular, galaxy-ng (setup.py), pulpcore
+django==2.2.18            # via django-currentuser, django-filter, django-guardian, django-import-export, django-lifecycle, djangorestframework, drf-nested-routers, drf-spectacular, galaxy-ng (setup.py), pulpcore
 djangorestframework-queryfields==1.0.0  # via pulpcore
 djangorestframework==3.11.2  # via drf-nested-routers, drf-spectacular, pulpcore
 drf-access-policy==0.7.0  # via pulpcore
@@ -63,7 +63,7 @@ openpyxl==3.0.5           # via tablib
 packaging==20.4           # via ansible-base, bleach, pulp-ansible
 prometheus-client==0.8.0  # via django-prometheus
 psycopg2==2.8.6           # via pulpcore
-pulp-ansible==0.5.5       # via galaxy-ng (setup.py)
+pulp-ansible==0.5.6       # via galaxy-ng (setup.py)
 pulp-container==2.1.0     # via -r requirements/requirements.standalone.in
 pulpcore==3.7.1           # via galaxy-ng (setup.py), pulp-ansible, pulp-container
 pycares==3.1.1            # via aiodns
