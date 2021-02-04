@@ -1,4 +1,5 @@
 import logging
+import pprint
 
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -44,6 +45,7 @@ class TestUiUserViewSet(BaseTestCase):
         }
 
         response = self.client.post(self.user_url, new_user_data, format='json')
+        log.debug('response.json:\n%s', response.json())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['errors'][0]['source']['parameter'], 'groups')
 
@@ -89,6 +91,7 @@ class TestUiUserViewSet(BaseTestCase):
         log.debug('self.client.__dict__: %s', self.client.__dict__)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(self.user_url)
+            log.debug('response.json:\n%s', response.json())
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         self.client.force_authenticate(user=self.admin_user)
@@ -100,6 +103,7 @@ class TestUiUserViewSet(BaseTestCase):
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             response = self.client.get(self.user_url)
+            log.debug('response.json:\n%s', response.json())
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_get(self):
@@ -109,12 +113,15 @@ class TestUiUserViewSet(BaseTestCase):
         self.client.force_authenticate(user=self.user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)
+            log.debug('response.json:\n%s', response.json())
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # But not other users
         url = '{}{}/'.format(self.user_url, self.admin_user.id)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         url = '{}{}/'.format(self.user_url, self.user.id)
@@ -137,12 +144,15 @@ class TestUiUserViewSet(BaseTestCase):
         self.client.force_authenticate(user=auth_user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             response = method_call(self.user_url, new_user_data, format='json')
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             # set user with invalid password
             new_user_data['password'] = '12345678'
             response = method_call(url, new_user_data, format='json')
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
+
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
             error_messages = set([])
@@ -213,6 +223,7 @@ class TestUiUserViewSet(BaseTestCase):
         self.client.force_authenticate(user=self.user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.put(put_url, new_user_data, format='json')
+            log.debug('response.json:\n%s', response.json())
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         self._test_create_or_update(

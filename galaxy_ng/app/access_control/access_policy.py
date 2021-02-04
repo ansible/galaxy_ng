@@ -70,16 +70,25 @@ class AccessPolicyVerboseMixin:
                   ",".join(['"%s"' % ug for ug in user_groups]),
                   matched_principals)
 
+        self.matched['principals'].extend(matched_principals)
+
         matched = self._get_statements_matching_action(request, action, matched)
 
         log.debug('"%s" action "%s" matched statements %s',
                   self.NAME, action, matched)
 
+        self.matched['actions'].extend(matched)
+
         matched = self._get_statements_matching_context_conditions(
             request, view, action, matched
         )
 
+        self.matched['conditions'].extend(matched)
+        self.matched['foo'] = 'bar'
+
         denied = [_ for _ in matched if _["effect"] != "allow"]
+
+        log.debug('self.matched:\n%s', self.matched)
 
         if len(matched) == 0 or len(denied) > 0:
             return False
@@ -165,6 +174,15 @@ class AccessPolicyVerboseMixin:
 
 
 class AccessPolicyBase(AccessPolicyVerboseMixin, AccessPolicy):
+    code = 'access_policy'
+
+    def __init__(self, *args, **kwargs):
+        self.matched = {'principals': [],
+                        'actions': [],
+                        'conditions': []
+                        }
+        super().__init__(*args, **kwargs)
+
     def _get_statements(self, deployment_mode):
         return STATEMENTS[deployment_mode]
 
@@ -212,6 +230,7 @@ class AccessPolicyBase(AccessPolicyVerboseMixin, AccessPolicy):
 
 class NamespaceAccessPolicy(AccessPolicyBase):
     NAME = 'NamespaceViewSet'
+    code = 'access_policy_namespace'
 
 
 class CollectionAccessPolicy(AccessPolicyBase):
@@ -237,6 +256,7 @@ class CollectionRemoteAccessPolicy(AccessPolicyBase):
 
 class UserAccessPolicy(AccessPolicyBase):
     NAME = 'UserViewSet'
+    code = 'access_policy_user'
 
     def user_is_superuser(self, request, view, action):
         user = view.get_object()
@@ -248,6 +268,7 @@ class UserAccessPolicy(AccessPolicyBase):
 
 class MyUserAccessPolicy(AccessPolicyBase):
     NAME = 'MyUserViewSet'
+    code = 'access_policy_my_user'
 
     def is_current_user(self, request, view, action):
         return request.user == view.get_object()
