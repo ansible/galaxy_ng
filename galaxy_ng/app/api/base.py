@@ -58,27 +58,27 @@ class LocalSettingsMixin:
 
         # Include the deployment mode and AccessPolicy in exception context for
         # better errors
-        access_policy = None
-        for permission in self.get_permissions():
-            if isinstance(permission, AccessPolicy):
-                access_policy = permission
-                break
+        # access_policy = None
+        # for permission in self.get_permissions():
+        #     if isinstance(permission, AccessPolicy):
+        #         access_policy = permission
+        #         break
 
-        access_policy_data = {}
-        if access_policy:
-            access_policy_data['name'] = access_policy.NAME
-            # access_policy_data['statements'] = \
-            #     access_policy.get_policy_statements(context['request'],
-            #                                         context['view'])
-            access_policy_data['matched'] = access_policy.matched
+        # access_policy_data = {}
+        # if access_policy:
+        #     access_policy_data['name'] = access_policy.NAME
+        #     access_policy_data['statements'] = \
+        #         access_policy.get_policy_statements(context['request'],
+        #                                             context['view'])
+        #     access_policy_data['matched'] = access_policy.matched
 
         context['deployment_mode'] = getattr(settings, 'GALAXY_DEPLOYMENT_MODE', None)
-        context['access_policy'] = access_policy_data
+        # context['access_policy'] = access_policy_data
 
-        import pprint
-        log.debug('context:\n%s', pprint.pformat(context))
-        log.debug('access_policy: %s', access_policy)
-        log.debug('id(access_policy): %s', id(access_policy))
+        # import pprint
+        # log.debug('context:\n%s', pprint.pformat(context))
+        # log.debug('access_policy: %s', access_policy)
+        # log.debug('id(access_policy): %s', id(access_policy))
         return context
 
     # This are the from the drf view/viewset classes that are used to raise

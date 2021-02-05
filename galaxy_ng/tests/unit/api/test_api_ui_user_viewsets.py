@@ -45,7 +45,7 @@ class TestUiUserViewSet(BaseTestCase):
         }
 
         response = self.client.post(self.user_url, new_user_data, format='json')
-        log.debug('response.json:\n%s', response.json())
+        log.debug('response.data:\n%s', pprint.pformat(response.data))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['errors'][0]['source']['parameter'], 'groups')
 
@@ -91,7 +91,7 @@ class TestUiUserViewSet(BaseTestCase):
         log.debug('self.client.__dict__: %s', self.client.__dict__)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(self.user_url)
-            log.debug('response.json:\n%s', response.json())
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         self.client.force_authenticate(user=self.admin_user)
@@ -103,7 +103,7 @@ class TestUiUserViewSet(BaseTestCase):
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             response = self.client.get(self.user_url)
-            log.debug('response.json:\n%s', response.json())
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_get(self):
@@ -113,7 +113,6 @@ class TestUiUserViewSet(BaseTestCase):
         self.client.force_authenticate(user=self.user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)
-            log.debug('response.json:\n%s', response.json())
             log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -128,6 +127,7 @@ class TestUiUserViewSet(BaseTestCase):
         self.client.force_authenticate(user=self.admin_user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             data = response.data
             self.assertEqual(data['email'], self.user.email)
@@ -167,6 +167,7 @@ class TestUiUserViewSet(BaseTestCase):
             # set valid user
             new_user_data['password'] = 'trekkie4Lyfe1701'
             response = method_call(url, new_user_data, format='json')
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, crud_status)
             data = response.data
             self.assertEqual(data['email'], new_user_data['email'])
@@ -223,7 +224,7 @@ class TestUiUserViewSet(BaseTestCase):
         self.client.force_authenticate(user=self.user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.put(put_url, new_user_data, format='json')
-            log.debug('response.json:\n%s', response.json())
+            log.debug('response.data:\n%s', pprint.pformat(response.data))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         self._test_create_or_update(
@@ -269,6 +270,7 @@ class TestUiUserViewSet(BaseTestCase):
         url = '{}{}/'.format(self.user_url, user.id)
 
         response = self.client.put(url, new_user_data, format='json')
+        log.debug('response.data:\n%s', pprint.pformat(response.data))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_me_delete(self):
