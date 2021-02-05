@@ -1,4 +1,5 @@
 import logging
+import pprint
 from typing import List
 
 from django.conf import settings
@@ -70,27 +71,28 @@ class AccessPolicyVerboseMixin:
                   ",".join(['"%s"' % ug for ug in user_groups]),
                   matched_principals)
 
-        self.matched['principals'].extend(matched_principals)
+        # self.matched['principals'].extend(matched_principals)
 
         matched = self._get_statements_matching_action(request, action, matched)
 
         log.debug('"%s" action "%s" matched statements %s',
                   self.NAME, action, matched)
 
-        self.matched['actions'].extend(matched)
+        # self.matched['actions'].extend(matched)
 
         matched = self._get_statements_matching_context_conditions(
             request, view, action, matched
         )
 
-        self.matched['conditions'].extend(matched)
-        self.matched['foo'] = 'bar'
+        # self.matched['conditions'].extend(matched)
 
         denied = [_ for _ in matched if _["effect"] != "allow"]
 
-        log.debug('self.matched:\n%s', self.matched)
+        self.denied.extend(denied)
 
         if len(matched) == 0 or len(denied) > 0:
+            log.debug('denied:\n%s', pprint.pformat(denied))
+            # log.debug('self.failed_rules:\n%s', pprint.pformat(self.matched))
             return False
 
         return True
@@ -111,8 +113,10 @@ class AccessPolicyVerboseMixin:
 
         if arg is not None:
             result = method(request, view, action, arg)
+            condition_blurb = f"{method_name}:{arg}"
         else:
             result = method(request, view, action)
+            condition_blurb = method_name
 
         if type(result) is not bool:
             raise AccessPolicyException(
@@ -120,17 +124,20 @@ class AccessPolicyVerboseMixin:
                 % (condition, type(result))
             )
 
-        res_blurb = "failed"
+        res_blurb = "ACCESS DENIED"
         if result:
-            res_blurb = "passed"
+            res_blurb = "GRANTED"
 
-        log.debug('"%s" action "%s" for user "%s" %s conditions "%s"',
+        log.debug('"%s" action "%s" for user "%s" |%s| conditions "%s" %s',
                   self.NAME,
                   action,
                   request.user,
                   res_blurb,
                   condition,
+                  condition_blurb,
                   )
+
+        # self.matched['conditions'].append(condition_blurb)
 
         return result
 
@@ -177,10 +184,7 @@ class AccessPolicyBase(AccessPolicyVerboseMixin, AccessPolicy):
     code = 'access_policy'
 
     def __init__(self, *args, **kwargs):
-        self.matched = {'principals': [],
-                        'actions': [],
-                        'conditions': []
-                        }
+        self.denied = []
         super().__init__(*args, **kwargs)
 
     def _get_statements(self, deployment_mode):
@@ -231,6 +235,11 @@ class AccessPolicyBase(AccessPolicyVerboseMixin, AccessPolicy):
 class NamespaceAccessPolicy(AccessPolicyBase):
     NAME = 'NamespaceViewSet'
     code = 'access_policy_namespace'
+
+    def user_is_bad_at_names(self, request, view, permission, user):
+        return True
+        # namespace = models.Namespace.objects.get(name=collection.namespace)
+        # return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
 
 class CollectionAccessPolicy(AccessPolicyBase):

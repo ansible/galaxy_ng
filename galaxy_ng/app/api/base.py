@@ -100,7 +100,7 @@ class LocalSettingsMixin:
         log.debug('our permission_denied locals:\n%s', pprint.pformat(locals()))
         log.debug('stack', stack_info=True)
         log.debug('perms instance: %s', permission)
-        log.debug('perms.matched: %s', permission.matched)
+        log.debug('perms.denied: %s', permission.denied)
         raise AccessPolicyPermissionDenied(detail=message, code=code, permission=permission)
 
     # TODO: likely don't need throttled yet, but it could be extended in similar way

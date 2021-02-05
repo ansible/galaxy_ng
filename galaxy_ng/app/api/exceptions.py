@@ -61,7 +61,7 @@ def _get_errors(detail, *, status, title, source=None, context=None):
                                                               context['view'])
 
                 meta['access_policy'] = {'name': permission.NAME,
-                                         'failed_rules': permission.matched,
+                                         'denied_rules': permission.denied,
                                          'statements': statements}
 
         except KeyError:
