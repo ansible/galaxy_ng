@@ -6,6 +6,12 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 
+class AccessPolicyPermissionDenied(exceptions.PermissionDenied):
+    def __init__(self, detail=None, code=None, permission=None):
+        self.permission = permission
+        super().__init__(detail, code)
+
+
 def _get_errors(detail, *, status, title, source=None, context=None):
     """Generator which returns JSON:API style error structs for use in the REST responses.
 
@@ -48,8 +54,11 @@ def _get_errors(detail, *, status, title, source=None, context=None):
 
         # Provide the access_policy name to give a hint to origin of perm errors
         try:
-            access_policy = context['access_policy']
-            meta['access_policy'] = access_policy
+            # access_policy = context['permission']['access_policy']
+            permission = context['permission']
+            if permission:
+                meta['access_policy'] = {'name': permission.NAME,
+                                         'matched': permission.matched}
         except KeyError:
             pass
 
@@ -83,6 +92,7 @@ def _handle_drf_api_exception(exc, context):
 
     # Build a list of JSON:API style error objects
     title = exc.__class__.default_detail
+    context['permission'] = getattr(exc, 'permission', [])
     errors = _get_errors(exc.detail, status=exc.status_code, title=title, context=context)
     data = {'errors': list(errors)}
     return Response(data, status=exc.status_code, headers=headers)

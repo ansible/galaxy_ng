@@ -12,6 +12,8 @@ from rest_framework.settings import perform_import
 
 from rest_access_policy import AccessPolicy
 
+from galaxy_ng.app.api.exceptions import AccessPolicyPermissionDenied
+
 GALAXY_EXCEPTION_HANDLER = perform_import(
     settings.GALAXY_EXCEPTION_HANDLER,
     'GALAXY_EXCEPTION_HANDLER'
@@ -65,9 +67,9 @@ class LocalSettingsMixin:
         access_policy_data = {}
         if access_policy:
             access_policy_data['name'] = access_policy.NAME
-            access_policy_data['statements'] = \
-                access_policy.get_policy_statements(context['request'],
-                                                    context['view'])
+            # access_policy_data['statements'] = \
+            #     access_policy.get_policy_statements(context['request'],
+            #                                         context['view'])
             access_policy_data['matched'] = access_policy.matched
 
         context['deployment_mode'] = getattr(settings, 'GALAXY_DEPLOYMENT_MODE', None)
@@ -89,7 +91,7 @@ class LocalSettingsMixin:
     #       permission objects)
 
     # TODO: raise a custom PermissionDenied that can hold extra detail/context
-    def permission_denied(self, request, message=None, code=None):
+    def permission_denied(self, request, message=None, code=None, permission=None):
         """
         If request is not permitted, determine what kind of exception to raise.
         """
@@ -97,7 +99,9 @@ class LocalSettingsMixin:
             raise exceptions.NotAuthenticated()
         log.debug('our permission_denied locals:\n%s', pprint.pformat(locals()))
         log.debug('stack', stack_info=True)
-        raise exceptions.PermissionDenied(detail=message, code=code)
+        log.debug('perms instance: %s', permission)
+        log.debug('perms.matched: %s', permission.matched)
+        raise AccessPolicyPermissionDenied(detail=message, code=code, permission=permission)
 
     # TODO: likely don't need throttled yet, but it could be extended in similar way
     def throttled(self, request, wait):
@@ -120,7 +124,8 @@ class LocalSettingsMixin:
                 self.permission_denied(
                     request,
                     message=getattr(permission, 'message', None),
-                    code=getattr(permission, 'code', None)
+                    code=getattr(permission, 'code', None),
+                    permission=permission
                 )
 
     def check_object_permissions(self, request, obj):
@@ -134,7 +139,8 @@ class LocalSettingsMixin:
                 self.permission_denied(
                     request,
                     message=getattr(permission, 'message', None),
-                    code=getattr(permission, 'code', None)
+                    code=getattr(permission, 'code', None),
+                    permission=permission
                 )
 
     # NOTE: For my reference to remind me each request returns a list of
