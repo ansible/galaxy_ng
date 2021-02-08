@@ -22,12 +22,12 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_model_or_obj_perms:galaxy.change_namespace"
         },
-        {
-            "action": ["*"],
-            "principal": "*",
-            "effect": "deny",
-            "condition": "user_is_bad_at_names:adrian",
-        },
+        # {
+        #     "action": ["*"],
+        #     "principal": "*",
+        #     "effect": "deny",
+        #     "condition": "user_is_bad_at_names:adrian",
+        # },
     ],
     'CollectionViewSet': [
         {

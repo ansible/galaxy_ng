@@ -1,4 +1,5 @@
 import base64
+import logging
 
 from django.test import override_settings
 from django.urls import reverse
@@ -12,6 +13,8 @@ from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app.models import auth as auth_models
 
 from .base import get_current_ui_url
+
+log = logging.getLogger(__name__)
 
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
@@ -71,6 +74,7 @@ class TestTokenViewStandalone(APITestCase):
         new_client = APIClient()
 
         response: Response = new_client.get(self.me_url)
+        log.debug('response.data:\n%s', response.data)
         self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.data,
