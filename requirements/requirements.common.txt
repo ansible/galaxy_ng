@@ -31,7 +31,7 @@ backoff==1.10.0
     # via pulpcore
 bleach-whitelist==0.0.11
     # via galaxy-importer
-bleach==3.2.1
+bleach==3.3.0
     # via galaxy-importer
 certifi==2020.6.20
     # via requests
