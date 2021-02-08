@@ -61,7 +61,7 @@ django-lifecycle==0.8.0
     # via pulpcore
 django-prometheus==2.0.0
     # via galaxy-ng (setup.py)
-django==2.2.16
+django==2.2.18
     # via
     #   django-currentuser
     #   django-filter
