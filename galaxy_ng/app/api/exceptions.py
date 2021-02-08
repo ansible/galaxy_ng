@@ -56,13 +56,14 @@ def _get_errors(detail, *, status, title, source=None, context=None):
         try:
             # access_policy = context['permission']['access_policy']
             permission = context['permission']
-            if permission:
-                statements = permission.get_policy_statements(context['request'],
-                                                              context['view'])
+            if permission and permission.denied:
+                # statements = permission.get_policy_statements(context['request'],
+                #                                              context['view'])
 
                 meta['access_policy'] = {'name': permission.NAME,
                                          'denied_rules': permission.denied,
-                                         'statements': statements}
+                                         # 'statements': statements,
+                                         }
 
         except KeyError:
             pass
