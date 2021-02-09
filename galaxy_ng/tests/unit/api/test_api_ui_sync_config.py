@@ -202,6 +202,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
             response_names.add(field['name'])
 
         self.assertEqual(set(write_only_fields), response_names)
+        self.client.put(api_url, request_data, format='json')
 
         # Check that all write only fields are unset
         write_only = self.client.get(api_url).data['write_only_fields']
