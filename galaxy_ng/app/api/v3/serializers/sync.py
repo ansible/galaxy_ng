@@ -245,11 +245,12 @@ def get_write_only_fields(serializer, obj, extra_data={}):
     """
     fields = []
 
+    # returns false if field is "" or None
     def _is_set(field_name):
         if (field_name in extra_data):
-            return extra_data[field_name] is not None
+            return bool(extra_data[field_name])
         else:
-            return getattr(obj, field_name) is not None
+            return bool(getattr(obj, field_name))
 
     # There are two ways to set write_only. This checks both.
 

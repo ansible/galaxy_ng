@@ -208,6 +208,13 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         write_only = self.client.get(api_url).data['write_only_fields']
         for field in write_only:
             self.assertEqual(field['is_set'], False)
+            request_data[field['name']] = ""
+
+        self.client.put(api_url, request_data, format='json')
+
+        write_only = self.client.get(api_url).data['write_only_fields']
+        for field in write_only:
+            self.assertEqual(field['is_set'], False)
 
     def test_split_proxy_url_field(self):
         self.client.force_authenticate(user=self.admin_user)
