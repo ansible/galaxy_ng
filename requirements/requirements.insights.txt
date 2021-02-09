@@ -66,6 +66,8 @@ cryptography==3.4.5
     # via
     #   ansible-base
     #   pyjwt
+dataclasses==0.8
+    # via rich
 defusedxml==0.6.0
     # via odfpy
 diff-match-patch==20200713
@@ -131,10 +133,18 @@ galaxy-importer==0.2.15
     #   pulp-ansible
 gunicorn==20.0.4
     # via pulpcore
+idna-ssl==1.1.0
+    # via aiohttp
 idna==2.10
     # via
+    #   idna-ssl
     #   requests
     #   yarl
+importlib-metadata==3.4.0
+    # via
+    #   flake8
+    #   jsonschema
+    #   markdown
 inflection==0.5.1
     # via drf-spectacular
 jdcal==1.4.1
@@ -241,6 +251,8 @@ rich==9.11.0
     # via ansible-lint
 rq==1.7.0
     # via pulpcore
+ruamel.yaml.clib==0.2.2
+    # via ruamel.yaml
 ruamel.yaml==0.16.12
     # via ansible-lint
 s3transfer==0.3.4
@@ -263,7 +275,12 @@ tablib[html,ods,xls,xlsx,yaml]==3.0.0
 typing-extensions==3.7.4.3
     # via
     #   aiohttp
+    #   ansible-lint
+    #   importlib-metadata
     #   rich
+    #   yarl
+typing==3.7.4.3
+    # via aiodns
 uritemplate==3.0.1
     # via drf-spectacular
 url-normalize==1.4.3

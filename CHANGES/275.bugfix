@@ -1,0 +1,5 @@
+Update pulp_container deps to 2.3
+
+And some adjustments to use the newer
+pulpcore 3.10, and pulp_ansible 2.7ish that
+are needed for newer pulp_container

@@ -59,7 +59,7 @@ requirements = [
     "Django~=2.2.18",
     "galaxy-importer==0.2.15",
     "pulpcore<3.11,>=3.10",
-    "pulp-ansible==0.7.0",
+    "pulp-ansible",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container==2.3.1"
