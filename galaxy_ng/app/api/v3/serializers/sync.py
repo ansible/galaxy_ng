@@ -214,13 +214,11 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
         return super().validate(data)
 
     def get_write_only_fields(self, obj):
-        fields = []
-
-        for e in self.Meta.extra_kwargs:
-            if self.Meta.extra_kwargs[e].get('write_only', False):
-                fields.append({"name": e, "is_set": getattr(obj, e) is not None})
-
-        return fields
+        url = obj.proxy_url
+        proxy_password = None
+        if url is not None:
+            proxy_password = strip_auth_from_url(url)[2]
+        return get_write_only_fields(self, obj, extra_data={'proxy_password': proxy_password})
 
     def get_repositories(self, obj):
         return [
@@ -234,3 +232,36 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
         return CollectionSyncTask.objects.filter(
             repository=obj.repository_set.order_by('-pulp_last_updated').first()
         ).first()
+
+
+def get_write_only_fields(serializer, obj, extra_data={}):
+    """
+    Returns a list of write only fields and whether or not their values are set
+    so that clients can tell if they are overwriting an existing value.
+    serializer: Serializer instance
+    obj: model object being serialized
+    extra_data: extra fields that might not be on obj. This is used when a write
+        only field is not one of the fields in the underlying data model.
+    """
+    fields = []
+
+    def _is_set(field_name):
+        if (field_name in extra_data):
+            return extra_data[field_name] is not None
+        else:
+            return getattr(obj, field_name) is not None
+
+    # There are two ways to set write_only. This checks both.
+
+    # check for values that are set to write_only in Meta.extra_kwargs
+    for field_name in serializer.Meta.extra_kwargs:
+        if serializer.Meta.extra_kwargs[field_name].get('write_only', False):
+            fields.append({"name": field_name, "is_set": _is_set(field_name)})
+
+    # check for values that are set to write_only in fields
+    serializer_fields = serializer.get_fields()
+    for field_name in serializer_fields:
+        if (serializer_fields[field_name].write_only):
+            fields.append({"name": field_name, "is_set": _is_set(field_name)})
+
+    return fields

@@ -174,6 +174,40 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         self.assertNotIn('token', response.data)
         self.assertNotIn('proxy_password', response.data)
 
+    def test_write_only_fields(self):
+        self.client.force_authenticate(user=self.admin_user)
+        api_url = self.build_config_url(self.certified_remote.name)
+        write_only_fields = ['client_key', 'token', 'password', 'proxy_password']
+
+        # note, proxy url and user have to be set in order to be able to set a
+        # proxy password
+        request_data = {
+            "url": self.certified_remote.url,
+            "proxy_url": "https://example.com",
+            "proxy_username": "bob"}
+
+        for field in write_only_fields:
+            request_data[field] = "value_is_set"
+
+        self.client.put(api_url, request_data, format='json')
+
+        write_only = self.client.get(api_url).data['write_only_fields']
+        response_names = set()
+        # Check that all write only fields are set
+        for field in write_only:
+            self.assertEqual(field['is_set'], True)
+
+            # unset all write only fields
+            request_data[field['name']] = None
+            response_names.add(field['name'])
+
+        self.assertEqual(set(write_only_fields), response_names)
+
+        # Check that all write only fields are unset
+        write_only = self.client.get(api_url).data['write_only_fields']
+        for field in write_only:
+            self.assertEqual(field['is_set'], False)
+
     def test_split_proxy_url_field(self):
         self.client.force_authenticate(user=self.admin_user)
 
