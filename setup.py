@@ -10,8 +10,6 @@ from setuptools import find_packages, setup, Command
 from setuptools.command.build_py import build_py as _BuildPyCommand
 from setuptools.command.sdist import sdist as _SDistCommand
 
-from galaxy_ng import __version__
-
 
 class PrepareStaticCommand(Command):
     if os.environ.get("ALTERNATE_UI_DOWNLOAD_URL"):
@@ -60,14 +58,16 @@ class BuildPyCommand(_BuildPyCommand):
 requirements = [
     "Django~=2.2.18",
     "galaxy-importer==0.2.15",
-    "pulpcore>=3.7,<3.9",
-    "pulp-ansible==0.5.5",
+    "pulpcore<3.11,>=3.10",
+    "pulp-ansible==0.7.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
 ]
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-version = os.environ.get("ALTERNATE_VERSION", __version__)
+
+with open('galaxy_ng/app/VERSION') as version_file:
+    version = os.environ.get("ALTERNATE_VERSION", version_file.read())
 
 setup(
     name=package_name,
