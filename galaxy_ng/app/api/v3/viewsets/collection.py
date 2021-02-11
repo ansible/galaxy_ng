@@ -51,6 +51,12 @@ log = logging.getLogger(__name__)
 class ViewNamespaceSerializerContextMixin:
     def get_serializer_context(self):
         """Inserts distribution path to a serializer context."""
+
+        self._deprecation
+        # ^ this call is needed so we populate deprecated_collections_context
+        # that was added here
+        # https://github.com/pulp/pulp_ansible/commit/b1d4797c20663c8552a80b3766fde5ad287c996e
+
         context = super().get_serializer_context()
 
         # view_namespace will be used by the serializers that need to return different hrefs
