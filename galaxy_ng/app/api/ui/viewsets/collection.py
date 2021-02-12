@@ -55,10 +55,7 @@ class CollectionViewSet(
         if path is None:
             raise Http404("Distribution base path is required")
 
-        distro_content = self.get_distro_content(path)
-        repo_version = self.get_repository_version(path)
-
-        versions = CollectionVersion.objects.filter(pk__in=distro_content).values_list(
+        versions = CollectionVersion.objects.filter(pk__in=self._distro_content).values_list(
             "collection_id",
             "version",
         )
@@ -81,7 +78,7 @@ class CollectionViewSet(
             query_params |= Q(collection_id=collection_id, version=version)
 
         deprecated_query = AnsibleCollectionDeprecated.objects.filter(
-            collection=OuterRef("collection"), repository_version=repo_version
+            collection=OuterRef("collection"), repository_version=self._repository_version
         )
         version_qs = CollectionVersion.objects.select_related("collection").filter(query_params)
         version_qs = version_qs.annotate(deprecated=Exists(deprecated_query))
@@ -97,10 +94,9 @@ class CollectionViewSet(
                 queryset, namespace=self.kwargs["namespace"], name=self.kwargs["name"]
             )
 
-        distro_content = self.get_distro_content(self.kwargs["path"])
         return get_object_or_404(
             CollectionVersion.objects.all(),
-            pk__in=distro_content,
+            pk__in=self._distro_content,
             namespace=self.kwargs["namespace"],
             name=self.kwargs["name"],
             version=version,

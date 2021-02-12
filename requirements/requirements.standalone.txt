@@ -20,8 +20,12 @@ ansible==2.10.6
     # via
     #   ansible-lint
     #   galaxy-importer
+async-lru==1.0.2
+    # via pulp-ansible
 async-timeout==3.0.1
     # via aiohttp
+asyncio-throttle==1.0.1
+    # via pulpcore
 attrs==20.3.0
     # via
     #   aiohttp
@@ -63,6 +67,8 @@ django-filter==2.4.0
     # via pulpcore
 django-guardian==2.3.0
     # via pulpcore
+django-guid==2.2.0
+    # via pulpcore
 django-import-export==2.4.0
     # via pulpcore
 django-lifecycle==0.8.1
@@ -74,6 +80,7 @@ django==2.2.18
     #   django-currentuser
     #   django-filter
     #   django-guardian
+    #   django-guid
     #   django-import-export
     #   django-lifecycle
     #   djangorestframework
@@ -92,7 +99,7 @@ drf-access-policy==0.8.6
     # via pulpcore
 drf-nested-routers==0.92.1
     # via pulpcore
-drf-spectacular==0.9.14
+drf-spectacular==0.11.0
     # via
     #   galaxy-ng (setup.py)
     #   pulpcore
@@ -153,11 +160,11 @@ prometheus-client==0.9.0
     # via django-prometheus
 psycopg2==2.8.6
     # via pulpcore
-pulp-ansible==0.5.5
+pulp-ansible==0.7.0
     # via galaxy-ng (setup.py)
-pulp-container==2.1.0
+pulp-container==2.3.0
     # via -r requirements/requirements.standalone.in
-pulpcore==3.8.1
+pulpcore==3.10.0
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -212,7 +219,7 @@ requirements-parser==0.2.0
     # via ansible-builder
 rich==9.10.0
     # via ansible-lint
-rq==1.5.2
+rq==1.7.0
     # via pulpcore
 ruamel.yaml==0.16.12
     # via ansible-lint
