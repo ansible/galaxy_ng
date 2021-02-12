@@ -17,6 +17,11 @@ from .synclist import (
 from .collectionsync import (
     CollectionSyncTask
 )
+
+from .container import (
+    ContainerDistribution,
+)
+
 __all__ = (
     'Group',
     'User',
@@ -25,4 +30,5 @@ __all__ = (
     'NamespaceLink',
     'SyncList',
     'CollectionSyncTask',
+    'ContainerDistribution'
 )

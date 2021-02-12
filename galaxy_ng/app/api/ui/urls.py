@@ -31,6 +31,21 @@ auth_views = [
     path("logout/", views.LogoutView.as_view(), name="auth-logout"),
 ]
 
+container_paths = [
+    path(
+        "distributions/",
+        viewsets.CotainerDistributionViewSet.as_view({'get': 'list'}),
+        name='container-distribution-detail'),
+    path(
+        "distributions/<str:name>/",
+        viewsets.CotainerDistributionViewSet.as_view({'get': 'retrieve'}),
+        name='container-distribution-detail'),
+    path(
+        "distributions/<str:namespace>/<str:name>/",
+        viewsets.CotainerDistributionViewSet.as_view({'get': 'retrieve'}),
+        name='container-distribution-detail'),
+]
+
 # Groups are subclassed from pulpcore and use nested viewsets, so router.register
 # unfortunately doesn't work
 group_paths = [
@@ -69,7 +84,7 @@ paths = [
 
     path('auth/', include(auth_views)),
     path('groups/', include(group_paths)),
-
+    path('container/', include(container_paths)),
     path(
         'repo/<str:path>/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),

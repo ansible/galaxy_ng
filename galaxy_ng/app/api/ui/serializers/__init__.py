@@ -27,6 +27,10 @@ from .distribution import (
     DistributionSerializer
 )
 
+from .container import (
+    ContainerDistributionSerializer
+)
+
 __all__ = (
     # auth
     'LoginSerializer',
@@ -46,6 +50,8 @@ __all__ = (
     # synclist
     'SyncListSerializer',
     'SyncListCollectionSummarySerializer',
-    # distribution,
-    'DistributionSerializer'
+    # distribution
+    'DistributionSerializer',
+    # container
+    'ContainerDistributionSerializer'
 )
