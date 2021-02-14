@@ -68,9 +68,15 @@ class ViewNamespaceSerializerContextMixin:
         return context
 
 
+class RepoMetadataViewSet(api_base.LocalSettingsMixin,
+                          pulp_ansible_views.RepoMetadataViewSet):
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
+
 class UnpaginatedCollectionViewSet(api_base.LocalSettingsMixin,
                                    ViewNamespaceSerializerContextMixin,
                                    pulp_ansible_views.UnpaginatedCollectionViewSet):
+    pagination_class = None
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
 
@@ -94,7 +100,6 @@ class CollectionListMixin:
 
     def list(self, request, *args, **kwargs):
         """Returns paginated CollectionVersions list."""
-        1/0
         queryset = self.filter_queryset(self.get_queryset())
         queryset = sorted(
             queryset, key=lambda obj: semantic_version.Version(obj.version), reverse=True
@@ -110,14 +115,13 @@ class CollectionListMixin:
         return Response(serializer.data)
 
 
-class UnpaginatedCollectionVersionViewset(api_base.LocalSettingsMixin,
+class UnpaginatedCollectionVersionViewSet(api_base.LocalSettingsMixin,
                                           ViewNamespaceSerializerContextMixin,
                                           CollectionListMixin,
                                           pulp_ansible_views.UnpaginatedCollectionVersionViewSet):
+    pagination_class = None
     serializer_class = CollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
-
-    # See https://pulp.plan.io/issues/7032
 
 
 class CollectionVersionViewSet(api_base.LocalSettingsMixin,
