@@ -32,6 +32,11 @@ sync_urls = [
 
 urlpatterns = [
     path(
+        'collections/all/',
+        viewsets.UnpaginatedCollectionViewSet.as_view({'get': 'list'}),
+        name='collections-all-list'
+    ),
+    path(
         'collections/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
         name='collections-list'

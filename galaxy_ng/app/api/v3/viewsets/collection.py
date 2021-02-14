@@ -68,6 +68,13 @@ class ViewNamespaceSerializerContextMixin:
         return context
 
 
+class UnpaginatedCollectionViewSet(api_base.LocalSettingsMixin,
+                                   ViewNamespaceSerializerContextMixin,
+                                   pulp_ansible_views.UnpaginatedCollectionViewSet):
+    permission_classes = [access_policy.CollectionAccessPolicy]
+    serializer_class = CollectionSerializer
+
+
 class CollectionViewSet(api_base.LocalSettingsMixin,
                         ViewNamespaceSerializerContextMixin,
                         pulp_ansible_views.CollectionViewSet):
@@ -75,19 +82,19 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
     serializer_class = CollectionSerializer
 
 
-class CollectionVersionViewSet(api_base.LocalSettingsMixin,
-                               ViewNamespaceSerializerContextMixin,
-                               pulp_ansible_views.CollectionVersionViewSet):
-    serializer_class = CollectionVersionSerializer
-    permission_classes = [access_policy.CollectionAccessPolicy]
+class CollectionListMixin:
 
     # TODO: This is cut&paste from pulp_ansible_views.CollectionVersionViewSet.list, so
     #       the serializer class can be overridden. Should be able to remove this
     #       once pulp_ansible serializers use something like _get_href that names
     #       url namespace into account
+    #       See https://pulp.plan.io/issues/7032
+    #       Remove this mixin when this https://github.com/pulp/pulp_ansible/pull/523
+    #       gets merged/released.
+
     def list(self, request, *args, **kwargs):
         """Returns paginated CollectionVersions list."""
-
+        1/0
         queryset = self.filter_queryset(self.get_queryset())
         queryset = sorted(
             queryset, key=lambda obj: semantic_version.Version(obj.version), reverse=True
@@ -101,6 +108,29 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
 
         serializer = CollectionVersionListSerializer(queryset, many=True, context=context)
         return Response(serializer.data)
+
+
+class UnpaginatedCollectionVersionViewset(api_base.LocalSettingsMixin,
+                                          ViewNamespaceSerializerContextMixin,
+                                          CollectionListMixin,
+                                          pulp_ansible_views.UnpaginatedCollectionVersionViewSet):
+    serializer_class = CollectionVersionSerializer
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
+    # See https://pulp.plan.io/issues/7032
+
+
+class CollectionVersionViewSet(api_base.LocalSettingsMixin,
+                               ViewNamespaceSerializerContextMixin,
+                               CollectionListMixin,
+                               pulp_ansible_views.CollectionVersionViewSet):
+    serializer_class = CollectionVersionSerializer
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
+    # TODO: Pulp_ansible 0.8.0 will include this attribute
+    # see: https://github.com/pulp/pulp_ansible/pull/523
+    # then we can set this here and remove CollectionListMixin
+    # list_serializer_class = CollectionVersionListSerializer
 
 
 class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
