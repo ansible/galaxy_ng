@@ -2,13 +2,11 @@ from rest_framework import serializers
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField
 
-from pulp_container.app import models as container_models
-
 
 class ContainerDistributionSerializer(serializers.ModelSerializer):
     repository = serializers.SerializerMethodField()
     groups = GroupPermissionField()
-    # namespace = serializers.SerializerMethodField()
+    namespace = serializers.SerializerMethodField()
 
     class Meta:
         model = models.ContainerDistribution
@@ -19,9 +17,8 @@ class ContainerDistributionSerializer(serializers.ModelSerializer):
             'base_path',
             'groups',
             'repository',
-            # Missing namespace and description which are available in 2.3
-            # 'namespace',
-            # 'description',
+            'namespace',
+            'description',
         )
 
     def get_namespace(self, distro):
