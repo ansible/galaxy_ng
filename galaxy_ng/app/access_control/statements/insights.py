@@ -199,4 +199,11 @@ INSIGHTS_STATEMENTS = {
             "condition": "has_rh_entitlements",
         },
     ],
+    'ContainerRepositoryViewSet': [
+        {
+            "action": ["*"],
+            "principal": "*",
+            "effect": "deny",
+        },
+    ],
 }

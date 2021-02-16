@@ -291,3 +291,7 @@ class DistributionAccessPolicy(AccessPolicyBase):
 
 class MyDistributionAccessPolicy(AccessPolicyBase):
     NAME = 'MyDistributionViewSet'
+
+
+class ContainerRepositoryAccessPolicy(AccessPolicyBase):
+    NAME = 'ContainerRepositoryViewSet'

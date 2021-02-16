@@ -27,8 +27,8 @@ from .distribution import (
     DistributionSerializer
 )
 
-from .container import (
-    ContainerDistributionSerializer
+from .execution_environment import (
+    ContainerRepositorySerializer
 )
 
 __all__ = (
@@ -53,5 +53,5 @@ __all__ = (
     # distribution
     'DistributionSerializer',
     # container
-    'ContainerDistributionSerializer'
+    'ContainerRepositorySerializer'
 )
