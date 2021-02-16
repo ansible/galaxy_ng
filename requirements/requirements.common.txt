@@ -54,7 +54,9 @@ colorama==0.4.4
 commonmark==0.9.1
     # via rich
 cryptography==3.4.5
-    # via ansible-base
+    # via
+    #   ansible-base
+    #   pyjwt
 defusedxml==0.6.0
     # via odfpy
 diff-match-patch==20200713
@@ -103,10 +105,14 @@ drf-spectacular==0.11.0
     #   pulpcore
 dynaconf==3.1.2
     # via pulpcore
+ecdsa==0.13.3
+    # via pulp-container
 et-xmlfile==1.0.1
     # via openpyxl
 flake8==3.8.4
     # via galaxy-importer
+future==0.18.2
+    # via pyjwkest
 galaxy-importer==0.2.15
     # via
     #   galaxy-ng (setup.py)
@@ -156,22 +162,31 @@ psycopg2==2.8.6
     # via pulpcore
 pulp-ansible==0.7.0
     # via galaxy-ng (setup.py)
+pulp-container==2.3.1
+    # via galaxy-ng (setup.py)
 pulpcore==3.10.0
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
+    #   pulp-container
 pycares==3.1.1
     # via aiodns
 pycodestyle==2.6.0
     # via flake8
 pycparser==2.20
     # via cffi
+pycryptodomex==3.10.1
+    # via pyjwkest
 pyflakes==2.2.0
     # via flake8
 pygments==2.8.0
     # via rich
 pygtrie==2.3.3
     # via pulpcore
+pyjwkest==1.4.2
+    # via pulp-container
+pyjwt[crypto]==1.7.1
+    # via pulp-container
 pyparsing==2.4.7
     # via
     #   drf-access-policy
@@ -197,10 +212,12 @@ redis==3.5.3
     #   pulpcore
     #   rq
 requests==2.25.1
-    # via galaxy-importer
+    # via
+    #   galaxy-importer
+    #   pyjwkest
 requirements-parser==0.2.0
     # via ansible-builder
-rich==9.10.0
+rich==9.11.0
     # via ansible-lint
 rq==1.7.0
     # via pulpcore
@@ -214,6 +231,8 @@ six==1.15.0
     # via
     #   bleach
     #   jsonschema
+    #   pyjwkest
+    #   url-normalize
 sqlparse==0.4.1
     # via django
 tablib[html,ods,xls,xlsx,yaml]==3.0.0
@@ -224,6 +243,8 @@ typing-extensions==3.7.4.3
     #   rich
 uritemplate==3.0.1
     # via drf-spectacular
+url-normalize==1.4.3
+    # via pulp-container
 urllib3==1.26.3
     # via requests
 urlman==1.4.0

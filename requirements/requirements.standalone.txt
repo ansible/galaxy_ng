@@ -163,7 +163,7 @@ psycopg2==2.8.6
 pulp-ansible==0.7.0
     # via galaxy-ng (setup.py)
 pulp-container==2.3.1
-    # via -r requirements/requirements.standalone.in
+    # via galaxy-ng (setup.py)
 pulpcore==3.10.0
     # via
     #   galaxy-ng (setup.py)
@@ -217,7 +217,7 @@ requests==2.25.1
     #   pyjwkest
 requirements-parser==0.2.0
     # via ansible-builder
-rich==9.10.0
+rich==9.11.0
     # via ansible-lint
 rq==1.7.0
     # via pulpcore
