@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from pulp_container.app import models as container_models
+
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField
 
@@ -65,3 +67,36 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 'base_path': distro.base_path,
             }
         }
+
+
+class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
+    config_blob = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
+
+    class Meta:
+        model = container_models.Manifest
+        fields = (
+            'pulp_id',
+            'digest',
+            'schema_version',
+            'media_type',
+            'config_blob',
+            'tags',
+            'pulp_created'
+        )
+
+    def get_config_blob(self, obj):
+        return obj.config_blob.digest
+
+    def get_tags(self, obj):
+        tags = []
+
+        # tagget_manifests returns all tags on the manifest, not just the ones
+        # that are in the latest version of the repo.
+        repo_content = self.context['view'].repository_version.content.all()
+        tag_qs = obj.tagged_manifests.filter(pk__in=repo_content)
+
+        for tag in tag_qs:
+            tags.append(tag.name)
+
+        return tags

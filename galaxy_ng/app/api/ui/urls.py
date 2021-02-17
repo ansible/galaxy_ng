@@ -37,6 +37,14 @@ container_paths = [
         viewsets.ContainerRepositoryViewSet.as_view({'get': 'list'}),
         name='container-repository-detail'),
     path(
+        "repositories/<str:name>/images/",
+        viewsets.CotainerRepositoryManifestViewSet.as_view({'get': 'list'}),
+        name='container-repository-images'),
+    path(
+        "repositories/<str:namespace>/<str:name>/images/",
+        viewsets.CotainerRepositoryManifestViewSet.as_view({'get': 'list'}),
+        name='container-repository-images'),
+    path(
         "repositories/<str:name>/",
         viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
         name='container-repository-detail'),

@@ -1,4 +1,5 @@
 import logging
+from pulp_container.app import models as container_models
 
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
@@ -44,3 +45,24 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
             base_path = "{}/{}".format(self.kwargs["namespace"], self.kwargs["name"])
 
         return get_object_or_404(self.queryset, base_path=base_path)
+
+
+class CotainerRepositoryManifestViewSet(api_base.ModelViewSet):
+    serializer_class = serializers.ContainerRepositoryImageSerializer
+
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+
+    def get_queryset(self):
+        base_path = self.kwargs["name"]
+        if self.kwargs.get("namespace"):
+            base_path = "{}/{}".format(self.kwargs["namespace"], self.kwargs["name"])
+
+        repo = get_object_or_404(models.ContainerDistribution, base_path=base_path).repository
+        repo_version = repo.latest_version()
+
+        # set the repo version as an attribute of the viewset so it's available to
+        # the serializer so that the serializer can limit tags to tags that are in
+        # the current repo version
+        self.repository_version = repo_version
+
+        return container_models.Manifest.objects.filter(pk__in=repo_version.content.all())
