@@ -65,6 +65,9 @@ cmd_prefix bash -c "PULP_DATABASES__default__USER=postgres django-admin test --n
 # Run functional tests
 export PYTHONPATH=$TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR/../pulpcore${PYTHONPATH:+:${PYTHONPATH}}
 
+# Testing OpenAPI
+cmd_prefix bash -c "pulpcore-manager spectacular --file schema.yml --validate"
+
 if [[ "$TEST" == "performance" ]]; then
   wget -qO- https://github.com/crazy-max/travis-wait-enhanced/releases/download/v1.0.0/travis-wait-enhanced_1.0.0_linux_x86_64.tar.gz | sudo tar -C /usr/local/bin -zxvf - travis-wait-enhanced
   echo "--- Performance Tests ---"
