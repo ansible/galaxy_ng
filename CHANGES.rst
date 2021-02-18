@@ -13,6 +13,37 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.2 (2021-02-18)
+==================
+
+Bugfixes
+--------
+
+- Fix how travis checks for existence of Jira issues
+  `AAH-44 <https://issues.redhat.com/browse/AAH-44>`_
+- Fix the galaxy-importer check for max size of docs files
+  `AAH-220 <https://issues.redhat.com/browse/AAH-220>`_
+- Users should not be able to delete themselves.
+
+  Even if they have 'delete-user' perms.
+  `AAH-265 <https://issues.redhat.com/browse/AAH-265>`_
+- Prevent users with delete-user perms from deleting admin users
+  `AAH-266 <https://issues.redhat.com/browse/AAH-266>`_
+- Make token and password obfuscated on the API docs for /sync/config
+  `AAH-282 <https://issues.redhat.com/browse/AAH-282>`_
+- split proxy_url in 3 fields: username, password, address
+  `AAH-291 <https://issues.redhat.com/browse/AAH-291>`_
+
+
+Misc
+----
+
+- `AAH-120 <https://issues.redhat.com/browse/AAH-120>`_, `AAH-295 <https://issues.redhat.com/browse/AAH-295>`_, `AAH-318 <https://issues.redhat.com/browse/AAH-318>`_
+
+
+----
+
+
 4.2.1 (2020-12-16)
 ==================
 
