@@ -36,10 +36,10 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         return distro.pulp_id
 
     def get_created(self, distro):
-        return distro.pulp_created
+        return distro.repository.pulp_created
 
     def get_updated(self, distro):
-        return distro.repository.pulp_created
+        return distro.repository.pulp_last_updated
 
     def get_namespace(self, distro):
         return distro.namespace.name
@@ -55,7 +55,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 'version': repo.latest_version().number,
                 'name': repo.name,
                 'description': repo.description,
-                'pulp_created': repo.pulp_created
+                'pulp_created': repo.pulp_created,
             },
             'distribution':
             {

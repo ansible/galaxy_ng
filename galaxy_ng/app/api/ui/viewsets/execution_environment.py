@@ -16,10 +16,10 @@ log = logging.getLogger(__name__)
 class RepositoryFilter(filterset.FilterSet):
     sort = filters.OrderingFilter(
         fields=(
-            ('pulp_created', 'created'),
+            ('repository__pulp_created', 'created'),
             ('name', 'name'),
             ('description', 'description'),
-            ('repository__pulp_created', 'updated'),
+            ('repository__pulp_last_updated', 'updated'),
         ),
     )
 
