@@ -34,15 +34,15 @@ auth_views = [
 container_paths = [
     path(
         "repositories/",
-        viewsets.CotainerRepositoryViewSet.as_view({'get': 'list'}),
+        viewsets.ContainerRepositoryViewSet.as_view({'get': 'list'}),
         name='container-repository-detail'),
     path(
         "repositories/<str:name>/",
-        viewsets.CotainerRepositoryViewSet.as_view({'get': 'retrieve'}),
+        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
         name='container-repository-detail'),
     path(
         "repositories/<str:namespace>/<str:name>/",
-        viewsets.CotainerRepositoryViewSet.as_view({'get': 'retrieve'}),
+        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
         name='container-repository-detail'),
 ]
 
