@@ -89,9 +89,11 @@ class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
 
     def get_layers(self, obj):
         layers = []
-        blobs = container_models.BlobManifest.objects.filter(manifest=obj)
-        for blob in blobs:
-            layers.append(blob.manifest_blob.digest)
+        for blob in obj.blobs.all():
+            layers.append({
+                'digest': blob.digest,
+                'size': blob._artifacts.first().size
+            })
         return layers
 
     def get_config_blob(self, obj):
