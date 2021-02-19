@@ -1,4 +1,8 @@
 import logging
+
+from django.db.models import Subquery, OuterRef
+from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
+
 from pulp_container.app import models as container_models
 
 from django_filters import filters
@@ -32,6 +36,24 @@ class RepositoryFilter(filterset.FilterSet):
         }
 
 
+class ManifestFilter(filterset.FilterSet):
+    tag = filters.CharFilter(method='tag_filter')
+    sort = filters.OrderingFilter(
+        fields=(
+            ('pulp_created', 'created'),
+        ),
+    )
+
+    class Meta:
+        model = container_models.Manifest
+        fields = {
+            'digest': ['exact', 'icontains', 'contains', 'startswith'],
+        }
+
+    def tag_filter(self, queryset, name, value):
+        pass
+
+
 class ContainerRepositoryViewSet(api_base.ModelViewSet):
     queryset = models.ContainerDistribution.objects.all()
     serializer_class = serializers.ContainerRepositorySerializer
@@ -43,8 +65,9 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
 
 class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
     serializer_class = serializers.ContainerRepositoryImageSerializer
-
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    # filter_backends = (DjangoFilterBackend,)
+    # filterset_class = ManifestFilter
 
     def get_queryset(self):
         base_path = self.kwargs["base_path"]
@@ -55,5 +78,12 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
         # the serializer so that the serializer can limit tags to tags that are in
         # the current repo version
         self.repository_version = repo_version
+        repo_content = repo_version.content.all()
 
-        return container_models.Manifest.objects.filter(pk__in=repo_version.content.all())
+        manifests = container_models.Manifest.objects.filter(pk__in=repo_content)
+        tags = container_models.Tag.objects\
+            .filter(pk__in=repo_content)\
+            .filter(tagged_manifest=OuterRef('pk'))\
+            .annotate(tags=ArrayAgg('name'))
+
+        return manifests.annotate(tags=Subquery(tags.values('tags')))

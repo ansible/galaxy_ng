@@ -103,14 +103,15 @@ class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
         }
 
     def get_tags(self, obj):
-        tags = []
+        # tags = []
 
         # tagget_manifests returns all tags on the manifest, not just the ones
         # that are in the latest version of the repo.
-        repo_content = self.context['view'].repository_version.content.all()
-        tag_qs = obj.tagged_manifests.filter(pk__in=repo_content)
+        # repo_content = self.context['view'].repository_version.content.all()
+        # tag_qs = obj.tagged_manifests.filter(pk__in=repo_content)
 
-        for tag in tag_qs:
-            tags.append(tag.name)
+        # for tag in obj.tagged_manifest:
+        #     tags.append(tag.name)
+        # return tags
 
-        return tags
+        return obj.tags
