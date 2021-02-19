@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework import routers
 
 from galaxy_ng.app import constants
@@ -31,25 +31,30 @@ auth_views = [
     path("logout/", views.LogoutView.as_view(), name="auth-logout"),
 ]
 
+container_repo_paths = [
+
+    re_path(
+        r'images/',
+        viewsets.ContainerRepositoryManifestViewSet.as_view({'get': 'list'}),
+        name='container-repository-images'),
+]
+
 container_paths = [
     path(
         "repositories/",
         viewsets.ContainerRepositoryViewSet.as_view({'get': 'list'}),
-        name='container-repository-detail'),
-    path(
-        "repositories/<str:name>/images/",
-        viewsets.CotainerRepositoryManifestViewSet.as_view({'get': 'list'}),
-        name='container-repository-images'),
-    path(
-        "repositories/<str:namespace>/<str:name>/images/",
-        viewsets.CotainerRepositoryManifestViewSet.as_view({'get': 'list'}),
-        name='container-repository-images'),
-    path(
-        "repositories/<str:name>/",
-        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
-        name='container-repository-detail'),
-    path(
-        "repositories/<str:namespace>/<str:name>/",
+        name='container-repository-list'),
+
+    # image names can't start with _, so namespacing all the nested views
+    # under _detail prevents cases where an image could be named foo/images
+    # and conflict with our URL paths.
+    re_path(
+        r'repositories/(?P<base_path>\w+\/{0,1}\w+)/_content/',
+        include(container_repo_paths)),
+
+    # This regex can capture "namespace/name" and "name"
+    re_path(
+        r'repositories/(?P<base_path>\w+\/{0,1}\w+)/',
         viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
         name='container-repository-detail'),
 ]

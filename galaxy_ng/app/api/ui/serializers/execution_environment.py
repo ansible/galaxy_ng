@@ -72,6 +72,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
 class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
     config_blob = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
+    layers = serializers.SerializerMethodField()
 
     class Meta:
         model = container_models.Manifest
@@ -82,11 +83,22 @@ class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
             'media_type',
             'config_blob',
             'tags',
-            'pulp_created'
+            'pulp_created',
+            'layers'
         )
 
+    def get_layers(self, obj):
+        layers = []
+        blobs = container_models.BlobManifest.objects.filter(manifest=obj)
+        for blob in blobs:
+            layers.append(blob.manifest_blob.digest)
+        return layers
+
     def get_config_blob(self, obj):
-        return obj.config_blob.digest
+        return {
+            'digest': obj.config_blob.digest,
+            'media_type': obj.config_blob.media_type
+        }
 
     def get_tags(self, obj):
         tags = []

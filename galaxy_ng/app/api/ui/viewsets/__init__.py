@@ -18,7 +18,7 @@ from .group import GroupViewSet, GroupModelPermissionViewSet, GroupUserViewSet
 from .distribution import DistributionViewSet, MyDistributionViewSet
 from .execution_environment import (
     ContainerRepositoryViewSet,
-    CotainerRepositoryManifestViewSet
+    ContainerRepositoryManifestViewSet
 )
 
 __all__ = (
@@ -40,5 +40,5 @@ __all__ = (
     'DistributionViewSet',
     'MyDistributionViewSet',
     'ContainerRepositoryViewSet',
-    'CotainerRepositoryManifestViewSet'
+    'ContainerRepositoryManifestViewSet'
 )

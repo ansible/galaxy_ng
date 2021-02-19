@@ -38,25 +38,16 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RepositoryFilter
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
-
-    def get_object(self):
-        base_path = self.kwargs["name"]
-        if self.kwargs.get("namespace"):
-            base_path = "{}/{}".format(self.kwargs["namespace"], self.kwargs["name"])
-
-        return get_object_or_404(self.queryset, base_path=base_path)
+    lookup_field = "base_path"
 
 
-class CotainerRepositoryManifestViewSet(api_base.ModelViewSet):
+class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
     serializer_class = serializers.ContainerRepositoryImageSerializer
 
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
 
     def get_queryset(self):
-        base_path = self.kwargs["name"]
-        if self.kwargs.get("namespace"):
-            base_path = "{}/{}".format(self.kwargs["namespace"], self.kwargs["name"])
-
+        base_path = self.kwargs["base_path"]
         repo = get_object_or_404(models.ContainerDistribution, base_path=base_path).repository
         repo_version = repo.latest_version()
 
