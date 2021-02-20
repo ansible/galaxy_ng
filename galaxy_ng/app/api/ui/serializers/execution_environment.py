@@ -89,11 +89,14 @@ class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
 
     def get_layers(self, obj):
         layers = []
-        for blob in obj.blobs.all():
+        # use the prefetched blob_list and artifact_list instead of obj.blobs and
+        # blob._artifacts to cut down on queries made.
+        for blob in obj.blob_list:
             layers.append({
                 'digest': blob.digest,
-                'size': blob._artifacts.first().size
+                'size': blob.artifact_list[0].size
             })
+
         return layers
 
     def get_config_blob(self, obj):
@@ -103,15 +106,10 @@ class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
         }
 
     def get_tags(self, obj):
-        # tags = []
-
+        tags = []
         # tagget_manifests returns all tags on the manifest, not just the ones
         # that are in the latest version of the repo.
-        # repo_content = self.context['view'].repository_version.content.all()
-        # tag_qs = obj.tagged_manifests.filter(pk__in=repo_content)
+        for tag in obj.tagged_manifests.all():
+            tags.append(tag.name)
 
-        # for tag in obj.tagged_manifest:
-        #     tags.append(tag.name)
-        # return tags
-
-        return obj.tags
+        return tags

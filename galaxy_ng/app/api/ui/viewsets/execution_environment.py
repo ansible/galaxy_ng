@@ -1,7 +1,6 @@
 import logging
 
-from django.db.models import Subquery, OuterRef
-from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
+from django.db.models import Prefetch
 
 from pulp_container.app import models as container_models
 
@@ -37,7 +36,7 @@ class RepositoryFilter(filterset.FilterSet):
 
 
 class ManifestFilter(filterset.FilterSet):
-    tag = filters.CharFilter(method='tag_filter')
+    # tag = filters.CharFilter(method='tag_filter')
     sort = filters.OrderingFilter(
         fields=(
             ('pulp_created', 'created'),
@@ -49,9 +48,6 @@ class ManifestFilter(filterset.FilterSet):
         fields = {
             'digest': ['exact', 'icontains', 'contains', 'startswith'],
         }
-
-    def tag_filter(self, queryset, name, value):
-        pass
 
 
 class ContainerRepositoryViewSet(api_base.ModelViewSet):
@@ -66,24 +62,43 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
 class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
     serializer_class = serializers.ContainerRepositoryImageSerializer
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
-    # filter_backends = (DjangoFilterBackend,)
-    # filterset_class = ManifestFilter
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ManifestFilter
 
     def get_queryset(self):
         base_path = self.kwargs["base_path"]
         repo = get_object_or_404(models.ContainerDistribution, base_path=base_path).repository
         repo_version = repo.latest_version()
-
-        # set the repo version as an attribute of the viewset so it's available to
-        # the serializer so that the serializer can limit tags to tags that are in
-        # the current repo version
-        self.repository_version = repo_version
         repo_content = repo_version.content.all()
 
-        manifests = container_models.Manifest.objects.filter(pk__in=repo_content)
-        tags = container_models.Tag.objects\
+        manifests = container_models.Manifest.objects\
             .filter(pk__in=repo_content)\
-            .filter(tagged_manifest=OuterRef('pk'))\
-            .annotate(tags=ArrayAgg('name'))
+            .prefetch_related(
+                # Prefetch limits the tag list to tags in the current repo version.
+                # Without it, tags from all repo versions are allowed which leads
+                # to duplicates.
+                Prefetch(
+                    'tagged_manifests',
+                    container_models.Tag.objects.filter(pk__in=repo_content)),
+                Prefetch(
+                    'blobs',
+                    container_models.Blob.objects.prefetch_related(
+                        Prefetch('_artifacts', to_attr='artifact_list')),
+                    to_attr='blob_list'),
+                'config_blob'
+            )
 
-        return manifests.annotate(tags=Subquery(tags.values('tags')))
+        # I know that this should go in the FilterSet, but I cannot for the life
+        # of me figure out how to access base_path in the filterset. Without
+        # base_path, it's impossible to filter the tags down to a specific repo version,
+        # which means this query would end up pulling all of the tags in all repos
+        # that match the tag param, which could potentially be thousands of objects.
+        tag_filter = self.request.GET.get('tag', None)
+        if tag_filter:
+            manifests = manifests.filter(
+                tagged_manifests__name__contains=tag_filter,
+                # tagged_manifests doesn't respect the Prefetch filtering, so
+                # the repo version has to be filtered again here
+                tagged_manifests__pk__in=repo_content)
+
+        return manifests
