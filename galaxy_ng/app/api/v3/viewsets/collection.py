@@ -15,7 +15,7 @@ from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException, NotFound
 
-from pulpcore.plugin.models import ContentArtifact, Task
+from pulpcore.plugin.models import Task
 from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
@@ -51,11 +51,6 @@ log = logging.getLogger(__name__)
 class ViewNamespaceSerializerContextMixin:
     def get_serializer_context(self):
         """Inserts distribution path to a serializer context."""
-
-        self._deprecation
-        # ^ this call is needed so we populate deprecated_collections_context
-        # that was added here
-        # https://github.com/pulp/pulp_ansible/commit/b1d4797c20663c8552a80b3766fde5ad287c996e
 
         context = super().get_serializer_context()
 
@@ -105,24 +100,6 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
             return self.get_paginated_response(serializer.data)
 
         serializer = CollectionVersionListSerializer(queryset, many=True, context=context)
-        return Response(serializer.data)
-
-    # Custom retrive so we can use the class serializer_class
-    # galaxy_ng.app.api.v3.serializers.CollectionVersionSerializer
-    # which is responsible for building the 'download_url'. The default pulp one doesn't
-    # include the distro base_path which we need (https://pulp.plan.io/issues/6510)
-    # so override this so we can use a different serializer
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Returns a CollectionVersion object.
-        """
-        instance = self.get_object()
-        artifact = ContentArtifact.objects.get(content=instance)
-
-        context = self.get_serializer_context()
-        context["content_artifact"] = artifact
-
-        serializer = self.get_serializer_class()(instance, context=context)
         return Response(serializer.data)
 
 
