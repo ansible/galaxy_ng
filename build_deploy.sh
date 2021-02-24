@@ -30,7 +30,7 @@ mkdir -p "${DOCKER_CONF}"
 
 docker --config="${DOCKER_CONF}" login --username "${QUAY_USER}" --password "${QUAY_TOKEN}" quay.io
 docker --config="${DOCKER_CONF}" login --username "${RH_REGISTRY_USER}" --password "${RH_REGISTRY_TOKEN}" registry.redhat.io
-docker --config="${DOCKER_CONF}" build --file Dockerfile.rhel8 --tag "${IMAGE}:${IMAGE_TAG}" .
+docker --config="${DOCKER_CONF}" build --tag "${IMAGE}:${IMAGE_TAG}" .
 docker --config="${DOCKER_CONF}" push "${IMAGE}:${IMAGE_TAG}"
 docker --config="${DOCKER_CONF}" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:qa"
 docker --config="${DOCKER_CONF}" push "${IMAGE}:qa"
