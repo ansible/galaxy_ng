@@ -28,7 +28,8 @@ from .distribution import (
 )
 
 from .execution_environment import (
-    ContainerRepositorySerializer
+    ContainerRepositorySerializer,
+    ContainerRepositoryImageSerializer
 )
 
 __all__ = (
@@ -53,5 +54,6 @@ __all__ = (
     # distribution
     'DistributionSerializer',
     # container
-    'ContainerRepositorySerializer'
+    'ContainerRepositorySerializer',
+    'ContainerRepositoryImageSerializer'
 )

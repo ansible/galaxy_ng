@@ -62,7 +62,7 @@ requirements = [
     "pulp-ansible==0.7.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container==2.3.1"
+    "pulp-container>=2.3.1"
 ]
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
