@@ -1,7 +1,8 @@
 import logging
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count, Subquery, OuterRef, Q
 
+from pulpcore.plugin import models as core_models
 from pulp_container.app import models as container_models
 
 from django_filters import filters
@@ -102,3 +103,45 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
                 tagged_manifests__pk__in=repo_content)
 
         return manifests
+
+
+class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
+    # queryset = models.ContainerDistribution.objects.all()
+    serializer_class = serializers.ContainerRepositoryHistorySerializer
+    # filter_backends = (DjangoFilterBackend,)
+    # filterset_class = RepositoryFilter
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    lookup_field = "base_path"
+
+    def get_queryset(self):
+        base_path = self.kwargs["base_path"]
+        repo = get_object_or_404(models.ContainerDistribution, base_path=base_path).repository
+
+        allowed_content_types = ['container.manifest', 'container.tag']
+
+        # The ui only cares about repo versions where tags and manifests are added.
+        # Pulp container revs the repo version each time any blobs are added, so
+        # this filters out any repo versions where tags and manifests are unchanged.
+        return repo.versions\
+            .annotate(
+                # Count the number of added/removed manifests and tags and use
+                # the result to filter out any versions where tags and manifests
+                # are unchanged.
+                added_count=Count('added_memberships', filter=Q(
+                    added_memberships__content__pulp_type__in=allowed_content_types)),
+                removed_count=Count('removed_memberships', filter=Q(
+                    removed_memberships__content__pulp_type__in=allowed_content_types))
+            )\
+            .filter(Q(added_count__gt=0) | Q(removed_count__gt=0))\
+            .prefetch_related(
+                Prefetch(
+                    'added_memberships',
+                    queryset=core_models.RepositoryContent.objects.filter(
+                        content__pulp_type__in=allowed_content_types).prefetch_related('content'),
+                ),
+                Prefetch(
+                    'removed_memberships',
+                    queryset=core_models.RepositoryContent.objects.filter(
+                        content__pulp_type__in=allowed_content_types).prefetch_related('content'),
+                )
+            )
