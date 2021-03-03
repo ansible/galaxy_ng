@@ -63,7 +63,6 @@ def get_synclist(base_path):
 def get_collection_synclist_queryset(orignal_qs, distro_name):
     # This is a dirty hack that bypasses the need to curate synclist repos until
     # we can figure out how to make it more performant
-    # synclist_pattern = settings.GALAXY_API_SYNCLIST_NAME_FORMAT.replace('{account_name}', '')
 
     synclist_data = get_synclist(distro_name)
     if synclist_data is not None:
@@ -81,7 +80,6 @@ def get_collection_synclist_queryset(orignal_qs, distro_name):
 def get_collection_version_synclist_queryset(orignal_qs, distro_name, namespace, name):
     # This is a dirty hack that bypasses the need to curate synclist repos until
     # we can figure out how to make it more performant
-    # synclist_pattern = settings.GALAXY_API_SYNCLIST_NAME_FORMAT.replace('{account_name}', '')
 
     synclist_data = get_synclist(distro_name)
     if synclist_data is not None:
