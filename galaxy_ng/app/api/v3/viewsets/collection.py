@@ -11,6 +11,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.db.models import Q
 
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException, NotFound
@@ -18,7 +19,7 @@ from rest_framework.exceptions import APIException, NotFound
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
-from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
+from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution, Collection
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from galaxy_ng.app.api import base as api_base
 
@@ -48,6 +49,60 @@ from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 log = logging.getLogger(__name__)
 
 
+def get_synclist(base_path):
+    try:
+        repo = AnsibleDistribution.objects.get(base_path=base_path).repository
+        synclist = models.SyncList.objects.get(repository=repo)
+        collections = synclist.collections.all().values_list('pk', flat=True)
+        namespaces = synclist.namespaces.all().values_list('name', flat=True)
+        return {'policy': synclist.policy, 'collections': collections, 'namespaces': namespaces}
+    except ObjectDoesNotExist:
+        return None
+
+
+def get_collection_synclist_queryset(orignal_qs, distro_name):
+    # This is a dirty hack that bypasses the need to curate synclist repos until
+    # we can figure out how to make it more performant
+    # synclist_pattern = settings.GALAXY_API_SYNCLIST_NAME_FORMAT.replace('{account_name}', '')
+
+    synclist_data = get_synclist(distro_name)
+    if synclist_data is not None:
+        if synclist_data['policy'] == "exclude":
+            return Collection.objects.exclude(pk__in=synclist_data['collections'])\
+                .exclude(namespace__in=synclist_data['namespaces'])
+        else:
+            return Collection.objects.filter(
+                Q(pk__in=synclist_data['collections'])
+                | Q(namespace__in=synclist_data['namespaces']))
+
+    return orignal_qs
+
+
+def get_collection_version_synclist_queryset(orignal_qs, distro_name, namespace, name):
+    # This is a dirty hack that bypasses the need to curate synclist repos until
+    # we can figure out how to make it more performant
+    # synclist_pattern = settings.GALAXY_API_SYNCLIST_NAME_FORMAT.replace('{account_name}', '')
+
+    synclist_data = get_synclist(distro_name)
+    if synclist_data is not None:
+        # From https://github.com/pulp/pulp_ansible/blob/002fab0bfd3eddf03d272182eaf7269590953a60/pulp_ansible/app/galaxy/v3/views.py#L104
+        qs = CollectionVersion.objects.select_related(
+            "content_ptr__contentartifact"
+        ).filter(
+            namespace=namespace, name=name
+        )
+
+        if synclist_data['policy'] == "exclude":
+            return qs.exclude(collection__pk__in=synclist_data['collections'])\
+                .exclude(collection__namespace__in=synclist_data['namespaces'])
+    else:
+        return qs.filter(
+            Q(collection__pk__in=synclist_data['collections'])
+            | Q(collection__pk__in=synclist_data['namespaces']))
+
+    return orignal_qs
+
+
 class ViewNamespaceSerializerContextMixin:
     def get_serializer_context(self):
         """Inserts distribution path to a serializer context."""
@@ -74,12 +129,23 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
 
+    def get_queryset(self):
+        return get_collection_synclist_queryset(super().get_queryset(), self.kwargs["path"])
+
 
 class CollectionVersionViewSet(api_base.LocalSettingsMixin,
                                ViewNamespaceSerializerContextMixin,
                                pulp_ansible_views.CollectionVersionViewSet):
     serializer_class = CollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
+
+    def get_queryset(self):
+        return get_collection_version_synclist_queryset(
+            super().get_queryset(),
+            self.kwargs["path"],
+            self.kwargs["namespace"],
+            self.kwargs["name"]
+        )
 
     # TODO: This is cut&paste from pulp_ansible_views.CollectionVersionViewSet.list, so
     #       the serializer class can be overridden. Should be able to remove this
@@ -106,6 +172,14 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
 class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
                                    pulp_ansible_views.CollectionVersionDocsViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
+
+    def get_queryset(self):
+        return get_collection_version_synclist_queryset(
+            super().get_queryset(),
+            self.kwargs["path"],
+            self.kwargs["namespace"],
+            self.kwargs["name"]
+        )
 
 
 class CollectionImportViewSet(api_base.LocalSettingsMixin,
