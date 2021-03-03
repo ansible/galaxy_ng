@@ -94,10 +94,10 @@ def get_collection_version_synclist_queryset(orignal_qs, distro_name, namespace,
         if synclist_data['policy'] == "exclude":
             return qs.exclude(collection__pk__in=synclist_data['collections'])\
                 .exclude(collection__namespace__in=synclist_data['namespaces'])
-    else:
-        return qs.filter(
-            Q(collection__pk__in=synclist_data['collections'])
-            | Q(collection__pk__in=synclist_data['namespaces']))
+        else:
+            return qs.filter(
+                Q(collection__pk__in=synclist_data['collections'])
+                | Q(collection__pk__in=synclist_data['namespaces']))
 
     return orignal_qs
 
