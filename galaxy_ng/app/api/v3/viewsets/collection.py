@@ -83,7 +83,8 @@ def get_collection_version_synclist_queryset(orignal_qs, distro_name, namespace,
 
     synclist_data = get_synclist(distro_name)
     if synclist_data is not None:
-        # From https://github.com/pulp/pulp_ansible/blob/002fab0bfd3eddf03d272182eaf7269590953a60/pulp_ansible/app/galaxy/v3/views.py#L104
+        # From https://github.com/pulp/pulp_ansible/blob/002fab0bfd3eddf03d2721
+        #      82eaf7269590953a60/pulp_ansible/app/galaxy/v3/views.py#L104
         qs = CollectionVersion.objects.select_related(
             "content_ptr__contentartifact"
         ).filter(
