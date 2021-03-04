@@ -90,6 +90,41 @@ class TestCollectionViewsets(BaseTestCase):
             }
         )
 
+        self.versions_detail_url = reverse(
+            'galaxy:api:content:v3:collection-versions-detail',
+            kwargs={
+                'path': self.repo.name,
+                'namespace': self.namespace.name,
+                'name': self.collection.name,
+                'version': '1.1.2'
+            }
+        )
+
+        # metadata urls
+        self.all_collections_url = reverse(
+            'galaxy:api:content:v3:all-collections-list',
+            kwargs={
+                'path': self.repo.name,
+            }
+        )
+
+        self.all_versions_url = reverse(
+            'galaxy:api:content:v3:all-collection-versions-list',
+            kwargs={
+                'path': self.repo.name,
+            }
+        )
+
+        self.metadata_url = reverse(
+            'galaxy:api:content:v3:repo-metadata',
+            kwargs={
+                'path': self.repo.name,
+            }
+        )
+
+        # used for href tests
+        self.pulp_href_fragment = "pulp_ansible/galaxy"
+
     def test_collections_list(self):
         """Assert the call to v3/collections returns correct
         collections and versions
@@ -102,6 +137,25 @@ class TestCollectionViewsets(BaseTestCase):
             response.data['data'][0]['highest_version']['version'], '1.1.2'
         )
 
+        # Ensure href is overwritten
+        self.assertNotIn(self.pulp_href_fragment, response.data["data"][0]["href"])
+        self.assertNotIn(self.pulp_href_fragment, response.data["data"][0]["versions_url"])
+        self.assertNotIn(self.pulp_href_fragment, response.data["data"][0]["highest_version"]["href"])
+
+    def test_unpaginated_collections_list(self):
+        """Assert the call to v3/collections/all returns correct
+        collections and versions
+        """
+        self.client.force_authenticate(user=self.admin_user)
+        response = self.client.get(self.all_collections_url)
+        self.assertEqual(response.data[0]['deprecated'], False)
+        self.assertEqual(response.data[0]['highest_version']['version'], '1.1.2')
+
+        # Ensure href is overwritten
+        self.assertNotIn(self.pulp_href_fragment, response.data[0]["href"])
+        self.assertNotIn(self.pulp_href_fragment, response.data[0]["versions_url"])
+        self.assertNotIn(self.pulp_href_fragment, response.data[0]["highest_version"]["href"])
+
     def test_collections_detail(self):
         """Assert detail view for v3/collections/namespace/name
         retrurns the same values
@@ -113,6 +167,11 @@ class TestCollectionViewsets(BaseTestCase):
         self.assertEqual(
             response.data['highest_version']['version'], '1.1.2'
         )
+
+        # Ensure hrefs are overwritten
+        self.assertNotIn(self.pulp_href_fragment, response.data["href"])
+        self.assertNotIn(self.pulp_href_fragment, response.data["versions_url"])
+        self.assertNotIn(self.pulp_href_fragment, response.data["highest_version"]["href"])
 
     def test_collection_versions_list(self):
         """Assert v3/collections/namespace/name/versions/
@@ -127,8 +186,38 @@ class TestCollectionViewsets(BaseTestCase):
         self.assertEqual(response.data['data'][0]['version'], '1.1.2')
         self.assertEqual(response.data['data'][1]['version'], '1.1.1')
 
+        # Ensure hrefs are overwritten
+        self.assertNotIn(self.pulp_href_fragment, response.data["data"][0]["href"])
+
         # TODO: implement subtests for each version after the
         # upload of artifacts has been implemented in `self.setUp`
         # for version in response.data['data']:
         #     with self.subTest(version=version['version):
         #         vresponse = self.client.get(version['href'])
+        #         self.assertNotIn(self.pulp_href_fragment, vresponse.data["href"])
+        #         self.assertNotIn(self.pulp_href_fragment, vresponse.data["collection"]["href"])
+        #         self.assertNotIn(self.pulp_href_fragment, vresponse.data["download_url"])
+
+    # def test_unpaginated_collection_versions_list(self):
+    #     """Assert the call to v3/collections/all returns correct
+    #     collections and versions
+    #     """
+    #     self.client.force_authenticate(user=self.admin_user)
+    #     response = self.client.get(self.all_versions_url)
+    #     self.assertEqual(response.data[0]['version'], '1.1.2')
+
+    #     # Ensure href is overwritten
+    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["href"])
+    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["collection"]["href"])
+    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["download_url"])
+
+    #     # Ensure some fields are in
+    #     for field in ('metadata', 'namespace', 'name', 'artifact'):
+    #         with self.subTest(field=field):
+    #             self.assertIn(field, response.data[0])
+
+    #     # Ensure some fields are not in
+    #     for field in ('manifest', 'files'):
+    #         with self.subTest(field=field):
+    #             self.assertNotIn(field, response.data[0])
+

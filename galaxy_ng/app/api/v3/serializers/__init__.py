@@ -3,6 +3,7 @@ from .collection import (
     CollectionVersionSerializer,
     CollectionVersionListSerializer,
     CollectionUploadSerializer,
+    UnpaginatedCollectionVersionSerializer,
 )
 
 from .namespace import (
@@ -30,4 +31,5 @@ __all__ = (
     'NamespaceSummarySerializer',
     'TaskSerializer',
     'TaskSummarySerializer',
+    'UnpaginatedCollectionVersionSerializer',
 )
