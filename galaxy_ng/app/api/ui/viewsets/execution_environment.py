@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Prefetch, Count, Subquery, OuterRef, Q
+from django.db.models import Prefetch, Count, Q
 
 from pulpcore.plugin import models as core_models
 from pulp_container.app import models as container_models
