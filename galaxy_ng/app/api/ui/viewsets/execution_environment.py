@@ -37,7 +37,6 @@ class RepositoryFilter(filterset.FilterSet):
 
 
 class ManifestFilter(filterset.FilterSet):
-    # tag = filters.CharFilter(method='tag_filter')
     sort = filters.OrderingFilter(
         fields=(
             ('pulp_created', 'created'),
@@ -46,9 +45,20 @@ class ManifestFilter(filterset.FilterSet):
 
     class Meta:
         model = container_models.Manifest
+        # Tag filters are supported, but are done in get_queryset. See the comment
+        # there
         fields = {
             'digest': ['exact', 'icontains', 'contains', 'startswith'],
         }
+
+
+class HistoryFilter(filterset.FilterSet):
+    sort = filters.OrderingFilter(
+        fields=(
+            ('pulp_created', 'created'),
+            ('number', 'number'),
+        ),
+    )
 
 
 class ContainerRepositoryViewSet(api_base.ModelViewSet):
@@ -106,10 +116,9 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
 
 
 class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
-    # queryset = models.ContainerDistribution.objects.all()
     serializer_class = serializers.ContainerRepositoryHistorySerializer
-    # filter_backends = (DjangoFilterBackend,)
-    # filterset_class = RepositoryFilter
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = HistoryFilter
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     lookup_field = "base_path"
 
@@ -137,11 +146,11 @@ class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
                 Prefetch(
                     'added_memberships',
                     queryset=core_models.RepositoryContent.objects.filter(
-                        content__pulp_type__in=allowed_content_types).prefetch_related('content'),
+                        content__pulp_type__in=allowed_content_types).select_related('content'),
                 ),
                 Prefetch(
                     'removed_memberships',
                     queryset=core_models.RepositoryContent.objects.filter(
-                        content__pulp_type__in=allowed_content_types).prefetch_related('content'),
+                        content__pulp_type__in=allowed_content_types).select_related('content'),
                 )
-            )
+            ).order_by('-pulp_created')
