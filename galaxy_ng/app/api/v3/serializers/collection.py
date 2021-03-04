@@ -82,7 +82,8 @@ class CollectionVersionListSerializer(_CollectionVersionListSerializer, HrefName
         )
 
 
-class UnpaginatedCollectionVersionSerializer(_UnpaginatedCollectionVersionSerializer, HrefNamespaceMixin):
+class UnpaginatedCollectionVersionSerializer(_UnpaginatedCollectionVersionSerializer,
+                                             HrefNamespaceMixin):
 
     collection = CollectionRefSerializer(read_only=True)
 

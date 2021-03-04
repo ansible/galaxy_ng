@@ -140,7 +140,9 @@ class TestCollectionViewsets(BaseTestCase):
         # Ensure href is overwritten
         self.assertNotIn(self.pulp_href_fragment, response.data["data"][0]["href"])
         self.assertNotIn(self.pulp_href_fragment, response.data["data"][0]["versions_url"])
-        self.assertNotIn(self.pulp_href_fragment, response.data["data"][0]["highest_version"]["href"])
+        self.assertNotIn(
+            self.pulp_href_fragment, response.data["data"][0]["highest_version"]["href"]
+        )
 
     def test_unpaginated_collections_list(self):
         """Assert the call to v3/collections/all returns correct
@@ -220,4 +222,3 @@ class TestCollectionViewsets(BaseTestCase):
     #     for field in ('manifest', 'files'):
     #         with self.subTest(field=field):
     #             self.assertNotIn(field, response.data[0])
-
