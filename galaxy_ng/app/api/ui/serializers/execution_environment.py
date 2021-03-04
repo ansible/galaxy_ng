@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.db.models import Q
 
 from pulp_container.app import models as container_models
 from pulpcore.plugin import models as core_models
