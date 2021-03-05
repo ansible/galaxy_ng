@@ -1,5 +1,7 @@
 import logging
-import pprint
+import itertools
+
+from django.conf import settings
 from django.db.models import F, Q
 
 from pulpcore.plugin.models import (
@@ -9,9 +11,7 @@ from pulpcore.plugin.models import (
     Task,
     TaskGroup,
 )
-
 from pulpcore.plugin.tasking import add_and_remove, enqueue_with_reservation
-
 from pulp_ansible.app.models import (
     AnsibleRepository,
     CollectionVersion,
@@ -20,7 +20,6 @@ from pulp_ansible.app.models import (
 from galaxy_ng.app import models
 
 log = logging.getLogger(__name__)
-pf = pprint.pformat
 
 
 def curate_all_synclist_repository(upstream_repository_name, **kwargs):
@@ -65,25 +64,27 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
         total=synclist_qs.count(),
     ) as task_progress_report:
 
-        for synclist in synclist_qs:
+        synclist_iter = synclist_qs.iterator()
+        while True:
+            batch = list(itertools.islice(synclist_iter, settings.SYNCLIST_BATCH_SIZE))
+            if not batch:
+                break
+
             # TODO: filter down to just synclists that have a synclist repo
             # locks need to be Model or str not int
-            locks = [str(synclist.id)]
-
-            task_args = (synclist.id,)
-            task_kwargs = {}
+            synclist_ids = [synclist.id for synclist in batch]
+            locks = [synclist.repository for synclist in batch]
 
             enqueue_with_reservation(
-                curate_synclist_repository,
+                curate_synclist_repository_batch,
                 locks,
-                args=task_args,
-                kwargs=task_kwargs,
+                args=(synclist_ids,),
                 task_group=task_group,
             )
             task_progress_report.increment()
 
             progress_report = task_group.group_progress_reports.filter(code="synclist.curate")
-            progress_report.update(done=F("done") + 1)
+            progress_report.update(done=F("done") + len(synclist_ids))
 
     log.info(
         "Finishing curating %s synclist repos based on %s update",
@@ -92,6 +93,11 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
     )
 
     task_group.finish()
+
+
+def curate_synclist_repository_batch(synclist_pks, **kwargs):
+    for synclist_pk in synclist_pks:
+        curate_synclist_repository(synclist_pk=synclist_pk)
 
 
 def curate_synclist_repository(synclist_pk, **kwargs):
@@ -116,8 +122,6 @@ def curate_synclist_repository(synclist_pk, **kwargs):
         synclist.repository.name,
         upstream_repository.name,
     )
-
-    locks = [synclist.repository]
 
     namespaces = synclist.namespaces.filter().values_list("name", flat=True)
 
@@ -148,7 +152,7 @@ def curate_synclist_repository(synclist_pk, **kwargs):
             "add_content_units": collection_versions,
             "remove_content_units": ["*"],
         }
+    else:
+        raise RuntimeError("Unexpected synclist policy {}".format(synclist.policy))
 
-    enqueue_with_reservation(
-        add_and_remove, locks, kwargs=task_kwargs,
-    )
+    add_and_remove(**task_kwargs)
