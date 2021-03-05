@@ -1,0 +1,3 @@
+Fixed synclist curation creating 2 * N tasks, where N is number of synclists.
+Now synclist curation is executed in batches. Number of batches is configured in project settings.
+By default it is set to 200 synclists per task.
