@@ -29,3 +29,12 @@ docker/build:     ## Build all development images.
 .PHONY: docker/test
 docker/test:      ## Run unit tests.
 	./compose run api manage test galaxy_ng.tests.unit
+
+.PHONY: docker/loaddata
+docker/loaddata:  ## Load initial data from fixtures
+	./compose run --rm -e PULP_FIXTURE_DIRS='["/src/galaxy_ng/dev/automation-hub"]' \
+ api manage loaddata initial_data.json
+
+.PHONY: docker/migrate
+docker/migrate:   ## Run django migrations
+	./compose run --rm api manage migrate

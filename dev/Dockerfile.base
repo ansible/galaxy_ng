@@ -5,12 +5,19 @@ ARG USER_NAME=galaxy
 ARG USER_GROUP=galaxy
 ARG COMPOSE_PROFILE
 ARG LOCK_REQUIREMENTS
+ARG DEV_SOURCE_PATH
+ARG DEV_IMAGE_SUFFIX
+ARG DEV_VOLUME_SUFFIX
 
 ENV LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
     PULP_SETTINGS=/etc/pulp/settings.py \
     DJANGO_SETTINGS_MODULE=pulpcore.app.settings \
-    LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS}"
+    COMPOSE_PROFILE="${COMPOSE_PROFILE}" \
+    LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS}" \
+    DEV_SOURCE_PATH="${DEV_SOURCE_PATH}" \
+    DEV_IMAGE_SUFFIX="${DEV_IMAGE_SUFFIX}" \
+    DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX}"
 
 RUN set -ex; \
     id --group "${USER_GROUP}" &>/dev/null \
@@ -50,9 +57,12 @@ RUN set -ex; \
 # Install application
 COPY . /app
 
+# When LOCK_REQUIREMENTS is disabled avoid running collectstatic here
+# on that case developer should run collectstatic manually
 RUN set -ex; \
     pip install --no-cache-dir --editable /app \
-    && PULP_CONTENT_ORIGIN=x django-admin collectstatic
+    && if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
+    PULP_CONTENT_ORIGIN=x django-admin collectstatic; fi
 
 # Finalize installation
 RUN set -ex; \
