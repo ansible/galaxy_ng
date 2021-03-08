@@ -14,6 +14,7 @@ from pulp_ansible.app.galaxy.v3.serializers import (
     CollectionSerializer as _CollectionSerializer,
     CollectionRefSerializer as _CollectionRefSerializer,
     CollectionVersionSerializer as _CollectionVersionSerializer,
+    UnpaginatedCollectionVersionSerializer as _UnpaginatedCollectionVersionSerializer,
     CollectionVersionListSerializer as _CollectionVersionListSerializer,
 )
 
@@ -26,10 +27,12 @@ class HrefNamespaceMixin:
 
         view_namespace = self.context["view_namespace"]
 
-        # Handle the case where the /api/automation-hub/v3/collections/  urls do not
+        # Handle the case where the /api/automation-hub/v3/collections/ urls do not
         # include a "<str:path>" path param. ie, the bacwares compatible default "golden" repo
-        if "/<str:path>/v3/" not in self.context["view_route"]:
-            del kwargs["path"]
+        if "/<str:path>/v3/" in self.context["view_route"]:
+            kwargs.setdefault("path", self.context["path"])
+        else:
+            kwargs.pop("path", None)
 
         return reverse(
             f"{view_namespace}:{url_name}",
@@ -42,25 +45,19 @@ class CollectionSerializer(_CollectionSerializer, HrefNamespaceMixin):
         ref_name = "CollectionWithFixedHrefsSerializer"
 
     def get_href(self, obj):
-        """Get href."""
-        kwargs = {"path": self.context["path"], "namespace": obj.namespace, "name": obj.name}
-        return self._get_href("collections-detail", **kwargs)
+        return self._get_href("collections-detail", namespace=obj.namespace, name=obj.name)
 
     def get_versions_url(self, obj):
         """Get a link to a collection versions list."""
-        kwargs = {"path": self.context["path"], "namespace": obj.namespace, "name": obj.name}
-        return self._get_href("collection-versions-list", **kwargs)
+        return self._get_href("collection-versions-list", namespace=obj.namespace, name=obj.name)
 
     def get_highest_version(self, obj):
         """Get a highest version and its link."""
         data = super().get_highest_version(obj)
-        kwargs = {
-            "path": self.context["path"],
-            "namespace": obj.namespace,
-            "name": obj.name,
-            "version": data['version'],
-        }
-        data['href'] = self._get_href("collection-versions-detail", **kwargs)
+        data['href'] = self._get_href(
+            "collection-versions-detail",
+            namespace=obj.namespace, name=obj.name, version=data['version']
+        )
         return data
 
 
@@ -70,9 +67,7 @@ class CollectionRefSerializer(_CollectionRefSerializer, HrefNamespaceMixin):
 
     def get_href(self, obj):
         """Returns link to a collection."""
-
-        kwargs = {"path": self.context["path"], "namespace": obj.namespace, "name": obj.name}
-        return self._get_href("collections-detail", **kwargs)
+        return self._get_href("collections-detail", namespace=obj.namespace, name=obj.name)
 
 
 class CollectionVersionListSerializer(_CollectionVersionListSerializer, HrefNamespaceMixin):
@@ -81,14 +76,22 @@ class CollectionVersionListSerializer(_CollectionVersionListSerializer, HrefName
 
     def get_href(self, obj):
         """Get href."""
-        kwargs = {
-            "path": self.context["path"],
-            "namespace": obj.namespace,
-            "name": obj.name,
-            "version": obj.version,
-        }
+        return self._get_href(
+            "collection-versions-detail",
+            namespace=obj.namespace, name=obj.name, version=obj.version
+        )
 
-        return self._get_href("collection-versions-detail", **kwargs)
+
+class UnpaginatedCollectionVersionSerializer(_UnpaginatedCollectionVersionSerializer,
+                                             HrefNamespaceMixin):
+
+    collection = CollectionRefSerializer(read_only=True)
+
+    class Meta(_UnpaginatedCollectionVersionSerializer.Meta):
+        ref_name = "UnpaginatedCollectionVersionWithFixedHrefsSerializer"
+
+    def get_href(self, obj):
+        return self._get_href("collections-detail", namespace=obj.namespace, name=obj.name)
 
 
 class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMixin):
@@ -102,17 +105,16 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
         """
         Get artifact download URL.
         """
-
         host = settings.CONTENT_ORIGIN.strip("/")
         prefix = settings.CONTENT_PATH_PREFIX.strip("/")
         distro_base_path = self.context["path"]
         return f"{host}/{prefix}/{distro_base_path}/{obj.relative_path}"
 
     def get_href(self, obj):
-        """Get href."""
-        kwargs = {"path": self.context["path"], "namespace": obj.namespace,
-                  "name": obj.name, "version": obj.version}
-        return self._get_href("collection-versions-detail", **kwargs)
+        return self._get_href(
+            "collection-versions-detail",
+            namespace=obj.namespace, name=obj.name, version=obj.version
+        )
 
 
 class CollectionUploadSerializer(Serializer):

@@ -31,6 +31,17 @@ sync_urls = [
 ]
 
 urlpatterns = [
+    path("", viewsets.RepoMetadataViewSet.as_view({"get": "retrieve"}), name="repo-metadata"),
+    path(
+        'collections/all/',
+        viewsets.UnpaginatedCollectionViewSet.as_view({'get': 'list'}),
+        name='all-collections-list'
+    ),
+    path(
+        'collection_versions/all/',
+        viewsets.UnpaginatedCollectionVersionViewSet.as_view({"get": "list"}),
+        name="all-collection-versions-list"
+    ),
     path(
         'collections/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),

@@ -2,8 +2,6 @@ import logging
 
 import requests
 
-import semantic_version
-
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 
@@ -29,6 +27,7 @@ from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.v3.serializers import (
     CollectionSerializer,
     CollectionVersionSerializer,
+    UnpaginatedCollectionVersionSerializer,
     CollectionVersionListSerializer,
     CollectionUploadSerializer,
 )
@@ -68,6 +67,19 @@ class ViewNamespaceSerializerContextMixin:
         return context
 
 
+class RepoMetadataViewSet(api_base.LocalSettingsMixin,
+                          pulp_ansible_views.RepoMetadataViewSet):
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
+
+class UnpaginatedCollectionViewSet(api_base.LocalSettingsMixin,
+                                   ViewNamespaceSerializerContextMixin,
+                                   pulp_ansible_views.UnpaginatedCollectionViewSet):
+    pagination_class = None
+    permission_classes = [access_policy.CollectionAccessPolicy]
+    serializer_class = CollectionSerializer
+
+
 class CollectionViewSet(api_base.LocalSettingsMixin,
                         ViewNamespaceSerializerContextMixin,
                         pulp_ansible_views.CollectionViewSet):
@@ -75,32 +87,20 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
     serializer_class = CollectionSerializer
 
 
+class UnpaginatedCollectionVersionViewSet(api_base.LocalSettingsMixin,
+                                          ViewNamespaceSerializerContextMixin,
+                                          pulp_ansible_views.UnpaginatedCollectionVersionViewSet):
+    pagination_class = None
+    serializer_class = UnpaginatedCollectionVersionSerializer
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
+
 class CollectionVersionViewSet(api_base.LocalSettingsMixin,
                                ViewNamespaceSerializerContextMixin,
                                pulp_ansible_views.CollectionVersionViewSet):
     serializer_class = CollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
-
-    # TODO: This is cut&paste from pulp_ansible_views.CollectionVersionViewSet.list, so
-    #       the serializer class can be overridden. Should be able to remove this
-    #       once pulp_ansible serializers use something like _get_href that names
-    #       url namespace into account
-    def list(self, request, *args, **kwargs):
-        """Returns paginated CollectionVersions list."""
-
-        queryset = self.filter_queryset(self.get_queryset())
-        queryset = sorted(
-            queryset, key=lambda obj: semantic_version.Version(obj.version), reverse=True
-        )
-
-        context = self.get_serializer_context()
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = CollectionVersionListSerializer(page, many=True, context=context)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = CollectionVersionListSerializer(queryset, many=True, context=context)
-        return Response(serializer.data)
+    list_serializer_class = CollectionVersionListSerializer
 
 
 class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
@@ -243,7 +243,9 @@ class CollectionArtifactDownloadView(api_base.APIView):
         response = requests.get(url, stream=True, allow_redirects=False)
 
         if response.status_code == requests.codes.not_found:
-            metrics.collection_artifact_download_failures.labels(status=requests.codes.not_found).inc() # noqa
+            metrics.collection_artifact_download_failures.labels(
+                status=requests.codes.not_found
+            ).inc()
             raise NotFound()
 
         if response.status_code == requests.codes.found:

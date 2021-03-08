@@ -6,6 +6,9 @@ from .collection import (
     CollectionVersionViewSet,
     CollectionVersionDocsViewSet,
     CollectionVersionMoveViewSet,
+    UnpaginatedCollectionViewSet,
+    UnpaginatedCollectionVersionViewSet,
+    RepoMetadataViewSet,
 )
 
 from .namespace import (
@@ -30,4 +33,7 @@ __all__ = (
     'NamespaceViewSet',
     'SyncConfigViewSet',
     'TaskViewSet',
+    'UnpaginatedCollectionViewSet',
+    'UnpaginatedCollectionVersionViewSet',
+    'RepoMetadataViewSet',
 )
