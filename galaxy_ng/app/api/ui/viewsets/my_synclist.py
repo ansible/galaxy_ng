@@ -1,5 +1,6 @@
 import logging
 
+from django.shortcuts import get_object_or_404
 from guardian.shortcuts import get_objects_for_user
 
 from rest_framework.decorators import action
@@ -35,13 +36,12 @@ class MySyncListViewSet(SyncListViewSet):
         )
 
     @action(detail=True, methods=["post"])
-    def curate(self, request, pk=None):
-        locks = [pk]
-        task_args = (pk,)
-        task_kwargs = {}
-
+    def curate(self, request, pk):
+        synclist = get_object_or_404(models.SyncList, pk)
         synclist_task = enqueue_with_reservation(
-            curate_synclist_repository, locks, args=task_args, kwargs=task_kwargs
+            curate_synclist_repository,
+            resources=[synclist.repository],
+            args=(pk, )
         )
 
         log.debug("synclist_task: %s", synclist_task)

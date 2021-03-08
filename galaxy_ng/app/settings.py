@@ -43,6 +43,9 @@ GALAXY_API_SYNCLIST_NAME_FORMAT = "{account_name}-synclist"
 # Require approval for incoming content, which uses a staging repository
 GALAXY_REQUIRE_CONTENT_APPROVAL = True
 
+# Number of synclist to be processed in single task
+SYNCLIST_BATCH_SIZE = 200
+
 # Local rest framework settings
 # -----------------------------
 
