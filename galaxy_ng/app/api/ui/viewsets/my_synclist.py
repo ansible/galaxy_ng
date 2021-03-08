@@ -37,7 +37,7 @@ class MySyncListViewSet(SyncListViewSet):
 
     @action(detail=True, methods=["post"])
     def curate(self, request, pk):
-        synclist = get_object_or_404(models.SyncList, pk)
+        synclist = get_object_or_404(models.SyncList, pk=pk)
         synclist_task = enqueue_with_reservation(
             curate_synclist_repository,
             resources=[synclist.repository],
