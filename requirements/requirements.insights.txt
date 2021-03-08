@@ -63,7 +63,7 @@ openpyxl==3.0.5           # via tablib
 packaging==20.4           # via ansible-base, bleach, pulp-ansible
 prometheus-client==0.8.0  # via django-prometheus
 psycopg2==2.8.6           # via pulpcore
-pulp-ansible==0.5.6       # via galaxy-ng (setup.py)
+pulp-ansible==0.5.8       # via galaxy-ng (setup.py)
 pulpcore==3.7.1           # via galaxy-ng (setup.py), pulp-ansible
 pycares==3.1.1            # via aiodns
 pycodestyle==2.6.0        # via flake8
