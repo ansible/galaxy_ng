@@ -38,18 +38,18 @@ class Command(BaseCommand):
     #             "permission in the form 'app_label.codename'".format(
     #                 permission))
 
-    # def add_arguments(self, parser):
+    def add_arguments(self, parser):
     #     parser.add_argument('group', type=self.valid_group)
-    #     parser.add_argument(
-    #         'permissions',
-    #         nargs='+',
-    #         type=self.valid_permission
-    #     )
+        parser.add_argument(
+            '--deployment-mode',
+            dest='deployment_mode',
+            default=settings.GALAXY_DEPLOYMENT_MODE,
+            help="The deployment mode to use the access_policy of. Choices: insights, standalone"
+        )
 
     def handle(self, *args, **options):
         ap = access_control.access_policy.AccessPolicyBase()
-        deployment_mode = settings.GALAXY_DEPLOYMENT_MODE
-        deployment_mode = 'insights'
+        deployment_mode = options['deployment_mode']
         statements_map = ap._get_statements(deployment_mode)
         statement_template = \
             "\taction: {action}\n\t\tprincipal: {principal}\n\t\teffect: {effect}\n\t\tconditions:\n{conditions}\n"
