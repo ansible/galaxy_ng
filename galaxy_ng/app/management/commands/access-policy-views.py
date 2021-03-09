@@ -13,6 +13,7 @@ from django.core.exceptions import ViewDoesNotExist
 from django.urls import URLPattern, URLResolver  # type: ignore
 from django.utils import translation
 from django.contrib.auth import load_backend, get_backends
+from django.contrib.auth.backends import ModelBackend
 
 from django_extensions.management.commands import show_urls
 from rest_framework.views import get_view_name
@@ -34,7 +35,9 @@ class FauxRequest:
         self.user = user
         self.method = method
         self.path = path
+        self.query_params = {}
         self._request = FauxInnerRequest(user, method, path)
+
 
 
 class Command(show_urls.Command):
@@ -81,13 +84,11 @@ class Command(show_urls.Command):
 
     def _get_user(self, user_id):
         backends = get_backends()
-        print('backends: %s', backends)
         # backend = load_backend(backend_path)
         backend = backends[0]
-        user = backend.get_user(user_id=user_id)
-        if user is None:
-            print(f"No user found for user_id={user_id}")
-            return
+        if isinstance(backend, ModelBackend):
+            user = backend.get_user(user_id=user_id)
+
         return user
 
     def handle(self, *args, **options):
@@ -149,8 +150,8 @@ class Command(show_urls.Command):
                 continue
             if module.startswith('rest_framework'):
                 continue
-            # if module.startswith('pulp'):
-            #    continue
+            if module.startswith('pulp'):
+                continue
             if module.startswith('drf_spectacular'):
                 continue
 
@@ -171,7 +172,8 @@ class Command(show_urls.Command):
                                   "access_policy": perms[0],
                                   "path_regex": regex,
                                   "decorators": decorator,
-                                  "view": func.cls})
+                                  "view": func.cls,
+                                  "p": p})
 
             # format_style = 'json'
             # if format_style == 'json':
@@ -271,6 +273,8 @@ class Command(show_urls.Command):
 
         user_id = options['user_id']
         user = self._get_user(user_id)
+        if user_id and user is None:
+            raise CommandError(f"No user found for user_id={user_id}")
 
         for statement in statements:
             actions = statement['action']
@@ -290,8 +294,9 @@ class Command(show_urls.Command):
                                                             effect=statement['effect'],
                                                             conditions=conditions_buf))
                 # self.stdout.write("\t%s\n" % statement)
-
-            self._has_permission(viewset_info, user, action, viewset_info['url'])
+                if user and action not in ('*', 'update', 'destroy'):
+                    result = self._has_permission(viewset_info, user, action, viewset_info['url'])
+                    self.stdout.write(f'\t\tresult: {result}\n')
 
         # group = options['group']
         # for perm in options['permissions']:
@@ -300,14 +305,36 @@ class Command(show_urls.Command):
         #                   "group '{}'".format(group.name))
 
     def _has_permission(self, viewset_info, user=None, action=None, url=None):
-        request = FauxRequest(user, url=url)
-
         view = viewset_info['view']
-        view_instance = view()
+        log.debug('pre viewset_info=%s action=%s user=%s url=%s',
+                  viewset_info, action, user, url)
+
+        amap = {'list': 'GET',
+                'retrieve': 'GET',
+                'create': 'POST',
+                'destroy': 'DELETE',
+                'partial_update': 'PATCH',
+                'update': 'PUT',
+                'move_content': 'POST',
+                'sync': 'PUT',
+                }
+        method = amap.get(action)
+        assert method is not None, "action %s is unknown" % action
+
+        request = FauxRequest(user, method=method, path=url)
+        log.debug('request: %s request.method: %s', request, request.method)
+
+        # view_instance = view(action=action, request=request)
+        # view_instance = view.as_view(actions={'get':'list'})
+        # view_instance = view(action=action, request=request, kwargs={'lookup_url_kwarg':'pk'})
+        view_instance = view(action=action, request=request, kwargs={})
+        log.debug('view_instance: %s', view_instance)
 
         policy = viewset_info['access_policy']
         result = policy.has_permission(request, view_instance)
-        log.debug('result: %s', result)
+
+        log.debug('view_instance=%s action=%s user=%s url=%s result: %s',
+                  view_instance, action, user, url, result)
 
         return result
 

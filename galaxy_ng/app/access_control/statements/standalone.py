@@ -35,12 +35,6 @@ STANDALONE_STATEMENTS = {
             "effect": "deny",
         },
         {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "can_create_collection"
-        },
-        {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",
@@ -52,6 +46,14 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_model_perms:ansible.modify_ansible_repo_content"
         }
+    ],
+    'CollectionUploadViewSet': [
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "can_create_collection"
+        },
     ],
     'CollectionRemoteViewSet': [
         {
