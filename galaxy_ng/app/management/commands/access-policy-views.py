@@ -83,11 +83,10 @@ class Command(show_urls.Command):
                 traceback.print_exc()
             raise CommandError("Error occurred while trying to load %s: %s" % (getattr(settings, urlconf), str(e)))
 
-        log.debug('urlconf:\n%s', pp(urlconf.urlpatterns))
+        # log.debug('urlconf:\n%s', pp(urlconf.urlpatterns))
         view_functions = self.extract_views_from_urlpatterns(urlconf.urlpatterns)
-        log.debug('view_functions:\n%s', pp(view_functions))
 
-        access_policy_viewsets = []
+        # log.debug('view_functions:\n%s', pp(view_functions))
 
         for (func, regex, url_name, p) in view_functions:
             if hasattr(func, '__globals__'):
@@ -124,19 +123,17 @@ class Command(show_urls.Command):
                 continue
             if module.startswith('rest_framework'):
                 continue
-            if module.startswith('pulp'):
-                continue
+            # if module.startswith('pulp'):
+            #    continue
             if module.startswith('drf_spectacular'):
                 continue
 
             perms = []
-            # log.debug('func: %s', func)
+
             if hasattr(func, 'cls'):
-                log.debug('dir(%s):\n%s', func.cls, pp(dir(func.cls)))
                 permission_classes = func.cls.permission_classes
                 perms = func.cls.get_permissions(func.cls)
-                if isinstance(perms[0], AccessPolicy):
-                    access_policy_viewsets.append(func.cls)
+                if perms and isinstance(perms[0], AccessPolicy):
                     views.append({"url": url,
                                   "module": module,
                                   "name": url_name,
@@ -164,7 +161,7 @@ class Command(show_urls.Command):
             #         decorator=decorator,
             #     ).strip())
 
-        log.debug('views:\n%s', pp(views))
+        # log.debug('views:\n%s', pp(views))
         for view in views:
             self.show_access_policy(view)
 
