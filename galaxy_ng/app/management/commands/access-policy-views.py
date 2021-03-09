@@ -12,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ViewDoesNotExist
 from django.urls import URLPattern, URLResolver  # type: ignore
 from django.utils import translation
+from django.contrib.auth import load_backend, get_backends
 
 from django_extensions.management.commands import show_urls
 from rest_framework.views import get_view_name
@@ -21,6 +22,20 @@ from galaxy_ng.app import access_control
 
 log = logging.getLogger(__name__)
 pp = pprint.pformat
+
+class FauxInnerRequest:
+    def __init__(self, user, method, path, *args, **kwargs):
+        self.method = method
+        self.path = path
+        self.user = user
+
+class FauxRequest:
+    def __init__(self, user, method='GET', path='/faux', *args, **kwargs):
+        self.user = user
+        self.method = method
+        self.path = path
+        self._request = FauxInnerRequest(user, method, path)
+
 
 class Command(show_urls.Command):
     """
@@ -55,14 +70,25 @@ class Command(show_urls.Command):
     #             "permission in the form 'app_label.codename'".format(
     #                 permission))
 
-    # def add_arguments(self, parser):
-    # #     parser.add_argument('group', type=self.valid_group)
-    #     parser.add_argument(
-    #         '--deployment-mode',
-    #         dest='deployment_mode',
-    #         default=settings.GALAXY_DEPLOYMENT_MODE,
-    #         help="The deployment mode to use the access_policy of. Choices: insights, standalone"
-    #     )
+    def add_arguments(self, parser):
+    #     parser.add_argument('group', type=self.valid_group)
+        parser.add_argument(
+            '--userid',
+            dest='user_id',
+            help="The user to test with"
+        )
+        super().add_arguments(parser)
+
+    def _get_user(self, user_id):
+        backends = get_backends()
+        print('backends: %s', backends)
+        # backend = load_backend(backend_path)
+        backend = backends[0]
+        user = backend.get_user(user_id=user_id)
+        if user is None:
+            print(f"No user found for user_id={user_id}")
+            return
+        return user
 
     def handle(self, *args, **options):
         decorator = options['decorator']
@@ -133,12 +159,16 @@ class Command(show_urls.Command):
             if hasattr(func, 'cls'):
                 permission_classes = func.cls.permission_classes
                 perms = func.cls.get_permissions(func.cls)
+
+                # FIXME: handle AccessPolicy perm + other perms
+                # access_policy_perm = perms[0]
                 if perms and isinstance(perms[0], AccessPolicy):
                     views.append({"url": url,
                                   "module": module,
                                   "name": url_name,
                                   "permission_classes": permission_classes,
                                   "perms": perms,
+                                  "access_policy": perms[0],
                                   "path_regex": regex,
                                   "decorators": decorator,
                                   "view": func.cls})
@@ -163,7 +193,7 @@ class Command(show_urls.Command):
 
         # log.debug('views:\n%s', pp(views))
         for view in views:
-            self.show_access_policy(view)
+            self.show_access_policy(view, **options)
 
     def extract_views_from_urlpatterns(self, urlpatterns, base='', namespace=None):
         """
@@ -235,8 +265,12 @@ class Command(show_urls.Command):
         # self.stdout.write(f"deployment_mode: {deployment_mode}\n")
 
         view = access_policy_viewset
-        self.stdout.write("%s\n\tviewset: %s\n\turl_name: %s\n\n" % (viewset_info['url'], viewset_info['module'],
-                                                                     viewset_info['name']))
+        self.stdout.write("%s\n\tviewset: %s\n\turl_name: %s\n" % (viewset_info['url'], viewset_info['module'],
+                                                                   viewset_info['name']))
+        self.stdout.write("\taccess_policy: %s\n\n" % (viewset_info['access_policy'],))
+
+        user_id = options['user_id']
+        user = self._get_user(user_id)
 
         for statement in statements:
             actions = statement['action']
@@ -256,8 +290,25 @@ class Command(show_urls.Command):
                                                             effect=statement['effect'],
                                                             conditions=conditions_buf))
                 # self.stdout.write("\t%s\n" % statement)
+
+            self._has_permission(viewset_info, user, action, viewset_info['url'])
+
         # group = options['group']
         # for perm in options['permissions']:
         #     group.permissions.add(perm.id)
         # self.stdout.write("Assigned requested permission to "
         #                   "group '{}'".format(group.name))
+
+    def _has_permission(self, viewset_info, user=None, action=None, url=None):
+        request = FauxRequest(user, url=url)
+
+        view = viewset_info['view']
+        view_instance = view()
+
+        policy = viewset_info['access_policy']
+        result = policy.has_permission(request, view_instance)
+        log.debug('result: %s', result)
+
+        return result
+
+
