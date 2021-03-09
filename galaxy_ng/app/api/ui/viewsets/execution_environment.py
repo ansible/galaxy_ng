@@ -82,8 +82,9 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
         repo_version = repo.latest_version()
         repo_content = repo_version.content.all()
 
-        manifests = container_models.Manifest.objects\
-            .filter(pk__in=repo_content)\
+        manifests = (
+            container_models.Manifest.objects
+            .filter(pk__in=repo_content)
             .prefetch_related(
                 # Prefetch limits the tag list to tags in the current repo version.
                 # Without it, tags from all repo versions are allowed which leads
@@ -98,6 +99,7 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
                     to_attr='blob_list'),
                 'config_blob'
             )
+        )
 
         # I know that this should go in the FilterSet, but I cannot for the life
         # of me figure out how to access base_path in the filterset. Without
@@ -131,8 +133,8 @@ class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
         # The ui only cares about repo versions where tags and manifests are added.
         # Pulp container revs the repo version each time any blobs are added, so
         # this filters out any repo versions where tags and manifests are unchanged.
-        return repo.versions\
-            .annotate(
+        return (
+            repo.versions.annotate(
                 # Count the number of added/removed manifests and tags and use
                 # the result to filter out any versions where tags and manifests
                 # are unchanged.
@@ -140,8 +142,8 @@ class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
                     added_memberships__content__pulp_type__in=allowed_content_types)),
                 removed_count=Count('removed_memberships', filter=Q(
                     removed_memberships__content__pulp_type__in=allowed_content_types))
-            )\
-            .filter(Q(added_count__gt=0) | Q(removed_count__gt=0))\
+            )
+            .filter(Q(added_count__gt=0) | Q(removed_count__gt=0))
             .prefetch_related(
                 Prefetch(
                     'added_memberships',
@@ -154,3 +156,4 @@ class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
                         content__pulp_type__in=allowed_content_types).select_related('content'),
                 )
             ).order_by('-pulp_created')
+        )

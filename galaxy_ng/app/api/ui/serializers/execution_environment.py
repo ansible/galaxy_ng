@@ -132,18 +132,14 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
         )
 
     def get_added(self, obj):
-        added = []
-        for content in obj.added_memberships.all():
-            added.append(self._content_info(content.content))
-
-        return added
+        return [
+            self._content_info(content.content) for content in obj.added_memberships.all()
+        ]
 
     def get_removed(self, obj):
-        removed = []
-        for content in obj.removed_memberships.all():
-            removed.append(self._content_info(content.content))
-
-        return removed
+        return [
+            self._content_info(content.content) for content in obj.removed_memberships.all()
+        ]
 
     def _content_info(self, content):
         return_data = {
