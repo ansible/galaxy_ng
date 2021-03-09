@@ -9,8 +9,14 @@ from django.conf import settings
 from django.contrib.admindocs.views import simplify_regex
 from django.core.management import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ViewDoesNotExist
+from django.urls import URLPattern, URLResolver  # type: ignore
+from django.utils import translation
 
 from django_extensions.management.commands import show_urls
+from rest_framework.views import get_view_name
+from rest_access_policy import AccessPolicy
+
 from galaxy_ng.app import access_control
 
 log = logging.getLogger(__name__)
@@ -77,10 +83,13 @@ class Command(show_urls.Command):
                 traceback.print_exc()
             raise CommandError("Error occurred while trying to load %s: %s" % (getattr(settings, urlconf), str(e)))
 
+        log.debug('urlconf:\n%s', pp(urlconf.urlpatterns))
         view_functions = self.extract_views_from_urlpatterns(urlconf.urlpatterns)
         log.debug('view_functions:\n%s', pp(view_functions))
 
-        for (func, regex, url_name) in view_functions:
+        access_policy_viewsets = []
+
+        for (func, regex, url_name, p) in view_functions:
             if hasattr(func, '__globals__'):
                 func_globals = func.__globals__
             elif hasattr(func, 'func_globals'):
@@ -120,53 +129,135 @@ class Command(show_urls.Command):
             if module.startswith('drf_spectacular'):
                 continue
 
-            format_style = 'json'
-            if format_style == 'json':
-                views.append({"url": url,
-                              "module": module,
-                              "name": url_name,
-                              "permission_classes": permission_classes,
-                              "path_regex": regex,
+            perms = []
+            # log.debug('func: %s', func)
+            if hasattr(func, 'cls'):
+                log.debug('dir(%s):\n%s', func.cls, pp(dir(func.cls)))
+                permission_classes = func.cls.permission_classes
+                perms = func.cls.get_permissions(func.cls)
+                if isinstance(perms[0], AccessPolicy):
+                    access_policy_viewsets.append(func.cls)
+                    views.append({"url": url,
+                                  "module": module,
+                                  "name": url_name,
+                                  "permission_classes": permission_classes,
+                                  "perms": perms,
+                                  "path_regex": regex,
+                                  "decorators": decorator,
+                                  "view": func.cls})
 
-                              "decorators": decorator})
-            else:
-                views.append(fmtr.format(
-                    module='{0}.{1}'.format(style.MODULE(func.__module__), style.MODULE_NAME(func_name)),
-                    url_name=style.URL_NAME(url_name),
-                    url=style.URL(url),
-                    decorator=decorator,
-                ).strip())
+            # format_style = 'json'
+            # if format_style == 'json':
+            #     views.append({"url": url,
+            #                   "module": module,
+            #                   "name": url_name,
+            #                   "permission_classes": permission_classes,
+            #                   "perms": perms,
+            #                   "path_regex": regex,
+
+            #                   "decorators": decorator})
+            # else:
+            #     views.append(fmtr.format(
+            #         module='{0}.{1}'.format(style.MODULE(func.__module__), style.MODULE_NAME(func_name)),
+            #         url_name=style.URL_NAME(url_name),
+            #         url=style.URL(url),
+            #         decorator=decorator,
+            #     ).strip())
 
         log.debug('views:\n%s', pp(views))
+        for view in views:
+            self.show_access_policy(view)
+
+    def extract_views_from_urlpatterns(self, urlpatterns, base='', namespace=None):
+        """
+        Return a list of views from a list of urlpatterns.
+
+        Each object in the returned list is a three-tuple: (view_func, regex, name)
+        """
+        views = []
+        for p in urlpatterns:
+            if isinstance(p, (URLPattern, show_urls.RegexURLPattern)):
+                try:
+                    if not p.name:
+                        name = p.name
+                    elif namespace:
+                        name = '{0}:{1}'.format(namespace, p.name)
+                    else:
+                        name = p.name
+                    pattern = show_urls.describe_pattern(p)
+                    views.append((p.callback, base + pattern, name, p))
+                except ViewDoesNotExist:
+                    continue
+            elif isinstance(p, (URLResolver, show_urls.RegexURLResolver)):
+                try:
+                    patterns = p.url_patterns
+                except ImportError:
+                    continue
+                if namespace and p.namespace:
+                    _namespace = '{0}:{1}'.format(namespace, p.namespace)
+                else:
+                    _namespace = (p.namespace or namespace)
+                pattern = show_urls.describe_pattern(p)
+                if isinstance(p, show_urls.LocaleRegexURLResolver):
+                    for language in self.LANGUAGES:
+                        with translation.override(language[0]):
+                            views.extend(self.extract_views_from_urlpatterns(patterns, base + pattern, namespace=_namespace))
+                else:
+                    views.extend(self.extract_views_from_urlpatterns(patterns, base + pattern, namespace=_namespace))
+            elif hasattr(p, '_get_callback'):
+                try:
+                    views.append((p._get_callback(), base + show_urls.describe_pattern(p), p.name, p))
+                except ViewDoesNotExist:
+                    continue
+            elif hasattr(p, 'url_patterns') or hasattr(p, '_get_url_patterns'):
+                try:
+                    patterns = p.url_patterns
+                except ImportError:
+                    continue
+                views.extend(self.extract_views_from_urlpatterns(patterns, base + show_urls.describe_pattern(p), namespace=namespace))
+            else:
+                raise TypeError("%s does not appear to be a urlpattern object" % p)
+        return views
 
 
-    def not_handle(self, *args, **options):
-        ap = access_control.access_policy.AccessPolicyBase()
-        deployment_mode = options['deployment_mode']
-        statements_map = ap._get_statements(deployment_mode)
+    def show_access_policy(self, viewset_info, *args, **options):
+        # ap = access_control.access_policy.AccessPolicyBase()
+        # deployment_mode = options['deployment_mode']
+        # log.debug('access_policy_viewset: %s is_access_policy: %r', access_policy_viewset, isinstance(access_policy_viewset, AccessPolicy))
+        access_policy_viewset = viewset_info["view"]
+        perms = access_policy_viewset.get_permissions(access_policy_viewset)
+        # log.debug('perms: %s', perms)
+
+        deployment_mode = 'standalone'
+        access_perm = perms[0]
+        # statements_map = access_perm._get_statements(deployment_mode)
+        statements= access_perm.get_policy_statements(None, access_policy_viewset)
         statement_template = \
             "\taction: {action}\n\t\tprincipal: {principal}\n\t\teffect: {effect}\n\t\tconditions:\n{conditions}\n"
 
-        self.stdout.write(f"deployment_mode: {deployment_mode}\n")
-        for view, statements in statements_map.items():
-            self.stdout.write("%s\n" % view)
-            for statement in statements:
-                actions = statement['action']
-                if isinstance(actions, str):
-                    actions = [actions]
-                conditions = statement.get('condition', [])
-                if isinstance(conditions, str):
-                    conditions = [conditions]
-                condition_lines = []
-                for cond in conditions:
-                    condition_line = f'\t\t\t{cond}\n'
-                    condition_lines.append(condition_line)
-                conditions_buf = ''.join(condition_lines)
-                for action in actions:
-                    self.stdout.write(statement_template.format(action=action,
-                                                                principal=statement['principal'],
-                                                                effect=statement['effect'],
-                                                                conditions=conditions_buf))
+        # self.stdout.write(f"deployment_mode: {deployment_mode}\n")
+
+        view = access_policy_viewset
+        self.stdout.write("%s\n\tviewset: %s\n\turl_name: %s\n\n" % (viewset_info['url'], viewset_info['module'],
+                                                                     viewset_info['name']))
+
+        for statement in statements:
+            actions = statement['action']
+            if isinstance(actions, str):
+                actions = [actions]
+            conditions = statement.get('condition', [])
+            if isinstance(conditions, str):
+                conditions = [conditions]
+            condition_lines = []
+            for cond in conditions:
+                condition_line = f'\t\t\t{cond}\n'
+                condition_lines.append(condition_line)
+            conditions_buf = ''.join(condition_lines)
+            for action in actions:
+                self.stdout.write(statement_template.format(action=action,
+                                                            principal=statement['principal'],
+                                                            effect=statement['effect'],
+                                                            conditions=conditions_buf))
                 # self.stdout.write("\t%s\n" % statement)
         # group = options['group']
         # for perm in options['permissions']:
