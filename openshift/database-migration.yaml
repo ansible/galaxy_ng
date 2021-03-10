@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: automation-hub-database-migration
+objects:
+  - apiVersion: batch/v1
+    kind: Job
+    metadata: database-migration-${IMAGE_TAG}
+    spec:
+      template:
+        metadata:
+          labels:
+            app: database-migration-${IMAGE_TAG}
+          annotations:
+            app: database-migration-${IMAGE_TAG}
+        spec:
+          activeDeadlineSeconds: ${{ACTIVE_DEADLINE_SECONDS}}
+          backoffLimit: 1
+          completions: 1
+          parallelism: 1
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: quay-cloudservices-pull
+            - name: rh-registry-pull
+          containers:
+            - name: database-migration-${IMAGE_TAG}
+              image: ${IMAGE}:${IMAGE_TAG}
+              imagePullPolicy: IfNotPresent
+              command: ['manage', 'migrate']
+              resources:
+                limits:
+                  cpu: ${{CPU_LIMIT}}
+                  memory: ${{MEMORY_LIMIT}}
+                requests:
+                  cpu: ${{CPU_LIMIT}}
+                  memory: ${{MEMORY_LIMIT}}
+              env:
+                - name: PULP_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: django-secret-key
+                      name: automation-hub-galaxy
+                - name: PULP_DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      key: db.host
+                      name: automation-hub-db
+                - name: PULP_DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      key: db.user
+                      name: automation-hub-db
+                - name: PULP_DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: db.password
+                      name: automation-hub-db
+                - name: PULP_DB_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: db.name
+                      name: automation-hub-db
+                - name: PULP_CONTENT_ORIGIN
+                  valueFrom:
+                    secretKeyRef:
+                      key: pulp-content-origin
+                      name: automation-hub-galaxy
+                - name: PULP_REDIS_HOST
+                  value: ${REDIS_HOST}
+                - name: PULP_RH_ENTITLEMENT_REQUIRED
+                  value: ${RH_ENTITLEMENT_REQUIRED}
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_secret_access_key
+                      name: automation-hub-s3
+                - name: PULP_AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_access_key_id
+                      name: automation-hub-s3
+                - name: PULP_AWS_STORAGE_BUCKET_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: bucket
+                      name: automation-hub-s3
+                - name: PULP_AWS_S3_REGION_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_region
+                      name: automation-hub-s3
+                - name: CW_AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_access_key_id
+                      name: cloudwatch
+                - name: CW_AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_secret_access_key
+                      name: cloudwatch
+                - name: CW_AWS_REGION_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_region
+                      name: cloudwatch
+                - name: CW_LOGGING_GROUP
+                  valueFrom:
+                    secretKeyRef:
+                      key: log_group_name
+                      name: cloudwatch
+                - name: CW_LOGGING_STREAM_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: prometheus_multiproc_dir
+                  value: ${PROMETHEUS_DIR}
+                - name: PULP_USE_X_FORWARDED_HOST
+                  value: 'true'
+                - name: GUNICORN_FORWARDED_ALLOW_IPS
+                  value: '*'
+
+parameters:
+  - name: IMAGE
+    value: quay.io/cloudservices/automation-hub-galaxy-ng
+    required: true
+  - name: IMAGE_TAG
+    required: true
+  # Limits
+  - name: CPU_REQUEST
+    value: 200m
+    required: true
+  - name: CPU_LIMIT
+    value: 1000m
+    required: true
+  - name: MEMORY_REQUEST
+    value: 512Mi
+    required: true
+  - name: MEMORY_LIMIT
+    value: 768Mi
+    required: true
+  - name: ACTIVE_DEADLINE_SECONDS
+    value: "3600"
+    required: true
