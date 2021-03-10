@@ -262,7 +262,7 @@ class Command(show_urls.Command):
         # statements_map = access_perm._get_statements(deployment_mode)
         statements= access_perm.get_policy_statements(None, access_policy_viewset)
         statement_template = \
-            "\taction: {action}\n\t\tprincipal: {principal}\n\t\teffect: {effect}\n\t\tconditions:\n{conditions}\n"
+            "\taction: {action}\n\t\tprincipal: {principal}\n\t\teffect: {effect}\n\t\tconditions:\n{conditions}"
 
         # self.stdout.write(f"deployment_mode: {deployment_mode}\n")
 
@@ -285,18 +285,20 @@ class Command(show_urls.Command):
                 conditions = [conditions]
             condition_lines = []
             for cond in conditions:
-                condition_line = f'\t\t\t{cond}\n'
+                condition_line = f'\t\t\t{cond}'
                 condition_lines.append(condition_line)
-            conditions_buf = ''.join(condition_lines)
+            conditions_buf = '\n'.join(condition_lines) or '\t\t\t[]'
             for action in actions:
                 self.stdout.write(statement_template.format(action=action,
                                                             principal=statement['principal'],
                                                             effect=statement['effect'],
                                                             conditions=conditions_buf))
                 # self.stdout.write("\t%s\n" % statement)
+                result = False
                 if user and action not in ('*', 'update', 'destroy'):
                     result = self._has_permission(viewset_info, user, action, viewset_info['url'])
-                    self.stdout.write(f'\t\tresult: {result}\n')
+                self.stdout.write(f'\t\tresult: {result}\n')
+                self.stdout.write('\n')
 
         # group = options['group']
         # for perm in options['permissions']:
