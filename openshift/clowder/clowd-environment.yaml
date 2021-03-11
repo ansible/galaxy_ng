@@ -1,0 +1,55 @@
+---
+apiVersion: cloud.redhat.com/v1alpha1
+# Custom Resource defined as part of the Clowder API
+kind: ClowdEnvironment
+metadata:
+  name: automation-hub-env
+spec:
+  targetNamespace: automation-hub
+
+  # Providers all your app to consume configuration 
+  # data automatically based on your request
+  providers:
+
+    # provides a k8s service on port 8000
+    web:
+      port: 8000
+      privatePort: 8080
+      mode: operator
+
+    # provides a prometheus metrics port on 9000
+    metrics:
+      mode: none
+      port: 9000
+      path: "/metrics"
+
+    # Creates a kafka pod in the targetNamespace
+    kafka:
+      mode: none
+      namespace: default
+      clusterName: crc-cluster
+
+    # Clowder supports postgres 10 and 12. Specify the name
+    # and other details in the clowdapp
+    db:
+      mode: local
+
+    logging:
+      mode: none
+
+    # Deploys a local minio pod for object storage
+    objectStore:
+      mode: minio
+      port: 9000
+
+    # Deploys a local redis pod
+    inMemoryDb:
+      mode: redis
+
+  resourceDefaults:
+    limits: 
+      cpu: "1000m"
+      memory: "2048Mi"
+    requests:
+      cpu: "200m"
+      memory: "1024Mi"

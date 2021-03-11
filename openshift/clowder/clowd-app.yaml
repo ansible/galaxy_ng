@@ -1,0 +1,42 @@
+apiVersion: cloud.redhat.com/v1alpha1
+kind: ClowdApp
+metadata:
+  name: automation-hub
+  namespace: automation-hub
+spec:
+  # The name of the ClowdEnvironment providing the services
+  envName: automation-hub-env
+
+  # The bulk of your App. This is where your running apps will live
+  deployments:
+  - name: galaxy-api
+    podSpec:
+      image: quay.io/cutwater/automation-hub-galaxy-ng:latest
+      args: ['run', 'api']
+      env:
+        - name: WITH_MIGRATIONS
+          value: '1'
+        - name: PULP_CONTENT_ORIGIN
+          value: 'localhost'
+  - name: pulp-resource-manager
+    podSpec:
+      image: quay.io/cutwater/automation-hub-galaxy-ng:latest
+      args: ['run', 'resource-manager']
+      env:
+        - name: PULP_CONTENT_ORIGIN
+          value: 'localhost'
+
+  # Creates a Service on port 8000
+  webServices:
+    public: true
+    private: false
+    metrics: false
+
+  # Creates a database if local mode, or uses RDS in production
+  database:
+    # Must specify both a name and a major postgres version
+    name: automation-hub
+    version: 12
+
+  objectStore:
+    - automation-hub

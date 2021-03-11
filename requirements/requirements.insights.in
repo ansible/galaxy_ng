@@ -2,3 +2,4 @@ boto3
 logstash-formatter
 watchtower
 django-storages[boto3]
+app-common-python
