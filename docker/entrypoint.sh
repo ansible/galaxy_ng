@@ -70,10 +70,10 @@ run_service() {
         exit 1
     fi
 
-    wait-for-tcp "${PULP_DB_HOST:-localhost}" "${PULP_DB_PORT:-5432}"
-    wait-for-tcp "${PULP_REDIS_HOST:-localhost}" "${PULP_REDIS_PORT:-6379}"
+    # wait-for-tcp "${PULP_DB_HOST:-localhost}" "${PULP_DB_PORT:-5432}"
+    # wait-for-tcp "${PULP_REDIS_HOST:-localhost}" "${PULP_REDIS_PORT:-6379}"
 
-    # TODO: remove once Pulp recognizes REDIS_SSL parameter when building 
+    # TODO: remove once Pulp recognizes REDIS_SSL parameter when building
     # settings for RQ in pulpcore/rqconfig.py
     redis_connection_hack
 

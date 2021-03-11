@@ -35,6 +35,7 @@ RUN set -ex; \
                                /var/lib/pulp/tmp \
                                /tmp/ansible && \
     install -Dm 0644 /app/ansible.cfg /etc/ansible/ansible.cfg && \
+    install -Dm 0644 /app/docker/etc/settings.py /etc/pulp/settings.py && \
     install -Dm 0755 /app/docker/entrypoint.sh /entrypoint.sh && \
     install -Dm 0755 /app/docker/bin/* /usr/local/bin/
 
