@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+from packaging.version import parse as parse_version
 
 __metaclass__ = type
 
@@ -14,12 +15,17 @@ def _repr_filter(value):
     return repr(value)
 
 
+def _canonical_semver_filter(value):
+    return str(parse_version(value))
+
+
 # ---- Ansible filters ----
 class FilterModule(object):
-    """repr filter"""
+    """Repr filter."""
 
     def filters(self):
-        """Filter associations"""
+        """Filter associations."""
         return {
             "repr": _repr_filter,
+            "canonical_semver": _canonical_semver_filter,
         }
