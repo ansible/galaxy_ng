@@ -1,23 +1,29 @@
-FROM {{ ci_base | default("pulp/pulp-ci:latest") }}
+FROM {{ ci_base | default("pulp/pulp-ci-centos:latest") }}
 
-{% if s3_test | default(false) %}
-# Hacking botocore (https://github.com/boto/botocore/pull/1990)
-RUN pip3 install django-storages[boto3]
-RUN pip3 install git+https://github.com/fabricio-aguiar/botocore.git@fix-100-continue
-{% endif %}
-
+# Add source directories to container
 {% for item in plugins %}
-
-# Install {{ item.name }} from {{ item.source }}
-{% if item.name == "pulp-certguard" %}
-RUN pip3 install python-dateutil rhsm
-{% endif %}
 {% if item.source.startswith("./") %}
 ADD {{ item.source }} {{ item.source }}
 {% endif %}
-RUN pip3 install {{ item.source }}
+{% endfor %}
+
+# Install python packages
+# Hacking botocore (https://github.com/boto/botocore/pull/1990)
+
+RUN pip3 install \
+{%- if s3_test | default(false) -%}
+{{ " " }}django-storages[boto3] git+https://github.com/fabricio-aguiar/botocore.git@fix-100-continue
+{%- endif -%}
+{%- for item in plugins -%}
+{%- if item.name == "pulp-certguard" -%}
+{{ " " }}python-dateutil rhsm
+{%- endif -%}
+{{ " " }}"{{ item.source }}"
+{%- endfor %}
+
 RUN mkdir -p /etc/nginx/pulp/
-RUN ln /usr/local/lib/python3.7/site-packages/{{ item.name }}/app/webserver_snippets/nginx.conf /etc/nginx/pulp/{{ item.name }}.conf || true
+{% for item in plugins %}
+RUN ln /usr/local/lib/python3.6/site-packages/{{ item.name }}/app/webserver_snippets/nginx.conf /etc/nginx/pulp/{{ item.name }}.conf || true
 {% endfor %}
 
 ENTRYPOINT ["/init"]
