@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from pulp_container.app import models as container_models
+from pulpcore.plugin import models as core_models
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField
@@ -113,3 +115,48 @@ class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
             tags.append(tag.name)
 
         return tags
+
+
+class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
+    added = serializers.SerializerMethodField()
+    removed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = core_models.RepositoryVersion
+        fields = (
+            'pulp_id',
+            'added',
+            'removed',
+            'pulp_created',
+            'number'
+        )
+
+    def get_added(self, obj):
+        return [
+            self._content_info(content.content) for content in obj.added_memberships.all()
+        ]
+
+    def get_removed(self, obj):
+        return [
+            self._content_info(content.content) for content in obj.removed_memberships.all()
+        ]
+
+    def _content_info(self, content):
+        return_data = {
+            "pulp_id": content.pulp_id,
+            "pulp_type": content.pulp_type,
+            "manifest_digest": None,
+            "tag_name": None,
+        }
+
+        # TODO: Figure out if there is a way to prefetch Manifest and Tag objects
+        if content.pulp_type == 'container.manifest':
+            manifest = container_models.Manifest.objects.get(pk=content.pulp_id)
+            return_data['manifest_digest'] = manifest.digest
+        elif content.pulp_type == 'container.tag':
+            tag = container_models.Tag.objects.select_related('tagged_manifest')\
+                .get(pk=content.pulp_id)
+            return_data['manifest_digest'] = tag.tagged_manifest.digest
+            return_data['tag_name'] = tag.name
+
+        return return_data

@@ -1,7 +1,8 @@
 import logging
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count, Q
 
+from pulpcore.plugin import models as core_models
 from pulp_container.app import models as container_models
 
 from django_filters import filters
@@ -36,7 +37,6 @@ class RepositoryFilter(filterset.FilterSet):
 
 
 class ManifestFilter(filterset.FilterSet):
-    # tag = filters.CharFilter(method='tag_filter')
     sort = filters.OrderingFilter(
         fields=(
             ('pulp_created', 'created'),
@@ -45,9 +45,20 @@ class ManifestFilter(filterset.FilterSet):
 
     class Meta:
         model = container_models.Manifest
+        # Tag filters are supported, but are done in get_queryset. See the comment
+        # there
         fields = {
             'digest': ['exact', 'icontains', 'contains', 'startswith'],
         }
+
+
+class HistoryFilter(filterset.FilterSet):
+    sort = filters.OrderingFilter(
+        fields=(
+            ('pulp_created', 'created'),
+            ('number', 'number'),
+        ),
+    )
 
 
 class ContainerRepositoryViewSet(api_base.ModelViewSet):
@@ -71,8 +82,9 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
         repo_version = repo.latest_version()
         repo_content = repo_version.content.all()
 
-        manifests = container_models.Manifest.objects\
-            .filter(pk__in=repo_content)\
+        manifests = (
+            container_models.Manifest.objects
+            .filter(pk__in=repo_content)
             .prefetch_related(
                 # Prefetch limits the tag list to tags in the current repo version.
                 # Without it, tags from all repo versions are allowed which leads
@@ -87,6 +99,7 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
                     to_attr='blob_list'),
                 'config_blob'
             )
+        )
 
         # I know that this should go in the FilterSet, but I cannot for the life
         # of me figure out how to access base_path in the filterset. Without
@@ -102,3 +115,45 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
                 tagged_manifests__pk__in=repo_content)
 
         return manifests
+
+
+class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
+    serializer_class = serializers.ContainerRepositoryHistorySerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = HistoryFilter
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    lookup_field = "base_path"
+
+    def get_queryset(self):
+        base_path = self.kwargs["base_path"]
+        repo = get_object_or_404(models.ContainerDistribution, base_path=base_path).repository
+
+        allowed_content_types = ['container.manifest', 'container.tag']
+
+        # The ui only cares about repo versions where tags and manifests are added.
+        # Pulp container revs the repo version each time any blobs are added, so
+        # this filters out any repo versions where tags and manifests are unchanged.
+        return (
+            repo.versions.annotate(
+                # Count the number of added/removed manifests and tags and use
+                # the result to filter out any versions where tags and manifests
+                # are unchanged.
+                added_count=Count('added_memberships', filter=Q(
+                    added_memberships__content__pulp_type__in=allowed_content_types)),
+                removed_count=Count('removed_memberships', filter=Q(
+                    removed_memberships__content__pulp_type__in=allowed_content_types))
+            )
+            .filter(Q(added_count__gt=0) | Q(removed_count__gt=0))
+            .prefetch_related(
+                Prefetch(
+                    'added_memberships',
+                    queryset=core_models.RepositoryContent.objects.filter(
+                        content__pulp_type__in=allowed_content_types).select_related('content'),
+                ),
+                Prefetch(
+                    'removed_memberships',
+                    queryset=core_models.RepositoryContent.objects.filter(
+                        content__pulp_type__in=allowed_content_types).select_related('content'),
+                )
+            ).order_by('-pulp_created')
+        )

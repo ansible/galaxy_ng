@@ -32,10 +32,13 @@ auth_views = [
 ]
 
 container_repo_paths = [
-
-    re_path(
-        r'images/',
+    path(
+        'images/',
         viewsets.ContainerRepositoryManifestViewSet.as_view({'get': 'list'}),
+        name='container-repository-images'),
+    path(
+        'history/',
+        viewsets.ContainerRepositoryHistoryViewSet.as_view({'get': 'list'}),
         name='container-repository-images'),
 ]
 
@@ -46,7 +49,7 @@ container_paths = [
         name='container-repository-list'),
 
     # image names can't start with _, so namespacing all the nested views
-    # under _detail prevents cases where an image could be named foo/images
+    # under _content prevents cases where an image could be named foo/images
     # and conflict with our URL paths.
     re_path(
         r'repositories/(?P<base_path>\w+\/{0,1}\w+)/_content/',
