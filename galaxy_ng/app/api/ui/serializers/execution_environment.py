@@ -22,11 +22,9 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
     # hosted by other registries.
     class Meta:
         model = models.ContainerDistribution
-        fields = (
+        read_only_fields = (
             'id',
             'name',
-            'groups',
-
             # this field will return null on instances where hub is indexing a
             # different repo
             'pulp',
@@ -35,6 +33,9 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             'created',
             'updated'
         )
+        write_fields = ('groups',)
+
+        fields = read_only_fields + write_fields
 
     def get_id(self, distro):
         return distro.pulp_id
