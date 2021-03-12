@@ -5,7 +5,8 @@ metadata:
 objects:
   - apiVersion: batch/v1
     kind: Job
-    metadata: database-migration-${IMAGE_TAG}
+    metadata:
+      name: database-migration-${IMAGE_TAG}
     spec:
       template:
         metadata:
