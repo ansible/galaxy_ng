@@ -1,0 +1,4 @@
+ipython
+ipdb
+pdbr
+django-extensions

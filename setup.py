@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import tempfile
 import tarfile
 import urllib.request
@@ -64,6 +65,29 @@ requirements = [
     "drf-spectacular",
     "pulp-container>=2.3.1"
 ]
+
+
+is_on_dev_environment = (
+    "COMPOSE_PROFILE" in os.environ and "DEV_SOURCE_PATH" in os.environ
+    and os.environ.get("LOCK_REQUIREMENTS") == "0"
+)
+if is_on_dev_environment:
+    """
+    To enable the installation of local dependencies e.g: a local fork of
+    pulp_ansible checked out to specific branch/version.
+    The paths listed on DEV_SOURCE_PATH must be unpinned to avoid pip
+    VersionConflict error.
+    ref: https://github.com/ansible/galaxy_ng/wiki/Development-Setup
+         #steps-to-run-dev-environment-with-specific-upstream-branch
+    """
+    DEV_SOURCE_PATH = os.environ.get("DEV_SOURCE_PATH", "").split(":")
+    DEV_SOURCE_PATH += [path.replace("_", "-") for path in DEV_SOURCE_PATH]
+    requirements = [
+        re.sub(r"""(=|^|~|<|>|!)([\S]+)""", "", req)
+        if req.lower().startswith(tuple(DEV_SOURCE_PATH)) else req
+        for req in requirements
+    ]
+    print("Installing with unpinned DEV_SOURCE_PATH requirements", requirements)
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
 

@@ -8,7 +8,16 @@ services:
       dockerfile: "dev/Dockerfile.base"
       args:
         LOCK_REQUIREMENTS: "${LOCK_REQUIREMENTS}"
-    image: "localhost/galaxy_ng/galaxy_ng:base"
+        COMPOSE_PROFILE: "${COMPOSE_PROFILE}"
+        DEV_SOURCE_PATH: "${DEV_SOURCE_PATH}"
+        DEV_IMAGE_SUFFIX: "${DEV_IMAGE_SUFFIX:-}"
+        DEV_VOLUME_SUFFIX: "${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX:-}}"
+    image: "localhost/galaxy_ng/galaxy_ng:base${DEV_IMAGE_SUFFIX:-}"
+    environment:
+      - "WITH_DEV_INSTALL=1"
+      - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
+      - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
+      - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
     entrypoint: "/bin/true"
     tmpfs:
       - "/var/lib/pulp/artifact"
@@ -20,8 +29,9 @@ services:
       context: "${COMPOSE_CONTEXT}"
       dockerfile: "dev/${COMPOSE_PROFILE}/Dockerfile"
       args:
-        LOCK_REQUIREMENTS: "${LOCK_REQUIREMENTS}"
-    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
+        DEV_IMAGE_SUFFIX: "${DEV_IMAGE_SUFFIX:-}"
+        DEV_VOLUME_SUFFIX: "${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX:-}}"
+    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
     command: ['run', 'api-reload']
     ports:
       - "5001:8000"
@@ -29,6 +39,7 @@ services:
       - "WITH_DEV_INSTALL=1"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
+      - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
@@ -43,12 +54,13 @@ services:
       - redis
 
   resource-manager:
-    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
+    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
     command: ['run', 'resource-manager']
     environment:
       - "WITH_DEV_INSTALL=1"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
+      - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
@@ -63,12 +75,13 @@ services:
       - redis
 
   worker:
-    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
+    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
     command: ['run', 'worker']
     environment:
       - "WITH_DEV_INSTALL=1"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
+      - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
@@ -83,7 +96,7 @@ services:
       - redis
 
   content-app:
-    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}"
+    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
     command: ['run', 'content-app']
     ports:
       - "24816:24816"
@@ -91,6 +104,7 @@ services:
       - "WITH_DEV_INSTALL=1"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
+      - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
@@ -120,6 +134,9 @@ services:
 
 
 volumes:
-  pulp: {}
-  pg_data: {}
-  redis_data: {}
+  pulp:
+    name: pulp${DEV_VOLUME_SUFFIX:-}
+  pg_data:
+    name: pg_data${DEV_VOLUME_SUFFIX:-}
+  redis_data:
+    name: redis_data${DEV_VOLUME_SUFFIX:-}

@@ -5,7 +5,8 @@ set -o errexit
 
 if [[ -f '.compose.env' ]]; then
   set -o allexport
-  source .compose.env
+  # avoid override already set variables
+  source <(grep -v '^#' .compose.env | sed -E 's|^(.+)=(.*)$|: ${\1=\2}; export \1|g')
   set +o allexport
 fi
 
@@ -20,6 +21,9 @@ EOF
 fi
 
 echo "INFO: Using compose profile ${COMPOSE_PROFILE}"
+echo "INFO: ${DEV_SOURCE_PATH:-No} packages installed from source"
+echo "INFO: Image suffix ${DEV_IMAGE_SUFFIX:-is unset}"
+echo "INFO: Volume suffix ${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX:-is unset}}"
 
 compose_args=(
   -f 'dev/docker-compose.yml'
@@ -40,8 +44,11 @@ else
 fi
 
 declare -xr DEV_SOURCE_PATH=${DEV_SOURCE_PATH:-galaxy_ng}
-declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng}"
 declare -xr COMPOSE_CONTEXT=".."
 declare -xr LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}"
+declare -xr COMPOSE_PROFILE="${COMPOSE_PROFILE}"
+declare -xr DEV_IMAGE_SUFFIX="${DEV_IMAGE_SUFFIX:-}"
+declare -xr DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX}}"
+declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng${DEV_IMAGE_SUFFIX:-}}"
 
 exec docker-compose "${compose_args[@]}" "$@"
