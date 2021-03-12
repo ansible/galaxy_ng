@@ -31,9 +31,11 @@ changelog:        ## Build the changelog
 docker/build:     ## Build all development images.
 	./compose build
 
+# e.g: make docker/test TEST=.api.test_api_ui_sync_config
+# if TEST is not passed run all tests.
 .PHONY: docker/test
 docker/test:      ## Run unit tests.
-	./compose run api manage test galaxy_ng.tests.unit
+	./compose run api manage test galaxy_ng.tests.unit$(TEST)
 
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from fixtures

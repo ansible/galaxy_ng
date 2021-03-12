@@ -21,9 +21,9 @@ EOF
 fi
 
 echo "INFO: Using compose profile ${COMPOSE_PROFILE}"
-echo "INFO: Installing from source ${DEV_SOURCE_PATH}"
-echo "INFO: Image suffix ${DEV_IMAGE_SUFFIX}"
-echo "INFO: Volume suffix ${DEV_VOLUME_SUFFIX}"
+echo "INFO: ${DEV_SOURCE_PATH:-No} packages installed from source"
+echo "INFO: Image suffix ${DEV_IMAGE_SUFFIX:-is unset}"
+echo "INFO: Volume suffix ${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX:-is unset}}"
 
 compose_args=(
   -f 'dev/docker-compose.yml'
@@ -48,7 +48,7 @@ declare -xr COMPOSE_CONTEXT=".."
 declare -xr LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}"
 declare -xr COMPOSE_PROFILE="${COMPOSE_PROFILE}"
 declare -xr DEV_IMAGE_SUFFIX="${DEV_IMAGE_SUFFIX:-}"
-declare -xr DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX:-$DEV_IMAGE_SUFFIX}"
+declare -xr DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX}}"
 declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng${DEV_IMAGE_SUFFIX:-}}"
 
 exec docker-compose "${compose_args[@]}" "$@"
