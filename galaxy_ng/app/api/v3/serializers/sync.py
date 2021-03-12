@@ -80,11 +80,17 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
     proxy_password = serializers.CharField(
-        help_text="Password used to authenticate to proxy.",
+        help_text="Password for proxy authentication.",
         allow_null=True,
         required=False,
         style={'input_type': 'password'},
         write_only=True
+    )
+    proxy_username = serializers.CharField(
+        help_text="User for proxy authentication.",
+        allow_null=True,
+        required=False,
+        write_only=False,  # overwriting this as pulpcore defaults to True
     )
     token = serializers.CharField(
         allow_null=True,
@@ -94,11 +100,17 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
         style={'input_type': 'password'}
     )
     password = serializers.CharField(
-        help_text="The password to be used for authentication when syncing.",
+        help_text="Remote password.",
         allow_null=True,
         required=False,
         style={'input_type': 'password'},
         write_only=True
+    )
+    username = serializers.CharField(
+        help_text="Remote user.",
+        allow_null=True,
+        required=False,
+        write_only=False,  # overwriting this as pulpcore defaults to True
     )
     name = serializers.CharField(read_only=True)
     repositories = serializers.SerializerMethodField()

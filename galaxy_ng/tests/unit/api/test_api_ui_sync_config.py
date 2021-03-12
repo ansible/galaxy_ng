@@ -180,17 +180,13 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         write_only_fields = [
             'client_key',
             'token',
-            'username',
             'password',
-            'proxy_username',
             'proxy_password',
         ]
 
-        # note, proxy url and user have to be set in order to be able to set a
-        # proxy password
+        # note, proxy (url, username and password) are required together
         request_data = {
             "url": self.certified_remote.url,
-            "username": "bob",
             "proxy_url": "https://example.com",
             "proxy_username": "bob",
             "proxy_password": "1234",
@@ -211,11 +207,20 @@ class TestUiSyncConfigViewSet(BaseTestCase):
             request_data[field['name']] = None
             response_names.add(field['name'])
 
+        # proxy username and password can only be specified together
+        request_data["proxy_username"] = None
         self.assertEqual(set(write_only_fields), response_names)
         response = self.client.put(api_url, request_data, format='json')
         self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(api_url)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that proxy_username is unset
+        self.assertIsNone(response.data['proxy_username'])
+
         # Check that all write only fields are unset
-        write_only = self.client.get(api_url).data['write_only_fields']
+        write_only = response.data['write_only_fields']
         for field in write_only:
             self.assertEqual(field['is_set'], False)
             request_data[field['name']] = ""
@@ -240,8 +245,8 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         self.client.put(api_url, {'proxy_url': 'http://proxy.com:4242', **data}, format='json')
         response = self.client.get(api_url)
         self.assertEqual(response.data['proxy_url'], 'http://proxy.com:4242')
-        self.assertNotIn('proxy_username', response.data)
         self.assertNotIn('proxy_password', response.data)
+        self.assertIn('proxy_username', response.data)
         instance = CollectionRemote.objects.get(pk=response.data['pk'])
         self.assertEqual(instance.proxy_url, 'http://proxy.com:4242')
 
@@ -259,7 +264,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         response = self.client.get(api_url)
         self.assertEqual(response.data['proxy_url'], 'http://proxy.com:4242')
         self.assertNotIn('proxy_password', response.data)
-        self.assertNotIn('proxy_username', response.data)
+        self.assertIn('proxy_username', response.data)
         instance = CollectionRemote.objects.get(pk=response.data['pk'])
         self.assertEqual(instance.proxy_url, 'http://proxy.com:4242')
         self.assertEqual(instance.proxy_username, 'User1')
@@ -270,7 +275,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         response = self.client.get(api_url)
         self.assertEqual(response.data['proxy_url'], 'http://192.168.0.42:4242')
         self.assertNotIn('proxy_password', response.data)
-        self.assertNotIn('proxy_username', response.data)
+        self.assertIn('proxy_username', response.data)
         instance = CollectionRemote.objects.get(pk=response.data['pk'])
         self.assertEqual(instance.proxy_url, 'http://192.168.0.42:4242')
 
@@ -279,6 +284,6 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         response = self.client.get(api_url)
         self.assertEqual(response.data['proxy_url'], 'http://proxy2.com:4242')
         self.assertNotIn('proxy_password', response.data)
-        self.assertNotIn('proxy_username', response.data)
+        self.assertIn('proxy_username', response.data)
         instance = CollectionRemote.objects.get(pk=response.data['pk'])
         self.assertEqual(instance.proxy_url, 'http://proxy2.com:4242')
