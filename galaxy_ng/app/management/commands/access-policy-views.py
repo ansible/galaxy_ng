@@ -47,34 +47,7 @@ class Command(show_urls.Command):
 
     help = 'Show access_policy viewsets'
 
-    # def valid_group(self, group):
-    #     try:
-    #         return Group.objects.get(name=group)
-    #     except ObjectDoesNotExist:
-    #         raise CommandError(
-    #             'Group {} does not exist. Please provide a valid '
-    #             'group name.'.format(group))
-
-    # def valid_permission(self, permission):
-    #     try:
-    #         app_label, codename = permission.split('.', 1)
-    #     except ValueError:
-    #         raise CommandError(
-    #             "Invalid permission format for {}. "
-    #             "Expecting 'app_label.codename'.".format(permission)
-    #         )
-    #     try:
-    #         return Permission.objects.get(
-    #             content_type__app_label=app_label,
-    #             codename=codename)
-    #     except ObjectDoesNotExist:
-    #         raise CommandError(
-    #             "Permission {} not found. Please provide a valid "
-    #             "permission in the form 'app_label.codename'".format(
-    #                 permission))
-
     def add_arguments(self, parser):
-    #     parser.add_argument('group', type=self.valid_group)
         parser.add_argument(
             '--userid',
             dest='user_id',
@@ -96,7 +69,6 @@ class Command(show_urls.Command):
 
     def _get_user(self, user_id):
         backends = get_backends()
-        # backend = load_backend(backend_path)
         backend = backends[0]
         if isinstance(backend, ModelBackend):
             user = backend.get_user(user_id=user_id)
@@ -126,23 +98,9 @@ class Command(show_urls.Command):
         url_patterns = urlconf.urlpatterns
 
         url_filter = options['url']
-        # if url_filter:
-        #     resolve_match = resolve(url_filter)
-        #     log.debug('rm: %s', resolve_match)
-        #     log.debug('rm.args: %s', resolve_match.args)
-        #     log.debug('matched %s', url_filter)
-        #     urlpat = path(route=resolve_match.route,
-        #                   view=resolve_match.func,
-        #                   kwargs=resolve_match.kwargs,
-        #                   name=resolve_match.url_name)
-        #     url_patterns = [urlpat]
 
-        # log.debug('urlconf:\n%s', pp(urlconf.urlpatterns))
         view_functions = self.extract_views_from_urlpatterns(url_patterns, url_filter=url_filter)
-
         # log.debug('view_functions:\n%s', pp(view_functions))
-
-
 
         for (func, regex, url_name, p, resolved_match) in view_functions:
             if hasattr(func, '__globals__'):
@@ -173,16 +131,8 @@ class Command(show_urls.Command):
             url = simplify_regex(regex)
             decorator = ', '.join(decorators)
 
-            log.debug('p: %s', p)
-            log.debug('resolved_match: %s', resolved_match)
-
             url_filter = options['url']
             url_name_filter = options['urlname']
-            # if url_filter:
-            #     resolve_match = resolve(url_filter)
-            #     log.debug('rm: %s', resolve_match)
-            #     log.debug('rm.args: %s', resolve_match.args)
-            #     log.debug('matched %s', url_filter)
 
             if url_name_filter and url_name_filter != url_name:
                 continue
@@ -216,6 +166,7 @@ class Command(show_urls.Command):
                                   "path_regex": regex,
                                   "decorators": decorator,
                                   "view": func.cls,
+                                  "resolved_match": resolved_match,
                                   "p": p})
 
             # format_style = 'json'
@@ -249,8 +200,7 @@ class Command(show_urls.Command):
         views = []
         if url_filter:
             resolve_match = resolve(url_filter)
-            # log.debug('rm: %s', resolve_match)
-            log.debug('url_filter %s matched resolve_match: %s', url_filter, resolve_match)
+            # log.debug('url_filter %s matched resolve_match: %s', url_filter, resolve_match)
             urlpat = path(route=url_filter,
                           # route=resolve_match.route,
                           view=resolve_match.func,
@@ -258,7 +208,6 @@ class Command(show_urls.Command):
                           name=resolve_match.url_name)
             urlpatterns = [urlpat]
         for p in urlpatterns:
-            # log.debug('PATTERN p: %s type: %s', p, type(p))
             if isinstance(p, (URLPattern, show_urls.RegexURLPattern)):
                 try:
                     if not p.name:
@@ -268,18 +217,11 @@ class Command(show_urls.Command):
                     else:
                         name = p.name
                     pattern = show_urls.describe_pattern(p)
-                    log.debug('PATTERN p: %s', p)
-                    log.debug('p.callback: %s', p.callback)
-                    log.debug('base: %s', base)
-                    log.debug('pattern: %s', pattern)
-                    log.debug('base+pattern: %s', base + pattern)
-                    log.debug('name: %s', name)
+                    # log.debug('PATTERN p: %s', p)
+                    # log.debug('pattern: %s', pattern)
 
                     resolved_match = p.resolve(base + pattern)
                     log.debug('resolved_match: %s', resolved_match)
-
-                    rev_url = reverse(name, kwargs=resolved_match.kwargs)
-                    log.debug('rev_url: %s', rev_url)
 
                     views.append((p.callback, base + pattern, name, p, resolved_match))
                 except ViewDoesNotExist:
