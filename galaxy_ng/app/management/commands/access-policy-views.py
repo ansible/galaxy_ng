@@ -80,6 +80,12 @@ class Command(show_urls.Command):
             dest='user_id',
             help="The user to test with"
         )
+        parser.add_argument(
+            '--url',
+            dest='url',
+            default=None,
+            help="The url to show access policy for"
+        )
         super().add_arguments(parser)
 
     def _get_user(self, user_id):
@@ -144,6 +150,9 @@ class Command(show_urls.Command):
             url = simplify_regex(regex)
             decorator = ', '.join(decorators)
 
+            url_filter = options['url']
+            if url_filter and url_filter != url:
+                continue
             if module.startswith('admin'):
                 continue
             if module.startswith('django'):
@@ -154,6 +163,7 @@ class Command(show_urls.Command):
                 continue
             if module.startswith('drf_spectacular'):
                 continue
+
 
             perms = []
 
