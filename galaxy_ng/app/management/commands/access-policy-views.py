@@ -10,7 +10,7 @@ from django.contrib.admindocs.views import simplify_regex
 from django.core.management import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ViewDoesNotExist
-from django.urls import URLPattern, URLResolver, resolve, path, re_path  # type: ignore
+from django.urls import URLPattern, URLResolver, resolve, path, re_path, reverse # type: ignore
 from django.utils import translation
 from django.contrib.auth import load_backend, get_backends
 from django.contrib.auth.backends import ModelBackend
@@ -126,25 +126,25 @@ class Command(show_urls.Command):
         url_patterns = urlconf.urlpatterns
 
         url_filter = options['url']
-        if url_filter:
-            resolve_match = resolve(url_filter)
-            log.debug('rm: %s', resolve_match)
-            log.debug('rm.args: %s', resolve_match.args)
-            log.debug('matched %s', url_filter)
-            urlpat = path(route=resolve_match.route,
-                          view=resolve_match.func,
-                          kwargs=resolve_match.kwargs,
-                          name=resolve_match.url_name)
-            url_patterns = [urlpat]
+        # if url_filter:
+        #     resolve_match = resolve(url_filter)
+        #     log.debug('rm: %s', resolve_match)
+        #     log.debug('rm.args: %s', resolve_match.args)
+        #     log.debug('matched %s', url_filter)
+        #     urlpat = path(route=resolve_match.route,
+        #                   view=resolve_match.func,
+        #                   kwargs=resolve_match.kwargs,
+        #                   name=resolve_match.url_name)
+        #     url_patterns = [urlpat]
 
         # log.debug('urlconf:\n%s', pp(urlconf.urlpatterns))
-        view_functions = self.extract_views_from_urlpatterns(url_patterns)
+        view_functions = self.extract_views_from_urlpatterns(url_patterns, url_filter=url_filter)
 
         # log.debug('view_functions:\n%s', pp(view_functions))
 
 
 
-        for (func, regex, url_name, p) in view_functions:
+        for (func, regex, url_name, p, resolved_match) in view_functions:
             if hasattr(func, '__globals__'):
                 func_globals = func.__globals__
             elif hasattr(func, 'func_globals'):
@@ -172,6 +172,9 @@ class Command(show_urls.Command):
             url_name = url_name or ''
             url = simplify_regex(regex)
             decorator = ', '.join(decorators)
+
+            log.debug('p: %s', p)
+            log.debug('resolved_match: %s', resolved_match)
 
             url_filter = options['url']
             url_name_filter = options['urlname']
@@ -237,13 +240,23 @@ class Command(show_urls.Command):
         for view in views:
             self.show_access_policy(view, **options)
 
-    def extract_views_from_urlpatterns(self, urlpatterns, base='', namespace=None):
+    def extract_views_from_urlpatterns(self, urlpatterns, base='', namespace=None, url_filter=None):
         """
         Return a list of views from a list of urlpatterns.
 
         Each object in the returned list is a three-tuple: (view_func, regex, name)
         """
         views = []
+        if url_filter:
+            resolve_match = resolve(url_filter)
+            # log.debug('rm: %s', resolve_match)
+            log.debug('url_filter %s matched resolve_match: %s', url_filter, resolve_match)
+            urlpat = path(route=url_filter,
+                          # route=resolve_match.route,
+                          view=resolve_match.func,
+                          kwargs=resolve_match.kwargs,
+                          name=resolve_match.url_name)
+            urlpatterns = [urlpat]
         for p in urlpatterns:
             # log.debug('PATTERN p: %s type: %s', p, type(p))
             if isinstance(p, (URLPattern, show_urls.RegexURLPattern)):
@@ -261,7 +274,14 @@ class Command(show_urls.Command):
                     log.debug('pattern: %s', pattern)
                     log.debug('base+pattern: %s', base + pattern)
                     log.debug('name: %s', name)
-                    views.append((p.callback, base + pattern, name, p))
+
+                    resolved_match = p.resolve(base + pattern)
+                    log.debug('resolved_match: %s', resolved_match)
+
+                    rev_url = reverse(name, kwargs=resolved_match.kwargs)
+                    log.debug('rev_url: %s', rev_url)
+
+                    views.append((p.callback, base + pattern, name, p, resolved_match))
                 except ViewDoesNotExist:
                     continue
             elif isinstance(p, (URLResolver, show_urls.RegexURLResolver)):
