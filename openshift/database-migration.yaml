@@ -27,7 +27,7 @@ objects:
             - name: database-migration-${IMAGE_TAG}
               image: ${IMAGE}:${IMAGE_TAG}
               imagePullPolicy: IfNotPresent
-              command: ['manage', 'migrate']
+              args: ['manage', 'migrate']
               resources:
                 limits:
                   cpu: ${{CPU_LIMIT}}
@@ -66,30 +66,6 @@ objects:
                     secretKeyRef:
                       key: pulp-content-origin
                       name: automation-hub-galaxy
-                - name: PULP_REDIS_HOST
-                  value: ${REDIS_HOST}
-                - name: PULP_RH_ENTITLEMENT_REQUIRED
-                  value: ${RH_ENTITLEMENT_REQUIRED}
-                - name: AWS_SECRET_ACCESS_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      key: aws_secret_access_key
-                      name: automation-hub-s3
-                - name: PULP_AWS_ACCESS_KEY_ID
-                  valueFrom:
-                    secretKeyRef:
-                      key: aws_access_key_id
-                      name: automation-hub-s3
-                - name: PULP_AWS_STORAGE_BUCKET_NAME
-                  valueFrom:
-                    secretKeyRef:
-                      key: bucket
-                      name: automation-hub-s3
-                - name: PULP_AWS_S3_REGION_NAME
-                  valueFrom:
-                    secretKeyRef:
-                      key: aws_region
-                      name: automation-hub-s3
                 - name: CW_AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
@@ -114,12 +90,6 @@ objects:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                - name: prometheus_multiproc_dir
-                  value: ${PROMETHEUS_DIR}
-                - name: PULP_USE_X_FORWARDED_HOST
-                  value: 'true'
-                - name: GUNICORN_FORWARDED_ALLOW_IPS
-                  value: '*'
 
 parameters:
   - name: IMAGE
