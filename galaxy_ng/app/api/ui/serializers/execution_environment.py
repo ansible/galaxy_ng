@@ -161,3 +161,19 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
             return_data['tag_name'] = tag.name
 
         return return_data
+
+
+class ContainerReadmeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ContainerDistroReadme
+        fields = (
+            'updated',
+            'created',
+            'text',
+        )
+
+        read_only_fields = (
+            'updated',
+            'created',
+        )

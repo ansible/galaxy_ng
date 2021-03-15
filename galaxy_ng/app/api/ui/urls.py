@@ -40,6 +40,10 @@ container_repo_paths = [
         'history/',
         viewsets.ContainerRepositoryHistoryViewSet.as_view({'get': 'list'}),
         name='container-repository-images'),
+    path(
+        'readme/',
+        viewsets.ContainerReadmeViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        name='container-repository-images'),
 ]
 
 container_paths = [
