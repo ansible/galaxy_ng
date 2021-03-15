@@ -1,0 +1,117 @@
+{
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "pulp_href": "/pulp/api/v3/access_policies/564614bf-14e0-4464-a062-2a050100ce56/",
+      "pulp_created": "2021-02-16T17:49:06.887164Z",
+      "permissions_assignment": [
+        {
+          "function": "create_namespace_group",
+          "parameters": {
+            "group_type": "owners",
+            "add_user_to_group": true
+          },
+          "permissions": [
+            "container.view_containernamespace",
+            "container.delete_containernamespace",
+            "container.namespace_add_containerdistribution",
+            "container.namespace_delete_containerdistribution",
+            "container.namespace_view_containerdistribution",
+            "container.namespace_pull_containerdistribution",
+            "container.namespace_push_containerdistribution",
+            "container.namespace_change_containerdistribution",
+            "container.namespace_view_containerpushrepository",
+            "container.namespace_modify_content_containerpushrepository"
+          ]
+        },
+        {
+          "function": "create_namespace_group",
+          "parameters": {
+            "group_type": "collaborators",
+            "add_user_to_group": false
+          },
+          "permissions": [
+            "container.view_containernamespace",
+            "container.namespace_add_containerdistribution",
+            "container.namespace_delete_containerdistribution",
+            "container.namespace_view_containerdistribution",
+            "container.namespace_pull_containerdistribution",
+            "container.namespace_push_containerdistribution",
+            "container.namespace_change_containerdistribution",
+            "container.namespace_view_containerpushrepository",
+            "container.namespace_modify_content_containerpushrepository"
+          ]
+        },
+        {
+          "function": "create_namespace_group",
+          "parameters": {
+            "group_type": "consumers",
+            "add_user_to_group": false
+          },
+          "permissions": [
+            "container.view_containernamespace",
+            "container.namespace_view_containerdistribution",
+            "container.namespace_pull_containerdistribution",
+            "container.namespace_view_containerpushrepository"
+          ]
+        }
+      ],
+      "statements": [
+        {
+          "action": [
+            "list"
+          ],
+          "effect": "allow",
+          "principal": "authenticated"
+        },
+        {
+          "action": [
+            "create"
+          ],
+          "effect": "allow",
+          "condition": "has_model_perms:container.add_containernamespace",
+          "principal": "authenticated"
+        },
+        {
+          "action": [
+            "retrieve"
+          ],
+          "effect": "allow",
+          "condition": "has_model_or_obj_perms:container.view_containernamespace",
+          "principal": "authenticated"
+        },
+        {
+          "action": [
+            "destroy"
+          ],
+          "effect": "allow",
+          "condition": [
+            "has_model_or_obj_perms:container.delete_containernamespace",
+            "has_model_or_obj_perms:container.view_containernamespace"
+          ],
+          "principal": "authenticated"
+        },
+        {
+          "action": [
+            "create_distribution"
+          ],
+          "effect": "allow",
+          "condition": "has_model_or_obj_perms:container.namespace_add_containerdistribution",
+          "principal": "authenticated"
+        },
+        {
+          "action": [
+            "view_distribution"
+          ],
+          "effect": "allow",
+          "condition": "has_model_or_obj_perms:container.namespace_view_containerdistribution",
+          "principal": "authenticated"
+        }
+      ],
+      "viewset_name": "pulp_container/namespaces",
+      "customized": false
+    }
+  ]
+}
