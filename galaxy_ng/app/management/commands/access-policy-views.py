@@ -10,7 +10,7 @@ from django.contrib.admindocs.views import simplify_regex
 from django.core.management import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ViewDoesNotExist
-from django.urls import URLPattern, URLResolver  # type: ignore
+from django.urls import URLPattern, URLResolver, resolve, path, re_path  # type: ignore
 from django.utils import translation
 from django.contrib.auth import load_backend, get_backends
 from django.contrib.auth.backends import ModelBackend
@@ -86,6 +86,12 @@ class Command(show_urls.Command):
             default=None,
             help="The url to show access policy for"
         )
+        parser.add_argument(
+            '--urlname',
+            dest='urlname',
+            default=None,
+            help="The urlname ('galaxy:api:content:v3:sync-config' for ex) to show access policy for"
+        )
         super().add_arguments(parser)
 
     def _get_user(self, user_id):
@@ -116,10 +122,27 @@ class Command(show_urls.Command):
                 traceback.print_exc()
             raise CommandError("Error occurred while trying to load %s: %s" % (getattr(settings, urlconf), str(e)))
 
+
+        url_patterns = urlconf.urlpatterns
+
+        url_filter = options['url']
+        if url_filter:
+            resolve_match = resolve(url_filter)
+            log.debug('rm: %s', resolve_match)
+            log.debug('rm.args: %s', resolve_match.args)
+            log.debug('matched %s', url_filter)
+            urlpat = path(route=resolve_match.route,
+                          view=resolve_match.func,
+                          kwargs=resolve_match.kwargs,
+                          name=resolve_match.url_name)
+            url_patterns = [urlpat]
+
         # log.debug('urlconf:\n%s', pp(urlconf.urlpatterns))
-        view_functions = self.extract_views_from_urlpatterns(urlconf.urlpatterns)
+        view_functions = self.extract_views_from_urlpatterns(url_patterns)
 
         # log.debug('view_functions:\n%s', pp(view_functions))
+
+
 
         for (func, regex, url_name, p) in view_functions:
             if hasattr(func, '__globals__'):
@@ -151,8 +174,16 @@ class Command(show_urls.Command):
             decorator = ', '.join(decorators)
 
             url_filter = options['url']
-            if url_filter and url_filter != url:
+            url_name_filter = options['urlname']
+            # if url_filter:
+            #     resolve_match = resolve(url_filter)
+            #     log.debug('rm: %s', resolve_match)
+            #     log.debug('rm.args: %s', resolve_match.args)
+            #     log.debug('matched %s', url_filter)
+
+            if url_name_filter and url_name_filter != url_name:
                 continue
+
             if module.startswith('admin'):
                 continue
             if module.startswith('django'):
@@ -163,7 +194,6 @@ class Command(show_urls.Command):
                 continue
             if module.startswith('drf_spectacular'):
                 continue
-
 
             perms = []
 
@@ -215,6 +245,7 @@ class Command(show_urls.Command):
         """
         views = []
         for p in urlpatterns:
+            # log.debug('PATTERN p: %s type: %s', p, type(p))
             if isinstance(p, (URLPattern, show_urls.RegexURLPattern)):
                 try:
                     if not p.name:
@@ -224,6 +255,12 @@ class Command(show_urls.Command):
                     else:
                         name = p.name
                     pattern = show_urls.describe_pattern(p)
+                    log.debug('PATTERN p: %s', p)
+                    log.debug('p.callback: %s', p.callback)
+                    log.debug('base: %s', base)
+                    log.debug('pattern: %s', pattern)
+                    log.debug('base+pattern: %s', base + pattern)
+                    log.debug('name: %s', name)
                     views.append((p.callback, base + pattern, name, p))
                 except ViewDoesNotExist:
                     continue
