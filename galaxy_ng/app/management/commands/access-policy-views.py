@@ -22,7 +22,7 @@ from rest_access_policy import AccessPolicy
 from galaxy_ng.app import access_control
 
 log = logging.getLogger(__name__)
-pp = pprint.pformat
+pf = pprint.pformat
 
 class FauxInnerRequest:
     def __init__(self, user, method, path, *args, **kwargs):
@@ -278,7 +278,9 @@ class Command(show_urls.Command):
         view = access_policy_viewset
         self.stdout.write("%s\n\tviewset: %s\n\turl_name: %s\n" % (viewset_info['url'], viewset_info['module'],
                                                                    viewset_info['name']))
-        self.stdout.write("\taccess_policy: %s\n\n" % (viewset_info['access_policy'],))
+        self.stdout.write("\taccess_policy: %s\n" % (viewset_info['access_policy'],))
+        self.stdout.write("\tkwargs: %s\n" % (viewset_info['resolved_match'].kwargs,))
+        self.stdout.write("\n")
 
         user_id = options['user_id']
         user = self._get_user(user_id)
