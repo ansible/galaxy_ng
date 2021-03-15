@@ -1,5 +1,4 @@
 import functools
-import json
 import logging
 import pprint
 import re
@@ -7,28 +6,27 @@ import re
 from django.conf import settings
 
 from django.contrib.admindocs.views import simplify_regex
-from django.core.management import BaseCommand, CommandError
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.management import CommandError
 from django.core.exceptions import ViewDoesNotExist
-from django.urls import URLPattern, URLResolver, resolve, path, re_path, reverse # type: ignore
+from django.urls import URLPattern, URLResolver, resolve, path  # type: ignore
 from django.utils import translation
-from django.contrib.auth import load_backend, get_backends
+from django.contrib.auth import get_backends
 from django.contrib.auth.backends import ModelBackend
 
 from django_extensions.management.commands import show_urls
-from rest_framework.views import get_view_name
 from rest_access_policy import AccessPolicy
 
-from galaxy_ng.app import access_control
 
 log = logging.getLogger(__name__)
 pf = pprint.pformat
+
 
 class FauxInnerRequest:
     def __init__(self, user, method, path, *args, **kwargs):
         self.method = method
         self.path = path
         self.user = user
+
 
 class FauxRequest:
     def __init__(self, user, method='GET', path='/faux', *args, **kwargs):
@@ -37,7 +35,6 @@ class FauxRequest:
         self.path = path
         self.query_params = {}
         self._request = FauxInnerRequest(user, method, path)
-
 
 
 class Command(show_urls.Command):
@@ -63,7 +60,8 @@ class Command(show_urls.Command):
             '--urlname',
             dest='urlname',
             default=None,
-            help="The urlname ('galaxy:api:content:v3:sync-config' for ex) to show access policy for"
+            help="The urlname (eg, 'galaxy:api:content:v3:sync-config')"
+                 "to show access policy for"
         )
         super().add_arguments(parser)
 
@@ -84,7 +82,8 @@ class Command(show_urls.Command):
 
         views = []
         if not hasattr(settings, urlconf):
-            raise CommandError("Settings module {} does not have the attribute {}.".format(settings, urlconf))
+            raise CommandError("Settings module {} does not have the attribute {}.".format(settings,
+                                                                                           urlconf))
 
         try:
             urlconf = __import__(getattr(settings, urlconf), {}, {}, [''])
@@ -92,8 +91,9 @@ class Command(show_urls.Command):
             if options['traceback']:
                 import traceback
                 traceback.print_exc()
-            raise CommandError("Error occurred while trying to load %s: %s" % (getattr(settings, urlconf), str(e)))
-
+            msg = "Error occurred while trying to load %s: %s" % \
+                (getattr(settings, urlconf), str(e))
+            raise CommandError(msg)
 
         url_patterns = urlconf.urlpatterns
 
@@ -143,15 +143,18 @@ class Command(show_urls.Command):
                 continue
             if module.startswith('rest_framework'):
                 continue
-            if module.startswith('pulp'):
-                continue
+            # if module.startswith('pulp'):
+            #    continue
             if module.startswith('drf_spectacular'):
                 continue
 
             perms = []
 
             if hasattr(func, 'cls'):
+                log.debug('func.cls: %s', func.cls)
+                log.debug('func.cls.permission_classes: %s', func.cls.permission_classes)
                 permission_classes = func.cls.permission_classes
+
                 perms = func.cls.get_permissions(func.cls)
 
                 # FIXME: handle AccessPolicy perm + other perms
@@ -177,17 +180,8 @@ class Command(show_urls.Command):
             #                   "permission_classes": permission_classes,
             #                   "perms": perms,
             #                   "path_regex": regex,
-
             #                   "decorators": decorator})
-            # else:
-            #     views.append(fmtr.format(
-            #         module='{0}.{1}'.format(style.MODULE(func.__module__), style.MODULE_NAME(func_name)),
-            #         url_name=style.URL_NAME(url_name),
-            #         url=style.URL(url),
-            #         decorator=decorator,
-            #     ).strip())
 
-        # log.debug('views:\n%s', pp(views))
         for view in views:
             self.show_access_policy(view, **options)
 
@@ -217,8 +211,8 @@ class Command(show_urls.Command):
                     else:
                         name = p.name
                     pattern = show_urls.describe_pattern(p)
-                    # log.debug('PATTERN p: %s', p)
-                    # log.debug('pattern: %s', pattern)
+                    log.debug('PATTERN p: %s', p)
+                    log.debug('pattern: %s', pattern)
 
                     resolved_match = p.resolve(base + pattern)
                     log.debug('resolved_match: %s', resolved_match)
@@ -239,12 +233,19 @@ class Command(show_urls.Command):
                 if isinstance(p, show_urls.LocaleRegexURLResolver):
                     for language in self.LANGUAGES:
                         with translation.override(language[0]):
-                            views.extend(self.extract_views_from_urlpatterns(patterns, base + pattern, namespace=_namespace))
+                            views.extend(self.extract_views_from_urlpatterns(patterns,
+                                                                             base + pattern,
+                                                                             namespace=_namespace))
                 else:
-                    views.extend(self.extract_views_from_urlpatterns(patterns, base + pattern, namespace=_namespace))
+                    views.extend(self.extract_views_from_urlpatterns(patterns,
+                                                                     base + pattern,
+                                                                     namespace=_namespace))
             elif hasattr(p, '_get_callback'):
                 try:
-                    views.append((p._get_callback(), base + show_urls.describe_pattern(p), p.name, p))
+                    views.append((p._get_callback(),
+                                  base + show_urls.describe_pattern(p),
+                                  p.name,
+                                  p))
                 except ViewDoesNotExist:
                     continue
             elif hasattr(p, 'url_patterns') or hasattr(p, '_get_url_patterns'):
@@ -252,31 +253,25 @@ class Command(show_urls.Command):
                     patterns = p.url_patterns
                 except ImportError:
                     continue
-                views.extend(self.extract_views_from_urlpatterns(patterns, base + show_urls.describe_pattern(p), namespace=namespace))
+                views.extend(self.extract_views_from_urlpatterns(patterns,
+                                                                 base
+                                                                 + show_urls.describe_pattern(p),
+                                                                 namespace=namespace))
             else:
                 raise TypeError("%s does not appear to be a urlpattern object" % p)
         return views
 
-
     def show_access_policy(self, viewset_info, *args, **options):
-        # ap = access_control.access_policy.AccessPolicyBase()
-        # deployment_mode = options['deployment_mode']
-        # log.debug('access_policy_viewset: %s is_access_policy: %r', access_policy_viewset, isinstance(access_policy_viewset, AccessPolicy))
         access_policy_viewset = viewset_info["view"]
         perms = access_policy_viewset.get_permissions(access_policy_viewset)
-        # log.debug('perms: %s', perms)
 
-        deployment_mode = 'standalone'
         access_perm = perms[0]
-        # statements_map = access_perm._get_statements(deployment_mode)
-        statements= access_perm.get_policy_statements(None, access_policy_viewset)
-        statement_template = \
-            "\taction: {action}\n\t\tprincipal: {principal}\n\t\teffect: {effect}\n\t\tconditions:\n{conditions}"
+        statements = access_perm.get_policy_statements(None, access_policy_viewset)
+        statement_template = "\taction: {action}\n\t\tprincipal: {principal}\n\t\t" + \
+            "effect: {effect}\n\t\tconditions:\n{conditions}"
 
-        # self.stdout.write(f"deployment_mode: {deployment_mode}\n")
-
-        view = access_policy_viewset
-        self.stdout.write("%s\n\tviewset: %s\n\turl_name: %s\n" % (viewset_info['url'], viewset_info['module'],
+        self.stdout.write("%s\n\tviewset: %s\n\turl_name: %s\n" % (viewset_info['url'],
+                                                                   viewset_info['module'],
                                                                    viewset_info['name']))
         self.stdout.write("\taccess_policy: %s\n" % (viewset_info['access_policy'],))
         self.stdout.write("\tkwargs: %s\n" % (viewset_info['resolved_match'].kwargs,))
@@ -337,9 +332,6 @@ class Command(show_urls.Command):
         request = FauxRequest(user, method=method, path=url)
         log.debug('request: %s request.method: %s', request, request.method)
 
-        # view_instance = view(action=action, request=request)
-        # view_instance = view.as_view(actions={'get':'list'})
-        # view_instance = view(action=action, request=request, kwargs={'lookup_url_kwarg':'pk'})
         view_instance = view(action=action, request=request, kwargs={})
         log.debug('view_instance: %s', view_instance)
 
@@ -350,5 +342,3 @@ class Command(show_urls.Command):
                   view_instance, action, user, url, result)
 
         return result
-
-
