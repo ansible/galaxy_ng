@@ -219,5 +219,12 @@ STANDALONE_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
         },
+
+        {
+            "action": ["update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:container.change_containerdistribution"
+        },
     ],
 }

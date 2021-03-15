@@ -58,7 +58,7 @@ container_paths = [
     # This regex can capture "namespace/name" and "name"
     re_path(
         r'repositories/(?P<base_path>\w+\/{0,1}\w+)/',
-        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
+        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='container-repository-detail'),
 ]
 
