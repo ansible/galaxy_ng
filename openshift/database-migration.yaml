@@ -6,7 +6,7 @@ objects:
   - apiVersion: batch/v1
     kind: Job
     metadata:
-      name: database-migration-${IMAGE_TAG}-3
+      name: database-migration-${IMAGE_TAG}-4
     spec:
       backoffLimit: 1
       completions: 1
@@ -18,6 +18,10 @@ objects:
           imagePullSecrets:
             - name: quay-cloudservices-pull
             - name: rh-registry-pull
+          volumes:
+            - name: settings
+              configMap:
+                name: galaxy-config
           containers:
             - name: database-migration-${IMAGE_TAG}
               image: ${IMAGE}:${IMAGE_TAG}
@@ -30,6 +34,9 @@ objects:
                 requests:
                   cpu: ${{CPU_LIMIT}}
                   memory: ${{MEMORY_LIMIT}}
+              volumeMounts:
+                - mountPath: /etc/pulp
+                  name: settings
               env:
                 - name: PULP_SECRET_KEY
                   valueFrom:
