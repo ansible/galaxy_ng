@@ -79,8 +79,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-ALLOWED_CONTENT_CHECKSUMS = ["sha224", "sha256", "sha384", "sha512"]
-
 # Compatibility settings
 # ----------------------
 X_PULP_CONTENT_HOST = "localhost"
