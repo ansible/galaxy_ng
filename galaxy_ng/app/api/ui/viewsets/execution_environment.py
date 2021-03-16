@@ -80,6 +80,7 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
         base_path = self.kwargs["base_path"]
         repo = get_object_or_404(models.ContainerDistribution, base_path=base_path).repository
         repo_version = repo.latest_version()
+        # TODO: Fix this with get_content in pulpcore 3.11
         repo_content = repo_version.content.all()
 
         manifests = (
