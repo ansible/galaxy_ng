@@ -13,7 +13,8 @@ from galaxy_ng.app.access_control import access_policy
 # Using a view instead of a viewset since this endpoint effectively loads a
 # json blob from disk instead of being tied to a specific model.
 class ContainerConfigBlobView(api_base.GenericAPIView):
-    permission_classes = []
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    action = 'get'
 
     def get(self, request, *args, **kwargs):
         # manifest_ref can be a tag name or a manifest digest
