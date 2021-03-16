@@ -9,7 +9,6 @@ from pulp_ansible.app.models import (
 
 from galaxy_ng.app.constants import COMMUNITY_DOMAINS
 from galaxy_ng.app.models.collectionsync import CollectionSyncTask
-from galaxy_ng.app.common.proxy_url import strip_auth_from_url, join_proxy_url
 
 
 class AnsibleDistributionSerializer(serializers.ModelSerializer):
@@ -80,20 +79,18 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
     write_only_fields = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
-    proxy_url = serializers.URLField(
-        help_text="The proxy url e.g: http://IP:PORT",
-        allow_null=True,
-        required=False,
-    )
-    proxy_username = serializers.CharField(
-        allow_null=True,
-        required=False
-    )
     proxy_password = serializers.CharField(
+        help_text="Password for proxy authentication.",
         allow_null=True,
         required=False,
         style={'input_type': 'password'},
         write_only=True
+    )
+    proxy_username = serializers.CharField(
+        help_text="User for proxy authentication.",
+        allow_null=True,
+        required=False,
+        write_only=False,  # overwriting this as pulpcore defaults to True
     )
     token = serializers.CharField(
         allow_null=True,
@@ -103,11 +100,17 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
         style={'input_type': 'password'}
     )
     password = serializers.CharField(
-        help_text="The password to be used for authentication when syncing.",
+        help_text="Remote password.",
         allow_null=True,
         required=False,
         style={'input_type': 'password'},
         write_only=True
+    )
+    username = serializers.CharField(
+        help_text="Remote user.",
+        allow_null=True,
+        required=False,
+        write_only=False,  # overwriting this as pulpcore defaults to True
     )
     name = serializers.CharField(read_only=True)
     repositories = serializers.SerializerMethodField()
@@ -145,61 +148,6 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'client_key': {'write_only': True},
         }
 
-    def to_representation(self, instance):
-        """
-        Splits proxy_url field from DB in 3 fields for representation.
-        proxy_url, proxy_username, proxy_password (write-only)
-        """
-
-        data = super().to_representation(instance)
-
-        if instance.proxy_url is not None:
-            url, username, _ = strip_auth_from_url(instance.proxy_url)
-            data['proxy_url'] = url
-            data['proxy_username'] = username
-
-        return data
-
-    def save(self):
-        """
-        Rejoins 3 fields url, username, password back to proxy_url on DB.
-
-        If proxy_url is null or blank, the field is cleaned up in DB
-        regardless of username, password values.
-
-        If proxy, url, password or username is missing from the payload then
-        should be the same as the existing value in the DB or None.
-
-        If proxy username/password is set to null or blank, the fields are
-        cleaned up in DB.
-        """
-
-        empty = object()
-        proxy_url = self.validated_data.get('proxy_url', empty)
-        proxy_username = self.validated_data.get('proxy_username', empty)
-        proxy_password = self.validated_data.get('proxy_password', empty)
-
-        url_in_db, username_in_db, password_in_db = strip_auth_from_url(
-            self.instance.proxy_url
-        ) if self.instance.proxy_url else (None, None, None)
-
-        if proxy_url is empty:
-            proxy_url = url_in_db
-
-        if proxy_username is empty:
-            proxy_username = username_in_db
-
-        if proxy_password is empty:
-            proxy_password = password_in_db
-
-        self.validated_data['proxy_url'] = join_proxy_url(
-            proxy_url,
-            proxy_username,
-            proxy_password,
-        ) if proxy_url else None
-
-        super().save()
-
     def validate(self, data):
         if not data.get('requirements_file') and any(
             [domain in data['url'] for domain in COMMUNITY_DOMAINS]
@@ -214,11 +162,7 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
         return super().validate(data)
 
     def get_write_only_fields(self, obj):
-        url = obj.proxy_url
-        proxy_password = None
-        if url is not None:
-            proxy_password = strip_auth_from_url(url)[2]
-        return get_write_only_fields(self, obj, extra_data={'proxy_password': proxy_password})
+        return get_write_only_fields(self, obj)
 
     def get_repositories(self, obj):
         return [
@@ -234,7 +178,7 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
         ).first()
 
 
-def get_write_only_fields(serializer, obj, extra_data={}):
+def get_write_only_fields(serializer, obj, extra_data=None):
     """
     Returns a list of write only fields and whether or not their values are set
     so that clients can tell if they are overwriting an existing value.
@@ -244,6 +188,7 @@ def get_write_only_fields(serializer, obj, extra_data={}):
         only field is not one of the fields in the underlying data model.
     """
     fields = []
+    extra_data = extra_data or {}
 
     # returns false if field is "" or None
     def _is_set(field_name):
