@@ -26,10 +26,10 @@ EOF
   exit 1
 fi
 
-echo "INFO: Using compose profile ${COMPOSE_PROFILE}"
-echo "INFO: ${DEV_SOURCE_PATH:-No} packages installed from source"
-echo "INFO: Image suffix ${DEV_IMAGE_SUFFIX:-is unset}"
-echo "INFO: Volume suffix ${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX:-is unset}}"
+echo "INFO: Using compose profile ${COMPOSE_PROFILE}" >&2
+echo "INFO: ${DEV_SOURCE_PATH:-No} packages installed from source" >&2
+echo "INFO: Image suffix ${DEV_IMAGE_SUFFIX:-is unset}" >&2
+echo "INFO: Volume suffix ${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX:-is unset}}" >&2
 
 compose_args=(
   -f 'dev/docker-compose.yml'
