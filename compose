@@ -5,15 +5,7 @@ set -o errexit
 
 if [[ -f '.compose.env' ]]; then
   # export variables from .compose.env but only if the var is not already set.
-
-  # -- The below solution using `source` is good, but is not valid for `source`
-  #    on bash <3 on a Mac.
-  # set -o allexport
-  #source <(grep -v '^#' .compose.env | sed -E 's|^(.+)=(.*)$|: ${\1=\2}; export \1|g')
-  # set +o allexport
-
-  # This solution using `eval` works on bash <3, >3 and also zsh on Mac and Linux
-  eval "$(grep -v '^#' .compose.env | sed -E 's|^(.+)=(.*)$| export \1=${\1:-\2} |g' | xargs -L 1)"
+  eval "$(grep -v '^#' .compose.env | sed -E 's|^(.+)=(.*)$|export \1=${\1:-\2}|g' | xargs -L 1)"
 fi
 
 if [[ -z "${COMPOSE_PROFILE:-}" ]]; then
