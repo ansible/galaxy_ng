@@ -157,3 +157,17 @@ class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
                 )
             ).order_by('-pulp_created')
         )
+
+
+class ContainerReadmeViewSet(api_base.ModelViewSet):
+    queryset = models.ContainerDistroReadme.objects
+    serializer_class = serializers.ContainerReadmeSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RepositoryFilter
+    permission_classes = [access_policy.ContainerReadmeAccessPolicy]
+    lookup_field = "base_path"
+
+    def get_object(self):
+        base_path = self.kwargs["base_path"]
+        distro = get_object_or_404(models.ContainerDistribution, base_path=base_path)
+        return self.queryset.get_or_create(container=distro)[0]

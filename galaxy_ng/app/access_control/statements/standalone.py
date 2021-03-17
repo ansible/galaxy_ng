@@ -227,4 +227,21 @@ STANDALONE_STATEMENTS = {
             "condition": "has_model_or_obj_perms:container.change_containerdistribution"
         },
     ],
+
+    # The container readme can't just use the ContainerRepository access policies
+    # because the readme viewset returns a readme object and not a container
+    # repository object, which breaks has_model_or_obj_perms.
+    'ContainerReadmeViewset': [
+        {
+            "action": ["retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": ["update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_container_perms:container.change_containerdistribution"
+        },
+    ]
 }

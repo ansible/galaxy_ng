@@ -295,3 +295,11 @@ class MyDistributionAccessPolicy(AccessPolicyBase):
 
 class ContainerRepositoryAccessPolicy(AccessPolicyBase):
     NAME = 'ContainerRepositoryViewSet'
+
+
+class ContainerReadmeAccessPolicy(AccessPolicyBase):
+    NAME = 'ContainerReadmeViewset'
+
+    def has_container_perms(self, request, view, action, permission):
+        readme = view.get_object()
+        return request.user.has_perm(permission, readme.container)

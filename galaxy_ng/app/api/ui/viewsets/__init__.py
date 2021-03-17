@@ -19,7 +19,8 @@ from .distribution import DistributionViewSet, MyDistributionViewSet
 from .execution_environment import (
     ContainerRepositoryViewSet,
     ContainerRepositoryManifestViewSet,
-    ContainerRepositoryHistoryViewSet
+    ContainerRepositoryHistoryViewSet,
+    ContainerReadmeViewSet,
 )
 
 __all__ = (
@@ -42,5 +43,6 @@ __all__ = (
     'MyDistributionViewSet',
     'ContainerRepositoryViewSet',
     'ContainerRepositoryManifestViewSet',
-    'ContainerRepositoryHistoryViewSet'
+    'ContainerRepositoryHistoryViewSet',
+    'ContainerReadmeViewSet'
 )
