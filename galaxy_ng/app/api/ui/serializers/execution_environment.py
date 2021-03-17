@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers
 
 from pulp_container.app import models as container_models
@@ -72,7 +74,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         }
 
 
-class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
+class ContainerManifestSerializer(serializers.ModelSerializer):
     config_blob = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     layers = serializers.SerializerMethodField()
@@ -116,6 +118,22 @@ class ContainerRepositoryImageSerializer(serializers.ModelSerializer):
             tags.append(tag.name)
 
         return tags
+
+
+class ContainerManifestDetailSerializer(ContainerManifestSerializer):
+    def get_config_blob(self, obj):
+        with obj.config_blob._artifacts.first().file.open() as f:
+            config_json = json.load(f)
+
+        return {
+            'digest': obj.config_blob.digest,
+            'media_type': obj.config_blob.media_type,
+            'data': config_json
+        }
+
+    # class Meta:
+    #     model = super().Meta.model
+    #     fields = super().Meta.fields + ('config_blob')
 
 
 class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):

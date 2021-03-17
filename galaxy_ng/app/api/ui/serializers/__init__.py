@@ -29,9 +29,10 @@ from .distribution import (
 
 from .execution_environment import (
     ContainerRepositorySerializer,
-    ContainerRepositoryImageSerializer,
+    ContainerManifestSerializer,
     ContainerRepositoryHistorySerializer,
-    ContainerReadmeSerializer
+    ContainerReadmeSerializer,
+    ContainerManifestDetailSerializer
 )
 
 __all__ = (
@@ -59,5 +60,7 @@ __all__ = (
     'ContainerRepositorySerializer',
     'ContainerRepositoryImageSerializer',
     'ContainerRepositoryHistorySerializer',
+    'ContainerManifestSerializer',
+    'ContainerManifestDetailSerializer',
     'ContainerReadmeSerializer'
 )

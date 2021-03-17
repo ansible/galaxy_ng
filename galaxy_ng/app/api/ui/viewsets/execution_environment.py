@@ -1,6 +1,7 @@
 import logging
 
 from django.db.models import Prefetch, Count, Q
+from django.core import exceptions
 
 from pulpcore.plugin import models as core_models
 from pulp_container.app import models as container_models
@@ -70,22 +71,33 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
     lookup_field = "base_path"
 
 
-class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
-    serializer_class = serializers.ContainerRepositoryImageSerializer
+# provide some common methods across all <distro>/_content/ endpoints
+class ContainerContentBaseViewset(api_base.ModelViewSet):
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+
+    def get_distro(self):
+        return get_object_or_404(
+            models.ContainerDistribution, base_path=self.kwargs["base_path"])
+
+
+class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ManifestFilter
 
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return serializers.ContainerManifestDetailSerializer
+        return serializers.ContainerManifestSerializer
+
     def get_queryset(self):
-        base_path = self.kwargs["base_path"]
-        repo = get_object_or_404(models.ContainerDistribution, base_path=base_path).repository
+        repo = self.get_distro().repository
         repo_version = repo.latest_version()
         # TODO: Fix this with get_content in pulpcore 3.11
         repo_content = repo_version.content.all()
 
         manifests = (
-            container_models.Manifest.objects
-            .filter(pk__in=repo_content)
+            repo_version.get_content(container_models.Manifest.objects)
             .prefetch_related(
                 # Prefetch limits the tag list to tags in the current repo version.
                 # Without it, tags from all repo versions are allowed which leads
@@ -110,24 +122,38 @@ class ContainerRepositoryManifestViewSet(api_base.ModelViewSet):
         tag_filter = self.request.GET.get('tag', None)
         if tag_filter:
             manifests = manifests.filter(
-                tagged_manifests__name__contains=tag_filter,
                 # tagged_manifests doesn't respect the Prefetch filtering, so
                 # the repo version has to be filtered again here
-                tagged_manifests__pk__in=repo_content)
+                tagged_manifests__pk__in=repo_version.get_content(
+                    container_models.Tag.objects).filter(name__icontains=tag_filter))
 
         return manifests
 
+    def get_object(self):
+        qs = self.get_queryset()
+        # manifest_ref can be a tag name or a manifest digest
+        manifest_ref = self.kwargs['manifest_ref']
+        try:
+            repo_version = self.get_distro().repository.latest_version()
 
-class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
+            # we could just return tag.tagged_manifest, but using the tag in the
+            # queryset allows this to take advantage of all the prefetching that
+            # happens in get_queryset
+            tag = repo_version.get_content(container_models.Tag.objects).get(name=manifest_ref)
+            manifest = qs.get(tagged_manifests__pk=tag)
+        except exceptions.ObjectDoesNotExist:
+            manifest = get_object_or_404(qs, digest=manifest_ref)
+
+        return manifest
+
+
+class ContainerRepositoryHistoryViewSet(ContainerContentBaseViewset):
     serializer_class = serializers.ContainerRepositoryHistorySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = HistoryFilter
-    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
-    lookup_field = "base_path"
 
     def get_queryset(self):
-        base_path = self.kwargs["base_path"]
-        repo = get_object_or_404(models.ContainerDistribution, base_path=base_path).repository
+        repo = self.get_distro().repository
 
         allowed_content_types = ['container.manifest', 'container.tag']
 
@@ -160,15 +186,11 @@ class ContainerRepositoryHistoryViewSet(api_base.ModelViewSet):
         )
 
 
-class ContainerReadmeViewSet(api_base.ModelViewSet):
+class ContainerReadmeViewSet(ContainerContentBaseViewset):
     queryset = models.ContainerDistroReadme.objects
     serializer_class = serializers.ContainerReadmeSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = RepositoryFilter
     permission_classes = [access_policy.ContainerReadmeAccessPolicy]
-    lookup_field = "base_path"
 
     def get_object(self):
-        base_path = self.kwargs["base_path"]
-        distro = get_object_or_404(models.ContainerDistribution, base_path=base_path)
+        distro = self.get_distro()
         return self.queryset.get_or_create(container=distro)[0]
