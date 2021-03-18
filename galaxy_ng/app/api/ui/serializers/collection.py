@@ -69,6 +69,7 @@ class CollectionVersionBaseSerializer(Serializer):
     namespace = serializers.CharField()
     name = serializers.CharField()
     version = serializers.CharField()
+    requires_ansible = serializers.CharField()
     created_at = serializers.DateTimeField(source='pulp_created')
     metadata = CollectionMetadataSerializer(source='*')
     contents = serializers.ListField(ContentSerializer())
