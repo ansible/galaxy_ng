@@ -131,10 +131,6 @@ class ContainerManifestDetailSerializer(ContainerManifestSerializer):
             'data': config_json
         }
 
-    # class Meta:
-    #     model = super().Meta.model
-    #     fields = super().Meta.fields + ('config_blob')
-
 
 class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
     added = serializers.SerializerMethodField()

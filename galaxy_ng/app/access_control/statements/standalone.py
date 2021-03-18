@@ -215,7 +215,7 @@ STANDALONE_STATEMENTS = {
     # RBAC is added
     'ContainerRepositoryViewSet': [
         {
-            "action": ["list", "retrieve", "get"],
+            "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
         },

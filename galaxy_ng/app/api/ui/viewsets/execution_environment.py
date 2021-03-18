@@ -93,7 +93,6 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
     def get_queryset(self):
         repo = self.get_distro().repository
         repo_version = repo.latest_version()
-        # TODO: Fix this with get_content in pulpcore 3.11
         repo_content = repo_version.content.all()
 
         manifests = (
