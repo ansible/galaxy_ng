@@ -27,7 +27,6 @@ class ContainerDistroReadme(models.Model):
 
 class ContainerRegistryRemote(
     pulp_models.Remote,
-    LifecycleModelMixin,
     mixins.GroupModelPermissionsMixin,
 ):
 

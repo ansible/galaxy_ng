@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
             options={
                 'default_related_name': '%(app_label)s_%(model_name)s',
             },
-            bases=('core.remote', django_lifecycle.mixins.LifecycleModelMixin, galaxy_ng.app.access_control.mixins.GroupModelPermissionsMixin),
+            bases=('core.remote', galaxy_ng.app.access_control.mixins.GroupModelPermissionsMixin),
         ),
         migrations.CreateModel(
             name='ContainerSyncTask',
