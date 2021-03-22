@@ -37,6 +37,10 @@ container_repo_paths = [
         viewsets.ContainerRepositoryManifestViewSet.as_view({'get': 'list'}),
         name='container-repository-images'),
     path(
+        'images/<str:manifest_ref>/',
+        viewsets.ContainerRepositoryManifestViewSet.as_view({'get': 'retrieve'}),
+        name='container-repository-images-config-blob'),
+    path(
         'history/',
         viewsets.ContainerRepositoryHistoryViewSet.as_view({'get': 'list'}),
         name='container-repository-history'),

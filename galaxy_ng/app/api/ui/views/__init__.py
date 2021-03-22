@@ -3,7 +3,6 @@ from .auth import (
     LogoutView,
 )
 
-
 __all__ = (
     # auth
     "LoginView",
