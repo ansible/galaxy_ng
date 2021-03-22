@@ -29,6 +29,12 @@ class GroupViewSet(LocalSettingsMixin, viewsets.GroupViewSet):
     filterset_class = GroupFilter
     permission_classes = [access_policy.GroupAccessPolicy]
 
+    # TODO(awcrosby): replace this by setting attribute to None
+    # after https://pulp.plan.io/issues/8438 is resolved
+    def _remove_attr(self):
+        raise AttributeError
+    queryset_filtering_required_permission = property(_remove_attr)
+
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         name = request.data['name']
