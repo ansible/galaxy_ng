@@ -63,6 +63,10 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 'name': repo.name,
                 'description': repo.description,
                 'pulp_created': repo.pulp_created,
+                'last_sync_task': _get_last_sync_task(repo),
+                'pulp_labels': {
+                    label.key: label.value for label in repo.pulp_labels.all()
+                },
             },
             'distribution':
             {
@@ -72,6 +76,23 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 'base_path': distro.base_path,
             }
         }
+
+
+def _get_last_sync_task(repo):
+    sync_task = models.container.ContainerSyncTask.objects.filter(
+        repository=repo
+    ).first()
+    if not sync_task:
+        # UI handles `null` as "no status"
+        return
+
+    return {
+        "task_id": sync_task.id,
+        "state": sync_task.task.state,
+        "started_at": sync_task.task.started_at,
+        "finished_at": sync_task.task.finished_at,
+        "error": sync_task.task.error
+    }
 
 
 class ContainerManifestSerializer(serializers.ModelSerializer):
