@@ -1,3 +1,4 @@
+from unittest.case import skip
 from django.urls.base import reverse
 from galaxy_ng.app.constants import DeploymentMode
 from django.test.utils import override_settings
@@ -100,27 +101,28 @@ class TestCollectionViewsets(BaseTestCase):
             }
         )
 
+        # The following URLS are temporary deatived due to https://issues.redhat.com/browse/AAH-224
         # metadata urls
-        self.all_collections_url = reverse(
-            'galaxy:api:content:v3:all-collections-list',
-            kwargs={
-                'path': self.repo.name,
-            }
-        )
+        # self.all_collections_url = reverse(
+        #     'galaxy:api:content:v3:all-collections-list',
+        #     kwargs={
+        #         'path': self.repo.name,
+        #     }
+        # )
 
-        self.all_versions_url = reverse(
-            'galaxy:api:content:v3:all-collection-versions-list',
-            kwargs={
-                'path': self.repo.name,
-            }
-        )
+        # self.all_versions_url = reverse(
+        #     'galaxy:api:content:v3:all-collection-versions-list',
+        #     kwargs={
+        #         'path': self.repo.name,
+        #     }
+        # )
 
-        self.metadata_url = reverse(
-            'galaxy:api:content:v3:repo-metadata',
-            kwargs={
-                'path': self.repo.name,
-            }
-        )
+        # self.metadata_url = reverse(
+        #     'galaxy:api:content:v3:repo-metadata',
+        #     kwargs={
+        #         'path': self.repo.name,
+        #     }
+        # )
 
         # used for href tests
         self.pulp_href_fragment = "pulp_ansible/galaxy"
@@ -144,6 +146,7 @@ class TestCollectionViewsets(BaseTestCase):
             self.pulp_href_fragment, response.data["data"][0]["highest_version"]["href"]
         )
 
+    @skip("https://issues.redhat.com/browse/AAH-224")
     def test_unpaginated_collections_list(self):
         """Assert the call to v3/collections/all returns correct
         collections and versions
