@@ -222,6 +222,9 @@ class CollectionAccessPolicy(AccessPolicyBase):
         namespace = models.Namespace.objects.get(name=collection.namespace)
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
+class CollectionUploadAccessPolicy(AccessPolicyBase):
+    NAME = 'CollectionUploadViewSet'
+
     def can_create_collection(self, request, view, permission):
         data = view._get_data(request)
         try:
