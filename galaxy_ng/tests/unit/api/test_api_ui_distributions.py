@@ -71,9 +71,10 @@ class TestUIDistributions(BaseTestCase):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             self.client.force_authenticate(user=self.user)
             data = self.client.get(self.distro_url).data
-            self.assertEqual(len(data['data']), 3)
-            self.assertEqual(data['data'][0]['pulp_id'], str(self.repo2_distro.pk))
-            self.assertEqual(data['data'][0]['repository']['name'], self.repo2.name)
+
+            self.assertEqual(len(data['data']), 6)
+            # 5 distros created by data migration and one `other-repo` created
+            # on test setUp.
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self.client.force_authenticate(user=self.user)

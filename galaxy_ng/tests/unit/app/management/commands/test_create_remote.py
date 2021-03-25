@@ -112,18 +112,18 @@ class TestCreateRemoteCommand(TestCase):
         out = StringIO()
         call_command(
             'create-remote',
-            'community',
+            'My New Remote',
             'https://galaxy.ansible.com/v3/collections/',
             '-r', REQUIREMENTS_FILE_STR,
             stdout=out
         )
 
-        self.assertIn('Created new CollectionRemote community', out.getvalue())
-        self.assertIn('Created new Repository community', out.getvalue())
-        self.assertIn('Created new Distribution community', out.getvalue())
+        self.assertIn('Created new CollectionRemote my-new-remote', out.getvalue())
+        self.assertIn('Created new Repository my-new-remote', out.getvalue())
+        self.assertIn('Created new Distribution my-new-remote', out.getvalue())
 
         self.assertEqual(
-            CollectionRemote.objects.get(name='community').requirements_file,
+            CollectionRemote.objects.get(name='my-new-remote').requirements_file,
             REQUIREMENTS_FILE_STR
         )
 
