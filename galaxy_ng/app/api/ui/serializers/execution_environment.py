@@ -74,6 +74,9 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 'name': distro.name,
                 'pulp_created': distro.pulp_created,
                 'base_path': distro.base_path,
+                'pulp_labels': {
+                    label.key: label.value for label in distro.pulp_labels.all()
+                },
             }
         }
 
