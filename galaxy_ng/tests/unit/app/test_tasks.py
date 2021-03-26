@@ -106,10 +106,7 @@ class TestTaskPublish(TestCase):
     def test_import_and_auto_approve(self, mocked_enqueue, mocked_import, mocked_get_created):
         inbound_repo = AnsibleRepository.objects.get(name=staging_name)
 
-        golden_repo = AnsibleRepository.objects.create(name=golden_name)
-        golden_dist = AnsibleDistribution(name=golden_name, base_path=golden_name)
-        golden_dist.repository = golden_repo
-        golden_dist.save()
+        golden_repo = AnsibleRepository.objects.get(name=golden_name)
 
         mocked_get_created.return_value = [self.collection_version]
 

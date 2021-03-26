@@ -35,24 +35,9 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
-        self.certified_remote = _create_remote(
-            name='rh-certified',
-            url='https://a.certified.url.com/api/v2/',
-            requirements_file=None
-        )
-        _create_repo(name='rh-certified', remote=self.certified_remote)
-
-        self.community_remote = _create_remote(
-            name='community',
-            url='https://galaxy.ansible.com',
-            requirements_file=(
-                "collections:\n"
-                "  - name: initial.name\n"
-                "    server: initial.content.com\n"
-                "    api_key: NotASecret\n"
-            )
-        )
-        _create_repo(name='community', remote=self.community_remote)
+        # Remotes are created by data migration
+        self.certified_remote = CollectionRemote.objects.get(name='rh-certified')
+        self.community_remote = CollectionRemote.objects.get(name='community')
 
     def build_config_url(self, path):
         return reverse('galaxy:api:content:v3:sync-config', kwargs={'path': path})
