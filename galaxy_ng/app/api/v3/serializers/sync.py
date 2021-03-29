@@ -140,7 +140,8 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'proxy_url',
             'proxy_username',
             'proxy_password',
-            'write_only_fields'
+            'write_only_fields',
+            'rate_limit'
         )
         extra_kwargs = {
             'name': {'read_only': True},
