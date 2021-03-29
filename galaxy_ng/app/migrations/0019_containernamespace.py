@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('container', '0018_containerdistribution_description'),
-        ('galaxy', '0017_pulp_container_access_policies'),
+        ('galaxy', '0018_pulp_container_access_policies'),
     ]
 
     operations = [

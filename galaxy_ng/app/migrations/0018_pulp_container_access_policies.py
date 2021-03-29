@@ -268,7 +268,7 @@ def set_pulp_container_access_policy(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('galaxy', '0016_containerregistryremote_containerregistryrepos_containersynctask'),
+        ('galaxy', '0017_populate_repos_and_remotes'),
     ]
 
     operations = [
