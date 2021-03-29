@@ -2,3 +2,7 @@ ipython
 ipdb
 pdbr
 django-extensions
+
+jedi==0.17.2
+# jedi 0.18.x is buggy when used with ipython
+# ^ https://github.com/ipython/ipython/issues/12740#issuecomment-751273584
