@@ -62,6 +62,15 @@ class HistoryFilter(filterset.FilterSet):
     )
 
 
+class ContainerNamespaceViewSet(api_base.ModelViewSet):
+    queryset = models.ContainerNamespace.objects.all()
+    serializer_class = serializers.ContainerNamespaceSerializer
+    # filter_backends = (DjangoFilterBackend,)
+    # filterset_class = RepositoryFilter
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    lookup_field = "name"
+
+
 class ContainerRepositoryViewSet(api_base.ModelViewSet):
     queryset = models.ContainerDistribution.objects.all()
     serializer_class = serializers.ContainerRepositorySerializer
@@ -110,7 +119,7 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
                         Prefetch('_artifacts', to_attr='artifact_list')),
                     to_attr='blob_list'),
                 'config_blob'
-            )
+            ).select_related('namespace')
         )
 
         # I know that this should go in the FilterSet, but I cannot for the life

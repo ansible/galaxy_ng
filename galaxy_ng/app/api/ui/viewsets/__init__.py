@@ -21,6 +21,7 @@ from .execution_environment import (
     ContainerRepositoryManifestViewSet,
     ContainerRepositoryHistoryViewSet,
     ContainerReadmeViewSet,
+    ContainerNamespaceViewSet
 )
 
 __all__ = (
@@ -44,5 +45,6 @@ __all__ = (
     'ContainerRepositoryViewSet',
     'ContainerRepositoryManifestViewSet',
     'ContainerRepositoryHistoryViewSet',
-    'ContainerReadmeViewSet'
+    'ContainerReadmeViewSet',
+    'ContainerNamespaceViewSet'
 )

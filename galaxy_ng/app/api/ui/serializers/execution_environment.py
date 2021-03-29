@@ -9,6 +9,19 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField
 
 
+class ContainerNamespaceSerializer(serializers.ModelSerializer):
+    groups = GroupPermissionField()
+
+    class Meta:
+        model = models.ContainerNamespace
+        fields = (
+            'name',
+            'groups'
+        )
+
+        read_only_fields = ('name',)
+
+
 class ContainerRepositorySerializer(serializers.ModelSerializer):
     pulp = serializers.SerializerMethodField()
     groups = GroupPermissionField()
@@ -16,6 +29,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
     updated = serializers.SerializerMethodField()
+    owners = serializers.SerializerMethodField()
 
     # This serializer is purposfully refraining from using pulp fields directly
     # in the top level response body. This is because future versions of hub will have to
@@ -33,11 +47,15 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             'namespace',
             'description',
             'created',
-            'updated'
+            'updated',
+            'owners'
         )
         write_fields = ('groups',)
 
         fields = read_only_fields + write_fields
+
+    def get_namespace(self, distro):
+        return distro.namespace.name
 
     def get_id(self, distro):
         return distro.pulp_id
@@ -47,9 +65,6 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
 
     def get_updated(self, distro):
         return distro.repository.pulp_last_updated
-
-    def get_namespace(self, distro):
-        return distro.namespace.name
 
     def get_pulp(self, distro):
         repo = distro.repository
@@ -79,6 +94,10 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 },
             }
         }
+
+    def get_owners(self, distro):
+        name = f'container.distribution.owners.{distro.pulp_id}'
+        return [user.username for user in models.User.objects.filter(groups__name=name)]
 
 
 def _get_last_sync_task(repo):

@@ -29,6 +29,11 @@ class GroupViewSet(LocalSettingsMixin, viewsets.GroupViewSet):
     filterset_class = GroupFilter
     permission_classes = [access_policy.GroupAccessPolicy]
 
+    # Exclude container groups so they can't be viewed or updated
+    queryset = Group.objects.exclude(
+        name__startswith='container.distribution').exclude(
+            name__startswith='container.namespace')
+
     # TODO(awcrosby): replace this by setting attribute to None
     # after https://pulp.plan.io/issues/8438 is resolved
     def _remove_attr(self):
