@@ -17,14 +17,11 @@ REPOSITORIES = [
         "remote": {
             "name": "community",
             "url": "https://galaxy.ansible.com/api/",
-            "requirements_file": (
-                "---\n"
-                "collections:\n"
-                "  - name: namespace.collection"
-            ),
+            "requirements_file": None,
             "token": None,
             "auth_url": None,
             "pulp_type": "ansible.ansible",
+            "rate_limit": 8,
         }
     },
     {
@@ -42,6 +39,7 @@ REPOSITORIES = [
                 "redhat-external/protocol/openid-connect/token"
             ),
             "pulp_type": "ansible.ansible",
+            "rate_limit": 8,
         }
     }
 ]
