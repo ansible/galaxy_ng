@@ -1,5 +1,6 @@
 from django.db import migrations
-from django.contrib.auth.management import create_permissions
+import django_lifecycle.mixins
+import galaxy_ng.app.access_control.mixins
 
 
 viewsets = {
@@ -167,11 +168,7 @@ viewsets = {
                 "action": ["create"],
                 "principal": "authenticated",
                 "effect": "allow",
-                # Requiring permissions for namespaces creation means that
-                # add_containernamespace is required for creating new repos,
-                # along with add_containerdistribution which is confusing to
-                # the end user.
-                # "condition": "has_model_perms:container.add_containernamespace",
+                "condition": "has_model_perms:container.add_containernamespace",
             },
             {
                 "action": ["retrieve"],
@@ -211,6 +208,9 @@ viewsets = {
                 "permissions": [
                     "container.view_containernamespace",
                     "container.delete_containernamespace",
+                    # Add `container.change_containernamespace` permissions so the namespace
+                    # owner can add additional groups to their namespace.
+                    "container.change_containernamespace",
                     "container.namespace_add_containerdistribution",
                     "container.namespace_delete_containerdistribution",
                     "container.namespace_view_containerdistribution",
@@ -268,11 +268,24 @@ def set_pulp_container_access_policy(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('galaxy', '0017_populate_repos_and_remotes'),
+        ('galaxy', '0018_set_rate_limit_default'),
+        ('container', '0018_containerdistribution_description')
     ]
 
     operations = [
         migrations.RunPython(
             code=set_pulp_container_access_policy,
+        ),
+        migrations.CreateModel(
+            name='ContainerNamespace',
+            fields=[
+            ],
+            options={
+                'proxy': True,
+                'default_related_name': '%(app_label)s_%(model_name)s',
+                'indexes': [],
+                'constraints': [],
+            },
+            bases=('container.containernamespace', django_lifecycle.mixins.LifecycleModelMixin, galaxy_ng.app.access_control.mixins.GroupModelPermissionsMixin),
         ),
     ]

@@ -1,6 +1,8 @@
 from django.contrib.auth.models import Permission
 from django.db.models import Q
 
+from guardian.shortcuts import get_perms
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -46,7 +48,7 @@ class GroupPermissionField(serializers.Field):
 
 
 
-            
+
             # Exclude container groups so that they can't be unassigned from their
             # respective objects.
             if group.name.startswith('container.distribution') or group.name.startswith('container.namespace'):
@@ -82,3 +84,8 @@ class GroupPermissionField(serializers.Field):
                 raise ValidationError(detail={'group': 'Invalid group name or ID'})
 
         return internal
+
+
+class MyPermissionsField(serializers.Serializer):
+    def to_representation(self, object):
+        return get_perms(self.context['request'].user, object)

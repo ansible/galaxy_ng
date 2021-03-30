@@ -9,6 +9,8 @@ from pulp_container.app import models as container_models
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 
+from guardian.shortcuts import get_objects_for_user
+
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.ui import serializers
 from django.shortcuts import get_object_or_404
@@ -20,6 +22,8 @@ log = logging.getLogger(__name__)
 
 
 class RepositoryFilter(filterset.FilterSet):
+    my_perms = filters.CharFilter(method='has_permissions')
+
     sort = filters.OrderingFilter(
         fields=(
             ('repository__pulp_created', 'created'),
@@ -35,6 +39,12 @@ class RepositoryFilter(filterset.FilterSet):
             'name': ['exact', 'icontains', 'contains', 'startswith'],
             'description': ['exact', 'icontains', 'contains', 'startswith'],
         }
+
+    def has_permissions(self, queryset, name, value):
+        perms = self.request.query_params.getlist(name)
+        namespaces = get_objects_for_user(
+            self.request.user, perms, klass=container_models.ContainerNamespace)
+        return self.queryset.filter(namespace__in=namespaces)
 
 
 class ManifestFilter(filterset.FilterSet):
@@ -64,10 +74,8 @@ class HistoryFilter(filterset.FilterSet):
 
 class ContainerNamespaceViewSet(api_base.ModelViewSet):
     queryset = models.ContainerNamespace.objects.all()
-    serializer_class = serializers.ContainerNamespaceSerializer
-    # filter_backends = (DjangoFilterBackend,)
-    # filterset_class = RepositoryFilter
-    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    serializer_class = serializers.ContainerNamespaceDetailSerializer
+    permission_classes = [access_policy.ContainerNamespaceAccessPolicy]
     lookup_field = "name"
 
 

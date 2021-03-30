@@ -218,14 +218,7 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-        },
-
-        {
-            "action": ["update"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:container.change_containerdistribution"
-        },
+        }
     ],
 
     # The container readme can't just use the ContainerRepository access policies
@@ -241,7 +234,22 @@ STANDALONE_STATEMENTS = {
             "action": ["update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_container_perms:container.change_containerdistribution"
+            "condition": ("has_container_namespace_perms:"
+                          "container.namespace_change_containerdistribution")
+        },
+    ],
+
+    'ContainerNamespaceViewset': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": ["update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:container.change_containernamespace"
         },
     ]
 }

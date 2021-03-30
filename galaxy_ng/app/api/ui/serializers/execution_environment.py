@@ -6,17 +6,31 @@ from pulp_container.app import models as container_models
 from pulpcore.plugin import models as core_models
 
 from galaxy_ng.app import models
-from galaxy_ng.app.access_control.fields import GroupPermissionField
+from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
 
 
 class ContainerNamespaceSerializer(serializers.ModelSerializer):
+    my_permissions = MyPermissionsField(source='*')
+
+    class Meta:
+        model = models.ContainerNamespace
+        fields = (
+            'name',
+            'my_permissions'
+        )
+
+        read_only_fields = ('name',)
+
+
+class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):
     groups = GroupPermissionField()
 
     class Meta:
         model = models.ContainerNamespace
         fields = (
             'name',
-            'groups'
+            'groups',
+            'my_permissions'
         )
 
         read_only_fields = ('name',)
@@ -24,8 +38,7 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
 
 class ContainerRepositorySerializer(serializers.ModelSerializer):
     pulp = serializers.SerializerMethodField()
-    groups = GroupPermissionField()
-    namespace = serializers.SerializerMethodField()
+    namespace = ContainerNamespaceSerializer()
     id = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
     updated = serializers.SerializerMethodField()
@@ -48,11 +61,10 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             'description',
             'created',
             'updated',
-            'owners'
+            'owners',
         )
-        write_fields = ('groups',)
 
-        fields = read_only_fields + write_fields
+        fields = read_only_fields
 
     def get_namespace(self, distro):
         return distro.namespace.name
