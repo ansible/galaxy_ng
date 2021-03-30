@@ -7,7 +7,6 @@ from galaxy_ng.app.access_control import access_policy
 
 from galaxy_ng.app.api.base import LocalSettingsMixin
 from galaxy_ng.app.exceptions import ConflictError
-from galaxy_ng.app.common import container_group_filters
 from django.contrib.auth.models import Group
 
 
@@ -29,8 +28,7 @@ class GroupViewSet(LocalSettingsMixin, viewsets.GroupViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = GroupFilter
     permission_classes = [access_policy.GroupAccessPolicy]
-    # Exclude container groups so they can't be viewed or updated
-    queryset = container_group_filters.exclude_container_groups(Group.objects)
+    queryset = Group.objects
 
     # TODO(awcrosby): replace this by setting attribute to None
     # after https://pulp.plan.io/issues/8438 is resolved

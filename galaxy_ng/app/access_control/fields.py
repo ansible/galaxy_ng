@@ -42,17 +42,6 @@ class GroupPermissionField(serializers.Field):
     def to_representation(self, value):
         rep = []
         for group in value:
-            # TODO set the exclude filter in contants
-            # TODO figure out a better way to handl this filter
-
-
-
-
-
-            # Exclude container groups so that they can't be unassigned from their
-            # respective objects.
-            if group.name.startswith('container.distribution') or group.name.startswith('container.namespace'):
-                continue
             rep.append({
                 'id': group.id,
                 'name': group.name,

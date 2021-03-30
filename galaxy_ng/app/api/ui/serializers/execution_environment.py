@@ -2,24 +2,34 @@ import json
 
 from rest_framework import serializers
 
+from guardian.shortcuts import get_users_with_perms
+
 from pulp_container.app import models as container_models
 from pulpcore.plugin import models as core_models
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
 
+namespace_fields = (
+    'name',
+    'my_permissions',
+    'owners'
+)
+
 
 class ContainerNamespaceSerializer(serializers.ModelSerializer):
     my_permissions = MyPermissionsField(source='*')
+    owners = serializers.SerializerMethodField()
 
     class Meta:
         model = models.ContainerNamespace
-        fields = (
-            'name',
-            'my_permissions'
-        )
+        fields = namespace_fields
 
         read_only_fields = ('name',)
+
+    def get_owners(self, namespace):
+        users = get_users_with_perms(namespace, with_group_users=False)
+        return [user.username for user in users]
 
 
 class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):
@@ -27,12 +37,7 @@ class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):
 
     class Meta:
         model = models.ContainerNamespace
-        fields = (
-            'name',
-            'groups',
-            'my_permissions'
-        )
-
+        fields = namespace_fields + ('groups', )
         read_only_fields = ('name',)
 
 
@@ -42,7 +47,6 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
     updated = serializers.SerializerMethodField()
-    owners = serializers.SerializerMethodField()
 
     # This serializer is purposfully refraining from using pulp fields directly
     # in the top level response body. This is because future versions of hub will have to
@@ -61,7 +65,6 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             'description',
             'created',
             'updated',
-            'owners',
         )
 
         fields = read_only_fields
@@ -106,10 +109,6 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 },
             }
         }
-
-    def get_owners(self, distro):
-        name = f'container.distribution.owners.{distro.pulp_id}'
-        return [user.username for user in models.User.objects.filter(groups__name=name)]
 
 
 def _get_last_sync_task(repo):
