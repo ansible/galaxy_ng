@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from galaxy_ng.app.models import auth as auth_models
+from galaxy_ng.app.common import container_group_filters
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -82,8 +83,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        # group_qs = container_group_filters.exclude_container_groups(instance.groups.all())
+        group_qs = instance.groups.all()
+
         representation['groups'] = GroupSerializer(
-            instance.groups.all(), many=True).data
+            group_qs, many=True).data
         return representation
 
     def to_internal_value(self, data):
@@ -105,6 +109,9 @@ class UserSerializer(serializers.ModelSerializer):
                 except ValueError:
                     raise ValidationError(detail={'group': 'Invalid group name or ID'})
             data['groups'] = group_ids
+            for container_group in container_group_filters.get_container_groups(
+                    self.context['request'].user.groups):
+                data['groups'].append(container_group.id)
         return super().to_internal_value(data)
 
 
