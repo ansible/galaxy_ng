@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 class RepositoryFilter(filterset.FilterSet):
-    my_perms = filters.CharFilter(method='has_permissions')
+    my_permissions = filters.CharFilter(method='has_permissions')
 
     sort = filters.OrderingFilter(
         fields=(

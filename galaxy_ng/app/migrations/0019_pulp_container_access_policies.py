@@ -162,7 +162,6 @@ viewsets = {
 
 def set_pulp_container_access_policy(apps, schema_editor):
     AccessPolicy = apps.get_model("core", "AccessPolicy")
-    print(AccessPolicy)
     for view in viewsets:
         policy, created = AccessPolicy.objects.update_or_create(
             viewset_name=view, defaults={**viewsets[view], "customized": True})

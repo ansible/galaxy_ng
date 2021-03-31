@@ -28,8 +28,8 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
         read_only_fields = ('name',)
 
     def get_owners(self, namespace):
-        users = get_users_with_perms(namespace, with_group_users=False)
-        return [user.username for user in users]
+        return get_users_with_perms(namespace, with_group_users=False).values_list(
+            'username', flat=True)
 
 
 class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):

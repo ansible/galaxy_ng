@@ -58,11 +58,11 @@ container_paths = [
     path(
         "namespaces/<str:name>/",
         viewsets.ContainerNamespaceViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
-        name='container-repository-list'),
+        name='container-namespace-detail'),
     path(
         "namespaces/",
         viewsets.ContainerNamespaceViewSet.as_view({'get': 'list'}),
-        name='container-repository-list'),
+        name='container-namespace-list'),
 
     # image names can't start with _, so namespacing all the nested views
     # under _content prevents cases where an image could be named foo/images
