@@ -100,3 +100,7 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "dynaconf_merge": True,
 }
+
+# Disable django guardian anonymous user
+# https://django-guardian.readthedocs.io/en/stable/configuration.html#anonymous-user-name
+ANONYMOUS_USER_NAME = None
