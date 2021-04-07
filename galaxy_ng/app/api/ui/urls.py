@@ -60,12 +60,12 @@ container_paths = [
     # under _content prevents cases where an image could be named foo/images
     # and conflict with our URL paths.
     re_path(
-        r'repositories/(?P<base_path>\w+\/{0,1}\w+)/_content/',
+        r'repositories/(?P<base_path>[-\w]+\/{0,1}[-\w]+)/_content/',
         include(container_repo_paths)),
 
     # This regex can capture "namespace/name" and "name"
     re_path(
-        r'repositories/(?P<base_path>\w+\/{0,1}\w+)/',
+        r'repositories/(?P<base_path>[-\w]+\/{0,1}[-\w]+)/',
         viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='container-repository-detail'),
 ]
