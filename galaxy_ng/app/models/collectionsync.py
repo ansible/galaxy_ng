@@ -29,4 +29,4 @@ class CollectionSyncTask(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['-task__finished_at']
+        ordering = ['-task__pulp_last_updated']
