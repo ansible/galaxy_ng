@@ -32,7 +32,7 @@ django-guardian==2.3.0    # via pulpcore
 django-import-export==2.3.0  # via pulpcore
 django-lifecycle==0.7.7   # via pulpcore
 django-prometheus==2.1.0  # via galaxy-ng (setup.py)
-django==2.2.18            # via django-currentuser, django-filter, django-guardian, django-import-export, django-lifecycle, djangorestframework, drf-nested-routers, drf-spectacular, galaxy-ng (setup.py), pulpcore
+django==2.2.20            # via django-currentuser, django-filter, django-guardian, django-import-export, django-lifecycle, djangorestframework, drf-nested-routers, drf-spectacular, galaxy-ng (setup.py), pulpcore
 djangorestframework-queryfields==1.0.0  # via pulpcore
 djangorestframework==3.11.2  # via drf-nested-routers, drf-spectacular, pulpcore
 drf-access-policy==0.7.0  # via pulpcore
