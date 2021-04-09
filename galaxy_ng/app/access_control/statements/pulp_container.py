@@ -1,9 +1,7 @@
-from django.db import migrations
-import django_lifecycle.mixins
-import galaxy_ng.app.access_control.mixins
+# These access policies are loaded via a post migration signal. To reload them after
+# an edit, just rerun the migrations and any changes will get applied.
 
-
-viewsets = {
+PULP_CONTAINER_VIEWSETS = {
     # Note. This is the default Pulp Continer access policy with some modifications.
     # Our changes have been marked with comments.
     "distributions/container/container": {
@@ -156,38 +154,35 @@ viewsets = {
                 ],
             },
         ],
-    }
-}
+    },
 
 
-def set_pulp_container_access_policy(apps, schema_editor):
-    AccessPolicy = apps.get_model("core", "AccessPolicy")
-    for view in viewsets:
-        policy, created = AccessPolicy.objects.update_or_create(
-            viewset_name=view, defaults={**viewsets[view], "customized": True})
-
-
-class Migration(migrations.Migration):
-
-    dependencies = [
-        ('galaxy', '0018_set_rate_limit_default'),
-        ('container', '0018_containerdistribution_description')
-    ]
-
-    operations = [
-        migrations.RunPython(
-            code=set_pulp_container_access_policy,
-        ),
-        migrations.CreateModel(
-            name='ContainerNamespace',
-            fields=[
-            ],
-            options={
-                'proxy': True,
-                'default_related_name': '%(app_label)s_%(model_name)s',
-                'indexes': [],
-                'constraints': [],
+    "repositories/container/container-push": {
+        "statements": [
+            {
+                "action": ["list"],
+                "principal": "authenticated",
+                "effect": "allow",
             },
-            bases=('container.containernamespace', django_lifecycle.mixins.LifecycleModelMixin, galaxy_ng.app.access_control.mixins.GroupModelPermissionsMixin),
-        ),
-    ]
+            {
+                "action": ["retrieve"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_namespace_or_obj_perms:container.view_containerpushrepository",
+            },
+            {
+                "action": ["tag", "untag", "remove_image"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": [
+                    "has_namespace_or_obj_perms:container.modify_content_containerpushrepository",
+                    "has_namespace_or_obj_perms:container.view_containerpushrepository",
+                ],
+            },
+        ],
+        # Remove permission assignment since it's trying to add permissions to groups
+        # that don't exist
+        "permissions_assignment": [],
+    }
+
+}
