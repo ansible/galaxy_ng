@@ -302,7 +302,8 @@ class ContainerReadmeAccessPolicy(AccessPolicyBase):
 
     def has_container_namespace_perms(self, request, view, action, permission):
         readme = view.get_object()
-        return request.user.has_perm(permission, readme.container.namespace)
+        return (request.user.has_perm(permission)
+                or request.user.has_perm(permission, readme.container.namespace))
 
 
 class ContainerNamespaceAccessPolicy(AccessPolicyBase):

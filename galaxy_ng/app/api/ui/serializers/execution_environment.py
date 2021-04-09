@@ -18,14 +18,13 @@ namespace_fields = (
 
 
 class ContainerNamespaceSerializer(serializers.ModelSerializer):
-    my_permissions = MyPermissionsField(source='*')
+    my_permissions = MyPermissionsField(source='*', read_only=True)
     owners = serializers.SerializerMethodField()
 
     class Meta:
         model = models.ContainerNamespace
         fields = namespace_fields
-
-        read_only_fields = ('name',)
+        read_only_fields = ('name', 'my_permissions',)
 
     def get_owners(self, namespace):
         return get_users_with_perms(namespace, with_group_users=False).values_list(
@@ -38,7 +37,7 @@ class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):
     class Meta:
         model = models.ContainerNamespace
         fields = namespace_fields + ('groups', )
-        read_only_fields = ('name',)
+        read_only_fields = ('name', 'my_permissions',)
 
 
 class ContainerRepositorySerializer(serializers.ModelSerializer):

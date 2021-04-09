@@ -80,7 +80,7 @@ class ContainerNamespaceViewSet(api_base.ModelViewSet):
 
 
 class ContainerRepositoryViewSet(api_base.ModelViewSet):
-    queryset = models.ContainerDistribution.objects.all()
+    queryset = models.ContainerDistribution.objects.all().select_related('namespace')
     serializer_class = serializers.ContainerRepositorySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RepositoryFilter
@@ -127,7 +127,7 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
                         Prefetch('_artifacts', to_attr='artifact_list')),
                     to_attr='blob_list'),
                 'config_blob'
-            ).select_related('namespace')
+            )
         )
 
         # I know that this should go in the FilterSet, but I cannot for the life
