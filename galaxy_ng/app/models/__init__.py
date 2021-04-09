@@ -20,7 +20,8 @@ from .collectionsync import (
 
 from .container import (
     ContainerDistribution,
-    ContainerDistroReadme
+    ContainerDistroReadme,
+    ContainerNamespace
 )
 
 __all__ = (
@@ -32,5 +33,6 @@ __all__ = (
     'SyncList',
     'CollectionSyncTask',
     'ContainerDistribution',
-    'ContainerDistroReadme'
+    'ContainerDistroReadme',
+    'ContainerNamespace'
 )

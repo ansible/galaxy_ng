@@ -55,6 +55,14 @@ container_paths = [
         "repositories/",
         viewsets.ContainerRepositoryViewSet.as_view({'get': 'list'}),
         name='container-repository-list'),
+    path(
+        "namespaces/<str:name>/",
+        viewsets.ContainerNamespaceViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        name='container-namespace-detail'),
+    path(
+        "namespaces/",
+        viewsets.ContainerNamespaceViewSet.as_view({'get': 'list'}),
+        name='container-namespace-list'),
 
     # image names can't start with _, so namespacing all the nested views
     # under _content prevents cases where an image could be named foo/images
@@ -66,7 +74,7 @@ container_paths = [
     # This regex can capture "namespace/name" and "name"
     re_path(
         r'repositories/(?P<base_path>[-\w]+\/{0,1}[-\w]+)/',
-        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
         name='container-repository-detail'),
 ]
 

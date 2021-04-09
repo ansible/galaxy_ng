@@ -1,1 +1,1 @@
-Add rate_limit to remotes api.
+Set pulp container access policies.

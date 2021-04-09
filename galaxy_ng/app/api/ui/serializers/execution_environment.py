@@ -2,17 +2,47 @@ import json
 
 from rest_framework import serializers
 
+from guardian.shortcuts import get_users_with_perms
+
 from pulp_container.app import models as container_models
 from pulpcore.plugin import models as core_models
 
 from galaxy_ng.app import models
-from galaxy_ng.app.access_control.fields import GroupPermissionField
+from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
+
+namespace_fields = (
+    'name',
+    'my_permissions',
+    'owners'
+)
+
+
+class ContainerNamespaceSerializer(serializers.ModelSerializer):
+    my_permissions = MyPermissionsField(source='*', read_only=True)
+    owners = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.ContainerNamespace
+        fields = namespace_fields
+        read_only_fields = ('name', 'my_permissions',)
+
+    def get_owners(self, namespace):
+        return get_users_with_perms(namespace, with_group_users=False).values_list(
+            'username', flat=True)
+
+
+class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):
+    groups = GroupPermissionField()
+
+    class Meta:
+        model = models.ContainerNamespace
+        fields = namespace_fields + ('groups', )
+        read_only_fields = ('name', 'my_permissions',)
 
 
 class ContainerRepositorySerializer(serializers.ModelSerializer):
     pulp = serializers.SerializerMethodField()
-    groups = GroupPermissionField()
-    namespace = serializers.SerializerMethodField()
+    namespace = ContainerNamespaceSerializer()
     id = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
     updated = serializers.SerializerMethodField()
@@ -33,11 +63,13 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             'namespace',
             'description',
             'created',
-            'updated'
+            'updated',
         )
-        write_fields = ('groups',)
 
-        fields = read_only_fields + write_fields
+        fields = read_only_fields
+
+    def get_namespace(self, distro):
+        return distro.namespace.name
 
     def get_id(self, distro):
         return distro.pulp_id
@@ -47,9 +79,6 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
 
     def get_updated(self, distro):
         return distro.repository.pulp_last_updated
-
-    def get_namespace(self, distro):
-        return distro.namespace.name
 
     def get_pulp(self, distro):
         repo = distro.repository

@@ -82,8 +82,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['groups'] = GroupSerializer(
-            instance.groups.all(), many=True).data
+
+        representation['groups'] = GroupSerializer(instance.groups.all(), many=True).data
         return representation
 
     def to_internal_value(self, data):

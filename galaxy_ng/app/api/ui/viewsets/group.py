@@ -28,6 +28,7 @@ class GroupViewSet(LocalSettingsMixin, viewsets.GroupViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = GroupFilter
     permission_classes = [access_policy.GroupAccessPolicy]
+    queryset = Group.objects.all()
 
     # TODO(awcrosby): replace this by setting attribute to None
     # after https://pulp.plan.io/issues/8438 is resolved
