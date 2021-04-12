@@ -72,6 +72,10 @@ run_service() {
     wait-for-tcp "${PULP_DB_HOST:-localhost}" "${PULP_DB_PORT:-5432}"
     wait-for-tcp "${PULP_REDIS_HOST:-localhost}" "${PULP_REDIS_PORT:-6379}"
 
+    # TODO: remove once Pulp recognizes REDIS_SSL parameter when
+    #       building settings for RQ in pulpcore/rqconfig.py
+    redis_connection_hack
+
     if [[ "$WITH_DEV_INSTALL" -eq "1" ]]; then
         install_local_deps
     fi
@@ -89,6 +93,10 @@ run_service() {
 
 
 run_manage() {
+    # TODO: remove once Pulp recognizes REDIS_SSL parameter when
+    #       building settings for RQ in pulpcore/rqconfig.py
+    redis_connection_hack
+
     if [[ "$WITH_DEV_INSTALL" -eq "1" ]]; then
         install_local_deps
     fi
@@ -118,9 +126,6 @@ main() {
     if [[ "$#" -eq 0 ]]; then
         exec "/bin/bash"
     fi
-
-    # TODO: remove once Pulp recognizes REDIS_SSL parameter when building settings for RQ in pulpcore/rqconfig.py
-    redis_connection_hack
 
     case "$1" in
         'run')
