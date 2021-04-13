@@ -109,7 +109,7 @@ redis_connection_hack() {
         protocol="redis://"
     fi
 
-    if [[ ${PULP_REDIS_PASSWORD:-nopassword} = "nopassword" ]]; then
+    if [[ -z "${PULP_REDIS_PASSWORD:-}" ]]; then
         password=""
     else
         password=":${PULP_REDIS_PASSWORD}@"
