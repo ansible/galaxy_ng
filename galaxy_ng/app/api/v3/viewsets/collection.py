@@ -27,7 +27,7 @@ from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.v3.serializers import (
     CollectionSerializer,
     CollectionVersionSerializer,
-    UnpaginatedCollectionVersionSerializer,
+    MetadataCollectionSerializer,
     CollectionVersionListSerializer,
     CollectionUploadSerializer,
 )
@@ -72,12 +72,11 @@ class RepoMetadataViewSet(api_base.LocalSettingsMixin,
     permission_classes = [access_policy.CollectionAccessPolicy]
 
 
-class UnpaginatedCollectionViewSet(api_base.LocalSettingsMixin,
-                                   ViewNamespaceSerializerContextMixin,
-                                   pulp_ansible_views.UnpaginatedCollectionViewSet):
-    pagination_class = None
+class MetadataCollectionViewSet(api_base.LocalSettingsMixin,
+                                ViewNamespaceSerializerContextMixin,
+                                pulp_ansible_views.MetadataCollectionViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
-    serializer_class = CollectionSerializer
+    serializer_class = MetadataCollectionSerializer
 
 
 class CollectionViewSet(api_base.LocalSettingsMixin,
@@ -85,14 +84,6 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
                         pulp_ansible_views.CollectionViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
-
-
-class UnpaginatedCollectionVersionViewSet(api_base.LocalSettingsMixin,
-                                          ViewNamespaceSerializerContextMixin,
-                                          pulp_ansible_views.UnpaginatedCollectionVersionViewSet):
-    pagination_class = None
-    serializer_class = UnpaginatedCollectionVersionSerializer
-    permission_classes = [access_policy.CollectionAccessPolicy]
 
 
 class CollectionVersionViewSet(api_base.LocalSettingsMixin,

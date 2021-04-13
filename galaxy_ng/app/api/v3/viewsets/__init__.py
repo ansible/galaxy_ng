@@ -6,8 +6,7 @@ from .collection import (
     CollectionVersionViewSet,
     CollectionVersionDocsViewSet,
     CollectionVersionMoveViewSet,
-    UnpaginatedCollectionViewSet,
-    UnpaginatedCollectionVersionViewSet,
+    MetadataCollectionViewSet,
     RepoMetadataViewSet,
 )
 
@@ -33,7 +32,6 @@ __all__ = (
     'NamespaceViewSet',
     'SyncConfigViewSet',
     'TaskViewSet',
-    'UnpaginatedCollectionViewSet',
-    'UnpaginatedCollectionVersionViewSet',
+    'MetadataCollectionViewSet',
     'RepoMetadataViewSet',
 )
