@@ -63,7 +63,7 @@ requirements = [
     "pulp-ansible==0.7.1",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container>=2.5.0",
+    "pulp-container>=2.5.1",
 ]
 
 
