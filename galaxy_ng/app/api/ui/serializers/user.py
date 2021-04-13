@@ -31,7 +31,6 @@ class UserSerializer(serializers.ModelSerializer):
             'is_superuser'
         )
         extra_kwargs = {
-            'is_superuser': {'read_only': True},
             'date_joined': {'read_only': True},
             'password': {'write_only': True, 'allow_blank': True, 'required': False}
         }
@@ -61,6 +60,16 @@ class UserSerializer(serializers.ModelSerializer):
                     })
 
         return groups
+
+    def validate_is_superuser(self, data):
+        request_user = self.context['request'].user
+        if request_user.is_superuser != data:
+            if not request_user.is_superuser:
+                raise ValidationError(detail={
+                    "is_superuser": "Must be a super user to grant super user permissions."
+                })
+
+        return data
 
     def _set_password(self, instance, data):
         # password doesn't get set the same as other data, so delete it

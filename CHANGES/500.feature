@@ -1,0 +1,1 @@
+Allow creating super users.
