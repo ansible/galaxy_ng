@@ -6,7 +6,7 @@ objects:
   - apiVersion: batch/v1
     kind: Job
     metadata:
-      name: database-migration-${IMAGE_TAG}-4
+      name: database-migration-${IMAGE_TAG}-5
     spec:
       backoffLimit: 1
       completions: 1
@@ -68,6 +68,43 @@ objects:
                     secretKeyRef:
                       key: pulp-content-origin
                       name: automation-hub-galaxy
+                - name: PULP_REDIS_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      key: db.endpoint
+                      name: automation-hub-elasticache-redis
+                - name: PULP_REDIS_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      key: db.port
+                      name: automation-hub-elasticache-redis
+                - name: PULP_REDIS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: db.auth_token
+                      name: automation-hub-elasticache-redis
+                - name: PULP_REDIS_SSL
+                  value: ${REDIS_TLS}
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_secret_access_key
+                      name: automation-hub-s3
+                - name: PULP_AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_access_key_id
+                      name: automation-hub-s3
+                - name: PULP_AWS_STORAGE_BUCKET_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: bucket
+                      name: automation-hub-s3
+                - name: PULP_AWS_S3_REGION_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: aws_region
+                      name: automation-hub-s3
                 - name: CW_AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
@@ -98,6 +135,9 @@ parameters:
     value: quay.io/cloudservices/automation-hub-galaxy-ng
     required: true
   - name: IMAGE_TAG
+    required: true
+  - name: REDIS_TLS
+    value: "false"
     required: true
   # Limits
   - name: CPU_REQUEST
