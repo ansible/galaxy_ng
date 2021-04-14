@@ -26,7 +26,7 @@ class TestUiUserViewSet(BaseTestCase):
     def test_super_user(self):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             user = auth_models.User.objects.create(username='haxor')
-            group = self._create_group('', 'test_group1', users=[user], perms=[
+            self._create_group('', 'test_group1', users=[user], perms=[
                 'galaxy.view_user',
                 'galaxy.delete_user',
                 'galaxy.add_user',
