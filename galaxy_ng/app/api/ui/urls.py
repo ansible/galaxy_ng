@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import path, include, re_path
 from rest_framework import routers
 
@@ -115,8 +116,8 @@ paths = [
     path('', include(router.urls)),
 
     path('auth/', include(auth_views)),
+    path('feature-flags/', views.FeatureFlagsView.as_view(), name='feature-flags'),
     path('groups/', include(group_paths)),
-    path('execution-environments/', include(container_paths)),
     path(
         'repo/<str:path>/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
@@ -133,9 +134,14 @@ paths = [
         'me/',
         viewsets.CurrentUserViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='me'
+    ),
+]
+
+if settings.GALAXY_FEATURE_FLAGS['execution_environments']:
+    paths.append(
+        path('execution-environments/', include(container_paths)),
     )
 
-]
 app_name = "ui"
 
 urlpatterns = [
