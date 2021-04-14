@@ -23,6 +23,53 @@ class TestUiUserViewSet(BaseTestCase):
         self.user_url = get_current_ui_url('users-list')
         self.me_url = get_current_ui_url('me')
 
+    def test_super_user(self):
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
+            user = auth_models.User.objects.create(username='haxor')
+            group = self._create_group('', 'test_group1', users=[user], perms=[
+                'galaxy.view_user',
+                'galaxy.delete_user',
+                'galaxy.add_user',
+                'galaxy.change_user',
+            ])
+            self.client.force_authenticate(user=user)
+            new_user_data = {
+                'username': 'haxor_test1',
+                'password': 'cantTouchThis123',
+                'groups': [],
+                'is_superuser': True,
+            }
+
+            # test that regular user's can't create super users
+            response = self.client.post(self.user_url, new_user_data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            # test that admins can create super users
+            self.client.force_authenticate(user=self.admin_user)
+            response = self.client.post(self.user_url, new_user_data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+            my_data = {
+                'username': user.username,
+                'password': 'cantTouchThis123',
+                'groups': [],
+                'is_superuser': True,
+            }
+
+            # Test that user's can't elevate their perms
+            self.client.force_authenticate(user=user)
+            response = self.client.put(self.me_url, my_data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            put_url = '{}{}/'.format(self.user_url, user.id)
+            response = self.client.put(put_url, my_data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            # test that the admin can update another user
+            self.client.force_authenticate(user=self.admin_user)
+            response = self.client.put(put_url, my_data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_user_can_only_create_users_with_their_groups(self):
         user = auth_models.User.objects.create(username='haxor')
         group = self._create_group('', 'test_group1', users=[user], perms=[
