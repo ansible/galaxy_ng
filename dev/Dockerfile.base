@@ -42,7 +42,12 @@ RUN set -ex; \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \
     \
-    && python3 -m venv /venv
+    && mkdir /venv \
+    && chown ${USER_NAME}:${USER_GROUP} /venv
+
+USER ${USER_NAME}:${USER_GROUP}
+RUN set -ex; \
+    python3 -m venv /venv
 
 ENV PATH="/venv/bin:${PATH}" \
     VIRTUAL_ENV="/venv"
@@ -55,14 +60,17 @@ RUN set -ex; \
     pip install --no-cache-dir --requirement /tmp/requirements.txt; fi
 
 # Install application
-COPY . /app
+COPY --chown=${USER_NAME}:${USER_GROUP} . /app
 
 # When LOCK_REQUIREMENTS is disabled avoid running collectstatic here
 # on that case developer should run collectstatic manually
 RUN set -ex; \
     pip install --no-cache-dir --editable /app \
-    && pip install -r /app/requirements/requirements.dev.txt \
-    && if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
+    && pip install -r /app/requirements/requirements.dev.txt
+
+USER root:root
+RUN set -ex; \
+    if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic; fi
 
 # Finalize installation
@@ -73,8 +81,6 @@ RUN set -ex; \
              /etc/ansible \
              /entrypoints.d \
     && chown -R ${USER_NAME}:${USER_GROUP} \
-        /app \
-        /venv \
         /var/lib/pulp \
         /tmp/ansible \
         /etc/ansible \
