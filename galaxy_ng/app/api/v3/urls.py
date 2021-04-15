@@ -35,7 +35,7 @@ urlpatterns = [
     path(
         'collections/metadata/',
         viewsets.MetadataCollectionViewSet.as_view({'get': 'list'}),
-        name='metadata-collections-list'
+        name='metadata-collection-list'
     ),
     path(
         'collections/',

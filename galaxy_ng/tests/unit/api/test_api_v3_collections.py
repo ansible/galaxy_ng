@@ -101,28 +101,20 @@ class TestCollectionViewsets(BaseTestCase):
             }
         )
 
-        # The following URLS are temporary deatived due to https://issues.redhat.com/browse/AAH-224
         # metadata urls
-        # self.all_collections_url = reverse(
-        #     'galaxy:api:content:v3:all-collections-list',
-        #     kwargs={
-        #         'path': self.repo.name,
-        #     }
-        # )
+        self.all_collections_url = reverse(
+            'galaxy:api:content:v3:metadata-collection-list',
+            kwargs={
+                'path': self.repo.name,
+            }
+        )
 
-        # self.all_versions_url = reverse(
-        #     'galaxy:api:content:v3:all-collection-versions-list',
-        #     kwargs={
-        #         'path': self.repo.name,
-        #     }
-        # )
-
-        # self.metadata_url = reverse(
-        #     'galaxy:api:content:v3:repo-metadata',
-        #     kwargs={
-        #         'path': self.repo.name,
-        #     }
-        # )
+        self.metadata_url = reverse(
+            'galaxy:api:content:v3:repo-metadata',
+            kwargs={
+                'path': self.repo.name,
+            }
+        )
 
         # used for href tests
         self.pulp_href_fragment = "pulp_ansible/galaxy"
@@ -146,9 +138,9 @@ class TestCollectionViewsets(BaseTestCase):
             self.pulp_href_fragment, response.data["data"][0]["highest_version"]["href"]
         )
 
-    @skip("https://issues.redhat.com/browse/AAH-224")
-    def test_unpaginated_collections_list(self):
-        """Assert the call to v3/collections/all returns correct
+    @skip("Missing creation of ContentArtifact on SetUp")
+    def test_metadata_collection_list(self):
+        """Assert the call to v3/collections/metadata returns correct
         collections and versions
         """
         self.client.force_authenticate(user=self.admin_user)
@@ -160,6 +152,25 @@ class TestCollectionViewsets(BaseTestCase):
         self.assertNotIn(self.pulp_href_fragment, response.data[0]["href"])
         self.assertNotIn(self.pulp_href_fragment, response.data[0]["versions_url"])
         self.assertNotIn(self.pulp_href_fragment, response.data[0]["highest_version"]["href"])
+
+        # Ensure it has versions key
+        versions = response.data[0]['versions']
+
+        for version in versions:
+            # Ensure href is overwritten
+            self.assertNotIn(self.pulp_href_fragment, version["href"])
+            self.assertNotIn(self.pulp_href_fragment, version["collection"]["href"])
+            self.assertNotIn(self.pulp_href_fragment, version["download_url"])
+
+            # Ensure some fields are in
+            for field in ('metadata', 'namespace', 'name', 'artifact'):
+                with self.subTest(field=field):
+                    self.assertIn(field, version)
+
+            # Ensure some fields are not in
+            for field in ('manifest', 'files'):
+                with self.subTest(field=field):
+                    self.assertNotIn(field, version)
 
     def test_collections_detail(self):
         """Assert detail view for v3/collections/namespace/name
@@ -202,26 +213,3 @@ class TestCollectionViewsets(BaseTestCase):
         #         self.assertNotIn(self.pulp_href_fragment, vresponse.data["href"])
         #         self.assertNotIn(self.pulp_href_fragment, vresponse.data["collection"]["href"])
         #         self.assertNotIn(self.pulp_href_fragment, vresponse.data["download_url"])
-
-    # def test_unpaginated_collection_versions_list(self):
-    #     """Assert the call to v3/collections/all returns correct
-    #     collections and versions
-    #     """
-    #     self.client.force_authenticate(user=self.admin_user)
-    #     response = self.client.get(self.all_versions_url)
-    #     self.assertEqual(response.data[0]['version'], '1.1.2')
-
-    #     # Ensure href is overwritten
-    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["href"])
-    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["collection"]["href"])
-    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["download_url"])
-
-    #     # Ensure some fields are in
-    #     for field in ('metadata', 'namespace', 'name', 'artifact'):
-    #         with self.subTest(field=field):
-    #             self.assertIn(field, response.data[0])
-
-    #     # Ensure some fields are not in
-    #     for field in ('manifest', 'files'):
-    #         with self.subTest(field=field):
-    #             self.assertNotIn(field, response.data[0])
