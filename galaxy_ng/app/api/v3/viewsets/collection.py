@@ -16,7 +16,7 @@ from rest_framework.exceptions import APIException, NotFound
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
-from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
+from pulp_ansible.app.models import Collection, CollectionVersion, AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from galaxy_ng.app.api import base as api_base
 
@@ -77,7 +77,7 @@ class MetadataCollectionViewSet(api_base.LocalSettingsMixin,
                                 pulp_ansible_views.MetadataCollectionViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = MetadataCollectionSerializer
-
+    queryset = Collection.objects.prefetch_related('versions')
 
 class CollectionViewSet(api_base.LocalSettingsMixin,
                         ViewNamespaceSerializerContextMixin,

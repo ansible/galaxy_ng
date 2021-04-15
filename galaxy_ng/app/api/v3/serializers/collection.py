@@ -86,6 +86,8 @@ class CollectionVersionListSerializer(_CollectionVersionListSerializer, HrefName
 class MetadataCollectionVersionSerializer(_MetadataCollectionVersionSerializer,
                                           HrefNamespaceMixin):
 
+    collection = CollectionRefSerializer(read_only=True)
+
     class Meta(_MetadataCollectionVersionSerializer.Meta):
         ref_name = "MetadataCollectionVersionWithFixedHrefsSerializer"
 
@@ -131,6 +133,7 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
 
     class Meta(_CollectionVersionSerializer.Meta):
         ref_name = "CollectionVersionWithDownloadUrlSerializer"
+        fields = _CollectionVersionSerializer.Meta.fields + ("collection",)
 
     def get_download_url(self, obj):
         """
