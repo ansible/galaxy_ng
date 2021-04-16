@@ -16,6 +16,16 @@ class ContainerDistribution(
         default_related_name = "%(app_label)s_%(model_name)s"
 
 
+class ContainerNamespace(
+        container_models.ContainerNamespace,
+        LifecycleModelMixin,
+        mixins.GroupModelPermissionsMixin):
+
+    class Meta:
+        proxy = True
+        default_related_name = "%(app_label)s_%(model_name)s"
+
+
 class ContainerDistroReadme(models.Model):
     container = models.OneToOneField(
         container_models.ContainerDistribution,

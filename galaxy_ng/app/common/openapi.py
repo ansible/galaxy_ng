@@ -24,10 +24,10 @@ def preprocess_debug_logger(endpoints, **kwargs):
 def preprocess_exclude_endpoints(endpoints, **kwargs):
     """Return an iterable of (path, path_regex, method, callback) with some endpoints removed
 
-    For example, the default is to to remove '/pulp' and '/_ui/' api endpoints.
+    For example, the default is to to remove '/pulp' and '/_ui/' api endpoints, while
+    allowing /pulp/api/v3/status endpoint and all automation-hub v3 endpoints.
     """
-
     return [
         (path, path_regex, method, callback) for path, path_regex, method, callback in endpoints
-        if not path.startswith('/pulp') and '/_ui/' not in path
+        if path == '/pulp/api/v3/status/' or (not path.startswith('/pulp') and '/_ui/' not in path)
     ]

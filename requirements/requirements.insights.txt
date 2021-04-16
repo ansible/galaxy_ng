@@ -12,15 +12,15 @@ aiohttp==3.7.4.post0
     # via pulpcore
 ansible-base==2.10.7
     # via ansible
-ansible-lint==5.0.3
+ansible-lint==5.0.7
     # via galaxy-importer
-ansible==3.1.0
+ansible==3.2.0
     # via galaxy-importer
 async-lru==1.0.2
     # via pulp-ansible
 async-timeout==3.0.1
     # via aiohttp
-asyncio-throttle==1.0.1
+asyncio-throttle==1.0.2
     # via pulpcore
 attrs==20.3.0
     # via
@@ -33,12 +33,12 @@ bleach-allowlist==1.0.3
     # via galaxy-importer
 bleach==3.3.0
     # via galaxy-importer
-boto3==1.17.29
+boto3==1.17.47
     # via
     #   -r requirements/requirements.insights.in
     #   django-storages
     #   watchtower
-botocore==1.20.29
+botocore==1.20.47
     # via
     #   boto3
     #   s3transfer
@@ -60,7 +60,7 @@ colorama==0.4.4
     # via rich
 commonmark==0.9.1
     # via rich
-cryptography==3.4.6
+cryptography==3.4.7
     # via
     #   ansible-base
     #   pyjwt
@@ -84,7 +84,7 @@ django-prometheus==2.1.0
     # via galaxy-ng (setup.py)
 django-storages[boto3]==1.11.1
     # via -r requirements/requirements.insights.in
-django==2.2.19
+django==2.2.20
     # via
     #   django-currentuser
     #   django-filter
@@ -100,7 +100,7 @@ django==2.2.19
     #   pulpcore
 djangorestframework-queryfields==1.0.0
     # via pulpcore
-djangorestframework==3.12.2
+djangorestframework==3.12.4
     # via
     #   drf-nested-routers
     #   drf-spectacular
@@ -173,13 +173,13 @@ packaging==20.9
     #   ansible-lint
     #   bleach
     #   pulp-ansible
-prometheus-client==0.9.0
+prometheus-client==0.10.1
     # via django-prometheus
 psycopg2==2.8.6
     # via pulpcore
 pulp-ansible==0.7.1
     # via galaxy-ng (setup.py)
-pulp-container==2.3.1
+pulp-container==2.5.1
     # via galaxy-ng (setup.py)
 pulpcore==3.11.0.post0
     # via
@@ -194,7 +194,7 @@ pycparser==2.20
     # via cffi
 pycryptodomex==3.10.1
     # via pyjwkest
-pyflakes==2.3.0
+pyflakes==2.3.1
     # via flake8
 pygments==2.8.1
     # via rich
@@ -233,7 +233,7 @@ requests==2.25.1
     # via
     #   galaxy-importer
     #   pyjwkest
-rich==9.13.0
+rich==10.1.0
     # via
     #   ansible-lint
     #   enrich
@@ -241,9 +241,9 @@ rq==1.7.0
     # via pulpcore
 ruamel.yaml.clib==0.2.2
     # via ruamel.yaml
-ruamel.yaml==0.16.13
+ruamel.yaml==0.17.4
     # via ansible-lint
-s3transfer==0.3.4
+s3transfer==0.3.6
     # via boto3
 semantic-version==2.8.5
     # via
@@ -255,11 +255,14 @@ six==1.15.0
     #   jsonschema
     #   pyjwkest
     #   python-dateutil
+    #   tenacity
     #   url-normalize
 sqlparse==0.4.1
     # via django
 tablib[html,ods,xls,xlsx,yaml]==3.0.0
     # via django-import-export
+tenacity==7.0.0
+    # via ansible-lint
 typing-extensions==3.7.4.3
     # via
     #   aiohttp

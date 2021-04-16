@@ -9,7 +9,7 @@
 
 set -mveuo pipefail
 
-COMPONENT_VERSION=$(cat galaxy_ng/app/VERSION)
+COMPONENT_VERSION=$(cat .travis/VERSION)
 mkdir .travis/vars || true
 echo "---" > .travis/vars/main.yaml
 echo "legacy_component_name: galaxy_ng" >> .travis/vars/main.yaml

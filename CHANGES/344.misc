@@ -1,0 +1,8 @@
+Add bump2version config to setup.cfg
+
+Use bump2version to increment the 'version' string wherever
+it is needed. The canonical source of truth for the version
+is 'bump2version.current_version' in setup.cfg.
+
+To update version, change that and run 'bump2version'.
+

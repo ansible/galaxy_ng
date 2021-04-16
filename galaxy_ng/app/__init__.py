@@ -1,8 +1,6 @@
-import os
 from pulpcore.plugin import PulpPluginAppConfig
-
-with open(os.path.join(os.path.dirname(__file__), 'VERSION')) as version_file:
-    galaxy_ng_version = version_file.read()
+from django.db.models.signals import post_migrate
+from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
 
 
 class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
@@ -10,4 +8,24 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
 
     name = "galaxy_ng.app"
     label = "galaxy"
-    version = galaxy_ng_version
+    version = "4.3.0.dev"
+
+    def ready(self):
+        super().ready()
+        post_migrate.connect(
+            set_pulp_container_access_policies,
+            sender=self,
+            dispatch_uid="override_pulp_container_access_policies"
+        )
+
+
+def set_pulp_container_access_policies(sender, **kwargs):
+    apps = kwargs.get("apps")
+    if apps is None:
+        from django.apps import apps
+    AccessPolicy = apps.get_model("core", "AccessPolicy")
+
+    print("Overriding pulp_container access poliicy")
+    for view in PULP_CONTAINER_VIEWSETS:
+        policy, created = AccessPolicy.objects.update_or_create(
+            viewset_name=view, defaults={**PULP_CONTAINER_VIEWSETS[view], "customized": True})

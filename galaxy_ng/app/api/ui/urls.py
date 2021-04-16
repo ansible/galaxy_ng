@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import path, include, re_path
 from rest_framework import routers
 
@@ -55,18 +56,26 @@ container_paths = [
         "repositories/",
         viewsets.ContainerRepositoryViewSet.as_view({'get': 'list'}),
         name='container-repository-list'),
+    path(
+        "namespaces/<str:name>/",
+        viewsets.ContainerNamespaceViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        name='container-namespace-detail'),
+    path(
+        "namespaces/",
+        viewsets.ContainerNamespaceViewSet.as_view({'get': 'list'}),
+        name='container-namespace-list'),
 
     # image names can't start with _, so namespacing all the nested views
     # under _content prevents cases where an image could be named foo/images
     # and conflict with our URL paths.
     re_path(
-        r'repositories/(?P<base_path>\w+\/{0,1}\w+)/_content/',
+        r'repositories/(?P<base_path>[-\w]+\/{0,1}[-\w]+)/_content/',
         include(container_repo_paths)),
 
     # This regex can capture "namespace/name" and "name"
     re_path(
-        r'repositories/(?P<base_path>\w+\/{0,1}\w+)/',
-        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        r'repositories/(?P<base_path>[-\w]+\/{0,1}[-\w]+)/',
+        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
         name='container-repository-detail'),
 ]
 
@@ -107,8 +116,8 @@ paths = [
     path('', include(router.urls)),
 
     path('auth/', include(auth_views)),
+    path('feature-flags/', views.FeatureFlagsView.as_view(), name='feature-flags'),
     path('groups/', include(group_paths)),
-    path('execution-environments/', include(container_paths)),
     path(
         'repo/<str:path>/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
@@ -125,9 +134,14 @@ paths = [
         'me/',
         viewsets.CurrentUserViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='me'
+    ),
+]
+
+if settings.GALAXY_FEATURE_FLAGS['execution_environments']:
+    paths.append(
+        path('execution-environments/', include(container_paths)),
     )
 
-]
 app_name = "ui"
 
 urlpatterns = [

@@ -61,6 +61,11 @@ GALAXY_AUTHENTICATION_CLASSES = [
 # set to 'insights' for cloud.redhat.com deployments
 GALAXY_DEPLOYMENT_MODE = 'standalone'
 
+# Dictionary with True|False values for the application to turn on/off features
+GALAXY_FEATURE_FLAGS = {
+    'execution_environments': True,  # False will make execution_environments endpoints 404
+}
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -95,8 +100,10 @@ SPECTACULAR_SETTINGS = {
         "name": "GPLv2+",
         "url": "https://raw.githubusercontent.com/ansible/galaxy_ng/master/LICENSE",
     },
-    'PREPROCESSING_HOOKS': ['galaxy_ng.app.common.openapi.preprocess_exclude_endpoints',
-                            'galaxy_ng.app.common.openapi.preprocess_debug_logger'],
     "COMPONENT_SPLIT_REQUEST": True,
     "dynaconf_merge": True,
 }
+
+# Disable django guardian anonymous user
+# https://django-guardian.readthedocs.io/en/stable/configuration.html#anonymous-user-name
+ANONYMOUS_USER_NAME = None

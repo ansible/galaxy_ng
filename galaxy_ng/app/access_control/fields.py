@@ -1,6 +1,8 @@
 from django.contrib.auth.models import Permission
 from django.db.models import Q
 
+from guardian.shortcuts import get_perms_for_model
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -71,3 +73,18 @@ class GroupPermissionField(serializers.Field):
                 raise ValidationError(detail={'group': 'Invalid group name or ID'})
 
         return internal
+
+
+class MyPermissionsField(serializers.Serializer):
+    def to_representation(self, obj):
+        user = self.context['request'].user
+
+        # guardian's get_perms(user, obj) method only returns user permissions,
+        # not all permissions a user has.
+        my_perms = []
+        for perm in get_perms_for_model(type(obj)).all():
+            codename = "{}.{}".format(perm.content_type.app_label, perm.codename)
+            if user.has_perm(codename) or user.has_perm(codename, obj):
+                my_perms.append(codename)
+
+        return my_perms

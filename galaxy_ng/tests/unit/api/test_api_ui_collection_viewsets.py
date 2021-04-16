@@ -164,23 +164,24 @@ class TestUiCollectionRemoteViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.remote_data = {
-            'name': 'rh-certified',
-            'url': 'https://rh-certified.test',
+            "name": "rh-certified",
+            "url": "https://cloud.redhat.com/api/automation-hub/",
         }
-        self.remote = _create_remote(**self.remote_data)
-        self.repository = _create_repo(name='rh-certified-repo', remote=self.remote)
+        self.remote = CollectionRemote.objects.get(name=self.remote_data["name"])
+        self.repository = AnsibleRepository.objects.get(name=self.remote_data["name"])
 
     def test_get_remotes(self):
+        # data migration created 2 remotes
         response = self.client.get(get_current_ui_url('remotes-list'))
-        self.assertEqual(response.data['meta']['count'], 1)
+        self.assertEqual(response.data['meta']['count'], 2)
 
         for key, value in self.remote_data.items():
-            self.assertEqual(response.data['data'][0][key], value)
+            self.assertEqual(response.data['data'][1][key], value)
 
-        repository = response.data['data'][0]['repositories'][0]
+        repository = response.data['data'][1]['repositories'][0]
 
-        self.assertEqual(repository['name'], 'rh-certified-repo')
-        self.assertEqual(repository['distributions'][0]['base_path'], 'rh-certified-repo')
+        self.assertEqual(repository['name'], self.remote_data["name"])
+        self.assertEqual(repository['distributions'][0]['base_path'], self.remote_data["name"])
 
         # token is not visible in a GET
-        self.assertNotIn('token', response.data['data'][0])
+        self.assertNotIn('token', response.data['data'][1])

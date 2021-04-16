@@ -63,7 +63,7 @@ requirements = [
     "pulp-ansible==0.7.1",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container>=2.3.1"
+    "pulp-container>=2.5.1",
 ]
 
 
@@ -90,9 +90,7 @@ if is_on_dev_environment:
     print("Installing with unpinned DEV_SOURCE_PATH requirements", requirements)
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-
-with open('galaxy_ng/app/VERSION') as version_file:
-    version = os.environ.get("ALTERNATE_VERSION", version_file.read())
+version = "4.3.0.dev"
 
 setup(
     name=package_name,

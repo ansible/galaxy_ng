@@ -2,27 +2,11 @@ import logging
 from rest_framework import status
 from django.urls import reverse
 from django.test import override_settings
-from pulp_ansible.app.models import (
-    AnsibleDistribution,
-    AnsibleRepository,
-    CollectionRemote
-)
+from pulp_ansible.app.models import CollectionRemote
 from galaxy_ng.app.constants import DeploymentMode
 from .base import BaseTestCase
 
 log = logging.getLogger(__name__)
-
-
-def _create_repo(name, **kwargs):
-    repo = AnsibleRepository.objects.create(name=name, **kwargs)
-    AnsibleDistribution.objects.create(name=name, base_path=name, repository=repo)
-    return repo
-
-
-def _create_remote(name, url, **kwargs):
-    return CollectionRemote.objects.create(
-        name=name, url=url, **kwargs
-    )
 
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
@@ -35,12 +19,7 @@ class TestUiTaskListViewSet(BaseTestCase):
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
-        self.certified_remote = _create_remote(
-            name='rh-certified',
-            url='https://a.certified.url.com/api/v2/collections',
-            requirements_file=None
-        )
-        _create_repo(name='rh-certified', remote=self.certified_remote)
+        self.certified_remote = CollectionRemote.objects.get(name='rh-certified')
 
     def build_sync_url(self, path):
         return reverse('galaxy:api:content:v3:sync', kwargs={'path': path})
