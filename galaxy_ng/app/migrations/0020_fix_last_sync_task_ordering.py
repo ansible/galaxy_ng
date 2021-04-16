@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('galaxy', '0018_set_rate_limit_default'),
+        ('galaxy', '0019_containernamespace'),
     ]
 
     operations = [
