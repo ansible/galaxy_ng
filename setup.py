@@ -90,7 +90,7 @@ if is_on_dev_environment:
     print("Installing with unpinned DEV_SOURCE_PATH requirements", requirements)
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-version = "4.3.0.dev"
+version = "4.3.0a2"
 
 setup(
     name=package_name,

@@ -1,1 +1,0 @@
-Replace current PULP_REDIS* env variables with PULP_REDIS_URL env variable to accommodate PULP_REDIS_SSL.

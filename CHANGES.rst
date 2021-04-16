@@ -13,6 +13,146 @@ Changelog
 
 .. towncrier release notes start
 
+4.3.0a2 (2021-04-16)
+====================
+
+Features
+--------
+
+- Enable OpenAPI spec at cloud.redhat.com/api/automation-hub/v3/openapi.json
+
+  Update docs and decorators on viewsets and serializers to generate correct
+  spec.
+
+  Modify pulpcore openapigenerator to include concrete hrefs in addition
+  to {ansible_collection_href}/ style endpoints.
+
+  Need to provide the existing pulp /pulp/api/v3/docs/ view and
+  a new view at /api/automation-hub/v3/openapi.json
+  - new viewset may need drf-spectacular tweaks
+
+  Sub tasks:
+  - Create a snapshot of the OpenAPI spec in CI.
+    - setup any useful tooling for validating/verifying the spec
+      - openapidiff ?
+  - Enable swaggerui view (/v3/swagger/ ?)
+
+  Potential problems:
+
+  - May want/need to import pulpcore openapi generator utils, which may not be in plugin
+  api
+
+  Before:
+
+  Pulp uses drf-spectacular
+
+  A "live" generated version of the API is available at
+
+  http://localhost:5001/pulp/api/v3/docs/api.json
+  http://localhost:5001/pulp/api/v3/docs/api.yaml
+
+  And a "redoc" view at:
+  http://localhost:5001/pulp/api/v3/docs/
+
+  Note some issues:
+
+  - Lots of endpoints are in the form "{ansible_collection_import_href}"
+    - in theory, all endpoints should start with a "/" but even
+    when evaluated, the above is "ansible/ansible/v3/collections/artifacts"
+
+  - schema objects are inconsistent named
+    - pulpcore has no prefix
+    - pulp_ansible has ansible. prefix
+    - galaxy_ng sometimes? has galaxy. prefix and sometimes Galaxy
+  `AAH-57 <https://issues.redhat.com/browse/AAH-57>`_
+- Add OpenShift job template to run database migrations
+  `AAH-145 <https://issues.redhat.com/browse/AAH-145>`_
+- Allow on to customize version for sdist building
+  `AAH-185 <https://issues.redhat.com/browse/AAH-185>`_
+- Add debug level logging about access_policy permission evaluation.
+  `AAH-205 <https://issues.redhat.com/browse/AAH-205>`_
+- Add unpaginated collections, collectionversions and metadata endopints for better sync performance.
+  `AAH-224 <https://issues.redhat.com/browse/AAH-224>`_
+- Add rate_limit to remotes api.
+  `AAH-272 <https://issues.redhat.com/browse/AAH-272>`_
+- Add container list and detail endpoints for execution environments.
+  `AAH-274 <https://issues.redhat.com/browse/AAH-274>`_
+- Add the ability to view the changes that have been made to a container repo.
+  `AAH-276 <https://issues.redhat.com/browse/AAH-276>`_
+- Add api to return images in a container repo.
+  `AAH-277 <https://issues.redhat.com/browse/AAH-277>`_
+- Set pulp container access policies.
+  `AAH-278 <https://issues.redhat.com/browse/AAH-278>`_
+- Load initial data for repo, remote and distribution using data migrations
+  `AAH-281 <https://issues.redhat.com/browse/AAH-281>`_
+- Add GALAXY_FEATURE_FLAGS to enable/disable execution environments
+  `AAH-298 <https://issues.redhat.com/browse/AAH-298>`_
+- Add the ability to create readmes for container distributions.
+  `AAH-317 <https://issues.redhat.com/browse/AAH-317>`_
+- Add api for loading a container manifest configuration blob.
+  `AAH-338 <https://issues.redhat.com/browse/AAH-338>`_
+- Add requires_ansible to the collection api endpoints
+  `AAH-409 <https://issues.redhat.com/browse/AAH-409>`_
+- Add models for container registry sync config
+  `AAH-432 <https://issues.redhat.com/browse/AAH-432>`_
+- Allow creating super users.
+  `AAH-500 <https://issues.redhat.com/browse/AAH-500>`_
+
+
+Bugfixes
+--------
+
+- Fix how travis checks for existence of Jira issues
+  `AAH-44 <https://issues.redhat.com/browse/AAH-44>`_
+- Fixed synclist curation creating 2 * N tasks, where N is number of synclists.
+  Now synclist curation is executed in batches. Number of batches is configured in project settings.
+  By default it is set to 200 synclists per task.
+  `AAH-50 <https://issues.redhat.com/browse/AAH-50>`_
+- Fix NamespaceLink creation and Validation on duplicated name.
+  `AAH-132 <https://issues.redhat.com/browse/AAH-132>`_
+- API returns 409 in case of existing group with same name.
+  `AAH-152 <https://issues.redhat.com/browse/AAH-152>`_
+- The namespaces api now performs a partial match on namespace name and namespace company name when using the 'keywords' query parameter.
+  `AAH-166 <https://issues.redhat.com/browse/AAH-166>`_
+- Fix KeyError lookup in namespace and collection viewset
+  `AAH-195 <https://issues.redhat.com/browse/AAH-195>`_
+- Fix error in error msg when importing invalid filenames
+  `AAH-203 <https://issues.redhat.com/browse/AAH-203>`_
+- Fix the galaxy-importer check for max size of docs files
+  `AAH-220 <https://issues.redhat.com/browse/AAH-220>`_
+- Only show synclist toggles to org admin.
+
+
+  ie, non org admin's should get 403 response
+  when viewing synclist endpoints.
+  `AAH-222 <https://issues.redhat.com/browse/AAH-222>`_
+- Users should not be able to delete themselves.
+
+  Even if they have 'delete-user' perms.
+  `AAH-265 <https://issues.redhat.com/browse/AAH-265>`_
+- Prevent users with delete-user perms from deleting admin users
+  `AAH-266 <https://issues.redhat.com/browse/AAH-266>`_
+- Make token and password obfuscated on the API docs for /sync/config
+  `AAH-282 <https://issues.redhat.com/browse/AAH-282>`_
+- split proxy_url in 3 fields: username, password, address
+  `AAH-291 <https://issues.redhat.com/browse/AAH-291>`_
+- Fix groups endpoint viewable only by admin
+  `AAH-453 <https://issues.redhat.com/browse/AAH-453>`_
+- Expose pulp API in generated openapi spec.
+  `AAH-482 <https://issues.redhat.com/browse/AAH-482>`_
+- Replace current PULP_REDIS* env variables with PULP_REDIS_URL env variable to accommodate PULP_REDIS_SSL.
+  `AAH-486 <https://issues.redhat.com/browse/AAH-486>`_
+
+
+Misc
+----
+
+- `AAH-16 <https://issues.redhat.com/browse/AAH-16>`_, `AAH-31 <https://issues.redhat.com/browse/AAH-31>`_, `AAH-120 <https://issues.redhat.com/browse/AAH-120>`_, `AAH-139 <https://issues.redhat.com/browse/AAH-139>`_, `AAH-176 <https://issues.redhat.com/browse/AAH-176>`_, `AAH-177 <https://issues.redhat.com/browse/AAH-177>`_, `AAH-257 <https://issues.redhat.com/browse/AAH-257>`_, `AAH-295 <https://issues.redhat.com/browse/AAH-295>`_, `AAH-299 <https://issues.redhat.com/browse/AAH-299>`_, `AAH-344 <https://issues.redhat.com/browse/AAH-344>`_, `AAH-387 <https://issues.redhat.com/browse/AAH-387>`_, `AAH-393 <https://issues.redhat.com/browse/AAH-393>`_, `AAH-425 <https://issues.redhat.com/browse/AAH-425>`_, `AAH-433 <https://issues.redhat.com/browse/AAH-433>`_, `AAH-478 <https://issues.redhat.com/browse/AAH-478>`_, `AAH-483 <https://issues.redhat.com/browse/AAH-483>`_
+
+
+----
+
+
 4.2.0 (2020-11-12)
 ==================
 
