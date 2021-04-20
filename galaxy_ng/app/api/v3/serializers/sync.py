@@ -71,7 +71,8 @@ class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer
         ]
 
     def get_last_sync_task_queryset(self, obj):
-        return CollectionSyncTask.objects.filter(repository=obj).first()
+        return CollectionSyncTask.objects.order_by(
+            '-task__pulp_last_updated').filter(repository=obj).first()
 
 
 class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemoteSerializer):
@@ -174,8 +175,9 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
     def get_last_sync_task_queryset(self, obj):
         """Gets last_sync_task from Pulp using remote->repository relation"""
 
-        return CollectionSyncTask.objects.filter(
-            repository=obj.repository_set.order_by('-pulp_last_updated').first()
+        return CollectionSyncTask.objects.order_by(
+            '-task__pulp_last_updated').filter(
+            repository=obj.repository_set.order_by('pulp_last_updated').first()
         ).first()
 
 
