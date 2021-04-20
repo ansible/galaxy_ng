@@ -6,7 +6,7 @@ objects:
   - apiVersion: batch/v1
     kind: Job
     metadata:
-      name: database-migration-${IMAGE_TAG}-5
+      name: database-migration-${IMAGE_TAG}-6
     spec:
       backoffLimit: 1
       completions: 1
