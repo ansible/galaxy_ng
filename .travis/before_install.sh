@@ -16,15 +16,10 @@ echo "legacy_component_name: galaxy_ng" >> .travis/vars/main.yaml
 echo "component_name: galaxy" >> .travis/vars/main.yaml
 echo "component_version: '${COMPONENT_VERSION}'" >> .travis/vars/main.yaml
 
-export PRE_BEFORE_INSTALL=$TRAVIS_BUILD_DIR/.travis/pre_before_install.sh
 export POST_BEFORE_INSTALL=$TRAVIS_BUILD_DIR/.travis/post_before_install.sh
 
 COMMIT_MSG=$(git log --format=%B --no-merges -1)
 export COMMIT_MSG
-
-if [ -f $PRE_BEFORE_INSTALL ]; then
-  source $PRE_BEFORE_INSTALL
-fi
 
 if [[ -n $(echo -e $COMMIT_MSG | grep -P "Required PR:.*" | grep -v "https") ]]; then
   echo "Invalid Required PR link detected in commit message. Please use the full https url."
