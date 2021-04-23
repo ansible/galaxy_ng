@@ -15,8 +15,8 @@ from galaxy_ng import __version__
 
 class PrepareStaticCommand(Command):
     UI_DOWNLOAD_URL = (
-        "https://github.com/ansible/ansible-hub-ui/releases"
-        "/latest/download/automation-hub-ui-dist.tar.gz"
+        "https://github.com/ansible/ansible-hub-ui/releases/download/"
+        f"{__version__}/automation-hub-ui-dist.tar.gz"
     )
     TARGET_DIR = "galaxy_ng/app/static/galaxy_ng"
 

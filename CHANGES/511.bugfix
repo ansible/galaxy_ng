@@ -1,1 +1,0 @@
-Fix an issue where cancelled tasks would prevent the latest task from showing on collection sync.
