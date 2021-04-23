@@ -8,6 +8,7 @@ readonly WITH_MIGRATIONS="${WITH_MIGRATIONS:-0}"
 readonly WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-0}"
 readonly DEV_SOURCE_PATH="${DEV_SOURCE_PATH:-}"
 readonly LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}"
+readonly WAIT_FOR_MIGRATIONS="${WAIT_FOR_MIGRATIONS:-0}"
 
 
 log_message() {
@@ -82,7 +83,7 @@ run_service() {
 
     if [[ "${WITH_MIGRATIONS}" -eq "1" ]]; then
         django-admin migrate
-    else
+    elif [[ "${WAIT_FOR_MIGRATIONS}" -eq "1" ]]; then
         wait-for-migrations
     fi
 
