@@ -13,6 +13,25 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.3 (2021-04-23)
+==================
+
+Bugfixes
+--------
+
+- Update to pulp-ansible 0.5.8
+  `AAH-407 <https://issues.redhat.com/browse/AAH-407>`_
+- Update Django to 2.2.20
+  `AAH-489 <https://issues.redhat.com/browse/AAH-489>`_
+- Update urllib3, pyYAML, aiohttp for security updates.
+  `AAH-498 <https://issues.redhat.com/browse/AAH-498>`_
+- Fix an issue where cancelled tasks would prevent the latest task from showing on collection sync.
+  `AAH-511 <https://issues.redhat.com/browse/AAH-511>`_
+
+
+----
+
+
 4.2.2 (2021-02-18)
 ==================
 
