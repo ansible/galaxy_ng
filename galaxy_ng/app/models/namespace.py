@@ -1,4 +1,6 @@
 import contextlib
+import logging
+
 from django.db import models
 from django.db import transaction
 from django.db import IntegrityError
@@ -12,19 +14,30 @@ from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT
 
 __all__ = ("Namespace", "NamespaceLink")
 
+log = logging.getLogger(__name__)
+
 
 def create_inbound_repo(name):
     """Creates inbound repo and inbound distribution for namespace publication."""
     inbound_name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=name)
+    log.debug('Creating inbound repo for namespace_name=%s', name)
+
     with contextlib.suppress(IntegrityError):
         # IntegrityError is suppressed for when the named repo/distro already exists
         # In that cases the error handling is performed on the caller.
         repo = AnsibleRepository.objects.create(name=inbound_name)
-        AnsibleDistribution.objects.create(
+        log.debug('created repo=%s', repo)
+
+        distro = AnsibleDistribution.objects.create(
             name=inbound_name,
             base_path=inbound_name,
             repository=repo
         )
+        log.debug('created distro=%s', distro)
+        return
+
+    log.debug('Maybe have had an IntegrityError suppress for namespace_name=%s, inbound_name=%s',
+              name, inbound_name)
 
 
 def delete_inbound_repo(name):
@@ -40,10 +53,12 @@ class NamespaceManager(models.Manager):
 
     def create(self, **kwargs):
         """Override to create inbound repo and distro."""
+        log.debug('create kwargs=%s', repr(kwargs))
         create_inbound_repo(kwargs['name'])
         return super().create(**kwargs)
 
     def bulk_create(self, objs, **kwargs):
+        log.debug('bulk creating objs=%s', objs)
         for obj in objs:
             create_inbound_repo(obj.name)
         return super().bulk_create(objs, **kwargs)
