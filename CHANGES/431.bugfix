@@ -1,0 +1,1 @@
+Uses optional file_url from caller, pulp-ansible>=0.8, to support additional pulp backend storage platforms
