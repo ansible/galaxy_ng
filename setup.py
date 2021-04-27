@@ -45,7 +45,7 @@ class PrepareStaticCommand(Command):
         with tempfile.NamedTemporaryFile() as download_file:
             log.info(f"Downloading UI distribution to temporary file: {download_file.name}")
 
-            if (self.ALTERNATE_UI_DOWNLOAD_URL):
+            if self.ALTERNATE_UI_DOWNLOAD_URL:
                 log.info(f"Downloading UI from {self.ALTERNATE_UI_DOWNLOAD_URL}")
                 self._download_tarball(self.ALTERNATE_UI_DOWNLOAD_URL, download_file)
             else:
