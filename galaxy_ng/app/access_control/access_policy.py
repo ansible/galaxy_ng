@@ -218,6 +218,8 @@ class CollectionAccessPolicy(AccessPolicyBase):
     NAME = 'CollectionViewSet'
 
     def can_update_collection(self, request, view, permission):
+        if not view.kwargs.get("path"):
+            return False
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
@@ -239,11 +241,17 @@ class UserAccessPolicy(AccessPolicyBase):
     NAME = 'UserViewSet'
 
     def user_is_superuser(self, request, view, action):
-        user = view.get_object()
+        if view.kwargs.get("pk"):
+            user = view.get_object()
+        else:
+            user = request.user
         return user.is_superuser
 
     def is_current_user(self, request, view, action):
-        return request.user == view.get_object()
+        if view.kwargs.get("pk"):
+            return request.user == view.get_object()
+
+        return True
 
 
 class MyUserAccessPolicy(AccessPolicyBase):

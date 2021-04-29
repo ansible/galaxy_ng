@@ -2,6 +2,7 @@ import logging
 
 from django.db.models import Prefetch, Count, Q
 from django.core import exceptions
+from django.http import Http404
 
 from pulpcore.plugin import models as core_models
 from pulp_container.app import models as container_models
@@ -93,6 +94,8 @@ class ContainerContentBaseViewset(api_base.ModelViewSet):
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
 
     def get_distro(self):
+        if "base_path" not in self.kwargs:
+            raise Http404("Please provide 'base_path'")
         return get_object_or_404(
             models.ContainerDistribution, base_path=self.kwargs["base_path"])
 
