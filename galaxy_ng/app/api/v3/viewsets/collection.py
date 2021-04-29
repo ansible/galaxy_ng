@@ -123,12 +123,16 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         """Dispatch a pulp task started on upload of collection version."""
         locks = []
 
+        log.debug('temp_file_pk=%s', temp_file_pk)
+        log.debug('repository=%s', repository)
+
         kwargs["temp_file_pk"] = temp_file_pk
 
         if repository:
             locks.append(repository)
             kwargs["repository_pk"] = repository.pk
 
+        log.debug('kwargs=%s', kwargs)
         if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
             return enqueue_with_reservation(import_and_move_to_staging, locks, kwargs=kwargs)
         return enqueue_with_reservation(import_and_auto_approve, locks, kwargs=kwargs)
@@ -175,7 +179,14 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         data = self._get_data(request)
         filename = data['filename']
 
+        log.debug('settings.GALAXY_REQUIRE_CONTENT_APPROVAL=%s',
+                  settings.GALAXY_REQUIRE_CONTENT_APPROVAL)
+        log.debug('kwargs=%s', kwargs)
+        log.debug('filename.namespace=%s', filename.namespace)
+
         path = self._get_path(kwargs, filename_ns=filename.namespace)
+
+        log.debug('path=%s', path)
 
         try:
             namespace = models.Namespace.objects.get(name=filename.namespace)
@@ -184,7 +195,8 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
                 'Namespace "{0}" does not exist.'.format(filename.namespace)
             )
 
-        self._check_path_matches_expected_repo(path, filename_ns=namespace.name)
+        log.debug('namespace=%s', namespace)
+        # self._check_path_matches_expected_repo(path, filename_ns=namespace.name)
 
         self.check_object_permissions(request, namespace)
 

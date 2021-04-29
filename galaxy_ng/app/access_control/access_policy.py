@@ -55,17 +55,27 @@ class NamespaceAccessPolicy(AccessPolicyBase):
 class CollectionAccessPolicy(AccessPolicyBase):
     NAME = 'CollectionViewSet'
 
+    # NOTE: These are really more about modifying a Repository/Distribution
+    #       that contains these collections.
+    # NOTE: Also really more about modifying Repositories and updating a collection
+    #       and uploading a new collection version are the same thing.
     def can_update_collection(self, request, view, permission):
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
+    # FIXME: probably need to add something like 'can_modify_repository' and/or
+    #        'can_modify_distribution'. Or 'upload_to_repository', possibly
+    #        for dest repo and/or inbound repos.
     def can_create_collection(self, request, view, permission):
         data = view._get_data(request)
         try:
             namespace = models.Namespace.objects.get(name=data['filename'].namespace)
         except models.Namespace.DoesNotExist:
             raise NotFound('Namespace in filename not found.')
+        # FIXME: Need to change what we evaulate for perms to upload to a repository.
+        #        The upload_to_namespace perm makes a lot of assumptions which will
+        #        not be true anymore.
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
 
