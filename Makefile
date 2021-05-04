@@ -1,4 +1,7 @@
 DOCKER_IMAGE_NAME = localhost/galaxy_ng/galaxy_ng
+# use PIP_COMPILE_UPDATE_SPEC='-P pulp-container==2.5.1' to update
+# just pulp-container, other this defaults to updating everything.
+PIP_COMPILE_UPDATE_SPEC ?= -U
 
 .PHONY: help
 help:             ## Show the help.
@@ -14,11 +17,11 @@ help:             ## Show the help.
 
 .PHONY: requirements
 requirements:     ## Update python dependencies lock files (i.e. requirements.txt).
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.common.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -v $(REQ_SPEC) -o requirements/requirements.common.txt \
 		setup.py
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.standalone.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -v $(REQ_SPEC) -o requirements/requirements.standalone.txt \
 		setup.py requirements/requirements.standalone.in
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.insights.txt \
+	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -v $(REQ_SPEC) -o requirements/requirements.insights.txt \
 		setup.py requirements/requirements.insights.in
 
 .PHONY: changelog
