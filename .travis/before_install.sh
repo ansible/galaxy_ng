@@ -70,7 +70,7 @@ sed -i -e 's/localhost:24817/pulp/g' generate.sh
 sed -i -e 's/:24817/pulp/g' generate.sh
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.11
+git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.11.1
 
 cd pulpcore
 if [ -n "$PULPCORE_PR_NUMBER" ]; then
