@@ -100,7 +100,7 @@ if [ -z "$TRAVIS_TAG" ]; then
 fi
 
 
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.7.1
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.7.3
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
   cd pulp_ansible
   git fetch --depth=1 origin pull/$PULP_ANSIBLE_PR_NUMBER/head:$PULP_ANSIBLE_PR_NUMBER
