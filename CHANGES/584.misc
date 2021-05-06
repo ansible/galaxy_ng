@@ -1,0 +1,5 @@
+Temporary pin django==2.2.20
+
+To avoid
+   https://code.djangoproject.com/ticket/32718
+    Issue with assigning file to FileField
