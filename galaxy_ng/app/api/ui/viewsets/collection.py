@@ -48,6 +48,7 @@ class CollectionViewSet(
     versioning_class = versioning.UIVersioning
     filterset_class = CollectionByCollectionVersionFilter
     permission_classes = [access_policy.CollectionAccessPolicy]
+    pulp_tag_name = "Galaxy UI Collection"
 
     def get_queryset(self):
         """Returns a CollectionVersions queryset for specified distribution."""
@@ -142,6 +143,7 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
     serializer_class = serializers.CollectionVersionSerializer
     filterset_class = CollectionVersionFilter
     versioning_class = versioning.UIVersioning
+    pulp_tag_name = "Galaxy UI Collection Version"
 
     permission_classes = [access_policy.CollectionAccessPolicy]
 
@@ -199,6 +201,7 @@ class CollectionImportViewSet(api_base.GenericViewSet,
     ordering_fields = ('created',)
 
     permission_classes = [access_policy.CollectionAccessPolicy]
+    pulp_tag_name = "Galaxy UI Collection Version Artifact Import"
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -227,3 +230,4 @@ class CollectionRemoteViewSet(api_base.ModelViewSet):
     serializer_class = CollectionRemoteSerializer
 
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]
+    pulp_tag_name = "Galaxy UI Collection Remote"

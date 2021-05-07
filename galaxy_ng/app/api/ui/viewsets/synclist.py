@@ -13,3 +13,4 @@ class SyncListViewSet(api_base.ModelViewSet):
     queryset = models.SyncList.objects.all()
     serializer_class = serializers.SyncListSerializer
     permission_classes = [access_policy.MySyncListAccessPolicy]
+    pulp_tag_name = "Galaxy UI Synclist"

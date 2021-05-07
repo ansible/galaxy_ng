@@ -1,3 +1,4 @@
+
 MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     # BEGIN: Pulp standard middleware
@@ -100,12 +101,49 @@ CONTENT_BIND = None
 SPECTACULAR_SETTINGS = {
     "TITLE": "Automation Hub API",
     "DESCRIPTION": "Fetch, Upload, Organize, and Distribute Ansible Collections",
+    "DEFAULT_GENERATOR_CLASS": "galaxy_ng.openapi.schema_generator.GalaxySchemaGenerator",
     "VERSION": "v3",
     "LICENSE": {
         "name": "GPLv2+",
         "url": "https://raw.githubusercontent.com/ansible/galaxy_ng/master/LICENSE",
     },
     "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": False,
+        "docExpansion": "list",
+    },
+    "TAGS": [
+        {"name": "Galaxy Collection"},
+        {"name": "Galaxy Collection Version"},
+        {"name": "Galaxy Collection Version Artifact"},
+        {"name": "Galaxy Collection Version Artifact Import"},
+        {"name": "Galaxy Collection Namespace",
+         "description": "Namespaces used by ansible collections"},
+        {"name": "Galaxy Sync"},
+        {"name": "Galaxy Task"},
+        {"name": "Galaxy Auth"},
+        {"name": "Galaxy API"},
+        {"name": "Galaxy UI Collection"},
+        {"name": "Galaxy UI Collection Version"},
+        {"name": "Galaxy UI Collection Version Artifact Import"},
+        {"name": "Galaxy UI Collection Remote"},
+        {"name": "Galaxy UI Distribution"},
+        {"name": "Galaxy UI Synclist"},
+        {"name": "Galaxy UI Container Namespace"},
+        {"name": "Galaxy UI Container Repository"},
+        {"name": "Galaxy UI Container Repository Manifest"},
+        {"name": "Galaxy UI Container Repository History"},
+        {"name": "Galaxy UI Container Readme"},
+        {"name": "Galaxy UI Group"},
+        {"name": "Galaxy UI User"},
+        {"name": "Galaxy UI Namespace"},
+        {"name": "Galaxy UI Tag"},
+        {"name": "Galaxy UI Feature Flags"},
+        {"name": "Galaxy UI Auth"},
+        {"name": "Galaxy UI API"},
+    ],
     "dynaconf_merge": True,
 }
 

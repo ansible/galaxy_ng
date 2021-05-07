@@ -11,6 +11,7 @@ class TagsViewSet(api_base.GenericViewSet):
     serializer_class = TagSerializer
     permission_classes = [access_policy.TagsAccessPolicy]
     versioning_class = versioning.UIVersioning
+    pulp_tag_name = "Galaxy UI Tag"
 
     queryset = Tag.objects.all()
 

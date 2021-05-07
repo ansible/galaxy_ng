@@ -29,6 +29,7 @@ class GroupViewSet(LocalSettingsMixin, viewsets.GroupViewSet):
     filterset_class = GroupFilter
     permission_classes = [access_policy.GroupAccessPolicy]
     queryset = Group.objects.all()
+    pulp_tag_name = "Galaxy UI Group"
 
     # TODO(awcrosby): replace this by setting attribute to None
     # after https://pulp.plan.io/issues/8438 is resolved
@@ -48,7 +49,9 @@ class GroupViewSet(LocalSettingsMixin, viewsets.GroupViewSet):
 
 class GroupModelPermissionViewSet(LocalSettingsMixin, viewsets.GroupModelPermissionViewSet):
     permission_classes = [access_policy.GroupAccessPolicy]
+    pulp_tag_name = "Galaxy UI Group"
 
 
 class GroupUserViewSet(LocalSettingsMixin, viewsets.GroupUserViewSet):
     permission_classes = [access_policy.GroupAccessPolicy]
+    pulp_tag_name = "Galaxy UI Group"

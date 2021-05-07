@@ -49,6 +49,7 @@ class UserViewSet(
     filterset_class = UserFilter
     permission_classes = [access_policy.UserAccessPolicy]
     versioning_class = versioning.UIVersioning
+    pulp_tag_name = "Galaxy UI User"
 
 
 class CurrentUserViewSet(
@@ -60,6 +61,7 @@ class CurrentUserViewSet(
     model = auth_models.User
     permission_classes = [access_policy.MyUserAccessPolicy]
     versioning_class = versioning.UIVersioning
+    pulp_tag_name = "Galaxy UI User"
 
     def get_object(self):
         return get_object_or_404(self.model, pk=self.request.user.pk)

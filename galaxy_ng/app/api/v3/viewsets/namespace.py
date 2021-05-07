@@ -3,6 +3,8 @@ from django.db.models import Q
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 
+from drf_spectacular.utils import extend_schema
+
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.access_policy import NamespaceAccessPolicy
 from galaxy_ng.app.api import base as api_base
@@ -41,8 +43,8 @@ class NamespaceViewSet(api_base.ModelViewSet):
     serializer_class = serializers.NamespaceSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = NamespaceFilter
-    swagger_schema = None
     permission_classes = [NamespaceAccessPolicy]
+    pulp_tag_name = "Galaxy Collection Namespace"
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -50,6 +52,9 @@ class NamespaceViewSet(api_base.ModelViewSet):
         else:
             return self.serializer_class
 
+    @extend_schema(
+        request={"application/json": serializers.NamespaceSerializer},
+    )
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Override to validate for name duplication before serializer validation."""
