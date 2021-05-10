@@ -22,7 +22,7 @@ class MySyncListViewSet(SyncListViewSet):
     permission_classes = [
         access_policy.MySyncListAccessPolicy,
     ]
-    pulp_tag_name = "Galaxy UI Synclist"
+    pulp_tag_name = "Galaxy UI: Synclist"
 
     def get_queryset(self):
         """

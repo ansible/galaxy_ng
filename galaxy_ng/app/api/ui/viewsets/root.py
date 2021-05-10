@@ -7,7 +7,7 @@ from galaxy_ng.app import constants
 
 class APIRootView(api_base.ViewSet):
     permission_classes = [IsAuthenticated]
-    pulp_tag_name = "Galaxy UI API"
+    pulp_tag_name = "Galaxy UI: API"
 
     def list(self, request, *args, **kwargs):
         return Response({

@@ -32,7 +32,7 @@ class LoginView(api_base.GenericAPIView):
     serializer_class = LoginSerializer
     authentication_classes = (_CSRFSessionAuthentication,)
     permission_classes = [access_policy.LoginAccessPolicy]
-    pulp_tag_name = "Galaxy UI Auth"
+    pulp_tag_name = "Galaxy UI: Auth"
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, *args, **kwargs):
@@ -55,7 +55,7 @@ class LoginView(api_base.GenericAPIView):
 
 class LogoutView(api_base.APIView):
     permission_classes = [access_policy.LogoutAccessPolicy]
-    pulp_tag_name = "Galaxy UI Auth"
+    pulp_tag_name = "Galaxy UI: Auth"
 
     def post(self, request, *args, **kwargs):
         django_auth.logout(request)

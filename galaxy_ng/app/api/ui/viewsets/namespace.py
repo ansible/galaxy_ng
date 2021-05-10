@@ -8,4 +8,4 @@ log = logging.getLogger(__name__)
 
 class NamespaceViewSet(NamespaceViewSet):
     versioning_class = versioning.UIVersioning
-    pulp_tag_name = "Galaxy UI Namespace"
+    pulp_tag_name = "Galaxy UI: Namespace"

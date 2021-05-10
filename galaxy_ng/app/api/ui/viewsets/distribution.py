@@ -20,12 +20,12 @@ class DistributionViewSet(
             name__endswith='-synclist').order_by('name')
     permission_classes = [access_policy.DistributionAccessPolicy]
     versioning_class = versioning.UIVersioning
-    pulp_tag_name = "Galaxy UI Distribution"
+    pulp_tag_name = "Galaxy UI: Distribution"
 
 
 class MyDistributionViewSet(DistributionViewSet):
     permission_classes = [access_policy.MyDistributionAccessPolicy]
-    pulp_tag_name = "Galaxy UI Distribution"
+    pulp_tag_name = "Galaxy UI: Distribution"
 
     def get_queryset(self):
         synclists = get_objects_for_user(

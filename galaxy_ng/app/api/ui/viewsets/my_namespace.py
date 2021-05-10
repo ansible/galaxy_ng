@@ -5,7 +5,7 @@ from .namespace import NamespaceViewSet
 
 
 class MyNamespaceViewSet(NamespaceViewSet):
-    pulp_tag_name = "Galaxy UI Namespace"
+    pulp_tag_name = "Galaxy UI: Namespace"
 
     def get_queryset(self):
         return get_objects_for_user(

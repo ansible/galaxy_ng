@@ -13,7 +13,7 @@ class SyncConfigViewSet(
 ):
     serializer_class = CollectionRemoteSerializer
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]
-    pulp_tag_name = "Galaxy Sync"
+    pulp_tag_name = "Galaxy: Sync"
 
     def get_object(self):
         distribution = AnsibleDistribution.objects.get(base_path=self.kwargs['path'])

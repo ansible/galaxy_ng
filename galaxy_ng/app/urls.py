@@ -53,7 +53,7 @@ urlpatterns.append(
 urlpatterns.append(
     path(
         f"{API_PATH_PREFIX}/v3/swagger-ui/",
-        SwaggerView.as_view(url_name='schema', pulp_tag_name="Galaxy API"),
+        SwaggerView.as_view(url_name='schema', pulp_tag_name="Galaxy: API"),
         name='schema-swagger-ui',
     )
 )

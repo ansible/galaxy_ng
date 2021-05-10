@@ -77,7 +77,7 @@ class ContainerNamespaceViewSet(api_base.ModelViewSet):
     serializer_class = serializers.ContainerNamespaceDetailSerializer
     permission_classes = [access_policy.ContainerNamespaceAccessPolicy]
     lookup_field = "name"
-    pulp_tag_name = "Galaxy UI Container Namespace"
+    pulp_tag_name = "Galaxy UI: Container Namespace"
 
 
 class ContainerRepositoryViewSet(api_base.ModelViewSet):
@@ -87,7 +87,7 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
     filterset_class = RepositoryFilter
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     lookup_field = "base_path"
-    pulp_tag_name = "Galaxy UI Container Repository"
+    pulp_tag_name = "Galaxy UI: Container Repository"
 
 
 # provide some common methods across all <distro>/_content/ endpoints
@@ -103,7 +103,7 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ManifestFilter
-    pulp_tag_name = "Galaxy UI Container Repository Manifest"
+    pulp_tag_name = "Galaxy UI: Container Repository Manifest"
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -170,7 +170,7 @@ class ContainerRepositoryHistoryViewSet(ContainerContentBaseViewset):
     serializer_class = serializers.ContainerRepositoryHistorySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = HistoryFilter
-    pulp_tag_name = "Galaxy UI Container Repository History"
+    pulp_tag_name = "Galaxy UI: Container Repository History"
 
     def get_queryset(self):
         repo = self.get_distro().repository
@@ -210,7 +210,7 @@ class ContainerReadmeViewSet(ContainerContentBaseViewset):
     queryset = models.ContainerDistroReadme.objects
     serializer_class = serializers.ContainerReadmeSerializer
     permission_classes = [access_policy.ContainerReadmeAccessPolicy]
-    pulp_tag_name = "Galaxy UI Container Readme"
+    pulp_tag_name = "Galaxy UI: Container Readme"
 
     def get_object(self):
         distro = self.get_distro()

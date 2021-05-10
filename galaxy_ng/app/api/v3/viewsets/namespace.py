@@ -44,7 +44,7 @@ class NamespaceViewSet(api_base.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = NamespaceFilter
     permission_classes = [NamespaceAccessPolicy]
-    pulp_tag_name = "Galaxy Collection Namespace"
+    pulp_tag_name = "Galaxy: Collection Namespace"
 
     def get_serializer_class(self):
         if self.action == 'list':

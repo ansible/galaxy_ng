@@ -19,7 +19,7 @@ from galaxy_ng.app import models
 class SyncRemoteView(api_base.APIView):
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]
     action = 'sync'
-    pulp_tag_name = "Galaxy Sync"
+    pulp_tag_name = "Galaxy: Sync"
 
     def post(self, request: Request, *args, **kwargs) -> Response:
         distro_path = kwargs['path']

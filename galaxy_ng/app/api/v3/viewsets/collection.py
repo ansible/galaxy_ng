@@ -79,7 +79,7 @@ class UnpaginatedCollectionViewSet(api_base.LocalSettingsMixin,
     pagination_class = None
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
-    pulp_tag_name = "Galaxy Collection"
+    pulp_tag_name = "Galaxy: Collection"
 
 
 class CollectionViewSet(api_base.LocalSettingsMixin,
@@ -87,7 +87,7 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
                         pulp_ansible_views.CollectionViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
-    pulp_tag_name = "Galaxy Collection"
+    pulp_tag_name = "Galaxy: Collection"
 
 
 class UnpaginatedCollectionVersionViewSet(api_base.LocalSettingsMixin,
@@ -96,7 +96,7 @@ class UnpaginatedCollectionVersionViewSet(api_base.LocalSettingsMixin,
     pagination_class = None
     serializer_class = UnpaginatedCollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
-    pulp_tag_name = "Galaxy Collection"
+    pulp_tag_name = "Galaxy: Collection"
 
 
 class CollectionVersionViewSet(api_base.LocalSettingsMixin,
@@ -105,19 +105,19 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
     serializer_class = CollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
     list_serializer_class = CollectionVersionListSerializer
-    pulp_tag_name = "Galaxy Collection Version"
+    pulp_tag_name = "Galaxy: Collection Version"
 
 
 class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
                                    pulp_ansible_views.CollectionVersionDocsViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
-    pulp_tag_name = "Galaxy Collection Version"
+    pulp_tag_name = "Galaxy: Collection Version"
 
 
 class CollectionImportViewSet(api_base.LocalSettingsMixin,
                               pulp_ansible_views.CollectionImportViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
-    pulp_tag_name = "Galaxy Collection Version Artifact Import"
+    pulp_tag_name = "Galaxy: Collection Version Artifact Import"
 
 
 class CollectionUploadViewSet(api_base.LocalSettingsMixin,
@@ -125,7 +125,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
     permission_classes = [access_policy.CollectionAccessPolicy]
     parser_classes = [AnsibleGalaxy29MultiPartParser]
     serializer_class = CollectionUploadSerializer
-    pulp_tag_name = "Galaxy Collection Version Artifact"
+    pulp_tag_name = "Galaxy: Collection Version Artifact"
 
     def _dispatch_import_collection_task(self, temp_file_pk, repository=None, **kwargs):
         """Dispatch a pulp task started on upload of collection version."""
@@ -236,7 +236,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 class CollectionArtifactDownloadView(api_base.APIView):
     permission_classes = [access_policy.CollectionAccessPolicy]
     action = 'retrieve'
-    pulp_tag_name = "Galaxy Collection Version Artifact"
+    pulp_tag_name = "Galaxy: Collection Version Artifact"
 
     def _get_tcp_response(self, url):
         return requests.get(url, stream=True, allow_redirects=False)
@@ -288,7 +288,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
 
 class CollectionVersionMoveViewSet(api_base.ViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
-    pulp_tag_name = "Galaxy Collection Version"
+    pulp_tag_name = "Galaxy: Collection Version"
 
     def move_content(self, request, *args, **kwargs):
         """Remove content from source repo and add to destination repo.

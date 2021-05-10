@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 class TaskViewSet(LocalSettingsMixin, pulp_core_viewsets.TaskViewSet):
     permission_classes = [access_policy.TaskAccessPolicy]
     serializer_class = TaskSerializer
-    pulp_tag_name = "Galaxy Task"
+    pulp_tag_name = "Galaxy: Task"
 
     def get_serializer_class(self):
         if self.action == 'list':

@@ -17,7 +17,7 @@ from galaxy_ng.app.api import base as api_base
 
 class ApiRootView(api_base.APIView):
     permission_classes = [IsAuthenticated]
-    pulp_tag_name = "Galaxy API"
+    pulp_tag_name = "Galaxy: API"
 
     def get(self, request, *args, **kwargs):
         data = {
@@ -40,7 +40,7 @@ class ApiRedirectView(api_base.APIView):
     This can be removed when ansible-galaxy stops appending '/api' to the url."""
 
     permission_classes = [IsAuthenticated]
-    pulp_tag_name = "Galaxy API"
+    pulp_tag_name = "Galaxy: API"
 
     def get(self, request, *args, **kwargs):
         reverse_url_name = kwargs.get("reverse_url_name")
@@ -54,16 +54,16 @@ class ApiRedirectView(api_base.APIView):
 
 
 class JSONAPIView(SpectacularJSONAPIView):
-    pulp_tag_name = "Galaxy API"
+    pulp_tag_name = "Galaxy: API"
 
 
 class YAMLAPIView(SpectacularYAMLAPIView):
-    pulp_tag_name = "Galaxy API"
+    pulp_tag_name = "Galaxy: API"
 
 
 class RedocView(SpectacularRedocView):
-    pulp_tag_name = "Galaxy API"
+    pulp_tag_name = "Galaxy: API"
 
 
 class SwaggerView(SpectacularSwaggerView):
-    pulp_tag_name = "Galaxy API"
+    pulp_tag_name = "Galaxy: API"

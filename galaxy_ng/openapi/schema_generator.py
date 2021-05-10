@@ -6,26 +6,19 @@ log = logging.getLogger(__name__)
 
 
 class GalaxySchemaGenerator(PulpSchemaGenerator):
-    def __init__(self, *args, **kwargs):
-        self.repeated_paths = {}
-        super().__init__(*args, **kwargs)
 
     def convert_endpoint_path_params(self, path, view, schema):
-        try:
-            action = view.action
-        except AttributeError:
-            action = None
-
-        log.debug('(path,action)=(%s, %s)', path, action)
-        if (path, action) in self.repeated_paths:
-            log.debug('REPEATED PATH=%s, action=%s', path, action)
-            return super().convert_endpoint_path_params(path, view, schema)
-
-        self.repeated_paths[(path, action)] = (path, action)
-        # if "_href}" in path:
+        """
+        Skip pulpcore's converting of urls into pulp hrefs
+        """
+        # need core tweaks
+        # if request and 'bindings' in request.params:
         #     return super().convert_endpoint_path_params(path, view, schema)
+
         return path
 
+    # Only overridden to stick some logging in here with having to modify
+    # drf_spectacular
     def _get_paths_and_endpoints(self, request):
         """
         Generate (path, method, view) given (path, method, callback) for paths.
@@ -36,10 +29,4 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
             path = self.coerce_path(path, method, view)
             log.debug('gpae path=%s, view=%s', path, view)
             view_endpoints.append((path, path_regex, method, view))
-            # Add pulp api endpoints twice if in 'bindings mode'
-            if request:
-                log.debug('request.query_params=%s', request.query_params)
-            if request and "bindings" in request.query_params and path.startswith('/pulp'):
-                view_endpoints.append((path, path_regex, method, view))
-
         return view_endpoints
