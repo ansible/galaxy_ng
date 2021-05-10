@@ -128,22 +128,7 @@ INSIGHTS_STATEMENTS = {
     ],
     'MySyncListViewSet': [
         {
-            "action": ["list"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_rh_entitlements",
-                          "is_org_admin"]
-        },
-        {
-            "action": ["retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_rh_entitlements",
-                "is_org_admin"]
-        },
-        {
-            "action": ["update", "partial_update"],
+            "action": ["retrieve", "list", "update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": [

@@ -14,6 +14,40 @@ from galaxy_ng.app import constants
 
 API_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
 
+MOCKED_RH_IDENTITY = {
+    'entitlements': {
+        'insights': {
+            'is_entitled': True
+        },
+        'smart_management': {
+            'is_entitled': True
+        },
+        'openshift': {
+            'is_entitled': True
+        },
+        'hybrid': {
+            'is_entitled': True
+        }
+    },
+    'identity': {
+        'account_number': '6269497',
+        'type': 'User',
+        'user': {
+            'username': 'ansible-insights',
+            'email': 'fabricio.campineiro@bancoamazonia.com.br',
+            'first_name': 'Ansible',
+            'last_name': 'Insights',
+            'is_active': True,
+            'is_org_admin': True,
+            'is_internal': False,
+            'locale': 'en_US'
+        },
+        'internal': {
+            'org_id': '52814875'
+        }
+    }
+}
+
 
 def get_current_ui_url(namespace, **kwargs):
     return reverse('galaxy:api:ui:{version}:{namespace}'.format(
@@ -29,10 +63,11 @@ class BaseTestCase(APITestCase):
         self.user = self._create_user('test')
         self.client.force_authenticate(user=self.user)
 
-        # Permission mock
+        # Mock RH identity header
         patcher = mock.patch.object(
-            access_policy.AccessPolicyBase, "has_rh_entitlements", return_value=True
+            access_policy.AccessPolicyBase, "_get_rh_identity", return_value=MOCKED_RH_IDENTITY
         )
+
         patcher.start()
         self.addCleanup(patcher.stop)
 
