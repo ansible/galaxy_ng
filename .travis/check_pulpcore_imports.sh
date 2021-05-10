@@ -14,6 +14,7 @@ MATCHES=$(grep -n -r --include \*.py "from pulpcore.*import" . \
     | grep -v "tests\|plugin" \
     | grep -v "pulpcore.app.*viewsets" \
     | grep -v "pulpcore\.app.*admin" \
+    | grep -v "pulpcore\.openapi.*PulpSchemaGenerator" \
     | grep -v "ProgressReportSerializer")
 
 if [ $? -ne 1 ]; then

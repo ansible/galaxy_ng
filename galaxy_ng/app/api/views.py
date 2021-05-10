@@ -5,6 +5,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from drf_spectacular.views import (
+    SpectacularJSONAPIView,
+    SpectacularYAMLAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
+
 from galaxy_ng.app.api import base as api_base
 
 
@@ -44,3 +51,19 @@ class ApiRedirectView(api_base.APIView):
 
         return HttpResponseRedirect(reverse(reverse_url_name,
                                             kwargs=reverse_kwargs), status=307)
+
+
+class JSONAPIView(SpectacularJSONAPIView):
+    pulp_tag_name = "Galaxy API"
+
+
+class YAMLAPIView(SpectacularYAMLAPIView):
+    pulp_tag_name = "Galaxy API"
+
+
+class RedocView(SpectacularRedocView):
+    pulp_tag_name = "Galaxy API"
+
+
+class SwaggerView(SpectacularSwaggerView):
+    pulp_tag_name = "Galaxy API"
