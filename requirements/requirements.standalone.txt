@@ -10,11 +10,9 @@ aiofiles==0.6.0
     # via pulpcore
 aiohttp==3.7.4.post0
     # via pulpcore
-ansible-base==2.10.9
-    # via ansible
-ansible-lint==5.0.8
+ansible-core==2.11.0
     # via galaxy-importer
-ansible==3.3.0
+ansible-lint==5.0.8
     # via galaxy-importer
 async-lru==1.0.2
     # via pulp-ansible
@@ -22,7 +20,7 @@ async-timeout==3.0.1
     # via aiohttp
 asyncio-throttle==1.0.2
     # via pulpcore
-attrs==20.3.0
+attrs==21.2.0
     # via
     #   aiohttp
     #   galaxy-importer
@@ -53,10 +51,8 @@ commonmark==0.9.1
     # via rich
 cryptography==3.4.7
     # via
-    #   ansible-base
+    #   ansible-core
     #   pyjwt
-dataclasses==0.8
-    # via rich
 defusedxml==0.7.1
     # via odfpy
 diff-match-patch==20200713
@@ -115,29 +111,21 @@ flake8==3.9.2
     # via galaxy-importer
 future==0.18.2
     # via pyjwkest
-galaxy-importer==0.3.1
+galaxy-importer==0.3.2
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
 gunicorn==20.0.4
     # via pulpcore
-idna-ssl==1.1.0
-    # via aiohttp
 idna==2.10
     # via
-    #   idna-ssl
     #   requests
     #   yarl
-importlib-metadata==4.0.1
-    # via
-    #   flake8
-    #   jsonschema
-    #   markdown
 inflection==0.5.1
     # via drf-spectacular
 jinja2==2.11.3
     # via
-    #   ansible-base
+    #   ansible-core
     #   pulpcore
 jsonschema==3.2.0
     # via
@@ -161,7 +149,7 @@ openpyxl==3.0.7
     # via tablib
 packaging==20.9
     # via
-    #   ansible-base
+    #   ansible-core
     #   ansible-lint
     #   bleach
     #   pulp-ansible
@@ -208,7 +196,7 @@ pytz==2021.1
     # via django
 pyyaml==5.4.1
     # via
-    #   ansible-base
+    #   ansible-core
     #   ansible-lint
     #   drf-spectacular
     #   galaxy-importer
@@ -223,6 +211,8 @@ requests==2.25.1
     # via
     #   galaxy-importer
     #   pyjwkest
+resolvelib==0.5.4
+    # via ansible-core
 rich==10.1.0
     # via
     #   ansible-lint
@@ -253,12 +243,7 @@ tenacity==7.0.0
 typing-extensions==3.10.0.0
     # via
     #   aiohttp
-    #   ansible-lint
-    #   importlib-metadata
     #   rich
-    #   yarl
-typing==3.7.4.3
-    # via aiodns
 uritemplate==3.0.1
     # via drf-spectacular
 url-normalize==1.4.3
@@ -279,8 +264,6 @@ xlwt==1.3.0
     # via tablib
 yarl==1.6.3
     # via aiohttp
-zipp==3.4.1
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
