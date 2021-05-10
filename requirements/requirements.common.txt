@@ -10,11 +10,11 @@ aiofiles==0.6.0
     # via pulpcore
 aiohttp==3.7.4.post0
     # via pulpcore
-ansible-base==2.10.7
+ansible-base==2.10.9
     # via ansible
-ansible-lint==5.0.7
+ansible-lint==5.0.8
     # via galaxy-importer
-ansible==3.2.0
+ansible==3.3.0
     # via galaxy-importer
 async-lru==1.0.2
     # via pulp-ansible
@@ -55,11 +55,13 @@ cryptography==3.4.7
     # via
     #   ansible-base
     #   pyjwt
+dataclasses==0.8
+    # via rich
 defusedxml==0.7.1
     # via odfpy
 diff-match-patch==20200713
     # via django-import-export
-django-currentuser==0.5.2
+django-currentuser==0.5.3
     # via pulpcore
 django-filter==2.4.0
     # via pulpcore
@@ -107,22 +109,30 @@ ecdsa==0.13.3
     # via pulp-container
 enrich==1.2.6
     # via ansible-lint
-et-xmlfile==1.0.1
+et-xmlfile==1.1.0
     # via openpyxl
-flake8==3.9.0
+flake8==3.9.2
     # via galaxy-importer
 future==0.18.2
     # via pyjwkest
-galaxy-importer==0.3.0
+galaxy-importer==0.3.1
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
 gunicorn==20.0.4
     # via pulpcore
+idna-ssl==1.1.0
+    # via aiohttp
 idna==2.10
     # via
+    #   idna-ssl
     #   requests
     #   yarl
+importlib-metadata==4.0.1
+    # via
+    #   flake8
+    #   jsonschema
+    #   markdown
 inflection==0.5.1
     # via drf-spectacular
 jinja2==2.11.3
@@ -178,7 +188,7 @@ pycryptodomex==3.10.1
     # via pyjwkest
 pyflakes==2.3.1
     # via flake8
-pygments==2.8.1
+pygments==2.9.0
     # via rich
 pygtrie==2.4.2
     # via pulpcore
@@ -227,7 +237,7 @@ semantic-version==2.8.5
     # via
     #   galaxy-importer
     #   pulp-ansible
-six==1.15.0
+six==1.16.0
     # via
     #   bleach
     #   jsonschema
@@ -240,10 +250,15 @@ tablib[html,ods,xls,xlsx,yaml]==3.0.0
     # via django-import-export
 tenacity==7.0.0
     # via ansible-lint
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via
     #   aiohttp
+    #   ansible-lint
+    #   importlib-metadata
     #   rich
+    #   yarl
+typing==3.7.4.3
+    # via aiodns
 uritemplate==3.0.1
     # via drf-spectacular
 url-normalize==1.4.3
@@ -264,6 +279,8 @@ xlwt==1.3.0
     # via tablib
 yarl==1.6.3
     # via aiohttp
+zipp==3.4.1
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
