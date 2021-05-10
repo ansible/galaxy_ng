@@ -86,7 +86,8 @@ VARSYAML
 fi
 
 cat >> vars/main.yaml << VARSYAML
-pulp_settings: null
+pulp_settings:
+  RH_ENTITLEMENT_REQUIRED: insights
 VARSYAML
 
 ansible-playbook build_container.yaml
