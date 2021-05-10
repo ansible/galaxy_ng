@@ -91,8 +91,7 @@ INSIGHTS_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": ["has_model_perms:galaxy.view_synclist",
-                          "has_rh_entitlements",
-                          "is_org_admin"]
+                          "has_rh_entitlements"]
         },
         {
             "action": ["retrieve"],
@@ -100,8 +99,7 @@ INSIGHTS_STATEMENTS = {
             "effect": "allow",
             "condition": [
                 "has_model_or_obj_perms:galaxy.view_synclist",
-                "has_rh_entitlements",
-                "is_org_admin"]
+                "has_rh_entitlements"]
         },
         {
             "action": ["destroy"],
@@ -109,8 +107,7 @@ INSIGHTS_STATEMENTS = {
             "effect": "allow",
             "condition": [
                 "has_model_perms:galaxy.delete_synclist",
-                "has_rh_entitlements",
-                "is_org_admin"]
+                "has_rh_entitlements"]
         },
         {
             "action": ["create"],
@@ -118,8 +115,7 @@ INSIGHTS_STATEMENTS = {
             "effect": "allow",
             "condition": [
                 "has_model_perms:galaxy.add_synclist",
-                "has_rh_entitlements",
-                "is_org_admin"]
+                "has_rh_entitlements"]
         },
         {
             "action": ["update", "partial_update"],
@@ -132,34 +128,12 @@ INSIGHTS_STATEMENTS = {
     ],
     'MySyncListViewSet': [
         {
-            "action": ["list"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_rh_entitlements"
-        },
-        {
-            "action": ["retrieve"],
+            "action": ["retrieve", "list", "update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": [
-                "has_model_or_obj_perms:galaxy.view_synclist",
-                "has_rh_entitlements"]
-        },
-        {
-            "action": ["update", "partial_update"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_or_obj_perms:galaxy.change_synclist",
-                "has_rh_entitlements"]
-        },
-        {
-            "action": ["curate"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_or_obj_perms:galaxy.change_synclist",
-                "has_rh_entitlements"]
+                "has_rh_entitlements",
+                "is_org_admin"]
         },
     ],
     'TaskViewSet': [

@@ -6,6 +6,7 @@ from django.apps import apps
 from rest_framework import status as http_code
 
 from galaxy_ng.app.models import auth as auth_models
+from galaxy_ng.app.constants import DeploymentMode
 from . import base
 
 from .synclist_base import BaseSyncListViewSet, ACCOUNT_SCOPE
@@ -44,125 +45,130 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
         self.client.force_authenticate(user=self.user)
 
     def test_my_synclist_create(self):
-        galaxy_app_config = apps.get_app_config("galaxy")
-        log.info("gac module: %s", galaxy_app_config.module)
-        log.info("gac path: %s", galaxy_app_config.path)
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
+            galaxy_app_config = apps.get_app_config("galaxy")
+            log.info("gac module: %s", galaxy_app_config.module)
+            log.info("gac path: %s", galaxy_app_config.path)
 
-        post_data = {
-            "repository": self.repo.pulp_id,
-            "collections": [],
-            "namespaces": [],
-            "policy": "include",
-            "groups": [
-                {
-                    "id": self.group.id,
-                    "name": self.group.name,
-                    "object_permissions": self.default_owner_permissions,
-                },
-            ],
-        }
+            post_data = {
+                "repository": self.repo.pulp_id,
+                "collections": [],
+                "namespaces": [],
+                "policy": "include",
+                "groups": [
+                    {
+                        "id": self.group.id,
+                        "name": self.group.name,
+                        "object_permissions": self.default_owner_permissions,
+                    },
+                ],
+            }
 
-        synclists_url = base.get_current_ui_url("my-synclists-list")
+            synclists_url = base.get_current_ui_url("my-synclists-list")
 
-        response = self.client.post(synclists_url, post_data, format="json")
+            response = self.client.post(synclists_url, post_data, format="json")
 
-        log.debug("response: %s", response)
-        log.debug("response.data: %s", response.data)
+            log.debug("response: %s", response)
+            log.debug("response.data: %s", response.data)
 
-        # synclist create is not allowed via my-synclist viewset
-        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
+            # synclist create is not allowed via my-synclist viewset
+            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
 
     def test_my_synclist_update(self):
-        ns_name = "unittestnamespace1"
-        ns = self._create_namespace(ns_name, groups=[self.group])
-        ns.save()
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
+            ns_name = "unittestnamespace1"
+            ns = self._create_namespace(ns_name, groups=[self.group])
+            ns.save()
 
-        post_data = {
-            "repository": self.repo.pulp_id,
-            "collections": [],
-            "namespaces": [ns_name],
-            "policy": "include",
-            "groups": [
-                {
-                    "id": self.group.id,
-                    "name": self.group.name,
-                    "object_permissions": self.default_owner_permissions,
-                },
-            ],
-        }
+            post_data = {
+                "repository": self.repo.pulp_id,
+                "collections": [],
+                "namespaces": [ns_name],
+                "policy": "include",
+                "groups": [
+                    {
+                        "id": self.group.id,
+                        "name": self.group.name,
+                        "object_permissions": self.default_owner_permissions,
+                    },
+                ],
+            }
 
-        synclists_detail_url = base.get_current_ui_url(
-            "my-synclists-detail", kwargs={"pk": self.synclist.id}
-        )
+            synclists_detail_url = base.get_current_ui_url(
+                "my-synclists-detail", kwargs={"pk": self.synclist.id}
+            )
 
-        response = self.client.patch(synclists_detail_url, post_data, format="json")
+            response = self.client.patch(synclists_detail_url, post_data, format="json")
 
-        log.debug("response: %s", response)
-        log.debug("response.data: %s", response.data)
+            log.debug("response: %s", response)
+            log.debug("response.data: %s", response.data)
 
-        self.assertEqual(response.status_code, http_code.HTTP_200_OK)
-        self.assertIn("name", response.data)
-        self.assertIn("repository", response.data)
-        self.assertEqual(response.data["name"], self.synclist_name)
-        self.assertEqual(response.data["policy"], "include")
+            self.assertEqual(response.status_code, http_code.HTTP_200_OK)
+            self.assertIn("name", response.data)
+            self.assertIn("repository", response.data)
+            self.assertEqual(response.data["name"], self.synclist_name)
+            self.assertEqual(response.data["policy"], "include")
 
-        # Sort permission list for comparison
-        response.data["groups"][0]["object_permissions"].sort()
-        self.default_owner_permissions.sort()
-        self.assertEqual(
-            response.data["groups"],
-            [
-                {
-                    "name": self.group.name,
-                    "id": self.group.id,
-                    "object_permissions": self.default_owner_permissions,
-                }
-            ],
-        )
+            # Sort permission list for comparison
+            response.data["groups"][0]["object_permissions"].sort()
+            self.default_owner_permissions.sort()
+            self.assertEqual(
+                response.data["groups"],
+                [
+                    {
+                        "name": self.group.name,
+                        "id": self.group.id,
+                        "object_permissions": self.default_owner_permissions,
+                    }
+                ],
+            )
 
     def test_my_synclist_list(self):
-        synclists_url = base.get_current_ui_url("my-synclists-list")
-        log.debug("synclists_url: %s", synclists_url)
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
+            synclists_url = base.get_current_ui_url("my-synclists-list")
+            log.debug("synclists_url: %s", synclists_url)
 
-        response = self.client.get(synclists_url)
+            response = self.client.get(synclists_url)
 
-        log.debug("response: %s", response)
-        data = response.data["data"]
+            log.debug("response: %s", response)
+            data = response.data["data"]
 
-        self.assertIsInstance(data, list)
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]["name"], self.synclist_name)
-        self.assertEqual(data[0]["policy"], "exclude")
-        self.assertEqual(data[0]["repository"], self.repo.pulp_id)
+            self.assertIsInstance(data, list)
+            self.assertEqual(len(data), 1)
+            self.assertEqual(data[0]["name"], self.synclist_name)
+            self.assertEqual(data[0]["policy"], "exclude")
+            self.assertEqual(data[0]["repository"], self.repo.pulp_id)
 
     def test_my_synclist_detail(self):
-        synclists_detail_url = base.get_current_ui_url(
-            "my-synclists-detail", kwargs={"pk": self.synclist.id}
-        )
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
+            synclists_detail_url = base.get_current_ui_url(
+                "my-synclists-detail", kwargs={"pk": self.synclist.id}
+            )
 
-        log.debug("synclists_detail_url: %s", synclists_detail_url)
+            log.debug("synclists_detail_url: %s", synclists_detail_url)
 
-        response = self.client.get(synclists_detail_url)
+            response = self.client.get(synclists_detail_url)
 
-        log.debug("response: %s", response)
+            log.debug("response: %s", response)
 
-        self.assertEqual(response.status_code, http_code.HTTP_200_OK)
-        self.assertIn("name", response.data)
-        self.assertIn("repository", response.data)
-        self.assertEqual(response.data["name"], self.synclist_name)
-        self.assertEqual(response.data["policy"], "exclude")
-        self.assertEqual(response.data["collections"], [])
-        self.assertEqual(response.data["namespaces"], [])
+            self.assertEqual(response.status_code, http_code.HTTP_200_OK)
+            self.assertIn("name", response.data)
+            self.assertIn("repository", response.data)
+            self.assertEqual(response.data["name"], self.synclist_name)
+            self.assertEqual(response.data["policy"], "exclude")
+            self.assertEqual(response.data["collections"], [])
+            self.assertEqual(response.data["namespaces"], [])
 
     def test_my_synclist_delete(self):
-        synclists_detail_url = base.get_current_ui_url(
-            "my-synclists-detail", kwargs={"pk": self.synclist.id}
-        )
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
+            synclists_detail_url = base.get_current_ui_url(
+                "my-synclists-detail", kwargs={"pk": self.synclist.id}
+            )
 
-        log.debug("delete url: %s", synclists_detail_url)
+            log.debug("delete url: %s", synclists_detail_url)
 
-        response = self.client.delete(synclists_detail_url)
+            response = self.client.delete(synclists_detail_url)
 
-        log.debug("delete response: %s", response)
+            log.debug("delete response: %s", response)
 
-        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
