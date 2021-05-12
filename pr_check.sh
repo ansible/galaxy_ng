@@ -13,11 +13,12 @@ IMAGE="quay.io/cloudservices/automation-hub-galaxy-ng"
 
 # Install bonfire repo/initialize
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
-curl -s $CICD_URL/bootstrap.sh > .cicd_bootstrap.sh && source .cicd_bootstrap.sh
+curl -s "$CICD_URL/bootstrap.sh" > .cicd_bootstrap.sh
+source .cicd_bootstrap.sh
 
 export IMAGE_TAG="pr-$IMAGE_TAG"
 
-source $CICD_ROOT/build.sh
+source "$CICD_ROOT/build.sh"
 # source $APP_ROOT/unit_test.sh
 # source $CICD_ROOT/deploy_ephemeral_env.sh
 # source $CICD_ROOT/smoke_test.sh
