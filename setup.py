@@ -77,7 +77,7 @@ class BuildPyCommand(_BuildPyCommand):
 
 
 requirements = [
-    "Django==2.2.20",
+    "Django~=2.2.23",
     "galaxy-importer==0.3.2",
     "pulpcore<3.12,>=3.11.1",
     "pulp-ansible==0.7.3",
