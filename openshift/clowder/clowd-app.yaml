@@ -38,5 +38,7 @@ spec:
     name: automation-hub
     version: 12
 
+  inMemoryDb: true
+
   objectStore:
     - automation-hub
