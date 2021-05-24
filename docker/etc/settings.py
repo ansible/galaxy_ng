@@ -54,6 +54,9 @@ if clowder_config and clowder_config.isClowderEnabled():
     AWS_ACCESS_KEY_ID = LocalConfig.objectStore.accessKey
     AWS_SECRET_ACCESS_KEY = LocalConfig.objectStore.secretKey
     AWS_STORAGE_BUCKET_NAME = LocalConfig.objectStore.buckets[0].name
+    # Redis configuration
+    REDIS_HOST = LocalConfig.inMemoryDb.hostname
+    REDIS_PORT = LocalConfig.inMemoryDb.port
     del LocalConfig
 
 # Logging
