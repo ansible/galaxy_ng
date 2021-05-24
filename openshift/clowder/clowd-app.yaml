@@ -11,7 +11,7 @@ spec:
   deployments:
   - name: galaxy-api
     podSpec:
-      image: quay.io/cutwater/automation-hub-galaxy-ng:latest
+      image: quay.io/cloudservices/automation-hub-galaxy-ng
       args: ['run', 'api']
       env:
         - name: WITH_MIGRATIONS
@@ -20,11 +20,33 @@ spec:
           value: 'localhost'
   - name: pulp-resource-manager
     podSpec:
-      image: quay.io/cutwater/automation-hub-galaxy-ng:latest
+      image: quay.io/cloudservices/automation-hub-galaxy-ng
       args: ['run', 'resource-manager']
       env:
         - name: PULP_CONTENT_ORIGIN
           value: 'localhost'
+  - name: pulp-content-app
+    podSpec:
+      image: quay.io/cloudservices/automation-hub-galaxy-ng
+      args: ['run', 'content-app']
+      env:
+        - name: PULP_CONTENT_ORIGIN
+          value: 'localhost'
+  - name: pulp-worker
+    podSpec:
+      image: quay.io/cloudservices/automation-hub-galaxy-ng
+      args: ['run', 'worker']
+      env:
+        - name: PULP_CONTENT_ORIGIN
+          value: 'localhost'
+        - name: IMPORTER_MEMORY_REQUEST
+          value: 1Gi
+        - name: IMPORTER_MEMORY_LIMIT
+          value: 2Gi
+        - name: IMPORTER_CPU_REQUEST
+          value: 500m
+        - name: IMPORTER_CPU_LIMIT
+          value: 1000m
 
   # Creates a Service on port 8000
   webServices:
