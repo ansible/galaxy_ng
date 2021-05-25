@@ -84,6 +84,9 @@ requirements = [
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.5.2",
+    # click 8 requires py38,
+    # can be removed once we require >=py38
+    "click==7.1.2",
 ]
 
 
