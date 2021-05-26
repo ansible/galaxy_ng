@@ -1,0 +1,27 @@
+Resolve issues syncing all content via synclist
+
+
+Notes
+
+- https://issues.redhat.com/browse/AAH-585
+
+Reproducer
+
+How reproducible:
+
+1. Set "sync" only in one collection in cloud.redhat.com/ansible/automation-hub / COLLECTIONS
+
+2. Synchronize rh-certified repo in the on-premise automation hub
+
+Actual results:
+
+Only the selected collection should synchronize
+
+Expected results:
+
+All the collection set is synchronized
+
+
+
+Could be synclist repo's Distribution pointing to c.r.c rh-certified repo by default (ie, 'everything'
+until 'sync' is toggled on a collection.
