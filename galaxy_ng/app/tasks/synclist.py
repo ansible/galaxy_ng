@@ -125,6 +125,7 @@ def curate_synclist_repository(synclist_pk, **kwargs):
 
     namespaces = synclist.namespaces.filter().values_list("name", flat=True)
 
+    # FIXME: For 'exclude', probably need to remove the is_highest
     collection_versions = CollectionVersion.objects.filter(
         Q(
             repositories=synclist.upstream_repository,
