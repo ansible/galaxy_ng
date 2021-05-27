@@ -55,6 +55,7 @@ chardet==4.0.0
 click==7.1.2
     # via
     #   galaxy-ng (setup.py)
+    #   pulpcore
     #   rq
 colorama==0.4.4
     # via rich
@@ -181,7 +182,7 @@ pulp-ansible==0.7.3
     # via galaxy-ng (setup.py)
 pulp-container==2.5.2
     # via galaxy-ng (setup.py)
-pulpcore==3.11.1
+pulpcore==3.11.2
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
