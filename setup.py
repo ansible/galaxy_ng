@@ -5,21 +5,28 @@ import re
 import tempfile
 import tarfile
 import urllib.request
+import urllib.error
 from distutils import log
 
 from setuptools import find_packages, setup, Command
 from setuptools.command.build_py import build_py as _BuildPyCommand
 from setuptools.command.sdist import sdist as _SDistCommand
 
+package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
+version = "4.3.0b4"
+
 
 class PrepareStaticCommand(Command):
-    if os.environ.get("ALTERNATE_UI_DOWNLOAD_URL"):
-        UI_DOWNLOAD_URL = os.environ.get("ALTERNATE_UI_DOWNLOAD_URL")
-    else:
-        UI_DOWNLOAD_URL = (
-            "https://github.com/ansible/ansible-hub-ui/releases"
-            "/latest/download/automation-hub-ui-dist.tar.gz"
-        )
+    DEV_UI_DOWNLOAD_URL = (
+        "https://github.com/ansible/ansible-hub-ui/"
+        "releases/download/dev/automation-hub-ui-dist.tar.gz")
+
+    ALTERNATE_UI_DOWNLOAD_URL = os.environ.get("ALTERNATE_UI_DOWNLOAD_URL")
+
+    UI_DOWNLOAD_URL = (
+        "https://github.com/ansible/ansible-hub-ui/"
+        f"releases/download/{version}/automation-hub-ui-dist.tar.gz"
+    )
     TARGET_DIR = "galaxy_ng/app/static/galaxy_ng"
 
     user_options = []
@@ -37,11 +44,24 @@ class PrepareStaticCommand(Command):
 
         with tempfile.NamedTemporaryFile() as download_file:
             log.info(f"Downloading UI distribution to temporary file: {download_file.name}")
-            urllib.request.urlretrieve(self.UI_DOWNLOAD_URL, filename=download_file.name)
+
+            if self.ALTERNATE_UI_DOWNLOAD_URL:
+                log.info(f"Downloading UI from {self.ALTERNATE_UI_DOWNLOAD_URL}")
+                self._download_tarball(self.ALTERNATE_UI_DOWNLOAD_URL, download_file)
+            else:
+                log.info(f"Attempting to download UI for version {version}")
+                try:
+                    self._download_tarball(self.UI_DOWNLOAD_URL, download_file)
+                except urllib.error.HTTPError:
+                    log.warn(f"Failed to retrieve UI for {version}. Downloading latest UI.")
+                    self._download_tarball(self.DEV_UI_DOWNLOAD_URL, download_file)
 
             log.info(f"Extracting UI static files to {self.TARGET_DIR}")
             with tarfile.open(fileobj=download_file) as tfp:
                 tfp.extractall(self.TARGET_DIR)
+
+    def _download_tarball(self, url, download_file):
+        urllib.request.urlretrieve(url, filename=download_file.name)
 
 
 class SDistCommand(_SDistCommand):
@@ -57,13 +77,16 @@ class BuildPyCommand(_BuildPyCommand):
 
 
 requirements = [
-    "Django~=2.2.18",
-    "galaxy-importer==0.3.0",
-    "pulpcore<3.12,>=3.11",
-    "pulp-ansible==0.7.1",
+    "Django~=2.2.23",
+    "galaxy-importer==0.3.2",
+    "pulpcore<3.12,>=3.11.1",
+    "pulp-ansible==0.7.3",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.5.2",
+    # click 8 requires py38,
+    # can be removed once we require >=py38
+    "click==7.1.2",
 ]
 
 
@@ -88,9 +111,6 @@ if is_on_dev_environment:
         for req in requirements
     ]
     print("Installing with unpinned DEV_SOURCE_PATH requirements", requirements)
-
-package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-version = "4.3.0a2"
 
 setup(
     name=package_name,

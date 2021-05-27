@@ -75,7 +75,7 @@ sed -i -e 's/localhost:24817/pulp/g' generate.sh
 sed -i -e 's/:24817/pulp/g' generate.sh
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.11
+git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.11.1
 
 cd pulpcore
 if [ -n "$PULPCORE_PR_NUMBER" ]; then
@@ -105,7 +105,7 @@ if [ -z "$TRAVIS_TAG" ]; then
 fi
 
 
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.7.1
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.7.3
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
   cd pulp_ansible
   git fetch --depth=1 origin pull/$PULP_ANSIBLE_PR_NUMBER/head:$PULP_ANSIBLE_PR_NUMBER
