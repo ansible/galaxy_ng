@@ -13,7 +13,7 @@ Changelog
 
 .. towncrier release notes start
 
-4.3.0b4 (2021-06-01)
+4.3.0 (2021-06-01)
 ====================
 
 Bugfixes
