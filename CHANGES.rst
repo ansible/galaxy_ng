@@ -13,6 +13,31 @@ Changelog
 
 .. towncrier release notes start
 
+4.3.0 (2021-06-01)
+====================
+
+Bugfixes
+--------
+
+- Fix "CVE-2021-32052 django: header injection" by moving to django ~=2.2.23
+  `AAH-583 <https://issues.redhat.com/browse/AAH-583>`_
+- Update the required django to ~=2.2.23
+  `AAH-601 <https://issues.redhat.com/browse/AAH-601>`_
+- Pin 'click' version to 7.1.2 for 'rq' compat
+  `AAH-637 <https://issues.redhat.com/browse/AAH-637>`_
+- Download collection artifacts from the galaxy apis instead of the pulp content app.
+  `AAH-661 <https://issues.redhat.com/browse/AAH-661>`_
+
+
+Misc
+----
+
+- `AAH-584 <https://issues.redhat.com/browse/AAH-584>`_, `AAH-647 <https://issues.redhat.com/browse/AAH-647>`_
+
+
+----
+
+
 4.3.0b4 (2021-05-11)
 ====================
 
