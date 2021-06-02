@@ -217,7 +217,7 @@ typing-extensions==3.7.4.3
     #   rich
 uritemplate==3.0.1
     # via drf-spectacular
-urllib3==1.26.3
+urllib3==1.26.5
     # via requests
 urlman==1.4.0
     # via django-lifecycle
