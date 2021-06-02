@@ -14,15 +14,23 @@ spec:
       image: quay.io/cloudservices/automation-hub-galaxy-ng
       args: ['run', 'api']
       env:
-        - name: WITH_MIGRATIONS
-          value: '1'
+        - name: GALAXY_AUTHENTICATION_CLASSES
+          value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
+        - name: GALAXY_DEPLOYMENT_MODE
+          value: 'insights'
         - name: PULP_CONTENT_ORIGIN
           value: 'localhost'
+        - name: WITH_MIGRATIONS
+          value: '1'
   - name: pulp-resource-manager
     podSpec:
       image: quay.io/cloudservices/automation-hub-galaxy-ng
       args: ['run', 'resource-manager']
       env:
+        - name: GALAXY_AUTHENTICATION_CLASSES
+          value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
+        - name: GALAXY_DEPLOYMENT_MODE
+          value: 'insights'
         - name: PULP_CONTENT_ORIGIN
           value: 'localhost'
   - name: pulp-content-app
@@ -30,6 +38,10 @@ spec:
       image: quay.io/cloudservices/automation-hub-galaxy-ng
       args: ['run', 'content-app']
       env:
+        - name: GALAXY_AUTHENTICATION_CLASSES
+          value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
+        - name: GALAXY_DEPLOYMENT_MODE
+          value: 'insights'
         - name: PULP_CONTENT_ORIGIN
           value: 'localhost'
   - name: pulp-worker
@@ -37,8 +49,10 @@ spec:
       image: quay.io/cloudservices/automation-hub-galaxy-ng
       args: ['run', 'worker']
       env:
-        - name: PULP_CONTENT_ORIGIN
-          value: 'localhost'
+        - name: GALAXY_AUTHENTICATION_CLASSES
+          value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
+        - name: GALAXY_DEPLOYMENT_MODE
+          value: 'insights'
         - name: IMPORTER_MEMORY_REQUEST
           value: 1Gi
         - name: IMPORTER_MEMORY_LIMIT
@@ -47,6 +61,8 @@ spec:
           value: 500m
         - name: IMPORTER_CPU_LIMIT
           value: 1000m
+        - name: PULP_CONTENT_ORIGIN
+          value: 'localhost'
 
   # Creates a Service on port 8000
   webServices:
