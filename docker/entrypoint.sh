@@ -102,19 +102,29 @@ run_manage() {
 
 
 redis_connection_hack() {
-    if [[ ${PULP_REDIS_SSL:-false} = "true" ]]; then
+    redis_host="${PULP_REDIS_HOST:-}"
+    redis_password="${PULP_REDIS_PASSWORD:-}"
+    redis_port="${PULP_REDIS_PORT:-}"
+    redis_ssl="${PULP_REDIS_SSL:-}"
+    
+    if [[ -z "${redis_host}" && -z "${redis_port}" &&
+          -z "${redis_password}" && -z "${redis_ssl}" ]]; then
+        return
+    fi
+
+    if [[ "${redis_ssl}" == "true" ]]; then
         protocol="rediss://"
     else
         protocol="redis://"
     fi
 
-    if [[ -z "${PULP_REDIS_PASSWORD:-}" ]]; then
-        password=""
+    if [[ -n "${redis_password}" ]]; then
+        password=":${redis_password}@"
     else
-        password=":${PULP_REDIS_PASSWORD}@"
+        password=""
     fi
 
-    PULP_REDIS_URL="${protocol}${password}${PULP_REDIS_HOST:-localhost}:${PULP_REDIS_PORT:-6379}/0"
+    PULP_REDIS_URL="${protocol}${password}${redis_host}:${redis_port:-6379}/0"
     unset PULP_REDIS_HOST PULP_REDIS_PORT PULP_REDIS_PASSWORD
     export PULP_REDIS_URL
 }
