@@ -181,7 +181,8 @@ class TestUiCollectionRemoteViewSet(BaseTestCase):
         repository = response.data['data'][1]['repositories'][0]
 
         self.assertEqual(repository['name'], self.remote_data["name"])
-        self.assertEqual(repository['distributions'][0]['base_path'], self.remote_data["name"])
+        self.assertEqual(repository['distributions'][0]['name'], self.remote_data["name"])
+        self.assertEqual(repository['distributions'][0]['base_path'], "red-hat-certified")
 
         # token is not visible in a GET
         self.assertNotIn('token', response.data['data'][1])

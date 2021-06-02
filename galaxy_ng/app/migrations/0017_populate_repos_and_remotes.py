@@ -40,6 +40,10 @@ REPOSITORIES = [
             ),
             "pulp_type": "ansible.ansible",
             "rate_limit": 8,
+        },
+        "distribution": {
+            "name": "rh-certified",
+            "base_path": "red-hat-certified"
         }
     }
 ]
@@ -75,6 +79,8 @@ def populate_initial_repos(apps, schema_editor):
 
     for repo_data in REPOSITORIES:
 
+        distribution = repo_data.pop("distribution", {})
+
         remote = repo_data.pop("remote", None)
         if remote is not None:
             remote, _ = CollectionRemote.objects.get_or_create(
@@ -95,10 +101,10 @@ def populate_initial_repos(apps, schema_editor):
             )
 
         AnsibleDistribution.objects.get_or_create(
-            name=repository.name,
+            base_path=distribution.get("base_path", repository.name),
             defaults={
-                "name": repository.name,
-                "base_path": repository.name,
+                "name": distribution.get("name", repository.name),
+                "base_path": distribution.get("base_path", repository.name),
                 "remote": remote,
                 "repository": repository,
                 "pulp_type": "ansible.ansible"

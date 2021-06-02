@@ -33,7 +33,7 @@ class TestUiTaskListViewSet(BaseTestCase):
     def test_tasks_required_fields(self):
         # Spawn a task
         self.client.force_authenticate(user=self.admin_user)
-        response = self.client.post(self.build_sync_url(self.certified_remote.name))
+        response = self.client.post(self.build_sync_url("red-hat-certified"))
         log.debug('Spawn a task for testing tasks/ endpoint')
         log.debug('response: %s', response)
         log.debug('response.data: %s', response.data)

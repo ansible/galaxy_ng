@@ -47,7 +47,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
 
     def test_positive_get_config_sync_for_certified(self):
         self.client.force_authenticate(user=self.admin_user)
-        response = self.client.get(self.build_config_url(self.certified_remote.name))
+        response = self.client.get(self.build_config_url("red-hat-certified"))
         log.debug('test_positive_get_config_sync_for_certified')
         log.debug('response: %s', response)
         log.debug('response.data: %s', response.data)
@@ -71,7 +71,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
     def test_positive_update_certified_repo_data(self):
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.put(
-            self.build_config_url(self.certified_remote.name),
+            self.build_config_url("red-hat-certified"),
             {
                 "auth_url": "https://auth.com",
                 "token": "TEST",
@@ -87,7 +87,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         log.debug('response.data: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        updated = self.client.get(self.build_config_url(self.certified_remote.name))
+        updated = self.client.get(self.build_config_url("red-hat-certified"))
         self.assertEqual(updated.data["auth_url"], "https://auth.com")
         self.assertEqual(updated.data["url"], "https://updated.url.com/")
         self.assertIsNone(updated.data["requirements_file"])
@@ -144,7 +144,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
 
     def test_positive_syncing_returns_a_task_id(self):
         self.client.force_authenticate(user=self.admin_user)
-        response = self.client.post(self.build_sync_url(self.certified_remote.name))
+        response = self.client.post(self.build_sync_url("red-hat-certified"))
         log.debug('test_positive_syncing_returns_a_task_id')
         log.debug('response: %s', response)
         log.debug('response.data: %s', response.data)
@@ -153,7 +153,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
 
     def test_sensitive_fields_are_not_exposed(self):
         self.client.force_authenticate(user=self.admin_user)
-        api_url = self.build_config_url(self.certified_remote.name)
+        api_url = self.build_config_url("red-hat-certified")
         response = self.client.get(api_url)
         self.assertNotIn('password', response.data)
         self.assertNotIn('token', response.data)
@@ -161,7 +161,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
 
     def test_write_only_fields(self):
         self.client.force_authenticate(user=self.admin_user)
-        api_url = self.build_config_url(self.certified_remote.name)
+        api_url = self.build_config_url("red-hat-certified")
         write_only_fields = [
             'client_key',
             'token',
@@ -220,7 +220,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         self.client.force_authenticate(user=self.admin_user)
 
         # ensure proxy_url is blank
-        api_url = self.build_config_url(self.certified_remote.name)
+        api_url = self.build_config_url("red-hat-certified")
         response = self.client.get(api_url)
         self.assertIsNone(response.data['proxy_url'])
 
