@@ -1,0 +1,1 @@
+Create templates to deploy Automation Hub services via the Clowder operator
