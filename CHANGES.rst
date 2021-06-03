@@ -13,6 +13,15 @@ Changelog
 
 .. towncrier release notes start
 
+4.3.1 (2021-06-03)
+==================
+
+- Fix broken migration when upgrading from 4.2
+
+
+----
+
+
 4.3.0 (2021-06-01)
 ====================
 
