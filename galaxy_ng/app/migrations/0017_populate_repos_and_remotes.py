@@ -95,7 +95,7 @@ def populate_initial_repos(apps, schema_editor):
             )
 
         AnsibleDistribution.objects.get_or_create(
-            name=repository.name,
+            base_path=repository.name,
             defaults={
                 "name": repository.name,
                 "base_path": repository.name,
