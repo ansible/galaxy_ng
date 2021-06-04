@@ -1,9 +1,9 @@
+---
 apiVersion: v1
 kind: Template
 metadata:
   name: automation-hub
 objects:
-
 - apiVersion: cloud.redhat.com/v1alpha1
   kind: ClowdApp
   metadata:
@@ -11,13 +11,13 @@ objects:
     namespace: automation-hub
   spec:
     # The name of the ClowdEnvironment providing the services
-    envName: automation-hub-env
+    envName: ${ENV_NAME}
 
     # The bulk of your App. This is where your running apps will live
     deployments:
     - name: galaxy-api
       podSpec:
-        image: quay.io/cloudservices/automation-hub-galaxy-ng
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'api']
         env:
           - name: GALAXY_AUTHENTICATION_CLASSES
@@ -30,7 +30,7 @@ objects:
             value: '1'
     - name: pulp-resource-manager
       podSpec:
-        image: quay.io/cloudservices/automation-hub-galaxy-ng
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'resource-manager']
         env:
           - name: GALAXY_AUTHENTICATION_CLASSES
@@ -41,7 +41,7 @@ objects:
             value: 'localhost'
     - name: pulp-content-app
       podSpec:
-        image: quay.io/cloudservices/automation-hub-galaxy-ng
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'content-app']
         env:
           - name: GALAXY_AUTHENTICATION_CLASSES
@@ -52,7 +52,7 @@ objects:
             value: 'localhost'
     - name: pulp-worker
       podSpec:
-        image: quay.io/cloudservices/automation-hub-galaxy-ng
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'worker']
         env:
           - name: GALAXY_AUTHENTICATION_CLASSES
@@ -86,3 +86,14 @@ objects:
 
     objectStore:
       - automation-hub
+
+parameters:
+- descripton: Automation Hub image name
+  name: IMAGE_NAME
+  value: "quay.io/cloudservices/automation-hub-galaxy-ng"
+- description: Automation Analytics Image tag
+  name: IMAGE_TAG
+  required: true
+- description: Clowder ENV
+  name: ENV_NAME
+  required: true
