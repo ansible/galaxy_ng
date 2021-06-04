@@ -28,6 +28,9 @@ objects:
             value: 'localhost'
           - name: WITH_MIGRATIONS
             value: '1'
+      webServices:
+        public:
+            enabled: true
     - name: pulp-resource-manager
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
@@ -69,12 +72,6 @@ objects:
             value: 1000m
           - name: PULP_CONTENT_ORIGIN
             value: 'localhost'
-
-    # Creates a Service on port 8000
-    webServices:
-      public: true
-      private: false
-      metrics: false
 
     # Creates a database if local mode, or uses RDS in production
     database:
