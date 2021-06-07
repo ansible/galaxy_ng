@@ -10,9 +10,11 @@ aiofiles==0.6.0
     # via pulpcore
 aiohttp==3.7.4.post0
     # via pulpcore
-ansible-core==2.11.0
-    # via galaxy-importer
+ansible-base==2.10.9
+    # via ansible
 ansible-lint==5.0.8
+    # via galaxy-importer
+ansible==3.3.0
     # via galaxy-importer
 app-common-python==0.1.8
     # via -r requirements/requirements.insights.in
@@ -22,7 +24,7 @@ async-timeout==3.0.1
     # via aiohttp
 asyncio-throttle==1.0.2
     # via pulpcore
-attrs==21.2.0
+attrs==20.3.0
     # via
     #   aiohttp
     #   galaxy-importer
@@ -33,12 +35,12 @@ bleach-allowlist==1.0.3
     # via galaxy-importer
 bleach==3.3.0
     # via galaxy-importer
-boto3==1.17.69
+boto3==1.17.68
     # via
     #   -r requirements/requirements.insights.in
     #   django-storages
     #   watchtower
-botocore==1.20.69
+botocore==1.20.68
     # via
     #   boto3
     #   s3transfer
@@ -65,7 +67,7 @@ commonmark==0.9.1
     # via rich
 cryptography==3.4.7
     # via
-    #   ansible-core
+    #   ansible-base
     #   pyjwt
 dataclasses==0.8
     # via rich
@@ -126,11 +128,11 @@ enrich==1.2.6
     # via ansible-lint
 et-xmlfile==1.1.0
     # via openpyxl
-flake8==3.9.2
+flake8==3.9.1
     # via galaxy-importer
 future==0.18.2
     # via pyjwkest
-galaxy-importer==0.3.2
+galaxy-importer==0.3.1
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -152,7 +154,7 @@ inflection==0.5.1
     # via drf-spectacular
 jinja2==2.11.3
     # via
-    #   ansible-core
+    #   ansible-base
     #   pulpcore
 jmespath==0.10.0
     # via
@@ -182,7 +184,7 @@ openpyxl==3.0.7
     # via tablib
 packaging==20.9
     # via
-    #   ansible-core
+    #   ansible-base
     #   ansible-lint
     #   bleach
     #   pulp-ansible
@@ -231,7 +233,7 @@ pytz==2021.1
     # via django
 pyyaml==5.4.1
     # via
-    #   ansible-core
+    #   ansible-base
     #   ansible-lint
     #   drf-spectacular
     #   galaxy-importer
@@ -246,8 +248,6 @@ requests==2.25.1
     # via
     #   galaxy-importer
     #   pyjwkest
-resolvelib==0.5.4
-    # via ansible-core
 rich==10.1.0
     # via
     #   ansible-lint
