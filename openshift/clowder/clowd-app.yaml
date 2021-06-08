@@ -1,82 +1,96 @@
-apiVersion: cloud.redhat.com/v1alpha1
-kind: ClowdApp
+---
+apiVersion: v1
+kind: Template
 metadata:
   name: automation-hub
-  namespace: automation-hub
-spec:
-  # The name of the ClowdEnvironment providing the services
-  envName: automation-hub-env
-
-  # The bulk of your App. This is where your running apps will live
-  deployments:
-  - name: galaxy-api
-    podSpec:
-      image: quay.io/cloudservices/automation-hub-galaxy-ng
-      args: ['run', 'api']
-      env:
-        - name: GALAXY_AUTHENTICATION_CLASSES
-          value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
-        - name: GALAXY_DEPLOYMENT_MODE
-          value: 'insights'
-        - name: PULP_CONTENT_ORIGIN
-          value: 'localhost'
-        - name: WITH_MIGRATIONS
-          value: '1'
-  - name: pulp-resource-manager
-    podSpec:
-      image: quay.io/cloudservices/automation-hub-galaxy-ng
-      args: ['run', 'resource-manager']
-      env:
-        - name: GALAXY_AUTHENTICATION_CLASSES
-          value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
-        - name: GALAXY_DEPLOYMENT_MODE
-          value: 'insights'
-        - name: PULP_CONTENT_ORIGIN
-          value: 'localhost'
-  - name: pulp-content-app
-    podSpec:
-      image: quay.io/cloudservices/automation-hub-galaxy-ng
-      args: ['run', 'content-app']
-      env:
-        - name: GALAXY_AUTHENTICATION_CLASSES
-          value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
-        - name: GALAXY_DEPLOYMENT_MODE
-          value: 'insights'
-        - name: PULP_CONTENT_ORIGIN
-          value: 'localhost'
-  - name: pulp-worker
-    podSpec:
-      image: quay.io/cloudservices/automation-hub-galaxy-ng
-      args: ['run', 'worker']
-      env:
-        - name: GALAXY_AUTHENTICATION_CLASSES
-          value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
-        - name: GALAXY_DEPLOYMENT_MODE
-          value: 'insights'
-        - name: IMPORTER_MEMORY_REQUEST
-          value: 1Gi
-        - name: IMPORTER_MEMORY_LIMIT
-          value: 2Gi
-        - name: IMPORTER_CPU_REQUEST
-          value: 500m
-        - name: IMPORTER_CPU_LIMIT
-          value: 1000m
-        - name: PULP_CONTENT_ORIGIN
-          value: 'localhost'
-
-  # Creates a Service on port 8000
-  webServices:
-    public: true
-    private: false
-    metrics: false
-
-  # Creates a database if local mode, or uses RDS in production
-  database:
-    # Must specify both a name and a major postgres version
+objects:
+- apiVersion: cloud.redhat.com/v1alpha1
+  kind: ClowdApp
+  metadata:
     name: automation-hub
-    version: 12
+    namespace: automation-hub
+  spec:
+    # The name of the ClowdEnvironment providing the services
+    envName: ${ENV_NAME}
 
-  inMemoryDb: true
+    # The bulk of your App. This is where your running apps will live
+    deployments:
+    - name: galaxy-api
+      podSpec:
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
+        args: ['run', 'api']
+        env:
+          - name: GALAXY_AUTHENTICATION_CLASSES
+            value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
+          - name: GALAXY_DEPLOYMENT_MODE
+            value: 'insights'
+          - name: PULP_CONTENT_ORIGIN
+            value: 'localhost'
+          - name: WITH_MIGRATIONS
+            value: '1'
+      webServices:
+        public:
+            enabled: true
+    - name: pulp-resource-manager
+      podSpec:
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
+        args: ['run', 'resource-manager']
+        env:
+          - name: GALAXY_AUTHENTICATION_CLASSES
+            value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
+          - name: GALAXY_DEPLOYMENT_MODE
+            value: 'insights'
+          - name: PULP_CONTENT_ORIGIN
+            value: 'localhost'
+    - name: pulp-content-app
+      podSpec:
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
+        args: ['run', 'content-app']
+        env:
+          - name: GALAXY_AUTHENTICATION_CLASSES
+            value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
+          - name: GALAXY_DEPLOYMENT_MODE
+            value: 'insights'
+          - name: PULP_CONTENT_ORIGIN
+            value: 'localhost'
+    - name: pulp-worker
+      podSpec:
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
+        args: ['run', 'worker']
+        env:
+          - name: GALAXY_AUTHENTICATION_CLASSES
+            value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
+          - name: GALAXY_DEPLOYMENT_MODE
+            value: 'insights'
+          - name: IMPORTER_MEMORY_REQUEST
+            value: 1Gi
+          - name: IMPORTER_MEMORY_LIMIT
+            value: 2Gi
+          - name: IMPORTER_CPU_REQUEST
+            value: 500m
+          - name: IMPORTER_CPU_LIMIT
+            value: 1000m
+          - name: PULP_CONTENT_ORIGIN
+            value: 'localhost'
 
-  objectStore:
-    - automation-hub
+    # Creates a database if local mode, or uses RDS in production
+    database:
+      # Must specify both a name and a major postgres version
+      name: automation-hub
+      version: 12
+
+    inMemoryDb: true
+
+    objectStore:
+      - automation-hub
+
+parameters:
+- descripton: Automation Hub image name
+  name: IMAGE_NAME
+  value: "quay.io/cloudservices/automation-hub-galaxy-ng"
+- description: Automation Analytics Image tag
+  name: IMAGE_TAG
+  required: true
+- description: Clowder ENV
+  name: ENV_NAME
+  required: true

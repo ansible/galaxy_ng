@@ -20,7 +20,7 @@ export IMAGE_TAG="pr-$IMAGE_TAG"
 
 source "$CICD_ROOT/build.sh"
 # source $APP_ROOT/unit_test.sh
-# source $CICD_ROOT/deploy_ephemeral_env.sh
+source $CICD_ROOT/deploy_ephemeral_env.sh
 # source $CICD_ROOT/smoke_test.sh
 
 # overriding IMAGE_TAG defined by boostrap.sh, for now
