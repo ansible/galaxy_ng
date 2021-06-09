@@ -19,6 +19,28 @@ objects:
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'api']
+        resources:
+          limits:
+            cpu: 600m
+            memory: 1536Mi
+          requests:
+            cpu: 200m
+            memory: 1024Mi
+        readinessProbe:
+          httpGet:
+            path: /api/automation-hub/_healthz
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 130
+          periodSeconds: 30
+        name: automation-hub-galaxy-api
+        livenessProbe:
+          httpGet:
+            path: /api/automation-hub/_healthz
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
         env:
           - name: GALAXY_AUTHENTICATION_CLASSES
             value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
@@ -35,6 +57,13 @@ objects:
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'resource-manager']
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
         env:
           - name: GALAXY_AUTHENTICATION_CLASSES
             value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
@@ -46,6 +75,13 @@ objects:
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'content-app']
+        resources:
+          limits:
+            cpu: 600m
+            memory: 1536Mi
+          requests:
+            cpu: 200m
+            memory: 1024Mi
         env:
           - name: GALAXY_AUTHENTICATION_CLASSES
             value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
@@ -57,6 +93,13 @@ objects:
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'worker']
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 512m
+            memory: 256Mi
         env:
           - name: GALAXY_AUTHENTICATION_CLASSES
             value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
