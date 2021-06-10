@@ -21,6 +21,9 @@ default_repo_name = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 
 
 class SyncListCollectionSummarySerializer(serializers.Serializer):
+    class Meta:
+        ref_name = "galaxy.UISyncListCollectionSummarySerializer"
+
     namespace = serializers.CharField(max_length=64)
     name = serializers.CharField(max_length=64)
 
@@ -178,3 +181,4 @@ class SyncListSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = ("repository", )
+        ref_name = "galaxy.UISyncListSerializer"

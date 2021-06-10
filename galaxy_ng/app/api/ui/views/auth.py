@@ -53,9 +53,10 @@ class LoginView(api_base.GenericAPIView):
         return Response(status=http_code.HTTP_204_NO_CONTENT)
 
 
-class LogoutView(api_base.APIView):
+class LogoutView(api_base.GenericAPIView):
     permission_classes = [access_policy.LogoutAccessPolicy]
     pulp_tag_name = "Galaxy UI: Auth"
+    serializer_class = None
 
     def post(self, request, *args, **kwargs):
         django_auth.logout(request)

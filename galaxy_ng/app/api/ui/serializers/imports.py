@@ -22,6 +22,7 @@ class ImportTaskListSerializer(serializers.ModelSerializer):
         model = PulpCollectionImport
         fields = ("id", "state", "namespace", "name", "version",
                   "created_at", "updated_at", "started_at", "finished_at")
+        ref_name = "galaxy.UIImportTaskListSerializer"
 
 
 class ImportTaskDetailSerializer(ImportTaskListSerializer):
@@ -32,3 +33,4 @@ class ImportTaskDetailSerializer(ImportTaskListSerializer):
     class Meta(ImportTaskListSerializer.Meta):
         fields = ImportTaskListSerializer.Meta.fields + \
             ('error', 'messages')
+        ref_name = "galaxy.UIImportTaskDetailSerializer"

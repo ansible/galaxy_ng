@@ -24,6 +24,7 @@ class AnsibleDistributionSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         )
+        ref_name = "galaxy.AnsibleDistributionSerializer"
 
 
 class LastSyncTaskMixin:
@@ -63,6 +64,7 @@ class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer
             'updated_at',
             'last_sync_task',
         )
+        ref_name = "galaxy.AnsibleRepositorySerializer"
 
     def get_distributions(self, obj):
         return [
@@ -148,6 +150,7 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'pulp_href': {'read_only': True},
             'client_key': {'write_only': True},
         }
+        ref_name = "galaxy.CollectionRemoteSerializer"
 
     def validate(self, data):
         if not data.get('requirements_file') and any(

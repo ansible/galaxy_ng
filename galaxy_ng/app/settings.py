@@ -114,6 +114,12 @@ SPECTACULAR_SETTINGS = {
         "displayOperationId": False,
         "docExpansion": "list",
     },
+    "ENUM_NAME_OVERRIDES": {
+        "SynclistPolicyEnum": 'galaxy_ng.app.models.synclist.SyncList.POLICY_CHOICES',
+        "RemotePolicyEnum": 'pulpcore.plugin.models.Remote.POLICY_CHOICES',
+        "ContainerManifestMediaTypeEnum": 'pulp_container.app.models.Manifest.MANIFEST_CHOICES',
+        "ContainerBlobMediaTypeEnum": 'pulp_container.app.models.Blob.BLOB_CHOICES',
+    },
     "TAGS": [
         {"name": "Galaxy: Collection"},
         {"name": "Galaxy: Collection Version"},

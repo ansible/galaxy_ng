@@ -25,6 +25,7 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
         model = models.ContainerNamespace
         fields = namespace_fields
         read_only_fields = ('name', 'my_permissions',)
+        ref_name = "galaxy.UIContainerNamespaceSerializer"
 
     def get_owners(self, namespace):
         return get_users_with_perms(namespace, with_group_users=False).values_list(
@@ -38,6 +39,7 @@ class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):
         model = models.ContainerNamespace
         fields = namespace_fields + ('groups', )
         read_only_fields = ('name', 'my_permissions',)
+        ref_name = "galaxy.UIContainerNamespaceDetailSerializer"
 
 
 class ContainerRepositorySerializer(serializers.ModelSerializer):
@@ -67,6 +69,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         )
 
         fields = read_only_fields
+        ref_name = 'galaxy.UIContainerRepositorySerializer'
 
     def get_namespace(self, distro):
         return distro.namespace.name
@@ -144,6 +147,7 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
             'pulp_created',
             'layers'
         )
+        ref_name = 'galaxy.UIContainerManifestSerializer'
 
     def get_layers(self, obj):
         layers = []
@@ -174,6 +178,9 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
 
 
 class ContainerManifestDetailSerializer(ContainerManifestSerializer):
+    class Meta(ContainerManifestSerializer.Meta):
+        ref_name = 'galaxy.UIContainerManifestSerializer'
+
     def get_config_blob(self, obj):
         with obj.config_blob._artifacts.first().file.open() as f:
             config_json = json.load(f)
@@ -198,6 +205,7 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
             'pulp_created',
             'number'
         )
+        ref_name = "galaxy.UIContainerRepositoryHistorySerializer"
 
     def get_added(self, obj):
         return [
@@ -244,3 +252,4 @@ class ContainerReadmeSerializer(serializers.ModelSerializer):
             'updated',
             'created',
         )
+        ref_name = "galaxy.UIContainerReadmeSerializer"

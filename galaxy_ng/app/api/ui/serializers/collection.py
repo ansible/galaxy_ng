@@ -15,6 +15,8 @@ log = logging.getLogger(__name__)
 
 
 class ContentSummarySerializer(Serializer):
+    class Meta():
+        ref_name = "galaxy.UIContentSummarySerializer"
 
     def to_representation(self, contents):
         summary = {"role": [], "module": [], "playbook": [], "plugin": []}
@@ -37,12 +39,18 @@ class ContentSummarySerializer(Serializer):
 
 
 class ContentSerializer(Serializer):
+    class Meta():
+        ref_name = "galaxy.UIContentSerializer"
+
     name = serializers.CharField()
     content_type = serializers.CharField()
     description = serializers.CharField()
 
 
 class CollectionMetadataSerializer(Serializer):
+    class Meta():
+        ref_name = "galaxy.UICollectionMetadataSerializer"
+
     dependencies = serializers.JSONField()
     contents = serializers.JSONField()
 
@@ -76,6 +84,9 @@ class CollectionVersionBaseSerializer(Serializer):
 
 
 class CollectionVersionSerializer(CollectionVersionBaseSerializer):
+    class Meta(CollectionVersionBaseSerializer.Meta):
+        ref_name = "galaxy.UICollectionVersionSerializer"
+
     repository_list = serializers.SerializerMethodField()
 
     def get_repository_list(self, collection_version):
@@ -95,10 +106,14 @@ class CollectionVersionSerializer(CollectionVersionBaseSerializer):
 
 
 class CollectionVersionDetailSerializer(CollectionVersionBaseSerializer):
+    class Meta():
+        ref_name = "galaxy.UICollectionVersionDetailSerializer"
     docs_blob = serializers.JSONField()
 
 
 class CollectionVersionSummarySerializer(Serializer):
+    class Meta():
+        ref_name = "galaxy.UICollectionVersionSummarySerializer"
     version = serializers.CharField()
     created = serializers.CharField(source='pulp_created')
 
@@ -120,6 +135,9 @@ class _CollectionSerializer(Serializer):
 
 
 class CollectionListSerializer(_CollectionSerializer):
+    class Meta(_CollectionSerializer.Meta):
+        ref_name = "galaxy.UICollectionListSerializer"
+
     deprecated = serializers.BooleanField()
 
     def get_latest_version(self, obj):
@@ -127,6 +145,9 @@ class CollectionListSerializer(_CollectionSerializer):
 
 
 class CollectionDetailSerializer(_CollectionSerializer):
+    class Meta(_CollectionSerializer.Meta):
+        ref_name = "galaxy.UICollectionDetailSerializer"
+
     all_versions = serializers.SerializerMethodField()
 
     # TODO: rename field to "version_details" since with

@@ -13,6 +13,7 @@ class GroupSerializer(serializers.ModelSerializer):
             'id',
             'name'
         )
+        ref_name = "galaxy.UIGroupSerializer"
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             'date_joined': {'read_only': True},
             'password': {'write_only': True, 'allow_blank': True, 'required': False}
         }
+        ref_name = "galaxy.UIUserSerializer"
 
     def validate_password(self, password):
         if password:
@@ -127,6 +129,7 @@ class CurrentUserSerializer(UserSerializer):
             groups={'read_only': True},
             **UserSerializer.Meta.extra_kwargs
         )
+        ref_name = "galaxy.UICurrentUserSerializer"
 
     def get_model_permissions(self, obj):
         return {

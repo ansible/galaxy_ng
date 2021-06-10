@@ -14,6 +14,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             'pulp_last_updated',
             'content_count'
         )
+        ref_name = "galaxy.UIRepositorySerializer"
 
     def get_content_count(self, repo):
         return repo.latest_version().content.count()
@@ -30,3 +31,4 @@ class DistributionSerializer(serializers.ModelSerializer):
             'base_path',
             'repository'
         )
+        ref_name = "galaxy.UIDistributionSerializer"

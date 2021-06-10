@@ -40,7 +40,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        ref_name = "Task"
+        ref_name = "galaxy.Task"
         fields = (
             'pulp_id',
             'name',
@@ -81,3 +81,4 @@ class TaskSummarySerializer(TaskSerializer):
             'finished_at',
             'href',
         )
+        ref_name = "galaxy.TaskSummarySerializer"
