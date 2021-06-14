@@ -61,6 +61,10 @@ requirements = [
     "pulp-ansible==0.5.8",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
+    "ansible~=2.10.0",
+    # click 8 requires py38,
+    # can be removed once we require >=py38
+    "click==7.1.2",
 ]
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
