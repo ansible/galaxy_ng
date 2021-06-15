@@ -1,8 +1,7 @@
 from django.apps import apps
 from django.http import HttpResponseRedirect
 
-from rest_framework import status as http_code
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
@@ -43,11 +42,3 @@ class ApiRedirectView(api_base.APIView):
 
         return HttpResponseRedirect(reverse(reverse_url_name,
                                             kwargs=reverse_kwargs), status=307)
-
-
-class HealthView(api_base.APIView):
-    permission_classes = [AllowAny]
-
-    def get(self, *args, **kwargs) -> Response:
-        """Return health status"""
-        return Response(status=http_code.HTTP_200_OK)

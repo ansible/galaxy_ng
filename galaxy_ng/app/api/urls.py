@@ -62,8 +62,6 @@ urlpatterns = [
 
     path("", include((content_urlpatterns, app_name), namespace='content')),
 
-    path("_healthz", views.HealthView.as_view(), name="health"),
-
     path("",
          views.ApiRootView.as_view(),
          name="root",

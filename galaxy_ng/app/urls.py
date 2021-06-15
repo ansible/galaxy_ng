@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.urls import include, path
 
+from . import views
 from galaxy_ng.app.api import urls as api_urls
 from galaxy_ng.app import customadmin as admin
 from galaxy_ng.ui import urls as ui_urls
@@ -54,5 +55,13 @@ urlpatterns.append(
         f"{API_PATH_PREFIX}/v3/swagger-ui/",
         SpectacularSwaggerView.as_view(url_name='schema'),
         name='swagger-ui',
+    )
+)
+
+urlpatterns.append(
+    path(
+        "_healthz",
+        views.HealthViewSet.as_view({'get': 'list'}),
+        name="health"
     )
 )
