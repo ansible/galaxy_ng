@@ -12,4 +12,4 @@ log = logging.getLogger(__name__)
 class SyncListViewSet(api_base.ModelViewSet):
     queryset = models.SyncList.objects.all()
     serializer_class = serializers.SyncListSerializer
-    permission_classes = [access_policy.SyncListAccessPolicy]
+    permission_classes = [access_policy.MySyncListAccessPolicy]
