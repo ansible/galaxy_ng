@@ -122,7 +122,7 @@ INSIGHTS_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": [
-                "has_model_or_obj_perms:galaxy.change_synclist",
+                "has_model_perms:galaxy.change_synclist",
                 "has_rh_entitlements"]
         },
     ],
