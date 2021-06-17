@@ -107,7 +107,13 @@ SPECTACULAR_SETTINGS = {
         "name": "GPLv2+",
         "url": "https://raw.githubusercontent.com/ansible/galaxy_ng/master/LICENSE",
     },
-    "COMPONENT_SPLIT_REQUEST": True,
+    # Create separate components for PATCH endpoints (without required list) default:True
+    'COMPONENT_SPLIT_PATCH': False,
+    # Split components into request and response parts where appropriate default: False
+    'COMPONENT_SPLIT_REQUEST': False,
+    # Aid client generator targets that have trouble with read-only properties. default: False
+    'COMPONENT_NO_READ_ONLY_REQUIRED': False,
+
     "SWAGGER_UI_SETTINGS": {
         "deepLinking": True,
         "persistAuthorization": True,
