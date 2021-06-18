@@ -16,8 +16,8 @@ attrs==20.3.0             # via aiohttp, galaxy-importer, jsonschema
 backoff==1.10.0           # via pulpcore
 bleach-allowlist==1.0.3   # via galaxy-importer
 bleach==3.3.0             # via galaxy-importer
-boto3==1.17.93            # via -r requirements/requirements.insights.in, django-storages, watchtower
-botocore==1.20.93         # via boto3, s3transfer
+boto3==1.17.97            # via -r requirements/requirements.insights.in, django-storages, watchtower
+botocore==1.20.97         # via boto3, s3transfer
 certifi==2021.5.30        # via requests
 cffi==1.14.5              # via cryptography, pycares
 chardet==4.0.0            # via aiohttp, requests
@@ -29,18 +29,18 @@ dataclasses==0.8          # via rich
 defusedxml==0.7.1         # via odfpy
 diff-match-patch==20200713  # via django-import-export
 django-currentuser==0.5.3  # via pulpcore
-django-filter==2.4.0      # via pulpcore
+django-filter==2.3.0      # via pulpcore
 django-guardian==2.3.0    # via pulpcore
-django-import-export==2.4.0  # via pulpcore
+django-import-export==2.3.0  # via pulpcore
 django-lifecycle==0.8.1   # via pulpcore
 django-prometheus==2.1.0  # via galaxy-ng (setup.py)
 django-storages[boto3]==1.11.1  # via -r requirements/requirements.insights.in
 django==2.2.24            # via django-currentuser, django-filter, django-guardian, django-import-export, django-lifecycle, django-storages, djangorestframework, drf-nested-routers, drf-spectacular, galaxy-ng (setup.py), pulpcore
 djangorestframework-queryfields==1.0.0  # via pulpcore
-djangorestframework==3.12.4  # via drf-nested-routers, drf-spectacular, pulpcore
-drf-access-policy==0.8.7  # via pulpcore
-drf-nested-routers==0.92.1  # via pulpcore
-drf-spectacular==0.9.14   # via galaxy-ng (setup.py), pulpcore
+djangorestframework==3.11.2  # via drf-nested-routers, drf-spectacular, pulpcore
+drf-access-policy==0.7.0  # via pulpcore
+drf-nested-routers==0.91  # via pulpcore
+drf-spectacular==0.9.13   # via galaxy-ng (setup.py), pulpcore
 dynaconf==3.1.4           # via pulpcore
 et-xmlfile==1.1.0         # via openpyxl
 flake8==3.9.2             # via galaxy-importer
@@ -65,19 +65,19 @@ packaging==20.9           # via ansible-base, bleach, pulp-ansible
 prometheus-client==0.11.0  # via django-prometheus
 psycopg2==2.8.6           # via pulpcore
 pulp-ansible==0.5.8       # via galaxy-ng (setup.py)
-pulpcore==3.8.1           # via galaxy-ng (setup.py), pulp-ansible
+pulpcore==3.7.6           # via galaxy-ng (setup.py), pulp-ansible
 pycares==4.0.0            # via aiodns
 pycodestyle==2.7.0        # via flake8
 pycparser==2.20           # via cffi
 pyflakes==2.3.1           # via flake8
 pygments==2.9.0           # via rich
 pygtrie==2.3.3            # via pulpcore
-pyparsing==2.4.7          # via drf-access-policy, packaging
+pyparsing==2.4.7          # via packaging
 pyrsistent==0.17.3        # via jsonschema
 python-dateutil==2.8.1    # via botocore
 python-gnupg==0.4.7       # via pulpcore
 pytz==2021.1              # via django
-pyyaml==5.3.1             # via ansible-base, ansible-builder, ansible-lint, drf-spectacular, galaxy-importer, pulp-ansible, pulpcore, tablib
+pyyaml==5.4.1             # via ansible-base, ansible-builder, ansible-lint, drf-spectacular, galaxy-importer, pulp-ansible, pulpcore, tablib
 redis==3.5.3              # via pulpcore, rq
 requests==2.25.1          # via galaxy-importer
 requirements-parser==0.2.0  # via ansible-builder
