@@ -128,7 +128,7 @@ INSIGHTS_STATEMENTS = {
     ],
     'MySyncListViewSet': [
         {
-            "action": ["retrieve", "list", "update", "partial_update"],
+            "action": ["retrieve", "list", "update", "partial_update", "curate"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": [
