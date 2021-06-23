@@ -13,53 +13,86 @@ objects:
     # The name of the ClowdEnvironment providing the services
     envName: ${ENV_NAME}
 
-    # The bulk of your App. This is where your running apps will live
     deployments:
     - name: galaxy-api
       podSpec:
+        name: galaxy-api
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'api']
+        initContainers:
+          - args: ["wait-for-migrations"]
+            inheritEnv: true
+        resources:
+          limits:
+            cpu: ${{GALAXY_API_CPU_LIMIT}}
+            memory: ${{GALAXY_API_MEMORY_LIMIT}}
+          requests:
+            cpu: ${{GALAXY_API_CPU_REQUEST}}
+            memory: ${{GALAXY_API_MEMORY_REQUEST}}
         env:
-          - name: GALAXY_AUTHENTICATION_CLASSES
-            value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
           - name: GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: 'localhost'
-          - name: WITH_MIGRATIONS
-            value: '1'
       webServices:
         public:
             enabled: true
+
     - name: pulp-resource-manager
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'resource-manager']
+        initContainers:
+          - args: ["manage", "migrate"]
+            inheritEnv: true
+        resources:
+          limits:
+            cpu: ${{PULP_RESOURCE_MANAGER_CPU_LIMIT}}
+            memory: ${{PULP_RESOURCE_MANAGER_MEMORY_LIMIT}}
+          requests:
+            cpu: ${{PULP_RESOURCE_MANAGER_CPU_REQUEST}}
+            memory: ${{PULP_RESOURCE_MANAGER_MEMORY_REQUEST}}
         env:
-          - name: GALAXY_AUTHENTICATION_CLASSES
-            value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
           - name: GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: 'localhost'
+
     - name: pulp-content-app
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'content-app']
+        initContainers:
+          - args: ["wait-for-migrations"]
+            inheritEnv: true
+        resources:
+          limits:
+            cpu: ${{PULP_CONTENT_APP_CPU_LIMIT}}
+            memory: ${{PULP_CONTENT_APP_MEMORY_LIMIT}}
+          requests:
+            cpu: ${{PULP_CONTENT_APP_CPU_REQUEST}}
+            memory: ${{PULP_CONTENT_APP_MEMORY_REQUEST}}
         env:
-          - name: GALAXY_AUTHENTICATION_CLASSES
-            value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
           - name: GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: 'localhost'
+
     - name: pulp-worker
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'worker']
+        initContainers:
+          - args: ["wait-for-migrations"]
+            inheritEnv: true
+        resources:
+          limits:
+            cpu: ${{PULP_WORKER_CPU_LIMIT}}
+            memory: ${{PULP_WORKER_MEMORY_LIMIT}}
+          requests:
+            cpu: ${{PULP_WORKER_CPU_REQUEST}}
+            memory: ${{PULP_WORKER_MEMORY_REQUEST}}
         env:
-          - name: GALAXY_AUTHENTICATION_CLASSES
-            value: '["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]'
           - name: GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: IMPORTER_MEMORY_REQUEST
@@ -88,9 +121,49 @@ parameters:
 - descripton: Automation Hub image name
   name: IMAGE_NAME
   value: "quay.io/cloudservices/automation-hub-galaxy-ng"
-- description: Automation Analytics Image tag
+- description: Automation Hub image tag
   name: IMAGE_TAG
   required: true
 - description: Clowder ENV
   name: ENV_NAME
   required: true
+
+# galaxy-api resource requirements
+- name: GALAXY_API_MEMORY_REQUEST
+  value: 1024Mi
+- name: GALAXY_API_MEMORY_LIMIT
+  value: 1024Mi
+- name: GALAXY_API_CPU_REQUEST
+  value: 200m
+- name: GALAXY_API_CPU_LIMIT
+  value: 600m
+
+# pulp-resource-manager resource requirements
+- name: PULP_RESOURCE_MANAGER_MEMORY_REQUEST
+  value: 512Mi
+- name: PULP_RESOURCE_MANAGER_MEMORY_LIMIT
+  value: 512Mi
+- name: PULP_RESOURCE_MANAGER_CPU_REQUEST
+  value: 200m
+- name: PULP_RESOURCE_MANAGER_CPU_LIMIT
+  value: 500m
+
+# pulp-content-app resource requirements
+- name: PULP_CONTENT_APP_MEMORY_REQUEST
+  value: 1024Mi
+- name: PULP_CONTENT_APP_MEMORY_LIMIT
+  value: 1536Mi
+- name: PULP_CONTENT_APP_CPU_REQUEST
+  value: 200m
+- name: PULP_CONTENT_APP_CPU_LIMIT
+  value: 600m
+
+# pulp-worker resource requirements
+- name: PULP_WORKER_MEMORY_REQUEST
+  value: 256Mi
+- name: PULP_WORKER_MEMORY_LIMIT
+  value: 512Mi
+- name: PULP_WORKER_CPU_REQUEST
+  value: 200m
+- name: PULP_WORKER_CPU_LIMIT
+  value: 500m
