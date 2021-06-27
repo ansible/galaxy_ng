@@ -184,9 +184,9 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         log.debug('kwargs=%s', kwargs)
         log.debug('filename.namespace=%s', filename.namespace)
 
-        path = self._get_path(kwargs, filename_ns=filename.namespace)
+        distro_base_path = self._get_path(kwargs, filename_ns=filename.namespace)
 
-        log.debug('path=%s', path)
+        log.debug('distro_base_path=%s', distro_base_path)
 
         try:
             namespace = models.Namespace.objects.get(name=filename.namespace)
@@ -201,7 +201,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         self.check_object_permissions(request, namespace)
 
         try:
-            response = super(CollectionUploadViewSet, self).create(request, path)
+            response = super(CollectionUploadViewSet, self).create(request, distro_base_path)
         except ValidationError:
             log.exception('Failed to publish artifact %s (namespace=%s, sha256=%s)',  # noqa
                           data['file'].name, namespace, data.get('sha256'))
@@ -228,7 +228,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         #       it needs the  repo/distro base_path for the <path> part of url
         import_obj_url = reverse("galaxy:api:content:v3:collection-import",
                                  kwargs={'pk': str(task_detail.pulp_id),
-                                         'path': path})
+                                         'path': distro_base_path})
 
         log.debug('import_obj_url: %s', import_obj_url)
         return Response(
