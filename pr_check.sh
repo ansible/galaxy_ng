@@ -20,7 +20,22 @@ export IMAGE_TAG="pr-$IMAGE_TAG"
 
 source "$CICD_ROOT/build.sh"
 # source $APP_ROOT/unit_test.sh
-source $CICD_ROOT/deploy_ephemeral_env.sh
+
+# BEGIN WORKAROUND
+# NOTE(cutwater): See https://issues.redhat.com/browse/RHCLOUD-14977
+source ${CICD_ROOT}/_common_deploy_logic.sh
+export NAMESPACE=$(bonfire namespace reserve)
+bonfire deploy \
+    ${APP_NAME} \
+    --source=appsre \
+    --ref-env insights-stage \
+    --set-template-ref ${APP_NAME}/${COMPONENT_NAME}=${GIT_COMMIT} \
+    --set-image-tag ${IMAGE}=${IMAGE_TAG} \
+    --namespace ${NAMESPACE} \
+    --no-remove-resources \
+    ${COMPONENTS_ARG}
+# END WORKAROUND
+
 # source $CICD_ROOT/smoke_test.sh
 
 # overriding IMAGE_TAG defined by boostrap.sh, for now
