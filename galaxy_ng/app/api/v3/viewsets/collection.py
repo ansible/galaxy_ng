@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from django.conf import settings
 from django.http import HttpResponseRedirect, StreamingHttpResponse
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
@@ -211,7 +212,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         # FIXME: derive this from deployment mode or provide a setting for it.
         use_inbound = True
-        if use_inbound:
+        if use_inbound and not distro_base_path.startswith('inbound'):
             inbound_distro_base_path = f'inbound-{distro_base_path}'
 
         log.debug('inbound_distro_base_path: %s', inbound_distro_base_path)
@@ -223,6 +224,13 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         try:
             response = super(CollectionUploadViewSet, self).create(request,
                                                                    inbound_distro_base_path)
+        except Http404 as exc:
+            log.exception(exc)
+            log.warning("No inbound repo '%s' was found for repo '%s', so importing directly to '%s'",
+                        inbound_distro_base_path, distro_base_path, distro_base_path)
+            response = super(CollectionUploadViewSet, self).create(request,
+                                                                   distro_base_path)
+
         except ValidationError:
             log.exception('Failed to publish artifact %s (namespace=%s, sha256=%s)',  # noqa
                           data['file'].name, namespace, data.get('sha256'))
