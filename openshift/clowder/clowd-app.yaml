@@ -79,6 +79,7 @@ objects:
             value: 'localhost'
 
     - name: pulp-worker
+      k8sAccessLevel: edit
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'worker']
