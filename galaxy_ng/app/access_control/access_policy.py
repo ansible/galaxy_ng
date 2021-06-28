@@ -69,9 +69,13 @@ class CollectionAccessPolicy(AccessPolicyBase):
     #        for dest repo and/or inbound repos.
     def can_create_collection(self, request, view, permission):
         data = view._get_data(request)
+        log.debug('data=%s', data)
+        log.debug('request.user=%s', request.user)
+
         try:
             namespace = models.Namespace.objects.get(name=data['filename'].namespace)
         except models.Namespace.DoesNotExist:
+            log.exception('didnt find namespace %s', namespace)
             raise NotFound('Namespace in filename not found.')
         # FIXME: Need to change what we evaulate for perms to upload to a repository.
         #        The upload_to_namespace perm makes a lot of assumptions which will

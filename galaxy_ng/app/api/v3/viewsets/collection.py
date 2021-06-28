@@ -1,4 +1,5 @@
 import logging
+import pprint
 
 import requests
 
@@ -125,7 +126,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         log.debug('temp_file_pk=%s', temp_file_pk)
         log.debug('repository=%s', repository)
-
+        log.debug('kwargs=%s', pprint.pformat(kwargs))
         kwargs["temp_file_pk"] = temp_file_pk
 
         if repository:
@@ -133,6 +134,8 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
             kwargs["repository_pk"] = repository.pk
 
         log.debug('kwargs=%s', kwargs)
+        log.debug('settings.GALAXY_REQUIRE_CONTENT_APPROVAL: %s',
+                  settings.GALAXY_REQUIRE_CONTENT_APPROVAL)
         if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
             return enqueue_with_reservation(import_and_move_to_staging, locks, kwargs=kwargs)
         return enqueue_with_reservation(import_and_auto_approve, locks, kwargs=kwargs)
@@ -183,11 +186,14 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
                   settings.GALAXY_REQUIRE_CONTENT_APPROVAL)
         log.debug('kwargs=%s', kwargs)
         log.debug('filename.namespace=%s', filename.namespace)
+        log.debug('filename.name=%s', filename.name)
 
+        # FIXME: no longer needs to be based on the filename namespace
         distro_base_path = self._get_path(kwargs, filename_ns=filename.namespace)
 
         log.debug('distro_base_path=%s', distro_base_path)
 
+        # TODO:
         try:
             namespace = models.Namespace.objects.get(name=filename.namespace)
         except models.Namespace.DoesNotExist:
@@ -198,10 +204,25 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         log.debug('namespace=%s', namespace)
         # self._check_path_matches_expected_repo(path, filename_ns=namespace.name)
 
+        # TODO: find the 'inbound-repo' (the inbound distro base path name ) associated
+        #       with distro_base_path
+        # TODO: too simple?
+        inbound_distro_base_path = distro_base_path
+
+        # FIXME: derive this from deployment mode or provide a setting for it.
+        use_inbound = True
+        if use_inbound:
+            inbound_distro_base_path = f'inbound-{distro_base_path}'
+
+        log.debug('inbound_distro_base_path: %s', inbound_distro_base_path)
+
         self.check_object_permissions(request, namespace)
 
+        # FIXME: Have to create the inbound distro (and repo) before calling this
+        #        (or via migrations, or at repo create time, etc)
         try:
-            response = super(CollectionUploadViewSet, self).create(request, distro_base_path)
+            response = super(CollectionUploadViewSet, self).create(request,
+                                                                   inbound_distro_base_path)
         except ValidationError:
             log.exception('Failed to publish artifact %s (namespace=%s, sha256=%s)',  # noqa
                           data['file'].name, namespace, data.get('sha256'))
@@ -228,7 +249,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         #       it needs the  repo/distro base_path for the <path> part of url
         import_obj_url = reverse("galaxy:api:content:v3:collection-import",
                                  kwargs={'pk': str(task_detail.pulp_id),
-                                         'path': distro_base_path})
+                                         'path': inbound_distro_base_path})
 
         log.debug('import_obj_url: %s', import_obj_url)
         return Response(

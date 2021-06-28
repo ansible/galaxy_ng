@@ -61,6 +61,30 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
         call_remove_task(collection_version, inbound_repo)
 
 
+def get_dest_repo_for_inbound_repo(inbound_repo):
+    """Given an inbound AnsibleRepository, lookup/find it's destination repo
+
+    This could be the 'golden' repo, or another repo.
+
+    For the simple case, 'inbound-myrepo' should return the 'myrepo' repo.
+
+    Returns:
+        AnsibleRepository
+    """
+
+    log.debug('inbound_repo: %s', inbound_repo)
+
+    dest_repo_name = GOLDEN_NAME
+
+    # the "old" way
+    try:
+        dest_repo = AnsibleDistribution.objects.get(name=dest_repo_name).repository
+    except AnsibleRepository.DoesNotExist:
+        raise RuntimeError(f'Could not find destination repository: "{dest_repo_name}"')
+
+    return dest_repo
+
+
 def import_and_auto_approve(temp_file_pk, **kwargs):
     """Import collection version and automatically approve.
 
@@ -68,6 +92,7 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
     then automatically approve collection version so no
     manual approval action needs to occur.
     """
+    log.debug('kwargs=%s', repr(kwargs))
     inbound_repository_pk = kwargs.get('repository_pk')
     import_collection(
         temp_file_pk=temp_file_pk,
@@ -77,19 +102,22 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
         expected_version=kwargs['expected_version'],
     )
 
-    try:
-        golden_repo = AnsibleDistribution.objects.get(name=GOLDEN_NAME).repository
-    except AnsibleRepository.DoesNotExist:
-        raise RuntimeError(f'Could not find staging repository: "{GOLDEN_NAME}"')
-
     inbound_repo = AnsibleRepository.objects.get(pk=inbound_repository_pk)
+
+    # TODO(558): Instead of always trying to promote to the 'golden' repo, we
+    #            want to promote to the repo corresponding to the inbound repo
+    #            ie, 'inbound-myrepo' -> 'myrepo'
+    dest_repo = get_dest_repo_for_inbound_repo(inbound_repo)
+
+    log.debug('dest_repo=%s', dest_repo)
 
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        call_copy_task(collection_version, inbound_repo, golden_repo)
+        # TODO(558) dest_repo will be the repo associated with inbound
+        call_copy_task(collection_version, inbound_repo, dest_repo)
         call_remove_task(collection_version, inbound_repo)
 
         log.info('Imported and auto approved collection artifact %s to repository %s',
                  collection_version.relative_path,
-                 golden_repo.latest_version())
+                 dest_repo.latest_version())

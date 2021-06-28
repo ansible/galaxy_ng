@@ -18,6 +18,8 @@ But for standalone, a POST to
 /api/automation-hub/content/mycustomrepo/v3/collections/  would enqueue an
 import to 'inbound-mycustomrepo'.
 
+NEED to create inbound-mycustomrepo somewhere
+
 Depending on config for 'autopromote' it may automatically get moved to
 mycustomrepo if import succeeds, or it may move to a staging repo.
 
