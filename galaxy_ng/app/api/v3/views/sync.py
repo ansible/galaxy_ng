@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from pulp_ansible.app import models as pulp_models
 from pulp_ansible.app.tasks.collections import sync as collection_sync
 
-from pulpcore.plugin.tasking import enqueue_with_reservation
+from pulpcore.plugin.tasking import dispatch
 from pulpcore.plugin.models import Task
 
 from galaxy_ng.app.api import base as api_base
@@ -41,7 +41,7 @@ class SyncRemoteView(api_base.APIView):
                         'requirements file is not allowed.'
                 })
 
-        result = enqueue_with_reservation(
+        result = dispatch(
             collection_sync,
             [distro.repository, remote],
             kwargs={
