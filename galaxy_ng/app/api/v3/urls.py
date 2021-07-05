@@ -100,4 +100,9 @@ urlpatterns = [
         viewsets.TaskViewSet.as_view({'get': 'retrieve'}),
         name='tasks-detail'
     ),
+    path(
+        'excludes/',
+        views.ExcludesView.as_view(),
+        name='excludes-file'
+    ),
 ]
