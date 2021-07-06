@@ -14,6 +14,27 @@ objects:
     envName: ${ENV_NAME}
 
     deployments:
+    - name: backend
+      podSpec:
+        name: backend
+        image: ${NGINX_IMAGE}:${NGINX_IMAGE_TAG}
+        resources:
+          limits:
+            cpu: ${{NGINX_CPU_LIMIT}}
+            memory: ${{NGINX_MEMORY_LIMIT}}
+          requests:
+            cpu: ${{NGINX_CPU_REQUEST}}
+            memory: ${{NGINX_MEMORY_REQUEST}}
+        volumeMounts:
+          - name: cache
+            mountPath: /var/cache/nginx
+        volumes:
+          - name: cache
+            emptyDir: {}
+      webServices:
+        public:
+            enabled: true
+
     - name: galaxy-api
       podSpec:
         name: galaxy-api
@@ -119,15 +140,31 @@ objects:
       - automation-hub
 
 parameters:
+- description: Clowder ENV
+  name: ENV_NAME
+  required: true
+
 - descripton: Automation Hub image name
   name: IMAGE_NAME
   value: "quay.io/cloudservices/automation-hub-galaxy-ng"
 - description: Automation Hub image tag
   name: IMAGE_TAG
   required: true
-- description: Clowder ENV
-  name: ENV_NAME
-  required: true
+
+- name: NGINX_IMAGE
+  value: "quay.io/cloudservices/automation-hub-nginx"
+- name: NGINX_IMAGE_TAG
+  value: latest
+
+# nginx resource requirements
+- name: NGINX_MEMORY_REQUEST
+  value: 64Mi
+- name: NGINX_MEMORY_LIMIT
+  value: 128Mi
+- name: NGINX_CPU_REQUEST
+  value: 50m
+- name: NGINX_CPU_LIMIT
+  value: 200m
 
 # galaxy-api resource requirements
 - name: GALAXY_API_MEMORY_REQUEST
