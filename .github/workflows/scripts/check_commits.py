@@ -54,14 +54,18 @@ def git_commit_message(commit_sha):
 
 
 def check_changelog_record(issue):
-    reconrds_count = len(glob.glob(f"CHANGES/{issue}.*"))
-    if reconrds_count == 0:
+    changelog_filenames = glob.glob(f"CHANGES/{issue}.*")
+    if len(changelog_filenames) == 0:
         LOG.error(f"Missing change log entry for issue AAH-{issue}.")
         return False
-    if reconrds_count == 1:
-        return True
-    LOG.error(f"Multiple change log records found for issue AAH-{issue}.")
-    return False
+    if len(changelog_filenames) > 1:
+        LOG.error(f"Multiple change log records found for issue AAH-{issue}.")
+        return False
+    with open(changelog_filenames[0]) as f:
+        if len(f.readlines()) != 1:
+            LOG.error(f"Expected log entry for issue AAH-{issue} to be a single line.")
+            return False
+    return True
 
 
 def check_issue_exists(issue):
