@@ -76,7 +76,7 @@ api/runserver:    ## Runs api using django webserver for debugging
 	# Stop all running containers if any
 	./compose stop
 	# Start only services if containers exists, else create the containers and start.
-	./compose start worker resource-manager content-app ui || ./compose up -d worker resource-manager content-app ui
+	./compose start worker content-app ui || ./compose up -d worker content-app ui
 	# ensure API is not running
 	./compose stop api
 	# Run api using django runserver for debugging
