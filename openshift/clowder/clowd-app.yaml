@@ -30,10 +30,16 @@ objects:
             cpu: ${{GALAXY_API_CPU_REQUEST}}
             memory: ${{GALAXY_API_MEMORY_REQUEST}}
         env:
-          - name: GALAXY_DEPLOYMENT_MODE
+          - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: 'localhost'
+          - name: PULP_RH_ENTITLEMENT_REQUIRED
+            value: 'insights'
+          - name: PULP_X_PULP_CONTENT_HOST
+            value: 'automation-hub-pulp-content-app'
+          - name: PULP_X_PULP_CONTENT_PORT
+            value: '10000'
       webServices:
         public:
             enabled: true
@@ -53,7 +59,7 @@ objects:
             cpu: ${{PULP_RESOURCE_MANAGER_CPU_REQUEST}}
             memory: ${{PULP_RESOURCE_MANAGER_MEMORY_REQUEST}}
         env:
-          - name: GALAXY_DEPLOYMENT_MODE
+          - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: 'localhost'
@@ -73,10 +79,15 @@ objects:
             cpu: ${{PULP_CONTENT_APP_CPU_REQUEST}}
             memory: ${{PULP_CONTENT_APP_MEMORY_REQUEST}}
         env:
-          - name: GALAXY_DEPLOYMENT_MODE
+          - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: 'localhost'
+          - name: GUNICORN_PORT
+            value: '10000'
+      webServices:
+        private:
+            enabled: true
 
     - name: pulp-worker
       k8sAccessLevel: edit
@@ -94,7 +105,7 @@ objects:
             cpu: ${{PULP_WORKER_CPU_REQUEST}}
             memory: ${{PULP_WORKER_MEMORY_REQUEST}}
         env:
-          - name: GALAXY_DEPLOYMENT_MODE
+          - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: IMPORTER_MEMORY_REQUEST
             value: 1Gi

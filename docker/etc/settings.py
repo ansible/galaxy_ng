@@ -4,9 +4,9 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_DEFAULT_ACL = None
 
 CONTENT_PATH_PREFIX = "/api/automation-hub/v3/artifacts/collections/"
-GALAXY_API_PATH_PREFIX = "/api/automation-hub"
+ANSIBLE_API_HOSTNAME = os.environ.get('PULP_CONTENT_ORIGIN')
 
-GALAXY_DEPLOYMENT_MODE = os.environ.get('GALAXY_DEPLOYMENT_MODE')
+GALAXY_API_PATH_PREFIX = "/api/automation-hub"
 GALAXY_AUTHENTICATION_CLASSES = ['galaxy_ng.app.auth.auth.RHIdentityAuthentication']
 GALAXY_PERMISSION_CLASSES = ['rest_framework.permissions.IsAuthenticated',
                              'galaxy_ng.app.auth.auth.RHEntitlementRequired']
