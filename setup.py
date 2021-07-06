@@ -79,12 +79,12 @@ class BuildPyCommand(_BuildPyCommand):
 requirements = [
     "Django~=2.2.23",
     "galaxy-importer==0.3.2",
-    "pulpcore<3.12,>=3.11.2",
-    "pulp-ansible==0.7.3",
+    "pulpcore>=3.14.0,<3.15.0",
+    "pulp-ansible>=0.8.0,<0.9.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     # pulp-container 2.6 requires pulpcore >=3.12.1
-    "pulp-container>=2.5.2,<2.6.0",
+    "pulp-container>=2.7.0,<2.8.0",
     # click 8 requires py38,
     # can be removed once we require >=py38
     "click==7.1.2",
