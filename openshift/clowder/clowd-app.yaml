@@ -65,26 +65,6 @@ objects:
         public:
             enabled: true
 
-    - name: pulp-resource-manager
-      podSpec:
-        image: ${IMAGE_NAME}:${IMAGE_TAG}
-        args: ['run', 'resource-manager']
-        initContainers:
-          - args: ["manage", "migrate"]
-            inheritEnv: true
-        resources:
-          limits:
-            cpu: ${{PULP_RESOURCE_MANAGER_CPU_LIMIT}}
-            memory: ${{PULP_RESOURCE_MANAGER_MEMORY_LIMIT}}
-          requests:
-            cpu: ${{PULP_RESOURCE_MANAGER_CPU_REQUEST}}
-            memory: ${{PULP_RESOURCE_MANAGER_MEMORY_REQUEST}}
-        env:
-          - name: PULP_GALAXY_DEPLOYMENT_MODE
-            value: 'insights'
-          - name: PULP_CONTENT_ORIGIN
-            value: 'localhost'
-
     - name: pulp-content-app
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
@@ -186,16 +166,6 @@ parameters:
   value: 200m
 - name: GALAXY_API_CPU_LIMIT
   value: 600m
-
-# pulp-resource-manager resource requirements
-- name: PULP_RESOURCE_MANAGER_MEMORY_REQUEST
-  value: 512Mi
-- name: PULP_RESOURCE_MANAGER_MEMORY_LIMIT
-  value: 512Mi
-- name: PULP_RESOURCE_MANAGER_CPU_REQUEST
-  value: 200m
-- name: PULP_RESOURCE_MANAGER_CPU_LIMIT
-  value: 500m
 
 # pulp-content-app resource requirements
 - name: PULP_CONTENT_APP_MEMORY_REQUEST
