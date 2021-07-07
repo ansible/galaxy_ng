@@ -89,6 +89,11 @@ AUTH_PASSWORD_VALIDATORS = [
 X_PULP_CONTENT_HOST = "localhost"
 X_PULP_CONTENT_PORT = 24816
 
+# Example setting of CONTENT_BIND if unix sockets are used
+# CONTENT_BIND = "unix:/var/run/pulpcore-content/pulpcore-content.sock"
+
+CONTENT_BIND = None
+
 # This is example of how to set this via enviroment variables via dynaconf
 # SPECTACULAR_SETTINGS__TITLE = "Automation Hub API __TITLE"
 
