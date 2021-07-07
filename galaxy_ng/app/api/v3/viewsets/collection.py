@@ -26,6 +26,7 @@ from galaxy_ng.app.constants import DeploymentMode, INBOUND_REPO_NAME_FORMAT
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 
+from galaxy_ng.app.api.utils import SocketHTTPAdapter
 from galaxy_ng.app.api.v3.serializers import (
     CollectionSerializer,
     CollectionVersionSerializer,
@@ -246,6 +247,15 @@ class CollectionArtifactDownloadView(api_base.APIView):
     permission_classes = [access_policy.CollectionAccessPolicy]
     action = 'retrieve'
 
+    def _get_tcp_response(self, url):
+        return requests.get(url, stream=True, allow_redirects=False)
+
+    def _get_unix_socket_response(self, url):
+        socket_file = settings.CONTENT_BIND.split(':')[1]
+        session = requests.Session()
+        session.mount("http://", SocketHTTPAdapter(socket_file))
+        return session.get(url, stream=True, allow_redirects=False)
+
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
@@ -257,7 +267,11 @@ class CollectionArtifactDownloadView(api_base.APIView):
             filename=self.kwargs['filename'],
         )
 
-        response = requests.get(url, stream=True, allow_redirects=False)
+        content_bind = settings.get("CONTENT_BIND", None)
+        if content_bind and content_bind.startswith("unix:"):
+            response = self._get_unix_socket_response(url)
+        else:
+            response = self._get_tcp_response(url)
 
         if response.status_code == requests.codes.not_found:
             metrics.collection_artifact_download_failures.labels(status=requests.codes.not_found).inc() # noqa

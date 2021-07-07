@@ -1,9 +1,14 @@
 from collections import namedtuple
 import re
+from requests.adapters import HTTPAdapter
+import socket
+from urllib3.connection import HTTPConnection
+from urllib3.connectionpool import HTTPConnectionPool
 
 
 CollectionFilename = namedtuple("CollectionFilename", ["namespace", "name", "version"])
 
+LOCALHOST = "localhost"
 FILENAME_REGEXP = re.compile(
     r"^(?P<namespace>\w+)-(?P<name>\w+)-" r"(?P<version>[0-9a-zA-Z.+-]+)\.tar\.gz$"
 )
@@ -45,3 +50,31 @@ def parse_collection_filename(filename):
         raise ValueError(msg.format(version=version, filename=filename))
 
     return CollectionFilename(namespace, name, version)
+
+
+class SocketHTTPConnection(HTTPConnection):
+    def __init__(self, socket_file):
+        self.socket_file = socket_file
+        super().__init__(LOCALHOST)
+
+    def connect(self):
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.sock.connect(self.socket_file)
+
+
+class SocketHTTPConnectionPool(HTTPConnectionPool):
+    def __init__(self, socket_file):
+        self.socket_file = socket_file
+        super().__init__(LOCALHOST)
+
+    def _new_conn(self):
+        return SocketHTTPConnection(self.socket_file)
+
+
+class SocketHTTPAdapter(HTTPAdapter):
+    def __init__(self, socket_file):
+        self.socket_file = socket_file
+        super().__init__()
+
+    def get_connection(self, url, proxies=None):
+        return SocketHTTPConnectionPool(self.socket_file)
