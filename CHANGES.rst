@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.3.2 (2021-07-07)
+==================
+
+Features
+--------
+
+- Add unix socket support to collection version download view
+  `AAH-743 <https://issues.redhat.com/browse/AAH-743>`_
+
+
+----
+
+
 4.3.1 (2021-06-03)
 ==================
 
