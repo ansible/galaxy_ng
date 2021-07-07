@@ -250,7 +250,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
             filename=self.kwargs['filename'],
         )
 
-        if settings.PULP_CONTENT_BIND:
+        if settings.PULP_CONTENT_BIND and settings.PULP_CONTENT_BIND.startswith("unix:"):
             response = self._get_unix_socket_response(url)
         else:
             response = self._get_tcp_response(url)
