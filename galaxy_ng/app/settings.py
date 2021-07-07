@@ -91,3 +91,8 @@ X_PULP_API_PREFIX = "pulp_ansible/galaxy/automation-hub/api"
 
 X_PULP_CONTENT_HOST = "localhost"
 X_PULP_CONTENT_PORT = 24816
+
+# Example setting of CONTENT_BIND if unix sockets are used
+# CONTENT_BIND = "unix:/var/run/pulpcore-content/pulpcore-content.sock"
+
+CONTENT_BIND = None
