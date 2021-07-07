@@ -234,7 +234,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
         return requests.get(url, stream=True, allow_redirects=False)
 
     def _get_unix_socket_response(self, url):
-        socket_file = settings.PULP_CONTENT_BIND.split(':')[1]
+        socket_file = settings.CONTENT_BIND.split(':')[1]
         session = requests.Session()
         session.mount("http://", SocketHTTPAdapter(socket_file))
         return session.get(url, stream=True, allow_redirects=False)
