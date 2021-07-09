@@ -28,7 +28,7 @@ def serialize_collection_queryset(queryset):
     """Serialize a Queryset in to a JSONable format."""
     return queryset is not None and [
         {
-            "name": "{collection.namespace}/{collection.name}".format(collection=collection)
+            "name": "{collection.namespace}.{collection.name}".format(collection=collection)
         }
         for collection in queryset.all()
     ] or []
