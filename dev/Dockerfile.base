@@ -41,9 +41,10 @@ RUN set -ex; \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \
-    \
-    && mkdir /venv \
-    && chown ${USER_NAME}:${USER_GROUP} /venv
+    && mkdir --mode=2775 /venv \
+    && chown ${USER_NAME}:${USER_GROUP} /venv \
+    && mkdir --mode=2775 /app \
+    && chown ${USER_NAME}:${USER_GROUP} /app
 
 USER ${USER_NAME}:${USER_GROUP}
 RUN set -ex; \
@@ -75,19 +76,19 @@ RUN set -ex; \
 
 # Finalize installation
 RUN set -ex; \
-    mkdir -p /var/lib/pulp/artifact \
+    mkdir -p /entrypoints.d \
+            /etc/ansible \
+    && mkdir --mode=2775 -p /var/lib/pulp \
+    && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp \
+    && mkdir --mode=2775 -p \
+             /var/lib/pulp/artifact \
              /var/lib/pulp/tmp \
              /tmp/ansible \
-             /etc/ansible \
-             /entrypoints.d \
-    && chown -R ${USER_NAME}:${USER_GROUP} \
-        /var/lib/pulp \
+    && chown ${USER_NAME}:${USER_GROUP} \
         /tmp/ansible \
         /etc/ansible \
-    && chmod -R 0775 /var/lib/pulp \
-                     /app/docker/entrypoint.sh \
+    && chmod -R 0775 /app/docker/entrypoint.sh \
                      /app/docker/bin/* \
-                     /tmp/ansible \
     && mv /app/docker/entrypoint.sh /entrypoint.sh \
     && mv /app/ansible.cfg /etc/ansible/ansible.cfg \
     && mv /app/docker/bin/* /usr/local/bin
