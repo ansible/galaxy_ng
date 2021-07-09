@@ -16,7 +16,7 @@ help:             ## Show the help.
 # Repository management
 
 .PHONY: requirements
-requirements:     ## Update python dependencies lock files (i.e. requirements.txt).
+requirements:     ## Update python dependencies lock files (i.e. requirements.*.txt).
 	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile $(PIP_COMPILE_UPDATE_SPEC) -o requirements/requirements.common.txt \
 		setup.py
 	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile $(PIP_COMPILE_UPDATE_SPEC) -o requirements/requirements.standalone.txt \
