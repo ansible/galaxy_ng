@@ -32,7 +32,7 @@ bonfire deploy \
     --set-template-ref ${APP_NAME}/${COMPONENT_NAME}=${GIT_COMMIT} \
     --set-image-tag ${IMAGE}=${IMAGE_TAG} \
     --namespace ${NAMESPACE} \
-    --no-remove-resources \
+    --no-remove-resources all \
     ${COMPONENTS_ARG}
 # END WORKAROUND
 
