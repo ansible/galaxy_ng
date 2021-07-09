@@ -13,7 +13,7 @@ from setuptools.command.build_py import build_py as _BuildPyCommand
 from setuptools.command.sdist import sdist as _SDistCommand
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-version = "4.3.1"
+version = "4.3.2"
 
 
 class PrepareStaticCommand(Command):
@@ -83,7 +83,8 @@ requirements = [
     "pulp-ansible==0.7.3",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container>=2.5.2",
+    # pulp-container 2.6 requires pulpcore >=3.12.1
+    "pulp-container>=2.5.2,<2.6.0",
     # click 8 requires py38,
     # can be removed once we require >=py38
     "click==7.1.2",
