@@ -67,7 +67,7 @@ class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer
     def get_distributions(self, obj):
         return [
             AnsibleDistributionSerializer(distro).data
-            for distro in obj.ansible_ansibledistribution.all()
+            for distro in obj.distributions.all()
         ]
 
     def get_last_sync_task_queryset(self, obj):

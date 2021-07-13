@@ -5,9 +5,6 @@ services:
   api:
     env_file:
       - './standalone/galaxy_ng.env'
-  resource-manager:
-    env_file:
-      - './standalone/galaxy_ng.env'
   worker:
     env_file:
       - './standalone/galaxy_ng.env'

@@ -5,9 +5,6 @@ services:
   api:
     env_file:
       - './insights/galaxy_ng.env'
-  resource-manager:
-    env_file:
-      - './insights/galaxy_ng.env'
   worker:
     env_file:
       - './insights/galaxy_ng.env'
