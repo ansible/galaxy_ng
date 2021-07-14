@@ -1,0 +1,1 @@
+Made API Root view to raise 404 if distro path is provided but distro doesn´t exist.
