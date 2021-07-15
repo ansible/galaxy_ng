@@ -11,6 +11,14 @@ from galaxy_ng.app.api import base as api_base
 
 
 class UserFilter(filterset.FilterSet):
+    username = filters.CharFilter(field_name='username', lookup_expr='icontains')
+    email = filters.CharFilter(field_name='email', lookup_expr='icontains')
+    first_name = filters.CharFilter(field_name='first_name', lookup_expr='icontains')
+    last_name = filters.CharFilter(field_name='last_name', lookup_expr='icontains')
+    date_joined = filters.CharFilter(field_name='date_joined')
+    groups_name = filters.CharFilter(field_name='groups__name')
+    groups = filters.CharFilter(field_name='groups')
+
     sort = filters.OrderingFilter(
         fields=(
             ('username', 'username'),
@@ -23,15 +31,15 @@ class UserFilter(filterset.FilterSet):
 
     class Meta:
         model = auth_models.User
-        fields = {
-            'username': ['exact', 'contains', 'startswith'],
-            'email': ['exact', 'contains', 'startswith'],
-            'first_name': ['exact', 'contains', 'startswith'],
-            'last_name': ['exact', 'contains', 'startswith'],
-            'date_joined': ['exact'],
-            'groups__name': ['exact'],
-            'groups': ['exact']
-        }
+        fields = [
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'date_joined',
+            'groups__name',
+            'groups',
+        ]
 
 
 class UserViewSet(
