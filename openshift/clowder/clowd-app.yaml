@@ -41,7 +41,7 @@ objects:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'api']
         initContainers:
-          - args: ["wait-for-migrations"]
+          - args: ["manage", "migrate"]
             inheritEnv: true
         resources:
           limits:
