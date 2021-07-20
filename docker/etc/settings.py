@@ -49,7 +49,7 @@ if clowder_config and clowder_config.isClowderEnabled():
         'PASSWORD': LocalConfig.database.password
     }
     # AWS S3 configuration
-    AWS_S3_ENDPOINT_URL = 'http://{}:{}'.format(
+    AWS_S3_ENTRYPOINT_URL = 'http://{}:{}'.format(
         LocalConfig.objectStore.hostname,
         LocalConfig.objectStore.port
     )
