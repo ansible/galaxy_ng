@@ -58,9 +58,8 @@ chardet==4.0.0
     # via
     #   aiohttp
     #   requests
-click==7.1.2
+click==8.0.1
     # via
-    #   galaxy-ng (setup.py)
     #   pulpcore
     #   rq
 colorama==0.4.4
