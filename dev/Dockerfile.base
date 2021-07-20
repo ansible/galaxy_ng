@@ -1,4 +1,4 @@
-FROM quay.io/app-sre/ubi8-ubi:8.2
+FROM quay.io/centos/centos:8
 
 ARG USER_ID=1000
 ARG USER_NAME=galaxy
@@ -35,7 +35,7 @@ RUN set -ex; \
         git \
         gcc \
         glibc-langpack-en \
-        python38-devel \
+        python3-devel \
         libpq \
         libpq-devel \
     && dnf clean all \
