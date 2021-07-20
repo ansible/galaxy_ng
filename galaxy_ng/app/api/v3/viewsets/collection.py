@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import APIException, NotFound
 
 from pulpcore.plugin.models import Task
-from pulpcore.plugin.tasking import dispatch
+from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
@@ -131,8 +131,8 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
             kwargs["repository_pk"] = repository.pk
 
         if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
-            return dispatch(import_and_move_to_staging, locks, kwargs=kwargs)
-        return dispatch(import_and_auto_approve, locks, kwargs=kwargs)
+            return enqueue_with_reservation(import_and_move_to_staging, locks, kwargs=kwargs)
+        return enqueue_with_reservation(import_and_auto_approve, locks, kwargs=kwargs)
 
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
     # the import task and the collection artifact details
@@ -329,7 +329,7 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
                 task_args = (repo_name,)
                 task_kwargs = {}
 
-                curate_task = dispatch(
+                curate_task = enqueue_with_reservation(
                     curate_all_synclist_repository, locks, args=task_args, kwargs=task_kwargs
                 )
                 curate_task_id = curate_task.id

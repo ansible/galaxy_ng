@@ -62,12 +62,16 @@ def populate_initial_repos(apps, schema_editor):
     db_alias = schema_editor.connection.alias
 
     AnsibleRepository = apps.get_model('ansible', 'AnsibleRepository')
+    AnsibleRepository.objects = AnsibleRepository.objects.using(db_alias)
 
     AnsibleDistribution = apps.get_model('ansible', 'AnsibleDistribution')
+    AnsibleDistribution.objects = AnsibleDistribution.objects.using(db_alias)
 
     CollectionRemote = apps.get_model('ansible', 'CollectionRemote')
+    CollectionRemote.objects = CollectionRemote.objects.using(db_alias)
 
     RepositoryVersion = apps.get_model('core', 'RepositoryVersion')
+    RepositoryVersion.objects = RepositoryVersion.objects.using(db_alias)
 
     for repo_data in REPOSITORIES:
 
