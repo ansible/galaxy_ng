@@ -170,8 +170,6 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
 class CollectionImportFilter(filterset.FilterSet):
     namespace = filters.CharFilter(field_name='galaxy_import__namespace__name')
     name = filters.CharFilter(field_name='galaxy_import__name')
-    keywords = filters.CharFilter(field_name='galaxy_import__name', lookup_expr='icontains')
-    state = filters.CharFilter(field_name='task__state')
     version = filters.CharFilter(field_name='galaxy_import__version')
     created = filters.DateFilter(field_name='galaxy_import__created_at')
     versioning_class = versioning.UIVersioning
@@ -184,8 +182,6 @@ class CollectionImportFilter(filterset.FilterSet):
         model = PulpCollectionImport
         fields = ['namespace',
                   'name',
-                  'keywords',
-                  'state',
                   'version']
 
 
