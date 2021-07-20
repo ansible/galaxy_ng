@@ -85,9 +85,6 @@ requirements = [
     "drf-spectacular",
     # pulp-container 2.6 requires pulpcore >=3.12.1
     "pulp-container>=2.7.0,<2.8.0",
-    # click 8 requires py38,
-    # can be removed once we require >=py38
-    "click==7.1.2",
 ]
 
 
@@ -121,7 +118,7 @@ setup(
     author="Red Hat, Inc.",
     author_email="info@ansible.com",
     url="https://github.com/ansible/galaxy_ng/",
-    python_requires=">=3.8",
+    python_requires=">=3.8,<3.9",
     setup_requires=["wheel"],
     install_requires=requirements,
     include_package_data=True,
