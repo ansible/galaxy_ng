@@ -10,7 +10,7 @@ sudo: required
 dist: bionic
 language: python
 python:
-  - "3.8"
+  - "3.6"
 env:
   global:
     # generate manifests parameters
