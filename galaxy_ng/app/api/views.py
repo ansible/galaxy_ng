@@ -1,7 +1,5 @@
 from django.apps import apps
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
-from pulp_ansible.app.models import AnsibleDistribution
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,30 +8,19 @@ from rest_framework.reverse import reverse
 from galaxy_ng.app.api import base as api_base
 
 
-# define the version matrix at the module level to avoid the redefinition on every API call.
-VERSIONS = {
-    "available_versions": {"v3": "v3/"},
-    "server_version": apps.get_app_config("galaxy").version,
-    "galaxy_ng_version": apps.get_app_config("galaxy").version,
-    "pulp_ansible_version": apps.get_app_config('ansible').version,
-}
-
-
 class ApiRootView(api_base.APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        """
-        Returns the version matrix for the API + the current distro.
-        """
-        data = {**VERSIONS}
+        data = {
+            "available_versions": {"v3": "v3/"},
+            "server_version": apps.get_app_config("galaxy").version,
+            "galaxy_ng_version": apps.get_app_config("galaxy").version,
+            "pulp_ansible_version": apps.get_app_config('ansible').version,
+        }
 
         if kwargs.get("path"):
-            distro = get_object_or_404(
-                AnsibleDistribution,
-                name=self.kwargs["path"]
-            )
-            data["distro_base_path"] = distro.base_path
+            data["distro_base_path"] = kwargs["path"]
 
         return Response(data)
 
