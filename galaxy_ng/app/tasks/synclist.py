@@ -125,26 +125,23 @@ def curate_synclist_repository(synclist_pk, **kwargs):
 
     namespaces = synclist.namespaces.filter().values_list("name", flat=True)
 
-    # FIXME: For 'exclude', we want to remove all version of the excluded collection
-    is_highest = True
-    if synclist.policy == 'exclude':
-        is_highest = False
+    # include adds only highest version and exclude removes all versions of the collection.
+    is_highest_query_param = {}
+    if synclist.policy == 'include':
+        is_highest_query_param = {"is_highest": True}
 
     collection_versions = CollectionVersion.objects.filter(
         Q(
             repositories=synclist.upstream_repository,
             collection__namespace__in=namespaces,
-            is_highest=is_highest,
+            **is_highest_query_param
         )
         | Q(
             collection__in=synclist.collections.all(),
             repositories=synclist.repository,
-            is_highest=is_highest,
+            **is_highest_query_param
         )
     )
-
-    import pprint
-    log.debug('collection_versions: %s', pprint.pformat(collection_versions.all()))
 
     if synclist.policy == "exclude":
         task_kwargs = {
@@ -163,5 +160,4 @@ def curate_synclist_repository(synclist_pk, **kwargs):
     else:
         raise RuntimeError("Unexpected synclist policy {}".format(synclist.policy))
 
-    log.debug('task_kwargs: %s', pprint.pformat(task_kwargs))
     add_and_remove(**task_kwargs)
