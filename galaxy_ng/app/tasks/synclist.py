@@ -11,7 +11,7 @@ from pulpcore.plugin.models import (
     Task,
     TaskGroup,
 )
-from pulpcore.plugin.tasking import add_and_remove, enqueue_with_reservation
+from pulpcore.plugin.tasking import add_and_remove, dispatch
 from pulp_ansible.app.models import (
     AnsibleRepository,
     CollectionVersion,
@@ -75,7 +75,7 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
             synclist_ids = [synclist.id for synclist in batch]
             locks = [synclist.repository for synclist in batch]
 
-            enqueue_with_reservation(
+            dispatch(
                 curate_synclist_repository_batch,
                 locks,
                 args=(synclist_ids,),

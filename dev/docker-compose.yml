@@ -53,27 +53,6 @@ services:
       - postgres
       - redis
 
-  resource-manager:
-    image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
-    command: ['run', 'resource-manager']
-    environment:
-      - "WITH_DEV_INSTALL=1"
-      - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
-      - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
-      - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
-    env_file:
-      - './common/galaxy_ng.env'
-    volumes:
-      - "./common/settings.py:/etc/pulp/settings.py:z"
-      - "${COMPOSE_CONTEXT}/..:/src:z"
-      - "pulp:/var/lib/pulp"
-    tmpfs:
-      - "/tmp/ansible:uid=1000,gid=1000"
-    depends_on:
-      - _base
-      - postgres
-      - redis
-
   worker:
     image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
     command: ['run', 'worker']

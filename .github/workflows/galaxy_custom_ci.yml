@@ -29,4 +29,4 @@ jobs:
         START_COMMIT: ${{ github.event.before }}
         END_COMMIT: ${{ github.event.after }}
       run: |
-        sh .github/workflows/scripts/check_commits.sh
+        python .github/workflows/scripts/check_commits.py
