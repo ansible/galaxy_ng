@@ -118,7 +118,7 @@ setup(
     author="Red Hat, Inc.",
     author_email="info@ansible.com",
     url="https://github.com/ansible/galaxy_ng/",
-    python_requires=">=3.8,<3.9",
+    python_requires=">=3.8",
     setup_requires=["wheel"],
     install_requires=requirements,
     include_package_data=True,
