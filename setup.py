@@ -31,9 +31,11 @@ class PrepareStaticCommand(Command):
     TARGET_DIR = "galaxy_ng/app/static/galaxy_ng"
 
     user_options = [
-        ('force-download-ui',
-        None,
-        'Replace any existing static files with the ones downloaded from github.'),
+        (
+            'force-download-ui',
+            None,
+            'Replace any existing static files with the ones downloaded from github.'
+        ),
     ]
 
     def initialize_options(self):
