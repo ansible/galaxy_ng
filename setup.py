@@ -4,6 +4,7 @@ import os
 import re
 import tempfile
 import tarfile
+import shutil
 import urllib.request
 import urllib.error
 from distutils import log
@@ -29,18 +30,24 @@ class PrepareStaticCommand(Command):
     )
     TARGET_DIR = "galaxy_ng/app/static/galaxy_ng"
 
-    user_options = []
+    user_options = [
+        ('force-download-ui', None, 'Replace any existing static files with the ones downloaded from github.'),
+    ]
 
     def initialize_options(self):
-        pass
+        self.force_download_ui = False
 
     def finalize_options(self):
         pass
 
     def run(self):
         if os.path.exists(self.TARGET_DIR):
-            log.warn(f"Static directory {self.TARGET_DIR} already exists, skipping. ")
-            return
+            if self.force_download_ui:
+                log.warn(f"Removing {self.TARGET_DIR} and re downloading the UI.")
+                shutil.rmtree(self.TARGET_DIR)
+            else:
+                log.warn(f"Static directory {self.TARGET_DIR} already exists, skipping. ")
+                return
 
         with tempfile.NamedTemporaryFile() as download_file:
             log.info(f"Downloading UI distribution to temporary file: {download_file.name}")
