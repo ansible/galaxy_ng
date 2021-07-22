@@ -79,12 +79,14 @@ class BuildPyCommand(_BuildPyCommand):
 requirements = [
     "Django~=2.2.23",
     "galaxy-importer==0.3.4",
-    "pulpcore>=3.14.0,<3.15.0",
-    "pulp-ansible>=0.8.0,<0.9.0",
+    "pulpcore<3.12,>=3.11.2",
+    "pulp-ansible==0.7.3",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    # pulp-container 2.6 requires pulpcore >=3.12.1
-    "pulp-container>=2.7.0,<2.8.0",
+    "pulp-container>=2.5.2",
+    # click 8 requires py38,
+    # can be removed once we require >=py38
+    "click==7.1.2",
 ]
 
 
@@ -118,7 +120,7 @@ setup(
     author="Red Hat, Inc.",
     author_email="info@ansible.com",
     url="https://github.com/ansible/galaxy_ng/",
-    python_requires=">=3.8,<3.9",
+    python_requires=">=3.6",
     setup_requires=["wheel"],
     install_requires=requirements,
     include_package_data=True,
@@ -129,8 +131,8 @@ setup(
         "Framework :: Django",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ),
     entry_points={"pulpcore.plugin": ["galaxy_ng = galaxy_ng:default_app_config"]},
     cmdclass={
