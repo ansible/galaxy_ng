@@ -80,10 +80,9 @@ requirements = [
     "Django~=2.2.23",
     "galaxy-importer==0.3.4",
     "pulpcore>=3.14.0,<3.15.0",
-    "pulp-ansible>=0.8.0,<0.9.0",
+    "pulp-ansible>=0.9.0,<0.10.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    # pulp-container 2.6 requires pulpcore >=3.12.1
     "pulp-container>=2.7.0,<2.8.0",
 ]
 
