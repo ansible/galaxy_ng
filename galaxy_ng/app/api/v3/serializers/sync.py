@@ -38,7 +38,7 @@ class LastSyncTaskMixin:
             return
 
         return {
-            "task_id": sync_task.id,
+            "task_id": sync_task.pulp_id,
             "state": sync_task.task.state,
             "started_at": sync_task.task.started_at,
             "finished_at": sync_task.task.finished_at,
