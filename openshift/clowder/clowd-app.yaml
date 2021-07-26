@@ -4,6 +4,20 @@ kind: Template
 metadata:
   name: automation-hub
 objects:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: galaxy-importer-config
+    namespace: automation-hub
+  data:
+    galaxy-importer.cfg: |
+      [galaxy-importer]
+      LOG_LEVEL_MAIN = INFO
+      RUN_ANSIBLE_TEST = True
+      INFRA_PULP = True
+      INFRA_OSD = True
+      ANSIBLE_LOCAL_TMP = '/tmp/ansible'
+
 - apiVersion: cloud.redhat.com/v1alpha1
   kind: ClowdApp
   metadata:
@@ -128,6 +142,12 @@ objects:
         env:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
+          - name: PULP_CONTENT_ORIGIN
+            value: 'localhost'
+          - name: IMPORTER_API_DOMAIN
+            value: ${{API_DOMAIN}}
+          - name: IMPORTER_JOB_NAMESPACE
+            value: ${{NAMESPACE}}
           - name: IMPORTER_MEMORY_REQUEST
             value: 1Gi
           - name: IMPORTER_MEMORY_LIMIT
@@ -136,8 +156,13 @@ objects:
             value: 500m
           - name: IMPORTER_CPU_LIMIT
             value: 1000m
-          - name: PULP_CONTENT_ORIGIN
-            value: 'localhost'
+        volumeMounts:
+          - name: importer-config
+            mountPath: /etc/galaxy-importer
+        volumes:
+          - name: importer-config
+            configMap:
+              name: galaxy-importer-config
 
     # Creates a database if local mode, or uses RDS in production
     database:
@@ -166,6 +191,11 @@ parameters:
   value: "quay.io/cloudservices/automation-hub-nginx"
 - name: NGINX_IMAGE_TAG
   value: latest
+
+- name: NAMESPACE
+  required: true
+- name: API_DOMAIN
+  value: https://kubernetes.default.svc:443
 
 # nginx resource requirements
 - name: NGINX_MEMORY_REQUEST
