@@ -58,6 +58,13 @@ objects:
           requests:
             cpu: ${{NGINX_CPU_REQUEST}}
             memory: ${{NGINX_MEMORY_REQUEST}}
+        env:
+          - name: LISTEN_PORT
+            value: '8000'
+          - name: GALAXY_API_HOST
+            value: automation-hub-galaxy-api
+          - name: GALAXY_API_PORT
+            value: '8000'
         volumeMounts:
           - name: cache
             mountPath: /var/cache/nginx
