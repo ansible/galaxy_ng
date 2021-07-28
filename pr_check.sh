@@ -1,5 +1,8 @@
 #!/bin/bash
 
+env|grep -i git
+exit 0
+
 # --------------------------------------------
 # Options that must be configured by app owner
 # --------------------------------------------
