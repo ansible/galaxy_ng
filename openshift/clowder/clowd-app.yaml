@@ -28,7 +28,7 @@ objects:
     envName: ${ENV_NAME}
 
     deployments:
-    - name: backend
+    - name: "backend${SUFFIX}"
       podSpec:
         name: backend
         image: ${NGINX_IMAGE}:${NGINX_IMAGE_TAG}
@@ -43,7 +43,7 @@ objects:
           - name: LISTEN_PORT
             value: '8000'
           - name: GALAXY_API_HOST
-            value: automation-hub-galaxy-api
+            value: "automation-hub-galaxy-api${SUFFIX}"
           - name: GALAXY_API_PORT
             value: '8000'
         volumeMounts:
@@ -56,7 +56,7 @@ objects:
         public:
             enabled: true
 
-    - name: galaxy-api
+    - name: "galaxy-api${SUFFIX}"
       podSpec:
         name: galaxy-api
         image: ${IMAGE_NAME}:${IMAGE_TAG}
@@ -75,18 +75,18 @@ objects:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
-            value: 'localhost'
+            value: ${{CONTENT_ORIGIN}}
           - name: PULP_RH_ENTITLEMENT_REQUIRED
             value: 'insights'
           - name: PULP_X_PULP_CONTENT_HOST
-            value: 'automation-hub-pulp-content-app'
+            value: 'automation-hub-pulp-content-app${SUFFIX}'
           - name: PULP_X_PULP_CONTENT_PORT
             value: '10000'
       webServices:
         public:
             enabled: true
 
-    - name: pulp-resource-manager
+    - name: "pulp-resource-manager${SUFFIX}"
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'resource-manager']
@@ -104,9 +104,9 @@ objects:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
-            value: 'localhost'
+            value: ${{CONTENT_ORIGIN}}
 
-    - name: pulp-content-app
+    - name: "pulp-content-app${SUFFIX}"
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'content-app']
@@ -124,14 +124,14 @@ objects:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
-            value: 'localhost'
+            value: ${{CONTENT_ORIGIN}}
           - name: GUNICORN_PORT
             value: '10000'
       webServices:
         private:
             enabled: true
 
-    - name: pulp-worker
+    - name: "pulp-worker${SUFFIX}"
       k8sAccessLevel: edit
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
@@ -150,11 +150,11 @@ objects:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
-            value: 'localhost'
+            value: ${{CONTENT_ORIGIN}}
           - name: IMPORTER_API_DOMAIN
             value: ${{API_DOMAIN}}
           - name: IMPORTER_JOB_NAMESPACE
-            value: ${{NAMESPACE}}
+            value: ${{IMPORTER_JOB_NAMESPACE}}
           - name: IMPORTER_MEMORY_REQUEST
             value: 1Gi
           - name: IMPORTER_MEMORY_LIMIT
@@ -186,6 +186,8 @@ parameters:
 - description: Clowder ENV
   name: ENV_NAME
   required: true
+- name: SUFFIX
+  value: ''
 
 - descripton: Automation Hub image name
   name: IMAGE_NAME
@@ -199,8 +201,10 @@ parameters:
 - name: NGINX_IMAGE_TAG
   value: latest
 
-- name: NAMESPACE
+- name: IMPORTER_JOB_NAMESPACE
   required: true
+- name: CONTENT_ORIGIN
+  value: 'localhost'
 - name: API_DOMAIN
   value: https://kubernetes.default.svc:443
 
