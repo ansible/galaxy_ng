@@ -30,7 +30,7 @@ bonfire deploy \
     --source=appsre \
     --ref-env insights-stage \
     --set-template-ref ${APP_NAME}/${COMPONENT_NAME}=${GIT_COMMIT} \
-    --set-parameter "${APP_NAME}/${COMPONENT_NAME}/NAMESPACE=${NAMESPACE}" \
+    --set-parameter "${APP_NAME}/${COMPONENT_NAME}/IMPORTER_JOB_NAMESPACE=${NAMESPACE}" \
     --set-image-tag ${IMAGE}=${IMAGE_TAG} \
     --namespace ${NAMESPACE} \
     --no-remove-resources all \
