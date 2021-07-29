@@ -1,0 +1,3 @@
+[allowlist]
+  description = "Our test install exports a test only MINIO ACCESS KEY"
+  files = [ '''.github/workflows/scripts/install.sh''' ]
