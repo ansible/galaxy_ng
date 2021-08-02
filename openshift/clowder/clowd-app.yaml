@@ -29,6 +29,7 @@ objects:
 
     deployments:
     - name: "backend${SUFFIX}"
+      minReplicas: ${{NGINX_REPLICAS}}
       podSpec:
         name: backend
         image: ${NGINX_IMAGE}:${NGINX_IMAGE_TAG}
@@ -57,6 +58,7 @@ objects:
             enabled: true
 
     - name: "galaxy-api${SUFFIX}"
+      minReplicas: ${{GALAXY_API_REPLICAS}}
       podSpec:
         name: galaxy-api
         image: ${IMAGE_NAME}:${IMAGE_TAG}
@@ -87,6 +89,7 @@ objects:
             enabled: true
 
     - name: "pulp-resource-manager${SUFFIX}"
+      minReplicas: ${{PULP_RESOURCE_MANAGER_REPLICAS}}
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'resource-manager']
@@ -107,6 +110,7 @@ objects:
             value: ${{CONTENT_ORIGIN}}
 
     - name: "pulp-content-app${SUFFIX}"
+      minReplicas: ${{PULP_CONTENT_APP_REPLICAS}}
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'content-app']
@@ -132,6 +136,7 @@ objects:
             enabled: true
 
     - name: "pulp-worker${SUFFIX}"
+      minReplicas: ${{PULP_WORKER_REPLICAS}}
       k8sAccessLevel: edit
       podSpec:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
@@ -209,6 +214,8 @@ parameters:
   value: https://kubernetes.default.svc:443
 
 # nginx resource requirements
+- name: NGINX_REPLICAS
+  value: '1'
 - name: NGINX_MEMORY_REQUEST
   value: 64Mi
 - name: NGINX_MEMORY_LIMIT
@@ -219,6 +226,8 @@ parameters:
   value: 200m
 
 # galaxy-api resource requirements
+- name: GALAXY_API_REPLICAS
+  value: '1'
 - name: GALAXY_API_MEMORY_REQUEST
   value: 1024Mi
 - name: GALAXY_API_MEMORY_LIMIT
@@ -229,6 +238,8 @@ parameters:
   value: 600m
 
 # pulp-resource-manager resource requirements
+- name: PULP_RESOURCE_MANAGER_REPLICAS
+  value: '1'
 - name: PULP_RESOURCE_MANAGER_MEMORY_REQUEST
   value: 512Mi
 - name: PULP_RESOURCE_MANAGER_MEMORY_LIMIT
@@ -239,6 +250,8 @@ parameters:
   value: 500m
 
 # pulp-content-app resource requirements
+- name: PULP_CONTENT_APP_REPLICAS
+  value: '1'
 - name: PULP_CONTENT_APP_MEMORY_REQUEST
   value: 1024Mi
 - name: PULP_CONTENT_APP_MEMORY_LIMIT
@@ -249,6 +262,8 @@ parameters:
   value: 600m
 
 # pulp-worker resource requirements
+- name: PULP_WORKER_REPLICAS
+  value: '1'
 - name: PULP_WORKER_MEMORY_REQUEST
   value: 256Mi
 - name: PULP_WORKER_MEMORY_LIMIT
