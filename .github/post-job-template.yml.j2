@@ -1,0 +1,18 @@
+update_manifest:
+
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: {{ "${{ github.event.after }}" }}  # for PR avoids checking out merge commit
+          fetch-depth: 0  # include all history
+
+      - name: Update Manifest for Ansible Hub UI
+        env:
+          GITHUB_PULL_REQUEST: {{ "${{ github.event.number }}" }}
+          GITHUB_BRANCH: {{ "${{ github.head_ref }}" }}
+          GITHUB_REPO_SLUG: {{ "${{ github.repository }}" }}
+        run: .github/workflows/scripts/update_manifest.sh
+        shell: bash
