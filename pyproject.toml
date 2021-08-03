@@ -48,6 +48,7 @@ ignore = [
     "dev/**",
     "docker/**",
     "openshift/**",
+    "galaxy_ng/app/static/**",
     ".compose.env.example",
     ".dockerignore",
     "COMMITMENT",
