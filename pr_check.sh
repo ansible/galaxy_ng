@@ -19,6 +19,7 @@ source .cicd_bootstrap.sh
 
 
 
+
 export IMAGE_TAG="pr-$IMAGE_TAG"
 
 source "$CICD_ROOT/build.sh"
