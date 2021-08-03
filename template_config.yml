@@ -1,12 +1,33 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-additional_plugins:
-- branch: master
-  name: pulp_ansible
+# generated with plugin_template@2021.04.08-87-g2136629-dirty
+
+additional_repos:
+  - name: pulp_ansible
+    org: pulp
+    bindings: true
+    branch: 0.9.0
+  - name: pulp_container
+    org: pulp
+    bindings: true
+    branch: 2.7.1
+  - name: galaxy-importer
+    bindings: false
+    org: ansible
+    branch: v0.3.4
 black: false
 check_commit_message: false
+check_gettext: true
+check_manifest: true
+check_openapi_schema: true
+check_stray_pulpcore_imports: true
+core_import_allowed:
+  - "pulpcore.app.*viewsets"
+  - "pulpcore\\.app.*admin"
+  - "ProgressReportSerializer"
 cherry_pick_automation: false
+ci_trigger: "{pull_request: {branches: ['*']}, push: {branches: ['*']}}"
 coverage: false
 deploy_client_to_pypi: false
 deploy_client_to_rubygems: false
@@ -14,7 +35,9 @@ deploy_daily_client_to_pypi: false
 deploy_daily_client_to_rubygems: false
 deploy_to_pypi: false
 docker_fixtures: false
-docs_test: true
+docs_test: false
+flake8: true
+issue_tracker: null
 plugin_app_label: galaxy
 plugin_camel: GalaxyNG
 plugin_camel_short: Galaxy
@@ -22,18 +45,39 @@ plugin_caps: GALAXY_NG
 plugin_caps_short: GALAXY
 plugin_dash: galaxy-ng
 plugin_dash_short: galaxy
+plugin_default_branch: master
 plugin_name: galaxy_ng
 plugin_snake: galaxy_ng
-pulp_settings: null
-pulpcore_branch: master
+post_job_template: 
+  name: update_manifest
+  path: "galaxy_ng/.github/post-job-template.yml.j2"
+pre_job_template:
+  name: check_commit
+  path: "galaxy_ng/.github/pre-job-template.yml.j2"
+publish_docs_to_pulpprojectdotorg: false
+pulp_scheme: http
+pulp_settings:
+  allowed_export_paths: /tmp
+  allowed_import_paths: /tmp
+  rh_entitlement_required: insights
+pulpcore_branch: '3.14'
 pulpcore_pip_version_specifier: null
+pulpprojectdotorg_key_id: null
 pydocstyle: true
 pypi_username: null
+python_version: '3.8'
 redmine_project: null
-stable_branch: null
+release_user: ansible
+stable_branch: stable
+sync_ci: true
 test_bindings: false
+test_cli: false
 test_performance: false
-test_s3: false
+test_released_plugin_with_next_pulpcore_release: false
+test_s3: true
 travis_addtl_services: []
 travis_notifications: null
+update_redmine: false
+upgrade_range: []
+
 
