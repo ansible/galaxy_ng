@@ -1,3 +1,5 @@
+import os
+
 MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     # BEGIN: Pulp standard middleware
@@ -112,3 +114,79 @@ SPECTACULAR_SETTINGS = {
 # Disable django guardian anonymous user
 # https://django-guardian.readthedocs.io/en/stable/configuration.html#anonymous-user-name
 ANONYMOUS_USER_NAME = None
+
+GALAXY_ENABLE_API_ACCESS_LOG = os.getenv('GALAXY_ENABLE_API_ACCESS_LOG', default=False)
+
+if GALAXY_ENABLE_API_ACCESS_LOG:
+    INSTALLED_APPS.append('automated_logging')
+    MIDDLEWARE.append('automated_logging.middleware.AutomatedLoggingMiddleware')
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "automated_logging": {"format": "%(asctime)s: %(levelname)s: %(message)s"},
+        },
+        "handlers": {
+            "automated_logging": {
+                "level": "INFO",
+                "class": "logging.handlers.WatchedFileHandler",
+                "filename": "/var/log/galaxy_api_access.log",
+                "formatter": "automated_logging",
+            },
+        },
+        "loggers": {
+            "automated_logging": {
+                "handlers": ["automated_logging"],
+                "level": "INFO",
+                "propagate": False,
+            },
+        },
+        "dynaconf_merge": True,
+    }
+    AUTOMATED_LOGGING = {
+        "globals": {
+            "exclude": {
+                "applications": [
+                    "plain:contenttypes",
+                    "plain:admin",
+                    "plain:basehttp",
+                    "glob:session*",
+                    "plain:migrations",
+                ]
+            }
+        },
+        "model": {
+            "detailed_message": True,
+            "exclude": {"applications": [], "fields": [], "models": [], "unknown": False},
+            "loglevel": 20,
+            "mask": [],
+            "max_age": None,
+            "performance": False,
+            "snapshot": False,
+            "user_mirror": False,
+        },
+        "modules": ["request", "unspecified", "model"],
+        "request": {
+            "data": {
+                "content_types": ["application/json"],
+                "enabled": [],
+                "ignore": [],
+                "mask": ["password"],
+                "query": False,
+            },
+            "exclude": {
+                "applications": [],
+                "methods": ["GET"],
+                "status": [],
+                "unknown": False,
+            },
+            "ip": True,
+            "loglevel": 20,
+            "max_age": None,
+        },
+        "unspecified": {
+            "exclude": {"applications": [], "files": [], "unknown": False},
+            "loglevel": 20,
+            "max_age": None,
+        },
+    }
