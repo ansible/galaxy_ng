@@ -7,7 +7,7 @@ ref_string=$(git show-ref --tags | grep refs/tags/$1)
 
 SHA=${ref_string:0:40}
 
-remote_repo=https://ansible:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+remote_repo=https://pulpbot:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
 
 git push "${remote_repo}" $BRANCH_NAME
 
