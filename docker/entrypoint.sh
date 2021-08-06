@@ -106,9 +106,9 @@ redis_connection_hack() {
     redis_password="${PULP_REDIS_PASSWORD:-}"
     redis_port="${PULP_REDIS_PORT:-}"
     redis_ssl="${PULP_REDIS_SSL:-}"
-    
+
     if [[ -z "${redis_host}" && -z "${redis_port}" &&
-          -z "${redis_password}" && -z "${redis_ssl}" ]]; then
+          -z "${redis_password}" ]]; then
         return
     fi
 

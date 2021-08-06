@@ -1,5 +1,6 @@
 import os
 
+
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_DEFAULT_ACL = None
 
@@ -57,9 +58,22 @@ if clowder_config and clowder_config.isClowderEnabled():
     AWS_ACCESS_KEY_ID = LocalConfig.objectStore.buckets[0].accessKey
     AWS_SECRET_ACCESS_KEY = LocalConfig.objectStore.buckets[0].secretKey
     AWS_STORAGE_BUCKET_NAME = LocalConfig.objectStore.buckets[0].name
+
     # Redis configuration
     REDIS_HOST = LocalConfig.inMemoryDb.hostname
     REDIS_PORT = LocalConfig.inMemoryDb.port
+    REDIS_PASSWORD = LocalConfig.inMemoryDb.password
+    REDIS_DB = 0
+    REDIS_SSL = os.environ.get("PULP_REDIS_SSL") == "true"
+
+    REDIS_URL = "{scheme}://{password}{host}:{port}/{db}".format(
+        scheme=("rediss" if REDIS_SSL else "redis"),
+        password=f":{REDIS_PASSWORD}@" if REDIS_PASSWORD else "",
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        db=REDIS_DB,
+    )
+
     del LocalConfig
 
 # Logging
