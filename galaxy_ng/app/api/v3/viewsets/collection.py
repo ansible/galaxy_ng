@@ -332,12 +332,12 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
                 curate_task = dispatch(
                     curate_all_synclist_repository, locks, args=task_args, kwargs=task_kwargs
                 )
-                curate_task_id = curate_task.pulp_id
+                curate_task_id = curate_task.pk
 
         return Response(
             data={
-                'copy_task_id': copy_task.pulp_id,
-                'remove_task_id': remove_task.pulp_id,
+                'copy_task_id': copy_task.pk,
+                'remove_task_id': remove_task.pk,
                 "curate_all_synclist_repository_task_id": curate_task_id,
             },
             status='202'
