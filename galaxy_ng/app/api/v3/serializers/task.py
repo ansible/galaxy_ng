@@ -67,7 +67,7 @@ class TaskSummarySerializer(TaskSerializer):
     def get_href(self, obj):
         return reverse(
             'galaxy:api:v3:default-content:tasks-detail',
-            kwargs={"pk": str(obj.pulp_id)}
+            kwargs={"pk": str(obj.pk)}
         )
 
     class Meta:

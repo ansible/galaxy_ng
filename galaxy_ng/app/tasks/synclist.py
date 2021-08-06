@@ -145,15 +145,15 @@ def curate_synclist_repository(synclist_pk, **kwargs):
 
     if synclist.policy == "exclude":
         task_kwargs = {
-            "base_version_pk": str(latest_upstream.pulp_id),
-            "repository_pk": str(synclist.repository.pulp_id),
+            "base_version_pk": str(latest_upstream.pk),
+            "repository_pk": str(synclist.repository.pk),
             "add_content_units": [],
             "remove_content_units": collection_versions,
         }
 
     elif synclist.policy == "include":
         task_kwargs = {
-            "repository_pk": str(synclist.repository.pulp_id),
+            "repository_pk": str(synclist.repository.pk),
             "add_content_units": collection_versions,
             "remove_content_units": ["*"],
         }

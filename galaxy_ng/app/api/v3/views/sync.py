@@ -58,4 +58,4 @@ class SyncRemoteView(api_base.APIView):
             task=result
         )
 
-        return Response({'task': result.pulp_id})
+        return Response({'task': result.pk})

@@ -72,7 +72,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         return distro.namespace.name
 
     def get_id(self, distro):
-        return distro.pulp_id
+        return distro.pk
 
     def get_created(self, distro):
         return distro.repository.pulp_created
@@ -86,7 +86,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         return {
             'repository':
             {
-                'pulp_id': repo.pulp_id,
+                'pulp_id': repo.pk,
                 'pulp_type': repo.pulp_type,
                 'version': repo.latest_version().number,
                 'name': repo.name,
@@ -99,7 +99,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             },
             'distribution':
             {
-                'pulp_id': distro.pulp_id,
+                'pulp_id': distro.pk,
                 'name': distro.name,
                 'pulp_created': distro.pulp_created,
                 'base_path': distro.base_path,
@@ -119,7 +119,7 @@ def _get_last_sync_task(repo):
         return
 
     return {
-        "task_id": sync_task.pulp_id,
+        "task_id": sync_task.pk,
         "state": sync_task.task.state,
         "started_at": sync_task.task.started_at,
         "finished_at": sync_task.task.finished_at,
@@ -211,7 +211,7 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
 
     def _content_info(self, content):
         return_data = {
-            "pulp_id": content.pulp_id,
+            "pulp_id": content.pk,
             "pulp_type": content.pulp_type,
             "manifest_digest": None,
             "tag_name": None,
@@ -219,11 +219,11 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
 
         # TODO: Figure out if there is a way to prefetch Manifest and Tag objects
         if content.pulp_type == 'container.manifest':
-            manifest = container_models.Manifest.objects.get(pk=content.pulp_id)
+            manifest = container_models.Manifest.objects.get(pk=content.pk)
             return_data['manifest_digest'] = manifest.digest
         elif content.pulp_type == 'container.tag':
             tag = container_models.Tag.objects.select_related('tagged_manifest')\
-                .get(pk=content.pulp_id)
+                .get(pk=content.pk)
             return_data['manifest_digest'] = tag.tagged_manifest.digest
             return_data['tag_name'] = tag.name
 
