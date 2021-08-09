@@ -104,7 +104,7 @@ objects:
           - name: PULP_X_PULP_CONTENT_PORT
             value: '10000'
           - name: PULP_REDIS_SSL
-            value: ${{REDIS_SSL}}
+            value: ${REDIS_SSL}
       webServices:
         public:
             enabled: true
@@ -132,7 +132,7 @@ objects:
           - name: GUNICORN_PORT
             value: '10000'
           - name: PULP_REDIS_SSL
-            value: ${{REDIS_SSL}}
+            value: ${REDIS_SSL}
       webServices:
         private:
             enabled: true
@@ -171,7 +171,7 @@ objects:
           - name: IMPORTER_CPU_LIMIT
             value: 1000m
           - name: PULP_REDIS_SSL
-            value: ${{REDIS_SSL}}
+            value: ${REDIS_SSL}
         volumeMounts:
           - name: importer-config
             mountPath: /etc/galaxy-importer
