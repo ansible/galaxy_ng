@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.conf.urls import url
+from django.shortcuts import redirect
 from django.urls import include, path
 
 from . import views
@@ -46,3 +48,8 @@ urlpatterns = [
     ),
     path("healthz", views.health_view),
 ]
+
+if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
+    urlpatterns.append(url("", include("social_django.urls", namespace="social")))
+    urlpatterns.append(path("login/",
+                       lambda request: redirect("/login/keycloak/", permanent=False)))

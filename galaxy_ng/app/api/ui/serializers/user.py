@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
 
@@ -132,7 +133,8 @@ class CurrentUserSerializer(UserSerializer):
         )
 
     def get_model_permissions(self, obj):
-        return {
+
+        permissions = {
             "add_namespace": obj.has_perm('galaxy.add_namespace'),
             "upload_to_namespace": obj.has_perm('galaxy.upload_to_namespace'),
             "change_namespace": obj.has_perm('galaxy.change_namespace'),
@@ -145,11 +147,20 @@ class CurrentUserSerializer(UserSerializer):
             "add_distribution": obj.has_perm('ansible.add_ansibledistribution'),
             "view_distribution": obj.has_perm('ansible.view_ansibledistribution'),
             "view_user": obj.has_perm('galaxy.view_user'),
-            "delete_user": obj.has_perm('galaxy.delete_user'),
-            "change_user": obj.has_perm('galaxy.change_user'),
-            "add_user": obj.has_perm('galaxy.add_user'),
-            "add_group": obj.has_perm('galaxy.add_group'),
-            "delete_group": obj.has_perm('galaxy.delete_group'),
             "change_group": obj.has_perm('galaxy.change_group'),
             "view_group": obj.has_perm('galaxy.view_group'),
+            "delete_user": False,
+            "change_user": False,
+            "add_user": False,
+            "add_group": False,
+            "delete_group": False,
         }
+
+        if not settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
+            permissions["delete_user"] = obj.has_perm('galaxy.delete_user')
+            permissions["change_user"] = obj.has_perm('galaxy.change_user')
+            permissions["add_user"] = obj.has_perm('galaxy.add_user')
+            permissions["add_group"] = obj.has_perm('galaxy.add_group')
+            permissions["delete_group"] = obj.has_perm('galaxy.delete_group')
+
+        return permissions
