@@ -103,6 +103,8 @@ objects:
             value: 'automation-hub-pulp-content-app${SUFFIX}'
           - name: PULP_X_PULP_CONTENT_PORT
             value: '10000'
+          - name: PULP_REDIS_SSL
+            value: ${REDIS_SSL}
       webServices:
         public:
             enabled: true
@@ -129,6 +131,8 @@ objects:
             value: ${{CONTENT_ORIGIN}}
           - name: GUNICORN_PORT
             value: '10000'
+          - name: PULP_REDIS_SSL
+            value: ${REDIS_SSL}
       webServices:
         private:
             enabled: true
@@ -166,6 +170,8 @@ objects:
             value: 500m
           - name: IMPORTER_CPU_LIMIT
             value: 1000m
+          - name: PULP_REDIS_SSL
+            value: ${REDIS_SSL}
         volumeMounts:
           - name: importer-config
             mountPath: /etc/galaxy-importer
@@ -220,6 +226,8 @@ parameters:
   value: 'localhost'
 - name: API_DOMAIN
   value: https://kubernetes.default.svc:443
+- name: REDIS_SSL
+  value: "false"
 
 # nginx resource requirements
 - name: NGINX_REPLICAS
