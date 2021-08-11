@@ -1,3 +1,6 @@
+# FIXME(cutwater): Refactoring required. Merge this settings file into
+#                  main galaxy_ng/app/settings.py file.
+#                  Split the configuration if necessary.
 import os
 
 
@@ -26,10 +29,14 @@ DATABASES = {
     }
 }
 
+# FIXME(cutwater): This looks redundant and should be removed.
 REDIS_HOST = os.environ.get('PULP_REDIS_HOST')
 REDIS_PORT = os.environ.get('PULP_REDIS_PORT')
 
 REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = ['rest_framework.renderers.JSONRenderer']
+
+_enabled_handlers = ['console']
+_extra_handlers = {}
 
 # Clowder
 # -------
@@ -39,30 +46,32 @@ except ImportError:
     clowder_config = None
 
 if clowder_config and clowder_config.isClowderEnabled():
+    _LoadedConfig = clowder_config.LoadedConfig
+
     # Database configuration
-    LocalConfig = clowder_config.LoadedConfig
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': LocalConfig.database.name,
-        'HOST': LocalConfig.database.hostname,
-        'PORT': LocalConfig.database.port,
-        'USER': LocalConfig.database.username,
-        'PASSWORD': LocalConfig.database.password
+        'NAME': _LoadedConfig.database.name,
+        'HOST': _LoadedConfig.database.hostname,
+        'PORT': _LoadedConfig.database.port,
+        'USER': _LoadedConfig.database.username,
+        'PASSWORD': _LoadedConfig.database.password
     }
+
     # AWS S3 configuration
     AWS_S3_ENDPOINT_URL = '{}://{}:{}'.format(
-        'https' if LocalConfig.objectStore.tls else 'http',
-        LocalConfig.objectStore.hostname,
-        LocalConfig.objectStore.port
+        'https' if _LoadedConfig.objectStore.tls else 'http',
+        _LoadedConfig.objectStore.hostname,
+        _LoadedConfig.objectStore.port
     )
-    AWS_ACCESS_KEY_ID = LocalConfig.objectStore.buckets[0].accessKey
-    AWS_SECRET_ACCESS_KEY = LocalConfig.objectStore.buckets[0].secretKey
-    AWS_STORAGE_BUCKET_NAME = LocalConfig.objectStore.buckets[0].name
+    AWS_ACCESS_KEY_ID = _LoadedConfig.objectStore.buckets[0].accessKey
+    AWS_SECRET_ACCESS_KEY = _LoadedConfig.objectStore.buckets[0].secretKey
+    AWS_STORAGE_BUCKET_NAME = _LoadedConfig.objectStore.buckets[0].name
 
     # Redis configuration
-    REDIS_HOST = LocalConfig.inMemoryDb.hostname
-    REDIS_PORT = LocalConfig.inMemoryDb.port
-    REDIS_PASSWORD = LocalConfig.inMemoryDb.password
+    REDIS_HOST = _LoadedConfig.inMemoryDb.hostname
+    REDIS_PORT = _LoadedConfig.inMemoryDb.port
+    REDIS_PASSWORD = _LoadedConfig.inMemoryDb.password
     REDIS_DB = 0
     REDIS_SSL = os.environ.get("PULP_REDIS_SSL") == "true"
 
@@ -74,12 +83,34 @@ if clowder_config and clowder_config.isClowderEnabled():
         db=REDIS_DB,
     )
 
-    del LocalConfig
+    try:
+        with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace') as f:
+            K8S_NAMESPACE = f.read()
+    except OSError:
+        K8S_NAMESPACE = None
+
+    # Cloudwatch configuration
+    CLOUDWATCH_ACCESS_KEY_ID = _LoadedConfig.logging.cloudwatch.accessKeyId
+    CLOUDWATCH_SECRET_ACCESS_KEY = _LoadedConfig.logging.cloudwatch.secretAccessKey
+    CLOUDWATCH_REGION_NAME = _LoadedConfig.logging.cloudwatch.region
+    CLOUDWATCH_LOGGING_GROUP = _LoadedConfig.logging.cloudwatch.logGroup
+    CLOUDWATCH_LOGGING_STREAM_NAME = K8S_NAMESPACE
+
+    if all((
+            CLOUDWATCH_ACCESS_KEY_ID,
+            CLOUDWATCH_SECRET_ACCESS_KEY,
+            CLOUDWATCH_LOGGING_STREAM_NAME
+    )):
+        _enabled_handlers.append("cloudwatch")
+        _extra_handlers["cloudwatch"] = {
+            "level": "INFO",
+            "class": "galaxy_ng.contrib.cloudwatch.CloudWatchHandler",
+        }
+
+    del _LoadedConfig
 
 # Logging
 # -------
-_logging_handlers = ['console']
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -98,34 +129,31 @@ LOGGING = {
             "class": "pulp_ansible.app.logutils.CollectionImportHandler",
             "formatter": "simple",
         },
-        # 'cloudwatch': {
-        #     'level': 'INFO',
-        #     'class': 'galaxy_ng.contrib.cloudwatch.CloudWatchHandler',
-        # },
+
     },
     'root': {
         'level': 'INFO',
-        'handlers': _logging_handlers,
+        'handlers': _enabled_handlers,
     },
     'loggers': {
         'django': {
             'level': 'INFO',
-            'handlers': _logging_handlers,
+            'handlers': _enabled_handlers,
             'propagate': False,
         },
         'django.request': {
             'level': 'INFO',
-            'handlers': _logging_handlers,
+            'handlers': _enabled_handlers,
             'propagate': False,
         },
         'django.server': {
             'level': 'INFO',
-            'handlers': _logging_handlers,
+            'handlers': _enabled_handlers,
             'propagate': False,
         },
         'gunicorn.access': {
             'level': 'INFO',
-            'handlers': _logging_handlers,
+            'handlers': _enabled_handlers,
             'propagate': False,
         },
         "pulp_ansible.app.tasks.collection.import_collection": {
@@ -135,3 +163,4 @@ LOGGING = {
         },
     }
 }
+LOGGING["handlers"].update(_extra_handlers)

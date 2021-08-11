@@ -1,17 +1,16 @@
-import os
+from django.conf import settings
 
 import boto3
-from gunicorn import glogging
 import logstash_formatter
 import watchtower
 
 
-AWS_ACCESS_KEY_ID = os.getenv('CW_AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('CW_AWS_SECRET_ACCESS_KEY')
-AWS_REGION_NAME = os.getenv('CW_AWS_REGION_NAME')
+AWS_ACCESS_KEY_ID = settings.CLOUDWATCH_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY = settings.CLOUDWATCH_SECRET_ACCESS_KEY
+AWS_REGION_NAME = settings.CLOUDWATCH_REGION_NAME
 
-LOGGING_GROUP = os.getenv('CW_LOGGING_GROUP')
-LOGGING_STREAM_NAME = os.getenv('CW_LOGGING_STREAM_NAME')
+LOGGING_GROUP = settings.CLOUDWATCH_LOGGING_GROUP
+LOGGING_STREAM_NAME = settings.CLOUDWATCH_LOGGING_STREAM_NAME
 
 
 class CloudWatchHandler(watchtower.CloudWatchLogHandler):
@@ -31,12 +30,3 @@ class CloudWatchHandler(watchtower.CloudWatchLogHandler):
         # TODO(cutwater): Request ID should not depend on Django framework
         # self.addFilter(request_id.logging.RequestIdFilter())
         self.setFormatter(logstash_formatter.LogstashFormatterV1())
-
-
-class GunicornLogger(glogging.Logger):
-
-    def setup(self, cfg):
-        super().setup(cfg)
-
-        self.error_log.addHandler(CloudWatchHandler())
-        self.access_log.addHandler(CloudWatchHandler())
