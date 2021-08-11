@@ -95,6 +95,7 @@ requirements = [
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.7.0,<2.8.0",
+    "django-automated-logging"
 ]
 
 
