@@ -9,6 +9,7 @@ from pulp_ansible.app.models import (
 
 from galaxy_ng.app.constants import COMMUNITY_DOMAINS
 from galaxy_ng.app.models.collectionsync import CollectionSyncTask
+from galaxy_ng.app.api import utils
 
 
 class AnsibleDistributionSerializer(serializers.ModelSerializer):
@@ -79,6 +80,7 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
     write_only_fields = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
+
     proxy_password = serializers.CharField(
         help_text="Password for proxy authentication.",
         allow_null=True,
@@ -149,6 +151,9 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             'client_key': {'write_only': True},
         }
 
+    def get_write_only_fields(self, obj):
+        return utils.get_write_only_fields(self, obj)
+
     def validate(self, data):
         if not data.get('requirements_file') and any(
             [domain in data['url'] for domain in COMMUNITY_DOMAINS]
@@ -162,9 +167,6 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             )
         return super().validate(data)
 
-    def get_write_only_fields(self, obj):
-        return get_write_only_fields(self, obj)
-
     def get_repositories(self, obj):
         return [
             AnsibleRepositorySerializer(repo).data
@@ -177,38 +179,3 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
         return CollectionSyncTask.objects.filter(
             repository=obj.repository_set.order_by('-pulp_last_updated').first()
         ).first()
-
-
-def get_write_only_fields(serializer, obj, extra_data=None):
-    """
-    Returns a list of write only fields and whether or not their values are set
-    so that clients can tell if they are overwriting an existing value.
-    serializer: Serializer instance
-    obj: model object being serialized
-    extra_data: extra fields that might not be on obj. This is used when a write
-        only field is not one of the fields in the underlying data model.
-    """
-    fields = []
-    extra_data = extra_data or {}
-
-    # returns false if field is "" or None
-    def _is_set(field_name):
-        if (field_name in extra_data):
-            return bool(extra_data[field_name])
-        else:
-            return bool(getattr(obj, field_name))
-
-    # There are two ways to set write_only. This checks both.
-
-    # check for values that are set to write_only in Meta.extra_kwargs
-    for field_name in serializer.Meta.extra_kwargs:
-        if serializer.Meta.extra_kwargs[field_name].get('write_only', False):
-            fields.append({"name": field_name, "is_set": _is_set(field_name)})
-
-    # check for values that are set to write_only in fields
-    serializer_fields = serializer.get_fields()
-    for field_name in serializer_fields:
-        if (serializer_fields[field_name].write_only):
-            fields.append({"name": field_name, "is_set": _is_set(field_name)})
-
-    return fields

@@ -210,3 +210,11 @@ class ContainerReadmeViewSet(ContainerContentBaseViewset):
     def get_object(self):
         distro = self.get_distro()
         return self.queryset.get_or_create(container=distro)[0]
+
+
+class SyncConfigContainerViewSet(
+    api_base.ModelViewSet,
+):
+    queryset = models.ContainerRegistryRemote.objects.all()
+    serializer_class = serializers.ContainerRegistryRemoteSerializer
+    permission_classes = []

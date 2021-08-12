@@ -1,3 +1,4 @@
+from galaxy_ng.app.models.container import ContainerRegistryRemote
 from .auth import (
     LoginSerializer,
 )
@@ -33,7 +34,8 @@ from .execution_environment import (
     ContainerRepositoryHistorySerializer,
     ContainerReadmeSerializer,
     ContainerManifestDetailSerializer,
-    ContainerNamespaceDetailSerializer
+    ContainerNamespaceDetailSerializer,
+    ContainerRegistryRemoteSerializer,
 )
 
 __all__ = (
@@ -64,5 +66,7 @@ __all__ = (
     'ContainerManifestSerializer',
     'ContainerManifestDetailSerializer',
     'ContainerReadmeSerializer',
-    'ContainerNamespaceDetailSerializer'
+    'ContainerNamespaceDetailSerializer',
+    'ContainerRegistryRemote',
+    'ContainerRegistryRemoteSerializer',
 )

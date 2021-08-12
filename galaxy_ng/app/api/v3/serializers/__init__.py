@@ -20,6 +20,10 @@ from .task import (
     TaskSummarySerializer,
 )
 
+from .sync import (
+    LastSyncTaskMixin,
+)
+
 
 __all__ = (
     'CollectionSerializer',
@@ -32,4 +36,5 @@ __all__ = (
     'TaskSerializer',
     'TaskSummarySerializer',
     'UnpaginatedCollectionVersionSerializer',
+    'LastSyncTaskMixin',
 )
