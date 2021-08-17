@@ -31,6 +31,7 @@ COMMIT_MSG=$(git log --format=%B --no-merges -1)
 export COMMIT_MSG
 
 if [[ "$TEST" == "upgrade" ]]; then
+  pip install -r functest_requirements.txt
   git checkout -b ci_upgrade_test
   cp -R .github /tmp/.github
   cp -R .ci /tmp/.ci
@@ -38,8 +39,6 @@ if [[ "$TEST" == "upgrade" ]]; then
   rm -rf .ci .github
   cp -R /tmp/.github .
   cp -R /tmp/.ci .
-  # Pin deps
-  sed -i "s/~/=/g" requirements.txt
 fi
 
 if [[ "$TEST" == "plugin-from-pypi" ]]; then
@@ -115,6 +114,7 @@ fi
 git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.14
 
 cd pulpcore
+
 if [ -n "$PULPCORE_PR_NUMBER" ]; then
   git fetch --depth=1 origin pull/$PULPCORE_PR_NUMBER/head:$PULPCORE_PR_NUMBER
   git checkout $PULPCORE_PR_NUMBER
@@ -123,28 +123,34 @@ cd ..
 
 
 git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.9.0
+cd pulp_ansible
+
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
-  cd pulp_ansible
   git fetch --depth=1 origin pull/$PULP_ANSIBLE_PR_NUMBER/head:$PULP_ANSIBLE_PR_NUMBER
   git checkout $PULP_ANSIBLE_PR_NUMBER
-  cd ..
 fi
+
+cd ..
 
 git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.7.1
+cd pulp_container
+
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
-  cd pulp_container
   git fetch --depth=1 origin pull/$PULP_CONTAINER_PR_NUMBER/head:$PULP_CONTAINER_PR_NUMBER
   git checkout $PULP_CONTAINER_PR_NUMBER
-  cd ..
 fi
 
+cd ..
+
 git clone --depth=1 https://github.com/ansible/galaxy-importer.git --branch v0.3.4
+cd galaxy-importer
+
 if [ -n "$GALAXY_IMPORTER_PR_NUMBER" ]; then
-  cd galaxy-importer
   git fetch --depth=1 origin pull/$GALAXY_IMPORTER_PR_NUMBER/head:$GALAXY_IMPORTER_PR_NUMBER
   git checkout $GALAXY_IMPORTER_PR_NUMBER
-  cd ..
 fi
+
+cd ..
 
 
 

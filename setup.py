@@ -88,7 +88,6 @@ class BuildPyCommand(_BuildPyCommand):
 
 
 requirements = [
-    "Django~=2.2.23",
     "galaxy-importer==0.3.4",
     "pulpcore>=3.14.0,<3.15.0",
     "pulp-ansible>=0.9.0,<0.10.0",
@@ -98,12 +97,9 @@ requirements = [
     "django-automated-logging"
 ]
 
-
-is_on_dev_environment = (
-    "COMPOSE_PROFILE" in os.environ and "DEV_SOURCE_PATH" in os.environ
-    and os.environ.get("LOCK_REQUIREMENTS") == "0"
-)
-if is_on_dev_environment:
+# next line can be replaced via sed in ci scripts/post_before_install.sh
+unpin_requirements = os.getenv("LOCK_REQUIREMENTS") == "0"
+if unpin_requirements:
     """
     To enable the installation of local dependencies e.g: a local fork of
     pulp_ansible checked out to specific branch/version.
@@ -112,7 +108,10 @@ if is_on_dev_environment:
     ref: https://github.com/ansible/galaxy_ng/wiki/Development-Setup
          #steps-to-run-dev-environment-with-specific-upstream-branch
     """
-    DEV_SOURCE_PATH = os.environ.get("DEV_SOURCE_PATH", "").split(":")
+    DEV_SOURCE_PATH = os.getenv(
+        "DEV_SOURCE_PATH",
+        default="pulpcore:pulp_ansible:pulp_container:galaxy_importer"
+    ).split(":")
     DEV_SOURCE_PATH += [path.replace("_", "-") for path in DEV_SOURCE_PATH]
     requirements = [
         re.sub(r"""(=|^|~|<|>|!)([\S]+)""", "", req)
