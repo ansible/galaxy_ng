@@ -264,7 +264,7 @@ class ContainerRegistryRemoteSerializer(
         }
 
     def get_write_only_fields(self, obj):
-        return utils.get_write_only_field(self, obj)
+        return utils.get_write_only_fields(self, obj)
 
     def get_last_sync_task_queryset(self, obj):
         """Gets last_sync_task from Pulp using remote->repository relation"""

@@ -212,7 +212,7 @@ class ContainerReadmeViewSet(ContainerContentBaseViewset):
         return self.queryset.get_or_create(container=distro)[0]
 
 
-class SyncConfigContainerViewSet(
+class ContainerRegistryRemoteViewSet(
     api_base.ModelViewSet,
 ):
     queryset = models.ContainerRegistryRemote.objects.all()
