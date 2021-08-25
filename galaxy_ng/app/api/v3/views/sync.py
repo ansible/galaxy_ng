@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 
 from pulp_ansible.app import models as pulp_models
 from pulp_ansible.app.tasks.collections import sync as collection_sync
@@ -25,8 +26,8 @@ class SyncRemoteView(api_base.APIView):
 
         if not distro.repository or not distro.repository.remote:
             raise ValidationError(
-                detail={'remote': f'The {distro_path} distribution does not have'
-                                  ' any remotes associated with it.'})
+                detail={'remote': _('The %s distribution does not have'
+                                    ' any remotes associated with it.') % distro_path})
 
         remote = distro.repository.remote.ansible_collectionremote
 
@@ -36,8 +37,8 @@ class SyncRemoteView(api_base.APIView):
             raise ValidationError(
                 detail={
                     'requirements_file':
-                        'Syncing content from galaxy.ansible.com without specifying a '
-                        'requirements file is not allowed.'
+                        _('Syncing content from galaxy.ansible.com without specifying a '
+                          'requirements file is not allowed.')
                 })
 
         result = dispatch(

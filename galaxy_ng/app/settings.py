@@ -11,6 +11,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     # END: Pulp standard middleware
     'django_prometheus.middleware.PrometheusAfterMiddleware',
     'django_currentuser.middleware.ThreadLocalUserMiddleware',
@@ -114,6 +115,23 @@ SPECTACULAR_SETTINGS = {
 # Disable django guardian anonymous user
 # https://django-guardian.readthedocs.io/en/stable/configuration.html#anonymous-user-name
 ANONYMOUS_USER_NAME = None
+
+# L10N settings
+USE_L10N = True
+USE_I18N = True
+
+# Default language
+LANGUAGE_CODE = 'en-us'
+
+LANGUAGES = [
+    ('ja', 'Japanese'),
+    ('nl', 'Dutch'),
+    ('fr', 'French'),
+    ('es', 'Spanish'),
+    ('zh-hans', 'Chinese'),
+]
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 
 GALAXY_ENABLE_API_ACCESS_LOG = os.getenv('GALAXY_ENABLE_API_ACCESS_LOG', default=False)
 

@@ -3,10 +3,10 @@ import re
 
 from django.db import transaction
 from django.core import validators
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
-
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField
@@ -57,7 +57,7 @@ class NamespaceLinkSerializer(serializers.ModelSerializer):
     # adds the URL to the error so the user can figure out which link the error
     # message is for
     def validate_url(self, url):
-        v = validators.URLValidator(message=f"'{url}' is not a valid url.")
+        v = validators.URLValidator(message=_("'%s' is not a valid url.") % url)
         v(url)
         return url
 
@@ -85,16 +85,16 @@ class NamespaceSerializer(serializers.ModelSerializer):
     def validate_name(self, name):
         if not name:
             raise ValidationError(detail={
-                'name': "Attribute 'name' is required"})
+                'name': _("Attribute 'name' is required")})
         if not re.match(r'^[a-z0-9_]+$', name):
             raise ValidationError(detail={
-                'name': 'Name can only contain lower case letters, underscores and numbers'})
+                'name': _('Name can only contain lower case letters, underscores and numbers')})
         if len(name) <= 2:
             raise ValidationError(detail={
-                'name': 'Name must be longer than 2 characters'})
+                'name': _('Name must be longer than 2 characters')})
         if name.startswith('_'):
             raise ValidationError(detail={
-                'name': "Name cannot begin with '_'"})
+                'name': _("Name cannot begin with '_'")})
         return name
 
     @transaction.atomic

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import Permission
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 from guardian.shortcuts import get_perms_for_model
 
@@ -13,17 +14,17 @@ class GroupPermissionField(serializers.Field):
     def _validate_group(self, group_data):
         if 'object_permissions' not in group_data:
             raise ValidationError(detail={
-                'groups': 'object_permissions field is required'})
+                'groups': _('object_permissions field is required')})
 
         if 'id' not in group_data and 'name' not in group_data:
             raise ValidationError(detail={
-                'groups': 'id or name field is required'})
+                'groups': _('id or name field is required')})
 
         perms = group_data['object_permissions']
 
         if not isinstance(perms, list):
             raise ValidationError(detail={
-                'groups': 'object_permissions must be a list of strings'})
+                'groups': _('object_permissions must be a list of strings')})
 
         # validate that the permissions exist
         for perm in perms:
@@ -37,7 +38,7 @@ class GroupPermissionField(serializers.Field):
             # performing N queries for each permission
             if not Permission.objects.filter(filter_q).exists():
                 raise ValidationError(detail={
-                    'groups': 'Permission {} does not exist'.format(perm)})
+                    'groups': _('Permission {} does not exist').format(perm)})
 
     def to_representation(self, value):
         rep = []
@@ -52,7 +53,7 @@ class GroupPermissionField(serializers.Field):
     def to_internal_value(self, data):
         if not isinstance(data, list):
             raise ValidationError(detail={
-                'groups': 'Groups must be a list of group objects'
+                'groups': _('Groups must be a list of group objects')
             })
 
         internal = {}
@@ -67,10 +68,11 @@ class GroupPermissionField(serializers.Field):
                 internal[group] = group_data['object_permissions']
             except auth_models.Group.DoesNotExist:
                 raise ValidationError(detail={
-                    'groups': "Group name=%s, id=%s does not exist" % (group_data.get('name'),
-                                                                       group_data.get('id'))})
+                    'groups': _("Group name=%s, id=%s does not exist") % (
+                        group_data.get('name'), group_data.get('id'))
+                })
             except ValueError:
-                raise ValidationError(detail={'group': 'Invalid group name or ID'})
+                raise ValidationError(detail={'group': _('Invalid group name or ID')})
 
         return internal
 

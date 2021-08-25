@@ -2,6 +2,7 @@ from django.db.models import Exists, OuterRef, Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from drf_spectacular.utils import extend_schema
@@ -53,7 +54,7 @@ class CollectionViewSet(
         """Returns a CollectionVersions queryset for specified distribution."""
         path = self.kwargs.get('path')
         if path is None:
-            raise Http404("Distribution base path is required")
+            raise Http404(_("Distribution base path is required"))
 
         versions = CollectionVersion.objects.filter(pk__in=self._distro_content).values_list(
             "collection_id",
@@ -151,7 +152,7 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @extend_schema(summary="Retrieve collection version",
+    @extend_schema(summary=_("Retrieve collection version"),
                    responses={200: serializers.CollectionVersionDetailSerializer})
     def retrieve(self, request, *args, **kwargs):
         namespace, name, version = self.kwargs['version'].split('/')
@@ -162,7 +163,7 @@ class CollectionVersionViewSet(api_base.GenericViewSet):
                 version=version,
             )
         except ObjectDoesNotExist:
-            raise NotFound(f'Collection version not found for: {self.kwargs["version"]}')
+            raise NotFound(_('Collection version not found for: {}').format(self.kwargs["version"]))
         serializer = serializers.CollectionVersionDetailSerializer(collection_version)
         return Response(serializer.data)
 
@@ -218,7 +219,7 @@ class CollectionImportViewSet(api_base.GenericViewSet,
 
         return self.get_paginated_response(serializer.data)
 
-    @extend_schema(summary="Retrieve collection import",
+    @extend_schema(summary=_("Retrieve collection import"),
                    responses={200: serializers.ImportTaskDetailSerializer})
     def retrieve(self, request, *args, **kwargs):
         task = self.get_object()

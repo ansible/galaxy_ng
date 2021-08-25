@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import serializers
 
 from pulp_ansible.app import viewsets as pulp_viewsets
@@ -80,14 +82,14 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
     proxy_password = serializers.CharField(
-        help_text="Password for proxy authentication.",
+        help_text=_("Password for proxy authentication."),
         allow_null=True,
         required=False,
         style={'input_type': 'password'},
         write_only=True
     )
     proxy_username = serializers.CharField(
-        help_text="User for proxy authentication.",
+        help_text=_("User for proxy authentication."),
         allow_null=True,
         required=False,
         write_only=False,  # overwriting this as pulpcore defaults to True
@@ -100,14 +102,14 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
         style={'input_type': 'password'}
     )
     password = serializers.CharField(
-        help_text="Remote password.",
+        help_text=_("Remote password."),
         allow_null=True,
         required=False,
         style={'input_type': 'password'},
         write_only=True
     )
     username = serializers.CharField(
-        help_text="Remote user.",
+        help_text=_("Remote user."),
         allow_null=True,
         required=False,
         write_only=False,  # overwriting this as pulpcore defaults to True
@@ -156,8 +158,8 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             raise serializers.ValidationError(
                 detail={
                     'requirements_file':
-                        'Syncing content from community domains without specifying a '
-                        'requirements file is not allowed.'
+                        _('Syncing content from community domains without specifying a '
+                          'requirements file is not allowed.')
                 }
             )
         return super().validate(data)

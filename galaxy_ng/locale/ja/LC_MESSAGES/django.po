@@ -1,0 +1,272 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-08-22 23:27+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: galaxy_ng/app/access_control/access_policy.py:69
+msgid "Namespace in filename not found."
+msgstr ""
+
+#: galaxy_ng/app/access_control/fields.py:17
+msgid "object_permissions field is required"
+msgstr ""
+
+#: galaxy_ng/app/access_control/fields.py:21
+msgid "id or name field is required"
+msgstr ""
+
+#: galaxy_ng/app/access_control/fields.py:27
+msgid "object_permissions must be a list of strings"
+msgstr ""
+
+#: galaxy_ng/app/access_control/fields.py:41
+msgid "Permission {} does not exist"
+msgstr ""
+
+#: galaxy_ng/app/access_control/fields.py:56
+msgid "Groups must be a list of group objects"
+msgstr ""
+
+#: galaxy_ng/app/access_control/fields.py:71
+#, python-format
+msgid "Group name=%s, id=%s does not exist"
+msgstr ""
+
+#: galaxy_ng/app/access_control/fields.py:75
+#: galaxy_ng/app/api/ui/serializers/user.py:118
+msgid "Invalid group name or ID"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/serializers/synclist.py:41
+#, python-brace-format
+msgid "Repository \"{pulp_id}\" not found while creating synclist"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/serializers/synclist.py:96
+#, python-format
+msgid "Synclist already exists: %s"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/serializers/synclist.py:104
+#, python-brace-format
+msgid ""
+"Collection \"{namespace}.{name}\" not found while creating synclist "
+"{synclist}"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/serializers/synclist.py:143
+#, python-brace-format
+msgid ""
+"Collection \"{namespace}.{name}\" not found while updating synclist "
+"{synclist}"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/serializers/user.py:60
+msgid ""
+"'galaxy.change_group' permission is required to change a users group that "
+"the requesting user is not in."
+msgstr ""
+
+#: galaxy_ng/app/api/ui/serializers/user.py:71
+msgid "Must be a super user to grant super user permissions."
+msgstr ""
+
+#: galaxy_ng/app/api/ui/serializers/user.py:114
+#, python-format
+msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/viewsets/collection.py:57
+msgid "Distribution base path is required"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/viewsets/collection.py:155
+msgid "Retrieve collection version"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/viewsets/collection.py:166
+msgid "Collection version not found for: {}"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/viewsets/collection.py:222
+msgid "Retrieve collection import"
+msgstr ""
+
+#: galaxy_ng/app/api/ui/viewsets/group.py:45
+#, python-format
+msgid "A group named %s already exists."
+msgstr "%sという名前のグループはすでに存在します。"
+
+#: galaxy_ng/app/api/utils.py:45
+#, python-brace-format
+msgid ""
+"Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
+msgstr ""
+
+#: galaxy_ng/app/api/utils.py:52
+#, python-brace-format
+msgid ""
+"Invalid version string {version} from filename {filename}. Expected semantic "
+"version format."
+msgstr ""
+
+#: galaxy_ng/app/api/utils.py:56
+#, python-format
+msgid "Expected namespace to be max length of %s"
+msgstr ""
+
+#: galaxy_ng/app/api/utils.py:58
+#, python-format
+msgid "Expected name to be max length of %s"
+msgstr ""
+
+#: galaxy_ng/app/api/utils.py:60
+#, python-format
+msgid "Expected version to be max length of %s"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/namespace.py:60
+#, python-format
+msgid "'%s' is not a valid url."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/namespace.py:88
+msgid "Attribute 'name' is required"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/namespace.py:91
+msgid "Name can only contain lower case letters, underscores and numbers"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/namespace.py:94
+msgid "Name must be longer than 2 characters"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/namespace.py:97
+msgid "Name cannot begin with '_'"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/sync.py:85
+msgid "Password for proxy authentication."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/sync.py:92
+msgid "User for proxy authentication."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/sync.py:105
+msgid "Remote password."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/sync.py:112
+msgid "Remote user."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/serializers/sync.py:161
+msgid ""
+"Syncing content from community domains without specifying a requirements "
+"file is not allowed."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/views/sync.py:29
+#, python-format
+msgid "The %s distribution does not have any remotes associated with it."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/views/sync.py:40
+msgid ""
+"Syncing content from galaxy.ansible.com without specifying a requirements "
+"file is not allowed."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/viewsets/collection.py:172
+#, python-format
+msgid "Path does not match: \"%s\""
+msgstr ""
+
+#: galaxy_ng/app/api/v3/viewsets/collection.py:186
+#, python-brace-format
+msgid "Namespace \"{0}\" does not exist."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/viewsets/collection.py:279
+#, python-format
+msgid "Unexpected response from content app. Code: %s."
+msgstr ""
+
+#: galaxy_ng/app/api/v3/viewsets/collection.py:301
+#, python-format
+msgid "Collection %s not found"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/viewsets/collection.py:309
+#, python-format
+msgid "Repo(s) for moving collection %s not found"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/viewsets/collection.py:313
+#, python-format
+msgid "Collection %s not found in source repo"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/viewsets/collection.py:317
+#, python-format
+msgid "Collection %s already found in destination repo"
+msgstr ""
+
+#: galaxy_ng/app/api/v3/viewsets/namespace.py:61
+#, python-format
+msgid "A namespace named %s already exists."
+msgstr ""
+
+#: galaxy_ng/app/exceptions.py:8
+msgid "Data conflicts with existing entity."
+msgstr ""
+
+#: galaxy_ng/app/tasks/publishing.py:54 galaxy_ng/app/tasks/publishing.py:84
+#, python-format
+msgid "Could not find staging repository: \"%s\""
+msgstr ""
+
+#: galaxy_ng/app/tasks/synclist.py:45
+#, python-format
+msgid "Curating all synclists repos that curate from %s"
+msgstr ""
+
+#: galaxy_ng/app/tasks/synclist.py:56
+msgid "Synclists curating upstream repo"
+msgstr ""
+
+#: galaxy_ng/app/tasks/synclist.py:63
+msgid "Synclists curating upstream repo task"
+msgstr ""
+
+#: galaxy_ng/app/tasks/synclist.py:91
+#, python-format
+msgid "Finishing curating %s synclist repos based on %s update"
+msgstr ""
+
+#: galaxy_ng/app/tasks/synclist.py:120
+#, python-format
+msgid ""
+"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
+"repo \"%s\""
+msgstr ""
+
+#: galaxy_ng/app/tasks/synclist.py:162
+msgid "Unexpected synclist policy {}"
+msgstr ""

@@ -6,7 +6,6 @@ from rest_framework import views
 from rest_framework import viewsets
 from rest_framework.settings import perform_import
 
-
 GALAXY_EXCEPTION_HANDLER = perform_import(
     settings.GALAXY_EXCEPTION_HANDLER,
     'GALAXY_EXCEPTION_HANDLER'

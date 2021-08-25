@@ -3,6 +3,7 @@ import itertools
 
 from django.conf import settings
 from django.db.models import F, Q
+from django.utils.translation import gettext_lazy as _
 
 from pulpcore.plugin.models import (
     CreatedResource,
@@ -41,7 +42,7 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
     synclist_qs = models.SyncList.objects.filter(upstream_repository=upstream_repository)
 
     task_group = TaskGroup.objects.create(
-        description=f"Curating all synclists repos that curate from {upstream_repository_name}"
+        description=_("Curating all synclists repos that curate from %s") % upstream_repository_name
     )
     task_group.save()
 
@@ -52,14 +53,14 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
     current_task.save()
 
     GroupProgressReport(
-        message="Synclists curating upstream repo",
+        message=_("Synclists curating upstream repo"),
         code="synclist.curate",
         total=synclist_qs.count(),
         task_group=task_group,
     ).save()
 
     with ProgressReport(
-        message="Synclists curating upstream repo task",
+        message=_("Synclists curating upstream repo task"),
         code="synclist.curate.log",
         total=synclist_qs.count(),
     ) as task_progress_report:
@@ -87,7 +88,7 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
             progress_report.update(done=F("done") + len(synclist_ids))
 
     log.info(
-        "Finishing curating %s synclist repos based on %s update",
+        _("Finishing curating %s synclist repos based on %s update"),
         synclist_qs.count(),
         upstream_repository,
     )
@@ -116,7 +117,7 @@ def curate_synclist_repository(synclist_pk, **kwargs):
     latest_upstream = upstream_repository.latest_version()
 
     log.info(
-        'Applying synclist "%s" with policy=%s to curate repo "%s" from upstream repo "%s"',
+        _('Applying synclist "%s" with policy=%s to curate repo "%s" from upstream repo "%s"'),
         synclist.name,
         synclist.policy,
         synclist.repository.name,
@@ -158,6 +159,6 @@ def curate_synclist_repository(synclist_pk, **kwargs):
             "remove_content_units": ["*"],
         }
     else:
-        raise RuntimeError("Unexpected synclist policy {}".format(synclist.policy))
+        raise RuntimeError(_("Unexpected synclist policy {}").format(synclist.policy))
 
     add_and_remove(**task_kwargs)
