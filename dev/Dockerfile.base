@@ -93,7 +93,12 @@ RUN set -ex; \
                      /app/docker/bin/* \
     && mv /app/docker/entrypoint.sh /entrypoint.sh \
     && mv /app/ansible.cfg /etc/ansible/ansible.cfg \
-    && mv /app/docker/bin/* /usr/local/bin
+    && mv /app/docker/bin/* /usr/local/bin \
+    && mkdir -p /etc/pulp/certs/ \
+    && echo "DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=" > /etc/pulp/certs/database_fields.symmetric.key
+
+# This symmetric.key is for dev only and should not be used in production
+# DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=
 
 USER "${USER_NAME}"
 VOLUME [ "/var/lib/pulp", "/tmp/ansible" ]
