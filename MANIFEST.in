@@ -6,3 +6,4 @@ include pyproject.toml
 include requirements/requirements.common.txt
 graft galaxy_ng/app/webserver_snippets
 graft galaxy_ng/app/static
+graft galaxy_ng/locale

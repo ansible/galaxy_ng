@@ -5,6 +5,8 @@ import socket
 from urllib3.connection import HTTPConnection
 from urllib3.connectionpool import HTTPConnectionPool
 
+from django.utils.translation import gettext_lazy as _
+
 from galaxy_importer.schema import MAX_LENGTH_NAME, MAX_LENGTH_VERSION
 
 CollectionFilename = namedtuple("CollectionFilename", ["namespace", "name", "version"])
@@ -40,22 +42,22 @@ def parse_collection_filename(filename):
     match = FILENAME_REGEXP.match(filename)
 
     if not match:
-        msg = "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
+        msg = _("Invalid filename {filename}. Expected format: namespace-name-version.tar.gz")
         raise ValueError(msg.format(filename=filename))
 
     namespace, name, version = match.groups()
 
     match = VERSION_REGEXP.match(version)
     if not match:
-        msg = "Invalid version string {version} from filename {filename}. Expected semantic version format." # noqa
+        msg = _("Invalid version string {version} from filename {filename}. Expected semantic version format.") # noqa
         raise ValueError(msg.format(version=version, filename=filename))
 
     if len(namespace) > MAX_LENGTH_NAME:
-        raise ValueError(f"Expected namespace to be max length of {MAX_LENGTH_NAME}")
+        raise ValueError(_("Expected namespace to be max length of %s") % MAX_LENGTH_NAME)
     if len(name) > MAX_LENGTH_NAME:
-        raise ValueError(f"Expected name to be max length of {MAX_LENGTH_NAME}")
+        raise ValueError(_("Expected name to be max length of %s") % MAX_LENGTH_NAME)
     if len(version) > MAX_LENGTH_VERSION:
-        raise ValueError(f"Expected version to be max length of {MAX_LENGTH_VERSION}")
+        raise ValueError(_("Expected version to be max length of %s") % MAX_LENGTH_VERSION)
 
     return CollectionFilename(namespace, name, version)
 

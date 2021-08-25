@@ -1,4 +1,6 @@
 from django.contrib.auth import password_validation
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -55,8 +57,8 @@ class UserSerializer(serializers.ModelSerializer):
             for g in group_difference:
                 if not authed_user_groups.filter(pk=g.id).exists():
                     raise ValidationError(detail={
-                        "groups": "'galaxy.change_group' permission is required to change"
-                                  " a users group that the requesting user is not in."
+                        "groups": _("'galaxy.change_group' permission is required to change"
+                                    " a users group that the requesting user is not in.")
                     })
 
         return groups
@@ -66,7 +68,7 @@ class UserSerializer(serializers.ModelSerializer):
         if request_user.is_superuser != data:
             if not request_user.is_superuser:
                 raise ValidationError(detail={
-                    "is_superuser": "Must be a super user to grant super user permissions."
+                    "is_superuser": _("Must be a super user to grant super user permissions.")
                 })
 
         return data
@@ -109,10 +111,11 @@ class UserSerializer(serializers.ModelSerializer):
                     group_ids.append(group.id)
                 except auth_models.Group.DoesNotExist:
                     raise ValidationError(detail={
-                        'groups': "Group name=%s, id=%s does not exist" % (group.get('name'),
-                                                                           group.get('id'))})
+                        'groups': _('Group name=%(name)s, id=%(id)s does not exist') % {
+                            'name': group.get('name'), 'id': group.get('id')}
+                    })
                 except ValueError:
-                    raise ValidationError(detail={'group': 'Invalid group name or ID'})
+                    raise ValidationError(detail={'group': _('Invalid group name or ID')})
             data['groups'] = group_ids
         return super().to_internal_value(data)
 

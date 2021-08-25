@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from rest_access_policy import AccessPolicy
 from rest_framework.exceptions import NotFound
 
@@ -65,7 +66,7 @@ class CollectionAccessPolicy(AccessPolicyBase):
         try:
             namespace = models.Namespace.objects.get(name=data['filename'].namespace)
         except models.Namespace.DoesNotExist:
-            raise NotFound('Namespace in filename not found.')
+            raise NotFound(_('Namespace in filename not found.'))
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
 
 

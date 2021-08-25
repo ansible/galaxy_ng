@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
 
 from pulpcore.plugin.models import Task
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, CollectionVersion
@@ -50,7 +51,7 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
     try:
         staging_repo = AnsibleDistribution.objects.get(name=STAGING_NAME).repository
     except AnsibleRepository.DoesNotExist:
-        raise RuntimeError(f'Could not find staging repository: "{STAGING_NAME}"')
+        raise RuntimeError(_('Could not find staging repository: "%s"') % STAGING_NAME)
 
     inbound_repo = AnsibleRepository.objects.get(pk=inbound_repository_pk)
 
@@ -80,7 +81,7 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
     try:
         golden_repo = AnsibleDistribution.objects.get(name=GOLDEN_NAME).repository
     except AnsibleRepository.DoesNotExist:
-        raise RuntimeError(f'Could not find staging repository: "{GOLDEN_NAME}"')
+        raise RuntimeError(_('Could not find staging repository: "%s"') % GOLDEN_NAME)
 
     inbound_repo = AnsibleRepository.objects.get(pk=inbound_repository_pk)
 

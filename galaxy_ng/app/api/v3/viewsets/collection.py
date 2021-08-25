@@ -4,11 +4,11 @@ import requests
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
-
 from django.conf import settings
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException, NotFound
@@ -43,7 +43,6 @@ from galaxy_ng.app.tasks import (
 )
 
 from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
-
 
 log = logging.getLogger(__name__)
 
@@ -170,7 +169,9 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         if INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns) == repo_name:
             return
         raise NotFound(
-            f'Path does not match: "{INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)}"')
+            _('Path does not match: "%s"')
+            % INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)
+        )
 
     def create(self, request, *args, **kwargs):
         data = self._get_data(request)
@@ -182,7 +183,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
             namespace = models.Namespace.objects.get(name=filename.namespace)
         except models.Namespace.DoesNotExist:
             raise ValidationError(
-                'Namespace "{0}" does not exist.'.format(filename.namespace)
+                _('Namespace "{0}" does not exist.').format(filename.namespace)
             )
 
         self._check_path_matches_expected_repo(path, filename_ns=namespace.name)
@@ -274,8 +275,9 @@ class CollectionArtifactDownloadView(api_base.APIView):
             )
 
         metrics.collection_artifact_download_failures.labels(status=response.status_code).inc()
-        raise APIException('Unexpected response from content app. '
-                           f'Code: {response.status_code}.')
+        raise APIException(
+            _('Unexpected response from content app. Code: %s.') % response.status_code
+        )
 
 
 class CollectionVersionMoveViewSet(api_base.ViewSet):
@@ -296,7 +298,7 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
                 version=self.kwargs['version'],
             )
         except ObjectDoesNotExist:
-            raise NotFound(f'Collection {version_str} not found')
+            raise NotFound(_('Collection %s not found') % version_str)
 
         try:
             src_repo = AnsibleDistribution.objects.get(
@@ -304,15 +306,15 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
             dest_repo = AnsibleDistribution.objects.get(
                 base_path=self.kwargs['dest_path']).repository
         except ObjectDoesNotExist:
-            raise NotFound(f'Repo(s) for moving collection {version_str} not found')
+            raise NotFound(_('Repo(s) for moving collection %s not found') % version_str)
 
         src_versions = CollectionVersion.objects.filter(pk__in=src_repo.latest_version().content)
         if collection_version not in src_versions:
-            raise NotFound(f'Collection {version_str} not found in source repo')
+            raise NotFound(_('Collection %s not found in source repo') % version_str)
 
         dest_versions = CollectionVersion.objects.filter(pk__in=dest_repo.latest_version().content)
         if collection_version in dest_versions:
-            raise NotFound(f'Collection {version_str} already found in destination repo')
+            raise NotFound(_('Collection %s already found in destination repo') % version_str)
 
         copy_task = call_copy_task(collection_version, src_repo, dest_repo)
         remove_task = call_remove_task(collection_version, src_repo)

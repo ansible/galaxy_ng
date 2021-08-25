@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from django.db import transaction
 from django.db.utils import IntegrityError
-
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
@@ -13,7 +13,6 @@ from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField
-
 
 log = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ class SyncListSerializer(serializers.ModelSerializer):
             repository = AnsibleRepository.objects.get(pulp_id=repository_id)
             return repository
         except AnsibleRepository.DoesNotExist:
-            errmsg = 'Repository "{pulp_id}" not found while creating synclist'
+            errmsg = _('Repository "{pulp_id}" not found while creating synclist')
             raise ValidationError(errmsg.format(pulp_id=repository_id))
 
     def to_internal_value(self, data):
@@ -94,7 +93,7 @@ class SyncListSerializer(serializers.ModelSerializer):
                 **validated_data
             )
         except IntegrityError as exc:
-            raise ValidationError("Synclist already exists: %s" % exc)
+            raise ValidationError(_("Synclist already exists: %s") % exc)
 
         collections = []
         for collection_data in collections_data:
@@ -102,7 +101,8 @@ class SyncListSerializer(serializers.ModelSerializer):
                 collections.append(Collection.objects.get(**collection_data))
             except Collection.DoesNotExist:
                 errmsg = (
-                    'Collection "{namespace}.{name}" not found while creating synclist {synclist}'
+                    _('Collection "{namespace}.{name}" not found '
+                      'while creating synclist {synclist}')
                 )
                 raise ValidationError(
                     errmsg.format(
@@ -140,7 +140,8 @@ class SyncListSerializer(serializers.ModelSerializer):
                 new_collections.append(Collection.objects.get(**collection_data))
             except Collection.DoesNotExist:
                 errmsg = (
-                    'Collection "{namespace}.{name}" not found while updating synclist {synclist}'
+                    _('Collection "{namespace}.{name}" not found '
+                      'while updating synclist {synclist}')
                 )
                 raise ValidationError(
                     errmsg.format(

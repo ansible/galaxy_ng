@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 
@@ -57,6 +58,6 @@ class NamespaceViewSet(api_base.ModelViewSet):
         if name and models.Namespace.objects.filter(name=name).exists():
             # Ensures error raised is 409, not 400.
             raise ConflictError(
-                detail={'name': f'A namespace named {name} already exists.'}
+                detail={'name': _('A namespace named %s already exists.') % name}
             )
         return super().create(request, *args, **kwargs)
