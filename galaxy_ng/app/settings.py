@@ -124,12 +124,15 @@ USE_I18N = True
 LANGUAGE_CODE = 'en-us'
 
 LANGUAGES = [
+    # Django 3.0+ requires the language defined in LANGUAGE_CODE to be in the list
+    ('en-us', 'English (USA)'),
     ('ja', 'Japanese'),
     ('nl', 'Dutch'),
     ('fr', 'French'),
     ('es', 'Spanish'),
     ('zh-hans', 'Chinese'),
 ]
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 

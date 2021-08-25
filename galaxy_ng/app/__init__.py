@@ -1,5 +1,6 @@
 from pulpcore.plugin import PulpPluginAppConfig
 
+
 class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
     """Entry point for the galaxy plugin."""
 
@@ -9,5 +10,6 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
 
     def ready(self):
         """https://stackoverflow.com/a/22924754"""
+
         super().ready()
         from .signals import handlers  # noqa

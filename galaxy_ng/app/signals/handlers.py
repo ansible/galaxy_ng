@@ -12,6 +12,18 @@ from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
 from galaxy_ng.app.models.namespace import Namespace
 
 
+@receiver(post_save, sender=AnsibleRepository)
+def ensure_retain_repo_versions_on_repository(sender, instance, created, **kwargs):
+    """Ensure repository has retain_repo_versions set when created.
+
+    retain_repo_versions defaults to 1 when not set.
+    """
+
+    if created and instance.retain_repo_versions is None:
+        instance.retain_repo_versions = 1
+        instance.save()
+
+
 @receiver(post_save, sender=Collection)
 def create_namespace_if_not_present(sender, instance, created, **kwargs):
     """Ensure Namespace object exists when Collection object saved.
