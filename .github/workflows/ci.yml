@@ -5,7 +5,7 @@
 #
 # For more info visit https://github.com/pulp/plugin_template
 ---
-name: Pulp CI
+name: Galaxy CI
 on: {pull_request: {branches: ['*']}, push: {branches: ['*']}}
 jobs:
 
