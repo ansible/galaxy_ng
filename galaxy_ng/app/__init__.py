@@ -1,7 +1,4 @@
 from pulpcore.plugin import PulpPluginAppConfig
-from django.db.models.signals import post_migrate
-from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
-
 
 class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
     """Entry point for the galaxy plugin."""
@@ -11,21 +8,6 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
     version = "4.4.0dev"
 
     def ready(self):
+        """https://stackoverflow.com/a/22924754"""
         super().ready()
-        post_migrate.connect(
-            set_pulp_container_access_policies,
-            sender=self,
-            dispatch_uid="override_pulp_container_access_policies"
-        )
-
-
-def set_pulp_container_access_policies(sender, **kwargs):
-    apps = kwargs.get("apps")
-    if apps is None:
-        from django.apps import apps
-    AccessPolicy = apps.get_model("core", "AccessPolicy")
-
-    print("Overriding pulp_container access poliicy")
-    for view in PULP_CONTAINER_VIEWSETS:
-        policy, created = AccessPolicy.objects.update_or_create(
-            viewset_name=view, defaults={**PULP_CONTAINER_VIEWSETS[view], "customized": True})
+        from .signals import handlers  # noqa
