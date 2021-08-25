@@ -66,6 +66,7 @@ if clowder_config and clowder_config.isClowderEnabled():
     )
     AWS_ACCESS_KEY_ID = _LoadedConfig.objectStore.buckets[0].accessKey
     AWS_SECRET_ACCESS_KEY = _LoadedConfig.objectStore.buckets[0].secretKey
+    AWS_S3_REGION_NAME = _LoadedConfig.objectStore.buckets[0].region
     AWS_STORAGE_BUCKET_NAME = _LoadedConfig.objectStore.buckets[0].name
 
     # Redis configuration
