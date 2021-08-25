@@ -33,7 +33,8 @@ from .execution_environment import (
     ContainerRepositoryHistorySerializer,
     ContainerReadmeSerializer,
     ContainerManifestDetailSerializer,
-    ContainerNamespaceDetailSerializer
+    ContainerNamespaceDetailSerializer,
+    ContainerRegistryRemoteSerializer,
 )
 
 __all__ = (
@@ -64,5 +65,6 @@ __all__ = (
     'ContainerManifestSerializer',
     'ContainerManifestDetailSerializer',
     'ContainerReadmeSerializer',
-    'ContainerNamespaceDetailSerializer'
+    'ContainerNamespaceDetailSerializer',
+    'ContainerRegistryRemoteSerializer',
 )
