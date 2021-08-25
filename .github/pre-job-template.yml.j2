@@ -10,6 +10,7 @@ check_commit:
 
       - name: Run script to validate commits for both pull request and a push
         env:
+          {{ set_env_vars() | indent(10) }}
           GITHUB_PR_COMMITS_URL: {{ "${{ github.event.pull_request.commits_url }}" }}
           START_COMMIT: {{ "${{ github.event.before }}" }}
           END_COMMIT: {{ "${{ github.event.after }}" }}
