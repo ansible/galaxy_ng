@@ -45,6 +45,19 @@ try:
 except ImportError:
     clowder_config = None
 
+
+def _make_aws_endpoint(config):
+    scheme = 'https' if config.tls else 'http'
+    port = config.port
+
+    netloc = config.hostname
+    if ((scheme == 'http' and port != 80)
+            or (scheme == 'https' and port != 443)):
+        netloc = f"{netloc}:{port}"
+
+    return f"{scheme}://{netloc}"
+
+
 if clowder_config and clowder_config.isClowderEnabled():
     _LoadedConfig = clowder_config.LoadedConfig
 
@@ -59,11 +72,7 @@ if clowder_config and clowder_config.isClowderEnabled():
     }
 
     # AWS S3 configuration
-    AWS_S3_ENDPOINT_URL = '{}://{}:{}'.format(
-        'https' if _LoadedConfig.objectStore.tls else 'http',
-        _LoadedConfig.objectStore.hostname,
-        _LoadedConfig.objectStore.port
-    )
+    AWS_S3_ENDPOINT_URL = _make_aws_endpoint(_LoadedConfig.objectStore)
     AWS_ACCESS_KEY_ID = _LoadedConfig.objectStore.buckets[0].accessKey
     AWS_SECRET_ACCESS_KEY = _LoadedConfig.objectStore.buckets[0].secretKey
     AWS_STORAGE_BUCKET_NAME = _LoadedConfig.objectStore.buckets[0].name
