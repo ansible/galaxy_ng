@@ -41,7 +41,7 @@ fi
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
   GALAXY_IMPORTER=./galaxy-importer
 else
-  GALAXY_IMPORTER=git+https://github.com/ansible/galaxy-importer.git@v0.3.4
+  GALAXY_IMPORTER=git+https://github.com/ansible/galaxy-importer.git@v0.4.0
 fi
 if [[ "$TEST" == "plugin-from-pypi" ]]; then
   PLUGIN_NAME=galaxy_ng
