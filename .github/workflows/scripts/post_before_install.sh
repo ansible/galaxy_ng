@@ -1,21 +1,46 @@
 #!/usr/bin/env bash
 
-if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
-  echo "Skipping post_before_install.sh because this is not a pull request."
-  exit 0
+# This script runs after the before_install script.
+# Features on this script:
+# 
+# - If worflow is Nightly Latest then it forces RUN_ON_LATESTS to 1.
+# - Else, if event is not 'pull_request' then it skips the script.
+# - Read the last commit message and extracts environment variables from it.
+#   - Commit message format: 'env:KEY=value' is parsed and the environment variables are set.
+#   - Available envvars: 
+#     RUN_ON_LATEST - If set to 1, the script will checkout to main/master branches for all repos.
+#     LOCK_REQUIREMENTS - If set to 0, the script will unpin requirements from galaxy_ng/setup.py.
+#     <REPO>_REVISION - If set to specific git commit sha, the script will checkout to that commit.
+#        The above can be commit, tag, branch, or any other git ref. e.g:
+#        env: PULPCORE_REVISION=36692a8c628a5d5af220fb1c7bede712727e1e89
+#        env: GALAXY_IMPORTER_REVISION=branch_foo
+#
+
+echo "Workflow name: $GITHUB_WORKFLOW"
+if [ "$GITHUB_WORKFLOW" == "Nightly Latest" ]; then
+    echo "Forcing RUN_ON_LATEST=1"
+    RUN_ON_LATEST=1
+    export RUN_ON_LATEST
+    LOCK_REQUIREMENTS=1
+    export LOCK_REQUIREMENTS
+else
+    if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
+        echo "Skipping post_before_install.sh because this is not a pull request or nightly latest job."
+        exit 0
+    fi
+
+    # Read the latest commit message
+    COMMIT_MSG=$(git log --format=%B --no-merges -1)
+    export COMMIT_MSG
+
+    # Read the commit message and extract the environment variables from there
+    # lines containing the format: 'env:NAME=value' are parsed
+    set -o allexport
+    eval $(echo "${COMMIT_MSG}" | grep 'env:' | awk -F '["=]+' '{print substr($1, 5)"="$2}')
+    set +o allexport
+    # Alternative implementation to above logic.
+    # export $(echo "${COMMIT_MSG}" | grep 'env:' | awk -F '["=]+' '{print substr($1, 5)"="$2}' | xargs)
 fi
-
-# Read the latest commit message
-COMMIT_MSG=$(git log --format=%B --no-merges -1)
-export COMMIT_MSG
-
-# Read the commit message and extract the environment variables from there
-# lines containing the format: 'env:NAME=value' are parsed
-set -o allexport
-eval $(echo "${COMMIT_MSG}" | grep 'env:' | awk -F '["=]+' '{print substr($1, 5)"="$2}')
-set +o allexport
-# Alternative implementation to above logic.
-# export $(echo "${COMMIT_MSG}" | grep 'env:' | awk -F '["=]+' '{print substr($1, 5)"="$2}' | xargs)
 
 # Unpin Requirements from galaxy_ng setup.py?
 # This runs when commit has 'env:LOCK_REQUIRENTS=0'
