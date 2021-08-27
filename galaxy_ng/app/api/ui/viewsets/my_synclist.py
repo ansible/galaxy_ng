@@ -6,7 +6,7 @@ from guardian.shortcuts import get_objects_for_user
 from rest_framework.decorators import action
 
 from pulpcore.plugin.viewsets import OperationPostponedResponse
-from pulpcore.plugin.tasking import enqueue_with_reservation
+from pulpcore.plugin.tasking import dispatch
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
@@ -38,7 +38,7 @@ class MySyncListViewSet(SyncListViewSet):
     @action(detail=True, methods=["post"])
     def curate(self, request, pk):
         synclist = get_object_or_404(models.SyncList, pk=pk)
-        synclist_task = enqueue_with_reservation(
+        synclist_task = dispatch(
             curate_synclist_repository,
             resources=[synclist.repository],
             args=(pk, )
