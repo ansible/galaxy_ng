@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 
@@ -62,4 +61,4 @@ class CurrentUserViewSet(
     versioning_class = versioning.UIVersioning
 
     def get_object(self):
-        return get_object_or_404(self.model, pk=self.request.user.pk)
+        return self.request.user

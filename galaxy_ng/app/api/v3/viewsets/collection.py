@@ -229,7 +229,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
 class CollectionArtifactDownloadView(api_base.APIView):
     permission_classes = [access_policy.CollectionAccessPolicy]
-    action = 'retrieve'
+    action = 'download'
 
     def _get_tcp_response(self, url):
         return requests.get(url, stream=True, allow_redirects=False)

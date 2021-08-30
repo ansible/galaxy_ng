@@ -1,0 +1,1 @@
+Enable unauthenticated view-only collection browsing

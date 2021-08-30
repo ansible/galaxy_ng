@@ -1,8 +1,32 @@
+from galaxy_ng.app.settings import GALAXY_ENABLE_VIEW_ONLY_ACCESS
+
+
+COLLECTION_UNATHENTICATED_ACCESS = "view"
+
+
+def get_collection_view_principal():
+    if COLLECTION_UNATHENTICATED_ACCESS in ("view", "download"):
+        return "*"
+    return "authenticated"
+
+
+def get_collection_download_principal():
+    if COLLECTION_UNATHENTICATED_ACCESS == "download":
+        return "*"
+    return "authenticated"
+
+
+def get_myuserviewset_retrieve_principal():
+    if GALAXY_ENABLE_VIEW_ONLY_ACCESS:
+        return "*"
+    return "authenticated"
+
+
 STANDALONE_STATEMENTS = {
     'NamespaceViewSet': [
         {
             "action": ["list", "retrieve"],
-            "principal": "authenticated",
+            "principal": get_collection_view_principal(),
             "effect": "allow",
         },
         {
@@ -27,8 +51,13 @@ STANDALONE_STATEMENTS = {
     'CollectionViewSet': [
         {
             "action": ["list", "retrieve"],
-            "principal": "authenticated",
+            "principal": get_collection_view_principal(),
             "effect": "allow",
+        },
+        {
+            "action": ["download"],
+            "principal": get_collection_download_principal(),
+            "effect": "allow"
         },
         {
             "action": "destroy",
@@ -113,7 +142,12 @@ STANDALONE_STATEMENTS = {
     ],
     'MyUserViewSet': [
         {
-            "action": ["retrieve", "update", "partial_update"],
+            "action": ["retrieve"],
+            "principal": get_myuserviewset_retrieve_principal(),
+            "effect": "allow",
+        },
+        {
+            "action": ["update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "is_current_user"
