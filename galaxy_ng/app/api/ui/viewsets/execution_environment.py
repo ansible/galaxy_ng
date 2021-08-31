@@ -1,15 +1,26 @@
+from django.http import request
+from pulpcore.app.serializers.base import ValidateFieldsMixin
+
 import logging
 
 from django.db.models import Prefetch, Count, Q
+from django.db import IntegrityError, transaction
 from django.core import exceptions
+from django.utils.translation import gettext_lazy as _
+from rest_framework import response
+
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from pulpcore.plugin import models as core_models
 from pulp_container.app import models as container_models
+from pulp_container.app import serializers as container_serializers
 
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 
 from guardian.shortcuts import get_objects_for_user
+from galaxy_ng.app import api
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.ui import serializers
@@ -269,3 +280,38 @@ class ContainerRegistryRemoteViewSet(
     serializer_class = serializers.ContainerRegistryRemoteSerializer
     permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
     filterset_class = ContainerRegistryRemoteFilter
+
+
+class ContainerRemoteViewSet(
+    api_base.ModelViewSet,
+):
+    queryset = container_models.ContainerRemote.objects.all()
+    serializer_class = serializers.ContainerRemoteSerializer
+    permission_classes = []
+
+    def create(self, validated_data):
+        registry = None
+        try:
+            registry = models.ContainerRegistryRemote.objects.get( pk = validated_data['registry'])
+        except exceptions.ObjectDoesNotExist:
+            raise ValidationError(detail={
+                'registry': _("Selected registry does not exist.")})
+
+        with transaction.atomic():
+            remote = self.serializer_class.create(validated_data)
+            remote_serializer = self.serializer_class(remote, context={ "request": self.request})
+            repo_serializer = container_serializers.ContainerPushRepositorySerializer(
+                data={"name": validated_data['name'], "remote": remote_serializer.data['pulp_href']}, context={"request": self.request}
+            )
+            repo_serializer.is_valid(raise_exception=True)
+            repository = repo_serializer.create(repo_serializer.validated_data)
+            repo_href = container_serializers.ContainerPushRepositorySerializer(
+                repository, context={"request": self.request}
+            ).data["pulp_href"]
+            dist_serializer = serializers.ContainerDistributionSerializer(
+                data={"base_path": validated_data['name'], "name": validated_data['name'], "repository": repo_href}
+            )
+            dist_serializer.is_valid(raise_exception=True)
+            distribution = dist_serializer.create(dist_serializer.validated_data)
+            models.ContainerRegistryRepos.objects.create(registry = registry, repository_remote = remote)
+            return Response(remote_serializer.data)

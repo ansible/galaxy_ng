@@ -24,6 +24,8 @@ from .container import (
     ContainerNamespace,
     ContainerRegistryRemote,
     ContainerSyncTask,
+    ContainerRegistryRepos
+
 )
 
 __all__ = (
@@ -39,4 +41,5 @@ __all__ = (
     'ContainerNamespace',
     'ContainerRegistryRemote',
     'ContainerSyncTask',
+    'ContainerRegistryRepos',
 )

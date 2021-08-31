@@ -23,6 +23,7 @@ from .execution_environment import (
     ContainerReadmeViewSet,
     ContainerNamespaceViewSet,
     ContainerRegistryRemoteViewSet,
+    ContainerRemoteViewSet,
     ContainerTagViewset
 )
 
@@ -50,5 +51,6 @@ __all__ = (
     'ContainerReadmeViewSet',
     'ContainerNamespaceViewSet',
     'ContainerRegistryRemoteViewSet',
+    'ContainerRemoteViewSet',
     'ContainerTagViewset'
 )

@@ -76,6 +76,14 @@ container_paths = [
         "registries/",
         viewsets.ContainerRegistryRemoteViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='execution-environments-registry-list'),
+    path(
+        "remotes/<str:pk>/",
+        viewsets.ContainerRemoteViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        name='execution-environments-remote-detail'),
+    path(
+        "remotes/",
+        viewsets.ContainerRemoteViewSet.as_view({'get': 'list', 'post': 'create'}),
+        name='execution-environments-remote-list'),
 
     # image names can't start with _, so namespacing all the nested views
     # under _content prevents cases where an image could be named foo/images
