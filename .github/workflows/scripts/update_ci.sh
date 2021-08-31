@@ -19,7 +19,7 @@ popd
 
 if [[ `git status --porcelain` ]]; then
   git add -A
-  git commit -m "Update CI files" -m "[noissue]"
+  git commit -m "Update CI files" -m "No-Issue"
 else
   echo "No updates needed"
 fi
