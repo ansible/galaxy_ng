@@ -7,8 +7,9 @@ STANDALONE_STATEMENTS = {
         },
         {
             "action": "destroy",
-            "principal": "*",
-            "effect": "deny",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:galaxy.delete_namespace"
         },
         {
             "action": "create",
