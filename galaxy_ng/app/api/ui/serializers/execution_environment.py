@@ -1,14 +1,18 @@
+from pulpcore.app.serializers import repository
 import json
 
 from rest_framework import serializers
+from django.core import exceptions
 
 from guardian.shortcuts import get_users_with_perms
 
 from pulp_container.app import models as container_models
+from pulp_container.app import serializers as container_serializers
 from pulpcore.plugin import models as core_models
 from pulpcore.plugin import serializers as core_serializers
 
 from galaxy_ng.app import models
+from galaxy_ng.app.access_control import fields
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
 from galaxy_ng.app.api.v3 import serializers as v3_serializers
 from galaxy_ng.app.api import utils
@@ -271,3 +275,25 @@ class ContainerRegistryRemoteSerializer(
 
         return models.ContainerSyncTask.objects.filter(
             repository=obj.repository_set.order_by('-pulp_last_updated').first()).first()
+
+class ContainerRemoteSerializer(
+    container_serializers.ContainerRemoteSerializer,
+
+):
+
+    registry = serializers.SerializerMethodField()
+
+    class Meta:
+        model = container_models.ContainerRemote
+        fields = [
+            "pk",
+            "name",
+            "upstream_name",
+            "registry",
+        ]
+
+    def get_registry(self, obj):
+        try:
+            return models.ContainerRegistryRepos.objects.get(repository_remote = obj.pk).registry.pk
+        except exceptions.ObjectDoesNotExist:
+            return None
