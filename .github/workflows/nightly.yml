@@ -226,7 +226,7 @@ jobs:
         shell: bash
 
       - name: Install Ruby client
-        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
+        
         run: .github/workflows/scripts/install_ruby_client.sh
         shell: bash
 

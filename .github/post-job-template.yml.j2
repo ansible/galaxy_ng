@@ -11,8 +11,6 @@ update_manifest:
 
       - name: Update Manifest for Ansible Hub UI
         env:
-          GITHUB_PULL_REQUEST: {{ "${{ github.event.number }}" }}
-          GITHUB_BRANCH: {{ "${{ github.head_ref }}" }}
-          GITHUB_REPO_SLUG: {{ "${{ github.repository }}" }}
+          {{ set_env_vars() | indent(10) }}
         run: .github/workflows/scripts/update_manifest.sh
         shell: bash
