@@ -90,7 +90,7 @@ class BuildPyCommand(_BuildPyCommand):
 requirements = [
     "Django~=2.2.23",
     "galaxy-importer==0.3.4",
-    "pulpcore>=3.14.0,<3.15.0",
+    "pulpcore @ git+https://git@github.com/bmbouter/pulpcore@0e26f5400f835b1cc035914d0fc9a528123c3f12#egg=pulpcore",
     "pulp-ansible>=0.9.0,<0.10.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
