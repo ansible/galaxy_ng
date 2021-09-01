@@ -19,9 +19,9 @@ objects:
             - name: quay-cloudservices-pull
             - name: rh-registry-pull
           volumes:
-            - name: settings
-              configMap:
-                name: galaxy-config
+            - name: pulp-key
+              secret:
+                secretName: pulp-key
           containers:
             - name: database-migration-${IMAGE_TAG}
               image: ${IMAGE}:${IMAGE_TAG}
@@ -35,8 +35,9 @@ objects:
                   cpu: ${{CPU_LIMIT}}
                   memory: ${{MEMORY_LIMIT}}
               volumeMounts:
-                - mountPath: /etc/pulp
-                  name: settings
+                - name: pulp-key
+                  mountPath: /etc/pulp/certs
+                  readOnly: true
               env:
                 - name: PULP_SECRET_KEY
                   valueFrom:

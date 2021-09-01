@@ -5,6 +5,15 @@ metadata:
   name: automation-hub
 objects:
 - apiVersion: v1
+  kind: Secret
+  metadata:
+    name: pulp-key
+    namespace: automation-hub
+  data:
+    database_fields.symmetric.key: |
+      DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=
+
+- apiVersion: v1
   kind: ConfigMap
   metadata:
     name: galaxy-importer-config
@@ -46,6 +55,14 @@ objects:
               value: 'insights'
             - name: PULP_CONTENT_ORIGIN
               value: 'localhost'
+          volumeMounts:
+          - name: pulp-key
+            mountPath: /etc/pulp/certs
+            readOnly: true
+          volumes:
+          - name: pulp-key
+            secret:
+              secretName: pulp-key
 
     deployments:
     - name: "backend${SUFFIX}"
@@ -106,6 +123,14 @@ objects:
             value: '10000'
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
+        volumeMounts:
+          - name: pulp-key
+            mountPath: /etc/pulp/certs
+            readOnly: true
+        volumes:
+          - name: pulp-key
+            secret:
+              secretName: pulp-key
       webServices:
         public:
             enabled: true
@@ -134,6 +159,14 @@ objects:
             value: '10000'
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
+        volumeMounts:
+          - name: pulp-key
+            mountPath: /etc/pulp/certs
+            readOnly: true
+        volumes:
+          - name: pulp-key
+            secret:
+              secretName: pulp-key
       webServices:
         private:
             enabled: true
@@ -176,10 +209,16 @@ objects:
         volumeMounts:
           - name: importer-config
             mountPath: /etc/galaxy-importer
+          - name: pulp-key
+            mountPath: /etc/pulp/certs
+            readOnly: true
         volumes:
           - name: importer-config
             configMap:
               name: galaxy-importer-config
+          - name: pulp-key
+            secret:
+              secretName: pulp-key
 
     # Creates a database if local mode, or uses RDS in production
     database:
