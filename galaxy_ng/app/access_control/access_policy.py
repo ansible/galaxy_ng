@@ -7,17 +7,28 @@ from rest_framework.exceptions import NotFound
 
 from galaxy_ng.app import models
 
-from galaxy_ng.app.access_control.statements import STANDALONE_STATEMENTS, INSIGHTS_STATEMENTS
-
 log = logging.getLogger(__name__)
-
-STATEMENTS = {'insights': INSIGHTS_STATEMENTS,
-              'standalone': STANDALONE_STATEMENTS}
 
 
 class AccessPolicyBase(AccessPolicy):
+
+    _STATEMENTS = None
+
+    @property
+    def galaxy_statements(self):
+        """Lazily import the galaxy_statements from the statements file."""
+        if self._STATEMENTS is None:
+            # import here to avoid working outside django/dynaconf settings context
+            from galaxy_ng.app.access_control.statements import STANDALONE_STATEMENTS  # noqa
+            from galaxy_ng.app.access_control.statements import INSIGHTS_STATEMENTS  # noqa
+            self._STATEMENTS = {
+                'insights': INSIGHTS_STATEMENTS,
+                'standalone': STANDALONE_STATEMENTS
+            }
+        return self._STATEMENTS
+
     def _get_statements(self, deployment_mode):
-        return STATEMENTS[deployment_mode]
+        return self.galaxy_statements[deployment_mode]
 
     def get_policy_statements(self, request, view):
         statements = self._get_statements(settings.GALAXY_DEPLOYMENT_MODE)

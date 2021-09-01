@@ -7,7 +7,6 @@ from guardian import shortcuts
 from pulp_ansible.app import models as pulp_ansible_models
 
 from galaxy_ng.app import models as galaxy_models
-from galaxy_ng.app.access_control.statements import INSIGHTS_STATEMENTS
 from galaxy_ng.app.models import auth as auth_models
 
 from . import base
@@ -46,6 +45,7 @@ class BaseSyncListViewSet(base.BaseTestCase):
             name=repo_name, base_path=repo_name, repository=self.default_repo
         )
 
+        from galaxy_ng.app.access_control.statements import INSIGHTS_STATEMENTS  # noqa
         patcher = mock.patch(
             "galaxy_ng.app.access_control." "access_policy.AccessPolicyBase._get_statements",
             return_value=INSIGHTS_STATEMENTS,
