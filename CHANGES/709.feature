@@ -1,0 +1,1 @@
+Enable Namespace deletion endpoint.

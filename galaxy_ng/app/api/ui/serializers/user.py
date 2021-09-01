@@ -138,6 +138,7 @@ class CurrentUserSerializer(UserSerializer):
             "add_namespace": obj.has_perm('galaxy.add_namespace'),
             "upload_to_namespace": obj.has_perm('galaxy.upload_to_namespace'),
             "change_namespace": obj.has_perm('galaxy.change_namespace'),
+            "delete_namespace": obj.has_perm('galaxy.delete_namespace'),
             "move_collection": obj.has_perm('ansible.modify_ansible_repo_content'),
             "change_remote": obj.has_perm('ansible.change_collectionremote'),
             "delete_remote": obj.has_perm('ansible.delete_collectionremote'),
