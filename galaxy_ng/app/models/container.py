@@ -42,6 +42,30 @@ class ContainerRegistryRemote(
 
     class Meta:
         default_related_name = "%(app_label)s_%(model_name)s"
+    
+    def get_connection_fields(self):
+        copy_fields = (
+            "url",
+            "policy",
+            "username",
+            "password",
+            "tls_validation",
+            "client_key",
+            "client_cert",
+            "ca_cert",
+            "download_concurrency",
+            "proxy_url",
+            "proxy_username",
+            "proxy_password",
+            "rate_limit",
+        )
+
+        result = {}
+
+        for field in copy_fields:
+            result[field] = getattr(self, field)
+
+        return result
 
 
 class ContainerRegistryRepos(models.Model):
@@ -53,6 +77,7 @@ class ContainerRegistryRepos(models.Model):
         container_models.ContainerRemote,
         on_delete=models.CASCADE,
         primary_key=True,
+        related_name="registry"
     )
 
 

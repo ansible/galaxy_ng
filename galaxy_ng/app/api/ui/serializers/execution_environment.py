@@ -3,6 +3,8 @@ import json
 
 from rest_framework import serializers
 from django.core import exceptions
+from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 
 from guardian.shortcuts import get_users_with_perms
 
@@ -303,22 +305,59 @@ class ContainerRegistryRemoteSerializer(
 
 class ContainerRemoteSerializer(
     container_serializers.ContainerRemoteSerializer,
-
 ):
 
-    registry = serializers.SerializerMethodField()
+    registry = serializers.CharField(source="registry.registry.pk")
 
     class Meta:
         model = container_models.ContainerRemote
         fields = [
-            "pk",
+            "pulp_id",
             "name",
             "upstream_name",
             "registry",
         ]
 
-    def get_registry(self, obj):
+    def validate_registry(self, value):
         try:
-            return models.ContainerRegistryRepos.objects.get(repository_remote = obj.pk).registry.pk
+            registry = models.ContainerRegistryRemote.objects.get(pk = value)
+            return registry
         except exceptions.ObjectDoesNotExist:
-            return None
+            raise serializers.ValidationError(_("Selected registry does not exist."))
+
+    @transaction.atomic
+    def create(self, validated_data):
+        registry = validated_data['registry']['registry']['pk']
+        del validated_data['registry']
+
+        validated_data = {**registry.get_connection_fields(), **validated_data}
+
+        # validated_data['url'] = registry.url
+        request = self.context['request']
+
+        # Create the remote instances using data from the registry
+
+        remote = super().create(validated_data)
+        remote_href = container_serializers.ContainerRemoteSerializer(remote, context={"request": request}).data['pulp_href']
+
+        # Create the container repository with the new remote
+        repo_serializer = container_serializers.ContainerRepositorySerializer(
+            data={"name": remote.name, "remote": remote_href}, context={"request": request}
+        )
+        repo_serializer.is_valid(raise_exception=True)
+        repository = repo_serializer.create(repo_serializer.validated_data)
+        repo_href = container_serializers.ContainerRepositorySerializer(
+            repository, context={"request": request}
+        ).data["pulp_href"]
+
+        # Create the container distribution with the new repository
+        dist_serializer = container_serializers.ContainerDistributionSerializer(
+            data={"base_path": remote.name, "name": remote.name, "repository": repo_href}
+        )
+        dist_serializer.is_valid(raise_exception=True)
+        distribution = dist_serializer.create(dist_serializer.validated_data)
+
+        # Bind the new remote to the registry object.
+        models.ContainerRegistryRepos.objects.create(registry = registry, repository_remote = remote)
+        
+        return remote
