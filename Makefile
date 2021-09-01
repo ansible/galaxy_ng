@@ -69,6 +69,10 @@ docker/migrate:   ## Run django migrations
 docker/resetdb:   ## Cleans database
 	./compose run --rm api /bin/bash -c "./entrypoint.sh manage reset_db && django-admin migrate"
 
+.PHONY: docker/translations
+docker/translations:   ## Generate the translation messages
+	./compose run --rm api bash -c "cd /app/galaxy_ng && django-admin makemessages --all"
+
 # Application management and debugging
 
 # e.g: make api/get URL=/content/community/v3/collections/
