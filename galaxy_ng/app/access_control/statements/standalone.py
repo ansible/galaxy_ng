@@ -1,7 +1,8 @@
-from galaxy_ng.app.settings import GALAXY_ENABLE_VIEW_ONLY_ACCESS
+from django.conf import settings
 
 
-COLLECTION_UNATHENTICATED_ACCESS = "view"
+GALAXY_ENABLE_VIEW_ONLY_ACCESS = settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
+COLLECTION_UNATHENTICATED_ACCESS = settings.COLLECTION_UNATHENTICATED_ACCESS
 
 
 def get_collection_view_principal():

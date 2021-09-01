@@ -12,7 +12,6 @@ from rest_framework import status as http_code
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app.settings import GALAXY_ENABLE_VIEW_ONLY_ACCESS
 
 from galaxy_ng.app.api.ui.serializers import LoginSerializer
 
@@ -47,7 +46,7 @@ class LoginView(api_base.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=self.request.data)
 
-        if str(request.user) == "AnonymousUser" and GALAXY_ENABLE_VIEW_ONLY_ACCESS:
+        if str(request.user) == "AnonymousUser" and settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS:
             return HttpResponseRedirect('/')
 
         serializer.is_valid(raise_exception=True)
