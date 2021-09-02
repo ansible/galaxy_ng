@@ -6,9 +6,20 @@ galaxy_ng.app.__init__:PulpGalaxyPluginAppConfig.ready() method.
 from django.apps import apps
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_migrate
-from pulp_ansible.app.models import Collection
+from pulp_ansible.app.models import AnsibleRepository, Collection
 from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
 from galaxy_ng.app.models.namespace import Namespace
+
+
+@receiver(post_save, sender=AnsibleRepository)
+def ensure_retain_repo_versions_on_repository(sender, instance, created, **kwargs):
+    """Ensure repository has retain_repo_versions set when created.
+    retain_repo_versions defaults to 1 when not set.
+    """
+
+    if created and instance.retain_repo_versions is None:
+        instance.retain_repo_versions = 1
+        instance.save()
 
 
 @receiver(post_save, sender=Collection)
