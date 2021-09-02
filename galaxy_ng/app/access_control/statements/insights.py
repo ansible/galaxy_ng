@@ -13,6 +13,12 @@ INSIGHTS_STATEMENTS = {
             "condition": ["has_model_perms:galaxy.add_namespace", "has_rh_entitlements"]
         },
         {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": ["has_model_or_obj_perms:galaxy.delete_namespace", "has_rh_entitlements"]
+        },
+        {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",

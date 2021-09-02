@@ -93,7 +93,11 @@ class BaseTestCase(APITestCase):
 
         groups_to_add = {}
         for group in groups:
-            groups_to_add[group] = ['galaxy.upload_to_namespace', 'galaxy.change_namespace']
+            groups_to_add[group] = [
+                'galaxy.upload_to_namespace',
+                'galaxy.change_namespace',
+                'galaxy.delete_namespace'
+            ]
         namespace.groups = groups_to_add
         return namespace
 
@@ -104,6 +108,7 @@ class BaseTestCase(APITestCase):
             'galaxy.add_namespace',
             'galaxy.change_namespace',
             'galaxy.upload_to_namespace',
+            'galaxy.delete_namespace',
 
             # collections
             'ansible.modify_ansible_repo_content',

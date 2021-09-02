@@ -33,6 +33,8 @@ class TestV3NamespaceViewSet(BaseTestCase):
         self.admin_user.groups.add(self.pe_group)
         self.admin_user.save()
 
+        self.regular_user = auth_models.User.objects.create(username='regular')
+
         self.ns_url = reverse('galaxy:api:v3:namespaces-list')
 
     def test_namespace_validation(self):
@@ -152,7 +154,8 @@ class TestV3NamespaceViewSet(BaseTestCase):
                             "name": self.pe_group.name,
                             "object_permissions": [
                                 'galaxy.upload_to_namespace',
-                                'galaxy.change_namespace'
+                                'galaxy.change_namespace',
+                                'galaxy.delete_namespace',
                             ]
                         },
                     ],
@@ -173,13 +176,24 @@ class TestV3NamespaceViewSet(BaseTestCase):
             # Delete namespace + repo
             ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1_name})
             response = self.client.delete(ns_detail_url)
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            self.assertEqual(0, len(AnsibleRepository.objects.filter(name=repo_name)))
+            self.assertEqual(0, len(AnsibleDistribution.objects.filter(name=repo_name)))
+            self.assertEqual(0, len(Namespace.objects.filter(name=ns1_name)))
 
-            # Namespace deletion is currently disabled via access policy. If we re-enable it
-            # we can re-enable these tests
+    def test_unauthorized_user_cant_delete_namespace(self):
+        ns1_name = "unittestnamespacefordeletion"
+        repo_name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=ns1_name)
+        self._create_namespace(ns1_name, groups=[self.pe_group])
+
+        with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
+            self.client.force_authenticate(user=self.regular_user)
+            ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1_name})
+            response = self.client.delete(ns_detail_url)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-            # self.assertEqual(0, len(AnsibleRepository.objects.filter(name=repo_name)))
-            # self.assertEqual(0, len(AnsibleDistribution.objects.filter(name=repo_name)))
-            # self.assertEqual(0, len(Namespace.objects.filter(name=ns1_name)))
+            self.assertEqual(1, len(Namespace.objects.filter(name=ns1_name)))
+            self.assertEqual(1, len(AnsibleRepository.objects.filter(name=repo_name)))
+            self.assertEqual(1, len(AnsibleDistribution.objects.filter(name=repo_name)))
 
     def test_delete_namespace_no_error_if_no_repo_exist(self):
         ns2_name = "unittestnamespace2"
