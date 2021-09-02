@@ -11,7 +11,7 @@ objects:
     namespace: automation-hub
   data:
     database_fields.symmetric.key: |
-      DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=
+      RE5tTmR3Z3ladWdUYXg5UzY0SjBGSVRUcjlJSFB4YnVvRjFGMUNHUHI2OD0=
 
 - apiVersion: v1
   kind: ConfigMap
