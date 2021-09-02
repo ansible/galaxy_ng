@@ -61,6 +61,12 @@ class CollectionViewSet(
             "version",
         )
 
+        deprecated_query = AnsibleCollectionDeprecated.objects.filter(
+            namespace=OuterRef("namespace"),
+            name=OuterRef("name"),
+            pk__in=self._distro_content,
+        )
+
         collection_versions = {}
         for collection_id, version in versions:
             value = collection_versions.get(str(collection_id))
@@ -71,16 +77,13 @@ class CollectionViewSet(
             return CollectionVersion.objects.none().annotate(
                 # AAH-122: annotated fields must exist in all the returned querysets
                 #          in order for filters to work.
-                deprecated=Exists(AnsibleCollectionDeprecated.objects)
+                deprecated=Exists(deprecated_query)
             )
 
         query_params = Q()
         for collection_id, version in collection_versions.items():
             query_params |= Q(collection_id=collection_id, version=version)
 
-        deprecated_query = AnsibleCollectionDeprecated.objects.filter(
-            collection=OuterRef("collection"), repository_version=self._repository_version
-        )
         version_qs = CollectionVersion.objects.select_related("collection").filter(query_params)
         version_qs = version_qs.annotate(deprecated=Exists(deprecated_query))
         return version_qs
