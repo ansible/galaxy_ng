@@ -187,7 +187,7 @@ pulp-ansible==0.9.0
     # via galaxy-ng (setup.py)
 pulp-container==2.7.0
     # via galaxy-ng (setup.py)
-git+https://git@github.com/bmbouter/pulpcore@011e086f5e7afbf12ee2ec155e4b3e5a30dde979#egg=pulpcore
+pulpcore==3.14.6
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -245,8 +245,6 @@ rich==10.1.0
     # via
     #   ansible-lint
     #   enrich
-rpdb==0.1.6
-    # via pulpcore
 rq==1.8.1
     # via pulpcore
 ruamel.yaml==0.17.4
