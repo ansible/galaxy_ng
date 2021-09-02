@@ -187,7 +187,7 @@ pulp-ansible==0.9.0
     # via galaxy-ng (setup.py)
 pulp-container==2.7.0
     # via galaxy-ng (setup.py)
-git+https://git@github.com/bmbouter/pulpcore@4317c67097b661dc5fa7b7a51aeb96658125873b#egg=pulpcore
+git+https://git@github.com/bmbouter/pulpcore@011e086f5e7afbf12ee2ec155e4b3e5a30dde979#egg=pulpcore
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
