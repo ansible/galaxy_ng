@@ -79,17 +79,3 @@ class ContainerRegistryRepos(models.Model):
         primary_key=True,
         related_name="registry"
     )
-
-
-class ContainerSyncTask(models.Model):
-    repository = models.ForeignKey(
-        container_models.ContainerRepository,
-        on_delete=models.CASCADE,
-    )
-    task = models.ForeignKey(
-        pulp_models.Task,
-        on_delete=models.CASCADE,
-    )
-
-    class Meta:
-        ordering = ['-task__finished_at']

@@ -5,7 +5,6 @@ from rest_framework.reverse import reverse
 from drf_spectacular.utils import extend_schema_field
 from pulpcore.app.serializers import ProgressReportSerializer
 from pulpcore.plugin.models import Task
-from galaxy_ng.app.models import CollectionSyncTask
 
 
 log = logging.getLogger(__name__)
@@ -15,7 +14,6 @@ class TaskSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(source='pulp_created')
     updated_at = serializers.DateTimeField(source='pulp_last_updated')
     worker = serializers.SerializerMethodField()
-    repository = serializers.SerializerMethodField()
     progress_reports = ProgressReportSerializer(many=True, read_only=True)
     pulp_id = serializers.UUIDField(source='pk')
     name = serializers.CharField()
@@ -32,11 +30,6 @@ class TaskSerializer(serializers.ModelSerializer):
                 'last_heartbeat': obj.worker.last_heartbeat,
             }
 
-    @extend_schema_field(Optional[str])
-    def get_repository(self, obj):
-        sync_task = CollectionSyncTask.objects.filter(task=obj).first()
-        if sync_task:
-            return sync_task.repository.name
 
     class Meta:
         model = Task
@@ -53,7 +46,6 @@ class TaskSerializer(serializers.ModelSerializer):
             'worker',
             'parent_task',
             'child_tasks',
-            'repository',
             'progress_reports',
         )
 

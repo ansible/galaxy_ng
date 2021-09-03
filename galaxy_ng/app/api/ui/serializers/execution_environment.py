@@ -94,6 +94,9 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
 
     def get_pulp(self, distro):
         repo = distro.repository
+        remote = None
+        if(repo.remote):
+            remote = ContainerRemoteSerializer(repo.remote.cast()).data
 
         return {
             "repository": {
@@ -105,6 +108,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "pulp_created": repo.pulp_created,
                 "last_sync_task": _get_last_sync_task(repo),
                 "pulp_labels": {label.key: label.value for label in repo.pulp_labels.all()},
+                "remote": remote
             },
             "distribution": {
                 "pulp_id": distro.pk,
@@ -258,12 +262,11 @@ class ContainerReadmeSerializer(serializers.ModelSerializer):
 
 
 class ContainerRegistryRemoteSerializer(
-    v3_serializers.LastSyncTaskMixin,
     core_serializers.RemoteSerializer,
 ):
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
-    last_sync_task = serializers.SerializerMethodField()
+    last_sync_task = utils.RemoteSyncTaskField(source="*")
     write_only_fields = serializers.SerializerMethodField()
 
     class Meta:
@@ -297,17 +300,12 @@ class ContainerRegistryRemoteSerializer(
     def get_write_only_fields(self, obj):
         return utils.get_write_only_fields(self, obj)
 
-    def get_last_sync_task_queryset(self, obj):
-        """Gets last_sync_task from Pulp using remote->repository relation"""
-
-        return models.ContainerSyncTask.objects.filter(
-            repository=obj.repository_set.order_by('-pulp_last_updated').first()).first()
-
 class ContainerRemoteSerializer(
     container_serializers.ContainerRemoteSerializer,
 ):
 
     registry = serializers.CharField(source="registry.registry.pk")
+    last_sync_task = utils.RemoteSyncTaskField(source="*")
 
     class Meta:
         model = container_models.ContainerRemote
@@ -317,6 +315,7 @@ class ContainerRemoteSerializer(
             "name",
             "upstream_name",
             "registry",
+            "last_sync_task"
         ]
 
     def validate_registry(self, value):

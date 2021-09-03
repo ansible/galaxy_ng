@@ -1,11 +1,16 @@
-from collections import namedtuple
 import re
-from requests.adapters import HTTPAdapter
 import socket
+
+from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
+
+from rest_framework import serializers
+from pulpcore.plugin import models as pulp_models
+
+from collections import namedtuple
+from requests.adapters import HTTPAdapter
 from urllib3.connection import HTTPConnection
 from urllib3.connectionpool import HTTPConnectionPool
-
-from django.utils.translation import gettext_lazy as _
 
 from galaxy_importer.schema import MAX_LENGTH_NAME, MAX_LENGTH_VERSION
 
@@ -123,3 +128,26 @@ def get_write_only_fields(serializer, obj, extra_data=None):
             fields.append({"name": field_name, "is_set": _is_set(field_name)})
 
     return fields
+
+
+class RemoteSyncTaskField(serializers.Field):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, read_only=True)
+
+    def to_representation(self, remote):
+        # Query the database for sync tasks that reserve the given remote's PK
+        task = pulp_models.Task.objects.filter(
+            reserved_resources_record__icontains=remote.pk,
+            name__icontains="sync"
+        ).order_by('-pulp_last_updated').first()
+
+        if not task:
+            return {}
+        else:
+            return {
+                "task_id": task.pk,
+                "state": task.state,
+                "started_at": task.started_at,
+                "finished_at": task.finished_at,
+                "error": task.error
+            }

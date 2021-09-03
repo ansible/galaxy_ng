@@ -54,9 +54,4 @@ class SyncRemoteView(api_base.APIView):
 
         repo = pulp_models.AnsibleRepository.objects.get(pk=distro.repository.pk)
 
-        models.CollectionSyncTask.objects.create(
-            repository=repo,
-            task=result
-        )
-
         return Response({'task': result.pk})
