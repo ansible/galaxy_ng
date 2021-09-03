@@ -1,31 +1,26 @@
-from django.http import request
-from pulpcore.app.serializers.base import ValidateFieldsMixin
-
 import logging
 
 from django.db.models import Prefetch, Count, Q
-from django.db import IntegrityError, transaction
 from django.core import exceptions
-from rest_framework import response
 
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
+from rest_framework import mixins
 
+from pulpcore.plugin import viewsets as pulp_viewsets
 from pulpcore.plugin import models as core_models
+
 from pulp_container.app import models as container_models
-from pulp_container.app import serializers as container_serializers
 
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend
 
 from guardian.shortcuts import get_objects_for_user
-from galaxy_ng.app import api
 
+
+from galaxy_ng.app import api
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.ui import serializers
 from django.shortcuts import get_object_or_404
 from galaxy_ng.app.access_control import access_policy
-
 from galaxy_ng.app import models
 
 log = logging.getLogger(__name__)
@@ -272,18 +267,14 @@ class ContainerRegistryRemoteFilter(filterset.FilterSet):
         }
 
 
-class ContainerRegistryRemoteViewSet(
-    api_base.ModelViewSet,
-):
+class ContainerRegistryRemoteViewSet(api_base.ModelViewSet):
     queryset = models.ContainerRegistryRemote.objects.all()
     serializer_class = serializers.ContainerRegistryRemoteSerializer
     permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
     filterset_class = ContainerRegistryRemoteFilter
 
 
-class ContainerRemoteViewSet(
-    api_base.ModelViewSet,
-):
+class ContainerRemoteViewSet(api_base.ModelViewSet):
     queryset = container_models.ContainerRemote.objects.all()
     serializer_class = serializers.ContainerRemoteSerializer
     permission_classes = []
