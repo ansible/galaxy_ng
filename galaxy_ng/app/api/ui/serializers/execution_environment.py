@@ -125,6 +125,14 @@ def _get_last_sync_task(repo):
     }
 
 
+class ContainerTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = container_models.Tag
+        fields = (
+            "name",
+        )
+
+
 class ContainerManifestSerializer(serializers.ModelSerializer):
     config_blob = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()

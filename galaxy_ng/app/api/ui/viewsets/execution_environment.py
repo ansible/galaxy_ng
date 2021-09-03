@@ -97,6 +97,17 @@ class ContainerContentBaseViewset(api_base.ModelViewSet):
             models.ContainerDistribution, base_path=self.kwargs["base_path"])
 
 
+class ContainerTagViewset(ContainerContentBaseViewset):
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    serializer_class = serializers.ContainerTagSerializer
+
+    def get_queryset(self):
+        repo = self.get_distro().repository
+        repo_version = repo.latest_version()
+        return repo_version.get_content(container_models.Tag.objects)
+        
+
+
 class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     filter_backends = (DjangoFilterBackend,)
