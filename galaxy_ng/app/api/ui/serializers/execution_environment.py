@@ -311,6 +311,7 @@ class ContainerRemoteSerializer(
 
     class Meta:
         model = container_models.ContainerRemote
+        read_only_fields = ('name',)
         fields = [
             "pulp_id",
             "name",
@@ -324,6 +325,18 @@ class ContainerRemoteSerializer(
             return registry
         except exceptions.ObjectDoesNotExist:
             raise serializers.ValidationError(_("Selected registry does not exist."))
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        registry = validated_data['registry']['registry']['pk']
+        del validated_data['registry']
+        del validated_data['name']
+
+        instance.registry.registry = registry
+        instance.registry.save()
+        validated_data = {**registry.get_connection_fields(), **validated_data}
+        return super().update(instance, validated_data)
+
 
     @transaction.atomic
     def create(self, validated_data):
