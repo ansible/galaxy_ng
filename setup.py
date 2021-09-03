@@ -94,7 +94,9 @@ requirements = [
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.8.0,<2.9.0",
-    "django-automated-logging"
+    "django-automated-logging",
+    "social-auth-core>=3.3.1,<4.0.0",
+    "social-auth-app-django>=3.1.0,<4.0.0",
 ]
 
 # next line can be replaced via sed in ci scripts/post_before_install.sh
