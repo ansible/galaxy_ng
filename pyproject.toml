@@ -23,6 +23,19 @@ exclude = '''
 '''
 
 
+[tool.darker]
+src = [
+    "galaxy_ng",
+]
+revision = "master"
+isort = true
+lint = [
+    "flake8 --config flake8.cfg",
+]
+log_level = "INFO"
+line_length = 100
+
+
 [tool.check-manifest]
 ignore = [
     ".gitleaks.toml",
