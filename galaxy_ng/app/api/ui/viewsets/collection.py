@@ -114,8 +114,15 @@ class CollectionViewSet(
 
 
 class CollectionVersionFilter(filterset.FilterSet):
-    repository = filters.CharFilter(field_name='repository', method='repo_filter')
+    dependency = filters.CharFilter(field_name="dependency", method="dependency_filter")
+    repository = filters.CharFilter(field_name="repository", method="repo_filter")
     versioning_class = versioning.UIVersioning
+
+    def dependency_filter(self, queryset, name, value):
+        """Return all CollectionVersions that have a dependency on the Collection
+        passed in the url string, ex: ?dependency=my_namespace.my_collection_name
+        """
+        return CollectionVersion.objects.filter(dependencies__has_key=value)
 
     def repo_filter(self, queryset, name, value):
         try:
@@ -136,7 +143,7 @@ class CollectionVersionFilter(filterset.FilterSet):
 
     class Meta:
         model = CollectionVersion
-        fields = ['namespace', 'name', 'version', 'repository']
+        fields = ["namespace", "name", "version"]
 
 
 class CollectionVersionViewSet(api_base.GenericViewSet):
