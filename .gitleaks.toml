@@ -1,6 +1,6 @@
 [allowlist]
   description = "Our test install exports a test only MINIO ACCESS KEY"
-  files = [
+  paths = [
     ".github/workflows/scripts/install.sh",
     "openshift/clowder/clowd-app.yaml",
     "dev/Dockerfile.base",
