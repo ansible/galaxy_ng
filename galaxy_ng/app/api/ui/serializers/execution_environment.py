@@ -303,7 +303,8 @@ class ContainerRegistryRemoteSerializer(
 class ContainerRemoteSerializer(
     container_serializers.ContainerRemoteSerializer,
 ):
-
+    created_at = serializers.DateTimeField(source='pulp_created', required=False)
+    updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
     registry = serializers.CharField(source="registry.registry.pk")
     last_sync_task = utils.RemoteSyncTaskField(source="*")
 
@@ -315,7 +316,12 @@ class ContainerRemoteSerializer(
             "name",
             "upstream_name",
             "registry",
-            "last_sync_task"
+            "last_sync_task",
+            "created_at",
+            "updated_at",
+            "include_foreign_layers",
+            "include_tags",
+            "exclude_tags"
         ]
 
     def validate_registry(self, value):
