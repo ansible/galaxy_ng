@@ -217,4 +217,4 @@ class ContainerRegistryRemoteViewSet(
 ):
     queryset = models.ContainerRegistryRemote.objects.all()
     serializer_class = serializers.ContainerRegistryRemoteSerializer
-    permission_classes = []
+    permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
