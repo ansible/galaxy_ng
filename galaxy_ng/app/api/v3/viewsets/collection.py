@@ -2,6 +2,9 @@ import logging
 
 import requests
 
+from packaging.specifiers import SpecifierSet
+from packaging.version import Version
+
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from django.conf import settings
@@ -10,8 +13,10 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException, NotFound
+from rest_framework.mixins import DestroyModelMixin
 
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.tasking import dispatch
@@ -87,12 +92,26 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
     serializer_class = CollectionSerializer
 
 
-class UnpaginatedCollectionVersionViewSet(api_base.LocalSettingsMixin,
-                                          ViewNamespaceSerializerContextMixin,
-                                          pulp_ansible_views.UnpaginatedCollectionVersionViewSet):
+class UnpaginatedCollectionVersionViewSet(
+    api_base.LocalSettingsMixin,
+    ViewNamespaceSerializerContextMixin,
+    DestroyModelMixin,
+    pulp_ansible_views.UnpaginatedCollectionVersionViewSet,
+):
     pagination_class = None
     serializer_class = UnpaginatedCollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
+
+
+def get_dependents(parent):
+    """Given a parent collection, return a list of collections that depend on it."""
+    key = f"{parent.namespace}.{parent.name}"
+    dependents = []
+    for child in CollectionVersion.objects.filter(dependencies__has_key=key):
+        spec = SpecifierSet(child.dependencies[key])
+        if Version(parent.version) in spec:
+            dependents.append(child)
+    return dependents
 
 
 class CollectionVersionViewSet(api_base.LocalSettingsMixin,
@@ -101,6 +120,37 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
     serializer_class = CollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
     list_serializer_class = CollectionVersionListSerializer
+
+    def destroy(self, request: Request, *args, **kwargs) -> Response:
+        """
+        Allow a CollectionVersion to be deleted.
+        1. Perform Dependency Check to verify that the collection version can be deleted
+        2. If it can, perform Collection Repository Cleanup
+        3. If the collection version can’t be deleted, return the reason why
+        4. If the version being deleted is the last collection version in the collection,
+           remove the collection object as well.
+        """
+        collection_version = self.get_object()
+        # dependency check
+        dependents = get_dependents(collection_version)
+        if dependents:
+            return Response(
+                {
+                    "detail": _(
+                        "Collection {namespace}.{name} could not be deleted "
+                        "because there are other collections that require it."
+                    ).format(
+                        namespace=collection_version.namespace,
+                        name=collection_version.collection.name,
+                    ),
+                    "dependent_collections": [f"{dep.namespace}.{dep.name}" for dep in dependents],
+                },
+                status=400,
+            )
+        # collection repo cleanup
+
+        # collection_version.perform_destroy()
+        return Response(status=204)
 
 
 class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,

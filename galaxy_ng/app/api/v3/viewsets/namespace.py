@@ -87,9 +87,9 @@ class NamespaceViewSet(api_base.ModelViewSet):
         if Collection.objects.filter(namespace=namespace.name).exists():
             raise ValidationError(
                 detail=_(
-                    'Namespace %s cannot be deleted because '
-                    'there are still collections associated with it.'
-                ) % namespace.name
+                    "Namespace {name} cannot be deleted because "
+                    "there are still collections associated with it."
+                ).format(name=namespace.name)
             )
 
         # 2. Delete the inbound pulp distro and repository
