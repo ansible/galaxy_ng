@@ -125,6 +125,7 @@ paths = [
 
     path('auth/', include(auth_views)),
     path('feature-flags/', views.FeatureFlagsView.as_view(), name='feature-flags'),
+    path('controllers/', views.ControllerListView.as_view(), name='controllers'),
     path('groups/', include(group_paths)),
     path(
         'repo/<str:path>/',
