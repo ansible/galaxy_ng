@@ -252,5 +252,34 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_model_or_obj_perms:container.change_containernamespace"
         },
-    ]
+    ],
+
+    'ContainerRegistryRemoteViewSet': [
+        # prevents deletion of registry
+        {
+            "action": "destroy",
+            "principal": "*",
+            "effect": "deny",
+        },
+        # allows authenticated users to VIEW registries
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        # allows users with model create permissions to create new registries
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.add_containerregistryremote"
+        },
+        # allows users with model create permissions to update registries
+        {
+            "action": "update",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.change_containerregistryremote"
+        },
+    ],
 }

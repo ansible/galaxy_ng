@@ -171,3 +171,7 @@ class ContainerReadmeAccessPolicy(AccessPolicyBase):
 
 class ContainerNamespaceAccessPolicy(AccessPolicyBase):
     NAME = 'ContainerNamespaceViewset'
+
+
+class ContainerRegistryRemoteAccessPolicy(AccessPolicyBase):
+    NAME = 'ContainerRegistryRemoteViewSet'
