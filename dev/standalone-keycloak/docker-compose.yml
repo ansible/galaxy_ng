@@ -7,16 +7,19 @@ services:
       - './standalone-keycloak/galaxy_ng.env'
     environment:
       SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: ${SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY}
+      KEYCLOAK_HOST_LOOPBACK: ${KEYCLOAK_HOST_LOOPBACK}
   worker:
     env_file:
       - './standalone-keycloak/galaxy_ng.env'
     environment:
       SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: ${SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY}
+      KEYCLOAK_HOST_LOOPBACK: ${KEYCLOAK_HOST_LOOPBACK}
   content-app:
     env_file:
       - './standalone-keycloak/galaxy_ng.env'
     environment:
       SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: ${SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY}
+      KEYCLOAK_HOST_LOOPBACK: ${KEYCLOAK_HOST_LOOPBACK}
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
