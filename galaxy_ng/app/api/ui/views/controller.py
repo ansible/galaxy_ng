@@ -18,7 +18,7 @@ class ControllerListView(api_base.APIView):
         for controller in settings.CONNECTED_ANSIBLE_CONTROLLERS:
             if host_filter and controller != host_filter:
                 continue
-            
+
             if host_icontains_filter and host_icontains_filter.lower() not in controller.lower():
                 continue
 

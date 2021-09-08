@@ -28,11 +28,13 @@ class TestUiFeatureFlagsView(BaseTestCase):
         controller_list = self.client.get(self.feature_flags_url + "?limit=1").data['data']
         self.assertEqual(len(controller_list), 1)
 
-        controller_list = self.client.get(self.feature_flags_url + "?host__icontains=EXAMPLE.COM").data['data']
+        controller_list = self.client.get(
+            self.feature_flags_url + "?host__icontains=EXAMPLE.COM").data['data']
         self.assertEqual(len(controller_list), 2)
         for controller in controller_list:
             self.assertTrue('example.com' in controller['host'])
 
-        controller_list = self.client.get(self.feature_flags_url + "?host=https://boring-url.example.com/").data['data']
+        controller_list = self.client.get(
+            self.feature_flags_url + "?host=https://boring-url.example.com/").data['data']
         self.assertEqual(len(controller_list), 1)
         self.assertEqual(controller_list[0]["host"], "https://boring-url.example.com/")
