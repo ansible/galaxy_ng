@@ -63,6 +63,9 @@ class AccessPolicyBase(AccessPolicy):
 class NamespaceAccessPolicy(AccessPolicyBase):
     NAME = 'NamespaceViewSet'
 
+    def view_only_mode_enabled(self, request, view, permission):
+        return settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
+
 
 class CollectionAccessPolicy(AccessPolicyBase):
     NAME = 'CollectionViewSet'
@@ -79,6 +82,9 @@ class CollectionAccessPolicy(AccessPolicyBase):
         except models.Namespace.DoesNotExist:
             raise NotFound(_('Namespace in filename not found.'))
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
+
+    def view_only_mode_enabled(self, request, view, permission):
+        return settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
 
 
 class CollectionRemoteAccessPolicy(AccessPolicyBase):
@@ -101,6 +107,9 @@ class MyUserAccessPolicy(AccessPolicyBase):
 
     def is_current_user(self, request, view, action):
         return request.user == view.get_object()
+
+    def view_only_mode_enabled(self, request, view, action):
+        return settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
 
 
 class SyncListAccessPolicy(AccessPolicyBase):

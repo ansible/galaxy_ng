@@ -1,34 +1,15 @@
-from django.conf import settings
-
-
-GALAXY_ENABLE_VIEW_ONLY_ACCESS = settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
-COLLECTION_UNATHENTICATED_ACCESS = settings.COLLECTION_UNATHENTICATED_ACCESS
-
-
-def get_collection_view_principal():
-    if COLLECTION_UNATHENTICATED_ACCESS in ("view", "download"):
-        return "*"
-    return "authenticated"
-
-
-def get_collection_download_principal():
-    if COLLECTION_UNATHENTICATED_ACCESS == "download":
-        return "*"
-    return "authenticated"
-
-
-def get_myuserviewset_retrieve_principal():
-    if GALAXY_ENABLE_VIEW_ONLY_ACCESS:
-        return "*"
-    return "authenticated"
-
-
 STANDALONE_STATEMENTS = {
     'NamespaceViewSet': [
         {
             "action": ["list", "retrieve"],
-            "principal": get_collection_view_principal(),
+            "principal": "authenticated",
             "effect": "allow",
+        },
+        {
+            "action": ["list", "retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "view_only_mode_enabled"
         },
         {
             "action": "destroy",
@@ -52,13 +33,14 @@ STANDALONE_STATEMENTS = {
     'CollectionViewSet': [
         {
             "action": ["list", "retrieve"],
-            "principal": get_collection_view_principal(),
+            "principal": "authenticated",
             "effect": "allow",
         },
         {
-            "action": ["download"],
-            "principal": get_collection_download_principal(),
-            "effect": "allow"
+            "action": ["list", "retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "view_only_mode_enabled"
         },
         {
             "action": "destroy",
@@ -144,11 +126,12 @@ STANDALONE_STATEMENTS = {
     'MyUserViewSet': [
         {
             "action": ["retrieve"],
-            "principal": get_myuserviewset_retrieve_principal(),
+            "principal": "anonymous",
             "effect": "allow",
+            "condition": "view_only_mode_enabled"
         },
         {
-            "action": ["update", "partial_update"],
+            "action": ["retrieve", "update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "is_current_user"
