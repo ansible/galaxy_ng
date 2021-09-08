@@ -6,7 +6,6 @@ from galaxy_ng.app.api import base as api_base
 
 class ControllerListView(api_base.APIView):
     permission_classes = [IsAuthenticated]
-    queryset = settings.CONNECTED_ANSIBLE_CONTROLLERS
 
     # Returns a paginated list. This will make this easier to upgrade to a
     # database setting down the line.
