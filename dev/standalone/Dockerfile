@@ -11,9 +11,6 @@ RUN set -ex; \
 
 USER root
 
-RUN dnf install -y gettext; \
-    touch /var/log/galaxy_api_access.log \
-    && chmod 0644 /var/log/galaxy_api_access.log \
-    && chown galaxy:galaxy /var/log/galaxy_api_access.log
+RUN dnf install -y gettext;
 
 USER galaxy
