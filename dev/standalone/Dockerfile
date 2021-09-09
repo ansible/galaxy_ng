@@ -11,6 +11,6 @@ RUN set -ex; \
 
 USER root
 
-RUN dnf install -y gettext
+RUN dnf install -y gettext;
 
 USER galaxy
