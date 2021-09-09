@@ -138,6 +138,9 @@ LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 
 CONNECTED_ANSIBLE_CONTROLLERS = []
 
+GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS = False
+GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD = False
+
 GALAXY_ENABLE_API_ACCESS_LOG = False
 # Extra AUTOMATED_LOGGING settings are defined on dynaconf_hooks.py
 # to be overridden by the /etc/pulp/settings.py

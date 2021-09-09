@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.contrib import auth as django_auth
-from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.authentication import SessionAuthentication
@@ -45,9 +44,6 @@ class LoginView(api_base.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=self.request.data)
-
-        if str(request.user) == "AnonymousUser" and settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS:
-            return HttpResponseRedirect('/')
 
         serializer.is_valid(raise_exception=True)
 

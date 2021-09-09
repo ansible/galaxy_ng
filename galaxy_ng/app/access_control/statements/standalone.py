@@ -9,7 +9,7 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "anonymous",
             "effect": "allow",
-            "condition": "view_only_mode_enabled"
+            "condition": "unauthenticated_collection_access_enabled"
         },
         {
             "action": "destroy",
@@ -40,12 +40,23 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "anonymous",
             "effect": "allow",
-            "condition": "view_only_mode_enabled"
+            "condition": "unauthenticated_collection_access_enabled"
         },
         {
             "action": "destroy",
             "principal": "*",
             "effect": "deny",
+        },
+        {
+            "action": ["download"],
+            "principal": 'authenticated',
+            "effect": "allow",
+        },
+        {
+            "action": ["download"],
+            "principal": 'anonymous',
+            "effect": "allow",
+            "condition": "unauthenticated_collection_download_enabled",
         },
         {
             "action": "create",
@@ -128,7 +139,7 @@ STANDALONE_STATEMENTS = {
             "action": ["retrieve"],
             "principal": "anonymous",
             "effect": "allow",
-            "condition": "view_only_mode_enabled"
+            "condition": "unauthenticated_collection_access_enabled"
         },
         {
             "action": ["retrieve", "update", "partial_update"],

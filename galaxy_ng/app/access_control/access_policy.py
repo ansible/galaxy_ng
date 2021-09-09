@@ -6,7 +6,7 @@ from rest_access_policy import AccessPolicy
 from rest_framework.exceptions import NotFound
 
 from galaxy_ng.app import models
-from galaxy_ng.app.access_control.mixins import ViewOnlyMixin
+from galaxy_ng.app.access_control.mixins import UnauthenticatedCollectionAccessMixin
 
 log = logging.getLogger(__name__)
 
@@ -61,11 +61,11 @@ class AccessPolicyBase(AccessPolicy):
         return entitlement.get('is_entitled', False)
 
 
-class NamespaceAccessPolicy(ViewOnlyMixin, AccessPolicyBase):
+class NamespaceAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
     NAME = 'NamespaceViewSet'
 
 
-class CollectionAccessPolicy(ViewOnlyMixin, AccessPolicyBase):
+class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
     NAME = 'CollectionViewSet'
 
     def can_update_collection(self, request, view, permission):
@@ -80,6 +80,9 @@ class CollectionAccessPolicy(ViewOnlyMixin, AccessPolicyBase):
         except models.Namespace.DoesNotExist:
             raise NotFound(_('Namespace in filename not found.'))
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
+
+    def unauthenticated_collection_download_enabled(self, request, view, permission):
+        return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
 
 
 class CollectionRemoteAccessPolicy(AccessPolicyBase):
@@ -97,7 +100,7 @@ class UserAccessPolicy(AccessPolicyBase):
         return request.user == view.get_object()
 
 
-class MyUserAccessPolicy(ViewOnlyMixin, AccessPolicyBase):
+class MyUserAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
     NAME = 'MyUserViewSet'
 
     def is_current_user(self, request, view, action):

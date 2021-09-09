@@ -78,10 +78,10 @@ class ViewOnlyTestCase(BaseTestCase):
             }
         )
 
-    def test_view_only_access_to_collections(self):
+    def test_unauthenticated_access_to_collections(self):
         response = self.client.get(self.collections_detail_url)
         self.assertEqual(response.data['errors'][0]['status'], '403')
-        with self.settings(GALAXY_ENABLE_VIEW_ONLY_ACCESS=True):
+        with self.settings(GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=True):
             response = self.client.get(self.collections_detail_url)
             self.assertEqual(response.data['name'], self.collection.name)
             self.assertEqual(response.data['namespace'], self.collection.namespace.name)
@@ -90,9 +90,9 @@ class ViewOnlyTestCase(BaseTestCase):
                 response.data['highest_version']['version'], '1.1.2'
             )
 
-    def test_view_only_access_to_namespace(self):
+    def test_unauthenticated_access_to_namespace(self):
         response = self.client.get(self.ns_detail_url)
         self.assertEqual(response.data['errors'][0]['status'], '403')
-        with self.settings(GALAXY_ENABLE_VIEW_ONLY_ACCESS=True):
+        with self.settings(GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=True):
             response = self.client.get(self.ns_detail_url)
             self.assertEqual(response.data['name'], self.namespace.name)

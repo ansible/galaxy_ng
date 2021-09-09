@@ -38,6 +38,6 @@ class GroupModelPermissionsMixin:
             self._set_groups(self._groups)
 
 
-class ViewOnlyMixin:
-    def view_only_mode_enabled(self, request, view, action):
-        return settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
+class UnauthenticatedCollectionAccessMixin:
+    def unauthenticated_collection_access_enabled(self, request, view, action):
+        return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS
