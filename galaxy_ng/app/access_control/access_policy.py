@@ -6,6 +6,7 @@ from rest_access_policy import AccessPolicy
 from rest_framework.exceptions import NotFound
 
 from galaxy_ng.app import models
+from galaxy_ng.app.access_control.mixins import ViewOnlyMixin
 
 log = logging.getLogger(__name__)
 
@@ -60,14 +61,11 @@ class AccessPolicyBase(AccessPolicy):
         return entitlement.get('is_entitled', False)
 
 
-class NamespaceAccessPolicy(AccessPolicyBase):
+class NamespaceAccessPolicy(ViewOnlyMixin, AccessPolicyBase):
     NAME = 'NamespaceViewSet'
 
-    def view_only_mode_enabled(self, request, view, permission):
-        return settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
 
-
-class CollectionAccessPolicy(AccessPolicyBase):
+class CollectionAccessPolicy(ViewOnlyMixin, AccessPolicyBase):
     NAME = 'CollectionViewSet'
 
     def can_update_collection(self, request, view, permission):
@@ -82,9 +80,6 @@ class CollectionAccessPolicy(AccessPolicyBase):
         except models.Namespace.DoesNotExist:
             raise NotFound(_('Namespace in filename not found.'))
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
-
-    def view_only_mode_enabled(self, request, view, permission):
-        return settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
 
 
 class CollectionRemoteAccessPolicy(AccessPolicyBase):
@@ -102,14 +97,11 @@ class UserAccessPolicy(AccessPolicyBase):
         return request.user == view.get_object()
 
 
-class MyUserAccessPolicy(AccessPolicyBase):
+class MyUserAccessPolicy(ViewOnlyMixin, AccessPolicyBase):
     NAME = 'MyUserViewSet'
 
     def is_current_user(self, request, view, action):
         return request.user == view.get_object()
-
-    def view_only_mode_enabled(self, request, view, action):
-        return settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
 
 
 class SyncListAccessPolicy(AccessPolicyBase):

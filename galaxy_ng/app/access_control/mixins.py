@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import transaction
 from guardian.shortcuts import get_groups_with_perms, assign_perm, remove_perm
 from django_lifecycle import hook
@@ -35,3 +36,8 @@ class GroupModelPermissionsMixin:
     def set_object_groups(self):
         if self._groups:
             self._set_groups(self._groups)
+
+
+class ViewOnlyMixin:
+    def view_only_mode_enabled(self, request, view, action):
+        return settings.GALAXY_ENABLE_VIEW_ONLY_ACCESS
