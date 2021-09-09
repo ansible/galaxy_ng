@@ -94,6 +94,9 @@ RUN set -ex; \
     && mv /app/docker/entrypoint.sh /entrypoint.sh \
     && mv /app/ansible.cfg /etc/ansible/ansible.cfg \
     && mv /app/docker/bin/* /usr/local/bin \
+    && touch /var/log/galaxy_api_access.log \
+    && chmod 0644 /var/log/galaxy_api_access.log \
+    && chown galaxy:galaxy /var/log/galaxy_api_access.log \
     && mkdir -p /etc/pulp/certs/ \
     && echo "DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=" > /etc/pulp/certs/database_fields.symmetric.key
 
