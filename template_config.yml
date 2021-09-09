@@ -72,6 +72,7 @@ python_version: '3.8'
 redmine_project: null
 release_email: ansible-infra@redhat.com
 release_user: ansible
+single_commit_check: false
 stable_branch: stable
 sync_ci: true
 test_bindings: false
