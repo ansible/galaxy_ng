@@ -114,6 +114,12 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
             "dynaconf_merge",
         ]
 
+        # Enable basic authentication using keycloak username and password
+        data["REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES"] = [
+            "rest_framework.authentication.SessionAuthentication",
+            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
+        ]
+
         # Replace AUTH CLASSES
         data["GALAXY_AUTHENTICATION_CLASSES"] = [
             "rest_framework.authentication.SessionAuthentication",
