@@ -47,7 +47,6 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("healthz", views.health_view),
-    path("keycloak-container-token/", views.ContainerRegistryTokenView.as_view()),
 ]
 
 if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
