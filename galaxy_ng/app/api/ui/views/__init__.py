@@ -6,6 +6,8 @@ from .feature_flags import FeatureFlagsView
 
 from .controller import ControllerListView
 
+from .settings import SettingsView
+
 __all__ = (
     # auth
     "LoginView",
@@ -16,4 +18,7 @@ __all__ = (
 
     # controller
     "ControllerListView",
+
+    # settings
+    "SettingsView",
 )
