@@ -10,10 +10,10 @@ class SettingsView(api_base.APIView):
 
     def get(self, request, *args, **kwargs):
         data = {}
-        data['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'] = settings.get(
-            'GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'
-        ) or False
-        data['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] = settings.get(
-            'GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'
-        ) or False
+        keyset = [
+            "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS",
+            "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD",
+            "GALAXY_FEATURE_FLAGS",
+        ]
+        data = {key: settings.as_dict().get(key, None) for key in keyset}
         return Response(data)
