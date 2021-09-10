@@ -5,23 +5,20 @@ services:
   api:
     env_file:
       - './standalone-keycloak/galaxy_ng.env'
-    environment:
-      SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: ${SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY}
+      - '../.compose.env'
   worker:
     env_file:
       - './standalone-keycloak/galaxy_ng.env'
-    environment:
-      SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: ${SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY}
+      - '../.compose.env'
   content-app:
     env_file:
       - './standalone-keycloak/galaxy_ng.env'
-    environment:
-      SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: ${SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY}
-
+      - '../.compose.env'
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     env_file:
       - './standalone-keycloak/keycloak.env'
+      - '../.compose.env'
     ports:
       - 8080:8080
     depends_on:
@@ -34,6 +31,7 @@ services:
       - kc_pg_data:/var/lib/postgresql/data
     env_file:
       - './standalone-keycloak/kc-postgres.env'
+      - '../.compose.env'
     
   ldap:
     image: "rroemhild/test-openldap"

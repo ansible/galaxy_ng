@@ -52,8 +52,8 @@
         consent_required: no
         standard_flow_enabled: yes
         implicit_flow_enabled: no
-        direct_access_grants_enabled: no
-        service_accounts_enabled: no
+        direct_access_grants_enabled: yes
+        service_accounts_enabled: yes
         authorization_services_enabled: no
         public_client: no
         frontchannel_logout: no
