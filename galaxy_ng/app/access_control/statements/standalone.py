@@ -6,6 +6,12 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
         {
+            "action": ["list", "retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "unauthenticated_collection_access_enabled"
+        },
+        {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
@@ -31,9 +37,26 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
         {
+            "action": ["list", "retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "unauthenticated_collection_access_enabled"
+        },
+        {
             "action": "destroy",
             "principal": "*",
             "effect": "deny",
+        },
+        {
+            "action": ["download"],
+            "principal": 'authenticated',
+            "effect": "allow",
+        },
+        {
+            "action": ["download"],
+            "principal": 'anonymous',
+            "effect": "allow",
+            "condition": "unauthenticated_collection_download_enabled",
         },
         {
             "action": "create",
@@ -112,6 +135,12 @@ STANDALONE_STATEMENTS = {
         },
     ],
     'MyUserViewSet': [
+        {
+            "action": ["retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "unauthenticated_collection_access_enabled"
+        },
         {
             "action": ["retrieve", "update", "partial_update"],
             "principal": "authenticated",
