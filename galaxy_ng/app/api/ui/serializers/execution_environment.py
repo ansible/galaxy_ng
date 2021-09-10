@@ -125,11 +125,28 @@ def _get_last_sync_task(repo):
     }
 
 
+class ManifestListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = container_models.Manifest
+        fields = (
+            "pulp_id",
+            "digest",
+            "schema_version",
+            "media_type",
+            "pulp_created",
+        )
+
+
 class ContainerTagSerializer(serializers.ModelSerializer):
+    tagged_manifest = ManifestListSerializer()
+
     class Meta:
         model = container_models.Tag
         fields = (
             "name",
+            "pulp_created",
+            "pulp_last_updated",
+            "tagged_manifest"
         )
 
 
