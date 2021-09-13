@@ -1,9 +1,7 @@
 from django.urls import include, path
-
 from rest_framework import routers
 
-from . import views
-from . import viewsets
+from . import views, viewsets
 
 router = routers.SimpleRouter()
 router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')

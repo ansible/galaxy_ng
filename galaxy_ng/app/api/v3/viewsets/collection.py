@@ -1,53 +1,46 @@
 import logging
 
 import requests
-
-from packaging.specifiers import SpecifierSet
-from packaging.version import Version
-
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
-
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.exceptions import APIException, NotFound
-from rest_framework.mixins import DestroyModelMixin
-
+from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
+from pulp_ansible.app.models import AnsibleDistribution
+from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
+from pulp_ansible.app.models import CollectionVersion
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.tasking import dispatch
-from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
-from pulp_ansible.app.models import CollectionVersion, AnsibleDistribution
-from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
-from galaxy_ng.app.api import base as api_base
+from rest_framework import status
+from rest_framework.exceptions import APIException, NotFound
+from rest_framework.request import Request
+from rest_framework.response import Response
+from semantic_version import SimpleSpec, Version
 
-from galaxy_ng.app.constants import DeploymentMode, INBOUND_REPO_NAME_FORMAT
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
-
+from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.utils import SocketHTTPAdapter
 from galaxy_ng.app.api.v3.serializers import (
     CollectionSerializer,
+    CollectionUploadSerializer,
+    CollectionVersionListSerializer,
     CollectionVersionSerializer,
     UnpaginatedCollectionVersionSerializer,
-    CollectionVersionListSerializer,
-    CollectionUploadSerializer,
 )
-
 from galaxy_ng.app.common import metrics
+from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
+from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT, DeploymentMode
 from galaxy_ng.app.tasks import (
-    import_and_move_to_staging,
-    import_and_auto_approve,
     call_copy_task,
     call_remove_task,
     curate_all_synclist_repository,
+    delete_collection_version,
+    import_and_auto_approve,
+    import_and_move_to_staging,
 )
-
-from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 
 log = logging.getLogger(__name__)
 
@@ -95,7 +88,6 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
 class UnpaginatedCollectionVersionViewSet(
     api_base.LocalSettingsMixin,
     ViewNamespaceSerializerContextMixin,
-    DestroyModelMixin,
     pulp_ansible_views.UnpaginatedCollectionVersionViewSet,
 ):
     pagination_class = None
@@ -104,12 +96,14 @@ class UnpaginatedCollectionVersionViewSet(
 
 
 def get_dependents(parent):
-    """Given a parent collection, return a list of collections that depend on it."""
+    """Given a parent collection version, return a list of
+    collection versions that depend on it.
+    """
     key = f"{parent.namespace}.{parent.name}"
     dependents = []
     for child in CollectionVersion.objects.filter(dependencies__has_key=key):
-        spec = SpecifierSet(child.dependencies[key])
-        if Version(parent.version) in spec:
+        spec = SimpleSpec(child.dependencies[key])
+        if spec.match(Version(parent.version)):
             dependents.append(child)
     return dependents
 
@@ -125,32 +119,40 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
         """
         Allow a CollectionVersion to be deleted.
         1. Perform Dependency Check to verify that the collection version can be deleted
-        2. If it can, perform Collection Repository Cleanup
-        3. If the collection version can’t be deleted, return the reason why
-        4. If the version being deleted is the last collection version in the collection,
+        2. If the collection version can’t be deleted, return the reason why
+        3. If it can, dispatch task to delete CollectionVersion and clean up repository.
+           If the version being deleted is the last collection version in the collection,
            remove the collection object as well.
         """
         collection_version = self.get_object()
+
         # dependency check
         dependents = get_dependents(collection_version)
         if dependents:
             return Response(
                 {
                     "detail": _(
-                        "Collection {namespace}.{name} could not be deleted "
-                        "because there are other collections that require it."
+                        "Collection version {namespace}.{name} {version} could not be "
+                        "deleted because there are other collections that require it."
                     ).format(
                         namespace=collection_version.namespace,
                         name=collection_version.collection.name,
+                        version=collection_version.version,
                     ),
-                    "dependent_collections": [f"{dep.namespace}.{dep.name}" for dep in dependents],
+                    "dependent_collection_versions": [
+                        f"{dep.namespace}.{dep.name} {dep.version}" for dep in dependents
+                    ],
                 },
                 status=400,
             )
-        # collection repo cleanup
 
-        # collection_version.perform_destroy()
-        return Response(status=204)
+        dispatch(
+            delete_collection_version,
+            exclusive_resources=collection_version.repositories.all(),
+            kwargs={"collection_version_pk": collection_version.pk},
+        )
+
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
