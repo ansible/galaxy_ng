@@ -144,10 +144,10 @@ api/create-test-collections:   ## Creates a set of test collections
 	@read -p "How many namespaces to create? : " NS; \
 	read -p "Number of collections on each namespace? : " COLS; \
 	read -p "Add a prefix? : " PREFIX; \
-	ARGS="--prefix=$${PREFIX:-dev} --strategy=faux --ns=$${NS:-6} --cols=$${COLS:-6}"; \
+	ARGS="--prefix=$${PREFIX:-dev} --strategy=$${STRATEGY:-faux} --ns=$${NS:-6} --cols=$${COLS:-6}"; \
 	echo "Creating test collections with args: $${ARGS}"; \
 	export ARGS; \
-	$(call exec_or_run, api, $(DJ_MANAGER), create-test-collections, $${ARGS})
+	./compose exec api django-admin create-test-collections $${ARGS}
 
 .PHONY: api/list-permissions
 api/list-permissions:   ## List all permissions - CONTAINS=str
