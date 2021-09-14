@@ -106,7 +106,6 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "name": repo.name,
                 "description": repo.description,
                 "pulp_created": repo.pulp_created,
-                "last_sync_task": _get_last_sync_task(repo),
                 "pulp_labels": {label.key: label.value for label in repo.pulp_labels.all()},
                 "remote": remote
             },
@@ -118,46 +117,6 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "pulp_labels": {label.key: label.value for label in distro.pulp_labels.all()},
             },
         }
-
-
-def _get_last_sync_task(repo):
-    sync_task = models.container.ContainerSyncTask.objects.filter(repository=repo).first()
-    if not sync_task:
-        # UI handles `null` as "no status"
-        return
-
-    return {
-        "task_id": sync_task.pk,
-        "state": sync_task.task.state,
-        "started_at": sync_task.task.started_at,
-        "finished_at": sync_task.task.finished_at,
-        "error": sync_task.task.error,
-    }
-
-
-class ManifestListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = container_models.Manifest
-        fields = (
-            "pulp_id",
-            "digest",
-            "schema_version",
-            "media_type",
-            "pulp_created",
-        )
-
-
-class ContainerTagSerializer(serializers.ModelSerializer):
-    tagged_manifest = ManifestListSerializer()
-
-    class Meta:
-        model = container_models.Tag
-        fields = (
-            "name",
-            "pulp_created",
-            "pulp_last_updated",
-            "tagged_manifest"
-        )
 
 
 class ContainerManifestSerializer(serializers.ModelSerializer):
@@ -198,6 +157,31 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
             tags.append(tag.name)
 
         return tags
+
+
+class ManifestListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = container_models.Manifest
+        fields = (
+            "pulp_id",
+            "digest",
+            "schema_version",
+            "media_type",
+            "pulp_created",
+        )
+
+
+class ContainerTagSerializer(serializers.ModelSerializer):
+    tagged_manifest = ManifestListSerializer()
+
+    class Meta:
+        model = container_models.Tag
+        fields = (
+            "name",
+            "pulp_created",
+            "pulp_last_updated",
+            "tagged_manifest"
+        )
 
 
 class ContainerManifestDetailSerializer(ContainerManifestSerializer):
@@ -303,14 +287,24 @@ class ContainerRegistryRemoteSerializer(
 class ContainerRemoteSerializer(
     container_serializers.ContainerRemoteSerializer,
 ):
-    created_at = serializers.DateTimeField(source='pulp_created', required=False)
-    updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
+    created_at = serializers.DateTimeField(source='pulp_created', read_only=True, required=False)
+    updated_at = serializers.DateTimeField(source='pulp_last_updated', read_only=True, required=False)
     registry = serializers.CharField(source="registry.registry.pk")
     last_sync_task = utils.RemoteSyncTaskField(source="*")
 
     class Meta:
+        read_only_fields = (
+            "created_at",
+            "updated_at",
+            "name"
+        )
+
         model = container_models.ContainerRemote
-        read_only_fields = ('name',)
+        extra_kwargs = {
+            'name': {'read_only': True},
+            'client_key': {'write_only': True},
+        }
+
         fields = [
             "pulp_id",
             "name",
@@ -377,5 +371,5 @@ class ContainerRemoteSerializer(
 
         # Bind the new remote to the registry object.
         models.ContainerRegistryRepos.objects.create(registry = registry, repository_remote = remote)
-        
+
         return remote
