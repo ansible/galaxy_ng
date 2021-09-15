@@ -62,7 +62,7 @@ pulp_settings:
   allowed_export_paths: /tmp
   allowed_import_paths: /tmp
   rh_entitlement_required: insights
-pulpcore_branch: '3.14'
+pulpcore_branch: '3.14.6'
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
