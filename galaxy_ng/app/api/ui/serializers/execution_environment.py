@@ -1,5 +1,5 @@
-from pulpcore.app.serializers import repository
 import json
+import re
 
 from rest_framework import serializers
 from django.core import exceptions
@@ -14,13 +14,12 @@ from pulpcore.plugin import models as core_models
 from pulpcore.plugin import serializers as core_serializers
 
 from galaxy_ng.app import models
-from galaxy_ng.app.access_control import fields
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
-from galaxy_ng.app.api.v3 import serializers as v3_serializers
 from galaxy_ng.app.api import utils
 
 namespace_fields = ("name", "my_permissions", "owners")
 
+VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*/?[A-Za-z0-9._-]*$"
 
 class ContainerNamespaceSerializer(serializers.ModelSerializer):
     my_permissions = MyPermissionsField(source="*", read_only=True)
@@ -284,6 +283,7 @@ class ContainerRegistryRemoteSerializer(
     def get_write_only_fields(self, obj):
         return utils.get_write_only_fields(self, obj)
 
+
 class ContainerRemoteSerializer(
     container_serializers.ContainerRemoteSerializer,
 ):
@@ -320,16 +320,31 @@ class ContainerRemoteSerializer(
 
     def validate_registry(self, value):
         try:
-            registry = models.ContainerRegistryRemote.objects.get(pk = value)
+            registry = models.ContainerRegistryRemote.objects.get(pk=value)
             return registry
         except exceptions.ObjectDoesNotExist:
             raise serializers.ValidationError(_("Selected registry does not exist."))
+
+    # pulp container doesn't validate container names and I don't know what is considered a
+    # valid name.This is a stopgap solution to make sure that at the very least, users
+    # don't create names that breakthe galaxy_ng registry
+    def validate_name(self, value):
+        r = re.compile(VALID_REMOTE_REGEX)
+        if not r.match(value):
+            raise serializers.ValidationError(
+                _('Container names can only contain alphanumeric numbers, '
+                    '".", "_", "-" and a up to one "/".'))
+        return value
 
     @transaction.atomic
     def update(self, instance, validated_data):
         registry = validated_data['registry']['registry']['pk']
         del validated_data['registry']
-        del validated_data['name']
+
+        if(instance.name != validated_data['name']):
+            raise serializers.ValidationError(detail={
+                "name": _("Name cannot be changed.")
+            })
 
         instance.registry.registry = registry
         instance.registry.save()
