@@ -42,7 +42,7 @@ class ContainerRegistryRemote(
 
     class Meta:
         default_related_name = "%(app_label)s_%(model_name)s"
-    
+
     def get_connection_fields(self):
         copy_fields = (
             "url",

@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from pulpcore.app.models import repository
 from rest_access_policy import AccessPolicy
 from rest_framework.exceptions import NotFound
 

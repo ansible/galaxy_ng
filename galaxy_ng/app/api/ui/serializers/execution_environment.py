@@ -21,6 +21,7 @@ namespace_fields = ("name", "my_permissions", "owners")
 
 VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*/?[A-Za-z0-9._-]*$"
 
+
 class ContainerNamespaceSerializer(serializers.ModelSerializer):
     my_permissions = MyPermissionsField(source="*", read_only=True)
     owners = serializers.SerializerMethodField()
@@ -288,7 +289,8 @@ class ContainerRemoteSerializer(
     container_serializers.ContainerRemoteSerializer,
 ):
     created_at = serializers.DateTimeField(source='pulp_created', read_only=True, required=False)
-    updated_at = serializers.DateTimeField(source='pulp_last_updated', read_only=True, required=False)
+    updated_at = serializers.DateTimeField(
+        source='pulp_last_updated', read_only=True, required=False)
     registry = serializers.CharField(source="registry.registry.pk")
     last_sync_task = utils.RemoteSyncTaskField(source="*")
 
@@ -351,7 +353,6 @@ class ContainerRemoteSerializer(
         validated_data = {**registry.get_connection_fields(), **validated_data}
         return super().update(instance, validated_data)
 
-
     @transaction.atomic
     def create(self, validated_data):
         registry = validated_data['registry']['registry']['pk']
@@ -365,7 +366,8 @@ class ContainerRemoteSerializer(
         # Create the remote instances using data from the registry
 
         remote = super().create(validated_data)
-        remote_href = container_serializers.ContainerRemoteSerializer(remote, context={"request": request}).data['pulp_href']
+        remote_href = container_serializers.ContainerRemoteSerializer(
+            remote, context={"request": request}).data['pulp_href']
 
         # Create the container repository with the new remote
         repo_serializer = container_serializers.ContainerRepositorySerializer(
@@ -382,9 +384,9 @@ class ContainerRemoteSerializer(
             data={"base_path": remote.name, "name": remote.name, "repository": repo_href}
         )
         dist_serializer.is_valid(raise_exception=True)
-        distribution = dist_serializer.create(dist_serializer.validated_data)
+        dist_serializer.create(dist_serializer.validated_data)
 
         # Bind the new remote to the registry object.
-        models.ContainerRegistryRepos.objects.create(registry = registry, repository_remote = remote)
+        models.ContainerRegistryRepos.objects.create(registry=registry, repository_remote=remote)
 
         return remote

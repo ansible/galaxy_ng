@@ -30,7 +30,6 @@ class TaskSerializer(serializers.ModelSerializer):
                 'last_heartbeat': obj.worker.last_heartbeat,
             }
 
-
     class Meta:
         model = Task
         ref_name = "Task"
