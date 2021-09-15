@@ -320,11 +320,15 @@ class ContainerReadmeViewSet(ContainerContentBaseViewset):
 class ContainerRegistryRemoteFilter(filterset.FilterSet):
     name = filters.CharFilter(field_name='name')
     url = filters.CharFilter(field_name='url')
+    created_at = filters.CharFilter(field_name='pulp_created')
+    updated_at = filters.CharFilter(field_name='pulp_last_updated')
 
     sort = filters.OrderingFilter(
         fields=(
             ('name', 'name'),
             ('url', 'url'),
+            ('pulp_created', 'created_at'),
+            ('pulp_last_updated', 'updated_at'),
         ),
     )
 
