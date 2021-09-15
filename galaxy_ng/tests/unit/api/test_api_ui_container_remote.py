@@ -63,13 +63,13 @@ class TestContainerRemote(BaseTestCase):
         )
 
     def _error_has_message(self, response, message, expected_errors=None, expected_field=None):
-        '''
+        """
         Checks that:
             1. the response object has an errors field
             2. that the given message matches one of the fields
             4. (optional) that the error matching the message is from the expected field
             3. (optional) that the number of errors is equal to expected_errors
-        '''
+        """
         errors = response.data.get('errors', None)
         self.assertTrue(errors is not None)
 
