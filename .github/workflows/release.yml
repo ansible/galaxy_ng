@@ -4,6 +4,7 @@
 # './plugin-template --github galaxy_ng' to update this file.
 #
 # For more info visit https://github.com/pulp/plugin_template
+
 ---
 name: Release Pipeline
 on:
@@ -45,12 +46,13 @@ jobs:
           pip install bandersnatch bump2version gitpython python-redmine towncrier==19.9.0 wheel
           echo ::endgroup::
 
-      - name: Configure Git with pulpbot name and email
+      - name: Configure Git with ansible name and email
         run: |
-          git config --global user.name 'pulpbot'
+          git config --global user.name 'ansible'
           git config --global user.email 'pulp-infra@redhat.com'
 
       - name: Setting secrets
+        
         run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
@@ -107,12 +109,22 @@ jobs:
           sudo apt-get update -yq
           sudo -E apt-get -yq --no-install-suggests --no-install-recommends install httpie
           echo ::endgroup::
-          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
           echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
+          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
 
       - name: Before Install
+        
         run: .github/workflows/scripts/before_install.sh
         shell: bash
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          GITHUB_PULL_REQUEST: ${{ github.event.number }}
+          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_BRANCH: ${{ github.head_ref }}
+          GITHUB_REPO_SLUG: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
 
       - name: Install
         run: |
@@ -121,23 +133,43 @@ jobs:
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
+          GITHUB_PULL_REQUEST: ${{ github.event.number }}
+          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_BRANCH: ${{ github.head_ref }}
+          GITHUB_REPO_SLUG: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
         shell: bash
 
       - name: Before Script
-        run: |
-          .github/workflows/scripts/before_script.sh
+        
+        run: .github/workflows/scripts/before_script.sh
+        shell: bash
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          GITHUB_PULL_REQUEST: ${{ github.event.number }}
+          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_BRANCH: ${{ github.head_ref }}
+          GITHUB_REPO_SLUG: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
 
       - name: Setting secrets
+        
         run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
 
       - name: Install Python client
+        
         run: .github/workflows/scripts/install_python_client.sh
+        shell: bash
 
       - name: Install Ruby client
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
         run: .github/workflows/scripts/install_ruby_client.sh
+        shell: bash
 
       - name: Additional before_script
         run: ${{ github.event.inputs.before_script }}
@@ -147,6 +179,15 @@ jobs:
         if: ${{ env.TEST != 'generate-bindings' }}
         run: .github/workflows/scripts/script.sh
         shell: bash
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          GITHUB_PULL_REQUEST: ${{ github.event.number }}
+          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_BRANCH: ${{ github.head_ref }}
+          GITHUB_REPO_SLUG: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
 
       - name: Upload python client packages
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
@@ -172,6 +213,7 @@ jobs:
       - name: After failure
         if: failure()
         run: |
+          echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
           http --timeout 30 --check-status --pretty format --print hb http://pulp/pulp/api/v3/status/ || true
           docker images || true
           docker ps -a || true
@@ -199,12 +241,13 @@ jobs:
           python-version: "3.8"
 
       - uses: actions/setup-ruby@v1
+        
         with:
           ruby-version: "2.6"
 
-      - name: Configure Git with pulpbot name and email
+      - name: Configure Git with ansible name and email
         run: |
-          git config --global user.name 'pulpbot'
+          git config --global user.name 'ansible'
           git config --global user.email 'pulp-infra@redhat.com'
 
       - name: Untar repository
@@ -222,6 +265,7 @@ jobs:
           git checkout "origin/${GITHUB_REF##*/}" -- .github
 
       - name: Setting secrets
+        
         run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
@@ -249,13 +293,15 @@ jobs:
       - name: Create Pull Request for Changelog
         uses: peter-evans/create-pull-request@v3
         with:
-          committer: pulpbot <pulp-infra@redhat.com>
-          author: pulpbot <pulp-infra@redhat.com>
-          branch: ${{ github.event.inputs.release }}-changelog
+          token: ${{ secrets.RELEASE_TOKEN }}
+          committer: ansible <pulp-infra@redhat.com>
+          author: ansible <pulp-infra@redhat.com>
+          branch: changelog/${{ github.event.inputs.release }}
           base: master
-          title: 'Building changelog for ${{ github.event.inputs.release }}'
+          title: 'Cherry pick ${{ github.event.inputs.release }} changelog'
           body: '[noissue]'
           commit-message: |
-            Building changelog for ${{ github.event.inputs.release }}
+            ${{ github.event.inputs.release }} changelog
+
             [noissue]
           delete-branch: true

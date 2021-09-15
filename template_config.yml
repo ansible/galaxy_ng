@@ -1,33 +1,34 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.04.08-87-g2136629-dirty
+# generated with plugin_template@2021.08.26-14-g7edf776
 
 additional_repos:
-  - name: pulp_ansible
-    org: pulp
-    bindings: true
-    branch: 0.9.0
-  - name: pulp_container
-    org: pulp
-    bindings: true
-    branch: 2.7.1
-  - name: galaxy-importer
-    bindings: false
-    org: ansible
-    branch: v0.3.4
+- bindings: true
+  branch: 0.9.0
+  name: pulp_ansible
+  org: pulp
+- bindings: true
+  branch: 2.7.1
+  name: pulp_container
+  org: pulp
+- bindings: false
+  branch: v0.3.4
+  name: galaxy-importer
+  org: ansible
 black: false
 check_commit_message: false
 check_gettext: true
 check_manifest: true
 check_openapi_schema: true
 check_stray_pulpcore_imports: true
-core_import_allowed:
-  - "pulpcore.app.*viewsets"
-  - "pulpcore\\.app.*admin"
-  - "ProgressReportSerializer"
 cherry_pick_automation: false
-ci_trigger: "{pull_request: {branches: ['*']}, push: {branches: ['*']}}"
+ci_env: {}
+ci_trigger: '{pull_request: {branches: [''*'']}, push: {branches: [''*'']}}'
+core_import_allowed:
+- pulpcore.app.*viewsets
+- pulpcore\.app.*admin
+- ProgressReportSerializer
 coverage: false
 deploy_client_to_pypi: false
 deploy_client_to_rubygems: false
@@ -38,6 +39,7 @@ docker_fixtures: false
 docs_test: false
 flake8: true
 issue_tracker: null
+noissue_marker: '[noissue]'
 plugin_app_label: galaxy
 plugin_camel: GalaxyNG
 plugin_camel_short: Galaxy
@@ -48,12 +50,12 @@ plugin_dash_short: galaxy
 plugin_default_branch: master
 plugin_name: galaxy_ng
 plugin_snake: galaxy_ng
-post_job_template: 
+post_job_template:
   name: update_manifest
-  path: "galaxy_ng/.github/post-job-template.yml.j2"
+  path: galaxy_ng/.github/post-job-template.yml.j2
 pre_job_template:
   name: check_commit
-  path: "galaxy_ng/.github/pre-job-template.yml.j2"
+  path: galaxy_ng/.github/pre-job-template.yml.j2
 publish_docs_to_pulpprojectdotorg: false
 pulp_scheme: http
 pulp_settings:
@@ -62,12 +64,15 @@ pulp_settings:
   rh_entitlement_required: insights
 pulpcore_branch: '3.14'
 pulpcore_pip_version_specifier: null
+pulpcore_revision: null
 pulpprojectdotorg_key_id: null
 pydocstyle: true
 pypi_username: null
 python_version: '3.8'
 redmine_project: null
+release_email: pulp-infra@redhat.com
 release_user: ansible
+single_commit_check: true
 stable_branch: stable
 sync_ci: true
 test_bindings: false
@@ -79,5 +84,4 @@ travis_addtl_services: []
 travis_notifications: null
 update_redmine: false
 upgrade_range: []
-
 
