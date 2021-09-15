@@ -1,9 +1,8 @@
+from pulpcore.plugin import viewsets as pulp_viewsets
 from rest_framework import mixins
 
-from pulpcore.plugin import viewsets as pulp_viewsets
-
-from galaxy_ng.app.api.ui import serializers
 from galaxy_ng.app import models
+from galaxy_ng.app.api.ui import serializers
 
 # This file is necesary to prevent the DRF web API browser from breaking on all of the
 # pulp/api/v3/repositories/ endpoints.
@@ -20,10 +19,17 @@ from galaxy_ng.app import models
 # on the remote field and can't find a viewset name for galaxy's ContainerRegistryRemote model.
 
 
-class ContainerRegistryRemoteViewSet(
-    pulp_viewsets.NamedModelViewSet,
-    mixins.RetrieveModelMixin
-):
+class ContainerRegistryRemoteViewSet(pulp_viewsets.NamedModelViewSet, mixins.RetrieveModelMixin):
     queryset = models.ContainerRegistryRemote.objects.all()
     serializer_class = serializers.ContainerRegistryRemoteSerializer
     endpoint_name = "container-registry"
+
+
+class ContainerDistributionViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+):
+    queryset = models.ContainerDistribution.objects.all()
+    serializer_class = serializers.ContainerRepositorySerializer
+    endpoint_name = "container-distribution"

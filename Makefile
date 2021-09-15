@@ -149,8 +149,8 @@ api/create-test-collections:   ## Creates a set of test collections
 	export ARGS; \
 	./compose exec api django-admin create-test-collections $${ARGS}
 
-.PHONY: api/push-test-containers
-api/push-test-containers:   ## Pushes a set of test containers
+.PHONY: api/push-test-images
+api/push-test-images:   ## Pushes a set of test container images
 	docker login -u admin -p admin localhost:5001 || echo "!!! docker login failed, check if docker is running"
 	for foo in postgres treafik mongo mariadb redis node mysql busybox alpine docker python hhtpd nginx memcached golang; do  docker pull $$foo; docker image tag $$foo localhost:5001/$$foo:latest; docker push localhost:5001/$$foo:latest; done
 
