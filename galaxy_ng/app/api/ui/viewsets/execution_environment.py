@@ -74,7 +74,7 @@ class TagFilter(filterset.FilterSet):
     class Meta:
         model = container_models.Tag
         # Tag filters are supported, but are done in get_queryset. See the comment
-        # there
+        # in ContainerRepositoryManifestViewSet.get_queryset
         fields = {
             'name': ['exact', 'icontains', 'contains', 'startswith'],
             'tagged_manifest__digest': ['exact', 'icontains', 'contains', 'startswith'],
