@@ -86,6 +86,8 @@ objects:
             value: '10000'
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
+          - name: prometheus_multiproc_dir
+            value: ${PROMETHEUS_DIR}
       webServices:
         public:
             enabled: true
@@ -222,6 +224,8 @@ parameters:
   value: https://kubernetes.default.svc:443
 - name: REDIS_SSL
   value: "false"
+- name: PROMETHEUS_DIR
+  value: "/tmp"
 
 # nginx resource requirements
 - name: NGINX_REPLICAS
