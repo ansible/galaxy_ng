@@ -2,8 +2,12 @@ import logging
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from pulpcore.app.models import repository
 from rest_access_policy import AccessPolicy
 from rest_framework.exceptions import NotFound
+
+from pulp_container.app.access_policy import NamespacedAccessPolicyMixin
+from pulp_container.app import models as container_models
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.mixins import UnauthenticatedCollectionAccessMixin
@@ -179,3 +183,30 @@ class ContainerNamespaceAccessPolicy(AccessPolicyBase):
 
 class ContainerRegistryRemoteAccessPolicy(AccessPolicyBase):
     NAME = 'ContainerRegistryRemoteViewSet'
+
+
+class ContainerRemoteAccessPolicy(AccessPolicyBase, NamespacedAccessPolicyMixin):
+    NAME = 'ContainerRemoteViewSet'
+
+    def has_distro_permission(self, request, view, action, permission):
+        class FakeView:
+            def __init__(self, obj):
+                self.obj = obj
+
+            def get_object(self):
+                return self.obj
+
+        # has_container_namespace_perms
+
+        remote = view.get_object()
+        repositories = remote.repository_set.all()
+
+        # In theory there should never be more than one repository connected to a remote, but
+        # the pulp apis don't prevent you from attaching as many remotes as you want to a repo.
+        for repo in repositories:
+            for distro in container_models.ContainerDistribution.objects.filter(repository=repo):
+                dummy_view = FakeView(distro)
+                if self.has_namespace_or_obj_perms(request, dummy_view, action, permission):
+                    return True
+
+        return False

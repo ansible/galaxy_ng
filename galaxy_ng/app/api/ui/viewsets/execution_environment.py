@@ -3,9 +3,6 @@ import logging
 from django.db.models import Prefetch, Count, Q
 from django.core import exceptions
 
-from rest_framework import mixins
-
-from pulpcore.plugin import viewsets as pulp_viewsets
 from pulpcore.plugin import models as core_models
 
 from pulp_container.app import models as container_models
@@ -16,7 +13,6 @@ from django_filters.rest_framework import filterset, DjangoFilterBackend
 from guardian.shortcuts import get_objects_for_user
 
 
-from galaxy_ng.app import api
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.ui import serializers
 from django.shortcuts import get_object_or_404
@@ -277,4 +273,4 @@ class ContainerRegistryRemoteViewSet(api_base.ModelViewSet):
 class ContainerRemoteViewSet(api_base.ModelViewSet):
     queryset = container_models.ContainerRemote.objects.all()
     serializer_class = serializers.ContainerRemoteSerializer
-    permission_classes = []
+    permission_classes = [access_policy.ContainerRemoteAccessPolicy]
