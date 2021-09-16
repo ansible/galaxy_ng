@@ -122,7 +122,7 @@ class CollectionVersionFilter(filterset.FilterSet):
         """Return all CollectionVersions that have a dependency on the Collection
         passed in the url string, ex: ?dependency=my_namespace.my_collection_name
         """
-        return CollectionVersion.objects.filter(dependencies__has_key=value)
+        return queryset.filter(dependencies__has_key=value)
 
     def repo_filter(self, queryset, name, value):
         try:
