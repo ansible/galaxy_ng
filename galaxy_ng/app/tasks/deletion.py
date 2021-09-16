@@ -34,6 +34,7 @@ def delete_collection_version(collection_version_pk):
 
     _remove_collection_version_from_repos(collection_version)
 
+    log.info("Running orphan_cleanup to delete CollectionVersion object and artifact")
     orphan_cleanup(content_pks=None, orphan_protection_time=0)
 
     if not collection.versions.all():

@@ -7,12 +7,15 @@ from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import CollectionVersion
 from pulpcore.plugin.models import Task
+from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
+from pulpcore.plugin.viewsets import OperationPostponedResponse
 from rest_framework import status
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.request import Request
@@ -115,6 +118,10 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
     permission_classes = [access_policy.CollectionAccessPolicy]
     list_serializer_class = CollectionVersionListSerializer
 
+    @extend_schema(
+        description="Trigger an asynchronous delete task",
+        responses={status.HTTP_202_ACCEPTED: AsyncOperationResponseSerializer},
+    )
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         """
         Allow a CollectionVersion to be deleted.
@@ -146,13 +153,13 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
                 status=400,
             )
 
-        dispatch(
+        async_result = dispatch(
             delete_collection_version,
             exclusive_resources=collection_version.repositories.all(),
             kwargs={"collection_version_pk": collection_version.pk},
         )
 
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return OperationPostponedResponse(async_result, request)
 
 
 class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
