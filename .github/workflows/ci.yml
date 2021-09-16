@@ -207,5 +207,6 @@ jobs:
       - name: Update Manifest for Ansible Hub UI
         env:
           GITHUB_PULL_REQUEST: ${{ github.event.number }}
+          MANIFEST_PASSPHRASE: ${{ secrets.MANIFEST_PASSPHRASE }}
         run: .github/workflows/scripts/update_manifest.sh
         shell: bash
