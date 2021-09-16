@@ -37,7 +37,7 @@ generate_docker_manifest() {
     echo "${PREFIX}/Dockerfile-FROM-${base_image}"
 }
 
-if [[ "$GITHUB_PULL_REQUEST" != 'false' ]]; then
+if [[ -n "$GITHUB_PULL_REQUEST" ]]; then
     log_message 'Ignoring manifest update for pull request.'
     exit 0
 fi
