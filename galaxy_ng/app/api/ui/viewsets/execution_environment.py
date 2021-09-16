@@ -66,7 +66,8 @@ class ManifestFilter(filterset.FilterSet):
 class TagFilter(filterset.FilterSet):
     sort = filters.OrderingFilter(
         fields=(
-            ('pulp_created', 'created'),
+            ('pulp_created', 'pulp_created'),
+            ('pulp_last_updated', 'pulp_last_updated'),
             ('name', 'name'),
         ),
     )
