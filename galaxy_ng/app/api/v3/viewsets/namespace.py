@@ -2,21 +2,19 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django_filters import filters
-from django_filters.rest_framework import filterset, DjangoFilterBackend
-
+from django_filters.rest_framework import DjangoFilterBackend, filterset
+from pulp_ansible.app.models import Collection
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from pulp_ansible.app.models import Collection
-
 from galaxy_ng.app import models
-from galaxy_ng.app.models.namespace import delete_inbound_repo
 from galaxy_ng.app.access_control.access_policy import NamespaceAccessPolicy
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.v3 import serializers
 from galaxy_ng.app.exceptions import ConflictError
+from galaxy_ng.app.models.namespace import delete_inbound_repo
 
 
 class NamespaceFilter(filterset.FilterSet):
@@ -87,9 +85,9 @@ class NamespaceViewSet(api_base.ModelViewSet):
         if Collection.objects.filter(namespace=namespace.name).exists():
             raise ValidationError(
                 detail=_(
-                    'Namespace %s cannot be deleted because '
-                    'there are still collections associated with it.'
-                ) % namespace.name
+                    "Namespace {name} cannot be deleted because "
+                    "there are still collections associated with it."
+                ).format(name=namespace.name)
             )
 
         # 2. Delete the inbound pulp distro and repository
