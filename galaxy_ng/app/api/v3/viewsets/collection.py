@@ -99,6 +99,10 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
 
+    @extend_schema(
+        description="Trigger an asynchronous delete task",
+        responses={status.HTTP_202_ACCEPTED: AsyncOperationResponseSerializer},
+    )
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         """
         Allow a Collection to be deleted.
@@ -126,7 +130,7 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
                         f"{dep.namespace}.{dep.name} {dep.version}" for dep in dependents
                     ],
                 },
-                status=400,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         repositories = set()
@@ -134,13 +138,13 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
             for repo in version.repositories.all():
                 repositories.add(repo)
 
-        dispatch(
+        async_result = dispatch(
             delete_collection,
             exclusive_resources=list(repositories),
             kwargs={"collection_pk": collection.pk},
         )
 
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return OperationPostponedResponse(async_result, request)
 
 
 class UnpaginatedCollectionVersionViewSet(
@@ -205,7 +209,7 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
                         f"{dep.namespace}.{dep.name} {dep.version}" for dep in dependents
                     ],
                 },
-                status=400,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         async_result = dispatch(

@@ -11,9 +11,10 @@ from pulp_ansible.app.models import (
     Collection,
     CollectionVersion,
 )
+from rest_framework import status
 
 from galaxy_ng.app import models
-from galaxy_ng.app.api.v3.viewsets.collection import get_dependents
+from galaxy_ng.app.api.v3.viewsets.collection import get_collection_dependents, get_dependents
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.tests.constants import TEST_COLLECTION_CONFIGS
 
@@ -225,6 +226,11 @@ class TestCollectionViewsets(BaseTestCase):
         self.assertNotIn(self.pulp_href_fragment, response.data["versions_url"])
         self.assertNotIn(self.pulp_href_fragment, response.data["highest_version"]["href"])
 
+        # Check response after DELETE
+        response = self.client.delete(self.collections_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertIn("task", response.data.keys())
+
     def test_collection_version_delete_dependency_check_positive_match(self):
         baz_collection = Collection.objects.create(namespace=self.namespace, name="baz")
         for counter, dep_version in enumerate(["1.1.1", ">=1", "<2", "~1", "*"]):
@@ -248,6 +254,19 @@ class TestCollectionViewsets(BaseTestCase):
                 dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
             )
             self.assertNotIn(baz_version, get_dependents(self.version_1_1_1))
+
+    def test_collection_delete_dependency_check(self):
+        baz_collection = Collection.objects.create(namespace=self.namespace, name="baz")
+        for counter, dep_version in enumerate(["1.1.1", ">=1", "<2", "~1", "*"]):
+            baz_version = _get_create_version_in_repo(
+                self.namespace,
+                baz_collection,
+                self.repo,
+                version=counter,
+                dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
+            )
+            self.assertIn(baz_version, get_collection_dependents(self.collection))
+        self.assertFalse(get_collection_dependents(baz_collection))
 
     def test_collection_versions_list(self):
         """Assert v3/collections/namespace/name/versions/
