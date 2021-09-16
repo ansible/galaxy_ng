@@ -52,7 +52,6 @@ class TestUiTaskListViewSet(BaseTestCase):
             'finished_at',
             'started_at',
             'state',
-            'repository',
             'href',
         )
         for field in required_fields:
@@ -75,7 +74,6 @@ class TestUiTaskListViewSet(BaseTestCase):
             'worker',
             'parent_task',
             'child_tasks',
-            'repository',
             'progress_reports',
         )
         for field in required_fields:
