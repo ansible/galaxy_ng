@@ -30,7 +30,6 @@ class AnsibleDistributionSerializer(serializers.ModelSerializer):
 
 class AnsibleRepositorySerializer(serializers.ModelSerializer):
     distributions = serializers.SerializerMethodField()
-    last_sync_task = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created')
     updated_at = serializers.DateTimeField(source='pulp_last_updated')
 

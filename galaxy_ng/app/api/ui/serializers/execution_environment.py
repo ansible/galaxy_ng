@@ -95,7 +95,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
     def get_pulp(self, distro):
         repo = distro.repository
         remote = None
-        if(repo.remote):
+        if repo.remote:
             remote = ContainerRemoteSerializer(repo.remote.cast()).data
 
         return {
