@@ -57,6 +57,7 @@ GALAXY_PAGINATION_CLASS = "galaxy_ng.app.api.pagination.LimitOffsetPagination"
 GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
+    "rest_framework.authentication.BasicAuthentication",
 ]
 # Settings for insights mode
 # GALAXY_AUTHENTICATION_CLASSES = ["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]

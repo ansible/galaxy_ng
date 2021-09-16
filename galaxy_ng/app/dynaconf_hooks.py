@@ -124,6 +124,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         data["GALAXY_AUTHENTICATION_CLASSES"] = [
             "rest_framework.authentication.SessionAuthentication",
             "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
         ]
 
         # Set default to one day expiration
