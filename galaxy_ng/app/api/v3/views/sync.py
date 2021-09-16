@@ -13,7 +13,6 @@ from pulpcore.plugin.tasking import dispatch
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app import models
 
 
 class SyncRemoteView(api_base.APIView):
@@ -50,13 +49,6 @@ class SyncRemoteView(api_base.APIView):
                 "mirror": True,
                 "optimize": True,
             },
-        )
-
-        repo = pulp_models.AnsibleRepository.objects.get(pk=distro.repository.pk)
-
-        models.CollectionSyncTask.objects.create(
-            repository=repo,
-            task=result
         )
 
         return Response({'task': result.pk})

@@ -43,6 +43,30 @@ class ContainerRegistryRemote(
     class Meta:
         default_related_name = "%(app_label)s_%(model_name)s"
 
+    def get_connection_fields(self):
+        copy_fields = (
+            "url",
+            "policy",
+            "username",
+            "password",
+            "tls_validation",
+            "client_key",
+            "client_cert",
+            "ca_cert",
+            "download_concurrency",
+            "proxy_url",
+            "proxy_username",
+            "proxy_password",
+            "rate_limit",
+        )
+
+        result = {}
+
+        for field in copy_fields:
+            result[field] = getattr(self, field)
+
+        return result
+
 
 class ContainerRegistryRepos(models.Model):
     registry = models.ForeignKey(
@@ -53,18 +77,5 @@ class ContainerRegistryRepos(models.Model):
         container_models.ContainerRemote,
         on_delete=models.CASCADE,
         primary_key=True,
+        related_name="registry"
     )
-
-
-class ContainerSyncTask(models.Model):
-    repository = models.ForeignKey(
-        container_models.ContainerRepository,
-        on_delete=models.CASCADE,
-    )
-    task = models.ForeignKey(
-        pulp_models.Task,
-        on_delete=models.CASCADE,
-    )
-
-    class Meta:
-        ordering = ['-task__finished_at']

@@ -311,4 +311,29 @@ STANDALONE_STATEMENTS = {
             "condition": "has_model_perms:galaxy.change_containerregistryremote"
         },
     ],
+
+    'ContainerRemoteViewSet': [
+        # The permissions for creating namespaces are used as a proxy for creating containers,
+        # so allow users to create container remotes if they have create namespace permissions.
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:container.add_containernamespace"
+        },
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            # Permissions for containers are controlled via container distributions and namespaces.
+            # Since the remote controls what will go into the container distribution, reuse the
+            # same permissions here.
+            "action": "update",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_distro_permission:container.change_containerdistribution"
+        },
+    ]
 }

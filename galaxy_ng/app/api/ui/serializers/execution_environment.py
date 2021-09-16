@@ -1,19 +1,25 @@
 import json
+import re
 
 from rest_framework import serializers
+from django.core import exceptions
+from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 
 from guardian.shortcuts import get_users_with_perms
 
 from pulp_container.app import models as container_models
+from pulp_container.app import serializers as container_serializers
 from pulpcore.plugin import models as core_models
 from pulpcore.plugin import serializers as core_serializers
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
-from galaxy_ng.app.api.v3 import serializers as v3_serializers
 from galaxy_ng.app.api import utils
 
 namespace_fields = ("name", "my_permissions", "owners")
+
+VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*/?[A-Za-z0-9._-]*$"
 
 
 class ContainerNamespaceSerializer(serializers.ModelSerializer):
@@ -88,6 +94,9 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
 
     def get_pulp(self, distro):
         repo = distro.repository
+        remote = None
+        if repo.remote:
+            remote = ContainerRemoteSerializer(repo.remote.cast()).data
 
         return {
             "repository": {
@@ -97,8 +106,8 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "name": repo.name,
                 "description": repo.description,
                 "pulp_created": repo.pulp_created,
-                "last_sync_task": _get_last_sync_task(repo),
                 "pulp_labels": {label.key: label.value for label in repo.pulp_labels.all()},
+                "remote": remote
             },
             "distribution": {
                 "pulp_id": distro.pk,
@@ -108,46 +117,6 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "pulp_labels": {label.key: label.value for label in distro.pulp_labels.all()},
             },
         }
-
-
-def _get_last_sync_task(repo):
-    sync_task = models.container.ContainerSyncTask.objects.filter(repository=repo).first()
-    if not sync_task:
-        # UI handles `null` as "no status"
-        return
-
-    return {
-        "task_id": sync_task.pk,
-        "state": sync_task.task.state,
-        "started_at": sync_task.task.started_at,
-        "finished_at": sync_task.task.finished_at,
-        "error": sync_task.task.error,
-    }
-
-
-class ManifestListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = container_models.Manifest
-        fields = (
-            "pulp_id",
-            "digest",
-            "schema_version",
-            "media_type",
-            "pulp_created",
-        )
-
-
-class ContainerTagSerializer(serializers.ModelSerializer):
-    tagged_manifest = ManifestListSerializer()
-
-    class Meta:
-        model = container_models.Tag
-        fields = (
-            "name",
-            "pulp_created",
-            "pulp_last_updated",
-            "tagged_manifest"
-        )
 
 
 class ContainerManifestSerializer(serializers.ModelSerializer):
@@ -188,6 +157,31 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
             tags.append(tag.name)
 
         return tags
+
+
+class ManifestListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = container_models.Manifest
+        fields = (
+            "pulp_id",
+            "digest",
+            "schema_version",
+            "media_type",
+            "pulp_created",
+        )
+
+
+class ContainerTagSerializer(serializers.ModelSerializer):
+    tagged_manifest = ManifestListSerializer()
+
+    class Meta:
+        model = container_models.Tag
+        fields = (
+            "name",
+            "pulp_created",
+            "pulp_last_updated",
+            "tagged_manifest"
+        )
 
 
 class ContainerManifestDetailSerializer(ContainerManifestSerializer):
@@ -252,12 +246,11 @@ class ContainerReadmeSerializer(serializers.ModelSerializer):
 
 
 class ContainerRegistryRemoteSerializer(
-    v3_serializers.LastSyncTaskMixin,
     core_serializers.RemoteSerializer,
 ):
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
-    last_sync_task = serializers.SerializerMethodField()
+    last_sync_task = utils.RemoteSyncTaskField(source="*")
     write_only_fields = serializers.SerializerMethodField()
 
     class Meta:
@@ -291,8 +284,109 @@ class ContainerRegistryRemoteSerializer(
     def get_write_only_fields(self, obj):
         return utils.get_write_only_fields(self, obj)
 
-    def get_last_sync_task_queryset(self, obj):
-        """Gets last_sync_task from Pulp using remote->repository relation"""
 
-        return models.ContainerSyncTask.objects.filter(
-            repository=obj.repository_set.order_by('-pulp_last_updated').first()).first()
+class ContainerRemoteSerializer(
+    container_serializers.ContainerRemoteSerializer,
+):
+    created_at = serializers.DateTimeField(source='pulp_created', read_only=True, required=False)
+    updated_at = serializers.DateTimeField(
+        source='pulp_last_updated', read_only=True, required=False)
+    registry = serializers.CharField(source="registry.registry.pk")
+    last_sync_task = utils.RemoteSyncTaskField(source="*")
+
+    class Meta:
+        read_only_fields = (
+            "created_at",
+            "updated_at",
+            "name"
+        )
+
+        model = container_models.ContainerRemote
+        extra_kwargs = {
+            'name': {'read_only': True},
+            'client_key': {'write_only': True},
+        }
+
+        fields = [
+            "pulp_id",
+            "name",
+            "upstream_name",
+            "registry",
+            "last_sync_task",
+            "created_at",
+            "updated_at",
+            "include_foreign_layers",
+            "include_tags",
+            "exclude_tags"
+        ]
+
+    def validate_registry(self, value):
+        try:
+            registry = models.ContainerRegistryRemote.objects.get(pk=value)
+            return registry
+        except exceptions.ObjectDoesNotExist:
+            raise serializers.ValidationError(_("Selected registry does not exist."))
+
+    # pulp container doesn't validate container names and I don't know what is considered a
+    # valid name.This is a stopgap solution to make sure that at the very least, users
+    # don't create names that breakthe galaxy_ng registry
+    def validate_name(self, value):
+        r = re.compile(VALID_REMOTE_REGEX)
+        if not r.match(value):
+            raise serializers.ValidationError(
+                _('Container names can only contain alphanumeric numbers, '
+                    '".", "_", "-" and a up to one "/".'))
+        return value
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        registry = validated_data['registry']['registry']['pk']
+        del validated_data['registry']
+
+        if(instance.name != validated_data['name']):
+            raise serializers.ValidationError(detail={
+                "name": _("Name cannot be changed.")
+            })
+
+        instance.registry.registry = registry
+        instance.registry.save()
+        validated_data = {**registry.get_connection_fields(), **validated_data}
+        return super().update(instance, validated_data)
+
+    @transaction.atomic
+    def create(self, validated_data):
+        registry = validated_data['registry']['registry']['pk']
+        del validated_data['registry']
+
+        validated_data = {**registry.get_connection_fields(), **validated_data}
+
+        # validated_data['url'] = registry.url
+        request = self.context['request']
+
+        # Create the remote instances using data from the registry
+
+        remote = super().create(validated_data)
+        remote_href = container_serializers.ContainerRemoteSerializer(
+            remote, context={"request": request}).data['pulp_href']
+
+        # Create the container repository with the new remote
+        repo_serializer = container_serializers.ContainerRepositorySerializer(
+            data={"name": remote.name, "remote": remote_href}, context={"request": request}
+        )
+        repo_serializer.is_valid(raise_exception=True)
+        repository = repo_serializer.create(repo_serializer.validated_data)
+        repo_href = container_serializers.ContainerRepositorySerializer(
+            repository, context={"request": request}
+        ).data["pulp_href"]
+
+        # Create the container distribution with the new repository
+        dist_serializer = container_serializers.ContainerDistributionSerializer(
+            data={"base_path": remote.name, "name": remote.name, "repository": repo_href}
+        )
+        dist_serializer.is_valid(raise_exception=True)
+        dist_serializer.create(dist_serializer.validated_data)
+
+        # Bind the new remote to the registry object.
+        models.ContainerRegistryRepos.objects.create(registry=registry, repository_remote=remote)
+
+        return remote
