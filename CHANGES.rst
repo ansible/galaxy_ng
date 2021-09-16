@@ -13,6 +13,21 @@ Changelog
 
 .. towncrier release notes start
 
+4.3.3 (2021-09-16)
+==================
+
+Bugfixes
+--------
+
+- Implemented filters for state and keywords on imports API.
+  `AAH-646 <https://issues.redhat.com/browse/AAH-646>`_
+- Create 'inbound-namespaces' whenever a namespace is created.
+  `AAH-739 <https://issues.redhat.com/browse/AAH-739>`_
+
+
+----
+
+
 4.3.2 (2021-07-07)
 ==================
 
