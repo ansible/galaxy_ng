@@ -66,7 +66,6 @@ class TaskSummarySerializer(TaskSerializer):
         fields = (
             'pulp_id',
             'name',
-            'repository',
             'state',
             'started_at',
             'finished_at',
