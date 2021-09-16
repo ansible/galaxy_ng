@@ -49,6 +49,10 @@ container_repo_paths = [
         'readme/',
         viewsets.ContainerReadmeViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='container-repository-readme'),
+    path(
+        'tags/',
+        viewsets.ContainerTagViewset.as_view({'get': 'list'}),
+        name='container-repository-tags'),
 ]
 
 container_paths = [

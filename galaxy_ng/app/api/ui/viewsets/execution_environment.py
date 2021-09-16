@@ -63,6 +63,25 @@ class ManifestFilter(filterset.FilterSet):
         }
 
 
+class TagFilter(filterset.FilterSet):
+    sort = filters.OrderingFilter(
+        fields=(
+            ('pulp_created', 'pulp_created'),
+            ('pulp_last_updated', 'pulp_last_updated'),
+            ('name', 'name'),
+        ),
+    )
+
+    class Meta:
+        model = container_models.Tag
+        # Tag filters are supported, but are done in get_queryset. See the comment
+        # in ContainerRepositoryManifestViewSet.get_queryset
+        fields = {
+            'name': ['exact', 'icontains', 'contains', 'startswith'],
+            'tagged_manifest__digest': ['exact', 'icontains', 'contains', 'startswith'],
+        }
+
+
 class HistoryFilter(filterset.FilterSet):
     sort = filters.OrderingFilter(
         fields=(
@@ -95,6 +114,18 @@ class ContainerContentBaseViewset(api_base.ModelViewSet):
     def get_distro(self):
         return get_object_or_404(
             models.ContainerDistribution, base_path=self.kwargs["base_path"])
+
+
+class ContainerTagViewset(ContainerContentBaseViewset):
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    serializer_class = serializers.ContainerTagSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TagFilter
+
+    def get_queryset(self):
+        repo = self.get_distro().repository
+        repo_version = repo.latest_version()
+        return repo_version.get_content(container_models.Tag.objects)
 
 
 class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
