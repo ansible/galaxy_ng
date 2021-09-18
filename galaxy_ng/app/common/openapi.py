@@ -1,5 +1,7 @@
 import logging
 
+from django.conf import settings
+
 log = logging.getLogger(__name__)
 log.debug('openapi autoschema')
 
@@ -31,3 +33,24 @@ def preprocess_exclude_endpoints(endpoints, **kwargs):
         (path, path_regex, method, callback) for path, path_regex, method, callback in endpoints
         if path == '/pulp/api/v3/status/' or (not path.startswith('/pulp') and '/_ui/' not in path)
     ]
+
+
+class AllowCorsMiddleware:
+    """This is for use on dev environment and testing only"""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # One-time configuration and initialization.
+
+    def __call__(self, request):
+        # Code to be executed for each request before
+        # the view (and later middleware) are called.
+
+        response = self.get_response(request)
+        response["Access-Control-Allow-Origin"] = settings.get("GALAXY_CORS_ALLOWED_ORIGINS", "")
+        response["Access-Control-Allow-Headers"] = settings.get("GALAXY_CORS_ALLOWED_HEADERS", "")
+
+        # Code to be executed for each request/response after
+        # the view is called.
+
+        return response
