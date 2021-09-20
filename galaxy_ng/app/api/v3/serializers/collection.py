@@ -26,10 +26,10 @@ class HrefNamespaceMixin:
     def _get_download_url(self, obj):
         """Get artifact download URL."""
 
-        host = settings.ANSIBLE_API_HOSTNAME.strip("/")
-        prefix = settings.GALAXY_API_PATH_PREFIX.strip("/")
+        host = settings.CONTENT_ORIGIN.strip("/")
+        prefix = settings.CONTENT_PATH_PREFIX.strip("/")
         distro_base_path = self.context["path"]
-        return f"{host}/{prefix}/v3/artifacts/collections/{distro_base_path}/{obj.relative_path}"
+        return f"{host}/{prefix}/{distro_base_path}/{obj.relative_path}"
 
     def _get_href(self, url_name, **kwargs):
         """Generic get_*_href that uses context["view_namespace"] to reverse the right url"""
