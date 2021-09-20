@@ -106,10 +106,10 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
         Get artifact download URL.
         """
 
-        host = settings.ANSIBLE_API_HOSTNAME.strip("/")
-        prefix = settings.GALAXY_API_PATH_PREFIX.strip("/")
+        host = settings.CONTENT_ORIGIN.strip("/")
+        prefix = settings.CONTENT_PATH_PREFIX.strip("/")
         distro_base_path = self.context["path"]
-        return f"{host}/{prefix}/v3/artifacts/collections/{distro_base_path}/{obj.relative_path}"
+        return f"{host}/{prefix}/{distro_base_path}/{obj.relative_path}"
 
     def get_href(self, obj):
         return self._get_href(
