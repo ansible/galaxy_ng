@@ -23,6 +23,10 @@ from .container import (
 
 )
 
+from .contentguard import (
+    CollectionDownloadContentGuard,
+)
+
 __all__ = (
     'Group',
     'User',
@@ -35,4 +39,5 @@ __all__ = (
     'ContainerNamespace',
     'ContainerRegistryRemote',
     'ContainerRegistryRepos',
+    'CollectionDownloadContentGuard',
 )

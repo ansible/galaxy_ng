@@ -28,5 +28,6 @@ class DistributionSerializer(serializers.ModelSerializer):
             'pulp_id',
             'name',
             'base_path',
-            'repository'
+            'repository',
+            'content-guard',
         )
