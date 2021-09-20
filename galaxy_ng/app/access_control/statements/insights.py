@@ -39,7 +39,7 @@ INSIGHTS_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": [
-                "has_model_perms:ansible.delete_ansible_repo_content",
+                "has_model_perms:ansible.delete_collection",
                 "has_rh_entitlements",
             ],
         },

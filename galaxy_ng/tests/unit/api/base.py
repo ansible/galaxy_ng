@@ -112,6 +112,7 @@ class BaseTestCase(APITestCase):
 
             # collections
             'ansible.modify_ansible_repo_content',
+            'ansible.delete_collection',
 
             # users
             'galaxy.view_user',

@@ -45,7 +45,9 @@ urlpatterns = [
     ),
     path(
         "collections/<str:namespace>/<str:name>/",
-        viewsets.CollectionViewSet.as_view({"get": "retrieve", "patch": "update"}),
+        viewsets.CollectionViewSet.as_view(
+            {"get": "retrieve", "patch": "update", "delete": "destroy"}
+        ),
         name="collections-detail",
     ),
     path(

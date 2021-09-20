@@ -40,6 +40,7 @@ from galaxy_ng.app.tasks import (
     call_copy_task,
     call_remove_task,
     curate_all_synclist_repository,
+    delete_collection,
     delete_collection_version,
     import_and_auto_approve,
     import_and_move_to_staging,
@@ -81,11 +82,69 @@ class UnpaginatedCollectionViewSet(api_base.LocalSettingsMixin,
     serializer_class = CollectionSerializer
 
 
+def get_collection_dependents(parent):
+    """Given a parent collection, return a list of collection versions that depend on it."""
+    key = f"{parent.namespace}.{parent.name}"
+    dependents = []
+    for child in CollectionVersion.objects.exclude(collection=parent).filter(
+        dependencies__has_key=key
+    ):
+        dependents.append(child)
+    return dependents
+
+
 class CollectionViewSet(api_base.LocalSettingsMixin,
                         ViewNamespaceSerializerContextMixin,
                         pulp_ansible_views.CollectionViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
+
+    @extend_schema(
+        description="Trigger an asynchronous delete task",
+        responses={status.HTTP_202_ACCEPTED: AsyncOperationResponseSerializer},
+    )
+    def destroy(self, request: Request, *args, **kwargs) -> Response:
+        """
+        Allow a Collection to be deleted.
+        1. Perform Dependency Check to verify that each CollectionVersion
+           inside Collection can be deleted
+        2. If the Collection can’t be deleted, return the reason why
+        3. If it can, dispatch task to delete each CollectionVersion
+           and the Collection
+        """
+        collection = self.get_object()
+
+        # dependency check
+        dependents = get_collection_dependents(collection)
+        if dependents:
+            return Response(
+                {
+                    "detail": _(
+                        "Collection {namespace}.{name} could not be deleted "
+                        "because there are other collections that require it."
+                    ).format(
+                        namespace=collection.namespace,
+                        name=collection.name,
+                    ),
+                    "dependent_collection_versions": [
+                        f"{dep.namespace}.{dep.name} {dep.version}" for dep in dependents
+                    ],
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        repositories = set()
+        for version in collection.versions.all():
+            for repo in version.repositories.all():
+                repositories.add(repo)
+
+        async_result = dispatch(
+            delete_collection,
+            exclusive_resources=list(repositories),
+            kwargs={"collection_pk": collection.pk},
+        )
+
+        return OperationPostponedResponse(async_result, request)
 
 
 class UnpaginatedCollectionVersionViewSet(
@@ -150,7 +209,7 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
                         f"{dep.namespace}.{dep.name} {dep.version}" for dep in dependents
                     ],
                 },
-                status=400,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         async_result = dispatch(

@@ -46,7 +46,7 @@ STANDALONE_STATEMENTS = {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.delete_ansible_repo_content",
+            "condition": "has_model_perms:ansible.delete_collection",
         },
         {
             "action": ["download"],
