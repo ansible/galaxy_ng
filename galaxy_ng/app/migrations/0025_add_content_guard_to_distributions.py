@@ -16,7 +16,7 @@ def add_content_guard(apps, schema_editor):
         content_guard=None,
         pulp_type='ansible.ansible'
     ).update(
-        content_guard=ContentGuard.objects.first,
+        content_guard=ContentGuard.objects.first(),
     )
 
 
