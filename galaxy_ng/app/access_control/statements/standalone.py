@@ -249,7 +249,13 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-        }
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:pulp_container.delete_containerrepository",
+        },
     ],
 
     # The container readme can't just use the ContainerRepository access policies

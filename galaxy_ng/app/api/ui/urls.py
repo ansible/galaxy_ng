@@ -1,12 +1,10 @@
 from django.conf import settings
-from django.urls import path, include, re_path
+from django.urls import include, path, re_path
 from rest_framework import routers
 
 from galaxy_ng.app import constants
 
-from . import views
-from . import viewsets
-
+from . import views, viewsets
 
 router = routers.SimpleRouter()
 # TODO: Replace with a RedirectView
@@ -39,7 +37,9 @@ container_repo_paths = [
         name='container-repository-images'),
     path(
         'images/<str:manifest_ref>/',
-        viewsets.ContainerRepositoryManifestViewSet.as_view({'get': 'retrieve'}),
+        viewsets.ContainerRepositoryManifestViewSet.as_view(
+            {"get": "retrieve", "delete": "destroy"}
+        ),
         name='container-repository-images-config-blob'),
     path(
         'history/',
@@ -94,9 +94,10 @@ container_paths = [
 
     # This regex can capture "namespace/name" and "name"
     re_path(
-        r'repositories/(?P<base_path>[-\w]+\/{0,1}[-\w]+)/',
-        viewsets.ContainerRepositoryViewSet.as_view({'get': 'retrieve'}),
-        name='container-repository-detail'),
+        r"repositories/(?P<base_path>[-\w]+\/{0,1}[-\w]+)/",
+        viewsets.ContainerRepositoryViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
+        name="container-repository-detail",
+    ),
 ]
 
 # Groups are subclassed from pulpcore and use nested viewsets, so router.register

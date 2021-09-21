@@ -1,7 +1,8 @@
 import logging
 
 from pulp_ansible.app.models import Collection, CollectionVersion
-from pulpcore.app.tasks import orphan_cleanup
+from pulp_container.app import tasks as pulp_container_tasks
+from pulpcore.app.tasks import orphan_cleanup, reclaim_space
 from pulpcore.plugin.tasking import add_and_remove
 
 log = logging.getLogger(__name__)
@@ -60,3 +61,26 @@ def delete_collection(collection_pk):
 
     log.info("Deleting collection {}".format(collection))
     collection.delete()
+
+
+def delete_container_distribution(instance_ids):
+    """Deletes a container distribution and push repository related."""
+
+    log.info("Running container.general_multi_delete to delete distro and repo")
+    pulp_container_tasks.general_multi_delete(instance_ids=instance_ids)
+
+    log.info("Running orphan_cleanup to delete Container objects and artifacts")
+    orphan_cleanup(content_pks=None, orphan_protection_time=0)
+
+
+def delete_container_image_manifest(repository_pk, content_unit_pks):
+    """Deletes a container image manifest."""
+
+    log.info(f"Running delete manifest for {repository_pk}")
+    pulp_container_tasks.recursive_remove_content(
+        repository_pk=repository_pk,
+        content_units=content_unit_pks,
+    )
+
+    log.info(f"Reclaiming disk space for {repository_pk}")
+    reclaim_space(repo_pks=[repository_pk], force=True)
