@@ -14,8 +14,6 @@ class CollectionDownloadContentGuard(ContentGuard):
         from galaxy_ng.app.api.v3.viewsets import CollectionArtifactDownloadView
 
         view = CollectionArtifactDownloadView()
-        setattr(view, "get_object", lambda: self)
-        setattr(view, "action", "download")
         try:
             view.check_permissions(request)
         except APIException as e:

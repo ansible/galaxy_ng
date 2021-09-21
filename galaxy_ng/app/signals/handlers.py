@@ -27,7 +27,9 @@ def ensure_content_guard_exists_on_distribution(sender, instance, created, **kwa
     """Ensure distribution have a content guard when created."""
 
     if created and instance.content_guard is None:
-        instance.content_guard = CollectionDownloadContentGuard.objects.first()
+        instance.content_guard = CollectionDownloadContentGuard.objects.get_or_create(
+            pulp_type='ansible.ansible'
+        )[0]
         instance.save()
 
 

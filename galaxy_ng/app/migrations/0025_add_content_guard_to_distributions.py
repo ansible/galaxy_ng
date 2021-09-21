@@ -7,16 +7,13 @@ def add_content_guard(apps, schema_editor):
     AnsibleDistribution = apps.get_model('ansible', 'AnsibleDistribution')
     ContentGuard = apps.get_model('galaxy', 'CollectionDownloadContentGuard')
 
-    cg = ContentGuard(
-        pulp_type='ansible.ansible'
-    )
-    cg.save()
-
     AnsibleDistribution.objects.filter(
         content_guard=None,
         pulp_type='ansible.ansible'
     ).update(
-        content_guard=ContentGuard.objects.first(),
+        content_guard=ContentGuard.objects.get_or_create(
+            pulp_type='ansible.ansible'
+        )[0]
     )
 
 
