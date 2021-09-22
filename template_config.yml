@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-14-g7edf776
+# generated with plugin_template@2021.08.26-18-g1f402a4
 
 additional_repos:
 - bindings: true
@@ -62,7 +62,7 @@ pulp_settings:
   allowed_export_paths: /tmp
   allowed_import_paths: /tmp
   rh_entitlement_required: insights
-pulpcore_branch: '3.14.6'
+pulpcore_branch: 3.14.6
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
@@ -75,6 +75,7 @@ release_user: ansible
 single_commit_check: false
 stable_branch: stable
 sync_ci: true
+tasking_allow_async_unsafe: true
 test_bindings: false
 test_cli: false
 test_performance: false
