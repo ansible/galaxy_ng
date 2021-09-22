@@ -11,11 +11,13 @@ class CollectionDownloadContentGuard(ContentGuard):
         """
         Authorize the specified request based on if the request is authenticated.
         """
+        if not (drequest := request.get("drf_request", None)):
+            raise PermissionError("Request not properly authenticated")
         from galaxy_ng.app.api.v3.viewsets import CollectionArtifactDownloadView
 
         view = CollectionArtifactDownloadView()
         try:
-            view.check_permissions(request)
+            view.check_permissions(drequest)
         except APIException as e:
             raise PermissionError(e)
 

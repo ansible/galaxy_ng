@@ -65,6 +65,16 @@ GALAXY_AUTHENTICATION_CLASSES = [
 # set to 'insights' for cloud.redhat.com deployments
 GALAXY_DEPLOYMENT_MODE = 'standalone'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+        "dynaconf_merge",
+    ),
+    'dynaconf_merge': True
+}
+
 # Dictionary with True|False values for the application to turn on/off features
 GALAXY_FEATURE_FLAGS = {
     'execution_environments': True,  # False will make execution_environments endpoints 404

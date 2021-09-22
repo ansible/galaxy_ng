@@ -119,6 +119,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         data["REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES"] = [
             "rest_framework.authentication.SessionAuthentication",
             "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
+            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
         ]
 
         # Replace AUTH CLASSES
