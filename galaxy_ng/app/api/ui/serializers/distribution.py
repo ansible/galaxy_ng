@@ -29,5 +29,5 @@ class DistributionSerializer(serializers.ModelSerializer):
             'name',
             'base_path',
             'repository',
-            'content-guard',
+            'content_guard',
         )
