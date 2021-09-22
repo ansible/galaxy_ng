@@ -28,7 +28,7 @@ from galaxy_ng.app.api.v3.serializers.sync import CollectionRemoteSerializer
 
 
 class CollectionByCollectionVersionFilter(pulp_ansible_viewsets.CollectionVersionFilter):
-    """pulp_ansible CollectionVersion filter for Collection viewset."""
+    """pulp_ansible CollectionVersion  filter for Collection viewset."""
     versioning_class = versioning.UIVersioning
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
     deprecated = filters.BooleanFilter()
