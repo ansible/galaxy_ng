@@ -40,5 +40,4 @@ __all__ = (
     'ContainerRegistryRemote',
     'ContainerRegistryRepos',
     'ContentRedirectContentGuard',
-    'GalaxyAnsibleDistribution',
 )
