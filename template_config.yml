@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.04.08-99-gd8b54c6
+# generated with plugin_template@2021.08.26-19-g88bcdd3
 
 additional_repos:
 - bindings: true
@@ -58,7 +58,7 @@ pre_job_template:
   name: check_commit
   path: galaxy_ng/.github/pre-job-template.yml.j2
 publish_docs_to_pulpprojectdotorg: false
-pulp_scheme: http
+pulp_scheme: https
 pulp_settings:
   allowed_export_paths: /tmp
   allowed_import_paths: /tmp
@@ -76,6 +76,8 @@ release_user: ansible
 single_commit_check: false
 stable_branch: stable
 sync_ci: true
+tasking_allow_async_unsafe: true
+test_azure: true
 test_bindings: false
 test_cli: false
 test_performance: false
