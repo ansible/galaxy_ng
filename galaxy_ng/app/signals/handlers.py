@@ -6,9 +6,9 @@ galaxy_ng.app.__init__:PulpGalaxyPluginAppConfig.ready() method.
 from django.apps import apps
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_migrate
-from pulp_ansible.app.models import AnsibleRepository, Collection
+from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection
 from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
-from galaxy_ng.app.models.namespace import Namespace
+from galaxy_ng.app.models import ContentRedirectContentGuard, Namespace
 
 
 @receiver(post_save, sender=AnsibleRepository)
@@ -19,6 +19,19 @@ def ensure_retain_repo_versions_on_repository(sender, instance, created, **kwarg
 
     if created and instance.retain_repo_versions is None:
         instance.retain_repo_versions = 1
+        instance.save()
+
+
+@receiver(post_save, sender=AnsibleDistribution)
+def ensure_content_guard_exists_on_distribution(sender, instance, created, **kwargs):
+    """Ensure distribution have a content guard when created."""
+
+    content_guard, _ = ContentRedirectContentGuard.objects.get_or_create(
+        pulp_type='ansible.ansible'
+    )
+
+    if created and instance.content_guard is None:
+        instance.content_guard = content_guard
         instance.save()
 
 

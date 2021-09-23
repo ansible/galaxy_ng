@@ -23,6 +23,10 @@ from .container import (
 
 )
 
+from .contentguard import (
+    ContentRedirectContentGuard,
+)
+
 __all__ = (
     'Group',
     'User',
@@ -35,4 +39,6 @@ __all__ = (
     'ContainerNamespace',
     'ContainerRegistryRemote',
     'ContainerRegistryRepos',
+    'ContentRedirectContentGuard',
+    'GalaxyAnsibleDistribution',
 )

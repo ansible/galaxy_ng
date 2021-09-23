@@ -365,6 +365,9 @@ class CollectionArtifactDownloadView(api_base.APIView):
         session.mount("http://", SocketHTTPAdapter(socket_file))
         return session.get(url, stream=True, allow_redirects=False)
 
+    def _get_ansible_distribution(self, base_path):
+        return AnsibleDistribution.objects.get(base_path=base_path)
+
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
@@ -376,11 +379,16 @@ class CollectionArtifactDownloadView(api_base.APIView):
             filename=self.kwargs['filename'],
         )
 
+        distribution = self._get_ansible_distribution(self.kwargs['path'])
+
+        redirect_url = AnsibleDistribution.redirect_to_content_app(distribution, url)
+
         content_bind = settings.get("CONTENT_BIND", None)
         if content_bind and content_bind.startswith("unix:"):
             response = self._get_unix_socket_response(url)
         else:
-            response = self._get_tcp_response(url)
+            response = redirect_url
+            # response = self._get_tcp_response(url)
 
         if response.status_code == requests.codes.not_found:
             metrics.collection_artifact_download_failures.labels(
