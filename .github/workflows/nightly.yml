@@ -22,6 +22,7 @@ jobs:
       matrix:
         env:
           - TEST: pulp
+          - TEST: azure
           - TEST: s3
 
     steps:
@@ -146,7 +147,7 @@ jobs:
         if: failure()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
-          http --timeout 30 --check-status --pretty format --print hb http://pulp/pulp/api/v3/status/ || true
+          http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
           docker images || true
           docker ps -a || true
           docker logs pulp || true
@@ -260,7 +261,7 @@ jobs:
         if: failure()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
-          http --timeout 30 --check-status --pretty format --print hb http://pulp/pulp/api/v3/status/ || true
+          http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
           docker images || true
           docker ps -a || true
           docker logs pulp || true

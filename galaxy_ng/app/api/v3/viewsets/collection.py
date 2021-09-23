@@ -291,6 +291,13 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
             % INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)
         )
 
+    @extend_schema(
+        description="Create an artifact and trigger an asynchronous task to create "
+        "Collection content from it.",
+        summary="Upload a collection",
+        request=CollectionUploadSerializer,
+        responses={202: AsyncOperationResponseSerializer},
+    )
     def create(self, request, *args, **kwargs):
         data = self._get_data(request)
         filename = data['filename']
