@@ -8,7 +8,10 @@ def add_content_guard(apps, schema_editor):
     AnsibleDistribution = apps.get_model('ansible', 'AnsibleDistribution')
     ContentRedirectContentGuard = apps.get_model('galaxy', 'ContentRedirectContentGuard')
 
-    content_guard, _ = ContentRedirectContentGuard.objects.get_or_create(pulp_type='ansible.ansible')
+    content_guard, _ = ContentRedirectContentGuard.objects.get_or_create(
+        name='ContentRedirectContentGuard',
+        pulp_type='ansible.ansible'
+    )
 
     AnsibleDistribution.objects.filter(
         content_guard=None,

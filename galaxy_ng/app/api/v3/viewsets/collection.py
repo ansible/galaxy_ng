@@ -4,7 +4,7 @@ import requests
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import HttpResponseRedirect, StreamingHttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
@@ -379,16 +379,12 @@ class CollectionArtifactDownloadView(api_base.APIView):
             filename=self.kwargs['filename'],
         )
 
-        distribution = self._get_ansible_distribution(self.kwargs['path'])
-
-        redirect_url = AnsibleDistribution.redirect_to_content_app(distribution, url)
-
         content_bind = settings.get("CONTENT_BIND", None)
         if content_bind and content_bind.startswith("unix:"):
             response = self._get_unix_socket_response(url)
         else:
-            response = redirect_url
-            # response = self._get_tcp_response(url)
+            distribution = self._get_ansible_distribution(self.kwargs['path'])
+            response = redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
         if response.status_code == requests.codes.not_found:
             metrics.collection_artifact_download_failures.labels(
