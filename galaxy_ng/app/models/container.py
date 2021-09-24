@@ -73,7 +73,7 @@ class ContainerRegistryRemote(
 
     def get_registry_backend(self):
         for registry in self.RED_HAT_REGISTY_DOMAINS:
-            if self.url in registry:
+            if registry in self.url:
                 return 'redhat'
         return None
 

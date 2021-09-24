@@ -23,7 +23,8 @@ CATALOG_API = "https://catalog.redhat.com/api/containers/v1/repositories"
 class CouldNotCreateContainerError(Exception):
     def __init__(self, remote_name, error=""):
         self.message = _(
-            f"Failed to create container {remote_name}. {error}"
+            "Failed to create container {remote_name}. {error}".format(
+                remote_name=remote_name, error=error)
         )
 
         super().__init__(self.message)
@@ -32,8 +33,8 @@ class CouldNotCreateContainerError(Exception):
 def _get_request(request_data):
     request = HttpRequest()
 
-    for k in request_data:
-        setattr(request, k, request_data[k])
+    for k, v in request_data.items():
+        setattr(request, k, v)
 
     return request
 
@@ -156,5 +157,5 @@ def index_execution_environments_from_redhat_registry(registry_pk, request_data)
                 "registry_pk": registry.pk,
                 "request_data": request_data
             },
-            exclusive_resources=['/pulp/api/v3/distributions/']
+            exclusive_resources=["/api/v3/distributions/"]
         )
