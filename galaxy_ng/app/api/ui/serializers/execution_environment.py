@@ -142,8 +142,11 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
         # use the prefetched blob_list and artifact_list instead of obj.blobs and
         # blob._artifacts to cut down on queries made.
         for blob in obj.blob_list:
-            layers.append({"digest": blob.digest, "size": blob.artifact_list[0].size})
-
+            # Manifest can be empty after deleting an image.
+            if blob.artifact_list:
+                layers.append(
+                    {"digest": blob.digest, "size": blob.artifact_list[0].size}
+                )
         return layers
 
     def get_config_blob(self, obj):
