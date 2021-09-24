@@ -359,12 +359,6 @@ class CollectionArtifactDownloadView(api_base.APIView):
     def _get_tcp_response(self, url):
         return requests.get(url, stream=True, allow_redirects=False)
 
-    def _get_unix_socket_response(self, url):
-        socket_file = settings.CONTENT_BIND.split(':')[1]
-        session = requests.Session()
-        session.mount("http://", SocketHTTPAdapter(socket_file))
-        return session.get(url, stream=True, allow_redirects=False)
-
     def _get_ansible_distribution(self, base_path):
         return AnsibleDistribution.objects.get(base_path=base_path)
 
