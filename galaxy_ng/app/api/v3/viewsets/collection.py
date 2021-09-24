@@ -371,20 +371,24 @@ class CollectionArtifactDownloadView(api_base.APIView):
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
-        url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
-            host=settings.X_PULP_CONTENT_HOST,
-            port=settings.X_PULP_CONTENT_PORT,
-            prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
-            distro_base_path=self.kwargs['path'],
-            filename=self.kwargs['filename'],
-        )
+        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
+            url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
+                host=settings.X_PULP_CONTENT_HOST,
+                port=settings.X_PULP_CONTENT_PORT,
+                prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
+                distro_base_path=self.kwargs['path'],
+                filename=self.kwargs['filename'],
+            )
+        elif settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:
+            url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
+                host=settings.CONTENT_ORIGIN.strip("/"),
+                prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
+                distro_base_path=self.kwargs['path'],
+                filename=self.kwargs['filename'],
+            )
 
-        content_bind = settings.get("CONTENT_BIND", None)
-        if content_bind and content_bind.startswith("unix:"):
-            response = self._get_unix_socket_response(url)
-        else:
-            distribution = self._get_ansible_distribution(self.kwargs['path'])
-            response = redirect(distribution.content_guard.cast().preauthenticate_url(url))
+        distribution = self._get_ansible_distribution(self.kwargs['path'])
+        response = redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
         if response.status_code == requests.codes.not_found:
             metrics.collection_artifact_download_failures.labels(
