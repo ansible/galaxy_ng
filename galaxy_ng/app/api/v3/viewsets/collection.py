@@ -371,20 +371,24 @@ class CollectionArtifactDownloadView(api_base.APIView):
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
+        distro_base_path = self.kwargs['path']
+        filename = self.kwargs['filename']
+        prefix = settings.CONTENT_PATH_PREFIX.strip('/')
+
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
                 host=settings.X_PULP_CONTENT_HOST,
                 port=settings.X_PULP_CONTENT_PORT,
-                prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
-                distro_base_path=self.kwargs['path'],
-                filename=self.kwargs['filename'],
+                prefix=prefix,
+                distro_base_path=distro_base_path,
+                filename=filename,
             )
         elif settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:
             url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
                 host=settings.CONTENT_ORIGIN.strip("/"),
-                prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
-                distro_base_path=self.kwargs['path'],
-                filename=self.kwargs['filename'],
+                prefix=prefix,
+                distro_base_path=distro_base_path,
+                filename=filename,
             )
 
         distribution = self._get_ansible_distribution(self.kwargs['path'])
