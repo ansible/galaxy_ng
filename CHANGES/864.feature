@@ -1,0 +1,4 @@
+Add the ability to index execution environments from Red Hat registry remotes.
+
+This scans the registry for containers that are labeled with the execution environment
+label and creates remote container repositories for them which can be synced.

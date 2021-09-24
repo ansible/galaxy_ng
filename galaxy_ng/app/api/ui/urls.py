@@ -81,6 +81,10 @@ container_paths = [
         views.ContainerSyncRegistryView.as_view(),
         name='container-registry-sync'),
     path(
+        "registries/<str:pk>/index/",
+        views.IndexRegistryEEView.as_view(),
+        name='execution-environments-registry-index'),
+    path(
         "registries/",
         viewsets.ContainerRegistryRemoteViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='execution-environments-registry-list'),
