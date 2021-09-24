@@ -7,7 +7,7 @@ from .feature_flags import FeatureFlagsView
 from .controller import ControllerListView
 
 from .settings import SettingsView
-from .sync import ContainerSyncRemoteView
+from .sync import ContainerSyncRemoteView, ContainerSyncRegistryView
 
 __all__ = (
     # auth
@@ -25,4 +25,5 @@ __all__ = (
 
     # sync
     "ContainerSyncRemoteView",
+    "ContainerSyncRegistryView"
 )

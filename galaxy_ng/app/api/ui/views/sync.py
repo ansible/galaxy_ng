@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
 from pulp_container.app import models as pulp_models
-from pulp_container.app.tasks.synchronize import synchronize as container_sync
 from pulpcore.plugin.viewsets import (
     OperationPostponedResponse,
 )
@@ -14,7 +13,7 @@ from pulpcore.plugin.tasking import dispatch
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app import models
+from galaxy_ng.app import models, tasks
 
 
 class ContainerSyncRemoteView(api_base.APIView):
@@ -40,18 +39,21 @@ class ContainerSyncRemoteView(api_base.APIView):
                                     ' any registries associated with it.') % distro_path}
             )
 
-        for key, value in registry.get_connection_fields().items():
-            setattr(remote, key, value)
-        remote.save()
+        result = tasks.launch_container_remote_sync(remote, registry, distro.repository)
+        return OperationPostponedResponse(result, request)
+
+
+class ContainerSyncRegistryView(api_base.APIView):
+    permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
+    action = 'sync'
+
+    def post(self, request: Request, *args, **kwargs) -> Response:
+        registry = get_object_or_404(models.ContainerRegistryRemote, pk=kwargs['pk'])
 
         result = dispatch(
-            container_sync,
-            shared_resources=[remote],
-            exclusive_resources=[distro.repository],
+            tasks.sync_all_repos_in_registry,
             kwargs={
-                "remote_pk": str(remote.pk),
-                "repository_pk": str(distro.repository.pk),
-                "mirror": True,
+                "registry_pk": str(registry.pk),
             },
         )
         return OperationPostponedResponse(result, request)

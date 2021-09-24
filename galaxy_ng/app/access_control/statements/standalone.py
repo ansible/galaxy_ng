@@ -310,6 +310,12 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_model_perms:galaxy.add_containerregistryremote"
         },
+        {
+            "action": "sync",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.change_containerregistryremote"
+        },
         # allows users with model create permissions to update registries
         {
             "action": "update",
