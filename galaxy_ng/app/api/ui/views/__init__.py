@@ -9,6 +9,8 @@ from .controller import ControllerListView
 from .settings import SettingsView
 from .sync import ContainerSyncRemoteView, ContainerSyncRegistryView
 
+from .index_execution_environments import IndexRegistryEEView
+
 __all__ = (
     # auth
     "LoginView",
@@ -25,5 +27,8 @@ __all__ = (
 
     # sync
     "ContainerSyncRemoteView",
-    "ContainerSyncRegistryView"
+    "ContainerSyncRegistryView",
+
+    # index_execution_environments
+    "IndexRegistryEEView",
 )

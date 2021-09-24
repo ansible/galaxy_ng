@@ -323,6 +323,12 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_model_perms:galaxy.change_containerregistryremote"
         },
+        {
+            "action": "index_execution_environments",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.change_containerregistryremote"
+        },
     ],
 
     'ContainerRemoteViewSet': [

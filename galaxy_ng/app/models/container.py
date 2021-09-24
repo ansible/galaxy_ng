@@ -43,6 +43,10 @@ class ContainerRegistryRemote(
     class Meta:
         default_related_name = "%(app_label)s_%(model_name)s"
 
+    RED_HAT_REGISTY_DOMAINS = (
+        'registry.redhat.io',
+    )
+
     def get_connection_fields(self):
         copy_fields = (
             "url",
@@ -66,6 +70,12 @@ class ContainerRegistryRemote(
             result[field] = getattr(self, field)
 
         return result
+
+    def get_registry_backend(self):
+        for registry in self.RED_HAT_REGISTY_DOMAINS:
+            if registry in self.url:
+                return 'redhat'
+        return None
 
 
 class ContainerRegistryRepos(models.Model):

@@ -254,6 +254,7 @@ class ContainerRegistryRemoteSerializer(
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
     last_sync_task = utils.RemoteSyncTaskField(source="*")
     write_only_fields = serializers.SerializerMethodField()
+    is_indexable = serializers.SerializerMethodField()
 
     class Meta:
         model = models.ContainerRegistryRemote
@@ -277,6 +278,7 @@ class ContainerRegistryRemoteSerializer(
             "proxy_password",
             "write_only_fields",
             "rate_limit",
+            "is_indexable"
         ]
         extra_kwargs = {
             'name': {'read_only': True},
@@ -285,6 +287,11 @@ class ContainerRegistryRemoteSerializer(
 
     def get_write_only_fields(self, obj):
         return utils.get_write_only_fields(self, obj)
+
+    def get_is_indexable(self, obj):
+        if obj.get_registry_backend():
+            return True
+        return False
 
 
 class ContainerRemoteSerializer(
