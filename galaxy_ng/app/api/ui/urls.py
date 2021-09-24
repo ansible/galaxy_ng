@@ -53,6 +53,10 @@ container_repo_paths = [
         'tags/',
         viewsets.ContainerTagViewset.as_view({'get': 'list'}),
         name='container-repository-tags'),
+    path(
+        "sync/",
+        views.ContainerSyncRemoteView.as_view(),
+        name='container-repository-sync'),
 ]
 
 container_paths = [
@@ -84,10 +88,6 @@ container_paths = [
         "remotes/",
         viewsets.ContainerRemoteViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='execution-environments-remote-list'),
-    path(
-        "repositories/<str:base_path>/sync/",
-        views.ContainerSyncRemoteView.as_view(),
-        name='container-repository-sync'),
 
     # image names can't start with _, so namespacing all the nested views
     # under _content prevents cases where an image could be named foo/images
