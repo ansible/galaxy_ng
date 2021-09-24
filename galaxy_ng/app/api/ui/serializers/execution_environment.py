@@ -147,6 +147,8 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
         return layers
 
     def get_config_blob(self, obj):
+        if not obj.config_blob:
+            return {}
         return {"digest": obj.config_blob.digest, "media_type": obj.config_blob.media_type}
 
     def get_tags(self, obj):

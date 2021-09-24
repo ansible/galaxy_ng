@@ -77,6 +77,10 @@ container_paths = [
         viewsets.ContainerRegistryRemoteViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='execution-environments-registry-detail'),
     path(
+        "registries/<str:pk>/sync/",
+        views.ContainerSyncRegistryView.as_view(),
+        name='container-registry-sync'),
+    path(
         "registries/",
         viewsets.ContainerRegistryRemoteViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='execution-environments-registry-list'),
