@@ -380,9 +380,9 @@ class CollectionArtifactDownloadView(api_base.APIView):
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
                 host=settings.X_PULP_CONTENT_HOST,
                 port=settings.X_PULP_CONTENT_PORT,
-                prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
-                distro_base_path=self.kwargs['path'],
-                filename=self.kwargs['filename'],
+                prefix=prefix,
+                distro_base_path=distro_base_path,
+                filename=filename,
             )
             response = self._get_tcp_response(url)
             response = redirect(distribution.content_guard.cast().preauthenticate_url(url))
@@ -412,31 +412,6 @@ class CollectionArtifactDownloadView(api_base.APIView):
                 filename=filename,
             )
             return redirect(distribution.content_guard.cast().preauthenticate_url(url))
-
-        distribution = self._get_ansible_distribution(self.kwargs['path'])
-        response = redirect(distribution.content_guard.cast().preauthenticate_url(url))
-
-        if response.status_code == requests.codes.not_found:
-            metrics.collection_artifact_download_failures.labels(
-                status=requests.codes.not_found
-            ).inc()
-            raise NotFound()
-
-        if response.status_code == requests.codes.found:
-            return HttpResponseRedirect(response.headers['Location'])
-
-        if response.status_code == requests.codes.ok:
-            metrics.collection_artifact_download_successes.inc()
-
-            return StreamingHttpResponse(
-                response.raw.stream(amt=4096),
-                content_type=response.headers['Content-Type']
-            )
-
-        metrics.collection_artifact_download_failures.labels(status=response.status_code).inc()
-        raise APIException(
-            _('Unexpected response from content app. Code: %s.') % response.status_code
-        )
 
 
 class CollectionVersionMoveViewSet(api_base.ViewSet):
