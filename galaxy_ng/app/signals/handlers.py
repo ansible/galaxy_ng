@@ -26,7 +26,7 @@ def ensure_retain_repo_versions_on_repository(sender, instance, created, **kwarg
 def ensure_content_guard_exists_on_distribution(sender, instance, created, **kwargs):
     """Ensure distribution have a content guard when created."""
 
-    content_guard, _ = ContentRedirectContentGuard.objects.first()
+    content_guard = ContentRedirectContentGuard.objects.first()
 
     if created and instance.content_guard is None:
         instance.content_guard = content_guard
