@@ -22,7 +22,7 @@ def __getattr__(self, name):
     <plugin_name>.app.viewsets. Since galaxy_ng stores it's viewsets in a different
     module, this file is necesary for pulp tbe able to associate the ContainerRegistryRemote
     model to a viewset.
-    Without this viewset defined here, pulp get's confused when it tries to auto generate
+    Without this viewset defined here, pulp gets confused when it tries to auto generate
     the form on the repositories endpoint because it tries to provide a dropdown
     on the remote field and can't find a viewset name for galaxy's ContainerRegistryRemote model.
 
