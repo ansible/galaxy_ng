@@ -4,7 +4,7 @@ import requests
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import HttpResponseRedirect, StreamingHttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
@@ -25,7 +25,6 @@ from semantic_version import SimpleSpec, Version
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.utils import SocketHTTPAdapter
 from galaxy_ng.app.api.v3.serializers import (
     CollectionSerializer,
     CollectionUploadSerializer,
@@ -359,50 +358,53 @@ class CollectionArtifactDownloadView(api_base.APIView):
     def _get_tcp_response(self, url):
         return requests.get(url, stream=True, allow_redirects=False)
 
-    def _get_unix_socket_response(self, url):
-        socket_file = settings.CONTENT_BIND.split(':')[1]
-        session = requests.Session()
-        session.mount("http://", SocketHTTPAdapter(socket_file))
-        return session.get(url, stream=True, allow_redirects=False)
+    def _get_ansible_distribution(self, base_path):
+        return AnsibleDistribution.objects.get(base_path=base_path)
 
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
-        url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
-            host=settings.X_PULP_CONTENT_HOST,
-            port=settings.X_PULP_CONTENT_PORT,
-            prefix=settings.CONTENT_PATH_PREFIX.strip('/'),
-            distro_base_path=self.kwargs['path'],
-            filename=self.kwargs['filename'],
-        )
+        distro_base_path = self.kwargs['path']
+        filename = self.kwargs['filename']
+        prefix = settings.CONTENT_PATH_PREFIX.strip('/')
+        distribution = self._get_ansible_distribution(self.kwargs['path'])
 
-        content_bind = settings.get("CONTENT_BIND", None)
-        if content_bind and content_bind.startswith("unix:"):
-            response = self._get_unix_socket_response(url)
-        else:
-            response = self._get_tcp_response(url)
-
-        if response.status_code == requests.codes.not_found:
-            metrics.collection_artifact_download_failures.labels(
-                status=requests.codes.not_found
-            ).inc()
-            raise NotFound()
-
-        if response.status_code == requests.codes.found:
-            return HttpResponseRedirect(response.headers['Location'])
-
-        if response.status_code == requests.codes.ok:
-            metrics.collection_artifact_download_successes.inc()
-
-            return StreamingHttpResponse(
-                response.raw.stream(amt=4096),
-                content_type=response.headers['Content-Type']
+        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
+            url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
+                host=settings.X_PULP_CONTENT_HOST,
+                port=settings.X_PULP_CONTENT_PORT,
+                prefix=prefix,
+                distro_base_path=distro_base_path,
+                filename=filename,
             )
+            response = self._get_tcp_response(url)
+            response = redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
-        metrics.collection_artifact_download_failures.labels(status=response.status_code).inc()
-        raise APIException(
-            _('Unexpected response from content app. Code: %s.') % response.status_code
-        )
+            if response.status_code == requests.codes.not_found:
+                metrics.collection_artifact_download_failures.labels(
+                    status=requests.codes.not_found
+                ).inc()
+                raise NotFound()
+            if response.status_code == requests.codes.found:
+                return HttpResponseRedirect(response.headers['Location'])
+            if response.status_code == requests.codes.ok:
+                metrics.collection_artifact_download_successes.inc()
+                return StreamingHttpResponse(
+                    response.raw.stream(amt=4096),
+                    content_type=response.headers['Content-Type']
+                )
+            metrics.collection_artifact_download_failures.labels(status=response.status_code).inc()
+            raise APIException(
+                _('Unexpected response from content app. Code: %s.') % response.status_code
+            )
+        elif settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:
+            url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
+                host=settings.CONTENT_ORIGIN.strip("/"),
+                prefix=prefix,
+                distro_base_path=distro_base_path,
+                filename=filename,
+            )
+            return redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
 
 class CollectionVersionMoveViewSet(api_base.ViewSet):
