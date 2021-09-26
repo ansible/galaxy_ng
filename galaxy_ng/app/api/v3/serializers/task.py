@@ -55,7 +55,7 @@ class TaskSummarySerializer(TaskSerializer):
     For use in /tasks/<str:pk>/ detail views."""
     href = serializers.SerializerMethodField()
 
-    def get_href(self, obj):
+    def get_href(self, obj) -> str:
         return reverse(
             'galaxy:api:v3:default-content:tasks-detail',
             kwargs={"pk": str(obj.pk)}

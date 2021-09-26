@@ -4,6 +4,7 @@ from pulp_ansible.app.models import (
     AnsibleDistribution,
     CollectionVersion,
 )
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 import semantic_version
 
@@ -57,6 +58,7 @@ class CollectionMetadataSerializer(Serializer):
     license = serializers.ListField(serializers.CharField())
     tags = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.ListField)
     def get_tags(self, collection_version):
         # TODO(awcrosby): remove when galaxy_pulp no longer used in _ui
         if isinstance(collection_version, dict):
@@ -78,6 +80,7 @@ class CollectionVersionBaseSerializer(Serializer):
 class CollectionVersionSerializer(CollectionVersionBaseSerializer):
     repository_list = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.ListField)
     def get_repository_list(self, collection_version):
         """Repository list where content is in the latest RepositoryVersion."""
 
@@ -114,6 +117,7 @@ class _CollectionSerializer(Serializer):
     download_count = serializers.IntegerField(default=0)
     latest_version = serializers.SerializerMethodField()
 
+    @extend_schema_field(NamespaceSummarySerializer)
     def get_namespace(self, obj):
         namespace = Namespace.objects.get(name=obj.namespace)
         return NamespaceSummarySerializer(namespace).data
@@ -122,6 +126,7 @@ class _CollectionSerializer(Serializer):
 class CollectionListSerializer(_CollectionSerializer):
     deprecated = serializers.BooleanField()
 
+    @extend_schema_field(CollectionVersionBaseSerializer)
     def get_latest_version(self, obj):
         return CollectionVersionBaseSerializer(obj).data
 
@@ -131,9 +136,11 @@ class CollectionDetailSerializer(_CollectionSerializer):
 
     # TODO: rename field to "version_details" since with
     # "version" query param this won't always be the latest version
+    @extend_schema_field(CollectionVersionDetailSerializer)
     def get_latest_version(self, obj):
         return CollectionVersionDetailSerializer(obj).data
 
+    @extend_schema_field(CollectionVersionSummarySerializer(many=True))
     def get_all_versions(self, obj):
         path = self.context['request'].parser_context['kwargs']['path']
         distro = AnsibleDistribution.objects.get(base_path=path)
