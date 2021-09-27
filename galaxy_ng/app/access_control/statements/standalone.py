@@ -294,8 +294,9 @@ STANDALONE_STATEMENTS = {
         # prevents deletion of registry
         {
             "action": "destroy",
-            "principal": "*",
-            "effect": "deny",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.delete_containerregistryremote"
         },
         # allows authenticated users to VIEW registries
         {

@@ -74,7 +74,9 @@ container_paths = [
         name='container-namespace-list'),
     path(
         "registries/<str:pk>/",
-        viewsets.ContainerRegistryRemoteViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        viewsets.ContainerRegistryRemoteViewSet.as_view(
+            {'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}
+        ),
         name='execution-environments-registry-detail'),
     path(
         "registries/<str:pk>/sync/",
