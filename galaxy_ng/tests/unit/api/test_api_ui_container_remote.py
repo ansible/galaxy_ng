@@ -153,6 +153,60 @@ class TestContainerRemote(BaseTestCase):
         self.assertTrue(self._error_has_message(
             response, "cannot be changed", expected_field="name"))
 
+    def test_remote_update_after_registry_deletion(self):
+        """Ensure that a remote can be updated after the registry it's associated with is deleted
+
+        1. create a registry
+        2. create a remote in the registry
+        3. delete the registry
+        4. attempt to update the remote to use a new registry
+        """
+        # 1
+        registry = models.ContainerRegistryRemote.objects.create(
+            name="Test registry 3",
+            url="docker.io",
+        )
+
+        # 2
+        response = self._create_remote(self.admin, 'remote3/remote_repo3', registry.pk)
+        obj_data = response.data
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        remote_pk = response.data['pulp_id']
+
+        # 3
+        registry.delete()
+
+        # connection has been deleted
+        self.assertFalse(
+            models.container.ContainerRegistryRepos.objects.filter(
+                registry=registry,
+                repository_remote__pk=remote_pk
+            ).exists()
+        )
+
+        # 4
+        new_registry = models.ContainerRegistryRemote.objects.create(
+            name="Test registry 4",
+            url="myregistry.io",
+        )
+
+        # test update after registry deletion
+        response = self._update_remote(
+            remote_pk,
+            self.container_user,
+            {**obj_data, "upstream_name": "streamy", "registry": new_registry.pk}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # connection has been re-created
+        self.assertTrue(
+            models.container.ContainerRegistryRepos.objects.filter(
+                registry=new_registry,
+                repository_remote__pk=remote_pk
+            ).exists()
+        )
+
     def test_validation(self):
         # test invalid registry
         response = self._create_remote(
