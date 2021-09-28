@@ -143,7 +143,11 @@ class CollectionVersionFilter(filterset.FilterSet):
 
     class Meta:
         model = CollectionVersion
-        fields = ["namespace", "name", "version"]
+        fields = {
+            'name': ['exact', 'icontains', 'contains', 'startswith'],
+            'namespace': ['exact', 'icontains', 'contains', 'startswith'],
+            'version': ['exact', 'icontains', 'contains', 'startswith'],
+        }
 
 
 class CollectionVersionViewSet(api_base.GenericViewSet):
