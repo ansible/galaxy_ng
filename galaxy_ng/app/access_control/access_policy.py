@@ -5,7 +5,11 @@ from django.utils.translation import gettext_lazy as _
 from rest_access_policy import AccessPolicy
 from rest_framework.exceptions import NotFound
 
+from pulp_container.app.access_policy import NamespacedAccessPolicyMixin
+from pulp_container.app import models as container_models
+
 from galaxy_ng.app import models
+from galaxy_ng.app.access_control.mixins import UnauthenticatedCollectionAccessMixin
 
 log = logging.getLogger(__name__)
 
@@ -60,11 +64,11 @@ class AccessPolicyBase(AccessPolicy):
         return entitlement.get('is_entitled', False)
 
 
-class NamespaceAccessPolicy(AccessPolicyBase):
+class NamespaceAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
     NAME = 'NamespaceViewSet'
 
 
-class CollectionAccessPolicy(AccessPolicyBase):
+class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
     NAME = 'CollectionViewSet'
 
     def can_update_collection(self, request, view, permission):
@@ -79,6 +83,9 @@ class CollectionAccessPolicy(AccessPolicyBase):
         except models.Namespace.DoesNotExist:
             raise NotFound(_('Namespace in filename not found.'))
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
+
+    def unauthenticated_collection_download_enabled(self, request, view, permission):
+        return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
 
 
 class CollectionRemoteAccessPolicy(AccessPolicyBase):
@@ -96,7 +103,7 @@ class UserAccessPolicy(AccessPolicyBase):
         return request.user == view.get_object()
 
 
-class MyUserAccessPolicy(AccessPolicyBase):
+class MyUserAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
     NAME = 'MyUserViewSet'
 
     def is_current_user(self, request, view, action):
@@ -171,3 +178,38 @@ class ContainerReadmeAccessPolicy(AccessPolicyBase):
 
 class ContainerNamespaceAccessPolicy(AccessPolicyBase):
     NAME = 'ContainerNamespaceViewset'
+
+
+class ContainerRegistryRemoteAccessPolicy(AccessPolicyBase):
+    NAME = 'ContainerRegistryRemoteViewSet'
+
+
+class ContainerRemoteAccessPolicy(AccessPolicyBase, NamespacedAccessPolicyMixin):
+    NAME = 'ContainerRemoteViewSet'
+
+    def has_distro_permission(self, request, view, action, permission):
+        class FakeView:
+            def __init__(self, obj):
+                self.obj = obj
+
+            def get_object(self):
+                return self.obj
+
+        # has_container_namespace_perms
+
+        remote = view.get_object()
+        repositories = remote.repository_set.all()
+
+        # In theory there should never be more than one repository connected to a remote, but
+        # the pulp apis don't prevent you from attaching as many remotes as you want to a repo.
+        for repo in repositories:
+            for distro in container_models.ContainerDistribution.objects.filter(repository=repo):
+                dummy_view = FakeView(distro)
+                if self.has_namespace_or_obj_perms(request, dummy_view, action, permission):
+                    return True
+
+        return False
+
+
+class ContainerRemoteSyncAccessPolicy(AccessPolicyBase):
+    NAME = 'ContainerSyncRemoteView'

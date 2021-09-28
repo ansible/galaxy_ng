@@ -87,7 +87,22 @@ diff-match-patch==20200713
     # via django-import-export
 distro==1.6.0
     # via bindep
-django-automated-logging==6.1.1
+django==3.2.6
+    # via
+    #   django-automated-logging
+    #   django-currentuser
+    #   django-filter
+    #   django-guardian
+    #   django-guid
+    #   django-import-export
+    #   django-lifecycle
+    #   django-picklefield
+    #   django-storages
+    #   djangorestframework
+    #   drf-nested-routers
+    #   drf-spectacular
+    #   pulpcore
+django-automated-logging==6.1.3
     # via galaxy-ng (setup.py)
 django-currentuser==0.5.3
     # via pulpcore

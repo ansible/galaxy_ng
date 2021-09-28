@@ -57,6 +57,7 @@ GALAXY_PAGINATION_CLASS = "galaxy_ng.app.api.pagination.LimitOffsetPagination"
 GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
+    "rest_framework.authentication.BasicAuthentication",
 ]
 # Settings for insights mode
 # GALAXY_AUTHENTICATION_CLASSES = ["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
@@ -137,6 +138,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 
 CONNECTED_ANSIBLE_CONTROLLERS = []
+
+GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS = False
+GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD = False
 
 GALAXY_ENABLE_API_ACCESS_LOG = False
 # Extra AUTOMATED_LOGGING settings are defined on dynaconf_hooks.py

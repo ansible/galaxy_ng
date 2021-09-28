@@ -35,6 +35,15 @@ INSIGHTS_STATEMENTS = {
             "condition": "has_rh_entitlements",
         },
         {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "has_model_perms:ansible.delete_collection",
+                "has_rh_entitlements",
+            ],
+        },
+        {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",

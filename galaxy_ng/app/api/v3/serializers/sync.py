@@ -10,7 +10,6 @@ from pulp_ansible.app.models import (
 )
 
 from galaxy_ng.app.constants import COMMUNITY_DOMAINS
-from galaxy_ng.app.models.collectionsync import CollectionSyncTask
 from galaxy_ng.app.api import utils
 
 
@@ -29,31 +28,12 @@ class AnsibleDistributionSerializer(serializers.ModelSerializer):
         )
 
 
-class LastSyncTaskMixin:
-
-    def get_last_sync_task_queryset(self, obj):
-        raise NotImplementedError("subclass must implement get_last_sync_task_queryset")
-
-    def get_last_sync_task(self, obj):
-        sync_task = self.get_last_sync_task_queryset(obj)
-        if not sync_task:
-            # UI handles `null` as "no status"
-            return
-
-        return {
-            "task_id": sync_task.pk,
-            "state": sync_task.task.state,
-            "started_at": sync_task.task.started_at,
-            "finished_at": sync_task.task.finished_at,
-            "error": sync_task.task.error
-        }
-
-
-class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer):
+class AnsibleRepositorySerializer(serializers.ModelSerializer):
     distributions = serializers.SerializerMethodField()
-    last_sync_task = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created')
     updated_at = serializers.DateTimeField(source='pulp_last_updated')
+
+    last_sync_task = utils.RemoteSyncTaskField(source='remote')
 
     class Meta:
         model = AnsibleRepository
@@ -73,12 +53,10 @@ class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer
             for distro in obj.distributions.all()
         ]
 
-    def get_last_sync_task_queryset(self, obj):
-        return CollectionSyncTask.objects.filter(repository=obj).first()
 
+class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
+    last_sync_task = utils.RemoteSyncTaskField(source='*')
 
-class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemoteSerializer):
-    last_sync_task = serializers.SerializerMethodField()
     write_only_fields = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
@@ -174,10 +152,3 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
             AnsibleRepositorySerializer(repo).data
             for repo in obj.repository_set.all()
         ]
-
-    def get_last_sync_task_queryset(self, obj):
-        """Gets last_sync_task from Pulp using remote->repository relation"""
-
-        return CollectionSyncTask.objects.filter(
-            repository=obj.repository_set.order_by('-pulp_last_updated').first()
-        ).first()

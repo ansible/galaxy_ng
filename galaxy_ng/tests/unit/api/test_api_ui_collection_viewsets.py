@@ -25,16 +25,91 @@ def _create_remote(name, url, **kwargs):
     )
 
 
-def _get_create_version_in_repo(namespace, collection, version, repo):
+def _get_create_version_in_repo(namespace, collection, repo, **kwargs):
     collection_version, _ = CollectionVersion.objects.get_or_create(
         namespace=namespace,
         name=collection.name,
         collection=collection,
-        version=version,
+        **kwargs,
     )
     qs = CollectionVersion.objects.filter(pk=collection_version.pk)
     with repo.new_version() as new_version:
         new_version.add_content(qs)
+
+
+@override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
+class TestUiCollectionVersionDependencyFilter(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.versions_url = get_current_ui_url("collection-versions-list")
+        self.repo = _create_repo(name="the_repo")
+        self.namespace = models.Namespace.objects.create(name="my_namespace")
+        collection_foo = Collection.objects.create(namespace=self.namespace, name="foo")
+        collection_bar = Collection.objects.create(namespace=self.namespace, name="bar")
+
+        _get_create_version_in_repo(self.namespace, collection_foo, self.repo, version="1.0.0")
+        _get_create_version_in_repo(self.namespace, collection_bar, self.repo, version="1.0.0")
+        _get_create_version_in_repo(
+            self.namespace,
+            collection_foo,
+            self.repo,
+            version="2.0.0",
+            dependencies={"my_namespace.bar": "*"},
+        )
+
+    def _versions_url_with_params(self, query_params):
+        return self.versions_url + "?" + urllib.parse.urlencode(query_params)
+
+    def test_no_filters(self):
+        response = self.client.get(self.versions_url)
+        self.assertEqual(response.data["meta"]["count"], 3)
+
+    def test_filter_dne(self):
+        url = self._versions_url_with_params({"dependency": "ns_dne:name_dne"})
+        response = self.client.get(url)
+        self.assertEqual(response.data["meta"]["count"], 0)
+
+    def test_filter_match(self):
+        url = self._versions_url_with_params({"dependency": "my_namespace.bar"})
+        response = self.client.get(url)
+        self.assertEqual(response.data["meta"]["count"], 1)
+        self.assertEqual(response.data["data"][0]["name"], "foo")
+        self.assertEqual(response.data["data"][0]["version"], "2.0.0")
+
+    def test_that_filter_ignores_dependency_version(self):
+        collection_baz = Collection.objects.create(namespace=self.namespace, name="baz")
+        _get_create_version_in_repo(
+            self.namespace,
+            collection_baz,
+            self.repo,
+            version="0.0.1",
+            dependencies={"my_namespace.foo": "*"},
+        )
+        _get_create_version_in_repo(
+            self.namespace,
+            collection_baz,
+            self.repo,
+            version="0.0.2",
+            dependencies={"my_namespace.foo": "1.0.0"},
+        )
+        _get_create_version_in_repo(
+            self.namespace,
+            collection_baz,
+            self.repo,
+            version="0.0.3",
+            dependencies={"my_namespace.foo": ">=2.0.0"},
+        )
+        _get_create_version_in_repo(
+            self.namespace,
+            collection_baz,
+            self.repo,
+            version="0.0.4",
+            dependencies={"my_namespace.foo": "9.9.9"},
+        )
+
+        url = self._versions_url_with_params({"dependency": "my_namespace.foo"})
+        response = self.client.get(url)
+        self.assertEqual(response.data["meta"]["count"], 4)
 
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
@@ -46,9 +121,11 @@ class TestUiCollectionVersionViewSet(BaseTestCase):
         self.collection = Collection.objects.create(namespace=self.namespace, name='my_collection')
 
         _get_create_version_in_repo(
-            self.namespace, self.collection, '1.1.1', _create_repo(name='repo1'))
+            self.namespace, self.collection, _create_repo(name="repo1"), version="1.1.1"
+        )
         _get_create_version_in_repo(
-            self.namespace, self.collection, '1.1.2', _create_repo(name='repo2'))
+            self.namespace, self.collection, _create_repo(name="repo2"), version="1.1.2"
+        )
 
     def _versions_url_with_params(self, query_params):
         return self.versions_url + '?' + urllib.parse.urlencode(query_params)
@@ -114,10 +191,10 @@ class TestUiCollectionViewSet(BaseTestCase):
         self.collection2 = Collection.objects.create(
             namespace=self.namespace, name=collection2_name)
 
-        _get_create_version_in_repo(self.namespace, self.collection1, '1.0.0', self.repo1)
-        _get_create_version_in_repo(self.namespace, self.collection1, '1.0.1', self.repo1)
-        _get_create_version_in_repo(self.namespace, self.collection2, '2.0.0', self.repo1)
-        _get_create_version_in_repo(self.namespace, self.collection1, '1.0.0', self.repo2)
+        _get_create_version_in_repo(self.namespace, self.collection1, self.repo1, version="1.0.0")
+        _get_create_version_in_repo(self.namespace, self.collection1, self.repo1, version="1.0.1")
+        _get_create_version_in_repo(self.namespace, self.collection2, self.repo1, version="2.0.0")
+        _get_create_version_in_repo(self.namespace, self.collection1, self.repo2, version="1.0.0")
 
         self.repo1_list_url = get_current_ui_url(
             'collections-list', kwargs={'path': 'repo1'})

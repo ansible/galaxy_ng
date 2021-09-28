@@ -1,16 +1,26 @@
+import logging
 from unittest.case import skip
-from django.urls.base import reverse
-from galaxy_ng.app.constants import DeploymentMode
-from django.test.utils import override_settings
+from uuid import uuid4
 
+from django.test.utils import override_settings
+from django.urls.base import reverse
+from orionutils.generator import build_collection
 from pulp_ansible.app.models import (
     AnsibleDistribution,
     AnsibleRepository,
     Collection,
     CollectionVersion,
 )
+from rest_framework import status
+
 from galaxy_ng.app import models
+from galaxy_ng.app.api.v3.viewsets.collection import get_collection_dependents, get_dependents
+from galaxy_ng.app.constants import DeploymentMode
+from galaxy_ng.tests.constants import TEST_COLLECTION_CONFIGS
+
 from .base import BaseTestCase
+
+log = logging.getLogger(__name__)
 
 
 def _create_repo(name, **kwargs):
@@ -21,16 +31,17 @@ def _create_repo(name, **kwargs):
     return repo
 
 
-def _get_create_version_in_repo(namespace, collection, version, repo):
+def _get_create_version_in_repo(namespace, collection, repo, **kwargs):
     collection_version, _ = CollectionVersion.objects.get_or_create(
         namespace=namespace,
         name=collection.name,
         collection=collection,
-        version=version,
+        **kwargs,
     )
     qs = CollectionVersion.objects.filter(pk=collection_version.pk)
     with repo.new_version() as new_version:
         new_version.add_content(qs)
+    return collection_version
 
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
@@ -50,17 +61,17 @@ class TestCollectionViewsets(BaseTestCase):
         )
         self.repo = _create_repo(name='col_repo')
 
-        _get_create_version_in_repo(
+        self.version_1_1_1 = _get_create_version_in_repo(
             self.namespace,
             self.collection,
-            '1.1.1',
-            self.repo
+            self.repo,
+            version="1.1.1",
         )
         _get_create_version_in_repo(
             self.namespace,
             self.collection,
-            '1.1.2',
-            self.repo
+            self.repo,
+            version="1.1.2",
         )
 
         # TODO: Upload pulp_ansible/tests/assets collection
@@ -101,31 +112,68 @@ class TestCollectionViewsets(BaseTestCase):
             }
         )
 
-        # The following URLS are temporary deatived due to https://issues.redhat.com/browse/AAH-224
-        # metadata urls
-        # self.all_collections_url = reverse(
-        #     'galaxy:api:content:v3:all-collections-list',
-        #     kwargs={
-        #         'path': self.repo.name,
-        #     }
-        # )
+        self.collection_upload_url = reverse(
+            "galaxy:api:v3:default-content:collection-artifact-upload"
+        )
 
-        # self.all_versions_url = reverse(
-        #     'galaxy:api:content:v3:all-collection-versions-list',
-        #     kwargs={
-        #         'path': self.repo.name,
-        #     }
-        # )
+        self.all_collections_url = reverse(
+            "galaxy:api:content:v3:all-collections-list",
+            kwargs={
+                "path": self.repo.name,
+            },
+        )
 
-        # self.metadata_url = reverse(
-        #     'galaxy:api:content:v3:repo-metadata',
-        #     kwargs={
-        #         'path': self.repo.name,
-        #     }
-        # )
+        self.all_versions_url = reverse(
+            "galaxy:api:content:v3:all-collection-versions-list",
+            kwargs={
+                "path": self.repo.name,
+            },
+        )
+
+        self.metadata_url = reverse(
+            "galaxy:api:content:v3:repo-metadata",
+            kwargs={
+                "path": self.repo.name,
+            },
+        )
 
         # used for href tests
         self.pulp_href_fragment = "pulp_ansible/galaxy"
+
+    def upload_collections(self, namespace=None, collection_configs=None):
+        """using the config from TEST_COLLECTION_CONFIGS,
+        generates and uploads collections to pulp_ansible/galaxy.
+        """
+        collection_configs = collection_configs or TEST_COLLECTION_CONFIGS
+        self._create_namespace(namespace, groups=[self.pe_group])
+        collections = []
+        for config in collection_configs:
+            config["namespace"] = namespace
+            collection = build_collection("skeleton", config=config)
+            response = self.client.post(
+                self.collection_upload_url, {"file": open(collection.filename, "rb")}
+            )
+            collections.append((collection, response))
+        return collections
+
+    def test_upload_collection(self):
+        """Test successful upload of collections generated with orionutils.
+
+        NOTE: This test is testing only the upload view of the collection
+              After the collection is uploaded a pulp task is created to import it.
+              but there are no workers running, so the import task is not executed.
+
+        TODO: Call the move/promote of task manually or find a way to execute a eager worker.
+              (or even better, move this tests to functional testing)
+        """
+
+        self.client.force_authenticate(user=self.admin_user)
+        collections = self.upload_collections(namespace=uuid4().hex)
+        self.assertEqual(len(collections), 12)
+        # assert each collection returned a 202
+        for collection in collections:
+            self.assertEqual(collection[1].status_code, 202)
+        # Upload is performed but the collection is not yet imported
 
     def test_collections_list(self):
         """Assert the call to v3/collections returns correct
@@ -177,6 +225,48 @@ class TestCollectionViewsets(BaseTestCase):
         self.assertNotIn(self.pulp_href_fragment, response.data["href"])
         self.assertNotIn(self.pulp_href_fragment, response.data["versions_url"])
         self.assertNotIn(self.pulp_href_fragment, response.data["highest_version"]["href"])
+
+        # Check response after DELETE
+        response = self.client.delete(self.collections_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertIn("task", response.data.keys())
+
+    def test_collection_version_delete_dependency_check_positive_match(self):
+        baz_collection = Collection.objects.create(namespace=self.namespace, name="baz")
+        for counter, dep_version in enumerate(["1.1.1", ">=1", "<2", "~1", "*"]):
+            baz_version = _get_create_version_in_repo(
+                self.namespace,
+                baz_collection,
+                self.repo,
+                version=counter,
+                dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
+            )
+            self.assertIn(baz_version, get_dependents(self.version_1_1_1))
+
+    def test_collection_version_delete_dependency_check_negative_match(self):
+        baz_collection = Collection.objects.create(namespace=self.namespace, name="baz")
+        for counter, dep_version in enumerate(["1.1.2", ">1", "<1.1.1", "~=2"]):
+            baz_version = _get_create_version_in_repo(
+                self.namespace,
+                baz_collection,
+                self.repo,
+                version=counter,
+                dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
+            )
+            self.assertNotIn(baz_version, get_dependents(self.version_1_1_1))
+
+    def test_collection_delete_dependency_check(self):
+        baz_collection = Collection.objects.create(namespace=self.namespace, name="baz")
+        for counter, dep_version in enumerate(["1.1.1", ">=1", "<2", "~1", "*"]):
+            baz_version = _get_create_version_in_repo(
+                self.namespace,
+                baz_collection,
+                self.repo,
+                version=counter,
+                dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
+            )
+            self.assertIn(baz_version, get_collection_dependents(self.collection))
+        self.assertFalse(get_collection_dependents(baz_collection))
 
     def test_collection_versions_list(self):
         """Assert v3/collections/namespace/name/versions/

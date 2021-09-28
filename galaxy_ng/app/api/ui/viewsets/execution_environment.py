@@ -1,22 +1,26 @@
 import logging
 
-from django.db.models import Prefetch, Count, Q
 from django.core import exceptions
-
-from pulpcore.plugin import models as core_models
-from pulp_container.app import models as container_models
-
-from django_filters import filters
-from django_filters.rest_framework import filterset, DjangoFilterBackend
-
-from guardian.shortcuts import get_objects_for_user
-
-from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.ui import serializers
+from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404
-from galaxy_ng.app.access_control import access_policy
+from django_filters import filters
+from django_filters.rest_framework import DjangoFilterBackend, filterset
+from drf_spectacular.utils import extend_schema
+from guardian.shortcuts import get_objects_for_user
+from pulp_container.app import models as container_models
+from pulpcore.plugin import models as core_models
+from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
+from pulpcore.plugin.tasking import dispatch
+from pulpcore.plugin.viewsets import OperationPostponedResponse
 
 from galaxy_ng.app import models
+from galaxy_ng.app.access_control import access_policy
+from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.tasks.deletion import (
+    delete_container_distribution,
+    delete_container_image_manifest,
+)
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +67,25 @@ class ManifestFilter(filterset.FilterSet):
         }
 
 
+class TagFilter(filterset.FilterSet):
+    sort = filters.OrderingFilter(
+        fields=(
+            ("pulp_created", "pulp_created"),
+            ("pulp_last_updated", "pulp_last_updated"),
+            ("name", "name"),
+        ),
+    )
+
+    class Meta:
+        model = container_models.Tag
+        # Tag filters are supported, but are done in get_queryset. See the comment
+        # in ContainerRepositoryManifestViewSet.get_queryset
+        fields = {
+            "name": ["exact", "icontains", "contains", "startswith"],
+            "tagged_manifest__digest": ["exact", "icontains", "contains", "startswith"],
+        }
+
+
 class HistoryFilter(filterset.FilterSet):
     sort = filters.OrderingFilter(
         fields=(
@@ -87,6 +110,33 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     lookup_field = "base_path"
 
+    @extend_schema(
+        description="Trigger an asynchronous delete task",
+        responses={202: AsyncOperationResponseSerializer},
+    )
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete a distribution. If a push repository is associated to it, delete it as well.
+        Perform orphan cleanup.
+        """
+        distribution = self.get_object()
+        reservations = [distribution]
+        ids_for_multi_delete = [
+            (str(distribution.pk), "container", "ContainerDistributionSerializer"),
+        ]
+        if distribution.repository and distribution.repository.cast().PUSH_ENABLED:
+            reservations.append(distribution.repository)
+            ids_for_multi_delete.append(
+                (str(distribution.repository.pk), "container", "ContainerPushRepositorySerializer"),
+            )
+
+        # Delete the distribution, repository, and perform orphan cleanup
+        async_result = dispatch(
+            delete_container_distribution, reservations, args=(ids_for_multi_delete,)
+        )
+
+        return OperationPostponedResponse(async_result, request)
+
 
 # provide some common methods across all <distro>/_content/ endpoints
 class ContainerContentBaseViewset(api_base.ModelViewSet):
@@ -95,6 +145,18 @@ class ContainerContentBaseViewset(api_base.ModelViewSet):
     def get_distro(self):
         return get_object_or_404(
             models.ContainerDistribution, base_path=self.kwargs["base_path"])
+
+
+class ContainerTagViewset(ContainerContentBaseViewset):
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    serializer_class = serializers.ContainerTagSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TagFilter
+
+    def get_queryset(self):
+        repo = self.get_distro().repository
+        repo_version = repo.latest_version()
+        return repo_version.get_content(container_models.Tag.objects)
 
 
 class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
@@ -162,6 +224,49 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
 
         return manifest
 
+    @extend_schema(
+        description=(
+            "Trigger an asynchronous task to remove a manifest and all its associated "
+            "data by a digest"
+        ),
+        summary="Delete an image from a repository",
+        responses={202: AsyncOperationResponseSerializer},
+    )
+    def destroy(self, request, *args, **kwargs):
+        """Deletes a image manifest.
+
+        - Looks up the image via a sha
+        - Remove all tags that point to the selected manifest from the latest version of the repo.
+        - Remove the selected image manifest from the selected repository using the pulp container
+          remove_image function: This function will remove the manifest from the latest version
+          of the repository and any blobs associated with the manifest that aren’t used by
+          other manifests.
+        - Call the reclaim disk space function on the selected repository, with the latest version
+          of the repository preserved. This will clear out artifacts for content that isn’t in the
+          latest version of the repository.
+        """
+        # Looks up the image via a sha
+        manifest = self.get_object()
+        repository = self.get_distro().repository
+        latest_version = repository.latest_version()
+
+        # Remove all tags that point to the selected manifest from the latest version of the repo.
+        tags_pks = container_models.Tag.objects.filter(
+            pk__in=latest_version.content.all(), tagged_manifest=manifest
+        ).values_list("pk", flat=True)
+
+        # Remove the selected image manifest from the selected repository using the pulp container
+        content_unit_pks = [str(pk) for pk in list(tags_pks) + [manifest.pk]]
+
+        # Call the recursive_remove_content from pulp_container + reclaim disk space
+        async_result = dispatch(
+            delete_container_image_manifest,
+            [repository],
+            args=(str(repository.pk), content_unit_pks),
+        )
+
+        return OperationPostponedResponse(async_result, request)
+
 
 class ContainerRepositoryHistoryViewSet(ContainerContentBaseViewset):
     serializer_class = serializers.ContainerRepositoryHistorySerializer
@@ -212,9 +317,37 @@ class ContainerReadmeViewSet(ContainerContentBaseViewset):
         return self.queryset.get_or_create(container=distro)[0]
 
 
-class ContainerRegistryRemoteViewSet(
-    api_base.ModelViewSet,
-):
+class ContainerRegistryRemoteFilter(filterset.FilterSet):
+    name = filters.CharFilter(field_name='name')
+    url = filters.CharFilter(field_name='url')
+    created_at = filters.CharFilter(field_name='pulp_created')
+    updated_at = filters.CharFilter(field_name='pulp_last_updated')
+
+    sort = filters.OrderingFilter(
+        fields=(
+            ('name', 'name'),
+            ('url', 'url'),
+            ('pulp_created', 'created_at'),
+            ('pulp_last_updated', 'updated_at'),
+        ),
+    )
+
+    class Meta:
+        model = models.ContainerRegistryRemote
+        fields = {
+            'name': ['exact', 'icontains', 'contains', 'startswith'],
+            'url': ['exact', 'icontains', 'contains', 'startswith'],
+        }
+
+
+class ContainerRegistryRemoteViewSet(api_base.ModelViewSet):
     queryset = models.ContainerRegistryRemote.objects.all()
     serializer_class = serializers.ContainerRegistryRemoteSerializer
-    permission_classes = []
+    permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
+    filterset_class = ContainerRegistryRemoteFilter
+
+
+class ContainerRemoteViewSet(api_base.ModelViewSet):
+    queryset = container_models.ContainerRemote.objects.all()
+    serializer_class = serializers.ContainerRemoteSerializer
+    permission_classes = [access_policy.ContainerRemoteAccessPolicy]

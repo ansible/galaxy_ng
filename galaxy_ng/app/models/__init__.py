@@ -14,16 +14,17 @@ from .synclist import (
     SyncList,
 )
 
-from .collectionsync import (
-    CollectionSyncTask
-)
-
 from .container import (
     ContainerDistribution,
     ContainerDistroReadme,
     ContainerNamespace,
     ContainerRegistryRemote,
-    ContainerSyncTask,
+    ContainerRegistryRepos
+
+)
+
+from .contentguard import (
+    ContentRedirectContentGuard,
 )
 
 __all__ = (
@@ -33,10 +34,10 @@ __all__ = (
     'Namespace',
     'NamespaceLink',
     'SyncList',
-    'CollectionSyncTask',
     'ContainerDistribution',
     'ContainerDistroReadme',
     'ContainerNamespace',
     'ContainerRegistryRemote',
-    'ContainerSyncTask',
+    'ContainerRegistryRepos',
+    'ContentRedirectContentGuard',
 )
