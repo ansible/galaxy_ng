@@ -352,8 +352,15 @@ class ContainerRemoteSerializer(
 
     @transaction.atomic
     def update(self, instance, validated_data):
+
         registry = validated_data['registry']['registry']['pk']
         del validated_data['registry']
+
+        # Ensure connection exists between remote and registry
+        models.container.ContainerRegistryRepos.objects.get_or_create(
+            repository_remote=instance,
+            defaults={'registry': registry, 'repository_remote': instance}
+        )
 
         if(instance.name != validated_data['name']):
             raise serializers.ValidationError(detail={

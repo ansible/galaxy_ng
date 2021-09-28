@@ -88,3 +88,18 @@ class TestContainerRegistryRemoteViewset(BaseTestCase):
         # URL is required in PUT, so this should fail
         response = self.client.put(url, {'name' : updated_name}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_registry_remote(self):
+        name = 'registry_to_delete'
+        pk = self.create_registry_remote(name)
+        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'pk': pk})
+        # Get it first
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], name)
+        # Delete it
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        # Get it again
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

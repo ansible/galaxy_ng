@@ -23,7 +23,7 @@ class IndexRegistryEEView(api_base.APIView):
     action = 'index_execution_environments'
 
     @extend_schema(
-        description="Trigger an asynchronous delete task",
+        description="Trigger an asynchronous indexing task",
         responses={status.HTTP_202_ACCEPTED: AsyncOperationResponseSerializer},
     )
     def post(self, request: Request, *args, **kwargs) -> Response:
