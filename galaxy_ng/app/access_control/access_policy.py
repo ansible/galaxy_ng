@@ -209,7 +209,3 @@ class ContainerRemoteAccessPolicy(AccessPolicyBase, NamespacedAccessPolicyMixin)
                     return True
 
         return False
-
-
-class ContainerRemoteSyncAccessPolicy(AccessPolicyBase):
-    NAME = 'ContainerSyncRemoteView'
