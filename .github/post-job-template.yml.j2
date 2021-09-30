@@ -6,11 +6,16 @@ update_manifest:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          ref: {{ "${{ github.event.after }}" }}  # for PR avoids checking out merge commit
           fetch-depth: 0  # include all history
+
+      - name: "Set GITHUB_BRANCH"
+        run: |
+          GITHUB_BRANCH=`sed 's/^refs\/heads\///' <<< $GITHUB_REF`
+          echo "GITHUB_BRANCH=${GITHUB_BRANCH}" >> $GITHUB_ENV
 
       - name: Update Manifest for Ansible Hub UI
         env:
-          {{ set_env_vars() | indent(10) }}
+          GITHUB_PULL_REQUEST: {{ "${{ github.event.number }}" }}
+          MANIFEST_PASSPHRASE: {{ "${{ secrets.MANIFEST_PASSPHRASE }}" }}
         run: .github/workflows/scripts/update_manifest.sh
         shell: bash

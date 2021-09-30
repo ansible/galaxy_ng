@@ -10,8 +10,7 @@ readonly GITHUB_BRANCH="${GITHUB_BRANCH:-}"
 
 readonly MANIFESTS_GIT_USER="${MANIFESTS_GIT_USER:-}"
 readonly MANIFESTS_GIT_EMAIL="${MANIFESTS_GIT_EMAIL:-}"
-readonly MANIFESTS_GIT_TOKEN="${MANIFESTS_GIT_TOKEN:-}"
-readonly MANIFESTS_GIT_URL="https://${MANIFESTS_GIT_USER}:${MANIFESTS_GIT_TOKEN}@github.com/RedHatInsights/manifests.git"
+readonly MANIFESTS_GIT_URL="git@github.com:RedHatInsights/manifests.git"
 
 readonly MANIFESTS_DIR='/tmp/manifests'
 readonly MANIFEST_FILE="${MANIFESTS_DIR}/automation-hub/automation-hub-api.txt"
@@ -37,7 +36,7 @@ generate_docker_manifest() {
     echo "${PREFIX}/Dockerfile-FROM-${base_image}"
 }
 
-if [[ "$GITHUB_PULL_REQUEST" != 'false' ]]; then
+if [[ -n "$GITHUB_PULL_REQUEST" ]]; then
     log_message 'Ignoring manifest update for pull request.'
     exit 0
 fi
@@ -48,6 +47,14 @@ else
     log_message "Ignoring manifest update for branch '${GITHUB_BRANCH}'."
     exit 0
 fi
+
+# decrypt deploy key and use
+gpg --quiet --batch --yes --decrypt --passphrase="$MANIFEST_PASSPHRASE" --output .github/workflows/scripts/deploy_manifest .github/workflows/scripts/deploy_manifest.gpg
+
+chmod 600 .github/workflows/scripts/deploy_manifest
+eval `ssh-agent -s`
+ssh-add .github/workflows/scripts/deploy_manifest
+
 
 git clone --depth=10 --branch="${manifests_branch}" \
     "${MANIFESTS_GIT_URL}" "${MANIFESTS_DIR}" &>/dev/null
