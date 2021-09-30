@@ -355,14 +355,11 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_distro_permission:container.change_containerdistribution"
         },
-    ],
-
-    'ContainerSyncRemoteView': [
         {
             "action": "sync",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.change_containerremote"
+            "condition": "has_distro_permission:container.change_containerdistribution"
         },
     ],
 }
