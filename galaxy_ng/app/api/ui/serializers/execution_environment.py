@@ -119,10 +119,30 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         }
 
 
+class ManifestListManifestSerializer(serializers.ModelSerializer):
+    digest = serializers.SerializerMethodField()
+
+    class Meta:
+        model = container_models.ManifestListManifest
+        fields = (
+            "os",
+            "architecture",
+            "os_version",
+            "os_features",
+            "features",
+            "variant",
+            "digest"
+        )
+
+    def get_digest(self, obj):
+        return obj.manifest_list.digest
+
+
 class ContainerManifestSerializer(serializers.ModelSerializer):
     config_blob = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     layers = serializers.SerializerMethodField()
+    image_manifests = ManifestListManifestSerializer(many=True)
 
     class Meta:
         model = container_models.Manifest
@@ -135,6 +155,7 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
             "tags",
             "pulp_created",
             "layers",
+            "image_manifests"
         )
 
     def get_layers(self, obj):
