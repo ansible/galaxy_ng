@@ -17,7 +17,7 @@ from galaxy_ng.app import models, tasks
 
 
 class ContainerSyncRemoteView(api_base.APIView):
-    permission_classes = [access_policy.ContainerRemoteSyncAccessPolicy]
+    permission_classes = [access_policy.ContainerRemoteAccessPolicy]
     action = 'sync'
 
     def post(self, request: Request, *args, **kwargs) -> Response:
