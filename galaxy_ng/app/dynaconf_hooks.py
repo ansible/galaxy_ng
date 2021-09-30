@@ -18,6 +18,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
 
     data.update(configure_logging(settings))
     data.update(configure_keycloak(settings))
+    data.update(configure_cors(settings))
 
     return data
 
@@ -124,6 +125,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         data["GALAXY_AUTHENTICATION_CLASSES"] = [
             "rest_framework.authentication.SessionAuthentication",
             "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
         ]
 
         # Set default to one day expiration
@@ -240,4 +242,18 @@ def configure_logging(settings: Dynaconf) -> Dict[str, Any]:
             },
         }
 
+    return data
+
+
+def configure_cors(settings: Dynaconf) -> Dict[str, Any]:
+    """This adds CORS Middleware, useful to access swagger UI on dev environment"""
+
+    if os.getenv("DEV_SOURCE_PATH", None) is None:
+        # Only add CORS if we are in dev mode
+        return {}
+
+    data = {}
+    if settings.get("GALAXY_ENABLE_CORS", default=False):
+        corsmiddleware = ["galaxy_ng.app.common.openapi.AllowCorsMiddleware"]
+        data["MIDDLEWARE"] = corsmiddleware + settings.get("MIDDLEWARE", [])
     return data

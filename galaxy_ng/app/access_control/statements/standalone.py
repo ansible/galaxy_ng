@@ -6,6 +6,12 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
         {
+            "action": ["list", "retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "unauthenticated_collection_access_enabled"
+        },
+        {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
@@ -31,9 +37,27 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
         {
+            "action": ["list", "retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "unauthenticated_collection_access_enabled"
+        },
+        {
             "action": "destroy",
-            "principal": "*",
-            "effect": "deny",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.delete_collection",
+        },
+        {
+            "action": ["download"],
+            "principal": 'authenticated',
+            "effect": "allow",
+        },
+        {
+            "action": ["download"],
+            "principal": 'anonymous',
+            "effect": "allow",
+            "condition": "unauthenticated_collection_download_enabled",
         },
         {
             "action": "create",
@@ -112,6 +136,12 @@ STANDALONE_STATEMENTS = {
         },
     ],
     'MyUserViewSet': [
+        {
+            "action": ["retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "unauthenticated_collection_access_enabled"
+        },
         {
             "action": ["retrieve", "update", "partial_update"],
             "principal": "authenticated",
@@ -219,7 +249,13 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-        }
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:pulp_container.delete_containerrepository",
+        },
     ],
 
     # The container readme can't just use the ContainerRepository access policies
@@ -252,5 +288,81 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_model_or_obj_perms:container.change_containernamespace"
         },
-    ]
+    ],
+
+    'ContainerRegistryRemoteViewSet': [
+        # prevents deletion of registry
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.delete_containerregistryremote"
+        },
+        # allows authenticated users to VIEW registries
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        # allows users with model create permissions to create new registries
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.add_containerregistryremote"
+        },
+        {
+            "action": "sync",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.change_containerregistryremote"
+        },
+        # allows users with model create permissions to update registries
+        {
+            "action": "update",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.change_containerregistryremote"
+        },
+        {
+            "action": "index_execution_environments",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.change_containerregistryremote"
+        },
+    ],
+
+    'ContainerRemoteViewSet': [
+        # The permissions for creating namespaces are used as a proxy for creating containers,
+        # so allow users to create container remotes if they have create namespace permissions.
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:container.add_containernamespace"
+        },
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            # Permissions for containers are controlled via container distributions and namespaces.
+            # Since the remote controls what will go into the container distribution, reuse the
+            # same permissions here.
+            "action": "update",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_distro_permission:container.change_containerdistribution"
+        },
+    ],
+
+    'ContainerSyncRemoteView': [
+        {
+            "action": "sync",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.change_containerremote"
+        },
+    ],
 }

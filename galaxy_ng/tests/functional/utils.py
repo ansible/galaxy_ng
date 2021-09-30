@@ -43,7 +43,7 @@ configuration.safe_chars_for_path_param = "/"
 def set_up_module():
     """Skip tests Pulp 3 isn't under test or if galaxy_ng isn't installed."""
     require_pulp_3(SkipTest)
-    require_pulp_plugins({"galaxy_ng"}, SkipTest)
+    require_pulp_plugins({"galaxy"}, SkipTest)
 
 
 def gen_galaxy_client():

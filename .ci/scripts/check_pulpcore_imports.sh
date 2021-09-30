@@ -13,7 +13,7 @@ cd "$(dirname "$(realpath -e "$0")")"/../..
 set -uv
 
 # check for imports not from pulpcore.plugin. exclude tests
-MATCHES=$(grep -n -r --include \*.py "from pulpcore.*import" . | grep -v "tests\|plugin"| grep -v "pulpcore.app.*viewsets"| grep -v "pulpcore\.app.*admin"| grep -v "ProgressReportSerializer")
+MATCHES=$(grep -n -r --include \*.py "from pulpcore.*import" . | grep -v "tests\|plugin"| grep -v "pulpcore.app.*viewsets"| grep -v "pulpcore\.app.*admin"| grep -v "ProgressReportSerializer"| grep -v "pulpcore.app.*tasks")
 
 if [ $? -ne 1 ]; then
   printf "\nERROR: Detected bad imports from pulpcore:\n"

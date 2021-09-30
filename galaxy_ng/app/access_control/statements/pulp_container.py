@@ -36,7 +36,7 @@ PULP_CONTAINER_VIEWSETS = {
                 # "principal": "*",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": [
+                "condition_expression": [
                     "not is_private",
                 ],
             },

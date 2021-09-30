@@ -112,6 +112,17 @@ services:
       - "redis_data:/data"
 
 
+  swagger-ui:
+   image: swaggerapi/swagger-ui
+   container_name: swagger_ui_container
+   ports:
+      - "8003:8080"
+  #  volumes:
+  #     - ./doc:/usr/share/nginx/html/doc
+   environment:
+      API_URL: http://0.0.0.0:5001/api/automation-hub/v3/openapi.json
+
+
 volumes:
   pulp:
     name: pulp${DEV_VOLUME_SUFFIX:-}

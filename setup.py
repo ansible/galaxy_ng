@@ -14,7 +14,7 @@ from setuptools.command.build_py import build_py as _BuildPyCommand
 from setuptools.command.sdist import sdist as _SDistCommand
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-version = "4.4.0a1"
+version = "4.4.0a2"
 
 
 class PrepareStaticCommand(Command):
@@ -94,7 +94,7 @@ requirements = [
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.8.0,<2.9.0",
-    "django-automated-logging",
+    "django-automated-logging==6.1.3",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",
     "dynaconf>=3.1.7",  # 3.1.7 contains support for dynaconf_hooks.
