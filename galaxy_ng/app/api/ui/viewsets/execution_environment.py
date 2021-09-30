@@ -52,6 +52,8 @@ class RepositoryFilter(filterset.FilterSet):
 
 
 class ManifestFilter(filterset.FilterSet):
+    exclude_child_manifests = filters.BooleanFilter(method='filter_child_manifests')
+
     sort = filters.OrderingFilter(
         fields=(
             ('pulp_created', 'created'),
@@ -65,6 +67,12 @@ class ManifestFilter(filterset.FilterSet):
         fields = {
             'digest': ['exact', 'icontains', 'contains', 'startswith'],
         }
+
+    def filter_child_manifests(self, queryset, name, value):
+        if value:
+            return queryset.annotate(num_parents=Count("manifest_lists")).exclude(num_parents__gt=0)
+        else:
+            return queryset
 
 
 class TagFilter(filterset.FilterSet):
