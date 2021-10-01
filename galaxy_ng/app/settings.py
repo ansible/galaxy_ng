@@ -53,7 +53,7 @@ SYNCLIST_BATCH_SIZE = 200
 # -----------------------------
 
 GALAXY_EXCEPTION_HANDLER = "galaxy_ng.app.api.exceptions.exception_handler"
-GALAXY_PAGINATION_CLASS = "galaxy_ng.app.api.pagination.LimitOffsetPagination"
+GALAXY_PAGINATION_CLASS = "pulp_ansible.app.galaxy.v3.pagination.LimitOffsetPagination"
 GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",

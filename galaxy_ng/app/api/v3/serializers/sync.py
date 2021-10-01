@@ -1,5 +1,5 @@
 from django.utils.translation import gettext_lazy as _
-
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from pulp_ansible.app import viewsets as pulp_viewsets
@@ -47,6 +47,7 @@ class AnsibleRepositorySerializer(serializers.ModelSerializer):
             'last_sync_task',
         )
 
+    @extend_schema_field(AnsibleDistributionSerializer(many=True))
     def get_distributions(self, obj):
         return [
             AnsibleDistributionSerializer(distro).data
@@ -131,6 +132,7 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
             'client_key': {'write_only': True},
         }
 
+    @extend_schema_field(serializers.ListField)
     def get_write_only_fields(self, obj):
         return utils.get_write_only_fields(self, obj)
 
@@ -147,6 +149,7 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
             )
         return super().validate(data)
 
+    @extend_schema_field(AnsibleRepositorySerializer(many=True))
     def get_repositories(self, obj):
         return [
             AnsibleRepositorySerializer(repo).data

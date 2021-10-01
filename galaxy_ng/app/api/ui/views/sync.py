@@ -4,11 +4,13 @@ from rest_framework.exceptions import ValidationError
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema
 
 from pulp_container.app import models as pulp_models
 from pulpcore.plugin.viewsets import (
     OperationPostponedResponse,
 )
+from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
 
 from galaxy_ng.app.api import base as api_base
@@ -58,6 +60,10 @@ class ContainerSyncRegistryView(api_base.APIView):
     permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
     action = 'sync'
 
+    @extend_schema(
+        description="Trigger an asynchronous sync task",
+        responses={202: AsyncOperationResponseSerializer},
+    )
     def post(self, request: Request, *args, **kwargs) -> Response:
         registry = get_object_or_404(models.ContainerRegistryRemote, pk=kwargs['pk'])
 
