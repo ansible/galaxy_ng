@@ -151,6 +151,9 @@ class ContainerContentBaseViewset(api_base.ModelViewSet):
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
 
     def get_distro(self):
+        if getattr(self, "swagger_fake_view", False):
+            # OpenAPI will generate a fake view with this attribute set
+            return models.ContainerDistribution.objects.none()
         return get_object_or_404(
             models.ContainerDistribution, base_path=self.kwargs["base_path"])
 
@@ -162,6 +165,9 @@ class ContainerTagViewset(ContainerContentBaseViewset):
     filterset_class = TagFilter
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            # OpenAPI will generate a fake view with this attribute set
+            return container_models.Tag.objects.none()
         repo = self.get_distro().repository
         repo_version = repo.latest_version()
         return repo_version.get_content(container_models.Tag.objects)
@@ -178,6 +184,9 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
         return serializers.ContainerManifestSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            # OpenAPI will generate a fake view with this attribute set
+            return container_models.Manifest.objects.none()
         repo = self.get_distro().repository
         repo_version = repo.latest_version()
         repo_content = repo_version.content.all()
@@ -282,6 +291,9 @@ class ContainerRepositoryHistoryViewSet(ContainerContentBaseViewset):
     filterset_class = HistoryFilter
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            # OpenAPI will generate a fake view with this attribute set
+            return core_models.RepositoryVersion.objects.none()
         repo = self.get_distro().repository
 
         allowed_content_types = ['container.manifest', 'container.tag']
