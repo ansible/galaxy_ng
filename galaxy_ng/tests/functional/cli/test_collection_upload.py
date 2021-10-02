@@ -56,9 +56,9 @@ class InstallCollectionTestCase(PulpTestCase):
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             content = http_get(
-                "https://galaxy.ansible.com/download/pulp-pulp_installer-3.14.0.tar.gz"
+                "https://galaxy.ansible.com/download/pulp-squeezer-0.0.9.tar.gz"
             )
-            collection_path = f"{tmp_dir}/pulp-pulp_installer-3.14.0.tar.gz"
+            collection_path = f"{tmp_dir}/pulp-squeezer-0.0.9.tar.gz"
             with open(collection_path, "wb") as f:
                 f.write(content)
 
@@ -70,8 +70,8 @@ class InstallCollectionTestCase(PulpTestCase):
         self.assertEqual(collections.meta.count, 1)
 
         collection = self.collections_api.read(
-            path="published", namespace="pulp", name="pulp_installer"
+            path="published", namespace="pulp", name="squeezer"
         )
         self.assertEqual(collection.namespace, "pulp")
-        self.assertEqual(collection.name, "pulp_installer")
-        self.assertEqual(collection.highest_version["version"], "3.14.0")
+        self.assertEqual(collection.name, "squeezer")
+        self.assertEqual(collection.highest_version["version"], "0.0.9")
