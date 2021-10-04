@@ -254,7 +254,7 @@ STANDALONE_STATEMENTS = {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:pulp_container.delete_containerrepository",
+            "condition": "has_model_perms:container.delete_containerrepository",
         },
     ],
 
