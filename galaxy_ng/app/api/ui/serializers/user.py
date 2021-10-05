@@ -19,6 +19,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    auth_provider = serializers.SerializerMethodField()
 
     class Meta:
         model = auth_models.User
@@ -31,12 +32,22 @@ class UserSerializer(serializers.ModelSerializer):
             'groups',
             'password',
             'date_joined',
-            'is_superuser'
+            'is_superuser',
+            'auth_provider',
         )
         extra_kwargs = {
             'date_joined': {'read_only': True},
             'password': {'write_only': True, 'allow_blank': True, 'required': False}
         }
+
+    def get_auth_provider(self, user):
+        if hasattr(user, 'social_auth') and user.social_auth.all():
+            providers = []
+            for social in user.social_auth.all():
+                providers.append(social.provider)
+            return providers
+
+        return ['django']
 
     def validate_password(self, password):
         if password:
