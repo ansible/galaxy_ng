@@ -14,6 +14,7 @@ class SettingsView(api_base.APIView):
             "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS",
             "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD",
             "GALAXY_FEATURE_FLAGS",
+            "GALAXY_TOKEN_EXPIRATION",
         ]
         data = {key: settings.as_dict().get(key, None) for key in keyset}
         return Response(data)
