@@ -22,8 +22,9 @@ class ContainerSyncRemoteView(api_base.APIView):
     permission_classes = [access_policy.ContainerRemoteAccessPolicy]
     action = 'sync'
 
-    def post(self, request: Request, *args, **kwargs) -> Response:
-        distro_path = kwargs['base_path']
+    def get_object(self):
+        """Return a distro instance to be used by the access_policy to check obj permission"""
+        distro_path = self.kwargs['base_path']
         distro = get_object_or_404(pulp_models.ContainerDistribution, base_path=distro_path)
 
         if not distro.repository or not distro.repository.remote:
@@ -31,6 +32,11 @@ class ContainerSyncRemoteView(api_base.APIView):
                 detail={'remote': _('The %s distribution does not have'
                                     ' any remotes associated with it.') % distro_path})
 
+        return distro
+
+    def post(self, request: Request, *args, **kwargs) -> Response:
+        distro_path = kwargs['base_path']
+        distro = self.get_object()
         remote = distro.repository.remote.cast()
 
         try:
