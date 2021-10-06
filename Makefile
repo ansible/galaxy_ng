@@ -84,6 +84,10 @@ docker/loaddata:  ## Load initial data from fixtures
 	./compose run --rm -e PULP_FIXTURE_DIRS='["/src/galaxy_ng/dev/automation-hub"]' \
  api manage loaddata initial_data.json
 
+.PHONY: docker/makemigrations
+docker/makemigrations:   ## Run django migrations
+	$(call exec_or_run, api, $(DJ_MANAGER), makemigrations)
+
 .PHONY: docker/migrate
 docker/migrate:   ## Run django migrations
 	$(call exec_or_run, api, $(DJ_MANAGER), migrate)
@@ -101,10 +105,10 @@ docker/translations:   ## Generate the translation messages
 
 .PHONY: docker/all
 docker/all: 	                                ## Build, migrate, loaddata, translate and add test collections.
-	make docker/build 
-	make docker/migrate 
-	make docker/loaddata 
-	make docker/translations 
+	make docker/build
+	make docker/migrate
+	make docker/loaddata
+	make docker/translations
 
 # Application management and debugging
 
