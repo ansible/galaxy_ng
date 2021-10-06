@@ -146,18 +146,48 @@ class CurrentUserSerializer(UserSerializer):
     def get_model_permissions(self, obj):
 
         permissions = {
+            # Collection Namespace
             "add_namespace": obj.has_perm('galaxy.add_namespace'),
             "upload_to_namespace": obj.has_perm('galaxy.upload_to_namespace'),
             "change_namespace": obj.has_perm('galaxy.change_namespace'),
             "delete_namespace": obj.has_perm('galaxy.delete_namespace'),
+
+            # Collection Repository
             "move_collection": obj.has_perm('ansible.modify_ansible_repo_content'),
+            "delete_collection": obj.has_perm('ansible.delete_collection'),
+
+            # Collection Remote
+            "add_remote": obj.has_perm('ansible.add_collectionremote'),
             "change_remote": obj.has_perm('ansible.change_collectionremote'),
             "delete_remote": obj.has_perm('ansible.delete_collectionremote'),
-            "add_remote": obj.has_perm('ansible.add_collectionremote'),
+
+            # Collection Distribution
+            "view_distribution": obj.has_perm('ansible.view_ansibledistribution'),
+            "add_distribution": obj.has_perm('ansible.add_ansibledistribution'),
             "change_distribution": obj.has_perm('ansible.change_ansibledistribution'),
             "delete_distribution": obj.has_perm('ansible.delete_ansibledistribution'),
-            "add_distribution": obj.has_perm('ansible.add_ansibledistribution'),
-            "view_distribution": obj.has_perm('ansible.view_ansibledistribution'),
+
+            # Container Namespace
+            "add_containernamespace": obj.has_perm('container.add_containernamespace'),
+            "change_containernamespace": obj.has_perm('container.change_containernamespace'),
+            "delete_containernamespace": obj.has_perm('container.delete_containernamespace'),
+
+            # Container Repository
+            "add_containerrepository": obj.has_perm('container.add_containerrepository'),
+            "change_containerrepository": obj.has_perm('container.change_containerrepository'),
+            "delete_containerrepository": obj.has_perm('container.delete_containerrepository'),
+
+            # Container Remote
+            "add_containerregistry": obj.has_perm('galaxy.add_containerregistryremote'),
+            "change_containerregistry": obj.has_perm('galaxy.change_containerregistryremote'),
+            "delete_containerregistry": obj.has_perm('galaxy.delete_containerregistryremote'),
+
+            # Container Distribution
+            "add_containerdistribution": obj.has_perm('container.add_containerdistribution'),
+            "change_containerdistribution": obj.has_perm('container.change_containerdistribution'),
+            "delete_containerdistribution": obj.has_perm('container.delete_containerdistribution'),
+
+            # Auth
             "view_user": obj.has_perm('galaxy.view_user'),
             "change_group": obj.has_perm('galaxy.change_group'),
             "view_group": obj.has_perm('galaxy.view_group'),
