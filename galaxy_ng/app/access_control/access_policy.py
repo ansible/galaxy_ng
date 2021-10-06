@@ -206,8 +206,7 @@ class ContainerRemoteAccessPolicy(AccessPolicyBase, NamespacedAccessPolicyMixin)
 
         # has_container_namespace_perms
 
-        distro = view.get_object()
-        remote = distro.repository.remote.cast()
+        remote = view.get_object()
         repositories = remote.repository_set.all()
 
         # In theory there should never be more than one repository connected to a remote, but

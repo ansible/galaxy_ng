@@ -23,7 +23,12 @@ class ContainerSyncRemoteView(api_base.APIView):
     action = 'sync'
 
     def get_object(self):
-        """Return a distro instance to be used by the access_policy to check obj permission"""
+        """Object is a ContainerRemote instance"""
+        distro = self.get_distribution()
+        remote = distro.repository.remote.cast()
+        return remote
+
+    def get_distribution(self):
         distro_path = self.kwargs['base_path']
         distro = get_object_or_404(pulp_models.ContainerDistribution, base_path=distro_path)
 
@@ -36,7 +41,7 @@ class ContainerSyncRemoteView(api_base.APIView):
 
     def post(self, request: Request, *args, **kwargs) -> Response:
         distro_path = kwargs['base_path']
-        distro = self.get_object()
+        distro = self.get_distribution()
         remote = distro.repository.remote.cast()
 
         try:
