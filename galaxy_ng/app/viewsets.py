@@ -1,40 +1,38 @@
-import logging
+from pulpcore.plugin import viewsets as pulp_viewsets
+from rest_framework import mixins
+
+from galaxy_ng.app import models
+from galaxy_ng.app.access_control import access_policy
+from galaxy_ng.app.api.ui import serializers
+
+# This file is necesary to prevent the DRF web API browser from breaking on all of the
+# pulp/api/v3/repositories/ endpoints.
+
+# Pulp expects models it manages to come with a viewset attached to them. Since the
+# ContainerRegistryRemote model is a pulp remote, pulp expects it to have a pulp
+# viewset attached to it. Pulp associates viewsets with models by looking in
+# <plugin_name>.app.viewsets. Since galaxy_ng stores it's viewsets in a different
+# module, this file is necesary for pulp tbe able to associate the ContainerRegistryRemote
+# model to a viewset.
+
+# Without this viewset defined here, pulp get's confused when it tries to auto generate
+# the form on the repositories endpoint because it tries to provide a dropdown
+# on the remote field and can't find a viewset name for galaxy's ContainerRegistryRemote model.
 
 
-log = logging.getLogger(__name__)
-
-viewsets = {
-    # name :  source module
-    "ContainerRegistryRemoteViewSet": "galaxy_ng.app.api.ui.viewsets.execution_environment",
-    "ContainerDistributionViewSet": "pulp_container.app.viewsets",
-}
+class ContainerRegistryRemoteViewSet(pulp_viewsets.NamedModelViewSet, mixins.RetrieveModelMixin):
+    queryset = models.ContainerRegistryRemote.objects.all()
+    serializer_class = serializers.ContainerRegistryRemoteSerializer
+    permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
+    endpoint_name = "execution-environments-registry-detail"
 
 
-def __getattr__(self, name):
-    """
-    This is a hack to get pulp to associate the model with a viewset.
-
-    This file is necessary to prevent the DRF web API browser from breaking on all of the
-    pulp/api/v3/repositories/ endpoints.
-    Pulp expects models it manages to come with a viewset attached to them. Since the
-    ContainerRegistryRemote model is a pulp remote, pulp expects it to have a NamedModelViewSet
-    viewset attached to it. Pulp associates viewsets with models by looking in
-    <plugin_name>.app.viewsets. Since galaxy_ng stores its viewsets in a different
-    module, this file is necesary for pulp tbe able to associate the ContainerRegistryRemote
-    model to a viewset.
-    Without this viewset defined here, pulp gets confused when it tries to auto generate
-    the form on the repositories endpoint because it tries to provide a dropdown
-    on the remote field and can't find a viewset name for galaxy's ContainerRegistryRemote model.
-
-    """
-
-    if name in viewsets:
-        try:
-            module = __import__(viewsets[name])
-        except ImportError as e:
-            log.error("Error importing viewset: %s" % e)
-        else:
-            return getattr(module, name)
-
-    log.warning("No viewset found for model %s", name)
-    raise AttributeError(name)
+class ContainerDistributionViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+):
+    queryset = models.ContainerDistribution.objects.all()
+    serializer_class = serializers.ContainerRepositorySerializer
+    permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
+    endpoint_name = "container"
