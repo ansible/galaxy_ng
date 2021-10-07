@@ -101,27 +101,28 @@ class TestCollectionViewsets(BaseTestCase):
             }
         )
 
-        # The following URLS are temporary deatived due to https://issues.redhat.com/browse/AAH-224
-        # metadata urls
+        # The following tests use endpoints related to
+        # issue https://issues.redhat.com/browse/AAH-224
+        # For now endpoints are temporary deactivated
         # self.all_collections_url = reverse(
-        #     'galaxy:api:content:v3:all-collections-list',
+        #     "galaxy:api:content:v3:all-collections-list",
         #     kwargs={
-        #         'path': self.repo.name,
-        #     }
+        #         "path": self.repo.name,
+        #     },
         # )
-
+        #
         # self.all_versions_url = reverse(
-        #     'galaxy:api:content:v3:all-collection-versions-list',
+        #     "galaxy:api:content:v3:all-collection-versions-list",
         #     kwargs={
-        #         'path': self.repo.name,
-        #     }
+        #         "path": self.repo.name,
+        #     },
         # )
-
+        #
         # self.metadata_url = reverse(
-        #     'galaxy:api:content:v3:repo-metadata',
+        #     "galaxy:api:content:v3:repo-metadata",
         #     kwargs={
-        #         'path': self.repo.name,
-        #     }
+        #         "path": self.repo.name,
+        #     },
         # )
 
         # used for href tests
