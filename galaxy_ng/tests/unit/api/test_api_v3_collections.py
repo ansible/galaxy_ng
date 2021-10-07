@@ -116,26 +116,29 @@ class TestCollectionViewsets(BaseTestCase):
             "galaxy:api:v3:default-content:collection-artifact-upload"
         )
 
-        self.all_collections_url = reverse(
-            "galaxy:api:content:v3:all-collections-list",
-            kwargs={
-                "path": self.repo.name,
-            },
-        )
-
-        self.all_versions_url = reverse(
-            "galaxy:api:content:v3:all-collection-versions-list",
-            kwargs={
-                "path": self.repo.name,
-            },
-        )
-
-        self.metadata_url = reverse(
-            "galaxy:api:content:v3:repo-metadata",
-            kwargs={
-                "path": self.repo.name,
-            },
-        )
+        # The following tests use endpoints related to
+        # issue https://issues.redhat.com/browse/AAH-224
+        # For now endpoints are temporary deactivated
+        # self.all_collections_url = reverse(
+        #     "galaxy:api:content:v3:all-collections-list",
+        #     kwargs={
+        #         "path": self.repo.name,
+        #     },
+        # )
+        #
+        # self.all_versions_url = reverse(
+        #     "galaxy:api:content:v3:all-collection-versions-list",
+        #     kwargs={
+        #         "path": self.repo.name,
+        #     },
+        # )
+        #
+        # self.metadata_url = reverse(
+        #     "galaxy:api:content:v3:repo-metadata",
+        #     kwargs={
+        #         "path": self.repo.name,
+        #     },
+        # )
 
         # used for href tests
         self.pulp_href_fragment = "pulp_ansible/galaxy"
