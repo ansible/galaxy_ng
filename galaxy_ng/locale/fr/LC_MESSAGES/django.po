@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -19,92 +18,92 @@ msgstr ""
 
 #: galaxy_ng/app/access_control/access_policy.py:69
 msgid "Namespace in filename not found."
-msgstr ""
+msgstr "L'espace de nom dans le nom de fichier n'a pas été trouvé."
 
 #: galaxy_ng/app/access_control/fields.py:17
 msgid "object_permissions field is required"
-msgstr ""
+msgstr "le champ object_permissions est obligatoire"
 
 #: galaxy_ng/app/access_control/fields.py:21
 msgid "id or name field is required"
-msgstr ""
+msgstr "Ce champ est obligatoire."
 
 #: galaxy_ng/app/access_control/fields.py:27
 msgid "object_permissions must be a list of strings"
-msgstr ""
+msgstr "object_permissions doit être une liste de chaînes de caractères"
 
 #: galaxy_ng/app/access_control/fields.py:41
 msgid "Permission {} does not exist"
-msgstr ""
+msgstr "La permission {} n'existe pas"
 
 #: galaxy_ng/app/access_control/fields.py:56
 msgid "Groups must be a list of group objects"
-msgstr ""
+msgstr "Les groupes doivent correspondre à une liste d'objets de groupe"
 
 #: galaxy_ng/app/access_control/fields.py:71
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
-msgstr ""
+msgstr "Le groupe name=%s, id=%s n'existe pas"
 
 #: galaxy_ng/app/access_control/fields.py:75
 #: galaxy_ng/app/api/ui/serializers/user.py:118
 msgid "Invalid group name or ID"
-msgstr ""
+msgstr "Nom de groupe ou ID invalide"
 
 #: galaxy_ng/app/api/ui/serializers/synclist.py:41
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr ""
+msgstr "Le référentiel \"{pulp_id}\" n'a pas été trouvé lors de la création de la synclist"
 
 #: galaxy_ng/app/api/ui/serializers/synclist.py:96
 #, python-format
 msgid "Synclist already exists: %s"
-msgstr ""
+msgstr "Synclist existe déjà : %s"
 
 #: galaxy_ng/app/api/ui/serializers/synclist.py:104
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr ""
+msgstr "La collection \"{namespace}.{name}\" n'a pas été trouvée lors de la création de la synclist {synclist}"
 
 #: galaxy_ng/app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr ""
+msgstr "La collection \"{namespace}.{name}\" n'a pas été trouvée lors de la mise à jour de la liste syntaxique {synclist}"
 
 #: galaxy_ng/app/api/ui/serializers/user.py:60
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr ""
+msgstr "L'autorisation 'galaxy.change_group' est nécessaire pour modifier un groupe d'utilisateurs dont l'utilisateur demandeur ne fait pas partie."
 
 #: galaxy_ng/app/api/ui/serializers/user.py:71
 msgid "Must be a super user to grant super user permissions."
-msgstr ""
+msgstr "Il faut être un super utilisateur pour accorder des autorisations de super utilisateur."
 
 #: galaxy_ng/app/api/ui/serializers/user.py:114
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
-msgstr ""
+msgstr "Le groupe name=%(name)s, id=%(id)s n'existe pas"
 
 #: galaxy_ng/app/api/ui/viewsets/collection.py:57
 msgid "Distribution base path is required"
-msgstr ""
+msgstr "Le chemin de la base de distribution est requis"
 
 #: galaxy_ng/app/api/ui/viewsets/collection.py:155
 msgid "Retrieve collection version"
-msgstr ""
+msgstr "Récupérer la version de la collection"
 
 #: galaxy_ng/app/api/ui/viewsets/collection.py:166
 msgid "Collection version not found for: {}"
-msgstr ""
+msgstr "Version de la collection non trouvée pour : {}"
 
 #: galaxy_ng/app/api/ui/viewsets/collection.py:222
 msgid "Retrieve collection import"
-msgstr ""
+msgstr "Récupérer l'importation de la collection"
 
 #: galaxy_ng/app/api/ui/viewsets/group.py:45
 #, python-format
@@ -115,158 +114,158 @@ msgstr "Un groupe nommé %s existe déjà."
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr ""
+msgstr "Nom de fichier non valide {filename}. Format attendu : namespace-name-version.tar.gz"
 
 #: galaxy_ng/app/api/utils.py:52
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr ""
+msgstr "Chaîne de version non valide {version} à partir du nom de fichier {filename}. Format de version sémantique attendu."
 
 #: galaxy_ng/app/api/utils.py:56
 #, python-format
 msgid "Expected namespace to be max length of %s"
-msgstr ""
+msgstr "L'espace de nom attendu est d'une longueur maximale de %s"
 
 #: galaxy_ng/app/api/utils.py:58
 #, python-format
 msgid "Expected name to be max length of %s"
-msgstr ""
+msgstr "Le nom doit avoir une longueur maximale de %s"
 
 #: galaxy_ng/app/api/utils.py:60
 #, python-format
 msgid "Expected version to be max length of %s"
-msgstr ""
+msgstr "La version attendue est d'une longueur maximale de %s"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:60
 #, python-format
 msgid "'%s' is not a valid url."
-msgstr ""
+msgstr "\"%s\" n'est pas un choix valide."
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:88
 msgid "Attribute 'name' is required"
-msgstr ""
+msgstr "L'attribut \"nom\" est obligatoire"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:91
 msgid "Name can only contain lower case letters, underscores and numbers"
-msgstr ""
+msgstr "Le nom ne peut contenir que des lettres minuscules, des caractères de soulignement et des chiffres"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:94
 msgid "Name must be longer than 2 characters"
-msgstr ""
+msgstr "Le nom doit comporter plus de 2 caractères"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:97
 msgid "Name cannot begin with '_'"
-msgstr ""
+msgstr "Le nom ne peut pas commencer par '_'"
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:85
 msgid "Password for proxy authentication."
-msgstr ""
+msgstr "Mot de passe pour l'authentification du proxy."
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:92
 msgid "User for proxy authentication."
-msgstr ""
+msgstr "Utilisateur pour l'authentification du proxy."
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:105
 msgid "Remote password."
-msgstr ""
+msgstr "Mot de passe utilisateur à distance."
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:112
 msgid "Remote user."
-msgstr ""
+msgstr "Utilisateur distant."
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:161
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr ""
+msgstr "La synchronisation du contenu des domaines communautaires sans spécifier un fichier d'exigences n'est pas autorisée."
 
 #: galaxy_ng/app/api/v3/views/sync.py:29
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
-msgstr ""
+msgstr "La distribution %s n'a pas d’utilisateurs distants associés à elle."
 
 #: galaxy_ng/app/api/v3/views/sync.py:40
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr ""
+msgstr "La synchronisation du contenu de galaxy.ansible.com sans spécifier un fichier d'exigences n'est pas autorisée."
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:172
 #, python-format
 msgid "Path does not match: \"%s\""
-msgstr ""
+msgstr "Le chemin ne correspond pas : \"%s\""
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:186
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
-msgstr ""
+msgstr "L'espace de nommage \"{0}\" n'existe pas."
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:279
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
-msgstr ""
+msgstr "Réponse inattendue de l'application de contenu. Code : %s."
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:301
 #, python-format
 msgid "Collection %s not found"
-msgstr ""
+msgstr "Collection %s non trouvée"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:309
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
-msgstr ""
+msgstr "Repo(s) pour déplacer la collection %s non trouvé(s)"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:313
 #, python-format
 msgid "Collection %s not found in source repo"
-msgstr ""
+msgstr "Collection %s non trouvée dans le repo source"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:317
 #, python-format
 msgid "Collection %s already found in destination repo"
-msgstr ""
+msgstr "Collection %s déjà trouvée dans le repo de destination"
 
 #: galaxy_ng/app/api/v3/viewsets/namespace.py:61
 #, python-format
 msgid "A namespace named %s already exists."
-msgstr ""
+msgstr "Un espace de nom nommé %s existe déjà."
 
 #: galaxy_ng/app/exceptions.py:8
 msgid "Data conflicts with existing entity."
-msgstr ""
+msgstr "Les données entrent en conflit avec une entité existante."
 
 #: galaxy_ng/app/tasks/publishing.py:54 galaxy_ng/app/tasks/publishing.py:84
 #, python-format
 msgid "Could not find staging repository: \"%s\""
-msgstr ""
+msgstr "Impossible de trouver le référentiel «staging» : \"%s\""
 
 #: galaxy_ng/app/tasks/synclist.py:45
 #, python-format
 msgid "Curating all synclists repos that curate from %s"
-msgstr ""
+msgstr "Curation de tous les dépôts synclistes à partir de %s"
 
 #: galaxy_ng/app/tasks/synclist.py:56
 msgid "Synclists curating upstream repo"
-msgstr ""
+msgstr "Synclistes conservant le repo amont"
 
 #: galaxy_ng/app/tasks/synclist.py:63
 msgid "Synclists curating upstream repo task"
-msgstr ""
+msgstr "Tâche de curation de repo amont par Synclists"
 
 #: galaxy_ng/app/tasks/synclist.py:91
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
-msgstr ""
+msgstr "Fin de la préparation de %s repos synclistes basés sur la mise à jour %s"
 
 #: galaxy_ng/app/tasks/synclist.py:120
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr ""
+msgstr "Application de synclist \"%s\" avec policy=%s au repo curate \"%s\" à partir du repo amont \"%s\""
 
 #: galaxy_ng/app/tasks/synclist.py:162
 msgid "Unexpected synclist policy {}"
-msgstr ""
+msgstr "Politique syncliste inattendue {}"
