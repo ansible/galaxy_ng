@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -19,92 +18,92 @@ msgstr ""
 
 #: galaxy_ng/app/access_control/access_policy.py:69
 msgid "Namespace in filename not found."
-msgstr ""
+msgstr "未找到文件名中的命名空间。"
 
 #: galaxy_ng/app/access_control/fields.py:17
 msgid "object_permissions field is required"
-msgstr ""
+msgstr "object_permissions 字段是必需的"
 
 #: galaxy_ng/app/access_control/fields.py:21
 msgid "id or name field is required"
-msgstr ""
+msgstr "id 或 name 字段是必需的"
 
 #: galaxy_ng/app/access_control/fields.py:27
 msgid "object_permissions must be a list of strings"
-msgstr ""
+msgstr "object_permissions 必须是一个字符串列表"
 
 #: galaxy_ng/app/access_control/fields.py:41
 msgid "Permission {} does not exist"
-msgstr ""
+msgstr "权限 {} 不存在"
 
 #: galaxy_ng/app/access_control/fields.py:56
 msgid "Groups must be a list of group objects"
-msgstr ""
+msgstr "组必须是一个组对象的列表"
 
 #: galaxy_ng/app/access_control/fields.py:71
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
-msgstr ""
+msgstr "组名=%s，id=%s 不存在"
 
 #: galaxy_ng/app/access_control/fields.py:75
 #: galaxy_ng/app/api/ui/serializers/user.py:118
 msgid "Invalid group name or ID"
-msgstr ""
+msgstr "无效的组名称或 ID。"
 
 #: galaxy_ng/app/api/ui/serializers/synclist.py:41
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr ""
+msgstr "创建同步列表时未找到存储库 \"{pulp_id}\""
 
 #: galaxy_ng/app/api/ui/serializers/synclist.py:96
 #, python-format
 msgid "Synclist already exists: %s"
-msgstr ""
+msgstr "同步类别已存在：%s"
 
 #: galaxy_ng/app/api/ui/serializers/synclist.py:104
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr ""
+msgstr "创建同步列表 {synclist} 时找不到集合 \"{namespace}.{name}\""
 
 #: galaxy_ng/app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr ""
+msgstr "更新同步列表 {synclist} 时找不到集合 \"{namespace}.{name}\""
 
 #: galaxy_ng/app/api/ui/serializers/user.py:60
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr ""
+msgstr "更改请求用户不在的用户组需要具有 'galaxy.change_group' 权限。"
 
 #: galaxy_ng/app/api/ui/serializers/user.py:71
 msgid "Must be a super user to grant super user permissions."
-msgstr ""
+msgstr "必须是超级用户才能授予超级用户权限。"
 
 #: galaxy_ng/app/api/ui/serializers/user.py:114
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
-msgstr ""
+msgstr "组 name=%(name)s, id=%(id)s 不存在"
 
 #: galaxy_ng/app/api/ui/viewsets/collection.py:57
 msgid "Distribution base path is required"
-msgstr ""
+msgstr "发布基础路径是必需的"
 
 #: galaxy_ng/app/api/ui/viewsets/collection.py:155
 msgid "Retrieve collection version"
-msgstr ""
+msgstr "检索集合版本"
 
 #: galaxy_ng/app/api/ui/viewsets/collection.py:166
 msgid "Collection version not found for: {}"
-msgstr ""
+msgstr "未找到集合版本：{}"
 
 #: galaxy_ng/app/api/ui/viewsets/collection.py:222
 msgid "Retrieve collection import"
-msgstr ""
+msgstr "检索集合导入"
 
 #: galaxy_ng/app/api/ui/viewsets/group.py:45
 #, python-format
@@ -115,158 +114,158 @@ msgstr "名为 %s 的组已存在。"
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr ""
+msgstr "无效的文件名 {filename}。预期的格式：namespace-name-version.tar.gz"
 
 #: galaxy_ng/app/api/utils.py:52
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr ""
+msgstr "文件名 {filename} 中的无效版本字符串 {version}。预期语义版本格式。"
 
 #: galaxy_ng/app/api/utils.py:56
 #, python-format
 msgid "Expected namespace to be max length of %s"
-msgstr ""
+msgstr "预期命名空间最大长度为 %s"
 
 #: galaxy_ng/app/api/utils.py:58
 #, python-format
 msgid "Expected name to be max length of %s"
-msgstr ""
+msgstr "预期名称最大长度为 %s"
 
 #: galaxy_ng/app/api/utils.py:60
 #, python-format
 msgid "Expected version to be max length of %s"
-msgstr ""
+msgstr "预期版本的最大长度为 %s"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:60
 #, python-format
 msgid "'%s' is not a valid url."
-msgstr ""
+msgstr "'%s' 不是一个有效字符串。"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:88
 msgid "Attribute 'name' is required"
-msgstr ""
+msgstr "需要 'name' 属性"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:91
 msgid "Name can only contain lower case letters, underscores and numbers"
-msgstr ""
+msgstr "名称只能包含小写字母、下划线和数字"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:94
 msgid "Name must be longer than 2 characters"
-msgstr ""
+msgstr "名称必须大于 2 个字符"
 
 #: galaxy_ng/app/api/v3/serializers/namespace.py:97
 msgid "Name cannot begin with '_'"
-msgstr ""
+msgstr "名称不能以 '_' 开头"
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:85
 msgid "Password for proxy authentication."
-msgstr ""
+msgstr "用于代理身份验证的密码。"
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:92
 msgid "User for proxy authentication."
-msgstr ""
+msgstr "用于代理身份验证的用户。"
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:105
 msgid "Remote password."
-msgstr ""
+msgstr "远程密码。"
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:112
 msgid "Remote user."
-msgstr ""
+msgstr "远程用户。"
 
 #: galaxy_ng/app/api/v3/serializers/sync.py:161
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr ""
+msgstr "不允许从社区域同步内容而不指定要求文件。"
 
 #: galaxy_ng/app/api/v3/views/sync.py:29
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
-msgstr ""
+msgstr "%s 发行版没有任何与之关联的远程设备。"
 
 #: galaxy_ng/app/api/v3/views/sync.py:40
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr ""
+msgstr "在不指定要求文件的情况下，不允许从 galaxy.ansible.com 同步内容。"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:172
 #, python-format
 msgid "Path does not match: \"%s\""
-msgstr ""
+msgstr "路径不匹配：\"%s\""
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:186
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
-msgstr ""
+msgstr "命名空间 \"{0}\" 不存在。"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:279
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
-msgstr ""
+msgstr "来自内容应用的意外响应。代码：%s。"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:301
 #, python-format
 msgid "Collection %s not found"
-msgstr ""
+msgstr "未找到集合 %s"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:309
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
-msgstr ""
+msgstr "未找到用于移动集合的存储库 %s"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:313
 #, python-format
 msgid "Collection %s not found in source repo"
-msgstr ""
+msgstr "源仓库中没有找到集合 %s"
 
 #: galaxy_ng/app/api/v3/viewsets/collection.py:317
 #, python-format
 msgid "Collection %s already found in destination repo"
-msgstr ""
+msgstr "目标仓库中已找到集合 %s"
 
 #: galaxy_ng/app/api/v3/viewsets/namespace.py:61
 #, python-format
 msgid "A namespace named %s already exists."
-msgstr ""
+msgstr "已存在名为 %s 的命名空间。"
 
 #: galaxy_ng/app/exceptions.py:8
 msgid "Data conflicts with existing entity."
-msgstr ""
+msgstr "数据与现有实体冲突。"
 
 #: galaxy_ng/app/tasks/publishing.py:54 galaxy_ng/app/tasks/publishing.py:84
 #, python-format
 msgid "Could not find staging repository: \"%s\""
-msgstr ""
+msgstr "无法找到 staging存储库：\"%s\""
 
 #: galaxy_ng/app/tasks/synclist.py:45
 #, python-format
 msgid "Curating all synclists repos that curate from %s"
-msgstr ""
+msgstr "策展从 %s 中策展的所有同步列表"
 
 #: galaxy_ng/app/tasks/synclist.py:56
 msgid "Synclists curating upstream repo"
-msgstr ""
+msgstr "Synclists 策展上游存储库"
 
 #: galaxy_ng/app/tasks/synclist.py:63
 msgid "Synclists curating upstream repo task"
-msgstr ""
+msgstr "Synclists 策展上游存储库任务"
 
 #: galaxy_ng/app/tasks/synclist.py:91
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
-msgstr ""
+msgstr "根据 %s 更新完成策展 %s 同步列表存储库"
 
 #: galaxy_ng/app/tasks/synclist.py:120
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr ""
+msgstr "使用 policy=%s 应用同步列表 \"%s\" 以从上游仓库 \"%s\" 中策展存储库 \"%s\""
 
 #: galaxy_ng/app/tasks/synclist.py:162
 msgid "Unexpected synclist policy {}"
-msgstr ""
+msgstr "意外同步列表策略 {}"

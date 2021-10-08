@@ -117,7 +117,7 @@ class TestLocalization(BaseTestCase):
             response = self._switch_lang_post('ja')
             self.assertEqual(
                 response,
-                'test_groupという名前のグループはすでに存在します。'
+                'test_group という名前のグループはすでに存在します。'
             )
 
             response = self._switch_lang_post('zh')
