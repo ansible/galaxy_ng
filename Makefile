@@ -24,9 +24,9 @@ requirements/pip-upgrade-single-package:     ## Update based on setup.py and *.i
 
 .PHONY: requirements/pip-upgrade-all
 requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, and all packages via pip
-	pip-compile -o requirements/requirements.common.txt setup.py
-	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in
-	pip-compile -o requirements/requirements.standalone.txt setup.py requirements/requirements.standalone.in
+	pip-compile -o requirements/requirements.common.txt setup.py --upgrade
+	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in --upgrade
+	pip-compile -o requirements/requirements.standalone.txt setup.py requirements/requirements.standalone.in --upgrade
 
 
 .PHONY: docker/build
