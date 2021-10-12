@@ -1,0 +1,1 @@
+Update logging config to log GET requests.  Results in logging redirect to Content App for artifact download.

@@ -227,7 +227,7 @@ def configure_logging(settings: Dynaconf) -> Dict[str, Any]:
                 },
                 "exclude": {
                     "applications": [],
-                    "methods": ["GET"],
+                    "methods": [],
                     "status": [],
                     "unknown": False,
                 },
