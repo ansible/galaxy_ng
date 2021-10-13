@@ -165,5 +165,5 @@ KEYCLOAK_REALM = None
 #   bundle is used to validate server certs.
 # /path/to/certfile: A custom CA certificate can be provided. If this is
 #   set automation hub will use the CA certs in the file to validate
-#   the keycloak's SSL certificate. 
+#   the keycloak's SSL certificate.
 GALAXY_VERIFY_KEYCLOAK_SSL_CERTS = False
