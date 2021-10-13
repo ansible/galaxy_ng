@@ -158,5 +158,12 @@ KEYCLOAK_REALM = None
 # to be overridden by the /etc/pulp/settings.py
 # or environment variable PULP_SOCIAL_AUTH_KEYCLOAK_KEY etc...
 
-# require signed and valid SSL certificates when making HTTPS requets to keycloak
-GALAXY_VERIFY_KEYCLOAK_CERTS = False
+# This is used to enable or disable SSL validation on calls to the
+# keycloak server. This setting has 3 options:
+# False: SSL certificates are never verified.
+# True: Valid SSL certificates are required. If this is set, the curl CA
+#   bundle is used to validate server certs.
+# /path/to/certfile: A custom CA certificate can be provided. If this is
+#   set automation hub will use the CA certs in the file to validate
+#   the keycloak's SSL certificate. 
+GALAXY_VERIFY_KEYCLOAK_SSL_CERTS = False

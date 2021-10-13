@@ -85,7 +85,7 @@ class LogoutView(api_base.APIView):
             url=logout_url,
             headers=headers,
             data=payload,
-            verify=settings.GALAXY_VERIFY_KEYCLOAK_CERTS
+            verify=settings.GALAXY_VERIFY_KEYCLOAK_SSL_CERTS
         )
 
         if response.status_code == http_code.HTTP_200_OK:

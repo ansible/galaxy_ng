@@ -31,7 +31,7 @@ class KeycloakBasicAuth(BasicAuthentication):
             url=settings.SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL,
             headers=headers,
             data=payload,
-            verify=settings.GALAXY_VERIFY_KEYCLOAK_CERTS
+            verify=settings.GALAXY_VERIFY_KEYCLOAK_SSL_CERTS
         )
 
         if response.status_code == http_code.HTTP_200_OK:
