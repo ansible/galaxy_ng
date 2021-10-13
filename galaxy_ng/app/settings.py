@@ -157,3 +157,6 @@ KEYCLOAK_REALM = None
 # Extra KEYCLOAK settings are defined on dynaconf_hooks.py
 # to be overridden by the /etc/pulp/settings.py
 # or environment variable PULP_SOCIAL_AUTH_KEYCLOAK_KEY etc...
+
+# require signed and valid SSL certificates when making HTTPS requets to keycloak
+GALAXY_VERIFY_KEYCLOAK_CERTS = False

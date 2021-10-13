@@ -81,7 +81,12 @@ class LogoutView(api_base.APIView):
         payload = {'client_id': settings.SOCIAL_AUTH_KEYCLOAK_KEY, 'refresh_token': refresh_token,
                    'client_secret': settings.SOCIAL_AUTH_KEYCLOAK_SECRET}
         headers = {"Authorization": "Bearer {access_token}".format(access_token=access_token)}
-        response = requests_post(url=logout_url, headers=headers, data=payload)
+        response = requests_post(
+            url=logout_url,
+            headers=headers,
+            data=payload,
+            verify=settings.GALAXY_VERIFY_KEYCLOAK_CERTS
+        )
 
         if response.status_code == http_code.HTTP_200_OK:
             log.debug("Logout of openid-connect client successful.")

@@ -30,7 +30,8 @@ class KeycloakBasicAuth(BasicAuthentication):
         response = requests_post(
             url=settings.SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL,
             headers=headers,
-            data=payload
+            data=payload,
+            verify=settings.GALAXY_VERIFY_KEYCLOAK_CERTS
         )
 
         if response.status_code == http_code.HTTP_200_OK:
