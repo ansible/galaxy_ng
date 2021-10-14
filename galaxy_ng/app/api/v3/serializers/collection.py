@@ -115,6 +115,7 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
 
     class Meta(_CollectionVersionSerializer.Meta):
         ref_name = "CollectionVersionWithDownloadUrlSerializer"
+        fields = _CollectionVersionSerializer.Meta.fields + ('scmref',)
 
     def get_download_url(self, obj) -> str:
         return self._get_download_url(obj)
