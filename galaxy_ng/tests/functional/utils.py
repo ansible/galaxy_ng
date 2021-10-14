@@ -29,7 +29,6 @@ from galaxy_ng.tests.functional.constants import (
 from pulpcore.client.pulpcore import (
     ApiClient as CoreApiClient,
     ArtifactsApi,
-    Configuration,
     TasksApi,
 )
 from pulpcore.client.galaxy_ng import (
@@ -41,10 +40,7 @@ from pulpcore.client.galaxy_ng import (
 )
 
 
-configuration = Configuration()
-configuration.username = os.getenv("PULP_API_TEST_USER" ,"admin")
-configuration.password = os.getenv("PULP_API_TEST_PASSWORD" ,"password")
-configuration.safe_chars_for_path_param = "/"
+configuration = config.get_config().get_bindings_config()
 
 
 def set_up_module():
@@ -174,7 +170,7 @@ class TestCaseUsingBindings(PulpTestCase):
         cls.sync_config_api = ApiContentV3SyncConfigApi(cls.client)
         cls.sync_api = ApiContentV3SyncApi(cls.client)
         cls.get_ansible_cfg_before_test()
-        cls.galaxy_api_prefix = os.getenv("PULP_GALAXY_API_PATH_PREFIX", "/api/galaxy/")
+        cls.galaxy_api_prefix = os.getenv("PULP_GALAXY_API_PATH_PREFIX", "/api/galaxy").rstrip("/")
 
     def tearDown(self):
         """Clean class-wide variable."""
@@ -185,7 +181,7 @@ class TestCaseUsingBindings(PulpTestCase):
     @classmethod
     def get_token(cls):
         """Get a Galaxy NG token."""
-        return cls.smash_client.post(f"{cls.galaxy_api_prefix}v3/auth/token/")["token"]
+        return cls.smash_client.post(f"{cls.galaxy_api_prefix}/v3/auth/token/")["token"]
 
     @classmethod
     def get_ansible_cfg_before_test(cls):
@@ -203,7 +199,7 @@ class TestCaseUsingBindings(PulpTestCase):
             "\n"
             "[galaxy_server.community_repo]\n"
             f"url={self.cfg.get_content_host_base_url()}"
-            f"{self.galaxy_api_prefix}content/{base_path}/\n"
+            f"{self.galaxy_api_prefix}/content/{base_path}/\n"
             f"token={token}"
         )
         with open("ansible.cfg", "w") as f:

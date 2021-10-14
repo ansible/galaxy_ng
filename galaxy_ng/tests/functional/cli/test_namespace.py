@@ -13,7 +13,7 @@ class CreateNamespaceTestCase(TestCaseUsingBindings):
         # delete namespace
         # namespace_api does not support delete, so we can use the smash_client directly
         response = self.smash_client.delete(
-            "/api/automation-hub/v3/namespaces/" + namespace_name
+            f"{self.galaxy_api_prefix}/v3/namespaces/{namespace_name}"
         )
         self.assertEqual(response.status_code, 204)
 
@@ -31,7 +31,6 @@ class CreateNamespaceTestCase(TestCaseUsingBindings):
         self.assertIn(namespace.name, [item.name for item in namespaces.data])
 
         # delete namespace
-        # namespace_api does not support delete, so we can use the smash_client directly
         self.delete_namespace(namespace.name)
 
         # ensure namespace is NO MORE available
