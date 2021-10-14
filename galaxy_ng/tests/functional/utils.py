@@ -1,4 +1,5 @@
 """Utilities for tests for the galaxy plugin."""
+import os
 from functools import partial
 import requests
 from unittest import SkipTest
@@ -41,8 +42,8 @@ from pulpcore.client.galaxy_ng import (
 
 
 configuration = Configuration()
-configuration.username = "admin"
-configuration.password = "password"
+configuration.username = os.getenv("PULP_API_TEST_USER" ,"admin")
+configuration.password = os.getenv("PULP_API_TEST_PASSWORD" ,"password")
 configuration.safe_chars_for_path_param = "/"
 
 
@@ -173,6 +174,7 @@ class TestCaseUsingBindings(PulpTestCase):
         cls.sync_config_api = ApiContentV3SyncConfigApi(cls.client)
         cls.sync_api = ApiContentV3SyncApi(cls.client)
         cls.get_ansible_cfg_before_test()
+        cls.galaxy_api_prefix = os.getenv("PULP_GALAXY_API_PATH_PREFIX", "/api/galaxy/")
 
     def tearDown(self):
         """Clean class-wide variable."""
@@ -183,7 +185,7 @@ class TestCaseUsingBindings(PulpTestCase):
     @classmethod
     def get_token(cls):
         """Get a Galaxy NG token."""
-        return cls.smash_client.post("/api/galaxy/v3/auth/token/")["token"]
+        return cls.smash_client.post(f"{cls.galaxy_api_prefix}v3/auth/token/")["token"]
 
     @classmethod
     def get_ansible_cfg_before_test(cls):
@@ -200,7 +202,8 @@ class TestCaseUsingBindings(PulpTestCase):
             "server_list = community_repo\n"
             "\n"
             "[galaxy_server.community_repo]\n"
-            f"url={ self.cfg.get_content_host_base_url()}/api/galaxy/content/{base_path}/\n"
+            f"url={self.cfg.get_content_host_base_url()}"
+            f"{self.galaxy_api_prefix}content/{base_path}/\n"
             f"token={token}"
         )
         with open("ansible.cfg", "w") as f:
