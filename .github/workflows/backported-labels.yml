@@ -1,0 +1,32 @@
+name: 'Add backported-* labels'
+
+on:
+  # allow running manually
+  workflow_dispatch:
+  push:
+    branches: [ 'stable-*' ]
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Set $LABEL from branch name'
+      run: |
+        VERSION=`sed 's/^refs\/heads\/stable-//' <<< $GITHUB_REF`
+        LABEL="backported-${VERSION}"
+        echo "LABEL=${LABEL}" >> $GITHUB_ENV
+
+    - uses: actions/checkout@v2
+
+    - name: 'Set $PR to PR number'
+      run: |
+        git log -1 --oneline
+        echo PR=`git log -1 --oneline | perl -ne 'print if s/^.*?\(#(\d+)\).*\(#\d+\).*$/$1/'` >> $GITHUB_ENV
+
+    - name: "Add ${{ env.LABEL }} to #${{ env.PR }}"
+      if: ${{ env.PR }}
+      uses: actions-ecosystem/action-add-labels@v1
+      with:
+        labels: ${{ env.LABEL }}
+        number: ${{ env.PR }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
