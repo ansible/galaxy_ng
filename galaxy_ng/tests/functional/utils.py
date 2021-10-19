@@ -37,7 +37,8 @@ from pulpcore.client.galaxy_ng import (
     ApiContentV3SyncApi,
     ApiContentV3SyncConfigApi,
     ApiV3NamespacesApi,
-    ApiUiV1ExecutionEnvironmentsRepositoriesContentTagsApi as ContainerRepoEndpointApi,
+    ApiUiV1ExecutionEnvironmentsRepositoriesContentTagsApi as ContainerRepositoryEndpointApi,
+    ApiUiV1ExecutionEnvironmentsRepositoriesApi as ContainerRepositoryApi
 )
 
 
@@ -170,7 +171,8 @@ class TestCaseUsingBindings(PulpTestCase):
         cls.collections_api = ApiContentV3CollectionsApi(cls.client)
         cls.sync_config_api = ApiContentV3SyncConfigApi(cls.client)
         cls.sync_api = ApiContentV3SyncApi(cls.client)
-        cls.container_repo_tags_api = ContainerRepoEndpointApi(cls.client)
+        cls.container_repo_tags_api = ContainerRepositoryEndpointApi(cls.client)
+        cls.container_repo_api = ContainerRepositoryApi(cls.client)
         cls.get_ansible_cfg_before_test()
         cls.galaxy_api_prefix = os.getenv("PULP_GALAXY_API_PATH_PREFIX", "/api/galaxy").rstrip("/")
 

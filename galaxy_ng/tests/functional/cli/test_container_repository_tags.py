@@ -1,18 +1,7 @@
-from subprocess import run
+from subprocess import Popen, run, PIPE, STDOUT
 
 from galaxy_ng.tests.functional.utils import TestCaseUsingBindings
 from galaxy_ng.tests.functional.utils import set_up_module as setUpModule  # noqa:F401
-
-###
-# 1. login to registry
-#   - move to utils.py?
-# 2. tag and push images
-#   - move to utils.py?
-# 3. verify tags via api endpoint
-# 4. delete tags/images
-#   - move to utils.py?
-# 5. verify tags removed via api endpoint
-#
 
 
 class ContainerRepositoryTagsTestCase(TestCaseUsingBindings):
@@ -40,35 +29,49 @@ class ContainerRepositoryTagsTestCase(TestCaseUsingBindings):
         container_engine="podman",
         tag="latest",
     ):
-        cmds = [
-            [container_engine, "pull", f"registry.access.redhat.com/{image}:{tag}"],
-            [
-                container_engine, "tag",
-                f"registry.access.redhat.com/{image}:{tag}",
-                f"{registry}/{image}:{tag}"
-            ],
-            [container_engine, "push", "--tls-verify=false", f"{registry}/{image}:{tag}"]
-        ]
-        for cmd in cmds:
-            run(cmd)
+        pull_registry = "registry.access.redhat.com"
 
-    def delete_container_repository(self):
-        pass
+        # Pull images, record image id for cleanup
+        proc = Popen(
+            [container_engine, "pull", f"{pull_registry}/{image}:{tag}"],
+            stdout=PIPE,
+            stderr=STDOUT,
+            encoding="utf-8",
+        )
+        image_id = ""
+        for line in proc.stdout:
+            image_id = line.strip()
+
+        # Tag images
+        run([container_engine, "tag", f"{pull_registry}/{image}:{tag}", f"{registry}/{image}:{tag}"],)
+
+        # Push images to localhost:5001
+        run([container_engine, "push", "--tls-verify=false", f"{registry}/{image}:{tag}"])
+
+        return image_id
 
     def test_list_container_repository_tags(self):
-        self.setUpClass()
         self.login_to_registry()
 
+        image_ids = []
         image = "ubi8"
-        tags = ["8.2", "8.3"]
+        tags = ["8.1", "8.2"]
         for tag in tags:
-            self.create_container_repository(
+            image_id = self.create_container_repository(
                 image=image,
                 registry="localhost:5001",
                 tag=tag)
+            image_ids.append(image_id)
 
         response = self.container_repo_tags_api.list(base_path=image)
 
         self.assertEqual(response.meta.count, len(tags))
         for entry in response.data:
             self.assertIn(entry.name, tags)
+
+        # Delete downloaded images
+        for image_id in image_ids:
+            run(['podman', "image", "rm", f"{image_id}", "--force"])
+
+        # Delete Content Repository
+        # self.container_repo_api.delete(base_path=image)
