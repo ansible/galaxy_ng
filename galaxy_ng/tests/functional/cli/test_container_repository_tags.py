@@ -25,12 +25,6 @@ class ContainerRepositoryTagsTestCase(TestCaseUsingBindings):
         password="admin",
         registry="localhost:5001"
     ):
-        """Login to a registry
-        :param String container_engine: Container engine to be used, defaults to podman
-        :param String user: User to login as
-        :param String password: Password for User
-        :param String registry: Registry to login to, ie: localhost:5001
-        """
         cmd = [
             container_engine,
             "login", "-u", user, "-p", password,
@@ -46,18 +40,12 @@ class ContainerRepositoryTagsTestCase(TestCaseUsingBindings):
         container_engine="podman",
         tag="latest",
     ):
-        """Create a container repository with a tagged image.
-        :param String container_engine: Container engine to be used, defaults to podman
-        :param String image: Image to pulled, tagged and pushed to the registry
-        :param String tag: Optional tag for the image.  Defaults to 'latest'
-        :param String registry: Registry to login to, ie: localhost:5001
-        """
         cmds = [
             [container_engine, "pull", f"registry.access.redhat.com/{image}:{tag}"],
             [
                 container_engine, "tag",
                 f"registry.access.redhat.com/{image}:{tag}",
-                f"{registry}/test-{image}:{tag}"
+                f"{registry}/{image}:{tag}"
             ],
             [container_engine, "push", "--tls-verify=false", f"{registry}/{image}:{tag}"]
         ]
@@ -69,22 +57,18 @@ class ContainerRepositoryTagsTestCase(TestCaseUsingBindings):
 
     def test_list_container_repository_tags(self):
         self.setUpClass()
-        self.login_to_registry(password='password', registry='localhost')
+        self.login_to_registry()
 
         image = "ubi8"
         tags = ["8.2", "8.3"]
         for tag in tags:
             self.create_container_repository(
                 image=image,
-                registry="localhost",
+                registry="localhost:5001",
                 tag=tag)
 
-        api_url = f"/_ui/v1/execution-environments/repositories/{image}/_content/tags/"
-        response = self.smash_client.get(
-            f"{self.galaxy_api_prefix}{api_url}"
-        )
-        print(response["data"][1])
-        print(response["data"][1]["name"])
-        self.assertEqual(response["meta"]["count"], len(tags))
-        self.assertIn(response["data"][0]["name"], tags)
-        self.assertIn(response["data"][1]["name"], tags)
+        response = self.container_repo_tags_api.list(base_path=image)
+
+        self.assertEqual(response.meta.count, len(tags))
+        for entry in response.data:
+            self.assertIn(entry.name, tags)
