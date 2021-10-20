@@ -1,5 +1,7 @@
 from subprocess import Popen, run, PIPE, STDOUT
 
+from pulp_smash.pulp3.bindings import monitor_task
+
 from galaxy_ng.tests.functional.utils import TestCaseUsingBindings
 from galaxy_ng.tests.functional.utils import set_up_module as setUpModule  # noqa:F401
 
@@ -73,5 +75,9 @@ class ContainerRepositoryTagsTestCase(TestCaseUsingBindings):
         for image_id in image_ids:
             run(['podman', "image", "rm", f"{image_id}", "--force"])
 
-        # Delete Content Repository
-        # self.container_repo_api.delete(base_path=image)
+        # Delete Execution Environment
+        # api does not currently support delete
+        ee_delete_response = self.smash_client.delete(
+            f"{self.galaxy_api_prefix}/_ui/v1/execution-environments/repositories/{image}"
+        )
+        print(f"Delete execution environment: {ee_delete_response['state']}")
