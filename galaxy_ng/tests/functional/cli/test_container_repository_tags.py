@@ -36,6 +36,7 @@ class ContainerRepositoryTagsTestCase(TestCaseUsingBindings, rbac_base.BaseRegis
         cls.registry_name = urlparse(cls.cfg.get_base_url()).netloc
         admin_user, admin_password = cls.cfg.pulp_auth
         cls.user_admin = {"username": admin_user, "password": admin_password}
+        cls._pull(f"{DOCKERHUB_PULP_FIXTURE_1}:manifest_a")
 
     def test_list_container_repository_tags(self):
         image_name = "foo/bar"
