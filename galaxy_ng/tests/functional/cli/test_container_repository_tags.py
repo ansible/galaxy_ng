@@ -1,15 +1,12 @@
 import unittest
 
-from subprocess import Popen, run, PIPE, STDOUT
 from urllib.parse import urlparse
 
 from pulp_container.tests.functional.api import rbac_base
 from pulp_container.tests.functional.constants import DOCKERHUB_PULP_FIXTURE_1
 from pulp_smash import cli
-from pulp_smash.pulp3.bindings import monitor_task
 
 from galaxy_ng.tests.functional.utils import TestCaseUsingBindings
-from galaxy_ng.tests.functional.utils import set_up_module as setUpModule  # noqa:F401
 
 
 class ContainerRepositoryTagsTestCase(TestCaseUsingBindings, rbac_base.BaseRegistryTest):
