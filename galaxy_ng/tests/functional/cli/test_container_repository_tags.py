@@ -2,6 +2,7 @@ import unittest
 
 from urllib.parse import urlparse
 
+from pulpcore.client.galaxy_ng.exceptions import ApiException
 from pulp_container.tests.functional.api import rbac_base
 from pulp_container.tests.functional.constants import DOCKERHUB_PULP_FIXTURE_1
 from pulp_smash import cli
@@ -42,6 +43,13 @@ class ContainerRepositoryTagsTestCase(TestCaseUsingBindings, rbac_base.BaseRegis
         image_name = "foo/bar"
         image_path = f"{DOCKERHUB_PULP_FIXTURE_1}:manifest_a"
         local_url = "/".join([self.registry_name, f"{image_name}:1.0"])
+
+        # expect the Container Repository Tags not to exist yet
+        with self.assertRaises(ApiException) as context:
+            self.container_repo_tags_api.list(base_path=image_name)
+
+        # Bad request
+        assert context.exception.status == 404
 
         self._push(image_path, local_url, self.user_admin)
 
