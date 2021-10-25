@@ -8,8 +8,8 @@ set -o errexit
 readonly GITHUB_PULL_REQUEST="${GITHUB_PULL_REQUEST:-}"
 readonly GITHUB_BRANCH="${GITHUB_BRANCH:-}"
 
-readonly MANIFESTS_GIT_USER="${MANIFESTS_GIT_USER:-}"
-readonly MANIFESTS_GIT_EMAIL="${MANIFESTS_GIT_EMAIL:-}"
+readonly MANIFESTS_GIT_USER="${MANIFESTS_GIT_USER:-rh-galaxy-droid}"
+readonly MANIFESTS_GIT_EMAIL="${MANIFESTS_GIT_EMAIL:-galaxy_ng+manifests@example.com}"
 readonly MANIFESTS_GIT_URL="git@github.com:RedHatInsights/manifests.git"
 
 readonly MANIFESTS_DIR='/tmp/manifests'
