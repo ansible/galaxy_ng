@@ -1,3 +1,4 @@
 git+https://github.com/pulp/pulp-smash.git#egg=pulp-smash
+pulp-container>=2.8.0,<2.9.0
 pytest
 orionutils
