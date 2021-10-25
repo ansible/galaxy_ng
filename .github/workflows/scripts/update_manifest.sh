@@ -24,8 +24,8 @@ log_message() {
 }
 
 generate_python_manifest() {
-    python .github/workflows/scripts/generate_python_manifest.py \
-        --requirements requirements/requirements.insights.txt
+    # "aiodns==3.0.0" -> "services-ansible-automation-hub:api/aiodns:3.0.0.pypi"
+    sed -e 's/#.*$//' -e '/^\s*$/d' -e '/^git+/d' -e 's/^/'"$PREFIX"'\//' -e 's/==/:/' -e 's/$/.pypi/' requirements/requirements.insights.txt | sort
 }
 
 generate_docker_manifest() {
