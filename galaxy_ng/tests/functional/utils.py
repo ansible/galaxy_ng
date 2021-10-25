@@ -224,3 +224,11 @@ class TestCaseUsingBindings(PulpTestCase):
 
         response = self.sync_api.sync(repo_name)
         monitor_task(f"/pulp/api/v3/tasks/{response.task}/")
+
+
+class ContainerTestCaseUsingBindings(TestCaseUsingBindings):
+    @classmethod
+    def setUpClass(cls):
+        if os.getenv("TEST") == "azure":
+            raise SkipTest("Container Registry disabled")
+        super().setUpClass()
