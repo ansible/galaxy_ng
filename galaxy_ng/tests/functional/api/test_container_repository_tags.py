@@ -32,7 +32,6 @@ class ContainerRepositoryTagsTestCase(ContainerTestCaseUsingBindings, rbac_base.
         """
         super().setUpClass()
 
-        cfg = cls.cfg
         cls.registry = cli.RegistryClient(cls.cfg)
         cls.registry.raise_if_unsupported(unittest.SkipTest, "Tests require podman/docker")
         cls.registry_name = urlparse(cls.cfg.get_base_url()).netloc
