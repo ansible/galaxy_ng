@@ -31,20 +31,22 @@ sync_urls = [
 ]
 
 urlpatterns = [
+
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
-    # For now endpoints are temporary deactivated
+    # For now endpoints are temporary deactivated until the issue is resolved.
     #
     # path("", viewsets.RepoMetadataViewSet.as_view({"get": "retrieve"}), name="repo-metadata"),
     # path(
-    #     "collections/all/",
-    #     viewsets.UnpaginatedCollectionViewSet.as_view({"get": "list"}),
-    #     name="all-collections-list",
+    #     'collections/all/',
+    #     viewsets.UnpaginatedCollectionViewSet.as_view({'get': 'list'}),
+    #     name='all-collections-list'
     # ),
     # path(
-    #     "collection_versions/all/",
+    #     'collection_versions/all/',
     #     viewsets.UnpaginatedCollectionVersionViewSet.as_view({"get": "list"}),
-    #     name="all-collection-versions-list",
+    #     name="all-collection-versions-list"
     # ),
+
     path(
         'collections/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
@@ -100,10 +102,5 @@ urlpatterns = [
         'tasks/<str:pk>/',
         viewsets.TaskViewSet.as_view({'get': 'retrieve'}),
         name='tasks-detail'
-    ),
-    path(
-        'excludes/',
-        views.ExcludesView.as_view(),
-        name='excludes-file'
     ),
 ]

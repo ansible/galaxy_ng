@@ -1,6 +1,6 @@
 # Galaxy NG
 
-[![Build Status](https://github.com/ansible/galaxy_ng/actions/workflows/ci.yml/badge.svg)](https://github.com/ansible/galaxy_ng/actions/workflows/ci.yml)
+[![Build Status](https://travis-ci.com/ansible/galaxy_ng.svg?branch=master)](https://travis-ci.com/ansible/galaxy_ng)
 
 A Pulp plugin to support hosting your very own Ansible Galaxy server.
 
@@ -20,7 +20,7 @@ View the latest version of the spec by [clicking here](https://petstore.swagger.
 
 * If you're interested in jumping in and helping out, [view the contributing guide](https://github.com/ansible/galaxy_ng/wiki#contributing-to-galaxyng).
 * To setup your development environment, [view the development setup guide](https://github.com/ansible/galaxy_ng/wiki/Development-Setup).
-* Chat with us on irc.libera.chat: #ansible-galaxy
+* Chat with us on irc.freenode.net: #ansible-galaxy
 * Found a bug or have a feature idea? Please [open an issue](https://issues.redhat.com/projects/AAH/issues).
 
 ## Installation

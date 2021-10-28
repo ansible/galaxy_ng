@@ -102,8 +102,8 @@ class TestTaskPublish(TestCase):
 
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
-    @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
-    def test_import_and_auto_approve(self, mocked_dispatch, mocked_import, mocked_get_created):
+    @mock.patch('galaxy_ng.app.tasks.promotion.enqueue_with_reservation')
+    def test_import_and_auto_approve(self, mocked_enqueue, mocked_import, mocked_get_created):
         inbound_repo = AnsibleRepository.objects.get(name=staging_name)
 
         golden_repo = AnsibleRepository.objects.get(name=golden_name)
@@ -119,7 +119,7 @@ class TestTaskPublish(TestCase):
         )
 
         self.assertTrue(mocked_import.call_count == 1)
-        self.assertTrue(mocked_dispatch.call_count == 2)
+        self.assertTrue(mocked_enqueue.call_count == 2)
 
         # test cannot find golden repo
         golden_repo.name = 'a_different_name_for_golden'
@@ -136,8 +136,8 @@ class TestTaskPublish(TestCase):
 
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.import_collection')
-    @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
-    def test_import_and_move_to_staging(self, mocked_dispatch, mocked_import, mocked_get_created):
+    @mock.patch('galaxy_ng.app.tasks.promotion.enqueue_with_reservation')
+    def test_import_and_move_to_staging(self, mocked_enqueue, mocked_import, mocked_get_created):
         staging_repo = AnsibleRepository.objects.get(name=staging_name)
 
         inbound_name = 'the_incoming_repo'
@@ -157,7 +157,7 @@ class TestTaskPublish(TestCase):
         )
 
         self.assertTrue(mocked_import.call_count == 1)
-        self.assertTrue(mocked_dispatch.call_count == 2)
+        self.assertTrue(mocked_enqueue.call_count == 2)
 
         # test cannot find staging repo
         staging_repo.name = 'a_different_name_for_staging'

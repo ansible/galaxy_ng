@@ -55,7 +55,7 @@ class BaseUiSynclistViewSet:
     def test_synclist_create(self):
         new_synclist_name = "new_synclist"
         post_data = {
-            "repository": self.repo.pk,
+            "repository": self.repo.pulp_id,
             "collections": [],
             "namespaces": [],
             "policy": "include",
@@ -83,7 +83,7 @@ class BaseUiSynclistViewSet:
         ns2.save()
 
         post_data = {
-            "repository": self.repo.pk,
+            "repository": self.repo.pulp_id,
             "collections": [],
             "namespaces": [ns1_name, ns2_name],
             "policy": "include",
@@ -197,7 +197,7 @@ class DeniedSynclistViewSet(BaseUiSynclistViewSet):
 
     def test_synclist_create(self):
         post_data = {
-            "repository": self.repo.pk,
+            "repository": self.repo.pulp_id,
             "collections": [],
             "namespaces": [],
             "policy": "include",
@@ -230,7 +230,7 @@ class DeniedSynclistViewSet(BaseUiSynclistViewSet):
 
     def test_synclist_update(self):
         post_data = {
-            "repository": self.repo.pk,
+            "repository": self.repo.pulp_id,
             "collections": [],
             "namespaces": [],
             "policy": "include",
@@ -307,7 +307,7 @@ class TestUiSynclistViewSetWithDefaultGroupPerms(DeniedSynclistViewSet, BaseSync
         ns1.save()
 
         post_data = {
-            "repository": self.repo.pk,
+            "repository": self.repo.pulp_id,
             "collections": [],
             "namespaces": [ns1_name],
             "policy": "include",

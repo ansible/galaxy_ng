@@ -1,4 +1,4 @@
-from pulpcore.plugin.tasking import dispatch
+from pulpcore.plugin.tasking import enqueue_with_reservation
 from pulp_ansible.app.models import AnsibleRepository, CollectionVersion
 from pulp_ansible.app.tasks.copy import copy_content
 
@@ -11,7 +11,7 @@ def call_copy_task(collection_version, source_repo, dest_repo):
         'dest_repo': dest_repo.pk,
         'content': [collection_version.pk],
     }]
-    return dispatch(
+    return enqueue_with_reservation(
         copy_content,
         locks,
         args=[config],
@@ -22,7 +22,7 @@ def call_copy_task(collection_version, source_repo, dest_repo):
 def call_remove_task(collection_version, repository):
     """Calls task to remove content from repo."""
     remove_task_args = (collection_version.pk, repository.pk)
-    return dispatch(
+    return enqueue_with_reservation(
         _remove_content_from_repository,
         [repository],
         args=remove_task_args,

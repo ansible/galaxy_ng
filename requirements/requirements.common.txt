@@ -4,24 +4,20 @@
 #
 #    pip-compile --output-file=requirements/requirements.common.txt setup.py
 #
-aiodns==3.0.0
+aiodns==2.0.0
     # via pulpcore
-aiofiles==0.7.0
+aiofiles==0.6.0
     # via pulpcore
 aiohttp==3.7.4.post0
     # via pulpcore
-aioredis==2.0.0
-    # via pulpcore
-ansible-core==2.11.0
+ansible-core==2.11.2
     # via galaxy-importer
 ansible-lint==5.0.8
     # via galaxy-importer
 async-lru==1.0.2
     # via pulp-ansible
 async-timeout==3.0.1
-    # via
-    #   aiohttp
-    #   aioredis
+    # via aiohttp
 asyncio-throttle==1.0.2
     # via pulpcore
 attrs==21.2.0
@@ -47,8 +43,9 @@ chardet==4.0.0
     # via
     #   aiohttp
     #   requests
-click==8.0.1
+click==7.1.2
     # via
+    #   galaxy-ng (setup.py)
     #   pulpcore
     #   rq
 colorama==0.4.4
@@ -63,7 +60,7 @@ defusedxml==0.7.1
     # via odfpy
 diff-match-patch==20200713
     # via django-import-export
-django==2.2.24
+django==2.2.23
     # via
     #   django-currentuser
     #   django-filter
@@ -80,7 +77,7 @@ django-currentuser==0.5.3
     # via pulpcore
 django-filter==2.4.0
     # via pulpcore
-django-guardian==2.4.0
+django-guardian==2.3.0
     # via pulpcore
 django-guid==2.2.1
     # via pulpcore
@@ -97,15 +94,15 @@ djangorestframework==3.12.4
     #   pulpcore
 djangorestframework-queryfields==1.0.0
     # via pulpcore
-drf-access-policy==0.9.2
+drf-access-policy==0.8.7
     # via pulpcore
 drf-nested-routers==0.93.3
     # via pulpcore
-drf-spectacular==0.17.3
+drf-spectacular==0.13.2
     # via
     #   galaxy-ng (setup.py)
     #   pulpcore
-dynaconf==3.1.5
+dynaconf==3.1.4
     # via pulpcore
 ecdsa==0.13.3
     # via pulp-container
@@ -121,7 +118,7 @@ galaxy-importer==0.3.4
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
-gunicorn==20.1.0
+gunicorn==20.0.4
     # via pulpcore
 idna==2.10
     # via
@@ -163,16 +160,16 @@ prometheus-client==0.10.1
     # via django-prometheus
 psycopg2==2.8.6
     # via pulpcore
-pulp-ansible==0.9.2
+pulp-ansible==0.7.3
     # via galaxy-ng (setup.py)
-pulp-container==2.7.0
+pulp-container==2.5.2
     # via galaxy-ng (setup.py)
-pulpcore==3.14.6
+pulpcore==3.11.2
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
     #   pulp-container
-pycares==4.0.0
+pycares==3.1.1
     # via aiodns
 pycodestyle==2.7.0
     # via flake8
@@ -223,7 +220,7 @@ rich==10.1.0
     # via
     #   ansible-lint
     #   enrich
-rq==1.8.1
+rq==1.7.0
     # via pulpcore
 ruamel.yaml==0.17.4
     # via ansible-lint
@@ -249,7 +246,6 @@ tenacity==7.0.0
 typing-extensions==3.10.0.0
     # via
     #   aiohttp
-    #   aioredis
     #   rich
 uritemplate==3.0.1
     # via drf-spectacular
@@ -270,9 +266,7 @@ xlrd==2.0.1
 xlwt==1.3.0
     # via tablib
 yarl==1.6.3
-    # via
-    #   aiohttp
-    #   pulpcore
+    # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

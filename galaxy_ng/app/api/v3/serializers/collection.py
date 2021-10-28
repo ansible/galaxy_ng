@@ -22,15 +22,6 @@ log = logging.getLogger(__name__)
 
 
 class HrefNamespaceMixin:
-
-    def _get_download_url(self, obj):
-        """Get artifact download URL."""
-
-        host = settings.ANSIBLE_API_HOSTNAME.strip("/")
-        prefix = settings.GALAXY_API_PATH_PREFIX.strip("/")
-        distro_base_path = self.context["path"]
-        return f"{host}/{prefix}/v3/artifacts/collections/{distro_base_path}/{obj.relative_path}"
-
     def _get_href(self, url_name, **kwargs):
         """Generic get_*_href that uses context["view_namespace"] to reverse the right url"""
 
@@ -99,9 +90,6 @@ class UnpaginatedCollectionVersionSerializer(_UnpaginatedCollectionVersionSerial
     class Meta(_UnpaginatedCollectionVersionSerializer.Meta):
         ref_name = "UnpaginatedCollectionVersionWithFixedHrefsSerializer"
 
-    def get_download_url(self, obj) -> str:
-        return self._get_download_url(obj)
-
     def get_href(self, obj):
         return self._get_href("collections-detail", namespace=obj.namespace, name=obj.name)
 
@@ -114,7 +102,14 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
         ref_name = "CollectionVersionWithDownloadUrlSerializer"
 
     def get_download_url(self, obj):
-        return self._get_download_url(obj)
+        """
+        Get artifact download URL.
+        """
+
+        host = settings.ANSIBLE_API_HOSTNAME.strip("/")
+        prefix = settings.GALAXY_API_PATH_PREFIX.strip("/")
+        distro_base_path = self.context["path"]
+        return f"{host}/{prefix}/v3/artifacts/collections/{distro_base_path}/{obj.relative_path}"
 
     def get_href(self, obj):
         return self._get_href(

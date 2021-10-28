@@ -16,8 +16,3 @@ services:
       - label:disable
     ports:
       - "1337:1337"
-    extra_hosts:
-      - "ci.foo.redhat.com:127.0.0.1"
-      - "prod.foo.redhat.com:127.0.0.1"
-      - "qa.foo.redhat.com:127.0.0.1"
-      - "stage.foo.redhat.com:127.0.0.1"

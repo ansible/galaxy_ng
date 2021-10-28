@@ -9,6 +9,7 @@ from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 from galaxy_ng.app.access_control import mixins
 from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT
 
+
 __all__ = ("Namespace", "NamespaceLink")
 
 
@@ -47,11 +48,9 @@ class NamespaceManager(models.Manager):
             create_inbound_repo(obj.name)
         return super().bulk_create(objs, **kwargs)
 
-    def get_or_create(self, *args, **kwargs):
-        ns, created = super().get_or_create(*args, **kwargs)
-        if created:
-            create_inbound_repo(kwargs['name'])
-        return ns, created
+    def delete(self):
+        delete_inbound_repo(self.name)
+        return super().delete()
 
 
 class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin, AutoDeleteObjPermsMixin):
@@ -96,10 +95,6 @@ class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin, AutoDeleteObj
             NamespaceLink(name=link["name"], url=link["url"], namespace=self)
             for link in links
         )
-
-    def delete(self, *args, **kwargs):
-        delete_inbound_repo(self.name)
-        return super().delete(*args, **kwargs)
 
     class Meta:
         permissions = (

@@ -11,7 +11,7 @@ from pulpcore.plugin.models import (
     Task,
     TaskGroup,
 )
-from pulpcore.plugin.tasking import add_and_remove, dispatch
+from pulpcore.plugin.tasking import add_and_remove, enqueue_with_reservation
 from pulp_ansible.app.models import (
     AnsibleRepository,
     CollectionVersion,
@@ -75,7 +75,7 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
             synclist_ids = [synclist.id for synclist in batch]
             locks = [synclist.repository for synclist in batch]
 
-            dispatch(
+            enqueue_with_reservation(
                 curate_synclist_repository_batch,
                 locks,
                 args=(synclist_ids,),
@@ -125,35 +125,30 @@ def curate_synclist_repository(synclist_pk, **kwargs):
 
     namespaces = synclist.namespaces.filter().values_list("name", flat=True)
 
-    # include adds only highest version and exclude removes all versions of the collection.
-    is_highest_query_param = {}
-    if synclist.policy == 'include':
-        is_highest_query_param = {"is_highest": True}
-
     collection_versions = CollectionVersion.objects.filter(
         Q(
             repositories=synclist.upstream_repository,
             collection__namespace__in=namespaces,
-            **is_highest_query_param
+            is_highest=True,
         )
         | Q(
             collection__in=synclist.collections.all(),
             repositories=synclist.repository,
-            **is_highest_query_param
+            is_highest=True,
         )
     )
 
     if synclist.policy == "exclude":
         task_kwargs = {
-            "base_version_pk": str(latest_upstream.pk),
-            "repository_pk": str(synclist.repository.pk),
+            "base_version_pk": str(latest_upstream.pulp_id),
+            "repository_pk": str(synclist.repository.pulp_id),
             "add_content_units": [],
             "remove_content_units": collection_versions,
         }
 
     elif synclist.policy == "include":
         task_kwargs = {
-            "repository_pk": str(synclist.repository.pk),
+            "repository_pk": str(synclist.repository.pulp_id),
             "add_content_units": collection_versions,
             "remove_content_units": ["*"],
         }

@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8
+FROM quay.io/centos/centos:8
 
 ARG USER_ID=1000
 ARG USER_NAME=galaxy
@@ -35,16 +35,15 @@ RUN set -ex; \
         git \
         gcc \
         glibc-langpack-en \
-        python38-devel \
+        python3-devel \
         libpq \
         libpq-devel \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \
-    && mkdir --mode=2775 /venv \
-    && chown ${USER_NAME}:${USER_GROUP} /venv \
-    && mkdir --mode=2775 /app \
-    && chown ${USER_NAME}:${USER_GROUP} /app
+    \
+    && mkdir /venv \
+    && chown ${USER_NAME}:${USER_GROUP} /venv
 
 USER ${USER_NAME}:${USER_GROUP}
 RUN set -ex; \
@@ -76,21 +75,19 @@ RUN set -ex; \
 
 # Finalize installation
 RUN set -ex; \
-    mkdir -p /entrypoints.d \
-            /etc/ansible \
-    && mkdir --mode=2775 -p /var/lib/pulp \
-    && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp \
-    && mkdir --mode=2775 -p \
-             /var/lib/pulp/artifact \
+    mkdir -p /var/lib/pulp/artifact \
              /var/lib/pulp/tmp \
              /tmp/ansible \
-    && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/artifact \
-    && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/tmp \
-    && chown ${USER_NAME}:${USER_GROUP} \
+             /etc/ansible \
+             /entrypoints.d \
+    && chown -R ${USER_NAME}:${USER_GROUP} \
+        /var/lib/pulp \
         /tmp/ansible \
         /etc/ansible \
-    && chmod -R 0775 /app/docker/entrypoint.sh \
+    && chmod -R 0775 /var/lib/pulp \
+                     /app/docker/entrypoint.sh \
                      /app/docker/bin/* \
+                     /tmp/ansible \
     && mv /app/docker/entrypoint.sh /entrypoint.sh \
     && mv /app/ansible.cfg /etc/ansible/ansible.cfg \
     && mv /app/docker/bin/* /usr/local/bin

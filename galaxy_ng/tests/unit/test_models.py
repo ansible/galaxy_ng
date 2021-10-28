@@ -45,12 +45,9 @@ class TestNamespaceModelManager(TestCase):
     def test_delete_namespace_deletes_inbound_repo(self):
         """When deleting a Namespace the manager should delete inbound instances."""
         Namespace.objects.get_or_create(name=self.namespace_name)
-        ns = Namespace.objects.get(name=self.namespace_name)
-        ns.delete()
+        Namespace.objects.filter(name=self.namespace_name).delete()
 
         inbound_name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=self.namespace_name)
-
         self.assertFalse(Namespace.objects.filter(name=self.namespace_name).exists())
-
         self.assertFalse(AnsibleRepository.objects.filter(name=inbound_name).exists())
         self.assertFalse(AnsibleDistribution.objects.filter(name=inbound_name).exists())

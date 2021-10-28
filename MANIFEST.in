@@ -1,8 +1,2 @@
-include CHANGES.rst
-include COMMITMENT
-include LICENSE
-include unittest_requirements.txt
-include pyproject.toml
-include requirements/requirements.common.txt
-graft galaxy_ng/app/webserver_snippets
-graft galaxy_ng/app/static
+include galaxy_ng/app/webserver_snippets/*
+recursive-include galaxy_ng/app/static/ *

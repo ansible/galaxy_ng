@@ -27,25 +27,6 @@ objects:
     # The name of the ClowdEnvironment providing the services
     envName: ${ENV_NAME}
 
-    jobs:
-      - name: db-migration
-        podSpec:
-          name: db-migration
-          image: ${IMAGE_NAME}:${IMAGE_TAG}
-          args: ['manage', 'migrate']
-          resources:
-            limits:
-              cpu: ${{DB_MIGRATION_CPU_LIMIT}}
-              memory: ${{DB_MIGRATION_MEMORY_LIMIT}}
-            requests:
-              cpu: ${{DB_MIGRATION_CPU_REQUEST}}
-              memory: ${{DB_MIGRATION_MEMORY_REQUEST}}
-          env:
-            - name: PULP_GALAXY_DEPLOYMENT_MODE
-              value: 'insights'
-            - name: PULP_CONTENT_ORIGIN
-              value: 'localhost'
-
     deployments:
     - name: "backend${SUFFIX}"
       minReplicas: ${{NGINX_REPLICAS}}
@@ -105,11 +86,32 @@ objects:
             value: '10000'
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
-          - name: prometheus_multiproc_dir
-            value: ${PROMETHEUS_DIR}
       webServices:
         public:
             enabled: true
+
+    - name: "pulp-resource-manager${SUFFIX}"
+      minReplicas: ${{PULP_RESOURCE_MANAGER_REPLICAS}}
+      podSpec:
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
+        args: ['run', 'resource-manager']
+        initContainers:
+          - args: ["manage", "migrate"]
+            inheritEnv: true
+        resources:
+          limits:
+            cpu: ${{PULP_RESOURCE_MANAGER_CPU_LIMIT}}
+            memory: ${{PULP_RESOURCE_MANAGER_MEMORY_LIMIT}}
+          requests:
+            cpu: ${{PULP_RESOURCE_MANAGER_CPU_REQUEST}}
+            memory: ${{PULP_RESOURCE_MANAGER_MEMORY_REQUEST}}
+        env:
+          - name: PULP_GALAXY_DEPLOYMENT_MODE
+            value: 'insights'
+          - name: PULP_CONTENT_ORIGIN
+            value: ${{CONTENT_ORIGIN}}
+          - name: PULP_REDIS_SSL
+            value: ${REDIS_SSL}
 
     - name: "pulp-content-app${SUFFIX}"
       minReplicas: ${{PULP_CONTENT_APP_REPLICAS}}
@@ -193,16 +195,6 @@ objects:
     objectStore:
       - automation-hub
 
-- apiVersion: cloud.redhat.com/v1alpha1
-  kind: ClowdJobInvocation
-  metadata:
-    name: "ah-init-${IMAGE_TAG}"
-    namespace: automation-hub
-  spec:
-    appName: automation-hub
-    jobs: ['db-migration']
-
-
 parameters:
 - description: Clowder ENV
   name: ENV_NAME
@@ -230,8 +222,6 @@ parameters:
   value: https://kubernetes.default.svc:443
 - name: REDIS_SSL
   value: "false"
-- name: PROMETHEUS_DIR
-  value: "/tmp"
 
 # nginx resource requirements
 - name: NGINX_REPLICAS
@@ -245,16 +235,6 @@ parameters:
 - name: NGINX_CPU_LIMIT
   value: 200m
 
-# nginx resource requirements
-- name: DB_MIGRATION_MEMORY_REQUEST
-  value: 256Mi
-- name: DB_MIGRATION_MEMORY_LIMIT
-  value: 1024Mi
-- name: DB_MIGRATION_CPU_REQUEST
-  value: 200m
-- name: DB_MIGRATION_CPU_LIMIT
-  value: 1000m
-
 # galaxy-api resource requirements
 - name: GALAXY_API_REPLICAS
   value: '1'
@@ -266,6 +246,18 @@ parameters:
   value: 200m
 - name: GALAXY_API_CPU_LIMIT
   value: 600m
+
+# pulp-resource-manager resource requirements
+- name: PULP_RESOURCE_MANAGER_REPLICAS
+  value: '1'
+- name: PULP_RESOURCE_MANAGER_MEMORY_REQUEST
+  value: 512Mi
+- name: PULP_RESOURCE_MANAGER_MEMORY_LIMIT
+  value: 512Mi
+- name: PULP_RESOURCE_MANAGER_CPU_REQUEST
+  value: 200m
+- name: PULP_RESOURCE_MANAGER_CPU_LIMIT
+  value: 500m
 
 # pulp-content-app resource requirements
 - name: PULP_CONTENT_APP_REPLICAS

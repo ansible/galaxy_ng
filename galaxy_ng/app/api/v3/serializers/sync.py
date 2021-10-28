@@ -38,7 +38,7 @@ class LastSyncTaskMixin:
             return
 
         return {
-            "task_id": sync_task.pk,
+            "task_id": sync_task.id,
             "state": sync_task.task.state,
             "started_at": sync_task.task.started_at,
             "finished_at": sync_task.task.finished_at,
@@ -67,7 +67,7 @@ class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer
     def get_distributions(self, obj):
         return [
             AnsibleDistributionSerializer(distro).data
-            for distro in obj.distributions.all()
+            for distro in obj.ansible_ansibledistribution.all()
         ]
 
     def get_last_sync_task_queryset(self, obj):

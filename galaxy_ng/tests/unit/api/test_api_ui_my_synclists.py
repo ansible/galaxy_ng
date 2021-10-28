@@ -51,7 +51,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
             log.info("gac path: %s", galaxy_app_config.path)
 
             post_data = {
-                "repository": self.repo.pk,
+                "repository": self.repo.pulp_id,
                 "collections": [],
                 "namespaces": [],
                 "policy": "include",
@@ -81,7 +81,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
             ns.save()
 
             post_data = {
-                "repository": self.repo.pk,
+                "repository": self.repo.pulp_id,
                 "collections": [],
                 "namespaces": [ns_name],
                 "policy": "include",
@@ -137,7 +137,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
             self.assertEqual(len(data), 1)
             self.assertEqual(data[0]["name"], self.synclist_name)
             self.assertEqual(data[0]["policy"], "exclude")
-            self.assertEqual(data[0]["repository"], self.repo.pk)
+            self.assertEqual(data[0]["repository"], self.repo.pulp_id)
 
     def test_my_synclist_detail(self):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):

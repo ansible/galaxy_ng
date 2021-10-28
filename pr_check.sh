@@ -33,7 +33,7 @@ bonfire deploy \
     --set-parameter "${APP_NAME}/${COMPONENT_NAME}/IMPORTER_JOB_NAMESPACE=${NAMESPACE}" \
     --set-image-tag ${IMAGE}=${IMAGE_TAG} \
     --namespace ${NAMESPACE} \
-    --no-remove-resources all \
+    --no-remove-resources \
     ${COMPONENTS_ARG}
 # END WORKAROUND
 
