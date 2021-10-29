@@ -60,7 +60,7 @@ defusedxml==0.7.1
     # via odfpy
 diff-match-patch==20200713
     # via django-import-export
-django==2.2.23
+django==2.2.24
     # via
     #   django-currentuser
     #   django-filter
@@ -237,7 +237,7 @@ six==1.16.0
     #   pyjwkest
     #   tenacity
     #   url-normalize
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
 tablib[html,ods,xls,xlsx,yaml]==3.0.0
     # via django-import-export
