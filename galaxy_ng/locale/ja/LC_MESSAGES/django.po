@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-22 23:27+0200\n"
+"POT-Creation-Date: 2021-10-15 22:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,256 +16,325 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: galaxy_ng/app/access_control/access_policy.py:69
+#: app/access_control/access_policy.py:87
 msgid "Namespace in filename not found."
 msgstr "ファイル名の名前空間が見つかりません。"
 
-#: galaxy_ng/app/access_control/fields.py:17
+#: app/access_control/fields.py:17
 msgid "object_permissions field is required"
 msgstr "object_permissions フィールドは必須です。"
 
-#: galaxy_ng/app/access_control/fields.py:21
+#: app/access_control/fields.py:21
 msgid "id or name field is required"
 msgstr "ID または名前のフィールドは必須です。"
 
-#: galaxy_ng/app/access_control/fields.py:27
+#: app/access_control/fields.py:27
 msgid "object_permissions must be a list of strings"
 msgstr "object_permissions は文字列のリストでなければなりません"
 
-#: galaxy_ng/app/access_control/fields.py:41
+#: app/access_control/fields.py:41
 msgid "Permission {} does not exist"
 msgstr "パーミッション {} は存在しません"
 
-#: galaxy_ng/app/access_control/fields.py:56
+#: app/access_control/fields.py:56
 msgid "Groups must be a list of group objects"
 msgstr "グループは、グループオブジェクトの一覧でなければなりません"
 
-#: galaxy_ng/app/access_control/fields.py:71
+#: app/access_control/fields.py:71
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
 msgstr "グループ名=%s、id=%s は存在しません"
 
-#: galaxy_ng/app/access_control/fields.py:75
-#: galaxy_ng/app/api/ui/serializers/user.py:118
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
 msgid "Invalid group name or ID"
 msgstr "無効なグループ名または ID"
 
-#: galaxy_ng/app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/execution_environment.py:375
+#, fuzzy
+#| msgid "Namespace \"{0}\" does not exist."
+msgid "Selected registry does not exist."
+msgstr "選択したレジストリーが存在しません。"
+
+#: app/api/ui/serializers/execution_environment.py:384
+msgid ""
+"Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
+"and a up to one \"/\"."
+msgstr "コンテナー名には、英数字、「.」、「_」、「-」、および「/」を最大 1つ含めることができます。"
+
+#: app/api/ui/serializers/execution_environment.py:402
+#, fuzzy
+#| msgid "Name cannot begin with '_'"
+msgid "Name cannot be changed."
+msgstr "名前を変更できません。"
+
+#: app/api/ui/serializers/synclist.py:41
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "同期リストの作成中にリポジトリー \"{pulp_id}\" が見つかりませんでした"
 
-#: galaxy_ng/app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:96
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "同期リストはすでに存在します: %s"
 
-#: galaxy_ng/app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:104
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
 
-#: galaxy_ng/app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
 msgstr "同期リスト {synclist} の更新中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
 
-#: galaxy_ng/app/api/ui/serializers/user.py:60
+#: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
 msgstr "要求するユーザーが所属しないユーザーグループを変更するには、「galaxy.change_group」パーミッションが必要です。"
 
-#: galaxy_ng/app/api/ui/serializers/user.py:71
+#: app/api/ui/serializers/user.py:85
 msgid "Must be a super user to grant super user permissions."
 msgstr "スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があります。"
 
-#: galaxy_ng/app/api/ui/serializers/user.py:114
+#: app/api/ui/serializers/user.py:128
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "グループ名=%(name)s、id=%(id)s は存在しません"
 
-#: galaxy_ng/app/api/ui/viewsets/collection.py:57
+#: app/api/ui/views/index_execution_environments.py:36
+msgid "Indexing execution environments is not supported on this registry."
+msgstr "実行環境のインデックス作成は、このレジストリーではサポートされません。"
+
+#: app/api/ui/views/sync.py:37 app/api/v3/views/sync.py:34
+#, python-format
+msgid "The %s distribution does not have any remotes associated with it."
+msgstr "%s ディストリビューションには、リモートが関連付けられていません。"
+
+#: app/api/ui/views/sync.py:51
+#, fuzzy, python-format
+#| msgid "The %s distribution does not have any remotes associated with it."
+msgid "The %s remote does not have any registries associated with it."
+msgstr "%s リモートには、リモートが関連付けられていません。"
+
+#: app/api/ui/viewsets/collection.py:60
 msgid "Distribution base path is required"
 msgstr "ディストリビューションベースパスが必要です"
 
-#: galaxy_ng/app/api/ui/viewsets/collection.py:155
+#: app/api/ui/viewsets/collection.py:175
 msgid "Retrieve collection version"
 msgstr "コレクションバージョンの取得"
 
-#: galaxy_ng/app/api/ui/viewsets/collection.py:166
+#: app/api/ui/viewsets/collection.py:186
 msgid "Collection version not found for: {}"
 msgstr "コレクションバージョンが見つかりません: {}"
 
-#: galaxy_ng/app/api/ui/viewsets/collection.py:222
+#: app/api/ui/viewsets/collection.py:242
 msgid "Retrieve collection import"
 msgstr "コレクションインポートの取得"
 
-#: galaxy_ng/app/api/ui/viewsets/group.py:45
+#: app/api/ui/viewsets/group.py:45
 #, python-format
 msgid "A group named %s already exists."
 msgstr "%s という名前のグループはすでに存在します。"
 
-#: galaxy_ng/app/api/utils.py:45
+#: app/api/utils.py:49
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
 msgstr "ファイル名 {filename} が無効です。想定される形式: namespace-name-version.tar.gz"
 
-#: galaxy_ng/app/api/utils.py:52
+#: app/api/utils.py:56
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
 msgstr "ファイル名 {filename} のバージョン文字列 {version} が無効です。セマンティックのバージョン形式が必要です。"
 
-#: galaxy_ng/app/api/utils.py:56
+#: app/api/utils.py:60
 #, python-format
 msgid "Expected namespace to be max length of %s"
 msgstr "想定される名前空間の最大長は %s です"
 
-#: galaxy_ng/app/api/utils.py:58
+#: app/api/utils.py:62
 #, python-format
 msgid "Expected name to be max length of %s"
 msgstr "想定される名前の最大長は %s です"
 
-#: galaxy_ng/app/api/utils.py:60
+#: app/api/utils.py:64
 #, python-format
 msgid "Expected version to be max length of %s"
 msgstr "想定されるバージョンの最大長は %s です"
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:60
+#: app/api/v3/serializers/namespace.py:60
 #, python-format
 msgid "'%s' is not a valid url."
 msgstr "「%s」は有効な URL ではありません"
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:88
+#: app/api/v3/serializers/namespace.py:88
 msgid "Attribute 'name' is required"
 msgstr "属性「名」が必要です。"
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:91
+#: app/api/v3/serializers/namespace.py:91
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr "名前に使用できる値は小文字、アンダースコア、数字のみです"
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:94
+#: app/api/v3/serializers/namespace.py:94
 msgid "Name must be longer than 2 characters"
 msgstr "名前は 2 文字以上にする必要があります"
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:97
+#: app/api/v3/serializers/namespace.py:97
 msgid "Name cannot begin with '_'"
 msgstr "名前は '_' で開始できません"
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:85
+#: app/api/v3/serializers/sync.py:66
 msgid "Password for proxy authentication."
 msgstr "プロキシー認証のパスワード。"
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:92
+#: app/api/v3/serializers/sync.py:73
 msgid "User for proxy authentication."
 msgstr "プロキシー認証のユーザー。"
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:105
+#: app/api/v3/serializers/sync.py:86
 msgid "Remote password."
 msgstr "リモートパスワード。"
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:112
+#: app/api/v3/serializers/sync.py:93
 msgid "Remote user."
 msgstr "リモートユーザー。"
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:161
+#: app/api/v3/serializers/sync.py:146
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
 msgstr "要件ファイルを指定せずに、コミュニティードメインからのコンテンツを同期することはできません。"
 
-#: galaxy_ng/app/api/v3/views/sync.py:29
-#, python-format
-msgid "The %s distribution does not have any remotes associated with it."
-msgstr "%s ディストリビューションには、リモートが関連付けられていません。"
-
-#: galaxy_ng/app/api/v3/views/sync.py:40
+#: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
 msgstr "要件ファイルを指定せずに galaxy.ansible.com からコンテンツを同期することはできません。"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:172
+#: app/api/v3/viewsets/collection.py:122
+#, python-brace-format
+msgid ""
+"Collection {namespace}.{name} could not be deleted because there are other "
+"collections that require it."
+msgstr "コレクション {namespace}.{name} は、他のコレクションで必要とされているため、削除できませんでした。"
+
+#: app/api/v3/viewsets/collection.py:200
+#, python-brace-format
+msgid ""
+"Collection version {namespace}.{name} {version} could not be deleted because "
+"there are other collections that require it."
+msgstr "コレクションバージョン {namespace}.{name} {version} は、他のコレクションで必要とされるため、削除できませんでした。"
+
+#: app/api/v3/viewsets/collection.py:289
 #, python-format
 msgid "Path does not match: \"%s\""
 msgstr "パスが一致しません: \"%s\""
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:186
+#: app/api/v3/viewsets/collection.py:310
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
 msgstr "名前空間 \"{0}\" は存在しません。"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:279
+#: app/api/v3/viewsets/collection.py:398
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
 msgstr "コンテンツアプリからの予期しない応答。コード: %s"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:301
+#: app/api/v3/viewsets/collection.py:428
 #, python-format
 msgid "Collection %s not found"
 msgstr "コレクション %s が見つかりません"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:309
+#: app/api/v3/viewsets/collection.py:436
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
 msgstr "コレクション %s を移動するためのリポジトリーが見つかりません"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:313
+#: app/api/v3/viewsets/collection.py:440
 #, python-format
 msgid "Collection %s not found in source repo"
 msgstr "ソースリポジトリーでコレクション %s が見つかりません"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:317
+#: app/api/v3/viewsets/collection.py:444
 #, python-format
 msgid "Collection %s already found in destination repo"
 msgstr "宛先リポジトリーでコレクション %s がすでに見つかっています"
 
-#: galaxy_ng/app/api/v3/viewsets/namespace.py:61
+#: app/api/v3/viewsets/namespace.py:67
 #, python-format
 msgid "A namespace named %s already exists."
 msgstr "%s という名前の名前空間はすでに存在します。"
 
-#: galaxy_ng/app/exceptions.py:8
+#: app/api/v3/viewsets/namespace.py:88
+#, python-brace-format
+msgid ""
+"Namespace {name} cannot be deleted because there are still collections "
+"associated with it."
+msgstr "名前空間 {name} には関連付けられるコレクションがあるため、削除できません。"
+
+#: app/auth/keycloak.py:51
+msgid "Authentication failed."
+msgstr "認証に失敗しました。"
+
+#: app/exceptions.py:8
 msgid "Data conflicts with existing entity."
 msgstr "データは既存のエンティティーと競合します。"
 
-#: galaxy_ng/app/tasks/publishing.py:54 galaxy_ng/app/tasks/publishing.py:84
+#: app/tasks/index_registry.py:26
+#, python-brace-format
+msgid "Failed to create container {remote_name}. {error}"
+msgstr "コンテナー {remote_name} の作成に失敗しました。{error}"
+
+#: app/tasks/index_registry.py:90
+msgid ""
+"A remote container with this name already exists, but is not associated with "
+"any registry."
+msgstr "この名前が割り当てられたリモートコンテナーはすでに存在しますが、レジストリーには関連付けられていません。"
+
+#: app/tasks/index_registry.py:97
+#, fuzzy
+#| msgid "A namespace named %s already exists."
+msgid "A local container with this name already exists."
+msgstr "この名前が指定されたローカルコンテナーはすでに存在します。"
+
+#: app/tasks/publishing.py:54 app/tasks/publishing.py:84
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "ステージングリポジトリーが見つかりませんでした: \"%s\""
 
-#: galaxy_ng/app/tasks/synclist.py:45
+#: app/tasks/synclist.py:45
 #, python-format
 msgid "Curating all synclists repos that curate from %s"
 msgstr "%s から再帰的にすべての同期リストをキュレート中"
 
-#: galaxy_ng/app/tasks/synclist.py:56
+#: app/tasks/synclist.py:56
 msgid "Synclists curating upstream repo"
 msgstr "キュレート中のアップストリームリポジトリーの同期リスト"
 
-#: galaxy_ng/app/tasks/synclist.py:63
+#: app/tasks/synclist.py:63
 msgid "Synclists curating upstream repo task"
 msgstr "キュレート中のアップストリームのリポジトリータスクの同期リスト"
 
-#: galaxy_ng/app/tasks/synclist.py:91
+#: app/tasks/synclist.py:91
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
 msgstr "%s 更新に基づく %s 同期リストリポジトリーの級レートの完了"
 
-#: galaxy_ng/app/tasks/synclist.py:120
+#: app/tasks/synclist.py:120
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
 msgstr "アップストリームのリポジトリーから \"%s\" リポジトリー \"%s\" をキュレーとする policy=%s で同期リスト \"%s\" を適用中"
 
-#: galaxy_ng/app/tasks/synclist.py:162
+#: app/tasks/synclist.py:162
 msgid "Unexpected synclist policy {}"
 msgstr "予期せぬ同期リストポリシー {}"
