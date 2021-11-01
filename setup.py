@@ -88,6 +88,7 @@ class BuildPyCommand(_BuildPyCommand):
 
 
 requirements = [
+    "epdb",
     "galaxy-importer==0.4.0",
     "pulpcore>=3.15.0,<3.16.0",
     "pulp-ansible>=0.10.1,<0.11.0",

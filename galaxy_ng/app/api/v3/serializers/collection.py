@@ -115,7 +115,7 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
 
     class Meta(_CollectionVersionSerializer.Meta):
         ref_name = "CollectionVersionWithDownloadUrlSerializer"
-        fields = _CollectionVersionSerializer.Meta.fields + ('scmref',)
+        fields = _CollectionVersionSerializer.Meta.fields + ('is_role', 'commit', 'repository',)
 
     def get_download_url(self, obj) -> str:
         return self._get_download_url(obj)
@@ -125,6 +125,9 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
             "collection-versions-detail",
             namespace=obj.namespace, name=obj.name, version=obj.version
         )
+
+    def get_repository(self, obj) -> str:
+        return obj.metadata.get('repository')
 
 
 class CollectionUploadSerializer(Serializer):
