@@ -27,6 +27,25 @@ objects:
     # The name of the ClowdEnvironment providing the services
     envName: ${ENV_NAME}
 
+    jobs:
+      - name: db-migration
+        podSpec:
+          name: db-migration
+          image: ${IMAGE_NAME}:${IMAGE_TAG}
+          args: ['manage', 'migrate']
+          resources:
+            limits:
+              cpu: ${{DB_MIGRATION_CPU_LIMIT}}
+              memory: ${{DB_MIGRATION_MEMORY_LIMIT}}
+            requests:
+              cpu: ${{DB_MIGRATION_CPU_REQUEST}}
+              memory: ${{DB_MIGRATION_MEMORY_REQUEST}}
+          env:
+            - name: PULP_GALAXY_DEPLOYMENT_MODE
+              value: 'insights'
+            - name: PULP_CONTENT_ORIGIN
+              value: 'localhost'
+
     deployments:
     - name: "backend${SUFFIX}"
       minReplicas: ${{NGINX_REPLICAS}}
@@ -197,6 +216,16 @@ objects:
     objectStore:
       - automation-hub
 
+- apiVersion: cloud.redhat.com/v1alpha1
+  kind: ClowdJobInvocation
+  metadata:
+    name: "ah-init-${IMAGE_TAG}"
+    namespace: automation-hub
+  spec:
+    appName: automation-hub
+    jobs: ['db-migration']
+
+
 parameters:
 - description: Clowder ENV
   name: ENV_NAME
@@ -238,6 +267,16 @@ parameters:
   value: 50m
 - name: NGINX_CPU_LIMIT
   value: 200m
+
+# nginx resource requirements
+- name: DB_MIGRATION_MEMORY_REQUEST
+  value: 256Mi
+- name: DB_MIGRATION_MEMORY_LIMIT
+  value: 1024Mi
+- name: DB_MIGRATION_CPU_REQUEST
+  value: 200m
+- name: DB_MIGRATION_CPU_LIMIT
+  value: 1000m
 
 # galaxy-api resource requirements
 - name: GALAXY_API_REPLICAS
