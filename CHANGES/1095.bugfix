@@ -1,0 +1,1 @@
+Fix a bug where remote container repositories could not be deleted.

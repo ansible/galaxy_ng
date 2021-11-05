@@ -132,11 +132,26 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
         ids_for_multi_delete = [
             (str(distribution.pk), "container", "ContainerDistributionSerializer"),
         ]
-        if distribution.repository and distribution.repository.cast().PUSH_ENABLED:
+        if distribution.repository:
             reservations.append(distribution.repository)
-            ids_for_multi_delete.append(
-                (str(distribution.repository.pk), "container", "ContainerPushRepositorySerializer"),
-            )
+
+            if distribution.repository.cast().PUSH_ENABLED:
+                ids_for_multi_delete.append(
+                    (str(distribution.repository.pk), "container",
+                        "ContainerPushRepositorySerializer"),
+                )
+            else:
+                ids_for_multi_delete.append(
+                    (str(distribution.repository.pk), "container",
+                        "ContainerRepositorySerializer"),
+                )
+
+            if distribution.repository.remote:
+                ids_for_multi_delete.append(
+                    (str(distribution.repository.remote.pk), "container",
+                        "ContainerRemoteSerializer"),
+                )
+
 
         # Delete the distribution, repository, and perform orphan cleanup
         async_result = dispatch(
