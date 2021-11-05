@@ -39,11 +39,7 @@ class ContainerSyncandManifestListTestCase(TestCaseUsingBindings):
         self.addCleanup(self.smash_client.delete, f"{self.galaxy_api_prefix}/_ui/v1/execution-environments/registries/{self.docker_registry.pk}/")
 
     def _delete_remote_repo(self, remote):
-        # TODO the repo deletion endpoint is currently borked for remote containers
-
-        # self.smash_client.delete(f"{self.galaxy_api_prefix}/_ui/v1/execution-environments/repositories/{remote.name}/")
-
-        pass
+        self.smash_client.delete(f"{self.galaxy_api_prefix}/_ui/v1/execution-environments/repositories/{remote.name}/")
 
     def test_manifests_and_remote_sync(self):
         remote_repo = self.container_remotes_api.create({
