@@ -147,6 +147,7 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
                 )
 
             if distribution.repository.remote:
+                reservations.append(distribution.repository.remote)
                 ids_for_multi_delete.append(
                     (str(distribution.repository.remote.pk), "container",
                         "ContainerRemoteSerializer"),
