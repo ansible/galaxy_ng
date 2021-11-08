@@ -268,9 +268,9 @@ parameters:
 - name: NGINX_CPU_LIMIT
   value: 200m
 
-# nginx resource requirements
+# db-migration resource requirements
 - name: DB_MIGRATION_MEMORY_REQUEST
-  value: 256Mi
+  value: 512Mi
 - name: DB_MIGRATION_MEMORY_LIMIT
   value: 1024Mi
 - name: DB_MIGRATION_CPU_REQUEST
