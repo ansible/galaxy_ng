@@ -38,7 +38,12 @@ from pulpcore.client.galaxy_ng import (
     ApiContentV3SyncConfigApi,
     ApiV3NamespacesApi,
     ApiUiV1ExecutionEnvironmentsRepositoriesContentTagsApi as ContainerRepositoryEndpointApi,
-    ApiUiV1ExecutionEnvironmentsRepositoriesApi as ContainerRepositoryApi
+    ApiUiV1ExecutionEnvironmentsRepositoriesApi as ContainerRepositoryApi,
+    ApiUiV1ExecutionEnvironmentsRemotesApi,
+    ApiUiV1ExecutionEnvironmentsRegistriesApi,
+    ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi,
+    ApiUiV1ExecutionEnvironmentsRegistriesSyncApi,
+    ApiUiV1ExecutionEnvironmentsRepositoriesContentImagesApi as ContainerImagesAPI,
 )
 
 
@@ -173,6 +178,11 @@ class TestCaseUsingBindings(PulpTestCase):
         cls.sync_api = ApiContentV3SyncApi(cls.client)
         cls.container_repo_tags_api = ContainerRepositoryEndpointApi(cls.client)
         cls.container_repo_api = ContainerRepositoryApi(cls.client)
+        cls.container_remotes_api = ApiUiV1ExecutionEnvironmentsRemotesApi(cls.client)
+        cls.container_registries_api = ApiUiV1ExecutionEnvironmentsRegistriesApi(cls.client)
+        cls.container_remote_sync_api = ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
+        cls.container_registry_sync_api = ApiUiV1ExecutionEnvironmentsRegistriesSyncApi(cls.client)
+        cls.container_images_api = ContainerImagesAPI(cls.client)
         cls.get_ansible_cfg_before_test()
         cls.galaxy_api_prefix = os.getenv("PULP_GALAXY_API_PATH_PREFIX", "/api/galaxy").rstrip("/")
 
