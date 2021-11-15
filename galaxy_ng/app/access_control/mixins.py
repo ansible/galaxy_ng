@@ -1,6 +1,16 @@
 from django.conf import settings
 from django.db import transaction
-from guardian.shortcuts import get_groups_with_perms, assign_perm, remove_perm
+from django.core.exceptions import BadRequest
+from django.utils.translation import gettext_lazy as _
+
+from rest_framework.exceptions import ValidationError
+
+from pulpcore.app.role_util import (
+    assign_role,
+    remove_role,
+    get_groups_with_perms_attached_roles
+)
+
 from django_lifecycle import hook
 
 
@@ -9,7 +19,7 @@ class GroupModelPermissionsMixin:
 
     @property
     def groups(self):
-        return get_groups_with_perms(self, attach_perms=True)
+        return get_groups_with_perms_attached_roles(self)
 
     @groups.setter
     def groups(self, groups):
@@ -17,20 +27,26 @@ class GroupModelPermissionsMixin:
 
     @transaction.atomic
     def _set_groups(self, groups):
-        # guardian doesn't allow adding permissions to objects that haven't been
+        # Can't add permissions to objects that haven't been
         # saved. When creating new objects, save group data to _groups where it
         # can be picked up by the post save hook.
         if self._state.adding:
             self._groups = groups
         else:
-            current_groups = get_groups_with_perms(self, attach_perms=True)
+            current_groups = get_groups_with_perms_attached_roles(self)
             for group in current_groups:
                 for perm in current_groups[group]:
-                    remove_perm(perm, group, self)
+                    remove_role(perm, group, self)
 
             for group in groups:
-                for perm in groups[group]:
-                    assign_perm(perm, group, self)
+                for role in groups[group]:
+                    try:
+                        assign_role(role, group, self)
+                    except BadRequest:
+                        raise ValidationError(
+                            detail={'groups': _(f'Role {role} does not exist or does not '
+                                                'have any permissions related to this object.')}
+                        )
 
     @hook('after_save')
     def set_object_groups(self):

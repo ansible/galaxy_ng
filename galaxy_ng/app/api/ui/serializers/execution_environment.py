@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 
-from guardian.shortcuts import get_users_with_perms
+from pulpcore.app.role_util import get_users_with_perms
 
 from pulp_container.app import models as container_models
 from pulp_container.app import serializers as container_serializers

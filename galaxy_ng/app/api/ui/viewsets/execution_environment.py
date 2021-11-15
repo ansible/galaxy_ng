@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django_filters import filters
 from django_filters.rest_framework import DjangoFilterBackend, filterset
 from drf_spectacular.utils import extend_schema
-from guardian.shortcuts import get_objects_for_user
+from pulpcore.app.role_util import get_objects_for_user
 from pulp_container.app import models as container_models
 from pulpcore.plugin import models as core_models
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
@@ -47,7 +47,7 @@ class RepositoryFilter(filterset.FilterSet):
     def has_permissions(self, queryset, name, value):
         perms = self.request.query_params.getlist(name)
         namespaces = get_objects_for_user(
-            self.request.user, perms, klass=container_models.ContainerNamespace)
+            self.request.user, perms, qs=container_models.ContainerNamespace.objects.all())
         return self.queryset.filter(namespace__in=namespaces)
 
 

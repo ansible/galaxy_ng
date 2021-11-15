@@ -1,6 +1,6 @@
 from rest_framework import mixins
 from pulp_ansible.app import models as pulp_models
-from guardian.shortcuts import get_objects_for_user
+from pulpcore.app.role_util import get_objects_for_user
 
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers, versioning
