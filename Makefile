@@ -1,6 +1,5 @@
 DOCKER_IMAGE_NAME = localhost/galaxy_ng/galaxy_ng
 
-
 .PHONY: help
 help:             ## Show the help.
 	@echo "Usage: make <target>"
@@ -8,32 +7,26 @@ help:             ## Show the help.
 	@echo "Targets:"
 	@fgrep "##" Makefile | fgrep -v fgrep
 
-# ANSIBLE_SKIP_CONFLICT_CHECK=1 tells pip/pip-compile to avoid
-# refusing to update ansbile 2.9 to ansible 2.10.
-
 
 # Update python dependencies lock files (i.e. requirements.*.txt)
 
-.PHONY: requirements/update_local
-requirements/update_local:     ## Update based on setup.py and *.in files
-	pip-compile --output-file=requirements/requirements.common.txt setup.py
-	pip-compile --output-file=requirements/requirements.insights.txt requirements/requirements.insights.in setup.py
-	pip-compile --output-file=requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py
+.PHONY: requirements/no-pip-upgrade
+requirements/no-pip-upgrade:     ## Update based on setup.py and *.in files without asking pip for latest version
+	pip-compile -o requirements/requirements.common.txt setup.py
+	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py
+	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py
 
-.PHONY: requirements/update_local_and_pip_param
-requirements/update_local_and_pip_param:     ## Update based on setup.py and *.in files, and parameter via pip, i.e. package=djangorestframework
-	pip-compile --output-file=requirements/requirements.common.txt setup.py --upgrade-package $(package)
-	pip-compile --output-file=requirements/requirements.insights.txt requirements/requirements.insights.in setup.py --upgrade-package $(package)
-	pip-compile --output-file=requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py --upgrade-package $(package)
+.PHONY: requirements/pip-upgrade-single-package
+requirements/pip-upgrade-single-package:     ## Update based on setup.py and *.in files, and parameter via pip, i.e. package=djangorestframework
+	pip-compile -o requirements/requirements.common.txt setup.py --upgrade-package $(package)
+	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py --upgrade-package $(package)
+	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py --upgrade-package $(package)
 
-.PHONY: requirements/update_local_and_pip_all
-requirements/update_local_and_pip_all:     ## Update based on setup.py and *.in files, and all packages via pip
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile $(PIP_COMPILE_UPDATE_SPEC) -o requirements/requirements.common.txt \
-		setup.py
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.standalone.txt \
-		setup.py requirements/requirements.standalone.in
-	ANSIBLE_SKIP_CONFLICT_CHECK=1 pip-compile -U -o requirements/requirements.insights.txt \
-		setup.py requirements/requirements.insights.in
+.PHONY: requirements/pip-upgrade-all
+requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, and all packages via pip
+	pip-compile -o requirements/requirements.common.txt setup.py --upgrade
+	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in --upgrade
+	pip-compile -o requirements/requirements.standalone.txt setup.py requirements/requirements.standalone.in --upgrade
 
 
 .PHONY: docker/build
