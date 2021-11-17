@@ -7,11 +7,14 @@ from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+# from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import CollectionVersion
+from pulp_ansible.app.models import Collection
+
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
@@ -97,6 +100,22 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
                         pulp_ansible_views.CollectionViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
     serializer_class = CollectionSerializer
+
+    # doesn't work here!?
+    #filter_backends = [DjangoFilterBackend]
+    #filterset_fields = ['is_role']
+
+    def get_queryset(self):
+        #import epdb; epdb.serve(port=8888)
+        queryset = Collection.objects.all()
+        '''
+        roles = self.request.query_params.get('role', False)
+        if roles:
+            queryset = queryset.filter(collection__is_role=True)
+        else:
+            queryset = queryset.filter(collection__is_role=False)
+        '''
+        return queryset
 
     @extend_schema(
         description="Trigger an asynchronous delete task",

@@ -32,6 +32,7 @@ class CollectionByCollectionVersionFilter(pulp_ansible_viewsets.CollectionVersio
     versioning_class = versioning.UIVersioning
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
     deprecated = filters.BooleanFilter()
+    is_role = filters.BooleanFilter()
 
 
 class CollectionViewSet(

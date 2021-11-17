@@ -74,6 +74,10 @@ urlpatterns = [
         name="collection-import",
     ),
     path(
+        "imports/collections/",
+        viewsets.CollectionImportViewSet.as_view({"post": "create"})
+    ),
+    path(
         "artifacts/collections/",
         viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
         name="collection-artifact-upload",
