@@ -60,7 +60,7 @@ def set_role_definitions(sender, **kwargs):
         locked_roles = GALAXY_VIEWSETS[viewset]['LOCKED_ROLES']
         if locked_roles is not None:
             desired_roles.update(locked_roles or {})
-    adjust_roles(apps, role_prefix, desired_roles, 0)
+    adjust_roles(apps, role_prefix, desired_roles, verbosity=kwargs.get("verbosity", 1))
 
 
 post_migrate.connect(
