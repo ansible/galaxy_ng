@@ -1,1 +1,0 @@
-Update settings.py with Redis config provided by Clowder

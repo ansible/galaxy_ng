@@ -1,1 +1,0 @@
-Add created_at and updated_at filters to container registries endpoint.
