@@ -171,6 +171,8 @@ objects:
             value: ${{API_DOMAIN}}
           - name: IMPORTER_JOB_NAMESPACE
             value: ${{IMPORTER_JOB_NAMESPACE}}
+          - name: IMPORTER_IMAGE_TAG
+            value: ${{IMPORTER_IMAGE_TAG}}
           - name: IMPORTER_MEMORY_REQUEST
             value: 1Gi
           - name: IMPORTER_MEMORY_LIMIT
@@ -227,6 +229,8 @@ parameters:
 
 - name: IMPORTER_JOB_NAMESPACE
   required: true
+- name: IMPORTER_IMAGE_TAG
+  value: 'latest'
 - name: CONTENT_ORIGIN
   value: 'localhost'
 - name: API_DOMAIN
