@@ -8,11 +8,9 @@ services:
       - "8002:8002"
     volumes:
       - "${ANSIBLE_HUB_UI_PATH}:/hub/app/"
-      # Forces npm to ignore the node_node modules in the volume and look
-      # for it in ../node_modules instead
-      - "nodata:/hub/app/node_modules:ro"
+    tmpfs:
+      # Forces npm to ignore the node_modules in the volume and look
+      # for it in ../node_modules instead, while still being able to write .cache
+      - "/hub/app/node_modules"
     depends_on:
       - api
-
-volumes:
-  nodata: {}
