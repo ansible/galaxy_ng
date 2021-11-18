@@ -114,7 +114,6 @@ services:
 
   swagger-ui:
    image: swaggerapi/swagger-ui
-   container_name: swagger_ui_container
    ports:
       - "8003:8080"
   #  volumes:
