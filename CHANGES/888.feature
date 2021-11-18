@@ -1,1 +1,0 @@
-Add CONNECTED_ANSIBLE_CONTROLLERS setting which enables users to specify a list of controller instances that they wish to have galaxy ng connect to. 
