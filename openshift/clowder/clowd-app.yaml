@@ -172,7 +172,7 @@ objects:
           - name: IMPORTER_JOB_NAMESPACE
             value: ${{IMPORTER_JOB_NAMESPACE}}
           - name: IMPORTER_IMAGE_TAG
-            value: ${{IMPORTER_IMAGE_TAG}}
+            value: ${IMPORTER_IMAGE_TAG}
           - name: IMPORTER_MEMORY_REQUEST
             value: 1Gi
           - name: IMPORTER_MEMORY_LIMIT
