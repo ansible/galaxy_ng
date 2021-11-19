@@ -1,1 +1,0 @@
-Fix keycloak setting not being loaded from /etc/pulp/settings.py

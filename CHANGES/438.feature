@@ -1,1 +1,0 @@
-Create remote sync api endpoint.
