@@ -1,1 +1,0 @@
-Create access policy for registries endpoint.
