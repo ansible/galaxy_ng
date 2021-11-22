@@ -36,3 +36,13 @@ class ContainerDistributionViewSet(
     serializer_class = serializers.ContainerRepositorySerializer
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     endpoint_name = "container"
+
+
+# shim view to satisfy upstream pulpcore requirements
+class ContentRedirectContentGuardViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+):
+    queryset = models.ContentRedirectContentGuard.objects.all()
+    endpoint_name = "contentgaurd"
