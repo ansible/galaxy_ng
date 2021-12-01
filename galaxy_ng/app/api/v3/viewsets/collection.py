@@ -115,6 +115,7 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
         else:
             queryset = queryset.filter(collection__is_role=False)
         '''
+        print(f'GET_QUERYSET: {queryset}')
         return queryset
 
     @extend_schema(
