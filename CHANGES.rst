@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.2.7 (2021-12-02)
+==================
+
+Bugfixes
+--------
+
+- Fix proxy and proxy credentials during collection sync.
+  `AAH-910 <https://issues.redhat.com/browse/AAH-910>`_
+
+
+----
+
+
 4.2.6 (2021-08-26)
 ==================
 
