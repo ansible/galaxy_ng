@@ -11,9 +11,6 @@ from .promotion import call_copy_task, call_remove_task
 
 log = logging.getLogger(__name__)
 
-if settings.GALAXY_ENABLE_API_ACCESS_LOG:
-    api_access_log = logging.getLogger("automated_logging")
-
 GOLDEN_NAME = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 STAGING_NAME = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
 
@@ -64,11 +61,10 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
         call_remove_task(collection_version, inbound_repo)
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
-            api_access_log.info(
-                "Anonymous uploaded collection: %s-%s-%s",
+            _log_collection_upload(
                 kwargs["expected_namespace"],
                 kwargs["expected_name"],
-                kwargs["expected_version"],
+                kwargs["expected_version"]
             )
 
 
@@ -106,9 +102,13 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
                  golden_repo.latest_version())
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
-            api_access_log.info(
-                "Anonymous uploaded collection: %s-%s-%s",
+            _log_collection_upload(
                 kwargs["expected_namespace"],
                 kwargs["expected_name"],
-                kwargs["expected_version"],
+                kwargs["expected_version"]
             )
+
+
+def _log_collection_upload(namespace, name, version):
+    api_access_log = logging.getLogger("automated_logging")
+    api_access_log.info("Collection uploaded: %s-%s-%s", namespace, name, version,)
