@@ -11,12 +11,8 @@ from .promotion import call_copy_task, call_remove_task
 
 log = logging.getLogger(__name__)
 
-api_access_log = logging.getLogger("automated_logging")
-formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
-handler = logging.FileHandler("/var/log/galaxy_api_access.log")
-handler.setFormatter(formatter)
-api_access_log.setLevel(logging.INFO)
-api_access_log.addHandler(handler)
+if settings.GALAXY_ENABLE_API_ACCESS_LOG:
+    api_access_log = logging.getLogger("automated_logging")
 
 GOLDEN_NAME = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 STAGING_NAME = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
