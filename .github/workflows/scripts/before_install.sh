@@ -142,7 +142,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/ansible/galaxy-importer.git --branch v0.4.0
+git clone --depth=1 https://github.com/ansible/galaxy-importer.git --branch v0.4.2
 cd galaxy-importer
 
 if [ -n "$GALAXY_IMPORTER_PR_NUMBER" ]; then
@@ -166,8 +166,6 @@ then
   echo "Failed to install amazon.aws"
   exit $s
 fi
-
-sed -i -e 's/DEBUG = False/DEBUG = True/' pulpcore/pulpcore/app/settings.py
 
 cd galaxy_ng
 
