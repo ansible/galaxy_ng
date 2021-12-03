@@ -18,7 +18,7 @@ helper = textwrap.dedent(
         Stage the changelog for a release on master branch.
 
         Example:
-            $ python .github/workflows/scripts/stage-changelog-for-master.py 3.4.0
+            $ python .github/workflows/scripts/stage-changelog-for-default-branch.py 3.4.0
 
     """
 )

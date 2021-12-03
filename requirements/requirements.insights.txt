@@ -154,7 +154,7 @@ flake8==3.9.2
     # via galaxy-importer
 future==0.18.2
     # via pyjwkest
-galaxy-importer==0.4.0
+galaxy-importer==0.4.2
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible

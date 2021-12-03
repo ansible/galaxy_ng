@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-19-g88bcdd3
+# generated with plugin_template@2021.08.26-40-gb1730d5
 
 additional_repos:
 - bindings: true
@@ -13,7 +13,7 @@ additional_repos:
   name: pulp_container
   org: pulp
 - bindings: false
-  branch: v0.4.0
+  branch: v0.4.2
   name: galaxy-importer
   org: ansible
 black: false
@@ -36,11 +36,12 @@ deploy_client_to_rubygems: false
 deploy_daily_client_to_pypi: false
 deploy_daily_client_to_rubygems: false
 deploy_to_pypi: false
+disabled_redis_runners: []
 docker_fixtures: false
 docs_test: false
 flake8: true
 issue_tracker: null
-noissue_marker: 'No-Issue'
+noissue_marker: No-Issue
 plugin_app_label: galaxy
 plugin_camel: GalaxyNG
 plugin_camel_short: Galaxy
@@ -62,10 +63,10 @@ pulp_scheme: https
 pulp_settings:
   allowed_export_paths: /tmp
   allowed_import_paths: /tmp
-  rh_entitlement_required: insights
-  galaxy_api_default_distribution_base_path: "published"
+  galaxy_api_default_distribution_base_path: published
   galaxy_require_content_approval: false
-pulpcore_branch: '3.15.2'
+  rh_entitlement_required: insights
+pulpcore_branch: 3.15.2
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
