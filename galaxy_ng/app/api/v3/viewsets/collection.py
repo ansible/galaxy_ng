@@ -494,3 +494,4 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
             },
             status='202'
         )
+

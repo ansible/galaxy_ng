@@ -69,6 +69,11 @@ urlpatterns = [
         name="collection-versions-detail-docs",
     ),
     path(
+        "git/sync/collection/",
+        views.CollectionGitSyncView.as_view({"post": "create"}),
+        name="collection-git-sync",
+    ),
+    path(
         "imports/collections/<str:pk>/",
         viewsets.CollectionImportViewSet.as_view({"get": "retrieve"}),
         name="collection-import",
