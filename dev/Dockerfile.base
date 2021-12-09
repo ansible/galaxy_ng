@@ -38,6 +38,7 @@ RUN set -ex; \
         python38-devel \
         libpq \
         libpq-devel \
+        pinentry \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \
@@ -54,6 +55,7 @@ ENV PATH="/venv/bin:${PATH}" \
     VIRTUAL_ENV="/venv"
 
 COPY ./requirements/requirements.common.txt /tmp/requirements.txt
+COPY ./dev/common/ansible-sign.key /tmp/ansible-sign.key
 
 RUN set -ex; \
     pip install --no-cache-dir --upgrade pip \
@@ -83,9 +85,11 @@ RUN set -ex; \
     && mkdir --mode=2775 -p \
              /var/lib/pulp/artifact \
              /var/lib/pulp/tmp \
+             /var/lib/pulp/scripts \
              /tmp/ansible \
     && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/artifact \
     && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/tmp \
+    && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/scripts \
     && chown ${USER_NAME}:${USER_GROUP} \
         /tmp/ansible \
         /etc/ansible \
@@ -98,7 +102,9 @@ RUN set -ex; \
     && chmod 0644 /var/log/galaxy_api_access.log \
     && chown galaxy:galaxy /var/log/galaxy_api_access.log \
     && mkdir -p /etc/pulp/certs/ \
-    && echo "DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=" > /etc/pulp/certs/database_fields.symmetric.key
+    && echo "DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=" > /etc/pulp/certs/database_fields.symmetric.key \
+    && gpg --batch --import /tmp/ansible-sign.key &>/dev/null \
+    && (echo trust &echo 5 &echo y &echo quit &echo save) | gpg --batch --command-fd 0 --edit-key galaxy3 &>/dev/null
 
 # This symmetric.key is for dev only and should not be used in production
 # DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=

@@ -21,6 +21,7 @@ services:
     entrypoint: "/bin/true"
     tmpfs:
       - "/var/lib/pulp/artifact"
+      - "/var/lib/pulp/scripts"
       - "/var/lib/pulp/tmp"
       - "/tmp/ansible"
 
@@ -44,6 +45,7 @@ services:
       - './common/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
+      - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
@@ -65,6 +67,7 @@ services:
       - './common/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
+      - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
@@ -88,6 +91,7 @@ services:
       - './common/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
+      - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
