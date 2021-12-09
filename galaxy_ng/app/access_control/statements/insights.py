@@ -44,6 +44,17 @@ INSIGHTS_STATEMENTS = {
             ],
         },
         {
+            "action": ["download"],
+            "principal": 'authenticated',
+            "effect": "allow",
+        },
+        {
+            "action": ["download"],
+            "principal": 'anonymous',
+            "effect": "allow",
+            "condition": "unauthenticated_collection_download_enabled",
+        },
+        {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
