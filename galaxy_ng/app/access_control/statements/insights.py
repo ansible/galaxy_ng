@@ -47,12 +47,7 @@ INSIGHTS_STATEMENTS = {
             "action": ["download"],
             "principal": 'authenticated',
             "effect": "allow",
-        },
-        {
-            "action": ["download"],
-            "principal": 'anonymous',
-            "effect": "allow",
-            "condition": "unauthenticated_collection_download_enabled",
+            "condition": "has_rh_entitlements",
         },
         {
             "action": "create",
