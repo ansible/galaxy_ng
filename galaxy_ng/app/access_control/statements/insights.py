@@ -44,6 +44,12 @@ INSIGHTS_STATEMENTS = {
             ],
         },
         {
+            "action": ["download"],
+            "principal": 'authenticated',
+            "effect": "allow",
+            "condition": "has_rh_entitlements",
+        },
+        {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
