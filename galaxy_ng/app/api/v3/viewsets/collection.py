@@ -377,8 +377,9 @@ class CollectionArtifactDownloadView(api_base.APIView):
                 distro_base_path=distro_base_path,
                 filename=filename,
             )
-            response = self._get_tcp_response(url)
-            response = redirect(distribution.content_guard.cast().preauthenticate_url(url))
+            response = self._get_tcp_response(
+                distribution.content_guard.cast().preauthenticate_url(url)
+            )
 
             if response.status_code == requests.codes.not_found:
                 metrics.collection_artifact_download_failures.labels(
