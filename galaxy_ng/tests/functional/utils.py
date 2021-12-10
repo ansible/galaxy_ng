@@ -1,6 +1,7 @@
 """Utilities for tests for the galaxy plugin."""
 import os
 from functools import partial
+import random
 import requests
 from unittest import SkipTest
 from tempfile import NamedTemporaryFile
@@ -212,7 +213,7 @@ class TestCaseUsingBindings(PulpTestCase):
             "server_list = community_repo\n"
             "\n"
             "[galaxy_server.community_repo]\n"
-            f"url={self.cfg.get_content_host_base_url()}"
+            f"url={self.cfg.get_base_url()}"
             f"{self.galaxy_api_prefix}/content/{base_path}/\n"
             f"token={token}"
         )
@@ -234,6 +235,20 @@ class TestCaseUsingBindings(PulpTestCase):
 
         response = self.sync_api.sync(repo_name)
         monitor_task(f"/pulp/api/v3/tasks/{response.task}/")
+
+
+    def delete_namespace(self, namespace_name):
+        """Delete a Namespace"""
+        # namespace_api does not support delete, so we can use the smash_client directly
+        self.smash_client.delete(
+            f"{self.galaxy_api_prefix}/v3/namespaces/{namespace_name}"
+        )
+
+    def delete_collection(self, collection_namespace, collection_name):
+        """Delete a Collection"""
+        self.smash_client.delete(
+            f"{self.galaxy_api_prefix}/v3/collections/{collection_namespace}/{collection_name}/"
+        )
 
 
 class ContainerTestCaseUsingBindings(TestCaseUsingBindings):
