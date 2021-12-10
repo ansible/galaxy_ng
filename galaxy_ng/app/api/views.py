@@ -36,7 +36,7 @@ class ApiRootView(api_base.APIView):
         if kwargs.get("path"):
             distro = get_object_or_404(
                 AnsibleDistribution,
-                name=self.kwargs["path"]
+                base_path=self.kwargs["path"]
             )
             data["distro_base_path"] = distro.base_path
 
