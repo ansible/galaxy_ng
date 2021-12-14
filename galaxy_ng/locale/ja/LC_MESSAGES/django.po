@@ -323,14 +323,14 @@ msgstr "キュレート中のアップストリームのリポジトリータス
 #: app/tasks/synclist.py:91
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
-msgstr "%s 更新に基づく %s 同期リストリポジトリーの級レートの完了"
+msgstr "%s 更新に基づく %s 同期リストリポジトリーのキュレートの完了"
 
 #: app/tasks/synclist.py:120
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr "アップストリームのリポジトリーから \"%s\" リポジトリー \"%s\" をキュレーとする policy=%s で同期リスト \"%s\" を適用中"
+msgstr "アップストリームのリポジトリーから \"%s\" リポジトリー \"%s\" をキュレートする policy=%s で同期リスト \"%s\" を適用中"
 
 #: app/tasks/synclist.py:162
 msgid "Unexpected synclist policy {}"
