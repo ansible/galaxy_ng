@@ -17,8 +17,6 @@ CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
 curl -s "$CICD_URL/bootstrap.sh" > .cicd_bootstrap.sh
 source .cicd_bootstrap.sh
 
-export IMAGE_TAG="pr-$IMAGE_TAG"
-
 source "$CICD_ROOT/build.sh"
 # source $APP_ROOT/unit_test.sh
 
@@ -40,8 +38,6 @@ bonfire deploy \
 # END WORKAROUND
 
 # source $CICD_ROOT/smoke_test.sh
-
-# overriding IMAGE_TAG defined by boostrap.sh, for now
 
 # source smoke_test.sh
 
