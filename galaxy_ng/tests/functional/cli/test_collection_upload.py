@@ -50,7 +50,6 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
         self.delete_collection(collection.namespace, collection.name)
         self.delete_namespace(collection.namespace)
 
-    @skip("Requires GALAXY_ENABLE_API_ACCESS_LOG to be enabled")
     def test_uploaded_collection_logged(self):
         """Test whether a Collection uploaded via ansible-galaxy is logged correctly in API Access Log."""
         delete_orphans()
@@ -74,13 +73,14 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
             subprocess.run(cmd.split())
 
-            cmd = f"docker cp galaxy_ng_worker_1:/var/log/galaxy_api_access.log {tmp_dir}"
+            cmd = f"docker cp pulp:/var/log/galaxy_api_access.log {tmp_dir}"
 
             subprocess.run(cmd.split())
 
             with open(f"{tmp_dir}/galaxy_api_access.log") as f:
                 log_contents = f.readlines()
-            
+                print(log_contents)
+
         # Verify that the collection was published
         collections = self.collections_api.list("published")
         self.assertEqual(collections.meta.count, 1)
@@ -88,7 +88,7 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
         # Verify that the colletion publishing was logged in the api access log
         collection = self.collections_api.read(path="published", namespace="pulp", name="squeezer")
         for line in log_contents:
-            if "INFO: Collection uploaded: " in line:
+            if "INFO: Collection uploaded: " in line and 'pulp' in line:
                 self.assertIn(collection.namespace, line)
                 self.assertIn(collection.name, line)
                 self.assertIn(collection.highest_version["version"], line)
