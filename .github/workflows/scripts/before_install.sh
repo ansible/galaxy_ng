@@ -167,8 +167,6 @@ then
   exit $s
 fi
 
-sed -i -e 's/DEBUG = False/DEBUG = True/' pulpcore/pulpcore/app/settings.py
-
 cd galaxy_ng
 
 if [ -f $POST_BEFORE_INSTALL ]; then
