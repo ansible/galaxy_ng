@@ -1,4 +1,5 @@
 import copy
+import datetime
 import os
 import subprocess
 import time
@@ -28,6 +29,10 @@ from pulpcore.app.models.task import Task
 from pulpcore.plugin.viewsets import OperationPostponedResponse
 from pulp_ansible.app.tasks.copy import copy_content
 
+from galaxy_importer.utils.roles import get_path_role_version
+from galaxy_importer.utils.roles import get_path_role_name
+from galaxy_importer.utils.roles import get_path_role_namespace
+
 
 '''
  71     path(
@@ -50,6 +55,10 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
 class FakeFileName:
     def __init__(self, namespace):
         self.namespace = namespace
+    def __str__(self):
+        return f'<FakeFileName: {self.namespace}>'
+    def __repr__(self):
+        return f'<FakeFileName: {self.namespace}>'
 
 
 class CollectionGitSyncView(api_base.ViewSet):
@@ -72,12 +81,27 @@ class CollectionGitSyncView(api_base.ViewSet):
         print(f'GET_DATA ARGS.data: {args[0].data}')
 
         data = copy.deepcopy(kwargs)
+        for k,v in args[0].data.items():
+            data[k] = v
 
         # the permission class needs to inspect the namespace to determine RBAC,
         # so we -need- to know it now ... but -how- do we get it!?!? ...
         #   namespace = models.Namespace.objects.get(name=data['filename'].namespace)
-        data['filename'] = FakeFileName('amazon')
 
+        if data.get('namespace'):
+            data['filename'] = FakeFileName(data['namespace'])
+        elif data.get('repository'):
+            filename = data.get('repository')
+            filename = filename.replace('https://github.com/', '')
+            filename = filename.split('/')[0]
+            data['filename'] = FakeFileName(filename)
+        else:
+            data['filename'] = FakeFileName('amazon')
+
+        self._namespace = data['filename'].namespace
+        self._name = data.get('name')
+
+        print(f'PDATA: {data}')
         return data
 
     def create(self, *args, **kwargs):
@@ -92,13 +116,17 @@ class CollectionGitSyncView(api_base.ViewSet):
         self._git_ref = data.get('git_ref')
 
         #task = dispatch(git_synchronize, args=[self._git_repository, self._git_ref])
-        task = dispatch(run_import, args=[self._git_repository, self._git_ref])
+        task = dispatch(
+            run_import,
+            args=[self._git_repository, self._git_ref],
+            kwargs={'namespace': self._namespace, 'name': self._name}
+        )
         #return HttpResponse(status=201)
         return OperationPostponedResponse(task, request)
 
 
-def run_import(git_repo, git_ref):
-    gi = GitImport(git_repo, git_ref)
+def run_import(git_repo, git_ref, namespace=None, name=None):
+    gi = GitImport(git_repo, git_ref, namespace=None, name=None)
     gi.create()
 
 
@@ -114,9 +142,11 @@ class GitImport:
     _name = None
     _version = None
 
-    def __init__(self, git_repo, git_ref):
+    def __init__(self, git_repo, git_ref, namespace=None, name=None):
         self._git_repository = git_repo
         self._git_ref = git_ref
+        self._namespace = namespace
+        self._name = name
 
     def clone_repo(self):
         self._clone_path = tempfile.mkdtemp()
@@ -132,8 +162,36 @@ class GitImport:
 
     @property
     def galaxy_meta(self):
+
         fpath = os.path.join(self._clone_path, 'galaxy.yml')
         if not os.path.exists(fpath):
+
+            # handle v1 roles ...
+            mpath = os.path.join(self._clone_path, 'meta', 'main.yml')
+            if os.path.exists(mpath):
+                with open(mpath, 'r') as f:
+                    data = yaml.load(f.read())
+
+                # shim the role name ...
+                #data['name'] = data['galaxy_info']['role_name']
+                if self._name:
+                    data['name'] = self._name
+                else:
+                    data['name'] = get_path_role_name(self._clone_path)
+
+                # get the "namespace" via the git url ...
+                #data['namespace'] = self._git_repository.replace('https://github.com/', '').split('/')[0]
+                if self._namespace:
+                    data['namespace'] = self._namespace
+                else:
+                    data['namespace'] = get_path_role_namespace(self._clone_path)
+
+                # what is the version?
+                data['version'] = get_path_role_version(self._clone_path)
+
+                print(f'GALAXY_META: {data}')
+                return data
+
             return {}
 
         with open(fpath, 'r') as f:
@@ -235,7 +293,18 @@ class GitImport:
             version=self._version,
             #repository=repository
         )
-        cv = cvs[0]
+
+        try:
+            cv = cvs[0]
+        except Exception as e:
+
+            cvs = CollectionVersion.objects.all().filter(
+                namespace=self._namespace,
+                name=self._name
+            )
+            cversions = [x.version for x in cvs]
+
+            raise Exception(f'no CV version {self._version} found: {cversions}')
 
         #####################################
         # copy bits from inbound to staging
