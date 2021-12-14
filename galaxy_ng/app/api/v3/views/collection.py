@@ -280,12 +280,14 @@ class GitImport:
         # run sync ...
         #   <Repository: inbound-aws; Version: 5>
         gsync = git_synchronize(remote.pk, repository.pk)
+        '''
         print(f'GSYNC: {gsync}')
         for x in dir(gsync):
             try:
                 print(f'GSYNC.{x}: {getattr(gsync, x)}')
             except Exception as e:
                 pass
+        '''
 
         # run importer!? ... done by sync
 
