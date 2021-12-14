@@ -32,6 +32,7 @@ from pulp_ansible.app.tasks.copy import copy_content
 from galaxy_importer.utils.roles import get_path_role_version
 from galaxy_importer.utils.roles import get_path_role_name
 from galaxy_importer.utils.roles import get_path_role_namespace
+from galaxy_importer.utils.roles import path_is_role
 
 
 '''
@@ -141,12 +142,14 @@ class GitImport:
     _namespace = None
     _name = None
     _version = None
+    _is_role = False
 
     def __init__(self, git_repo, git_ref, namespace=None, name=None):
         self._git_repository = git_repo
         self._git_ref = git_ref
         self._namespace = namespace
         self._name = name
+        self._is_role = False
 
     def clone_repo(self):
         self._clone_path = tempfile.mkdtemp()
@@ -159,6 +162,8 @@ class GitImport:
 
         if self._git_ref is None:
             self._git_ref = self._head
+
+        self._is_role = path_is_role(self._clone_path)
 
     @property
     def galaxy_meta(self):
@@ -305,6 +310,13 @@ class GitImport:
             cversions = [x.version for x in cvs]
 
             raise Exception(f'no CV version {self._version} found: {cversions}')
+
+        #####################################
+        # flag is_role ...
+        #####################################
+        if self._is_role:
+            cv.is_role = True
+            cv.save()
 
         #####################################
         # copy bits from inbound to staging
