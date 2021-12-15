@@ -2,6 +2,8 @@ import logging
 import mimetypes
 
 from django.conf import settings
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, _get_error_details
@@ -53,13 +55,14 @@ class CollectionSerializer(_CollectionSerializer, HrefNamespaceMixin):
     class Meta(_CollectionSerializer.Meta):
         ref_name = "CollectionWithFixedHrefsSerializer"
 
-    def get_href(self, obj):
+    def get_href(self, obj) -> str:
         return self._get_href("collections-detail", namespace=obj.namespace, name=obj.name)
 
-    def get_versions_url(self, obj):
+    def get_versions_url(self, obj) -> str:
         """Get a link to a collection versions list."""
         return self._get_href("collection-versions-list", namespace=obj.namespace, name=obj.name)
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_highest_version(self, obj):
         """Get a highest version and its link."""
         data = super().get_highest_version(obj)
@@ -74,7 +77,7 @@ class CollectionRefSerializer(_CollectionRefSerializer, HrefNamespaceMixin):
     class Meta:
         ref_name = "CollectionWithFixedHrefsRefSerializer"
 
-    def get_href(self, obj):
+    def get_href(self, obj) -> str:
         """Returns link to a collection."""
         return self._get_href("collections-detail", namespace=obj.namespace, name=obj.name)
 
@@ -83,7 +86,7 @@ class CollectionVersionListSerializer(_CollectionVersionListSerializer, HrefName
     class Meta(_CollectionVersionListSerializer.Meta):
         ref_name = "CollectionVersionWithFixedHrefsRefListSerializer"
 
-    def get_href(self, obj):
+    def get_href(self, obj) -> str:
         """Get href."""
         return self._get_href(
             "collection-versions-detail",
@@ -102,7 +105,7 @@ class UnpaginatedCollectionVersionSerializer(_UnpaginatedCollectionVersionSerial
     def get_download_url(self, obj) -> str:
         return self._get_download_url(obj)
 
-    def get_href(self, obj):
+    def get_href(self, obj) -> str:
         return self._get_href("collections-detail", namespace=obj.namespace, name=obj.name)
 
 
@@ -113,10 +116,10 @@ class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMix
     class Meta(_CollectionVersionSerializer.Meta):
         ref_name = "CollectionVersionWithDownloadUrlSerializer"
 
-    def get_download_url(self, obj):
+    def get_download_url(self, obj) -> str:
         return self._get_download_url(obj)
 
-    def get_href(self, obj):
+    def get_href(self, obj) -> str:
         return self._get_href(
             "collection-versions-detail",
             namespace=obj.namespace, name=obj.name, version=obj.version

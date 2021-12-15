@@ -1,11 +1,13 @@
 """Utilities for tests for the galaxy plugin."""
+import os
 from functools import partial
+import random
 import requests
 from unittest import SkipTest
-from time import sleep
 from tempfile import NamedTemporaryFile
 
-from pulp_smash import api, selectors
+from pulp_smash import api, config, selectors
+from pulp_smash.pulp3.bindings import delete_orphans, monitor_task, PulpTestCase
 from pulp_smash.pulp3.utils import (
     gen_remote,
     gen_repo,
@@ -28,16 +30,25 @@ from galaxy_ng.tests.functional.constants import (
 from pulpcore.client.pulpcore import (
     ApiClient as CoreApiClient,
     ArtifactsApi,
-    Configuration,
     TasksApi,
 )
-from pulpcore.client.galaxy_ng import ApiClient as GalaxyApiClient
+from pulpcore.client.galaxy_ng import (
+    ApiClient as GalaxyApiClient,
+    ApiContentV3CollectionsApi,
+    ApiContentV3SyncApi,
+    ApiContentV3SyncConfigApi,
+    ApiV3NamespacesApi,
+    ApiUiV1ExecutionEnvironmentsRepositoriesContentTagsApi as ContainerRepositoryEndpointApi,
+    ApiUiV1ExecutionEnvironmentsRepositoriesApi as ContainerRepositoryApi,
+    ApiUiV1ExecutionEnvironmentsRemotesApi,
+    ApiUiV1ExecutionEnvironmentsRegistriesApi,
+    ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi,
+    ApiUiV1ExecutionEnvironmentsRegistriesSyncApi,
+    ApiUiV1ExecutionEnvironmentsRepositoriesContentImagesApi as ContainerImagesAPI,
+)
 
 
-configuration = Configuration()
-configuration.username = "admin"
-configuration.password = "password"
-configuration.safe_chars_for_path_param = "/"
+configuration = config.get_config().get_bindings_config()
 
 
 def set_up_module():
@@ -153,25 +164,96 @@ def gen_artifact(url=GALAXY_URL):
         return artifact.to_dict()
 
 
-def monitor_task(task_href):
-    """Polls the Task API until the task is in a completed state.
+class TestCaseUsingBindings(PulpTestCase):
+    """A parent TestCase that instantiates the various bindings used throughout tests."""
 
-    Prints the task details and a success or failure message. Exits on failure.
+    @classmethod
+    def setUpClass(cls):
+        """Create class-wide variables."""
+        cls.cfg = config.get_config()
+        cls.client = gen_galaxy_client()
+        cls.smash_client = api.Client(cls.cfg, api.smart_handler)
+        cls.namespace_api = ApiV3NamespacesApi(cls.client)
+        cls.collections_api = ApiContentV3CollectionsApi(cls.client)
+        cls.sync_config_api = ApiContentV3SyncConfigApi(cls.client)
+        cls.sync_api = ApiContentV3SyncApi(cls.client)
+        cls.container_repo_tags_api = ContainerRepositoryEndpointApi(cls.client)
+        cls.container_repo_api = ContainerRepositoryApi(cls.client)
+        cls.container_remotes_api = ApiUiV1ExecutionEnvironmentsRemotesApi(cls.client)
+        cls.container_registries_api = ApiUiV1ExecutionEnvironmentsRegistriesApi(cls.client)
+        cls.container_remote_sync_api = ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
+        cls.container_registry_sync_api = ApiUiV1ExecutionEnvironmentsRegistriesSyncApi(cls.client)
+        cls.container_images_api = ContainerImagesAPI(cls.client)
+        cls.get_ansible_cfg_before_test()
+        cls.galaxy_api_prefix = os.getenv("PULP_GALAXY_API_PATH_PREFIX", "/api/galaxy").rstrip("/")
 
-    Args:
-        task_href(str): The href of the task to monitor
+    def tearDown(self):
+        """Clean class-wide variable."""
+        with open("ansible.cfg", "w") as f:
+            f.write(self.previous_ansible_cfg)
+        delete_orphans()
 
-    Returns:
-        list[str]: List of hrefs that identify resource created by the task
+    @classmethod
+    def get_token(cls):
+        """Get a Galaxy NG token."""
+        return cls.smash_client.post(f"{cls.galaxy_api_prefix}/v3/auth/token/")["token"]
 
-    """
-    completed = ["completed", "failed", "canceled"]
-    task = tasks.read(task_href)
-    while task.state not in completed:
-        sleep(2)
-        task = tasks.read(task_href)
+    @classmethod
+    def get_ansible_cfg_before_test(cls):
+        """Update ansible.cfg to use the given base_path."""
+        with open("ansible.cfg", "r") as f:
+            cls.previous_ansible_cfg = f.read()
 
-    if task.state == "completed":
-        return task.created_resources
+    def update_ansible_cfg(self, base_path):
+        """Update ansible.cfg to use the given base_path."""
+        token = self.get_token()
+        ansible_cfg = (
+            f"{self.previous_ansible_cfg}\n"
+            "[galaxy]\n"
+            "server_list = community_repo\n"
+            "\n"
+            "[galaxy_server.community_repo]\n"
+            f"url={self.cfg.get_base_url()}"
+            f"{self.galaxy_api_prefix}/content/{base_path}/\n"
+            f"token={token}"
+        )
+        with open("ansible.cfg", "w") as f:
+            f.write(ansible_cfg)
 
-    return task.to_dict()
+    def sync_repo(self, requirements_file, **kwargs):
+        """Sync a repository with a given requirements_file"""
+        repo_name = kwargs.get("repo_name", "community")
+        url = kwargs.get("url", "https://galaxy.ansible.com/api/")
+
+        self.sync_config_api.update(
+            repo_name,
+            {
+                "url": f"{url}",
+                "requirements_file": f"{requirements_file}",
+            },
+        )
+
+        response = self.sync_api.sync(repo_name)
+        monitor_task(f"/pulp/api/v3/tasks/{response.task}/")
+
+
+    def delete_namespace(self, namespace_name):
+        """Delete a Namespace"""
+        # namespace_api does not support delete, so we can use the smash_client directly
+        self.smash_client.delete(
+            f"{self.galaxy_api_prefix}/v3/namespaces/{namespace_name}"
+        )
+
+    def delete_collection(self, collection_namespace, collection_name):
+        """Delete a Collection"""
+        self.smash_client.delete(
+            f"{self.galaxy_api_prefix}/v3/collections/{collection_namespace}/{collection_name}/"
+        )
+
+
+class ContainerTestCaseUsingBindings(TestCaseUsingBindings):
+    @classmethod
+    def setUpClass(cls):
+        if os.getenv("TEST") == "azure":
+            raise SkipTest("Container Registry disabled")
+        super().setUpClass()

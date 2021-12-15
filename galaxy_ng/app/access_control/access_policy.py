@@ -72,6 +72,9 @@ class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyB
     NAME = 'CollectionViewSet'
 
     def can_update_collection(self, request, view, permission):
+        if getattr(self, "swagger_fake_view", False):
+            # If OpenAPI schema is requested, don't check for update permissions
+            return False
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
         return request.user.has_perm('galaxy.upload_to_namespace', namespace)
@@ -96,10 +99,16 @@ class UserAccessPolicy(AccessPolicyBase):
     NAME = 'UserViewSet'
 
     def user_is_superuser(self, request, view, action):
+        if getattr(self, "swagger_fake_view", False):
+            # If OpenAPI schema is requested, don't check for superuser
+            return False
         user = view.get_object()
         return user.is_superuser
 
     def is_current_user(self, request, view, action):
+        if getattr(self, "swagger_fake_view", False):
+            # If OpenAPI schema is requested, don't check for current user
+            return False
         return request.user == view.get_object()
 
 

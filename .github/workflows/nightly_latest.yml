@@ -18,6 +18,7 @@ jobs:
       matrix:
         env:
           - TEST: pulp
+          - TEST: azure
           - TEST: s3
 
     steps:

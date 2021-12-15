@@ -5,6 +5,8 @@ from rest_framework import serializers
 from django.core import exceptions
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 
 from guardian.shortcuts import get_users_with_perms
 
@@ -34,6 +36,7 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
             "my_permissions",
         )
 
+    @extend_schema_field(serializers.ListField)
     def get_owners(self, namespace):
         return get_users_with_perms(namespace, with_group_users=False).values_list(
             "username", flat=True
@@ -80,18 +83,22 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
 
         fields = read_only_fields
 
-    def get_namespace(self, distro):
+    def get_namespace(self, distro) -> str:
         return distro.namespace.name
 
+    @extend_schema_field(OpenApiTypes.UUID)
     def get_id(self, distro):
         return distro.pk
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_created(self, distro):
         return distro.repository.pulp_created
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_updated(self, distro):
         return distro.repository.pulp_last_updated
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_pulp(self, distro):
         repo = distro.repository
         remote = None
@@ -158,6 +165,7 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
             "image_manifests"
         )
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_layers(self, obj):
         layers = []
         # use the prefetched blob_list and artifact_list instead of obj.blobs and
@@ -170,11 +178,13 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
                 )
         return layers
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_config_blob(self, obj):
         if not obj.config_blob:
             return {}
         return {"digest": obj.config_blob.digest, "media_type": obj.config_blob.media_type}
 
+    @extend_schema_field(serializers.ListField)
     def get_tags(self, obj):
         tags = []
         # tagget_manifests returns all tags on the manifest, not just the ones
@@ -211,6 +221,7 @@ class ContainerTagSerializer(serializers.ModelSerializer):
 
 
 class ContainerManifestDetailSerializer(ContainerManifestSerializer):
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_config_blob(self, obj):
         with obj.config_blob._artifacts.first().file.open() as f:
             config_json = json.load(f)
@@ -230,9 +241,11 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
         model = core_models.RepositoryVersion
         fields = ("pulp_id", "added", "removed", "pulp_created", "number")
 
+    @extend_schema_field(serializers.ListField(child=serializers.JSONField()))
     def get_added(self, obj):
         return [self._content_info(content.content) for content in obj.added_memberships.all()]
 
+    @extend_schema_field(serializers.ListField(child=serializers.JSONField()))
     def get_removed(self, obj):
         return [self._content_info(content.content) for content in obj.removed_memberships.all()]
 
@@ -309,10 +322,11 @@ class ContainerRegistryRemoteSerializer(
             'client_key': {'write_only': True},
         }
 
+    @extend_schema_field(serializers.ListField)
     def get_write_only_fields(self, obj):
         return utils.get_write_only_fields(self, obj)
 
-    def get_is_indexable(self, obj):
+    def get_is_indexable(self, obj) -> bool:
         if obj.get_registry_backend():
             return True
         return False
