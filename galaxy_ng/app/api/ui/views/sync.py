@@ -72,5 +72,6 @@ class ContainerSyncRegistryView(api_base.APIView):
             kwargs={
                 "registry_pk": str(registry.pk),
             },
+            exclusive_resources=[registry]
         )
         return OperationPostponedResponse(result, request)
