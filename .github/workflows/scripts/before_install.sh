@@ -132,7 +132,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.8.0
+git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.8.3
 cd pulp_container
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
@@ -166,8 +166,6 @@ then
   echo "Failed to install amazon.aws"
   exit $s
 fi
-
-sed -i -e 's/DEBUG = False/DEBUG = True/' pulpcore/pulpcore/app/settings.py
 
 cd galaxy_ng
 
