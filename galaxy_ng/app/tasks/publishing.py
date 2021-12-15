@@ -3,10 +3,9 @@ import logging
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
-
-from pulpcore.plugin.models import Task
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, CollectionVersion
 from pulp_ansible.app.tasks.collections import import_collection
+from pulpcore.plugin.models import Task
 
 from .promotion import call_copy_task, call_remove_task
 
@@ -61,6 +60,13 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
         call_copy_task(collection_version, inbound_repo, staging_repo)
         call_remove_task(collection_version, inbound_repo)
 
+        if settings.GALAXY_ENABLE_API_ACCESS_LOG:
+            _log_collection_upload(
+                kwargs["expected_namespace"],
+                kwargs["expected_name"],
+                kwargs["expected_version"]
+            )
+
 
 def import_and_auto_approve(temp_file_pk, **kwargs):
     """Import collection version and automatically approve.
@@ -94,3 +100,15 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
         log.info('Imported and auto approved collection artifact %s to repository %s',
                  collection_version.relative_path,
                  golden_repo.latest_version())
+
+        if settings.GALAXY_ENABLE_API_ACCESS_LOG:
+            _log_collection_upload(
+                kwargs["expected_namespace"],
+                kwargs["expected_name"],
+                kwargs["expected_version"]
+            )
+
+
+def _log_collection_upload(namespace, name, version):
+    api_access_log = logging.getLogger("automated_logging")
+    api_access_log.info("Collection uploaded: %s-%s-%s", namespace, name, version,)

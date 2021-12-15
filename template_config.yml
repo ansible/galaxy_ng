@@ -63,9 +63,10 @@ pulp_scheme: https
 pulp_settings:
   allowed_export_paths: /tmp
   allowed_import_paths: /tmp
-  rh_entitlement_required: insights
-  galaxy_api_default_distribution_base_path: "published"
+  galaxy_api_default_distribution_base_path: published
   galaxy_require_content_approval: false
+  galaxy_enable_api_access_log: true
+  rh_entitlement_required: insights
 pulpcore_branch: '3.15.2'
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
