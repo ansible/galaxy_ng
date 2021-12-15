@@ -12,6 +12,7 @@ from pulp_ansible.app.models import (
 )
 from pulp_ansible.app.tasks.copy import copy_content
 
+from galaxy_ng.app.tasks.publishing import _log_collection_upload
 from galaxy_ng.app.tasks import import_and_auto_approve, import_and_move_to_staging
 from galaxy_ng.app.tasks.promotion import _remove_content_from_repository
 
@@ -170,4 +171,13 @@ class TestTaskPublish(TestCase):
                 expected_namespace='',
                 expected_name='',
                 expected_version='',
+            )
+
+    def test_log_collection_upload(self):
+        with self.assertLogs(logger='automated_logging', level='INFO') as lm:
+            _log_collection_upload('namespace', 'name', '0.0.1')
+
+            self.assertIn(
+                'INFO:automated_logging:Collection uploaded: namespace-name-0.0.1',
+                lm.output
             )
