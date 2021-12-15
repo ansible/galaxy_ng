@@ -99,7 +99,7 @@ VARSYAML
 fi
 
 cat >> vars/main.yaml << VARSYAML
-pulp_settings: {"allowed_export_paths": "/tmp", "allowed_import_paths": "/tmp", "rh_entitlement_required": "insights"}
+pulp_settings: {"allowed_export_paths": "/tmp", "allowed_import_paths": "/tmp", "galaxy_api_default_distribution_base_path": "published", "galaxy_enable_api_access_log": true, "galaxy_require_content_approval": false, "rh_entitlement_required": "insights"}
 pulp_scheme: https
 
 pulp_container_tag: https

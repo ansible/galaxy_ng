@@ -52,6 +52,9 @@ class CollectionViewSet(
 
     def get_queryset(self):
         """Returns a CollectionVersions queryset for specified distribution."""
+        if getattr(self, "swagger_fake_view", False):
+            # OpenAPI spec generation
+            return CollectionVersion.objects.none()
         path = self.kwargs.get('path')
         if path is None:
             raise Http404(_("Distribution base path is required"))
@@ -91,6 +94,9 @@ class CollectionViewSet(
     def get_object(self):
         """Return CollectionVersion object, latest or via query param 'version'."""
         version = self.request.query_params.get('version', None)
+        if getattr(self, "swagger_fake_view", False):
+            # OpenAPI spec generation
+            return CollectionVersion.objects.none()
 
         if not version:
             queryset = self.get_queryset()

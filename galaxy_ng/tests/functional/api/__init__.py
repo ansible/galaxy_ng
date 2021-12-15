@@ -1,1 +1,1 @@
-"""Tests that communicate with galaxy plugin via the v3 API."""
+"""Tests that communicate with Galaxy NG via the API."""
