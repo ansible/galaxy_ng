@@ -13,9 +13,9 @@ def call_copy_task(collection_version, source_repo, dest_repo):
     }]
     return dispatch(
         copy_content,
-        locks,
         args=[config],
         kwargs={},
+        exclusive_resources=locks,
     )
 
 
@@ -24,9 +24,9 @@ def call_remove_task(collection_version, repository):
     remove_task_args = (collection_version.pk, repository.pk)
     return dispatch(
         _remove_content_from_repository,
-        [repository],
         args=remove_task_args,
         kwargs={},
+        exclusive_resources=[repository],
     )
 
 
