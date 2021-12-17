@@ -7,10 +7,10 @@ from pulp_container.tests.functional.api import rbac_base
 from pulp_container.tests.functional.constants import DOCKERHUB_PULP_FIXTURE_1
 from pulp_smash import cli
 
-from galaxy_ng.tests.functional.utils import ContainerTestCaseUsingBindings
+from galaxy_ng.tests.functional.utils import TestCaseUsingBindings
 
 
-class ContainerRepositoryTagsTestCase(ContainerTestCaseUsingBindings, rbac_base.BaseRegistryTest):
+class ContainerRepositoryTagsTestCase(TestCaseUsingBindings, rbac_base.BaseRegistryTest):
     """Test whether a container repository's tags can be listed.
 
     When running functional tests in dev environment please ensure that
