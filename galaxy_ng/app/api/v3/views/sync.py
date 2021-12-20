@@ -48,13 +48,13 @@ class SyncRemoteView(api_base.APIView):
 
         result = dispatch(
             collection_sync,
-            [distro.repository, remote],
             kwargs={
                 "remote_pk": remote.pk,
                 "repository_pk": distro.repository.pk,
                 "mirror": True,
                 "optimize": True,
             },
+            exclusive_resources=[distro.repository, remote],
         )
 
         return Response({'task': result.pk})
