@@ -15,6 +15,24 @@ log_message() {
     echo "$@" >&2
 }
 
+setup_signing_service() {
+    log_message "Setting up signing service"
+    # this assumes the key file is mounted during container startup time.
+    # the dev environment key was created using `galaxy3@ansible.com` admin ID
+    gpg --batch --import /tmp/ansible-sign.key &>/dev/null
+    # Pulp AsciiArmoured default SS expects a higher trust level so we need to edit it after import
+    (echo trust &echo 5 &echo y &echo quit &echo save) | gpg --batch --command-fd 0 --edit-key galaxy3 &>/dev/null
+
+    # Add the signing service using pulp command, this assumes the script is mounted during container startup
+    HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
+    if [[ "$HAS_SIGNING" -eq "1" ]]; then
+        log_message "Signing service already exists"
+    else
+        log_message "Creating signing service"
+        django-admin add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh galaxy3@ansible.com 2>/dev/null || true
+    fi
+
+}
 
 # TODO(cutwater): This function should be moved to entrypoint hooks.
 install_local_deps() {
@@ -89,6 +107,8 @@ run_service() {
 
     process_init_files /entrypoints.d/*
 
+    setup_signing_service
+
     exec "${service_path}" "$@"
 }
 
@@ -97,6 +117,8 @@ run_manage() {
     if [[ "$WITH_DEV_INSTALL" -eq "1" ]]; then
         install_local_deps
     fi
+
+    setup_signing_service
     exec django-admin "$@"
 }
 

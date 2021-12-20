@@ -157,7 +157,7 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
         async_result = dispatch(
             delete_container_distribution,
             args=(ids_for_multi_delete,),
-            exclusive_resources=reservations
+            exclusive_resources=reservations,
         )
 
         return OperationPostponedResponse(async_result, request)

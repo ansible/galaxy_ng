@@ -466,7 +466,7 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
                     curate_all_synclist_repository,
                     exclusive_resources=locks,
                     args=task_args,
-                    kwargs=task_kwargs
+                    kwargs=task_kwargs,
                 )
                 curate_task_id = curate_task.pk
 
