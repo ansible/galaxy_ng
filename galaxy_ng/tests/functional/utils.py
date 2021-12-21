@@ -250,10 +250,3 @@ class TestCaseUsingBindings(PulpTestCase):
             f"{self.galaxy_api_prefix}/v3/collections/{collection_namespace}/{collection_name}/"
         )
 
-
-class ContainerTestCaseUsingBindings(TestCaseUsingBindings):
-    @classmethod
-    def setUpClass(cls):
-        if os.getenv("TEST") == "azure":
-            raise SkipTest("Container Registry disabled")
-        super().setUpClass()
