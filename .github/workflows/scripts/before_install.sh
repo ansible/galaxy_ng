@@ -111,7 +111,7 @@ fi
 
 
 
-git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.17.0
+git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.17.1
 
 cd pulpcore
 
