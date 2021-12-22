@@ -78,8 +78,8 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
 
             dispatch(
                 curate_synclist_repository_batch,
-                locks,
                 args=(synclist_ids,),
+                exclusive_resources=locks,
                 task_group=task_group,
             )
             task_progress_report.increment()

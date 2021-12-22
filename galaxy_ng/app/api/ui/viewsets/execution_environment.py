@@ -155,7 +155,9 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
 
         # Delete the distribution, repository, and perform orphan cleanup
         async_result = dispatch(
-            delete_container_distribution, reservations, args=(ids_for_multi_delete,)
+            delete_container_distribution,
+            args=(ids_for_multi_delete,),
+            exclusive_resources=reservations
         )
 
         return OperationPostponedResponse(async_result, request)
@@ -293,8 +295,8 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
         # Call the recursive_remove_content from pulp_container + reclaim disk space
         async_result = dispatch(
             delete_container_image_manifest,
-            [repository],
             args=(str(repository.pk), content_unit_pks),
+            exclusive_resources=[repository],
         )
 
         return OperationPostponedResponse(async_result, request)
