@@ -3,9 +3,10 @@
 # --------------------------------------------
 # Options that must be configured by app owner
 # --------------------------------------------
-APP_NAME="automation-hub"  # name of app-sre "application" folder this component lives in
+APP_NAME="automation-hub,gateway,insights-ephemeral"  # name of app-sre "application" folder this component lives in
 COMPONENT_NAME="automation-hub"  # name of app-sre "resourceTemplate" in deploy.yaml for this component
 IMAGE="quay.io/cloudservices/automation-hub-galaxy-ng"
+COMPONENTS_W_RESOURCES="all"  # components which should preserve resource settings (optional, default: none)
 
 # IQE_PLUGINS=""
 # IQE_MARKER_EXPRESSION="ephemeral"
@@ -15,8 +16,6 @@ IMAGE="quay.io/cloudservices/automation-hub-galaxy-ng"
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
 curl -s "$CICD_URL/bootstrap.sh" > .cicd_bootstrap.sh
 source .cicd_bootstrap.sh
-
-export IMAGE_TAG="pr-$IMAGE_TAG"
 
 source "$CICD_ROOT/build.sh"
 # source $APP_ROOT/unit_test.sh
@@ -29,17 +28,16 @@ bonfire deploy \
     ${APP_NAME} \
     --source=appsre \
     --ref-env insights-stage \
-    --set-template-ref ${APP_NAME}/${COMPONENT_NAME}=${GIT_COMMIT} \
-    --set-parameter "${APP_NAME}/${COMPONENT_NAME}/IMPORTER_JOB_NAMESPACE=${NAMESPACE}" \
+    --set-template-ref ${COMPONENT_NAME}=${GIT_COMMIT} \
     --set-image-tag ${IMAGE}=${IMAGE_TAG} \
     --namespace ${NAMESPACE} \
-    --no-remove-resources all \
-    ${COMPONENTS_ARG}
+    --timeout ${DEPLOY_TIMEOUT} \
+    ${COMPONENTS_ARG} \
+    ${COMPONENTS_RESOURCES_ARG} \
+    --set-parameter ${COMPONENT_NAME}/IMPORTER_JOB_NAMESPACE=${NAMESPACE}
 # END WORKAROUND
 
 # source $CICD_ROOT/smoke_test.sh
-
-# overriding IMAGE_TAG defined by boostrap.sh, for now
 
 # source smoke_test.sh
 
@@ -50,3 +48,4 @@ cat << EOF > artifacts/junit-dummy.xml
 <testsuite tests="1">
     <testcase classname="dummy" name="dummytest"/>
 </testsuite>
+EOF
