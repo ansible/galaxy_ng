@@ -124,11 +124,15 @@ def validate_pr_commits(github_pr_commits_url):
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
+    github_user = os.environ.get("GITHUB_USER")
     github_pr_commits_url = os.environ["GITHUB_PR_COMMITS_URL"]
     start_commit = os.environ["START_COMMIT"]
     end_commit = os.environ["END_COMMIT"]
+    skip_users = ['dependabot[bot]', 'patchback[bot]']
 
-    if github_pr_commits_url:
+    if github_user in skip_users:
+        is_valid = True
+    elif github_pr_commits_url:
         is_valid = validate_pr_commits(github_pr_commits_url)
     else:
         is_valid = validate_push_commits(start_commit, end_commit)
