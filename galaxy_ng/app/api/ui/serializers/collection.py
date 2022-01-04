@@ -54,8 +54,8 @@ class CollectionMetadataSerializer(Serializer):
     repository = serializers.CharField()
 
     description = serializers.CharField()
-    authors = serializers.ListField(serializers.CharField())
-    license = serializers.ListField(serializers.CharField())
+    authors = serializers.ListField(child=serializers.CharField())
+    license = serializers.ListField(child=serializers.CharField())
     tags = serializers.SerializerMethodField()
 
     @extend_schema_field(serializers.ListField)
@@ -74,7 +74,7 @@ class CollectionVersionBaseSerializer(Serializer):
     requires_ansible = serializers.CharField()
     created_at = serializers.DateTimeField(source='pulp_created')
     metadata = CollectionMetadataSerializer(source='*')
-    contents = serializers.ListField(ContentSerializer())
+    contents = serializers.ListField(child=ContentSerializer())
 
 
 class CollectionVersionSerializer(CollectionVersionBaseSerializer):
