@@ -89,11 +89,11 @@ class BuildPyCommand(_BuildPyCommand):
 
 requirements = [
     "galaxy-importer==0.4.2",
-    "pulpcore>=3.15.0,<3.16.0",
-    "pulp-ansible>=0.10.1,<0.11.0",
+    "pulpcore>=3.17.1,<3.18.0",
+    "pulp-ansible>=0.11.1,<0.12.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container>=2.8.3,<2.9.0",
+    "pulp-container>=2.10.0,<2.11.0",
     "django-automated-logging==6.1.3",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",

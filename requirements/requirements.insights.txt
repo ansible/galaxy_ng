@@ -6,12 +6,14 @@
 #
 aiodns==3.0.0
     # via pulpcore
-aiofiles==0.7.0
+aiofiles==0.8.0
     # via pulpcore
-aiohttp==3.7.4.post0
+aiohttp==3.8.1
     # via pulpcore
 aioredis==2.0.0
     # via pulpcore
+aiosignal==1.2.0
+    # via aiohttp
 ansible-builder==1.0.1
     # via galaxy-importer
 ansible-core==2.11.4
@@ -24,7 +26,7 @@ asgiref==3.4.1
     # via django
 async-lru==1.0.2
     # via pulp-ansible
-async-timeout==3.0.1
+async-timeout==4.0.2
     # via
     #   aiohttp
     #   aioredis
@@ -60,19 +62,17 @@ cffi==1.14.6
     # via
     #   cryptography
     #   pycares
-chardet==4.0.0
-    # via aiohttp
 charset-normalizer==2.0.4
-    # via requests
-click==8.0.1
     # via
-    #   pulpcore
-    #   rq
+    #   aiohttp
+    #   requests
+click==8.0.1
+    # via pulpcore
 colorama==0.4.4
     # via rich
 commonmark==0.9.1
     # via rich
-cryptography==3.4.8
+cryptography==36.0.1
     # via
     #   ansible-core
     #   pulpcore
@@ -87,7 +87,7 @@ diff-match-patch==20200713
     # via django-import-export
 distro==1.6.0
     # via bindep
-django==3.2.6
+django==3.2.10
     # via
     #   django-automated-logging
     #   django-currentuser
@@ -106,17 +106,17 @@ django-automated-logging==6.1.3
     # via galaxy-ng (setup.py)
 django-currentuser==0.5.3
     # via pulpcore
-django-filter==2.4.0
+django-filter==21.1
     # via pulpcore
 django-guardian==2.4.0
     # via pulpcore
 django-guid==3.2.0
     # via pulpcore
-django-import-export==2.5.0
+django-import-export==2.7.0
     # via pulpcore
 django-ipware==3.0.7
     # via django-automated-logging
-django-lifecycle==0.9.1
+django-lifecycle==0.9.3
     # via pulpcore
 django-picklefield==3.0.1
     # via django-automated-logging
@@ -132,11 +132,11 @@ djangorestframework==3.12.4
     #   pulpcore
 djangorestframework-queryfields==1.0.0
     # via pulpcore
-drf-access-policy==1.0.1
+drf-access-policy==1.1.0
     # via pulpcore
-drf-nested-routers==0.93.3
+drf-nested-routers==0.93.4
     # via pulpcore
-drf-spectacular==0.17.3
+drf-spectacular==0.21.0
     # via
     #   galaxy-ng (setup.py)
     #   pulpcore
@@ -144,7 +144,7 @@ dynaconf==3.1.7
     # via
     #   galaxy-ng (setup.py)
     #   pulpcore
-ecdsa==0.13.3
+ecdsa==0.17.0
     # via pulp-container
 enrich==1.2.6
     # via ansible-lint
@@ -152,12 +152,20 @@ et-xmlfile==1.1.0
     # via openpyxl
 flake8==3.9.2
     # via galaxy-importer
+frozenlist==1.2.0
+    # via
+    #   aiohttp
+    #   aiosignal
 future==0.18.2
     # via pyjwkest
 galaxy-importer==0.4.2
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
+gitdb==4.0.9
+    # via gitpython
+gitpython==3.1.24
+    # via pulp-ansible
 gunicorn==20.1.0
     # via pulpcore
 idna==3.2
@@ -214,13 +222,13 @@ pbr==5.6.0
     # via bindep
 prometheus-client==0.11.0
     # via django-prometheus
-psycopg2==2.9.1
+psycopg2==2.9.2
     # via pulpcore
-pulp-ansible==0.10.1
+pulp-ansible==0.11.1
     # via galaxy-ng (setup.py)
-pulp-container==2.8.3
+pulp-container==2.10.0
     # via galaxy-ng (setup.py)
-pulpcore==3.15.2
+pulpcore==3.17.1
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -253,7 +261,7 @@ pyrsistent==0.18.0
     # via jsonschema
 python-dateutil==2.8.2
     # via botocore
-python-gnupg==0.4.7
+python-gnupg==0.4.8
     # via pulpcore
 python3-openid==3.2.0
     # via social-auth-core
@@ -270,9 +278,7 @@ pyyaml==5.4.1
     #   pulpcore
     #   tablib
 redis==3.5.3
-    # via
-    #   pulpcore
-    #   rq
+    # via pulpcore
 requests==2.26.0
     # via
     #   galaxy-importer
@@ -289,12 +295,8 @@ rich==10.9.0
     # via
     #   ansible-lint
     #   enrich
-rq==1.9.0
-    # via pulpcore
 ruamel.yaml==0.17.16
     # via ansible-lint
-ruamel.yaml.clib==0.2.6
-    # via ruamel.yaml
 s3transfer==0.5.0
     # via boto3
 semantic-version==2.8.5
@@ -304,12 +306,15 @@ semantic-version==2.8.5
 six==1.16.0
     # via
     #   bleach
+    #   ecdsa
     #   jsonschema
     #   pyjwkest
     #   python-dateutil
     #   social-auth-app-django
     #   social-auth-core
     #   url-normalize
+smmap==5.0.0
+    # via gitdb
 social-auth-app-django==3.4.0
     # via galaxy-ng (setup.py)
 social-auth-core==3.4.0
@@ -323,9 +328,7 @@ tablib[html,ods,xls,xlsx,yaml]==3.0.0
 tenacity==8.0.1
     # via ansible-lint
 typing-extensions==3.10.0.2
-    # via
-    #   aiohttp
-    #   aioredis
+    # via aioredis
 uritemplate==3.0.1
     # via drf-spectacular
 url-normalize==1.4.3

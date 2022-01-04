@@ -3,7 +3,7 @@ import logging
 from pulp_ansible.app.models import Collection, CollectionVersion
 from pulp_container.app import tasks as pulp_container_tasks
 from pulpcore.app.tasks import orphan_cleanup, reclaim_space
-from pulpcore.plugin.tasking import add_and_remove
+from pulpcore.plugin.tasking import add_and_remove, general_multi_delete
 
 log = logging.getLogger(__name__)
 
@@ -66,8 +66,8 @@ def delete_collection(collection_pk):
 def delete_container_distribution(instance_ids):
     """Deletes a container distribution and push repository related."""
 
-    log.info("Running container.general_multi_delete to delete distro and repo")
-    pulp_container_tasks.general_multi_delete(instance_ids=instance_ids)
+    log.info("Running core.general_multi_delete to delete distro and repo")
+    general_multi_delete(instance_ids=instance_ids)
 
     log.info("Running orphan_cleanup to delete Container objects and artifacts")
     orphan_cleanup(content_pks=None, orphan_protection_time=0)
