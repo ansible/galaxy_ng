@@ -66,3 +66,8 @@ echo "which podman ..."
 podman --version
 echo "podman --version"
 podman --version
+
+
+cat /etc/issue
+cat /etc/redhat-release
+python3 --version
