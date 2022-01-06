@@ -112,9 +112,13 @@ class UnpaginatedCollectionVersionSerializer(_UnpaginatedCollectionVersionSerial
 class CollectionVersionSerializer(_CollectionVersionSerializer, HrefNamespaceMixin):
 
     collection = CollectionRefSerializer(read_only=True)
+    id = serializers.CharField(source="pk")
 
     class Meta(_CollectionVersionSerializer.Meta):
         ref_name = "CollectionVersionWithDownloadUrlSerializer"
+        fields = (
+            "id",
+        ) + _CollectionVersionSerializer.Meta.fields
 
     def get_download_url(self, obj) -> str:
         return self._get_download_url(obj)

@@ -12,6 +12,7 @@ from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import CollectionVersion
+from pulpcore.plugin.models import SigningService
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
@@ -44,6 +45,7 @@ from galaxy_ng.app.tasks import (
     import_and_auto_approve,
     import_and_move_to_staging,
 )
+from galaxy_ng.app.tasks.signing import call_sign_and_move_task
 
 log = logging.getLogger(__name__)
 
@@ -447,10 +449,30 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         if collection_version in dest_versions:
             raise NotFound(_('Collection %s already found in destination repo') % version_str)
 
-        copy_task = call_copy_task(collection_version, src_repo, dest_repo)
-        remove_task = call_remove_task(collection_version, src_repo)
+        response_data = {}
 
-        curate_task_id = None
+        if settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False):
+            signing_service_name = settings.get(
+                "GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default"
+            )
+            try:
+                signing_service = SigningService.objects.get(name=signing_service_name)
+            except ObjectDoesNotExist:
+                raise NotFound(_('Signing %s service not found') % signing_service_name)
+
+            sign_and_move_task = call_sign_and_move_task(
+                signing_service,
+                collection_version,
+                src_repo,
+                dest_repo,
+            )
+            response_data['copy_task_id'] = response_data['remove_task_id'] = sign_and_move_task.pk
+        else:
+            copy_task = call_copy_task(collection_version, src_repo, dest_repo)
+            response_data['copy_task_id'] = copy_task.pk
+            remove_task = call_remove_task(collection_version, src_repo)
+            response_data['remove_task_id'] = remove_task.pk
+
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             golden_repo = AnsibleDistribution.objects.get(
                 base_path=settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
@@ -468,13 +490,6 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
                     args=task_args,
                     kwargs=task_kwargs,
                 )
-                curate_task_id = curate_task.pk
+                response_data['curate_all_synclist_repository_task_id'] = curate_task.pk
 
-        return Response(
-            data={
-                'copy_task_id': copy_task.pk,
-                'remove_task_id': remove_task.pk,
-                "curate_all_synclist_repository_task_id": curate_task_id,
-            },
-            status='202'
-        )
+        return Response(data=response_data, status='202')
