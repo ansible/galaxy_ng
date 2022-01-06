@@ -67,6 +67,9 @@ podman --version
 echo "podman --version"
 podman --version
 
+echo "docker-compose version ..."
+docker-compose --version
+
 
 cat /etc/issue
 cat /etc/redhat-release
