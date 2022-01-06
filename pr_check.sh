@@ -53,6 +53,16 @@ EOF
 
 # This is just a check to see if we can reach gitlab.cee
 git clone https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugin
-RC=$?
-find iqe-automation-hub-plugin
-exit $RC
+#RC=$?
+#find iqe-automation-hub-plugin
+#exit $RC
+
+# This is a check to see if we have docker access here
+echo "which docker ..."
+which docker
+echo "docker --version ..."
+docker --version
+echo "which podman ..."
+podman --version
+echo "podman --version"
+podman --version
