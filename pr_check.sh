@@ -52,9 +52,9 @@ EOF
 
 
 # This is just a check to see if we can reach gitlab.cee
-#git clone https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugin
-#RC=$?
-#find iqe-automation-hub-plugin
+git clone https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugin.git
+RC=$?
+find iqe-automation-hub-plugin
 #exit $RC
 
 # This is a check to see if we have docker access here
@@ -81,3 +81,6 @@ python3 --version
 
 echo "oc get pods ..."
 oc get pods
+
+echo "ENVIRONMENT ..."
+env
