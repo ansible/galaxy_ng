@@ -77,3 +77,7 @@ docker ps -a
 cat /etc/issue
 cat /etc/redhat-release
 python3 --version
+
+
+echo "oc get pods ..."
+oc get pods
