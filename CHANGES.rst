@@ -13,6 +13,27 @@ Changelog
 
 .. towncrier release notes start
 
+4.4.1 (2022-01-06)
+Bugfixes
+--------
+
+- Remote registry sync status not shown on registry page
+  `AAH-1094 <https://issues.redhat.com/browse/AAH-1094>`_
+- Upgrade to pulp-container 2.8.3 to fix azure and S3 storage backends.
+  `AAH-1188 <https://issues.redhat.com/browse/AAH-1188>`_
+- Fix a bug preventing users upgrading from 1.2 to 2.1 from downloading content from the rh-certified repository.
+  `AAH-1200 <https://issues.redhat.com/browse/AAH-1200>`_
+
+
+Misc
+----
+
+- `AAH-804 <https://issues.redhat.com/browse/AAH-804>`_, `AAH-1015 <https://issues.redhat.com/browse/AAH-1015>`_
+
+
+----
+
+
 4.4.0 (2021-11-18)
 ==================
 
