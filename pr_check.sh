@@ -70,6 +70,9 @@ podman --version
 echo "docker-compose version ..."
 docker-compose --version
 
+echo "running containers ..."
+docker ps -a
+
 
 cat /etc/issue
 cat /etc/redhat-release
