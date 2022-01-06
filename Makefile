@@ -3,7 +3,7 @@ DOCKER_IMAGE_NAME = localhost/galaxy_ng/galaxy_ng
 RUNNING = $(shell docker ps -q -f name=api)
 
 # if running is empty, then DJ_MANAGER = manage, else DJ_MANAGER = django-admin
-DJ_MANAGER = $(shell if [ "$(RUNNING)" == "" ]; then echo manage; else echo django-admin; fi)
+DJ_MANAGER = $(shell if [ "$(RUNNING)" = "" ]; then echo manage; else echo django-admin; fi)
 
 define exec_or_run
 	# Tries to run on existing container if it exists, otherwise starts a new one.
