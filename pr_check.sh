@@ -52,7 +52,7 @@ EOF
 
 
 # This is just a check to see if we can reach gitlab.cee
-git clone https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugin
+#git clone https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugin
 #RC=$?
 #find iqe-automation-hub-plugin
 #exit $RC
