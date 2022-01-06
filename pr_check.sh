@@ -49,3 +49,10 @@ cat << EOF > artifacts/junit-dummy.xml
     <testcase classname="dummy" name="dummytest"/>
 </testsuite>
 EOF
+
+
+# This is just a check to see if we can reach gitlab.cee
+git clone https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugin
+RC=$?
+find iqe-automation-hub-plugin
+exit $RC
