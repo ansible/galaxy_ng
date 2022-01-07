@@ -92,4 +92,9 @@ urlpatterns = [
     path("tasks/", viewsets.TaskViewSet.as_view({"get": "list"}), name="tasks-list"),
     path("tasks/<str:pk>/", viewsets.TaskViewSet.as_view({"get": "retrieve"}), name="tasks-detail"),
     path("excludes/", views.ExcludesView.as_view(), name="excludes-file"),
+    path(
+        "sign/collections/",
+        viewsets.CollectionSignViewSet.as_view({"post": "sign"}),
+        name="collection-sign"
+    ),
 ]
