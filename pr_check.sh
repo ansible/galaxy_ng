@@ -85,10 +85,14 @@ oc get pods
 echo "###########################################"
 echo "ENVIRONMENT ..."
 echo "###########################################"
-env
+env | sort
 
 
 echo "###########################################"
 echo "FILE LISTING"
 echo "###########################################"
 ls -al
+
+
+# NAMESPACE - ephemeral-05
+# https://docs.google.com/presentation/d/1-3MCjCYT1DgBZIg5dzfhKf21_TweMns3s-EjSijELYU/edit#slide=id.pG
