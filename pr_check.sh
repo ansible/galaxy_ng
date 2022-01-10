@@ -93,6 +93,16 @@ echo "FILE LISTING"
 echo "###########################################"
 ls -al
 
+echo "###########################################"
+echo "CURL FRONTEND"
+echo "###########################################"
 
 # NAMESPACE - ephemeral-05
-# https://docs.google.com/presentation/d/1-3MCjCYT1DgBZIg5dzfhKf21_TweMns3s-EjSijELYU/edit#slide=id.pG
+NG_API_URL="https://front-end-aggregator-$(NAMESPACE).apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
+curl -k -v $NG_API_URL
+
+
+echo "###########################################"
+echo "DONE"
+echo "###########################################"
+
