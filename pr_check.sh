@@ -102,7 +102,7 @@ NG_API_URL="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.op
 curl -k -v $NG_API_URL
 
 echo "###########################################"
-echo "SLEEPING"
+echo "SLEEPING 500s"
 echo "###########################################"
 
 for X in $(seq 500 -1 0); do
