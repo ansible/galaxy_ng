@@ -101,6 +101,14 @@ echo "###########################################"
 NG_API_URL="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
 curl -k -v $NG_API_URL
 
+echo "###########################################"
+echo "SLEEPING"
+echo "###########################################"
+
+for X in $(seq 500 -1 0); do
+    echo $X
+    sleep 1
+done
 
 echo "###########################################"
 echo "DONE"
