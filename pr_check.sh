@@ -98,7 +98,7 @@ echo "CURL FRONTEND"
 echo "###########################################"
 
 # NAMESPACE - ephemeral-05
-NG_API_URL="https://front-end-aggregator-$(NAMESPACE).apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
+NG_API_URL="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
 curl -k -v $NG_API_URL
 
 
