@@ -109,6 +109,8 @@ for user in users:
     print(user)
     print(user.name)
     print(user.is_superuser)
+    user.is_superuser = True
+    user.save()
 EOF
 
 echo "# oc project ${NAMESPACE}"
