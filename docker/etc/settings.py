@@ -62,13 +62,21 @@ if clowder_config and clowder_config.isClowderEnabled():
     _LoadedConfig = clowder_config.LoadedConfig
 
     # Database configuration
+    if _LoadedConfig.database.rdsCa:
+        DB_SSLROOTCERT = _LoadedConfig.rds_ca()
+    else
+        DB_SSLROOTCERT = ''
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': _LoadedConfig.database.name,
         'HOST': _LoadedConfig.database.hostname,
         'PORT': _LoadedConfig.database.port,
         'USER': _LoadedConfig.database.username,
-        'PASSWORD': _LoadedConfig.database.password
+        'PASSWORD': _LoadedConfig.database.password,
+        'OPTIONS': {
+            'sslmode': _LoadedConfig.database.sslMode,
+            'sslrootcert': DB_SSLROOTCERT
+        }
     }
 
     # AWS S3 configuration
