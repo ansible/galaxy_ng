@@ -64,8 +64,8 @@ if clowder_config and clowder_config.isClowderEnabled():
     # Database configuration
     if _LoadedConfig.database.rdsCa:
         DB_SSLROOTCERT = _LoadedConfig.rds_ca()
-    else
-        DB_SSLROOTCERT = ''
+    else:
+        DB_SSLROOTCERT = ""
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': _LoadedConfig.database.name,
