@@ -82,6 +82,9 @@ python3 --version
 echo "###########################################"
 echo "OC GET PODS ..."
 echo "###########################################"
+echo "# oc project ${NAMESPACE}"
+oc project ${NAMESPACE}
+echo "# oc get pods ..."
 oc get pods
 
 echo "###########################################"
