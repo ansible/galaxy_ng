@@ -79,8 +79,21 @@ cat /etc/redhat-release
 python3 --version
 
 
-echo "oc get pods ..."
+echo "###########################################"
+echo "OC GET PODS ..."
+echo "###########################################"
 oc get pods
+
+echo "###########################################"
+echo "OC GET PODS+CONTAINERS ..."
+echo "###########################################"
+# oc get pods | egrep -v NAME | awk '{print $1}' | xargs -I {} oc get pod {} -o jsonpath='{.spec.containers[*].name}'
+PODS=$(oc get pods | egrep -v NAME | awk '{print $1}')
+for POD in $PODS; do
+    echo "# ${POD} CONTAINERS ..."
+    oc get pod ${POD} -o jsonpath='{.spec.containers[*].name}'
+    echo ""
+done
 
 echo "###########################################"
 echo "ENVIRONMENT ..."
