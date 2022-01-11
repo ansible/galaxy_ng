@@ -101,7 +101,7 @@ echo "###########################################"
 
 cat << EOF > listusers.py
 from galaxy_ng.app.models.auth import User
-users = [x for x in User.objects.all()
+users = [x for x in User.objects.all()]
 for user in users:
     print(user)
     print(user.name)
