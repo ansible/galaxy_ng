@@ -96,15 +96,33 @@ for POD in $PODS; do
 done
 
 echo "###########################################"
+echo "LIST API USERS ..."
+echo "###########################################"
+
+cat << EOF > listusers.py
+from galaxy_ng.app.models.auth import User
+users = [x for x in User.objects.all()
+for user in users:
+    print(user)
+    print(user.name)
+    print(user.is_superuser)
+EOF
+
+oc project ${NAMESPACE}
+AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.metadata.name --no-headers | head -1)
+echo "AH_API_POD: ${AH_API_POD}"
+oc exec -it $AH_API_POD -- /entrypoint.sh manage shell < listusers.py
+
+
+echo "###########################################"
 echo "ENVIRONMENT ..."
 echo "###########################################"
 env | sort
 
-
-echo "###########################################"
-echo "FILE LISTING"
-echo "###########################################"
-ls -al
+#echo "###########################################"
+#echo "FILE LISTING"
+#echo "###########################################"
+#ls -al
 
 echo "###########################################"
 echo "CURL FRONTEND"
@@ -112,6 +130,7 @@ echo "###########################################"
 
 # NAMESPACE - ephemeral-05
 NG_API_URL="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
+echo "# API URL: ${NG_API_URL}"
 curl -k -v $NG_API_URL
 
 echo "###########################################"
