@@ -108,7 +108,9 @@ for user in users:
     print(user.is_superuser)
 EOF
 
+echo "# oc project ${NAMESPACE}"
 oc project ${NAMESPACE}
+echo "# oc get pod -l pod=automation-hub-galaxy-api ..."
 AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.metadata.name --no-headers | head -1)
 echo "AH_API_POD: ${AH_API_POD}"
 oc exec -it $AH_API_POD -- /entrypoint.sh manage shell < listusers.py
