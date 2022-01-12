@@ -6,7 +6,7 @@ galaxy_ng.app.__init__:PulpGalaxyPluginAppConfig.ready() method.
 from django.apps import apps
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_migrate
-from pulpcore.app.apps import adjust_roles
+from pulpcore.plugin.apps import adjust_roles
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection
 from galaxy_ng.app.access_control.statements.roles import VIEWSETS as GALAXY_VIEWSETS
 from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
