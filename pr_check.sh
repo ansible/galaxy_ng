@@ -24,6 +24,7 @@ source "$CICD_ROOT/build.sh"
 # NOTE(cutwater): See https://issues.redhat.com/browse/RHCLOUD-14977
 source ${CICD_ROOT}/_common_deploy_logic.sh
 export NAMESPACE=$(bonfire namespace reserve)
+set -x
 bonfire deploy \
     ${APP_NAME} \
     --source=appsre \
@@ -35,6 +36,7 @@ bonfire deploy \
     ${COMPONENTS_ARG} \
     ${COMPONENTS_RESOURCES_ARG} \
     --set-parameter ${COMPONENT_NAME}/IMPORTER_JOB_NAMESPACE=${NAMESPACE}
+set +x
 # END WORKAROUND
 
 # source $CICD_ROOT/smoke_test.sh
