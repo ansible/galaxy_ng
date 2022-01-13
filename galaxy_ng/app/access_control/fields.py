@@ -3,9 +3,9 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from pulpcore.app.models.role import Role
+from pulpcore.plugin.models.role import Role
 
-from pulpcore.app.role_util import get_perms_for_model
+from pulpcore.plugin.util import get_perms_for_model
 
 from galaxy_ng.app.models import auth as auth_models
 
@@ -59,7 +59,10 @@ class GroupPermissionField(serializers.Field):
                     group_filter[field] = group_data[field]
             try:
                 group = auth_models.Group.objects.get(**group_filter)
-                internal[group] = group_data['object_roles']
+                if 'object_permissions' in group_data:
+                    internal[group] = group_data['object_permissions']
+                if 'object_roles' in group_data:
+                    internal[group] = group_data['object_roles']
             except auth_models.Group.DoesNotExist:
                 raise ValidationError(detail={
                     'groups': _("Group name=%s, id=%s does not exist") % (

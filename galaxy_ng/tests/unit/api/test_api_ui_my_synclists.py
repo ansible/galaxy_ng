@@ -59,7 +59,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
                     {
                         "id": self.group.id,
                         "name": self.group.name,
-                        "object_permissions": self.default_owner_permissions,
+                        "object_roles": self.default_owner_roles,
                     },
                 ],
             }
@@ -89,7 +89,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
                     {
                         "id": self.group.id,
                         "name": self.group.name,
-                        "object_permissions": self.default_owner_permissions,
+                        "object_roles": self.default_owner_roles,
                     },
                 ],
             }
@@ -109,16 +109,16 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
             self.assertEqual(response.data["name"], self.synclist_name)
             self.assertEqual(response.data["policy"], "include")
 
-            # Sort permission list for comparison
-            response.data["groups"][0]["object_permissions"].sort()
-            self.default_owner_permissions.sort()
+            # Sort role list for comparison
+            response.data["groups"][0]["object_roles"].sort()
+            self.default_owner_roles.sort()
             self.assertEqual(
                 response.data["groups"],
                 [
                     {
                         "name": self.group.name,
                         "id": self.group.id,
-                        "object_permissions": self.default_owner_permissions,
+                        "object_roles": self.default_owner_roles
                     }
                 ],
             )

@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from rest_framework.exceptions import ValidationError
 
-from pulpcore.app.role_util import (
+from pulpcore.plugin.util import (
     assign_role,
     remove_role,
     get_groups_with_perms_attached_roles
@@ -44,8 +44,9 @@ class GroupModelPermissionsMixin:
                         assign_role(role, group, self)
                     except BadRequest:
                         raise ValidationError(
-                            detail={'groups': _(f'Role {role} does not exist or does not '
-                                                'have any permissions related to this object.')}
+                            detail={'groups': _('Role {role} does not exist or does not '
+                                                'have any permissions related to this object.'
+                                                ).format(role=role)}
                         )
 
     @hook('after_save')

@@ -1,5 +1,5 @@
 from galaxy_ng.app import models
-from pulpcore.app.role_util import get_objects_for_user
+from pulpcore.plugin.util import get_objects_for_user
 
 from .namespace import NamespaceViewSet
 

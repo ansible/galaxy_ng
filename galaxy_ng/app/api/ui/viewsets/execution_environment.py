@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django_filters import filters
 from django_filters.rest_framework import DjangoFilterBackend, filterset
 from drf_spectacular.utils import extend_schema
-from pulpcore.app.role_util import get_objects_for_user
+from pulpcore.plugin.util import get_objects_for_user
 from pulp_container.app import models as container_models
 from pulpcore.plugin import models as core_models
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer

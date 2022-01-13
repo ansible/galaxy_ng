@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 from django.db import transaction
 
-from pulpcore.app.role_util import get_objects_for_group
+from pulpcore.plugin.util import get_objects_for_group
 
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository
 from rest_framework.authentication import BaseAuthentication
@@ -105,12 +105,6 @@ class RHIdentityAuthentication(BaseAuthentication):
                 },
             )
 
-
-
-
-
-
-            # TODO need to create role for synclist owners
             default_synclist.groups = {group: ['galaxy.synclist_owner']}
             default_synclist.save()
         return default_synclist
