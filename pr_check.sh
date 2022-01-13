@@ -104,9 +104,20 @@ echo "###########################################"
 echo "LIST API USERS ..."
 echo "###########################################"
 
+cat << EOF > createuser.py
+from galaxy_ng.app.models.auth import User
+for uname in ['foo', 'jdoe']:
+    print(f'CREATE {uname}')
+    user = User.objects.create_user(uname, password='bar')
+    user.is_superuser=True
+    user.is_staff=True
+    user.save()
+EOF
+
 cat << EOF > listusers.py
 from galaxy_ng.app.models.auth import User
 users = [x for x in User.objects.all()]
+print(f'TOTAL USERS: {len(users)}')
 for user in users:
     print(user)
     print(user.name)
@@ -122,6 +133,7 @@ AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.
 echo "AH_API_POD: ${AH_API_POD}"
 #oc exec -it $AH_API_POD -- /entrypoint.sh manage shell < listusers.py
 #oc exec -i $AH_API_POD -- /entrypoint.sh manage shell < listusers.py
+oc exec -i $AH_API_POD /entrypoint.sh manage shell < createuser.py
 oc exec -i $AH_API_POD /entrypoint.sh manage shell < listusers.py
 
 
