@@ -119,8 +119,8 @@ from galaxy_ng.app.models.auth import User
 users = [x for x in User.objects.all()]
 print(f'TOTAL USERS: {len(users)}')
 for user in users:
-    print(user)
-    print(user.name)
+    print(f'USER: {user}')
+    #print(user.name)
     print(user.is_superuser)
     user.is_superuser = True
     user.save()
