@@ -37,8 +37,6 @@ from galaxy_ng.app.common import metrics
 from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT, DeploymentMode
 from galaxy_ng.app.tasks import (
-    call_copy_task,
-    call_remove_task,
     curate_all_synclist_repository,
     delete_collection,
     delete_collection_version,
@@ -46,6 +44,7 @@ from galaxy_ng.app.tasks import (
     import_and_move_to_staging,
 )
 from galaxy_ng.app.tasks.signing import call_sign_and_move_task, call_sign_task
+from galaxy_ng.app.tasks.promotion import call_move_content_task
 
 log = logging.getLogger(__name__)
 
@@ -553,18 +552,20 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
             except ObjectDoesNotExist:
                 raise NotFound(_('Signing %s service not found') % signing_service_name)
 
-            sign_and_move_task = call_sign_and_move_task(
+            move_task = call_sign_and_move_task(
                 signing_service,
                 collection_version,
                 src_repo,
                 dest_repo,
             )
-            response_data['copy_task_id'] = response_data['remove_task_id'] = sign_and_move_task.pk
         else:
-            copy_task = call_copy_task(collection_version, src_repo, dest_repo)
-            response_data['copy_task_id'] = copy_task.pk
-            remove_task = call_remove_task(collection_version, src_repo)
-            response_data['remove_task_id'] = remove_task.pk
+            move_task = call_move_content_task(
+                collection_version,
+                src_repo,
+                dest_repo,
+            )
+
+        response_data['copy_task_id'] = response_data['remove_task_id'] = move_task.pk
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             golden_repo = AnsibleDistribution.objects.get(

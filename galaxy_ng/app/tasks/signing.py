@@ -29,7 +29,12 @@ def sign_and_move(signing_service_pk, collection_version_pk, source_repo_pk, des
 
 
 def call_sign_and_move_task(signing_service, collection_version, source_repo, dest_repo):
-    """Dispatches sign and move task"""
+    """Dispatches sign and move task
+
+
+    This is a wrapper to group sign, copy_content and remove_content tasks
+    because those 3 must run in sequence ensuring the same locks.
+    """
     return dispatch(
         sign_and_move,
         exclusive_resources=[source_repo, dest_repo],

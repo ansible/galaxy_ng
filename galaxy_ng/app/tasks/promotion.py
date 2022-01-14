@@ -3,30 +3,36 @@ from pulp_ansible.app.models import AnsibleRepository, CollectionVersion
 from pulp_ansible.app.tasks.copy import copy_content
 
 
-def call_copy_task(collection_version, source_repo, dest_repo):
-    """Calls pulp_ansible task to copy content from source to destination repo."""
-    locks = [source_repo, dest_repo]
+def move_content(collection_version_pk, source_repo_pk, dest_repo_pk):
+    """Move collection version from one repository to another"""
+    # Copy to the destination repo
+    source_repo = AnsibleRepository.objects.get(pk=source_repo_pk)
     config = [{
         'source_repo_version': source_repo.latest_version().pk,
-        'dest_repo': dest_repo.pk,
-        'content': [collection_version.pk],
+        'dest_repo': dest_repo_pk,
+        'content': [collection_version_pk],
     }]
-    return dispatch(
-        copy_content,
-        args=[config],
-        kwargs={},
-        exclusive_resources=locks,
-    )
+    copy_content(config)
+
+    # remove old content from source repo
+    _remove_content_from_repository(collection_version_pk, source_repo_pk)
 
 
-def call_remove_task(collection_version, repository):
-    """Calls task to remove content from repo."""
-    remove_task_args = (collection_version.pk, repository.pk)
+def call_move_content_task(collection_version, source_repo, dest_repo):
+    """Dispatches the move content task
+
+    This is a wrapper to group copy_content and remove_content tasks
+    because those 2 must run in sequence ensuring the same locks.
+
+    """
     return dispatch(
-        _remove_content_from_repository,
-        args=remove_task_args,
-        kwargs={},
-        exclusive_resources=[repository],
+        move_content,
+        exclusive_resources=[source_repo, dest_repo],
+        kwargs=dict(
+            collection_version_pk=collection_version.pk,
+            source_repo_pk=source_repo.pk,
+            dest_repo_pk=dest_repo.pk
+        )
     )
 
 
