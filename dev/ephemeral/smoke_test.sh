@@ -11,6 +11,10 @@ AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.
 echo "Fixing keycloak user permissions"
 oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/fixuser.py
 
+echo "Create token for keycloak user"
+oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_token.py
+
+
 # What is the username?
 export HUB_USERNAME="jdoe"
 
