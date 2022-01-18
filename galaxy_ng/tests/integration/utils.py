@@ -6,7 +6,7 @@ import re
 import tarfile
 import tempfile
 import time
-from tkinter import W
+#from tkinter import W
 import uuid
 from contextlib import contextmanager
 from functools import lru_cache
