@@ -1,0 +1,5 @@
+epdb
+requests
+ansible-core
+pytest
+orionutils
