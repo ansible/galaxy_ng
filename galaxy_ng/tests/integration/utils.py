@@ -6,6 +6,7 @@ import re
 import tarfile
 import tempfile
 import time
+from tkinter import W
 import uuid
 from contextlib import contextmanager
 from functools import lru_cache
@@ -173,6 +174,7 @@ def upload_artifact(
         n_url = _urljoin(config["url"], "v3", "artifacts", "collections") + "/"
 
     resp = client(n_url, args=data, headers=headers, method="POST", auth_required=True)
+
     return resp
 
 

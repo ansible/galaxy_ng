@@ -11,8 +11,8 @@ AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.
 echo "Fixing keycloak user permissions"
 oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/fixuser.py
 
-echo "Create token for keycloak user"
-oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_token.py
+#echo "Create token for keycloak user"
+#oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_token.py
 
 
 # What is the username?
@@ -22,11 +22,13 @@ export HUB_USERNAME="jdoe"
 export HUB_PASSWORD="redhat"
 
 # What is the token?
-export HUB_TOKEN="abcdefghijklmnopqrstuvwxyz1234567890"
+#export HUB_TOKEN="abcdefghijklmnopqrstuvwxyz1234567890"
 
 # What is the api root?
 export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/api/automation-hub/"
 echo "HUB_API_ROOT: ${HUB_API_ROOT}"
+export HUB_AUTH_URL="https://keycloak-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/auth/realms/redhat-external/protocol/openid-connect/token"
+echo "HUB_AUTH_URL: ${HUB_AUTH_URL}"
 
 echo "Creating virtualenv for testing ..."
 VENV_PATH=gvenv

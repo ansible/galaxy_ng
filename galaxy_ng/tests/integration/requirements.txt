@@ -1,5 +1,6 @@
 epdb
 requests
-ansible-core
+#ansible-core
+ansible-base
 pytest
 orionutils

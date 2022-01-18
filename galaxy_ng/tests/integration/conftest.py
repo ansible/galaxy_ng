@@ -44,7 +44,7 @@ class AnsibleConfigFixture(dict):
         elif key == 'token':
             return os.environ.get(
                 'HUB_TOKEN',
-                'abcdefghijklmnopqrstuvwxyz1234567890'
+                None
             )
 
         elif key == 'username':
