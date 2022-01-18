@@ -28,6 +28,15 @@ export HUB_TOKEN="abcdefghijklmnopqrstuvwxyz1234567890"
 export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
 echo "HUB_API_ROOT: ${HUB_API_ROOT}"
 
+echo "Creating virtualenv for testing ..."
+VENV_PATH=gvenv
+virtualenv ${VENV_PATH}
+source ${VENV_PATH}/bin/activate
+${VENV_PATH}/bin/pip install --upgrade pip wheel
+${VENV_PATH}/bin/pip install -r galaxy_ng/tests/integration/requirements.txt
+
+echo "Running pytest ..."
+${VENV_PATH}/bin/pytest --capture=no -m "not standalone_only" -v galaxy_ng/tests/integration
 
 echo "Starting sleep cycle ..."
 for X in $(seq 1500 -1 0); do
