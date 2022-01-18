@@ -71,6 +71,7 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
         else:
             token = None
     client = GalaxyAPI(None, "automation_hub", url=server, token=token)
+    client.validate_certs = False
 
     # make an api call with the upstream galaxy client lib from ansible core
     def request(url, *args, **kwargs):
