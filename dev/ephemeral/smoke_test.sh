@@ -3,6 +3,7 @@
 echo "SMOKE TEST!"
 
 # Need to fix the user first ...
+oc project ${NAMESPACE}
 AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.metadata.name --no-headers | head -1)
 oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/fixuser.py
 
