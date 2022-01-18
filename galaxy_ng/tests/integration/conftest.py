@@ -36,8 +36,6 @@ class AnsibleConfigFixture(dict):
 
         elif key == 'auth_url':
             # The auth_url value should be None for a standalone stack.
-
-            # return 'http://localhost:8002/api/automation-hub/'
             return os.environ.get(
                 'HUB_AUTH_URL',
                 None
@@ -46,7 +44,7 @@ class AnsibleConfigFixture(dict):
         elif key == 'token':
             return os.environ.get(
                 'HUB_TOKEN',
-                'abdc7286e9bae6895a6f0fc3f2b05cc09a22381d'
+                'abcdefghijklmnopqrstuvwxyz1234567890'
             )
 
         elif key == 'username':
