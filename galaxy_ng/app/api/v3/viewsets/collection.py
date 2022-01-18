@@ -416,7 +416,27 @@ class CollectionSignViewSet(api_base.ViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
 
     def sign(self, request, *args, **kwargs):
-        """Creates a signature for the collection version"""
+        """Creates a signature for the content units specified in the request.
+
+        The request body should contain a JSON object with the following keys:
+
+        # Required
+        - signing_service: The name of the signing service to use
+        - repository: The name of the repository to add the signatures
+
+        # Optional
+        - content_units: A list of content units UUIDS to be signed.
+          (if content_units is ["*"], all units under the repo will be signed)
+        OR
+        - namespace: Namespace name
+          (if only namespace is specified, all collections under that namespace will be signed)
+
+        # Optional (one or more)
+        - collection: Collection name
+          (if collection name is added, all versions under that collection will be signed)
+        - version: The version of the collection to sign
+          (if version is specified, only that version will be signed)
+        """
 
         signing_service = self.get_signing_service(request)
         repository = self.get_repository(request)
@@ -468,7 +488,7 @@ class CollectionSignViewSet(api_base.ViewSet):
                     _('No content units found for: %s') % query_params
                 )
 
-            return content_units
+            return [str(item) for item in content_units]
 
     def get_repository(self, request):
         """
@@ -543,7 +563,12 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
 
         response_data = {}
 
-        if settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False):
+        published_path = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
+        auto_sign = settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False)
+
+        if auto_sign and dest_repo.name == published_path:
+            # Assumed that if user has access to modify the repo, they can also sign the content
+            # so we don't need to check access policies here.
             signing_service_name = settings.get(
                 "GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default"
             )

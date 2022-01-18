@@ -81,7 +81,7 @@ STANDALONE_STATEMENTS = {
             "action": "sign",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.modify_ansible_repo_content"
+            "condition": "can_sign_collections"
         }
     ],
     'CollectionRemoteViewSet': [
