@@ -25,7 +25,7 @@ export HUB_PASSWORD="redhat"
 export HUB_TOKEN="abcdefghijklmnopqrstuvwxyz1234567890"
 
 # What is the api root?
-export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
+export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/api/automation-hub/"
 echo "HUB_API_ROOT: ${HUB_API_ROOT}"
 
 echo "Creating virtualenv for testing ..."
