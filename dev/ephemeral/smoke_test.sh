@@ -30,7 +30,7 @@ echo "HUB_API_ROOT: ${HUB_API_ROOT}"
 
 echo "Creating virtualenv for testing ..."
 VENV_PATH=gvenv
-virtualenv ${VENV_PATH}
+virtualenv --python=$(which python3) ${VENV_PATH}
 source ${VENV_PATH}/bin/activate
 ${VENV_PATH}/bin/pip install --upgrade pip wheel
 ${VENV_PATH}/bin/pip install -r galaxy_ng/tests/integration/requirements.txt
