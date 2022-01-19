@@ -50,6 +50,7 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
     auth_url = config.get("auth_url")
 
     # force the galaxy client lib to think the ignore certs kwarg was used
+    # NOTE: this does not work with 2.12+
     context.CLIARGS = {"ignore_certs": True}
 
     token = config.get("token") or None

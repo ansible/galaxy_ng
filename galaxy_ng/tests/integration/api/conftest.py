@@ -1,8 +1,8 @@
 import os
 import pytest
 
-from .utils import upload_artifact as _upload_artifact
-from .constants import USERNAME_PUBLISHER
+from ..utils import upload_artifact as _upload_artifact
+from ..constants import USERNAME_PUBLISHER
 from orionutils.generator import build_collection
 
 

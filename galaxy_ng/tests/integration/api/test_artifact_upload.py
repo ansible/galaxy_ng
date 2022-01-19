@@ -10,12 +10,12 @@ import pytest
 from orionutils.generator import build_collection
 from orionutils.generator import randstr
 
-from .constants import USERNAME_PUBLISHER
-from .utils import CapturingGalaxyError
-from .utils import get_client
-from .utils import modify_artifact
-from .utils import set_certification
-from .utils import wait_for_task
+from ..constants import USERNAME_PUBLISHER
+from ..utils import CapturingGalaxyError
+from ..utils import get_client
+from ..utils import modify_artifact
+from ..utils import set_certification
+from ..utils import wait_for_task
 
 
 logger = logging.getLogger(__name__)

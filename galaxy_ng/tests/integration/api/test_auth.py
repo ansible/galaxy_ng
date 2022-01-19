@@ -6,8 +6,8 @@ See: https://github.com/ansible/galaxy-dev/issues/149
 import pytest
 from ansible.galaxy.api import GalaxyError
 
-from .utils import get_client
-from .utils import uuid4
+from ..utils import get_client
+from ..utils import uuid4
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
