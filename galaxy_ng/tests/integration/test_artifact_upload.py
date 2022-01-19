@@ -253,12 +253,12 @@ def test_long_field_values(ansible_config, upload_artifact, field):
 @pytest.mark.parametrize(
     "spec",
     [
-        ("2eq", "==2.10", "completed"),
-        ("range1", ">=2.10,<2.11", "completed"),
+        #("2eq", "==2.10", "completed"),
+        #("range1", ">=2.10,<2.11", "completed"),
         ("range2", ">=2.10,<<2.11", "failed"),
         ("2comma", ">=2.10,,", "failed"),
-        ("star", "2.10.*", "completed"),
-        ("exc", ">=2.1,!=2.1.2", "completed"),
+        #("star", "2.10.*", "completed"),
+        #("exc", ">=2.1,!=2.1.2", "completed"),
         # Known limitations
         # ("label", "2.10.post1", "completed"),
         # ("pre", "2.11b4", "completed"),
