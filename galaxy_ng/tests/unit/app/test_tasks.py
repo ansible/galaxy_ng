@@ -117,6 +117,7 @@ class TestTaskPublish(TestCase):
             expected_namespace='',
             expected_name='',
             expected_version='',
+            username='',
         )
 
         self.assertTrue(mocked_import.call_count == 1)
@@ -133,6 +134,7 @@ class TestTaskPublish(TestCase):
                 expected_namespace='',
                 expected_name='',
                 expected_version='',
+                username='',
             )
 
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
@@ -155,6 +157,7 @@ class TestTaskPublish(TestCase):
             expected_namespace='',
             expected_name='',
             expected_version='',
+            username='',
         )
 
         self.assertTrue(mocked_import.call_count == 1)
@@ -171,6 +174,7 @@ class TestTaskPublish(TestCase):
                 expected_namespace='',
                 expected_name='',
                 expected_version='',
+                username='',
             )
 
     def test_log_collection_upload(self):
