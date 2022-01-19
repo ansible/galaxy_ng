@@ -239,8 +239,11 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
     def _dispatch_import_collection_task(self, temp_file_pk, repository=None, **kwargs):
         """Dispatch a pulp task started on upload of collection version."""
         locks = []
+        context = super().get_serializer_context()
+        request = context.get("request", None)
 
         kwargs["temp_file_pk"] = temp_file_pk
+        kwargs["username"] = request.user.username
 
         if repository:
             locks.append(repository)
