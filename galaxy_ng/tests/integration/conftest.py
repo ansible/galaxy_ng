@@ -10,6 +10,17 @@ from .constants import USERNAME_PUBLISHER
 from orionutils.generator import build_collection
 
 
+MARKER_CONFIG = """
+qa: Mark tests to run in the vortex job.
+galaxyapi_smoke: Smoke tests for galaxy-api backend.
+standalone_only: Tests that should not run against the Insights version of Hub.
+cloud_only: Tests that should not run against the standalone version of Hub.
+cli: Tests that shell out to the real ansible-galaxy cli.
+"""
+
+
+def pytest_configure(config):
+    config.addinitvalue_line('markers', MARKER_CONFIG)
 
 
 class AnsibleConfigFixture(dict):
