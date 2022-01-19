@@ -293,6 +293,9 @@ def ansible_galaxy(command, check_retcode=0, server="automation_hub", ansible_co
         f.write('\n')
         f.write(f'[galaxy_server.{server}]\n')
         f.write(f"url={ansible_config.get('url')}\n")
+        if ansible_config.get('auth_url'):
+            f.write(f"auth_url={ansible_config.get('auth_url')}\n")
+        f.write('validate_certs=False\n')
         f.write(f"username={ansible_config.get('username')}\n")
         f.write(f"password={ansible_config.get('password')}\n")
         if ansible_config.get('token'):
