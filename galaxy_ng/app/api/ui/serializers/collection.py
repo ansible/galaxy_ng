@@ -57,6 +57,12 @@ class CollectionMetadataSerializer(Serializer):
     authors = serializers.ListField(child=serializers.CharField())
     license = serializers.ListField(child=serializers.CharField())
     tags = serializers.SerializerMethodField()
+    signatures = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_signatures(self, obj):
+        """Returns signature pubkey_fingerprint for each signature."""
+        return obj.signatures.values_list("pubkey_fingerprint", flat=True)
 
     @extend_schema_field(serializers.ListField)
     def get_tags(self, collection_version):
@@ -125,6 +131,25 @@ class _CollectionSerializer(Serializer):
 
 class CollectionListSerializer(_CollectionSerializer):
     deprecated = serializers.BooleanField()
+    sign_state = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.CharField)
+    def get_sign_state(self, obj):
+        """Returns sign state of the collection.
+
+        unsigned: collection doesn't at least one version signed.
+        signed: collection has all versions signed.
+        partial: collection has some versions signed.
+        """
+        signatures = list(
+            obj.collection.versions.all().values_list("signatures", flat=True)
+        )
+        if not signatures:
+            return "unsigned"
+        elif all(signatures):
+            return "signed"
+        else:
+            return "partial"
 
     @extend_schema_field(CollectionVersionBaseSerializer)
     def get_latest_version(self, obj):
