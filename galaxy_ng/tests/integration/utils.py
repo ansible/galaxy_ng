@@ -14,6 +14,7 @@ from json.decoder import JSONDecodeError
 from subprocess import PIPE
 from subprocess import run
 from urllib.parse import urljoin
+import shutil
 
 import pytest
 import requests
@@ -275,3 +276,83 @@ def set_certification(client, collection):
 def uuid4():
     """Return a random UUID4 as a string."""
     return str(uuid.uuid4())
+
+
+def ansible_galaxy(command, check_retcode=0, server="automation_hub", ansible_config=None, cleanup=True):
+
+    if ansible_config is None:
+        import epdb; epdb.st()
+
+    tdir = tempfile.mkdtemp(prefix='ansible-galaxy-testing-')
+    if not os.path.exists(tdir):
+        os.makedirs(tdir)
+    cfgfile = os.path.join(tdir, 'ansible.cfg')
+    with open(cfgfile, 'w') as f:
+        f.write('[galaxy]\n')
+        f.write(f'server_list = {server}\n')
+        f.write('\n')
+        f.write(f'[galaxy_server.{server}]\n')
+        f.write(f"url={ansible_config.get('url')}\n")
+        f.write(f"username={ansible_config.get('username')}\n")
+        f.write(f"password={ansible_config.get('password')}\n")
+        if ansible_config.get('token'):
+            f.write(f"token={ansible_config.get('token')}\n")
+
+    command_string = f"ansible-galaxy -vvv {command} --server={server} --ignore-certs"
+    p = run(command_string, cwd=tdir, shell=True, stdout=PIPE, stderr=PIPE, env=os.environ)
+    logger.debug(f"RUN {command_string}")
+    logger.debug("STDOUT---")
+    for line in p.stdout.decode("utf8").split("\n"):
+        logger.debug(re.sub("(.\x08)+", "...", line))
+    logger.debug("STDERR---")
+    for line in p.stderr.decode("utf8").split("\n"):
+        logger.debug(re.sub("(.\x08)+", "...", line))
+    if check_retcode is not False:
+        assert p.returncode == check_retcode, p.stderr.decode("utf8")
+    if cleanup:
+        shutil.rmtree(tdir)
+    return p
+
+
+def get_collections_namespace_path(namespace):
+    """Get collections namespace path."""
+    return os.path.expanduser(f"~/.ansible/collections/ansible_collections/{namespace}/")
+                                                                                                                                 
+
+def get_collection_full_path(namespace, collection_name):
+    """Get collections full path."""
+    return os.path.join(get_collections_namespace_path(namespace), collection_name)
+
+
+def set_certification(client, collection):
+    """Moves a collection from the `staging` to the `published` repository.
+
+    For use in instances that use repository-based certification and that
+    do not have auto-certification enabled.
+    """
+    if client.config["use_move_endpoint"]:
+        url = ( 
+            f"v3/collections/{collection.namespace}/{collection.name}/versions/"
+            f"{collection.version}/move/staging/published/"
+        )   
+        client(url, method="POST", args=b"{}")
+        # no task url in response from above request, so can't intelligently wait.
+        # so we'll just sleep for 1 second and hope the certification is done by then.
+        dest_url = ( 
+            f"v3/collections/{collection.namespace}/"
+            f"{collection.name}/versions/{collection.version}/"
+        )   
+
+        ready = False
+        timeout = 5 
+        while not ready:
+            try:
+                client(dest_url, method="GET")
+                # if we aren't done publishing, GalaxyError gets thrown and we skip
+                # past the below line and directly to the `except GalaxyError` line.
+                ready = True
+            except GalaxyError:
+                time.sleep(1)
+                timeout = timeout - 1 
+                if timeout < 0:
+                    raise

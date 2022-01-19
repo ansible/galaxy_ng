@@ -1,8 +1,12 @@
 import os
 import pytest
+import shutil
 
-from ..utils import upload_artifact as _upload_artifact
-from ..constants import USERNAME_PUBLISHER
+from .utils import upload_artifact as _upload_artifact
+from .utils import get_client
+from .utils import ansible_galaxy
+from .utils import set_certification
+from .constants import USERNAME_PUBLISHER
 from orionutils.generator import build_collection
 
 
@@ -19,7 +23,7 @@ class AnsibleConfigFixture(dict):
     #   config = ansible_config("ansible_partner")
     #   config = ansible_config("ansible_insights")
 
-    def __init__(self, namespace):
+    def __init__(self, namespace1, namespace=None):
         self.namespace = namespace
     
     def __repr__(self):
@@ -109,9 +113,24 @@ def ansible_config():
     return AnsibleConfigFixture
 
 
+'''
 @pytest.fixture
 def published():
     return {}
+'''
+
+@pytest.fixture(scope="function")
+def published(ansible_config, artifact):                                                                                        
+    config = ansible_config("ansible_partner", namespace=artifact.namespace)
+    ansible_galaxy(
+        f"collection publish {artifact.filename} -vvv --server=automation_hub",
+        ansible_config=config
+    )
+
+    client = get_client(ansible_config("ansible_insights"))
+    set_certification(client, artifact)
+
+    return artifact
 
 
 @pytest.fixture
@@ -133,3 +152,26 @@ def artifact():
 @pytest.fixture
 def upload_artifact():
     return _upload_artifact
+
+
+'''
+@pytest.fixture
+def cleanup_collections():
+    def cleanup(*args, **kwargs):
+        import epdb; epdb.st()
+        return None
+    return cleanup
+'''
+
+@pytest.fixture
+def cleanup_collections(request):
+    """Clean created resources during test executions."""
+
+    def cleanup():
+        path = os.path.expanduser(
+            f"~/.ansible/collections/ansible_collections/{USERNAME_PUBLISHER}/"
+        )
+        if os.path.exists(path):
+            shutil.rmtree(path)
+
+    request.addfinalizer(cleanup)
