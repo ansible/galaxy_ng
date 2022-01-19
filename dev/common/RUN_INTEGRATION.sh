@@ -27,8 +27,7 @@ fi
 source $VENVPATH/bin/activate
 echo "PYTHON: $(which python)"
 
-pip show epdb || pip install epdb
-
 pip install -r galaxy_ng/tests/integration/requirements.txt
+pip show epdb || pip install epdb
 
 pytest --capture=no --pdb -m "not standalone_only" -v galaxy_ng/tests/integration
