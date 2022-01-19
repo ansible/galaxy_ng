@@ -14,6 +14,8 @@ oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/fixuser.py
 #echo "Create token for keycloak user"
 #oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_token.py
 
+echo "Creating test data"
+oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_objects.py
 
 # What is the username?
 export HUB_USERNAME="jdoe"
