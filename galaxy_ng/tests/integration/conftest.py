@@ -16,11 +16,22 @@ galaxyapi_smoke: Smoke tests for galaxy-api backend.
 standalone_only: Tests that should not run against the Insights version of Hub.
 cloud_only: Tests that should not run against the standalone version of Hub.
 cli: Tests that shell out to the real ansible-galaxy cli.
+ui: Tests that navigate the UI via selenium.
+ui_standalone: UI tests that only work in standalone mode.
+smoke: Same as galaxyapi_smoke?
+prod_status: For checking prod?
+busted: Doesn't work yet.
+stage_health: For checking stage?
 """
 
 
 def pytest_configure(config):
-    config.addinivalue_line('markers', MARKER_CONFIG)
+    #config.addinivalue_line('markers', MARKER_CONFIG)
+    for line in MARKER_CONFIG.split('\n'):
+        if not line:
+            continue
+        config.addinivalue_line('markers', line)        
+    import epdb; epdb.st()
 
 
 class AnsibleConfigFixture(dict):
