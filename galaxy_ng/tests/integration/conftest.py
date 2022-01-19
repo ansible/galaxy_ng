@@ -20,7 +20,7 @@ cli: Tests that shell out to the real ansible-galaxy cli.
 
 
 def pytest_configure(config):
-    config.addinitvalue_line('markers', MARKER_CONFIG)
+    config.addinivalue_line('markers', MARKER_CONFIG)
 
 
 class AnsibleConfigFixture(dict):
