@@ -175,9 +175,9 @@ class TestTaskPublish(TestCase):
 
     def test_log_collection_upload(self):
         with self.assertLogs(logger='automated_logging', level='INFO') as lm:
-            _log_collection_upload('namespace', 'name', '0.0.1')
+            _log_collection_upload('admin', 'namespace', 'name', '0.0.1')
 
             self.assertIn(
-                'INFO:automated_logging:Collection uploaded: namespace-name-0.0.1',
+                "INFO:automated_logging:Collection uploaded by user 'admin': namespace-name-0.0.1",
                 lm.output
             )
