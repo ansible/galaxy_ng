@@ -72,6 +72,11 @@ class AnsibleConfigFixture(dict):
             # automatically in the default config for standalone,
             # so should return False in that case ...
 
+            if os.environ.get('HUB_USE_MOVE_ENDPOINT'):
+                val = os.environ['HUB_USE_MOVE_ENDPOINT']
+                if str(val) in ['1', 'True', 'true']:
+                    return True
+
             # standalone ...
             return False
 
