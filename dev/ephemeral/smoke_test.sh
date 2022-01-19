@@ -2,6 +2,13 @@
 
 echo "SMOKE TEST!"
 
+echo "System info ..."
+cat /etc/redhat-release
+cat /etc/issue
+
+echo "RPM packges ..."
+rpm -qa 
+
 echo "Set project to ${NAMESPACE}"
 oc project ${NAMESPACE}
 

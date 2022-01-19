@@ -30,4 +30,9 @@ echo "PYTHON: $(which python)"
 pip install -r galaxy_ng/tests/integration/requirements.txt
 pip show epdb || pip install epdb
 
-pytest --capture=no --pdb -m "not standalone_only" -v galaxy_ng/tests/integration
+
+if [[ -z $HUB_LOCAL ]]; then
+    pytest --capture=no --pdb -m "not standalone_only" -v galaxy_ng/tests/integration
+else
+    pytest --capture=no --pdb -v galaxy_ng/tests/integration
+fi
