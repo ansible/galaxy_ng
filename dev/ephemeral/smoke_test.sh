@@ -43,15 +43,15 @@ echo "Running pytest ..."
 ${VENV_PATH}/bin/pytest --capture=no -m "not standalone_only" -v galaxy_ng/tests/integration || echo "TESTS FAILED!!!"
 
 
-echo ""
-echo "##################################################"
-echo "# API POD LOGS"
-echo "##################################################"
-echo ""
-oc logs $AH_API_POD
+#echo ""
+#echo "##################################################"
+#echo "# API POD LOGS"
+#echo "##################################################"
+#echo ""
+#oc logs $AH_API_POD
 
-echo "Starting sleep cycle ..."
-for X in $(seq 3000 -1 0); do
-    echo "SLEEP ${X}"
-    sleep 1
-done
+#echo "Starting sleep cycle ..."
+#for X in $(seq 3000 -1 0); do
+#    echo "SLEEP ${X}"
+#    sleep 1
+#done
