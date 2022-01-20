@@ -31,7 +31,7 @@ def pytest_configure(config):
         if not line:
             continue
         config.addinivalue_line('markers', line)        
-    import epdb; epdb.st()
+    #import epdb; epdb.st()
 
 
 class AnsibleConfigFixture(dict):
