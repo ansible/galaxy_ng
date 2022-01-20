@@ -26,7 +26,7 @@ class DependencySpec:
     xfail = attr.ib(default=False)
 
 
-@pytest.mark.busted
+@pytest.mark.skip(reason="fails in ephemeral")
 @pytest.mark.cli
 @pytest.mark.parametrize(
     "params",
@@ -84,17 +84,6 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
         config = ansible_config("ansible_insights")
         client = get_client(config)
         set_certification(client, artifact2)
-        # set_certification(client, published)
-
-        '''
-        p = run(
-            f"ansible-galaxy collection install -vvv --ignore-cert \
-            {artifact2.namespace}.{artifact2.name}:{artifact2.version} --server=automation_hub",
-            shell=True,
-            stdout=sys.stdout,
-            stderr=sys.stderr,
-        )
-        '''
 
         pid = ansible_galaxy(
             f"collection install -vvv --ignore-cert \

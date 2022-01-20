@@ -54,11 +54,10 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
     # NOTE: this does not work with 2.12+
     context.CLIARGS = {"ignore_certs": True}
 
-    token = config.get("token") or None
-
     # request token implies that upstream test wants to use authentication.
     # however, some tests need to auth but send request_token=False, so this
     # kwarg is poorly named and confusing.
+    token = config.get("token") or None
     if request_token:
         if token:
             # keycloak must have a unique auth url ...
@@ -74,6 +73,8 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
         else:
             token = None
     client = GalaxyAPI(None, "automation_hub", url=server, token=token)
+
+    # Fix for 2.12+
     client.validate_certs = False
 
     # make an api call with the upstream galaxy client lib from ansible core
@@ -239,49 +240,12 @@ def move_collection(client, collection, source, destination):
     client(url, method="PUT")
 
 
-def set_certification(client, collection):
-    """Moves a collection from the `staging` to the `published` repository.
-
-    For use in instances that use repository-based certification and that
-    do not have auto-certification enabled.
-    """
-    if client.config["use_move_endpoint"]:
-        url = (
-            f"v3/collections/{collection.namespace}/{collection.name}/versions/"
-            f"{collection.version}/move/staging/published/"
-        )
-        client(url, method="POST", args=b"{}")
-        # no task url in response from above request, so can't intelligently wait.
-        # so we'll just sleep for 1 second and hope the certification is done by then.
-        dest_url = (
-            f"v3/collections/{collection.namespace}/"
-            f"{collection.name}/versions/{collection.version}/"
-        )
-
-        ready = False
-        timeout = 5
-        while not ready:
-            try:
-                client(dest_url, method="GET")
-                # if we aren't done publishing, GalaxyError gets thrown and we skip
-                # past the below line and directly to the `except GalaxyError` line.
-                ready = True
-            except GalaxyError:
-                time.sleep(1)
-                timeout = timeout - 1
-                if timeout < 0:
-                    raise
-
-
 def uuid4():
     """Return a random UUID4 as a string."""
     return str(uuid.uuid4())
 
 
 def ansible_galaxy(command, check_retcode=0, server="automation_hub", ansible_config=None, cleanup=True):
-
-    if ansible_config is None:
-        import epdb; epdb.st()
 
     tdir = tempfile.mkdtemp(prefix='ansible-galaxy-testing-')
     if not os.path.exists(tdir):
@@ -337,17 +301,19 @@ def set_certification(client, collection):
         url = ( 
             f"v3/collections/{collection.namespace}/{collection.name}/versions/"
             f"{collection.version}/move/staging/published/"
-        )   
+        )
+
         client(url, method="POST", args=b"{}")
+
         # no task url in response from above request, so can't intelligently wait.
         # so we'll just sleep for 1 second and hope the certification is done by then.
         dest_url = ( 
             f"v3/collections/{collection.namespace}/"
             f"{collection.name}/versions/{collection.version}/"
         )   
-
         ready = False
-        timeout = 5 
+        timeout = 5
+        res = None
         while not ready:
             try:
                 client(dest_url, method="GET")
