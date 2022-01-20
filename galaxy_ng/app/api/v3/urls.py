@@ -1,5 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
+from pulp_ansible.app.urls import (
+    v3_urls
+)
 
 from . import views, viewsets
 
@@ -43,52 +46,10 @@ urlpatterns = [
     #     viewsets.UnpaginatedCollectionVersionViewSet.as_view({"get": "list"}),
     #     name="all-collection-versions-list",
     # ),
-    path(
-        "collections/", viewsets.CollectionViewSet.as_view({"get": "list"}), name="collections-list"
-    ),
-    path(
-        "collections/<str:namespace>/<str:name>/",
-        viewsets.CollectionViewSet.as_view(
-            {"get": "retrieve", "patch": "update", "delete": "destroy"}
-        ),
-        name="collections-detail",
-    ),
-    path(
-        "collections/<str:namespace>/<str:name>/versions/",
-        viewsets.CollectionVersionViewSet.as_view({"get": "list"}),
-        name="collection-versions-list",
-    ),
-    path(
-        "collections/<str:namespace>/<str:name>/versions/<str:version>/",
-        viewsets.CollectionVersionViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
-        name="collection-versions-detail",
-    ),
-    path(
-        "collections/<str:namespace>/<str:name>/versions/<str:version>/docs-blob/",
-        viewsets.CollectionVersionDocsViewSet.as_view({"get": "retrieve"}),
-        name="collection-versions-detail-docs",
-    ),
-    path(
-        "imports/collections/<str:pk>/",
-        viewsets.CollectionImportViewSet.as_view({"get": "retrieve"}),
-        name="collection-import",
-    ),
-    path(
-        "artifacts/collections/",
-        viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
-        name="collection-artifact-upload",
-    ),
-    path(
-        "artifacts/collections/<str:path>/<str:filename>",
-        viewsets.CollectionArtifactDownloadView.as_view(),
-        name="collection-artifact-download",
-    ),
-    path(
-        "collections/<str:namespace>/<str:name>/versions/<str:version>/move/"
-        "<str:source_path>/<str:dest_path>/",
-        viewsets.CollectionVersionMoveViewSet.as_view({"post": "move_content"}),
-        name="collection-version-move",
-    ),
+
+
+    path("", include(v3_urls)),
+
     path("tasks/", viewsets.TaskViewSet.as_view({"get": "list"}), name="tasks-list"),
     path("tasks/<str:pk>/", viewsets.TaskViewSet.as_view({"get": "retrieve"}), name="tasks-detail"),
     path("excludes/", views.ExcludesView.as_view(), name="excludes-file"),

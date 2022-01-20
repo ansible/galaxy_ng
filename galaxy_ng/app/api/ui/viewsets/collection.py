@@ -114,8 +114,7 @@ class CollectionViewSet(
         if getattr(self, "swagger_fake_view", False):
             # OpenAPI spec generation
             return CollectionVersion.objects.none()
-
-        path = self.kwargs.get("path")
+        path = self.kwargs.get('distro_base_path')
         if path is None:
             raise Http404(_("Distribution base path is required"))
 

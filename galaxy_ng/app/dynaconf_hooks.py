@@ -19,7 +19,8 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_logging(settings))
     data.update(configure_keycloak(settings))
     data.update(configure_cors(settings))
-    data.update(configure_feature_flags(settings))
+    data.update(configure_pulp_ansible(settings))
+    data.update(configure_pulp_ansible(settings))
 
     return data
 
@@ -279,3 +280,10 @@ def configure_feature_flags(settings: Dynaconf) -> Dict[str, Any]:
     data["GALAXY_FEATURE_FLAGS__collection_auto_sign"] = settings.get(
         "GALAXY_AUTO_SIGN_COLLECTIONS", False)
     return data
+
+
+def configure_pulp_ansible(settings: Dynaconf) -> Dict[str, Any]:
+    return {
+        "ANSIBLE_URL_NAMESPACE": "galaxy:api:v3:default-content:",
+        "ANSIBLE_DEFAULT_DISTRIBUTION_PATH": "published"
+    }

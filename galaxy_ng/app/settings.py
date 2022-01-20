@@ -55,6 +55,8 @@ SYNCLIST_BATCH_SIZE = 200
 
 GALAXY_EXCEPTION_HANDLER = "galaxy_ng.app.api.exceptions.exception_handler"
 GALAXY_PAGINATION_CLASS = "pulp_ansible.app.galaxy.v3.pagination.LimitOffsetPagination"
+
+# TODO: remove GALAXY_AUTHENTICATION_CLASSES classes and use DEFAULT_AUTHENTICATION_CLASSES instead
 GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
@@ -62,7 +64,11 @@ GALAXY_AUTHENTICATION_CLASSES = [
 ]
 
 REST_FRAMEWORK__DEFAULT_PERMISSION_CLASSES = ("galaxy_ng.app.access_control.access_policy.AccessPolicyBase", )
-
+REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES = [
+    "rest_framework.authentication.SessionAuthentication",
+    "rest_framework.authentication.TokenAuthentication",
+    "rest_framework.authentication.BasicAuthentication",
+]
 # Settings for insights mode
 # GALAXY_AUTHENTICATION_CLASSES = ["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
 

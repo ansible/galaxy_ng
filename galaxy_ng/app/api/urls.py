@@ -23,10 +23,16 @@ v3_urlpatterns = [
     path(
         "",
         include((v3_urls, app_name), namespace='default-content'),
-        {
-            'no_path_specified': True,
-            'path': DEFAULT_DISTRIBUTION_BASE_PATH,
-        }
+
+
+     # TODO remove me permanently
+
+
+
+     #    {
+     #        'no_path_specified': True,
+     #        'path': DEFAULT_DISTRIBUTION_BASE_PATH,
+     #    }
     ),
 ]
 
