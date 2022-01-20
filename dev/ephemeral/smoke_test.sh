@@ -34,7 +34,7 @@ export HUB_PASSWORD="redhat"
 #export HUB_TOKEN="abcdefghijklmnopqrstuvwxyz1234567890"
 
 # Force "publishing" uploaded collections
-export HUB_USE_MOVE_ENDPOINT=1
+export HUB_USE_MOVE_ENDPOINT="true"
 
 # What is the api root?
 export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/api/automation-hub/"
