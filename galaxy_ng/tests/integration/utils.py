@@ -6,31 +6,22 @@ import re
 import tarfile
 import tempfile
 import time
-#from tkinter import W
 import uuid
 from contextlib import contextmanager
-from functools import lru_cache
-from json.decoder import JSONDecodeError
 from subprocess import PIPE
 from subprocess import run
 from urllib.parse import urljoin
 import shutil
 
-import pytest
-import requests
 from ansible import context
-from ansible.errors import AnsibleError
 from ansible.galaxy.api import GalaxyAPI
 from ansible.galaxy.api import GalaxyError
 from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
 
-logger = logging.getLogger(__name__)
 
-# FILENAME_INCLUDED
-# FILENAME_EXCLUDED
-# FILENAME_MISSING
+logger = logging.getLogger(__name__)
 
 
 class TaskWaitingTimeout(Exception):
@@ -245,7 +236,13 @@ def uuid4():
     return str(uuid.uuid4())
 
 
-def ansible_galaxy(command, check_retcode=0, server="automation_hub", ansible_config=None, cleanup=True):
+def ansible_galaxy(
+    command,
+    check_retcode=0,
+    server="automation_hub",
+    ansible_config=None,
+    cleanup=True
+):
 
     tdir = tempfile.mkdtemp(prefix='ansible-galaxy-testing-')
     if not os.path.exists(tdir):
@@ -284,7 +281,7 @@ def ansible_galaxy(command, check_retcode=0, server="automation_hub", ansible_co
 def get_collections_namespace_path(namespace):
     """Get collections namespace path."""
     return os.path.expanduser(f"~/.ansible/collections/ansible_collections/{namespace}/")
-                                                                                                                                 
+
 
 def get_collection_full_path(namespace, collection_name):
     """Get collections full path."""
@@ -298,7 +295,7 @@ def set_certification(client, collection):
     do not have auto-certification enabled.
     """
     if client.config["use_move_endpoint"]:
-        url = ( 
+        url = (
             f"v3/collections/{collection.namespace}/{collection.name}/versions/"
             f"{collection.version}/move/staging/published/"
         )
@@ -307,21 +304,23 @@ def set_certification(client, collection):
 
         # no task url in response from above request, so can't intelligently wait.
         # so we'll just sleep for 1 second and hope the certification is done by then.
-        dest_url = ( 
+        dest_url = (
             f"v3/collections/{collection.namespace}/"
             f"{collection.name}/versions/{collection.version}/"
-        )   
+        )
         ready = False
         timeout = 5
         res = None
         while not ready:
             try:
-                client(dest_url, method="GET")
+                res = client(dest_url, method="GET")
                 # if we aren't done publishing, GalaxyError gets thrown and we skip
                 # past the below line and directly to the `except GalaxyError` line.
                 ready = True
             except GalaxyError:
                 time.sleep(1)
-                timeout = timeout - 1 
+                timeout = timeout - 1
                 if timeout < 0:
                     raise
+
+        return res

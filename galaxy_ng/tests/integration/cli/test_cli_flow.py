@@ -21,6 +21,7 @@ from ..utils import set_certification
 pytestmark = pytest.mark.qa  # noqa: F821
 logger = logging.getLogger(__name__)
 
+
 @pytest.mark.cli
 @pytest.mark.skip(reason="fails in ephemeral")
 def test_publish_newer_version_collection(ansible_config):
@@ -57,7 +58,7 @@ def test_publish_newer_version_collection(ansible_config):
         ansible_config=ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
     )
     cert1 = set_certification(client, collection)
-    print(f'PUBLISH 2 RC: {publish_pid_2.returncode}')
+    print(f'PUBLISH 2 RC: {publish_pid_2.returncode} {cert1}')
 
     # Install newer collection version
     ansible_config("ansible_partner")
@@ -68,7 +69,6 @@ def test_publish_newer_version_collection(ansible_config):
         check_retcode=False
     )
     print(install_pid.stdout.decode('utf-8'))
-    import epdb; epdb.st()
 
     # Verify installed collection
     collection_path = get_collection_full_path(USERNAME_PUBLISHER, collection.name)

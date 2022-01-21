@@ -26,28 +26,26 @@ stage_health: For checking stage?
 
 
 def pytest_configure(config):
-    #config.addinivalue_line('markers', MARKER_CONFIG)
     for line in MARKER_CONFIG.split('\n'):
         if not line:
             continue
-        config.addinivalue_line('markers', line)        
-    #import epdb; epdb.st()
+        config.addinivalue_line('markers', line)
 
 
 class AnsibleConfigFixture(dict):
 
     # This is "kinda" like how IQE uses dynaconf, but
-    # much simpler and not such a huge tangled mess to 
+    # much simpler and not such a huge tangled mess to
     # understand ...
-    
-    # The class is instantiated with a "namespace" of sorts, 
+
+    # The class is instantiated with a "namespace" of sorts,
     # which sets the context for the rest of the config ...
     #   config = ansible_config("ansible_partner")
     #   config = ansible_config("ansible_insights")
 
     def __init__(self, namespace1, namespace=None):
         self.namespace = namespace
-    
+
     def __repr__(self):
         return f'<AnsibleConfigFixture: {self.namespace}>'
 
@@ -86,7 +84,7 @@ class AnsibleConfigFixture(dict):
             )
 
         elif key == 'hub_use_inbound':
-            # This value will be compared to "use_distribution" in the 
+            # This value will be compared to "use_distribution" in the
             # test_api_publish test. I assume it has to do with pulp's
             # concept of "distribution" but not sure what it actually
             # means in this case
@@ -110,12 +108,10 @@ class AnsibleConfigFixture(dict):
             # return True
 
         else:
-            print('')
-            print(f'## GET {self.namespace} {key}')
-            import epdb; epdb.st()
+            raise Exception(f'Uknown config key: {self.namespace}.{key}')
 
         return super().__getitem__(key)
-    
+
     def get(self, key):
         return self.__getitem__(key)
 
@@ -135,14 +131,8 @@ def ansible_config():
     return AnsibleConfigFixture
 
 
-'''
-@pytest.fixture
-def published():
-    return {}
-'''
-
 @pytest.fixture(scope="function")
-def published(ansible_config, artifact):                                                                                        
+def published(ansible_config, artifact):
     config = ansible_config("ansible_partner", namespace=artifact.namespace)
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
@@ -175,15 +165,6 @@ def artifact():
 def upload_artifact():
     return _upload_artifact
 
-
-'''
-@pytest.fixture
-def cleanup_collections():
-    def cleanup(*args, **kwargs):
-        import epdb; epdb.st()
-        return None
-    return cleanup
-'''
 
 @pytest.fixture
 def cleanup_collections(request):

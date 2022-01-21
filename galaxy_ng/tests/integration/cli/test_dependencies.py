@@ -1,7 +1,5 @@
 """test_dependencies.py - Tests of collection dependency handling."""
 import logging
-import sys
-from subprocess import run
 
 import attr
 import pytest
@@ -11,7 +9,6 @@ from ..constants import USERNAME_PUBLISHER
 from ..utils import ansible_galaxy
 from ..utils import get_client
 from ..utils import set_certification
-#from ..utils import xfail_open_issue
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -39,11 +36,11 @@ class DependencySpec:
         DependencySpec("gteq", ">=0.9.0", 0),
         DependencySpec("range", ">0.1.0,<1.0.1", 0),
         DependencySpec("invalid", "this is just junk", 1),
-        #DependencySpec("carot", "^1.0.0", 1, xfail="galaxy-dev#104"),
-        #DependencySpec("tilde", "~1.0.0", 1, xfail="galaxy-dev#104"),
-        #DependencySpec("exception", ">0.0.0,!=1.0.0", 1, xfail="galaxy-dev#104"),
-        #DependencySpec("missing1", "2.0.0", 1, xfail="galaxy-dev#104"),
-        #DependencySpec("missing2", ">1.0.0", 1, xfail="galaxy-dev#104"),
+        # DependencySpec("carot", "^1.0.0", 1, xfail="galaxy-dev#104"),
+        # DependencySpec("tilde", "~1.0.0", 1, xfail="galaxy-dev#104"),
+        # DependencySpec("exception", ">0.0.0,!=1.0.0", 1, xfail="galaxy-dev#104"),
+        # DependencySpec("missing1", "2.0.0", 1, xfail="galaxy-dev#104"),
+        # DependencySpec("missing2", ">1.0.0", 1, xfail="galaxy-dev#104"),
     ),
     ids=lambda s: s.name,
 )
@@ -79,6 +76,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
             return pytest.xfail()
         else:
             raise
+    print(f'install pid: {p}')
 
     if retcode == 0:
         config = ansible_config("ansible_insights")
@@ -90,7 +88,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
                 {artifact2.namespace}.{artifact2.name}:{artifact2.version} --server=automation_hub",
             check_retcode=False,
             ansible_config=ansible_config("ansible_insights"),
-            #cleanup=False
+            # cleanup=False
         )
 
         try:
