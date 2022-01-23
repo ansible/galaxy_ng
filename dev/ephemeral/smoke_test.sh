@@ -47,7 +47,7 @@ VENV_PATH=gvenv
 virtualenv --python=$(which python3) ${VENV_PATH}
 source ${VENV_PATH}/bin/activate
 ${VENV_PATH}/bin/pip install --upgrade pip wheel
-${VENV_PATH}/bin/pip install -r galaxy_ng/tests/integration/requirements.txt
+${VENV_PATH}/bin/pip install -r integration_requirements.txt
 
 echo "Running pytest ..."
 ${VENV_PATH}/bin/pytest --capture=no -m "not standalone_only" -v galaxy_ng/tests/integration || echo "TESTS FAILED!!!"

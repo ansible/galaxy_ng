@@ -1,6 +1,7 @@
 include CHANGES.rst
 include COMMITMENT
 include LICENSE
+include integration_requirements.txt
 include unittest_requirements.txt
 include pyproject.toml
 include requirements/requirements.common.txt

@@ -29,7 +29,7 @@ fi
 source $VENVPATH/bin/activate
 echo "PYTHON: $(which python)"
 
-pip install -r galaxy_ng/tests/integration/requirements.txt
+pip install -r integration_requirements.txt
 pip show epdb || pip install epdb
 
 
