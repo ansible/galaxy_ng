@@ -65,10 +65,11 @@ PODS=$(oc get pods | egrep -v NAME | awk '{print $1}')
 for POD in $PODS; do
     echo "# ${POD} CONTAINERS ..."
     #oc get pod ${POD} -o jsonpath='{.spec.containers[*].name}'
-    POD_CONTAINERS=$(oc get pod -l pod=${POD} -o custom-columns=POD:.metadata.name --no-headers | head -1)
-    for POD_CONTAINER in $POD_CONTAINERS; do
-        echo "#    POD_CONTAINER: ${POD_CONTAINER}"
-    done
+    oc get pod -l pod=${POD} -o custom-columns=POD:.metadata.name --no-headers
+    #POD_CONTAINERS=$(oc get pod -l pod=${POD} -o custom-columns=POD:.metadata.name --no-headers | head -1)
+    #for POD_CONTAINER in $POD_CONTAINERS; do
+    #    echo "#    POD_CONTAINER: ${POD_CONTAINER}"
+    #done
     echo ""
 done
 
