@@ -59,8 +59,22 @@ ${VENV_PATH}/bin/pytest --capture=no -m "not standalone_only" -v galaxy_ng/tests
 #echo ""
 #oc logs $AH_API_POD
 
-echo "Starting sleep cycle for 10000s... "
-for X in $(seq 10000 -1 0); do
-    #echo "SLEEP ${X}"
-    sleep 1
+
+#AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.metadata.name --no-headers | head -1)
+PODS=$(oc get pods | egrep -v NAME | awk '{print $1}')
+for POD in $PODS; do
+    echo "# ${POD} CONTAINERS ..."
+    #oc get pod ${POD} -o jsonpath='{.spec.containers[*].name}'
+    POD_CONTAINERS=$(oc get pod -l pod=${POD} -o custom-columns=POD:.metadata.name --no-headers | head -1)
+    for POD_CONTAINER in $POD_CONTAINERS; do
+        echo "#    POD_CONTAINER: ${POD_CONTAINER}"
+    done
+    echo ""
 done
+
+
+#echo "Starting sleep cycle for 10000s... "
+#for X in $(seq 10000 -1 0); do
+#    #echo "SLEEP ${X}"
+#    sleep 1
+#done
