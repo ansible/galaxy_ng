@@ -62,6 +62,7 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(
+                kwargs["username"],
                 kwargs["expected_namespace"],
                 kwargs["expected_name"],
                 kwargs["expected_version"]
@@ -103,12 +104,19 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(
+                kwargs["username"],
                 kwargs["expected_namespace"],
                 kwargs["expected_name"],
                 kwargs["expected_version"]
             )
 
 
-def _log_collection_upload(namespace, name, version):
+def _log_collection_upload(username, namespace, name, version):
     api_access_log = logging.getLogger("automated_logging")
-    api_access_log.info("Collection uploaded: %s-%s-%s", namespace, name, version,)
+    api_access_log.info(
+        "Collection uploaded by user '%s': %s-%s-%s",
+        username,
+        namespace,
+        name,
+        version,
+    )
