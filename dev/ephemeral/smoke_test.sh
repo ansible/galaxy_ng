@@ -59,8 +59,8 @@ ${VENV_PATH}/bin/pytest --capture=no -m "not standalone_only" -v galaxy_ng/tests
 #echo ""
 #oc logs $AH_API_POD
 
-#echo "Starting sleep cycle for 10000s... "
-#for X in $(seq 10000 -1 0); do
-#    #echo "SLEEP ${X}"
-#    sleep 1
-#done
+echo "Starting sleep cycle for 10000s... "
+for X in $(seq 10000 -1 0); do
+    #echo "SLEEP ${X}"
+    sleep 1
+done

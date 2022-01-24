@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.cli
-@pytest.mark.skip(reason="fails in ephemeral")
 def test_publish_newer_version_collection(ansible_config):
     """Test whether a newer version of collection can be installed after being published.
 
