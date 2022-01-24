@@ -268,7 +268,7 @@ def ansible_galaxy(
     print('# ansible.cfg ...')
     with open(cfgfile, 'r') as f:
         data = f.read()
-        print(data_
+        print(data)
     print('< EOF')
 
     command_string = f"ansible-galaxy -vvv {command} --server={server} --ignore-certs"
