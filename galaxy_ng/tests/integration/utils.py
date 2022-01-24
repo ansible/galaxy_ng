@@ -82,8 +82,8 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
             else:
                 kwargs["headers"] = headers
 
-        if 'move' in url:
-            import epdb; epdb.st()
+        #if 'move' in url:
+        #    import epdb; epdb.st()
 
         return client._call_galaxy(url, *args, **kwargs)
 
@@ -271,7 +271,7 @@ def ansible_galaxy(
         print(data)
     print('< EOF')
 
-    command_string = f"ansible-galaxy -vvv {command} --server={server} --ignore-certs"
+    command_string = f"ansible-galaxy -vvvv {command} --server={server} --ignore-certs"
     print(f'# RUN: {command_string}')
     p = run(command_string, cwd=tdir, shell=True, stdout=PIPE, stderr=PIPE, env=os.environ)
     logger.debug(f"RUN {command_string}")
@@ -324,6 +324,7 @@ def set_certification(client, collection):
         while not ready:
             try:
                 res = client(dest_url, method="GET")
+                #import epdb; epdb.st()
                 # if we aren't done publishing, GalaxyError gets thrown and we skip
                 # past the below line and directly to the `except GalaxyError` line.
                 ready = True

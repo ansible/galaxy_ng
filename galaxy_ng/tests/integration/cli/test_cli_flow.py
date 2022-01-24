@@ -40,8 +40,11 @@ def test_publish_newer_version_collection(ansible_config):
         f"collection publish {collection.filename}",
         ansible_config=ansible_config("ansible_insights")
     )
-    cert1 = set_certification(client, collection)
     print(f'PUBLISH 1 RC: {publish_pid_1.returncode}')
+    assert publish_pid_1.returncode == 0
+
+    cert1 = set_certification(client, collection)
+    print(f'SET CERTIFICATION 2: {cert1}')
 
     # Increase collection version
     new_version = increment_version(collection.version)
@@ -56,8 +59,11 @@ def test_publish_newer_version_collection(ansible_config):
         f"collection publish {collection.filename}",
         ansible_config=ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
     )
-    cert1 = set_certification(client, collection)
-    print(f'PUBLISH 2 RC: {publish_pid_2.returncode} {cert1}')
+    print(f'PUBLISH 2 RC: {publish_pid_2.returncode}')
+    assert publish_pid_2.returncode == 0
+
+    cert2 = set_certification(client, collection)
+    print(f'SET CERTIFICATION 2: {cert2}')
 
     # Install newer collection version
     ansible_config("ansible_partner")
@@ -68,11 +74,15 @@ def test_publish_newer_version_collection(ansible_config):
         check_retcode=False
     )
     print(install_pid.stdout.decode('utf-8'))
+    assert install_pid.returncode == 0
 
     # Verify installed collection
     collection_path = get_collection_full_path(USERNAME_PUBLISHER, collection.name)
     with open(os.path.join(collection_path, "MANIFEST.json")) as manifest_json:
         data = json.load(manifest_json)
+
+    #import epdb; epdb.st()
+
     assert data["collection_info"]["version"] == collection.version
 
 

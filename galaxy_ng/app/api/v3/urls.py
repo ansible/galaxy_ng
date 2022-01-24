@@ -44,6 +44,9 @@ urlpatterns = [
     #     name="all-collection-versions-list",
     # ),
     path(
+        'server_info/', views.server_info, name="server-info"
+    ),
+    path(
         "collections/", viewsets.CollectionViewSet.as_view({"get": "list"}), name="collections-list"
     ),
     path(
