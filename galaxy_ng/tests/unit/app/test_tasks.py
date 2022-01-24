@@ -117,6 +117,7 @@ class TestTaskPublish(TestCase):
             expected_namespace='',
             expected_name='',
             expected_version='',
+            username='',
         )
 
         self.assertTrue(mocked_import.call_count == 1)
@@ -133,6 +134,7 @@ class TestTaskPublish(TestCase):
                 expected_namespace='',
                 expected_name='',
                 expected_version='',
+                username='',
             )
 
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
@@ -155,6 +157,7 @@ class TestTaskPublish(TestCase):
             expected_namespace='',
             expected_name='',
             expected_version='',
+            username='',
         )
 
         self.assertTrue(mocked_import.call_count == 1)
@@ -171,13 +174,14 @@ class TestTaskPublish(TestCase):
                 expected_namespace='',
                 expected_name='',
                 expected_version='',
+                username='',
             )
 
     def test_log_collection_upload(self):
         with self.assertLogs(logger='automated_logging', level='INFO') as lm:
-            _log_collection_upload('namespace', 'name', '0.0.1')
+            _log_collection_upload('admin', 'namespace', 'name', '0.0.1')
 
             self.assertIn(
-                'INFO:automated_logging:Collection uploaded: namespace-name-0.0.1',
+                "INFO:automated_logging:Collection uploaded by user 'admin': namespace-name-0.0.1",
                 lm.output
             )
