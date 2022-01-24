@@ -82,6 +82,9 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
             else:
                 kwargs["headers"] = headers
 
+        if 'move' in url:
+            import epdb; epdb.st()
+
         return client._call_galaxy(url, *args, **kwargs)
 
     request.config = config
@@ -262,7 +265,14 @@ def ansible_galaxy(
         if ansible_config.get('token'):
             f.write(f"token={ansible_config.get('token')}\n")
 
+    print('# ansible.cfg ...')
+    with open(cfgfile, 'r') as f:
+        data = f.read()
+        print(data_
+    print('< EOF'
+
     command_string = f"ansible-galaxy -vvv {command} --server={server} --ignore-certs"
+    print(f'# RUN: {command_string}')
     p = run(command_string, cwd=tdir, shell=True, stdout=PIPE, stderr=PIPE, env=os.environ)
     logger.debug(f"RUN {command_string}")
     logger.debug("STDOUT---")
