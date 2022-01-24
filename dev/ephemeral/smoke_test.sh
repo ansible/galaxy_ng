@@ -52,30 +52,8 @@ ${VENV_PATH}/bin/pip install -r integration_requirements.txt
 echo "Running pytest ..."
 ${VENV_PATH}/bin/pytest --capture=no -m "not standalone_only" -v galaxy_ng/tests/integration || echo "test failed"
 
-#echo ""
-#echo "##################################################"
-#echo "# API POD LOGS"
-#echo "##################################################"
-#echo ""
-#oc logs $AH_API_POD
-
-
-#AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.metadata.name --no-headers | head -1)
-PODS=$(oc get pods | egrep -v NAME | awk '{print $1}')
-for POD in $PODS; do
-    echo "# ${POD} CONTAINERS ..."
-    #oc get pod ${POD} -o jsonpath='{.spec.containers[*].name}'
-    oc get pod -l pod=${POD} -o custom-columns=POD:.metadata.name --no-headers
-    #POD_CONTAINERS=$(oc get pod -l pod=${POD} -o custom-columns=POD:.metadata.name --no-headers | head -1)
-    #for POD_CONTAINER in $POD_CONTAINERS; do
-    #    echo "#    POD_CONTAINER: ${POD_CONTAINER}"
-    #done
-    echo ""
+echo "Starting sleep cycle for 10000s... "
+for X in $(seq 10000 -1 0); do
+    #echo "SLEEP ${X}"
+    sleep 1
 done
-
-
-#echo "Starting sleep cycle for 10000s... "
-#for X in $(seq 10000 -1 0); do
-#    #echo "SLEEP ${X}"
-#    sleep 1
-#done
