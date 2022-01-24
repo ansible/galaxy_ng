@@ -84,6 +84,10 @@ docker/loaddata:  ## Load initial data from fixtures
 	./compose run --rm -e PULP_FIXTURE_DIRS='["/src/galaxy_ng/dev/automation-hub"]' \
  api manage loaddata initial_data.json
 
+.PHONY: docker/loadtoken
+docker/loadtoken: 
+	./compose run api manage shell < dev/standalone/create_admin_token.py
+
 .PHONY: docker/makemigrations
 docker/makemigrations:   ## Run django migrations
 	$(call exec_or_run, api, $(DJ_MANAGER), makemigrations)

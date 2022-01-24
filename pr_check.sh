@@ -40,6 +40,7 @@ bonfire deploy \
 # source $CICD_ROOT/smoke_test.sh
 
 # source smoke_test.sh
+source dev/ephemeral/smoke_test.sh
 
 
 # Need to make a dummy results file to make tests pass
