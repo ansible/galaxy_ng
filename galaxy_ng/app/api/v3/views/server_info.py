@@ -1,4 +1,6 @@
 import json
+import os
+
 from django.http import HttpResponse
 from django.conf import settings
 
@@ -10,4 +12,8 @@ def server_info(*args, **kwargs):
         'settings.X_PULP_CONTENT_PORT': settings.X_PULP_CONTENT_PORT,
         'settings.CONTENT_PATH_PREFIX': settings.CONTENT_PATH_PREFIX
     }
-    return HttpResponse(json.dumps(ds))
+
+    for k, v in os.environ.items():
+        ds['ENV--' + k] = v
+
+    return HttpResponse(json.dumps(ds, sort_keys=True))
