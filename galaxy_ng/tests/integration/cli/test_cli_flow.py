@@ -75,6 +75,13 @@ def test_publish_newer_version_collection(ansible_config):
     v11data = client(v11url)
     pprint(v11data)
 
+
+    print('# SERVER INFO ...')
+    iurl = f"/api/automaton-hub/v3/server_info/"
+    idata = client(v11url)
+    pprint(idata)
+    #import epdb; epdb.st()
+
     # Install newer collection version
     ansible_config("ansible_partner")
     install_pid = ansible_galaxy(
