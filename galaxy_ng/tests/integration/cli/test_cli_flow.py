@@ -17,6 +17,8 @@ from ..utils import get_client
 from ..utils import get_collection_full_path
 from ..utils import set_certification
 
+from pprint import pprint
+
 
 pytestmark = pytest.mark.qa  # noqa: F821
 logger = logging.getLogger(__name__)
@@ -64,6 +66,14 @@ def test_publish_newer_version_collection(ansible_config):
 
     cert2 = set_certification(client, collection)
     print(f'SET CERTIFICATION 2: {cert2}')
+
+
+    print('# COLLECTION DATA ...')
+    #url = f"/v3/collections/{namespace}/{name}/versions/{version}/move/{source}/{destination}"
+    vurl = f"/api/automaton-hub/v3/collections/{collection.namespace}/{collection.name}/versions/"
+    v11url = f"/api/automation-hub/v3/collections/{collection.namespace}/{collection.name}/versions/{collection.version}"
+    v11data = client(v11url)
+    pprint(v11data)
 
     # Install newer collection version
     ansible_config("ansible_partner")
