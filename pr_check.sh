@@ -55,6 +55,18 @@ oc patch clowdapp automation-hub \
         }]'
 
 
+echo "# ALL ROUTES ..."
+oc get routes
+
+echo "# ROUTES DESCRIBE ..."
+ROUTES=$(oc get routes | awk '{print $1}')
+for ROUTE in $ROUTES; do
+    echo "# ROUTE ${ROUTE} ..."
+    oc describe route/${ROUTE}
+done
+
+
+
 # source smoke_test.sh
 source dev/ephemeral/smoke_test.sh
 
