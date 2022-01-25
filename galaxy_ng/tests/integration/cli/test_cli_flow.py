@@ -78,7 +78,7 @@ def test_publish_newer_version_collection(ansible_config):
 
     print('# SERVER INFO ...')
     iurl = f"/api/automaton-hub/v3/server_info/"
-    idata = client(v11url)
+    idata = client(iurl)
     pprint(idata)
     #import epdb; epdb.st()
 
