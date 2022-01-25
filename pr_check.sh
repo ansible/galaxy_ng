@@ -59,7 +59,7 @@ echo "# ALL ROUTES ..."
 oc get routes
 
 echo "# ROUTES DESCRIBE ..."
-ROUTES=$(oc get routes | awk '{print $1}')
+ROUTES=$(oc get routes | awk '{print $1}' | fgrep -v "NAME")
 for ROUTE in $ROUTES; do
     echo "# ROUTE ${ROUTE} ..."
     oc describe route/${ROUTE}
