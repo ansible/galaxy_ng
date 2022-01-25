@@ -39,11 +39,24 @@ bonfire deploy \
     --set-parameter ${COMPONENT_NAME}/CONTENT_ORIGIN="${CONTENT_ORIGIN}"
 # END WORKAROUND
 
-# source $CICD_ROOT/smoke_test.sh
+# Fix the routing for minio and artifact urls
+oc project ${NAMESPACE}
+oc create route edge minio --service=env-${NAMESPACE}-minio --insecure-policy=Redirect
+MINIO_ROUTE=$(oc get route minio -o jsonpath='https://{.spec.host}{"\n"}')
+oc patch clowdapp automation-hub \
+    --type=json \
+    -p '[{
+            "op": "add", 
+            "path": "/spec/deployments/3/podSpec/env/-", 
+            "value": {
+                "name": "PULP_AWS_S3_ENDPOINT_URL", 
+                "value": "'"${MINIO_ROUTE}"'"
+            }
+        }]'
+
 
 # source smoke_test.sh
 source dev/ephemeral/smoke_test.sh
-
 
 # Need to make a dummy results file to make tests pass
 mkdir -p artifacts
