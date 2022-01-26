@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.cli
-@pytest.mark.skip(reason="fails in ephemeral")
 def test_publish_newer_version_collection(ansible_config):
     """Test whether a newer version of collection can be installed after being published.
 
@@ -78,7 +77,6 @@ def test_publish_newer_version_collection(ansible_config):
 
 
 @pytest.mark.cli
-@pytest.mark.skip(reason="fails in ephemeral")
 def test_publish_newer_certified_collection_version(ansible_config, cleanup_collections):
     """Test whether a newer certified collection version can be installed.
 
@@ -123,7 +121,6 @@ def test_publish_newer_certified_collection_version(ansible_config, cleanup_coll
 
 @pytest.mark.cli
 @pytest.mark.xfail
-@pytest.mark.skip(reason="fails in ephemeral")
 def test_publish_same_collection_version(ansible_config):
     """Test whether same collection version can be published."""
     ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
@@ -141,7 +138,6 @@ def test_publish_same_collection_version(ansible_config):
 
 
 @pytest.mark.cli
-@pytest.mark.skip(reason="fails in ephemeral")
 def test_publish_and_install_by_self(ansible_config, published, cleanup_collections):
     """A publishing user has the permission to install an uncertified version of their
     own collection.
@@ -156,7 +152,6 @@ def test_publish_and_install_by_self(ansible_config, published, cleanup_collecti
 
 @pytest.mark.cli
 @pytest.mark.cloud_only
-@pytest.mark.skip(reason="fails in ephemeral")
 def test_publish_and_expect_uncertified_hidden(ansible_config, published, cleanup_collections):
     """A discovering/consumer user has the permission to download a specific version of an
     uncertified collection, but not an unspecified version range.
@@ -175,7 +170,6 @@ def test_publish_and_expect_uncertified_hidden(ansible_config, published, cleanu
 
 @pytest.mark.cli
 @pytest.mark.cloud_only
-@pytest.mark.skip(reason="fails in ephemeral")
 def test_certification_endpoint(ansible_config, artifact):
     """Certification makes a collection installable in a version range by a consumer-level
     user.
