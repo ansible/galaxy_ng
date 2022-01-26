@@ -131,25 +131,10 @@ class _CollectionSerializer(Serializer):
 
 class CollectionListSerializer(_CollectionSerializer):
     deprecated = serializers.BooleanField()
-    sign_state = serializers.SerializerMethodField()
-
-    @extend_schema_field(serializers.CharField)
-    def get_sign_state(self, obj):
-        """Returns sign state of the collection.
-
-        unsigned: collection doesn't at least one version signed.
-        signed: collection has all versions signed.
-        partial: collection has some versions signed.
-        """
-        signatures = list(
-            obj.collection.versions.all().values_list("signatures", flat=True)
-        )
-        if not signatures:
-            return "unsigned"
-        elif all(signatures):
-            return "signed"
-        else:
-            return "partial"
+    sign_state = serializers.CharField()
+    total_versions = serializers.IntegerField(default=0)
+    signed_versions = serializers.IntegerField(default=0)
+    unsigned_versions = serializers.IntegerField(default=0)
 
     @extend_schema_field(CollectionVersionBaseSerializer)
     def get_latest_version(self, obj):
