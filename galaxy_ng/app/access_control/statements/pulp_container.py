@@ -86,7 +86,7 @@ PULP_CONTAINER_VIEWSETS = {
         ],
         # Removed permission assignement. Filtering out the container groups
         # proved to be too much of a challenge.
-        "permissions_assignment": []
+        "creation_hooks": []
     },
 
     "pulp_container/namespaces": {
@@ -132,7 +132,7 @@ PULP_CONTAINER_VIEWSETS = {
         ],
         # Removed group creation for owner. Filtering out the container groups proved to be too
         # much of a challenge.
-        "permissions_assignment": [
+        "creation_hooks": [
             {
                 "function": "add_for_object_creator",
                 "parameters": None,
@@ -180,7 +180,7 @@ PULP_CONTAINER_VIEWSETS = {
         ],
         # Remove permission assignment since it's trying to add permissions to groups
         # that don't exist
-        "permissions_assignment": [],
+        "creation_hooks": [],
     }
 
 }
