@@ -53,7 +53,7 @@ echo "Running pytest ..."
 ${VENV_PATH}/bin/pytest --capture=no -m "not standalone_only" -v galaxy_ng/tests/integration || echo "test failed"
 
 echo "Starting sleep cycle for 10000s... "
-for X in $(seq 10000 -1 0); do
+for X in $(seq 10001 -1 0); do
     #echo "SLEEP ${X}"
     sleep 1
 done
