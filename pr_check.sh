@@ -65,7 +65,8 @@ for ROUTE in $ROUTES; do
     oc describe route/${ROUTE}
 done
 
-
+echo "# DEPLOYMENT ..."
+oc get clowdapp automation-hub
 
 # source smoke_test.sh
 source dev/ephemeral/smoke_test.sh
