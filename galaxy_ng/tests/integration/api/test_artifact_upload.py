@@ -7,16 +7,16 @@ from unittest.mock import patch
 from urllib.parse import urljoin
 
 import pytest
-from orionutils.generator import build_collection
-from orionutils.generator import randstr
+from orionutils.generator import build_collection, randstr
 
 from ..constants import USERNAME_PUBLISHER
-from ..utils import CapturingGalaxyError
-from ..utils import get_client
-from ..utils import modify_artifact
-from ..utils import set_certification
-from ..utils import wait_for_task
-
+from ..utils import (
+    CapturingGalaxyError,
+    get_client,
+    modify_artifact,
+    set_certification,
+    wait_for_task,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -317,7 +317,10 @@ def test_ansible_lint_exception(ansible_config, upload_artifact):
 
     artifact = build_collection(
         "skeleton",
-        config={"namespace": USERNAME_PUBLISHER},
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["database"],
+        },
         extra_files={
             "roles/main/tasks/main.yml": broken_role_yaml,
             "roles/main/README.md": "role readme",
@@ -357,7 +360,10 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
 
     artifact = build_collection(
         "skeleton",
-        config={"namespace": USERNAME_PUBLISHER},
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["cloud"],
+        },
         extra_files={
             "meta/runtime.yml": {"requires_ansible": ">=2.10,<2.11"},
             "requirements.txt": ["requests  # my pypi requirement"],
@@ -397,7 +403,10 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
 
     artifact = build_collection(
         "skeleton",
-        config={"namespace": USERNAME_PUBLISHER},
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["networking"],
+        },
         extra_files={
             "meta/runtime.yml": {"requires_ansible": ">=2.10,<2.11"},
             "tests/sanity/ignore-2.10.txt": [
@@ -424,3 +433,37 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
     ignorefile = [item for item in log_messages if ignorefile_re.match(item)]
 
     assert len(ignorefile) == 1  # found ignorefile log message
+
+
+@pytest.mark.cloud_only
+def test_publish_fail_required_tag(ansible_config, upload_artifact):
+    """
+    Test cloud publish fails when collection metadata tags do not include
+    at least one tag in the galaxy-importer REQUIRED_TAG_LIST,
+    as set by the galaxy-importer config CHECK_REQUIRED_TAGS.
+    """
+    config = ansible_config("ansible_partner")
+    api_client = get_client(config)
+
+    artifact = build_collection(
+        "skeleton",
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["not_a_required_tag"],
+        },
+    )
+
+    resp = upload_artifact(config, api_client, artifact)
+
+    ready = False
+    url = urljoin(config["url"], resp["task"])
+    while not ready:
+        resp = api_client(url)
+        ready = resp["state"] not in ("running", "waiting")
+        time.sleep(5)
+
+    assert resp["state"] == "failed"
+    assert (
+        "Invalid collection metadata. At least one tag required from tag list"
+        in resp["error"]["description"]
+    )

@@ -27,6 +27,7 @@ objects:
       INFRA_OSD = True
       ANSIBLE_LOCAL_TMP = '/tmp/ansible'
       REQUIRE_V1_OR_GREATER = True
+      CHECK_REQUIRED_TAGS = True
 
 - apiVersion: cloud.redhat.com/v1alpha1
   kind: ClowdApp
