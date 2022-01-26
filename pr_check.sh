@@ -47,7 +47,7 @@ oc patch clowdapp automation-hub \
     --type=json \
     -p '[{
             "op": "add", 
-            "path": "/spec/deployments/1/podSpec/env/-", 
+            "path": "/spec/deployments/2/podSpec/env/-", 
             "value": {
                 "name": "PULP_AWS_S3_ENDPOINT_URL", 
                 "value": "'"${MINIO_ROUTE}"'"
@@ -66,7 +66,7 @@ for ROUTE in $ROUTES; do
 done
 
 echo "# DEPLOYMENT ..."
-oc get clowdapp automation-hub
+oc get clowdapp automation-hub -o json
 
 # source smoke_test.sh
 source dev/ephemeral/smoke_test.sh
