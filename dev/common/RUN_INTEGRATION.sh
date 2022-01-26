@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -z $HUB_LOCAL ]]; then
-    export NAMESPACE="ephemeral-1riioj"
+    export NAMESPACE="ephemeral-czsqdh"
     export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/api/automation-hub/"
     export HUB_AUTH_URL="https://keycloak-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/auth/realms/redhat-external/protocol/openid-connect/token"
     export HUB_USERNAME="jdoe"
