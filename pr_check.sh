@@ -47,7 +47,7 @@ oc patch clowdapp automation-hub \
     --type=json \
     -p '[{
             "op": "add", 
-            "path": "/spec/deployments/3/podSpec/env/-", 
+            "path": "/spec/deployments/1/podSpec/env/-", 
             "value": {
                 "name": "PULP_AWS_S3_ENDPOINT_URL", 
                 "value": "'"${MINIO_ROUTE}"'"
