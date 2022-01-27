@@ -89,6 +89,8 @@ run_service() {
 
     process_init_files /entrypoints.d/*
 
+    setup_signing_service
+
     exec "${service_path}" "$@"
 }
 
@@ -100,6 +102,17 @@ run_manage() {
     exec django-admin "$@"
 }
 
+setup_signing_service() {
+    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /var/lib/pulp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
+    export KEY_ID=${KEY_FINGERPRINT: -16}
+    gpg --batch --import /var/lib/pulp/ansible-sign.key &>/dev/null
+    echo "${KEY_FINGERPRINT}:6:" | gpg --import-ownertrust &>/dev/null
+    
+    HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
+    if [[ "$HAS_SIGNING" -eq "0" ]]; then
+        django-admin add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh ${KEY_ID}
+    fi
+}
 
 redis_connection_hack() {
     redis_host="${PULP_REDIS_HOST:-}"

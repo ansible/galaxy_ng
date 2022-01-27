@@ -14,6 +14,23 @@ objects:
       RE5tTmR3Z3ladWdUYXg5UzY0SjBGSVRUcjlJSFB4YnVvRjFGMUNHUHI2OD0=
 
 - apiVersion: v1
+  kind: Secret
+  metadata:
+    name: signing-gpg-key
+    namespace: automation-hub
+  data:
+    ansible-sign.key: |
+      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
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: signing-script
+    namespace: automation-hub
+  data:
+    collection_sign.sh: |
+      IyEvYmluL2Jhc2gKCkZJTEVfUEFUSD0kMQpTSUdOQVRVUkVfUEFUSD0iJDEuYXNjIgoKQURNSU5fSUQ9ImdhbGF4eTNAYW5zaWJsZS5jb20iClBBU1NXT1JEPSJHYWxheHkyMDIyIgoKIyBDcmVhdGUgYSBkZXRhY2hlZCBzaWduYXR1cmUKZ3BnIC0tcXVpZXQgLS1iYXRjaCAtLXBpbmVudHJ5LW1vZGUgbG9vcGJhY2sgLS15ZXMgLS1wYXNzcGhyYXNlICAgJFBBU1NXT1JEIC0tZGV0YWNoLXNpZ24gLS1kZWZhdWx0LWtleSAkQURNSU5fSUQgICAtLWFybW9yIC0tb3V0cHV0ICRTSUdOQVRVUkVfUEFUSCAkRklMRV9QQVRICgojIENoZWNrIHRoZSBleGl0IHN0YXR1cwpTVEFUVVM9JD8KaWYgWyAkU1RBVFVTIC1lcSAwIF07IHRoZW4KICBlY2hvIHtcImZpbGVcIjogXCIkRklMRV9QQVRIXCIsIFwic2lnbmF0dXJlXCI6IFwiJFNJR05BVFVSRV9QQVRIXCJ9CmVsc2UKICBleGl0ICRTVEFUVVMKZmkK
+
+- apiVersion: v1
   kind: ConfigMap
   metadata:
     name: galaxy-importer-config
@@ -99,14 +116,29 @@ objects:
             value: ${REDIS_SSL}
           - name: prometheus_multiproc_dir
             value: ${PROMETHEUS_DIR}
+          - name: GNUPGHOME
+            value: '/tmp/ansible/.gnupg'
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs
+            readOnly: true
+          - name: signing-gpg-key
+            mountPath: /var/lib/pulp/ansible-sign.key
+            subPath: ansible-sign.key
+            readOnly: true
+          - name: signing-script
+            mountPath: /var/lib/pulp/scripts
             readOnly: true
         volumes:
           - name: pulp-key
             secret:
               secretName: pulp-key
+          - name: signing-gpg-key
+            secret:
+              secretName: signing-gpg-key
+          - name: signing-script
+            secret:
+              secretName: signing-script
       webServices:
         public:
             enabled: true
@@ -135,14 +167,29 @@ objects:
             value: '10000'
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
+          - name: GNUPGHOME
+            value: '/tmp/ansible/.gnupg'
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs
+            readOnly: true
+          - name: signing-gpg-key
+            mountPath: /var/lib/pulp/ansible-sign.key
+            subPath: ansible-sign.key
+            readOnly: true
+          - name: signing-script
+            mountPath: /var/lib/pulp/scripts
             readOnly: true
         volumes:
           - name: pulp-key
             secret:
               secretName: pulp-key
+          - name: signing-gpg-key
+            secret:
+              secretName: signing-gpg-key
+          - name: signing-script
+            secret:
+              secretName: signing-script
       webServices:
         private:
             enabled: true
@@ -184,11 +231,20 @@ objects:
             value: 1000m
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
+          - name: GNUPGHOME
+            value: '/tmp/ansible/.gnupg'
         volumeMounts:
           - name: importer-config
             mountPath: /etc/galaxy-importer
           - name: pulp-key
             mountPath: /etc/pulp/certs
+            readOnly: true
+          - name: signing-gpg-key
+            mountPath: /var/lib/pulp/ansible-sign.key
+            subPath: ansible-sign.key
+            readOnly: true
+          - name: signing-script
+            mountPath: /var/lib/pulp/scripts
             readOnly: true
         volumes:
           - name: importer-config
@@ -197,6 +253,12 @@ objects:
           - name: pulp-key
             secret:
               secretName: pulp-key
+          - name: signing-gpg-key
+            secret:
+              secretName: signing-gpg-key
+          - name: signing-script
+            secret:
+              secretName: signing-script
 
     # Creates a database if local mode, or uses RDS in production
     database:
