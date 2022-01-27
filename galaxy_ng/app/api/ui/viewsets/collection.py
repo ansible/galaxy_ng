@@ -61,6 +61,43 @@ class CollectionViewSet(
     filterset_class = CollectionByCollectionVersionFilter
     permission_classes = [access_policy.CollectionAccessPolicy]
 
+    def build_signing_annotations(self, base_total_qs):
+        """Builds a dict with queries for annotation."""
+        total_versions_query = Subquery(
+            base_total_qs.annotate(
+                total=Func(F("pk"), function="count")
+            ).values('total')
+        )
+
+        signed_versions_query = Subquery(
+            base_total_qs.filter(
+                signatures__isnull=False,
+            ).annotate(
+                total=Func(F("pk"), function="count")
+            ).values('total')
+        )
+
+        unsigned_versions_query = Subquery(
+            base_total_qs.filter(
+                signatures__isnull=True,
+            ).annotate(
+                total=Func(F("pk"), function="count")
+            ).values('total')
+        )
+
+        sign_state_query = Case(
+            When(signed_versions=F("total_versions"), then=Value("signed")),
+            When(unsigned_versions=F("total_versions"), then=Value("unsigned")),
+            When(signed_versions__lt=F("total_versions"), then=Value("partial")),
+        )
+
+        return {
+            "total_versions": total_versions_query,
+            "signed_versions": signed_versions_query,
+            "unsigned_versions": unsigned_versions_query,
+            "sign_state": sign_state_query,
+        }
+
     def get_queryset(self):
         """Returns a CollectionVersions queryset for specified distribution."""
         if getattr(self, "swagger_fake_view", False):
@@ -106,40 +143,9 @@ class CollectionViewSet(
             namespace=OuterRef("namespace"), name=OuterRef("name")
         )
 
-        total_versions_query = Subquery(
-            base_total_qs.annotate(
-                total=Func(F("pk"), function="count")
-            ).values('total')
-        )
-
-        signed_versions_query = Subquery(
-            base_total_qs.filter(
-                signatures__isnull=False,
-            ).annotate(
-                total=Func(F("pk"), function="count")
-            ).values('total')
-        )
-
-        unsigned_versions_query = Subquery(
-            base_total_qs.filter(
-                signatures__isnull=True,
-            ).annotate(
-                total=Func(F("pk"), function="count")
-            ).values('total')
-        )
-
-        sign_state_query = Case(
-            When(signed_versions=F("total_versions"), then=Value("signed")),
-            When(unsigned_versions=F("total_versions"), then=Value("unsigned")),
-            When(signed_versions__lt=F("total_versions"), then=Value("partial")),
-        )
-
         version_qs = version_qs.annotate(
             deprecated=Exists(deprecated_query),
-            total_versions=total_versions_query,
-            signed_versions=signed_versions_query,
-            unsigned_versions=unsigned_versions_query,
-            sign_state=sign_state_query,
+            **self.build_signing_annotations(base_total_qs)
         )
 
         return version_qs
@@ -157,11 +163,13 @@ class CollectionViewSet(
                 queryset, namespace=self.kwargs["namespace"], name=self.kwargs["name"]
             )
 
-        return get_object_or_404(
-            CollectionVersion.objects.all(),
+        base_qs = CollectionVersion.objects.filter(
             pk__in=self._distro_content,
             namespace=self.kwargs["namespace"],
             name=self.kwargs["name"],
+        )
+        return get_object_or_404(
+            base_qs.annotate(**self.build_signing_annotations(base_qs)),
             version=version,
         )
 

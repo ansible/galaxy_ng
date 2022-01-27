@@ -1,10 +1,13 @@
 
+import logging
 from pulpcore.plugin.tasking import dispatch
 from pulp_ansible.app.tasks.signature import sign
 from pulp_ansible.app.tasks.copy import copy_content
 from pulp_ansible.app.models import AnsibleRepository
 
 from .promotion import _remove_content_from_repository
+
+log = logging.getLogger(__name__)
 
 
 def sign_and_move(signing_service_pk, collection_version_pk, source_repo_pk, dest_repo_pk):
@@ -35,6 +38,14 @@ def call_sign_and_move_task(signing_service, collection_version, source_repo, de
     This is a wrapper to group sign, copy_content and remove_content tasks
     because those 3 must run in sequence ensuring the same locks.
     """
+    log.info(
+        'Signing with `%s` and moving collection version `%s` from `%s` to `%s`',
+        signing_service.name,
+        collection_version.pk,
+        source_repo.name,
+        dest_repo.name
+    )
+
     return dispatch(
         sign_and_move,
         exclusive_resources=[source_repo, dest_repo],
@@ -56,6 +67,13 @@ def call_sign_task(signing_service, repository, content_units):
                    to sign all content units under repo
 
     """
+    log.info(
+        'Signing on-demand with `%s` on repository `%s` content `%s`',
+        signing_service.name,
+        repository.name,
+        content_units
+    )
+
     return dispatch(
         sign,
         exclusive_resources=[repository],

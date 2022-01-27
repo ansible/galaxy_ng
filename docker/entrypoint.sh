@@ -107,7 +107,10 @@ run_service() {
 
     process_init_files /entrypoints.d/*
 
-    setup_signing_service
+    # run setup signing service only if DEV_SOURCE_PATH is set
+    if [[ -n "$DEV_SOURCE_PATH" ]]; then
+        setup_signing_service
+    fi
 
     exec "${service_path}" "$@"
 }
@@ -118,7 +121,11 @@ run_manage() {
         install_local_deps
     fi
 
-    setup_signing_service
+    # run setup signing service only if DEV_SOURCE_PATH is set
+    if [[ -n "$DEV_SOURCE_PATH" ]]; then
+        setup_signing_service
+    fi
+    
     exec django-admin "$@"
 }
 

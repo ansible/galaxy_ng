@@ -19,6 +19,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_logging(settings))
     data.update(configure_keycloak(settings))
     data.update(configure_cors(settings))
+    data.update(configure_feature_flags(settings))
 
     return data
 
@@ -267,4 +268,14 @@ def configure_cors(settings: Dynaconf) -> Dict[str, Any]:
     if settings.get("GALAXY_ENABLE_CORS", default=False):
         corsmiddleware = ["galaxy_ng.app.common.openapi.AllowCorsMiddleware"]
         data["MIDDLEWARE"] = corsmiddleware + settings.get("MIDDLEWARE", [])
+    return data
+
+
+def configure_feature_flags(settings: Dynaconf) -> Dict[str, Any]:
+    """Adds conditional feature flags"""
+    data = {}
+    data["GALAXY_FEATURE_FLAGS__collection_signing"] = settings.get(
+        "GALAXY_COLLECTION_SIGNING_SERVICE") is not None
+    data["GALAXY_FEATURE_FLAGS__collection_auto_sign"] = settings.get(
+        "GALAXY_AUTO_SIGN_COLLECTIONS") is True
     return data
