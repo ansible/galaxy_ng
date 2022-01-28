@@ -125,7 +125,7 @@ objects:
             mountPath: /etc/pulp/certs
             readOnly: true
           - name: signing-gpg-key
-            mountPath: /var/lib/pulp/ansible-sign.key
+            mountPath: /tmp/ansible-sign.key
             subPath: ansible-sign.key
             readOnly: true
           - name: signing-script
@@ -178,7 +178,7 @@ objects:
             mountPath: /etc/pulp/certs
             readOnly: true
           - name: signing-gpg-key
-            mountPath: /var/lib/pulp/ansible-sign.key
+            mountPath: /tmp/ansible-sign.key
             subPath: ansible-sign.key
             readOnly: true
           - name: signing-script
@@ -246,7 +246,7 @@ objects:
             mountPath: /etc/pulp/certs
             readOnly: true
           - name: signing-gpg-key
-            mountPath: /var/lib/pulp/ansible-sign.key
+            mountPath: /tmp/ansible-sign.key
             subPath: ansible-sign.key
             readOnly: true
           - name: signing-script

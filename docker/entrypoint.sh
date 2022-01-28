@@ -106,9 +106,9 @@ run_manage() {
 }
 
 setup_signing_service() {
-    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /var/lib/pulp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
+    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
     export KEY_ID=${KEY_FINGERPRINT: -16}
-    gpg --batch --import /var/lib/pulp/ansible-sign.key &>/dev/null
+    gpg --batch --import /tmp/ansible-sign.key &>/dev/null
     echo "${KEY_FINGERPRINT}:6:" | gpg --import-ownertrust &>/dev/null
     
     HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
