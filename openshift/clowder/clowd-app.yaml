@@ -116,6 +116,8 @@ objects:
             value: ${REDIS_SSL}
           - name: prometheus_multiproc_dir
             value: ${PROMETHEUS_DIR}
+          - name: ENABLE_SIGNING
+            value: "1"
           - name: GNUPGHOME
             value: '/tmp/ansible/.gnupg'
         volumeMounts:
@@ -167,6 +169,8 @@ objects:
             value: '10000'
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
+          - name: ENABLE_SIGNING
+            value: "1"
           - name: GNUPGHOME
             value: '/tmp/ansible/.gnupg'
         volumeMounts:
@@ -231,6 +235,8 @@ objects:
             value: 1000m
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
+          - name: ENABLE_SIGNING
+            value: "1"
           - name: GNUPGHOME
             value: '/tmp/ansible/.gnupg'
         volumeMounts:

@@ -9,6 +9,7 @@ readonly WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-0}"
 readonly DEV_SOURCE_PATH="${DEV_SOURCE_PATH:-}"
 readonly LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}"
 readonly WAIT_FOR_MIGRATIONS="${WAIT_FOR_MIGRATIONS:-0}"
+readonly ENABLE_SIGNING="${ENABLE_SIGNING:-0}"
 
 
 log_message() {
@@ -89,7 +90,9 @@ run_service() {
 
     process_init_files /entrypoints.d/*
 
-    setup_signing_service
+    if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
+        setup_signing_service
+    fi
 
     exec "${service_path}" "$@"
 }
