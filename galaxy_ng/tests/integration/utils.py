@@ -29,9 +29,10 @@ class TaskWaitingTimeout(Exception):
 
 
 class CapturingGalaxyError(Exception):
-    def __init__(self, http_error, message):
+    def __init__(self, http_error, message, http_code=None):
         self.http_error = http_error
         self.message = message
+        self.http_code = http_code
 
 
 def get_client(config, require_auth=True, request_token=True, headers=None):

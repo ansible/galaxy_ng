@@ -20,6 +20,7 @@ smoke: Same as galaxyapi_smoke?
 prod_status: For checking prod?
 busted: Doesn't work yet.
 stage_health: For checking stage?
+namespace: Tests that manipulate namespaces.
 """
 
 
