@@ -157,7 +157,7 @@ def artifact():
         "skeleton",
         config={
             "namespace": USERNAME_PUBLISHER,
-            "tags": ["database"],
+            "tags": ["tools", "database"],
         },
     )
     return artifact

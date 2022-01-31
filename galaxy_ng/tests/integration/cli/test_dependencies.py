@@ -23,7 +23,6 @@ class DependencySpec:
     xfail = attr.ib(default=False)
 
 
-@pytest.mark.skip(reason="fails in ephemeral")
 @pytest.mark.cli
 @pytest.mark.parametrize(
     "params",
@@ -76,7 +75,6 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
             return pytest.xfail()
         else:
             raise
-    print(f'install pid: {p}')
 
     if retcode == 0:
         config = ansible_config("ansible_insights")
