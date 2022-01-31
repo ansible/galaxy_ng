@@ -1,11 +1,11 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-44-g30d780c
+# generated with plugin_template@2021.08.26-65-g3505809
 
 additional_repos:
 - bindings: true
-  branch: 0.10.1
+  branch: 0.10.2
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -16,6 +16,7 @@ additional_repos:
   branch: v0.4.0
   name: galaxy-importer
   org: ansible
+aiohttp_fixtures_origin: 172.18.0.1
 black: false
 check_commit_message: false
 check_gettext: true
@@ -42,6 +43,7 @@ docs_test: false
 flake8: true
 issue_tracker: null
 noissue_marker: No-Issue
+parallel_test_workers: 8
 plugin_app_label: galaxy
 plugin_camel: GalaxyNG
 plugin_camel_short: Galaxy
@@ -64,10 +66,10 @@ pulp_settings:
   allowed_export_paths: /tmp
   allowed_import_paths: /tmp
   galaxy_api_default_distribution_base_path: published
-  galaxy_require_content_approval: false
   galaxy_enable_api_access_log: true
+  galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: '3.15.2'
+pulpcore_branch: 3.15.4
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
@@ -84,10 +86,13 @@ tasking_allow_async_unsafe: true
 test_azure: true
 test_bindings: false
 test_cli: false
+test_deprecations: true
 test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
 test_s3: true
 travis_addtl_services: []
 travis_notifications: null
+update_github: true
 update_redmine: false
 upgrade_range: []
+
