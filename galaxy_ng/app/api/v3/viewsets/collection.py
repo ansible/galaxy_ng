@@ -271,7 +271,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
            if user does not specify distribution base path
            then use an inbound distribution based on filename namespace.
         """
-        path = kwargs['path']
+        path = kwargs['distro_base_path']
         if kwargs.get('no_path_specified', None):
             path = INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)
         return path
@@ -346,7 +346,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         # TODO: CollectionImport.get_absolute_url() should be able to generate this, but
         #       it needs the  repo/distro base_path for the <path> part of url
-        import_obj_url = reverse("galaxy:api:content:v3:collection-import",
+        import_obj_url = reverse("galaxy:api:v3:collection-imports-detail",
                                  kwargs={'pk': str(task_detail.pk),
                                          'path': path})
 

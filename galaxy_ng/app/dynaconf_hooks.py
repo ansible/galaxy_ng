@@ -284,6 +284,6 @@ def configure_feature_flags(settings: Dynaconf) -> Dict[str, Any]:
 
 def configure_pulp_ansible(settings: Dynaconf) -> Dict[str, Any]:
     return {
-        "ANSIBLE_URL_NAMESPACE": "galaxy:api:v3:default-content:",
+        "ANSIBLE_URL_NAMESPACE": "galaxy:api:v3:",
         "ANSIBLE_DEFAULT_DISTRIBUTION_PATH": "published"
     }

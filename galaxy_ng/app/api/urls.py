@@ -22,7 +22,7 @@ v3_urlpatterns = [
     # use the hard coded 'default' distro (ie, 'automation-hub')
     path(
         "",
-        include((v3_urls, app_name), namespace='default-content'),
+        include(v3_urls),
 
 
      # TODO remove me permanently
@@ -47,7 +47,7 @@ content_v3_urlpatterns = [
 
 content_urlpatterns = [
     path("content/",
-         include((content_v3_urlpatterns, app_name), namespace="v3")),
+         include(content_v3_urlpatterns)),
 
     path("content/<str:path>/",
          views.ApiRootView.as_view(),
@@ -61,12 +61,16 @@ content_urlpatterns = [
          kwargs={"reverse_url_name": "galaxy:api:content:root"}),
 ]
 
-urlpatterns = [
-    path("v3/", include((v3_urlpatterns, app_name), namespace="v3")),
+v3_combined = [
+    path("v3/", include(v3_urlpatterns)),
 
+    path("", include(content_urlpatterns)),
+]
+
+urlpatterns = [
     path("_ui/", include((ui_urls, app_name), namespace="ui")),
 
-    path("", include((content_urlpatterns, app_name), namespace='content')),
+    path("", include((v3_combined, app_name), namespace='v3')),
 
     path("",
          views.ApiRootView.as_view(),
