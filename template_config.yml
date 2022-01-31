@@ -86,7 +86,7 @@ tasking_allow_async_unsafe: true
 test_azure: true
 test_bindings: false
 test_cli: false
-test_deprecations: true
+test_deprecations: false
 test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
 test_s3: true
