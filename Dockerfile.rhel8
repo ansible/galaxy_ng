@@ -33,6 +33,7 @@ COPY . /app
 
 RUN set -ex; \
     pip install --no-deps --editable /app && \
+    pip install https://github.com/pulp/pulp_ansible/archive/main.zip && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
     install -dm 0775 -o galaxy /var/lib/pulp/artifact \
                                /var/lib/pulp/tmp \
