@@ -12,6 +12,7 @@ from subprocess import PIPE
 from subprocess import run
 from urllib.parse import urljoin
 import shutil
+import subprocess
 
 from ansible import context
 from ansible.galaxy.api import GalaxyAPI
@@ -325,3 +326,49 @@ def set_certification(client, collection):
                     raise
 
         return res
+
+
+class CollectionTarballInspector:
+
+    def __init__(self, filename):
+        self.filename = filename
+        self.manifest = None
+        self._extract_path = None
+        self._enumerate()
+
+    def _enumerate(self):
+        self._extract_path = tempfile.mkdtemp(prefix='collection-extract-')
+        cmd = f'cd {self._extract_path}; tar xzvf {self.filename}'
+        p = subprocess.run(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+
+        with open(os.path.join(self._extract_path, 'MANIFEST.json'), 'r') as f:
+            self.manifest = json.loads(f.read())
+
+    @property
+    def namespace(self):
+        if self.manifest is None:
+            return None
+        return self.manifest['collection_info']['namespace']
+
+    @property
+    def name(self):
+        if self.manifest is None:
+            return None
+        return self.manifest['collection_info']['name']
+
+    @property
+    def tags(self):
+        if self.manifest is None:
+            return None
+        return self.manifest['collection_info']['tags']
+
+    @property
+    def version(self):
+        if self.manifest is None:
+            return None
+        return self.manifest['collection_info']['version']

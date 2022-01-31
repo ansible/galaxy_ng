@@ -16,12 +16,14 @@ from ..utils import CapturingGalaxyError
 from ..utils import get_client
 from ..utils import get_collection_full_path
 from ..utils import set_certification
+from ..utils import CollectionTarballInspector
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.testme
 @pytest.mark.cli
 def test_publish_newer_version_collection(ansible_config):
     """Test whether a newer version of collection can be installed after being published.
@@ -30,25 +32,34 @@ def test_publish_newer_version_collection(ansible_config):
     has to be specified during installation.
     """
 
-    print('')
     client = get_client(ansible_config("ansible_insights"))
 
     # Publish first collection version
     ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
-    collection = build_collection("skeleton", config={"namespace": USERNAME_PUBLISHER})
+    collection = build_collection(
+        "skeleton",
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["tools"]
+        }
+    )
+
     publish_pid_1 = ansible_galaxy(
         f"collection publish {collection.filename}",
         ansible_config=ansible_config("ansible_insights")
     )
     cert1 = set_certification(client, collection)
-    print(f'PUBLISH 1 RC: {publish_pid_1.returncode}')
 
     # Increase collection version
     new_version = increment_version(collection.version)
     collection = build_collection(
         "skeleton",
         key=collection.key,
-        config={"namespace": USERNAME_PUBLISHER, "version": new_version},
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "version": new_version,
+            "tags": ["tools"]
+        }
     )
 
     # Publish newer collection version
@@ -57,7 +68,6 @@ def test_publish_newer_version_collection(ansible_config):
         ansible_config=ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
     )
     cert1 = set_certification(client, collection)
-    print(f'PUBLISH 2 RC: {publish_pid_2.returncode} {cert1}')
 
     # Install newer collection version
     ansible_config("ansible_partner")
@@ -67,7 +77,6 @@ def test_publish_newer_version_collection(ansible_config):
         cleanup=False,
         check_retcode=False
     )
-    print(install_pid.stdout.decode('utf-8'))
 
     # Verify installed collection
     collection_path = get_collection_full_path(USERNAME_PUBLISHER, collection.name)
@@ -85,7 +94,13 @@ def test_publish_newer_certified_collection_version(ansible_config, cleanup_coll
     client = get_client(ansible_config("ansible_insights"))
 
     ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
-    collection = build_collection("skeleton", config={"namespace": USERNAME_PUBLISHER})
+    collection = build_collection(
+        "skeleton",
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["tools"]
+        }
+    )
     ansible_galaxy(
         f"collection publish {collection.filename}",
         ansible_config=ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
@@ -97,7 +112,11 @@ def test_publish_newer_certified_collection_version(ansible_config, cleanup_coll
     collection = build_collection(
         "skeleton",
         key=collection.key,
-        config={"namespace": USERNAME_PUBLISHER, "version": new_version},
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "version": new_version,
+            "tags": ["tools"]
+        }
     )
 
     ansible_galaxy(
@@ -124,7 +143,13 @@ def test_publish_newer_certified_collection_version(ansible_config, cleanup_coll
 def test_publish_same_collection_version(ansible_config):
     """Test whether same collection version can be published."""
     ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
-    collection = build_collection("skeleton", config={"namespace": USERNAME_PUBLISHER})
+    collection = build_collection(
+        "skeleton",
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["tools"]
+        }
+    )
     ansible_galaxy(
         f"collection publish {collection.filename}",
         ansible_config=ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
