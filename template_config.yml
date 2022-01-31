@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-47-g98a48cc
+# generated with plugin_template@2021.08.26-65-g3505809
 
 additional_repos:
 - bindings: true
@@ -43,6 +43,7 @@ docs_test: false
 flake8: true
 issue_tracker: null
 noissue_marker: No-Issue
+parallel_test_workers: 8
 plugin_app_label: galaxy
 plugin_camel: GalaxyNG
 plugin_camel_short: Galaxy
@@ -85,11 +86,12 @@ tasking_allow_async_unsafe: true
 test_azure: true
 test_bindings: false
 test_cli: false
+test_deprecations: false
 test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
 test_s3: true
 travis_addtl_services: []
 travis_notifications: null
-update_redmine: false
+update_github: false
 upgrade_range: []
 
