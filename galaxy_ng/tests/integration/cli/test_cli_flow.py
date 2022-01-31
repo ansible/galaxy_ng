@@ -2,8 +2,6 @@
 import json
 import logging
 import os
-import sys
-from subprocess import run
 from unittest.mock import patch
 
 import pytest
@@ -16,14 +14,12 @@ from ..utils import CapturingGalaxyError
 from ..utils import get_client
 from ..utils import get_collection_full_path
 from ..utils import set_certification
-from ..utils import CollectionTarballInspector
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.testme
 @pytest.mark.cli
 def test_publish_newer_version_collection(ansible_config):
     """Test whether a newer version of collection can be installed after being published.
@@ -48,7 +44,9 @@ def test_publish_newer_version_collection(ansible_config):
         f"collection publish {collection.filename}",
         ansible_config=ansible_config("ansible_insights")
     )
+    assert publish_pid_1.returncode == 0, publish_pid_1.stderr
     cert1 = set_certification(client, collection)
+    assert cert1.get('href'), cert1
 
     # Increase collection version
     new_version = increment_version(collection.version)
@@ -67,16 +65,18 @@ def test_publish_newer_version_collection(ansible_config):
         f"collection publish {collection.filename}",
         ansible_config=ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
     )
-    cert1 = set_certification(client, collection)
+    assert publish_pid_2.returncode == 0, publish_pid_2.stderr
+    cert2 = set_certification(client, collection)
+    assert cert2.get('href'), cert2
 
     # Install newer collection version
-    ansible_config("ansible_partner")
     install_pid = ansible_galaxy(
         f"collection install {collection.namespace}.{collection.name}:{collection.version}",
         ansible_config=ansible_config("ansible_partner"),
         cleanup=False,
         check_retcode=False
     )
+    assert install_pid.returncode == 0, install_pid.stderr
 
     # Verify installed collection
     collection_path = get_collection_full_path(USERNAME_PUBLISHER, collection.name)

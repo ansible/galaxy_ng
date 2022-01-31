@@ -339,7 +339,7 @@ class CollectionTarballInspector:
     def _enumerate(self):
         self._extract_path = tempfile.mkdtemp(prefix='collection-extract-')
         cmd = f'cd {self._extract_path}; tar xzvf {self.filename}'
-        p = subprocess.run(
+        subprocess.run(
             cmd,
             shell=True,
             stdout=subprocess.PIPE,

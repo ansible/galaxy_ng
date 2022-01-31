@@ -65,7 +65,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
     )
 
     try:
-        p = ansible_galaxy(
+        ansible_galaxy(
             f"collection publish {artifact2.filename} --server=automation_hub",
             check_retcode=retcode,
             ansible_config=ansible_config("ansible_partner", namespace=published.namespace)
