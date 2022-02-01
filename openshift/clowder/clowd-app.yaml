@@ -28,7 +28,7 @@ objects:
     namespace: automation-hub
   data:
     collection_sign.sh: |
-      IyEvYmluL2Jhc2gKCkZJTEVfUEFUSD0kMQpTSUdOQVRVUkVfUEFUSD0iJDEuYXNjIgoKQURNSU5fSUQ9ImdhbGF4eTNAYW5zaWJsZS5jb20iClBBU1NXT1JEPSJHYWxheHkyMDIyIgoKIyBDcmVhdGUgYSBkZXRhY2hlZCBzaWduYXR1cmUKZ3BnIC0tcXVpZXQgLS1iYXRjaCAtLXBpbmVudHJ5LW1vZGUgbG9vcGJhY2sgLS15ZXMgLS1wYXNzcGhyYXNlICAgJFBBU1NXT1JEIC0tZGV0YWNoLXNpZ24gLS1kZWZhdWx0LWtleSAkQURNSU5fSUQgICAtLWFybW9yIC0tb3V0cHV0ICRTSUdOQVRVUkVfUEFUSCAkRklMRV9QQVRICgojIENoZWNrIHRoZSBleGl0IHN0YXR1cwpTVEFUVVM9JD8KaWYgWyAkU1RBVFVTIC1lcSAwIF07IHRoZW4KICBlY2hvIHtcImZpbGVcIjogXCIkRklMRV9QQVRIXCIsIFwic2lnbmF0dXJlXCI6IFwiJFNJR05BVFVSRV9QQVRIXCJ9CmVsc2UKICBleGl0ICRTVEFUVVMKZmkK
+      IyEvYmluL2Jhc2gKCkZJTEVfUEFUSD0kMQpTSUdOQVRVUkVfUEFUSD0iJDEuYXNjIgoKQURNSU5fSUQ9ImdhbGF4eTNAYW5zaWJsZS5jb20iClBBU1NXT1JEPSJHYWxheHkyMDIyIgoKIyBDcmVhdGUgYSBkZXRhY2hlZCBzaWduYXR1cmUKZ3BnIC0tcXVpZXQgLS1iYXRjaCAtLXBpbmVudHJ5LW1vZGUgbG9vcGJhY2sgLS15ZXMgLS1wYXNzcGhyYXNlICAgJFBBU1NXT1JEIC0taG9tZWRpciAvdG1wL2Fuc2libGUvLmdudXBnIC0tZGV0YWNoLXNpZ24gLS1kZWZhdWx0LWtleSAkQURNSU5fSUQgICAtLWFybW9yIC0tb3V0cHV0ICRTSUdOQVRVUkVfUEFUSCAkRklMRV9QQVRICgojIENoZWNrIHRoZSBleGl0IHN0YXR1cwpTVEFUVVM9JD8KaWYgWyAkU1RBVFVTIC1lcSAwIF07IHRoZW4KICBlY2hvIHtcImZpbGVcIjogXCIkRklMRV9QQVRIXCIsIFwic2lnbmF0dXJlXCI6IFwiJFNJR05BVFVSRV9QQVRIXCJ9CmVsc2UKICBleGl0ICRTVEFUVVMKZmkK
 
 - apiVersion: v1
   kind: ConfigMap
@@ -140,6 +140,7 @@ objects:
               secretName: signing-gpg-key
           - name: signing-script
             secret:
+              defaultMode: 0555
               secretName: signing-script
       webServices:
         public:
@@ -193,6 +194,7 @@ objects:
               secretName: signing-gpg-key
           - name: signing-script
             secret:
+              defaultMode: 0555
               secretName: signing-script
       webServices:
         private:
@@ -264,6 +266,7 @@ objects:
               secretName: signing-gpg-key
           - name: signing-script
             secret:
+              defaultMode: 0555
               secretName: signing-script
 
     # Creates a database if local mode, or uses RDS in production
