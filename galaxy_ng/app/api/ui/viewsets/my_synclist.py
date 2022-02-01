@@ -40,7 +40,7 @@ class MySyncListViewSet(SyncListViewSet):
         synclist = get_object_or_404(models.SyncList, pk=pk)
         synclist_task = dispatch(
             curate_synclist_repository,
-            resources=[synclist.repository],
+            exclusive_resources=[synclist.repository],
             args=(pk, )
         )
 
