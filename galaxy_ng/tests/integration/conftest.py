@@ -1,14 +1,12 @@
 import os
-import pytest
 import shutil
 
-from .utils import upload_artifact as _upload_artifact
-from .utils import get_client
-from .utils import ansible_galaxy
-from .utils import set_certification
-from .constants import USERNAME_PUBLISHER
+import pytest
 from orionutils.generator import build_collection
 
+from .constants import USERNAME_PUBLISHER
+from .utils import ansible_galaxy, get_client, set_certification
+from .utils import upload_artifact as _upload_artifact
 
 MARKER_CONFIG = """
 qa: Mark tests to run in the vortex job.
@@ -156,7 +154,10 @@ def artifact():
 
     artifact = build_collection(
         "skeleton",
-        config={"namespace": USERNAME_PUBLISHER}
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["database"],
+        },
     )
     return artifact
 

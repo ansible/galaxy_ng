@@ -9,6 +9,7 @@ readonly WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-0}"
 readonly DEV_SOURCE_PATH="${DEV_SOURCE_PATH:-}"
 readonly LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}"
 readonly WAIT_FOR_MIGRATIONS="${WAIT_FOR_MIGRATIONS:-0}"
+readonly ENABLE_SIGNING="${ENABLE_SIGNING:-0}"
 
 
 log_message() {
@@ -107,8 +108,7 @@ run_service() {
 
     process_init_files /entrypoints.d/*
 
-    # run setup signing service only if DEV_SOURCE_PATH is set
-    if [[ -n "$DEV_SOURCE_PATH" ]]; then
+    if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
         setup_signing_service
     fi
 
@@ -129,6 +129,17 @@ run_manage() {
     exec django-admin "$@"
 }
 
+setup_signing_service() {
+    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
+    export KEY_ID=${KEY_FINGERPRINT: -16}
+    gpg --batch --import /tmp/ansible-sign.key &>/dev/null
+    echo "${KEY_FINGERPRINT}:6:" | gpg --import-ownertrust &>/dev/null
+    
+    HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
+    if [[ "$HAS_SIGNING" -eq "0" ]]; then
+        django-admin add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh ${KEY_ID}
+    fi
+}
 
 redis_connection_hack() {
     redis_host="${PULP_REDIS_HOST:-}"
