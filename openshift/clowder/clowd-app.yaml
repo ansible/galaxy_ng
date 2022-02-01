@@ -140,6 +140,7 @@ objects:
               secretName: signing-gpg-key
           - name: signing-script
             secret:
+              defaultMode: 0555
               secretName: signing-script
       webServices:
         public:
@@ -193,6 +194,7 @@ objects:
               secretName: signing-gpg-key
           - name: signing-script
             secret:
+              defaultMode: 0555
               secretName: signing-script
       webServices:
         private:
@@ -264,6 +266,7 @@ objects:
               secretName: signing-gpg-key
           - name: signing-script
             secret:
+              defaultMode: 0555
               secretName: signing-script
 
     # Creates a database if local mode, or uses RDS in production
