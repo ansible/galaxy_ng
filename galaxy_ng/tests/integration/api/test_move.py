@@ -1,6 +1,6 @@
-"""test_namespace_management.py - Test related to namespaces.
+"""test_move.py - Tests related to the move api.
 
-See: https://issues.redhat.com/browse/AAH-1303
+See: https://issues.redhat.com/browse/AAH-1268
 
 """
 import pytest
