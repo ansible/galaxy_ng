@@ -3,7 +3,7 @@ import logging
 from pulpcore.plugin.tasking import dispatch
 from pulp_ansible.app.tasks.signature import sign
 from pulp_ansible.app.tasks.copy import copy_content
-from pulp_ansible.app.models import AnsibleRepository
+from pulp_ansible.app.models import AnsibleRepository, CollectionVersionSignature
 
 from .promotion import _remove_content_from_repository
 
@@ -18,17 +18,25 @@ def sign_and_move(signing_service_pk, collection_version_pk, source_repo_pk, des
         content_hrefs=[collection_version_pk],
         signing_service_href=signing_service_pk
     )
-    # Then copy to the destination repo
+
+    # Then copy to the destination repo including the new signature
     source_repo = AnsibleRepository.objects.get(pk=source_repo_pk)
+    signatures = CollectionVersionSignature.objects.filter(
+        signed_collection=collection_version_pk,
+        pk__in=source_repo.content.values_list("pk", flat=True)
+    ).values_list("pk", flat=True)
+    content = [collection_version_pk]
+    if signatures:
+        content += signatures
     config = [{
         'source_repo_version': source_repo.latest_version().pk,
         'dest_repo': dest_repo_pk,
-        'content': [collection_version_pk],
+        'content': content,
     }]
     copy_content(config)
 
     # remove old content from source repo
-    _remove_content_from_repository(collection_version_pk, source_repo_pk)
+    _remove_content_from_repository(collection_version_pk, source_repo_pk, signatures)
 
 
 def call_sign_and_move_task(signing_service, collection_version, source_repo, dest_repo):

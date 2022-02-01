@@ -119,7 +119,7 @@ setup_signing_service() {
     HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
     if [[ "$HAS_SIGNING" -eq "0" ]]; then
         log_message "Creating signing service. using key ${KEY_ID}"
-        django-admin add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh ${KEY_ID}
+        django-admin add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh ${KEY_ID} 2>/dev/null || true
     else
         log_message "Signing service already exists."
     fi
