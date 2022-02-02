@@ -21,6 +21,9 @@ prod_status: For checking prod?
 busted: Doesn't work yet.
 stage_health: For checking stage?
 namespace: Tests that manipulate namespaces.
+certification: Related to certification.
+collection_move: Related to moving collection versions.
+move: Related to the move api.
 """
 
 
