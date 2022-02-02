@@ -4,11 +4,11 @@ See: https://issues.redhat.com/browse/AAH-1303
 
 """
 import pytest
-import random
-import string
 from ansible.errors import AnsibleError
 
 from ..utils import get_client
+from ..utils import generate_unused_namespace
+from ..utils import get_all_namespaces
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -32,37 +32,12 @@ def test_namespace_create_and_delete(ansible_config, api_version):
     config = ansible_config("ansible_partner")
     api_client = get_client(config, request_token=True, require_auth=True)
 
-    def generate_namespace(exclude=None):
-        if exclude is None:
-            exclude = []
-        namespace = None
-        while namespace is None or namespace in exclude:
-            namespace = ''
-            namespace += random.choice(string.ascii_lowercase)
-            for x in range(0, random.choice(range(1, 20))):
-                namespace += random.choice(string.ascii_lowercase + string.digits + '_')
-        return namespace
-
-    def get_all_namespaces():
-
-        namespaces = []
-        next_page = f'/api/automation-hub/{api_version}/namespaces/'
-        while next_page:
-            resp = api_client(next_page)
-            namespaces.extend(resp['data'])
-            next_page = resp.get('links', {}).get('next')
-
-        return namespaces
-
-    existing = get_all_namespaces()
-    existing = dict((x['name'], x) for x in existing)
-    new_namespace = generate_namespace(exclude=list(existing.keys()))
-
+    new_namespace = generate_unused_namespace(api_client=api_client, api_version=api_version)
     payload = {'name': new_namespace, 'groups': []}
     resp = api_client(f'/api/automation-hub/{api_version}/namespaces/', args=payload, method='POST')
     assert resp['name'] == new_namespace
 
-    existing2 = get_all_namespaces()
+    existing2 = get_all_namespaces(api_client=api_client, api_version=api_version)
     existing2 = dict((x['name'], x) for x in existing2)
     assert new_namespace in existing2
 
@@ -76,6 +51,6 @@ def test_namespace_create_and_delete(ansible_config, api_version):
     except AnsibleError:
         pass
 
-    existing3 = get_all_namespaces()
+    existing3 = get_all_namespaces(api_client=api_client, api_version=api_version)
     existing3 = dict((x['name'], x) for x in existing3)
     assert new_namespace not in existing3

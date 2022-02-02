@@ -156,7 +156,7 @@ def test_api_publish_broken_manifest(ansible_config, artifact, upload_artifact):
 INVALID_NAMES = {
     "just_wrong": lambda s: "a-wrong-name.tar.gz",
     "underscore": lambda s: s.replace("-", "_"),
-    "too_long": lambda s: s.replace("collection_dep_a_", "collection_dep_" + "a" * 100 + "_"),
+    "too_long": lambda s: s.replace(s.split('-')[1], 'nevergonnagiveyouuporhurtyo' + 'u' * 100),
 }
 
 
@@ -166,14 +166,15 @@ def test_api_publish_invalid_filename(ansible_config, artifact, upload_artifact,
     config = ansible_config("ansible_partner")
     api_client = get_client(config)
 
+    # use the param lambda function to alter the tarball filename ...
     wrong_name = INVALID_NAMES[wrong_name](os.path.basename(artifact.filename))
-
     filename = os.path.join(os.path.dirname(artifact.filename), wrong_name)
     os.rename(artifact.filename, filename)
 
     # need to rename so that upload_artifact() has the correct name.
     artifact.filename = filename
 
+    # Ensure an excepton is thrown by the client lib ...
     with pytest.raises(CapturingGalaxyError) as excinfo:
         with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
             resp = upload_artifact(config, api_client, artifact)
