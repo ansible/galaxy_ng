@@ -28,6 +28,7 @@ namespace: Tests that manipulate namespaces.
 certification: Related to certification.
 collection_move: Related to moving collection versions.
 move: Related to the move api.
+synclist: Related to synclist object and synclist repo.
 """
 
 
