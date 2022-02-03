@@ -277,5 +277,5 @@ def configure_feature_flags(settings: Dynaconf) -> Dict[str, Any]:
     data["GALAXY_FEATURE_FLAGS__collection_signing"] = settings.get(
         "GALAXY_COLLECTION_SIGNING_SERVICE") is not None
     data["GALAXY_FEATURE_FLAGS__collection_auto_sign"] = settings.get(
-        "GALAXY_AUTO_SIGN_COLLECTIONS") is True
+        "GALAXY_AUTO_SIGN_COLLECTIONS", False)
     return data

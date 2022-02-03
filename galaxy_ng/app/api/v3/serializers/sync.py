@@ -124,7 +124,8 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
             'proxy_username',
             'proxy_password',
             'write_only_fields',
-            'rate_limit'
+            'rate_limit',
+            'signed_only',
         )
         extra_kwargs = {
             'name': {'read_only': True},
