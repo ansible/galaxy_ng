@@ -2,7 +2,9 @@
 import json
 import logging
 import os
+import random
 import re
+import string
 import tarfile
 import tempfile
 import time
@@ -12,6 +14,7 @@ from subprocess import PIPE
 from subprocess import run
 from urllib.parse import urljoin
 import shutil
+import subprocess
 
 from ansible import context
 from ansible.galaxy.api import GalaxyAPI
@@ -19,6 +22,11 @@ from ansible.galaxy.api import GalaxyError
 from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
+
+from orionutils.generator import build_collection as _build_collection
+from orionutils.generator import randstr
+
+from .constants import USERNAME_PUBLISHER
 
 
 logger = logging.getLogger(__name__)
@@ -29,9 +37,65 @@ class TaskWaitingTimeout(Exception):
 
 
 class CapturingGalaxyError(Exception):
-    def __init__(self, http_error, message):
+    def __init__(self, http_error, message, http_code=None):
         self.http_error = http_error
         self.message = message
+        self.http_code = http_code
+
+
+class CollectionInspector:
+
+    """ Easy shim to look at tarballs or installed collections """
+
+    def __init__(self, tarball=None, directory=None):
+        self.tarball = tarball
+        self.directory = directory
+        self.manifest = None
+        self._extract_path = None
+        self._enumerate()
+
+    def _enumerate(self):
+        if self.tarball:
+            self._extract_path = tempfile.mkdtemp(prefix='collection-extract-')
+            cmd = f'cd {self._extract_path}; tar xzvf {self.filename}'
+            subprocess.run(
+                cmd,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+        else:
+            self._extract_path = self.directory
+
+        with open(os.path.join(self._extract_path, 'MANIFEST.json'), 'r') as f:
+            self.manifest = json.loads(f.read())
+
+        if self.tarball:
+            shutil.rmtree(self._extract_path)
+
+    @property
+    def namespace(self):
+        if self.manifest is None:
+            return None
+        return self.manifest['collection_info']['namespace']
+
+    @property
+    def name(self):
+        if self.manifest is None:
+            return None
+        return self.manifest['collection_info']['name']
+
+    @property
+    def tags(self):
+        if self.manifest is None:
+            return None
+        return self.manifest['collection_info']['tags']
+
+    @property
+    def version(self):
+        if self.manifest is None:
+            return None
+        return self.manifest['collection_info']['version']
 
 
 def get_client(config, require_auth=True, request_token=True, headers=None):
@@ -324,3 +388,143 @@ def set_certification(client, collection):
                     raise
 
         return res
+
+
+def generate_namespace(exclude=None):
+    """ Create a valid random namespace string """
+
+    # This should be a list of pre-existing namespaces
+    if exclude is None:
+        exclude = []
+
+    def is_valid(ns):
+        """ Assert namespace meets backend requirements """
+        if ns is None:
+            return False
+        if ns in exclude:
+            return False
+        if len(namespace) < 3:
+            return False
+        if len(namespace) > 64:
+            return False
+        for char in namespace:
+            if char not in string.ascii_lowercase + string.digits:
+                return False
+
+        return True
+
+    namespace = None
+    while not is_valid(namespace):
+        namespace = ''
+        namespace += random.choice(string.ascii_lowercase)
+        for x in range(0, random.choice(range(3, 63))):
+            namespace += random.choice(string.ascii_lowercase + string.digits + '_')
+
+    return namespace
+
+
+def get_all_namespaces(api_client=None, api_version='v3'):
+    """ Create a list of namespaces visible to the client """
+
+    assert api_client is not None, "api_client is a required param"
+    namespaces = []
+    next_page = f'/api/automation-hub/{api_version}/namespaces/'
+    while next_page:
+        resp = api_client(next_page)
+        namespaces.extend(resp['data'])
+        next_page = resp.get('links', {}).get('next')
+    return namespaces
+
+
+def generate_unused_namespace(api_client=None, api_version='v3'):
+    """ Make a random namespace string that does not exist """
+
+    assert api_client is not None, "api_client is a required param"
+    existing = get_all_namespaces(api_client=api_client, api_version=api_version)
+    existing = dict((x['name'], x) for x in existing)
+    return generate_namespace(exclude=list(existing.keys()))
+
+
+def create_unused_namespace(api_client=None):
+    """ Make a namespace for testing """
+
+    assert api_client is not None, "api_client is a required param"
+    ns = generate_unused_namespace(api_client=api_client)
+    payload = {'name': ns, 'groups': []}
+    api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
+    return ns
+
+
+def get_all_collections_by_repo(api_client=None):
+    """ Return a dict of each repo and their collections """
+    assert api_client is not None, "api_client is a required param"
+    collections = {
+        'staging': {},
+        'published': {}
+    }
+    for repo in collections.keys():
+        next_page = f'/api/automation-hub/_ui/v1/collection-versions/?repository={repo}'
+        while next_page:
+            resp = api_client(next_page)
+            for _collection in resp['data']:
+                key = (_collection['namespace'], _collection['name'], _collection['version'])
+                collections[repo][key] = _collection
+            next_page = resp.get('links', {}).get('next')
+    return collections
+
+
+def build_collection(
+    base=None,
+    config=None,
+    filename=None,
+    key=None,
+    pre_build=None,
+    extra_files=None,
+    namespace=None,
+    name=None,
+    tags=None,
+    version=None,
+    dependencies=None
+):
+
+    if base is None:
+        base = "skeleton"
+
+    if config is None:
+        config = {
+            "namespace": None,
+            "name": None,
+            "tags": []
+        }
+
+    if namespace is not None:
+        config['namespace'] = namespace
+    else:
+        config['namespace'] = USERNAME_PUBLISHER
+
+    if name is not None:
+        config['name'] = name
+    else:
+        config['name'] = randstr()
+
+    if version is not None:
+        config['version'] = version
+
+    if dependencies is not None:
+        config['dependencies'] = dependencies
+
+    if tags is not None:
+        config['tags'] = tags
+
+    # workaround for cloud importer config
+    if 'tools' not in config['tags']:
+        config['tags'].append('tools')
+
+    return _build_collection(
+        base,
+        config=config,
+        filename=filename,
+        key=key,
+        pre_build=pre_build,
+        extra_files=extra_files
+    )

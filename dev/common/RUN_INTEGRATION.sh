@@ -37,5 +37,5 @@ if [[ -z $HUB_LOCAL ]]; then
     pytest --capture=no --pdb -m "not standalone_only" $@ -v galaxy_ng/tests/integration
     #pytest --capture=no --pdb -v $@ galaxy_ng/tests/integration
 else
-    pytest --capture=no --pdb -v $@ galaxy_ng/tests/integration
+    pytest --capture=no --pdb -m "not cloud_only" -v $@ galaxy_ng/tests/integration
 fi

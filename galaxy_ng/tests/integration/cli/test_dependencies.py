@@ -3,12 +3,11 @@ import logging
 
 import attr
 import pytest
-from orionutils.generator import build_collection
 
-from ..constants import USERNAME_PUBLISHER
 from ..utils import ansible_galaxy
 from ..utils import get_client
 from ..utils import set_certification
+from ..utils import build_collection
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -23,7 +22,6 @@ class DependencySpec:
     xfail = attr.ib(default=False)
 
 
-@pytest.mark.skip(reason="fails in ephemeral")
 @pytest.mark.cli
 @pytest.mark.parametrize(
     "params",
@@ -56,17 +54,10 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
     spec = params.spec
     retcode = params.retcode
     ansible_config("ansible_partner", namespace=published.namespace)
-
-    artifact2 = build_collection(
-        "skeleton",
-        config={
-            "namespace": USERNAME_PUBLISHER,
-            "dependencies": {f"{published.namespace}.{published.name}": spec},
-        },
-    )
+    artifact2 = build_collection(dependencies={f"{published.namespace}.{published.name}": spec})
 
     try:
-        p = ansible_galaxy(
+        ansible_galaxy(
             f"collection publish {artifact2.filename} --server=automation_hub",
             check_retcode=retcode,
             ansible_config=ansible_config("ansible_partner", namespace=published.namespace)
@@ -76,7 +67,6 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
             return pytest.xfail()
         else:
             raise
-    print(f'install pid: {p}')
 
     if retcode == 0:
         config = ansible_config("ansible_insights")
