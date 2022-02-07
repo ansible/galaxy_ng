@@ -67,11 +67,18 @@
         state: present
       when: s3_test | default(false)
 
-    - name: "Fix ~/.netrc permissions"
+    - name: "Check if ~/.netrc exists"
+      shell: ls -al ~/.netrc
+      failed_when: False
+      changed_when: False
+      register: netrc_exists
+
+    - name: "Fix ~/.netrc permissions if exists"
       file:
         path: ~/.netrc
         state: file
         mode: 0600
+      when: "netrc_exists.rc == 0"
 
     - block:
         - name: "Wait for Pulp"
