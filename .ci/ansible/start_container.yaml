@@ -67,6 +67,12 @@
         state: present
       when: s3_test | default(false)
 
+    - name: "Fix ~/.netrc permissions"
+      file:
+        path: ~/.netrc
+        state: file
+        mode: 0600
+
     - block:
         - name: "Wait for Pulp"
           uri:
