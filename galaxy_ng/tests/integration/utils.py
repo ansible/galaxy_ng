@@ -135,16 +135,27 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
     # make an api call with the upstream galaxy client lib from ansible core
     def request(url, *args, **kwargs):
         url = urljoin(server, url)
+        req_headers = dict(headers)
+        kwargs_headers = kwargs.get('headers') or {}
+        kwargs_headers_keys = list(kwargs_headers.keys())
+        kwargs_headers_keys = [x.lower() for x in list(kwargs_headers.keys())]
 
         if isinstance(kwargs.get("args"), dict):
             kwargs["args"] = json.dumps(kwargs["args"])
-            headers["Content-Type"] = "application/json"
 
-        if headers:
+        # Always send content-type
+        if 'content-type' in kwargs_headers_keys:
+            for k, v in headers.items():
+                if k.lower() == 'content-type':
+                    req_headers.pop(k, None)
+        else:
+            req_headers["Content-Type"] = "application/json"
+
+        if req_headers:
             if "headers" in kwargs:
-                kwargs["headers"].update(headers)
+                kwargs["headers"].update(req_headers)
             else:
-                kwargs["headers"] = headers
+                kwargs["headers"] = req_headers
 
         return client._call_galaxy(url, *args, **kwargs)
 
@@ -471,6 +482,47 @@ def get_all_collections_by_repo(api_client=None):
                 collections[repo][key] = _collection
             next_page = resp.get('links', {}).get('next')
     return collections
+
+
+def get_all_repository_collection_versions(api_client):
+    """ Return a dict of each repo and their collection versions """
+
+    repositories = [
+        'staging',
+        'published'
+    ]
+
+    collections = []
+    for repo in repositories:
+        next_page = f'/api/automation-hub/content/{repo}/v3/collections/'
+        while next_page:
+            resp = api_client(next_page)
+            collections.extend(resp['data'])
+            next_page = resp.get('links', {}).get('next')
+
+    collection_versions = []
+    for collection in collections:
+        next_page = collection['versions_url']
+        while next_page:
+            resp = api_client(next_page)
+            for cv in resp['data']:
+                cv['namespace'] = collection['namespace']
+                cv['name'] = collection['name']
+                if 'staging' in cv['href']:
+                    cv['repository'] = 'staging'
+                else:
+                    cv['repository'] = 'published'
+                collection_versions.append(cv)
+            next_page = resp.get('links', {}).get('next')
+
+    rcv = dict(
+        (
+            (x['repository'], x['namespace'], x['name'], x['version']),
+            x
+        )
+        for x in collection_versions
+    )
+    return rcv
 
 
 def build_collection(
