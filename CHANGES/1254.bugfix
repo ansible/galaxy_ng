@@ -1,0 +1,1 @@
+Add missing proxy_password if field is set on CollectionRemote update
