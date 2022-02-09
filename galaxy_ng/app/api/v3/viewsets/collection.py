@@ -36,8 +36,7 @@ from galaxy_ng.app.common import metrics
 from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT, DeploymentMode
 from galaxy_ng.app.tasks import (
-    call_copy_task,
-    call_remove_task,
+    call_move_content_task,
     curate_all_synclist_repository,
     delete_collection,
     delete_collection_version,
@@ -447,8 +446,7 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         if collection_version in dest_versions:
             raise NotFound(_('Collection %s already found in destination repo') % version_str)
 
-        copy_task = call_copy_task(collection_version, src_repo, dest_repo)
-        remove_task = call_remove_task(collection_version, src_repo)
+        move_task = call_move_content_task(collection_version, src_repo, dest_repo)
 
         curate_task_id = None
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
@@ -472,8 +470,8 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
 
         return Response(
             data={
-                'copy_task_id': copy_task.pk,
-                'remove_task_id': remove_task.pk,
+                "copy_task_id": move_task.pk,
+                "remove_task_id": move_task.pk,
                 "curate_all_synclist_repository_task_id": curate_task_id,
             },
             status='202'
