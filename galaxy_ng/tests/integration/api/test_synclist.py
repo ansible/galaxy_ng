@@ -1,15 +1,15 @@
 """test_synclist.py - Test related to synclists."""
 
-from contextlib import contextmanager
 import os
-import pytest
 import time
+from contextlib import contextmanager
 
+import pytest
+from ansible.galaxy.api import GalaxyError
 from orionutils.generator import build_collection
 
 from ..constants import USERNAME_PUBLISHER
-from ..utils import get_client, wait_for_task
-from ..utils import set_certification
+from ..utils import get_client, set_certification, wait_for_task
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -37,11 +37,11 @@ def test_synclist_object_get(ansible_config):
         api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
-    assert resp['meta']['count'] == 1
+    assert resp["meta"]["count"] == 1
     print(f"resp={resp}")
 
     resp = api_client("_ui/v1/synclists/", args={}, method="GET")
-    assert resp['meta']['count'] > 0
+    assert resp["meta"]["count"] > 0
 
 
 @pytest.mark.galaxyapi_smoke
@@ -81,23 +81,23 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 
     # determine synclist repo associated to user
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
-    synclist_data_before = resp['data'][0]
-    synclist_id = synclist_data_before['id']
+    synclist_data_before = resp["data"][0]
+    synclist_id = synclist_data_before["id"]
 
     # edit synclist payload
     my_synclist_url = f"_ui/v1/my-synclists/{synclist_id}/"
     synclist_data_after = dict(synclist_data_before)
-    synclist_data_after['namespaces'] = [USERNAME_PUBLISHER]
-    resp = api_client(my_synclist_url, args=synclist_data_after, method='PUT')
+    synclist_data_after["namespaces"] = [USERNAME_PUBLISHER]
+    resp = api_client(my_synclist_url, args=synclist_data_after, method="PUT")
 
     # confirm synclist GET payload is same as payload sent via PUT
-    resp = api_client(my_synclist_url, args={}, method='GET')
-    assert(resp == synclist_data_after)
+    resp = api_client(my_synclist_url, args={}, method="GET")
+    assert resp == synclist_data_after
 
     # return synclist to previous state
-    api_client(my_synclist_url, args=synclist_data_before, method='PUT')
-    resp = api_client(my_synclist_url, args={}, method='GET')
-    assert(resp == synclist_data_before)
+    api_client(my_synclist_url, args=synclist_data_before, method="PUT")
+    resp = api_client(my_synclist_url, args={}, method="GET")
+    assert resp == synclist_data_before
 
 
 @pytest.mark.galaxyapi_smoke
@@ -105,7 +105,7 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 @pytest.mark.cloud_only
 def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact):
     """Edit synclist object to exclude a collection, do curate task,
-       confirm collection removed from synclist repository."""
+    confirm collection removed from synclist repository."""
 
     # NOTE: on stage env, a toggle action accesses these:
     # PUT https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/
@@ -128,27 +128,26 @@ def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact)
 
     # determine synclist repo associated to user
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
-    synclist_data_before = resp['data'][0]
-    synclist_name = synclist_data_before['name']
-    synclist_id = synclist_data_before['id']
+    synclist_data_before = resp["data"][0]
+    synclist_name = synclist_data_before["name"]
+    synclist_id = synclist_data_before["id"]
 
     # check that collection is part of synclist repo
-    url = f'content/{synclist_name}/v3/collections/?limit=30'
+    url = f"content/{synclist_name}/v3/collections/?limit=30"
     resp = api_client(url)
-    collections_before = [(c['namespace'], c['name']) for c in resp['data']]
+    collections_before = [(c["namespace"], c["name"]) for c in resp["data"]]
     assert collection_key in collections_before
 
     # edit synclist payload
     my_synclist_url = f"_ui/v1/my-synclists/{synclist_id}/"
     synclist_data_after = dict(synclist_data_before)
-    synclist_data_after['collections'] = [{
-        "namespace": collection.namespace,
-        "name": collection.name
-    }]
-    resp = api_client(my_synclist_url, args=synclist_data_after, method='PUT')
+    synclist_data_after["collections"] = [
+        {"namespace": collection.namespace, "name": collection.name}
+    ]
+    resp = api_client(my_synclist_url, args=synclist_data_after, method="PUT")
 
     # kick off a curate task
-    resp = api_client(f"_ui/v1/my-synclists/{synclist_id}/curate/", args={}, method='POST')
+    resp = api_client(f"_ui/v1/my-synclists/{synclist_id}/curate/", args={}, method="POST")
 
     # wait for the curate task to finish
     try:
@@ -161,7 +160,7 @@ def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact)
             raise Exception(ge)
 
     # check collection is NOT part of synclist repo
-    url = f'content/{synclist_name}/v3/collections/?limit=30'
+    url = f"content/{synclist_name}/v3/collections/?limit=30"
     resp = api_client(url)
-    collections_after = [(c['namespace'], c['name']) for c in resp['data']]
+    collections_after = [(c["namespace"], c["name"]) for c in resp["data"]]
     assert collection_key not in collections_after
