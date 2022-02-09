@@ -31,6 +31,7 @@ collection_delete: Deletes collections.
 collection_version_delete: Deletes collections versions.
 delete: Tests for deleting objects.
 move: Related to the move api.
+synclist: Related to synclist object and synclist repo.
 """
 
 
