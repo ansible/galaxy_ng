@@ -76,7 +76,7 @@ diff-match-patch==20200713
     # via django-import-export
 distro==1.6.0
     # via bindep
-django==3.2.11
+django==3.2.12
     # via
     #   django-automated-logging
     #   django-currentuser
