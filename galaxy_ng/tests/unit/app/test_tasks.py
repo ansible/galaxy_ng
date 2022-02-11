@@ -119,7 +119,7 @@ class TestTaskPublish(TestCase):
         )
 
         self.assertTrue(mocked_import.call_count == 1)
-        self.assertTrue(mocked_enqueue.call_count == 2)
+        self.assertTrue(mocked_enqueue.call_count == 1)
 
         # test cannot find golden repo
         golden_repo.name = 'a_different_name_for_golden'
@@ -157,7 +157,7 @@ class TestTaskPublish(TestCase):
         )
 
         self.assertTrue(mocked_import.call_count == 1)
-        self.assertTrue(mocked_enqueue.call_count == 2)
+        self.assertTrue(mocked_enqueue.call_count == 1)
 
         # test cannot find staging repo
         staging_repo.name = 'a_different_name_for_staging'

@@ -37,8 +37,7 @@ from galaxy_ng.app.common import metrics
 from galaxy_ng.app.tasks import (
     import_and_move_to_staging,
     import_and_auto_approve,
-    call_copy_task,
-    call_remove_task,
+    call_move_content_task,
     curate_all_synclist_repository,
 )
 
@@ -314,8 +313,7 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         if collection_version in dest_versions:
             raise NotFound(f'Collection {version_str} already found in destination repo')
 
-        copy_task = call_copy_task(collection_version, src_repo, dest_repo)
-        remove_task = call_remove_task(collection_version, src_repo)
+        move_task = call_move_content_task(collection_version, src_repo, dest_repo)
 
         curate_task_id = None
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
@@ -336,8 +334,8 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
 
         return Response(
             data={
-                'copy_task_id': copy_task.id,
-                'remove_task_id': remove_task.id,
+                'copy_task_id': move_task.id,
+                'remove_task_id': move_task.id,
                 "curate_all_synclist_repository_task_id": curate_task_id,
             },
             status='202'
