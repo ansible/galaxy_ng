@@ -55,17 +55,17 @@ jobs:
       - name: Install requirements
         run: pip3 install -r dev_requirements.txt
 
-      
 
-      
+
+
 
       # Lint code.
       - name: Run flake8
         run: flake8 --config flake8.cfg
 
       # check for any files unintentionally left out of MANIFEST.in
-      - name: Check manifest
-        run: check-manifest
+      # - name: Check manifest
+      #   run: check-manifest
 
       - name: Check for pulpcore imports outside of pulpcore.plugin
         run: sh .ci/scripts/check_pulpcore_imports.sh
@@ -112,7 +112,7 @@ jobs:
           echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
 
       - name: Before Install
-        
+
         run: .github/workflows/scripts/before_install.sh
         shell: bash
         env:
@@ -126,7 +126,7 @@ jobs:
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
 
       - name: Install
-        
+
         run: .github/workflows/scripts/install.sh
         shell: bash
         env:
@@ -140,7 +140,7 @@ jobs:
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
 
       - name: Install Python client
-        
+
         run: .github/workflows/scripts/install_python_client.sh
         shell: bash
 
@@ -150,7 +150,7 @@ jobs:
         shell: bash
 
       - name: Before Script
-        
+
         run: .github/workflows/scripts/before_script.sh
         shell: bash
         env:
@@ -171,7 +171,7 @@ jobs:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
 
       - name: Script
-        
+
         run: .github/workflows/scripts/script.sh
         shell: bash
         env:
@@ -200,7 +200,7 @@ jobs:
           docker exec pulp cat /etc/yum.repos.d/* || true
           docker exec pulp pip3 list
 
-  
+
   update_manifest:
     runs-on: ubuntu-latest
     needs: test
@@ -219,14 +219,3 @@ jobs:
           MANIFEST_PASSPHRASE: ${{ secrets.MANIFEST_PASSPHRASE }}
         run: .github/workflows/scripts/update_manifest.sh
         shell: bash
-
-  lint_po:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - run: |
-          pip install lint-po
-          lint-po ./galaxy_ng/locale/*/LC_MESSAGES/*.po
