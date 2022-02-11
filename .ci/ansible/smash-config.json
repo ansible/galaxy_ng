@@ -1,0 +1,34 @@
+{
+  "pulp": {
+    "auth": [
+      "admin",
+      "password"
+    ],
+    "selinux enabled": false,
+    "version": "3",
+    "aiohttp_fixtures_origin": "172.18.0.1"
+  },
+  "hosts": [
+    {
+      "hostname": "pulp",
+      "roles": {
+        "api": {
+          "port": 443,
+          "scheme": "https",
+          "service": "nginx"
+        },
+        "content": {
+          "port": 443,
+          "scheme": "https",
+          "service": "pulp_content_app"
+        },
+        "pulp resource manager": {},
+        "pulp workers": {},
+        "redis": {},
+        "shell": {
+          "transport": "docker"
+        }
+      }
+    }
+  ]
+}
