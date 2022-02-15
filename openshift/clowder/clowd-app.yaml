@@ -85,6 +85,8 @@ objects:
             cpu: ${{GALAXY_API_CPU_REQUEST}}
             memory: ${{GALAXY_API_MEMORY_REQUEST}}
         env:
+          - name: ANSIBLE_API_HOSTNAME
+            value: ${{ANSIBLE_API_HOSTNAME}}
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
@@ -234,6 +236,8 @@ parameters:
   value: 'latest'
 - name: CONTENT_ORIGIN
   value: 'localhost'
+- name: ANSIBLE_API_HOSTNAME
+  required: true
 - name: API_DOMAIN
   value: https://kubernetes.default.svc:443
 - name: REDIS_SSL

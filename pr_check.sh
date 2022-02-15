@@ -25,6 +25,7 @@ source "$CICD_ROOT/build.sh"
 source ${CICD_ROOT}/_common_deploy_logic.sh
 export NAMESPACE=$(bonfire namespace reserve)
 export CONTENT_ORIGIN="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
+export ANSIBLE_API_HOSTNAME="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com"
 bonfire deploy \
     ${APP_NAME} \
     --source=appsre \
@@ -36,8 +37,10 @@ bonfire deploy \
     ${COMPONENTS_ARG} \
     ${COMPONENTS_RESOURCES_ARG} \
     --set-parameter ${COMPONENT_NAME}/IMPORTER_JOB_NAMESPACE=${NAMESPACE} \
+    --set-parameter ${COMPONENT_NAME}/ANSIBLE_API_HOSTNAME=${ANSIBLE_API_HOSTNAME} \
     --set-parameter ${COMPONENT_NAME}/CONTENT_ORIGIN="${CONTENT_ORIGIN}"
 # END WORKAROUND
+
 
 # Fix the routing for minio and artifact urls
 oc project ${NAMESPACE}
