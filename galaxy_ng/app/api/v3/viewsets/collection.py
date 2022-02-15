@@ -371,14 +371,13 @@ class CollectionArtifactDownloadView(api_base.APIView):
         prefix = settings.CONTENT_PATH_PREFIX.strip('/')
         distribution = self._get_ansible_distribution(self.kwargs['path'])
 
+        url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
+            host=settings.CONTENT_ORIGIN.strip("/"),
+            prefix=prefix,
+            distro_base_path=distro_base_path,
+            filename=filename,
+        )
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
-            url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
-                host=settings.X_PULP_CONTENT_HOST,
-                port=settings.X_PULP_CONTENT_PORT,
-                prefix=prefix,
-                distro_base_path=distro_base_path,
-                filename=filename,
-            )
             response = self._get_tcp_response(
                 distribution.content_guard.cast().preauthenticate_url(url)
             )
@@ -401,12 +400,6 @@ class CollectionArtifactDownloadView(api_base.APIView):
                 _('Unexpected response from content app. Code: %s.') % response.status_code
             )
         elif settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:
-            url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
-                host=settings.CONTENT_ORIGIN.strip("/"),
-                prefix=prefix,
-                distro_base_path=distro_base_path,
-                filename=filename,
-            )
             return redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
 

@@ -90,7 +90,7 @@ objects:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
-            value: ${{CONTENT_ORIGIN}}
+            value: 'http://automation-hub-pulp-content-app${SUFFIX}:10000'
           - name: PULP_RH_ENTITLEMENT_REQUIRED
             value: 'insights'
           - name: PULP_X_PULP_CONTENT_HOST
