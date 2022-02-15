@@ -7,7 +7,7 @@ from pulpcore.plugin.models import Task
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, CollectionVersion
 from pulp_ansible.app.tasks.collections import import_collection
 
-from .promotion import call_copy_task, call_remove_task
+from .promotion import call_move_content_task
 
 log = logging.getLogger(__name__)
 
@@ -57,8 +57,7 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        call_copy_task(collection_version, inbound_repo, staging_repo)
-        call_remove_task(collection_version, inbound_repo)
+        call_move_content_task(collection_version, inbound_repo, staging_repo)
 
 
 def import_and_auto_approve(temp_file_pk, **kwargs):
@@ -87,8 +86,7 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        call_copy_task(collection_version, inbound_repo, golden_repo)
-        call_remove_task(collection_version, inbound_repo)
+        call_move_content_task(collection_version, inbound_repo, golden_repo)
 
         log.info('Imported and auto approved collection artifact %s to repository %s',
                  collection_version.relative_path,
