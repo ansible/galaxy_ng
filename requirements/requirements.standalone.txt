@@ -7,7 +7,9 @@
 aiodns==3.0.0
     # via pulpcore
 aiofiles==0.8.0
-    # via pulpcore
+    # via
+    #   pulp-ansible
+    #   pulpcore
 aiohttp==3.8.1
     # via pulpcore
 aioredis==2.0.0
@@ -204,7 +206,7 @@ prometheus-client==0.11.0
     # via django-prometheus
 psycopg2==2.9.2
     # via pulpcore
-pulp-ansible==0.11.1
+pulp-ansible==0.12.0
     # via galaxy-ng (setup.py)
 pulp-container==2.10.0
     # via galaxy-ng (setup.py)
@@ -273,7 +275,7 @@ rich==10.9.0
     # via
     #   ansible-lint
     #   enrich
-ruamel.yaml==0.17.16
+ruamel-yaml==0.17.16
     # via ansible-lint
 semantic-version==2.8.5
     # via
