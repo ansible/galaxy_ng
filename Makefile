@@ -7,13 +7,13 @@ DJ_MANAGER = $(shell if [ "$(RUNNING)" = "" ]; then echo manage; else echo djang
 
 define exec_or_run
 	# Tries to run on existing container if it exists, otherwise starts a new one.
-	@echo $(1)$(2)$(3)$(4)$(5)
+	@echo $(1)$(2)$(3)$(4)$(5)$(6)
 	@if [ "$(RUNNING)" != "" ]; then \
 		echo "Running on existing container $(RUNNING)" 1>&2; \
-		./compose exec $(1) $(2) $(3) $(4) $(5); \
+		./compose exec $(1) $(2) $(3) $(4) $(5) $(6); \
 	else \
 		echo "Starting new container" 1>&2; \
-		./compose run --use-aliases --service-ports --rm $(1) $(2) $(3) $(4) $(5); \
+		./compose run --use-aliases --service-ports --rm $(1) $(2) $(3) $(4) $(5) $(6); \
 	fi
 endef
 
@@ -95,6 +95,10 @@ docker/makemigrations:   ## Run django migrations
 .PHONY: docker/migrate
 docker/migrate:   ## Run django migrations
 	$(call exec_or_run, api, $(DJ_MANAGER), migrate)
+
+.PHONY: docker/add-signing-service
+docker/add-signing-service:    ## Add a Signing service using default GPG key
+	$(call exec_or_run, worker, $(DJ_MANAGER), add-signing-service, ansible-default, /var/lib/pulp/scripts/collection_sign.sh, galaxy3@ansible.com)
 
 .PHONY: docker/resetdb
 docker/resetdb:   ## Cleans database

@@ -18,9 +18,11 @@ services:
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
       - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
+      - "ENABLE_SIGNING=${ENABLE_SIGNING}"
     entrypoint: "/bin/true"
     tmpfs:
       - "/var/lib/pulp/artifact"
+      - "/var/lib/pulp/scripts"
       - "/var/lib/pulp/tmp"
       - "/tmp/ansible"
 
@@ -40,10 +42,12 @@ services:
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
       - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
+      - "ENABLE_SIGNING=${ENABLE_SIGNING}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
+      - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
@@ -61,10 +65,12 @@ services:
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
       - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
+      - "ENABLE_SIGNING=${ENABLE_SIGNING}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
+      - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
@@ -84,10 +90,12 @@ services:
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
       - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
+      - "ENABLE_SIGNING=${ENABLE_SIGNING}"
     env_file:
       - './common/galaxy_ng.env'
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
+      - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
