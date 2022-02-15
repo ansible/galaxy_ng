@@ -8,6 +8,7 @@
 import re
 import subprocess
 import sys
+import warnings
 from pathlib import Path
 
 
@@ -30,7 +31,11 @@ def __check_status(issue):
     response.raise_for_status()
     bug_json = response.json()
     status = bug_json["issue"]["status"]["name"]
-    if status not in STATUSES:
+    if status not in STATUSES and "cherry picked from commit" not in message:
+        warnings.warn(
+            "When backporting, use the -x flag to append a line that says "
+            "'(cherry picked from commit ...)' to the original commit message."
+        )
         sys.exit(
             "Error: issue #{issue} has invalid status of {status}. Status must be one of "
             "{statuses}.".format(issue=issue, status=status, statuses=", ".join(STATUSES))
