@@ -371,15 +371,15 @@ class CollectionArtifactDownloadView(api_base.APIView):
         prefix = settings.CONTENT_PATH_PREFIX.strip('/')
         distribution = self._get_ansible_distribution(self.kwargs['path'])
 
-        # NOTE: attempt to use CONTENT_ORIGIN+redirect in eph env
-        url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
-            host=settings.CONTENT_ORIGIN.strip("/"),
-            prefix=prefix,
-            distro_base_path=distro_base_path,
-            filename=filename,
-        )
-        print(f"url={url}")
-        return redirect(distribution.content_guard.cast().preauthenticate_url(url))
+        # # NOTE: attempt to use CONTENT_ORIGIN+redirect in eph env
+        # url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
+        #     host=settings.CONTENT_ORIGIN.strip("/"),
+        #     prefix=prefix,
+        #     distro_base_path=distro_base_path,
+        #     filename=filename,
+        # )
+        # print(f"url={url}")
+        # return redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
@@ -395,8 +395,6 @@ class CollectionArtifactDownloadView(api_base.APIView):
             print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>")
             print(f"response={response}")
             print(f"response.status_code={response.status_code}")
-            print(f"dict(response)={dict(response)}")
-            print(f"vars(response)={vars(response)}")
 
             if response.status_code == requests.codes.not_found:
                 metrics.collection_artifact_download_failures.labels(
