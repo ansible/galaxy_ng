@@ -382,6 +382,11 @@ class CollectionArtifactDownloadView(api_base.APIView):
             response = self._get_tcp_response(
                 distribution.content_guard.cast().preauthenticate_url(url)
             )
+            print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>")
+            print(f"response={response}")
+            print(f"response.status_code={response.status_code}")
+            print(f"dict(response)={dict(response)}")
+            print(f"vars(response)={vars(response)}")
 
             if response.status_code == requests.codes.not_found:
                 metrics.collection_artifact_download_failures.labels(
@@ -389,8 +394,10 @@ class CollectionArtifactDownloadView(api_base.APIView):
                 ).inc()
                 raise NotFound()
             if response.status_code == requests.codes.found:
+                print(f"response.headers['Location']={response.headers['Location']}")
                 return HttpResponseRedirect(response.headers['Location'])
             if response.status_code == requests.codes.ok:
+                print(">>>>>>>>> Streaming")
                 metrics.collection_artifact_download_successes.inc()
                 return StreamingHttpResponse(
                     response.raw.stream(amt=4096),
