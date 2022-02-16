@@ -91,6 +91,8 @@ objects:
             value: ${{CONTENT_ORIGIN}}
           - name: PULP_RH_ENTITLEMENT_REQUIRED
             value: 'insights'
+          - name: PULP_ANSIBLE_CONTENT_HOSTNAME
+            value: 'http://automation-hub-pulp-content-app${SUFFIX}:10000/api/automation-hub/v3/artifacts/collections'
           - name: PULP_X_PULP_CONTENT_HOST
             value: 'automation-hub-pulp-content-app${SUFFIX}'
           - name: PULP_X_PULP_CONTENT_PORT
@@ -129,6 +131,8 @@ objects:
         env:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
+          - name: PULP_ANSIBLE_CONTENT_HOSTNAME
+            value: 'http://automation-hub-pulp-content-app${SUFFIX}:10000/api/automation-hub/v3/artifacts/collections'
           - name: PULP_CONTENT_ORIGIN
             value: ${{CONTENT_ORIGIN}}
           - name: GUNICORN_PORT

@@ -378,6 +378,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
             distro_base_path=distro_base_path,
             filename=filename,
         )
+        print(f"url={url}")
         return redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
@@ -406,7 +407,6 @@ class CollectionArtifactDownloadView(api_base.APIView):
                 print(f"response.headers['Location']={response.headers['Location']}")
                 return HttpResponseRedirect(response.headers['Location'])
             if response.status_code == requests.codes.ok:
-                print(">>>>>>>>> Streaming")
                 metrics.collection_artifact_download_successes.inc()
                 return StreamingHttpResponse(
                     response.raw.stream(amt=4096),
