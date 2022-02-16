@@ -56,6 +56,7 @@ oc patch clowdapp automation-hub \
 # source smoke_test.sh
 source dev/ephemeral/smoke_test.sh
 
+export TEARDOWN_RAN=1
 
 # Need to make a dummy results file to make tests pass
 mkdir -p artifacts
