@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: Template
+metadata:
+  name: automation-hub-post-deploy-test
+objects:
+- apiVersion: cloud.redhat.com/v1alpha1
+  kind: ClowdJobInvocation
+  metadata:
+    name: automation-hub-iqe-${IMAGE_TAG}-${JOBID}
+  spec:
+    appName: automation-hub
+    testing:
+      iqe:
+        debug: false
+        dynaconfEnvName: stage_proxy
+        filter: ''
+        marker: 'stage_health'
+parameters:
+  - name: IMAGE_TAG
+    value: ""
+    required: true
+  - name: JOBID
+    generate: expression
+    from: "[0-9a-z]{5}"
