@@ -29,7 +29,7 @@ TAG=ci_build
 if [ -e $REPO_ROOT/../pulp_ansible ]; then
   PULP_ANSIBLE=./pulp_ansible
 else
-  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.11.1
+  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.12.0
 fi
 
 if [ -e $REPO_ROOT/../pulp_container ]; then
