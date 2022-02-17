@@ -128,16 +128,20 @@ class MySyncListAccessPolicy(AccessPolicyBase):
 
     def is_org_admin(self, request, view, permission):
         """Check the rhn_entitlement data to see if user is an org admin"""
-        x_rh_identity = self._get_rh_identity(request)
+        # FIXME TEMPORARILY DISABLE SYNCLIST CURATION
 
-        if not x_rh_identity:
-            log.debug("No x_rh_identity found for request %s for view %s",
-                      request, view)
-            return False
+        # x_rh_identity = self._get_rh_identity(request)
 
-        identity = x_rh_identity['identity']
-        user = identity['user']
-        return user.get('is_org_admin', False)
+        # if not x_rh_identity:
+        #     log.debug("No x_rh_identity found for request %s for view %s",
+        #               request, view)
+        #     return False
+
+        # identity = x_rh_identity['identity']
+        # user = identity['user']
+        # return user.get('is_org_admin', False)
+
+        return False
 
 
 class TagsAccessPolicy(AccessPolicyBase):

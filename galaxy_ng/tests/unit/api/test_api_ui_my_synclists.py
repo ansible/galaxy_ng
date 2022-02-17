@@ -1,4 +1,5 @@
 import logging
+import unittest
 
 from django.conf import settings
 from django.apps import apps
@@ -74,6 +75,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
             # synclist create is not allowed via my-synclist viewset
             self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN, msg=response.data)
 
+    @unittest.skip("Skipping until synclist curation can be re-enabled")
     def test_my_synclist_update(self):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             ns_name = "unittestnamespace1"
@@ -123,6 +125,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
                 ],
             )
 
+    @unittest.skip("Skipping until synclist curation can be re-enabled")
     def test_my_synclist_list(self):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             synclists_url = base.get_current_ui_url("my-synclists-list")
@@ -139,6 +142,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
             self.assertEqual(data[0]["policy"], "exclude")
             self.assertEqual(data[0]["repository"], self.repo.pk)
 
+    @unittest.skip("Skipping until synclist curation can be re-enabled")
     def test_my_synclist_detail(self):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             synclists_detail_url = base.get_current_ui_url(
