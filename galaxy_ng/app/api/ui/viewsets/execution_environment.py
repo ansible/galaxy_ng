@@ -295,7 +295,7 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
         # Call the recursive_remove_content from pulp_container + reclaim disk space
         async_result = dispatch(
             delete_container_image_manifest,
-            args=(str(repository.pk), content_unit_pks),
+            args=(str(repository.pk), content_unit_pks, str(latest_version.pk)),
             exclusive_resources=[repository],
         )
 
