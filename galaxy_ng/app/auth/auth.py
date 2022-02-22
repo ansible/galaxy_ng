@@ -2,18 +2,15 @@ import base64
 import json
 import logging
 
-from django.db import transaction
 from django.conf import settings
-
+from django.db import transaction
 from guardian import shortcuts
-
+from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
-from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository
 from galaxy_ng.app.models import SyncList
 from galaxy_ng.app.models.auth import Group, User
-
 
 DEFAULT_UPSTREAM_REPO_NAME = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 RH_ACCOUNT_SCOPE = 'rh-identity-account'
@@ -99,10 +96,14 @@ class RHIdentityAuthentication(BaseAuthentication):
             repository = self._ensure_repository(distro_name)
             self._get_or_create_synclist_distribution(distro_name, upstream_repository)
 
-            default_synclist = SyncList.objects.create(
-                repository=repository, upstream_repository=upstream_repository,
-                policy=SYNCLIST_DEFAULT_POLICY,
-                name=distro_name)
+            default_synclist, _ = SyncList.objects.get_or_create(
+                name=distro_name,
+                defaults={
+                    "repository": repository,
+                    "upstream_repository": upstream_repository,
+                    "policy": SYNCLIST_DEFAULT_POLICY,
+                },
+            )
 
             default_synclist.groups = {group: ['galaxy.view_synclist', 'galaxy.add_synclist',
                                                'galaxy.delete_synclist', 'galaxy.change_synclist']}
