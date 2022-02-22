@@ -15,6 +15,10 @@ GALAXY_AUTHENTICATION_CLASSES = ['galaxy_ng.app.auth.auth.RHIdentityAuthenticati
 GALAXY_PERMISSION_CLASSES = ['rest_framework.permissions.IsAuthenticated',
                              'galaxy_ng.app.auth.auth.RHEntitlementRequired']
 
+
+GALAXY_AUTO_SIGN_COLLECTIONS = "true"
+GALAXY_COLLECTION_SIGNING_SERVICE = "ansible-default"
+
 X_PULP_CONTENT_HOST = "pulp-content-app"
 X_PULP_CONTENT_PORT = 24816
 
