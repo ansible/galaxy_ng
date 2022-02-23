@@ -10,6 +10,11 @@
         src: Containerfile.j2
         dest: Containerfile
 
+    - name: "Check if pulp container already exists ..."
+      command: docker images | fgrep ci_build
+      failed_when: False
+      register: image_check
+
     - name: "Build pulp image"
       # We build from the ../.. (parent dir of pulpcore git repo) Docker build
       # "context" so that repos like pulp-smash are accessible to Docker
@@ -20,8 +25,10 @@
       # Run build.yaml with -e cache=false if your builds are using outdated
       # layers.
       command: "docker build --network host --no-cache={{ not cache | default(true) | bool }} -t {{ image.name }}:{{ image.tag }} -f {{ playbook_dir }}/Containerfile ../../.."
+      when: 'image_check.rc != 0'
 
     - name: "Clean image cache"
       docker_prune:
         images : true
+      when: 'image_check.rc != 0'
 ...
