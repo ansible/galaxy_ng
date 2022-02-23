@@ -79,6 +79,7 @@ def curate_all_synclist_repository(upstream_repository_name, **kwargs):
             dispatch(
                 curate_synclist_repository_batch,
                 args=(synclist_ids,),
+                shared_resources=[upstream_repository],
                 exclusive_resources=locks,
                 task_group=task_group,
             )

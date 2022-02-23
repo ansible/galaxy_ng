@@ -455,16 +455,11 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
             ).repository
 
             if dest_repo == golden_repo or src_repo == golden_repo:
-                repo_name = golden_repo.name
-                locks = [golden_repo]
-                task_args = (repo_name,)
-                task_kwargs = {}
-
                 curate_task = dispatch(
                     curate_all_synclist_repository,
-                    exclusive_resources=locks,
-                    args=task_args,
-                    kwargs=task_kwargs
+                    shared_resources=[golden_repo],
+                    args=(golden_repo.name,),
+                    kwargs={},
                 )
                 curate_task_id = curate_task.pk
 
