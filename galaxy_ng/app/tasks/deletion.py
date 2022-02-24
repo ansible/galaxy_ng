@@ -1,3 +1,30 @@
+"""tasks/deletion.py
+
+This module includes tasks related to deleting Content.
+
+You can remove Content from a Repository by making a new RepositoryVersion
+without the Content. If an API endpoint uses a Distribution which points to
+the latest_version of the Repository then the Content is unavailable,
+however it is not deleted.
+
+Content can only be deleted if it exists in no RepositoryVersion.
+
+Content cannot be removed from a RepositoryVersion since it is immutable.
+
+Pulp's orphan_cleanup task deletes any Content not part of a RepositoryVersion.
+
+Deleting Content is made possible by retaining only one RepositoryVersion
+for a Repository, and deleting all older RepositoryVersion. This module
+assumes retain_repo_versions is set to 1 for all Repository the Content is
+associated with.
+
+If retain_repo_versions value has been manually set to greater than 1, than the
+CollectionVersion will still exist in previous RepositoryVersion and will
+not get deleted from system on orphan_cleanup. In the future if the Content no
+longer exists in a RepositoryVersion (they have since been deleted), then the
+subsequent orphan_cleanup will delete it from the system.
+"""
+
 import logging
 
 from pulp_ansible.app.models import Collection, CollectionVersion
@@ -9,14 +36,8 @@ log = logging.getLogger(__name__)
 
 
 def _remove_collection_version_from_repos(collection_version):
-    """Remove CollectionVersion from each repo, and ensure no old RepositoryVersion."""
+    """Remove CollectionVersion from latest RepositoryVersion of each repo."""
     for repo in collection_version.repositories.all():
-        # enforce retain_repo_versions is set to 1 on the repository
-        if repo.retain_repo_versions != 1:
-            repo.retain_repo_versions = 1
-            repo.save()
-
-        # remove CollectionVersion from latest RepositoryVersion
         add_and_remove(repo.pk, add_content_units=[], remove_content_units=[collection_version.pk])
     collection_version.save()
 
