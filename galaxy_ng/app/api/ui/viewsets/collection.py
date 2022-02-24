@@ -1,4 +1,4 @@
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef, Q, When, Case, Value, Subquery, F, Func
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -32,6 +32,14 @@ class CollectionByCollectionVersionFilter(pulp_ansible_viewsets.CollectionVersio
     versioning_class = versioning.UIVersioning
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
     deprecated = filters.BooleanFilter()
+    sign_state = filters.CharFilter(method="filter_by_sign_state")
+
+    def filter_by_sign_state(self, qs, name, value):
+        """Filter queryset qs by list of sign_state."""
+        query_params = Q()
+        for state in value.split(","):
+            query_params |= Q(sign_state=state.strip())
+        return qs.filter(query_params)
 
 
 class CollectionViewSet(
@@ -50,6 +58,52 @@ class CollectionViewSet(
     filterset_class = CollectionByCollectionVersionFilter
     permission_classes = [access_policy.CollectionAccessPolicy]
 
+    def build_signing_annotations(self, base_total_qs):
+        """Builds a dict with queryset annotations.
+
+        Containing:
+
+            Count of Versions of the Collection
+            Count of Signed Versions of the Collection
+            Count of Unsigned Versions of the Collection
+            Sign State of the Collection
+                signed: all versions are signed
+                unsigned: all versions are unsigned
+                partial: some versions are signed, some are unsigned
+        """
+        total_versions_query = Subquery(
+            base_total_qs.annotate(total=Func(F("pk"), function="count")).values('total')
+        )
+
+        signed_versions_query = Subquery(
+            base_total_qs.filter(
+                signatures__isnull=False,
+            ).annotate(
+                total=Func(F("pk"), function="count")
+            ).values('total')
+        )
+
+        unsigned_versions_query = Subquery(
+            base_total_qs.filter(
+                signatures__isnull=True,
+            ).annotate(
+                total=Func(F("pk"), function="count")
+            ).values('total')
+        )
+
+        sign_state_query = Case(
+            When(signed_versions=F("total_versions"), then=Value("signed")),
+            When(unsigned_versions=F("total_versions"), then=Value("unsigned")),
+            When(signed_versions__lt=F("total_versions"), then=Value("partial")),
+        )
+
+        return {
+            "total_versions": total_versions_query,
+            "signed_versions": signed_versions_query,
+            "unsigned_versions": unsigned_versions_query,
+            "sign_state": sign_state_query,
+        }
+
     def get_queryset(self):
         """Returns a CollectionVersions queryset for specified distribution."""
         if getattr(self, "swagger_fake_view", False):
@@ -59,7 +113,8 @@ class CollectionViewSet(
         if path is None:
             raise Http404(_("Distribution base path is required"))
 
-        versions = CollectionVersion.objects.filter(pk__in=self._distro_content).values_list(
+        base_versions_query = CollectionVersion.objects.filter(pk__in=self._distro_content)
+        versions = base_versions_query.values_list(
             "collection_id",
             "version",
         )
@@ -78,9 +133,10 @@ class CollectionViewSet(
 
         if not collection_versions.items():
             return CollectionVersion.objects.none().annotate(
-                # AAH-122: annotated fields must exist in all the returned querysets
+                # AAH-122: annotated filterable fields must exist in all the returned querysets
                 #          in order for filters to work.
-                deprecated=Exists(deprecated_query)
+                deprecated=Exists(deprecated_query),
+                sign_state=Value("unsigned"),
             )
 
         query_params = Q()
@@ -88,7 +144,16 @@ class CollectionViewSet(
             query_params |= Q(collection_id=collection_id, version=version)
 
         version_qs = CollectionVersion.objects.select_related("collection").filter(query_params)
-        version_qs = version_qs.annotate(deprecated=Exists(deprecated_query))
+
+        base_total_qs = base_versions_query.filter(
+            namespace=OuterRef("namespace"), name=OuterRef("name")
+        )
+
+        version_qs = version_qs.annotate(
+            deprecated=Exists(deprecated_query),
+            **self.build_signing_annotations(base_total_qs)
+        )
+
         return version_qs
 
     def get_object(self):
@@ -104,11 +169,13 @@ class CollectionViewSet(
                 queryset, namespace=self.kwargs["namespace"], name=self.kwargs["name"]
             )
 
-        return get_object_or_404(
-            CollectionVersion.objects.all(),
+        base_qs = CollectionVersion.objects.filter(
             pk__in=self._distro_content,
             namespace=self.kwargs["namespace"],
             name=self.kwargs["name"],
+        )
+        return get_object_or_404(
+            base_qs.annotate(**self.build_signing_annotations(base_qs)),
             version=version,
         )
 

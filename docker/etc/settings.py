@@ -15,9 +15,13 @@ GALAXY_AUTHENTICATION_CLASSES = ['galaxy_ng.app.auth.auth.RHIdentityAuthenticati
 GALAXY_PERMISSION_CLASSES = ['rest_framework.permissions.IsAuthenticated',
                              'galaxy_ng.app.auth.auth.RHEntitlementRequired']
 
-
-GALAXY_AUTO_SIGN_COLLECTIONS = "true"
-GALAXY_COLLECTION_SIGNING_SERVICE = "ansible-default"
+# GALAXY_AUTO_SIGN_COLLECTIONS = True
+# GALAXY_COLLECTION_SIGNING_SERVICE = "ansible-default"
+"""
+By default the signing variables are not set.
+if one want to enable signing, then set the following variables
+on the per environment basis. e.g: export PULP_GALAXY_....
+"""
 
 X_PULP_CONTENT_HOST = "pulp-content-app"
 X_PULP_CONTENT_PORT = 24816

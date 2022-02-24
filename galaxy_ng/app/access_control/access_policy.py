@@ -95,6 +95,25 @@ class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyB
             raise NotFound(_("Namespace in filename not found."))
         return request.user.has_perm("galaxy.upload_to_namespace", namespace)
 
+    def can_sign_collections(self, request, view, permission):
+        # Repository is required on the CollectionSign payload
+        # Assumed that if user can modify repo they can sign everything in it
+        repository = view.get_repository(request)
+        can_modify_repo = request.user.has_perm('ansible.modify_ansible_repo_content', repository)
+
+        # Payload can optionally specify a namespace to filter its contents
+        # Assumed that if user has access to modify namespace they can sign its contents.
+        if namespace := request.data.get('namespace'):
+            try:
+                namespace = models.Namespace.objects.get(name=namespace)
+            except models.Namespace.DoesNotExist:
+                raise NotFound(_('Namespace not found.'))
+            return request.user.has_perm('galaxy.upload_to_namespace', namespace)
+
+        # the other filtering options are content_units and name/version
+        # and falls on the same permissions as modifying the main repo
+        return can_modify_repo
+
     def unauthenticated_collection_download_enabled(self, request, view, permission):
         return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
 
