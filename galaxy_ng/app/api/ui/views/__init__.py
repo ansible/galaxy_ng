@@ -7,6 +7,7 @@ from .feature_flags import FeatureFlagsView
 from .controller import ControllerListView
 
 from .settings import SettingsView
+from .landing_page import LandingPageView
 from .sync import ContainerSyncRemoteView, ContainerSyncRegistryView
 
 from .index_execution_environments import IndexRegistryEEView
@@ -24,6 +25,9 @@ __all__ = (
 
     # settings
     "SettingsView",
+
+    # landing_page
+    "LandingPageView",
 
     # sync
     "ContainerSyncRemoteView",

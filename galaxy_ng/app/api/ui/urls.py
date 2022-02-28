@@ -152,6 +152,7 @@ paths = [
 
     path('auth/', include(auth_views)),
     path("settings/", views.SettingsView.as_view(), name="settings"),
+    path("landing-page/", views.LandingPageView.as_view(), name="landing-page"),
     path('feature-flags/', views.FeatureFlagsView.as_view(), name='feature-flags'),
     path('controllers/', views.ControllerListView.as_view(), name='controllers'),
     path('groups/', include(group_paths)),

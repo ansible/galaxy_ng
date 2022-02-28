@@ -25,9 +25,10 @@ class AccessPolicyBase(AccessPolicy):
             # import here to avoid working outside django/dynaconf settings context
             from galaxy_ng.app.access_control.statements import STANDALONE_STATEMENTS  # noqa
             from galaxy_ng.app.access_control.statements import INSIGHTS_STATEMENTS  # noqa
+
             self._STATEMENTS = {
-                'insights': INSIGHTS_STATEMENTS,
-                'standalone': STANDALONE_STATEMENTS
+                "insights": INSIGHTS_STATEMENTS,
+                "standalone": STANDALONE_STATEMENTS,
             }
         return self._STATEMENTS
 
@@ -43,7 +44,7 @@ class AccessPolicyBase(AccessPolicy):
             log.debug("No request rh_identity request.auth found for request %s", request)
             return False
 
-        x_rh_identity = request.auth.get('rh_identity')
+        x_rh_identity = request.auth.get("rh_identity")
         if not x_rh_identity:
             return False
 
@@ -55,21 +56,24 @@ class AccessPolicyBase(AccessPolicy):
         x_rh_identity = self._get_rh_identity(request)
 
         if not x_rh_identity:
-            log.debug("No x_rh_identity found when check entitlements for request %s for view %s",
-                      request, view)
+            log.debug(
+                "No x_rh_identity found when check entitlements for request %s for view %s",
+                request,
+                view,
+            )
             return False
 
-        entitlements = x_rh_identity.get('entitlements', {})
+        entitlements = x_rh_identity.get("entitlements", {})
         entitlement = entitlements.get(settings.RH_ENTITLEMENT_REQUIRED, {})
-        return entitlement.get('is_entitled', False)
+        return entitlement.get("is_entitled", False)
 
 
 class NamespaceAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
-    NAME = 'NamespaceViewSet'
+    NAME = "NamespaceViewSet"
 
 
 class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
-    NAME = 'CollectionViewSet'
+    NAME = "CollectionViewSet"
 
     def can_update_collection(self, request, view, permission):
         if getattr(self, "swagger_fake_view", False):
@@ -77,26 +81,26 @@ class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyB
             return False
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
-        return request.user.has_perm('galaxy.upload_to_namespace', namespace)
+        return request.user.has_perm("galaxy.upload_to_namespace", namespace)
 
     def can_create_collection(self, request, view, permission):
         data = view._get_data(request)
         try:
-            namespace = models.Namespace.objects.get(name=data['filename'].namespace)
+            namespace = models.Namespace.objects.get(name=data["filename"].namespace)
         except models.Namespace.DoesNotExist:
-            raise NotFound(_('Namespace in filename not found.'))
-        return request.user.has_perm('galaxy.upload_to_namespace', namespace)
+            raise NotFound(_("Namespace in filename not found."))
+        return request.user.has_perm("galaxy.upload_to_namespace", namespace)
 
     def unauthenticated_collection_download_enabled(self, request, view, permission):
         return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
 
 
 class CollectionRemoteAccessPolicy(AccessPolicyBase):
-    NAME = 'CollectionRemoteViewSet'
+    NAME = "CollectionRemoteViewSet"
 
 
 class UserAccessPolicy(AccessPolicyBase):
-    NAME = 'UserViewSet'
+    NAME = "UserViewSet"
 
     def user_is_superuser(self, request, view, action):
         if getattr(self, "swagger_fake_view", False):
@@ -113,18 +117,18 @@ class UserAccessPolicy(AccessPolicyBase):
 
 
 class MyUserAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
-    NAME = 'MyUserViewSet'
+    NAME = "MyUserViewSet"
 
     def is_current_user(self, request, view, action):
         return request.user == view.get_object()
 
 
 class SyncListAccessPolicy(AccessPolicyBase):
-    NAME = 'SyncListViewSet'
+    NAME = "SyncListViewSet"
 
 
 class MySyncListAccessPolicy(AccessPolicyBase):
-    NAME = 'MySyncListViewSet'
+    NAME = "MySyncListViewSet"
 
     def is_org_admin(self, request, view, permission):
         """Check the rhn_entitlement data to see if user is an org admin"""
@@ -145,60 +149,61 @@ class MySyncListAccessPolicy(AccessPolicyBase):
 
 
 class TagsAccessPolicy(AccessPolicyBase):
-    NAME = 'TagViewSet'
+    NAME = "TagViewSet"
 
 
 class TaskAccessPolicy(AccessPolicyBase):
-    NAME = 'TaskViewSet'
+    NAME = "TaskViewSet"
 
 
 class LoginAccessPolicy(AccessPolicyBase):
-    NAME = 'LoginView'
+    NAME = "LoginView"
 
 
 class LogoutAccessPolicy(AccessPolicyBase):
-    NAME = 'LogoutView'
+    NAME = "LogoutView"
 
 
 class TokenAccessPolicy(AccessPolicyBase):
-    NAME = 'TokenView'
+    NAME = "TokenView"
 
 
 class GroupAccessPolicy(AccessPolicyBase):
-    NAME = 'GroupViewSet'
+    NAME = "GroupViewSet"
 
 
 class DistributionAccessPolicy(AccessPolicyBase):
-    NAME = 'DistributionViewSet'
+    NAME = "DistributionViewSet"
 
 
 class MyDistributionAccessPolicy(AccessPolicyBase):
-    NAME = 'MyDistributionViewSet'
+    NAME = "MyDistributionViewSet"
 
 
 class ContainerRepositoryAccessPolicy(AccessPolicyBase):
-    NAME = 'ContainerRepositoryViewSet'
+    NAME = "ContainerRepositoryViewSet"
 
 
 class ContainerReadmeAccessPolicy(AccessPolicyBase):
-    NAME = 'ContainerReadmeViewset'
+    NAME = "ContainerReadmeViewset"
 
     def has_container_namespace_perms(self, request, view, action, permission):
         readme = view.get_object()
-        return (request.user.has_perm(permission)
-                or request.user.has_perm(permission, readme.container.namespace))
+        return request.user.has_perm(permission) or request.user.has_perm(
+            permission, readme.container.namespace
+        )
 
 
 class ContainerNamespaceAccessPolicy(AccessPolicyBase):
-    NAME = 'ContainerNamespaceViewset'
+    NAME = "ContainerNamespaceViewset"
 
 
 class ContainerRegistryRemoteAccessPolicy(AccessPolicyBase):
-    NAME = 'ContainerRegistryRemoteViewSet'
+    NAME = "ContainerRegistryRemoteViewSet"
 
 
 class ContainerRemoteAccessPolicy(AccessPolicyBase, NamespacedAccessPolicyMixin):
-    NAME = 'ContainerRemoteViewSet'
+    NAME = "ContainerRemoteViewSet"
 
     def has_distro_permission(self, request, view, action, permission):
         class FakeView:
@@ -222,3 +227,7 @@ class ContainerRemoteAccessPolicy(AccessPolicyBase, NamespacedAccessPolicyMixin)
                     return True
 
         return False
+
+
+class LandingPageAccessPolicy(AccessPolicyBase):
+    NAME = "LandingPageViewSet"
