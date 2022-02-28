@@ -49,7 +49,7 @@ requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, an
 
 .PHONY: pulp/template-plugin-check
 pulp/template-plugin-check:
-	bash dev/common/check_pulp_template.sh
+	./dev/common/check_pulp_template.sh
 
 # Repository management
 
