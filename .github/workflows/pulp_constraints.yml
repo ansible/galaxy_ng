@@ -1,0 +1,14 @@
+---
+name: Verify pulp imposed constraints
+on: {pull_request: {branches: ['*']}, push: {branches: ['*']}}
+jobs:
+
+  check_pulp_template_plugin:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run script to validate commits for both pull request and a push
+        run: make pulp/template-plugin-check
