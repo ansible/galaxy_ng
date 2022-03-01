@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-65-g3505809
+# generated with plugin_template@2021.08.26-83-g29b161f
 
 additional_repos:
 - bindings: true
@@ -89,9 +89,11 @@ test_cli: false
 test_deprecations: false
 test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
+test_reroute: true
 test_s3: true
 travis_addtl_services: []
 travis_notifications: null
 update_github: false
 upgrade_range: []
 use_issue_template: false
+
