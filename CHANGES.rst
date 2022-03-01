@@ -13,6 +13,23 @@ Changelog
 
 .. towncrier release notes start
 
+4.4.2 (2022-03-01)
+Bugfixes
+--------
+
+- Log query items to api access log to capture collection details when uploading a collection.
+  `AAH-1018 <https://issues.redhat.com/browse/AAH-1018>`_
+- Update pulpcore to 3.15.4 to pickup CDN related fixes
+  `AAH-1202 <https://issues.redhat.com/browse/AAH-1202>`_
+- Update pulp_ansible to 0.10.2 to pickup proxy authentication fix.
+  `AAH-1243 <https://issues.redhat.com/browse/AAH-1243>`_
+- Add missing proxy_password if field is set on CollectionRemote update
+  `AAH-1254 <https://issues.redhat.com/browse/AAH-1254>`_
+
+
+----
+
+
 4.4.1 (2022-01-06)
 Bugfixes
 --------
