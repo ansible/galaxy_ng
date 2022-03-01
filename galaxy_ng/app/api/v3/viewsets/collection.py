@@ -442,7 +442,7 @@ class CollectionSignViewSet(api_base.ViewSet):
         """
 
         signing_service = self._get_signing_service(request)
-        repository = self._get_repository(request)
+        repository = self.get_repository(request)
         content_units = self._get_content_units_to_sign(request, repository)
 
         sign_task = call_sign_task(signing_service, repository, content_units)
@@ -483,11 +483,13 @@ class CollectionSignViewSet(api_base.ViewSet):
 
             return [str(item) for item in content_units]
 
-    def _get_repository(self, request):
+    def get_repository(self, request):
         """Retrieves the repository object from the request.
 
         :param request: the request object
         :return: the repository object
+
+        NOTE: This method is used by the access policies.
         """
         try:
             return AnsibleDistribution.objects.get(base_path=request.data["repository"]).repository

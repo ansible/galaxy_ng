@@ -33,9 +33,12 @@ pip install -r integration_requirements.txt
 pip show epdb || pip install epdb
 
 
+# when running user can specify extra pytest arguments such as
+# export HUB_LOCAL=1 
+# dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
 if [[ -z $HUB_LOCAL ]]; then
-    pytest --capture=no --pdb -m "not standalone_only" $@ -v galaxy_ng/tests/integration
+    pytest --capture=no -m "not standalone_only" $@ -v galaxy_ng/tests/integration
     #pytest --capture=no --pdb -v $@ galaxy_ng/tests/integration
 else
-    pytest --capture=no --pdb -m "not cloud_only" -v $@ galaxy_ng/tests/integration
+    pytest --capture=no -m "not cloud_only" -v $@ galaxy_ng/tests/integration
 fi
