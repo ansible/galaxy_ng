@@ -20,6 +20,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_keycloak(settings))
     data.update(configure_cors(settings))
     data.update(configure_feature_flags(settings))
+    data.update(configure_default_permission_classes(settings))
 
     return data
 
@@ -278,4 +279,14 @@ def configure_feature_flags(settings: Dynaconf) -> Dict[str, Any]:
         "GALAXY_COLLECTION_SIGNING_SERVICE") is not None
     data["GALAXY_FEATURE_FLAGS__collection_auto_sign"] = settings.get(
         "GALAXY_AUTO_SIGN_COLLECTIONS", False)
+    return data
+
+
+def configure_default_permission_classes(settings: Dynaconf) -> Dict[str, Any]:
+    """Configure default permission classes for galaxy."""
+    data = {}
+    data["REST_FRAMEWORK"] = settings.get("REST_FRAMEWORK")
+    data["REST_FRAMEWORK"]["DEFAULT_PERMISSION_CLASSES"] = [
+        "galaxy_ng.app.access_control.access_policy.AccessPolicyBase"
+    ]
     return data
