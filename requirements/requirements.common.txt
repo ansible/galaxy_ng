@@ -210,7 +210,7 @@ pulp-ansible==0.12.0
     # via galaxy-ng (setup.py)
 pulp-container==2.10.0
     # via galaxy-ng (setup.py)
-pulpcore==3.17.3
+pulpcore==3.17.4
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -275,8 +275,10 @@ rich==10.9.0
     # via
     #   ansible-lint
     #   enrich
-ruamel-yaml==0.17.16
+ruamel.yaml==0.17.21
     # via ansible-lint
+ruamel.yaml.clib==0.2.6
+    # via ruamel.yaml
 semantic-version==2.8.5
     # via
     #   galaxy-importer

@@ -69,7 +69,7 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: 3.17.3
+pulpcore_branch: 3.17.4
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
