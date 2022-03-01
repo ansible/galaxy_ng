@@ -371,15 +371,17 @@ class CollectionArtifactDownloadView(api_base.APIView):
         prefix = settings.CONTENT_PATH_PREFIX.strip('/')
         distribution = self._get_ansible_distribution(self.kwargs['path'])
 
-        # # NOTE: attempt to use CONTENT_ORIGIN+redirect in eph env
-        # url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
-        #     host=settings.CONTENT_ORIGIN.strip("/"),
-        #     prefix=prefix,
-        #     distro_base_path=distro_base_path,
-        #     filename=filename,
-        # )
-        # print(f"url={url}")
-        # return redirect(distribution.content_guard.cast().preauthenticate_url(url))
+        # NOTE: attempt to use CONTENT_ORIGIN+redirect in eph env
+        url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
+            host=settings.CONTENT_ORIGIN.strip("/"),
+            prefix=prefix,
+            distro_base_path=distro_base_path,
+            filename=filename,
+        )
+        print(f"url={url}")
+        log.info(f"url={url}")
+        log.error(f"url={url}")
+        return redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
