@@ -47,6 +47,9 @@ requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, an
 	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in --upgrade
 	pip-compile -o requirements/requirements.standalone.txt setup.py requirements/requirements.standalone.in --upgrade
 
+.PHONY: pulp/template-plugin-check
+pulp/template-plugin-check:
+	./dev/common/check_pulp_template.sh
 
 # Repository management
 
