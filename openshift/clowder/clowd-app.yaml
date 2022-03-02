@@ -117,9 +117,9 @@ objects:
           - name: prometheus_multiproc_dir
             value: ${PROMETHEUS_DIR}
           - name: ENABLE_SIGNING
-            value: "1"
+            value: ${ENABLE_SIGNING}
           - name: GNUPGHOME
-            value: '/tmp/ansible/.gnupg'
+            value: ${GNUPGHOME}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs
@@ -171,9 +171,9 @@ objects:
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
           - name: ENABLE_SIGNING
-            value: "1"
+            value: ${ENABLE_SIGNING}
           - name: GNUPGHOME
-            value: '/tmp/ansible/.gnupg'
+            value: ${GNUPGHOME}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs
@@ -238,9 +238,9 @@ objects:
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
           - name: ENABLE_SIGNING
-            value: "1"
+            value: ${ENABLE_SIGNING}
           - name: GNUPGHOME
-            value: '/tmp/ansible/.gnupg'
+            value: ${GNUPGHOME}
         volumeMounts:
           - name: importer-config
             mountPath: /etc/galaxy-importer
@@ -311,6 +311,10 @@ parameters:
   value: "false"
 - name: PROMETHEUS_DIR
   value: "/tmp"
+- name: ENABLE_SIGNING
+  value: "1"
+- name: GNUPGHOME
+  value: "/tmp/ansible/.gnupg"
 
 # nginx resource requirements
 - name: NGINX_REPLICAS
