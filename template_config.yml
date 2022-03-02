@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-65-g3505809
+# generated with plugin_template@2021.08.26-83-g29b161f
 
 additional_repos:
 - bindings: true
@@ -69,7 +69,7 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: 3.17.3
+pulpcore_branch: 3.17.4
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
@@ -89,6 +89,7 @@ test_cli: false
 test_deprecations: false
 test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
+test_reroute: false
 test_s3: true
 travis_addtl_services: []
 travis_notifications: null

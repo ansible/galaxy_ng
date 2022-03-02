@@ -36,6 +36,7 @@ jobs:
           author: ansible <ansible-infra@redhat.com>
           title: 'Update CI files'
           body: 'No-Issue'
+          branch: 'create-pull-request/${{ github.ref }}/patch'
           commit-message: |
             Update CI files
 

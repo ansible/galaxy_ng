@@ -46,7 +46,9 @@ if [[ "$TEST" = "docs" ]]; then
 fi
 
 if [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
-  REPORTED_VERSION=$(http $PULP_URL/pulp/api/v3/status/ | jq --arg plugin galaxy --arg legacy_plugin galaxy_ng -r '.versions[] | select(.component == $plugin or .component == $legacy_plugin) | .version')
+  STATUS_ENDPOINT="${PULP_URL}/pulp/api/v3/status/"
+  echo $STATUS_ENDPOINT
+  REPORTED_VERSION=$(http $STATUS_ENDPOINT | jq --arg plugin galaxy --arg legacy_plugin galaxy_ng -r '.versions[] | select(.component == $plugin or .component == $legacy_plugin) | .version')
   response=$(curl --write-out %{http_code} --silent --output /dev/null https://pypi.org/project/galaxy-ng/$REPORTED_VERSION/)
   if [ "$response" == "200" ];
   then
