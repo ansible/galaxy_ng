@@ -4,18 +4,93 @@ kind: Template
 metadata:
   name: automation-hub-post-deploy-test
 objects:
-- apiVersion: cloud.redhat.com/v1alpha1
-  kind: ClowdJobInvocation
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: entrypoint
+  data:
+    run_iqe.sh: |
+      #!/bin/bash
+
+      # trigger build
+      BUILD_NUM=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.nextBuildNumber')
+      curl -X POST -H "Authorization: Bearer ${JENKINS_TOKEN}" ${JENKINS_JOB_URL}/buildWithParameters
+
+      # verify build started
+      BUILD_STATUS=$(curl --silent ${JENKINS_JOB_URL}/${BUILD_NUM}/api/json | jq '.building')
+      if [ -n "${BUILD_STATUS}" ]; then
+        echo "Jenkins job triggered: ${JENKINS_JOB_URL}/${BUILD_NUM}/"
+        echo "waiting for build to complete..."
+      else
+        echo "Failed to trigger ${JENKINS_JOB_URL}"
+        exit 1
+      fi
+
+      # wait for build to complete
+      LAST_COMPLETE_BUILD=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.lastCompletedBuild.number')
+      while [ ${LAST_COMPLETE_BUILD} -lt ${BUILD_NUM} ]; do
+        sleep 60
+        LAST_COMPLETE_BUILD=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.lastCompletedBuild.number')
+      done
+
+      # get build status
+      curl --silent ${JENKINS_JOB_URL}/${BUILD_NUM}/consoleText
+      BUILD_RESULT=$(curl --silent ${JENKINS_JOB_URL}/${BUILD_NUM}/api/json | jq '.result')
+      if [ "${BUILD_RESULT}" = "\"SUCCESS\"" ]; then
+        exit 0
+      else
+        exit 1
+      fi
+
+- apiVersion: batch/v1
+  kind: Job
   metadata:
     name: automation-hub-iqe-${IMAGE_TAG}-${JOBID}
   spec:
-    appName: automation-hub
-    testing:
-      iqe:
-        debug: false
-        dynaconfEnvName: stage_proxy
-        filter: ''
-        marker: 'stage_health'
+    backoffLimit: 5
+    template:
+      spec:
+        restartPolicy: Never
+        imagePullSecrets:
+          - name: quay-cloudservices-pull
+        containers:
+          - image: quay.io/cloudservices/iqe-tests:automation-hub
+            imagePullPolicy: Always
+            name: automation-hub-iqe
+            resources:
+              limits:
+                cpu: ${IQE_CPU_LIMIT}
+                memory: ${IQE_MEMORY_LIMIT}
+              requests:
+                cpu: ${IQE_CPU_REQUEST}
+                memory: ${IQE_MEMORY_REQUEST}
+            command:
+              - /run_iqe.sh
+            env:
+              - name: JENKINS_JOB_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: iqe-jenkins
+                    key: job-url
+              - name: JENKINS_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: iqe-jenkins
+                    key: token
+            volumeMounts:
+            - name: entrypoint
+              mountPath: /run_iqe.sh
+              subPath: run_iqe.sh
+              readOnly: true
+        volumes:
+          - name: entrypoint
+            configMap:
+              name: entrypoint
+              items:
+                - key: run_iqe.sh
+                  path: run_iqe.sh
+              defaultMode: 0555
+
 parameters:
   - name: IMAGE_TAG
     value: ""
@@ -23,3 +98,11 @@ parameters:
   - name: JOBID
     generate: expression
     from: "[0-9a-z]{5}"
+  - name: IQE_MEMORY_REQUEST
+    value: 64Mi
+  - name: IQE_MEMORY_LIMIT
+    value: 128Mi
+  - name: IQE_CPU_REQUEST
+    value: 50m
+  - name: IQE_CPU_LIMIT
+    value: 200m
