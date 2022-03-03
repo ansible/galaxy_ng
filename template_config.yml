@@ -31,6 +31,7 @@ core_import_allowed:
 - pulpcore\.app.*admin
 - ProgressReportSerializer
 - pulpcore.app.*tasks
+- pulpcore.openapi.*
 coverage: false
 deploy_client_to_pypi: false
 deploy_client_to_rubygems: false
