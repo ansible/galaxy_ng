@@ -124,7 +124,7 @@ def test_openapi_bindings_generation(ansible_config):
 
         properties = '--additional-properties=packageName=pulpcore.client.galaxy_ng'
         properties += ',projectName=galaxy_ng-client'
-        properties += f',packageVersion={version}',
+        properties += f',packageVersion={version}'
 
         cmd = [
             'docker',
