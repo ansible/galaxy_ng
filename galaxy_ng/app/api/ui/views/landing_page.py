@@ -36,12 +36,6 @@ class LandingPageView(api_base.APIView):
                             "href": "./ansible/automation-hub/partners/%s" % namespace.name,
                         },
                         "description": "Discover automation from our partners.",
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ]
                     }
                 ]
             }
@@ -56,12 +50,6 @@ class LandingPageView(api_base.APIView):
                             "title": "Collections",
                             "href": "./ansible/automation-hub/",
                         },
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ],
                     },
                     {
                         "id": "ansible-partners",
@@ -70,12 +58,6 @@ class LandingPageView(api_base.APIView):
                             "title": "Partners",
                             "href": "./ansible/automation-hub/partners/",
                         },
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ],
                     },
                 ],
             },
@@ -83,12 +65,6 @@ class LandingPageView(api_base.APIView):
             "configTryLearn": {
                 "configure": [
                     {
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ],
                         "shape": {
                             "title": "Sync Red Hat certified collections",
                             "description": (
@@ -104,12 +80,6 @@ class LandingPageView(api_base.APIView):
                 ],
                 "try": [
                     {
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ],
                         "shape": {
                             "title": "Install Private Automation Hub",
                             "link": {
@@ -124,12 +94,6 @@ class LandingPageView(api_base.APIView):
                         },
                     },
                     {
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ],
                         "shape": {
                             "title": "Manage repositories in Private Automation Hub",
                             "description": (
@@ -151,12 +115,6 @@ class LandingPageView(api_base.APIView):
                 ],
                 "learn": [
                     {
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ],
                         "shape": {
                             "title": "Connect Automation Hub to your automation infrastructure",
                             "link": {
@@ -171,12 +129,6 @@ class LandingPageView(api_base.APIView):
                         },
                     },
                     {
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ],
                         "shape": {
                             "title": "Learn about namespaces",
                             "description": (
@@ -194,12 +146,6 @@ class LandingPageView(api_base.APIView):
                         },
                     },
                     {
-                        "permissions": [
-                            {
-                                "method": "isEntitled",
-                                "args": ["ansible"],
-                            }
-                        ],
                         "shape": {
                             "title": "Explore Red Hat certified collections",
                             "link": {
