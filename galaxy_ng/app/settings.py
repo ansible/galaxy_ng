@@ -1,5 +1,7 @@
 import os
 
+DEBUG = False
+
 MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     # BEGIN: Pulp standard middleware
@@ -111,6 +113,7 @@ SPECTACULAR_SETTINGS = {
     },
     "COMPONENT_SPLIT_REQUEST": True,
     "dynaconf_merge": True,
+    "DEFAULT_GENERATOR_CLASS": "galaxy_ng.openapi.GalaxySchemaGenerator",
 }
 
 # Disable django guardian anonymous user
