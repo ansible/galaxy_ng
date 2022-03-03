@@ -57,7 +57,7 @@ def delete_collection_version(collection_version_pk):
     _remove_collection_version_from_repos(collection_version)
 
     log.info("Running orphan_cleanup to delete CollectionVersion object and artifact")
-    orphan_cleanup(content_pks=None, orphan_protection_time=0)
+    orphan_cleanup(content_pks=None, orphan_protection_time=10)
 
     if not collection.versions.all():
         log.info("Collection has no more versions, deleting collection {}".format(collection))
@@ -78,7 +78,7 @@ def delete_collection(collection_pk):
         _remove_collection_version_from_repos(version)
 
     log.info("Running orphan_cleanup to delete CollectionVersion objects and artifacts")
-    orphan_cleanup(content_pks=None, orphan_protection_time=0)
+    orphan_cleanup(content_pks=None, orphan_protection_time=10)
 
     log.info("Deleting collection {}".format(collection))
     collection.delete()
@@ -91,7 +91,7 @@ def delete_container_distribution(instance_ids):
     general_multi_delete(instance_ids=instance_ids)
 
     log.info("Running orphan_cleanup to delete Container objects and artifacts")
-    orphan_cleanup(content_pks=None, orphan_protection_time=0)
+    orphan_cleanup(content_pks=None, orphan_protection_time=10)
 
 
 def delete_container_image_manifest(repository_pk, content_unit_pks):
