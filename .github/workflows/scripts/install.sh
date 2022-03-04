@@ -35,7 +35,7 @@ fi
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
 else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.8.3
+  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.8.6
 fi
 
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
@@ -106,6 +106,10 @@ pulp_container_tag: https
 
 VARSYAML
 
+if [ "$TEST" = "upgrade" ]; then
+  sed -i "/^pulp_container_tag:.*/s//pulp_container_tag: upgrade-https/" vars/main.yaml
+fi
+
 if [ "$TEST" = "s3" ]; then
   export MINIO_ACCESS_KEY=AKIAIT2Z5TDYPX3ARJBA
   export MINIO_SECRET_KEY=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
@@ -119,6 +123,8 @@ if [ "$TEST" = "s3" ]; then
   sed -i -e '$a s3_test: true\
 minio_access_key: "'$MINIO_ACCESS_KEY'"\
 minio_secret_key: "'$MINIO_SECRET_KEY'"' vars/main.yaml
+  echo "PULP_API_ROOT=/rerouted/djnd/" >> "$GITHUB_ENV"
+  export PULP_API_ROOT="/rerouted/djnd/"
 fi
 
 if [ "$TEST" = "azure" ]; then
@@ -135,6 +141,10 @@ if [ "$TEST" = "azure" ]; then
       - ./azurite:/etc/pulp\
     command: "azurite-blob --blobHost 0.0.0.0 --cert /etc/pulp/azcert.pem --key /etc/pulp/azkey.pem"' vars/main.yaml
   sed -i -e '$a azure_test: true' vars/main.yaml
+fi
+
+if [ "${PULP_API_ROOT:-}" ]; then
+  sed -i -e '$a api_root: "'"$PULP_API_ROOT"'"' vars/main.yaml
 fi
 
 ansible-playbook build_container.yaml
