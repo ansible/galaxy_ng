@@ -49,5 +49,6 @@ declare -xr ENABLE_SIGNING="${ENABLE_SIGNING:-1}"
 declare -xr DEV_IMAGE_SUFFIX="${DEV_IMAGE_SUFFIX:-}"
 declare -xr DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX}}"
 declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng${DEV_IMAGE_SUFFIX:-}}"
+declare -xr WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-1}"
 
 exec docker-compose "${compose_args[@]}" "$@"
