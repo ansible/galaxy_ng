@@ -73,7 +73,7 @@ def delete_container_distribution(instance_ids):
     orphan_cleanup(content_pks=None, orphan_protection_time=10)
 
 
-def delete_container_image_manifest(repository_pk, content_unit_pks):
+def delete_container_image_manifest(repository_pk, content_unit_pks, repo_latest_version_pk):
     """Deletes a container image manifest."""
 
     log.info(f"Running delete manifest for {repository_pk}")
@@ -83,4 +83,4 @@ def delete_container_image_manifest(repository_pk, content_unit_pks):
     )
 
     log.info(f"Reclaiming disk space for {repository_pk}")
-    reclaim_space(repo_pks=[repository_pk], force=True)
+    reclaim_space(repo_pks=[repository_pk], keeplist_rv_pks=[repo_latest_version_pk], force=True)
