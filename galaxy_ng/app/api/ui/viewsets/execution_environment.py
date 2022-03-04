@@ -294,7 +294,7 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
         async_result = dispatch(
             delete_container_image_manifest,
             [repository],
-            args=(str(repository.pk), content_unit_pks),
+            args=(str(repository.pk), content_unit_pks, str(latest_version.pk))
         )
 
         return OperationPostponedResponse(async_result, request)
