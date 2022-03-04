@@ -14,7 +14,7 @@ services:
         DEV_VOLUME_SUFFIX: "${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX:-}}"
     image: "localhost/galaxy_ng/galaxy_ng:base${DEV_IMAGE_SUFFIX:-}"
     environment:
-      - "WITH_DEV_INSTALL=1"
+      - "WITH_DEV_INSTALL=${WITH_DEV_INSTALL}"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
       - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
@@ -38,7 +38,7 @@ services:
     ports:
       - "5001:8000"
     environment:
-      - "WITH_DEV_INSTALL=1"
+      - "WITH_DEV_INSTALL=${WITH_DEV_INSTALL}"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
       - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
@@ -61,7 +61,7 @@ services:
     image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
     command: ['run', 'worker']
     environment:
-      - "WITH_DEV_INSTALL=1"
+      - "WITH_DEV_INSTALL=${WITH_DEV_INSTALL}"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
       - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"
@@ -86,7 +86,7 @@ services:
     ports:
       - "24816:24816"
     environment:
-      - "WITH_DEV_INSTALL=1"
+      - "WITH_DEV_INSTALL=${WITH_DEV_INSTALL}"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
       - "DEV_SOURCE_PATH=${DEV_SOURCE_PATH}"
       - "COMPOSE_PROFILE=${COMPOSE_PROFILE}"

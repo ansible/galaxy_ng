@@ -89,7 +89,11 @@ docker/loaddata:  ## Load initial data from fixtures
 
 .PHONY: docker/loadtoken
 docker/loadtoken: 
-	./compose run api manage shell < dev/standalone/create_admin_token.py
+	./compose run --rm api manage shell < dev/standalone/create_admin_token.py
+
+.PHONY: docker/load_test_data
+docker/load_test_data: 
+	./compose run --rm api manage shell < dev/ephemeral/create_objects.py
 
 .PHONY: docker/makemigrations
 docker/makemigrations:   ## Run django migrations

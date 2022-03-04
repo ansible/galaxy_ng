@@ -1,0 +1,55 @@
+---
+name: Galaxy CI
+on: {pull_request: {branches: ['*']}, push: {branches: ['*']}}
+jobs:
+
+  standalone_integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+      - name: Install docker-compose
+        run: pip3 install --upgrade docker-compose
+
+      - name: collect system info
+        run: whoami; id; pwd; ls -al; uname -a ; df -h .; mount ; cat /etc/issue; docker --version ; ps aux | fgrep -i docker; ls -al /var/run/containerd/containerd.sock
+
+      - name: clone the hub ui repo
+        run: git clone https://github.com/ansible/ansible-hub-ui /tmp/ansible-hub-ui 
+
+      - name: create the .compose.env file
+        run: rm -f .compose.env; cp .compose.env.example .compose.env
+
+      - name: workaround github worker permissions issues
+        run: sed -i.bak 's/PIP_EDITABLE_INSTALL=1/PIP_EDITABLE_INSTALL=0/' .compose.env
+
+      - name: workaround github worker permissions issues
+        run: sed -i.bak 's/WITH_DEV_INSTALL=1/WITH_DEV_INSTALL=0/' .compose.env
+
+      - name: set the hub ui path in .compose.env
+        run: echo "ANSIBLE_HUB_UI_PATH='/tmp/ansible-hub-ui'" >> .compose.env
+
+      - name: disable approval setting override
+        run: sed -i.bak 's/PULP_GALAXY_REQUIRE_CONTENT_APPROVAL/#PULP_GALAXY_REQUIRE_CONTENT_APPROVAL/' dev/standalone/galaxy_ng.env
+
+      - name: build stack and populate data
+        run: make docker/all
+
+      - name: add an api token
+        run: make docker/loadtoken
+
+      - name: add test data
+        run: make docker/load_test_data
+
+      - name: start the compose stack
+        run: ./compose up -d
+
+      - name: give stack some time to spin up
+        run: sleep 120
+
+      - name: run the integration tests
+        run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh
