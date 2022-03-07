@@ -93,6 +93,7 @@ def check_commit(commit_sha):
     signed = rr.json().get('commit', {}).get('verification', {}).get('verified')
     if not signed:
         LOG.error(f"Commit {commit_sha[:8]} is not signed")
+        return False
 
     ok = True
     for label, issue in issue_labels:
