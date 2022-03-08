@@ -88,7 +88,8 @@ def check_commit(commit_sha):
             LOG.error(f"Commit {commit_sha[:8]} has no issue attached")
             return False
 
-    commit_url = f'https://api.github.com/repos/ansible/galaxy_ng/commits/{commit_sha}'
+    repo = os.environ.get('GITHUB_REPOSITORY')
+    commit_url = f'https://api.github.com/repos/{repo}/commits/{commit_sha}'
     rr = requests.get(commit_url)
     signed = rr.json().get('commit', {}).get('verification', {}).get('verified')
     if not signed:
