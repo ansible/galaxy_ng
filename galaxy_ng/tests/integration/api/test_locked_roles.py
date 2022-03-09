@@ -7,6 +7,7 @@ from ..utils import get_client
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
+@pytest.mark.standalone_only
 @pytest.mark.role
 def test_locked_roles_exist(ansible_config):
     galaxy_locked_roles = [
@@ -20,8 +21,8 @@ def test_locked_roles_exist(ansible_config):
     config = ansible_config("ansible_partner")
     api_client = get_client(
         config=config,
-        request_token=True,
-        require_auth=True
+        require_auth=True,
+        request_token=False
     )
     resp = api_client('/pulp/api/v3/roles/', method='GET')
     locked_roles = resp['results']
