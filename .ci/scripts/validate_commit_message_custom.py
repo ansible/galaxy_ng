@@ -88,6 +88,14 @@ def check_commit(commit_sha):
             LOG.error(f"Commit {commit_sha[:8]} has no issue attached")
             return False
 
+    repo = os.environ.get('GITHUB_REPOSITORY')
+    commit_url = f'https://api.github.com/repos/{repo}/commits/{commit_sha}'
+    rr = requests.get(commit_url)
+    signed = rr.json().get('commit', {}).get('verification', {}).get('verified')
+    if not signed:
+        LOG.error(f"Commit {commit_sha[:8]} is not signed")
+        return False
+
     ok = True
     for label, issue in issue_labels:
         if not check_issue_exists(issue):
