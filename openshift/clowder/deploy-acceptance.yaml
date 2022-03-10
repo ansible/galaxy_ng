@@ -17,6 +17,14 @@ objects:
       curl -X POST -H "Authorization: Bearer ${JENKINS_TOKEN}" ${JENKINS_JOB_URL}/buildWithParameters
 
       # verify build started
+      while true; do
+        QUEUE_ITEM=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.queueItem')
+        if [ "${QUEUE_ITEM}" = "null" ]; then
+          break
+        else
+          sleep 10
+        fi
+      done
       BUILD_STATUS=$(curl --silent ${JENKINS_JOB_URL}/${BUILD_NUM}/api/json | jq '.building')
       if [ -n "${BUILD_STATUS}" ]; then
         echo "Jenkins job triggered: ${JENKINS_JOB_URL}/${BUILD_NUM}/"
@@ -47,7 +55,7 @@ objects:
   metadata:
     name: automation-hub-iqe-${IMAGE_TAG}-${JOBID}
   spec:
-    backoffLimit: 5
+    backoffLimit: 0
     template:
       spec:
         restartPolicy: Never
@@ -99,7 +107,7 @@ parameters:
     generate: expression
     from: "[0-9a-z]{5}"
   - name: IQE_MEMORY_REQUEST
-    value: 64Mi
+    value: 100Mi
   - name: IQE_MEMORY_LIMIT
     value: 128Mi
   - name: IQE_CPU_REQUEST
