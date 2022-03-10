@@ -9,6 +9,7 @@ PASSWORD="Galaxy2022"
 # Create a detached signature
 gpg --quiet --batch --pinentry-mode loopback --yes --passphrase \
    $PASSWORD --homedir ~/.gnupg/ --detach-sign --default-key $ADMIN_ID \
+   --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx \
    --armor --output $SIGNATURE_PATH $FILE_PATH
 
 # Check the exit status
