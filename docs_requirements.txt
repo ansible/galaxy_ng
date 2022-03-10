@@ -1,0 +1,4 @@
+mkdocs
+mkdocs-material
+mike
+mkdocs-git-revision-date-plugin

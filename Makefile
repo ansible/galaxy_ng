@@ -88,11 +88,11 @@ docker/loaddata:  ## Load initial data from fixtures
  api manage loaddata initial_data.json
 
 .PHONY: docker/loadtoken
-docker/loadtoken: 
+docker/loadtoken:
 	./compose run --rm api manage shell < dev/standalone/create_admin_token.py
 
 .PHONY: docker/load_test_data
-docker/load_test_data: 
+docker/load_test_data:
 	./compose run --rm api manage shell < dev/ephemeral/create_objects.py
 
 .PHONY: docker/makemigrations
@@ -199,3 +199,12 @@ dev/bumpversion-build:
 # another 'bumpversion release' to from from 5.3.7.b1 -> 5.3.7
 dev/bumpversion-release:
 	bump2version --verbose release
+
+docs/install:
+	@pip install -r docs_requirements.txt
+
+docs/build:
+	@mike deploy --push --update-aliases 4.5.0 latest
+
+docs/serve:
+	@mike serve
