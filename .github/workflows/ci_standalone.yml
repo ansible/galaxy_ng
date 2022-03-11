@@ -52,4 +52,18 @@ jobs:
         run: sleep 120
 
       - name: run the integration tests
-        run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh
+        run: HUB_LOCAL=1 GALAXY_JUNIT_FILE=integration-results.xml ./dev/common/RUN_INTEGRATION.sh
+
+      - name: Publish Junit Comments
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: integration-results.xml
+          check_name: Integration Tests Summary
+
+      - name: Publish Junit Test Annotations
+        uses: mikepenz/action-junit-report@v2
+        if: always() 
+        with:
+          report_paths: 'integration-results.xml'
+          check_name: Integration Tests Details

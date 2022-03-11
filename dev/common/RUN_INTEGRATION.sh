@@ -34,8 +34,8 @@ pip show epdb || pip install epdb
 
 
 if [[ -z $HUB_LOCAL ]]; then
-    pytest --capture=no --pdb -m "not standalone_only" $@ -v galaxy_ng/tests/integration
+    pytest --capture=no --pdb -m "not standalone_only" $@ -v galaxy_ng/tests/integration ${GALAXY_JUNIT_FILE:+"--junitxml=$GALAXY_JUNIT_FILE"}
     #pytest --capture=no --pdb -v $@ galaxy_ng/tests/integration
 else
-    pytest --capture=no --pdb -m "not cloud_only" -v $@ galaxy_ng/tests/integration
+    pytest --capture=no --pdb -m "not cloud_only" -v $@ galaxy_ng/tests/integration ${GALAXY_JUNIT_FILE:+"--junitxml=$GALAXY_JUNIT_FILE"}
 fi
