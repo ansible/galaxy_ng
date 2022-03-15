@@ -286,7 +286,7 @@ msgstr "Gegevens conflicteren met bestaande entiteit."
 #: app/tasks/index_registry.py:26
 #, python-brace-format
 msgid "Failed to create container {remote_name}. {error}"
-msgstr "Kan container {remote_name}. {error} niet aanmaken"
+msgstr "Kan container {remote_name} niet aanmaken. {error}"
 
 #: app/tasks/index_registry.py:90
 msgid ""
