@@ -36,6 +36,7 @@ RUN set -ex; \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
     install -dm 0775 -o galaxy /var/lib/pulp/artifact \
                                /var/lib/pulp/tmp \
+                               /etc/pulp/certs \
                                /tmp/ansible && \
     install -Dm 0644 /app/ansible.cfg /etc/ansible/ansible.cfg && \
     install -Dm 0644 /app/docker/etc/settings.py /etc/pulp/settings.py && \

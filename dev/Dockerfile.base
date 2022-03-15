@@ -86,10 +86,12 @@ RUN set -ex; \
              /var/lib/pulp/artifact \
              /var/lib/pulp/tmp \
              /var/lib/pulp/scripts \
+             /etc/pulp/certs/ \
              /tmp/ansible \
     && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/artifact \
     && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/tmp \
     && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/scripts \
+    && chown ${USER_NAME}:${USER_GROUP} /etc/pulp/certs \
     && chown ${USER_NAME}:${USER_GROUP} \
         /tmp/ansible \
         /etc/ansible \
