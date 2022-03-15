@@ -150,7 +150,9 @@ class CurrentUserSerializer(UserSerializer):
 
         permissions = {
             # Signing
-            "sign_collections_on_namespace": obj.has_perm('galaxy.upload_to_namespace'),
+            "sign_collections_on_namespace": obj.has_perm(
+                'galaxy.upload_to_namespace'
+            ) and obj.has_perm('ansible.modify_ansible_repo_content'),
             "sign_collections_on_repository": obj.has_perm('ansible.modify_ansible_repo_content'),
 
             # Collection Namespace

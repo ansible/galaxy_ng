@@ -14,7 +14,7 @@ from ..utils import (
     get_all_collections_by_repo,
     get_all_namespaces,
     get_client,
-    set_certification
+    set_certification,
 )
 
 log = logging.getLogger(__name__)
@@ -65,7 +65,9 @@ def import_and_wait(api_client, artifact, upload_artifact, config):
 def sign_on_demand(api_client, signing_service, **payload):
     """Sign a collection on demand calling /sign/collections/"""
     sign_payload = {"signing_service": signing_service, **payload}
-    resp = api_client("/api/automation-hub/v3/sign/collections/", method="POST", args=sign_payload)
+    resp = api_client(
+        "/api/automation-hub/_ui/v1/collection_signing/", method="POST", args=sign_payload
+    )
     log.info("Sign Task: %s", resp)
     # FIXME - pulp tasks do not seem to accept token auth, so no way to check task progress
     time.sleep(3)
@@ -148,7 +150,7 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, upload_a
 @pytest.mark.collection_signing
 @pytest.mark.standalone_only
 def test_collection_sign_on_demand(api_client, config, settings, upload_artifact):
-    """Test whether a collection can be signed on-demand by calling /sign/collections/"""
+    """Test whether a collection can be signed on-demand by calling _ui/v1/collection_signing/"""
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip(
             "GALAXY_REQUIRE_CONTENT_APPROVAL is False, "

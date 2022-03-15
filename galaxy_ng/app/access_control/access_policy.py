@@ -108,7 +108,9 @@ class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyB
                 namespace = models.Namespace.objects.get(name=namespace)
             except models.Namespace.DoesNotExist:
                 raise NotFound(_('Namespace not found.'))
-            return request.user.has_perm('galaxy.upload_to_namespace', namespace)
+            return can_modify_repo and request.user.has_perm(
+                'galaxy.upload_to_namespace', namespace
+            )
 
         # the other filtering options are content_units and name/version
         # and falls on the same permissions as modifying the main repo

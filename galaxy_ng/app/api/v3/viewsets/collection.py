@@ -41,7 +41,6 @@ from galaxy_ng.app.tasks import (
     call_move_content_task,
     curate_all_synclist_repository,
     call_sign_and_move_task,
-    call_sign_task,
     delete_collection,
     delete_collection_version,
     import_and_auto_approve,
@@ -413,100 +412,6 @@ class CollectionArtifactDownloadView(api_base.APIView):
                 filename=filename,
             )
             return redirect(distribution.content_guard.cast().preauthenticate_url(url))
-
-
-class CollectionSignViewSet(api_base.ViewSet):
-    permission_classes = [access_policy.CollectionAccessPolicy]
-
-    def sign(self, request, *args, **kwargs):
-        """Creates a signature for the content units specified in the request.
-
-        The request body should contain a JSON object with the following keys:
-
-        Required
-            - signing_service: The name of the signing service to use
-            - repository: The name of the repository to add the signatures
-
-        Optional
-            - content_units: A list of content units UUIDS to be signed.
-            (if content_units is ["*"], all units under the repo will be signed)
-            OR
-            - namespace: Namespace name
-            (if only namespace is specified, all collections under that namespace will be signed)
-
-        Optional (one or more)
-            - collection: Collection name
-            (if collection name is added, all versions under that collection will be signed)
-            - version: The version of the collection to sign
-            (if version is specified, only that version will be signed)
-        """
-
-        signing_service = self._get_signing_service(request)
-        repository = self.get_repository(request)
-        content_units = self._get_content_units_to_sign(request, repository)
-
-        sign_task = call_sign_task(signing_service, repository, content_units)
-        return Response(data={"task_id": sign_task.pk}, status=status.HTTP_202_ACCEPTED)
-
-    def _get_content_units_to_sign(self, request, repository):
-        """Returns a list of pks for content units to sign.
-
-        If `content_units` is specified in the request, it will be used.
-        Otherwise, will use the filtering options specified in the request.
-        namespace, collection, version can be used to filter the content units.
-        """
-        if request.data.get('content_units'):
-            return request.data['content_units']
-        else:
-            try:
-                namespace = request.data['namespace']
-            except KeyError:
-                raise ValidationError(
-                    _('Missing required field: namespace')
-                )
-
-            query_params = {
-                "pulp_type": "ansible.collection_version",
-                "ansible_collectionversion__namespace": namespace,
-            }
-
-            if request.data.get('collection'):
-                query_params['ansible_collectionversion__name'] = request.data['collection']
-            if request.data.get('version'):
-                query_params['ansible_collectionversion__version'] = request.data['version']
-
-            content_units = repository.content.filter(**query_params).values_list('pk', flat=True)
-            if not content_units:
-                raise ValidationError(
-                    _('No content units found for: %s') % query_params
-                )
-
-            return [str(item) for item in content_units]
-
-    def get_repository(self, request):
-        """Retrieves the repository object from the request.
-
-        :param request: the request object
-        :return: the repository object
-
-        NOTE: This method is used by the access policies.
-        """
-        try:
-            return AnsibleDistribution.objects.get(base_path=request.data["repository"]).repository
-        except KeyError:
-            raise ValidationError(_("repository field is required."))
-        except ObjectDoesNotExist:
-            raise ValidationError(_("Repository %s does not exist.") % request.data["repository"])
-
-    def _get_signing_service(self, request):
-        try:
-            return SigningService.objects.get(name=request.data['signing_service'])
-        except KeyError:
-            raise ValidationError(_('signing_service field is required.'))
-        except ObjectDoesNotExist:
-            raise ValidationError(
-                _('Signing service "%s" does not exist.') % request.data['signing_service']
-            )
 
 
 class CollectionVersionMoveViewSet(api_base.ViewSet):
