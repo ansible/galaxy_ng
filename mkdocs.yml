@@ -1,0 +1,43 @@
+site_name: Galaxy NG - Upstream for Ansible Automation Hub
+site_url: "https://ansible.github.io/galaxy_ng"
+repo_name: ansible/galaxy_ng
+repo_url: "https://github.com/ansible/galaxy_ng"
+edit_uri: edit/master/docs/
+nav:
+    - Home: index.md
+    - Install: installation.md
+    - Configuration: configuration.md
+    - Content Signing: content_signing.md
+    - Development: development.md
+    - Tags: tags.md
+theme:
+  features:
+      - search.suggest
+      - search.highlight
+      - search.share
+  name: material
+  palette:
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: teal
+      toggle:
+        icon: material/toggle-switch-off-outline 
+        name: Switch to dark mode
+    - scheme: slate 
+      media: "(prefers-color-scheme: dark)"
+      primary: teal
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+extra:
+  version:
+    provider: mike
+    default: latest
+
+plugins:
+  - git-revision-date
+  - tags:
+        tags_file: tags.md
+  - search:
+      lang: en
+      prebuild_index: true
