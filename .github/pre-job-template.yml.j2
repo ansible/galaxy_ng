@@ -16,3 +16,14 @@ check_commit:
           END_COMMIT: {{ "${{ github.event.after }}" }}
         run: |
           python .ci/scripts/validate_commit_message_custom.py
+
+  lint_po:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - run: |
+          pip install lint-po
+          lint-po ./galaxy_ng/locale/*/LC_MESSAGES/*.po
