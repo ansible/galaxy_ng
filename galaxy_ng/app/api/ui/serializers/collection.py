@@ -99,7 +99,8 @@ class CollectionVersionSerializer(CollectionVersionBaseSerializer):
 
 class CollectionVersionDetailSerializer(CollectionVersionBaseSerializer):
     docs_blob = serializers.JSONField()
-
+    deprecated = serializers.BooleanField()
+    
 
 class CollectionVersionSummarySerializer(Serializer):
     version = serializers.CharField()
