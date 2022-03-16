@@ -68,8 +68,8 @@ class AccessPolicyBase(AccessPolicy):
         return entitlement.get("is_entitled", False)
 
     # if not defined, defaults to parent qs of None breaking Group Detail
-    def scope_queryset(self, request, view):
-        return view
+    def scope_queryset(self, view, qs):
+        return qs
 
 
 class NamespaceAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
