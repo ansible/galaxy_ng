@@ -10,6 +10,7 @@ readonly DEV_SOURCE_PATH="${DEV_SOURCE_PATH:-}"
 readonly LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}"
 readonly WAIT_FOR_MIGRATIONS="${WAIT_FOR_MIGRATIONS:-0}"
 readonly ENABLE_SIGNING="${ENABLE_SIGNING:-0}"
+readonly PULP_GALAXY_DEPLOYMENT_MODE="${PULP_GALAXY_DEPLOYMENT_MODE:-}"
 
 
 log_message() {
@@ -89,6 +90,10 @@ run_service() {
 
     process_init_files /entrypoints.d/*
 
+    if [[ "$PULP_GALAXY_DEPLOYMENT_MODE" = "insights" ]]; then
+        django-admin maintain-pe-group
+    fi
+
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
         setup_signing_service
     fi
@@ -105,7 +110,7 @@ run_manage() {
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
         setup_signing_service
     fi
-    
+
     exec django-admin "$@"
 }
 
