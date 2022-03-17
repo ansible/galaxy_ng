@@ -1,43 +1,39 @@
-from pulpcore.plugin.tasking import dispatch
-from pulp_ansible.app.models import AnsibleRepository, CollectionVersion
-from pulp_ansible.app.tasks.copy import copy_content
+from pulpcore.plugin.tasking import add_and_remove, dispatch
 
 
-def call_copy_task(collection_version, source_repo, dest_repo):
-    """Calls pulp_ansible task to copy content from source to destination repo."""
-    locks = [source_repo, dest_repo]
-    config = [{
-        'source_repo_version': source_repo.latest_version().pk,
-        'dest_repo': dest_repo.pk,
-        'content': [collection_version.pk],
-    }]
+def call_move_content_task(collection_version, source_repo, dest_repo):
+    """Dispatches the move content task
+
+    This is a wrapper to group copy_content and remove_content tasks
+    because those 2 must run in sequence ensuring the same locks.
+
+    """
     return dispatch(
-        copy_content,
-        locks,
-        args=[config],
-        kwargs={},
+        move_content,
+        exclusive_resources=[source_repo, dest_repo],
+        kwargs=dict(
+            collection_version_pk=collection_version.pk,
+            source_repo_pk=source_repo.pk,
+            dest_repo_pk=dest_repo.pk,
+        ),
     )
 
 
-def call_remove_task(collection_version, repository):
-    """Calls task to remove content from repo."""
-    remove_task_args = (collection_version.pk, repository.pk)
-    return dispatch(
-        _remove_content_from_repository,
-        [repository],
-        args=remove_task_args,
-        kwargs={},
+def move_content(collection_version_pk, source_repo_pk, dest_repo_pk):
+    """Move collection version from one repository to another"""
+
+    content = [collection_version_pk]
+
+    # add content to the destination repo
+    add_and_remove(
+        dest_repo_pk,
+        add_content_units=content,
+        remove_content_units=[],
     )
 
-
-def _remove_content_from_repository(collection_version_pk, repository_pk):
-    """
-    Remove a CollectionVersion from a repository.
-    Args:
-        collection_version_pk: The pk of the CollectionVersion to remove from repository.
-        repository_pk: The pk of the AnsibleRepository to remove the CollectionVersion from.
-    """
-    repository = AnsibleRepository.objects.get(pk=repository_pk)
-    qs = CollectionVersion.objects.filter(pk=collection_version_pk)
-    with repository.new_version() as new_version:
-        new_version.remove_content(qs)
+    # remove content from source repo
+    add_and_remove(
+        source_repo_pk,
+        add_content_units=[],
+        remove_content_units=content,
+    )
