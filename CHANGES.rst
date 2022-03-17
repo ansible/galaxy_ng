@@ -13,6 +13,26 @@ Changelog
 
 .. towncrier release notes start
 
+
+4.4.3 (2022-03-16)
+Bugfixes
+--------
+
+- Update to the latest pulp_container release
+  `AAH-1373 <https://issues.redhat.com/browse/AAH-1373>`_
+- Make sure orphan_protection_time is not set to zero
+  `AAH-1384 <https://issues.redhat.com/browse/AAH-1384>`_
+- Prevent artifact removal from latest version when deleting images
+  `AAH-1389 <https://issues.redhat.com/browse/AAH-1389>`_
+- Fix intermittent 500 when pulling execution environments.
+  `AAH-1400 <https://issues.redhat.com/browse/AAH-1400>`_
+- Fix intermittent 500 when pushing execution environments.
+  `AAH-1411 <https://issues.redhat.com/browse/AAH-1411>`_
+
+
+----
+
+
 4.4.2 (2022-03-01)
 Bugfixes
 --------
