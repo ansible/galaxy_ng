@@ -1,5 +1,6 @@
-site_name: Galaxy NG - Upstream for Ansible Automation Hub
+site_name: Galaxy NG
 site_url: "https://ansible.github.io/galaxy_ng"
+site_description: Galaxy NG
 repo_name: ansible/galaxy_ng
 repo_url: "https://github.com/ansible/galaxy_ng"
 edit_uri: edit/master/docs/
@@ -15,6 +16,7 @@ theme:
       - search.suggest
       - search.highlight
       - search.share
+      - content.code.annotate
   name: material
   palette:
     - scheme: default
@@ -41,3 +43,31 @@ plugins:
   - search:
       lang: en
       prebuild_index: true
+markdown_extensions:
+  - tables
+  - attr_list
+  - md_in_html
+  - def_list
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - abbr
+  - pymdownx.snippets
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed
+  - pymdownx.tilde
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
