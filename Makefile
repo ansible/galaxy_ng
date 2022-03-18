@@ -207,4 +207,4 @@ docs/build:
 	@mike deploy --push --update-aliases 4.5.0 latest
 
 docs/serve:
-	@mike serve
+	@mkdocs serve
