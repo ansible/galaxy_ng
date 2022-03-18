@@ -62,12 +62,11 @@ def import_and_wait(api_client, artifact, upload_artifact, config):
     return resp
 
 
-def sign_on_demand(api_client, signing_service, **payload):
+def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
     """Sign a collection on demand calling /sign/collections/"""
+    sign_url = sign_url or "/api/automation-hub/_ui/v1/collection_signing/"
     sign_payload = {"signing_service": signing_service, **payload}
-    resp = api_client(
-        "/api/automation-hub/_ui/v1/collection_signing/", method="POST", args=sign_payload
-    )
+    resp = api_client(sign_url, method="POST", args=sign_payload)
     log.info("Sign Task: %s", resp)
     # FIXME - pulp tasks do not seem to accept token auth, so no way to check task progress
     time.sleep(3)
@@ -149,7 +148,23 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, upload_a
 
 @pytest.mark.collection_signing
 @pytest.mark.standalone_only
-def test_collection_sign_on_demand(api_client, config, settings, upload_artifact):
+@pytest.mark.parametrize(
+    "sign_url",
+    [
+        "/api/automation-hub/_ui/v1/collection_signing/",
+        "/api/automation-hub/_ui/v1/collection_signing/{distro_base_path}/",
+        "/api/automation-hub/_ui/v1/collection_signing/{distro_base_path}/{namespace}/",
+        (
+            "/api/automation-hub/_ui/v1/collection_signing/"
+            "{distro_base_path}/{namespace}/{collection}/"
+        ),
+        (
+            "/api/automation-hub/_ui/v1/collection_signing/"
+            "{distro_base_path}/{namespace}/{collection}/{version}/"
+        ),
+    ],
+)
+def test_collection_sign_on_demand(api_client, config, settings, upload_artifact, sign_url):
     """Test whether a collection can be signed on-demand by calling _ui/v1/collection_signing/"""
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip(
@@ -180,12 +195,12 @@ def test_collection_sign_on_demand(api_client, config, settings, upload_artifact
 
     # Sign the collection
     sign_payload = {
-        "repository": "staging",
+        "distro_base_path": "staging",
         "namespace": NAMESPACE,
         "collection": artifact.name,
         "version": artifact.version,
     }
-    sign_on_demand(api_client, signing_service, **sign_payload)
+    sign_on_demand(api_client, signing_service, sign_url.format(**sign_payload), **sign_payload)
 
     # Assert that the collection is signed on v3 api
     collection = api_client(
@@ -249,7 +264,7 @@ def test_collection_move_with_signatures(api_client, config, settings, upload_ar
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         # Sign the collection while still on staging
         sign_payload = {
-            "repository": "staging",
+            "distro_base_path": "staging",
             "namespace": NAMESPACE,
             "collection": artifact.name,
             "version": artifact.version,

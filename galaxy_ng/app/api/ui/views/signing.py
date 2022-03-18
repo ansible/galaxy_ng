@@ -27,16 +27,17 @@ class CollectionSignView(api_base.APIView):
         Base URL: _ui/v1/collection_signing/
 
         Optional URLS:
-        - _ui/v1/collection_signing/<repository>/
-        - _ui/v1/collection_signing/<repository>/<namespace>/
-        - _ui/v1/collection_signing/<repository>/<namespace>/<collection>/
-        - _ui/v1/collection_signing/<repository>/<namespace>/<collection>/<version>/
+        - _ui/v1/collection_signing/<distro_base_path>/
+        - _ui/v1/collection_signing/<distro_base_path>/<namespace>/
+        - _ui/v1/collection_signing/<distro_base_path>/<namespace>/<collection>/
+        - _ui/v1/collection_signing/<distro_base_path>/<namespace>/<collection>/<version>/
 
         The request body should contain a JSON object with the following keys:
 
         Required
             - signing_service: The name of the signing service to use
-            - repository: The name of the repository to add the signatures (if not provided via URL)
+            - distro_base_path: The name of the distro_base_path to add the signatures
+              (if not provided via URL)
 
         Optional
             - content_units: A list of content units UUIDS to be signed.
@@ -95,7 +96,7 @@ class CollectionSignView(api_base.APIView):
             return [str(item) for item in content_units]
 
     def get_repository(self, request):
-        """Retrieves the repository object from the request.
+        """Retrieves the repository object from the request distro_base_path.
 
         :param request: the request object
         :return: the repository object
@@ -103,14 +104,14 @@ class CollectionSignView(api_base.APIView):
         NOTE: This method is used by the access policies.
         """
         try:
-            distro_name = self.kwargs.get("path") or request.data["repository"]
+            distro_name = self.kwargs.get("path") or request.data["distro_base_path"]
         except KeyError:
-            raise ValidationError(_("repository field is required."))
+            raise ValidationError(_("distro_base_path field is required."))
 
         try:
             return AnsibleDistribution.objects.get(base_path=distro_name).repository
         except ObjectDoesNotExist:
-            raise ValidationError(_("Repository %s does not exist.") % request.data["repository"])
+            raise ValidationError(_("Distribution %s does not exist.") % distro_name)
 
     def _get_signing_service(self, request):
         try:
