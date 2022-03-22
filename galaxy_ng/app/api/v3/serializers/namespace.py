@@ -11,7 +11,6 @@ from rest_framework import serializers
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
 from galaxy_ng.app.api.base import RelatedFieldsBaseSerializer
-from pulp_ansible.app.models import Collection
 
 log = logging.getLogger(__name__)
 
