@@ -9,9 +9,15 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
 from galaxy_ng.app import models
-from galaxy_ng.app.access_control.fields import GroupPermissionField
+from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
+from galaxy_ng.app.api.base import RelatedFieldsBaseSerializer
+from pulp_ansible.app.models import Collection
 
 log = logging.getLogger(__name__)
+
+
+class NamespaceRelatedFieldSerializer(RelatedFieldsBaseSerializer):
+    my_permissions = MyPermissionsField(source="*", read_only=True)
 
 
 class ScopedErrorListSerializer(serializers.ListSerializer):
@@ -64,8 +70,8 @@ class NamespaceLinkSerializer(serializers.ModelSerializer):
 
 class NamespaceSerializer(serializers.ModelSerializer):
     links = NamespaceLinkSerializer(many=True, required=False)
-
     groups = GroupPermissionField()
+    related_fields = NamespaceRelatedFieldSerializer(source="*")
 
     class Meta:
         model = models.Namespace
@@ -78,7 +84,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
             'description',
             'links',
             'groups',
-            'resources'
+            'resources',
+            'related_fields',
         )
 
     # replace with a NamespaceNameSerializer and validate_name() ?
@@ -140,6 +147,7 @@ class NamespaceSummarySerializer(NamespaceSerializer):
             'avatar_url',
             'description',
             'groups',
+            'related_fields',
         )
 
         read_only_fields = ('name', )

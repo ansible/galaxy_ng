@@ -1,10 +1,17 @@
+from collections import OrderedDict
+
 from django.conf import settings
 
-from rest_framework import generics
-from rest_framework import permissions
-from rest_framework import views
-from rest_framework import viewsets
+from rest_framework import (
+    serializers,
+    viewsets,
+    views,
+    permissions,
+    generics
+)
+
 from rest_framework.settings import perform_import
+
 
 GALAXY_EXCEPTION_HANDLER = perform_import(
     settings.GALAXY_EXCEPTION_HANDLER,
@@ -52,3 +59,42 @@ class GenericViewSet(LocalSettingsMixin, viewsets.GenericViewSet):
 
 class ModelViewSet(LocalSettingsMixin, viewsets.ModelViewSet):
     pass
+
+
+class RelatedFieldsBaseSerializer(serializers.Serializer):
+    """
+    Serializer only returns fields specified in 'include_related' query param.
+
+    This allows for fields that require more database queries to be optionally
+    included in API responses, which lowers the load on the backend. This is
+    intended as a way to include extra data in list views.
+
+    Usage:
+
+    This functions the same as DRF's base `serializers.Serializer` class with the
+    exception that it will only return fields specified in the `?include_related=`
+    query parameter.
+    
+    Example:
+
+    MySerializer(RelatedFieldsBaseSerializer):
+        foo = CharField()
+        bar = CharField()
+
+    MySerializer will return:
+
+    {"foo": None} when called with `?include_related=foo` and {"foo": None, "bar" None}
+    when called with `?include_related=foo&include_related=bar`.
+    """
+
+    def to_representation(self, instance):
+        result = OrderedDict()
+        fields = self._readable_fields
+        include_fields = self.context.get('request', None).GET.getlist('include_related')
+
+        if len(include_fields) > 0:
+            for field in fields:
+                if field.field_name in include_fields:
+                    result[field.field_name] = field.to_representation(instance)
+
+        return result
