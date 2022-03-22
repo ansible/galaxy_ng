@@ -1,11 +1,9 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.translation import gettext_lazy as _
-from drf_spectacular.utils import extend_schema
 from pulp_ansible.app.models import AnsibleDistribution
 from pulpcore.plugin.models import SigningService
-from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
-from pulpcore.plugin.viewsets import OperationPostponedResponse
 from rest_framework import status
+from rest_framework.response import Response
 
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
@@ -16,10 +14,6 @@ class CollectionSignView(api_base.APIView):
     action = "sign"
     permission_classes = [access_policy.CollectionAccessPolicy]
 
-    @extend_schema(
-        description="Trigger an asynchronous signing task",
-        responses={status.HTTP_202_ACCEPTED: AsyncOperationResponseSerializer},
-    )
     def post(self, request, *args, **kwargs):
         """Creates a signature for the content units specified in the request.
 
@@ -59,7 +53,7 @@ class CollectionSignView(api_base.APIView):
         content_units = self._get_content_units_to_sign(request, repository)
 
         sign_task = call_sign_task(signing_service, repository, content_units)
-        return OperationPostponedResponse(sign_task, self.request)
+        return Response(data={"task_id": sign_task.pk}, status=status.HTTP_202_ACCEPTED)
 
     def _get_content_units_to_sign(self, request, repository):
         """Returns a list of pks for content units to sign.
