@@ -61,7 +61,7 @@ urlpatterns = [
     # health of the service. Until https://issues.redhat.com/browse/AAH-1385 can be resolved
     # we need to continue providing this endpoint from galaxy_ng.
     path(
-        "plugin/ansible/content/<path:distro_base_path>/artifacts/<str:filename>",
+        "plugin/ansible/content/<path:distro_base_path>/collections/artifacts/<str:filename>",
         viewsets.CollectionArtifactDownloadView.as_view(),
         name="collection-artifact-download",
     ),

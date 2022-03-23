@@ -374,10 +374,10 @@ class CollectionArtifactDownloadView(api_base.APIView):
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
-        distro_base_path = self.kwargs['path']
+        distro_base_path = self.kwargs['distro_base_path']
         filename = self.kwargs['filename']
         prefix = settings.CONTENT_PATH_PREFIX.strip('/')
-        distribution = self._get_ansible_distribution(self.kwargs['path'])
+        distribution = self._get_ansible_distribution(distro_base_path)
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
