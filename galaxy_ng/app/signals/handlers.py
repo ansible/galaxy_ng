@@ -10,7 +10,8 @@ from pulpcore.plugin.apps import adjust_roles
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection
 from galaxy_ng.app.access_control.statements.roles import VIEWSETS as GALAXY_VIEWSETS
 from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
-from galaxy_ng.app.models import ContentRedirectContentGuard, Namespace
+from galaxy_ng.app.models import Namespace
+from pulpcore.plugin.models import ContentRedirectContentGuard
 
 
 @receiver(post_save, sender=AnsibleRepository)

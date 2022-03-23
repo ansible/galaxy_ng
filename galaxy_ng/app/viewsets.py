@@ -38,16 +38,6 @@ class ContainerDistributionViewSet(
     endpoint_name = "container"
 
 
-# shim view to satisfy upstream pulpcore requirements
-class ContentRedirectContentGuardViewSet(
-    pulp_viewsets.NamedModelViewSet,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-):
-    queryset = models.ContentRedirectContentGuard.objects.all()
-    endpoint_name = "contentgaurd"
-
-
 class AuthViewSet(
     pulp_viewsets.NamedModelViewSet,
     mixins.RetrieveModelMixin,
