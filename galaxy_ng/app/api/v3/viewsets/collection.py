@@ -12,7 +12,7 @@ from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import CollectionVersion
-from pulpcore.plugin.models import Task
+from pulpcore.plugin.models import Content, Task
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
 from pulpcore.plugin.viewsets import OperationPostponedResponse
@@ -438,12 +438,12 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         except ObjectDoesNotExist:
             raise NotFound(_('Repo(s) for moving collection %s not found') % version_str)
 
-        src_versions = CollectionVersion.objects.filter(pk__in=src_repo.latest_version().content)
-        if collection_version not in src_versions:
+        content_obj = Content.objects.get(pk=collection_version.pk)
+
+        if content_obj not in src_repo.latest_version().content:
             raise NotFound(_('Collection %s not found in source repo') % version_str)
 
-        dest_versions = CollectionVersion.objects.filter(pk__in=dest_repo.latest_version().content)
-        if collection_version in dest_versions:
+        if content_obj in dest_repo.latest_version().content:
             raise NotFound(_('Collection %s already found in destination repo') % version_str)
 
         move_task = call_move_content_task(collection_version, src_repo, dest_repo)
