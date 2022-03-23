@@ -74,7 +74,7 @@ class RelatedFieldsBaseSerializer(serializers.Serializer):
     This functions the same as DRF's base `serializers.Serializer` class with the
     exception that it will only return fields specified in the `?include_related=`
     query parameter.
-    
+
     Example:
 
     MySerializer(RelatedFieldsBaseSerializer):
