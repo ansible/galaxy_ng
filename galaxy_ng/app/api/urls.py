@@ -23,16 +23,6 @@ v3_urlpatterns = [
     path(
         "",
         include(v3_urls),
-
-
-     # TODO remove me permanently
-
-
-
-     #    {
-     #        'no_path_specified': True,
-     #        'path': DEFAULT_DISTRIBUTION_BASE_PATH,
-     #    }
     ),
 ]
 

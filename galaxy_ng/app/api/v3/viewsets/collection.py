@@ -271,8 +271,12 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
            if user does not specify distribution base path
            then use an inbound distribution based on filename namespace.
         """
-        path = kwargs['distro_base_path']
-        if kwargs.get('no_path_specified', None):
+
+        # the legacy collection upload views don't get redirected and still have to use the
+        # old path arg
+        path = kwargs.get('distro_base_path', kwargs['path'])
+
+        if path == settings.ANSIBLE_DEFAULT_DISTRIBUTION_PATH:
             path = INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)
         return path
 

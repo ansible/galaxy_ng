@@ -79,18 +79,19 @@ urlpatterns = [
     #     viewsets.CollectionImportViewSet.as_view({"get": "retrieve"}),
     #     name="collection-import",
     # ),
-    # path(
-    #     "artifacts/collections/",
-    #     viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
-    #     name="collection-artifact-upload",
-    # ),
+
     # path(
     #     "artifacts/collections/<str:path>/<str:filename>",
     #     viewsets.CollectionArtifactDownloadView.as_view(),
     #     name="collection-artifact-download",
     # ),
  
- 
+    path(
+        "artifacts/collections/",
+        viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
+        name="collection-artifact-upload",
+    ),
+
     path(
         "collections/<str:namespace>/<str:name>/versions/<str:version>/move/"
         "<str:source_path>/<str:dest_path>/",

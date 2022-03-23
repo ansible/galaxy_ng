@@ -52,18 +52,22 @@ class AccessPolicyBase(AccessPolicyFromDB):
             }
         return self._STATEMENTS
 
-    def _get_statements(self, deployment_mode):
-        return self.galaxy_statements[deployment_mode]
+    def _get_statements(self):
+        return self.galaxy_statements[settings.GALAXY_DEPLOYMENT_MODE]
 
     def get_policy_statements(self, request, view):
-        statements = self._get_statements(settings.GALAXY_DEPLOYMENT_MODE)
+        statements = self._get_statements()
         if self.NAME:
             return statements.get(self.NAME, [])
-        viewname = get_view_urlpattern(view)
-        override_ap = statements.get(viewname, None)
 
-        if override_ap:
-            return override_ap
+        try:
+            viewname = get_view_urlpattern(view)
+            override_ap = statements.get(viewname, None)
+
+            if override_ap:
+                return override_ap
+        except AttributeError:
+            pass
 
         # Note: for the time being, pulp-container access policies should still be loaded from
         # the databse, because we can't override the get creation hooks like this.
