@@ -47,65 +47,49 @@ urlpatterns = [
     #     name="all-collection-versions-list",
     # ),
 
+    # >>>> OVERRIDDEN PULP ANSIBLE ENDPOINTS <<<<<
 
+    # Some pulp ansible endpoints have to be overridden because we have special logic
+    # that is specific to galaxy_ng's business needs. Until
+    # https://github.com/pulp/pulp_ansible/issues/835 is resolved, the only solution
+    # we have for this problem is to just override the viewset. Overridden API endpoints
+    # should be put here. Please include comments that describe why the override is necesary.
+    # Overridding an endpoint should be a measure of last resort.
 
-    # path(
-    #     "collections/", viewsets.CollectionViewSet.as_view({"get": "list"}), name="collections-list"
-    # ),
-    # path(
-    #     "collections/<str:namespace>/<str:name>/",
-    #     viewsets.CollectionViewSet.as_view(
-    #         {"get": "retrieve", "patch": "update", "delete": "destroy"}
-    #     ),
-    #     name="collections-detail",
-    # ),
-    # path(
-    #     "collections/<str:namespace>/<str:name>/versions/",
-    #     viewsets.CollectionVersionViewSet.as_view({"get": "list"}),
-    #     name="collection-versions-list",
-    # ),
-    # path(
-    #     "collections/<str:namespace>/<str:name>/versions/<str:version>/",
-    #     viewsets.CollectionVersionViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
-    #     name="collection-versions-detail",
-    # ),
-    # path(
-    #     "collections/<str:namespace>/<str:name>/versions/<str:version>/docs-blob/",
-    #     viewsets.CollectionVersionDocsViewSet.as_view({"get": "retrieve"}),
-    #     name="collection-versions-detail-docs",
-    # ),
-    # path(
-    #     "imports/collections/<str:pk>/",
-    #     viewsets.CollectionImportViewSet.as_view({"get": "retrieve"}),
-    #     name="collection-import",
-    # ),
+    # At the moment Automation Hub on console.redhat.com has a nonstandard configuration
+    # for collection download as well as prometheus metrics that are used to track the
+    # health of the service. Until https://issues.redhat.com/browse/AAH-1385 can be resolved
+    # we need to continue providing this endpoint from galaxy_ng.
+    path(
+        "plugin/ansible/content/<path:distro_base_path>/artifacts/<str:filename>",
+        viewsets.CollectionArtifactDownloadView.as_view(),
+        name="collection-artifact-download",
+    ),
 
-    # path(
-    #     "artifacts/collections/<str:path>/<str:filename>",
-    #     viewsets.CollectionArtifactDownloadView.as_view(),
-    #     name="collection-artifact-download",
-    # ),
- 
+    # Overridden because the galaxy_ng endpoints only allow collections to be uploaded into
+    # specific repositories.
     path(
         "artifacts/collections/",
         viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
         name="collection-artifact-upload",
     ),
 
+    # This is the same endpoint as `artifacts/collections/`. It can't be redirected because
+    # redirects break on collection publish.
+    path(
+        "plugin/ansible/content/<path:distro_base_path>/collections/artifacts/",
+        viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
+        name="collection-artifact-upload",
+    ),
+
+    # >>>> END OVERRIDDEN PULP ANSIBLE ENDPOINTS <<<<<
+
+    # TODO: This endpoint should be moved into pulp ansible
     path(
         "collections/<str:namespace>/<str:name>/versions/<str:version>/move/"
         "<str:source_path>/<str:dest_path>/",
         viewsets.CollectionVersionMoveViewSet.as_view({"post": "move_content"}),
         name="collection-version-move",
-    ),
-
-
-    # Override the pulp ansible artifact upload endpoint because galaxy_ng requires a more 
-    # opinionated implementation to work.
-    path(
-        "plugin/ansible/content/<path:distro_base_path>/collections/artifacts/",
-        viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
-        name="collection-artifact-upload",
     ),
 
     path("", include(v3_urls)),
