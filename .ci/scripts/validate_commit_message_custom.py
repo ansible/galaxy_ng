@@ -40,6 +40,13 @@ ISSUE_LABEL_REGEX = re.compile(
 JIRA_URL = "https://issues.redhat.com/rest/api/latest/issue/AAH-{issue}"
 
 
+def get_github_api_headers():
+    headers = {}
+    if os.environ.get('GITHUB_TOKEN'):
+        headers['Authorization'] = f'token {os.environ["GITHUB_TOKEN"]}'
+    return headers
+
+
 def git_list_commits(commit_range):
     git_range = "..".join(commit_range)
     cmd = ["git", "rev-list", "--no-merges", git_range]
@@ -90,7 +97,7 @@ def check_commit(commit_sha):
 
     repo = os.environ.get('GITHUB_REPOSITORY')
     commit_url = f'https://api.github.com/repos/{repo}/commits/{commit_sha}'
-    rr = requests.get(commit_url)
+    rr = requests.get(commit_url, headers=get_github_api_headers())
     signed = rr.json().get('commit', {}).get('verification', {}).get('verified')
     if not signed:
         LOG.error(f"Commit {commit_sha[:8]} is not signed")
@@ -117,7 +124,9 @@ def validate_push_commits(start_commit, end_commit):
 
 
 def validate_pr_commits(github_pr_commits_url):
-    request = requests.get(github_pr_commits_url)
+    request = requests.get(github_pr_commits_url, headers=get_github_api_headers())
+    if not isinstance(request.json(), list):
+        raise Exception(f'malformed api response for commit list: {request.json()}')
     commit_list = [c['sha'] for c in request.json()]
 
     at_least_one_commit_ok = False
