@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from rest_access_policy import AccessPolicy
 from rest_framework.exceptions import NotFound
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
@@ -18,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 class AccessPolicyBase(AccessPolicyFromDB):
-    '''
+    """
     This class is capable of loading access policy statements from galaxy_ng's hardcoded list of
     statements as well as from pulp's access policy database table. Priority is given to statements
     that are found in the hardcoded list of statements, so if a view name for a pulp viewset is
@@ -33,7 +32,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
     2. It can be subclassed and used as a permission class for viewsets in galaxy_ng. This allows
        for custom policy conditions to be declared for specific viewsets, rather than putting them
        in the base class.
-    '''
+    """
 
     _STATEMENTS = None
     NAME = None
