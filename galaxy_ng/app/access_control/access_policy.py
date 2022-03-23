@@ -73,6 +73,10 @@ class AccessPolicyBase(AccessPolicyFromDB):
         # the databse, because we can't override the get creation hooks like this.
         return super().get_policy_statements(request, view)
 
+    # if not defined, defaults to parent qs of None breaking Group Detail
+    def scope_queryset(self, view, qs):
+        return qs
+
     # Define global conditions here
     def _get_rh_identity(self, request):
         if not isinstance(request.auth, dict):
@@ -100,18 +104,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
         entitlements = x_rh_identity.get("entitlements", {})
         entitlement = entitlements.get(settings.RH_ENTITLEMENT_REQUIRED, {})
         return entitlement.get("is_entitled", False)
-
-    # if not defined, defaults to parent qs of None breaking Group Detail
-    def scope_queryset(self, view, qs):
-        return qs
-
-
-class NamespaceAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
-    NAME = "NamespaceViewSet"
-
-
-class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
-    NAME = "CollectionViewSet"
 
     def can_update_collection(self, request, view, permission):
         if getattr(self, "swagger_fake_view", False):
@@ -152,6 +144,14 @@ class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyB
 
     def unauthenticated_collection_download_enabled(self, request, view, permission):
         return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
+
+
+class NamespaceAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
+    NAME = "NamespaceViewSet"
+
+
+class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
+    NAME = "CollectionViewSet"
 
 
 class CollectionRemoteAccessPolicy(AccessPolicyBase):
