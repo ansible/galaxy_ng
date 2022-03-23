@@ -96,11 +96,20 @@ class RelatedFieldsBaseSerializer(serializers.Serializer):
     def to_representation(self, instance):
         result = OrderedDict()
         fields = self._readable_fields
-        include_fields = self.context.get('request', None).GET.getlist('include_related')
+        request = self.context.get('request', None)
+        if request:
 
-        if len(include_fields) > 0:
-            for field in fields:
-                if field.field_name in include_fields:
-                    result[field.field_name] = field.to_representation(instance)
+            # TODO: Figure out how to make `include_related` show up in the open API spec
+            include_fields = request.GET.getlist('include_related')
+
+            if len(include_fields) > 0:
+                for field in fields:
+                    if field.field_name in include_fields:
+                        result[field.field_name] = field.to_representation(instance)
+        else:
+            # When there is no request present, it usually means that the serializer is
+            # being inspected by DRF spectacular to generate the open API spec. In that
+            # case, this should act like a normal serializer.
+            return super().to_representation(instance)
 
         return result

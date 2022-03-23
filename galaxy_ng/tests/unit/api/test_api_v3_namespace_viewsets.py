@@ -102,6 +102,40 @@ class TestV3NamespaceViewSet(BaseTestCase):
             log.debug("data: %s", data)
             self.assertEqual(len(data), Namespace.objects.all().count())
 
+    def test_related_fields(self):
+        self.client.force_authenticate(user=self.admin_user)
+        regular_group = self._create_group("users", "regular_users", users=[self.regular_user])
+
+        ns1_name = "unittestnamespace1"
+        ns2_name = "unittestnamespace2"
+        self._create_namespace(ns1_name, groups=[regular_group])
+        self._create_namespace(ns2_name)
+
+        # Test no related fields:
+        response = self.client.get(self.ns_url)
+
+        for ns in response.data['data']:
+            self.assertEqual(ns['related_fields'], {})
+
+        # Test related fields for admin user
+        response = self.client.get(self.ns_url + "?include_related=my_permissions")
+
+        for ns in response.data['data']:
+            self.assertIn("my_permissions", ns["related_fields"])
+            self.assertGreater(len(ns["related_fields"]["my_permissions"]), 1)
+
+        # Test related fields for non admin user
+        self.client.force_authenticate(user=self.regular_user)
+        response = self.client.get(self.ns_url + "?include_related=my_permissions")
+
+        for ns in response.data['data']:
+            self.assertIn("my_permissions", ns["related_fields"])
+
+            if ns["name"] == ns1_name:
+                self.assertGreater(len(ns["related_fields"]["my_permissions"]), 1)
+            else:
+                self.assertEqual(len(ns["related_fields"]["my_permissions"]), 0)
+
     def test_namespace_get(self):
         ns_name = "unittestnamespace"
         ns1 = self._create_namespace(ns_name, groups=[self.pe_group])
