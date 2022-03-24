@@ -1,4 +1,4 @@
 mkdocs
 mkdocs-material
-mike
 mkdocs-git-revision-date-plugin
+Jinja2>3.0.0

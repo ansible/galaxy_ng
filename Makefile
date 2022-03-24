@@ -59,6 +59,7 @@ changelog:        ## Build the changelog
 
 .PHONY: lint
 lint:             ## Lint the code
+	check-manifest
 	flake8 --config flake8.cfg
 
 .PHONY: fmt
@@ -205,9 +206,10 @@ dev/bumpversion-release:
 
 docs/install:
 	@pip install -r docs_requirements.txt
+	@pip install -U 'Jinja2==3.0.1'
 
 docs/build:
-	@mike deploy --push --update-aliases 4.5.0 latest
+	@mkdocs build --clean
 
 docs/serve:
 	@mkdocs serve
