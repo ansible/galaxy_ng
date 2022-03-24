@@ -5,7 +5,6 @@ from django.urls import include, path
 
 from . import views
 from galaxy_ng.app.api import urls as api_urls
-from galaxy_ng.app import customadmin as admin
 from galaxy_ng.ui import urls as ui_urls
 
 from drf_spectacular.views import (
@@ -25,7 +24,6 @@ urlpatterns = [
     path("", include((galaxy_urls, "api"), namespace="galaxy")),
     path("", include(ui_urls)),
     path("", include("django_prometheus.urls")),
-    path(settings.ADMIN_SITE_URL, admin.site.urls),
     path(
         f"{API_PATH_PREFIX}/v3/openapi.json",
         SpectacularJSONAPIView.as_view(),
