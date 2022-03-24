@@ -9,5 +9,6 @@ graft galaxy_ng/app/webserver_snippets
 graft galaxy_ng/app/static
 graft galaxy_ng/locale
 exclude mkdocs.yml
+exclude netlify.toml
 exclude docs
 exclude docs_requirements.txt
