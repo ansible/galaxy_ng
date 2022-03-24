@@ -69,6 +69,14 @@ INSIGHTS_STATEMENTS = {
             ],
         },
         {
+            "action": "sign",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "can_sign_collections",
+                "has_rh_entitlements"]
+        },
+        {
             "action": "curate",
             "principal": "authenticated",
             "effect": "allow",

@@ -57,6 +57,19 @@ class CollectionMetadataSerializer(Serializer):
     authors = serializers.ListField(child=serializers.CharField())
     license = serializers.ListField(child=serializers.CharField())
     tags = serializers.SerializerMethodField()
+    signatures = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
+    def get_signatures(self, obj):
+        """Returns signature info for each signature."""
+        data = []
+        for signature in obj.signatures.all():
+            sig = {}
+            sig["signature"] = bytes(signature.data).decode("utf-8")
+            sig["pubkey_fingerprint"] = signature.pubkey_fingerprint
+            sig["signing_service"] = signature.signing_service.name
+            data.append(sig)
+        return data
 
     @extend_schema_field(serializers.ListField)
     def get_tags(self, collection_version):
@@ -67,7 +80,16 @@ class CollectionMetadataSerializer(Serializer):
         return [tag.name for tag in collection_version.tags.all()]
 
 
-class CollectionVersionBaseSerializer(Serializer):
+class CollectionVersionSignStateMixin:
+
+    @extend_schema_field(serializers.CharField())
+    def get_sign_state(self, obj):
+        """Returns the state of the signature."""
+        return "unsigned" if obj.signatures.count() == 0 else "signed"
+
+
+class CollectionVersionBaseSerializer(CollectionVersionSignStateMixin, Serializer):
+    id = serializers.UUIDField(source='pk')
     namespace = serializers.CharField()
     name = serializers.CharField()
     version = serializers.CharField()
@@ -75,6 +97,7 @@ class CollectionVersionBaseSerializer(Serializer):
     created_at = serializers.DateTimeField(source='pulp_created')
     metadata = CollectionMetadataSerializer(source='*')
     contents = serializers.ListField(child=ContentSerializer())
+    sign_state = serializers.SerializerMethodField()
 
 
 class CollectionVersionSerializer(CollectionVersionBaseSerializer):
@@ -102,9 +125,11 @@ class CollectionVersionDetailSerializer(CollectionVersionBaseSerializer):
     deprecated = serializers.BooleanField()
 
 
-class CollectionVersionSummarySerializer(Serializer):
+class CollectionVersionSummarySerializer(CollectionVersionSignStateMixin, Serializer):
+    id = serializers.UUIDField(source='pk')
     version = serializers.CharField()
     created = serializers.CharField(source='pulp_created')
+    sign_state = serializers.SerializerMethodField()
 
 
 class _CollectionSerializer(Serializer):
@@ -126,6 +151,10 @@ class _CollectionSerializer(Serializer):
 
 class CollectionListSerializer(_CollectionSerializer):
     deprecated = serializers.BooleanField()
+    sign_state = serializers.CharField()
+    total_versions = serializers.IntegerField(default=0)
+    signed_versions = serializers.IntegerField(default=0)
+    unsigned_versions = serializers.IntegerField(default=0)
 
     @extend_schema_field(CollectionVersionBaseSerializer)
     def get_latest_version(self, obj):
@@ -134,6 +163,10 @@ class CollectionListSerializer(_CollectionSerializer):
 
 class CollectionDetailSerializer(_CollectionSerializer):
     all_versions = serializers.SerializerMethodField()
+    sign_state = serializers.CharField()
+    total_versions = serializers.IntegerField(default=0)
+    signed_versions = serializers.IntegerField(default=0)
+    unsigned_versions = serializers.IntegerField(default=0)
 
     # TODO: rename field to "version_details" since with
     # "version" query param this won't always be the latest version

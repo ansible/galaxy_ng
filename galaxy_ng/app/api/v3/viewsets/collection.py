@@ -12,7 +12,9 @@ from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import CollectionVersion
-from pulpcore.plugin.models import Content, Task
+from pulpcore.plugin.models import Content
+from pulpcore.plugin.models import SigningService
+from pulpcore.plugin.models import Task
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
 from pulpcore.plugin.viewsets import OperationPostponedResponse
@@ -38,11 +40,13 @@ from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT, DeploymentMode
 from galaxy_ng.app.tasks import (
     call_move_content_task,
     curate_all_synclist_repository,
+    call_sign_and_move_task,
     delete_collection,
     delete_collection_version,
     import_and_auto_approve,
     import_and_move_to_staging,
 )
+
 
 log = logging.getLogger(__name__)
 
@@ -446,9 +450,36 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         if content_obj in dest_repo.latest_version().content:
             raise NotFound(_('Collection %s already found in destination repo') % version_str)
 
-        move_task = call_move_content_task(collection_version, src_repo, dest_repo)
+        response_data = {
+            "copy_task_id": None,
+            "remove_task_id": None,
+            "curate_all_synclist_repository_task_id": None,
+        }
+        golden_repo = settings.get("GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH", "published")
+        auto_sign = settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False)
+        move_task_params = {
+            "collection_version": collection_version,
+            "source_repo": src_repo,
+            "dest_repo": dest_repo,
+        }
 
-        curate_task_id = None
+        if auto_sign and dest_repo.name == golden_repo:
+            # Assumed that if user has access to modify the repo, they can also sign the content
+            # so we don't need to check access policies here.
+            signing_service_name = settings.get(
+                "GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default"
+            )
+            try:
+                signing_service = SigningService.objects.get(name=signing_service_name)
+            except ObjectDoesNotExist:
+                raise NotFound(_('Signing %s service not found') % signing_service_name)
+
+            move_task = call_sign_and_move_task(signing_service, **move_task_params)
+        else:
+            move_task = call_move_content_task(**move_task_params)
+
+        response_data['copy_task_id'] = response_data['remove_task_id'] = move_task.pk
+
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             golden_repo = AnsibleDistribution.objects.get(
                 base_path=settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
@@ -461,13 +492,6 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
                     args=(golden_repo.name,),
                     kwargs={},
                 )
-                curate_task_id = curate_task.pk
+                response_data['curate_all_synclist_repository_task_id'] = curate_task.pk
 
-        return Response(
-            data={
-                "copy_task_id": move_task.pk,
-                "remove_task_id": move_task.pk,
-                "curate_all_synclist_repository_task_id": curate_task_id,
-            },
-            status='202'
-        )
+        return Response(data=response_data, status='202')

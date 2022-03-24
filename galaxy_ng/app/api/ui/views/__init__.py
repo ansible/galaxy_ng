@@ -9,6 +9,7 @@ from .controller import ControllerListView
 from .settings import SettingsView
 from .landing_page import LandingPageView
 from .sync import ContainerSyncRemoteView, ContainerSyncRegistryView
+from .signing import CollectionSignView
 
 from .index_execution_environments import IndexRegistryEEView
 
@@ -35,4 +36,7 @@ __all__ = (
 
     # index_execution_environments
     "IndexRegistryEEView",
+
+    # Signing
+    "CollectionSignView",
 )

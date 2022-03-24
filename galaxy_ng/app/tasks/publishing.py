@@ -6,13 +6,17 @@ from django.utils.translation import gettext_lazy as _
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, CollectionVersion
 from pulp_ansible.app.tasks.collections import import_collection
 from pulpcore.plugin.models import Task
+from pulpcore.plugin.models import SigningService
 
 from .promotion import call_move_content_task
+from .signing import call_sign_and_move_task
 
 log = logging.getLogger(__name__)
 
 GOLDEN_NAME = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 STAGING_NAME = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
+AUTO_SIGN = settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False)
+SIGNING_SERVICE_NAME = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
 
 
 def get_created_collection_versions():
@@ -93,12 +97,27 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
 
     created_collection_versions = get_created_collection_versions()
 
-    for collection_version in created_collection_versions:
-        call_move_content_task(collection_version, inbound_repo, golden_repo)
+    try:
+        signing_service = AUTO_SIGN and SigningService.objects.get(name=SIGNING_SERVICE_NAME)
+    except SigningService.DoesNotExist:
+        raise RuntimeError(_('Signing %s service not found') % SIGNING_SERVICE_NAME)
 
-        log.info('Imported and auto approved collection artifact %s to repository %s',
-                 collection_version.relative_path,
-                 golden_repo.latest_version())
+    for collection_version in created_collection_versions:
+        move_task_params = {
+            "collection_version": collection_version,
+            "source_repo": inbound_repo,
+            "dest_repo": golden_repo,
+        }
+        if AUTO_SIGN:
+            call_sign_and_move_task(signing_service, **move_task_params)
+        else:
+            call_move_content_task(**move_task_params)
+
+        log.info(
+            'Imported and auto approved collection artifact %s to repository %s',
+            collection_version.relative_path,
+            golden_repo.latest_version()
+        )
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(

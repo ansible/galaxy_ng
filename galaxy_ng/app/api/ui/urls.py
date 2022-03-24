@@ -147,6 +147,39 @@ group_paths = [
         name='group-model-permissions-detail'),
 ]
 
+signing_paths = [
+    # _ui/v1/collection_signing/
+    path(
+        "",
+        views.CollectionSignView.as_view(),
+        name='collection-sign',
+    ),
+    # _ui/v1/collection_signing/staging/
+    path(
+        "<str:path>/",
+        views.CollectionSignView.as_view(),
+        name='collection-sign-repo',
+    ),
+    # _ui/v1/collection_signing/staging/namespace/
+    path(
+        "<str:path>/<str:namespace>/",
+        views.CollectionSignView.as_view(),
+        name='collection-sign-namespace',
+    ),
+    # _ui/v1/collection_signing/staging/namespace/collection/
+    path(
+        "<str:path>/<str:namespace>/<str:collection>/",
+        views.CollectionSignView.as_view(),
+        name='collection-sign-collection',
+    ),
+    # _ui/v1/collection_signing/staging/namespace/collection/1.0.0/
+    path(
+        "<str:path>/<str:namespace>/<str:collection>/<str:version>/",
+        views.CollectionSignView.as_view(),
+        name='collection-sign-version',
+    ),
+]
+
 paths = [
     path('', include(router.urls)),
 
@@ -156,6 +189,7 @@ paths = [
     path('feature-flags/', views.FeatureFlagsView.as_view(), name='feature-flags'),
     path('controllers/', views.ControllerListView.as_view(), name='controllers'),
     path('groups/', include(group_paths)),
+    path('collection_signing/', include(signing_paths)),
     path(
         'repo/<str:path>/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
