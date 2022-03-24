@@ -79,7 +79,10 @@ class GroupPermissionField(serializers.Field):
 
 class MyPermissionsField(serializers.Serializer):
     def to_representation(self, obj):
-        user = self.context['request'].user
+        request = self.context.get('request', None)
+        if request is None:
+            return []
+        user = request.user
 
         # guardian's get_perms(user, obj) method only returns user permissions,
         # not all permissions a user has.

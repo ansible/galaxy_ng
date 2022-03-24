@@ -87,6 +87,7 @@ class BaseTestCase(APITestCase):
 
     @staticmethod
     def _create_namespace(name, groups=None):
+        groups = groups or []
         namespace = models.Namespace.objects.create(name=name)
         if isinstance(groups, auth_models.Group):
             groups = [groups]
