@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 # TODO this is a function in pulpcore that needs to get moved ot the plugin api.
-# from pulpcore.app.util import get_view_urlpattern
+# from pulpcore.plugin.util import get_view_urlpattern
 def get_view_urlpattern(view):
     """
     Get a full urlpattern for a view which includes a parent urlpattern if it exists.
