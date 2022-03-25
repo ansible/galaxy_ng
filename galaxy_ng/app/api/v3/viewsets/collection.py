@@ -12,6 +12,9 @@ from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import CollectionVersion
+
+from pulp_ansible.app.galaxy.v3 import serializers as pulp_ansible_serializers
+
 from pulpcore.plugin.models import Content
 from pulpcore.plugin.models import SigningService
 from pulpcore.plugin.models import Task
@@ -27,13 +30,7 @@ from semantic_version import SimpleSpec, Version
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.v3.serializers import (
-    CollectionSerializer,
-    CollectionUploadSerializer,
-    CollectionVersionListSerializer,
-    CollectionVersionSerializer,
-    UnpaginatedCollectionVersionSerializer,
-)
+from galaxy_ng.app.api.v3.serializers import CollectionUploadSerializer
 from galaxy_ng.app.common import metrics
 from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT, DeploymentMode
@@ -71,19 +68,6 @@ class ViewNamespaceSerializerContextMixin:
         return context
 
 
-class RepoMetadataViewSet(api_base.LocalSettingsMixin,
-                          pulp_ansible_views.RepoMetadataViewSet):
-    permission_classes = [access_policy.CollectionAccessPolicy]
-
-
-class UnpaginatedCollectionViewSet(api_base.LocalSettingsMixin,
-                                   ViewNamespaceSerializerContextMixin,
-                                   pulp_ansible_views.UnpaginatedCollectionViewSet):
-    pagination_class = None
-    permission_classes = [access_policy.CollectionAccessPolicy]
-    serializer_class = CollectionSerializer
-
-
 def get_collection_dependents(parent):
     """Given a parent collection, return a list of collection versions that depend on it."""
     key = f"{parent.namespace}.{parent.name}"
@@ -99,7 +83,7 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
                         ViewNamespaceSerializerContextMixin,
                         pulp_ansible_views.CollectionViewSet):
     permission_classes = [access_policy.CollectionAccessPolicy]
-    serializer_class = CollectionSerializer
+    serializer_class = pulp_ansible_serializers.CollectionSerializer
 
     @extend_schema(
         description="Trigger an asynchronous delete task",
@@ -149,16 +133,6 @@ class CollectionViewSet(api_base.LocalSettingsMixin,
         return OperationPostponedResponse(async_result, request)
 
 
-class UnpaginatedCollectionVersionViewSet(
-    api_base.LocalSettingsMixin,
-    ViewNamespaceSerializerContextMixin,
-    pulp_ansible_views.UnpaginatedCollectionVersionViewSet,
-):
-    pagination_class = None
-    serializer_class = UnpaginatedCollectionVersionSerializer
-    permission_classes = [access_policy.CollectionAccessPolicy]
-
-
 def get_dependents(parent):
     """Given a parent collection version, return a list of
     collection versions that depend on it.
@@ -175,9 +149,9 @@ def get_dependents(parent):
 class CollectionVersionViewSet(api_base.LocalSettingsMixin,
                                ViewNamespaceSerializerContextMixin,
                                pulp_ansible_views.CollectionVersionViewSet):
-    serializer_class = CollectionVersionSerializer
+    serializer_class = pulp_ansible_serializers.CollectionVersionSerializer
     permission_classes = [access_policy.CollectionAccessPolicy]
-    list_serializer_class = CollectionVersionListSerializer
+    list_serializer_class = pulp_ansible_serializers.CollectionVersionListSerializer
 
     @extend_schema(
         description="Trigger an asynchronous delete task",
@@ -221,16 +195,6 @@ class CollectionVersionViewSet(api_base.LocalSettingsMixin,
         )
 
         return OperationPostponedResponse(async_result, request)
-
-
-class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
-                                   pulp_ansible_views.CollectionVersionDocsViewSet):
-    permission_classes = [access_policy.CollectionAccessPolicy]
-
-
-class CollectionImportViewSet(api_base.LocalSettingsMixin,
-                              pulp_ansible_views.CollectionImportViewSet):
-    permission_classes = [access_policy.CollectionAccessPolicy]
 
 
 class CollectionUploadViewSet(api_base.LocalSettingsMixin,
