@@ -1,11 +1,11 @@
 import logging
+import os
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
-from pulpcore.app.util import get_view_urlpattern
 
 from pulp_container.app.access_policy import NamespacedAccessPolicyMixin
 from pulp_container.app import models as container_models
@@ -14,6 +14,25 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control.mixins import UnauthenticatedCollectionAccessMixin
 
 log = logging.getLogger(__name__)
+
+
+# TODO this is a function in pulpcore that needs to get moved ot the plugin api. 
+# from pulpcore.app.util import get_view_urlpattern
+def get_view_urlpattern(view):
+    """
+    Get a full urlpattern for a view which includes a parent urlpattern if it exists.
+    E.g. for repository versions the urlpattern is just `versions` without its parent_viewset
+    urlpattern.
+
+    Args:
+        view(subclass rest_framework.viewsets.GenericViewSet): The view being requested.
+
+    Returns:
+        str: a full urlpattern for a specified view/viewset
+    """
+    if hasattr(view, "parent_viewset") and view.parent_viewset:
+        return os.path.join(view.parent_viewset.urlpattern(), view.urlpattern())
+    return view.urlpattern()
 
 
 class AccessPolicyBase(AccessPolicyFromDB):
