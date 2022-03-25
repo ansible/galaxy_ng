@@ -38,9 +38,20 @@ bonfire deploy \
     --set-parameter ${COMPONENT_NAME}/IMPORTER_JOB_NAMESPACE=${NAMESPACE} \
     --set-parameter ${COMPONENT_NAME}/CONTENT_ORIGIN="${CONTENT_ORIGIN}"
 # END WORKAROUND
+oc project ${NAMESPACE}
+
+UI_REF="qa-beta"
+echo "patching the frontend-aggregator to use ${UI_REF}"
+oc patch cm aggregator-app-config --type merge --patch "{\"data\": {\"app-config.yml\": \"${COMPONENT_NAME}:\n  commit: ${UI_REF}\n\"}}"
+oc rollout restart deployment/front-end-aggregator
+oc rollout status deployment/front-end-aggregator
+sleep 5
+FE_POD=$(oc get pod -l app=front-end-aggregator -o json | jq -r '.items[] | select( .metadata.deletionTimestamp == null ) | .metadata.name')
+oc exec ${FE_POD} -- /bin/bash -c "sed -i 's/--omit-dir-times/--omit-dir-times --omit-link-times/' /www/src/git_helper.sh"
+oc exec ${FE_POD} -- /bin/bash -c "/www/src/git_helper.sh config https://github.com/RedHatInsights/cloud-services-config prod-beta"
+oc exec ${FE_POD} -- /bin/bash -c 'cd /all/code/chrome/js && for f in $(ls *.js); do sed -i s/sso.qa.redhat.com/keycloak-"'"${NAMESPACE}"'".apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/g $f && rm -f $f.gz && gzip --keep $f; done'
 
 # Fix the routing for minio and artifact urls
-oc project ${NAMESPACE}
 oc create route edge minio --service=env-${NAMESPACE}-minio --insecure-policy=Redirect
 MINIO_ROUTE=$(oc get route minio -o jsonpath='https://{.spec.host}{"\n"}')
 oc patch clowdapp automation-hub \
