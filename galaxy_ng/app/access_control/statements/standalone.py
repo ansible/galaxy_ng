@@ -66,7 +66,12 @@ STANDALONE_STATEMENTS = {
     'pulp_ansible/v3/collection-versions': _collection_statements,
     'pulp_ansible/v3/collection-versions/docs': _collection_statements,
     'pulp_ansible/v3/collections/imports': _collection_statements,
-    'pulp_ansible/v3/repo-metadata': _collection_statements,
+
+    # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
+    # For now endpoints are temporary deactivated
+    'pulp_ansible/v3/collection-versions/all': [],
+    'pulp_ansible/v3/collections/all': [],
+    'pulp_ansible/v3/repo-metadata': [],
 
     'pulp_ansible/v3/legacy-redirected-viewset': [
         {

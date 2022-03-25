@@ -32,21 +32,6 @@ sync_urls = [
 ]
 
 urlpatterns = [
-    # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
-    # For now endpoints are temporary deactivated
-    #
-    # path("", viewsets.RepoMetadataViewSet.as_view({"get": "retrieve"}), name="repo-metadata"),
-    # path(
-    #     "collections/all/",
-    #     viewsets.UnpaginatedCollectionViewSet.as_view({"get": "list"}),
-    #     name="all-collections-list",
-    # ),
-    # path(
-    #     "collection_versions/all/",
-    #     viewsets.UnpaginatedCollectionVersionViewSet.as_view({"get": "list"}),
-    #     name="all-collection-versions-list",
-    # ),
-
     # >>>> OVERRIDDEN PULP ANSIBLE ENDPOINTS <<<<<
 
     # Some pulp ansible endpoints have to be overridden because we have special logic
@@ -84,12 +69,26 @@ urlpatterns = [
 
     # >>>> END OVERRIDDEN PULP ANSIBLE ENDPOINTS <<<<<
 
-    # TODO: This endpoint should be moved into pulp ansible
+    # TODO: Endpoints that have not been moved to pulp ansible yet
     path(
         "collections/<str:namespace>/<str:name>/versions/<str:version>/move/"
         "<str:source_path>/<str:dest_path>/",
         viewsets.CollectionVersionMoveViewSet.as_view({"post": "move_content"}),
         name="collection-version-move",
+    ),
+
+    # collection deletion
+    path(
+        "collections/<str:namespace>/<str:name>/versions/<str:version>/",
+        viewsets.CollectionVersionViewSet.as_view({"delete": "destroy"}),
+        name="collection-versions-detail",
+    ),
+    path(
+        "collections/<str:namespace>/<str:name>/",
+        viewsets.CollectionViewSet.as_view(
+            {"delete": "destroy"}
+        ),
+        name="collections-detail",
     ),
 
     path("", include(v3_urls)),
