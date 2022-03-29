@@ -1,4 +1,4 @@
-from django.db.models import Exists, OuterRef, Q, When, Case, Value, Subquery, F, Func, CharField
+from django.db.models import Exists, OuterRef, Q, When, Case, Value, Subquery, F, Func
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -19,7 +19,6 @@ from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from rest_framework import mixins
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-import semantic_version
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
@@ -119,53 +118,25 @@ class CollectionViewSet(
         if path is None:
             raise Http404(_("Distribution base path is required"))
 
+        # First we get all versions on the distribution, without more filtering
+        # so it can be used to build the annotations
         base_versions_query = CollectionVersion.objects.filter(pk__in=self._distro_content)
 
-        # Build a dict to be used by the annotation filter at the end of the method
-        collection_versions = {}
-        for collection_id, version in base_versions_query.values_list("collection_id", "version"):
-            value = collection_versions.get(str(collection_id))
-            if not value or semantic_version.Version(version) > semantic_version.Version(value):
-                collection_versions[str(collection_id)] = version
+        # Then apply filter to get only highest collection version per collection
+        version_qs = base_versions_query.select_related("collection").filter(is_highest=True)
 
+        # This queryset is to annotate each result with `deprecated` boolean
         deprecated_query = AnsibleCollectionDeprecated.objects.filter(
             namespace=OuterRef("namespace"),
             name=OuterRef("name"),
             pk__in=self._distro_content,
         )
 
-        if not collection_versions.items():
-            return CollectionVersion.objects.none().annotate(
-                # AAH-122: annotated filterable fields must exist in all the returned querysets
-                #          in order for filters to work.
-                deprecated=Exists(deprecated_query),
-                sign_state=Value("unsigned"),
-            )
-
-        # The main queryset to be annotated
-        version_qs = base_versions_query.select_related("collection")
-
-        # AAH-1484 - replacing `Q(collection__id, version)` with this annotation
-        # This builds `61505561-f806-4ddd-8f53-c403f0ec04ed:3.2.9` for each row.
-        # this is done to be able to filter at the end of this method and
-        # return collections only once and only for its highest version.
-        version_identifier_expression = Func(
-            F("collection__pk"), Value(":"), F("version"),
-            function="concat",
-            output_field=CharField(),
-        )
-
+        # Then apply the annotations
         version_qs = version_qs.annotate(
             deprecated=Exists(deprecated_query),
-            version_identifier=version_identifier_expression,
+            # the following adds `sign_state` and `total_versions` annotations
             **self.build_signing_annotations(base_versions_query)
-        )
-
-        # AAH-1484 - filtering by version_identifier
-        version_qs = version_qs.filter(
-            version_identifier__in=[
-                ":".join([pk, version]) for pk, version in collection_versions.items()
-            ]
         )
 
         return version_qs
