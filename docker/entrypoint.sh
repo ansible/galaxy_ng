@@ -57,6 +57,12 @@ process_init_files() {
     done
 }
 
+
+enable_coverage() {
+    bash -x /src/galaxy_ng/dev/standalone/hack_coverage.sh
+}
+
+
 run_service() {
     if [[ "$#" -eq 0 ]]; then
         log_message 'ERROR: Missing service name parameter.'
@@ -96,6 +102,10 @@ run_service() {
 
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
         setup_signing_service
+    fi
+
+    if [[ "$ENABLE_COVERAGE" -eq "1" ]]; then
+        enable_coverage
     fi
 
     exec "${service_path}" "$@"
