@@ -40,7 +40,8 @@ def test_delete_collection(ansible_config, uncertifiedv2):
 
     # Try deleting the whole collection ...
     resp = api_client(
-        f'/api/automation-hub/v3/collections/{cnamespace}/{cname}/',
+        ('/api/automation-hub/v3/plugin/ansible/content'
+         f'/published/collections/index/{cnamespace}/{cname}/'),
         method='DELETE'
     )
 

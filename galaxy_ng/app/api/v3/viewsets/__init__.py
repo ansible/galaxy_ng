@@ -1,8 +1,6 @@
 from .collection import (
     CollectionArtifactDownloadView,
     CollectionUploadViewSet,
-    CollectionViewSet,
-    CollectionVersionViewSet,
     CollectionVersionMoveViewSet,
 )
 
@@ -20,8 +18,6 @@ from .sync import SyncConfigViewSet
 __all__ = (
     'CollectionArtifactDownloadView',
     'CollectionUploadViewSet',
-    'CollectionViewSet',
-    'CollectionVersionViewSet',
     'CollectionVersionMoveViewSet',
     'NamespaceViewSet',
     'SyncConfigViewSet',

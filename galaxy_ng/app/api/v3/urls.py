@@ -77,20 +77,6 @@ urlpatterns = [
         name="collection-version-move",
     ),
 
-    # collection deletion
-    path(
-        "collections/<str:namespace>/<str:name>/versions/<str:version>/",
-        viewsets.CollectionVersionViewSet.as_view({"delete": "destroy"}),
-        name="collection-versions-detail",
-    ),
-    path(
-        "collections/<str:namespace>/<str:name>/",
-        viewsets.CollectionViewSet.as_view(
-            {"delete": "destroy"}
-        ),
-        name="collections-detail",
-    ),
-
     path("", include(v3_urls)),
 
     path("tasks/", viewsets.TaskViewSet.as_view({"get": "list"}), name="tasks-list"),
