@@ -18,6 +18,7 @@ def test_locked_roles_exist(ansible_config):
         "galaxy.user_admin",
         "galaxy.namespace_owner",
         "galaxy.synclist_owner",
+        "galaxy.content_admin"
     ]
 
     config = ansible_config("ansible_partner")

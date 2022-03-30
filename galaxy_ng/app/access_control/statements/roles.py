@@ -24,6 +24,9 @@ VIEWSETS = {
     },
     "NamespaceViewSet": {
         "LOCKED_ROLES": {
+            "galaxy.content_admin": [
+                "ansible.modify_ansible_repo_content",
+            ],
             "galaxy.namespace_owner": [
                 "galaxy.add_namespace",
                 "galaxy.change_namespace",
