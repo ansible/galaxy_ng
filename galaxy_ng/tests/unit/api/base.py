@@ -102,21 +102,14 @@ class BaseTestCase(APITestCase):
 
     @staticmethod
     def _create_partner_engineer_group():
+        # Maintain PE Group consistency with
+        # galaxy_ng/app/management/commands/maintain-pe-group.py:28
         pe_roles = [
-            # namespaces
             'galaxy.namespace_owner',
-
-            # collections
             'galaxy.collection_admin',
-
-            # users
             'galaxy.user_admin',
-
-            # groups
             'galaxy.group_admin',
-
-            # synclists
-            'galaxy.synclist_owner',
+            'galaxy.content_admin',
         ]
         pe_group = auth_models.Group.objects.create(
             name='partner-engineers')
