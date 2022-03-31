@@ -39,8 +39,6 @@ class TestV3NamespaceViewSet(BaseTestCase):
 
     def test_namespace_validation(self):
         ns_name = "unittestnamespace"
-        print(ns_name)
-        print(self.pe_group)
         ns1 = self._create_namespace(ns_name, groups=[self.pe_group])
 
         ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1.name})
