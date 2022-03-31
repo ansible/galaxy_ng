@@ -1,4 +1,4 @@
-from django.db.models import Exists, OuterRef, Q, When, Case, Value, Subquery, F, Func
+from django.db.models import Exists, OuterRef, Q, When, Case, Value, Subquery, F, Func, CharField
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -71,6 +71,11 @@ class CollectionViewSet(
                 unsigned: all versions are unsigned
                 partial: some versions are signed, some are unsigned
         """
+        # Ensure it filters only the same namespace
+        base_total_qs = base_total_qs.filter(
+            namespace=OuterRef("namespace"), name=OuterRef("name")
+        )
+
         total_versions_query = Subquery(
             base_total_qs.annotate(total=Func(F("pk"), function="count")).values('total')
         )
@@ -109,27 +114,25 @@ class CollectionViewSet(
         if getattr(self, "swagger_fake_view", False):
             # OpenAPI spec generation
             return CollectionVersion.objects.none()
-        path = self.kwargs.get('path')
+
+        path = self.kwargs.get("path")
         if path is None:
             raise Http404(_("Distribution base path is required"))
 
         base_versions_query = CollectionVersion.objects.filter(pk__in=self._distro_content)
-        versions = base_versions_query.values_list(
-            "collection_id",
-            "version",
-        )
+
+        # Build a dict to be used by the annotation filter at the end of the method
+        collection_versions = {}
+        for collection_id, version in base_versions_query.values_list("collection_id", "version"):
+            value = collection_versions.get(str(collection_id))
+            if not value or semantic_version.Version(version) > semantic_version.Version(value):
+                collection_versions[str(collection_id)] = version
 
         deprecated_query = AnsibleCollectionDeprecated.objects.filter(
             namespace=OuterRef("namespace"),
             name=OuterRef("name"),
             pk__in=self._distro_content,
         )
-
-        collection_versions = {}
-        for collection_id, version in versions:
-            value = collection_versions.get(str(collection_id))
-            if not value or semantic_version.Version(version) > semantic_version.Version(value):
-                collection_versions[str(collection_id)] = version
 
         if not collection_versions.items():
             return CollectionVersion.objects.none().annotate(
@@ -139,19 +142,30 @@ class CollectionViewSet(
                 sign_state=Value("unsigned"),
             )
 
-        query_params = Q()
-        for collection_id, version in collection_versions.items():
-            query_params |= Q(collection_id=collection_id, version=version)
+        # The main queryset to be annotated
+        version_qs = base_versions_query.select_related("collection")
 
-        version_qs = CollectionVersion.objects.select_related("collection").filter(query_params)
-
-        base_total_qs = base_versions_query.filter(
-            namespace=OuterRef("namespace"), name=OuterRef("name")
+        # AAH-1484 - replacing `Q(collection__id, version)` with this annotation
+        # This builds `61505561-f806-4ddd-8f53-c403f0ec04ed:3.2.9` for each row.
+        # this is done to be able to filter at the end of this method and
+        # return collections only once and only for its highest version.
+        version_identifier_expression = Func(
+            F("collection__pk"), Value(":"), F("version"),
+            function="concat",
+            output_field=CharField(),
         )
 
         version_qs = version_qs.annotate(
             deprecated=Exists(deprecated_query),
-            **self.build_signing_annotations(base_total_qs)
+            version_identifier=version_identifier_expression,
+            **self.build_signing_annotations(base_versions_query)
+        )
+
+        # AAH-1484 - filtering by version_identifier
+        version_qs = version_qs.filter(
+            version_identifier__in=[
+                ":".join([pk, version]) for pk, version in collection_versions.items()
+            ]
         )
 
         return version_qs
