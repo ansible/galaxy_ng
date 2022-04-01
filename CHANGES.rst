@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.3.4 (2022-04-01)
+Bugfixes
+--------
+
+- Consume proxy authentication fix in pulp_ansible 0.7.4
+  `AAH-840 <https://issues.redhat.com/browse/AAH-840>`_
+- Combine the copy and remove tasks
+  `AAH-1349 <https://issues.redhat.com/browse/AAH-1349>`_
+
+
+----
+
+
 4.3.3 (2021-09-16)
 ==================
 
