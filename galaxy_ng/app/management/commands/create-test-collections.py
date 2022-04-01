@@ -125,7 +125,7 @@ class Command(BaseCommand):
 
     def upload_collection(self, filename):
         collection_upload_url = reverse(
-            "galaxy:api:v3:default-content:collection-artifact-upload",
+            "galaxy:api:v3:collection-artifact-upload",
         )
         return self.client.post(collection_upload_url, {"file": open(filename, "rb")})
 
