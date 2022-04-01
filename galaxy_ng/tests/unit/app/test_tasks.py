@@ -23,10 +23,10 @@ golden_name = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 staging_name = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
 
 
-@override_settings(WORKING_DIRECTORY=tempfile.mkdtemp(suffix='galaxy_ng_unittest'))
+# @override_settings(WORKING_DIRECTORY=tempfile.mkdtemp(suffix='galaxy_ng_unittest'))
 class TestTaskPublish(TestCase):
-    # artifact_path = os.path.join(tempfile.gettempdir(), 'artifact-tmp')
-    artifact_path = os.path.join(settings.WORKING_DIRECTORY, 'artifact-tmp')
+    artifact_path = os.path.join(tempfile.gettempdir(), 'artifact-tmp')
+    # artifact_path = os.path.join(settings.WORKING_DIRECTORY, 'artifact-tmp')
 
     def setUp(self):
         with open(self.artifact_path, 'w') as f:
