@@ -47,7 +47,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
 
     # wait for the orphan_cleanup job to finish ...
     try:
-        wait_for_task(api_client, resp)
+        wait_for_task(api_client, resp, timeout=10000)
     except GalaxyError as ge:
         # FIXME - pulp tasks do not seem to accept token auth
         if ge.http_code in [403, 404]:
@@ -111,7 +111,7 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
 
             # wait for the orphan_cleanup job to finish ...
             try:
-                wait_for_task(api_client, resp)
+                wait_for_task(api_client, resp, timeout=10000)
             except GalaxyError as ge:
                 # FIXME - pulp tasks do not seem to accept token auth
                 if ge.http_code in [403, 404]:
