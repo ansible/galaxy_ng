@@ -122,7 +122,7 @@ fi
 cd ..
 
 
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch main
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 6c869c17da168144a440430809b0570ed8d536fc
 cd pulp_ansible
 
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
