@@ -4,7 +4,7 @@ import tempfile
 from unittest import mock
 
 from django.conf import settings
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from pulpcore.plugin.models import Artifact, PulpTemporaryFile, ContentArtifact
 from pulp_ansible.app.models import (
@@ -23,10 +23,10 @@ golden_name = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 staging_name = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
 
 
-@override_settings(WORKING_DIRECTORY=tempfile.mkdtemp(suffix='galaxy_ng_unittest'))
+# @override_settings(WORKING_DIRECTORY=tempfile.mkdtemp(suffix='galaxy_ng_unittest'))
 class TestTaskPublish(TestCase):
-    # artifact_path = os.path.join(tempfile.gettempdir(), 'artifact-tmp')
-    artifact_path = os.path.join(settings.WORKING_DIRECTORY, 'artifact-tmp')
+    artifact_path = os.path.join(tempfile.gettempdir(), 'artifact-tmp')
+    # artifact_path = os.path.join(settings.WORKING_DIRECTORY, 'artifact-tmp')
 
     def setUp(self):
         with open(self.artifact_path, 'w') as f:
