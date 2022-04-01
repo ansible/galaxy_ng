@@ -18,6 +18,7 @@ from pulpcore.plugin.models import SigningService
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
+from rest_framework import status
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
 
@@ -290,6 +291,21 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
 
             move_task = call_sign_and_move_task(signing_service, **move_task_params)
         else:
+            require_signatures = settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL", False)
+            if dest_repo.name == golden_repo and require_signatures:
+                if collection_version.signatures.count() == 0:
+                    return Response(
+                        {
+                            "detail": _(
+                                "Collection {namespace}.{name} could not be approved "
+                                "because system requires at least a signature for approval."
+                            ).format(
+                                namespace=collection_version.namespace,
+                                name=collection_version.name,
+                            )
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             move_task = call_move_content_task(**move_task_params)
 
         response_data['copy_task_id'] = response_data['remove_task_id'] = move_task.pk

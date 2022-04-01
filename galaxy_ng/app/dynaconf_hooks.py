@@ -1,7 +1,7 @@
 import os
 from typing import Any, Dict
 
-from dynaconf import Dynaconf
+from dynaconf import Dynaconf, Validator
 
 
 def post(settings: Dynaconf) -> Dict[str, Any]:
@@ -23,6 +23,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_pulp_ansible(settings))
     data.update(configure_authentication_classes(settings))
 
+    validate(settings)
     return data
 
 
@@ -307,3 +308,20 @@ def configure_authentication_classes(settings: Dynaconf) -> Dict[str, Any]:
         }
     else:
         return {}
+
+
+def validate(settings: Dynaconf) -> None:
+    """Validate the configuration, raise ValidationError if invalid"""
+    settings.validators.register(
+        Validator(
+            "GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL",
+            eq=False,
+            when=Validator(
+                "GALAXY_REQUIRE_CONTENT_APPROVAL", eq=False,
+            ),
+            messages={
+                "operations": "{name} cannot be True if GALAXY_REQUIRE_CONTENT_APPROVAL is False"
+            },
+        ),
+    )
+    settings.validators.validate()

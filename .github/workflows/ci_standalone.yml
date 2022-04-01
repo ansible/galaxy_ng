@@ -51,6 +51,9 @@ jobs:
       - name: give stack some time to spin up
         run: sleep 120
 
+      - name: set keyring on staging repo for signature upload
+        run: ./compose exec -T api ./entrypoint.sh manage set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y
+
       - name: run the integration tests
         continue-on-error: true
         run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh

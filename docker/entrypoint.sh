@@ -132,9 +132,12 @@ setup_signing_keyring() {
 
 setup_signing_service() {
     log_message "Setting up signing service."
-    HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
     export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
     export KEY_ID=${KEY_FINGERPRINT: -16}
+    gpg --batch --import /tmp/ansible-sign.key &>/dev/null
+    echo "${KEY_FINGERPRINT}:6:" | gpg --import-ownertrust &>/dev/null
+
+    HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
     if [[ "$HAS_SIGNING" -eq "0" ]]; then
         log_message "Creating signing service. using key ${KEY_ID}"
         django-admin add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh ${KEY_ID} 2>/dev/null || true
@@ -142,22 +145,6 @@ setup_signing_service() {
         log_message "Signing service already exists."
     fi
 }
-
-# setup_signing_service() {
-#     log_message "Setting up signing service."
-#     export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
-#     export KEY_ID=${KEY_FINGERPRINT: -16}
-#     gpg --batch --import /tmp/ansible-sign.key &>/dev/null
-#     echo "${KEY_FINGERPRINT}:6:" | gpg --import-ownertrust &>/dev/null
-
-#     HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
-#     if [[ "$HAS_SIGNING" -eq "0" ]]; then
-#         log_message "Creating signing service. using key ${KEY_ID}"
-#         django-admin add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh ${KEY_ID} 2>/dev/null || true
-#     else
-#         log_message "Signing service already exists."
-#     fi
-# }
 
 redis_connection_hack() {
     redis_host="${PULP_REDIS_HOST:-}"

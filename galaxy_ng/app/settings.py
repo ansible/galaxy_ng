@@ -176,3 +176,21 @@ KEYCLOAK_REALM = None
 #   set automation hub will use the CA certs in the file to validate
 #   the keycloak's SSL certificate.
 GALAXY_VERIFY_KEYCLOAK_SSL_CERTS = False
+
+# Default values for signing feature
+# Turn this on to enable the upload of signature
+# UI looks for this setting to add the upload controls.
+# this does't affect the API, upload is handled by pulp api directly
+GALAXY_SIGNATURE_UPLOAD_ENABLED = False
+
+# Turn this on to require at least one signature to be present
+# on the /move/ endpoint to be able to move/approve
+# to GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH (published)
+# This can only be set to True if GALAXY_REQUIRE_CONTENT_APPROVAL is also True
+GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL = False
+
+# With this set to True, all the approved collections will be also signed
+GALAXY_AUTO_SIGN_COLLECTIONS = False
+
+# This sets the name of the signing service to be used for signing
+GALAXY_COLLECTION_SIGNING_SERVICE = None
