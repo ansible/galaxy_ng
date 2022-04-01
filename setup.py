@@ -90,7 +90,8 @@ class BuildPyCommand(_BuildPyCommand):
 requirements = [
     "galaxy-importer==0.4.2",
     "pulpcore>=3.18.1,<3.19.0",
-    "pulp-ansible @ git+https://github.com/newswangerd/pulp_ansible@fix/9040-move-apis-to-plugin#egg=pulp-ansible",  # noqa E501
+    # "pulp-ansible>=0.13.0",
+    "pulp-ansible @ git+https://github.com/pulp/pulp_ansible@main#egg=pulp-ansible",  # noqa E501
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.10.2,<2.11.0",

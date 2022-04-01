@@ -5,7 +5,7 @@
 
 additional_repos:
 - bindings: true
-  branch: pull/849/head
+  branch: main
   name: pulp_ansible
   org: pulp
 - bindings: true
