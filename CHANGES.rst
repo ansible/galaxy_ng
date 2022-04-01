@@ -17,7 +17,7 @@ Changelog
 Bugfixes
 --------
 
-- Consume proxy authentication fix in pulp_ansible 0.7.4
+- Update to pulp_ansible 0.7.4 to backport AAH-840 bugfix, which did not resolve the issue for 4.3.
   `AAH-840 <https://issues.redhat.com/browse/AAH-840>`_
 - Combine the copy and remove tasks
   `AAH-1349 <https://issues.redhat.com/browse/AAH-1349>`_
