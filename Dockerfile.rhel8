@@ -1,11 +1,14 @@
 FROM registry.access.redhat.com/ubi8
 
+ARG GIT_COMMIT
+
 ENV LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=off \
     PULP_SETTINGS=/etc/pulp/settings.py \
     DJANGO_SETTINGS_MODULE=pulpcore.app.settings \
     PATH="/venv/bin:${PATH}" \
+    GIT_COMMIT=${GIT_COMMIT:-} \
     VIRTUAL_ENV="/venv"
 
 RUN adduser --uid 1000 --gid 0 --home-dir /app --no-create-home galaxy

@@ -35,7 +35,7 @@ mkdir -p "${DOCKER_CONF}"
 
 docker --config="${DOCKER_CONF}" login --username "${QUAY_USER}" --password "${QUAY_TOKEN}" quay.io
 docker --config="${DOCKER_CONF}" login --username "${RH_REGISTRY_USER}" --password "${RH_REGISTRY_TOKEN}" registry.redhat.io
-docker --config="${DOCKER_CONF}" build --tag "${IMAGE}:${IMAGE_TAG}" .
+docker --config="${DOCKER_CONF}" build --build-arg "GIT_COMMIT=${IMAGE_TAG}" --tag "${IMAGE}:${IMAGE_TAG}" .
 docker --config="${DOCKER_CONF}" push "${IMAGE}:${IMAGE_TAG}"
 
 docker --config="${DOCKER_CONF}" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:${IMAGE_ALIAS}"
