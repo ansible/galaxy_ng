@@ -5,9 +5,9 @@
 
 additional_repos:
 - bindings: true
-  branch: main
+  branch: fix/delete-signatures-deprecation
   name: pulp_ansible
-  org: pulp
+  org: newswangerd
 - bindings: true
   branch: 2.10.2
   name: pulp_container

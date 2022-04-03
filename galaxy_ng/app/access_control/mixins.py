@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import transaction
 from django.core.exceptions import BadRequest
 from django.utils.translation import gettext_lazy as _
