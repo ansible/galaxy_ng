@@ -11,7 +11,6 @@ from pulp_container.app.access_policy import NamespacedAccessPolicyMixin
 from pulp_container.app import models as container_models
 
 from galaxy_ng.app import models
-from galaxy_ng.app.access_control.mixins import UnauthenticatedCollectionAccessMixin
 
 log = logging.getLogger(__name__)
 
@@ -163,12 +162,15 @@ class AccessPolicyBase(AccessPolicyFromDB):
     def unauthenticated_collection_download_enabled(self, request, view, permission):
         return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
 
+    def unauthenticated_collection_access_enabled(self, request, view, action):
+        return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS
 
-class NamespaceAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
+
+class NamespaceAccessPolicy(AccessPolicyBase):
     NAME = "NamespaceViewSet"
 
 
-class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
+class CollectionAccessPolicy(AccessPolicyBase):
     NAME = "CollectionViewSet"
 
 
@@ -193,7 +195,7 @@ class UserAccessPolicy(AccessPolicyBase):
         return request.user == view.get_object()
 
 
-class MyUserAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
+class MyUserAccessPolicy(AccessPolicyBase):
     NAME = "MyUserViewSet"
 
     def is_current_user(self, request, view, action):

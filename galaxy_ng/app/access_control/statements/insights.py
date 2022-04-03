@@ -68,8 +68,6 @@ _collection_statements = [
 INSIGHTS_STATEMENTS = {
     'CollectionViewSet': _collection_statements,
     'pulp_ansible/v3/collections': _collection_statements,
-    'pulp_ansible/v3/collections/upload': _collection_statements,
-    'pulp_ansible/v3/collections/download': _collection_statements,
     'pulp_ansible/v3/collection-versions': _collection_statements,
     'pulp_ansible/v3/collection-versions/docs': _collection_statements,
     'pulp_ansible/v3/collections/imports': _collection_statements,
@@ -79,6 +77,10 @@ INSIGHTS_STATEMENTS = {
     'pulp_ansible/v3/collection-versions/all': [],
     'pulp_ansible/v3/collections/all': [],
     'pulp_ansible/v3/repo-metadata': [],
+
+    # disable upload and download APIs since we're not using them yet
+    'pulp_ansible/v3/collections/upload': [],
+    'pulp_ansible/v3/collections/download': [],
 
     "NamespaceViewSet": [
         {
