@@ -19,7 +19,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_logging(settings))
     data.update(configure_keycloak(settings))
     data.update(configure_cors(settings))
-    data.update(configure_pulp_ansible(settings))
+    data.update(configure_feature_flags(settings))
     data.update(configure_pulp_ansible(settings))
 
     return data
