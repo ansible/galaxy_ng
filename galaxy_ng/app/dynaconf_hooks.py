@@ -21,6 +21,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_cors(settings))
     data.update(configure_feature_flags(settings))
     data.update(configure_pulp_ansible(settings))
+    data.update(configure_authentication_classes(settings))
 
     return data
 
@@ -115,12 +116,6 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         data["AUTHENTICATION_BACKENDS"] = [
             "social_core.backends.keycloak.KeycloakOAuth2",
             "dynaconf_merge",
-        ]
-
-        # Enable basic authentication using keycloak username and password
-        data["REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES"] = [
-            "rest_framework.authentication.SessionAuthentication",
-            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
         ]
 
         # Replace AUTH CLASSES
@@ -293,3 +288,22 @@ def configure_pulp_ansible(settings: Dynaconf) -> Dict[str, Any]:
         "ANSIBLE_URL_NAMESPACE": "galaxy:api:v3:",
         "ANSIBLE_DEFAULT_DISTRIBUTION_PATH": distro_path
     }
+
+
+def configure_authentication_classes(settings: Dynaconf) -> Dict[str, Any]:
+    # GALAXY_AUTHENTICATION_CLASSES is used to configure the galaxy api authentication
+    # pretty much everywhere (on prem, cloud, dev environments, CI environments etc).
+    # We need to set the REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES variable so that
+    # the pulp APIs use the same authentication as the galaxy APIs. Rather than setting
+    # the galaxy auth classes and the DRF classes in all those environments just set the
+    # default rest framework auth classes to the galaxy auth classes. Ideally we should
+    # switch everything to use the default DRF auth classes, but given how many
+    # environments would have to be reconfigured, this is a lot easier.
+    galaxy_auth_classes = settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
+
+    if galaxy_auth_classes:
+        return {
+            "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES": galaxy_auth_classes
+        }
+    else:
+        return {}
