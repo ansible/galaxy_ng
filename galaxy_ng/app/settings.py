@@ -63,8 +63,10 @@ GALAXY_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.BasicAuthentication",
 ]
 
-REST_FRAMEWORK__DEFAULT_PERMISSION_CLASSES = \
-    ("galaxy_ng.app.access_control.access_policy.AccessPolicyBase", )
+REST_FRAMEWORK__DEFAULT_PERMISSION_CLASSES = (
+    "galaxy_ng.app.access_control.access_policy.AccessPolicyBase",
+)
+
 REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",

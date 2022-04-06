@@ -83,7 +83,8 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         # old path arg
         path = kwargs.get(
             'distro_base_path',
-            kwargs.get('path', settings.ANSIBLE_DEFAULT_DISTRIBUTION_PATH))
+            kwargs.get('path', settings.ANSIBLE_DEFAULT_DISTRIBUTION_PATH)
+        )
 
         if path == settings.ANSIBLE_DEFAULT_DISTRIBUTION_PATH:
             path = INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)
