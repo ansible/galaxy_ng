@@ -13,9 +13,12 @@ def test_locked_roles_exist(ansible_config):
     galaxy_locked_roles = [
         "galaxy.collection_admin",
         "galaxy.execution_environment_admin",
-        "galaxy.namespace_owner",
+        "galaxy.group_admin",
         "galaxy.publisher",
+        "galaxy.user_admin",
+        "galaxy.namespace_owner",
         "galaxy.synclist_owner",
+        "galaxy.content_admin"
     ]
 
     config = ansible_config("ansible_partner")

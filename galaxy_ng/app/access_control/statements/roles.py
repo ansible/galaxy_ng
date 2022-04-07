@@ -24,6 +24,9 @@ VIEWSETS = {
     },
     "NamespaceViewSet": {
         "LOCKED_ROLES": {
+            "galaxy.content_admin": [
+                "ansible.modify_ansible_repo_content",
+            ],
             "galaxy.namespace_owner": [
                 "galaxy.add_namespace",
                 "galaxy.change_namespace",
@@ -36,6 +39,18 @@ VIEWSETS = {
                 "galaxy.upload_to_namespace",
                 "ansible.delete_collection",
             ],
+            "galaxy.group_admin": [
+                "galaxy.view_group",
+                "galaxy.delete_group",
+                "galaxy.add_group",
+                "galaxy.change_group",
+            ],
+            "galaxy.user_admin": [
+                "galaxy.view_user",
+                "galaxy.delete_user",
+                "galaxy.add_user",
+                "galaxy.change_user",
+            ],
         },
     },
     "SyncListViewSet": {
@@ -45,6 +60,7 @@ VIEWSETS = {
                 "galaxy.change_synclist",
                 "galaxy.delete_synclist",
                 "galaxy.view_synclist",
+                "ansible.change_collectionremote",
             ],
         }
     },

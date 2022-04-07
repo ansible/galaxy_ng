@@ -46,3 +46,12 @@ class ContentRedirectContentGuardViewSet(
 ):
     queryset = models.ContentRedirectContentGuard.objects.all()
     endpoint_name = "contentgaurd"
+
+
+class AuthViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+):
+    queryset = models.auth.Group.objects.all()
+    endpoint_name = "auth"
