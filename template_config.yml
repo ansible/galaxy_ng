@@ -5,9 +5,9 @@
 
 additional_repos:
 - bindings: true
-  branch: fix/download-url
+  branch: main
   name: pulp_ansible
-  org: newswangerd
+  org: pulp
 - bindings: true
   branch: 2.10.2
   name: pulp_container
