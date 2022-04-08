@@ -24,7 +24,10 @@ check_manifest: true
 check_openapi_schema: true
 check_stray_pulpcore_imports: true
 cherry_pick_automation: false
-ci_env: {}
+# TODO: remove this when we go back to pinning to a stable branch
+ci_env: {
+  "LOCK_REQUIREMENTS": 0,
+}
 ci_trigger: '{pull_request: {branches: [''*'']}, push: {branches: [''*'']}}'
 core_import_allowed:
 - pulpcore.app.*viewsets
