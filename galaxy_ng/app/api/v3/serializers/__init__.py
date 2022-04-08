@@ -1,9 +1,5 @@
 from .collection import (
-    CollectionSerializer,
-    CollectionVersionSerializer,
-    CollectionVersionListSerializer,
     CollectionUploadSerializer,
-    UnpaginatedCollectionVersionSerializer,
 )
 
 from .namespace import (
@@ -21,9 +17,6 @@ from .task import (
 )
 
 __all__ = (
-    'CollectionSerializer',
-    'CollectionVersionSerializer',
-    'CollectionVersionListSerializer',
     'CollectionUploadSerializer',
     'GroupSummarySerializer',
     'NamespaceSerializer',

@@ -61,9 +61,9 @@ class ViewOnlyTestCase(BaseTestCase):
         )
 
         self.collections_detail_url = reverse(
-            'galaxy:api:content:v3:collections-detail',
+            'galaxy:api:v3:collections-detail',
             kwargs={
-                'path': self.repo.name,
+                'distro_base_path': self.repo.name,
                 'namespace': self.namespace.name,
                 'name': self.collection.name
             }

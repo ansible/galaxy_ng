@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import transaction
 from django.core.exceptions import BadRequest
 from django.utils.translation import gettext_lazy as _
@@ -53,8 +52,3 @@ class GroupModelPermissionsMixin:
     def set_object_groups(self):
         if self._groups:
             self._set_groups(self._groups)
-
-
-class UnauthenticatedCollectionAccessMixin:
-    def unauthenticated_collection_access_enabled(self, request, view, action):
-        return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS

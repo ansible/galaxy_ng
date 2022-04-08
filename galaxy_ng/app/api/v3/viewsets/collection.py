@@ -12,28 +12,19 @@ from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import CollectionVersion
+
 from pulpcore.plugin.models import Content
 from pulpcore.plugin.models import SigningService
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
-from pulpcore.plugin.viewsets import OperationPostponedResponse
-from rest_framework import status
 from rest_framework.exceptions import APIException, NotFound
-from rest_framework.request import Request
 from rest_framework.response import Response
-from semantic_version import SimpleSpec, Version
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.v3.serializers import (
-    CollectionSerializer,
-    CollectionUploadSerializer,
-    CollectionVersionListSerializer,
-    CollectionVersionSerializer,
-    UnpaginatedCollectionVersionSerializer,
-)
+from galaxy_ng.app.api.v3.serializers import CollectionUploadSerializer
 from galaxy_ng.app.common import metrics
 from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT, DeploymentMode
@@ -41,196 +32,12 @@ from galaxy_ng.app.tasks import (
     call_move_content_task,
     curate_all_synclist_repository,
     call_sign_and_move_task,
-    delete_collection,
-    delete_collection_version,
     import_and_auto_approve,
     import_and_move_to_staging,
 )
 
 
 log = logging.getLogger(__name__)
-
-
-class ViewNamespaceSerializerContextMixin:
-    def get_serializer_context(self):
-        """Inserts distribution path to a serializer context."""
-
-        context = super().get_serializer_context()
-
-        # view_namespace will be used by the serializers that need to return different hrefs
-        # depending on where in the urlconf they are.
-        # view_route is the url 'route' pattern, used to
-        # handle the special case /api/automation-hub/v3/collections/ not having
-        # a <str:path> in it's url
-        request = context.get("request", None)
-        context["view_namespace"] = None
-        if request:
-            context["view_namespace"] = request.resolver_match.namespace
-            context["view_route"] = request.resolver_match.route
-
-        return context
-
-
-class RepoMetadataViewSet(api_base.LocalSettingsMixin,
-                          pulp_ansible_views.RepoMetadataViewSet):
-    permission_classes = [access_policy.CollectionAccessPolicy]
-
-
-class UnpaginatedCollectionViewSet(api_base.LocalSettingsMixin,
-                                   ViewNamespaceSerializerContextMixin,
-                                   pulp_ansible_views.UnpaginatedCollectionViewSet):
-    pagination_class = None
-    permission_classes = [access_policy.CollectionAccessPolicy]
-    serializer_class = CollectionSerializer
-
-
-def get_collection_dependents(parent):
-    """Given a parent collection, return a list of collection versions that depend on it."""
-    key = f"{parent.namespace}.{parent.name}"
-    dependents = []
-    for child in CollectionVersion.objects.exclude(collection=parent).filter(
-        dependencies__has_key=key
-    ):
-        dependents.append(child)
-    return dependents
-
-
-class CollectionViewSet(api_base.LocalSettingsMixin,
-                        ViewNamespaceSerializerContextMixin,
-                        pulp_ansible_views.CollectionViewSet):
-    permission_classes = [access_policy.CollectionAccessPolicy]
-    serializer_class = CollectionSerializer
-
-    @extend_schema(
-        description="Trigger an asynchronous delete task",
-        responses={status.HTTP_202_ACCEPTED: AsyncOperationResponseSerializer},
-    )
-    def destroy(self, request: Request, *args, **kwargs) -> Response:
-        """
-        Allow a Collection to be deleted.
-        1. Perform Dependency Check to verify that each CollectionVersion
-           inside Collection can be deleted
-        2. If the Collection can’t be deleted, return the reason why
-        3. If it can, dispatch task to delete each CollectionVersion
-           and the Collection
-        """
-        collection = self.get_object()
-
-        # dependency check
-        dependents = get_collection_dependents(collection)
-        if dependents:
-            return Response(
-                {
-                    "detail": _(
-                        "Collection {namespace}.{name} could not be deleted "
-                        "because there are other collections that require it."
-                    ).format(
-                        namespace=collection.namespace,
-                        name=collection.name,
-                    ),
-                    "dependent_collection_versions": [
-                        f"{dep.namespace}.{dep.name} {dep.version}" for dep in dependents
-                    ],
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        repositories = set()
-        for version in collection.versions.all():
-            for repo in version.repositories.all():
-                repositories.add(repo)
-
-        async_result = dispatch(
-            delete_collection,
-            exclusive_resources=list(repositories),
-            kwargs={"collection_pk": collection.pk},
-        )
-
-        return OperationPostponedResponse(async_result, request)
-
-
-class UnpaginatedCollectionVersionViewSet(
-    api_base.LocalSettingsMixin,
-    ViewNamespaceSerializerContextMixin,
-    pulp_ansible_views.UnpaginatedCollectionVersionViewSet,
-):
-    pagination_class = None
-    serializer_class = UnpaginatedCollectionVersionSerializer
-    permission_classes = [access_policy.CollectionAccessPolicy]
-
-
-def get_dependents(parent):
-    """Given a parent collection version, return a list of
-    collection versions that depend on it.
-    """
-    key = f"{parent.namespace}.{parent.name}"
-    dependents = []
-    for child in CollectionVersion.objects.filter(dependencies__has_key=key):
-        spec = SimpleSpec(child.dependencies[key])
-        if spec.match(Version(parent.version)):
-            dependents.append(child)
-    return dependents
-
-
-class CollectionVersionViewSet(api_base.LocalSettingsMixin,
-                               ViewNamespaceSerializerContextMixin,
-                               pulp_ansible_views.CollectionVersionViewSet):
-    serializer_class = CollectionVersionSerializer
-    permission_classes = [access_policy.CollectionAccessPolicy]
-    list_serializer_class = CollectionVersionListSerializer
-
-    @extend_schema(
-        description="Trigger an asynchronous delete task",
-        responses={status.HTTP_202_ACCEPTED: AsyncOperationResponseSerializer},
-    )
-    def destroy(self, request: Request, *args, **kwargs) -> Response:
-        """
-        Allow a CollectionVersion to be deleted.
-        1. Perform Dependency Check to verify that the collection version can be deleted
-        2. If the collection version can’t be deleted, return the reason why
-        3. If it can, dispatch task to delete CollectionVersion and clean up repository.
-           If the version being deleted is the last collection version in the collection,
-           remove the collection object as well.
-        """
-        collection_version = self.get_object()
-
-        # dependency check
-        dependents = get_dependents(collection_version)
-        if dependents:
-            return Response(
-                {
-                    "detail": _(
-                        "Collection version {namespace}.{name} {version} could not be "
-                        "deleted because there are other collections that require it."
-                    ).format(
-                        namespace=collection_version.namespace,
-                        name=collection_version.collection.name,
-                        version=collection_version.version,
-                    ),
-                    "dependent_collection_versions": [
-                        f"{dep.namespace}.{dep.name} {dep.version}" for dep in dependents
-                    ],
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        async_result = dispatch(
-            delete_collection_version,
-            exclusive_resources=collection_version.repositories.all(),
-            kwargs={"collection_version_pk": collection_version.pk},
-        )
-
-        return OperationPostponedResponse(async_result, request)
-
-
-class CollectionVersionDocsViewSet(api_base.LocalSettingsMixin,
-                                   pulp_ansible_views.CollectionVersionDocsViewSet):
-    permission_classes = [access_policy.CollectionAccessPolicy]
-
-
-class CollectionImportViewSet(api_base.LocalSettingsMixin,
-                              pulp_ansible_views.CollectionImportViewSet):
-    permission_classes = [access_policy.CollectionAccessPolicy]
 
 
 class CollectionUploadViewSet(api_base.LocalSettingsMixin,
@@ -271,8 +78,15 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
            if user does not specify distribution base path
            then use an inbound distribution based on filename namespace.
         """
-        path = kwargs['path']
-        if kwargs.get('no_path_specified', None):
+
+        # the legacy collection upload views don't get redirected and still have to use the
+        # old path arg
+        path = kwargs.get(
+            'distro_base_path',
+            kwargs.get('path', settings.ANSIBLE_DEFAULT_DISTRIBUTION_PATH)
+        )
+
+        if path == settings.ANSIBLE_DEFAULT_DISTRIBUTION_PATH:
             path = INBOUND_REPO_NAME_FORMAT.format(namespace_name=filename_ns)
         return path
 
@@ -346,7 +160,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         # TODO: CollectionImport.get_absolute_url() should be able to generate this, but
         #       it needs the  repo/distro base_path for the <path> part of url
-        import_obj_url = reverse("galaxy:api:content:v3:collection-import",
+        import_obj_url = reverse("galaxy:api:v3:collection-imports-detail",
                                  kwargs={'pk': str(task_detail.pk),
                                          'path': path})
 
@@ -370,10 +184,10 @@ class CollectionArtifactDownloadView(api_base.APIView):
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
-        distro_base_path = self.kwargs['path']
+        distro_base_path = self.kwargs['distro_base_path']
         filename = self.kwargs['filename']
         prefix = settings.CONTENT_PATH_PREFIX.strip('/')
-        distribution = self._get_ansible_distribution(self.kwargs['path'])
+        distribution = self._get_ansible_distribution(distro_base_path)
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(

@@ -197,15 +197,15 @@ class TestUiCollectionViewSet(BaseTestCase):
         _get_create_version_in_repo(self.namespace, self.collection1, self.repo2, version="1.0.0")
 
         self.repo1_list_url = get_current_ui_url(
-            'collections-list', kwargs={'path': 'repo1'})
+            'collections-list', kwargs={'distro_base_path': 'repo1'})
         self.repo2_list_url = get_current_ui_url(
-            'collections-list', kwargs={'path': 'repo2'})
+            'collections-list', kwargs={'distro_base_path': 'repo2'})
         self.repo3_list_url = get_current_ui_url(
-            'collections-list', kwargs={'path': 'repo3'})
+            'collections-list', kwargs={'distro_base_path': 'repo3'})
         self.repo1_collection1_detail_url = get_current_ui_url(
             'collections-detail',
             kwargs={
-                'path': 'repo1',
+                'distro_base_path': 'repo1',
                 'namespace': namespace_name,
                 'name': collection1_name})
 

@@ -191,12 +191,12 @@ paths = [
     path('groups/', include(group_paths)),
     path('collection_signing/', include(signing_paths)),
     path(
-        'repo/<str:path>/',
+        'repo/<str:distro_base_path>/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
         name='collections-list'
     ),
     path(
-        'repo/<str:path>/<str:namespace>/<str:name>/',
+        'repo/<str:distro_base_path>/<str:namespace>/<str:name>/',
         viewsets.CollectionViewSet.as_view({'get': 'retrieve'}),
         name='collections-detail'
     ),

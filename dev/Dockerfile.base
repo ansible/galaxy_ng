@@ -73,6 +73,7 @@ RUN set -ex; \
 
 USER root:root
 RUN set -ex; \
+    mkdir --mode=2775 -p /etc/pulp/certs/ && \
     if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic; fi
 
@@ -86,10 +87,12 @@ RUN set -ex; \
              /var/lib/pulp/artifact \
              /var/lib/pulp/tmp \
              /var/lib/pulp/scripts \
+             /etc/pulp/certs \
              /tmp/ansible \
     && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/artifact \
     && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/tmp \
     && chown ${USER_NAME}:${USER_GROUP} /var/lib/pulp/scripts \
+    && chown ${USER_NAME}:${USER_GROUP} /etc/pulp/certs \
     && chown ${USER_NAME}:${USER_GROUP} \
         /tmp/ansible \
         /etc/ansible \
@@ -101,7 +104,6 @@ RUN set -ex; \
     && touch /var/log/galaxy_api_access.log \
     && chmod 0644 /var/log/galaxy_api_access.log \
     && chown galaxy:galaxy /var/log/galaxy_api_access.log \
-    && mkdir -p /etc/pulp/certs/ \
     && echo "DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=" > /etc/pulp/certs/database_fields.symmetric.key
 
 # This symmetric.key is for dev only and should not be used in production

@@ -1,4 +1,87 @@
+# Pulp ansible has the collections api broken down into a bunch of separate viewsets
+# (ie: collection versions, collections, download, upload etc.) Galaxy NG expects the
+# functionality of these viewsets to all be roughly the same, so instead of duplicating
+# the statenents for these viewsets, they're stored here and reused on a bunch of different
+# policies.
+_collection_statements = [
+    {
+        "action": ["list", "retrieve"],
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": "has_rh_entitlements",
+    },
+    {
+        "action": "destroy",
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": [
+            "has_model_perms:ansible.delete_collection",
+            "has_rh_entitlements",
+        ],
+    },
+    {
+        "action": ["download"],
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": "has_rh_entitlements",
+    },
+    {
+        "action": "create",
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": ["can_create_collection", "has_rh_entitlements"],
+    },
+    {
+        "action": "update",
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": ["can_update_collection", "has_rh_entitlements"],
+    },
+    {
+        "action": "move_content",
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": [
+            "has_model_perms:ansible.modify_ansible_repo_content",
+            "has_rh_entitlements",
+        ],
+    },
+    {
+        "action": "curate",
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": [
+            "has_model_perms:ansible.modify_ansible_repo_content",
+            "has_rh_entitlements",
+        ],
+    },
+    {
+        "action": "sign",
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": [
+            "can_sign_collections",
+            "has_rh_entitlements"]
+    },
+]
+
 INSIGHTS_STATEMENTS = {
+    'CollectionViewSet': _collection_statements,
+    'pulp_ansible/v3/collections': _collection_statements,
+    'pulp_ansible/v3/collection-versions': _collection_statements,
+    'pulp_ansible/v3/collection-versions/docs': _collection_statements,
+    'pulp_ansible/v3/collections/imports': _collection_statements,
+
+    # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
+    # For now endpoints are temporary deactivated
+    'pulp_ansible/v3/collection-versions/all': [],
+    'pulp_ansible/v3/collections/all': [],
+    'pulp_ansible/v3/repo-metadata': [],
+
+    # disable upload and download APIs since we're not using them yet
+    'pulp_ansible/v3/collections/upload': [],
+    'pulp_ansible/v3/collections/download': [],
+
     "NamespaceViewSet": [
         {
             "action": ["list", "retrieve"],
@@ -23,67 +106,6 @@ INSIGHTS_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": ["has_model_or_obj_perms:galaxy.change_namespace", "has_rh_entitlements"],
-        },
-    ],
-    "CollectionViewSet": [
-        {
-            "action": ["list", "retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_rh_entitlements",
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_perms:ansible.delete_collection",
-                "has_rh_entitlements",
-            ],
-        },
-        {
-            "action": ["download"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_rh_entitlements",
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["can_create_collection", "has_rh_entitlements"],
-        },
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "can_update_collection",
-        },
-        {
-            "action": "move_content",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_perms:ansible.modify_ansible_repo_content",
-                "has_rh_entitlements",
-            ],
-        },
-        {
-            "action": "sign",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "can_sign_collections",
-                "has_rh_entitlements"]
-        },
-        {
-            "action": "curate",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_perms:ansible.modify_ansible_repo_content",
-                "has_rh_entitlements",
-            ],
         },
     ],
     "CollectionRemoteViewSet": [

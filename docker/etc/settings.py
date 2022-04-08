@@ -12,8 +12,6 @@ ANSIBLE_API_HOSTNAME = os.environ.get('PULP_CONTENT_ORIGIN')
 
 GALAXY_API_PATH_PREFIX = "/api/automation-hub"
 GALAXY_AUTHENTICATION_CLASSES = ['galaxy_ng.app.auth.auth.RHIdentityAuthentication']
-GALAXY_PERMISSION_CLASSES = ['rest_framework.permissions.IsAuthenticated',
-                             'galaxy_ng.app.auth.auth.RHEntitlementRequired']
 
 # GALAXY_AUTO_SIGN_COLLECTIONS = True
 # GALAXY_COLLECTION_SIGNING_SERVICE = "ansible-default"

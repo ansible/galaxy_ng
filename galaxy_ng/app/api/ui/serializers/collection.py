@@ -175,7 +175,7 @@ class CollectionDetailSerializer(_CollectionSerializer):
 
     @extend_schema_field(CollectionVersionSummarySerializer(many=True))
     def get_all_versions(self, obj):
-        path = self.context['request'].parser_context['kwargs']['path']
+        path = self.context['request'].parser_context['kwargs']['distro_base_path']
         distro = AnsibleDistribution.objects.get(base_path=path)
         repository_version = distro.repository.latest_version()
         versions_in_repo = CollectionVersion.objects.filter(

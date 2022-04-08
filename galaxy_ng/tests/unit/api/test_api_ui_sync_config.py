@@ -43,10 +43,10 @@ class TestUiSyncConfigViewSet(BaseSyncListViewSet):
         self.community_remote = CollectionRemote.objects.get(name='community')
 
     def build_config_url(self, path):
-        return reverse('galaxy:api:content:v3:sync-config', kwargs={'path': path})
+        return reverse('galaxy:api:v3:sync-config', kwargs={'path': path})
 
     def build_sync_url(self, path):
-        return reverse('galaxy:api:content:v3:sync', kwargs={'path': path})
+        return reverse('galaxy:api:v3:sync', kwargs={'path': path})
 
     def test_positive_get_config_sync_for_certified(self):
         self.client.force_authenticate(user=self.admin_user)

@@ -1,11 +1,11 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-83-g29b161f
+# generated with plugin_template@2021.08.26-100-gbb6460d
 
 additional_repos:
 - bindings: true
-  branch: 0.12.0
+  branch: main
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -42,7 +42,9 @@ disabled_redis_runners: []
 docker_fixtures: false
 docs_test: false
 flake8: true
+github_org: pulp
 issue_tracker: null
+keep_ci_update_for_latest_branches: 5
 noissue_marker: No-Issue
 parallel_test_workers: 8
 plugin_app_label: galaxy
@@ -97,3 +99,4 @@ travis_notifications: null
 update_github: false
 upgrade_range: []
 use_issue_template: false
+

@@ -34,7 +34,6 @@ from pulpcore.client.pulpcore import (
 )
 from pulpcore.client.galaxy_ng import (
     ApiClient as GalaxyApiClient,
-    ApiContentV3CollectionsApi,
     ApiContentV3SyncApi,
     ApiContentV3SyncConfigApi,
     ApiV3NamespacesApi,
@@ -46,7 +45,10 @@ from pulpcore.client.galaxy_ng import (
     ApiUiV1ExecutionEnvironmentsRegistriesSyncApi,
     ApiUiV1ExecutionEnvironmentsRepositoriesContentImagesApi as ContainerImagesAPI,
 )
-
+from pulpcore.client.pulp_ansible import (
+    ApiClient as PulpAnsibleApiClient,
+    PulpAnsibleApiV3CollectionsApi,
+)
 
 configuration = config.get_config().get_bindings_config()
 
@@ -60,6 +62,11 @@ def set_up_module():
 def gen_galaxy_client():
     """Return an OBJECT for galaxy client."""
     return GalaxyApiClient(configuration)
+
+
+def gen_pulp_ansible_client():
+    """Return an OBJECT for galaxy client."""
+    return PulpAnsibleApiClient(configuration)
 
 
 def gen_galaxy_remote(url=GALAXY_FIXTURE_URL, **kwargs):
@@ -172,9 +179,10 @@ class TestCaseUsingBindings(PulpTestCase):
         """Create class-wide variables."""
         cls.cfg = config.get_config()
         cls.client = gen_galaxy_client()
+        cls.pulp_ansible_client = gen_pulp_ansible_client()
         cls.smash_client = api.Client(cls.cfg, api.smart_handler)
         cls.namespace_api = ApiV3NamespacesApi(cls.client)
-        cls.collections_api = ApiContentV3CollectionsApi(cls.client)
+        cls.collections_api = PulpAnsibleApiV3CollectionsApi(cls.pulp_ansible_client)
         cls.sync_config_api = ApiContentV3SyncConfigApi(cls.client)
         cls.sync_api = ApiContentV3SyncApi(cls.client)
         cls.container_repo_tags_api = ContainerRepositoryEndpointApi(cls.client)
@@ -246,7 +254,8 @@ class TestCaseUsingBindings(PulpTestCase):
 
     def delete_collection(self, collection_namespace, collection_name):
         """Delete a Collection"""
-        self.smash_client.delete(
-            f"{self.galaxy_api_prefix}/v3/collections/{collection_namespace}/{collection_name}/"
-        )
-
+        monitor_task(self.collections_api.delete(
+            namespace=collection_namespace,
+            name=collection_name,
+            path="published"
+        ).task)

@@ -1,22 +1,59 @@
 import logging
+import os
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from rest_access_policy import AccessPolicy
 from rest_framework.exceptions import NotFound
+
+from pulpcore.plugin.access_policy import AccessPolicyFromDB
 
 from pulp_container.app.access_policy import NamespacedAccessPolicyMixin
 from pulp_container.app import models as container_models
 
 from galaxy_ng.app import models
-from galaxy_ng.app.access_control.mixins import UnauthenticatedCollectionAccessMixin
 
 log = logging.getLogger(__name__)
 
 
-class AccessPolicyBase(AccessPolicy):
+# TODO this is a function in pulpcore that needs to get moved ot the plugin api.
+# from pulpcore.plugin.util import get_view_urlpattern
+def get_view_urlpattern(view):
+    """
+    Get a full urlpattern for a view which includes a parent urlpattern if it exists.
+    E.g. for repository versions the urlpattern is just `versions` without its parent_viewset
+    urlpattern.
+
+    Args:
+        view(subclass rest_framework.viewsets.GenericViewSet): The view being requested.
+
+    Returns:
+        str: a full urlpattern for a specified view/viewset
+    """
+    if hasattr(view, "parent_viewset") and view.parent_viewset:
+        return os.path.join(view.parent_viewset.urlpattern(), view.urlpattern())
+    return view.urlpattern()
+
+
+class AccessPolicyBase(AccessPolicyFromDB):
+    """
+    This class is capable of loading access policy statements from galaxy_ng's hardcoded list of
+    statements as well as from pulp's access policy database table. Priority is given to statements
+    that are found in the hardcoded list of statements, so if a view name for a pulp viewset is
+    found there, it will be loaded over whatever is in the database. If no viewset is found that
+    matches the pulp viewset name, the statements will be loaded from the database as they would
+    normally be loaded in pulp ansible.
+
+    This class has two main functions.
+    1. It is configured as the default permission class in settings.py. This means it will be used
+       to load access policy definitions for all of the pulp viewsets and provides a mechanism to
+       override pulp viewset access policies as well as create custom policy conditions
+    2. It can be subclassed and used as a permission class for viewsets in galaxy_ng. This allows
+       for custom policy conditions to be declared for specific viewsets, rather than putting them
+       in the base class.
+    """
 
     _STATEMENTS = None
+    NAME = None
 
     @property
     def galaxy_statements(self):
@@ -32,13 +69,32 @@ class AccessPolicyBase(AccessPolicy):
             }
         return self._STATEMENTS
 
-    def _get_statements(self, deployment_mode):
-        return self.galaxy_statements[deployment_mode]
+    def _get_statements(self):
+        return self.galaxy_statements[settings.GALAXY_DEPLOYMENT_MODE]
 
     def get_policy_statements(self, request, view):
-        statements = self._get_statements(settings.GALAXY_DEPLOYMENT_MODE)
-        return statements.get(self.NAME, [])
+        statements = self._get_statements()
+        if self.NAME:
+            return statements.get(self.NAME, [])
 
+        try:
+            viewname = get_view_urlpattern(view)
+            override_ap = statements.get(viewname, None)
+
+            if override_ap:
+                return override_ap
+        except AttributeError:
+            pass
+
+        # Note: for the time being, pulp-container access policies should still be loaded from
+        # the databse, because we can't override the get creation hooks like this.
+        return super().get_policy_statements(request, view)
+
+    # if not defined, defaults to parent qs of None breaking Group Detail
+    def scope_queryset(self, view, qs):
+        return qs
+
+    # Define global conditions here
     def _get_rh_identity(self, request):
         if not isinstance(request.auth, dict):
             log.debug("No request rh_identity request.auth found for request %s", request)
@@ -50,7 +106,6 @@ class AccessPolicyBase(AccessPolicy):
 
         return x_rh_identity
 
-    # used by insights access policy
     def has_rh_entitlements(self, request, view, permission):
 
         x_rh_identity = self._get_rh_identity(request)
@@ -66,18 +121,6 @@ class AccessPolicyBase(AccessPolicy):
         entitlements = x_rh_identity.get("entitlements", {})
         entitlement = entitlements.get(settings.RH_ENTITLEMENT_REQUIRED, {})
         return entitlement.get("is_entitled", False)
-
-    # if not defined, defaults to parent qs of None breaking Group Detail
-    def scope_queryset(self, view, qs):
-        return qs
-
-
-class NamespaceAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
-    NAME = "NamespaceViewSet"
-
-
-class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
-    NAME = "CollectionViewSet"
 
     def can_update_collection(self, request, view, permission):
         if getattr(self, "swagger_fake_view", False):
@@ -119,6 +162,17 @@ class CollectionAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyB
     def unauthenticated_collection_download_enabled(self, request, view, permission):
         return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
 
+    def unauthenticated_collection_access_enabled(self, request, view, action):
+        return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS
+
+
+class NamespaceAccessPolicy(AccessPolicyBase):
+    NAME = "NamespaceViewSet"
+
+
+class CollectionAccessPolicy(AccessPolicyBase):
+    NAME = "CollectionViewSet"
+
 
 class CollectionRemoteAccessPolicy(AccessPolicyBase):
     NAME = "CollectionRemoteViewSet"
@@ -141,7 +195,7 @@ class UserAccessPolicy(AccessPolicyBase):
         return request.user == view.get_object()
 
 
-class MyUserAccessPolicy(UnauthenticatedCollectionAccessMixin, AccessPolicyBase):
+class MyUserAccessPolicy(AccessPolicyBase):
     NAME = "MyUserViewSet"
 
     def is_current_user(self, request, view, action):

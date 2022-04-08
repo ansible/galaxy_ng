@@ -11,10 +11,12 @@ from pulp_ansible.app.models import (
     Collection,
     CollectionVersion,
 )
+
+from pulp_ansible.app.galaxy.v3.views import get_collection_dependents, get_dependents
+
 from rest_framework import status
 
 from galaxy_ng.app import models
-from galaxy_ng.app.api.v3.viewsets.collection import get_collection_dependents, get_dependents
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.tests.constants import TEST_COLLECTION_CONFIGS
 
@@ -78,34 +80,34 @@ class TestCollectionViewsets(BaseTestCase):
         #       or create dummy ContentArtifacts directly
 
         self.collections_url = reverse(
-            'galaxy:api:content:v3:collections-list',
+            'galaxy:api:v3:collections-list',
             kwargs={
-                'path': self.repo.name,
+                'distro_base_path': self.repo.name,
             }
         )
 
         self.collections_detail_url = reverse(
-            'galaxy:api:content:v3:collections-detail',
+            'galaxy:api:v3:collections-detail',
             kwargs={
-                'path': self.repo.name,
+                'distro_base_path': self.repo.name,
                 'namespace': self.namespace.name,
                 'name': self.collection.name
             }
         )
 
         self.versions_url = reverse(
-            'galaxy:api:content:v3:collection-versions-list',
+            'galaxy:api:v3:collection-versions-list',
             kwargs={
-                'path': self.repo.name,
+                'distro_base_path': self.repo.name,
                 'namespace': self.namespace.name,
                 'name': self.collection.name
             }
         )
 
         self.versions_detail_url = reverse(
-            'galaxy:api:content:v3:collection-versions-detail',
+            'galaxy:api:v3:collection-versions-detail',
             kwargs={
-                'path': self.repo.name,
+                'distro_base_path': self.repo.name,
                 'namespace': self.namespace.name,
                 'name': self.collection.name,
                 'version': '1.1.2'
@@ -113,30 +115,30 @@ class TestCollectionViewsets(BaseTestCase):
         )
 
         self.collection_upload_url = reverse(
-            "galaxy:api:v3:default-content:collection-artifact-upload"
+            "galaxy:api:v3:collection-artifact-upload"
         )
 
         # The following tests use endpoints related to
         # issue https://issues.redhat.com/browse/AAH-224
         # For now endpoints are temporary deactivated
         # self.all_collections_url = reverse(
-        #     "galaxy:api:content:v3:all-collections-list",
+        #     "galaxy:api:v3:all-collections-list",
         #     kwargs={
-        #         "path": self.repo.name,
+        #         "distro_base_path": self.repo.name,
         #     },
         # )
         #
         # self.all_versions_url = reverse(
-        #     "galaxy:api:content:v3:all-collection-versions-list",
+        #     "galaxy:api:v3:all-collection-versions-list",
         #     kwargs={
-        #         "path": self.repo.name,
+        #         "distro_base_path": self.repo.name,
         #     },
         # )
         #
         # self.metadata_url = reverse(
-        #     "galaxy:api:content:v3:repo-metadata",
+        #     "galaxy:api:v3:repo-metadata",
         #     kwargs={
-        #         "path": self.repo.name,
+        #         "distro_base_path": self.repo.name,
         #     },
         # )
 

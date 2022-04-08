@@ -25,13 +25,13 @@ class TestUiTaskListViewSet(BaseSyncListViewSet):
         self.certified_remote = CollectionRemote.objects.get(name='rh-certified')
 
     def build_sync_url(self, path):
-        return reverse('galaxy:api:content:v3:sync', kwargs={'path': path})
+        return reverse('galaxy:api:v3:sync', kwargs={'path': path})
 
     def build_task_url(self):
-        return reverse('galaxy:api:v3:default-content:tasks-list')
+        return reverse('galaxy:api:v3:tasks-list')
 
     def build_task_detail_url(self, pk):
-        return reverse('galaxy:api:v3:default-content:tasks-detail', kwargs={"pk": pk})
+        return reverse('galaxy:api:v3:tasks-detail', kwargs={"pk": pk})
 
     def test_tasks_required_fields(self):
         # Spawn a task

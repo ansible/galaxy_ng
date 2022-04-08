@@ -200,6 +200,13 @@ jobs:
           name: python-client.tar
           path: python-client.tar
 
+      - name: Upload python client docs
+        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: python-client-docs.tar
+          path: python-client-docs.tar
+
       - name: Upload ruby client packages
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
         uses: actions/upload-artifact@v2
@@ -270,7 +277,7 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install gitpython python-redmine
+          pip install gitpython python-redmine requests packaging
           echo ::endgroup::
 
       - name: Push branch and tag to GitHub
