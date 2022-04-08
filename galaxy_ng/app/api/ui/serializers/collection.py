@@ -145,7 +145,7 @@ class _CollectionSerializer(Serializer):
     @extend_schema_field(NamespaceSummarySerializer)
     def get_namespace(self, obj):
         namespace = Namespace.objects.get(name=obj.namespace)
-        return NamespaceSummarySerializer(namespace).data
+        return NamespaceSummarySerializer(namespace, context=self.context).data
 
 
 class CollectionListSerializer(_CollectionSerializer):
