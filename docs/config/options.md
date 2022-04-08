@@ -168,6 +168,8 @@ Here is a [diagram explaining](https://www.xmind.net/m/VPSF59/#) the loading ord
 | `GALAXY_PERMISSION_CLASSES`      | List of classes for permission backend , Default: `[]` |
 | `GALAXY_AUTO_SIGN_COLLECTIONS`      | Set if system sign collections upon approval , Default: `False` |
 | `GALAXY_COLLECTION_SIGNING_SERVICE`  | The signing service to use for signing , Default: `ansible-default` |
+| `GALAXY_SIGNATURE_UPLOAD_ENABLED`  | Used by UI to hide/show the upload buttons for signature, Default: `False` |
+| `GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL`  | Approval dashboard and move endpoint must require signature?, Default: `False` |
 
 
 For SSO Keycloak configuration see [keycloak](keycloak)
@@ -181,3 +183,14 @@ For SSO Keycloak configuration see [keycloak](keycloak)
 | `ANSIBLE_API_HOSTNAME`      | Hostname for the Ansible API, Default: `same as PULP_CONTENT_ORIGIN` |
 
 For more configuration options for pulp check on [https://docs.pulpproject.org/pulpcore/configuration/index.html](https://docs.pulpproject.org/pulpcore/configuration/index.html)
+
+
+### Immutable configuration options
+
+Some configuration keys appears on the settings but are not possible to be overwritten as
+Galaxy forces the final value for those variables.
+
+- `REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES` (defaults to value of `GALAXY_AUTHENTICATION_CLASSES`)
+- `ANSIBLE_URL_NAMESPACE` (default to fixed value `"galaxy:api:v3:"`)
+- `ANSIBLE_DEFAULT_DISTRIBUTION_PATH` (default to value of `GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH`)
+

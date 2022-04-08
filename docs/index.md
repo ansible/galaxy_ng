@@ -1,3 +1,8 @@
+![](imgs/medium.png)
+
+!!! WARNING
+    This documentation is a **Work In Progress** some pages are incomplete.
+
 # Galaxy NG
 
 [![Build Status](https://github.com/ansible/galaxy_ng/actions/workflows/ci.yml/badge.svg)](https://github.com/ansible/galaxy_ng/actions/workflows/ci.yml)
