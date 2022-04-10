@@ -78,9 +78,11 @@ docker/build:     ## Build all development images.
 
 # e.g: make docker/test TEST=.api.test_api_ui_sync_config
 # if TEST is not passed run all tests.
+# TEST_ARGS="-v3"
 .PHONY: docker/test
 docker/test:      ## Run unit tests.
-	$(call exec_or_run, api, $(DJ_MANAGER), test, galaxy_ng.tests.unit$(TEST))
+	#$(call exec_or_run, api, $(DJ_MANAGER), test, $(TEST_ARGS), galaxy_ng.tests.unit$(TEST))
+	$(call exec_or_run, api, 'ls -al /src')
 
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from fixtures
