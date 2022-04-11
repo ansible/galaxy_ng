@@ -291,7 +291,7 @@ jobs:
         run: bash .github/workflows/scripts/create_release_from_tag.sh ${{ github.event.inputs.release }}
 
       - name: Cleanup repository before making changelog PR
-        run: rm -rf .lock generation galaxy_ng_client* *-client.tar galaxy_ng.tar todo web docs.tar
+        run: rm -rf .lock generation galaxy_ng_client* *-client.tar galaxy_ng.tar todo web *docs.tar
 
       - name: Stage changelog for master branch
         run: python .github/workflows/scripts/stage-changelog-for-default-branch.py ${{ github.event.inputs.release }}
