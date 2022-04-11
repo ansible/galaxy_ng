@@ -1,38 +1,44 @@
+from django.contrib.auth.models import Permission
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+
+from guardian.shortcuts import get_perms_for_model
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
-from pulpcore.plugin.models.role import Role
-
-from pulpcore.plugin.util import get_perms_for_model
 
 from galaxy_ng.app.models import auth as auth_models
 
 
 class GroupPermissionField(serializers.Field):
     def _validate_group(self, group_data):
-        if 'object_roles' not in group_data:
+        if 'object_permissions' not in group_data:
             raise ValidationError(detail={
-                'groups': _('object_roles field is required')})
+                'groups': _('object_permissions field is required')})
 
         if 'id' not in group_data and 'name' not in group_data:
             raise ValidationError(detail={
                 'groups': _('id or name field is required')})
 
-        roles = group_data['object_roles']
+        perms = group_data['object_permissions']
 
-        if not isinstance(roles, list):
+        if not isinstance(perms, list):
             raise ValidationError(detail={
-                'groups': _('object_roles must be a list of strings')})
+                'groups': _('object_permissions must be a list of strings')})
 
         # validate that the permissions exist
-        for role in roles:
+        for perm in perms:
+            if '.' in perm:
+                app_label, codename = perm.split('.', maxsplit=1)
+                filter_q = Q(content_type__app_label=app_label) & Q(codename=codename)
+            else:
+                filter_q = Q(codename=perm)
+
             # TODO(newswangerd): Figure out how to make this one SQL query instead of
             # performing N queries for each permission
-            if not Role.objects.filter(name=role).exists():
+            if not Permission.objects.filter(filter_q).exists():
                 raise ValidationError(detail={
-                    'groups': _('Role {} does not exist').format(role)})
+                    'groups': _('Permission {} does not exist').format(perm)})
 
     def to_representation(self, value):
         rep = []
@@ -40,7 +46,7 @@ class GroupPermissionField(serializers.Field):
             rep.append({
                 'id': group.id,
                 'name': group.name,
-                'object_roles': value[group]
+                'object_permissions': value[group]
             })
         return rep
 
@@ -59,10 +65,7 @@ class GroupPermissionField(serializers.Field):
                     group_filter[field] = group_data[field]
             try:
                 group = auth_models.Group.objects.get(**group_filter)
-                if 'object_permissions' in group_data:
-                    internal[group] = group_data['object_permissions']
-                if 'object_roles' in group_data:
-                    internal[group] = group_data['object_roles']
+                internal[group] = group_data['object_permissions']
             except auth_models.Group.DoesNotExist:
                 raise ValidationError(detail={
                     'groups': _("Group name=%s, id=%s does not exist") % (
@@ -81,6 +84,8 @@ class MyPermissionsField(serializers.Serializer):
             return []
         user = request.user
 
+        # guardian's get_perms(user, obj) method only returns user permissions,
+        # not all permissions a user has.
         my_perms = []
         for perm in get_perms_for_model(type(obj)).all():
             codename = "{}.{}".format(perm.content_type.app_label, perm.codename)

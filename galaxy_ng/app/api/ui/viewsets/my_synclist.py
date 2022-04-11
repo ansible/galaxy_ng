@@ -1,7 +1,7 @@
 import logging
 
 from django.shortcuts import get_object_or_404
-from pulpcore.plugin.util import get_objects_for_user
+from guardian.shortcuts import get_objects_for_user
 
 from rest_framework.decorators import action
 
@@ -30,8 +30,9 @@ class MySyncListViewSet(SyncListViewSet):
         return get_objects_for_user(
             self.request.user,
             "galaxy.change_synclist",
-            # any_perm=True,
-            qs=models.SyncList.objects.all(),
+            any_perm=True,
+            accept_global_perms=False,
+            klass=models.SyncList,
         )
 
     @action(detail=True, methods=["post"])

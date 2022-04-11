@@ -2,8 +2,6 @@ import logging
 
 from django.contrib.auth import models as auth_models
 
-from pulpcore.plugin.models import Group as PulpGroup
-
 log = logging.getLogger(__name__)
 
 __all__ = (
@@ -38,7 +36,7 @@ class GroupManager(auth_models.GroupManager):
         return f"{scope}:{name}"
 
 
-class Group(PulpGroup):
+class Group(auth_models.Group):
     objects = GroupManager()
 
     class Meta:
