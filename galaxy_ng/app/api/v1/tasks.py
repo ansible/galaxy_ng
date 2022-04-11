@@ -127,6 +127,10 @@ def get_role_version(
     tags = pid.stdout.decode('utf-8')
     tags = tags.split('\n')
     tags = [x.strip() for x in tags if x.strip()]
+
+    if github_reference and github_reference in tags:
+        return github_reference
+
     #print(f'TAGS: {tags}')
     if tags:
         return tags[-1]
@@ -276,7 +280,7 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
 
         role_meta = roles.get_path_role_meta(checkout_path)
 
-        enumerated_version = get_role_version(
+        github_refernce = get_role_version(
             checkout_path=checkout_path,
             github_user=github_user,
             github_repo=github_repo,
@@ -303,15 +307,15 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
             namespace=namespace,
             collection=collection,
             collection_name=collection_name,
-            collection_version=enumerated_version,
+            collection_version=github_reference,
             tags=role_tags
         )
 
-    print(f'namespace:{namespace} collection:{collection} version:{enumerated_version} cv:{collection_version}')
+    print(f'namespace:{namespace} collection:{collection} version:{github_reference} cv:{collection_version}')
 
-    for x in range(0, 5):
-        print(x)
-        time.sleep(1)
+    #for x in range(0, 5):
+    #    print(x)
+    #    time.sleep(1)
 
     print('STOP LEGACY ROLE IMPORT')
     return True
