@@ -3,6 +3,7 @@ from django.urls import include, path
 
 from . import views
 from .ui import urls as ui_urls
+from .v1 import urls as v1_urls
 from .v3 import urls as v3_urls
 
 DEFAULT_DISTRIBUTION_BASE_PATH = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH.strip('/')
@@ -51,8 +52,16 @@ content_urlpatterns = [
          kwargs={"reverse_url_name": "galaxy:api:content:root"}),
 ]
 
+<<<<<<< HEAD
 v3_combined = [
     path("v3/", include(v3_urlpatterns)),
+=======
+urlpatterns = [
+
+    path("v1/", include((v1_urls, app_name), namespace="v1")),
+
+    path("v3/", include((v3_urlpatterns, app_name), namespace="v3")),
+>>>>>>> 9731af1 (Add an api/v1 shim to allow for importing smuggled roles)
 
     path("", include(content_urlpatterns)),
 ]
@@ -82,3 +91,4 @@ urlpatterns = [
          name="api-redirect",
          kwargs={"reverse_url_name": "galaxy:api:root"}),
 ]
+#print(f'app.api.urls: {urlpatterns}')

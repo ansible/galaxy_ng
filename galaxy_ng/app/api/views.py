@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from pulp_ansible.app.models import AnsibleDistribution
 
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
@@ -16,7 +17,10 @@ from galaxy_ng.app.api import base as api_base
 
 # define the version matrix at the module level to avoid the redefinition on every API call.
 VERSIONS = {
-    "available_versions": {"v3": "v3/"},
+    "available_versions": {
+        "v1": "v1/",
+        "v3": "v3/"
+    },
     "server_version": apps.get_app_config("galaxy").version,
     "galaxy_ng_version": apps.get_app_config("galaxy").version,
     "galaxy_ng_commit": os.environ.get("GIT_COMMIT", ""),
@@ -28,7 +32,8 @@ VERSIONS = {
 
 
 class ApiRootView(api_base.APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         """
@@ -47,7 +52,8 @@ class ApiRootView(api_base.APIView):
 
 
 class ApiRedirectView(api_base.APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     """Redirect requests to /api/automation-hub/api/ to /api/automation-hub/
 

@@ -5,6 +5,7 @@ from django.urls import include, path
 
 from . import views
 from galaxy_ng.app.api import urls as api_urls
+from galaxy_ng.app.api.v1 import urls as api_v1_urls
 from galaxy_ng.ui import urls as ui_urls
 
 from drf_spectacular.views import (
@@ -20,7 +21,10 @@ galaxy_urls = [
     path(f"{API_PATH_PREFIX}/", include(api_urls)),
 ]
 
+#    url(r'^$', RedirectView.as_view(url="/ui/")),
+
 urlpatterns = [
+    #path("api/v1/", include((api_v1_urls, "apiv1"), namespace="galaxy_v1")),
     path("", include((galaxy_urls, "api"), namespace="galaxy")),
     path("", include(ui_urls)),
     path("", include("django_prometheus.urls")),

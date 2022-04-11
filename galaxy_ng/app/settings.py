@@ -45,7 +45,7 @@ GALAXY_API_REJECTED_DISTRIBUTION_BASE_PATH = "rejected"
 GALAXY_API_SYNCLIST_NAME_FORMAT = "{account_name}-synclist"
 
 # Require approval for incoming content, which uses a staging repository
-GALAXY_REQUIRE_CONTENT_APPROVAL = True
+GALAXY_REQUIRE_CONTENT_APPROVAL = False
 
 # Number of synclist to be processed in single task
 SYNCLIST_BATCH_SIZE = 200
@@ -149,10 +149,10 @@ LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 
 CONNECTED_ANSIBLE_CONTROLLERS = []
 
-GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS = False
-GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD = False
+GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS = True
+GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD = True
 
-GALAXY_ENABLE_API_ACCESS_LOG = False
+GALAXY_ENABLE_API_ACCESS_LOG = True
 # Extra AUTOMATED_LOGGING settings are defined on dynaconf_hooks.py
 # to be overridden by the /etc/pulp/settings.py
 # or environment variable PULP_GALAXY_ENABLE_API_ACCESS_LOG
