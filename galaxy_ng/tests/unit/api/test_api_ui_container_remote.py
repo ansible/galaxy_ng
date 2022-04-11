@@ -17,7 +17,12 @@ log = logging.getLogger(__name__)
 class TestContainerRemote(BaseTestCase):
     def setUp(self):
         super().setUp()
-        roles = ['galaxy.execution_environment_admin']
+        permissions = [
+            # change containers
+            'container.namespace_change_containerdistribution',
+            # create containers
+            'container.add_containernamespace',
+        ]
         self.container_user = auth_models.User.objects.create(username='container_user')
         self.admin = auth_models.User.objects.create(username='admin', is_superuser=True)
         self.regular_user = auth_models.User.objects.create(username='hacker')
@@ -38,7 +43,7 @@ class TestContainerRemote(BaseTestCase):
             "",
             "container_group",
             users=[self.container_user, ],
-            roles=roles
+            perms=permissions
         )
 
     def _create_remote(self, user, name, registry_pk):
