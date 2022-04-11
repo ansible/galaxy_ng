@@ -76,14 +76,23 @@ def move_permissions_to_roles(apps, schema_editor):
 
     # Model Permissions
     for group in Group.objects.filter(name__ne="system:partner-engineers"):
+
+        print(f'process group:{group}')
+
         permissions = group.permissions.all()
         perms_to_remove = []
 
         # Use Galaxy locked Roles where possible
         for locked_perm_names, locked_rolename in MODEL_PERMISSION_TRANSLATOR:
+
+            #for app_label, codename in locked_perm_names:
+            #    print(f'app_label: {app_label}')
+            #    print(f'codename: {codename}')
+
             locked_perms = [Permission.objects.filter(
                 content_type__app_label=app_label, codename=codename
             ).first() for app_label, codename in locked_perm_names]
+            print(f'\tlocked_rolename:{locked_rolename} locked_perms:{len(locked_perms)}')
 
             if all(locked_perms):
                 # compare locked role perms to perms
@@ -98,8 +107,12 @@ def move_permissions_to_roles(apps, schema_editor):
                     # add permissions from locked_perms to list to be removed
                     perms_to_remove.extend(locked_perms)
 
+            #print(f'\tgroup_roles count: {len(group_roles)}')
+            #print(f'\tperms_to_remove count: {len(perms_to_remove)}')
+
             # Handle batches
             if len(group_roles) > 1000:
+                #print('group_roles > 1000')
                 GroupRole.objects.bulk_create(group_roles)
                 group_roles.clear()
 
@@ -108,6 +121,7 @@ def move_permissions_to_roles(apps, schema_editor):
 
         # Create custom role for current Group with permissions not in Galaxy locked roles
         if len(permissions) > 0:
+            print(f'\tCREATE {group.name}_role ...')
             role, _ = Role.objects.get_or_create(name=f"{group.name}_role")
             role.permissions.set(permissions)
             group_roles.append(GroupRole(group=group, role=role))
@@ -115,6 +129,9 @@ def move_permissions_to_roles(apps, schema_editor):
     # Group Object Permissions
     groups = {}
     for gop in GroupObjectPermission.objects.all():
+
+        print(f'process gop {gop}')
+
         current_group_object_pk =f"{gop.group.name}_{gop.object_pk}"
         if current_group_object_pk not in groups:
             groups[current_group_object_pk] = {
@@ -127,6 +144,9 @@ def move_permissions_to_roles(apps, schema_editor):
             groups[current_group_object_pk]["permissions"].append(gop.permission)
 
     for g in groups:
+
+        print(f'process[2] group {g}')
+
         rolename = f"{groups[g]['group'].name}_{groups[g]['object_pk']}"
         role, _ = Role.objects.get_or_create(name=rolename)
         for perm in groups[g]['permissions']:
@@ -149,6 +169,9 @@ def move_permissions_to_roles(apps, schema_editor):
     # User Object Permissions
     users = {}
     for uop in UserObjectPermission.objects.all():
+
+        print(f'process uop {uop}')
+
         current_user_object_pk = f"{uop.user.username}_{uop.object_pk}"
         if current_user_object_pk not in users:
             users[current_user_object_pk] = {
@@ -161,6 +184,9 @@ def move_permissions_to_roles(apps, schema_editor):
             users[current_user_object_pk]["permissions"].append(uop.permission)
 
     for u in users:
+
+        print(f'process user {u}')
+
         rolename = f"{users[u]['user'].username}_{users[u]['object_pk']}"
         role, _ = Role.objects.get_or_create(name=rolename)
         for perm in users[u]['permissions']:
@@ -188,14 +214,16 @@ def move_permissions_to_roles(apps, schema_editor):
 
     # Remove direct Group Permissions
     for group in Group.objects.filter(name__ne="system:partner-engineers"):
+        print(f'{group} clear permissions')
         group.permissions.clear()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("galaxy", "0025_add_content_guard_to_distributions"),
-        ("core", "0081_reapplabel_group_permissions"),
+        ("galaxy", "0027_delete_contentredirectcontentguard"),
+        #("galaxy", "0025_add_content_guard_to_distributions"),
+        #("core", "0081_reapplabel_group_permissions"),
     ]
 
     operations = [

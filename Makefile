@@ -81,8 +81,7 @@ docker/build:     ## Build all development images.
 # TEST_ARGS="-v3"
 .PHONY: docker/test
 docker/test:      ## Run unit tests.
-	#$(call exec_or_run, api, $(DJ_MANAGER), test, $(TEST_ARGS), galaxy_ng.tests.unit$(TEST))
-	$(call exec_or_run, api, 'ls -al /src')
+	$(call exec_or_run, api, $(DJ_MANAGER), test, $(TEST_ARGS), galaxy_ng.tests.unit$(TEST))
 
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from fixtures
