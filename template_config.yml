@@ -96,4 +96,3 @@ update_github: true
 update_redmine: false
 upgrade_range: []
 use_issue_template: true
-
