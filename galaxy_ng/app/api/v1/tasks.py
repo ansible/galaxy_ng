@@ -129,6 +129,7 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
             role_tags = []
         print(f'TAGS: {role_tags}')
 
+        galaxy_info = role_meta.get('galaxy_info', {})
         new_full_metadata = {
             'imported': datetime.datetime.now().isoformat(),
             'clone_url': clone_url,
@@ -138,7 +139,9 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
             'github_reference': github_reference,
             'issue_tracker_url': clone_url + '/issues',
             'dependencies': [],
-            'versions': []
+            'versions': [],
+            'description': galaxy_info.get('description', ''),
+            'license': galaxy_info.get('galaxy_info', {}).get('license', ''),
         }
 
         # Make the object

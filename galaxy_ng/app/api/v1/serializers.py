@@ -28,6 +28,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
     github_repo = serializers.SerializerMethodField()
     github_branch = serializers.SerializerMethodField()
     commit = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
     summary_fields = serializers.SerializerMethodField()
 
     class Meta:
@@ -41,6 +42,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
             'github_branch',
             'commit',
             'name',
+            'description',
             'summary_fields'
         ]
 
@@ -67,6 +69,9 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
 
     def get_commit(self, obj):
         return obj.full_metadata.get('commit')
+
+    def get_description(self, obj):
+        return obj.full_metadata.get('description')
 
     def get_summary_fields(self, obj):
         versions = obj.full_metadata.get('versions', [])
