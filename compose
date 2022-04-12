@@ -3,6 +3,18 @@
 set -o nounset
 set -o errexit
 
+# the internal mechanisms for installing and testing do not
+# work if the checkout path is not named "galaxy_ng", so
+# this script should -always- abort if that is not the case.
+CWD=$(basename $(pwd))
+if [[ "${CWD}" != "galaxy_ng" ]]; then
+    cat >&2 <<EOF
+ERROR: The checkout directory -must- be named galaxy_ng. A different
+       name can cause many unintended behaviors inside the containers
+EOF
+    exit 1
+fi
+
 if [[ -f '.compose.env' ]]; then
   # export variables from .compose.env but only if the var is not already set.
   eval "$(grep -v '^#' .compose.env | sed -E 's|^(.+)=(.*)$|export \1=${\1:-\2}|g' | xargs -L 1)"
