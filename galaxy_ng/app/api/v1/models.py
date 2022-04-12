@@ -34,7 +34,7 @@ class LegacyRole(models.Model):
         on_delete=models.PROTECT
     )
 
-    name = models.CharField(max_length=64, unique=True, blank=False)
+    name = models.CharField(max_length=64, unique=False, blank=False)
 
     full_metadata = psql_fields.JSONField(
         null=False,

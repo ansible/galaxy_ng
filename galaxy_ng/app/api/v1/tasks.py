@@ -89,7 +89,12 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
     print('START LEGACY ROLE IMPORT')
 
     role_name = alternate_role_name or github_repo.replace('ansible-role-', '')
-    namespace,_ = LegacyNamespace.objects.get_or_create(name=github_user)
+    if LegacyNamespace.objects.filter(name=github_user).count() == 0:
+        print('CREATE NEW NAMESPACE {github_user}')
+        namespace,_ = LegacyNamespace.objects.get_or_create(name=github_user)
+    else:
+        print('USE EXISTING NAMESPACE {github_user}')
+        namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
     with tempfile.TemporaryDirectory() as checkout_path:
 
@@ -98,7 +103,7 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
         print(cmd)
         pid = subprocess.run(cmd, shell=True)
         if github_reference is not None:
-            cmd = f'git checkout tags/{github_reference}'
+            cmd = f'git -c advice.detachedHead=false checkout tags/{github_reference}'
             pid = subprocess.run(cmd, shell=True, cwd=checkout_path)
         else:
             github_reference = get_role_version(

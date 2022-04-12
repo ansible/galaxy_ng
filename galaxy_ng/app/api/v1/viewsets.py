@@ -65,7 +65,19 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         hashed = hash(str(task.pulp_id))
         print(f'NEW_TASK_ID: {task.pulp_id}')
         print(f'NEW_HASHED_TASK_ID: {hashed}')
-        return Response({'results': [{'id': hashed}]})
+        role_name = kwargs['alternate_role_name'] or kwargs['github_repo'].replace('ansible-role-', '')
+        return Response({
+            'results': [{
+                'id': hashed,
+                'github_user': kwargs['github_user'],
+                'github_repo': kwargs['github_repo'],
+                'summary_fields': {
+                    'role': {
+                        'name': role_name
+                    }
+                }
+            }]
+        })
         #return OperationPostponedResponse(task, validated_data)
 
     def get_task(self, request):
