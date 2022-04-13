@@ -5,3 +5,4 @@ ansible-base
 pytest
 orionutils
 openapi-spec-validator
+git+https://github.com/ansible/galaxykit
