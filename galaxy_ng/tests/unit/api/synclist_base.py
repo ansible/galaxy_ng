@@ -2,8 +2,8 @@ import logging
 from unittest import mock
 
 from django.conf import settings
-from guardian import shortcuts
 
+from pulpcore.plugin.util import assign_role
 from pulp_ansible.app import models as pulp_ansible_models
 
 from galaxy_ng.app import models as galaxy_models
@@ -15,12 +15,7 @@ log = logging.getLogger(__name__)
 
 ACCOUNT_SCOPE = "rh-identity-account"
 
-SYNCLIST_PERMS = [
-    "add_synclist",
-    "view_synclist",
-    "delete_synclist",
-    "change_synclist",
-]
+SYNCLIST_ROLES = ["galaxy.synclist_owner"]
 
 
 log.info("settings.FIXTURE_DIRS(module scope): %s", settings.FIXTURE_DIRS)
@@ -28,7 +23,7 @@ log.info("settings.FIXTURE_DIRS(module scope): %s", settings.FIXTURE_DIRS)
 
 class BaseSyncListViewSet(base.BaseTestCase):
     url_name = "galaxy:api:v3:ui:synclists-list"
-    default_owner_permissions = SYNCLIST_PERMS
+    default_owner_roles = SYNCLIST_ROLES
 
     def setUp(self):
         super().setUp()
@@ -59,9 +54,8 @@ class BaseSyncListViewSet(base.BaseTestCase):
         if isinstance(users, auth_models.User):
             users = [users]
         group.user_set.add(*users)
-
-        for perm in SYNCLIST_PERMS:
-            shortcuts.assign_perm(f"galaxy.{perm}", group)
+        for role in SYNCLIST_ROLES:
+            assign_role(role, group)
         return group
 
     def _create_repository(self, name):
@@ -87,7 +81,7 @@ class BaseSyncListViewSet(base.BaseTestCase):
 
         groups_to_add = {}
         for group in groups:
-            groups_to_add[group] = self.default_owner_permissions
+            groups_to_add[group] = self.default_owner_roles
 
         synclist, _ = galaxy_models.SyncList.objects.get_or_create(
             name=name, repository=repository, upstream_repository=upstream_repository,
