@@ -1,0 +1,1 @@
+Fixes forbidden message when installing from ansible-galaxy a public collection and the settings has enable unautheticated download.

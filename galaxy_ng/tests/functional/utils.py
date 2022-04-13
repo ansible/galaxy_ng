@@ -212,9 +212,9 @@ class TestCaseUsingBindings(PulpTestCase):
         with open("ansible.cfg", "r") as f:
             cls.previous_ansible_cfg = f.read()
 
-    def update_ansible_cfg(self, base_path):
+    def update_ansible_cfg(self, base_path, auth=True):
         """Update ansible.cfg to use the given base_path."""
-        token = self.get_token()
+        token = f"token={self.get_token()}" if auth else ""
         ansible_cfg = (
             f"{self.previous_ansible_cfg}\n"
             "[galaxy]\n"
@@ -223,7 +223,7 @@ class TestCaseUsingBindings(PulpTestCase):
             "[galaxy_server.community_repo]\n"
             f"url={self.cfg.get_base_url()}"
             f"{self.galaxy_api_prefix}/content/{base_path}/\n"
-            f"token={token}"
+            f"{token}"
         )
         with open("ansible.cfg", "w") as f:
             f.write(ansible_cfg)
