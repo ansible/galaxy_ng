@@ -1,3 +1,5 @@
+import os
+
 import galaxy_importer
 
 from django.apps import apps
@@ -17,6 +19,7 @@ VERSIONS = {
     "available_versions": {"v3": "v3/"},
     "server_version": apps.get_app_config("galaxy").version,
     "galaxy_ng_version": apps.get_app_config("galaxy").version,
+    "galaxy_ng_commit": os.environ.get("GIT_COMMIT", ""),
     "galaxy_importer_version": galaxy_importer.__version__,
     "pulp_core_version": apps.get_app_config('core').version,
     "pulp_ansible_version": apps.get_app_config('ansible').version,
