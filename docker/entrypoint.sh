@@ -90,9 +90,10 @@ run_service() {
 
     process_init_files /entrypoints.d/*
 
-    if [[ "$PULP_GALAXY_DEPLOYMENT_MODE" = "insights" ]]; then
-        django-admin maintain-pe-group
-    fi
+    # TODO: re-enable after RBAC work is completed
+    # if [[ "$PULP_GALAXY_DEPLOYMENT_MODE" = "insights" ]]; then
+    #     django-admin maintain-pe-group
+    # fi
 
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
         setup_signing_service
