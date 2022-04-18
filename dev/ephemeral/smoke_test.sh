@@ -39,7 +39,7 @@ export HUB_USE_MOVE_ENDPOINT="true"
 # What is the api root?
 export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/api/automation-hub/"
 echo "HUB_API_ROOT: ${HUB_API_ROOT}"
-export HUB_AUTH_URL="https://keycloak-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/auth/realms/redhat-external/protocol/openid-connect/token"
+export HUB_AUTH_URL="https://mocks-keycloak-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/auth/realms/redhat-external/protocol/openid-connect/token"
 echo "HUB_AUTH_URL: ${HUB_AUTH_URL}"
 
 echo "Creating virtualenv for testing ..."
