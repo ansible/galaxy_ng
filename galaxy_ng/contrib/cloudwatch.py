@@ -17,15 +17,15 @@ class CloudWatchHandler(watchtower.CloudWatchLogHandler):
     """Pre-configured CloudWatch handler."""
 
     def __init__(self):
-        boto3_session = boto3.Session(
+        boto3_logs_client = boto3.client(
             aws_access_key_id=AWS_ACCESS_KEY_ID,
             aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
             region_name=AWS_REGION_NAME,
         )
         super().__init__(
-            boto3_session=boto3_session,
-            log_group=LOGGING_GROUP,
-            stream_name=LOGGING_STREAM_NAME,
+            boto3_client=boto3_logs_client,
+            log_group_name=LOGGING_GROUP,
+            log_stream_name=LOGGING_STREAM_NAME,
         )
         # TODO(cutwater): Request ID should not depend on Django framework
         # self.addFilter(request_id.logging.RequestIdFilter())

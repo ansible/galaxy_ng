@@ -46,7 +46,7 @@ echo "Creating virtualenv for testing ..."
 VENV_PATH=gvenv
 virtualenv --python=$(which python3) ${VENV_PATH}
 source ${VENV_PATH}/bin/activate
-${VENV_PATH}/bin/pip install --upgrade pip wheel
+${VENV_PATH}/bin/pip install --upgrade pip wheel crc-bonfire sh
 ${VENV_PATH}/bin/pip install -r integration_requirements.txt
 
 echo "Running pytest ..."
