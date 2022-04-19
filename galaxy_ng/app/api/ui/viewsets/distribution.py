@@ -1,6 +1,6 @@
 from rest_framework import mixins
 from pulp_ansible.app import models as pulp_models
-from guardian.shortcuts import get_objects_for_user
+from pulpcore.plugin.util import get_objects_for_user
 
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers, versioning
@@ -31,7 +31,7 @@ class MyDistributionViewSet(DistributionViewSet):
             'galaxy.change_synclist',
             any_perm=True,
             accept_global_perms=False,
-            klass=models.SyncList
+            qs=models.SyncList.objects.all()
         )
 
         # TODO: find a better way query this data
