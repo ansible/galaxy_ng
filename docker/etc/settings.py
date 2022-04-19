@@ -56,7 +56,13 @@ def _make_aws_endpoint(config):
     scheme = 'https' if config.tls else 'http'
     port = config.port
 
-    netloc = config.hostname
+    if "amazonaws.com" in config.hostname:
+        global AWS_S3_ADDRESSING_STYLE, AWS_S3_SIGNATURE_VERSION
+        AWS_S3_ADDRESSING_STYLE = "virtual"
+        AWS_S3_SIGNATURE_VERSION = "s3v4"
+        netloc = f"{config.buckets[0].name}.{config.hostname}"
+    else:
+        netloc = config.hostname
     if ((scheme == 'http' and port != 80)
             or (scheme == 'https' and port != 443)):
         netloc = f"{netloc}:{port}"
