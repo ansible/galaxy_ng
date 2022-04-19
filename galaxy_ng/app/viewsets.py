@@ -36,3 +36,12 @@ class ContainerDistributionViewSet(
     serializer_class = serializers.ContainerRepositorySerializer
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     endpoint_name = "container"
+
+
+class AuthViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+):
+    queryset = models.auth.Group.objects.all()
+    endpoint_name = "auth"
