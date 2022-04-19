@@ -26,11 +26,8 @@ class TestUiUserViewSet(BaseTestCase):
     def test_super_user(self):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             user = auth_models.User.objects.create(username='haxor')
-            self._create_group('', 'test_group1', users=[user], perms=[
-                'galaxy.view_user',
-                'galaxy.delete_user',
-                'galaxy.add_user',
-                'galaxy.change_user',
+            self._create_group('', 'test_group1', users=[user], roles=[
+                'galaxy.user_admin',
             ])
             self.client.force_authenticate(user=user)
             new_user_data = {
@@ -72,11 +69,8 @@ class TestUiUserViewSet(BaseTestCase):
 
     def test_user_can_only_create_users_with_their_groups(self):
         user = auth_models.User.objects.create(username='haxor')
-        group = self._create_group('', 'test_group1', users=[user], perms=[
-            'galaxy.view_user',
-            'galaxy.delete_user',
-            'galaxy.add_user',
-            'galaxy.change_user',
+        group = self._create_group('', 'test_group1', users=[user], roles=[
+            'galaxy.user_admin',
         ])
         self.client.force_authenticate(user=user)
 
@@ -109,12 +103,9 @@ class TestUiUserViewSet(BaseTestCase):
 
     def test_user_can_create_users_with_right_perms(self):
         user = auth_models.User.objects.create(username='haxor')
-        self._create_group('', 'test_group1', users=[user], perms=[
-            'galaxy.view_user',
-            'galaxy.delete_user',
-            'galaxy.add_user',
-            'galaxy.change_user',
-            'galaxy.change_group'
+        self._create_group('', 'test_group1', users=[user], roles=[
+            'galaxy.user_admin',
+            'galaxy.group_admin',
         ])
         self.client.force_authenticate(user=user)
 
@@ -313,12 +304,9 @@ class TestUiUserViewSet(BaseTestCase):
 
         group = self._create_group('', 'people_that_can_delete_users',
                                    users=[user],
-                                   perms=[
-                                       'galaxy.view_user',
-                                       'galaxy.delete_user',
-                                       'galaxy.add_user',
-                                       'galaxy.change_user',
-                                       'galaxy.change_group'
+                                   roles=[
+                                       'galaxy.user_admin',
+                                       'galaxy.group_admin'
                                    ])
         self.client.force_authenticate(user=user)
 
@@ -361,12 +349,9 @@ class TestUiUserViewSet(BaseTestCase):
 
         group = self._create_group('', 'people_that_can_delete_users',
                                    users=[user],
-                                   perms=[
-                                       'galaxy.view_user',
-                                       'galaxy.delete_user',
-                                       'galaxy.add_user',
-                                       'galaxy.change_user',
-                                       'galaxy.change_group'
+                                   roles=[
+                                       'galaxy.user_admin',
+                                       'galaxy.group_admin'
                                    ])
 
         new_user_data = {

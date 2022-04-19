@@ -49,6 +49,7 @@ api_ui: tests for the _ui v1 api
 importer: tests related checks in galaxy-importer
 pulp_api: tests related to the pulp api endpoints
 ldap: tests related to the ldap integration
+role: Related to RBAC Roles
 """
 
 

@@ -186,16 +186,15 @@ class TestV3NamespaceViewSet(BaseTestCase):
                         {
                             "id": self.pe_group.id,
                             "name": self.pe_group.name,
-                            "object_permissions": [
-                                'galaxy.upload_to_namespace',
-                                'galaxy.change_namespace',
-                                'galaxy.delete_namespace',
+                            "object_roles": [
+                                'galaxy.namespace_owner',
                             ]
                         },
                     ],
                 },
                 format='json',
             )
+            print(f"\n\n response: {response} \n\n")
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             self.assertEqual(1, len(AnsibleRepository.objects.filter(name=repo_name)))
             self.assertEqual(1, len(AnsibleDistribution.objects.filter(name=repo_name)))
