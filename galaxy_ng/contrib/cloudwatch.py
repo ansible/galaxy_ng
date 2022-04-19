@@ -18,6 +18,7 @@ class CloudWatchHandler(watchtower.CloudWatchLogHandler):
 
     def __init__(self):
         boto3_logs_client = boto3.client(
+            "logs",
             aws_access_key_id=AWS_ACCESS_KEY_ID,
             aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
             region_name=AWS_REGION_NAME,
