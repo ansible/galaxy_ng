@@ -61,9 +61,3 @@ jobs:
 
       - name: run the integration tests
         run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh
-
-      - name: dump the api logs
-        run: docker logs galaxy_ng_api_1
-
-      - name: dump the worker logs
-        run: docker logs galaxy_ng_worker_1
