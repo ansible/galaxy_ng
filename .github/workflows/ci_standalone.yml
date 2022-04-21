@@ -60,11 +60,4 @@ jobs:
         run: sleep 120
 
       - name: run the integration tests
-        continue-on-error: true
         run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh
-
-      - name: dump the api logs
-        run: docker logs galaxy_ng_api_1
-
-      - name: dump the worker logs
-        run: docker logs galaxy_ng_worker_1

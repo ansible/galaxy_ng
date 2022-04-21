@@ -38,7 +38,19 @@ pip show epdb || pip install epdb
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
 if [[ -z $HUB_LOCAL ]]; then
     pytest --capture=no -m "not standalone_only" $@ -v galaxy_ng/tests/integration
-    #pytest --capture=no --pdb -v $@ galaxy_ng/tests/integration
+    RC=$?
 else
     pytest --capture=no -m "not cloud_only" -v $@ galaxy_ng/tests/integration
+    RC=$?
+
+    if [[ $RC != 0 ]]; then
+        # dump the api logs
+        docker logs galaxy_ng_api_1
+
+        # dump the worker logs
+        docker logs galaxy_ng_worker_1
+    fi
+
 fi
+
+exit $RC
