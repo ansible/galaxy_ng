@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [[ -z $HUB_LOCAL ]]; then
     export NAMESPACE="ephemeral-1riioj"
     export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/api/automation-hub/"
@@ -10,7 +12,6 @@ if [[ -z $HUB_LOCAL ]]; then
     unset HUB_TOKEN
 else
     unset NAMESPACE
-    unset HUB_API_ROOT
     unset HUB_AUTH_URL
     unset HUB_USERNAME
     unset HUB_PASSWORD
