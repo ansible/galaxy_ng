@@ -65,6 +65,14 @@ _collection_statements = [
     },
 ]
 
+_deny_all = [
+    {
+        "principal": "*",
+        "action": "*",
+        "effect": "deny"
+    },
+]
+
 INSIGHTS_STATEMENTS = {
     'CollectionViewSet': _collection_statements,
     'pulp_ansible/v3/collections': _collection_statements,
@@ -74,13 +82,13 @@ INSIGHTS_STATEMENTS = {
 
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
     # For now endpoints are temporary deactivated
-    'pulp_ansible/v3/collection-versions/all': [],
-    'pulp_ansible/v3/collections/all': [],
-    'pulp_ansible/v3/repo-metadata': [],
+    'pulp_ansible/v3/collection-versions/all': _deny_all,
+    'pulp_ansible/v3/collections/all': _deny_all,
+    'pulp_ansible/v3/repo-metadata': _deny_all,
 
     # disable upload and download APIs since we're not using them yet
-    'pulp_ansible/v3/collections/upload': [],
-    'pulp_ansible/v3/collections/download': [],
+    'pulp_ansible/v3/collections/upload': _deny_all,
+    'pulp_ansible/v3/collections/download': _deny_all,
 
     "NamespaceViewSet": [
         {
@@ -117,13 +125,7 @@ INSIGHTS_STATEMENTS = {
             "condition": "has_model_perms:ansible.change_collectionremote",
         },
     ],
-    "UserViewSet": [
-        {
-            "action": ["*"],
-            "principal": "authenticated",
-            "effect": "deny",
-        },
-    ],
+    "UserViewSet": _deny_all,
     "MyUserViewSet": [
         {
             "action": ["retrieve"],
@@ -194,13 +196,7 @@ INSIGHTS_STATEMENTS = {
             "condition": "has_rh_entitlements",
         },
     ],
-    "DistributionViewSet": [
-        {
-            "action": ["*"],
-            "principal": "authenticated",
-            "effect": "deny",
-        },
-    ],
+    "DistributionViewSet": _deny_all,
     "MyDistributionViewSet": [
         {
             "action": ["list", "retrieve"],
@@ -209,13 +205,7 @@ INSIGHTS_STATEMENTS = {
             "condition": "has_rh_entitlements",
         },
     ],
-    "ContainerRepositoryViewSet": [
-        {
-            "action": ["*"],
-            "principal": "*",
-            "effect": "deny",
-        },
-    ],
+    "ContainerRepositoryViewSet": _deny_all,
     "LandingPageViewSet": [
         {
             "action": ["retrieve"],
