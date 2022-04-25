@@ -11,7 +11,7 @@ except IndexError:
     initial_branch = None
 
 repo = Repo(os.getcwd())
-heads = repo.git.ls_remote("--heads", "https://github.com/pulp/galaxy_ng.git").split("\n")
+heads = repo.git.ls_remote("--heads", "https://github.com/ansible/galaxy_ng.git").split("\n")
 branches = [h.split("/")[-1] for h in heads if re.search(r"^([0-9]+)\.([0-9]+)$", h.split("/")[-1])]
 branches.sort(key=lambda ver: Version(ver))
 
@@ -27,7 +27,7 @@ else:
 
 github_api = "https://api.github.com"
 workflow_path = "/actions/workflows/update_ci.yml/dispatches"
-url = f"{github_api}/repos/pulp/galaxy_ng{workflow_path}"
+url = f"{github_api}/repos/ansible/galaxy_ng{workflow_path}"
 
 for branch in branches[starting:]:
     print(f"Updating {branch}")

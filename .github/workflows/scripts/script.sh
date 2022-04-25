@@ -29,6 +29,10 @@ export PULP_SETTINGS=$PWD/.ci/ansible/settings/settings.py
 export PULP_URL="https://pulp"
 
 if [[ "$TEST" = "docs" ]]; then
+  if [[ "$GITHUB_WORKFLOW" == "Galaxy CI" ]]; then
+    pip install towncrier==19.9.0
+    towncrier --yes --version 4.0.0.ci
+  fi
   cd docs
   make PULP_URL="$PULP_URL" diagrams html
   tar -cvf docs.tar ./_build
@@ -47,6 +51,9 @@ fi
 
 if [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
   STATUS_ENDPOINT="${PULP_URL}/pulp/api/v3/status/"
+  if [ "${PULP_API_ROOT:-}" ]; then
+    STATUS_ENDPOINT="${PULP_URL}${PULP_API_ROOT}api/v3/status/"
+  fi
   echo $STATUS_ENDPOINT
   REPORTED_VERSION=$(http $STATUS_ENDPOINT | jq --arg plugin galaxy --arg legacy_plugin galaxy_ng -r '.versions[] | select(.component == $plugin or .component == $legacy_plugin) | .version')
   response=$(curl --write-out %{http_code} --silent --output /dev/null https://pypi.org/project/galaxy-ng/$REPORTED_VERSION/)
@@ -113,7 +120,7 @@ cmd_prefix bash -c "django-admin makemigrations --check --dry-run"
 
 if [[ "$TEST" != "upgrade" ]]; then
   # Run unit tests.
-  cmd_prefix bash -c "PULP_DATABASES__default__USER=postgres django-admin test --noinput /usr/local/lib/python3.8/site-packages/galaxy_ng/tests/unit/"
+  cmd_prefix bash -c "PULP_DATABASES__default__USER=postgres pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.unit"
 fi
 
 # Run functional tests

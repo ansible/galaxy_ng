@@ -242,7 +242,8 @@ class TestCaseUsingBindings(PulpTestCase):
         )
 
         response = self.sync_api.sync(repo_name)
-        monitor_task(f"/pulp/api/v3/tasks/{response.task}/")
+        api_root = os.environ.get("PULP_API_ROOT", "/pulp/")
+        monitor_task(f"{api_root}api/v3/tasks/{response.task}/")
 
 
     def delete_namespace(self, namespace_name):
