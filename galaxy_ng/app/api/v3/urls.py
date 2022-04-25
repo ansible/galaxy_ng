@@ -41,6 +41,20 @@ urlpatterns = [
     # should be put here. Please include comments that describe why the override is necesary.
     # Overridding an endpoint should be a measure of last resort.
 
+    # Disable the unpaginated collection views
+    # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
+    # For now endpoints are temporary deactivated
+    path(
+        "collections/all/",
+        views.NotFoundView.as_view(),
+        name="legacy-v3-metadata-collection-list",
+    ),
+    path(
+        "collection_versions/all/",
+        views.NotFoundView.as_view(),
+        name="legacy-v3-metadata-collection-versions-list",
+    ),
+
     # At the moment Automation Hub on console.redhat.com has a nonstandard configuration
     # for collection download as well as prometheus metrics that are used to track the
     # health of the service. Until https://issues.redhat.com/browse/AAH-1385 can be resolved
