@@ -3,21 +3,6 @@ version: "3.7"
 services:
   ui:
     environment:
+      - "API_PROXY_HOST=api"
+      - "API_PROXY_PORT=8000"
       - "DEPLOYMENT_MODE=${COMPOSE_PROFILE}"
-
-  insights_proxy:
-    image: "docker.io/redhatinsights/insights-proxy"
-    environment:
-      - "CUSTOM_CONF=true"
-      - "PLATFORM="
-    volumes:
-      - "${ANSIBLE_HUB_UI_PATH}/profiles/galaxy-ng-compose.js:/config/spandx.config.js"
-    security_opt:
-      - label:disable
-    ports:
-      - "1337:1337"
-    extra_hosts:
-      - "ci.foo.redhat.com:127.0.0.1"
-      - "prod.foo.redhat.com:127.0.0.1"
-      - "qa.foo.redhat.com:127.0.0.1"
-      - "stage.foo.redhat.com:127.0.0.1"
