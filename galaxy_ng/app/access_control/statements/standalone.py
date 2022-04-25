@@ -58,6 +58,14 @@ _collection_statements = [
     }
 ]
 
+_deny_all = [
+    {
+        "principal": "*",
+        "action": "*",
+        "effect": "deny"
+    },
+]
+
 STANDALONE_STATEMENTS = {
     'CollectionViewSet': _collection_statements,
     'pulp_ansible/v3/collections': _collection_statements,
@@ -67,13 +75,13 @@ STANDALONE_STATEMENTS = {
 
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
     # For now endpoints are temporary deactivated
-    'pulp_ansible/v3/collection-versions/all': [],
-    'pulp_ansible/v3/collections/all': [],
-    'pulp_ansible/v3/repo-metadata': [],
+    'pulp_ansible/v3/collection-versions/all': _deny_all,
+    'pulp_ansible/v3/collections/all': _deny_all,
+    'pulp_ansible/v3/repo-metadata': _deny_all,
 
     # disable upload and download APIs since we're not using them yet
-    'pulp_ansible/v3/collections/upload': [],
-    'pulp_ansible/v3/collections/download': [],
+    'pulp_ansible/v3/collections/upload': _deny_all,
+    'pulp_ansible/v3/collections/download': _deny_all,
 
     'pulp_ansible/v3/legacy-redirected-viewset': [
         {
@@ -185,22 +193,10 @@ STANDALONE_STATEMENTS = {
             "condition": "is_current_user"
         },
     ],
-    'SyncListViewSet': [
-        #  disable synclists for on prem installations
-        {
-            "action": ["*"],
-            "principal": "*",
-            "effect": "deny",
-        },
-    ],
-    'MySyncListViewSet': [
-        #  disable synclists for on prem installations
-        {
-            "action": ["*"],
-            "principal": "*",
-            "effect": "deny",
-        },
-    ],
+    #  disable synclists for on prem installations
+    'SyncListViewSet': _deny_all,
+    #  disable synclists for on prem installations
+    'MySyncListViewSet': _deny_all,
     'TaskViewSet': [
         {
             "action": ["list", "retrieve"],
