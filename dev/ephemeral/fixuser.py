@@ -1,6 +1,6 @@
 from galaxy_ng.app.models.auth import User
 
-user = User.objects.get_or_create(
+user, _ = User.objects.get_or_create(
     username='jdoe',
     defaults=dict(
         username='jdoe',
