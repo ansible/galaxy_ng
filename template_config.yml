@@ -24,7 +24,9 @@ check_manifest: true
 check_openapi_schema: true
 check_stray_pulpcore_imports: true
 cherry_pick_automation: false
-ci_env: {}
+ci_env: {
+  GITHUB_USER: '${{ github.event.pull_request.user.login }}'
+}
 ci_trigger: '{pull_request: {branches: [''*'']}, push: {branches: [''*'']}}'
 core_import_allowed:
 - pulpcore.app.*viewsets
