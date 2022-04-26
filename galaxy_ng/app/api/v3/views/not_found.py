@@ -5,5 +5,5 @@ from django.http import HttpResponseNotFound
 class NotFoundView(api_base.APIView):
     permission_classes = []
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         return HttpResponseNotFound()
