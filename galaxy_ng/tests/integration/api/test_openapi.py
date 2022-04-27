@@ -129,6 +129,7 @@ def test_openapi_bindings_generation(ansible_config):
         cmd = [
             'docker',
             'run',
+            '--ulimit', 'nofile=122880:122880',
             '-u',
             my_id,
             '--rm',
