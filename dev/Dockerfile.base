@@ -10,6 +10,9 @@ ENV LANG=en_US.UTF-8 \
     PULP_SETTINGS=/etc/pulp/settings.py \
     DJANGO_SETTINGS_MODULE=pulpcore.app.settings
 
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
+
 RUN set -ex; \
     id --group "${USER_GROUP}" &>/dev/null \
     || groupadd --gid "${USER_ID}" "${USER_GROUP}"; \
