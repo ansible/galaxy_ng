@@ -1,5 +1,7 @@
 import yaml
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
+
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
@@ -80,6 +82,7 @@ class ExcludesView(api_base.APIView):
         """
         Returns a list of excludes for a given distro.
         """
-        queryset = get_synclist_excludes(self.kwargs["path"])
+        base_path = self.kwargs.get('path', settings.ANSIBLE_DEFAULT_DISTRIBUTION_PATH)
+        queryset = get_synclist_excludes(base_path)
         collections_to_exclude = serialize_collection_queryset(queryset)
         return Response({"collections": collections_to_exclude})
