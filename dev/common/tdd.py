@@ -31,7 +31,7 @@ def get_changed_files(pr_branch, target_branch="master"):
 def verify_test_files_changed(changed_files):
 
     # places where appplication source goes
-    api_paths = [
+    app_paths = [
         'galaxy_ng/'
     ]
 
@@ -40,8 +40,8 @@ def verify_test_files_changed(changed_files):
         'galaxy_ng/tests'
     ]
 
-    def is_path_path(fn):
-        for ap in api_paths:
+    def is_app_path(fn):
+        for ap in app_paths:
             if fn.startswith(ap):
                 return True
         return False
@@ -53,11 +53,11 @@ def verify_test_files_changed(changed_files):
         return False
 
     # exit early if no non-test changed in the api code
-    api_changed = False
+    app_changed = False
     for cf in changed_files:
-        if is_api_path(cf) and not is_test_path(cf):
-            api_changed = True
-    if not api_changed:
+        if is_app_path(cf) and not is_test_path(cf):
+            app_changed = True
+    if not app_changed:
         return
 
     # look for any changes to file in the tests dirs
