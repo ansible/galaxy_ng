@@ -6,11 +6,14 @@ import os
 import subprocess
 import sys
 
-from pprint import pprint
-
 
 def get_current_branch():
-    pid = subprocess.run('git branch --show-current', shell=True, stdout=subprocess.PIPE, check=True)
+    pid = subprocess.run(
+        'git branch --show-current',
+        shell=True,
+        stdout=subprocess.PIPE,
+        check=True
+    )
     branch_name = pid.stdout.decode('utf-8')
     branch_name = branch_name.strip()
     return branch_name
@@ -73,7 +76,6 @@ def main():
     for cf in changed_files:
         print(f'modified file: {cf}')
     verify_test_files_changed(changed_files)
-
 
 
 if __name__ == "__main__":
