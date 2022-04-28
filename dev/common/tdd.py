@@ -29,19 +29,48 @@ def get_changed_files(pr_branch, target_branch="master"):
 
 
 def verify_test_files_changed(changed_files):
-    expected_paths = [
+
+    # places where appplication source goes
+    api_paths = [
+        'galaxy_ng/'
+    ]
+
+    # places where test code goes
+    test_paths = [
         'galaxy_ng/tests'
     ]
-    found = False
+
+    def is_path_path(fn):
+        for ap in api_paths:
+            if fn.startswith(ap):
+                return True
+        return False
+
+    def is_test_path(fn):
+        for tp in test_paths:
+            if fn.startswith(tp):
+                return True
+        return False
+
+    # exit early if no non-test changed in the api code
+    api_changed = False
+    for cf in changed_files:
+        if is_api_path(cf) and not is_test_path(cf):
+            api_changed = True
+    if not api_changed:
+        return
+
+    # look for any changes to file in the tests dirs
+    tests_found = False
     for cf in changed_files:
         for ep in expected_paths:
             if cf.startswith(ep):
-                found = True
+                tests_found = True
                 break
-        if found:
+        if tests_found:
             break
 
-    if not found:
+    if not tests_found:
         raise Exception('Tests should be added or modified with -every- PR!!!')
 
 
