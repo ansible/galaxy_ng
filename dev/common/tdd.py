@@ -63,8 +63,8 @@ def verify_test_files_changed(changed_files):
     # look for any changes to file in the tests dirs
     tests_found = False
     for cf in changed_files:
-        for ep in expected_paths:
-            if cf.startswith(ep):
+        for tp in test_paths:
+            if cf.startswith(tp):
                 tests_found = True
                 break
         if tests_found:
