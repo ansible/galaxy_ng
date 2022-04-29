@@ -56,7 +56,6 @@ MODEL_PERMISSION_TRANSLATOR = [
 
 def batch_process(model, objects, flush=False):
     if len(objects) > 1000 or flush:
-        # print(f'#{model.__name__} = {len(objects)}')
         model.objects.bulk_create(objects)
         objects.clear()
 
@@ -70,15 +69,9 @@ def filter_against_galaxy_locked_roles(
     Role = apps.get_model("core", "Role")
     # Use Galaxy locked Roles where possible
     for locked_perm_names, locked_rolename in MODEL_PERMISSION_TRANSLATOR:
-
-        # for app_label, codename in locked_perm_names:
-        #    print(f'app_label: {app_label}')
-        #    print(f'codename: {codename}')
-
         locked_perms = [Permission.objects.filter(
             content_type__app_label=app_label, codename=codename
         ).first() for app_label, codename in locked_perm_names]
-        print(f'\tlocked_rolename:{locked_rolename} locked_perms:{len(locked_perms)}:{locked_perms}')
 
         if all(locked_perms):
             # compare locked role perms to perms
@@ -88,7 +81,6 @@ def filter_against_galaxy_locked_roles(
                     name=locked_rolename,
                     defaults={"locked": True}
                 )
-                print(f'Locked role:{locked_role} created:{locked_role_created}')
                 if locked_role_created:
                     for locked_perm in locked_perms:
                         locked_role.permissions.add(locked_perm)
@@ -107,12 +99,6 @@ def filter_against_galaxy_locked_roles(
                 batch_process(GroupRole, group_roles)
             if user is not None and user_roles is not None:
                 batch_process(UserRole, user_roles)
-
-        # if group_roles is not None:
-        #     print(f'\tgroup_roles count: {len(group_roles)}')
-        # if user_roles is not None:
-        #     print(f'\tuser_roles count: {len(user_roles)}')
-        # print(f'\tperms_to_remove count: {len(perms_to_remove)}')
 
 
 def remove_locked_perms_from_permissions(perms_to_remove, permissions):
@@ -137,9 +123,6 @@ def move_permissions_to_roles(apps, schema_editor):
 
     # Model Permissions
     for group in Group.objects.filter(name__ne="system:partner-engineers"):
-
-        print(f'process group:{group}')
-
         permissions = group.permissions.all()
         perms_to_remove = []
 
@@ -153,7 +136,6 @@ def move_permissions_to_roles(apps, schema_editor):
 
         # Create custom role for current Group with permissions not in Galaxy locked roles
         if len(permissions) > 0:
-            print(f'\tCREATE {group.name}_role ...')
             role, _ = Role.objects.get_or_create(name=f"galaxy.{group.name}_role")
             role.permissions.set(permissions)
             group_roles.append(GroupRole(group=group, role=role))
@@ -162,9 +144,6 @@ def move_permissions_to_roles(apps, schema_editor):
     groups = {}
     for gop in GroupObjectPermission.objects.all():
         perms_to_remove = []
-
-        print(f'process gop {gop}')
-
         current_group_object_pk = f"{gop.group.name}_{gop.object_pk}"
         if current_group_object_pk not in groups:
             groups[current_group_object_pk] = {
@@ -177,9 +156,6 @@ def move_permissions_to_roles(apps, schema_editor):
             groups[current_group_object_pk]["permissions"].append(gop.permission)
 
     for g in groups:
-
-        print(f'process[2] group {g}')
-
         group = groups[g]['group']
         permissions = groups[g]['permissions']
         perms_to_remove = []
@@ -212,9 +188,6 @@ def move_permissions_to_roles(apps, schema_editor):
     # User Object Permissions
     users = {}
     for uop in UserObjectPermission.objects.all():
-
-        print(f'process uop {uop}')
-
         current_user_object_pk = f"{uop.user.username}_{uop.object_pk}"
         if current_user_object_pk not in users:
             users[current_user_object_pk] = {
@@ -227,9 +200,6 @@ def move_permissions_to_roles(apps, schema_editor):
             users[current_user_object_pk]["permissions"].append(uop.permission)
 
     for u in users:
-
-        print(f'process user {u}')
-
         user = users[u]['user']
         permissions = users[u]['permissions']
         perms_to_remove = []
@@ -265,7 +235,6 @@ def move_permissions_to_roles(apps, schema_editor):
 
     # Remove direct Group Permissions
     for group in Group.objects.filter(name__ne="system:partner-engineers"):
-        print(f'{group} clear permissions')
         group.permissions.clear()
 
 
