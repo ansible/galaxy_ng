@@ -294,18 +294,4 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
 
         response_data['copy_task_id'] = response_data['remove_task_id'] = move_task.pk
 
-        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
-            golden_repo = AnsibleDistribution.objects.get(
-                base_path=settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
-            ).repository
-
-            if dest_repo == golden_repo or src_repo == golden_repo:
-                curate_task = dispatch(
-                    curate_all_synclist_repository,
-                    shared_resources=[golden_repo],
-                    args=(golden_repo.name,),
-                    kwargs={},
-                )
-                response_data['curate_all_synclist_repository_task_id'] = curate_task.pk
-
         return Response(data=response_data, status='202')
