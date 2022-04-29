@@ -17,7 +17,7 @@ jobs:
           python-version: "3.8"
 
       - name: make the checkout in a sane way.
-        run: git clone https://github.com/${{ github.event.pull_request.user.login }}/galaxy_ng; cd galaxy_ng ; git checkout ${{ github.head_ref }}
+        run: git clone https://github.com/${{ github.event.pull_request.user.login }}/galaxy_ng; cd galaxy_ng ; git checkout "${{ github.head_ref }}"
 
       - name: Ensure changes were made to tests
         env:
