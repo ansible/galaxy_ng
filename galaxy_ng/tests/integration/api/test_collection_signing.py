@@ -4,18 +4,17 @@ See: https://issues.redhat.com/browse/AAH-312
 """
 
 import logging
+import tarfile
+import requests
+import os
+from tempfile import TemporaryDirectory
 import time
 from urllib.parse import urljoin
 
 import pytest
 from orionutils.generator import build_collection
 
-from ..utils import (
-    get_all_collections_by_repo,
-    get_all_namespaces,
-    get_client,
-    set_certification,
-)
+from ..utils import get_all_collections_by_repo, get_all_namespaces, get_client, set_certification
 
 log = logging.getLogger(__name__)
 
@@ -87,7 +86,7 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, upload_a
 
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
     if not signing_service:
-        pytest.skip("GALAXY_SIGN_SERVICE is not set")
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not set")
 
     artifact = build_collection(
         "skeleton",
@@ -174,7 +173,7 @@ def test_collection_sign_on_demand(api_client, config, settings, upload_artifact
 
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
     if not signing_service:
-        pytest.skip("GALAXY_SIGN_SERVICE is not set")
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not set")
 
     artifact = build_collection(
         "skeleton",
@@ -242,7 +241,7 @@ def test_collection_move_with_signatures(api_client, config, settings, upload_ar
     """
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
     if not signing_service:
-        pytest.skip("GALAXY_SIGN_SERVICE is not set")
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not set")
 
     artifact = build_collection(
         "skeleton",
@@ -322,3 +321,94 @@ def test_collection_move_with_signatures(api_client, config, settings, upload_ar
     assert metadata["signatures"][0]["signature"] is not None
     assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+
+
+@pytest.mark.collection_signing
+@pytest.mark.collection_move
+@pytest.mark.standalone_only
+def test_upload_signature(api_client, config, settings, upload_artifact):
+    """
+    1. If staging repository doesn't have a keyring, skip test
+    2. Generate a collection
+    3. Upload collection to staging
+    4. Sign the collection MANIFEST.json file
+    5. Upload the signature to staging
+    6. assert collection signature task has spawned
+    """
+    if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is not set")
+
+    distributions = api_client("/api/automation-hub/_ui/v1/distributions/")
+    if not distributions:
+        pytest.skip("No distribution found")
+
+    staging_has_keyring = False
+    for distribution in distributions["data"]:
+        if distribution["name"] == "staging":
+            if distribution["repository"]["keyring"]:
+                staging_has_keyring = True
+                break
+
+    if not staging_has_keyring:
+        pytest.skip("Staging repository doesn't have a keyring")
+
+    artifact = build_collection(
+        "skeleton",
+        config={
+            "namespace": NAMESPACE,
+            "tags": ["tools"],
+        },
+    )
+    ckey = (artifact.namespace, artifact.name, artifact.version)
+    # import and wait ...
+    import_and_wait(api_client, artifact, upload_artifact, config)
+    # Collection must be on /staging/
+    collections = get_all_collections_by_repo(api_client)
+    assert ckey in collections["staging"]
+    assert ckey not in collections["published"]
+
+    # extract all the contents of tarball to a temporary directory
+    tarball = artifact.filename
+    with TemporaryDirectory() as tmpdir:
+        with tarfile.open(tarball, "r:gz") as tar:
+            tar.extractall(tmpdir)
+        manifest_file = os.path.join(tmpdir, "MANIFEST.json")
+        signature_filename = f"{manifest_file}.asc"
+        os.system(
+            "gpg --batch --no-default-keyring --keyring test.kbx "
+            "--import dev/common/ansible-sign.key"
+        )
+        os.system(f"KEYRING=test.kbx dev/common/collection_sign.sh {manifest_file}")
+
+        if not os.path.exists(signature_filename):
+            pytest.skip("Signature cannot be created")
+
+        collection_version_pk = collections["staging"][ckey]["id"]
+        staging_resp = requests.get(
+            "http://localhost:8002/pulp/api/v3/repositories/ansible/ansible/?name=staging",
+            auth=("admin", "admin"),
+        )
+        repo_href = staging_resp.json()["results"][0]["pulp_href"]
+        signature_file = open(signature_filename, "rb")
+        response = requests.post(
+            "http://localhost:8002/pulp/api/v3/content/ansible/collection_signatures/",
+            files={"file": signature_file},
+            data={
+                "repository": repo_href,
+                "signed_collection": (
+                    f"/pulp/api/v3/content/ansible/collection_versions/{collection_version_pk}/"
+                ),
+            },
+            auth=("admin", "admin"),
+        )
+        assert "task" in response.json()
+
+    time.sleep(5)  # wait for the task to finish
+
+    # Assert that the collection is signed on v3 api
+    collection = api_client(
+        "/api/automation-hub/content/staging/v3/collections/"
+        f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
+    )
+    assert len(collection["signatures"]) >= 1
+    assert collection["signatures"][0]["signing_service"] is None

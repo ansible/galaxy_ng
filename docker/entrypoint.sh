@@ -96,7 +96,10 @@ run_service() {
     # fi
 
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
+        setup_signing_keyring
         setup_signing_service
+    elif [[ "$ENABLE_SIGNING" -eq "2" ]]; then
+        setup_signing_keyring
     fi
 
     exec "${service_path}" "$@"
@@ -109,10 +112,22 @@ run_manage() {
     fi
 
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
+        setup_signing_keyring
         setup_signing_service
+    elif [[ "$ENABLE_SIGNING" -eq "2" ]]; then
+        setup_signing_keyring
     fi
 
     exec django-admin "$@"
+}
+
+
+setup_signing_keyring() {
+    log_message "Setting up signing keyring."
+    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
+    export KEY_ID=${KEY_FINGERPRINT: -16}
+    gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import /tmp/ansible-sign.key &>/dev/null
+    echo "${KEY_FINGERPRINT}:6:" | gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import-ownertrust &>/dev/null
 }
 
 setup_signing_service() {

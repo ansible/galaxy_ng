@@ -28,7 +28,7 @@ objects:
     namespace: automation-hub
   data:
     collection_sign.sh: |
-      IyEvYmluL2Jhc2gKCkZJTEVfUEFUSD0kMQpTSUdOQVRVUkVfUEFUSD0iJDEuYXNjIgoKQURNSU5fSUQ9ImdhbGF4eTNAYW5zaWJsZS5jb20iClBBU1NXT1JEPSJHYWxheHkyMDIyIgoKIyBDcmVhdGUgYSBkZXRhY2hlZCBzaWduYXR1cmUKZ3BnIC0tcXVpZXQgLS1iYXRjaCAtLXBpbmVudHJ5LW1vZGUgbG9vcGJhY2sgLS15ZXMgLS1wYXNzcGhyYXNlICAgJFBBU1NXT1JEIC0taG9tZWRpciAvdG1wL2Fuc2libGUvLmdudXBnIC0tZGV0YWNoLXNpZ24gLS1kZWZhdWx0LWtleSAkQURNSU5fSUQgICAtLWFybW9yIC0tb3V0cHV0ICRTSUdOQVRVUkVfUEFUSCAkRklMRV9QQVRICgojIENoZWNrIHRoZSBleGl0IHN0YXR1cwpTVEFUVVM9JD8KaWYgWyAkU1RBVFVTIC1lcSAwIF07IHRoZW4KICBlY2hvIHtcImZpbGVcIjogXCIkRklMRV9QQVRIXCIsIFwic2lnbmF0dXJlXCI6IFwiJFNJR05BVFVSRV9QQVRIXCJ9CmVsc2UKICBleGl0ICRTVEFUVVMKZmkK
+      IyEvYmluL2Jhc2gKCkZJTEVfUEFUSD0kMQpTSUdOQVRVUkVfUEFUSD0iJDEuYXNjIgoKQURNSU5fSUQ9ImdhbGF4eTNAYW5zaWJsZS5jb20iClBBU1NXT1JEPSJHYWxheHkyMDIyIgpLRVlSSU5HPSIvZXRjL3B1bHAvY2VydHMvZ2FsYXh5LmtieCIKR05VUEdIT01FPSIvdG1wL2Fuc2libGUvLmdudXBnIgoKIyBDcmVhdGUgYSBkZXRhY2hlZCBzaWduYXR1cmUKZ3BnIC0tcXVpZXQgLS1iYXRjaCAtLW5vLWRlZmF1bHQta2V5cmluZyAtLWtleXJpbmcgJEtFWVJJTkcgLS1waW5lbnRyeS1tb2RlIGxvb3BiYWNrIC0teWVzIC0tcGFzc3BocmFzZSAgICRQQVNTV09SRCAtLWhvbWVkaXIgJEdOVVBHSE9NRSAtLWRldGFjaC1zaWduIC0tZGVmYXVsdC1rZXkgJEFETUlOX0lEICAgLS1hcm1vciAtLW91dHB1dCAkU0lHTkFUVVJFX1BBVEggJEZJTEVfUEFUSAoKIyBDaGVjayB0aGUgZXhpdCBzdGF0dXMKU1RBVFVTPSQ/CmlmIFsgJFNUQVRVUyAtZXEgMCBdOyB0aGVuCiAgZWNobyB7XCJmaWxlXCI6IFwiJEZJTEVfUEFUSFwiLCBcInNpZ25hdHVyZVwiOiBcIiRTSUdOQVRVUkVfUEFUSFwifQplbHNlCiAgZXhpdCAkU1RBVFVTCmZpCg==
 
 - apiVersion: v1
   kind: ConfigMap
@@ -122,7 +122,8 @@ objects:
             value: ${GNUPGHOME}
         volumeMounts:
           - name: pulp-key
-            mountPath: /etc/pulp/certs
+            mountPath: /etc/pulp/certs/database_fields.symmetric.key
+            subPath: database_fields.symmetric.key
             readOnly: true
           - name: signing-gpg-key
             mountPath: /tmp/ansible-sign.key
@@ -176,7 +177,8 @@ objects:
             value: ${GNUPGHOME}
         volumeMounts:
           - name: pulp-key
-            mountPath: /etc/pulp/certs
+            mountPath: /etc/pulp/certs/database_fields.symmetric.key
+            subPath: database_fields.symmetric.key
             readOnly: true
           - name: signing-gpg-key
             mountPath: /tmp/ansible-sign.key
@@ -245,7 +247,8 @@ objects:
           - name: importer-config
             mountPath: /etc/galaxy-importer
           - name: pulp-key
-            mountPath: /etc/pulp/certs
+            mountPath: /etc/pulp/certs/database_fields.symmetric.key
+            subPath: database_fields.symmetric.key
             readOnly: true
           - name: signing-gpg-key
             mountPath: /tmp/ansible-sign.key
