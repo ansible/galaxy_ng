@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, post_migrate
 from pulpcore.plugin.apps import adjust_roles
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection
-from galaxy_ng.app.access_control.statements.roles import VIEWSETS as GALAXY_VIEWSETS
+from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES as GALAXY_LOCKED_ROLES
 from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
 from galaxy_ng.app.models import Namespace
 from pulpcore.plugin.models import ContentRedirectContentGuard
@@ -56,12 +56,8 @@ def set_role_definitions(sender, **kwargs):
     if apps is None:
         from django.apps import apps
     role_prefix = f"{sender.label}."
-    desired_roles = {}
-    for viewset in GALAXY_VIEWSETS:
-        locked_roles = GALAXY_VIEWSETS[viewset]['LOCKED_ROLES']
-        if locked_roles is not None:
-            desired_roles.update(locked_roles or {})
-    adjust_roles(apps, role_prefix, desired_roles, verbosity=kwargs.get("verbosity", 1))
+    if GALAXY_LOCKED_ROLES is not None:
+        adjust_roles(apps, role_prefix, GALAXY_LOCKED_ROLES, verbosity=kwargs.get("verbosity", 1))
 
 
 post_migrate.connect(
