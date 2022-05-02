@@ -6,9 +6,7 @@ galaxy_ng.app.__init__:PulpGalaxyPluginAppConfig.ready() method.
 from django.apps import apps
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_migrate
-from pulpcore.plugin.apps import adjust_roles
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection
-from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES as GALAXY_LOCKED_ROLES
 from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
 from galaxy_ng.app.models import Namespace
 from pulpcore.plugin.models import ContentRedirectContentGuard
@@ -49,22 +47,6 @@ def create_namespace_if_not_present(sender, instance, created, **kwargs):
     """
 
     Namespace.objects.get_or_create(name=instance.namespace)
-
-
-def set_role_definitions(sender, **kwargs):
-    apps = kwargs.get("apps")
-    if apps is None:
-        from django.apps import apps
-    role_prefix = f"{sender.label}."
-    if GALAXY_LOCKED_ROLES is not None:
-        adjust_roles(apps, role_prefix, GALAXY_LOCKED_ROLES, verbosity=kwargs.get("verbosity", 1))
-
-
-post_migrate.connect(
-    set_role_definitions,
-    sender=apps.get_app_config("galaxy"),
-    dispatch_uid="set_galaxy_locked_role_definitions"
-)
 
 
 def set_pulp_container_access_policies(sender, **kwargs):

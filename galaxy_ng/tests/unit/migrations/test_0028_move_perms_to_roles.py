@@ -140,6 +140,11 @@ class TestMigratingPermissionsToRoles(TestCase):
         assert ('ansible', 'delete_collection') in permissions
         assert ('galaxy', 'upload_to_namespace') in permissions
 
+    def test_group_object_permissions(self):
+
+        apps_mock = Mock()
+        apps_mock.get_model = get_model
+
     def test_user_object_permissions(self):
 
         apps_mock = Mock()
