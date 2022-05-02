@@ -264,8 +264,7 @@ system you should clone them into the parent directory relative to your
 `galaxy_ng` working copy location.
 
 For example you want to work on `galaxy-importer` project and run
-development environment with your changes made locally. Assuming your
-current working directory is `galaxy_ng`.
+development environment with your changes made locally.
 
 1.  Clone `galaxy-importer` to parent directory::
 
