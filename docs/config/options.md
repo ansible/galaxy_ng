@@ -1,7 +1,7 @@
 # Configuration
 
-Galaxy NG is a Pulp Plugin and the configuration system is based on Pulp's configuration
-you can find more information about pulp configuration on [Pulp Docs](https://docs.pulpproject.org/pulpcore/configuration/index.html)
+Galaxy NG is a Pulp Plugin and the configuration system is based on Pulp's configuration.
+You can find more information about pulp configuration on [Pulp Docs](https://docs.pulpproject.org/pulpcore/configuration/index.html)
 
 
 !!! tldr
