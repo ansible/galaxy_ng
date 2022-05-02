@@ -231,7 +231,7 @@ In Background (you can close the terminal later)
     local development setup, the pulp\_container runs along with the Galaxy
     API on port 5001.
 
-    Tag am image like this:
+    Tag an image like this:
 
         docker image tag <IMAGE_ID> localhost:5001/<NAME>:<VERSION>
 
