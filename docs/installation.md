@@ -15,9 +15,9 @@ for any reason an installation from scratch is needed, all the details can be fo
 
 !!! info
     This is the recommended installation process for a production ready system. If you are looking
-    for information on how to install on a development environment see [development page](/development/)
+    for information on how to install on a development environment see [development setup page](/dev/setup/)
 
-The following provides instructions for installing GalaxyNG on a virtual machine, with an example playbook that installs Pulp and Galaxy NG from PyPi packages. If you wish to install and test from source code, see [Installing from source](https://github.com/ansible/galaxy_ng/wiki/Installing-from-source).
+The following provides instructions for installing GalaxyNG on a virtual machine, with an example playbook that installs Pulp and Galaxy NG from PyPi packages.
 
 Future iterations will include support for installing from RPMs and installing to Kubernetes and OpenShift. 
 

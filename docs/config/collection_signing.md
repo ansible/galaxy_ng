@@ -42,7 +42,7 @@ django-admin add-signing-service \  #(1)
 
 1. A django management command.
 2. Name the signing_service should get in the database.
-3. Absolute path to Shell script where the signing is created.
+3. Absolute path to Shell script where the signing is performed.
 4. Key id of the public key.
 
 The positional arguments to the `add-signing-service` command:
@@ -302,7 +302,7 @@ When enabled there will be upload buttons on the pages:
 
 ## Syncing Signatures
 
-When syncing from remote servers, if the signature is server Galaxy will also sync all the 
+When syncing from remote servers, if the signature is served by the remote then Galaxy will also sync all the 
 existing signatures.
 
 Signatures are additive, so each collection can hold multiple signatures.
