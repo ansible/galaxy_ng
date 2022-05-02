@@ -13,7 +13,7 @@ You can find more information about pulp configuration on [Pulp Docs](https://do
 
 ## Configuring your galaxy server
 
-There are 2 sources of custom configurations for a Galaxy server the custom **settings file** and **environment variables**.
+There are 2 sources of custom configurations for a Galaxy server: the custom **settings file** and **environment variables**.
 
 
 ### Settings File
