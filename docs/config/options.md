@@ -9,7 +9,7 @@ You can find more information about pulp configuration on [Pulp Docs](https://do
 
 
 !!! tip
-    If you are looking for how to se configuration options on the pulp-installer take a look on [installation page](/installation)
+    If you are looking for how to set configuration options on the pulp-installer take a look on [installation page](/installation)
 
 ## Configuring your galaxy server
 
