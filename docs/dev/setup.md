@@ -376,7 +376,7 @@ bump2version can also do this automatically if we want to enable it.
 ## Debugging
 
 
-https://github.com/ansible/galaxy\_ng/wiki/Debugging-with-PDB
+https://github.com/ansible/galaxy_ng/wiki/Debugging-with-PDB
 
 ## Add galaxy-importer.cfg to dev environment
 
