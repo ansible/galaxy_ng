@@ -300,11 +300,11 @@ current working directory is `galaxy_ng`.
         git clone https://github.com/ansible/ansible-hub-ui
         git clone https://github.com/ansible/galaxy_importer
 
-2.  **Checkout to desired branches.** `pulp_ansible` master is
-    compatible with a specific range of `pulpcore` versions. So the
-    recommended is to checkout to specific branch or tag following the
-    contraints defined on pulp\_ansible/requirements.txt or leave it
-    checked out to master if you know it is compatible with the
+2.  **Checkout to desired branches.** `pulp_ansible` main is
+    compatible with a specific range of `pulpcore` versions. So it is
+    recommended to checkout to a specific branch or tag following the
+    constraints defined on pulp\_ansible/requirements.txt or leave it
+    checked out to main if you know it is compatible with the
     pulp\_ansible branch you have. Example:
 
         cd ~/projects/pulpcore
