@@ -47,7 +47,7 @@ django-admin add-signing-service \  #(1)
 
 The positional arguments to the `add-signing-service` command:
 
-- **name**: Must a unique name to identify the signing service object.
+- **name**: Must be a unique name to identify the signing service object.
 - **script**: Must be a path to an executable acessible and runnable by the pulp worker process user.
     One example script can be found at the pulp documentation: [https://docs.pulpproject.org/pulpcore/workflows/signed-metadata.html#metadata-signing](https://docs.pulpproject.org/pulpcore/workflows/signed-metadata.html#metadata-signing)
 - **GPG_KEY_ID**: Must be the ID or e-mail that identifies the key on the global user keyring.
