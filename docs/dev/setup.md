@@ -269,7 +269,9 @@ current working directory is `galaxy_ng`.
 
 1.  Clone `galaxy-importer` to parent directory::
 
-        $ git clone https://github.com/ansible/galaxy-importer.git ../galaxy-importer
+        cd your/preferred/projects/folder
+        git clone https://github.com/ansible/galaxy-importer
+        cd galaxy_ng
 
 2.  Add `galaxy-importer` to `DEV_SOURCE_PATH` variable in your
     `.compose.env` file::
