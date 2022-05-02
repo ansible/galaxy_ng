@@ -92,7 +92,7 @@ GALAXY_FEATURE_FLAGS = {
 }
 ```
 
-1. This marks this settings to be merged with existing
+1. This marks this setting to be merged with existing
 
 And there is a Django style shortcut for the same as above:
 
@@ -119,7 +119,7 @@ GALAXY_AUTHENTICATION_CLASSES = [
 ]
 ```
 
-And you need to add a new custom value you can do
+If you need to add a new custom value:
 
 ```py title="/etc/pulp/settings.py"
 GALAXY_AUTHENTICATION_CLASSES = [
@@ -128,7 +128,7 @@ GALAXY_AUTHENTICATION_CLASSES = [
 ]
 ```
 
-1. This marks this settings to be merged with existing
+1. This marks this setting to be merged with existing
 
 And also there is a shortcut useful for environment variables using `@merge` mark.
 
@@ -136,7 +136,7 @@ And also there is a shortcut useful for environment variables using `@merge` mar
 export GALAXY_AUTHENTICATION_CLASSES="@merge my.new.AuthClass"
 ```
 
-On all the cases the `my.new.AuthClass` will be appended to the end of the existing list.
+In both cases the `my.new.AuthClass` will be appended to the end of the existing list.
 
 
 ### Settings sources
@@ -191,6 +191,6 @@ Some configuration keys appears on the settings but are not possible to be overw
 Galaxy forces the final value for those variables.
 
 - `REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES` (defaults to value of `GALAXY_AUTHENTICATION_CLASSES`)
-- `ANSIBLE_URL_NAMESPACE` (default to fixed value `"galaxy:api:v3:"`)
-- `ANSIBLE_DEFAULT_DISTRIBUTION_PATH` (default to value of `GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH`)
+- `ANSIBLE_URL_NAMESPACE` (defaults to fixed value `"galaxy:api:v3:"`)
+- `ANSIBLE_DEFAULT_DISTRIBUTION_PATH` (defaults to value of `GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH`)
 

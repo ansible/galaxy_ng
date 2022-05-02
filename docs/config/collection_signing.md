@@ -1,6 +1,6 @@
 # Enabling Collection Signing
 
-Galaxy Server can create, sync, receive as upload and verify and serve collection signatures.
+Galaxy Server can create, sync, receive as well as upload, verify, and serve collection signatures.
 
 A signature is typically a GPG ASCII Armoured Detached artifact, in other words, a file
 e.g: `MANIFEST.json.asc` that is created by a GPG compatible script based on the `MANIFEST.json`
@@ -23,7 +23,7 @@ server can internally create a signature for each collection.
 ### Signing Service
 
 A signing service is an object defined on the **pulp** backend that combines a GPG **key** and the
-absolute path an executable script.
+absolute path of an executable script.
 
 #### Creating a signing service
 
@@ -41,7 +41,7 @@ django-admin add-signing-service \  #(1)
 ```
 
 1. A django management command.
-2. Name, the signing_service should get in the database.
+2. Name the signing_service should get in the database.
 3. Absolute path to Shell script where the signing is created.
 4. Key id of the public key.
 
