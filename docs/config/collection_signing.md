@@ -78,7 +78,7 @@ export PULP_GALAXY_COLLECTION_SIGNING_SERVICE=unique-name #(1)
 1. The name of the created signing service
 
 
-#### Configuring Galaxy to automatic sign during approval
+#### Configuring Galaxy to automatically sign during approval
 
 Option 1:
 ```py title="/etc/pulp/settings.py"
