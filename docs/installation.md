@@ -22,7 +22,7 @@ The following provides instructions for installing GalaxyNG on a virtual machine
 Future iterations will include support for installing from RPMs and installing to Kubernetes and OpenShift. 
 
 ### Requirements
-Requires Ansible 2.10+
+Requires ansible-core 2.10+
 
 You will be using the Pulp Installer to complete the installation, so please review the requirements at [the Pulp Installer project](https://github.com/pulp/pulp_installer#system-requirements).
 
