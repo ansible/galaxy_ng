@@ -51,7 +51,7 @@ The positional arguments to the `add-signing-service` command:
 - **script**: Must be a path to an executable acessible and runnable by the pulp worker process user.
     One example script can be found at the pulp documentation: [https://docs.pulpproject.org/pulpcore/workflows/signed-metadata.html#metadata-signing](https://docs.pulpproject.org/pulpcore/workflows/signed-metadata.html#metadata-signing)
 - **GPG_KEY_ID**: Must be the ID or e-mail that identifies the key on the global user keyring.
-    The GPG key must be located at the pulp user level keyring and must be a valid GPG there is
+    The GPG key must be located at the pulp user level keyring and must be a valid GPG, there is
     a guide on how to create a valid gpg key here [https://access.redhat.com/articles/3359321](https://access.redhat.com/articles/3359321)
 
 !!! important
