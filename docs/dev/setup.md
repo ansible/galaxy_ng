@@ -14,7 +14,7 @@ git clone git@github.com:<YOUR_USER_NAME>/galaxy_ng.git
     We require all commits to be signed, so configure PGP signing on your git
 
 
-## Configuring your local editing environment
+## Configuring your local code editor
 
 Set your working directory to Galaxy folder
 
