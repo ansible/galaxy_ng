@@ -42,7 +42,7 @@ X_PULP_CONTENT_HOST = "localhost"
 
 !!! warning
     In most of the cases the only variables you may want to customize are those prefixed with `GALAXY_`
-    and a small subset of pulp control variables taht you can check on the configuration list provided
+    and a small subset of pulp control variables that you can see on the configuration list provided
     on the [bottom of this page.](#configuration-options)
 
 
