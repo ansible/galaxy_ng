@@ -8,7 +8,7 @@ tags:
 
 Galaxy NG is a Pulp plugin and can be installed just like any other Pulp plugin, the recommendation
 is to install using the [pulp installer](https://docs.pulpproject.org/pulp_installer/) however if
-for any reason the installarion from scratch is needed all the details can be found on 
+for any reason an installation from scratch is needed, all the details can be found on 
 [installing pulpcore](https://docs.pulpproject.org/pulpcore/installation/instructions.html#pypi-installation)
 
 ## Installing from source using pulp-installer
