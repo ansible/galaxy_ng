@@ -49,7 +49,7 @@ X_PULP_CONTENT_HOST = "localhost"
 ### Environment variables
 
 As Galaxy NG is a pulp plugin it assumes the envvar prefix as `PULP_` so any variable can be 
-customized by export a `PULP_<followed_with_the_variable>`, example:
+customized by export `PULP_<followed_with_the_variable>`, example:
 
 ```bash title="environment"
 export PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true
