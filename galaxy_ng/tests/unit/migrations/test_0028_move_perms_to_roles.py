@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from galaxy_ng.app.models import User
 from galaxy_ng.app.models import Group
+from galaxy_ng.app.models import Namespace
 
 from pulp_ansible.app.models import Collection
 
@@ -15,7 +16,6 @@ from django.contrib.auth.models import Permission
 from guardian.models import GroupObjectPermission
 from guardian.models import UserObjectPermission
 from guardian.shortcuts import assign_perm as guardian_assign_perm
-
 
 permission_names = [
     'ansible.delete_collection',
@@ -41,8 +41,6 @@ permission_names = [
 
 
 def get_model(a,b):
-    print(f'GET_MODEL: {a} {b}')
-
     if a == 'auth':
         if b == 'Permission':
             return Permission
@@ -69,9 +67,6 @@ def get_model(a,b):
 class TestMigratingPermissionsToRoles(TestCase):
 
     def setUp(self):
-
-        print('')
-
         # map out the permissions
         self.permissions = {}
         for perm_name in permission_names:
@@ -99,9 +94,12 @@ class TestMigratingPermissionsToRoles(TestCase):
         for x in range(2, 11):
             if x != 2:
                 continue
-            user_name =f'test_user_{x}'
+            user_name = f'test_user_{x}'
             self.user_names.append(user_name)
             self.users[user_name] = User.objects.create(username=user_name)
+
+        # Create namespace
+        self.namespace = Namespace.objects.create(name='test_namespace_2')
 
     def tearDown(self):
         for x in GroupRole.objects.all():
@@ -141,9 +139,32 @@ class TestMigratingPermissionsToRoles(TestCase):
         assert ('galaxy', 'upload_to_namespace') in permissions
 
     def test_group_object_permissions(self):
-
         apps_mock = Mock()
         apps_mock.get_model = get_model
+
+        # Create namespace
+        group = self.groups['test_group_2']
+        guardian_assign_perm('upload_to_namespace', group, self.namespace)
+
+        # Run migration
+        migration = import_module("galaxy_ng.app.migrations.0028_move_perms_to_roles")
+        migration.move_permissions_to_roles(apps_mock, None)
+
+        # Ensure a GroupRole was created for the group, object and permission
+        assert GroupRole.objects.filter(group=group).count() == 1
+
+        expected_role_name = 'galaxy.' + group.name + '_' + str(self.namespace.id)
+        assert Role.objects.filter(name=expected_role_name).count() == 1
+
+        # Ensure the role has only 1 permission
+        role = Role.objects.filter(name=expected_role_name).first()
+        assert role.permissions.all().count() == 1
+
+        # Ensure the role permission is the right one
+        role_perm = role.permissions.first()
+        assert role_perm.content_type.app_label == 'galaxy'
+        assert role_perm.codename == 'upload_to_namespace'
+
 
     def test_user_object_permissions(self):
 
