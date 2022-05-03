@@ -23,5 +23,6 @@ from galaxy_ng.app.api.v1.viewsets import LegacyRoleViewSet
 urlpatterns = [
     path('imports', LegacyRoleViewSet.as_view({"post": "create", "get": "get_task"}), name='legacy_role-imports1'),
     path('imports/', LegacyRoleViewSet.as_view({"post": "create", "get": "get_task"}), name='legacy_role-imports2'),
-    path('roles', LegacyRoleViewSet.as_view({"get": "list"}), name='legacy_role-list')
+    path('roles', LegacyRoleViewSet.as_view({"get": "list"}), name='legacy_role-list'),
+    path('roles/', LegacyRoleViewSet.as_view({"get": "list"}), name='legacy_role-list2')
 ]
