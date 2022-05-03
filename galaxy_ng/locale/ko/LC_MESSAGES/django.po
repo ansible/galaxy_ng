@@ -17,316 +17,316 @@ msgstr ""
 
 #: app/access_control/access_policy.py:87
 msgid "Namespace in filename not found."
-msgstr "L'espace de nom dans le nom de fichier n'a pas été trouvé."
+msgstr "파일 이름의 네임스페이스를 찾을 수 없습니다."
 
 #: app/access_control/fields.py:17
 msgid "object_permissions field is required"
-msgstr "le champ object_permissions est obligatoire"
+msgstr "object_permissions 필드가 필요합니다."
 
 #: app/access_control/fields.py:21
 msgid "id or name field is required"
-msgstr "Ce champ est obligatoire."
+msgstr "id 또는 name 필드는 필수입니다"
 
 #: app/access_control/fields.py:27
 msgid "object_permissions must be a list of strings"
-msgstr "object_permissions doit être une liste de chaînes de caractères"
+msgstr "object_permissions는 문자열 목록이어야 합니다."
 
 #: app/access_control/fields.py:41
 msgid "Permission {} does not exist"
-msgstr "La permission {} n'existe pas"
+msgstr "permission {}이 존재하지 않습니다."
 
 #: app/access_control/fields.py:56
 msgid "Groups must be a list of group objects"
-msgstr "Les groupes doivent correspondre à une liste d'objets de groupe"
+msgstr "그룹은 그룹 오브젝트 목록이어야 합니다."
 
 #: app/access_control/fields.py:71
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
-msgstr "Le groupe name=%s, id=%s n'existe pas"
+msgstr "그룹 이름=%s, id=%s이/가 존재하지 않습니다."
 
 #: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
 msgid "Invalid group name or ID"
-msgstr "Nom de groupe ou ID invalide"
+msgstr "잘못된 그룹 이름 또는 ID입니다."
 
 #: app/api/ui/serializers/execution_environment.py:375
 msgid "Selected registry does not exist."
-msgstr "Le registre sélectionné n'existe pas."
+msgstr "선택한 레지스트리가 존재하지 않습니다."
 
 #: app/api/ui/serializers/execution_environment.py:384
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "Les noms de conteneurs ne peuvent contenir que des chiffres alphanumériques, \".\", \"_\", \"-\" et un maximum d'un \"/\"."
+msgstr "컨테이너 이름에는 영숫자 \".\", \"_\", \"-\" 및 최대 하나의 \"/\"만 포함할 수 있습니다."
 
 #: app/api/ui/serializers/execution_environment.py:402
 msgid "Name cannot be changed."
-msgstr "Le nom ne peut pas être modifié."
+msgstr "이름은 변경할 수 없습니다."
 
 #: app/api/ui/serializers/synclist.py:41
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr "Le référentiel \"{pulp_id}\" n'a pas été trouvé lors de la création de la synclist"
+msgstr "동기화 목록을 생성하는 동안 리포지토리 \"{pulp_id}\"을/를 찾을 수 없습니다"
 
 #: app/api/ui/serializers/synclist.py:96
 #, python-format
 msgid "Synclist already exists: %s"
-msgstr "Synclist existe déjà : %s"
+msgstr "동기화 목록이 이미 존재합니다. %s"
 
 #: app/api/ui/serializers/synclist.py:104
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "La collection \"{namespace}.{name}\" n'a pas été trouvée lors de la création de la synclist {synclist}"
+msgstr "{synclist}동기화 목록을 생성하는 동안 \"{namespace}.{name}\" 컬렉션을 찾을 수 없습니다."
 
 #: app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "La collection \"{namespace}.{name}\" n'a pas été trouvé lors de la mise à jour de la synclist {synclist}"
+msgstr "{synclist} 동기화 목록을 업데이트하는 동안 컬렉션 \"{namespace}.{name}\"을 찾을 수 없습니다."
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "L'autorisation 'galaxy.change_group' est nécessaire pour modifier un groupe d'utilisateurs dont l'utilisateur demandeur ne fait pas partie."
+msgstr "변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 않습니다."
 
 #: app/api/ui/serializers/user.py:85
 msgid "Must be a super user to grant super user permissions."
-msgstr "Il faut être un super utilisateur pour accorder des autorisations de super utilisateur."
+msgstr "슈퍼유저 권한을 부여하려면 슈퍼유저여야 합니다."
 
 #: app/api/ui/serializers/user.py:128
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
-msgstr "Le groupe name=%(name)s, id=%(id)s n'existe pas"
+msgstr "그룹 이름=%(name)s, id=%(id)s이/가 존재하지 않습니다."
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
-msgstr "L'indexation des environnements d'exécution n'est pas prise en charge par ce registre."
+msgstr "이 레지스트리에서는 인덱싱 실행 환경이 지원되지 않습니다."
 
 #: app/api/ui/views/sync.py:37 app/api/v3/views/sync.py:34
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
-msgstr "La distribution %s n'a pas d’utilisateurs distants associés."
+msgstr "%s 배포에 연결된 원격 장치가 없습니다."
 
 #: app/api/ui/views/sync.py:51
 #, python-format
 msgid "The %s remote does not have any registries associated with it."
-msgstr "La distribution  %s n'a pas de registres associés."
+msgstr "%s 원격 장치에 연결된 레지스트리가 없습니다."
 
 #: app/api/ui/viewsets/collection.py:60
 msgid "Distribution base path is required"
-msgstr "Le chemin de la base de distribution est requis"
+msgstr "배포 기본 경로가 필요합니다."
 
 #: app/api/ui/viewsets/collection.py:175
 msgid "Retrieve collection version"
-msgstr "Récupérer la version de la collection"
+msgstr "컬렉션 버전 검색"
 
 #: app/api/ui/viewsets/collection.py:186
 msgid "Collection version not found for: {}"
-msgstr "Version de la collection non trouvée pour : {}"
+msgstr "컬렉션 버전을 찾을 수 없음: {}"
 
 #: app/api/ui/viewsets/collection.py:242
 msgid "Retrieve collection import"
-msgstr "Récupérer l'importation de la collection"
+msgstr "컬렉션 가져오기 검색"
 
 #: app/api/ui/viewsets/group.py:45
 #, python-format
 msgid "A group named %s already exists."
-msgstr "Un groupe nommé  %s existe déjà."
+msgstr "%s 이라는 그룹이 이미 존재합니다."
 
 #: app/api/utils.py:49
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr "Nom de fichier {filename} non valide. Format attendu : namespace-name-version.tar.gz"
+msgstr "잘못된 파일 이름 {filename} 예상 형식: namespace-name-version.tar.gz"
 
 #: app/api/utils.py:56
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "Chaîne de version {version} non valide  à partir du nom de fichier {filename}. Format de version sémantique attendu."
+msgstr "파일 이름 {filename}의 잘못된 버전 문자열 {version}. 시맨틱 버전 형식이 예상됩니다."
 
 #: app/api/utils.py:60
 #, python-format
 msgid "Expected namespace to be max length of %s"
-msgstr "L'espace de nom attendu est d'une longueur maximale de %s"
+msgstr "예상되는 최대 네임스페이스 길이 %s"
 
 #: app/api/utils.py:62
 #, python-format
 msgid "Expected name to be max length of %s"
-msgstr "Le nom doit avoir une longueur maximale de %s"
+msgstr "예상되는 최대 이름 길이는 %s입니다"
 
 #: app/api/utils.py:64
 #, python-format
 msgid "Expected version to be max length of %s"
-msgstr "La version attendue est d'une longueur maximale de %s"
+msgstr "예상 버전의 최대 길이는 %s입니다"
 
 #: app/api/v3/serializers/namespace.py:60
 #, python-format
 msgid "'%s' is not a valid url."
-msgstr "\"%s\" n'est pas un choix valide."
+msgstr "\"%s\"은/는 유효한 URL이 아닙니다."
 
 #: app/api/v3/serializers/namespace.py:88
 msgid "Attribute 'name' is required"
-msgstr "L'attribut \"nom\" est obligatoire"
+msgstr "'name' 속성이 필요합니다."
 
 #: app/api/v3/serializers/namespace.py:91
 msgid "Name can only contain lower case letters, underscores and numbers"
-msgstr "Le nom ne peut contenir que des lettres minuscules, des caractères de soulignement et des chiffres"
+msgstr "이름에는 소문자, 밑줄 및 숫자만 포함할 수 있습니다."
 
 #: app/api/v3/serializers/namespace.py:94
 msgid "Name must be longer than 2 characters"
-msgstr "Le nom doit comporter plus de 2 caractères"
+msgstr "이름은 2자 이상이어야 합니다."
 
 #: app/api/v3/serializers/namespace.py:97
 msgid "Name cannot begin with '_'"
-msgstr "Le nom ne peut pas commencer par '_'"
+msgstr "이름은 '_'로 시작할 수 없습니다."
 
 #: app/api/v3/serializers/sync.py:67
 msgid "Password for proxy authentication."
-msgstr "Mot de passe pour l'authentification du proxy."
+msgstr "프록시 인증을 위한 암호입니다."
 
 #: app/api/v3/serializers/sync.py:74
 msgid "User for proxy authentication."
-msgstr "Utilisateur pour l'authentification du proxy."
+msgstr "프록시 인증에 사용할 사용자입니다."
 
 #: app/api/v3/serializers/sync.py:87
 msgid "Remote password."
-msgstr "Mot de passe utilisateur à distance."
+msgstr "원격 암호."
 
 #: app/api/v3/serializers/sync.py:94
 msgid "Remote user."
-msgstr "Utilisateur distant."
+msgstr "원격 사용자."
 
 #: app/api/v3/serializers/sync.py:147
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "La synchronisation du contenu des domaines communautaires sans spécifier un fichier d'exigences n'est pas autorisée."
+msgstr "요구 사항 파일을 지정하지 않고 커뮤니티 도메인에서 콘텐츠를 동기화하는 것은 허용되지 않습니다."
 
 #: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "La synchronisation du contenu de galaxy.ansible.com sans spécifier un fichier d'exigences n'est pas autorisée."
+msgstr "요구 사항 파일을 지정하지 않고 dockerfile.ansible.com의 콘텐츠를 동기화할 수 없습니다."
 
 #: app/api/v3/viewsets/collection.py:121
 #, python-brace-format
 msgid ""
 "Collection {namespace}.{name} could not be deleted because there are other "
 "collections that require it."
-msgstr "La collection {namespace}.{name} n'a pas pu être supprimée car d'autres collections en ont besoin."
+msgstr "{namespace} {name} 컬렉션에는 다른 컬렉션이 필요하기 때문에 삭제할 수 없습니다."
 
 #: app/api/v3/viewsets/collection.py:199
 #, python-brace-format
 msgid ""
 "Collection version {namespace}.{name} {version} could not be deleted because "
 "there are other collections that require it."
-msgstr "La collection {namespace}.{name} {version}n'a pas pu être supprimée car d'autres collections en ont besoin."
+msgstr "다른 컬렉션 버전 {namespace} {name} {version}이 필요하기 때문에 컬렉션을 삭제할 수 없습니다."
 
 #: app/api/v3/viewsets/collection.py:291
 #, python-format
 msgid "Path does not match: \"%s\""
-msgstr "Le chemin ne correspond pas : \"%s\""
+msgstr "경로가 일치하지 않습니다. \"%s\""
 
 #: app/api/v3/viewsets/collection.py:312
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
-msgstr "L'espace de nommage \"{0}\" n'existe pas."
+msgstr "\"{0}\" 네임스페이스가 존재하지 않습니다."
 
 #: app/api/v3/viewsets/collection.py:400
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
-msgstr "Réponse inattendue de l'application de contenu. Code :%s."
+msgstr "콘텐츠 앱에서 예기치 않은 응답이 발생했습니다. 코드: %s."
 
 #: app/api/v3/viewsets/collection.py:430
 #, python-format
 msgid "Collection %s not found"
-msgstr "Collection %s non trouvée"
+msgstr "컬렉션%s을/를 찾을 수 없습니다."
 
 #: app/api/v3/viewsets/collection.py:438
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
-msgstr "Repo(s) pour déplacer la collection %s non trouvé(s)"
+msgstr "이동 컬렉션%s의 리포지터리를 찾을 수 없습니다"
 
 #: app/api/v3/viewsets/collection.py:442
 #, python-format
 msgid "Collection %s not found in source repo"
-msgstr "Collection %s non trouvée dans le repo source"
+msgstr "소스 저장소에서 컬렉션 %s을/를 찾을 수 없습니다"
 
 #: app/api/v3/viewsets/collection.py:446
 #, python-format
 msgid "Collection %s already found in destination repo"
-msgstr "Collection %s déjà trouvée dans le repo de destination"
+msgstr "대상 저장소에서 %s 컬렉션을 찾았습니다"
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
 msgid "A namespace named %s already exists."
-msgstr "Un espace de nom nommé %s existe déjà."
+msgstr "%s이라는 네임스페이스가 이미 존재합니다."
 
 #: app/api/v3/viewsets/namespace.py:88
 #, python-brace-format
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr "L'espace de nommage {name} ne peut pas être supprimé car des collections lui sont encore associées."
+msgstr "{name} 네임스페이스와 연결된 컬렉션이 있기 때문에 삭제할 수 없습니다."
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
-msgstr "Échec de notification."
+msgstr "인증에 실패했습니다."
 
 #: app/exceptions.py:8
 msgid "Data conflicts with existing entity."
-msgstr "Les données entrent en conflit avec une entité existante."
+msgstr "데이터가 기존 엔티티와 충돌합니다."
 
 #: app/tasks/index_registry.py:26
 #, python-brace-format
 msgid "Failed to create container {remote_name}. {error}"
-msgstr "Créer un groupe de conteneurs {remote_name}. {error}"
+msgstr "컨테이너 {remote_name}을/를 생성하지 못했습니다. {error}"
 
 #: app/tasks/index_registry.py:90
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "Un conteneur distant portant ce nom existe déjà, mais n'est associé à aucun registre."
+msgstr "이 이름의 원격 컨테이너는 이미 존재하지만 어떤 레지스트리에도 연결되어 있지 않습니다."
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
-msgstr "Un conteneur local portant ce nom existe déjà."
+msgstr "이 이름을 가진 로컬 컨테이너가 이미 존재합니다."
 
 #: app/tasks/publishing.py:53 app/tasks/publishing.py:90
 #, python-format
 msgid "Could not find staging repository: \"%s\""
-msgstr "Impossible de trouver le référentiel «staging» : \"%s\""
+msgstr "스테이징 리포지토리를 찾을 수 없음: \"%s\""
 
 #: app/tasks/synclist.py:45
 #, python-format
 msgid "Curating all synclists repos that curate from %s"
-msgstr "Curation de tous les dépôts synclistes à partir de %s"
+msgstr "%s에서 큐레이트된 모든 동기화 목록 리포지토리 선별"
 
 #: app/tasks/synclist.py:56
 msgid "Synclists curating upstream repo"
-msgstr "Synclistes conservant le repo amont"
+msgstr "큐레이트된 업스트림 리포지토리 동기화 목록"
 
 #: app/tasks/synclist.py:63
 msgid "Synclists curating upstream repo task"
-msgstr "Tâche de curation de repo amont par Synclists"
+msgstr "큐레이트된 업스트림 리포지토리 작업 동기화 목록"
 
 #: app/tasks/synclist.py:91
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
-msgstr "Fin de la préparation %s repos synclistes basés sur la mise à jour %s"
+msgstr "%s 업데이트를 기반으로 큐레이트된 %s 동기화 목록 리포지토리 사용을 완료"
 
 #: app/tasks/synclist.py:120
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr "Application de synclist \"%s\" avec policy=%s au repo curate \"%s\" à partir du repo amont \"%s\""
+msgstr "policy=%s와 동기화 목록 \"%s\"을 적용하여 업스트림 리포지토리 \"%s\"에서 리포지토리 \"%s\"을 처리"
 
 #: app/tasks/synclist.py:162
 msgid "Unexpected synclist policy {}"
-msgstr "Politique syncliste inattendue {}"
+msgstr "예기치 않은 동기화 목록 정책 {}"
