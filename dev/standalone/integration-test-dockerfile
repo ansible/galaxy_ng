@@ -1,19 +1,19 @@
 FROM python
 
-ENV HUB_LOCAL=1
-ENV HUB_API_ROOT=http://api:8000/api/automation-hub/
-
-WORKDIR /home/
+WORKDIR /app/
 
 # Install test requirements first to make running the tests faster
 SHELL ["/bin/bash", "-c"] 
-COPY integration_requirements.txt /home/integration_requirements.txt
+COPY integration_requirements.txt /app/integration_requirements.txt
 RUN pip install virtualenv && \
     virtualenv /tmp/gng_testing && \
     source /tmp/gng_testing/bin/activate &&\
     pip install -r integration_requirements.txt
 
-COPY --chmod=777 dev/common/RUN_INTEGRATION.sh /home/RUN_INTEGRATION.sh
-COPY galaxy_ng /home/galaxy_ng
+ENV HUB_LOCAL=1
+ENV HUB_API_ROOT=http://localhost:5001/api/automation-hub/
 
-ENTRYPOINT [ "/home/RUN_INTEGRATION.sh" ]
+# This layer should come last as it is most likely to change
+COPY . /app/
+
+ENTRYPOINT [ "/app/dev/common/RUN_INTEGRATION.sh" ]

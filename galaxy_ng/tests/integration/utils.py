@@ -582,6 +582,10 @@ def build_collection(
     )
 
 
+def is_docker_installed():
+    return shutil.which("docker") is not None
+
+
 class UIClient:
 
     """ An HTTP client to mimic the UI """

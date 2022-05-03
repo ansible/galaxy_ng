@@ -98,7 +98,7 @@ docker/test/integration:      ## Run integration tests with optional MARK param 
 .PHONY: docker/test/integration/container
 docker/test/integration/container:      ## Run integration tests.
 	docker build . -f dev/standalone/integration-test-dockerfile -t galaxy-integration-runner
-	docker run -it --rm --net galaxy_ng_default galaxy-integration-runner $(FLAGS)
+	docker run -it --rm --add-host=localhost:host-gateway galaxy-integration-runner $(FLAGS)
 
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from fixtures
