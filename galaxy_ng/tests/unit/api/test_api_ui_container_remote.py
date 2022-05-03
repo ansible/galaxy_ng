@@ -46,11 +46,11 @@ class TestContainerRemote(BaseTestCase):
             perms=permissions
         )
 
-    def _create_remote(self, user, name, registry_pk):
+    def _create_remote(self, user, name, registry_pk, **kwargs):
         self.client.force_authenticate(user=user)
         return self.client.post(
             self.remote_list_url,
-            {"name": name, "upstream_name": "foo", "registry": registry_pk},
+            {"name": name, "upstream_name": "foo", "registry": registry_pk, **kwargs},
             format='json'
         )
 
@@ -219,3 +219,23 @@ class TestContainerRemote(BaseTestCase):
             response, "registry does not exist", expected_field="registry"))
         self.assertTrue(self._error_has_message(
             response, "names can only contain alphanumeric", expected_field="name"))
+
+    def test_excludes_default(self):
+        response = self._create_remote(
+            self.admin, 'remote/remote_repo', self.registry.pk, exclude_tags=["foo"])
+        obj_data = response.data
+
+        self.assertTrue("*-source" in obj_data["exclude_tags"])
+        self.assertEqual(len(obj_data["exclude_tags"]), 2)
+
+        # verify exclude source can be removed.
+        response = self._update_remote(
+            obj_data['pulp_id'],
+            self.container_user,
+            {**obj_data, "exclude_tags": ["foo"]}
+        )
+
+        obj_data = response.data
+
+        self.assertTrue("*-source" not in obj_data["exclude_tags"])
+        self.assertEqual(len(obj_data["exclude_tags"]), 1)
