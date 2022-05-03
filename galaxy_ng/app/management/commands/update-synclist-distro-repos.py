@@ -47,10 +47,20 @@ class Command(BaseCommand):
 
         if options["point_each_to_synclist_repo"]:
             log.debug("Updating all synclists.repository to point to synclist repo")
+
             with transaction.atomic():
                 for synclist in synclists:
                     log.debug('repo: %s upstream: %s', synclist.repository, synclist.upstream_repository)
-                    # TODO: figure out what the synclist repo is, and if it should exist
-                    #       ie, .collections or .namespaces is not empty
-                    # synclist.repository = synclist.upstream_repository
-                    # synclist.save()
+
+                    if not synclist.collections.all() and not synclist.namespaces.all():
+                        # If nothing is specified to customize the synclist, we don't need a synclist repo
+                        log.debug('This synclist does not specify any excludes, so no need to create a synclist repo')
+                        continue
+
+                    log.debug('This synclist has exclude collections or namespaces, so it needs to point to correct synclist repo')
+                    # look up repo based on synclist.name
+                    synclist_repo = AnsibleRepository.get(name=synclist.name)
+
+                    log.debug('Pointing synclist %s to synclist repo %s', synclist, synclist_repo)
+                    synclist.repository = synclist_repo
+                    synclist.save()
