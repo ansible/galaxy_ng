@@ -5,6 +5,8 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers
 
+# TODO: see if this file is still needed with https://issues.redhat.com/browse/AAH-1544
+
 # This file is necesary to prevent the DRF web API browser from breaking on all of the
 # pulp/api/v3/repositories/ endpoints.
 

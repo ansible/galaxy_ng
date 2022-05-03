@@ -18,27 +18,12 @@ from ..utils import get_client
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-PULPY_VARIABLES = [
-    '{ansible_collection_href}',
-    '{ansible_collection_version_href}',
-    '{ansible_collection_import_href}',
-    '{role_href}',
-    '{task_group_href}',
-    '{upload_href}',
-    '{worker_href}'
-]
-
-
 @pytest.mark.openapi
 def test_galaxy_openapi_no_pulp_variables(ansible_config):
     """Tests whether openapi.json has valid path names"""
 
     config = ansible_config("ansible_partner")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
+    api_client = get_client(config=config, request_token=True, require_auth=True)
 
     galaxy_spec = api_client('/api/automation-hub/v3/openapi.json')
     assert 'paths' in galaxy_spec
@@ -53,34 +38,28 @@ def test_galaxy_openapi_validation(ansible_config):
     """Tests whether openapi.json passes openapi linter"""
 
     config = ansible_config("ansible_partner")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
+    api_client = get_client(config=config, request_token=True, require_auth=True)
 
-    galaxy_spec = api_client('/api/automation-hub/v3/openapi.json')
+    galaxy_spec = api_client("/api/automation-hub/v3/openapi.json")
     validate_spec(galaxy_spec)
 
 
-@pytest.mark.standalone_only
 @pytest.mark.openapi
-def test_pulp_openapi_has_variables(ansible_config):
-    """Tests whether openapi.json has valid path names for pulp"""
+def test_pulp_and_galaxy_specs_match(ansible_config):
+    """Tests whether galaxy and pulp openapi.json have same paths"""
 
     config = ansible_config("ansible_partner")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
+    api_client = get_client(config=config, request_token=True, require_auth=True)
 
-    pulp_spec = api_client('/pulp/api/v3/docs/api.json')
-    assert 'paths' in pulp_spec
+    pulp_spec = api_client("/api/automation-hub/pulp/api/v3/docs/api.json")
+    assert "paths" in pulp_spec
+    pulp_spec_paths_keys = list(pulp_spec["paths"].keys())
 
-    paths_keys = list(pulp_spec['paths'].keys())
-    for ev in PULPY_VARIABLES:
-        assert ev in paths_keys
+    galaxy_spec = api_client("/api/automation-hub/v3/openapi.json")
+    assert "paths" in galaxy_spec
+    galaxy_spec_paths_keys = list(galaxy_spec["paths"].keys())
+
+    assert pulp_spec_paths_keys == galaxy_spec_paths_keys
 
 
 @pytest.mark.standalone_only
@@ -90,27 +69,22 @@ def test_openapi_bindings_generation(ansible_config):
     """Verify client bindings can be built from the pulp'ish api spec"""
 
     config = ansible_config("ansible_partner")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
+    api_client = get_client(config=config, request_token=True, require_auth=True)
+
+    pulp_spec = api_client("/api/automation-hub/pulp/api/v3/docs/api.json")
+    status = api_client("/api/automation-hub/pulp/api/v3/status/")
+    version = [x["version"] for x in status["versions"] if x["component"] == "galaxy"][0]
+    my_id = (
+        subprocess.run("id -u", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        .stdout.decode("utf-8")
+        .strip()
     )
+    volume_name = "/local"
+    generator_repo = "https://github.com/pulp/pulp-openapi-generator"
 
-    pulp_spec = api_client('/pulp/api/v3/docs/api.json')
-    status = api_client('/pulp/api/v3/status/')
-    version = [x['version'] for x in status['versions'] if x['component'] == 'galaxy'][0]
-    my_id = subprocess.run(
-        'id -u',
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    ).stdout.decode('utf-8').strip()
-    volume_name = '/local'
-    generator_repo = 'https://github.com/pulp/pulp-openapi-generator'
+    with tempfile.TemporaryDirectory(prefix="galaxy-bindings-") as output_dir:
 
-    with tempfile.TemporaryDirectory(prefix='galaxy-bindings-') as output_dir:
-
-        generator_checkout = os.path.join(output_dir, 'pulp-openapi-generator')
+        generator_checkout = os.path.join(output_dir, "pulp-openapi-generator")
         clone_pid = subprocess.run(
             f'git clone {generator_repo} {generator_checkout}',
             shell=True,
