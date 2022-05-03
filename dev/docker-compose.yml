@@ -51,7 +51,7 @@ services:
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
-      - "/tmp/ansible:uid=1000,gid=1000"
+      - "/tmp/ansible:uid=${UID},gid=${GID}"
     depends_on:
       - _base
       - postgres
@@ -74,7 +74,7 @@ services:
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
-      - "/tmp/ansible:uid=1000,gid=1000"
+      - "/tmp/ansible:uid=${UID},gid=${GID}"
     depends_on:
       - _base
       - postgres
@@ -99,7 +99,7 @@ services:
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
-      - "/tmp/ansible:uid=1000,gid=1000"
+      - "/tmp/ansible:uid=${UID},gid=${GID}"
     depends_on:
       - _base
       - postgres

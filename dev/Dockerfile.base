@@ -1,6 +1,7 @@
 FROM registry.access.redhat.com/ubi8
 
-ARG USER_ID=1000
+ARG UID=1000
+ARG GID=1000
 ARG USER_NAME=galaxy
 ARG USER_GROUP=galaxy
 ARG COMPOSE_PROFILE
@@ -21,9 +22,9 @@ ENV LANG=en_US.UTF-8 \
 
 RUN set -ex; \
     id --group "${USER_GROUP}" &>/dev/null \
-    || groupadd --gid "${USER_ID}" "${USER_GROUP}"; \
+    || groupadd --gid "${GID}" "${USER_GROUP}"; \
     \
-    useradd --uid ${USER_ID} --gid "${USER_GROUP}" "${USER_NAME}"
+    useradd --uid ${UID} --gid "${USER_GROUP}" "${USER_NAME}"
 
 # Install dependencies:
 #   * glibc-langpack-en: install missing en_US.UTF-8 locale
