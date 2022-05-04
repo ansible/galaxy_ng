@@ -1,19 +1,14 @@
 import logging
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from guardian.shortcuts import get_objects_for_user
-
 from rest_framework.decorators import action
-
-from pulpcore.plugin.viewsets import OperationPostponedResponse
-from pulpcore.plugin.tasking import dispatch
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app.tasks import curate_synclist_repository
 
 from .synclist import SyncListViewSet
-
 
 log = logging.getLogger(__name__)
 
@@ -35,15 +30,11 @@ class MySyncListViewSet(SyncListViewSet):
             klass=models.SyncList,
         )
 
+    # TODO: on UI click of synclist toggle the UI makes 2 calls
+    # PUT /api/automation-hub/_ui/v1/my-synclists/1/
+    # POST /api/automation-hub/_ui/v1/my-synclists/1/curate/
+    # remove this method after UI stops calling curate action
     @action(detail=True, methods=["post"])
     def curate(self, request, pk):
-        synclist = get_object_or_404(models.SyncList, pk=pk)
-        synclist_task = dispatch(
-            curate_synclist_repository,
-            exclusive_resources=[synclist.repository],
-            args=(pk, )
-        )
-
-        log.debug("synclist_task: %s", synclist_task)
-
-        return OperationPostponedResponse(synclist_task, request)
+        get_object_or_404(models.SyncList, pk=pk)
+        return HttpResponse(status=202)

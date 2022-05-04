@@ -31,7 +31,6 @@ from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT, DeploymentMode
 from galaxy_ng.app.tasks import (
     call_move_content_task,
-    curate_all_synclist_repository,
     call_sign_and_move_task,
     import_and_auto_approve,
     import_and_move_to_staging,
@@ -314,14 +313,5 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
             golden_repo = AnsibleDistribution.objects.get(
                 base_path=settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
             ).repository
-
-            if dest_repo == golden_repo or src_repo == golden_repo:
-                curate_task = dispatch(
-                    curate_all_synclist_repository,
-                    shared_resources=[golden_repo],
-                    args=(golden_repo.name,),
-                    kwargs={},
-                )
-                response_data['curate_all_synclist_repository_task_id'] = curate_task.pk
 
         return Response(data=response_data, status='202')
