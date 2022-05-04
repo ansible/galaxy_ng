@@ -1,0 +1,1 @@
+Add collection download logging
