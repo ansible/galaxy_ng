@@ -7,18 +7,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-15 22:48+0000\n"
+"POT-Creation-Date: 2022-04-25 02:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
-"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app/access_control/access_policy.py:87
+#: app/access_control/access_policy.py:138
 msgid "Namespace in filename not found."
 msgstr "ファイル名の名前空間が見つかりません。"
+
+#: app/access_control/access_policy.py:153
+msgid "Namespace not found."
+msgstr "名前空間が見つかりません。"
 
 #: app/access_control/fields.py:17
 msgid "object_permissions field is required"
@@ -50,7 +53,6 @@ msgid "Invalid group name or ID"
 msgstr "無効なグループ名または ID"
 
 #: app/api/ui/serializers/execution_environment.py:375
-#| msgid "Namespace \"{0}\" does not exist."
 msgid "Selected registry does not exist."
 msgstr "選択したレジストリーが存在しません。"
 
@@ -58,10 +60,9 @@ msgstr "選択したレジストリーが存在しません。"
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "コンテナー名には、英数字、「.」、「_」、「-」、および「/」を最大 1つ含めることができます。"
+msgstr "コンテナー名には、英数字、「.」、「_」、「-」、および 1 つまでの「/」しか使用することができません。"
 
 #: app/api/ui/serializers/execution_environment.py:402
-#| msgid "Name cannot begin with '_'"
 msgid "Name cannot be changed."
 msgstr "名前を変更できません。"
 
@@ -108,6 +109,33 @@ msgstr "グループ名=%(name)s、id=%(id)s は存在しません"
 msgid "Indexing execution environments is not supported on this registry."
 msgstr "実行環境のインデックス作成は、このレジストリーではサポートされません。"
 
+#: app/api/ui/views/signing.py:71
+msgid "Missing required field: namespace"
+msgstr "必須フィールドがありません: 名前空間"
+
+#: app/api/ui/views/signing.py:88
+#, python-format
+msgid "No content units found for: %s"
+msgstr "コンテンツユニットが見つかりませんでした: %s"
+
+#: app/api/ui/views/signing.py:103
+msgid "distro_base_path field is required."
+msgstr "distro_base_path フィールドは必須です。"
+
+#: app/api/ui/views/signing.py:108
+#, python-format
+msgid "Distribution %s does not exist."
+msgstr "ディストリビューション %s は存在しません。"
+
+#: app/api/ui/views/signing.py:114
+msgid "signing_service field is required."
+msgstr "signing_service フィールドは必要です。"
+
+#: app/api/ui/views/signing.py:117
+#, python-format
+msgid "Signing service \"%s\" does not exist."
+msgstr "署名サービス \"%s\" は存在しません。"
+
 #: app/api/ui/views/sync.py:37 app/api/v3/views/sync.py:34
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
@@ -115,23 +143,22 @@ msgstr "%s ディストリビューションには、リモートが関連付け
 
 #: app/api/ui/views/sync.py:51
 #, python-format
-#| msgid "The %s distribution does not have any remotes associated with it."
 msgid "The %s remote does not have any registries associated with it."
-msgstr "%s リモートには、リモートが関連付けられていません。"
+msgstr "%s リモートには、レジストリーが関連付けられていません。"
 
-#: app/api/ui/viewsets/collection.py:60
+#: app/api/ui/viewsets/collection.py:119
 msgid "Distribution base path is required"
 msgstr "ディストリビューションベースパスが必要です"
 
-#: app/api/ui/viewsets/collection.py:175
+#: app/api/ui/viewsets/collection.py:255
 msgid "Retrieve collection version"
 msgstr "コレクションバージョンの取得"
 
-#: app/api/ui/viewsets/collection.py:186
+#: app/api/ui/viewsets/collection.py:266
 msgid "Collection version not found for: {}"
 msgstr "コレクションバージョンが見つかりません: {}"
 
-#: app/api/ui/viewsets/collection.py:242
+#: app/api/ui/viewsets/collection.py:322
 msgid "Retrieve collection import"
 msgstr "コレクションインポートの取得"
 
@@ -168,44 +195,44 @@ msgstr "想定される名前の最大長は %s です"
 msgid "Expected version to be max length of %s"
 msgstr "想定されるバージョンの最大長は %s です"
 
-#: app/api/v3/serializers/namespace.py:60
+#: app/api/v3/serializers/namespace.py:65
 #, python-format
 msgid "'%s' is not a valid url."
-msgstr "「%s」は有効な URL ではありません"
+msgstr "「%s」は有効な URL ではありません。"
 
-#: app/api/v3/serializers/namespace.py:88
+#: app/api/v3/serializers/namespace.py:94
 msgid "Attribute 'name' is required"
 msgstr "属性「名」が必要です。"
 
-#: app/api/v3/serializers/namespace.py:91
+#: app/api/v3/serializers/namespace.py:97
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr "名前に使用できる値は小文字、アンダースコア、数字のみです"
 
-#: app/api/v3/serializers/namespace.py:94
+#: app/api/v3/serializers/namespace.py:100
 msgid "Name must be longer than 2 characters"
 msgstr "名前は 2 文字以上にする必要があります"
 
-#: app/api/v3/serializers/namespace.py:97
+#: app/api/v3/serializers/namespace.py:103
 msgid "Name cannot begin with '_'"
 msgstr "名前は '_' で開始できません"
 
-#: app/api/v3/serializers/sync.py:66
+#: app/api/v3/serializers/sync.py:67
 msgid "Password for proxy authentication."
 msgstr "プロキシー認証のパスワード。"
 
-#: app/api/v3/serializers/sync.py:73
+#: app/api/v3/serializers/sync.py:74
 msgid "User for proxy authentication."
 msgstr "プロキシー認証のユーザー。"
 
-#: app/api/v3/serializers/sync.py:86
+#: app/api/v3/serializers/sync.py:87
 msgid "Remote password."
 msgstr "リモートパスワード。"
 
-#: app/api/v3/serializers/sync.py:93
+#: app/api/v3/serializers/sync.py:94
 msgid "Remote user."
 msgstr "リモートユーザー。"
 
-#: app/api/v3/serializers/sync.py:146
+#: app/api/v3/serializers/sync.py:148
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
@@ -217,54 +244,45 @@ msgid ""
 "file is not allowed."
 msgstr "要件ファイルを指定せずに galaxy.ansible.com からコンテンツを同期することはできません。"
 
-#: app/api/v3/viewsets/collection.py:122
-#, python-brace-format
-msgid ""
-"Collection {namespace}.{name} could not be deleted because there are other "
-"collections that require it."
-msgstr "コレクション {namespace}.{name} は、他のコレクションで必要とされているため、削除できませんでした。"
-
-#: app/api/v3/viewsets/collection.py:200
-#, python-brace-format
-msgid ""
-"Collection version {namespace}.{name} {version} could not be deleted because "
-"there are other collections that require it."
-msgstr "コレクションバージョン {namespace}.{name} {version} は、他のコレクションで必要とされるため、削除できませんでした。"
-
-#: app/api/v3/viewsets/collection.py:289
+#: app/api/v3/viewsets/collection.py:109
 #, python-format
 msgid "Path does not match: \"%s\""
 msgstr "パスが一致しません: \"%s\""
 
-#: app/api/v3/viewsets/collection.py:310
+#: app/api/v3/viewsets/collection.py:130
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
 msgstr "名前空間 \"{0}\" は存在しません。"
 
-#: app/api/v3/viewsets/collection.py:398
+#: app/api/v3/viewsets/collection.py:219
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
 msgstr "コンテンツアプリからの予期しない応答。コード: %s"
 
-#: app/api/v3/viewsets/collection.py:428
+#: app/api/v3/viewsets/collection.py:249
 #, python-format
 msgid "Collection %s not found"
 msgstr "コレクション %s が見つかりません"
 
-#: app/api/v3/viewsets/collection.py:436
+#: app/api/v3/viewsets/collection.py:257
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
 msgstr "コレクション %s を移動するためのリポジトリーが見つかりません"
 
-#: app/api/v3/viewsets/collection.py:440
+#: app/api/v3/viewsets/collection.py:262
 #, python-format
 msgid "Collection %s not found in source repo"
 msgstr "ソースリポジトリーでコレクション %s が見つかりません"
 
-#: app/api/v3/viewsets/collection.py:444
+#: app/api/v3/viewsets/collection.py:265
 #, python-format
 msgid "Collection %s already found in destination repo"
 msgstr "宛先リポジトリーでコレクション %s がすでに見つかっています"
+
+#: app/api/v3/viewsets/collection.py:289 app/tasks/publishing.py:103
+#, python-format
+msgid "Signing %s service not found"
+msgstr "署名 %s サービスが見つかりません"
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
@@ -276,7 +294,7 @@ msgstr "%s という名前の名前空間はすでに存在します。"
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr "名前空間 {name} には関連付けられるコレクションがあるため、削除できません。"
+msgstr "名前空間 {name} には関連付けられているコレクションがあるため、削除できません。"
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -298,11 +316,10 @@ msgid ""
 msgstr "この名前が割り当てられたリモートコンテナーはすでに存在しますが、レジストリーには関連付けられていません。"
 
 #: app/tasks/index_registry.py:97
-#| msgid "A namespace named %s already exists."
 msgid "A local container with this name already exists."
 msgstr "この名前が指定されたローカルコンテナーはすでに存在します。"
 
-#: app/tasks/publishing.py:54 app/tasks/publishing.py:84
+#: app/tasks/publishing.py:57 app/tasks/publishing.py:94
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "ステージングリポジトリーが見つかりませんでした: \"%s\""
@@ -310,28 +327,28 @@ msgstr "ステージングリポジトリーが見つかりませんでした: \
 #: app/tasks/synclist.py:45
 #, python-format
 msgid "Curating all synclists repos that curate from %s"
-msgstr "%s から再帰的にすべての同期リストをキュレート中"
+msgstr "%s からキュレートするすべての同期リストリポジトリーをキュレート中"
 
 #: app/tasks/synclist.py:56
 msgid "Synclists curating upstream repo"
-msgstr "キュレート中のアップストリームリポジトリーの同期リスト"
+msgstr "アップストリームリポジトリーをキュレート中の同期リスト"
 
 #: app/tasks/synclist.py:63
 msgid "Synclists curating upstream repo task"
-msgstr "キュレート中のアップストリームのリポジトリータスクの同期リスト"
+msgstr "アップストリームリポジトリータスクをキュレート中の同期リスト"
 
-#: app/tasks/synclist.py:91
+#: app/tasks/synclist.py:92
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
-msgstr "%s 更新に基づく %s 同期リストリポジトリーの級レートの完了"
+msgstr "%s 更新に基づく %s 同期リストリポジトリーのキュレートの完了"
 
-#: app/tasks/synclist.py:120
+#: app/tasks/synclist.py:121
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr "アップストリームのリポジトリーから \"%s\" リポジトリー \"%s\" をキュレーとする policy=%s で同期リスト \"%s\" を適用中"
+msgstr "アップストリームリポジトリー \"%s\" からリポジトリー \"%s\" をキュレートするために policy=%s で同期リスト \"%s\" を適用中"
 
-#: app/tasks/synclist.py:162
+#: app/tasks/synclist.py:163
 msgid "Unexpected synclist policy {}"
 msgstr "予期せぬ同期リストポリシー {}"
