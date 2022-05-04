@@ -13,6 +13,71 @@ Changelog
 
 .. towncrier release notes start
 
+
+4.5.0 (2022-05-04)
+==================
+
+Features
+--------
+
+- Collection Signing, signature creation, upload, verification and APIs.
+  `AAH-312 <https://issues.redhat.com/browse/AAH-312>`_
+- Add Signing Service to the dev environment
+  `AAH-1181 <https://issues.redhat.com/browse/AAH-1181>`_
+- Update pulp_ansible to 0.12.0, for signing features
+  `AAH-1353 <https://issues.redhat.com/browse/AAH-1353>`_
+- Add "related_fields" to the namespace serializer, which can optionally return "my_permissions" for namespaces.
+  `AAH-1458 <https://issues.redhat.com/browse/AAH-1458>`_
+
+
+Bugfixes
+--------
+
+- Improve queries on move api endpoint
+  `AAH-692 <https://issues.redhat.com/browse/AAH-692>`_
+- Log query items to api access log to capture collection details when uploading a collection.
+  `AAH-1018 <https://issues.redhat.com/browse/AAH-1018>`_
+- Remote registry sync status not shown on registry page
+  `AAH-1094 <https://issues.redhat.com/browse/AAH-1094>`_
+- Fix response for downloading collections in insights mode
+  `AAH-1162 <https://issues.redhat.com/browse/AAH-1162>`_
+- Upgrade to pulp-container 2.8.3 to fix azure and S3 storage backends.
+  `AAH-1188 <https://issues.redhat.com/browse/AAH-1188>`_
+- Fix a bug preventing users upgrading from 1.2 to 2.1 from downloading content from the rh-certified repository.
+  `AAH-1200 <https://issues.redhat.com/browse/AAH-1200>`_
+- Add missing proxy_password if field is set on CollectionRemote update
+  `AAH-1254 <https://issues.redhat.com/browse/AAH-1254>`_
+- Combine copy and remove tasks into single task
+  `AAH-1349 <https://issues.redhat.com/browse/AAH-1349>`_
+- Update to the latest pulp_container release
+  `AAH-1373 <https://issues.redhat.com/browse/AAH-1373>`_
+- Make sure orphan_protection_time is not set to zero
+  `AAH-1384 <https://issues.redhat.com/browse/AAH-1384>`_
+- Prevent artifact removal from latest version when deleting images
+  `AAH-1389 <https://issues.redhat.com/browse/AAH-1389>`_
+- Update locks on synclist tasks so golden_repo will not be written to during tasks
+  `AAH-1395 <https://issues.redhat.com/browse/AAH-1395>`_
+- Check for existing synclist obj before create in RH Auth
+  `AAH-1399 <https://issues.redhat.com/browse/AAH-1399>`_
+- Remove custom admin as TaskAdmin was removed from pulpcore
+  `AAH-1478 <https://issues.redhat.com/browse/AAH-1478>`_
+- Fix collectionversion query build, it was taking too much time to calculate a django Q() expression
+  `AAH-1484 <https://issues.redhat.com/browse/AAH-1484>`_
+- Use simple string splitting to remove the requirements versions
+  `AAH-1545 <https://issues.redhat.com/browse/AAH-1545>`_
+- Ensure that container remotes exclude source images by default to prevent networking errors when syncing.
+  `AAH-1557 <https://issues.redhat.com/browse/AAH-1557>`_
+
+
+Misc
+----
+
+- `AAH-765 <https://issues.redhat.com/browse/AAH-765>`_, `AAH-804 <https://issues.redhat.com/browse/AAH-804>`_, `AAH-1015 <https://issues.redhat.com/browse/AAH-1015>`_, `AAH-1038 <https://issues.redhat.com/browse/AAH-1038>`_, `AAH-1042 <https://issues.redhat.com/browse/AAH-1042>`_, `AAH-1090 <https://issues.redhat.com/browse/AAH-1090>`_, `AAH-1092 <https://issues.redhat.com/browse/AAH-1092>`_, `AAH-1097 <https://issues.redhat.com/browse/AAH-1097>`_, `AAH-1106 <https://issues.redhat.com/browse/AAH-1106>`_, `AAH-1212 <https://issues.redhat.com/browse/AAH-1212>`_, `AAH-1214 <https://issues.redhat.com/browse/AAH-1214>`_, `AAH-1219 <https://issues.redhat.com/browse/AAH-1219>`_, `AAH-1278 <https://issues.redhat.com/browse/AAH-1278>`_, `AAH-1361 <https://issues.redhat.com/browse/AAH-1361>`_, `AAH-1418 <https://issues.redhat.com/browse/AAH-1418>`_, `AAH-1442 <https://issues.redhat.com/browse/AAH-1442>`_
+
+
+----
+
+
 4.4.0 (2021-11-18)
 ==================
 
