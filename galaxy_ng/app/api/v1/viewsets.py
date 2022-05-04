@@ -21,6 +21,21 @@ from galaxy_ng.app.api.v1.tasks import legacy_role_import
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.serializers import LegacyRoleSerializer
+from galaxy_ng.app.api.v1.serializers import LegacyUserSerializer
+
+
+class LegacyUserSetPagination(PageNumberPagination):
+    page_size = 100
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+
+class LegacyUserViewSet(viewsets.ModelViewSet):
+    queryset = LegacyNamespace.objects.all()
+    serializer = LegacyUserSerializer
+    serializer_class = LegacyUserSerializer
+    permission_classes = [AllowAny]
+    pagination_class = LegacyUserSetPagination
 
 
 class LegacyRolesSetPagination(PageNumberPagination):
