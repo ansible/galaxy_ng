@@ -19,7 +19,7 @@ else
     export HUB_TOKEN="abcdefghijklmnopqrstuvwxyz1234567890"
 fi
 
-pip install virtualenv
+which virtualenv || pip install --user virtualenv
 
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
