@@ -94,11 +94,14 @@ class RHIdentityAuthentication(BaseAuthentication):
             )
 
             repository = self._ensure_repository(distro_name)
-            self._get_or_create_synclist_distribution(distro_name, upstream_repository)
+            distribution = self._get_or_create_synclist_distribution(
+                distro_name, upstream_repository
+            )
 
             default_synclist, _ = SyncList.objects.get_or_create(
                 name=distro_name,
                 defaults={
+                    "distribution": distribution,
                     "repository": repository,
                     "upstream_repository": upstream_repository,
                     "policy": SYNCLIST_DEFAULT_POLICY,
