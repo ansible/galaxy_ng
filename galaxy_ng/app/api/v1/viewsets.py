@@ -37,6 +37,12 @@ class LegacyUserViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     pagination_class = LegacyUserSetPagination
 
+    def get_user(self, *args, **kwargs):
+        userid = kwargs.get('userid')
+        user = LegacyNamespace.objects.filter(id=userid).first()
+        serializer = LegacyUserSerializer(user)
+        return Response(serializer.data)
+
 
 class LegacyRolesSetPagination(PageNumberPagination):
     page_size = 100
@@ -51,6 +57,12 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
     #permission_classes = [access_policy.CollectionAccessPolicy]
     permission_classes = [AllowAny]
     pagination_class = LegacyRolesSetPagination
+
+    def get_role(self, *args, **kwargs):
+        roleid = int(kwargs.get('roleid'))
+        role = LegacyRole.objects.filter(id=roleid).first()
+        serializer = LegacyRoleSerializer(role)
+        return Response(serializer.data)
 
     def create(self, validated_data):
         #print(f'CREATE: {validated_data}')

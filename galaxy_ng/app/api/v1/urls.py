@@ -20,12 +20,16 @@ from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.v1.viewsets import LegacyRoleViewSet
 from galaxy_ng.app.api.v1.viewsets import LegacyUserViewSet
 
-
+# path('articles/<int:year>/<int:month>/<slug:slug>/', views.article_detail)
 urlpatterns = [
     path('imports', LegacyRoleViewSet.as_view({"post": "create", "get": "get_task"}), name='legacy_role-imports1'),
     path('imports/', LegacyRoleViewSet.as_view({"post": "create", "get": "get_task"}), name='legacy_role-imports2'),
     path('roles', LegacyRoleViewSet.as_view({"get": "list"}), name='legacy_role-list'),
     path('roles/', LegacyRoleViewSet.as_view({"get": "list"}), name='legacy_role-list2'),
-    path('users', LegacyUserViewSet.as_view({"get": "list"}), name='legacy_role-userlist'),
-    path('users/', LegacyUserViewSet.as_view({"get": "list"}), name='legacy_role-userlist2')
+    path('roles/<int:roleid>', LegacyRoleViewSet.as_view({"get": "get_role"}), name='legacy_role-detail'),
+    path('roles/<int:roleid>/', LegacyRoleViewSet.as_view({"get": "get_role"}), name='legacy_role-detail2'),
+    path('users', LegacyUserViewSet.as_view({"get": "list"}), name='legacy_users-userlist'),
+    path('users/', LegacyUserViewSet.as_view({"get": "list"}), name='legacy_users-userlist2'),
+    path('users/<int:userid>', LegacyUserViewSet.as_view({"get": "get_user"}), name='legacy_user-userdetail'),
+    path('users/<int:userid>/', LegacyUserViewSet.as_view({"get": "get_user"}), name='legacy_user-userdetail2')
 ]
