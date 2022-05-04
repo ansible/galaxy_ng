@@ -137,6 +137,7 @@ LANGUAGES = [
     # Django 3.0+ requires the language defined in LANGUAGE_CODE to be in this list
     ('en-us', 'English (USA)'),
     ('ja', 'Japanese'),
+    ('ko', 'Korean'),
     ('nl', 'Dutch'),
     ('fr', 'French'),
     ('es', 'Spanish'),
