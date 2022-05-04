@@ -3,270 +3,352 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-22 23:27+0200\n"
+"POT-Creation-Date: 2022-04-25 02:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
-"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: galaxy_ng/app/access_control/access_policy.py:69
+#: app/access_control/access_policy.py:138
 msgid "Namespace in filename not found."
-msgstr ""
+msgstr "Namespace in bestandsnaam niet gevonden."
 
-#: galaxy_ng/app/access_control/fields.py:17
+#: app/access_control/access_policy.py:153
+msgid "Namespace not found."
+msgstr "Namespace niet gevonden."
+
+#: app/access_control/fields.py:17
 msgid "object_permissions field is required"
-msgstr ""
+msgstr "Veld object_permissions is verplicht"
 
-#: galaxy_ng/app/access_control/fields.py:21
+#: app/access_control/fields.py:21
 msgid "id or name field is required"
-msgstr ""
+msgstr "Veld id of naam is verplicht."
 
-#: galaxy_ng/app/access_control/fields.py:27
+#: app/access_control/fields.py:27
 msgid "object_permissions must be a list of strings"
-msgstr ""
+msgstr "object_permissions moet een lijst van tekenreeksen zijn"
 
-#: galaxy_ng/app/access_control/fields.py:41
+#: app/access_control/fields.py:41
 msgid "Permission {} does not exist"
-msgstr ""
+msgstr "Machtiging {} bestaat niet"
 
-#: galaxy_ng/app/access_control/fields.py:56
+#: app/access_control/fields.py:56
 msgid "Groups must be a list of group objects"
-msgstr ""
+msgstr "Groepen moet een lijst van groepsobjecten zijn"
 
-#: galaxy_ng/app/access_control/fields.py:71
+#: app/access_control/fields.py:71
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
-msgstr ""
+msgstr "Groepsnaam=%s, id=%s bestaat niet"
 
-#: galaxy_ng/app/access_control/fields.py:75
-#: galaxy_ng/app/api/ui/serializers/user.py:118
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
 msgid "Invalid group name or ID"
-msgstr ""
+msgstr "Ongeldige groepsnaam of id."
 
-#: galaxy_ng/app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/execution_environment.py:375
+msgid "Selected registry does not exist."
+msgstr "Geselecteerd register bestaat niet."
+
+#: app/api/ui/serializers/execution_environment.py:384
+msgid ""
+"Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
+"and a up to one \"/\"."
+msgstr "Containernamen kunnen alleen alfanumerieke getallen, \".\", \"_\", \"-\" en maximaal één \"/\" bevatten."
+
+#: app/api/ui/serializers/execution_environment.py:402
+msgid "Name cannot be changed."
+msgstr "Naam kan niet worden veranderd."
+
+#: app/api/ui/serializers/synclist.py:41
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr ""
+msgstr "Repository \"{pulp_id}\" niet gevonden tijdens aanmaken synclist"
 
-#: galaxy_ng/app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:96
 #, python-format
 msgid "Synclist already exists: %s"
-msgstr ""
+msgstr "Synclist bestaat al: %s"
 
-#: galaxy_ng/app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:104
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr ""
+msgstr "Collectie \"{namespace}.{name}\" niet gevonden tijdens het aanmaken van synclist {synclist}"
 
-#: galaxy_ng/app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr ""
+msgstr "Collectie \"{namespace}.{name}\" niet gevonden tijdens het bijwerken van synclist {synclist}"
 
-#: galaxy_ng/app/api/ui/serializers/user.py:60
+#: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr ""
+msgstr "De machtiging 'galaxy.change_group' is nodig om een gebruikersgroep te veranderen waar de aanvragende gebruiker geen deel van uitmaakt."
 
-#: galaxy_ng/app/api/ui/serializers/user.py:71
+#: app/api/ui/serializers/user.py:85
 msgid "Must be a super user to grant super user permissions."
-msgstr ""
+msgstr "Moet een supergebruiker zijn om machtigingen voor een supergebruiker te verlenen."
 
-#: galaxy_ng/app/api/ui/serializers/user.py:114
+#: app/api/ui/serializers/user.py:128
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgstr "Groepsnaam=%(name)s, id=%(id)s bestaat niet"
+
+#: app/api/ui/views/index_execution_environments.py:36
+msgid "Indexing execution environments is not supported on this registry."
+msgstr "Het indexeren van uitvoeringsomgevingen wordt in dit register niet ondersteund."
+
+#: app/api/ui/views/signing.py:71
+msgid "Missing required field: namespace"
+msgstr "Verplicht veld ontbreekt: namespace"
+
+#: app/api/ui/views/signing.py:88
+#, python-format
+msgid "No content units found for: %s"
+msgstr "Geen inhoudseenheden gevonden voor: %s"
+
+#: app/api/ui/views/signing.py:103
+msgid "distro_base_path field is required."
+msgstr "het veld distro_base_path is vereist."
+
+#: app/api/ui/views/signing.py:108
+#, python-format
+msgid "Distribution %s does not exist."
 msgstr ""
 
-#: galaxy_ng/app/api/ui/viewsets/collection.py:57
+#: app/api/ui/views/signing.py:114
+msgid "signing_service field is required."
+msgstr ""
+
+#: app/api/ui/views/signing.py:117
+#, python-format
+msgid "Signing service \"%s\" does not exist."
+msgstr ""
+
+#: app/api/ui/views/sync.py:37 app/api/v3/views/sync.py:34
+#, python-format
+msgid "The %s distribution does not have any remotes associated with it."
+msgstr "De %s-distributie heeft geen items op afstand die ermee zijn geassocieerd."
+
+#: app/api/ui/views/sync.py:51
+#, python-format
+msgid "The %s remote does not have any registries associated with it."
+msgstr "De %s op afstand heeft geen registers die ermee zijn geassocieerd."
+
+#: app/api/ui/viewsets/collection.py:119
 msgid "Distribution base path is required"
-msgstr ""
+msgstr "Basispad distributie is vereist"
 
-#: galaxy_ng/app/api/ui/viewsets/collection.py:155
+#: app/api/ui/viewsets/collection.py:255
 msgid "Retrieve collection version"
-msgstr ""
+msgstr "Collectieversie ophalen"
 
-#: galaxy_ng/app/api/ui/viewsets/collection.py:166
+#: app/api/ui/viewsets/collection.py:266
 msgid "Collection version not found for: {}"
-msgstr ""
+msgstr "Collectieversie niet gevonden voor: {}"
 
-#: galaxy_ng/app/api/ui/viewsets/collection.py:222
+#: app/api/ui/viewsets/collection.py:322
 msgid "Retrieve collection import"
-msgstr ""
+msgstr "Collectie import ophalen"
 
-#: galaxy_ng/app/api/ui/viewsets/group.py:45
+#: app/api/ui/viewsets/group.py:45
 #, python-format
 msgid "A group named %s already exists."
 msgstr "Een groep met de naam %s bestaat al."
 
-#: galaxy_ng/app/api/utils.py:45
+#: app/api/utils.py:49
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr ""
+msgstr "Ongeldige bestandsnaam {filename}. Verwachte indeling: namespace-naam-versie.tar.gz"
 
-#: galaxy_ng/app/api/utils.py:52
+#: app/api/utils.py:56
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr ""
+msgstr "Ongeldige versie string {version} van bestandsnaam {filename}. Verwachte semantische versie indeling."
 
-#: galaxy_ng/app/api/utils.py:56
+#: app/api/utils.py:60
 #, python-format
 msgid "Expected namespace to be max length of %s"
-msgstr ""
+msgstr "Verwachte namespace met maximale lengte van %s"
 
-#: galaxy_ng/app/api/utils.py:58
+#: app/api/utils.py:62
 #, python-format
 msgid "Expected name to be max length of %s"
-msgstr ""
+msgstr "Verwachte naam met max. lengte van %s"
 
-#: galaxy_ng/app/api/utils.py:60
+#: app/api/utils.py:64
 #, python-format
 msgid "Expected version to be max length of %s"
-msgstr ""
+msgstr "Verwachte versie met max. lengte van %s"
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:60
+#: app/api/v3/serializers/namespace.py:65
 #, python-format
 msgid "'%s' is not a valid url."
-msgstr ""
+msgstr "\"%s\" is geen geldige url."
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:88
+#: app/api/v3/serializers/namespace.py:94
 msgid "Attribute 'name' is required"
-msgstr ""
+msgstr "Een 'naam' voor het attribuut is vereist."
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:91
+#: app/api/v3/serializers/namespace.py:97
 msgid "Name can only contain lower case letters, underscores and numbers"
-msgstr ""
+msgstr "De naam mag alleen kleine letters, underscores en cijfers bevatten"
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:94
+#: app/api/v3/serializers/namespace.py:100
 msgid "Name must be longer than 2 characters"
-msgstr ""
+msgstr "Naam moet langer zijn dan 2 tekens"
 
-#: galaxy_ng/app/api/v3/serializers/namespace.py:97
+#: app/api/v3/serializers/namespace.py:103
 msgid "Name cannot begin with '_'"
-msgstr ""
+msgstr "Naam kan niet met '_' beginnen"
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:85
+#: app/api/v3/serializers/sync.py:67
 msgid "Password for proxy authentication."
-msgstr ""
+msgstr "Wachtwoord voor proxy-authenticatie."
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:92
+#: app/api/v3/serializers/sync.py:74
 msgid "User for proxy authentication."
-msgstr ""
+msgstr "Gebruiker voor proxy-authenticatie."
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:105
+#: app/api/v3/serializers/sync.py:87
 msgid "Remote password."
-msgstr ""
+msgstr "Wachtwoord op afstand."
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:112
+#: app/api/v3/serializers/sync.py:94
 msgid "Remote user."
-msgstr ""
+msgstr "Gebruiker op afstand."
 
-#: galaxy_ng/app/api/v3/serializers/sync.py:161
+#: app/api/v3/serializers/sync.py:148
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr ""
+msgstr "Het is niet toegestaan inhoud van gemeenschapsdomeinen te synchroniseren zonder een bestand met vereisten op te geven."
 
-#: galaxy_ng/app/api/v3/views/sync.py:29
-#, python-format
-msgid "The %s distribution does not have any remotes associated with it."
-msgstr ""
-
-#: galaxy_ng/app/api/v3/views/sync.py:40
+#: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr ""
+msgstr "Het is niet toegestaan inhoud van galaxy.ansible.com te synchroniseren zonder een bestand met vereisten op te geven."
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:172
+#: app/api/v3/viewsets/collection.py:109
 #, python-format
 msgid "Path does not match: \"%s\""
-msgstr ""
+msgstr "Pad komt niet overeen: \"%s\""
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:186
+#: app/api/v3/viewsets/collection.py:130
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
-msgstr ""
+msgstr "Namespace \"{0}\" bestaat niet."
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:279
+#: app/api/v3/viewsets/collection.py:219
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
-msgstr ""
+msgstr "Onverwachte reactie van inhoud app. Code: %s."
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:301
+#: app/api/v3/viewsets/collection.py:249
 #, python-format
 msgid "Collection %s not found"
-msgstr ""
+msgstr "Collectie %s niet gevonden"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:309
+#: app/api/v3/viewsets/collection.py:257
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
-msgstr ""
+msgstr "Repo('s) voor verplaatsen collectie %s niet gevonden"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:313
+#: app/api/v3/viewsets/collection.py:262
 #, python-format
 msgid "Collection %s not found in source repo"
-msgstr ""
+msgstr "Collectie %s niet gevonden in bron-repo"
 
-#: galaxy_ng/app/api/v3/viewsets/collection.py:317
+#: app/api/v3/viewsets/collection.py:265
 #, python-format
 msgid "Collection %s already found in destination repo"
+msgstr "Collectie %s reeds gevonden in doel-repo"
+
+#: app/api/v3/viewsets/collection.py:289 app/tasks/publishing.py:103
+#, python-format
+msgid "Signing %s service not found"
 msgstr ""
 
-#: galaxy_ng/app/api/v3/viewsets/namespace.py:61
+#: app/api/v3/viewsets/namespace.py:67
 #, python-format
 msgid "A namespace named %s already exists."
-msgstr ""
+msgstr "Een namespace met de naam %s bestaat al."
 
-#: galaxy_ng/app/exceptions.py:8
+#: app/api/v3/viewsets/namespace.py:88
+#, python-brace-format
+msgid ""
+"Namespace {name} cannot be deleted because there are still collections "
+"associated with it."
+msgstr "Namespace {name} kan niet worden verwijderd omdat er nog collecties aan zijn gekoppeld."
+
+#: app/auth/keycloak.py:51
+msgid "Authentication failed."
+msgstr "Authenticatie mislukt."
+
+#: app/exceptions.py:8
 msgid "Data conflicts with existing entity."
-msgstr ""
+msgstr "Gegevens conflicteren met bestaande entiteit."
 
-#: galaxy_ng/app/tasks/publishing.py:54 galaxy_ng/app/tasks/publishing.py:84
+#: app/tasks/index_registry.py:26
+#, python-brace-format
+msgid "Failed to create container {remote_name}. {error}"
+msgstr "Kan container {remote_name}. {error} niet aanmaken"
+
+#: app/tasks/index_registry.py:90
+msgid ""
+"A remote container with this name already exists, but is not associated with "
+"any registry."
+msgstr "Een container op afstand met deze naam bestaat al, maar is niet geassocieerd met een register."
+
+#: app/tasks/index_registry.py:97
+msgid "A local container with this name already exists."
+msgstr "Een lokale container met deze naam bestaat al."
+
+#: app/tasks/publishing.py:57 app/tasks/publishing.py:94
 #, python-format
 msgid "Could not find staging repository: \"%s\""
-msgstr ""
+msgstr "Kon de staging repository niet vinden: \"%s\""
 
-#: galaxy_ng/app/tasks/synclist.py:45
+#: app/tasks/synclist.py:45
 #, python-format
 msgid "Curating all synclists repos that curate from %s"
-msgstr ""
+msgstr "Cureren van alle synclists-repo's die cureren vanuit %s"
 
-#: galaxy_ng/app/tasks/synclist.py:56
+#: app/tasks/synclist.py:56
 msgid "Synclists curating upstream repo"
-msgstr ""
+msgstr "Synclisten cureren upstream repo"
 
-#: galaxy_ng/app/tasks/synclist.py:63
+#: app/tasks/synclist.py:63
 msgid "Synclists curating upstream repo task"
-msgstr ""
+msgstr "Synclisten cureren taak upstream repo"
 
-#: galaxy_ng/app/tasks/synclist.py:91
+#: app/tasks/synclist.py:92
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
-msgstr ""
+msgstr "Afwerking van %s synclist-repo's gebaseerd op %s-update"
 
-#: galaxy_ng/app/tasks/synclist.py:120
+#: app/tasks/synclist.py:121
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr ""
+msgstr "Synclist \"%s\" toepassen met policy=%s om repo \"%s\" te cureren vanuit upstream repo \"%s\""
 
-#: galaxy_ng/app/tasks/synclist.py:162
+#: app/tasks/synclist.py:163
 msgid "Unexpected synclist policy {}"
-msgstr ""
+msgstr "Onverwachte policy synclist {}"
