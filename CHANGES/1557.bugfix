@@ -1,0 +1,1 @@
+Ensure that container remotes exclude source images by default to prevent networking errors when syncing.
