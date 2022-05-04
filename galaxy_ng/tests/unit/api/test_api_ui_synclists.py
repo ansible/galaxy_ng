@@ -1,18 +1,16 @@
 import logging
 import unittest
 
-from django.test import override_settings
 from django.conf import settings
+from django.test import override_settings
+from guardian import shortcuts
 from rest_framework import status as http_code
 
-from guardian import shortcuts
-
-from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import DeploymentMode
+from galaxy_ng.app.models import auth as auth_models
 
-from . import base
-from . import rh_auth
-from .synclist_base import BaseSyncListViewSet, ACCOUNT_SCOPE
+from . import base, rh_auth
+from .synclist_base import ACCOUNT_SCOPE, BaseSyncListViewSet
 
 log = logging.getLogger(__name__)
 
@@ -34,6 +32,7 @@ class BaseUiSynclistViewSet:
         self.synclist_name = "test_synclist"
         self.synclist = self._create_synclist(
             name=self.synclist_name,
+            distribution=self.distro,
             repository=self.repo,
             upstream_repository=self.default_repo,
             groups=[self.group],
@@ -176,6 +175,7 @@ class TestUiSynclistViewSetWithGroupPerms(BaseUiSynclistViewSet, BaseSyncListVie
         self.synclist_name = "test_synclist"
         self.synclist = self._create_synclist(
             name=self.synclist_name,
+            distribution=self.distro,
             repository=self.repo,
             upstream_repository=self.default_repo,
             groups=[self.group],
@@ -274,6 +274,7 @@ class TestUiSynclistViewSetWithDefaultGroupPerms(DeniedSynclistViewSet, BaseSync
         self.synclist_name = "test_synclist"
         self.synclist = self._create_synclist(
             name=self.synclist_name,
+            distribution=self.distro,
             repository=self.repo,
             upstream_repository=self.default_repo,
             groups=[self.group],
@@ -354,6 +355,7 @@ class TestUiSynclistViewSetNoGroupPerms(DeniedSynclistViewSet, BaseSyncListViewS
         self.synclist_name = "test_synclist"
         self.synclist = self._create_synclist(
             name=self.synclist_name,
+            distribution=self.distro,
             repository=self.repo,
             upstream_repository=self.default_repo,
             groups=[self.group],

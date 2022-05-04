@@ -4,12 +4,9 @@ from django.conf import settings
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext_lazy as _
-
-from rest_framework.exceptions import ValidationError
+from pulp_ansible.app.models import AnsibleRepository, Collection
 from rest_framework import serializers
-
-from pulp_ansible.app.models import Collection
-from pulp_ansible.app.models import AnsibleRepository
+from rest_framework.exceptions import ValidationError
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField

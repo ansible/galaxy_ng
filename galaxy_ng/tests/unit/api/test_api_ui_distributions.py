@@ -40,9 +40,10 @@ class TestUIDistributions(BaseTestCase):
 
         upstream_repo = self._create_repository('upstream')
         self.synclist = self._create_synclist(
-            '123-synclist',
-            self.synclist_repo,
-            upstream_repo,
+            name="123-synclist",
+            distribution=self.synclist_distro,
+            repository=self.synclist_repo,
+            upstream_repository=upstream_repo,
             groups=[self.group]
         )
 
@@ -55,11 +56,22 @@ class TestUIDistributions(BaseTestCase):
         return repo
 
     def _create_synclist(
-        self, name, repository, upstream_repository, collections=None, namespaces=None,
-        policy=None, groups=None,
+        self,
+        name,
+        distribution,
+        repository,
+        upstream_repository,
+        collections=None,
+        namespaces=None,
+        policy=None,
+        groups=None,
     ):
         synclist = galaxy_models.SyncList.objects.create(
-            name=name, repository=repository, upstream_repository=upstream_repository)
+            name=name,
+            distribution=distribution,
+            repository=repository,
+            upstream_repository=upstream_repository,
+        )
         if groups:
             groups_to_add = {}
             for group in groups:

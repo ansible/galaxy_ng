@@ -36,6 +36,10 @@ class BaseSyncListViewSet(base.BaseTestCase):
         self.repo = self._create_repository("test_post_repo")
         self.repo.save()
 
+        self.distro = pulp_ansible_models.AnsibleDistribution.objects.get(
+            name=settings.get("GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH", "published")
+        )
+
         repo_name = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
         self.default_repo, _ = pulp_ansible_models.AnsibleRepository.objects.get_or_create(
             name=repo_name
@@ -71,7 +75,8 @@ class BaseSyncListViewSet(base.BaseTestCase):
     def _create_synclist(
         self,
         name,
-        repository,
+        distribution=None,
+        repository=None,
         collections=None,
         namespaces=None,
         policy=None,
@@ -90,7 +95,10 @@ class BaseSyncListViewSet(base.BaseTestCase):
             groups_to_add[group] = self.default_owner_permissions
 
         synclist, _ = galaxy_models.SyncList.objects.get_or_create(
-            name=name, repository=repository, upstream_repository=upstream_repository,
+            name=name,
+            distribution=distribution,
+            repository=repository,
+            upstream_repository=upstream_repository,
         )
 
         synclist.groups = groups_to_add

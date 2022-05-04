@@ -1,15 +1,14 @@
 import logging
 
-from django.conf import settings
 from django.apps import apps
-
+from django.conf import settings
 from rest_framework import status as http_code
 
-from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import DeploymentMode
-from . import base
+from galaxy_ng.app.models import auth as auth_models
 
-from .synclist_base import BaseSyncListViewSet, ACCOUNT_SCOPE
+from . import base
+from .synclist_base import ACCOUNT_SCOPE, BaseSyncListViewSet
 
 log = logging.getLogger(__name__)
 logging.getLogger().setLevel(logging.DEBUG)
@@ -38,6 +37,7 @@ class TestUiMySyncListViewSet(BaseSyncListViewSet):
         self.synclist = self._create_synclist(
             name=self.synclist_name,
             repository=self.repo,
+            distribution=self.distro,
             upstream_repository=self.default_repo,
             groups=[self.group],
         )
