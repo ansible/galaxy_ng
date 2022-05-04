@@ -19,8 +19,8 @@ from yaml.dumper import SafeDumper
 def get_synclist_excludes(base_path):
     """Get Synclist from distro base_path"""
     try:
-        repo = AnsibleDistribution.objects.get(base_path=base_path).repository
-        synclist = models.SyncList.objects.get(repository=repo, policy="exclude")
+        distro = AnsibleDistribution.objects.get(base_path=base_path)
+        synclist = models.SyncList.objects.get(distribution=distro, policy="exclude")
         return synclist.collections.all()
     except ObjectDoesNotExist:
         return None
