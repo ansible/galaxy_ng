@@ -1,11 +1,9 @@
 """test_synclist.py - Test related to synclists."""
 
 import os
-import time
 from contextlib import contextmanager
 
 import pytest
-from ansible.galaxy.api import GalaxyError
 from orionutils.generator import build_collection
 
 from ..constants import USERNAME_PUBLISHER
@@ -103,9 +101,11 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.synclist
 @pytest.mark.cloud_only
-def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact):
-    """Edit synclist object to exclude a collection, do curate task,
-    confirm collection removed from synclist repository."""
+def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
+    """Edit SyncList object to exclude a collection,
+    confirm see in content/{SyncList.name}/v3/excludes/
+    confirm no change to content/{SyncList.name}/v3/collections/
+    """
 
     # NOTE: on stage env, a toggle action accesses these:
     # PUT https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/
@@ -132,13 +132,19 @@ def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact)
     synclist_name = synclist_data_before["name"]
     synclist_id = synclist_data_before["id"]
 
-    # check that collection is part of synclist repo
+    # check collection in viewset {synclist_name}/v3/collections/
     url = f"content/{synclist_name}/v3/collections/?limit=30"
     resp = api_client(url)
     collections_before = [(c["namespace"], c["name"]) for c in resp["data"]]
     assert collection_key in collections_before
 
-    # edit synclist payload
+    # check collection not in viewset {synclist_name}/v3/excludes/
+    url = f"content/{synclist_name}/v3/excludes/"
+    resp = api_client(url)
+    excludes = [(c["name"].split(".")[0], c["name"].split(".")[1]) for c in resp["collections"]]
+    assert collection_key not in excludes
+
+    # edit SyncList.collections
     my_synclist_url = f"_ui/v1/my-synclists/{synclist_id}/"
     synclist_data_after = dict(synclist_data_before)
     synclist_data_after["collections"] = [
@@ -146,21 +152,14 @@ def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact)
     ]
     resp = api_client(my_synclist_url, args=synclist_data_after, method="PUT")
 
-    # kick off a curate task
-    resp = api_client(f"_ui/v1/my-synclists/{synclist_id}/curate/", args={}, method="POST")
+    # check collection in viewset {synclist_name}/v3/excludes/
+    url = f"content/{synclist_name}/v3/excludes/"
+    resp = api_client(url)
+    excludes = [(c["name"].split(".")[0], c["name"].split(".")[1]) for c in resp["collections"]]
+    assert collection_key in excludes
 
-    # wait for the curate task to finish
-    try:
-        wait_for_task(api_client, resp)
-    except GalaxyError as ge:
-        # FIXME - pulp tasks do not seem to accept token auth
-        if ge.http_code in [403, 404]:
-            time.sleep(5)
-        else:
-            raise Exception(ge)
-
-    # check collection is NOT part of synclist repo
+    # check viewset {synclist_name}/v3/collections/ has not changed
     url = f"content/{synclist_name}/v3/collections/?limit=30"
     resp = api_client(url)
     collections_after = [(c["namespace"], c["name"]) for c in resp["data"]]
-    assert collection_key not in collections_after
+    assert collections_before == collections_after
