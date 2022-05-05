@@ -4,12 +4,9 @@ from django.conf import settings
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext_lazy as _
-
-from rest_framework.exceptions import ValidationError
+from pulp_ansible.app.models import AnsibleRepository, Collection
 from rest_framework import serializers
-
-from pulp_ansible.app.models import Collection
-from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
+from rest_framework.exceptions import ValidationError
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField
@@ -60,22 +57,6 @@ class SyncListSerializer(serializers.ModelSerializer):
         if created:
             repository.save()
         return repository
-
-    def _update_distribution(self, name_slug, repository):
-        # Now the distro
-        try:
-            distribution, create = AnsibleDistribution.objects.get_or_create(
-                name=name_slug, base_path=name_slug,
-            )
-        except Exception as exc:
-            log.exception(exc)
-            raise
-
-        # Now update the Distribution to point to the new Repository
-        distribution.repository = repository
-
-        distribution.save()
-        return distribution
 
     @transaction.atomic
     def create(self, validated_data):
@@ -151,15 +132,6 @@ class SyncListSerializer(serializers.ModelSerializer):
                     )
                 )
         instance.collections.set(new_collections)
-
-        # if collection goes from empty to having something in it,
-        # then we also need to point the associated distro to the synclist repo
-        if instance.collections.all() and instance.repository:
-            self._update_distribution(instance.name, instance.repository)
-        else:
-            # synclist is no longer including/excluding anything, so point back
-            # at the default upstream repo
-            self._update_distribution(instance.name, instance.upstream_repository)
 
         instance.save()
 
