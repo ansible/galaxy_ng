@@ -126,19 +126,25 @@ def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact)
         config = ansible_config("ansible_partner")
         api_client = get_client(config, request_token=True, require_auth=True)
 
-    # determine synclist repo associated to user
+    # determine SyncList associated to user
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
     synclist_data_before = resp["data"][0]
     synclist_name = synclist_data_before["name"]
     synclist_id = synclist_data_before["id"]
 
-    # check that collection is part of synclist repo
+    # check that collection is part of SyncList.distribution
     url = f"content/{synclist_name}/v3/collections/?limit=30"
     resp = api_client(url)
     collections_before = [(c["namespace"], c["name"]) for c in resp["data"]]
     assert collection_key in collections_before
 
-    # edit synclist payload
+    # check that SyncList.distribution matches published repo
+    url = f"content/published/v3/collections/?limit=30"
+    resp = api_client(url)
+    published_collections = [(c["namespace"], c["name"]) for c in resp["data"]]
+    assert collections_before == published_collections
+
+    # edit SyncList.collections
     my_synclist_url = f"_ui/v1/my-synclists/{synclist_id}/"
     synclist_data_after = dict(synclist_data_before)
     synclist_data_after["collections"] = [
@@ -146,21 +152,12 @@ def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact)
     ]
     resp = api_client(my_synclist_url, args=synclist_data_after, method="PUT")
 
-    # kick off a curate task
-    resp = api_client(f"_ui/v1/my-synclists/{synclist_id}/curate/", args={}, method="POST")
+    # TODO: check SyncList was edited
 
-    # wait for the curate task to finish
-    try:
-        wait_for_task(api_client, resp)
-    except GalaxyError as ge:
-        # FIXME - pulp tasks do not seem to accept token auth
-        if ge.http_code in [403, 404]:
-            time.sleep(5)
-        else:
-            raise Exception(ge)
+    # TODO: confirm SyncList.distro viewset v3/excludes matches SyncList.collections
 
-    # check collection is NOT part of synclist repo
+    # confirm SyncList.distro viewset v3/collections has not changed
     url = f"content/{synclist_name}/v3/collections/?limit=30"
     resp = api_client(url)
     collections_after = [(c["namespace"], c["name"]) for c in resp["data"]]
-    assert collection_key not in collections_after
+    assert collections_before == collections_after
