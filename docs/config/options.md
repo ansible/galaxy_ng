@@ -170,7 +170,7 @@ Here is a [diagram explaining](https://www.xmind.net/m/VPSF59/#) the loading ord
 | `GALAXY_COLLECTION_SIGNING_SERVICE`  | The signing service to use for signing , Default: `ansible-default` |
 | `GALAXY_SIGNATURE_UPLOAD_ENABLED`  | Used by UI to hide/show the upload buttons for signature, Default: `False` |
 | `GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL`  | Approval dashboard and move endpoint must require signature?, Default: `False` |
-
+| `GALAXY_MINIMUM_PASSWORD_LENGTH` |  Minimum password lenght for validation, Default: 9 |
 
 For SSO Keycloak configuration see [keycloak](keycloak)
 
