@@ -1,11 +1,9 @@
 """test_synclist.py - Test related to synclists."""
 
 import os
-import time
 from contextlib import contextmanager
 
 import pytest
-from ansible.galaxy.api import GalaxyError
 from orionutils.generator import build_collection
 
 from ..constants import USERNAME_PUBLISHER
@@ -139,7 +137,7 @@ def test_synclist_object_and_synclist_repo_edit(ansible_config, upload_artifact)
     assert collection_key in collections_before
 
     # check that SyncList.distribution matches published repo
-    url = f"content/published/v3/collections/?limit=30"
+    url = "content/published/v3/collections/?limit=30"
     resp = api_client(url)
     published_collections = [(c["namespace"], c["name"]) for c in resp["data"]]
     assert collections_before == published_collections
