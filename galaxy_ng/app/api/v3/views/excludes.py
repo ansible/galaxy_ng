@@ -5,7 +5,6 @@ from django.conf import settings
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
-from pulp_ansible.app.models import AnsibleDistribution
 from rest_framework.renderers import (
     BaseRenderer,
     BrowsableAPIRenderer,
@@ -17,10 +16,9 @@ from yaml.dumper import SafeDumper
 
 
 def get_synclist_excludes(base_path):
-    """Get Synclist from distro base_path"""
+    """Get SyncList that has same name as distro base_path"""
     try:
-        repo = AnsibleDistribution.objects.get(base_path=base_path).repository
-        synclist = models.SyncList.objects.get(repository=repo, policy="exclude")
+        synclist = models.SyncList.objects.get(name=base_path, policy="exclude")
         return synclist.collections.all()
     except ObjectDoesNotExist:
         return None
