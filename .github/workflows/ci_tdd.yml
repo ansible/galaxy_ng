@@ -16,6 +16,8 @@ jobs:
         with:
           python-version: "3.8"
 
+      - uses: actions/checkout@v3
+
       - name: Ensure changes were made to tests
         env:
           PY_COLORS: '1'
