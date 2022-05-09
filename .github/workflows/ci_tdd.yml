@@ -23,6 +23,8 @@ jobs:
             cd galaxy_ng
             git checkout -b "${{ github.head_ref }}"
             git apply /tmp/pr.diff
+            git add -A
+            git commit -m 'PR TEST'
         env:
           GITHUB_PR_NUMBER: ${{github.event.number}}
 
