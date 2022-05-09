@@ -16,14 +16,14 @@ jobs:
         with:
           python-version: "3.8"
 
-      - name: make the checkout in a sane way.
-        run: git clone https://github.com/${{ github.event.pull_request.user.login }}/galaxy_ng; cd galaxy_ng ; git checkout "${{ github.head_ref }}"
+      - uses: actions/checkout@v3
 
       - name: Ensure changes were made to tests
         env:
           PY_COLORS: '1'
+          GITHUB_PR_NUMBER: ${{github.event.number}}
           GITHUB_BASE_REF: ${{ github.base_ref }}
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
           GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: cd galaxy_ng; python dev/common/tdd.py
+        run: python dev/common/tdd.py
