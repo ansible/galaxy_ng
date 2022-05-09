@@ -16,23 +16,10 @@ jobs:
         with:
           python-version: "3.8"
 
-      - name: make the checkout in a sane way.
-        run: |
-            curl -o /tmp/pr.diff https://patch-diff.githubusercontent.com/raw/ansible/galaxy_ng/pull/${GITHUB_PR_NUMBER}.diff
-            git clone https://github.com/ansible/galaxy_ng
-            cd galaxy_ng
-            git checkout -b "${{ github.head_ref }}"
-            git apply /tmp/pr.diff
-            git add -A
-            git config user.email "action@github.com"
-            git config user.name "PR Action"
-            git commit -m 'PR TEST'
-        env:
-          GITHUB_PR_NUMBER: ${{github.event.number}}
-
       - name: Ensure changes were made to tests
         env:
           PY_COLORS: '1'
+          GITHUB_PR_NUMBER: ${{github.event.number}}
           GITHUB_BASE_REF: ${{ github.base_ref }}
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}

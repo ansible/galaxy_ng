@@ -20,11 +20,29 @@ def get_current_branch():
 
 
 def get_changed_files(pr_branch, target_branch="master"):
-    cmd = f'git diff --name-only {pr_branch}..{target_branch}'
-    pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, check=True)
-    filenames = pid.stdout.decode('utf-8')
-    filenames = filenames.split('\n')
-    filenames = [x.strip() for x in filenames if x.strip()]
+    if os.environ.get('GITHUB_PR_NUMBER'):
+        url = "https://patch-diff.githubusercontent.com/raw/ansible/galaxy_ng"
+        url += f"/pull/{os.environ['GITHUB_PR_NUMBER']}.diff"
+        print(f'GET diff from {url}')
+        cmd = f'curl -s -o /tmp/pr.diff {url}'
+        pid = subprocess.run(cmd, shell=True)
+        assert pid.returncode == 0
+        with open('/tmp/pr.diff', 'r') as f:
+            raw = f.read()
+        filenames = raw.split('\n')
+        filenames = [x for x in filenames if x.startswith('---') or x.startswith('+++')]
+        filenames = [x.split(None, 1)[1] for x in filenames]
+        filenames = [x for x in filenames if not x.startswith('/dev/null')]
+        filenames = [x.lstrip('a/') for x in filenames]
+        filenames = [x.lstrip('b/') for x in filenames]
+        filenames = sorted(set(filenames))
+    else:
+        # diffs the local checkout ...
+        cmd = f'git diff --name-only "{pr_branch}".."{target_branch}"'
+        pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, check=True)
+        filenames = pid.stdout.decode('utf-8')
+        filenames = filenames.split('\n')
+        filenames = [x.strip() for x in filenames if x.strip()]
     return filenames
 
 
