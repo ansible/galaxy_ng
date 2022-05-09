@@ -114,8 +114,6 @@ objects:
             value: '10000'
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
-          - name: PULP_API_ROOT
-            value: '/api/automation-hub/pulp/'
           - name: prometheus_multiproc_dir
             value: ${PROMETHEUS_DIR}
           - name: ENABLE_SIGNING

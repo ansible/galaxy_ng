@@ -32,6 +32,9 @@ AUTH_USER_MODEL = 'galaxy.User'
 GALAXY_API_PATH_PREFIX = "/api/galaxy"
 STATIC_URL = "/static/"
 
+# Location where the pulpcore api will be served
+API_ROOT = "/api/automation-hub/pulp/"
+
 # A client connection to /api/automation-hub/ is the same as a client connection
 # to /api/automation-hub/content/<GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH>/
 # with the exception of galaxy_ng.app.api.v3.viewsets.CollectionUploadViewSet
