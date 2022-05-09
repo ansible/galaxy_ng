@@ -24,6 +24,8 @@ jobs:
             git checkout -b "${{ github.head_ref }}"
             git apply /tmp/pr.diff
             git add -A
+            git config user.email "action@github.com"
+            git config user.name "PR Action"
             git commit -m 'PR TEST'
         env:
           GITHUB_PR_NUMBER: ${{github.event.number}}
