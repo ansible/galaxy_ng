@@ -19,7 +19,7 @@ jobs:
       - name: make the checkout in a sane way.
         run: |
             curl -o /tmp/pr.diff https://patch-diff.githubusercontent.com/raw/ansible/galaxy_ng/pull/${GITHUB_PR_NUMBER}.diff
-            git clone https://github.com/galaxy_ng/galaxy_ng
+            git clone https://github.com/ansible/galaxy_ng
             cd galaxy_ng
             git checkout -b "${{ github.head_ref }}"
             git apply /tmp/pr.diff
