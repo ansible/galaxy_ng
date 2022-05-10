@@ -58,6 +58,12 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     pagination_class = LegacyRolesSetPagination
 
+    def get_queryset(self):
+        namespace = self.request.query_params.get('namespace')
+        if namespace:
+            return LegacyRole.objects.filter(namespace=namespace)
+        return LegacyRole.objects.all()
+
     def get_role(self, *args, **kwargs):
         roleid = int(kwargs.get('roleid'))
         role = LegacyRole.objects.filter(id=roleid).first()
