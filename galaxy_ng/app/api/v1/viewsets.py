@@ -62,6 +62,16 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         namespace = self.request.query_params.get('namespace')
         if namespace:
             return LegacyRole.objects.filter(namespace=namespace)
+
+        github_user = self.request.query_params.get('github_user')
+        name = self.request.query_params.get('name')
+        if github_user and name:
+            namespace = LegacyNamespace.objects.filter(name=github_user).first()
+            return LegacyRole.objects.filter(namespace=namespace, name=name)
+        elif github_user:
+            namespace = LegacyNamespace.objects.filter(name=github_user).first()
+            return LegacyRole.objects.filter(namespace=namespace)
+
         return LegacyRole.objects.all()
 
     def get_role(self, *args, **kwargs):

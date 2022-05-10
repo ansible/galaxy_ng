@@ -31,6 +31,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
 
     class Meta:
         model = LegacyNamespace
@@ -68,6 +69,10 @@ class LegacyUserSerializer(serializers.ModelSerializer):
 
     def get_active(self, obj):
         return True
+
+    def get_avatar_url(self, obj):
+        url = f'https://github.com/{obj.name}.png'
+        return url
 
 
 class LegacyRoleSerializer(serializers.ModelSerializer):
@@ -130,7 +135,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
             'namespace': {
                 'id': obj.namespace.id,
                 'name': obj.namespace.name,
-                'avatar_url': obj.namespace.avatar_url
+                'avatar_url': f'https://github.com/{obj.namespace.name}.png'
             },
             'provider_namespace': {
                 'id': obj.namespace.id,
