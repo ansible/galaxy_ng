@@ -1,6 +1,7 @@
 import asyncio
 import copy
 import datetime
+import os
 import subprocess
 import time
 import tempfile
@@ -140,8 +141,8 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
         # use the importer to grok the readme
         ldr = RoleLoader(
             content_type='role',
-            root=checkout_path,
-            rel_path=checkout_path
+            root=os.path.dirname(checkout_path),
+            rel_path=os.path.basename(checkout_path)
         )
         readme = ldr._get_readme()
         readme_html = markup_utils._render_from_markdown(readme)
@@ -160,7 +161,7 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
             'description': galaxy_info.get('description', ''),
             'license': galaxy_info.get('galaxy_info', {}).get('license', ''),
             'readme': readme,
-            'readme_html': ''
+            'readme_html': readme_html
         }
 
         # Make the object
