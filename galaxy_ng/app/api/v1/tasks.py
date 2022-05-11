@@ -37,6 +37,9 @@ from pulpcore.plugin.stages.content_stages import QueryExistingContents
 from pulpcore.plugin.stages.content_stages import ResolveContentFutures
 from pulpcore.plugin.tasking import add_and_remove
 
+from galaxy_importer.loaders.content import RoleLoader
+from galaxy_importer.utils import markup as markup_utils
+
 #from galaxy_ng.app.models import Namespace
 #from galaxy_ng.app.tasks.promotion import move_content
 import galaxy_ng.app.utils.roles as roles
@@ -134,6 +137,15 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
             role_tags = []
         print(f'TAGS: {role_tags}')
 
+        # use the importer to grok the readme
+        ldr = RoleLoader(
+            content_type='role',
+            root=checkout_path,
+            rel_path=checkout_path
+        )
+        readme = ldr._get_readme()
+        readme_html = markup_utils._render_from_markdown(readme)
+
         galaxy_info = role_meta.get('galaxy_info', {})
         new_full_metadata = {
             'imported': datetime.datetime.now().isoformat(),
@@ -147,6 +159,8 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
             'versions': [],
             'description': galaxy_info.get('description', ''),
             'license': galaxy_info.get('galaxy_info', {}).get('license', ''),
+            'readme': readme,
+            'readme_html': ''
         }
 
         # Make the object

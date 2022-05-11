@@ -149,3 +149,22 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
             'versions': versions
         }
 
+
+class LegacyRoleContentSerializer(serializers.ModelSerializer):
+
+    readme = serializers.SerializerMethodField()
+    readme_html = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LegacyRole
+        fields = [
+            'readme',
+            'readme_html'
+        ]
+
+    def get_readme(self, obj):
+        return obj.full_metadata.get('readme', '')
+
+    def get_readme_html(self, obj):
+        return obj.full_metadata.get('readme_html', '')
+

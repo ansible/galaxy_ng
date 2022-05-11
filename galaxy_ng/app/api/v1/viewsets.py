@@ -21,6 +21,7 @@ from galaxy_ng.app.api.v1.tasks import legacy_role_import
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.serializers import LegacyRoleSerializer
+from galaxy_ng.app.api.v1.serializers import LegacyRoleContentSerializer
 from galaxy_ng.app.api.v1.serializers import LegacyUserSerializer
 
 
@@ -78,6 +79,12 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         roleid = int(kwargs.get('roleid'))
         role = LegacyRole.objects.filter(id=roleid).first()
         serializer = LegacyRoleSerializer(role)
+        return Response(serializer.data)
+
+    def get_content(self, *args, **kwargs):
+        roleid = int(kwargs.get('roleid'))
+        role = LegacyRole.objects.filter(id=roleid).first()
+        serializer = LegacyRoleContentSerializer(role)
         return Response(serializer.data)
 
     def create(self, validated_data):
