@@ -2,19 +2,14 @@ from importlib import import_module
 from unittest.mock import Mock
 from django.test import TestCase
 
-from galaxy_ng.app.models import User
-from galaxy_ng.app.models import Group
-from galaxy_ng.app.models import Namespace
+from galaxy_ng.app.models import User, Group, Namespace
 
 from pulp_ansible.app.models import Collection
 
-from pulpcore.app.models.role import GroupRole
-from pulpcore.app.models.role import UserRole
-from pulpcore.app.models.role import Role
+from pulpcore.app.models.role import GroupRole, UserRole, Role
 
 from django.contrib.auth.models import Permission
-from guardian.models import GroupObjectPermission
-from guardian.models import UserObjectPermission
+from guardian.models import GroupObjectPermission, UserObjectPermission
 from guardian.shortcuts import assign_perm as guardian_assign_perm
 
 permission_names = [
