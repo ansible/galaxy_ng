@@ -4,6 +4,7 @@ from rest_framework import mixins
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
 
 # This file is necesary to prevent the DRF web API browser from breaking on all of the
 # pulp/api/v3/repositories/ endpoints.
@@ -45,3 +46,14 @@ class AuthViewSet(
 ):
     queryset = models.auth.Group.objects.all()
     endpoint_name = "auth"
+
+
+class NamespaceViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+):
+    queryset = models.Namespace.objects.all()
+    serializer_class = NamespaceSerializer
+    permission_classes = [access_policy.NamespaceAccessPolicy]
+    endpoint_name = "namespace"
