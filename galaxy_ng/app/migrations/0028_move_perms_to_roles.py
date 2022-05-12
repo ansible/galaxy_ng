@@ -5,9 +5,12 @@ MODEL_PERMISSION_TRANSLATOR = [
     ((
         ("galaxy", "change_namespace"),
         ("galaxy", "delete_namespace"),
-        ("galaxy", "view_namespace"),
+        # ("galaxy", "view_namespace"),
         ("galaxy", "upload_to_namespace"),
         ("ansible", "delete_collection"),
+        ("ansible", "change_collectionremote"),
+        ("ansible", "view_collectionremote"),
+        ("ansible", "modify_ansible_repo_content"),
     ), "galaxy.collection_admin"),
     ((
         ("container", "delete_containerrepository"),
@@ -16,7 +19,23 @@ MODEL_PERMISSION_TRANSLATOR = [
         ("container", "namespace_push_containerdistribution"),
         ("container", "add_containernamespace"),
         ("container", "change_containernamespace"),
+        # ("container", "namespace_add_containerdistribution")
+        ("galaxy", "add_containerregistryremote"),
+        ("galaxy", "change_containerregistryremote"),
+        ("galaxy", "delete_containerregistryremote"),
     ), "galaxy.execution_environment_admin"),
+    ((
+        ("container", "change_containernamespace"),
+        ("container", "namespace_push_containerdistribution"),
+        ("container", "namespace_change_containerdistribution"),
+        ("container", "namespace_modify_content_containerpushrepository"),
+        ("container", "namespace_add_containerdistribution")
+    ), "galaxy.execution_environment_namespace_owner"),
+    ((
+        ("container", "namespace_push_containerdistribution"),
+        ("container", "namespace_change_containerdistribution"),
+        ("container", "namespace_modify_content_containerpushrepository"),
+    ), "galaxy.execution_environment_collaborator"),
     ((
         ("ansible", "modify_ansible_repo_content"),
     ), "galaxy.content_admin"),
@@ -24,7 +43,7 @@ MODEL_PERMISSION_TRANSLATOR = [
         ("galaxy", "add_namespace"),
         ("galaxy", "change_namespace"),
         ("galaxy", "delete_namespace"),
-        ("galaxy", "view_namespace"),
+        # ("galaxy", "view_namespace"),
         ("galaxy", "upload_to_namespace"),
         ("ansible", "delete_collection"),
     ), "galaxy.namespace_owner"),
@@ -33,13 +52,13 @@ MODEL_PERMISSION_TRANSLATOR = [
         ("ansible", "delete_collection"),
     ), "galaxy.publisher"),
     ((
-        ("galaxy", "view_group"),
+        # ("galaxy", "view_group"),
         ("galaxy", "delete_group"),
         ("galaxy", "add_group"),
         ("galaxy", "change_group"),
     ), "galaxy.group_admin"),
     ((
-        ("galaxy", "view_user"),
+        # ("galaxy", "view_user"),
         ("galaxy", "delete_user"),
         ("galaxy", "add_user"),
         ("galaxy", "change_user"),
@@ -48,7 +67,7 @@ MODEL_PERMISSION_TRANSLATOR = [
         ("galaxy", "add_synclist"),
         ("galaxy", "change_synclist"),
         ("galaxy", "delete_synclist"),
-        ("galaxy", "view_synclist"),
+        # ("galaxy", "view_synclist"),
         ("ansible", "change_collectionremote"),
     ), "galaxy.synclist_owner"),
 ]
