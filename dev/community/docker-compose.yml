@@ -1,0 +1,16 @@
+---
+version: "3.7"
+
+services:
+  api:
+    env_file:
+      - './community/galaxy_ng.env'
+      - '../.compose.env'
+  worker:
+    env_file:
+      - './community/galaxy_ng.env'
+      - '../.compose.env'
+  content-app:
+    env_file:
+      - './community/galaxy_ng.env'
+      - '../.compose.env'
