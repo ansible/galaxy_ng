@@ -23,8 +23,6 @@ def preprocess_debug_logger(endpoints, **kwargs):
     # ]
 
 
-# TODO: Consider if this is needed, does not seem to be called and
-# http://localhost:5001/api/automation-hub/v3/openapi.json includes /_ui/ paths
 def preprocess_exclude_endpoints(endpoints, **kwargs):
     """Return an iterable of (path, path_regex, method, callback) with some endpoints removed
 

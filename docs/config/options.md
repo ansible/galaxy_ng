@@ -48,7 +48,7 @@ X_PULP_CONTENT_HOST = "localhost"
 
 ### Environment variables
 
-As Galaxy NG is a pulp plugin it assumes the envvar prefix as `PULP_` so any variable can be 
+As Galaxy NG is a pulp plugin it assumes the envvar prefix as `PULP_` so any variable can be
 customized by export `PULP_<followed_with_the_variable>`, example:
 
 ```bash title="environment"
@@ -57,7 +57,7 @@ export PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true
 
 !!! tip
     Pulp uses [dynaconf](dynaconf.com) to manage its settings, so environment variables have its
-    data types inferred, for example: `PULP_NUMBER=4.2` will be available under `django.conf.settings.NUMBER` 
+    data types inferred, for example: `PULP_NUMBER=4.2` will be available under `django.conf.settings.NUMBER`
     as a value of type `float`, if you need to force a string enclose on quotes. `PULP_TEXT='4.2'`
 
 
@@ -153,6 +153,7 @@ Here is a [diagram explaining](https://www.xmind.net/m/VPSF59/#) the loading ord
 | Variable name                                    | Description                          |
 | ----------------------------------------------   | ------------------------------------ |
 | `GALAXY_API_PATH_PREFIX`                         | The base url to access API endpoints, Default:`"/api/galaxy"` |
+| `API_ROOT`                                       | The base url to access pulp API endpoints, Default:`"/api/galaxy/pulp/"` |
 | `GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH`      | Distribution where collections go after approved, Default: `"published"` |
 | `GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH`      | Distribution where collections go when waiting for approval, Default: `"staging"` |
 | `GALAXY_API_REJECTED_DISTRIBUTION_BASE_PATH`     | Distribution where collections go after rejection, Default: `"rejected"` |
@@ -194,4 +195,3 @@ Galaxy forces the final value for those variables.
 - `REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES` (defaults to value of `GALAXY_AUTHENTICATION_CLASSES`)
 - `ANSIBLE_URL_NAMESPACE` (defaults to fixed value `"galaxy:api:v3:"`)
 - `ANSIBLE_DEFAULT_DISTRIBUTION_PATH` (defaults to value of `GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH`)
-

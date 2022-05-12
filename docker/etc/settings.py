@@ -11,6 +11,8 @@ CONTENT_PATH_PREFIX = "/api/automation-hub/v3/artifacts/collections/"
 ANSIBLE_API_HOSTNAME = os.environ.get('PULP_CONTENT_ORIGIN')
 
 GALAXY_API_PATH_PREFIX = "/api/automation-hub"
+API_ROOT = "/api/automation-hub/pulp/"
+
 GALAXY_AUTHENTICATION_CLASSES = ['galaxy_ng.app.auth.auth.RHIdentityAuthentication']
 
 # GALAXY_AUTO_SIGN_COLLECTIONS = True
