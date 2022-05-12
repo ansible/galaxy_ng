@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from dynaconf import Dynaconf, Validator
 
@@ -22,6 +22,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_feature_flags(settings))
     data.update(configure_pulp_ansible(settings))
     data.update(configure_authentication_classes(settings))
+    data.update(configure_password_validators(settings))
 
     validate(settings)
     return data
@@ -308,6 +309,19 @@ def configure_authentication_classes(settings: Dynaconf) -> Dict[str, Any]:
         }
     else:
         return {}
+
+
+def configure_password_validators(settings: Dynaconf) -> Dict[str, Any]:
+    """Configure the password validators"""
+    GALAXY_MINIMUM_PASSWORD_LENGTH: int = settings.get("GALAXY_MINIMUM_PASSWORD_LENGTH", 9)
+    AUTH_PASSWORD_VALIDATORS: List[Dict[str, Any]] = settings.AUTH_PASSWORD_VALIDATORS
+    # NOTE: Dynaconf can't add or merge on dicts inside lists.
+    # So we need to traverse the list to change it until the RFC is implemented
+    # https://github.com/rochacbruno/dynaconf/issues/299#issuecomment-900616706
+    for dict_item in AUTH_PASSWORD_VALIDATORS:
+        if dict_item["NAME"].endswith("MinimumLengthValidator"):
+            dict_item["OPTIONS"]["min_length"] = int(GALAXY_MINIMUM_PASSWORD_LENGTH)
+    return {"AUTH_PASSWORD_VALIDATORS": AUTH_PASSWORD_VALIDATORS}
 
 
 def validate(settings: Dynaconf) -> None:
