@@ -4,15 +4,17 @@ See: https://issues.redhat.com/browse/AAH-312
 """
 
 import logging
-import tarfile
-import requests
 import os
-from tempfile import TemporaryDirectory
+import tarfile
 import time
+from tempfile import TemporaryDirectory
 from urllib.parse import urljoin
 
 import pytest
+import requests
 from orionutils.generator import build_collection
+
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME, SLEEP_SECONDS_POLLING
 
 from ..utils import get_all_collections_by_repo, get_all_namespaces, get_client, set_certification
 
@@ -56,7 +58,7 @@ def import_and_wait(api_client, artifact, upload_artifact, config):
     while not ready:
         resp = api_client(url)
         ready = resp["state"] not in ("running", "waiting")
-        time.sleep(1)
+        time.sleep(SLEEP_SECONDS_POLLING)
     assert resp["state"] == "completed"
     return resp
 
@@ -68,7 +70,7 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
     resp = api_client(sign_url, method="POST", args=sign_payload)
     log.info("Sign Task: %s", resp)
     # FIXME - pulp tasks do not seem to accept token auth, so no way to check task progress
-    time.sleep(3)
+    time.sleep(SLEEP_SECONDS_ONETIME)
     return resp
 
 
@@ -403,7 +405,7 @@ def test_upload_signature(api_client, config, settings, upload_artifact):
         )
         assert "task" in response.json()
 
-    time.sleep(5)  # wait for the task to finish
+    time.sleep(SLEEP_SECONDS_ONETIME)  # wait for the task to finish
 
     # Assert that the collection is signed on v3 api
     collection = api_client(

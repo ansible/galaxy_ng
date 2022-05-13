@@ -3,15 +3,22 @@ import shutil
 import time
 
 import pytest
-# from orionutils.generator import build_collection
+from orionutils.utils import increment_version
+
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 
 from .constants import USERNAME_PUBLISHER
-from .utils import ansible_galaxy, get_client, set_certification
+from .utils import (
+    ansible_galaxy,
+    build_collection,
+    get_all_namespaces,
+    get_client,
+    set_certification,
+)
 from .utils import upload_artifact as _upload_artifact
-from .utils import get_all_namespaces
-from .utils import build_collection
 
-from orionutils.utils import increment_version
+# from orionutils.generator import build_collection
+
 
 MARKER_CONFIG = """
 qa: Mark tests to run in the vortex job.
@@ -156,11 +163,16 @@ def published(ansible_config, artifact):
         payload = {'name': artifact.namespace, 'groups': []}
         api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
 
-    # Publish and certify ...
+    # publish
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
         ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
     )
+
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
+
+    # certify
     set_certification(api_client, artifact)
 
     return artifact
@@ -177,11 +189,16 @@ def certifiedv2(ansible_config, artifact):
         payload = {'name': artifact.namespace, 'groups': []}
         api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
 
-    # Publish and certify v1 ...
+    # publish v1
     ansible_galaxy(
         f"collection publish {artifact.filename}",
         ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
     )
+
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
+
+    # certify v1
     set_certification(api_client, artifact)
 
     # Increase collection version
@@ -193,11 +210,16 @@ def certifiedv2(ansible_config, artifact):
         version=new_version
     )
 
-    # Publish and certify newer version ...
+    # publish newer version
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
         ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
     )
+
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
+
+    # certify newer version
     set_certification(api_client, artifact2)
 
     return (artifact, artifact2)
@@ -221,7 +243,7 @@ def uncertifiedv2(ansible_config, artifact):
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
-    time.sleep(3)
+    time.sleep(SLEEP_SECONDS_ONETIME)
 
     # certify v1
     set_certification(api_client, artifact)
@@ -242,7 +264,7 @@ def uncertifiedv2(ansible_config, artifact):
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
-    time.sleep(3)
+    time.sleep(SLEEP_SECONDS_ONETIME)
 
     return (artifact, artifact2)
 
