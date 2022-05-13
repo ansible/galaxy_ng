@@ -32,6 +32,6 @@ This default value can be changed, for exemple, to make session expire after 1 h
 SESSION_COOKIE_AGE=3600
 ```
 
-```bash title="envronment variables"
+```bash title="environment variables"
 export PULP_SESSION_COOKIE_AGE=3600
 ```
