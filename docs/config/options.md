@@ -181,6 +181,7 @@ For SSO Keycloak configuration see [keycloak](keycloak)
 | `CONTENT_BIND`      | Pulp app content bind ex: `unix:/path/to/socker.sock`, Default: `None` |
 | `DEFAULT_FILE_STORAGE`      | Sets the storage backend , ex: `'storages.backends.s3boto3.S3Boto3Storage'` Default: `None` |
 | `ANSIBLE_API_HOSTNAME`      | Hostname for the Ansible API, Default: `same as PULP_CONTENT_ORIGIN` |
+| `SESSION_COOKIE_AGE` | Seconds before session cookie expires, Default: `1209600` (2 weeks, in seconds)
 
 For more configuration options for pulp check on [https://docs.pulpproject.org/pulpcore/configuration/index.html](https://docs.pulpproject.org/pulpcore/configuration/index.html)
 
