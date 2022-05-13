@@ -96,7 +96,8 @@ requirements = [
     "django-automated-logging==6.1.3",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",
-    "dynaconf>=3.1.7",  # 3.1.7 contains support for dynaconf_hooks.
+    "dynaconf>=3.1.7",
+    "django-auth-ldap==4.0.0",
 ]
 
 

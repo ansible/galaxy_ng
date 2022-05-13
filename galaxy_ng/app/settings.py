@@ -195,3 +195,16 @@ GALAXY_AUTO_SIGN_COLLECTIONS = False
 
 # This sets the name of the signing service to be used for signing
 GALAXY_COLLECTION_SIGNING_SERVICE = None
+
+AUTH_LDAP_SERVER_URI = None
+AUTH_LDAP_BIND_DN = None
+AUTH_LDAP_BIND_PASSWORD = None
+AUTH_LDAP_USER_SEARCH_BASE_DN = None
+AUTH_LDAP_USER_SEARCH_SCOPE = None
+AUTH_LDAP_USER_SEARCH_FILTER = None
+AUTH_LDAP_GROUP_SEARCH_BASE_DN = None
+AUTH_LDAP_GROUP_SEARCH_SCOPE = None
+AUTH_LDAP_GROUP_SEARCH_FILTER = None
+# Extra LDAP settings are defined on dynaconf_hooks.py
+# to be overriden by the /etc/pulp/settings.py
+# or environment variable PULP_AUTH_LDAP_SERVER_URI etc ...

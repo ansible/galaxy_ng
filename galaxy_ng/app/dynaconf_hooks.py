@@ -1,6 +1,8 @@
+import json
+import ldap
 import os
 from typing import Any, Dict, List
-
+from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
 from dynaconf import Dynaconf, Validator
 
 
@@ -16,6 +18,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     # existing keys will be merged if dynaconf_merge is set to True
     # here it is set to false, so it allows each value to be individually marked as a merge.
 
+    data.update(configure_ldap(settings))
     data.update(configure_logging(settings))
     data.update(configure_keycloak(settings))
     data.update(configure_cors(settings))
@@ -331,6 +334,65 @@ def configure_api_base_path(settings: Dynaconf) -> Dict[str, Any]:
     galaxy_api_root = settings.get("GALAXY_API_PATH_PREFIX")
     pulp_api_root = f"/{galaxy_api_root.strip('/')}/pulp/"
     return {"API_ROOT": pulp_api_root}
+
+
+def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
+    """Configure ldap settings for galaxy.
+    This function returns a dictionary that will be merged to the settings.
+    """
+
+    data = {}
+    AUTH_LDAP_SERVER_URI = settings.get("AUTH_LDAP_SERVER_URI", default=None)
+    AUTH_LDAP_BIND_DN = settings.get("AUTH_LDAP_BIND_DN", default=None)
+    AUTH_LDAP_BIND_PASSWORD = settings.get("AUTH_LDAP_BIND_PASSWORD", default=None)
+    AUTH_LDAP_USER_SEARCH_BASE_DN = settings.get("AUTH_LDAP_USER_SEARCH_BASE_DN", default=None)
+    AUTH_LDAP_USER_SEARCH_SCOPE = settings.get("AUTH_LDAP_USER_SEARCH_SCOPE", default=None)
+    AUTH_LDAP_USER_SEARCH_FILTER = settings.get("AUTH_LDAP_USER_SEARCH_FILTER", default=None)
+    AUTH_LDAP_GROUP_SEARCH_BASE_DN = settings.get("AUTH_LDAP_GROUP_SEARCH_BASE_DN", default=None)
+    AUTH_LDAP_GROUP_SEARCH_SCOPE = settings.get("AUTH_LDAP_GROUP_SEARCH_SCOPE", default=None)
+    AUTH_LDAP_GROUP_SEARCH_FILTER = settings.get("AUTH_LDAP_GROUP_SEARCH_FILTER", default=None)
+    AUTH_LDAP_USER_ATTR_MAP = settings.get("AUTH_LDAP_USER_ATTR_MAP", default={})
+
+    AUTH_LDAP_SCOPE_MAP = {
+        "BASE": ldap.SCOPE_BASE,
+        "ONELEVEL": ldap.SCOPE_ONELEVEL,
+        "SUBTREE": ldap.SCOPE_SUBTREE,
+    }
+
+    # Add settings if LDAP Auth values are provided
+    if all(
+        [
+            AUTH_LDAP_SERVER_URI,
+            AUTH_LDAP_BIND_DN,
+            AUTH_LDAP_BIND_PASSWORD,
+            AUTH_LDAP_USER_SEARCH_BASE_DN,
+            AUTH_LDAP_USER_SEARCH_SCOPE,
+            AUTH_LDAP_USER_SEARCH_FILTER,
+            AUTH_LDAP_GROUP_SEARCH_BASE_DN,
+            AUTH_LDAP_GROUP_SEARCH_SCOPE,
+            AUTH_LDAP_GROUP_SEARCH_FILTER,
+        ]
+    ):
+        user_scope = AUTH_LDAP_SCOPE_MAP.get(AUTH_LDAP_USER_SEARCH_SCOPE, ldap.SCOPE_SUBTREE)
+        data["AUTH_LDAP_USER_SEARCH"] = LDAPSearch(AUTH_LDAP_USER_SEARCH_BASE_DN,
+                                                   user_scope,
+                                                   AUTH_LDAP_USER_SEARCH_FILTER)
+        group_scope = AUTH_LDAP_SCOPE_MAP.get(AUTH_LDAP_GROUP_SEARCH_SCOPE, ldap.SCOPE_SUBTREE)
+        data["AUTH_LDAP_GROUP_SEARCH"] = LDAPSearch(
+            AUTH_LDAP_GROUP_SEARCH_BASE_DN,
+            group_scope,
+            AUTH_LDAP_GROUP_SEARCH_FILTER
+        )
+
+        data["AUTH_LDAP_GROUP_TYPE"] = GroupOfNamesType(name_attr="cn")
+
+        if isinstance(AUTH_LDAP_USER_ATTR_MAP, str):
+            try:
+                data["AUTH_LDAP_USER_ATTR_MAP"] = json.loads(AUTH_LDAP_USER_ATTR_MAP)
+            except Exception:
+                data["AUTH_LDAP_USER_ATTR_MAP"] = {}
+
+    return data
 
 
 def validate(settings: Dynaconf) -> None:
