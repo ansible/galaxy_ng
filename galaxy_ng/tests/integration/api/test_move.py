@@ -67,6 +67,9 @@ def test_move_collection_version(ansible_config, upload_artifact):
         time.sleep(1)
     assert resp['state'] == 'completed'
 
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(3)
+
     # Make sure it ended up in staging but not in published ...
     before = get_all_collections()
     assert ckey in before['staging']

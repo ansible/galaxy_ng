@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 
 import pytest
 # from orionutils.generator import build_collection
@@ -213,11 +214,16 @@ def uncertifiedv2(ansible_config, artifact):
         payload = {'name': artifact.namespace, 'groups': []}
         api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
 
-    # Publish and certify v1 ...
+    # publish
     ansible_galaxy(
         f"collection publish {artifact.filename}",
         ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
     )
+
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(3)
+
+    # certify v1
     set_certification(api_client, artifact)
 
     # Increase collection version
@@ -234,6 +240,9 @@ def uncertifiedv2(ansible_config, artifact):
         f"collection publish {artifact2.filename}",
         ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
     )
+
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(3)
 
     return (artifact, artifact2)
 
