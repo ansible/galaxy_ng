@@ -152,8 +152,8 @@ Here is a [diagram explaining](https://www.xmind.net/m/VPSF59/#) the loading ord
 
 | Variable name                                    | Description                          |
 | ----------------------------------------------   | ------------------------------------ |
-| `GALAXY_API_PATH_PREFIX`                         | The base url to access API endpoints, Default:`"/api/galaxy"` |
-| `API_ROOT`                                       | The base url to access pulp API endpoints, Default:`"/api/galaxy/pulp/"` |
+| `GALAXY_API_PATH_PREFIX`                         | The base url to access API endpoints, Default: `"/api/galaxy"` |
+| `API_ROOT`                                       | The base url to access pulp API endpoints, Default: `"/api/galaxy/pulp/"` |
 | `GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH`      | Distribution where collections go after approved, Default: `"published"` |
 | `GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH`      | Distribution where collections go when waiting for approval, Default: `"staging"` |
 | `GALAXY_API_REJECTED_DISTRIBUTION_BASE_PATH`     | Distribution where collections go after rejection, Default: `"rejected"` |
