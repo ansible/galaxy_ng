@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-50-g7c31f64
+# generated with plugin_template@2021.08.26-130-ge87b661
 
 additional_repos:
 - bindings: true
@@ -17,6 +17,7 @@ additional_repos:
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1
+api_root: /pulp/
 black: false
 check_commit_message: false
 check_gettext: true
@@ -24,10 +25,9 @@ check_manifest: true
 check_openapi_schema: true
 check_stray_pulpcore_imports: true
 cherry_pick_automation: false
-ci_env: {
-  GITHUB_USER: '${{ github.event.pull_request.user.login }}'
-}
-ci_trigger: '{pull_request: {branches: [''*'']}, push: {branches: [''*'']}}'
+ci_env:
+  GITHUB_USER: ${{ github.event.pull_request.user.login }}
+ci_trigger: '{pull_request: {branches: [''**'']}, push: {branches: [''**'']}}'
 core_import_allowed:
 - pulpcore.app.*viewsets
 - pulpcore\.app.*admin
@@ -84,6 +84,7 @@ python_version: '3.8'
 redmine_project: null
 release_email: ansible-infra@redhat.com
 release_user: ansible
+run_pulpcore_tests_for_plugins: false
 single_commit_check: false
 stable_branch: stable
 sync_ci: false
@@ -96,6 +97,7 @@ test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
 test_reroute: true
 test_s3: true
+test_stream: false
 travis_addtl_services: []
 travis_notifications: null
 update_github: false
