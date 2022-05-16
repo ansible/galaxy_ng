@@ -40,7 +40,9 @@ LOCKED_ROLES = {
             "container.namespace_modify_content_containerpushrepository",
             "container.namespace_add_containerdistribution",
         ],
-        "description": "Create and update execution environments under existing container namespaces."
+        "description": (
+            "Create and update execution environments under existing "
+            "container namespaces.")
     },
     "galaxy.execution_environment_collaborator": {
         "permissions": [
