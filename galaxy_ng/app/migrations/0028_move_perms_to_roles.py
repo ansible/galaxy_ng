@@ -201,9 +201,6 @@ def get_object_group_permissions(group, Role, GroupRole, GuardianGroupObjectPerm
         content_type = perm_list[0].content_type
         object_id = perm_list[0].object_pk
 
-        # TODO: Optimize container namespace and namespce roles. If user has "change_containernamespace"
-        # or change_namespace give them ownership roles.
-
         # Add any locked roles that match the given group/objects permission set
         roles = get_roles_from_permissions(
             [p.permission for p in perm_list],
