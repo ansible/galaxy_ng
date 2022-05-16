@@ -152,8 +152,6 @@ fi
 
 cd ..
 
-
-
 # Intall requirements for ansible playbooks
 pip install docker netaddr boto3 ansible
 
