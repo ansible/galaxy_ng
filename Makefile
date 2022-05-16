@@ -88,6 +88,7 @@ docker/test/integration:      ## Run integration tests with optional MARK param 
 		exit 1;\
 	fi
 	make docker/loadtoken
+	make docker/load_test_data
 	if [ "$(MARK)" ]; then\
 	  HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh "-m $(MARK)";\
 	else\
