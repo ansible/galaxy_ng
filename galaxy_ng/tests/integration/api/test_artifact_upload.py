@@ -9,7 +9,8 @@ from urllib.parse import urljoin
 import pytest
 from orionutils.generator import build_collection, randstr
 
-from ..constants import USERNAME_PUBLISHER
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING, USERNAME_PUBLISHER
+
 from ..utils import (
     CapturingGalaxyError,
     get_client,
@@ -335,7 +336,7 @@ def test_ansible_lint_exception(ansible_config, upload_artifact):
     while not ready:
         resp = api_client(url)
         ready = resp["state"] not in ("running", "waiting")
-        time.sleep(5)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -382,7 +383,7 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
     while not ready:
         resp = api_client(url)
         ready = resp["state"] not in ("running", "waiting")
-        time.sleep(5)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -424,7 +425,7 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
     while not ready:
         resp = api_client(url)
         ready = resp["state"] not in ("running", "waiting")
-        time.sleep(5)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -461,7 +462,7 @@ def test_publish_fail_required_tag(ansible_config, upload_artifact):
     while not ready:
         resp = api_client(url)
         ready = resp["state"] not in ("running", "waiting")
-        time.sleep(5)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
     assert resp["state"] == "failed"
     assert (

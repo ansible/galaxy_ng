@@ -1,18 +1,19 @@
-"""test_namespace_management.py - Test related to namespaces.
-
-See: https://issues.redhat.com/browse/AAH-1303
-
+"""test_collection_delete.py - Tests related to collection deletion.
 """
-import pytest
+
 import time
 
+import pytest
 from ansible.galaxy.api import GalaxyError
 
-from ..utils import get_client
-from ..utils import get_all_collections_by_repo
-from ..utils import get_all_repository_collection_versions
-from ..utils import wait_for_task
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 
+from ..utils import (
+    get_all_collections_by_repo,
+    get_all_repository_collection_versions,
+    get_client,
+    wait_for_task,
+)
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -51,7 +52,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
     except GalaxyError as ge:
         # FIXME - pulp tasks do not seem to accept token auth
         if ge.http_code in [403, 404]:
-            time.sleep(5)
+            time.sleep(SLEEP_SECONDS_ONETIME)
         else:
             raise Exception(ge)
 
@@ -115,7 +116,7 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
             except GalaxyError as ge:
                 # FIXME - pulp tasks do not seem to accept token auth
                 if ge.http_code in [403, 404]:
-                    time.sleep(5)
+                    time.sleep(SLEEP_SECONDS_ONETIME)
                 else:
                     raise Exception(ge)
 

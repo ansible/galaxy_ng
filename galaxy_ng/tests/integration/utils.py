@@ -5,30 +5,26 @@ import logging
 import os
 import random
 import re
+import shutil
 import string
+import subprocess
 import tarfile
 import tempfile
 import time
 import uuid
 from contextlib import contextmanager
-from subprocess import PIPE
-from subprocess import run
+from subprocess import PIPE, run
 from urllib.parse import urljoin
-import shutil
-import subprocess
 
 from ansible import context
-from ansible.galaxy.api import GalaxyAPI
-from ansible.galaxy.api import GalaxyError
-from ansible.galaxy.token import BasicAuthToken
-from ansible.galaxy.token import GalaxyToken
-from ansible.galaxy.token import KeycloakToken
-
+from ansible.galaxy.api import GalaxyAPI, GalaxyError
+from ansible.galaxy.token import BasicAuthToken, GalaxyToken, KeycloakToken
 from orionutils.generator import build_collection as _build_collection
 from orionutils.generator import randstr
 
-from .constants import USERNAME_PUBLISHER
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 
+from .constants import USERNAME_PUBLISHER
 
 logger = logging.getLogger(__name__)
 
@@ -184,8 +180,8 @@ def upload_artifact(
     file_name = os.path.basename(collection_path)
     part_boundary = b"--" + to_bytes(boundary, errors="surrogate_or_strict")
 
-    from ansible.utils.hashing import secure_hash_s
     from ansible.galaxy.api import _urljoin
+    from ansible.utils.hashing import secure_hash_s
 
     form = []
 
@@ -262,7 +258,7 @@ def wait_for_task(api_client, resp, timeout=300):
                 raise
         else:
             ready = resp["state"] not in ("running", "waiting")
-        time.sleep(5)
+        time.sleep(SLEEP_SECONDS_POLLING)
     return resp
 
 
@@ -385,7 +381,7 @@ def set_certification(client, collection):
             f"{collection.name}/versions/{collection.version}/"
         )
         ready = False
-        timeout = 5
+        timeout = SLEEP_SECONDS_POLLING * 5
         res = None
         while not ready:
             try:
@@ -394,7 +390,7 @@ def set_certification(client, collection):
                 # past the below line and directly to the `except GalaxyError` line.
                 ready = True
             except GalaxyError:
-                time.sleep(1)
+                time.sleep(SLEEP_SECONDS_POLLING)
                 timeout = timeout - 1
                 if timeout < 0:
                     raise

@@ -1,13 +1,13 @@
 """test_dependencies.py - Tests of collection dependency handling."""
 import logging
+import time
 
 import attr
 import pytest
 
-from ..utils import ansible_galaxy
-from ..utils import get_client
-from ..utils import set_certification
-from ..utils import build_collection
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
+
+from ..utils import ansible_galaxy, build_collection, get_client, set_certification
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -68,10 +68,16 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
         else:
             raise
 
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
+
     if retcode == 0:
         config = ansible_config("ansible_insights")
         client = get_client(config)
         set_certification(client, artifact2)
+
+        # wait for move task from `staging` repo to `published` repo
+        time.sleep(SLEEP_SECONDS_ONETIME)
 
         pid = ansible_galaxy(
             f"collection install -vvv --ignore-cert \
