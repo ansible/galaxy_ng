@@ -1,14 +1,5 @@
-from django.utils.translation import gettext_lazy as _
-
-'''
-NOTES:
-- x Need registry permissions.
-- x Translations
-- add view permissions for everything
-'''
-
 LOCKED_ROLES = {
-    "galaxy.collection_admin":{
+    "galaxy.collection_admin": {
         "permissions": [
             "galaxy.add_namespace",
             "galaxy.change_namespace",
@@ -19,9 +10,9 @@ LOCKED_ROLES = {
             "ansible.view_collectionremote",
             "ansible.modify_ansible_repo_content",
         ],
-        "description": _(
-            "Create, delete and change collection namespaces."
-            "Upload and delete collections. Sync collections from remotes."
+        "description": (
+            "Create, delete and change collection namespaces. "
+            "Upload and delete collections. Sync collections from remotes. "
             "Approve and reject collections.")
     },
     "galaxy.execution_environment_admin": {
@@ -37,8 +28,8 @@ LOCKED_ROLES = {
             "galaxy.change_containerregistryremote",
             "galaxy.delete_containerregistryremote",
         ],
-        "description": _(
-            "Push, delete, and change execution environments."
+        "description": (
+            "Push, delete, and change execution environments. "
             "Create, delete and change remote registries.")
     },
     "galaxy.execution_environment_namespace_owner": {
@@ -49,7 +40,7 @@ LOCKED_ROLES = {
             "container.namespace_modify_content_containerpushrepository",
             "container.namespace_add_containerdistribution",
         ],
-        "description": _("Create and update execution environments under existing container namespaces.")
+        "description": "Create and update execution environments under existing container namespaces."
     },
     "galaxy.execution_environment_collaborator": {
         "permissions": [
@@ -57,13 +48,13 @@ LOCKED_ROLES = {
             "container.namespace_change_containerdistribution",
             "container.namespace_modify_content_containerpushrepository",
         ],
-        "description": _("Change existing execution environments.")
+        "description": "Change existing execution environments."
     },
     "galaxy.content_admin": {
         "permissions": [
             "ansible.modify_ansible_repo_content",
         ],
-        "description": _("Approve and reject collections.")
+        "description": "Approve and reject collections."
     },
     "galaxy.namespace_owner": {
         "permissions": [
@@ -71,14 +62,14 @@ LOCKED_ROLES = {
             "galaxy.upload_to_namespace",
             "ansible.delete_collection",
         ],
-        "description": _("Change and upload collections to namespaces.")
+        "description": "Change and upload collections to namespaces."
     },
     "galaxy.publisher": {
         "permissions": [
             "galaxy.upload_to_namespace",
             "ansible.delete_collection",
         ],
-        "description": _("Upload and delete collections.")
+        "description": "Upload and delete collections."
     },
     "galaxy.group_admin": {
         "permissions": [
@@ -87,7 +78,7 @@ LOCKED_ROLES = {
             "galaxy.add_group",
             "galaxy.change_group",
         ],
-        "description": _("View, add, remove and change groups.")
+        "description": "View, add, remove and change groups."
     },
     "galaxy.user_admin": {
         "permissions": [
@@ -96,7 +87,7 @@ LOCKED_ROLES = {
             "galaxy.add_user",
             "galaxy.change_user",
         ],
-        "description": _("View, add, remove and change users.")
+        "description": "View, add, remove and change users."
     },
     "galaxy.synclist_owner": {
         "permissions": [
@@ -106,6 +97,14 @@ LOCKED_ROLES = {
             "galaxy.view_synclist",
             "ansible.change_collectionremote",
         ],
-        "description": _("View, add, remove and change synclists.")
+        "description": "View, add, remove and change synclists."
+    },
+    "galaxy.task_admin": {
+        "permissions": [
+            "core.change_task",
+            "core.delete_task",
+            "core.view_task"
+        ],
+        "description": "View, and cancel any task."
     },
 }
