@@ -20,7 +20,7 @@ from pulpcore.plugin.models.role import GroupRole
 from django_lifecycle import hook
 
 
-# TODO: Replace this with the version from pulpcore once 
+# TODO: Replace this with the version from pulpcore once
 # https://github.com/pulp/pulpcore/pull/2728 is merged and released
 def get_groups_with_perms_attached_roles(obj, only_with_perms_in=None):
     ctype = ContentType.objects.get_for_model(obj)
