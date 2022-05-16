@@ -77,11 +77,22 @@ docker/prune:     ## Clean all development images and volumes
 docker/build:     ## Build all development images.
 	./compose build
 
-# e.g: make docker/test TEST=.api.test_api_ui_sync_config
-# if TEST is not passed run all tests.
-.PHONY: docker/test
-docker/test:      ## Run unit tests.
+.PHONY: docker/test/unit
+docker/test/unit:      ## Run unit tests with option TEST param otherwise run all, ex: TEST=.api.test_api_ui_sync_config
 	$(call exec_or_run, api, $(DJ_MANAGER), test, galaxy_ng.tests.unit$(TEST))
+
+.PHONY: docker/test/integration
+docker/test/integration:      ## Run integration tests with optional MARK param otherwise run all, ex: MARK=galaxyapi_smoke
+	if [ "$(shell docker exec -it galaxy_ng_api_1 env | grep PULP_GALAXY_REQUIRE_CONTENT_APPROVAL)" != "PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true" ]; then\
+	  echo "The integration tests will not run correctly unless you set PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true";\
+		exit 1;\
+	fi
+	make docker/loadtoken
+	if [ "$(MARK)" ]; then\
+	  HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh "-m $(MARK)";\
+	else\
+		HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh;\
+	fi
 
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from fixtures
