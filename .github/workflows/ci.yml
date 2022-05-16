@@ -7,7 +7,7 @@
 
 ---
 name: Galaxy CI
-on: {pull_request: {branches: ['*']}, push: {branches: ['*']}}
+on: {pull_request: {branches: ['**']}, push: {branches: ['**']}}
 jobs:
 
   check_commit:
