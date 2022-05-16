@@ -18,6 +18,7 @@ OBJECT_PERMISSION_TRANSLATOR = [
     ((
         ("galaxy", "change_namespace"),
         ("galaxy", "upload_to_namespace"),
+        ("ansible", "delete_collection"),
     ), "galaxy.namespace_owner"),
     ((
         ("galaxy", "add_synclist"),
@@ -31,7 +32,6 @@ GLOBAL_PERMISSION_TRANSLATOR = [
     ((
         ("galaxy", "change_namespace"),
         ("galaxy", "delete_namespace"),
-        # ("galaxy", "view_namespace"),
         ("galaxy", "upload_to_namespace"),
         ("ansible", "delete_collection"),
         ("ansible", "change_collectionremote"),
@@ -45,7 +45,8 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("container", "namespace_push_containerdistribution"),
         ("container", "add_containernamespace"),
         ("container", "change_containernamespace"),
-        # ("container", "namespace_add_containerdistribution")
+
+        # registries
         ("galaxy", "add_containerregistryremote"),
         ("galaxy", "change_containerregistryremote"),
         ("galaxy", "delete_containerregistryremote"),
@@ -66,10 +67,7 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("ansible", "modify_ansible_repo_content"),
     ), "galaxy.content_admin"),
     ((
-        # ("galaxy", "add_namespace"),
         ("galaxy", "change_namespace"),
-        # ("galaxy", "delete_namespace"),
-        # ("galaxy", "view_namespace"),
         ("galaxy", "upload_to_namespace"),
         ("ansible", "delete_collection"),
     ), "galaxy.namespace_owner"),
@@ -102,30 +100,6 @@ GLOBAL_PERMISSION_TRANSLATOR = [
     ), "galaxy.task_admin"),
 ]
 
-""""
-MIGRATION STRATEGY:
-
-Global Permissions:
-- Apply as many locked roles as possible
-- Create a new role specific to the group to apply any missing permissions
-
-Object Group Permissions:
-
-Objects we care about
-- container namespaces
-- synclists
-- collection namespaces
-- other?
-
-- attempt to apply existing object roles
-- create new reusable role with extra permissions
-
-User Object Permissions:
-The only places with user permissions (that we care about) are:
-- container namespace owner
-- tasks
-"""
-
 
 def batch_create(model, objects, flush=False):
     """
@@ -136,11 +110,13 @@ def batch_create(model, objects, flush=False):
         objects.clear()
 
 
-def get_roles_from_permissions(permission_iterable, translator, Role, Permission):
+def get_roles_from_permissions(permission_iterable, translator, Role, Permission, super_permissions=None):
     """
     Translates the given set of permissions into roles based on the translator that is passed in.
     """
     roles_to_add = []
+    if super_permissions is None:
+        super_permissions = {}
 
     # Use set comparisons instead of querysets to avoid unnecesary trips to the DB
     permissions = set(((p.content_type.app_label, p.codename) for p in permission_iterable))
@@ -150,7 +126,13 @@ def get_roles_from_permissions(permission_iterable, translator, Role, Permission
     for locked_perm_names, locked_rolename in translator:
         role_perms = set(locked_perm_names)
 
-        if role_perms.issubset(permissions):
+        super_perm_for_role = super_permissions.get(locked_rolename, None)
+
+        # Some objects have permissions that allow users to change permissions on the object.
+        # An example of this is galaxy.change_namespace allows the user to change their own
+        # permissions on the namespace effectively giving them all the permissions. If the
+        # user has one of these permissions, just give them the full role for the object.
+        if role_perms.issubset(permissions) or super_perm_for_role in permissions:
             # don't bother setting the permissions on the locked roles. They'll get applied in
             # the post migration hook.
             role, _ = Role.objects.get_or_create(name=locked_rolename, locked=True)
@@ -193,17 +175,6 @@ def get_global_group_permissions(group, Role, GroupRole, Permission):
     for role in roles:
         group_roles.append(GroupRole(group=group, role=role))
 
-    # Create custom role for current Group with permissions not in Galaxy locked roles
-    # if len(leftover_permissions) > 0:
-    #     role, _ = Role.objects.get_or_create(
-    #         name=f"galaxy._{group.name}_extra",
-    #         description = f"Automatically generated. Contains extra global pmerissions for {group.name}"
-    #     )
-    #     for app_label, codename in leftover_permissions:
-    #         role.permissions.add(group.permissions.get(codename=codename, content_type__app_label=app_label))
-
-    #     group_roles.append(GroupRole(group=group, role=role))
-
     return group_roles
 
 
@@ -235,7 +206,15 @@ def get_object_group_permissions(group, Role, GroupRole, GuardianGroupObjectPerm
 
         # Add any locked roles that match the given group/objects permission set
         roles = get_roles_from_permissions(
-            [p.permission for p in perm_list], OBJECT_PERMISSION_TRANSLATOR, Role, Permission)
+            [p.permission for p in perm_list],
+            OBJECT_PERMISSION_TRANSLATOR,
+            Role,
+            Permission,
+            super_permissions={
+                "galaxy.execution_environment_namespace_owner": ("container", "change_containernamespace"),
+                "galaxy.namespace_owner": ("galaxy", "change_namespace")
+            }
+        )
 
         # Queue up the locked roles for creation
         for role in roles:
@@ -245,44 +224,6 @@ def get_object_group_permissions(group, Role, GroupRole, GuardianGroupObjectPerm
                 content_type=content_type,
                 object_id=object_id
             ))
-
-        # If there are remainining permissions get or create a role that matches the exact set
-        # of permissions that are left over
-        # if len(leftover_permissions) > 0:
-        #     qs = Role.objects.annotate(
-        #         perm_count = Count("permissions")).filter(perm_count=len(leftover_permissions))
-
-        #     perms_for_new_role = []
-
-        #     # Attempt to find an existing role with the exact set of permissions
-        #     for app_label, codename in leftover_permissions:
-        #         perm = Permission.objects.get(codename=codename, content_type__app_label=app_label)
-        #         perms_for_new_role.append(perm)
-        #         qs = qs.filter(permissions=perm)
-
-        #     role = qs.first()
-
-        #     # If no role is found, create a new one 
-        #     if not role:
-        #         perm_string = ""
-        #         for p in leftover_permissions:
-        #             perm_string = perm_string + "." + p.split('.', maxsplit=1)[1]
-                
-        #         name = f"galaxy._{content_type.model}{perm_string}"
-
-        #         role, _ = Role.objects.get_or_create(
-        #             name=name[:128],
-        #             description="Auto generated role."
-        #         )
-
-        #         role.permissions.set(perms_for_new_role)
-
-        #     group_roles.append(GroupRole(
-        #         role=role,
-        #         group=group,
-        #         content_type=content_type,
-        #         object_id=object_id
-        #     ))
 
     return group_roles
 
@@ -306,12 +247,35 @@ def add_object_role_for_users_with_permission(role, permission, UserRole, Guardi
 
 
 def migrate_group_permissions_to_roles(apps, schema_editor):
+    """
+    Migration strategy:
+    - Apply locked roles to the group that match the group's permission set.
+    - If any permissions are left over after a role is applied add a role with a single
+      permission to it to make up for each missing permission.
+
+    Example:
+    If a group has permissions:
+        - galaxy.change_namespace
+        - galaxy.upload_to_namespace
+        - galaxy.delete_collection
+        - galaxy.view_group
+        - galaxy.view_user
+        
+    The following roles would get applied:
+        - galaxy.namespace_owner
+        - _permission:galaxy.view_group
+        - _permission:galaxy.view_user
+
+    galaxy.namespace_owner is applied because the user has all the permissions that match it.
+    After applying galaxy.namespace_owner, the view_group and view_group permissions are left 
+    over so _permission:galaxy.view_group and _permission:galaxy.view_user are created for each
+    missing permission and added to the group. _permision:<perm_name> roles will only have the
+    a single permission in them for <perm_name>.
+    """
     Group = apps.get_model("galaxy", "Group")
     GroupRole = apps.get_model("core", "GroupRole")
-    UserRole = apps.get_model("core", "UserRole")
     Role = apps.get_model("core", "Role")
     Permission = apps.get_model("auth", "Permission")
-    GuardianUserObjectPermission = apps.get_model("guardian", "UserObjectPermission")
     GuardianGroupObjectPermission = apps.get_model("guardian", "GroupObjectPermission")
 
     group_roles = []
@@ -328,14 +292,18 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
 
 
 def migrate_user_permissions_to_roles(apps, schema_editor):
+    """
+    Migration Strategy:
+
+    We only care about user permissions for container namespaces and tasks. Global permissions
+    for users are not used, and they should be ignored if they exist. The only user permissions
+    that the system uses are ones that get automatically added for users that create tasks and
+    container namespaces, so these are the only permissions that will get migrated to roles here.
+    """
     Permission = apps.get_model("auth", "Permission")
     Role = apps.get_model("core", "Role")
     UserRole = apps.get_model("core", "UserRole")
     GuardianUserObjectPermission = apps.get_model("guardian", "UserObjectPermission")
-
-    # TODO: Migrate user permissions.
-    # We only care about user permissions for container namespaces and tasks. Global permissions
-    # for users are not used, and they should be ignored if they exist.
 
     # Get all users with change_containernamespace permissions. Change container namespace allows
     # users to set permissions on container namespaces, so it allows us to use it as a proxy for
