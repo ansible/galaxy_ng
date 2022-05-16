@@ -84,6 +84,9 @@ def test_move_collection_version(ansible_config, upload_artifact):
     assert cert_result['href'] is not None
     assert cert_result['metadata']['tags'] == ['tools']
 
+    # wait for move task from `staging` repo to `published` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
+
     # Make sure it's moved to the right place ...
     after = get_all_collections()
     assert ckey not in after['staging']

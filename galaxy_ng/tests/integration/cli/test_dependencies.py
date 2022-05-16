@@ -76,6 +76,9 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
         client = get_client(config)
         set_certification(client, artifact2)
 
+        # wait for move task from `staging` repo to `published` repo
+        time.sleep(SLEEP_SECONDS_ONETIME)
+
         pid = ansible_galaxy(
             f"collection install -vvv --ignore-cert \
                 {artifact2.namespace}.{artifact2.name}:{artifact2.version} --server=automation_hub",

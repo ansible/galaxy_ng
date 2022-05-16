@@ -1,8 +1,6 @@
-"""test_namespace_management.py - Test related to namespaces.
-
-See: https://issues.redhat.com/browse/AAH-1303
-
+"""test_collection_delete.py - Tests related to collection deletion.
 """
+
 import time
 
 import pytest
