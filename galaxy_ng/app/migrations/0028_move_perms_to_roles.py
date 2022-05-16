@@ -268,6 +268,10 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
     over so _permission:galaxy.view_group and _permission:galaxy.view_user are created for each
     missing permission and added to the group. _permision:<perm_name> roles will only have the
     a single permission in them for <perm_name>.
+
+    Users with the ability to change the ownership of objects are given admin roles. For example
+    if my group has galaxy.change_namespace permissions on namespace foo, but nothing else, give
+    them the galaxy.namespace_owner role because they can already escalate their permissions.
     """
     Group = apps.get_model("galaxy", "Group")
     GroupRole = apps.get_model("core", "GroupRole")
