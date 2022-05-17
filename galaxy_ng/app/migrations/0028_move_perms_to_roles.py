@@ -1,5 +1,5 @@
-from django.db import migrations
-from django.db.models import Count
+from django.db import migrations, connection
+from django.conf import settings
 
 
 OBJECT_PERMISSION_TRANSLATOR = [
@@ -178,7 +178,7 @@ def get_global_group_permissions(group, Role, GroupRole, Permission):
     return group_roles
 
 
-def get_object_group_permissions(group, Role, GroupRole, GuardianGroupObjectPermission, Permission):
+def get_object_group_permissions(group, Role, GroupRole, ContentType, Permission):
     """
     Takes in a group object and returns a list of GroupRole objects to be created for
     each object that the group has permissions on.
@@ -186,24 +186,31 @@ def get_object_group_permissions(group, Role, GroupRole, GuardianGroupObjectPerm
     group_roles = []
     objects_with_perms = {}
 
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT object_pk, content_type_id, permission_id FROM guardian_groupobjectpermission WHERE group_id={group.pk};")
+
     # group the object permissions for this group by object instances to make them easier to process
-    for guardian_permission in GuardianGroupObjectPermission.objects.filter(group=group):
-        key = (str(guardian_permission.content_type), guardian_permission.object_pk)
+    for object_pk, content_id, permission_id in cursor.fetchall():
+        key = (content_id, object_pk)
 
         if key in objects_with_perms:
-            objects_with_perms[key].append(guardian_permission)
+            objects_with_perms[key].append(permission_id)
         else:
-            objects_with_perms[key] = [guardian_permission,]
+            objects_with_perms[key] = [permission_id,]
 
     # for each object permission that this group has, map it to a role.
     for k in objects_with_perms:
         perm_list = objects_with_perms[k]
-        content_type = perm_list[0].content_type
-        object_id = perm_list[0].object_pk
+        content_type_id = k[0]
+        object_id = k[1]
+
+        content_type = ContentType.objects.get(pk=content_type_id)
+
+        permissions = Permission.objects.filter(pk__in=perm_list)
 
         # Add any locked roles that match the given group/objects permission set
         roles = get_roles_from_permissions(
-            [p.permission for p in perm_list],
+            permissions,
             OBJECT_PERMISSION_TRANSLATOR,
             Role,
             Permission,
@@ -225,16 +232,18 @@ def get_object_group_permissions(group, Role, GroupRole, GuardianGroupObjectPerm
     return group_roles
 
 
-def add_object_role_for_users_with_permission(role, permission, UserRole, GuardianUserObjectPermission):
+def add_object_role_for_users_with_permission(role, permission, UserRole, ContentType, User):
     user_roles = []
 
-    for guardian_permission in GuardianUserObjectPermission.objects.filter(
-        permission=permission):
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT object_pk, content_type_id, user_id FROM guardian_userobjectpermission WHERE permission_id={permission.pk};")
+
+    for object_pk, content_type_id, user_id in cursor.fetchall():
         user_roles.append(UserRole(
             role=role,
-            user=guardian_permission.user,
-            content_type=guardian_permission.content_type,
-            object_id=guardian_permission.object_pk
+            user=User.objects.get(pk=user_id),
+            content_type=ContentType.objects.get(pk=content_type_id),
+            object_id=object_pk
         ))
         batch_create(UserRole, user_roles)
 
@@ -277,14 +286,14 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
     GroupRole = apps.get_model("core", "GroupRole")
     Role = apps.get_model("core", "Role")
     Permission = apps.get_model("auth", "Permission")
-    GuardianGroupObjectPermission = apps.get_model("guardian", "GroupObjectPermission")
+    ContentType = apps.get_model("contenttypes", "ContentType")
 
     group_roles = []
 
     # Group Permissions
     for group in Group.objects.filter(name__ne="system:partner-engineers"):
         group_roles.extend(get_global_group_permissions(group, Role, GroupRole, Permission))
-        group_roles.extend(get_object_group_permissions(group, Role, GroupRole, GuardianGroupObjectPermission, Permission))
+        group_roles.extend(get_object_group_permissions(group, Role, GroupRole, ContentType, Permission))
 
         batch_create(GroupRole, group_roles)
 
@@ -304,7 +313,8 @@ def migrate_user_permissions_to_roles(apps, schema_editor):
     Permission = apps.get_model("auth", "Permission")
     Role = apps.get_model("core", "Role")
     UserRole = apps.get_model("core", "UserRole")
-    GuardianUserObjectPermission = apps.get_model("guardian", "UserObjectPermission")
+    ContentType = apps.get_model("contenttypes", "ContentType")
+    User = apps.get_model(settings.AUTH_USER_MODEL)
 
     # Get all users with change_containernamespace permissions. Change container namespace allows
     # users to set permissions on container namespaces, so it allows us to use it as a proxy for
@@ -314,7 +324,7 @@ def migrate_user_permissions_to_roles(apps, schema_editor):
         codename="change_containernamespace", content_type__app_label="container")
     container_namespace_admin, _ = Role.objects.get_or_create(name="galaxy.execution_environment_namespace_owner")
     add_object_role_for_users_with_permission(
-        container_namespace_admin, change_container_namespace, UserRole, GuardianUserObjectPermission)
+        container_namespace_admin, change_container_namespace, UserRole, ContentType, User)
 
     # When tasks are created pulp adds delete task and a few other permissions to the user that
     # initiates the task. Delete task is a good proxy for this role.
@@ -322,7 +332,7 @@ def migrate_user_permissions_to_roles(apps, schema_editor):
         codename="view_task", content_type__app_label="core")
     task_owner, _ = Role.objects.get_or_create(name="galaxy.task_admin")
     add_object_role_for_users_with_permission(
-        task_owner, delete_task, UserRole, GuardianUserObjectPermission)
+        task_owner, delete_task, UserRole, ContentType, User)
 
 
 class Migration(migrations.Migration):
