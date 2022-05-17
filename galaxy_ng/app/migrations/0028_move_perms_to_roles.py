@@ -168,7 +168,6 @@ def get_global_group_permissions(group, Role, GroupRole, Permission):
     if len(perms) == 0:
         return
 
-    # roles, leftover_permissions = get_roles_from_permissions(perms, GLOBAL_PERMISSION_TRANSLATOR, Role)
     roles = get_roles_from_permissions(perms, GLOBAL_PERMISSION_TRANSLATOR, Role, Permission)
 
     # Add locked roles that match the group's permission set
@@ -186,6 +185,7 @@ def get_object_group_permissions(group, Role, GroupRole, ContentType, Permission
     group_roles = []
     objects_with_perms = {}
 
+    # Use raw sql because guardian won't be available
     cursor = connection.cursor()
     cursor.execute(f"SELECT object_pk, content_type_id, permission_id FROM guardian_groupobjectpermission WHERE group_id={group.pk};")
 
@@ -235,6 +235,7 @@ def get_object_group_permissions(group, Role, GroupRole, ContentType, Permission
 def add_object_role_for_users_with_permission(role, permission, UserRole, ContentType, User):
     user_roles = []
 
+    # Use raw sql because guardian won't be available
     cursor = connection.cursor()
     cursor.execute(f"SELECT object_pk, content_type_id, user_id FROM guardian_userobjectpermission WHERE permission_id={permission.pk};")
 
