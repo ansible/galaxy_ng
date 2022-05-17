@@ -36,7 +36,6 @@ def test_group_role_listing(ansible_config):
             {
                 "name": f"{group_response['name']}",
                 "object_roles": ["galaxy.namespace_owner"],
-                "object_permissions": ["galaxy.upload_to_namespace"],
             }
         ],
     }
