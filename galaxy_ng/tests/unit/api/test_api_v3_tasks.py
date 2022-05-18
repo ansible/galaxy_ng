@@ -15,7 +15,8 @@ class TestUiTaskListViewSet(BaseTestCase):
         super().setUp()
 
         self.admin_user = self._create_user("admin")
-        self.sync_group = self._create_group("", "admins", self.admin_user, ["galaxy.collection_admin"])
+        self.sync_group = self._create_group(
+            "", "admins", self.admin_user, ["galaxy.collection_admin"])
         self.admin_user.save()
 
         self.certified_remote = CollectionRemote.objects.get(name='rh-certified')
