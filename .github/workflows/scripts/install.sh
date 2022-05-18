@@ -22,7 +22,7 @@ if [[ "$TEST" = "docs" || "$TEST" = "publish" ]]; then
   pip install -r doc_requirements.txt
 fi
 
-pip install -e ../pulpcore -e ../pulp_ansible -e ../pulp_container -e ../galaxy-importer
+pip install -e ../pulpcore
 pip install -r functest_requirements.txt
 
 cd .ci/ansible/
@@ -38,7 +38,7 @@ fi
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
 else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.10.2
+  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.12.1
 fi
 
 if [ -e $REPO_ROOT/../galaxy-importer ]; then

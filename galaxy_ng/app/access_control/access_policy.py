@@ -7,7 +7,6 @@ from rest_framework.exceptions import NotFound
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 
-from pulp_container.app.access_policy import NamespacedAccessPolicyMixin
 from pulp_container.app import models as container_models
 
 from galaxy_ng.app import models
@@ -276,7 +275,7 @@ class ContainerRegistryRemoteAccessPolicy(AccessPolicyBase):
     NAME = "ContainerRegistryRemoteViewSet"
 
 
-class ContainerRemoteAccessPolicy(AccessPolicyBase, NamespacedAccessPolicyMixin):
+class ContainerRemoteAccessPolicy(AccessPolicyBase):
     NAME = "ContainerRemoteViewSet"
 
     def has_distro_permission(self, request, view, action, permission):
