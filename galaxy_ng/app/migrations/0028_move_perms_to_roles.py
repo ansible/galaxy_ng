@@ -18,7 +18,6 @@ OBJECT_PERMISSION_TRANSLATOR = [
     ((
         ("galaxy", "change_namespace"),
         ("galaxy", "upload_to_namespace"),
-        ("ansible", "delete_collection"),
     ), "galaxy.namespace_owner"),
     ((
         ("galaxy", "add_synclist"),
@@ -30,6 +29,7 @@ OBJECT_PERMISSION_TRANSLATOR = [
 
 GLOBAL_PERMISSION_TRANSLATOR = [
     ((
+        ("galaxy", "add_namespace"),
         ("galaxy", "change_namespace"),
         ("galaxy", "delete_namespace"),
         ("galaxy", "upload_to_namespace"),
@@ -45,6 +45,10 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("container", "namespace_push_containerdistribution"),
         ("container", "add_containernamespace"),
         ("container", "change_containernamespace"),
+
+        # excluding this because it wasn't needed for global permissions, but is
+        # needed for object permissions
+        # ("container", "namespace_add_containerdistribution")
 
         # registries
         ("galaxy", "add_containerregistryremote"),
@@ -69,7 +73,6 @@ GLOBAL_PERMISSION_TRANSLATOR = [
     ((
         ("galaxy", "change_namespace"),
         ("galaxy", "upload_to_namespace"),
-        ("ansible", "delete_collection"),
     ), "galaxy.namespace_owner"),
     ((
         ("galaxy", "upload_to_namespace"),
@@ -166,14 +169,14 @@ def get_global_group_permissions(group, Role, GroupRole, Permission):
 
     # If there are no permissions, then our job here is done
     if len(perms) == 0:
-        return
+        return group_roles
 
     roles = get_roles_from_permissions(perms, GLOBAL_PERMISSION_TRANSLATOR, Role, Permission)
 
     # Add locked roles that match the group's permission set
     for role in roles:
         group_roles.append(GroupRole(group=group, role=role))
-
+    
     return group_roles
 
 
@@ -186,18 +189,21 @@ def get_object_group_permissions(group, Role, GroupRole, ContentType, Permission
     objects_with_perms = {}
 
     # Use raw sql because guardian won't be available
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT object_pk, content_type_id, permission_id FROM guardian_groupobjectpermission WHERE group_id={group.pk};")
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT object_pk, content_type_id, permission_id FROM"
+            f" guardian_groupobjectpermission WHERE group_id={group.pk};"
+        )
 
-    # group the object permissions for this group by object instances to make them easier to process
-    for object_pk, content_id, permission_id in cursor.fetchall():
-        key = (content_id, object_pk)
+        # group the object permissions for this group by object instances to make them easier to process
+        for object_pk, content_id, permission_id in cursor.fetchall():
+            key = (content_id, object_pk)
 
-        if key in objects_with_perms:
-            objects_with_perms[key].append(permission_id)
-        else:
-            objects_with_perms[key] = [permission_id,]
-
+            if key in objects_with_perms:
+                objects_with_perms[key].append(permission_id)
+            else:
+                objects_with_perms[key] = [permission_id,]
+    
     # for each object permission that this group has, map it to a role.
     for k in objects_with_perms:
         perm_list = objects_with_perms[k]
@@ -236,17 +242,20 @@ def add_object_role_for_users_with_permission(role, permission, UserRole, Conten
     user_roles = []
 
     # Use raw sql because guardian won't be available
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT object_pk, content_type_id, user_id FROM guardian_userobjectpermission WHERE permission_id={permission.pk};")
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT object_pk, content_type_id, user_id FROM"
+            f" guardian_userobjectpermission WHERE permission_id={permission.pk};"
+        )
 
-    for object_pk, content_type_id, user_id in cursor.fetchall():
-        user_roles.append(UserRole(
-            role=role,
-            user=User.objects.get(pk=user_id),
-            content_type=ContentType.objects.get(pk=content_type_id),
-            object_id=object_pk
-        ))
-        batch_create(UserRole, user_roles)
+        for object_pk, content_type_id, user_id in cursor.fetchall():
+            user_roles.append(UserRole(
+                role=role,
+                user=User.objects.get(pk=user_id),
+                content_type=ContentType.objects.get(pk=content_type_id),
+                object_id=object_pk
+            ))
+            batch_create(UserRole, user_roles)
 
     # Create any remaining roles
     batch_create(UserRole, user_roles, flush=True)
@@ -323,7 +332,8 @@ def migrate_user_permissions_to_roles(apps, schema_editor):
     # execution environment admin role.
     change_container_namespace = Permission.objects.get(
         codename="change_containernamespace", content_type__app_label="container")
-    container_namespace_admin, _ = Role.objects.get_or_create(name="galaxy.execution_environment_namespace_owner")
+    container_namespace_admin, _ = Role.objects.get_or_create(
+        name="galaxy.execution_environment_namespace_owner", locked=True)
     add_object_role_for_users_with_permission(
         container_namespace_admin, change_container_namespace, UserRole, ContentType, User)
 
@@ -331,7 +341,7 @@ def migrate_user_permissions_to_roles(apps, schema_editor):
     # initiates the task. Delete task is a good proxy for this role.
     delete_task = Permission.objects.get(
         codename="view_task", content_type__app_label="core")
-    task_owner, _ = Role.objects.get_or_create(name="galaxy.task_admin")
+    task_owner, _ = Role.objects.get_or_create(name="galaxy.task_admin", locked=True)
     add_object_role_for_users_with_permission(
         task_owner, delete_task, UserRole, ContentType, User)
 

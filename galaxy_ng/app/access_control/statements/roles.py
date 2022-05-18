@@ -62,7 +62,6 @@ LOCKED_ROLES = {
         "permissions": [
             "galaxy.change_namespace",
             "galaxy.upload_to_namespace",
-            "ansible.delete_collection",
         ],
         "description": "Change and upload collections to namespaces."
     },
@@ -97,7 +96,6 @@ LOCKED_ROLES = {
             "galaxy.change_synclist",
             "galaxy.delete_synclist",
             "galaxy.view_synclist",
-            "ansible.change_collectionremote",
         ],
         "description": "View, add, remove and change synclists."
     },

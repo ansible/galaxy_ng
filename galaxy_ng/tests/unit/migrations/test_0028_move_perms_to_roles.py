@@ -1,194 +1,318 @@
 from importlib import import_module
-from unittest.mock import Mock
+from unicodedata import name
 from django.test import TestCase
+from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 
 from galaxy_ng.app.models import User, Group, Namespace
+from pulp_container.app.models import ContainerNamespace
 
 from pulp_ansible.app.models import Collection
-
 from pulpcore.app.models.role import GroupRole, UserRole, Role
 
 from django.contrib.auth.models import Permission
 from guardian.models import GroupObjectPermission, UserObjectPermission
 from guardian.shortcuts import assign_perm as guardian_assign_perm
 
-permission_names = [
-    'ansible.delete_collection',
-    'ansible.modify_ansible_repo_content',
-    'container.add_containernamespace',
-    'container.change_containernamespace',
-    'container.delete_containerrepository',
-    'container.namespace_change_containerdistribution',
-    'container.namespace_modify_content_containerpushrepository',
-    'container.namespace_push_containerdistribution',
-    'galaxy.add_group',
-    'galaxy.add_namespace',
-    'galaxy.add_user galaxy.change_user',
-    'galaxy.change_namespace',
-    'galaxy.delete_namespace',
-    'galaxy.upload_to_namespace',
-    'galaxy.view_group galaxy.view_user'
-    'galaxy.view_group',
-    'galaxy.view_namespace',
-    'galaxy.view_synclist',
-    'galaxy.view_user',
-]
+
+# Note, this copied from galaxy_ng.app.access_control.statements.roles instead of
+# imported because the roles may change in the future, but the migrations don't
+LOCKED_ROLES = {
+    "galaxy.collection_admin": {
+        "permissions": [
+            "galaxy.add_namespace",
+            "galaxy.change_namespace",
+            "galaxy.delete_namespace",
+            "galaxy.upload_to_namespace",
+            "ansible.delete_collection",
+            "ansible.change_collectionremote",
+            "ansible.view_collectionremote",
+            "ansible.modify_ansible_repo_content",
+        ],
+        "description": (
+            "Create, delete and change collection namespaces. "
+            "Upload and delete collections. Sync collections from remotes. "
+            "Approve and reject collections.")
+    },
+    "galaxy.execution_environment_admin": {
+        "permissions": [
+            "container.delete_containerrepository",
+            "container.namespace_change_containerdistribution",
+            "container.namespace_modify_content_containerpushrepository",
+            "container.namespace_push_containerdistribution",
+            "container.add_containernamespace",
+            "container.change_containernamespace",
+            "galaxy.add_containerregistryremote",
+            "galaxy.change_containerregistryremote",
+            "galaxy.delete_containerregistryremote",
+        ],
+        "description": (
+            "Push, delete, and change execution environments. "
+            "Create, delete and change remote registries.")
+    },
+    "galaxy.execution_environment_namespace_owner": {
+        "permissions": [
+            "container.change_containernamespace",
+            "container.namespace_push_containerdistribution",
+            "container.namespace_change_containerdistribution",
+            "container.namespace_modify_content_containerpushrepository",
+            "container.namespace_add_containerdistribution",
+        ],
+        "description": (
+            "Create and update execution environments under existing "
+            "container namespaces.")
+    },
+    "galaxy.execution_environment_collaborator": {
+        "permissions": [
+            "container.namespace_push_containerdistribution",
+            "container.namespace_change_containerdistribution",
+            "container.namespace_modify_content_containerpushrepository",
+        ],
+        "description": "Change existing execution environments."
+    },
+    "galaxy.content_admin": {
+        "permissions": [
+            "ansible.modify_ansible_repo_content",
+        ],
+        "description": "Approve and reject collections."
+    },
+    "galaxy.namespace_owner": {
+        "permissions": [
+            "galaxy.change_namespace",
+            "galaxy.upload_to_namespace",
+        ],
+        "description": "Change and upload collections to namespaces."
+    },
+    "galaxy.publisher": {
+        "permissions": [
+            "galaxy.upload_to_namespace",
+            "ansible.delete_collection",
+        ],
+        "description": "Upload and delete collections."
+    },
+    "galaxy.group_admin": {
+        "permissions": [
+            "galaxy.view_group",
+            "galaxy.delete_group",
+            "galaxy.add_group",
+            "galaxy.change_group",
+        ],
+        "description": "View, add, remove and change groups."
+    },
+    "galaxy.user_admin": {
+        "permissions": [
+            "galaxy.view_user",
+            "galaxy.delete_user",
+            "galaxy.add_user",
+            "galaxy.change_user",
+        ],
+        "description": "View, add, remove and change users."
+    },
+    "galaxy.synclist_owner": {
+        "permissions": [
+            "galaxy.add_synclist",
+            "galaxy.change_synclist",
+            "galaxy.delete_synclist",
+            "galaxy.view_synclist",
+        ],
+        "description": "View, add, remove and change synclists."
+    },
+    "galaxy.task_admin": {
+        "permissions": [
+            "core.change_task",
+            "core.delete_task",
+            "core.view_task"
+        ],
+        "description": "View, and cancel any task."
+    },
+}
 
 
-def get_model(a,b):
-    if a == 'auth':
-        if b == 'Permission':
-            return Permission
-    if a == 'galaxy':
-        if b == 'Group':
-            return Group
-    if a == 'core':
-        if b == 'GroupRole':
-            return GroupRole
-        if b == 'UserRole':
-            return UserRole
-        if b == 'Role':
-            return Role
-    if a == 'guardian':
-        if b == 'UserObjectPermission':
-            return UserObjectPermission
-        if b == 'GroupObjectPermission':
-            return GroupObjectPermission
 
-    return None
-
-
-# https://gist.githubusercontent.com/bmclaughlin/3a9d61d7310a285dd00627bfdff4ee69/raw/508386973223d3d2615a9ba63ee07e57dfae55c2/resetdb.sh
 class TestMigratingPermissionsToRoles(TestCase):
+    def _get_permission(self, permission_name):
+        app_label = permission_name.split('.')[0]
+        codename = permission_name.split('.')[1]
+        return Permission.objects.get(
+            content_type__app_label=app_label,
+            codename=codename
+        )
+    
+    def _run_migrations(self):
+        migration = import_module("galaxy_ng.app.migrations.0028_move_perms_to_roles")
+        migration.migrate_group_permissions_to_roles(apps, None)
+        migration.migrate_user_permissions_to_roles(apps, None)
 
-    def setUp(self):
-        # map out the permissions
-        self.permissions = {}
-        for perm_name in permission_names:
-            app_label = perm_name.split('.')[0]
-            codename = perm_name.split('.')[1]
-            this_perm = Permission.objects.filter(
-                content_type__app_label=app_label,
-                codename=codename
-            ).first()
-            self.permissions[(app_label, codename)] = this_perm
 
-        # make groups
-        self.group_names = []
-        self.groups = {}
-        for x in range(2, 11):
-            if x != 2:
-                continue
-            group_name = f'test_group_{x}'
-            self.group_names.append(group_name)
-            self.groups[group_name] = Group.objects.create(name=group_name)
+    def _create_user_and_group_with_permissions(self, name, permissions, obj=None):
+        user = User.objects.create(username=f"user_{name}")
+        group = Group.objects.create(name=f"group_{name}")
+        group.user_set.add(user)
 
-        # make users
-        self.user_names = []
-        self.users = {}
-        for x in range(2, 11):
-            if x != 2:
-                continue
-            user_name = f'test_user_{x}'
-            self.user_names.append(user_name)
-            self.users[user_name] = User.objects.create(username=user_name)
+        if obj:
+            for perm in permissions:
+                guardian_assign_perm(self._get_permission(perm), group, obj)
+        else:
+            for perm in permissions:
+                group.permissions.add(self._get_permission(perm))
+        group.save()
 
-        # Create namespace
-        self.namespace = Namespace.objects.create(name='test_namespace_2')
+        return (user, group)
 
-    def tearDown(self):
-        for x in GroupRole.objects.all():
-            if x.group.name in self.group_names:
-                x.delete()
-        for k,v in self.groups.items():
-            v.delete()
-        for k,v in self.users.items():
-            v.delete()
+    def _has_role(self, group, role, obj=None):
+        role_obj = Role.objects.get(name=role)
 
-    def test_model_permissions_move_to_custom_role(self):
+        if obj:
+            c_type = ContentType.objects.get_for_model(obj)
+            return GroupRole.objects.filter(
+                group=group,
+                role=role_obj,
+                content_type=c_type,
+                object_id=obj.pk).exists()
+        else:
+            return GroupRole.objects.filter(
+                group=group,
+                role=role_obj).exists()
 
-        apps_mock = Mock()
-        apps_mock.get_model = get_model
+    def test_group_model_locked_role_mapping(self):
+        roles = {}
+
+        for role in LOCKED_ROLES:
+            roles[role] = self._create_user_and_group_with_permissions(
+                name=role,
+                permissions=LOCKED_ROLES[role]["permissions"]
+            )
+        
+        self._run_migrations()
+
+        for role in roles:
+            permissions = LOCKED_ROLES[role]["permissions"]
+            user, group = roles[role]
+            
+            for perm in permissions:
+                self.assertTrue(user.has_perm(perm))
+
+            self.assertEqual(GroupRole.objects.filter(group=group).count(), 1)
+            self.assertTrue(self._has_role(group, role))
+
+
+    def test_group_model_locked_role_mapping_with_dangling_permissions(self):
+        permissions_to_add = \
+            LOCKED_ROLES["galaxy.collection_admin"]["permissions"] + \
+            LOCKED_ROLES["galaxy.execution_environment_admin"]["permissions"] + \
+            LOCKED_ROLES["galaxy.namespace_owner"]["permissions"] + \
+            ["galaxy.view_user", "core.view_task"]
+
+        user, group = self._create_user_and_group_with_permissions("test", permissions_to_add)
 
         # Add permissions directly to a group
-        for x in [('ansible', 'delete_collection'), ('galaxy', 'upload_to_namespace')]:
-            self.groups['test_group_2'].permissions.add(self.permissions[x])
-            self.groups['test_group_2'].save()
+        for perm in permissions_to_add:
+            group.permissions.add(self._get_permission(perm))
+        group.save()
 
-        # Run migration
-        migration = import_module("galaxy_ng.app.migrations.0028_move_perms_to_roles")
-        migration.move_permissions_to_roles(apps_mock, None)
+        self._run_migrations()
 
-        # All permissions on the group should have been removed
-        assert self.groups['test_group_2'].permissions.all().count() == 0
+        for perm in permissions_to_add:
+            self.assertTrue(user.has_perm(perm))
 
-        # A single new grouprole should have been created
-        assert GroupRole.objects.filter(group=self.groups['test_group_2']).count() == 1
-        gr = GroupRole.objects.filter(group=self.groups['test_group_2']).first()
-        assert gr.role.name == 'galaxy.publisher'
+        expected_roles = [
+            "galaxy.collection_admin",
+            "galaxy.execution_environment_admin",
+            "_permission:galaxy.view_user",
+            "_permission:core.view_task",
+        ]
 
-        # All of the group's permissions should have been moved to the role
-        permissions = [(x.content_type.app_label, x.codename) for x in gr.role.permissions.all()]
-        assert len(permissions) == 2
-        assert ('ansible', 'delete_collection') in permissions
-        assert ('galaxy', 'upload_to_namespace') in permissions
-
-    def test_group_object_permissions(self):
-        apps_mock = Mock()
-        apps_mock.get_model = get_model
-
-        # Create namespace
-        group = self.groups['test_group_2']
-        guardian_assign_perm('upload_to_namespace', group, self.namespace)
-
-        # Run migration
-        migration = import_module("galaxy_ng.app.migrations.0028_move_perms_to_roles")
-        migration.move_permissions_to_roles(apps_mock, None)
-
-        # Ensure a GroupRole was created for the group, object and permission
-        assert GroupRole.objects.filter(group=group).count() == 1
-
-        expected_role_name = 'galaxy.' + group.name + '_' + str(self.namespace.id)
-        assert Role.objects.filter(name=expected_role_name).count() == 1
-
-        # Ensure the role has only 1 permission
-        role = Role.objects.filter(name=expected_role_name).first()
-        assert role.permissions.all().count() == 1
-
-        # Ensure the role permission is the right one
-        role_perm = role.permissions.first()
-        assert role_perm.content_type.app_label == 'galaxy'
-        assert role_perm.codename == 'upload_to_namespace'
+        self.assertEqual(GroupRole.objects.filter(group=group).count(), len(expected_roles))
+        
+        for role in expected_roles:
+            role_obj = Role.objects.get(name=role)
+            self.assertEqual(GroupRole.objects.filter(group=group, role=role_obj).count(), 1)
+            self.assertTrue(self._has_role(group, role))
 
 
-    def test_user_object_permissions(self):
+    def test_group_object_locked_role_mapping(self):
+        namespace = Namespace.objects.create(name="my_namespace")
+        container_namespace = ContainerNamespace.objects.create(name="my_container_ns")
 
-        apps_mock = Mock()
-        apps_mock.get_model = get_model
+        _, namespace_super_group = self._create_user_and_group_with_permissions(
+            "ns_super_owner",
+            ["galaxy.change_namespace"],
+            obj=namespace
+        )
 
-        # Define the testuser
-        testuser = self.users['test_user_2']
+        _, container_namespace_super_group = self._create_user_and_group_with_permissions(
+            "cns_super_owner",
+            ["container.change_containernamespace", "container.namespace_push_containerdistribution"],
+            obj=container_namespace
+        )
 
-        # Create a collection and allow the user to delete it
-        col,_ = Collection.objects.get_or_create(namespace='foo', name='bar')
-        guardian_assign_perm('delete_collection', testuser, col)
+        ns_roles = ["galaxy.namespace_owner"]
+        c_ns_roles = [
+            "galaxy.execution_environment_namespace_owner",
+            "galaxy.execution_environment_collaborator"]
 
-        # Run migration
-        migration = import_module("galaxy_ng.app.migrations.0028_move_perms_to_roles")
-        migration.move_permissions_to_roles(apps_mock, None)
+        ns_users = {}
+        c_ns_users = {}
 
-        # Ensure a userrole was created for the user+obj+permission
-        assert UserRole.objects.filter(user=testuser).count() == 1
+        for role in ns_roles:
+            ns_users[role] = self._create_user_and_group_with_permissions(
+                role, LOCKED_ROLES[role]["permissions"], obj=namespace)
 
-        # Ensure a role was created with the concatenated name
-        expected_role_name = 'galaxy.' + testuser.username + '_' + str(col.pulp_id)
-        assert Role.objects.filter(name=expected_role_name).count() == 1
+        for role in c_ns_roles:
+            c_ns_users[role] = self._create_user_and_group_with_permissions(
+                role, LOCKED_ROLES[role]["permissions"], obj=container_namespace)
 
-        # Ensure the role has only 1 permission
-        role = Role.objects.filter(name=expected_role_name).first()
-        assert role.permissions.all().count() == 1
+        self._run_migrations()
 
-        # Ensure the role permission is the right one
-        role_perm = role.permissions.first()
-        assert role_perm.content_type.app_label == 'ansible'
-        assert role_perm.codename == 'delete_collection'
+        # Verify locked role mapping works
+        for role in ns_users:
+            permissions = LOCKED_ROLES[role]["permissions"]
+            user, group = ns_users[role]
+            
+            for perm in permissions:
+                self.assertTrue(user.has_perm(perm, obj=namespace))
+                self.assertFalse(user.has_perm(perm))
+            
+            self.assertEqual(GroupRole.objects.filter(group=group).count(), 1)
+            self.assertTrue(self._has_role(group, role, obj=namespace))
+
+        for role in c_ns_users:
+            permissions = LOCKED_ROLES[role]["permissions"]
+            user, group = c_ns_users[role]
+            
+            for perm in permissions:
+                self.assertTrue(user.has_perm(perm, obj=container_namespace))
+                self.assertFalse(user.has_perm(perm))
+            
+            self.assertEqual(GroupRole.objects.filter(group=group).count(), 1)
+            self.assertTrue(self._has_role(group, role, obj=container_namespace))
+    
+        # Verify super permissions work
+        self.assertTrue(self._has_role(namespace_super_group, "galaxy.namespace_owner", namespace))
+        self.assertTrue(
+            self._has_role(
+                container_namespace_super_group,
+                "galaxy.execution_environment_namespace_owner",
+                container_namespace)
+        )
+
+
+    def test_user_role(self):
+        ns = ContainerNamespace.objects.create(name="my_container_namespace")
+        user = User.objects.create(username="test")
+
+        perm = self._get_permission("container.change_containernamespace")
+        guardian_assign_perm(perm, user, obj=ns)
+        c_type = ContentType.objects.get_for_model(ContainerNamespace)
+
+        self._run_migrations()
+
+        role_obj = Role.objects.get(name="galaxy.execution_environment_namespace_owner")
+        has_role = UserRole.objects.filter(
+                user=user,
+                role=role_obj,
+                content_type=c_type,
+                object_id=ns.pk
+            ).exists()
+
+        self.assertTrue(has_role)
