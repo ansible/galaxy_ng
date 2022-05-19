@@ -18,6 +18,31 @@ from guardian.shortcuts import assign_perm as guardian_assign_perm
 # Note, this copied from galaxy_ng.app.access_control.statements.roles instead of
 # imported because the roles may change in the future, but the migrations don't
 LOCKED_ROLES = {
+    "galaxy.content_admin": {
+        "permissions": [
+            "galaxy.add_namespace",
+            "galaxy.change_namespace",
+            "galaxy.delete_namespace",
+            "galaxy.upload_to_namespace",
+            "ansible.delete_collection",
+            "ansible.change_collectionremote",
+            "ansible.view_collectionremote",
+            "ansible.modify_ansible_repo_content",
+            "container.delete_containerrepository",
+            "container.namespace_change_containerdistribution",
+            "container.namespace_modify_content_containerpushrepository",
+            "container.namespace_push_containerdistribution",
+            "container.add_containernamespace",
+            "container.change_containernamespace",
+            # "container.namespace_add_containerdistribution",
+            "galaxy.add_containerregistryremote",
+            "galaxy.change_containerregistryremote",
+            "galaxy.delete_containerregistryremote",
+        ],
+        "description": "Manage all content types."
+    },
+
+    # COLLECTIONS
     "galaxy.collection_admin": {
         "permissions": [
             "galaxy.add_namespace",
@@ -34,6 +59,31 @@ LOCKED_ROLES = {
             "Upload and delete collections. Sync collections from remotes. "
             "Approve and reject collections.")
     },
+    "galaxy.collection_publisher": {
+        "permissions": [
+            "galaxy.add_namespace",
+            "galaxy.change_namespace",
+            "galaxy.upload_to_namespace",
+        ],
+        "description": "Upload and modify collections."
+    },
+    "galaxy.collection_curator": {
+        "permissions": [
+            "ansible.change_collectionremote",
+            "ansible.view_collectionremote",
+            "ansible.modify_ansible_repo_content",
+        ],
+        "description": "Approve, reject and sync collections from remotes.",
+    },
+    "galaxy.collection_namespace_owner": {
+        "permissions": [
+            "galaxy.change_namespace",
+            "galaxy.upload_to_namespace",
+        ],
+        "description": "Change and upload collections to namespaces."
+    },
+
+    # EXECUTION ENVIRONMENTS
     "galaxy.execution_environment_admin": {
         "permissions": [
             "container.delete_containerrepository",
@@ -42,6 +92,7 @@ LOCKED_ROLES = {
             "container.namespace_push_containerdistribution",
             "container.add_containernamespace",
             "container.change_containernamespace",
+            # "container.namespace_add_containerdistribution",
             "galaxy.add_containerregistryremote",
             "galaxy.change_containerregistryremote",
             "galaxy.delete_containerregistryremote",
@@ -50,13 +101,24 @@ LOCKED_ROLES = {
             "Push, delete, and change execution environments. "
             "Create, delete and change remote registries.")
     },
+    "galaxy.execution_environment_publisher": {
+        "permissions": [
+            "container.namespace_change_containerdistribution",
+            "container.namespace_modify_content_containerpushrepository",
+            "container.namespace_push_containerdistribution",
+            "container.add_containernamespace",
+            "container.change_containernamespace",
+            # "container.namespace_add_containerdistribution",
+        ],
+        "description": "Push, and change execution environments."
+    },
     "galaxy.execution_environment_namespace_owner": {
         "permissions": [
             "container.change_containernamespace",
             "container.namespace_push_containerdistribution",
             "container.namespace_change_containerdistribution",
             "container.namespace_modify_content_containerpushrepository",
-            "container.namespace_add_containerdistribution",
+            # "container.namespace_add_containerdistribution",
         ],
         "description": (
             "Create and update execution environments under existing "
@@ -70,26 +132,8 @@ LOCKED_ROLES = {
         ],
         "description": "Change existing execution environments."
     },
-    "galaxy.content_admin": {
-        "permissions": [
-            "ansible.modify_ansible_repo_content",
-        ],
-        "description": "Approve and reject collections."
-    },
-    "galaxy.namespace_owner": {
-        "permissions": [
-            "galaxy.change_namespace",
-            "galaxy.upload_to_namespace",
-        ],
-        "description": "Change and upload collections to namespaces."
-    },
-    "galaxy.publisher": {
-        "permissions": [
-            "galaxy.upload_to_namespace",
-            "ansible.delete_collection",
-        ],
-        "description": "Upload and delete collections."
-    },
+
+    # ADMIN STUFF
     "galaxy.group_admin": {
         "permissions": [
             "galaxy.view_group",
@@ -126,7 +170,6 @@ LOCKED_ROLES = {
         "description": "View, and cancel any task."
     },
 }
-
 
 
 class TestMigratingPermissionsToRoles(TestCase):
@@ -192,6 +235,7 @@ class TestMigratingPermissionsToRoles(TestCase):
             for perm in permissions:
                 self.assertTrue(user.has_perm(perm))
 
+            print(role)
             self.assertEqual(GroupRole.objects.filter(group=group).count(), 1)
             self.assertTrue(self._has_role(group, role))
 
@@ -200,7 +244,7 @@ class TestMigratingPermissionsToRoles(TestCase):
         permissions_to_add = \
             LOCKED_ROLES["galaxy.collection_admin"]["permissions"] + \
             LOCKED_ROLES["galaxy.execution_environment_admin"]["permissions"] + \
-            LOCKED_ROLES["galaxy.namespace_owner"]["permissions"] + \
+            LOCKED_ROLES["galaxy.collection_namespace_owner"]["permissions"] + \
             ["galaxy.view_user", "core.view_task"]
 
         user, group = self._create_user_and_group_with_permissions("test", permissions_to_add)
@@ -215,9 +259,9 @@ class TestMigratingPermissionsToRoles(TestCase):
         for perm in permissions_to_add:
             self.assertTrue(user.has_perm(perm))
 
+        # content_admin contains perms for collection and EE admin
         expected_roles = [
-            "galaxy.collection_admin",
-            "galaxy.execution_environment_admin",
+            "galaxy.content_admin",
             "_permission:galaxy.view_user",
             "_permission:core.view_task",
         ]
@@ -246,7 +290,7 @@ class TestMigratingPermissionsToRoles(TestCase):
             obj=container_namespace
         )
 
-        ns_roles = ["galaxy.namespace_owner"]
+        ns_roles = ["galaxy.collection_namespace_owner"]
         c_ns_roles = [
             "galaxy.execution_environment_namespace_owner",
             "galaxy.execution_environment_collaborator"]
@@ -288,7 +332,7 @@ class TestMigratingPermissionsToRoles(TestCase):
             self.assertTrue(self._has_role(group, role, obj=container_namespace))
     
         # Verify super permissions work
-        self.assertTrue(self._has_role(namespace_super_group, "galaxy.namespace_owner", namespace))
+        self.assertTrue(self._has_role(namespace_super_group, "galaxy.collection_namespace_owner", namespace))
         self.assertTrue(
             self._has_role(
                 container_namespace_super_group,
@@ -316,3 +360,12 @@ class TestMigratingPermissionsToRoles(TestCase):
             ).exists()
 
         self.assertTrue(has_role)
+
+
+    def test_empty_groups(self):
+        user, group = self._create_user_and_group_with_permissions("test", [])
+
+        self._run_migrations()
+        
+        self.assertEqual(UserRole.objects.filter(user=user).count(), 0)
+        self.assertEqual(GroupRole.objects.filter(group=group).count(), 0)

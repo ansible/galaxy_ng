@@ -35,7 +35,7 @@ def test_group_role_listing(ansible_config):
         "groups": [
             {
                 "name": f"{group_response['name']}",
-                "object_roles": ["galaxy.namespace_owner"],
+                "object_roles": ["galaxy.collection_namespace_owner"],
             }
         ],
     }
@@ -48,5 +48,5 @@ def test_group_role_listing(ansible_config):
         f'/pulp/api/v3/groups/{group_response["id"]}/roles/', method="GET"
     )
     assert group_roles_response["count"] == 1
-    assert group_roles_response["results"][0]["role"] == "galaxy.namespace_owner"
+    assert group_roles_response["results"][0]["role"] == "galaxy.collection_namespace_owner"
     assert f'/groups/{group_response["id"]}/' in group_roles_response["results"][0]["pulp_href"]

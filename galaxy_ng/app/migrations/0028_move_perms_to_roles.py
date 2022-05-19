@@ -8,7 +8,7 @@ OBJECT_PERMISSION_TRANSLATOR = [
         ("container", "namespace_push_containerdistribution"),
         ("container", "namespace_change_containerdistribution"),
         ("container", "namespace_modify_content_containerpushrepository"),
-        ("container", "namespace_add_containerdistribution")
+        ("container", "namespace_add_containerdistribution"),
     ), "galaxy.execution_environment_namespace_owner"),
     ((
         ("container", "namespace_push_containerdistribution"),
@@ -18,7 +18,7 @@ OBJECT_PERMISSION_TRANSLATOR = [
     ((
         ("galaxy", "change_namespace"),
         ("galaxy", "upload_to_namespace"),
-    ), "galaxy.namespace_owner"),
+    ), "galaxy.collection_namespace_owner"),
     ((
         ("galaxy", "add_synclist"),
         ("galaxy", "change_synclist"),
@@ -37,7 +37,45 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("ansible", "change_collectionremote"),
         ("ansible", "view_collectionremote"),
         ("ansible", "modify_ansible_repo_content"),
+        ("container", "delete_containerrepository"),
+        ("container", "namespace_change_containerdistribution"),
+        ("container", "namespace_modify_content_containerpushrepository"),
+        ("container", "namespace_push_containerdistribution"),
+        ("container", "add_containernamespace"),
+        ("container", "change_containernamespace"),
+        # ("container", "namespace_add_containerdistribution"),
+        ("galaxy", "add_containerregistryremote"),
+        ("galaxy", "change_containerregistryremote"),
+        ("galaxy", "delete_containerregistryremote"),
+    ), "galaxy.content_admin"),
+
+    # COLLECTIONS
+    ((
+        ("galaxy", "add_namespace"),
+        ("galaxy", "change_namespace"),
+        ("galaxy", "delete_namespace"),
+        ("galaxy", "upload_to_namespace"),
+        ("ansible", "delete_collection"),
+        ("ansible", "change_collectionremote"),
+        ("ansible", "view_collectionremote"),
+        ("ansible", "modify_ansible_repo_content"),
     ), "galaxy.collection_admin"),
+    ((
+    ("galaxy", "add_namespace"),
+    ("galaxy", "change_namespace"),
+    ("galaxy", "upload_to_namespace"),
+    ), "galaxy.collection_publisher"),
+    ((
+        ("ansible", "change_collectionremote"),
+        ("ansible", "view_collectionremote"),
+        ("ansible", "modify_ansible_repo_content"),
+    ), "galaxy.collection_curator"),
+    ((
+        ("galaxy", "change_namespace"),
+        ("galaxy", "upload_to_namespace"),
+    ), "galaxy.collection_namespace_owner"),
+
+    # EXECUTION ENVIRONMENTS
     ((
         ("container", "delete_containerrepository"),
         ("container", "namespace_change_containerdistribution"),
@@ -45,22 +83,26 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("container", "namespace_push_containerdistribution"),
         ("container", "add_containernamespace"),
         ("container", "change_containernamespace"),
-
-        # excluding this because it wasn't needed for global permissions, but is
-        # needed for object permissions
-        # ("container", "namespace_add_containerdistribution")
-
-        # registries
+        # Excluding this because it's only used for object assignment, not model
+        # ("container", "namespace_add_containerdistribution"),
         ("galaxy", "add_containerregistryremote"),
         ("galaxy", "change_containerregistryremote"),
         ("galaxy", "delete_containerregistryremote"),
     ), "galaxy.execution_environment_admin"),
     ((
+        ("container", "namespace_change_containerdistribution"),
+        ("container", "namespace_modify_content_containerpushrepository"),
+        ("container", "namespace_push_containerdistribution"),
+        ("container", "add_containernamespace"),
+        ("container", "change_containernamespace"),
+        # ("container", "namespace_add_containerdistribution"),
+    ), "galaxy.execution_environment_publisher"),
+    ((
         ("container", "change_containernamespace"),
         ("container", "namespace_push_containerdistribution"),
         ("container", "namespace_change_containerdistribution"),
         ("container", "namespace_modify_content_containerpushrepository"),
-        ("container", "namespace_add_containerdistribution")
+        # ("container", "namespace_add_containerdistribution"),
     ), "galaxy.execution_environment_namespace_owner"),
     ((
         ("container", "namespace_push_containerdistribution"),
@@ -70,14 +112,8 @@ GLOBAL_PERMISSION_TRANSLATOR = [
     ((
         ("ansible", "modify_ansible_repo_content"),
     ), "galaxy.content_admin"),
-    ((
-        ("galaxy", "change_namespace"),
-        ("galaxy", "upload_to_namespace"),
-    ), "galaxy.namespace_owner"),
-    ((
-        ("galaxy", "upload_to_namespace"),
-        ("ansible", "delete_collection"),
-    ), "galaxy.publisher"),
+
+    # ADMIN STUFF
     ((
         ("galaxy", "view_group"),
         ("galaxy", "delete_group"),
@@ -221,8 +257,9 @@ def get_object_group_permissions(group, Role, GroupRole, ContentType, Permission
             Role,
             Permission,
             super_permissions={
-                "galaxy.execution_environment_namespace_owner": ("container", "change_containernamespace"),
-                "galaxy.namespace_owner": ("galaxy", "change_namespace")
+                "galaxy.execution_environment_namespace_owner":
+                    ("container", "change_containernamespace"),
+                "galaxy.collection_namespace_owner": ("galaxy", "change_namespace"),
             }
         )
 
@@ -254,7 +291,7 @@ def add_object_role_for_users_with_permission(role, permission, UserRole, Conten
                 user=User.objects.get(pk=user_id),
                 content_type=ContentType.objects.get(pk=content_type_id),
                 object_id=object_pk
-            ))
+            )),
             batch_create(UserRole, user_roles)
 
     # Create any remaining roles
@@ -278,19 +315,19 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
         - galaxy.view_user
         
     The following roles would get applied:
-        - galaxy.namespace_owner
+        - galaxy.collection_namespace_owner
         - _permission:galaxy.view_group
         - _permission:galaxy.view_user
 
-    galaxy.namespace_owner is applied because the user has all the permissions that match it.
-    After applying galaxy.namespace_owner, the view_group and view_group permissions are left 
+    galaxy.collection_namespace_owner is applied because the user has all the permissions that match it.
+    After applying galaxy.collection_namespace_owner, the view_group and view_group permissions are left 
     over so _permission:galaxy.view_group and _permission:galaxy.view_user are created for each
     missing permission and added to the group. _permision:<perm_name> roles will only have the
     a single permission in them for <perm_name>.
 
     Users with the ability to change the ownership of objects are given admin roles. For example
     if my group has galaxy.change_namespace permissions on namespace foo, but nothing else, give
-    them the galaxy.namespace_owner role because they can already escalate their permissions.
+    them the galaxy.collection_namespace_owner role because they can already escalate their permissions.
     """
     Group = apps.get_model("galaxy", "Group")
     GroupRole = apps.get_model("core", "GroupRole")

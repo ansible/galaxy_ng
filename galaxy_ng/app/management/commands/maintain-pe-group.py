@@ -29,7 +29,7 @@ class Command(BaseCommand):
             'galaxy.group_admin',
             'galaxy.user_admin',
             'galaxy.collection_admin',
-            'galaxy.namespace_owner',
+            'galaxy.collection_namespace_owner',
             'galaxy.content_admin',
         ]
 
