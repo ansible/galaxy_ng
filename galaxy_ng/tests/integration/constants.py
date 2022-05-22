@@ -17,5 +17,3 @@ DEFAULT_DISTROS = {
     'rh-certified': {'basepath': 'rh-certified'},
     'staging': {'basepath': 'staging'}
 }
-
-

@@ -100,11 +100,11 @@ schema_settings = {
         'GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS': {'type': 'boolean'},
         'GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD': {'type': 'boolean'},
         'GALAXY_FEATURE_FLAGS': {'type': 'object'},
-        'GALAXY_MINIMUM_PASSWORD_LENGTH': {'type': ['number', 'null']}, #FIXME
+        'GALAXY_MINIMUM_PASSWORD_LENGTH': {'type': ['number', 'null']},  # FIXME
         'GALAXY_REQUIRE_CONTENT_APPROVAL': {'type': 'boolean'},
         'GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL': {'type': 'boolean'},
         'GALAXY_SIGNATURE_UPLOAD_ENABLED': {'type': 'boolean'},
-        'GALAXY_TOKEN_EXPIRATION': {'type': ['number', 'null']}, #FIXME
+        'GALAXY_TOKEN_EXPIRATION': {'type': ['number', 'null']},  # FIXME
     }
 }
 
@@ -239,7 +239,7 @@ schema_collectionversion = {
         'metadata',
         'name',
         'namespace',
-        #'repository_list',
+        # 'repository_list',
         'requires_ansible',
         'sign_state',
         'version',
