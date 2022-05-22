@@ -44,7 +44,7 @@ Example using environment variables:
 
 
 Authentication class and deployment mode by default is already set tho the following values, 
-You don't need to change it, just confirm this is the setting you have in place.
+You don't need to change it, **just confirm this is the setting you have in place.**
 
 ```bash
 PULP_GALAXY_AUTHENTICATION_CLASSES=['rest_framework.authentication.SessionAuthentication','rest_framework.authentication.TokenAuthentication','rest_framework.authentication.BasicAuthentication']
@@ -58,10 +58,11 @@ https://docs.pulpproject.org/pulp_container/authentication.html
 PULP_TOKEN_AUTH_DISABLED=true
 ```
 
-`django_auth_ldap` must be included as the first authentication backend.
+`django_auth_ldap` must be included as the first authentication backend, there is a preset called
+`ldap` (you can set it to `custom` if you really want to override `PULP_AUTHENTICATION_BACKENDS` variable)
 
 ```bash
-PULP_AUTHENTICATION_BACKENDS=["django_auth_ldap.backend.LDAPBackend","django.contrib.auth.backends.ModelBackend","guardian.backends.ObjectPermissionBackend","pulpcore.backends.ObjectRolePermissionBackend"]
+PULP_AUTHENTICATION_BACKEND_PRESET=ldap
 ```
 
 Specific django_auth_ldap settings
@@ -128,7 +129,7 @@ PULP_GALAXY_LDAP_LOGGING=true
 Cache
 
 ```bash
-# Change the caching lifetime (for groups and users search)
+# Change the caching lifetime in seconds (for groups and users search)
 PULP_AUTH_LDAP_CACHE_TIMEOUT=3600
 ```
 
