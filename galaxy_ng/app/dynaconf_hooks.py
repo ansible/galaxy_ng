@@ -1,8 +1,10 @@
 import json
-import ldap
 import os
 from typing import Any, Dict, List
-from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+
+import ldap
+import pkg_resources
+from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
 
 
@@ -359,6 +361,13 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
         "SUBTREE": ldap.SCOPE_SUBTREE,
     }
 
+    global_options = settings.get("AUTH_LDAP_GLOBAL_OPTIONS", default={})
+
+    if settings.get("GALAXY_LDAP_SELF_SIGNED_CERT"):
+        global_options[ldap.OPT_X_TLS_REQUIRE_CERT] = ldap.OPT_X_TLS_NEVER
+
+    data["AUTH_LDAP_GLOBAL_OPTIONS"] = global_options
+
     # Add settings if LDAP Auth values are provided
     if all(
         [
@@ -373,6 +382,9 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
             AUTH_LDAP_GROUP_SEARCH_FILTER,
         ]
     ):
+        # The following is exposed on UI settings API to be uses as a feature flag for testing.
+        data["GALAXY_AUTH_LDAP_ENABLED"] = True
+
         user_scope = AUTH_LDAP_SCOPE_MAP.get(AUTH_LDAP_USER_SEARCH_SCOPE, ldap.SCOPE_SUBTREE)
         data["AUTH_LDAP_USER_SEARCH"] = LDAPSearch(AUTH_LDAP_USER_SEARCH_BASE_DN,
                                                    user_scope,
@@ -384,13 +396,34 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
             AUTH_LDAP_GROUP_SEARCH_FILTER
         )
 
-        data["AUTH_LDAP_GROUP_TYPE"] = GroupOfNamesType(name_attr="cn")
+        # Depending on the LDAP server the following might need to be changed
+        # options: https://django-auth-ldap.readthedocs.io/en/latest/groups.html#types-of-groups
+        # default is set to GroupOfNamesType
+        # data["AUTH_LDAP_GROUP_TYPE"] = GroupOfNamesType(name_attr="cn")
+        # export PULP_AUTH_LDAP_GROUP_TYPE_CLASS="django_auth_ldap.config:GroupOfNamesType"
+        if classpath := settings.get(
+            "AUTH_LDAP_GROUP_TYPE_CLASS",
+            default="django_auth_ldap.config:GroupOfNamesType"
+        ):
+            group_type_class = pkg_resources.EntryPoint.parse(
+                f"__name = {classpath}"
+            ).resolve()
+            data["AUTH_LDAP_GROUP_TYPE"] = group_type_class(name_attr="cn")
 
         if isinstance(AUTH_LDAP_USER_ATTR_MAP, str):
             try:
                 data["AUTH_LDAP_USER_ATTR_MAP"] = json.loads(AUTH_LDAP_USER_ATTR_MAP)
             except Exception:
                 data["AUTH_LDAP_USER_ATTR_MAP"] = {}
+
+        if settings.get("GALAXY_LDAP_LOGGING"):
+            data["LOGGING"] = {
+                "dynaconf_merge": True,
+                "version": 1,
+                "disable_existing_loggers": False,
+                "handlers": {"console": {"class": "logging.StreamHandler"}},
+                "loggers": {"django_auth_ldap": {"level": "DEBUG", "handlers": ["console"]}},
+            }
 
     return data
 

@@ -56,7 +56,7 @@ export PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true
 ```
 
 !!! tip
-    Pulp uses [dynaconf](dynaconf.com) to manage its settings, so environment variables have its
+    Pulp uses [dynaconf](http://dynaconf.com) to manage its settings, so environment variables have its
     data types inferred, for example: `PULP_NUMBER=4.2` will be available under `django.conf.settings.NUMBER` 
     as a value of type `float`, if you need to force a string enclose on quotes. `PULP_TEXT='4.2'`
 
