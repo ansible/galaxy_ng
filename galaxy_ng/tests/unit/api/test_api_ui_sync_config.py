@@ -8,7 +8,7 @@ from pulp_ansible.app.models import (
     CollectionRemote
 )
 from galaxy_ng.app.constants import DeploymentMode
-from .synclist_base import BaseSyncListViewSet
+from .base import BaseTestCase
 
 log = logging.getLogger(__name__)
 
@@ -26,16 +26,13 @@ def _create_remote(name, url, **kwargs):
 
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
-class TestUiSyncConfigViewSet(BaseSyncListViewSet):
+class TestUiSyncConfigViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
 
         self.admin_user = self._create_user("admin")
-        self.sync_group = self._create_group_with_synclist_perms(
-            scope=None,
-            name="sync_group",
-            users=self.admin_user
-        )
+        self.sync_group = self._create_group(
+            "", "admins", self.admin_user, ["galaxy.collection_admin"])
         self.admin_user.save()
 
         # Remotes are created by data migration
