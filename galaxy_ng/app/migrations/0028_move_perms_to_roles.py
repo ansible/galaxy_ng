@@ -61,9 +61,9 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("ansible", "modify_ansible_repo_content"),
     ), "galaxy.collection_admin"),
     ((
-    ("galaxy", "add_namespace"),
-    ("galaxy", "change_namespace"),
-    ("galaxy", "upload_to_namespace"),
+        ("galaxy", "add_namespace"),
+        ("galaxy", "change_namespace"),
+        ("galaxy", "upload_to_namespace"),
     ), "galaxy.collection_publisher"),
     ((
         ("ansible", "change_collectionremote"),
@@ -109,9 +109,6 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("container", "namespace_change_containerdistribution"),
         ("container", "namespace_modify_content_containerpushrepository"),
     ), "galaxy.execution_environment_collaborator"),
-    ((
-        ("ansible", "modify_ansible_repo_content"),
-    ), "galaxy.content_admin"),
 
     # ADMIN STUFF
     ((
