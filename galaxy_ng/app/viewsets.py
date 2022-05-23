@@ -52,10 +52,11 @@ class AuthViewSet(
 
 class NamespaceViewSet(
     pulp_viewsets.NamedModelViewSet,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
+    mixins.ListModelMixin
+    # mixins.RetrieveModelMixin,
+    # mixins.DestroyModelMixin,
 ):
     queryset = models.Namespace.objects.all()
     serializer_class = NamespaceSerializer
     permission_classes = [access_policy.NamespaceAccessPolicy]
-    endpoint_name = "namespace"
+    endpoint_name = "galaxy-ng/collection-namespaces"
