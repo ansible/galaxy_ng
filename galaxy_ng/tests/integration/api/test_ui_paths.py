@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import random
+import time
+
 import pytest
 from jsonschema import validate as validate_json
 
@@ -19,7 +21,10 @@ from ..schemas import (
     schema_collectionversion,
     schema_collectionversion_metadata,
     schema_collection_import,
-    schema_collection_import_detail
+    schema_collection_import_detail,
+    schema_ee_registry,
+    schema_task,
+    schema_task_detail,
 )
 
 
@@ -150,10 +155,109 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 
 # /api/automation-hub/_ui/v1/execution-environments/namespaces/
 # /api/automation-hub/_ui/v1/execution-environments/namespaces/{name}/
+
+
 # /api/automation-hub/_ui/v1/execution-environments/registries/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+@pytest.mark.testme
+def test_api_ui_v1_execution_environments_registries(ansible_config):
+
+    cfg = ansible_config('ansible_partner')
+    with UIClient(config=cfg) as uclient:
+
+        # get the response
+        resp = uclient.get('_ui/v1/execution-environments/registries/')
+        assert resp.status_code == 200
+
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_objectlist)
+
+        # try to create one
+        suffix = random.choice(range(0,1000))
+        rname = f'redhat.io.{suffix}'
+        payload = {
+            'name': rname,
+            'url': 'https://registry.redhat.io',
+        }
+        resp = uclient.post('_ui/v1/execution-environments/registries/', payload=payload)
+        assert resp.status_code == 201
+        rds = resp.json()
+        validate_json(instance=rds, schema=schema_ee_registry)
+
+        # try to get it by pulp_id
+        resp = uclient.get(f"_ui/v1/execution-environments/registries/{rds['pk']}/")
+        assert resp.status_code == 200
+        rds = resp.json()
+        validate_json(instance=rds, schema=schema_ee_registry)
+
+        # sync it
+        resp = uclient.post(f"_ui/v1/execution-environments/registries/{rds['pk']}/sync/", payload={})
+        assert resp.status_code == 202
+        task = resp.json()
+        validate_json(instance=task, schema=schema_task)
+
+        # wait for sync to finish
+        counter = 0
+        state = None
+        while state in [None, 'waiting', 'running']:
+            counter += 1
+            if counter >= 60:
+                raise Exception('ee registry sync task is taking too long')
+            resp = uclient.get(absolute_url=task['task'])
+            assert resp.status_code == 200
+            ds = resp.json()
+            validate_json(instance=ds, schema=schema_task_detail)
+            state = ds['state']
+            if state == 'completed':
+                break
+            time.sleep(.5)
+        assert state == 'completed'
+
+        # index it
+        resp = uclient.post(f"_ui/v1/execution-environments/registries/{rds['pk']}/index/", payload={})
+        assert resp.status_code == 202
+        task = resp.json()
+        validate_json(instance=task, schema=schema_task)
+
+        # wait for index to finish
+        counter = 0
+        state = None
+        while state in [None, 'waiting', 'running']:
+            counter += 1
+            if counter >= 60:
+                raise Exception('ee registry index task is taking too long')
+            resp = uclient.get(absolute_url=task['task'])
+            assert resp.status_code == 200
+            ds = resp.json()
+            validate_json(instance=ds, schema=schema_task_detail)
+            state = ds['state']
+            if state == 'completed':
+                break
+            time.sleep(.5)
+        assert state == 'completed'
+
+        # delete the registry
+        resp = uclient.delete(f"_ui/v1/execution-environments/registries/{rds['pk']}/")
+        assert resp.status_code == 204
+
+        # make sure it's gone
+        resp = uclient.get(f"_ui/v1/execution-environments/registries/{rds['pk']}/")
+        assert resp.status_code == 404
+
+
 # /api/automation-hub/_ui/v1/execution-environments/registries/{pulp_id}/
+# ^ tested by previous function
+
+
 # /api/automation-hub/_ui/v1/execution-environments/registries/{id}/index/
+# ^ tested by previous function
+
+
 # /api/automation-hub/_ui/v1/execution-environments/registries/{id}/sync/
+# ^ tested by previous function
+
+
 # /api/automation-hub/_ui/v1/execution-environments/remotes/
 # /api/automation-hub/_ui/v1/execution-environments/remotes/{pulp_id}/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/

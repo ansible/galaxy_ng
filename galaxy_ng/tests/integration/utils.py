@@ -17,6 +17,7 @@ import uuid
 from contextlib import contextmanager
 from subprocess import PIPE, run
 from urllib.parse import urljoin
+from urllib.parse import urlparse
 
 from ansible import context
 from ansible.galaxy.api import GalaxyAPI, GalaxyError
@@ -656,7 +657,7 @@ class UIClient:
             if res.status_code != expected_code:
                 raise Exception(f'logout status code was not {expected_code}')
 
-    def get(self, relative_url: str) -> requests.models.Response:
+    def get(self, relative_url: str=None, absolute_url: str=None) -> requests.models.Response:
 
         pheaders = {
             'Accept': 'application/json',
@@ -671,8 +672,15 @@ class UIClient:
                 cookie.append(f"sessionid={self.cookies['sessionid']}")
             pheaders['Cookie'] = '; '.join(cookie)
 
+        this_url = None
+        if absolute_url:
+            uri = urlparse(self.baseurl)
+            this_url = f"{uri.scheme}://{uri.netloc}{absolute_url}"
+        else:
+            this_url = self.baseurl + relative_url
+
         # get the response
-        resp = self._rs.get(self.baseurl + relative_url, headers=pheaders)
+        resp = self._rs.get(this_url, headers=pheaders)
         return resp
 
     def post(self, relative_url: str, payload: dict) -> requests.models.Response:
@@ -694,3 +702,24 @@ class UIClient:
         # get the response
         resp = self._rs.post(self.baseurl + relative_url, json=payload, headers=pheaders)
         return resp
+
+    def delete(self, relative_url: str) -> requests.models.Response:
+        pheaders = {
+            'Accept': 'application/json',
+        }
+
+        # send cookies whenever possible ...
+        if self.cookies is not None:
+            cookie = []
+            if self.cookies.get('csrftoken'):
+                pheaders['X-CSRFToken'] = self.cookies['csrftoken']
+                cookie.append(f"csrftoken={self.cookies['csrftoken']}")
+            if self.cookies.get('sessionid'):
+                cookie.append(f"sessionid={self.cookies['sessionid']}")
+            pheaders['Cookie'] = '; '.join(cookie)
+
+        # get the response
+        resp = self._rs.delete(self.baseurl + relative_url, headers=pheaders)
+        return resp
+
+

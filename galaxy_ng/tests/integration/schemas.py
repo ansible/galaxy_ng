@@ -348,3 +348,97 @@ schema_collection_import_detail = {
         'version': {'type': 'string'},
     }
 }
+
+
+schema_ee_registry = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': [
+        'ca_cert',
+        'client_cert',
+        'created_at',
+        'download_concurrency',
+        'is_indexable',
+        'last_sync_task',
+        'name',
+        'pk',
+        'policy',
+        'proxy_url',
+        'rate_limit',
+        'tls_validation',
+        'updated_at',
+        'url',
+        'write_only_fields',
+    ],
+    'properties': {
+        'ca_cert': {'type': ['string', 'null']},
+        'client_cert': {'type': ['string', 'null']},
+        'created_at': {'type': 'string'},
+        'download_concurrency': {'type': ['number', 'null']},
+        'is_indexable': {'type': 'boolean'},
+        'last_sync_task': {'type': 'object'},
+        'name': {'type': 'string'},
+        'pk': {'type': 'string'},
+        'policy': {'type': 'string'},
+        'proxy_url': {'type': ['string', 'null']},
+        'rate_limit': {'type': ['number', 'null']},
+        'tls_validation': {'type': 'boolean'},
+        'updated_at': {'type': 'string'},
+        'url': {'type': 'string'},
+        'write_only_fields': {'type': 'array'},
+    }
+}
+
+
+schema_task = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': [
+        'task',
+    ],
+    'properties': {
+        'task': {'type': 'string'},
+    }
+}
+
+
+schema_task_detail = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': [
+        'child_tasks',
+        'created_resources',
+        'error',
+        'finished_at',
+        'logging_cid',
+        'name',
+        'parent_task',
+        'progress_reports',
+        'pulp_created',
+        'pulp_href',
+        'reserved_resources_record',
+        'started_at',
+        'state',
+        'task_group',
+        'worker'
+    ],
+    'properties': {
+        'child_tasks': {'type': 'array'},
+        'child_tasks': {'type': 'array'},
+        'error': {'type': ['object', 'null']},
+        'finished_at': {'type': ['string', 'null']},
+        'logging_cid': {'type': 'string'},
+        'name': {'type': 'string'},
+        'parent_task': {'type': ['string', 'null']},
+        'progress_reports': {'type': 'array'},
+        'pulp_created': {'type': 'string'},
+        'pulp_href': {'type': 'string'},
+        'reserved_resources_record': {'type': 'array'},
+        'started_at': {'type': ['string', 'null']},
+        'state': {'type': 'string'},
+        'task_group': {'type': ['string', 'null']},
+        'worker': {'type': ['string', 'null']},
+    }
+}
+
+
