@@ -336,7 +336,7 @@ schema_collection_import_detail = {
     ],
     'properties': {
         'created_at': {'type': 'string'},
-        'error': {'type': ['string', 'null']},
+        'error': {'type': ['object', 'null']},
         'finished_at': {'type': 'string'},
         'messages': {'type': 'array'},
         'id': {'type': 'string'},
