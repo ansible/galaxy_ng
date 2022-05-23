@@ -160,7 +160,6 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/execution-environments/registries/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
-@pytest.mark.testme
 def test_api_ui_v1_execution_environments_registries(ansible_config):
 
     cfg = ansible_config('ansible_partner')
@@ -324,8 +323,92 @@ def test_api_ui_v1_groups(ansible_config):
 
 # /api/automation-hub/_ui/v1/groups/{group_pk}/model-permissions/
 # /api/automation-hub/_ui/v1/groups/{group_pk}/model-permissions/{id}/
+
+
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_groups_users(ansible_config):
+
+    cfg = ansible_config('ansible_partner')
+    with UIClient(config=cfg) as uclient:
+        resp = uclient.get('_ui/v1/groups/')
+        assert resp.status_code == 200
+        groups_ds = resp.json()
+        validate_json(instance=groups_ds, schema=schema_objectlist)
+
+        # get the primary key for PE
+        pe_id = None
+        for x in groups_ds['data']:
+            if x['name'] == 'system:partner-engineers':
+                pe_id = x['id']
+                break
+        assert pe_id is not None
+
+        # validate the pe user is in the group's userlist
+        resp = uclient.get(f'_ui/v1/groups/{pe_id}/users/')
+        assert resp.status_code == 200
+        users_ds = resp.json()
+        validate_json(instance=users_ds, schema=schema_objectlist)
+        assert cfg.get('username') in [x['username'] for x in users_ds['data']]
+
+
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/{id}/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+@pytest.mark.testme
+def test_api_ui_v1_groups_users_add_delete(ansible_config):
+
+    cfg = ansible_config('ansible_partner')
+    with UIClient(config=cfg) as uclient:
+
+        suffix = random.choice(range(0, 1000))
+        group_name = f'group{suffix}'
+        user_name = f'user{suffix}'
+
+        # make the group
+        resp = uclient.post('_ui/v1/groups/', payload={'name': group_name})
+        assert resp.status_code == 201
+        group_ds = resp.json()
+        validate_json(instance=group_ds, schema=schema_group)
+        group_id = group_ds['id']
+
+        # make the user
+        resp = uclient.post(
+            '_ui/v1/users/',
+            payload={
+                'username': user_name,
+                'first_name': 'foo',
+                'last_name': 'bar',
+                'email': 'foo@barz.com',
+                'groups': [group_ds],
+                'password': 'abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-+',
+                'is_superuser': False
+            }
+        )
+        assert resp.status_code == 201
+        user_ds = resp.json()
+        validate_json(instance=user_ds, schema=schema_user)
+
+        # validate the new user is in the group's userlist
+        resp = uclient.get(f'_ui/v1/groups/{group_id}/users/')
+        assert resp.status_code == 200
+        users_ds = resp.json()
+        validate_json(instance=users_ds, schema=schema_objectlist)
+        assert user_name in [x['username'] for x in users_ds['data']]
+
+        # remove the user from the group
+        user_id = user_ds['id']
+        resp = uclient.delete(f'_ui/v1/groups/{group_id}/users/{user_id}/')
+        assert resp.status_code == 204
+        assert resp.text == ''
+
+        # validate the new user is NOT in the group's userlist
+        resp = uclient.get(f'_ui/v1/groups/{group_id}/users/')
+        assert resp.status_code == 200
+        users_ds = resp.json()
+        validate_json(instance=users_ds, schema=schema_objectlist)
+        assert user_name not in [x['username'] for x in users_ds['data']]
 
 
 # /api/automation-hub/_ui/v1/groups/{id}/
