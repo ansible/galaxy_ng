@@ -657,7 +657,7 @@ class UIClient:
             if res.status_code != expected_code:
                 raise Exception(f'logout status code was not {expected_code}')
 
-    def get(self, relative_url: str=None, absolute_url: str=None) -> requests.models.Response:
+    def get(self, relative_url: str = None, absolute_url: str = None) -> requests.models.Response:
 
         pheaders = {
             'Accept': 'application/json',
@@ -721,5 +721,3 @@ class UIClient:
         # get the response
         resp = self._rs.delete(self.baseurl + relative_url, headers=pheaders)
         return resp
-
-

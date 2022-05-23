@@ -424,7 +424,7 @@ schema_task_detail = {
     ],
     'properties': {
         'child_tasks': {'type': 'array'},
-        'child_tasks': {'type': 'array'},
+        'created_resources': {'type': 'array'},
         'error': {'type': ['object', 'null']},
         'finished_at': {'type': ['string', 'null']},
         'logging_cid': {'type': 'string'},
@@ -440,5 +440,3 @@ schema_task_detail = {
         'worker': {'type': ['string', 'null']},
     }
 }
-
-

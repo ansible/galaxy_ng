@@ -174,7 +174,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=ds, schema=schema_objectlist)
 
         # try to create one
-        suffix = random.choice(range(0,1000))
+        suffix = random.choice(range(0, 1000))
         rname = f'redhat.io.{suffix}'
         payload = {
             'name': rname,
@@ -192,7 +192,10 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=rds, schema=schema_ee_registry)
 
         # sync it
-        resp = uclient.post(f"_ui/v1/execution-environments/registries/{rds['pk']}/sync/", payload={})
+        resp = uclient.post(
+            f"_ui/v1/execution-environments/registries/{rds['pk']}/sync/",
+            payload={}
+        )
         assert resp.status_code == 202
         task = resp.json()
         validate_json(instance=task, schema=schema_task)
@@ -215,7 +218,10 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         assert state == 'completed'
 
         # index it
-        resp = uclient.post(f"_ui/v1/execution-environments/registries/{rds['pk']}/index/", payload={})
+        resp = uclient.post(
+            f"_ui/v1/execution-environments/registries/{rds['pk']}/index/",
+            payload={}
+        )
         assert resp.status_code == 202
         task = resp.json()
         validate_json(instance=task, schema=schema_task)
