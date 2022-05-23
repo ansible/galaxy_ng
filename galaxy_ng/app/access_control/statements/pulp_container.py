@@ -133,7 +133,7 @@ PULP_CONTAINER_VIEWSETS = {
                 "function": "add_roles_for_object_creator",
                 "parameters": {
                     "roles": [
-                        "container.containernamespace_owner",
+                        "galaxy.execution_environment_namespace_owner",
                     ],
                 },
             }
