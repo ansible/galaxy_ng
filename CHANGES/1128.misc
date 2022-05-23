@@ -1,0 +1,1 @@
+Migration to move Permissions from Groups to custom Roles, filtering against Galaxy locked Roles where applicable
