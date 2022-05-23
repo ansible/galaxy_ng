@@ -289,3 +289,62 @@ schema_collectionversion_metadata = {
         'tags': {'type': 'array'},
     }
 }
+
+
+schema_collection_import = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': [
+        'created_at',
+        'finished_at',
+        'id',
+        'name',
+        'namespace',
+        'started_at',
+        'state',
+        'updated_at',
+        'version'
+    ],
+    'properties': {
+        'created_at': {'type': 'string'},
+        'finished_at': {'type': 'string'},
+        'id': {'type': 'string'},
+        'name': {'type': 'string'},
+        'namespace': {'type': 'string'},
+        'started_at': {'type': 'string'},
+        'state': {'type': 'string'},
+        'updated_at': {'type': 'string'},
+        'version': {'type': 'string'},
+    }
+}
+
+
+schema_collection_import_detail = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': [
+        'created_at',
+        'finished_at',
+        'id',
+        'messages',
+        'name',
+        'namespace',
+        'started_at',
+        'state',
+        'updated_at',
+        'version'
+    ],
+    'properties': {
+        'created_at': {'type': 'string'},
+        'error': {'type': ['string', 'null']},
+        'finished_at': {'type': 'string'},
+        'messages': {'type': 'array'},
+        'id': {'type': 'string'},
+        'name': {'type': 'string'},
+        'namespace': {'type': 'string'},
+        'started_at': {'type': 'string'},
+        'state': {'type': 'string'},
+        'updated_at': {'type': 'string'},
+        'version': {'type': 'string'},
+    }
+}

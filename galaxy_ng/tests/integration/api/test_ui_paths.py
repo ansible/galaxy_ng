@@ -17,7 +17,9 @@ from ..schemas import (
     schema_remote,
     schema_group,
     schema_collectionversion,
-    schema_collectionversion_metadata
+    schema_collectionversion_metadata,
+    schema_collection_import,
+    schema_collection_import_detail
 )
 
 
@@ -241,11 +243,37 @@ def test_api_ui_v1_groups_by_id(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/imports/collections/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_imports_collections(ansible_config):
+
+    cfg = ansible_config('ansible_partner')
+    with UIClient(config=cfg) as uclient:
+
+        # get the response
+        resp = uclient.get('_ui/v1/imports/collections/')
+        assert resp.status_code == 200
+
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_objectlist)
+
+        for job in ds['data']:
+            validate_json(instance=job, schema=schema_collection_import)
+            task_id = job['id']
+            jurl = f'_ui/v1/imports/collections/{task_id}/'
+            jresp = uclient.get(jurl)
+            assert jresp.status_code == 200
+            jds = jresp.json()
+            validate_json(instance=jds, schema=schema_collection_import_detail)
+
+
 # /api/automation-hub/_ui/v1/imports/collections/{task_id}/
+# ^ tested by the previous function
 
 
 # /api/automation-hub/_ui/v1/landing-page/
 # ^ tested in tests/integration/api/test_landing_page.py
+
 
 # /api/automation-hub/_ui/v1/me/
 @pytest.mark.standalone_only
