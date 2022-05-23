@@ -3,7 +3,9 @@ from rest_framework import mixins
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
+from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES as GALAXY_LOCKED_ROLES
 from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
 
 # This file is necesary to prevent the DRF web API browser from breaking on all of the
 # pulp/api/v3/repositories/ endpoints.
@@ -25,6 +27,7 @@ class ContainerRegistryRemoteViewSet(pulp_viewsets.NamedModelViewSet, mixins.Ret
     serializer_class = serializers.ContainerRegistryRemoteSerializer
     permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
     endpoint_name = "execution-environments-registry-detail"
+    LOCKED_ROLES = GALAXY_LOCKED_ROLES
 
 
 class ContainerDistributionViewSet(
@@ -45,3 +48,15 @@ class AuthViewSet(
 ):
     queryset = models.auth.Group.objects.all()
     endpoint_name = "auth"
+
+
+class NamespaceViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.ListModelMixin
+    # mixins.RetrieveModelMixin,
+    # mixins.DestroyModelMixin,
+):
+    queryset = models.Namespace.objects.all()
+    serializer_class = NamespaceSerializer
+    permission_classes = [access_policy.NamespaceAccessPolicy]
+    endpoint_name = "galaxy-ng/collection-namespaces"

@@ -95,7 +95,7 @@ class BaseTestCase(APITestCase):
         groups_to_add = {}
         for group in groups:
             groups_to_add[group] = [
-                'galaxy.namespace_owner',
+                'galaxy.collection_namespace_owner',
             ]
         namespace.groups = groups_to_add
         return namespace
@@ -105,7 +105,7 @@ class BaseTestCase(APITestCase):
         # Maintain PE Group consistency with
         # galaxy_ng/app/management/commands/maintain-pe-group.py:28
         pe_roles = [
-            'galaxy.namespace_owner',
+            'galaxy.collection_namespace_owner',
             'galaxy.collection_admin',
             'galaxy.user_admin',
             'galaxy.group_admin',

@@ -151,6 +151,14 @@ docker/all: 	                                ## Build, migrate, loaddata, transl
 	make docker/loaddata
 	make docker/translations
 
+.PHONY: docker/db_snapshot
+docker/db_snapshot:   ## Snapshot database
+	docker exec galaxy_ng_postgres_1 pg_dump -U galaxy_ng -F c -b -f "/galaxy.backup" galaxy_ng
+
+.PHONY: docker/db_restore
+docker/db_restore:   ## Restore database from last snapshot
+	docker exec galaxy_ng_postgres_1 pg_restore --clean -U galaxy_ng -d galaxy_ng "/galaxy.backup"
+
 # Application management and debugging
 
 # e.g: make api/get URL=/content/community/v3/collections/
