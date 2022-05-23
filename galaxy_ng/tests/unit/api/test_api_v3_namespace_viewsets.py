@@ -187,7 +187,7 @@ class TestV3NamespaceViewSet(BaseTestCase):
                             "id": self.pe_group.id,
                             "name": self.pe_group.name,
                             "object_roles": [
-                                'galaxy.namespace_owner',
+                                'galaxy.collection_namespace_owner',
                             ]
                         },
                     ],
