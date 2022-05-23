@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-136-ga3c43d7
+# generated with plugin_template@2021.08.26-122-g37dc7b5
 
 additional_repos:
 - bindings: true
@@ -9,7 +9,7 @@ additional_repos:
   name: pulp_ansible
   org: pulp
 - bindings: true
-  branch: 2.10.2
+  branch: 2.12.1
   name: pulp_container
   org: pulp
 - bindings: false
@@ -74,7 +74,7 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: 3.18.1
+pulpcore_branch: 3.19.0
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
@@ -107,4 +107,3 @@ travis_notifications: null
 update_github: false
 upgrade_range: []
 use_issue_template: false
-
