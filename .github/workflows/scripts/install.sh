@@ -38,7 +38,7 @@ fi
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
 else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.10.2
+  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.12.1
 fi
 
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
