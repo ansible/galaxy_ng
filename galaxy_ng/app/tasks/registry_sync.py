@@ -18,6 +18,7 @@ def launch_container_remote_sync(remote, registry, repository):
             "remote_pk": str(remote.pk),
             "repository_pk": str(repository.pk),
             "mirror": True,
+            "signed_only": False,
         },
     )
 
