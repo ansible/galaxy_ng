@@ -5,3 +5,4 @@ ansible-base
 pytest
 orionutils
 openapi-spec-validator
+jsonschema
