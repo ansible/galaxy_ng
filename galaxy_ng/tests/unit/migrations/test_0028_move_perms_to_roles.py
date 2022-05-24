@@ -1,5 +1,4 @@
 from importlib import import_module
-from unicodedata import name
 from django.test import TestCase
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
@@ -7,11 +6,9 @@ from django.contrib.contenttypes.models import ContentType
 from galaxy_ng.app.models import User, Group, Namespace
 from pulp_container.app.models import ContainerNamespace
 
-from pulp_ansible.app.models import Collection
 from pulpcore.app.models.role import GroupRole, UserRole, Role
 
 from django.contrib.auth.models import Permission
-from guardian.models import GroupObjectPermission, UserObjectPermission
 from guardian.shortcuts import assign_perm as guardian_assign_perm
 
 

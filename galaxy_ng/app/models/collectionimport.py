@@ -2,9 +2,6 @@ from django.db import models
 from django.urls import reverse
 from django_lifecycle import LifecycleModel
 
-from pulpcore.plugin.models import (
-    AutoDeleteObjPermsMixin,
-)
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from .namespace import Namespace
 
@@ -14,7 +11,7 @@ __all__ = (
 )
 
 
-class CollectionImport(LifecycleModel, AutoDeleteObjPermsMixin):
+class CollectionImport(LifecycleModel):
     """
     A model representing a mapping between pulp task id and task parameters.
 

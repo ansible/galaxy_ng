@@ -47,9 +47,5 @@ class GroupViewSet(LocalSettingsMixin, viewsets.GroupViewSet):
         return super().create(request, *args, **kwargs)
 
 
-class GroupModelPermissionViewSet(LocalSettingsMixin, viewsets.GroupModelPermissionViewSet):
-    permission_classes = [access_policy.GroupAccessPolicy]
-
-
 class GroupUserViewSet(LocalSettingsMixin, viewsets.GroupUserViewSet):
     permission_classes = [access_policy.GroupAccessPolicy]
