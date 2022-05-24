@@ -7,6 +7,7 @@ import pytest
 from jsonschema import validate as validate_json
 
 from ..constants import DEFAULT_DISTROS
+from ..constants import SLEEP_SECONDS_POLLING
 from ..utils import UIClient
 from ..schemas import (
     schema_objectlist,
@@ -213,7 +214,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
             state = ds['state']
             if state == 'completed':
                 break
-            time.sleep(.5)
+            time.sleep(SLEEP_SECONDS_POLLING)
         assert state == 'completed'
 
         # index it
@@ -239,7 +240,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
             state = ds['state']
             if state == 'completed':
                 break
-            time.sleep(.5)
+            time.sleep(SLEEP_SECONDS_POLLING)
         assert state == 'completed'
 
         # delete the registry
