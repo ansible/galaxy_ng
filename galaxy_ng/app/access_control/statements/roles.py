@@ -1,4 +1,15 @@
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+# DO NOT EVER RENAME ANY OF THE LOCKED ROLES HERE. IF A LOCKED ROLE IS RENAMED,
+# IT WILL GET DELETED AND RECREATED WHEN MIGRATIONS ARE RUN AND ANY USERS OR GROUPS
+# THAT ARE ASSOCIATED WITH IT WILL BE LOST.
+#
+#  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+
 LOCKED_ROLES = {
+    # DO NOT EVER RENAME THIS.
     "galaxy.content_admin": {
         "permissions": [
             "galaxy.add_namespace",
@@ -24,6 +35,7 @@ LOCKED_ROLES = {
     },
 
     # COLLECTIONS
+    # DO NOT EVER RENAME THIS.
     "galaxy.collection_admin": {
         "permissions": [
             "galaxy.add_namespace",
@@ -40,6 +52,7 @@ LOCKED_ROLES = {
             "Upload and delete collections. Sync collections from remotes. "
             "Approve and reject collections.")
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.collection_publisher": {
         "permissions": [
             "galaxy.add_namespace",
@@ -48,6 +61,7 @@ LOCKED_ROLES = {
         ],
         "description": "Upload and modify collections."
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.collection_curator": {
         "permissions": [
             "ansible.change_collectionremote",
@@ -56,6 +70,7 @@ LOCKED_ROLES = {
         ],
         "description": "Approve, reject and sync collections from remotes.",
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.collection_namespace_owner": {
         "permissions": [
             "galaxy.change_namespace",
@@ -65,6 +80,7 @@ LOCKED_ROLES = {
     },
 
     # EXECUTION ENVIRONMENTS
+    # DO NOT EVER RENAME THIS.
     "galaxy.execution_environment_admin": {
         "permissions": [
             "container.delete_containerrepository",
@@ -82,6 +98,7 @@ LOCKED_ROLES = {
             "Push, delete, and change execution environments. "
             "Create, delete and change remote registries.")
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.execution_environment_publisher": {
         "permissions": [
             "container.namespace_change_containerdistribution",
@@ -93,6 +110,7 @@ LOCKED_ROLES = {
         ],
         "description": "Push, and change execution environments."
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.execution_environment_namespace_owner": {
         "permissions": [
             "container.change_containernamespace",
@@ -105,6 +123,7 @@ LOCKED_ROLES = {
             "Create and update execution environments under existing "
             "container namespaces.")
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.execution_environment_collaborator": {
         "permissions": [
             "container.namespace_push_containerdistribution",
@@ -115,6 +134,7 @@ LOCKED_ROLES = {
     },
 
     # ADMIN STUFF
+    # DO NOT EVER RENAME THIS.
     "galaxy.group_admin": {
         "permissions": [
             "galaxy.view_group",
@@ -124,6 +144,7 @@ LOCKED_ROLES = {
         ],
         "description": "View, add, remove and change groups."
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.user_admin": {
         "permissions": [
             "galaxy.view_user",
@@ -133,6 +154,7 @@ LOCKED_ROLES = {
         ],
         "description": "View, add, remove and change users."
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.synclist_owner": {
         "permissions": [
             "galaxy.add_synclist",
@@ -142,6 +164,7 @@ LOCKED_ROLES = {
         ],
         "description": "View, add, remove and change synclists."
     },
+    # DO NOT EVER RENAME THIS.
     "galaxy.task_admin": {
         "permissions": [
             "core.change_task",
