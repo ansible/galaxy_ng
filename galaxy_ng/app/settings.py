@@ -30,10 +30,6 @@ AUTH_USER_MODEL = 'galaxy.User'
 # FIXME(cutwater): 1. Rename GALAXY_API_ROOT in pulp-ansible to ANSIBLE_API_ROOT
 #                  2. Rename API_PATH_PREFIX to GALAXY_API_ROOT
 GALAXY_API_PATH_PREFIX = "/api/galaxy"
-
-# Location where the pulp api will be served
-API_ROOT = "/api/galaxy/pulp/"
-
 STATIC_URL = "/static/"
 
 # A client connection to /api/automation-hub/ is the same as a client connection

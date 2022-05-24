@@ -23,6 +23,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_pulp_ansible(settings))
     data.update(configure_authentication_classes(settings))
     data.update(configure_password_validators(settings))
+    data.update(configure_api_base_path(settings))
 
     validate(settings)
     return data
@@ -322,6 +323,14 @@ def configure_password_validators(settings: Dynaconf) -> Dict[str, Any]:
         if dict_item["NAME"].endswith("MinimumLengthValidator"):
             dict_item["OPTIONS"]["min_length"] = int(GALAXY_MINIMUM_PASSWORD_LENGTH)
     return {"AUTH_PASSWORD_VALIDATORS": AUTH_PASSWORD_VALIDATORS}
+
+
+def configure_api_base_path(settings: Dynaconf) -> Dict[str, Any]:
+    """Set the pulp api root under the galaxy api root."""
+
+    galaxy_api_root = settings.get("GALAXY_API_PATH_PREFIX")
+    pulp_api_root = f"/{galaxy_api_root.strip('/')}/pulp/"
+    return {"API_ROOT": pulp_api_root}
 
 
 def validate(settings: Dynaconf) -> None:
