@@ -22,7 +22,7 @@ from django_lifecycle import hook
 
 # TODO: Replace this with the version from pulpcore once
 # https://github.com/pulp/pulpcore/pull/2728 is merged and released
-def get_groups_with_perms_attached_roles(obj, only_with_perms_in=None):
+def get_groups_with_perms_attached_roles(obj, only_with_perms_in=None, include_model_permissions=False, for_concrete_model=True):
     ctype = ContentType.objects.get_for_model(obj)
     perms = Permission.objects.filter(content_type__pk=ctype.id)
     if only_with_perms_in:
@@ -46,7 +46,7 @@ class GroupModelPermissionsMixin:
 
     @property
     def groups(self):
-        return get_groups_with_perms_attached_roles(self)
+        return get_groups_with_perms_attached_roles(self, include_model_permissions=False, for_concrete_model=True)
 
     @groups.setter
     def groups(self, groups):
@@ -60,7 +60,7 @@ class GroupModelPermissionsMixin:
         if self._state.adding:
             self._groups = groups
         else:
-            current_groups = get_groups_with_perms_attached_roles(self)
+            current_groups = get_groups_with_perms_attached_roles(self, include_model_permissions=False, for_concrete_model=True)
             for group in current_groups:
                 for perm in current_groups[group]:
                     remove_role(perm, group, self)

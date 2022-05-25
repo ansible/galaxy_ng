@@ -5,7 +5,7 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES as GALAXY_LOCKED_ROLES
 from galaxy_ng.app.api.ui import serializers
-from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
+from galaxy_ng.app.api.v3.serializers import NamespaceSummarySerializer
 
 # This file is necesary to prevent the DRF web API browser from breaking on all of the
 # pulp/api/v3/repositories/ endpoints.
@@ -22,41 +22,44 @@ from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
 # on the remote field and can't find a viewset name for galaxy's ContainerRegistryRemote model.
 
 
-class ContainerRegistryRemoteViewSet(pulp_viewsets.NamedModelViewSet, mixins.RetrieveModelMixin):
+# Added to keep the DRF forms from breaking
+class ContainerRegistryRemoteViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.RetrieveModelMixin,
+):
     queryset = models.ContainerRegistryRemote.objects.all()
     serializer_class = serializers.ContainerRegistryRemoteSerializer
     permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
-    endpoint_name = "execution-environments-registry-detail"
+    endpoint_name = "galaxy/registry-remote"
     LOCKED_ROLES = GALAXY_LOCKED_ROLES
-
 
 class ContainerDistributionViewSet(
     pulp_viewsets.NamedModelViewSet,
     mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
 ):
     queryset = models.ContainerDistribution.objects.all()
     serializer_class = serializers.ContainerRepositorySerializer
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
-    endpoint_name = "container"
+    endpoint_name = "galaxy_ng/container-distribution-proxy"
 
 
-class AuthViewSet(
-    pulp_viewsets.NamedModelViewSet,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-):
-    queryset = models.auth.Group.objects.all()
-    endpoint_name = "auth"
 
 
+# TODO: figure out why this is here
+# class AuthViewSet(
+#     pulp_viewsets.NamedModelViewSet,
+#     mixins.RetrieveModelMixin,
+# ):
+#     queryset = models.auth.Group.objects.all()
+#     endpoint_name = "auth"
+
+# added so that object permissions are viewable for namespaces on the roles api endpoint.
 class NamespaceViewSet(
     pulp_viewsets.NamedModelViewSet,
-    mixins.ListModelMixin
-    # mixins.RetrieveModelMixin,
-    # mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
 ):
     queryset = models.Namespace.objects.all()
-    serializer_class = NamespaceSerializer
+    serializer_class = NamespaceSummarySerializer
     permission_classes = [access_policy.NamespaceAccessPolicy]
-    endpoint_name = "galaxy-ng/collection-namespaces"
+    endpoint_name = "ansible/namespaces"
