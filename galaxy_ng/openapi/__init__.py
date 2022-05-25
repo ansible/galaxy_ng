@@ -16,7 +16,11 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
         """Munge pulp's get_schema result"""
         self._input_request = request
         schema = super().get_schema(request=request, public=public)
-        if self._input_request.path.startswith(settings.GALAXY_API_PATH_PREFIX):
+
+        if (
+            self._input_request.path.startswith(settings.GALAXY_API_PATH_PREFIX)
+            and "bindings" not in self._input_request.query_params
+        ):
             return self.dedupe_operationIds(schema)
         return schema
 
