@@ -15,7 +15,7 @@ set -euv
 
 source .github/workflows/scripts/utils.sh
 
-export PULP_API_ROOT="/api/automation-hub/pulp/"
+export PULP_API_ROOT="/api/galaxy/pulp/"
 
 if [[ "$TEST" = "docs" || "$TEST" = "publish" ]]; then
   pip install -r ../pulpcore/doc_requirements.txt
