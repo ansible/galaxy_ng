@@ -33,6 +33,8 @@ class ContainerRegistryRemoteViewSet(
     endpoint_name = "galaxy/registry-remote"
     LOCKED_ROLES = GALAXY_LOCKED_ROLES
 
+
+# Added to keep the DRF forms from breaking
 class ContainerDistributionViewSet(
     pulp_viewsets.NamedModelViewSet,
     mixins.RetrieveModelMixin,
@@ -42,16 +44,6 @@ class ContainerDistributionViewSet(
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     endpoint_name = "galaxy_ng/container-distribution-proxy"
 
-
-
-
-# TODO: figure out why this is here
-# class AuthViewSet(
-#     pulp_viewsets.NamedModelViewSet,
-#     mixins.RetrieveModelMixin,
-# ):
-#     queryset = models.auth.Group.objects.all()
-#     endpoint_name = "auth"
 
 # added so that object permissions are viewable for namespaces on the roles api endpoint.
 class NamespaceViewSet(
