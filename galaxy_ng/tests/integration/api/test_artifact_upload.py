@@ -133,9 +133,10 @@ def test_api_publish_missing_filename(ansible_config, artifact, upload_artifact)
     assert resp["errors"][0]["detail"]
 
 
+@pytest.mark.importer
 @pytest.mark.stage_health
 def test_api_publish_broken_manifest(ansible_config, artifact, upload_artifact):
-    """Test handling of uploads missing the filename parameter."""
+    """Test handling of uploads missing the collection name parameter."""
     config = ansible_config("ansible_partner")
     api_client = get_client(config)
 
@@ -233,6 +234,7 @@ MAX_LENGTH_VERSION = 128
     ids=lambda _: _[0],
 )
 @pytest.mark.stage_health
+@pytest.mark.importer
 def test_long_field_values(ansible_config, upload_artifact, field):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
     config = ansible_config("ansible_partner")
@@ -255,20 +257,31 @@ def test_long_field_values(ansible_config, upload_artifact, field):
 @pytest.mark.parametrize(
     "spec",
     [
-        # ("2eq", "==2.10", "completed"),
+        # TODO: move most these to galaxy-importer unit tests
+        ("2eq", "==2.10", "completed"),
+        # ("gt", ">2.10.0", "completed"),
+        # ("gteq", ">=2.10", "completed"),
+        # ("beta", ">=2.12b1", "completed"),
+        ("beta2", ">=2.12.0b1", "completed"),
+        # ("lt", "<2.11", "completed"),
         # ("range1", ">=2.10,<2.11", "completed"),
-        ("range2", ">=2.10,<<2.11", "failed"),
-        ("2comma", ">=2.10,,", "failed"),
-        # ("star", "2.10.*", "completed"),
+        # ("it_strips_commas", ">=2.10,,", "completed"),
+        # ("gtstar", ">2.10.*", "completed"),
         # ("exc", ">=2.1,!=2.1.2", "completed"),
-        # Known limitations
-        # ("label", "2.10.post1", "completed"),
-        # ("pre", "2.11b4", "completed"),
+        ("norange", "2.10", "failed"),
+        # ("norange2", "2.10.0", "failed"),
+        # ("norange3", "2.10.0b1", "failed"),
+        # ("norange4", "2.10.*", "failed"),
         # ("1eq", "=2.10", "failed"),
-        # ("contradiction", ">2.0,<1.0", "failed"),
+        # Potentially unexpected
+        # ("gt_dup", ">>>>>2.11", "completed"),
+        # ("lt_dup", ">=2.10,<<2.11", "completed"),
+        # ("contradiction", ">2.0,<1.0", "completed"),
+        # ("text", ">nonumbers", "completed"),
     ],
     ids=lambda _: _[0],
 )
+@pytest.mark.importer
 def test_ansible_requires(ansible_config, upload_artifact, spec):
     """
     Test handling of POSTs to the artifact endpoint neglecting to submit a file.
@@ -306,6 +319,7 @@ def test_ansible_requires(ansible_config, upload_artifact, spec):
 
 
 @pytest.mark.stage_health
+@pytest.mark.importer
 def test_ansible_lint_exception(ansible_config, upload_artifact):
     """
     Ensure that:
@@ -349,6 +363,7 @@ def test_ansible_lint_exception(ansible_config, upload_artifact):
     assert len(critical) == 0  # no critical errors
 
 
+@pytest.mark.importer
 def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
     """
     Test that galaxy-importer logs when meta/execution-environment.yml
@@ -396,6 +411,7 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
     assert len(file_not_found) == 1
 
 
+@pytest.mark.importer
 def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
     """
     Test that galaxy-importer logs when ansible-test sanity ignore files are present.
@@ -438,6 +454,7 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
 
 
 @pytest.mark.cloud_only
+@pytest.mark.importer
 def test_publish_fail_required_tag(ansible_config, upload_artifact):
     """
     Test cloud publish fails when collection metadata tags do not include
