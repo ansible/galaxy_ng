@@ -130,6 +130,19 @@ docker/resetdb:   ## Cleans database
 	./compose stop
 	./compose run --rm api /bin/bash -c "./entrypoint.sh manage reset_db && django-admin migrate"
 
+.PHONY: docker/db_snapshot
+NAME ?= galaxy
+docker/db_snapshot:   ## Snapshot database. Example: make docker/db_snapshot NAME=my_special_backup
+	docker exec galaxy_ng_postgres_1 pg_dump -U galaxy_ng -F c -b -f "/galaxy.backup" galaxy_ng
+	mkdir -p db_snapshots/
+	docker cp galaxy_ng_postgres_1:/galaxy.backup db_snapshots/$(NAME).backup
+
+.PHONY: docker/db_restore
+NAME ?= galaxy
+docker/db_restore:   ## Restore database from a snapshot. Example: make docker/db_restore NAME=my_special_backup
+	docker cp db_snapshots/$(NAME).backup galaxy_ng_postgres_1:/galaxy.backup
+	docker exec galaxy_ng_postgres_1 pg_restore --clean -U galaxy_ng -d galaxy_ng "/galaxy.backup"
+
 .PHONY: docker/translations
 docker/translations:   ## Generate the translation messages
 	./compose run --rm api bash -c "cd /app/galaxy_ng && django-admin makemessages --all"
