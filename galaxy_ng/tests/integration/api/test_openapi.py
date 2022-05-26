@@ -12,7 +12,7 @@ import tempfile
 
 from openapi_spec_validator import validate_spec
 
-from ..utils import get_client
+from ..utils import get_client, is_docker_installed
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -86,6 +86,7 @@ def test_pulp_openapi_has_variables(ansible_config):
 @pytest.mark.standalone_only
 @pytest.mark.openapi
 @pytest.mark.openapi_generate_bindings
+@pytest.mark.skipif(not is_docker_installed(), reason="docker is not installed on this machine")
 def test_openapi_bindings_generation(ansible_config):
     """Verify client bindings can be built from the pulp'ish api spec"""
 
