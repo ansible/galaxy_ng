@@ -95,7 +95,7 @@ test_cli: false
 test_deprecations: false
 test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
-test_reroute: true
+test_reroute: false
 test_s3: true
 test_stream: false
 travis_addtl_services: []
