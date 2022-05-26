@@ -1,0 +1,51 @@
+import random
+import requests
+import string
+
+NAMESPACE = "rbac_roles"
+ADMIN_CREDENTIALS = ("admin", "admin")
+API_ROOT = "http://localhost:5001/api/automation-hub/"
+PULP_API_ROOT = "http://localhost:5001/pulp/api/v3/"
+
+
+def gen_string(size=10, chars=string.ascii_lowercase):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+def create_group_with_user_and_role(user, role):
+    response = requests.post(
+        API_ROOT + "_ui/v1/groups/",
+        json={"name": f"{NAMESPACE}_group_{gen_string()}"},
+        auth=ADMIN_CREDENTIALS
+    )
+    group_id = response.json()["id"]
+    response = requests.post(
+        f"{API_ROOT}_ui/v1/groups/{group_id}/users/",
+        json={"username": user["username"]},
+        auth=ADMIN_CREDENTIALS
+    )
+    response = requests.post(
+        f"{PULP_API_ROOT}groups/{group_id}/roles/",
+        json={"role": role, "content_object": None},
+        auth=ADMIN_CREDENTIALS
+    )
+    # collect group_id for cleanup?
+    return group_id
+
+
+def create_user(username, password):
+    response = requests.post(
+        f"{API_ROOT}_ui/v1/users/",
+        json={
+            "username": username,
+            "first_name": "",
+            "last_name": "",
+            "email": "",
+            "group": "",
+            "password": password,
+            "description": "",
+        },
+        auth=ADMIN_CREDENTIALS,
+    )
+    # collect user_id for cleanup?
+    return response.json()

@@ -47,6 +47,7 @@ package: tests for the pip packaging
 api_ui: tests for the _ui v1 api
 importer: tests related checks in galaxy-importer
 role: Related to RBAC Roles
+role_rbac: The test I'm currently working on
 group: Related to Groups
 """
 
