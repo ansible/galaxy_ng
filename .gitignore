@@ -105,3 +105,6 @@ venv.bak/
 # Editors
 .vscode/
 .idea/
+
+# Galaxy NG
+db_snapshots/
