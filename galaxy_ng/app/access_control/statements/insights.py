@@ -90,6 +90,18 @@ INSIGHTS_STATEMENTS = {
     'pulp_ansible/v3/collections/upload': _deny_all,
     'pulp_ansible/v3/collections/download': _deny_all,
 
+    # The pulp viewsets are now accessible in GALAXY_DEPLOYMENT_MODE=insights
+    # via the pulpcore api rerouted under api/automation-hub/
+    # The following pulpcore viewsets are not needed in insights mode, and their
+    # access policy allows `list` to all authenticated users.
+    # We will deny these viewsets.
+    "contentguards/core/rbac": _deny_all,
+    "content/container/blobs": _deny_all,
+    "remotes/container/container": _deny_all,
+    "repositories/container/container": _deny_all,
+    "content/container/manifests": _deny_all,
+    "content/container/tags": _deny_all,
+
     "NamespaceViewSet": [
         {
             "action": ["list", "retrieve"],

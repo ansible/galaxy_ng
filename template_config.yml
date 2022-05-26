@@ -17,7 +17,7 @@ additional_repos:
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1
-api_root: /pulp/
+api_root: "/api/galaxy/pulp/"
 black: false
 check_commit_message: false
 check_gettext: true
@@ -95,7 +95,7 @@ test_cli: false
 test_deprecations: false
 test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
-test_reroute: true
+test_reroute: false
 test_s3: true
 test_stream: false
 travis_addtl_services: []
@@ -103,4 +103,3 @@ travis_notifications: null
 update_github: false
 upgrade_range: []
 use_issue_template: false
-
