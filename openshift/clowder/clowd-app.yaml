@@ -120,6 +120,14 @@ objects:
             value: ${ENABLE_SIGNING}
           - name: GNUPGHOME
             value: ${GNUPGHOME}
+          - name: PULP_GALAXY_SIGNATURE_UPLOAD_ENABLED
+            value: ${GALAXY_SIGNATURE_UPLOAD_ENABLED}
+          - name: PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL
+            value: ${GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL}
+          - name: PULP_GALAXY_COLLECTION_SIGNING_SERVICE
+            value: ${GALAXY_COLLECTION_SIGNING_SERVICE}
+          - name: PULP_GALAXY_AUTO_SIGN_COLLECTIONS
+            value: ${GALAXY_AUTO_SIGN_COLLECTIONS}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs/database_fields.symmetric.key
@@ -314,10 +322,20 @@ parameters:
   value: "false"
 - name: PROMETHEUS_DIR
   value: "/tmp"
+
+# signing requirements
 - name: ENABLE_SIGNING
   value: "1"
 - name: GNUPGHOME
   value: "/tmp/ansible/.gnupg"
+- name: GALAXY_SIGNATURE_UPLOAD_ENABLED
+  value: "True"
+- name: GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL
+  value: "True"
+- name: GALAXY_COLLECTION_SIGNING_SERVICE
+  value: "ansible-default"
+- name: GALAXY_AUTO_SIGN_COLLECTIONS
+  value: "True"
 
 # nginx resource requirements
 - name: NGINX_REPLICAS
