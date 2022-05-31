@@ -1,7 +1,10 @@
+import pytest
+
 from ..utils import get_client
 
 
-def test_pul_api_redirect(ansible_config, artifact):
+@pytest.mark.standalone_only
+def test_pulp_api_redirect(ansible_config, artifact):
     """Test that /pulp/ is redirecting to /api/galaxy/pulp/"""
 
     config = ansible_config("ansible_partner")
