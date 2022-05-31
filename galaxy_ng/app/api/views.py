@@ -16,7 +16,10 @@ from galaxy_ng.app.api import base as api_base
 
 # define the version matrix at the module level to avoid the redefinition on every API call.
 VERSIONS = {
-    "available_versions": {"v3": "v3/"},
+    "available_versions": {
+        "v3": "v3/",
+        "pulp-v3": "pulp/api/v3/"
+    },
     "server_version": apps.get_app_config("galaxy").version,
     "galaxy_ng_version": apps.get_app_config("galaxy").version,
     "galaxy_ng_commit": os.environ.get("GIT_COMMIT", ""),
