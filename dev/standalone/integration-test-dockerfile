@@ -7,8 +7,10 @@ SHELL ["/bin/bash", "-c"]
 COPY integration_requirements.txt /app/integration_requirements.txt
 RUN pip install virtualenv && \
     virtualenv /tmp/gng_testing && \
-    source /tmp/gng_testing/bin/activate &&\
-    pip install -r integration_requirements.txt
+    source /tmp/gng_testing/bin/activate && \
+    pip install -r integration_requirements.txt && \
+    # hack to get around bug where some tests fail when ~/.ansible is missing.
+    mkdir /root/.ansible
 
 ENV HUB_LOCAL=1
 ENV HUB_API_ROOT=http://localhost:5001/api/automation-hub/
