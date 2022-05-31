@@ -14,7 +14,7 @@ To learn more about Pulp, [view the Pulp project page](https://pulpproject.org/)
 
 ## OpenAPI Spec
 
-View the latest version of the spec by [clicking here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/ansible/galaxy_ng/master/openapi/openapi.yaml).
+View the latest version of the spec by [clicking here](https://console.redhat.com/api/automation-hub/v3/openapi.yaml).
 
 ## Contributing
 
