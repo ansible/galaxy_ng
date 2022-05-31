@@ -14,13 +14,8 @@ class HttpResponsePermanentRedirect308(HttpResponsePermanentRedirect):
 class PulpAPIRedirectView(api_base.APIView):
     permission_classes = []
 
-    def get(self, request, **kwargs):
-        api_path = kwargs.get("api_path", None)
-
-        url = f"/{settings.API_ROOT.strip('/')}/api/v3/"
-
-        if api_path:
-            url = f"{url}{api_path.strip('/')}/"
+    def get(self, request, api_path):
+        url = f"/{settings.API_ROOT.strip('/')}/api/{api_path.strip('/')}/"
 
         args = request.META.get("QUERY_STRING", "")
         if args:

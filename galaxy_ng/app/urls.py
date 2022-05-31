@@ -49,10 +49,8 @@ urlpatterns = [
 
 if settings.get("API_ROOT") != "/pulp/":
     urlpatterns.append(
-        path("pulp/api/v3/", views.PulpAPIRedirectView.as_view(), name="pulp_root_redirect"))
-    urlpatterns.append(
         path(
-            "pulp/api/v3/<path:api_path>",
+            "pulp/api/<path:api_path>",
             views.PulpAPIRedirectView.as_view(),
             name="pulp_redirect")
     )
