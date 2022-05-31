@@ -39,6 +39,7 @@ RUN set -ex; \
         libpq \
         libpq-devel \
         pinentry \
+        make \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \
@@ -46,6 +47,13 @@ RUN set -ex; \
     && chown ${USER_NAME}:${USER_GROUP} /venv \
     && mkdir --mode=2775 /app \
     && chown ${USER_NAME}:${USER_GROUP} /app
+
+# Install entr so we can have reload on worker processes
+RUN git clone https://github.com/eradman/entr && \
+    cd entr && \
+    cp Makefile.linux Makefile && \
+    make && \
+    make install
 
 USER ${USER_NAME}:${USER_GROUP}
 RUN set -ex; \
