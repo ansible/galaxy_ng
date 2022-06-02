@@ -12,27 +12,14 @@ from ..utils import get_client, set_certification, wait_for_task
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-# TODO: see if ansible_config() does or can be made to accept a user param
-@contextmanager
-def set_username_env_var(hub_username):
-    try:
-        original_username = os.environ.get("HUB_USERNAME", "")
-        os.environ["HUB_USERNAME"] = hub_username
-        yield
-    finally:
-        os.environ["HUB_USERNAME"] = original_username
-
-
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.synclist
 @pytest.mark.cloud_only
 def test_synclist_object_get(ansible_config):
     """Validate user can read the endpoints with synclist objects."""
 
-    # set user to org-admin to access synclists
-    with set_username_env_var("org-admin"):
-        config = ansible_config("ansible_partner")
-        api_client = get_client(config, request_token=True, require_auth=True)
+    config = ansible_config("org_admin")
+    api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
     assert resp["meta"]["count"] == 1
@@ -72,10 +59,8 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
     #     ]
     # }
 
-    # set user to org-admin to access synclists
-    with set_username_env_var("org-admin"):
-        config = ansible_config("ansible_partner")
-        api_client = get_client(config, request_token=True, require_auth=True)
+    config = ansible_config("org_admin")
+    api_client = get_client(config, request_token=True, require_auth=True)
 
     # determine synclist repo associated to user
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
@@ -107,9 +92,8 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
     confirm no change to content/{SyncList.name}/v3/collections/
     """
 
-    # NOTE: on stage env, a toggle action accesses these:
+    # NOTE: on stage env, a toggle action does:
     # PUT https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/
-    # POST https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/curate/
 
     config = ansible_config("ansible_partner")
     api_client = get_client(config, request_token=True, require_auth=True)
@@ -121,10 +105,8 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
     set_certification(api_client, collection)
     collection_key = (collection.namespace, collection.name)
 
-    # set user to org-admin to access synclists
-    with set_username_env_var("org-admin"):
-        config = ansible_config("ansible_partner")
-        api_client = get_client(config, request_token=True, require_auth=True)
+    config = ansible_config("org_admin")
+    api_client = get_client(config, request_token=True, require_auth=True)
 
     # determine synclist repo associated to user
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
