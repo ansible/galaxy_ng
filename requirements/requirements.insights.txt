@@ -109,7 +109,7 @@ django-prometheus==2.1.0
     # via galaxy-ng (setup.py)
 django-storages[boto3]==1.11.1
     # via -r requirements/requirements.insights.in
-django==3.2.6
+django==3.2.13
     # via
     #   django-automated-logging
     #   django-currentuser

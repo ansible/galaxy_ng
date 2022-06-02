@@ -96,7 +96,7 @@ django-picklefield==3.0.1
     # via django-automated-logging
 django-prometheus==2.1.0
     # via galaxy-ng (setup.py)
-django==3.2.6
+django==3.2.13
     # via
     #   django-automated-logging
     #   django-currentuser
