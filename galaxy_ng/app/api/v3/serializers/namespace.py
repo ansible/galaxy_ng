@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
-from pulpcore.app.serializers import IdentityField
+from pulpcore.plugin.serializers import IdentityField
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
