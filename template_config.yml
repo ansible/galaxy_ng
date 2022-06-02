@@ -1,15 +1,15 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-122-g37dc7b5
+# generated with plugin_template@2021.08.26-136-ga3c43d7
 
 additional_repos:
 - bindings: true
-  branch: 0.13
+  branch: main
   name: pulp_ansible
   org: pulp
 - bindings: true
-  branch: 2.12.1
+  branch: main
   name: pulp_container
   org: pulp
 - bindings: false
@@ -27,6 +27,7 @@ check_stray_pulpcore_imports: true
 cherry_pick_automation: false
 ci_env:
   GITHUB_USER: ${{ github.event.pull_request.user.login }}
+  LOCK_REQUIREMENTS: 0
 ci_trigger: '{pull_request: {branches: [''**'']}, push: {branches: [''**'']}}'
 core_import_allowed:
 - pulpcore.app.*viewsets
@@ -74,7 +75,7 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: 3.19.0
+pulpcore_branch: main
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
