@@ -47,6 +47,14 @@ urlpatterns = [
     path("healthz", views.health_view),
 ]
 
+if settings.get("API_ROOT") != "/pulp/":
+    urlpatterns.append(
+        path(
+            "pulp/api/<path:api_path>",
+            views.PulpAPIRedirectView.as_view(),
+            name="pulp_redirect")
+    )
+
 if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
     urlpatterns.append(url("", include("social_django.urls", namespace="social")))
     urlpatterns.append(path("login/",

@@ -1,0 +1,1 @@
+Redirect requests from /pulp/api/v3/ to /api/galaxy/pulp/api/v3/.
