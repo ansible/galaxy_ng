@@ -330,9 +330,7 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
     them the galaxy.collection_namespace_owner role because they can already escalate their permissions.
     """
 
-    # Skip the migration if the guardian permission tables don't exist.
-    if not does_table_exist("guardian_groupobjectpermission"):
-        return
+    is_guardian_table_avaiable = does_table_exist("guardian_groupobjectpermission")
 
     Group = apps.get_model("galaxy", "Group")
     GroupRole = apps.get_model("core", "GroupRole")
@@ -345,7 +343,11 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
     # Group Permissions
     for group in Group.objects.filter(name__ne="system:partner-engineers"):
         group_roles.extend(get_global_group_permissions(group, Role, GroupRole, Permission))
-        group_roles.extend(get_object_group_permissions(group, Role, GroupRole, ContentType, Permission))
+
+        # Skip migrating object permissions if guardian is not installed.
+        if is_guardian_table_avaiable:
+            group_roles.extend(
+                get_object_group_permissions(group, Role, GroupRole, ContentType, Permission))
 
         batch_create(GroupRole, group_roles)
 
