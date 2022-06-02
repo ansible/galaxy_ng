@@ -1,0 +1,6 @@
+pulp-smash @ git+https://github.com/pulp/pulp-smash.git
+orionutils
+pytest
+python-gnupg
+pulpcore-client
+pulp-file-client

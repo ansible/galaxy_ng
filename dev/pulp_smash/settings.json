@@ -1,0 +1,36 @@
+{
+  "hosts": [
+    {
+      "hostname": "localhost",
+      "roles": {
+        "api": {
+          "port": 5001,
+          "scheme": "http",
+          "service": "nginx",
+          "verify": false
+        },
+        "content": {
+          "port": 24816,
+          "scheme": "http",
+          "service": "pulp_content_app",
+          "verify": false
+        },
+        "pulp resource manager": {},
+        "pulp workers": {},
+        "redis": {},
+        "shell": {
+          "transport": "docker",
+          "container": "galaxy_ng_api_1"
+        }
+      }
+    }
+  ],
+  "pulp": {
+    "auth": [
+      "admin",
+      "admin"
+    ],
+    "selinux enabled": false,
+    "version": "3"
+  }
+}

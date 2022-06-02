@@ -243,3 +243,17 @@ docs/build:
 
 docs/serve:
 	@mkdocs serve
+
+.PHONY: test/functional/generate_client
+test/functional/generate_client:         ## Opens bash session in the api container
+	./dev/pulp_smash/generate_client.sh $(PLUGIN)
+
+.PHONY: test/functional/install_requirements
+test/functional/install_requirements:         ## Opens bash session in the api container
+	./dev/pulp_smash/generate_client.sh pulpcore
+	./dev/pulp_smash/generate_client.sh $(PLUGIN)
+	./dev/pulp_smash/install_requirements.sh $(PLUGIN)
+
+.PHONY: test/functional/run
+test/functional/run:         ## Opens bash session in the api container
+	./dev/pulp_smash/run_functional_tests.sh $(PLUGIN) $(FLAGS)
