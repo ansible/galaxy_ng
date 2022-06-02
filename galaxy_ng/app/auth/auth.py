@@ -124,7 +124,7 @@ class RHIdentityAuthentication(BaseAuthentication):
                 username=username,
                 defaults=attrs,
             )
-            if created:
+            if group not in user.groups.all():
                 user.groups.add(group)
         return user
 

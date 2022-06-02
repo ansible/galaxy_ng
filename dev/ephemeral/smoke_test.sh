@@ -7,7 +7,7 @@ cat /etc/redhat-release
 cat /etc/issue
 
 echo "RPM packges ..."
-rpm -qa 
+rpm -qa
 
 echo "Set project to ${NAMESPACE}"
 oc project ${NAMESPACE}
@@ -15,23 +15,16 @@ oc project ${NAMESPACE}
 echo "Find galaxy-api pod"
 AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.metadata.name --no-headers | head -1)
 
-echo "Fixing keycloak user permissions"
-oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/fixuser.py
-
 #echo "Create token for keycloak user"
 #oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_token.py
+
+echo "Setting up test users"
+oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/common/setup_test_users.py
 
 echo "Creating test data"
 oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_objects.py
 
-# What is the username?
-export HUB_USERNAME="jdoe"
-
-# What is the password?
-export HUB_PASSWORD="redhat"
-
-# What is the token?
-#export HUB_TOKEN="abcdefghijklmnopqrstuvwxyz1234567890"
+export TEARDOWN_RAN=1
 
 # Force "publishing" uploaded collections
 export HUB_USE_MOVE_ENDPOINT="true"
