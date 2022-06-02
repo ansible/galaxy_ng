@@ -178,7 +178,7 @@ prometheus-client==0.10.1
     # via django-prometheus
 psycopg2==2.8.6
     # via pulpcore
-pulp-ansible==0.7.4
+pulp-ansible==0.7.5
     # via galaxy-ng (setup.py)
 pulp-container==2.5.3
     # via galaxy-ng (setup.py)
@@ -242,10 +242,10 @@ rich==10.1.0
     #   enrich
 rq==1.7.0
     # via pulpcore
-ruamel.yaml==0.17.4
+ruamel-yaml==0.17.4
     # via ansible-lint
-ruamel.yaml.clib==0.2.2
-    # via ruamel.yaml
+ruamel-yaml-clib==0.2.2
+    # via ruamel-yaml
 s3transfer==0.4.2
     # via boto3
 semantic-version==2.8.5
