@@ -54,4 +54,4 @@ class NamespaceViewSet(
     queryset = models.Namespace.objects.all()
     serializer_class = NamespaceSummarySerializer
     permission_classes = [access_policy.NamespaceAccessPolicy]
-    endpoint_name = "ansible/namespaces"
+    endpoint_name = "pulp_ansible/namespaces"

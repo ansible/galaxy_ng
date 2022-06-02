@@ -74,12 +74,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
     groups = GroupPermissionField()
     related_fields = NamespaceRelatedFieldSerializer(source="*")
 
-
-
-    # TODO: should the pulp_href for namespaces point to the pulp API (pulp/api/v3)
-    # or the galaxy API (api/galaxy/v3)?
     # Add a pulp href to namespaces so that it can be referenced in the roles API.
-    pulp_href = IdentityField(view_name="ansible/namespaces-detail")
+    pulp_href = IdentityField(view_name="pulp_ansible/namespaces-detail", lookup_field="pk")
 
     class Meta:
         model = models.Namespace
