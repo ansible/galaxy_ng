@@ -60,7 +60,7 @@ services:
 
   worker:
     image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
-    command: ['run', 'worker']
+    command: ['run', 'worker-reload']
     environment:
       - "WITH_DEV_INSTALL=${WITH_DEV_INSTALL}"
       - "LOCK_REQUIREMENTS=${LOCK_REQUIREMENTS}"
