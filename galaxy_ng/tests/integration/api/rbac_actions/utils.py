@@ -1,11 +1,20 @@
 import random
 import requests
 import string
+import time
+from urllib.parse import urljoin
+
+from ansible.galaxy.api import GalaxyError
 
 NAMESPACE = "rbac_roles"
+PASSWORD = "p@ssword!"
 ADMIN_CREDENTIALS = ("admin", "admin")
 API_ROOT = "http://localhost:5001/api/automation-hub/"
 PULP_API_ROOT = "http://localhost:5001/pulp/api/v3/"
+
+
+class TaskWaitingTimeout(Exception):
+    pass
 
 
 def gen_string(size=10, chars=string.ascii_lowercase):
@@ -49,3 +58,21 @@ def create_user(username, password):
     )
     # collect user_id for cleanup?
     return response.json()
+
+
+def wait_for_task(resp, timeout=300):
+    ready = False
+    url = urljoin("http://localhost:5001", resp["task"])
+    wait_until = time.time() + timeout
+    while not ready:
+        if wait_until < time.time():
+            raise TaskWaitingTimeout()
+        try:
+            resp = requests.get(url)
+        except GalaxyError as e:
+            if "500" not in str(e):
+                raise
+        else:
+            ready = resp["state"] not in ("running", "waiting")
+        time.sleep(5)
+    return resp

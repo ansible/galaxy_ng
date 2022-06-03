@@ -1,10 +1,13 @@
 import requests
+
+from .utils import PASSWORD as UTIL_PASSWORD
 from .utils import (
     ADMIN_CREDENTIALS,
     API_ROOT,
     NAMESPACE,
+    PASSWORD,
     PULP_API_ROOT,
-    gen_string
+    gen_string,
 )
 # rbac_roles_user_yauxpkawsg
 # p@ssword!
@@ -98,7 +101,7 @@ def delete_users(user, password, expect_pass):
             "last_name": "",
             "email": "",
             "group": "",
-            "password": password,
+            "password": UTIL_PASSWORD,
             "description": "",
         },
         auth=ADMIN_CREDENTIALS,
@@ -124,7 +127,7 @@ def add_users(user, password, expect_pass):
             "last_name": "",
             "email": "",
             "group": "",
-            "password": password,
+            "password": UTIL_PASSWORD,
             "description": "",
         },
         auth=(user["username"], password),
@@ -145,7 +148,7 @@ def change_users(user, password, expect_pass):
             "last_name": "",
             "email": "",
             "group": "",
-            "password": password,
+            "password": UTIL_PASSWORD,
             "description": "",
         },
         auth=ADMIN_CREDENTIALS,
@@ -161,7 +164,7 @@ def change_users(user, password, expect_pass):
             "last_name": "",
             "email": "",
             "group": "",
-            "password": password,
+            "password": UTIL_PASSWORD,
             "description": "",
         },
         auth=(user["username"], password),

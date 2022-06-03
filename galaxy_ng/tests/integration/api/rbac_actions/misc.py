@@ -1,11 +1,5 @@
 import requests
-from .utils import (
-    ADMIN_CREDENTIALS,
-    API_ROOT,
-    NAMESPACE,
-    PULP_API_ROOT,
-    gen_string
-)
+from .utils import PULP_API_ROOT
 
 
 # Tasks
