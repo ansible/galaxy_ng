@@ -13,7 +13,7 @@ additional_repos:
   name: pulp_container
   org: pulp
 - bindings: false
-  branch: v0.4.2
+  branch: v0.4.5
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1

@@ -45,6 +45,7 @@ openapi: Checks the openapi schema and routes.
 openapi_generate_bindings: Verifies pulp client bindings generator
 package: tests for the pip packaging
 api_ui: tests for the _ui v1 api
+importer: tests related checks in galaxy-importer
 """
 
 
