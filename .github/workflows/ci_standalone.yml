@@ -16,12 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: apt update 
-        run: sudo apt-get update 
-
-      - name: Install LDAP testing system libraries
-        run: sudo apt-get install -y ldap-utils ldapvi libldap-common libldap-dev python-dev libldap2-dev libsasl2-dev libssl-dev --fix-missing
-
       - uses: actions/setup-python@v2
         with:
           python-version: "3.8"
