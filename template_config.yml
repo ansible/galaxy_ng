@@ -1,23 +1,23 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-129-gf780fda
+# generated with plugin_template@2021.08.26-137-gaeb6e72
 
 additional_repos:
 - bindings: true
-  branch: 0.13
   name: pulp_ansible
   org: pulp
+  revision: 9630d9ec681434146450c8994fccd8e42e72a272
 - bindings: true
-  branch: 2.10.2
   name: pulp_container
   org: pulp
+  revision: 4ee5416653277034b4e52b312b7b3710fe128d80
 - bindings: false
   branch: v0.4.5
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1
-api_root: "/api/galaxy/pulp/"
+api_root: /api/galaxy/pulp/
 black: false
 check_commit_message: false
 check_gettext: true
@@ -87,6 +87,10 @@ release_user: ansible
 run_pulpcore_tests_for_plugins: false
 single_commit_check: false
 stable_branch: stable
+stalebot: true
+stalebot_days_until_close: 30
+stalebot_days_until_stale: 90
+stalebot_limit_to_pulls: true
 sync_ci: false
 tasking_allow_async_unsafe: true
 test_azure: true
@@ -103,3 +107,4 @@ travis_notifications: null
 update_github: false
 upgrade_range: []
 use_issue_template: false
+

@@ -121,8 +121,6 @@ export PYTHONPATH=$REPO_ROOT/../pulp_container${PYTHONPATH:+:${PYTHONPATH}}
 export PYTHONPATH=$REPO_ROOT/../galaxy-importer${PYTHONPATH:+:${PYTHONPATH}}
 export PYTHONPATH=$REPO_ROOT${PYTHONPATH:+:${PYTHONPATH}}
 
-
-
 if [[ "$TEST" == "performance" ]]; then
   if [[ -z ${PERFORMANCE_TEST+x} ]]; then
     pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance
@@ -137,13 +135,13 @@ if [ -f $FUNC_TEST_SCRIPT ]; then
 else
 
     if [[ "$GITHUB_WORKFLOW" == "Galaxy Nightly CI/CD" ]]; then
-        pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8
-        pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m "not parallel"
+        pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8  --nightly
+        pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m "not parallel"  --nightly
 
     
     else
-        pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m "parallel and not nightly" -n 8
-        pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m "not parallel and not nightly"
+        pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8
+        pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m "not parallel"
 
     
     fi

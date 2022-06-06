@@ -122,8 +122,11 @@ fi
 cd ..
 
 
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.13
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git
 cd pulp_ansible
+
+git fetch --depth=1 origin 9630d9ec681434146450c8994fccd8e42e72a272
+git checkout 9630d9ec681434146450c8994fccd8e42e72a272
 
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
   git fetch --depth=1 origin pull/$PULP_ANSIBLE_PR_NUMBER/head:$PULP_ANSIBLE_PR_NUMBER
@@ -132,8 +135,11 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.10.2
+git clone --depth=1 https://github.com/pulp/pulp_container.git
 cd pulp_container
+
+git fetch --depth=1 origin 4ee5416653277034b4e52b312b7b3710fe128d80
+git checkout 4ee5416653277034b4e52b312b7b3710fe128d80
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
   git fetch --depth=1 origin pull/$PULP_CONTAINER_PR_NUMBER/head:$PULP_CONTAINER_PR_NUMBER
@@ -151,8 +157,6 @@ if [ -n "$GALAXY_IMPORTER_PR_NUMBER" ]; then
 fi
 
 cd ..
-
-
 
 # Intall requirements for ansible playbooks
 pip install docker netaddr boto3 ansible
