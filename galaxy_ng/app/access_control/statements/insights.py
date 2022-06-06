@@ -73,6 +73,14 @@ _deny_all = [
     },
 ]
 
+_read_only = [
+    {
+        "action": ["list", "retrieve"],
+        "principal": "authenticated",
+        "effect": "allow",
+    },
+]
+
 INSIGHTS_STATEMENTS = {
     'CollectionViewSet': _collection_statements,
     'pulp_ansible/v3/collections': _collection_statements,
@@ -80,6 +88,8 @@ INSIGHTS_STATEMENTS = {
     'pulp_ansible/v3/collection-versions/docs': _collection_statements,
     'pulp_ansible/v3/collections/imports': _collection_statements,
     'pulp_ansible/v3/repo-metadata': _collection_statements,
+
+    'repositories/ansible/ansible': _read_only,
 
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
     # For now endpoints are temporary deactivated
