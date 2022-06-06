@@ -30,7 +30,7 @@ class ContainerRegistryRemoteViewSet(
     queryset = models.ContainerRegistryRemote.objects.all()
     serializer_class = serializers.ContainerRegistryRemoteSerializer
     permission_classes = [access_policy.ContainerRegistryRemoteAccessPolicy]
-    endpoint_name = "galaxy/registry-remote"
+    endpoint_name = "galaxy_ng/registry-remote"
     LOCKED_ROLES = GALAXY_LOCKED_ROLES
 
 
