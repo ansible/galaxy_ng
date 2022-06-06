@@ -11,4 +11,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run script to validate commits for both pull request and a push
-        run: make pulp/template-plugin-check
+        run: make pulp/plugin-template-check
