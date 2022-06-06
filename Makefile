@@ -47,9 +47,14 @@ requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, an
 	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in --upgrade
 	pip-compile -o requirements/requirements.standalone.txt setup.py requirements/requirements.standalone.in --upgrade
 
-.PHONY: pulp/template-plugin-check
-pulp/template-plugin-check:
+.PHONY: pulp/plugin-template-check
+pulp/plugin-template-check:
 	./dev/common/check_pulp_template.sh
+
+.PHONY: pulp/run-plugin-template-script
+pulp/run-plugin-template-script:
+	echo "Running plugin_template script in sibling directory"
+	cd ../plugin_template/ && ./plugin-template --github galaxy_ng
 
 # Repository management
 
