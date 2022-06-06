@@ -6,12 +6,12 @@ set -o pipefail
 
 readonly WITH_MIGRATIONS="${WITH_MIGRATIONS:-0}"
 readonly WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-0}"
+readonly DEV_EXTRAS_REQUIRE="${DEV_EXTRAS_REQUIRE:-}"
 readonly DEV_SOURCE_PATH="${DEV_SOURCE_PATH:-}"
 readonly LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}"
 readonly WAIT_FOR_MIGRATIONS="${WAIT_FOR_MIGRATIONS:-0}"
 readonly ENABLE_SIGNING="${ENABLE_SIGNING:-0}"
 readonly PULP_GALAXY_DEPLOYMENT_MODE="${PULP_GALAXY_DEPLOYMENT_MODE:-}"
-
 
 log_message() {
     echo "$@" >&2
@@ -27,12 +27,21 @@ install_local_deps() {
         if [[ -d "$src_path" ]]; then
             log_message "Installing path ${item} in editable mode."
 
-            if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then
-                pip install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
-            else
+            # If DEV_EXTRAS_REQUIRE is set, we need to install the extras
+            # so append '[extra]' to the end of src_path variable.
+            # but only if src_path equals galaxy_ng
+            if [[ "${item}" == "galaxy_ng" ]] && [[ -n "${DEV_EXTRAS_REQUIRE}" ]]; then
+                src_path="$src_path[$DEV_EXTRAS_REQUIRE]"
+                log_message "INFO: Installing with extras: ${src_path}"
                 pip install --no-cache-dir --editable "$src_path" >/dev/null
+            else
+                if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then
+                    pip install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
+                else
+                    pip install --no-cache-dir --editable "$src_path" >/dev/null
+                fi 
             fi
-
+            
         else
             log_message "WARNING: Source path ${item} is not a directory."
         fi

@@ -97,7 +97,6 @@ requirements = [
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",
     "dynaconf>=3.1.7",
-    "django-auth-ldap==4.0.0",
 ]
 
 
@@ -133,6 +132,7 @@ if unpin_requirements:
     ]
     print("Installing with unpinned DEV_SOURCE_PATH requirements", requirements)
 
+
 setup(
     name=package_name,
     version=version,
@@ -144,6 +144,15 @@ setup(
     python_requires=">=3.8",
     setup_requires=["wheel"],
     install_requires=requirements,
+    extras_require={
+        "ldap": ["django-auth-ldap==4.0.0"],
+        # The following two keys are added as empty for now
+        # installers and RPM build can from now start using
+        # e.g: `pip install galaxy_ng[standalone,ldap]`
+        # and will be populated as soon as AAH-895 is resolved.
+        "standalone": [],
+        "insights": [],
+    },
     include_package_data=True,
     packages=find_packages(exclude=["tests", "tests.*"]),
     classifiers=(

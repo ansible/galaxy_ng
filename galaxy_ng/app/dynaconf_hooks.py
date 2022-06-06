@@ -2,10 +2,12 @@ import json
 import os
 from typing import Any, Dict, List
 
-import ldap
 import pkg_resources
-from django_auth_ldap.config import LDAPSearch
-from dynaconf import Dynaconf, Validator
+from dynaconf import Dynaconf, Validator, ValidationError
+
+
+class GalaxyConfigurationError(ValidationError):
+    """Raised when the configuration is invalid"""
 
 
 def post(settings: Dynaconf) -> Dict[str, Any]:
@@ -356,12 +358,6 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
     AUTH_LDAP_GROUP_SEARCH_FILTER = settings.get("AUTH_LDAP_GROUP_SEARCH_FILTER", default=None)
     AUTH_LDAP_USER_ATTR_MAP = settings.get("AUTH_LDAP_USER_ATTR_MAP", default={})
 
-    AUTH_LDAP_SCOPE_MAP = {
-        "BASE": ldap.SCOPE_BASE,
-        "ONELEVEL": ldap.SCOPE_ONELEVEL,
-        "SUBTREE": ldap.SCOPE_SUBTREE,
-    }
-
     # Add settings if LDAP Auth values are provided
     if all(
         [
@@ -376,6 +372,24 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
             AUTH_LDAP_GROUP_SEARCH_FILTER,
         ]
     ):
+
+        try:
+            import ldap
+            from django_auth_ldap.config import LDAPSearch
+        except ImportError as e:
+            raise GalaxyConfigurationError(
+                "LDAP Auth is enabled but the ldap library is not installed. "
+                "Please install the django-auth-ldap library and try again. "
+                "e.g: 'pip install galaxy_ng[ldap]'. "
+                f"Error: {e}"
+            )
+
+        AUTH_LDAP_SCOPE_MAP = {
+            "BASE": ldap.SCOPE_BASE,
+            "ONELEVEL": ldap.SCOPE_ONELEVEL,
+            "SUBTREE": ldap.SCOPE_SUBTREE,
+        }
+
         # The following is exposed on UI settings API to be uses as a feature flag for testing.
         data["GALAXY_AUTH_LDAP_ENABLED"] = True
 

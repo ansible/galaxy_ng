@@ -7,4 +7,11 @@ COPY requirements/requirements.standalone.txt /tmp/requirements.standalone.txt
 RUN set -ex; \
     if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
     pip install --no-cache-dir --requirement /tmp/requirements.standalone.txt; \
+    PULP_CONTENT_ORIGIN=x django-admin collectstatic; \
     fi
+
+USER root
+
+RUN dnf install -y gettext openldap-devel;
+
+USER galaxy

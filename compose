@@ -32,8 +32,13 @@ fi
 
 echo "INFO: Using compose profile ${COMPOSE_PROFILE}" >&2
 echo "INFO: ${DEV_SOURCE_PATH:-No} packages installed from source" >&2
+echo "INFO: [${DEV_EXTRAS_REQUIRE:-}] extra requirement for galaxy_ng" >&2
 echo "INFO: Image suffix ${DEV_IMAGE_SUFFIX:-is unset}" >&2
 echo "INFO: Volume suffix ${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX:-is unset}}" >&2
+
+# choose between requirements.standalone.txt and requirements.insights.txt based on the COMPOSE_PROFILE
+declare -xr REQUIREMENT_FILENAME="requirements.$(echo $COMPOSE_PROFILE | cut -d "-" -f 1).txt"
+echo "INFO: Using requirements file ${REQUIREMENT_FILENAME}" >&2
 
 compose_args=(
   -f 'dev/docker-compose.yml'
@@ -62,5 +67,6 @@ declare -xr DEV_IMAGE_SUFFIX="${DEV_IMAGE_SUFFIX:-}"
 declare -xr DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX}}"
 declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng${DEV_IMAGE_SUFFIX:-}}"
 declare -xr WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-1}"
+declare -xr DEV_EXTRAS_REQUIRE="${DEV_EXTRAS_REQUIRE:-}"
 
 exec docker-compose "${compose_args[@]}" "$@"

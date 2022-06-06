@@ -5,9 +5,12 @@ ARG USER_NAME=galaxy
 ARG USER_GROUP=galaxy
 ARG COMPOSE_PROFILE
 ARG LOCK_REQUIREMENTS
+ARG DEV_EXTRAS_REQUIRE
 ARG DEV_SOURCE_PATH
 ARG DEV_IMAGE_SUFFIX
 ARG DEV_VOLUME_SUFFIX
+ARG REQUIREMENT_FILENAME
+ARG WITH_DEV_INSTALL
 
 ENV LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
@@ -15,9 +18,11 @@ ENV LANG=en_US.UTF-8 \
     DJANGO_SETTINGS_MODULE=pulpcore.app.settings \
     COMPOSE_PROFILE="${COMPOSE_PROFILE}" \
     LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS}" \
+    DEV_EXTRAS_REQUIRE="${DEV_EXTRAS_REQUIRE}" \
     DEV_SOURCE_PATH="${DEV_SOURCE_PATH}" \
     DEV_IMAGE_SUFFIX="${DEV_IMAGE_SUFFIX}" \
-    DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX}"
+    DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX}" \
+    WITH_DEV_INSTALL="${WITH_DEV_INSTALL}"
 
 RUN set -ex; \
     id --group "${USER_GROUP}" &>/dev/null \
@@ -40,7 +45,6 @@ RUN set -ex; \
         libpq-devel \
         pinentry \
         make \
-        openldap-devel \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \
@@ -63,28 +67,23 @@ RUN set -ex; \
 ENV PATH="/venv/bin:${PATH}" \
     VIRTUAL_ENV="/venv"
 
-COPY ./requirements/requirements.common.txt /tmp/requirements.txt
+COPY ./requirements/${REQUIREMENT_FILENAME} /tmp/requirements.txt
 COPY ./dev/common/ansible-sign.key /tmp/ansible-sign.key
+COPY --chown=${USER_NAME}:${USER_GROUP} . /app
 
 RUN set -ex; \
     pip install --no-cache-dir --upgrade pip \
     && if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
-    pip install --no-cache-dir --requirement /tmp/requirements.txt; fi
-
-# Install application
-COPY --chown=${USER_NAME}:${USER_GROUP} . /app
-
-# When LOCK_REQUIREMENTS is disabled avoid running collectstatic here
-# on that case developer should run collectstatic manually
-RUN set -ex; \
-    pip install --no-cache-dir --editable /app \
-    && pip install -r /app/requirements/requirements.dev.txt
+    pip install --no-cache-dir --requirement /tmp/requirements.txt; fi \
+    && pip install -r /app/requirements/requirements.dev.txt \
+    # install app here only if WITH_DEV_INSTALL equals 0
+    # if WITH_DEV_INSTALL=1, install app as editable in the entrypoint.sh
+    && if [[ "${WITH_DEV_INSTALL}" -eq "0" ]]; then \
+    pip install /app; fi
 
 USER root:root
 RUN set -ex; \
-    mkdir --mode=2775 -p /etc/pulp/certs/ && \
-    if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
-    PULP_CONTENT_ORIGIN=x django-admin collectstatic; fi
+    mkdir --mode=2775 -p /etc/pulp/certs/
 
 # Finalize installation
 RUN set -ex; \

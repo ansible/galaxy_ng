@@ -23,7 +23,7 @@ COPY requirements/requirements.insights.txt /tmp/requirements.txt
 RUN set -ex; \
     DNF="dnf -y --disableplugin=subscription-manager" && \
     INSTALL_PKGS="glibc-langpack-en git-core libpq python38" && \
-    INSTALL_PKGS_BUILD="gcc libpq-devel python38-devel openldap-devel" && \
+    INSTALL_PKGS_BUILD="gcc libpq-devel python38-devel" && \
     LANG=C ${DNF} install ${INSTALL_PKGS} ${INSTALL_PKGS_BUILD} && \
     python3 -m venv "${VIRTUAL_ENV}" && \
     PYTHON="${VIRTUAL_ENV}/bin/python3" && \

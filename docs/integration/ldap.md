@@ -20,7 +20,7 @@ A running and acessible `LDAP` or `AD` server.
 
 Checking if your ldap server is up and running:
 
-> You need ldap-utils installed
+> You need ldap-utils installed on your local host
 
 ```bash
 # List all users
@@ -30,7 +30,22 @@ ldapsearch -H ldap://localhost:10389 -x -b "ou=people,dc=planetexpress,dc=com" -
 ldapsearch -H ldap://localhost:10389 -x -b "ou=people,dc=planetexpress,dc=com" -D "cn=admin,dc=planetexpress,dc=com" -w GoodNewsEveryone "(objectClass=Group)"
 ```
 
+## Installing server dependency
+
+Galaxy required `django-auth-ldap` to be installed, this can be achieved by installing galaxy_ng with
+
+```bash
+pip install galaxy_ng[standalone,ldap]
+```
+
+If you are using pulp-installer or platform installer provide the extra requirement on the yaml file.
+
+!!! info
+    If you are running the dev environment just add `DEV_EXTRAS_REQUIRE='standalone,ldap'` to the `.compose.env` file.
+
+
 ## Enabling Galaxy LDAP integration
+
 
 The following settings can be added to either `/etc/pulp/settings.py` or exported as environment
 variables prefixed with `PULP_`.
