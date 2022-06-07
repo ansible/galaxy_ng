@@ -111,10 +111,10 @@ fi
 
 
 
-git clone --depth=1 https://github.com/pulp/pulpcore.git --branch ea3b9c42a2a7a63e6292d94fa05173f178101076
+git clone --depth=1 https://github.com/pulp/pulpcore.git --branch main
 
 cd pulpcore
-git checkout ea3b9c42a2a7a63e6292d94fa05173f178101076
+
 if [ -n "$PULPCORE_PR_NUMBER" ]; then
   git fetch --depth=1 origin pull/$PULPCORE_PR_NUMBER/head:$PULPCORE_PR_NUMBER
   git checkout $PULPCORE_PR_NUMBER

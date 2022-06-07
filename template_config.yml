@@ -27,6 +27,7 @@ check_stray_pulpcore_imports: true
 cherry_pick_automation: false
 ci_env:
   GITHUB_USER: ${{ github.event.pull_request.user.login }}
+  LOCK_REQUIREMENTS: 0
 ci_trigger: '{pull_request: {branches: [''**'']}, push: {branches: [''**'']}}'
 core_import_allowed:
 - pulpcore.app.*viewsets
@@ -76,7 +77,7 @@ pulp_settings:
   rh_entitlement_required: insights
 pulpcore_branch: main
 pulpcore_pip_version_specifier: null
-pulpcore_revision: 6e44fb2fe609f92dc1f502b19c67abd08879148f
+pulpcore_revision: null
 pulpprojectdotorg_key_id: null
 pydocstyle: true
 pypi_username: null
