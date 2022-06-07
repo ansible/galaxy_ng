@@ -38,7 +38,7 @@ class GroupModelPermissionsMixin:
             # If the model is a proxy model, get the original model since pulp
             # doesn't allow us to assign permissions to proxied models.
             if self._meta.proxy:
-                obj=self._meta.concrete_model.objects.get(pk=self.pk)
+                obj = self._meta.concrete_model.objects.get(pk=self.pk)
 
             current_groups = get_groups_with_perms_attached_roles(
                 obj, include_model_permissions=False)

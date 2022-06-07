@@ -32,13 +32,13 @@ TAG=ci_build
 if [ -e $REPO_ROOT/../pulp_ansible ]; then
   PULP_ANSIBLE=./pulp_ansible
 else
-  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@main
+  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@e0df10e19782e1d207c179283d4de5a890efda50
 fi
 
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
 else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@main
+  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@43f7987176148bf85785b436f7c65a04c802b5d6
 fi
 
 if [ -e $REPO_ROOT/../galaxy-importer ]; then

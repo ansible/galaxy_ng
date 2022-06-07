@@ -33,12 +33,12 @@ bleach==3.3.1
     # via galaxy-importer
 bleach-allowlist==1.0.3
     # via galaxy-importer
-boto3==1.24.2
+boto3==1.24.3
     # via
     #   -r requirements/requirements.insights.in
     #   django-storages
     #   watchtower
-botocore==1.27.2
+botocore==1.27.3
     # via
     #   boto3
     #   s3transfer
@@ -160,7 +160,7 @@ pulp-ansible @ git+https://git@github.com/pulp/pulp_ansible@e0df10e19782e1d207c1
     # via galaxy-ng (setup.py)
 pulp-container @ git+https://git@github.com/pulp/pulp_container@43f7987176148bf85785b436f7c65a04c802b5d6
     # via galaxy-ng (setup.py)
-pulpcore @ git+https://git@github.com/pulp/pulpcore@ea3b9c42a2a7a63e6292d94fa05173f178101076
+pulpcore @ git+https://git@github.com/pulp/pulpcore@6e44fb2fe609f92dc1f502b19c67abd08879148f
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible

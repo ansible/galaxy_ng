@@ -111,10 +111,10 @@ fi
 
 
 
-git clone --depth=1 https://github.com/pulp/pulpcore.git --branch main
+git clone --depth=1 https://github.com/pulp/pulpcore.git --branch ea3b9c42a2a7a63e6292d94fa05173f178101076
 
 cd pulpcore
-
+git checkout ea3b9c42a2a7a63e6292d94fa05173f178101076
 if [ -n "$PULPCORE_PR_NUMBER" ]; then
   git fetch --depth=1 origin pull/$PULPCORE_PR_NUMBER/head:$PULPCORE_PR_NUMBER
   git checkout $PULPCORE_PR_NUMBER
@@ -122,8 +122,11 @@ fi
 cd ..
 
 
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch main
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git
 cd pulp_ansible
+
+git fetch --depth=1 origin e0df10e19782e1d207c179283d4de5a890efda50
+git checkout e0df10e19782e1d207c179283d4de5a890efda50
 
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
   git fetch --depth=1 origin pull/$PULP_ANSIBLE_PR_NUMBER/head:$PULP_ANSIBLE_PR_NUMBER
@@ -132,8 +135,11 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch main
+git clone --depth=1 https://github.com/pulp/pulp_container.git
 cd pulp_container
+
+git fetch --depth=1 origin 43f7987176148bf85785b436f7c65a04c802b5d6
+git checkout 43f7987176148bf85785b436f7c65a04c802b5d6
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
   git fetch --depth=1 origin pull/$PULP_CONTAINER_PR_NUMBER/head:$PULP_CONTAINER_PR_NUMBER
