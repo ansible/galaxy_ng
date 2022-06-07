@@ -102,7 +102,7 @@ requirements = [
 
 # https://softwareengineering.stackexchange.com/questions/223634/what-is-meant-by-now-you-have-two-problems
 def strip_package_name(spec):
-    operators = ['=', '>', '<', '~', '!', '^']
+    operators = ['=', '>', '<', '~', '!', '^', '@']
     for idc, char in enumerate(spec):
         if char in operators:
             return spec[:idc]
