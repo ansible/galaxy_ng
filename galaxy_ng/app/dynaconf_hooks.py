@@ -161,27 +161,21 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
 
 
 def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
-    """Configure keycloak settings for galaxy.
+    """Configure social auth settings for galaxy.
 
     This function returns a dictionary that will be merged to the settings.
     """
 
     data = {}
 
-    '''
-    # Add to authentication backends
-    data["AUTHENTICATION_BACKENDS"] = [
-        "social_core.backends.github.GithubOAuth2",
-        "dynaconf_merge",
-    ]
-    '''
+    SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
+    SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
 
-    backends = settings.get("AUTHENTICATION_BACKENDS", default=[])
-    #backends.append("social_core.backends.github.GithubOAuth2")
-    #backends.append("galaxy_ng.social.GalaxyOAuth2")
-    backends.append("galaxy_ng.social.GalaxyNGOAuth2")
-    backends.append("dynaconf_merge")
-    data["AUTHENTICATION_BACKENDS"] = backends
+    if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
+        backends = settings.get("AUTHENTICATION_BACKENDS", default=[])
+        backends.append("galaxy_ng.social.GalaxyNGOAuth2")
+        backends.append("dynaconf_merge")
+        data["AUTHENTICATION_BACKENDS"] = backends
 
     return data
 
