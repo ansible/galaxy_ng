@@ -76,7 +76,6 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
 
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
-@pytest.mark.standalone_only
 def test_collection_auto_sign_on_approval(api_client, config, settings, upload_artifact):
     """Test whether a collection is uploaded and automatically signed on approval
     when GALAXY_AUTO_SIGN_COLLECTIONS is set to true.
@@ -148,7 +147,6 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, upload_a
 
 
 @pytest.mark.collection_signing
-@pytest.mark.standalone_only
 @pytest.mark.parametrize(
     "sign_url",
     [
@@ -236,7 +234,6 @@ def test_collection_sign_on_demand(api_client, config, settings, upload_artifact
 
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
-@pytest.mark.standalone_only
 def test_collection_move_with_signatures(api_client, config, settings, upload_artifact):
     """Test whether a collection can be moved from repo to repo with its
     signatures.
@@ -327,7 +324,6 @@ def test_collection_move_with_signatures(api_client, config, settings, upload_ar
 
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
-@pytest.mark.standalone_only
 def test_upload_signature(api_client, config, settings, upload_artifact):
     """
     1. If staging repository doesn't have a keyring, skip test
