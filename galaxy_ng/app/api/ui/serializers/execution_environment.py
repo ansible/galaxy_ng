@@ -38,7 +38,7 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.ListField)
     def get_owners(self, namespace):
-        return get_users_with_perms(namespace, with_group_users=False).values_list(
+        return get_users_with_perms(namespace, with_group_users=False, for_concrete_model=True).values_list(
             "username", flat=True
         )
 

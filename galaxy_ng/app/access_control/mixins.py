@@ -33,16 +33,23 @@ class GroupModelPermissionsMixin:
         if self._state.adding:
             self._groups = groups
         else:
+            obj = self
+
+            # If the model is a proxy model, get the original model since pulp
+            # doesn't allow us to assign permissions to proxied models.
+            if self._meta.proxy:
+                obj=self._meta.concrete_model.objects.get(pk=self.pk)
+
             current_groups = get_groups_with_perms_attached_roles(
-                self, include_model_permissions=False, for_concrete_model=True)
+                obj, include_model_permissions=False)
             for group in current_groups:
                 for perm in current_groups[group]:
-                    remove_role(perm, group, self)
+                    remove_role(perm, group, obj)
 
             for group in groups:
                 for role in groups[group]:
                     try:
-                        assign_role(role, group, self)
+                        assign_role(role, group, obj)
                     except BadRequest:
                         raise ValidationError(
                             detail={'groups': _('Role {role} does not exist or does not '
