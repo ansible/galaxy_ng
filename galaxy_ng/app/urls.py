@@ -63,3 +63,6 @@ if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
     urlpatterns.append(url("", include("social_django.urls", namespace="social")))
     urlpatterns.append(path("login/",
                        lambda request: redirect("/login/keycloak/", permanent=False)))
+
+if settings.get("SOCIAL_AUTH_GITHUB_KEY"):
+    urlpatterns.append(url('', include('social_django.urls', namespace='github')))

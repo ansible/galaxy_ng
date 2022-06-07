@@ -18,6 +18,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
 
     data.update(configure_logging(settings))
     data.update(configure_keycloak(settings))
+    data.update(configure_socialauth(settings))
     data.update(configure_cors(settings))
     data.update(configure_feature_flags(settings))
     data.update(configure_pulp_ansible(settings))
@@ -118,6 +119,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         # Add to authentication backends
         data["AUTHENTICATION_BACKENDS"] = [
             "social_core.backends.keycloak.KeycloakOAuth2",
+            "social_core.backends.github.GithubOAuth2",
             "dynaconf_merge",
         ]
 
@@ -154,6 +156,32 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
                 },
             },
         ]
+
+    return data
+
+
+def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
+    """Configure keycloak settings for galaxy.
+
+    This function returns a dictionary that will be merged to the settings.
+    """
+
+    data = {}
+
+    '''
+    # Add to authentication backends
+    data["AUTHENTICATION_BACKENDS"] = [
+        "social_core.backends.github.GithubOAuth2",
+        "dynaconf_merge",
+    ]
+    '''
+
+    backends = settings.get("AUTHENTICATION_BACKENDS", default=[])
+    #backends.append("social_core.backends.github.GithubOAuth2")
+    #backends.append("galaxy_ng.social.GalaxyOAuth2")
+    backends.append("galaxy_ng.social.GalaxyNGOAuth2")
+    backends.append("dynaconf_merge")
+    data["AUTHENTICATION_BACKENDS"] = backends
 
     return data
 

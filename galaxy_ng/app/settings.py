@@ -22,6 +22,7 @@ MIDDLEWARE = [
 INSTALLED_APPS = [
     'rest_framework.authtoken',
     'dynaconf_merge',
+    'social_django'
 ]
 
 
@@ -195,3 +196,16 @@ GALAXY_AUTO_SIGN_COLLECTIONS = False
 
 # This sets the name of the signing service to be used for signing
 GALAXY_COLLECTION_SIGNING_SERVICE = None
+
+# SOCIAL AUTH
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_JSONFIELD_CUSTOM = 'django.db.models.JSONField'
+SOCIAL_AUTH_URL_NAMESPACE = 'github'
+SOCIAL_AUTH_GITHUB_KEY = '3a7ae2a0618cc786fff4'
+SOCIAL_AUTH_GITHUB_SECRET = '9af43d7337cdc8c701e7fc301649d3ebaf68142c'
+SESSION_COOKIE_SAMESITE = None
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = ['state']
+SESSION_COOKIE_SECURE = False
+
+>>>>>>> c7e98c0 (social auth kinda works)
