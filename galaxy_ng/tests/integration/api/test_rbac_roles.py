@@ -34,6 +34,23 @@ from .rbac_actions.collections import (
     # upload_collection_to_namespace,
     # upload_collection_to_namespace_object,
 )
+from .rbac_actions.exec_env import (
+    create_exec_env,
+    delete_exec_env,
+    change_exec_env_desc,
+    change_exec_env_readme,
+    # create_containers_under_existing_container_namespace,
+    # push_containers_to_existing_container_namespace,
+    # change_container_namespace,
+    # change_container_namespace_object,
+    # tag_untag_container_namespace,
+    # sync_remote_container,
+    create_container_registry_remote,
+    change_container_registry_remote,
+    delete_container_registry_remote,
+    # create_remote_container,
+    index_exec_env,
+)
 
 log = logging.getLogger(__name__)
 
@@ -54,8 +71,27 @@ GLOBAL_ACTIONS = [
     view_tasks,
     # cancel_tasks,
     create_collection_namespace,
+    # create_collection_namespace_object,
     change_collection_namespace,
     delete_collection_namespace,
+    configure_collection_sync,
+    launch_collection_sync,
+    view_sync_configuration,
+    deprecate_collections,
+    # deprecate_collections_object,
+    undeprecate_collections,
+    # undeprecate_collections_object,
+    # upload_collection_to_namespace,
+    # upload_collection_to_namespace_object,
+    # EE actions requiring account
+    # create_container_registry_remote,
+    # change_container_registry_remote,
+    # delete_container_registry_remote,
+    # create_exec_env,
+    # delete_exec_env,
+    # change_exec_env_desc,
+    # change_exec_env_readme,
+    # index_exec_env,
 ]
 # OBJECT_ACTIONS = [
 #     create_collection_namespace_object,
@@ -78,7 +114,23 @@ ROLES_TO_TEST = {
         # approve_reject_collections,
         deprecate_collections,
         undeprecate_collections,
-        #  ## insert EE actions here
+        # EE actions requiring account
+        # create_exec_env,
+        # delete_exec_env,
+        # change_exec_env_desc,
+        # change_exec_env_readme,
+        # create_container_registry_remote,
+        # change_container_registry_remote,
+        # delete_container_registry_remote,
+        # index_exec_env,
+        # EE subprocess-based actions
+        # create_containers_under_existing_container_namespace,
+        # push_containers_to_existing_container_namespace,
+        # change_container_namespace,
+        # change_container_namespace_object,
+        # tag_untag_container_namespace,
+        # sync_remote_container,
+        # create_remote_container,
     },
     "galaxy.collection_admin": {
         view_groups,  # error?
@@ -98,12 +150,13 @@ ROLES_TO_TEST = {
     "galaxy.collection_publisher": {
         view_groups,  # error?
         view_tasks,  # error?
+        view_sync_configuration,  # error?
         create_collection_namespace,
         change_collection_namespace,
         # upload_collection_to_namespace,
     },
     "galaxy.collection_curator": {
-        create_collection_namespace,  # error?
+        view_sync_configuration,  # error?
         view_groups,  # error?
         view_tasks,  # error?
         configure_collection_sync,
@@ -112,14 +165,14 @@ ROLES_TO_TEST = {
         # approve_reject_collections,
     },
     "galaxy.collection_namespace_owner": {
-        create_collection_namespace,  # error?
+        view_sync_configuration,  # error?
         view_groups,  # error?
         view_tasks,  # error?
         change_collection_namespace,
         # upload_collection_to_namespace,
     },
     "galaxy.group_admin": {
-        create_collection_namespace,  # error?
+        view_sync_configuration,  # error?
         view_tasks,  # error?
         view_groups,
         delete_groups,
@@ -127,7 +180,7 @@ ROLES_TO_TEST = {
         change_groups,
     },
     "galaxy.user_admin": {
-        create_collection_namespace,  # error?
+        view_sync_configuration,  # error?
         view_groups,  # error?
         view_tasks,  # error?
         view_users,
@@ -136,7 +189,7 @@ ROLES_TO_TEST = {
         change_users,
     },
     "galaxy.task_admin": {
-        create_collection_namespace,  # error?
+        view_sync_configuration,  # error?
         view_groups,  # error?
         view_tasks,
         # cancel_tasks,
@@ -159,9 +212,6 @@ def test_role_actions(role):
     for action in GLOBAL_ACTIONS:
         expect_pass = action in expected_allows
         action(user, PASSWORD, expect_pass)
-    #     print(f'action:{action}')
-    #     print(f'expected_allows:{expected_allows}')
-    #     print(f'expect_pass:{expect_pass}')
 
     # Test object actions
     # for action in OBJECT_ACTIONS:

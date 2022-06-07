@@ -1,5 +1,5 @@
-import datetime
 import requests
+from datetime import datetime
 
 from .utils import (
     ADMIN_CREDENTIALS,
@@ -9,12 +9,10 @@ from .utils import (
     wait_for_task,
 )
 
-requirements_file = "collections:\n  - name: newswangerd.collection_demo\n    version: 1.0.11\n    source: https://galaxy.ansible.com"
+requirements_file = "collections:\n  - name: newswangerd.collection_demo\n    version: 1.0.11\n    source: https://galaxy.ansible.com"  # noqa: 501
 
 
 def create_collection_namespace(user, password, expect_pass):
-    print(f'user:{user}')
-    print(f'expect_pass:{expect_pass}')
     response = requests.post(
         f"{API_ROOT}_ui/v1/namespaces/",
         json={
@@ -24,9 +22,8 @@ def create_collection_namespace(user, password, expect_pass):
                 "object_roles": ["galaxy.content_admin"]
             }],
         },
-        auth=('rbac_roles_user_izibxxpzey', 'p@ssword!'),
+        auth=(user['username'], password),
     )
-    print(f'response.status_code:{response.status_code}')
     if expect_pass:
         assert response.status_code == 201
     else:
@@ -90,18 +87,6 @@ def delete_collection_namespace(user, password, expect_pass):
 
 
 def upload_collection_to_namespace(user, password, expect_pass):
-    # Make and build a collection to upload
-    # ansible-galaxy collection init foo.bar
-    # cd foo/bar
-    # mkdir meta
-    # cd meta
-    # printf "requires_ansible: '>=2.9.10,<2.11.5'" > runtime.yml
-    # cd ..
-    # ansible-galaxy collection build
-    # cd $TMPDIR
-
-    # Upload collection
-    # ansible-galaxy collection publish foo-bar-*.tar.gz
     pass
 
 
@@ -191,17 +176,17 @@ def deprecate_collections(user, password, expect_pass):
         auth=ADMIN_CREDENTIALS,
     )
     # Sync community collection
-    response = requests.post(
+    sync_response = requests.post(
         f"{API_ROOT}content/community/v3/sync/",
         auth=ADMIN_CREDENTIALS,
     )
-    wait_for_task(response)
+    wait_for_task(sync_response, 'content/community/v3/tasks/')
     # Deprecate community collection
     col = "collection_demo"
     ns = "newswangerd"
     response = requests.patch(
         f'{API_ROOT}v3/plugin/ansible/content/community/collections/index/{ns}/{col}/',
-        auth=ADMIN_CREDENTIALS,
+        auth=(user['username'], password),
     )
     if expect_pass:
         assert response.status_code == 202

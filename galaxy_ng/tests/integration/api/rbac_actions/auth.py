@@ -5,13 +5,9 @@ from .utils import (
     ADMIN_CREDENTIALS,
     API_ROOT,
     NAMESPACE,
-    PASSWORD,
     PULP_API_ROOT,
     gen_string,
 )
-# rbac_roles_user_yauxpkawsg
-# p@ssword!
-# auth=('rbac_roles_user_yauxpkawsg', 'p@ssword!')
 
 
 # Groups

@@ -10,7 +10,7 @@ NAMESPACE = "rbac_roles"
 PASSWORD = "p@ssword!"
 ADMIN_CREDENTIALS = ("admin", "admin")
 API_ROOT = "http://localhost:5001/api/automation-hub/"
-PULP_API_ROOT = "http://localhost:5001/pulp/api/v3/"
+PULP_API_ROOT = "http://localhost:5001/api/automation-hub/pulp/api/v3/"
 
 
 class TaskWaitingTimeout(Exception):
@@ -38,7 +38,6 @@ def create_group_with_user_and_role(user, role):
         json={"role": role, "content_object": None},
         auth=ADMIN_CREDENTIALS
     )
-    # collect group_id for cleanup?
     return group_id
 
 
@@ -56,23 +55,22 @@ def create_user(username, password):
         },
         auth=ADMIN_CREDENTIALS,
     )
-    # collect user_id for cleanup?
     return response.json()
 
 
-def wait_for_task(resp, timeout=300):
+def wait_for_task(resp, path, timeout=300):
     ready = False
-    url = urljoin("http://localhost:5001", resp["task"])
+    url = urljoin(f"{API_ROOT}{path}", f'{resp.json()["task"]}/')
     wait_until = time.time() + timeout
     while not ready:
         if wait_until < time.time():
             raise TaskWaitingTimeout()
         try:
-            resp = requests.get(url)
+            resp = requests.get(url, auth=ADMIN_CREDENTIALS)
         except GalaxyError as e:
             if "500" not in str(e):
                 raise
         else:
-            ready = resp["state"] not in ("running", "waiting")
+            ready = resp.json()["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
