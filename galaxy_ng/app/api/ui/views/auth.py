@@ -43,16 +43,12 @@ class LoginView(api_base.GenericAPIView):
         return Response(status=http_code.HTTP_204_NO_CONTENT)
 
     def post(self, request, *args, **kwargs):
-        print(f'LoginView POST {args} {kwargs}')
-        print(f'LoginView POST {self.request.data}')
         serializer = self.get_serializer(data=self.request.data)
 
         serializer.is_valid(raise_exception=True)
 
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
-        print(f'USERNAME: {username}')
-        print(f'PASSWORD: {password}')
 
         user = django_auth.authenticate(request, username=username, password=password)
         if user is None:
