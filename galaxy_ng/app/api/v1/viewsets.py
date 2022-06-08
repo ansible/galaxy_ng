@@ -67,6 +67,7 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         for keyword in ['owner__username', 'github_user', 'namespace']:
             if self.request.query_params.get(keyword):
                 github_user = self.request.query_params[keyword]
+                break
 
         name = self.request.query_params.get('name')
         if github_user and name:
@@ -100,7 +101,15 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         versions = role.full_metadata.get('versions', [])
         #return Response(versions)
         transformed = LegacyRoleVersionsSerializer(versions)
-        return Response(transformed.data)
+        paginated = {
+            'count': len(transformed.data),
+            'next': None,
+            'next_link': None,
+            'previous': None,
+            'previous_link': None,
+            'results': transformed.data[:]
+        }
+        return Response(paginated)
 
     def create(self, validated_data):
         #print(f'CREATE: {validated_data}')
@@ -148,7 +157,7 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
     def get_task(self, request):
         #print(f'GET TASK: {args}')
         #print(f'GET TASK: {kwargs}')
-        print(f'GET TAKS: {request}')
+        print(f'GET TASK: {request}')
         task_id = int(request.GET.get('id', None))
         print(f'GET TASK id: {task_id}')
 

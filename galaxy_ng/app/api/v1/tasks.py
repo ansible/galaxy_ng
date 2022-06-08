@@ -64,8 +64,13 @@ def get_role_version(
         print(cmd)
         pid = subprocess.run(cmd, shell=True)
 
+    print('TAG FETCH')
     pid = subprocess.run('git fetch --tags', shell=True, cwd=checkout_path, stdout=subprocess.PIPE)
+    assert pid.returncode == 0, 'fetching tags failed'
+    print('TAG LIST')
     pid = subprocess.run('git tag -l', shell=True, cwd=checkout_path, stdout=subprocess.PIPE)
+    assert pid.returncode == 0, 'listing tags failed'
+
     tags = pid.stdout.decode('utf-8')
     tags = tags.split('\n')
     tags = [x.strip() for x in tags if x.strip()]
@@ -107,6 +112,10 @@ def get_tag_commit_date(git_url, tag, checkout_path=None):
 def legacy_role_import(github_user=None, github_repo=None, github_reference=None, alternate_role_name=None):
     print('START LEGACY ROLE IMPORT')
 
+    # prevent empty strings?
+    if not github_reference:
+        github_reference = None
+
     role_name = alternate_role_name or github_repo.replace('ansible-role-', '')
     if LegacyNamespace.objects.filter(name=github_user).count() == 0:
         print(f'CREATE NEW NAMESPACE {github_user}')
@@ -123,6 +132,7 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
         pid = subprocess.run(cmd, shell=True)
         if github_reference is not None:
             cmd = f'git -c advice.detachedHead=false checkout tags/{github_reference}'
+            print(cmd.upper())
             pid = subprocess.run(cmd, shell=True, cwd=checkout_path)
         else:
             github_reference = get_role_version(
@@ -131,8 +141,6 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
                 github_repo=github_repo,
                 github_reference=github_reference,
                 alternate_role_name=alternate_role_name,
-                namespace=namespace.name,
-                collection_name=collection_name
             )
         print(f'GITHUB_REFERENCE: {github_reference}')
 
