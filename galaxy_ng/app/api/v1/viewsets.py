@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework import serializers, viewsets
 
 
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
@@ -66,7 +68,7 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     #permission_classes = [IsAuthenticated]
     pagination_class = LegacyRolesSetPagination
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
 
     def get_queryset(self):
 
@@ -119,6 +121,18 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         }
         return Response(paginated)
 
+
+    def validate_create_kwargs(self, kwargs):
+        try:
+            assert kwargs.get('github_user') is not None
+            assert kwargs.get('github_user') != ''
+            assert kwargs.get('github_repo') is not None
+            assert kwargs.get('github_repo') != ''
+            if kwargs.get('alternate_role_name'):
+                assert kwargs.get('alternate_role_name') != ''
+        except Exception as e:
+            return e
+
     def create(self, validated_data):
 
         print(f'github_user: {validated_data.data.get("github_user")}')
@@ -132,6 +146,9 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
             'github_reference': validated_data.data.get("github_reference"),
             'alternate_role_name': validated_data.data.get("alternate_role_name"),
         }
+        error = self.validate_create_kwargs(kwargs)
+        if error:
+            return HttpResponse(str(error), status=403)
 
         print(f'SETTINGS: {settings}')
         for x in dir(settings):
