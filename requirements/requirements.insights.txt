@@ -156,7 +156,7 @@ pluggy==1.0.0
     # via pytest
 prometheus-client==0.14.1
     # via django-prometheus
-pulp-ansible @ git+https://git@github.com/pulp/pulp_ansible.git@e0df10e19782e1d207c179283d4de5a890efda50
+pulp-ansible @ git+https://git@github.com/pulp/pulp_ansible.git@06a7cc92876eec90bd79b1fffed794dda60a7333
     # via galaxy-ng (setup.py)
 pulp-container @ git+https://git@github.com/pulp/pulp_container.git@43f7987176148bf85785b436f7c65a04c802b5d6
     # via galaxy-ng (setup.py)

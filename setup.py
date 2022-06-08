@@ -89,7 +89,7 @@ class BuildPyCommand(_BuildPyCommand):
 requirements = [
     "galaxy-importer==0.4.5",
     "pulpcore@git+https://git@github.com/pulp/pulpcore.git@6e44fb2fe609f92dc1f502b19c67abd08879148f#egg=pulpcore",  # noqa E501
-    "pulp-ansible@git+https://git@github.com/pulp/pulp_ansible.git@e0df10e19782e1d207c179283d4de5a890efda50#egg=pulp-ansible",  # noqa E501
+    "pulp-ansible@git+https://git@github.com/pulp/pulp_ansible.git@06a7cc92876eec90bd79b1fffed794dda60a7333#egg=pulp-ansible",  # noqa E501
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container@git+https://git@github.com/pulp/pulp_container.git@43f7987176148bf85785b436f7c65a04c802b5d6#egg=pulp-container",  # noqa E501
