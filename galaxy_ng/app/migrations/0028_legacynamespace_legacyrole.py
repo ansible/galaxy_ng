@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('galaxy', '0025_add_content_guard_to_distributions'),
+        ('galaxy', '0027_delete_contentredirectcontentguard'),
     ]
 
     operations = [
