@@ -5,7 +5,7 @@
 
 additional_repos:
 - bindings: true
-  branch: 0.7.4
+  branch: 0.7.6
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -13,7 +13,7 @@ additional_repos:
   name: pulp_container
   org: pulp
 - bindings: false
-  branch: v0.3.4
+  branch: v0.4.0
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1
@@ -96,4 +96,3 @@ update_github: true
 update_redmine: false
 upgrade_range: []
 use_issue_template: true
-

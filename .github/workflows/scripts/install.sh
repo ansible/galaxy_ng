@@ -29,7 +29,7 @@ TAG=ci_build
 if [ -e $REPO_ROOT/../pulp_ansible ]; then
   PULP_ANSIBLE=./pulp_ansible
 else
-  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.7.4
+  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.7.6
 fi
 
 if [ -e $REPO_ROOT/../pulp_container ]; then
@@ -41,7 +41,7 @@ fi
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
   GALAXY_IMPORTER=./galaxy-importer
 else
-  GALAXY_IMPORTER=git+https://github.com/ansible/galaxy-importer.git@v0.3.4
+  GALAXY_IMPORTER=git+https://github.com/ansible/galaxy-importer.git@v0.4.0
 fi
 if [[ "$TEST" == "plugin-from-pypi" ]]; then
   PLUGIN_NAME=galaxy_ng
@@ -159,8 +159,7 @@ sudo update-ca-certificates
 echo ::endgroup::
 
 if [ "$TEST" = "azure" ]; then
-  AZCERTIFI=$(/opt/az/bin/python3 -c 'import certifi; print(certifi.where())')
-  cat /usr/local/share/ca-certificates/azcert.crt >> $AZCERTIFI
+  cat /usr/local/share/ca-certificates/azcert.crt >> /opt/az/lib/python3.6/site-packages/certifi/cacert.pem
   cat /usr/local/share/ca-certificates/azcert.crt | cmd_stdin_prefix tee -a /usr/local/lib/python3.8/site-packages/certifi/cacert.pem > /dev/null
   cat /usr/local/share/ca-certificates/azcert.crt | cmd_stdin_prefix tee -a /etc/pki/tls/cert.pem > /dev/null
   AZURE_STORAGE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=https://ci-azurite:10000/devstoreaccount1;'

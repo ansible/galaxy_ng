@@ -219,3 +219,14 @@ jobs:
           MANIFEST_PASSPHRASE: ${{ secrets.MANIFEST_PASSPHRASE }}
         run: .github/workflows/scripts/update_manifest.sh
         shell: bash
+
+  lint_po:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - run: |
+          pip install lint-po
+          lint-po ./galaxy_ng/locale/*/LC_MESSAGES/*.po
