@@ -1,12 +1,18 @@
 import datetime
 import time
 
+from django.conf import settings
+from django.http import HttpResponse
 from django.urls import include, path
 from rest_framework import routers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import serializers, viewsets
+
+
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
 from pulpcore.plugin.viewsets import OperationPostponedResponse
@@ -58,7 +64,9 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
     serializer_class = LegacyRoleSerializer
     #permission_classes = [access_policy.CollectionAccessPolicy]
     permission_classes = [AllowAny]
+    #permission_classes = [IsAuthenticated]
     pagination_class = LegacyRolesSetPagination
+    authentication_classes = [TokenAuthentication]
 
     def get_queryset(self):
 
@@ -112,34 +120,43 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         return Response(paginated)
 
     def create(self, validated_data):
-        #print(f'CREATE: {validated_data}')
-        #for x in dir(validated_data):
-        #    try:
-        #        print(f'\t{x} -> {getattr(validated_data, x)}')
-        #    except Exception as e:
-        #        pass
+
         print(f'github_user: {validated_data.data.get("github_user")}')
         print(f'github_repo: {validated_data.data.get("github_repo")}')
         print(f'github_reference: {validated_data.data.get("github_reference")}')
         print(f'alternate_role_name: {validated_data.data.get("alternate_role_name")}')
-        #return Response({})
+
         kwargs = {
             'github_user': validated_data.data.get("github_user"),
             'github_repo': validated_data.data.get("github_repo"),
             'github_reference': validated_data.data.get("github_reference"),
             'alternate_role_name': validated_data.data.get("alternate_role_name"),
         }
+
+        print(f'SETTINGS: {settings}')
+        for x in dir(settings):
+            if 'auth' in x.lower():
+                print(f'SETTING {x}: {getattr(settings, x)}')
+        print(f'REQUEST HEADERS: {self.request.headers}')
+        print(f'REQUEST USER: {self.request.user}')
+        print(f'REQUEST USER IS AUTHENTICATED: {self.request.user.is_authenticated}')
+        print(f'REQUEST USER USERNAME: {self.request.user.username}')
+
+        # validate is admin or gitub_user == auth_user ...
+        if not self.request.user.is_authenticated:
+            return HttpResponse('authentication required', status=403)
+        if not self.request.user.is_superuser and not self.request.user.username == kwargs['github_user']:
+            return HttpResponse('invalid permissions', status=403)
+
         task = dispatch(legacy_role_import, kwargs=kwargs)
         print(f'TASK: {task}')
-        #for x in dir(task):
-        #    try:
-        #        print(f'TASK.{x} -> {getattr(task, x)}')
-        #    except:
-        #        pass
+
         hashed = abs(hash(str(task.pulp_id)))
         print(f'NEW_TASK_ID: {task.pulp_id}')
         print(f'NEW_HASHED_TASK_ID: {hashed}')
+
         role_name = kwargs['alternate_role_name'] or kwargs['github_repo'].replace('ansible-role-', '')
+
         return Response({
             'results': [{
                 'id': hashed,
@@ -152,7 +169,6 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
                 }
             }]
         })
-        #return OperationPostponedResponse(task, validated_data)
 
     def get_task(self, request):
         #print(f'GET TASK: {args}')
