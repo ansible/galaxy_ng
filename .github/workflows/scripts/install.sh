@@ -28,8 +28,8 @@ pip install -r functest_requirements.txt
 cd .ci/ansible/
 
 TAG=ci_build
-PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@e0df10e19782e1d207c179283d4de5a890efda50#egg=pulp-ansible
-PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@43f7987176148bf85785b436f7c65a04c802b5d6#egg=pulp-container
+PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@06a7cc92876eec90bd79b1fffed794dda60a7333#egg=pulp-ansible
+PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@20bec438da54ddd6da4102f046f12c9f796a2ce9#egg=pulp-container
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
   GALAXY_IMPORTER=./galaxy-importer
 else

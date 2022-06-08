@@ -11,7 +11,7 @@ additional_repos:
 - bindings: true
   name: pulp_container
   org: pulp
-  revision: 43f7987176148bf85785b436f7c65a04c802b5d6
+  revision: 20bec438da54ddd6da4102f046f12c9f796a2ce9
 - bindings: false
   branch: v0.4.5
   name: galaxy-importer

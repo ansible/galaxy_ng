@@ -86,13 +86,35 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
+def _format_pulp_version(plugin, specifier=None, ref=None, gh_namespace="pulp"):
+    """
+    Formats the pulp plugin verson.
+
+    The plugin template is VERY picky about the format we use for git refs. This will
+    help format git refs in a way that won't break CI when we need to pin to development
+    versions of pulp.
+
+    example:
+      _format_pulp_version("pulpcore", specifier=">=3.18.1,<3.19.0")
+      _format_pulp_version("pulpcore", ref="6e44fb2fe609f92dc1f502b19c67abd08879148f")
+    """
+    if specifier:
+        return plugin + specifier
+    else:
+        repo = plugin.replace("-", "_")
+        return (
+            f"{plugin}@git+https://git@github.com/"
+            f"{gh_namespace}/{repo}.git@{ref}#egg={plugin}"
+        )
+
+
 requirements = [
     "galaxy-importer==0.4.5",
-    "pulpcore@git+https://git@github.com/pulp/pulpcore.git@6e44fb2fe609f92dc1f502b19c67abd08879148f#egg=pulpcore",  # noqa E501
-    "pulp-ansible@git+https://git@github.com/pulp/pulp_ansible.git@06a7cc92876eec90bd79b1fffed794dda60a7333#egg=pulp-ansible",  # noqa E501
+    _format_pulp_version("pulpcore", ref="6e44fb2fe609f92dc1f502b19c67abd08879148f"),
+    _format_pulp_version("pulp-ansible", ref="06a7cc92876eec90bd79b1fffed794dda60a7333"),
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container@git+https://git@github.com/pulp/pulp_container.git@43f7987176148bf85785b436f7c65a04c802b5d6#egg=pulp-container",  # noqa E501
+    _format_pulp_version("pulp-container", ref="20bec438da54ddd6da4102f046f12c9f796a2ce9"),
     "django-automated-logging==6.1.3",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",
@@ -102,7 +124,7 @@ requirements = [
 
 # https://softwareengineering.stackexchange.com/questions/223634/what-is-meant-by-now-you-have-two-problems
 def strip_package_name(spec):
-    operators = ['=', '>', '<', '~', '!', '^', '@']
+    operators = ['=', '>', '<', '~', '!', '^']
     for idc, char in enumerate(spec):
         if char in operators:
             return spec[:idc]

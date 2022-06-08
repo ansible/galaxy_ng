@@ -158,7 +158,7 @@ prometheus-client==0.14.1
     # via django-prometheus
 pulp-ansible @ git+https://git@github.com/pulp/pulp_ansible.git@06a7cc92876eec90bd79b1fffed794dda60a7333
     # via galaxy-ng (setup.py)
-pulp-container @ git+https://git@github.com/pulp/pulp_container.git@43f7987176148bf85785b436f7c65a04c802b5d6
+pulp-container @ git+https://git@github.com/pulp/pulp_container.git@20bec438da54ddd6da4102f046f12c9f796a2ce9
     # via galaxy-ng (setup.py)
 pulpcore @ git+https://git@github.com/pulp/pulpcore.git@6e44fb2fe609f92dc1f502b19c67abd08879148f
     # via
@@ -179,7 +179,7 @@ pygments==2.12.0
     # via rich
 pyjwkest==1.4.2
     # via pulp-container
-pyjwt[crypto]==1.7.1
+pyjwt[crypto]==2.4.0
     # via
     #   pulp-container
     #   social-auth-core
