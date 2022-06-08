@@ -52,21 +52,14 @@ content_urlpatterns = [
          kwargs={"reverse_url_name": "galaxy:api:content:root"}),
 ]
 
-<<<<<<< HEAD
 v3_combined = [
     path("v3/", include(v3_urlpatterns)),
-=======
-urlpatterns = [
-
-    path("v1/", include((v1_urls, app_name), namespace="v1")),
-
-    path("v3/", include((v3_urlpatterns, app_name), namespace="v3")),
->>>>>>> 9731af1 (Add an api/v1 shim to allow for importing smuggled roles)
 
     path("", include(content_urlpatterns)),
 ]
 
 urlpatterns = [
+    path("v1/", include((v1_urls, app_name), namespace="v1")),
     path("_ui/", include((ui_urls, app_name), namespace="ui")),
 
     path("", include((v3_combined, app_name), namespace='v3')),
@@ -91,4 +84,3 @@ urlpatterns = [
          name="api-redirect",
          kwargs={"reverse_url_name": "galaxy:api:root"}),
 ]
-#print(f'app.api.urls: {urlpatterns}')
