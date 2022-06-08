@@ -86,17 +86,17 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
-def _format_pulp_version(plugin, specifier=None, ref=None, gh_namespace="pulp"):
+def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pulp"):
     """
-    Formats the pulp plugin verson.
+    Formats the pulp plugin requirement.
 
     The plugin template is VERY picky about the format we use for git refs. This will
     help format git refs in a way that won't break CI when we need to pin to development
-    versions of pulp.
+    branches of pulp.
 
     example:
-      _format_pulp_version("pulpcore", specifier=">=3.18.1,<3.19.0")
-      _format_pulp_version("pulpcore", ref="6e44fb2fe609f92dc1f502b19c67abd08879148f")
+      _format_pulp_requirement("pulpcore", specifier=">=3.18.1,<3.19.0")
+      _format_pulp_requirement("pulpcore", ref="6e44fb2fe609f92dc1f502b19c67abd08879148f")
     """
     if specifier:
         return plugin + specifier
@@ -110,11 +110,11 @@ def _format_pulp_version(plugin, specifier=None, ref=None, gh_namespace="pulp"):
 
 requirements = [
     "galaxy-importer==0.4.5",
-    _format_pulp_version("pulpcore", ref="6e44fb2fe609f92dc1f502b19c67abd08879148f"),
-    _format_pulp_version("pulp-ansible", ref="06a7cc92876eec90bd79b1fffed794dda60a7333"),
+    _format_pulp_requirement("pulpcore", ref="6e44fb2fe609f92dc1f502b19c67abd08879148f"),
+    _format_pulp_requirement("pulp-ansible", ref="06a7cc92876eec90bd79b1fffed794dda60a7333"),
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    _format_pulp_version("pulp-container", ref="20bec438da54ddd6da4102f046f12c9f796a2ce9"),
+    _format_pulp_requirement("pulp-container", ref="20bec438da54ddd6da4102f046f12c9f796a2ce9"),
     "django-automated-logging==6.1.3",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",
