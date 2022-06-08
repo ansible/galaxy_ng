@@ -327,7 +327,7 @@ def test_collection_move_with_signatures(api_client, config, settings, upload_ar
 
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
-@pytest.mark.standalone_only
+@pytest.mark.standalone_only  # This test can't run on cloud yet
 def test_upload_signature(api_client, config, settings, upload_artifact):
     """
     1. If staging repository doesn't have a keyring, skip test
