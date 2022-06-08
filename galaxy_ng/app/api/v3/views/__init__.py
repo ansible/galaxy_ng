@@ -5,4 +5,3 @@ from .not_found import NotFoundView
 
 
 __all__ = ("TokenView", "SyncRemoteView", "ExcludesView", "NotFoundView")
-
