@@ -28,24 +28,14 @@ pip install -r functest_requirements.txt
 cd .ci/ansible/
 
 TAG=ci_build
-
-if [ -e $REPO_ROOT/../pulp_ansible ]; then
-  PULP_ANSIBLE=./pulp_ansible
-else
-  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@e0df10e19782e1d207c179283d4de5a890efda50
-fi
-
-if [ -e $REPO_ROOT/../pulp_container ]; then
-  PULP_CONTAINER=./pulp_container
-else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@43f7987176148bf85785b436f7c65a04c802b5d6
-fi
-
+PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@e0df10e19782e1d207c179283d4de5a890efda50#egg=pulp-ansible
+PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@43f7987176148bf85785b436f7c65a04c802b5d6#egg=pulp-container
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
   GALAXY_IMPORTER=./galaxy-importer
 else
   GALAXY_IMPORTER=git+https://github.com/ansible/galaxy-importer.git@v0.4.5
 fi
+PULPCORE=git+https://github.com/pulp/pulpcore.git@6e44fb2fe609f92dc1f502b19c67abd08879148f#egg=pulpcore
 if [[ "$TEST" == "plugin-from-pypi" ]]; then
   PLUGIN_NAME=galaxy_ng
 elif [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
@@ -87,7 +77,7 @@ plugins:
   - name: galaxy-importer
     source: $GALAXY_IMPORTER
   - name: pulpcore
-    source: ./pulpcore
+    source: "${PULPCORE}"
 VARSYAML
 fi
 

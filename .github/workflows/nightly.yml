@@ -62,7 +62,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
 
       - uses: ruby/setup-ruby@v1
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
@@ -83,7 +82,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
 
       - name: Before Script
         
@@ -99,7 +97,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
@@ -132,7 +129,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
 
       - name: Upload python client packages
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
@@ -264,7 +260,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
 
       - name: Install
         
@@ -280,7 +275,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
 
       - name: Install Python client
         
@@ -306,7 +300,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
