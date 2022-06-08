@@ -68,11 +68,6 @@ urlpatterns = [
     # Overridden because the galaxy_ng endpoints only allow collections to be uploaded into
     # specific repositories.
     path(
-        "git/sync/collection/",
-        views.GitSyncCollectionView.as_view({"post": "create"}),
-        name="collection-git-sync",
-    ),
-    path(
         "artifacts/collections/",
         viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
         name="collection-artifact-upload",
