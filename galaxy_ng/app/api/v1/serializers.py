@@ -168,3 +168,43 @@ class LegacyRoleContentSerializer(serializers.ModelSerializer):
     def get_readme_html(self, obj):
         return obj.full_metadata.get('readme_html', '')
 
+
+class LegacyRoleVersionsSerializer():
+
+    def __init__(self, versions):
+        self.versions = versions
+
+    @property
+    def data(self):
+
+        fields = [
+            'id',
+            'url',
+            'related',
+            'summary_fields',
+            'created',
+            'modified',
+            'name',
+            'version',
+            'commit_date',
+            'commit_sha',
+            'download_url',
+            'active'
+        ]
+
+        results = []
+
+        for idv,version in enumerate(self.versions):
+            ds = {}
+            for field in fields:
+                if field in ['created', 'modified'] and field not in version:
+                    ds[field] = version.get('release_date')
+                    continue
+                if field == 'version':
+                    ds[field] = version['name']
+                    continue
+                ds[field] = version.get(field)
+            ds['id'] = idv
+            results.append(ds)
+
+        return results

@@ -69,6 +69,7 @@ def get_role_version(
     tags = pid.stdout.decode('utf-8')
     tags = tags.split('\n')
     tags = [x.strip() for x in tags if x.strip()]
+    print(f'TAGS: {tags}')
 
     if github_reference and github_reference in tags:
         return github_reference
@@ -89,15 +90,29 @@ def get_tag_commit_hash(git_url, tag, checkout_path=None):
     return commit_hash
 
 
+def get_tag_commit_date(git_url, tag, checkout_path=None):
+    if checkout_path is None:
+        checkout_path = tempfile.mkdtemp()
+        pid = subprocess.run(f'git clone {git_url} {checkout_path}', shell=True)
+    pid = subprocess.run("git log -1 --format='%ci'", shell=True, cwd=checkout_path, stdout=subprocess.PIPE)
+    commit_date = pid.stdout.decode('utf-8').strip()
+
+    # 2022-06-07 22:18:41 +0000 --> 2022-06-07T22:18:41
+    parts = commit_date.split()
+    ts = f"{parts[0]}T{parts[1]}"
+
+    return ts
+
+
 def legacy_role_import(github_user=None, github_repo=None, github_reference=None, alternate_role_name=None):
     print('START LEGACY ROLE IMPORT')
 
     role_name = alternate_role_name or github_repo.replace('ansible-role-', '')
     if LegacyNamespace.objects.filter(name=github_user).count() == 0:
-        print('CREATE NEW NAMESPACE {github_user}')
+        print(f'CREATE NEW NAMESPACE {github_user}')
         namespace,_ = LegacyNamespace.objects.get_or_create(name=github_user)
     else:
-        print('USE EXISTING NAMESPACE {github_user}')
+        print(f'USE EXISTING NAMESPACE {github_user}')
         namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
     with tempfile.TemporaryDirectory() as checkout_path:
@@ -126,11 +141,13 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
         if old is not None:
             old_versions = old.full_metadata.get('versions', [])
             old_versions = [x['name'] for x in old_versions]
+            print(f'OLD VERSIONS: {old_versions}')
             if github_reference in old_versions:
                 raise Exception(f'{namespace.name}.{role_name} {github_reference} has already been imported')
 
         github_commit = get_tag_commit_hash(clone_url, github_reference, checkout_path=checkout_path)
-        print(f'GITHUB_COMMIT: {github_reference}')
+        github_commit_date = get_tag_commit_date(clone_url, github_reference, checkout_path=checkout_path)
+        print(f'GITHUB_COMMIT: {github_commit}')
 
         role_meta = roles.get_path_role_meta(checkout_path)
         role_tags = role_meta.get('galaxy_info', {}).get('galaxy_tags', [])
@@ -174,9 +191,18 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
         old_metadata = copy.deepcopy(this_role.full_metadata)
 
         new_full_metadata['versions'] = old_metadata.get('versions', [])
+        ts = datetime.datetime.now().isoformat()
         new_full_metadata['versions'].append({
             'name': github_reference,
-            'release_date': datetime.datetime.now().isoformat()
+            'version': github_reference,
+            'release_date': ts,
+            'created': ts,
+            'modified': ts,
+            'active': None,
+            'download_url': None,
+            'url': None,
+            'commit_date': github_commit_date,
+            'commit_sha': github_commit
         })
 
         # Save the new metadata

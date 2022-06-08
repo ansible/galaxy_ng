@@ -22,6 +22,7 @@ from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.serializers import LegacyRoleSerializer
 from galaxy_ng.app.api.v1.serializers import LegacyRoleContentSerializer
+from galaxy_ng.app.api.v1.serializers import LegacyRoleVersionsSerializer
 from galaxy_ng.app.api.v1.serializers import LegacyUserSerializer
 
 
@@ -60,16 +61,21 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
     pagination_class = LegacyRolesSetPagination
 
     def get_queryset(self):
-        namespace = self.request.query_params.get('namespace')
-        if namespace:
-            return LegacyRole.objects.filter(namespace=namespace)
 
-        github_user = self.request.query_params.get('github_user')
+        print(f'QUERY_PARAMS: {self.request.query_params}')
+        github_user = None
+        for keyword in ['owner__username', 'github_user', 'namespace']:
+            if self.request.query_params.get(keyword):
+                github_user = self.request.query_params[keyword]
+
         name = self.request.query_params.get('name')
         if github_user and name:
+            print('FILTER BY USER AND NAME')
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
             return LegacyRole.objects.filter(namespace=namespace, name=name)
+
         elif github_user:
+            print('FILTER BY USER')
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
             return LegacyRole.objects.filter(namespace=namespace)
 
@@ -86,6 +92,15 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         role = LegacyRole.objects.filter(id=roleid).first()
         serializer = LegacyRoleContentSerializer(role)
         return Response(serializer.data)
+
+    def get_versions(self, *args, **kwargs):
+        roleid = int(kwargs.get('roleid'))
+        role = LegacyRole.objects.filter(id=roleid).first()
+        #serializer = LegacyRoleVersionsSerializer(role)
+        versions = role.full_metadata.get('versions', [])
+        #return Response(versions)
+        transformed = LegacyRoleVersionsSerializer(versions)
+        return Response(transformed.data)
 
     def create(self, validated_data):
         #print(f'CREATE: {validated_data}')
@@ -112,7 +127,7 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         #        print(f'TASK.{x} -> {getattr(task, x)}')
         #    except:
         #        pass
-        hashed = hash(str(task.pulp_id))
+        hashed = abs(hash(str(task.pulp_id)))
         print(f'NEW_TASK_ID: {task.pulp_id}')
         print(f'NEW_HASHED_TASK_ID: {hashed}')
         role_name = kwargs['alternate_role_name'] or kwargs['github_repo'].replace('ansible-role-', '')
@@ -140,7 +155,7 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
         this_task = None
         for t in Task.objects.all():
             tid = str(t.pulp_id)
-            thash = hash(tid)
+            thash = abs(hash(tid))
             #print(f'tid:{tid} thash:{thash}')
             if thash == task_id:
                 this_task = t
