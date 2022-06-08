@@ -66,4 +66,4 @@ class GroupViewset(
     pulp_viewsets.NamedModelViewSet,
 ):
     queryset = models.auth.Group.objects.all()
-    endpoint_name = "groups"
+    endpoint_name = "galaxy_ng/sgroups"
