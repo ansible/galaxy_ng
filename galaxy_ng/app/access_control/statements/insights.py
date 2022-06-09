@@ -81,6 +81,18 @@ _read_only = [
     },
 ]
 
+_signature_upload_statements = [
+    {
+        "action": ["list", "retrieve", "create"],
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": [
+            "has_model_perms:ansible.modify_ansible_repo_content",
+            "has_rh_entitlements",
+        ],
+    },
+]
+
 INSIGHTS_STATEMENTS = {
     'CollectionViewSet': _collection_statements,
     'pulp_ansible/v3/collections': _collection_statements,
@@ -90,6 +102,7 @@ INSIGHTS_STATEMENTS = {
     'pulp_ansible/v3/repo-metadata': _collection_statements,
 
     'repositories/ansible/ansible': _read_only,
+    'content/ansible/collection_signatures': _signature_upload_statements,
 
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
     # For now endpoints are temporary deactivated
