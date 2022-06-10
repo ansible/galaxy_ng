@@ -5,8 +5,6 @@ from django.test import override_settings
 from django.conf import settings
 from rest_framework import status as http_code
 
-from guardian import shortcuts
-
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import DeploymentMode
 
@@ -346,9 +344,6 @@ class TestUiSynclistViewSetNoGroupPerms(DeniedSynclistViewSet, BaseSyncListViewS
         self.user.save()
         self.group.save()
 
-        # Remove any group level perms
-        for perm in self.default_owner_permissions:
-            shortcuts.remove_perm(f"galaxy.{perm}", self.group)
         self.group.save()
 
         self.synclist_name = "test_synclist"
@@ -358,8 +353,6 @@ class TestUiSynclistViewSetNoGroupPerms(DeniedSynclistViewSet, BaseSyncListViewS
             upstream_repository=self.default_repo,
             groups=[self.group],
         )
-        for perm in self.default_owner_permissions:
-            shortcuts.remove_perm(f"galaxy.{perm}", self.group, self.synclist)
 
         self.credentials()
         self.client.force_authenticate(user=self.user)
