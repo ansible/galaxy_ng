@@ -12,15 +12,3 @@ def view_tasks(user, password, expect_pass):
         assert response.status_code == 200
     else:
         assert response.status_code == 403
-
-
-def cancel_tasks(user, password, expect_pass):
-    pass
-    # Create a remote registry
-    # Create an execution environment
-    # Sync execution environment
-    # task_id = None
-    # if expect_pass:
-    #     assert response.status_code == 204
-    # else:
-    #     assert response.status_code == 403

@@ -11,6 +11,8 @@ PASSWORD = "p@ssword!"
 ADMIN_CREDENTIALS = ("admin", "admin")
 API_ROOT = "http://localhost:5001/api/automation-hub/"
 PULP_API_ROOT = "http://localhost:5001/api/automation-hub/pulp/api/v3/"
+ADMIN_USER = {'username': 'admin'}
+ADMIN_PASSWORD = "admin"
 
 
 class TaskWaitingTimeout(Exception):
@@ -58,9 +60,53 @@ def create_user(username, password):
     return response.json()
 
 
-def wait_for_task(resp, path, timeout=300):
+def cleanup_foo_collection():
+    # cleanup collection
+    foo_staging_exists = requests.get(
+        f"{API_ROOT}v3/plugin/ansible/content/staging/collections/index/foo/bar/",
+        auth=ADMIN_CREDENTIALS
+    ).status_code == 200
+    if foo_staging_exists:
+        response = requests.delete(
+            f"{API_ROOT}v3/plugin/ansible/content/staging/collections/index/foo/bar/",
+            auth=ADMIN_CREDENTIALS,
+        )
+        wait_for_task(response)
+    foo_published_exists = requests.get(
+        f"{API_ROOT}v3/plugin/ansible/content/published/collections/index/foo/bar/",
+        auth=ADMIN_CREDENTIALS
+    ).status_code == 200
+    if foo_published_exists:
+        response = requests.delete(
+            f"{API_ROOT}v3/plugin/ansible/content/published/collections/index/foo/bar/",
+            auth=ADMIN_CREDENTIALS,
+        )
+        wait_for_task(response)
+    foo_rejected_exists = requests.get(
+        f"{API_ROOT}v3/plugin/ansible/content/rejected/collections/index/foo/bar/",
+        auth=ADMIN_CREDENTIALS
+    ).status_code == 200
+    if foo_rejected_exists:
+        response = requests.delete(
+            f"{API_ROOT}v3/plugin/ansible/content/rejected/collections/index/foo/bar/",
+            auth=ADMIN_CREDENTIALS,
+        )
+        wait_for_task(response)
+    # cleanup namespace
+    response = requests.delete(
+        f"{API_ROOT}_ui/v1/namespaces/foo/",
+        auth=ADMIN_CREDENTIALS,
+    )
+
+
+def wait_for_task(resp, path=None, timeout=300):
     ready = False
-    url = urljoin(f"{API_ROOT}{path}", f'{resp.json()["task"]}/')
+    host = 'http://localhost:5001'
+    # Community collection delete wasn't providing path with task pk
+    if path is not None:
+        url = urljoin(f"{PULP_API_ROOT}{path}", f'{resp.json()["task"]}/')
+    else:
+        url = urljoin(f"{host}", f"{resp.json()['task']}")
     wait_until = time.time() + timeout
     while not ready:
         if wait_until < time.time():

@@ -8,21 +8,18 @@ from .utils import (
     gen_string,
 )
 
-REGISTRY_REMOTE_USERNAME = ""
-REGISTRY_REMOTE_PASSWORD = ""
-
 
 def create_exec_env(user, password, expect_pass):
     create_response = requests.post(
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": f"{NAMESPACE}_remote_registry_{gen_string()}",
-            "url": "https://registry.redhat.io",
+            "url": "http://example.com",
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": REGISTRY_REMOTE_USERNAME,
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -55,12 +52,12 @@ def delete_exec_env(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": f"{NAMESPACE}_remote_registry_{gen_string()}",
-            "url": "https://registry.redhat.io",
+            "url": "http://example.com",
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": REGISTRY_REMOTE_USERNAME,
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -103,12 +100,12 @@ def change_exec_env_desc(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": f"{NAMESPACE}_remote_registry_{gen_string()}",
-            "url": "https://registry.redhat.io",
+            "url": "http://example.com",
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": REGISTRY_REMOTE_USERNAME,
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -145,17 +142,21 @@ def change_exec_env_desc(user, password, expect_pass):
         assert response.status_code == 403
 
 
+def change_exec_env_desc_object(user, password, expect_pass):
+    pass
+
+
 def change_exec_env_readme(user, password, expect_pass):
     create_response = requests.post(
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": f"{NAMESPACE}_remote_registry_{gen_string()}",
-            "url": "https://registry.redhat.io",
+            "url": "http://example.com",
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": REGISTRY_REMOTE_USERNAME,
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -178,7 +179,7 @@ def change_exec_env_readme(user, password, expect_pass):
         auth=ADMIN_CREDENTIALS,
     )
     path = "_ui/v1/execution-environments/repositories/"
-    response = requests.put(                
+    response = requests.put(
         f"{API_ROOT}{path}{ee_create_resp.json()['name']}/_content/readme/",
         json={"text": "Praise the readme!"},
         auth=(user['username'], password),
@@ -187,6 +188,10 @@ def change_exec_env_readme(user, password, expect_pass):
         assert response.status_code == 200
     else:
         assert response.status_code == 403
+
+
+def change_exec_env_readme_object(user, password, expect_pass):
+    pass
 
 
 def create_containers_under_existing_container_namespace(user, password, expect_pass):
@@ -218,12 +223,12 @@ def create_container_registry_remote(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": f"{NAMESPACE}_remote_registry_{gen_string()}",
-            "url": "https://registry.redhat.io",
+            "url": "http://example.com",
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": REGISTRY_REMOTE_USERNAME,
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -248,12 +253,12 @@ def change_container_registry_remote(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": f"{NAMESPACE}_remote_registry_{gen_string()}",
-            "url": "https://registry.redhat.io",
+            "url": "http://example.com",
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": REGISTRY_REMOTE_USERNAME,
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -274,17 +279,17 @@ def change_container_registry_remote(user, password, expect_pass):
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": create_response.json()['name'],
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
             "ca_cert": None,
-            "download_concurrency": 10,
+            "download_concurrency": 10,  # changed
             "proxy_url": None,
             "proxy_username": None,
             "proxy_password": None,
-            "rate_limit": 8,
+            "rate_limit": 8,  # changed
         },
         auth=(user['username'], password),
     )
@@ -300,12 +305,12 @@ def delete_container_registry_remote(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": f"{NAMESPACE}_remote_registry_{gen_string()}",
-            "url": "https://registry.redhat.io",
+            "url": "http://example.com",
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": REGISTRY_REMOTE_USERNAME,
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -326,8 +331,8 @@ def delete_container_registry_remote(user, password, expect_pass):
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": create_response.json()['name'],
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -355,12 +360,12 @@ def index_exec_env(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": f"{NAMESPACE}_remote_registry_{gen_string()}",
-            "url": "https://registry.redhat.io",
+            "url": "http://example.com",
             "policy": "immediate",
             "created_at": str(datetime.now()),
             "updated_at": str(datetime.now()),
-            "username": REGISTRY_REMOTE_USERNAME,
-            "password": REGISTRY_REMOTE_PASSWORD,
+            "username": None,
+            "password": None,
             "tls_validation": False,
             "client_key": None,
             "client_cert": None,
@@ -378,6 +383,7 @@ def index_exec_env(user, password, expect_pass):
         auth=(user['username'], password),
     )
     if expect_pass:
-        assert response.status_code == 202
+        # action allowed, unsupported on remote registry
+        assert response.status_code == 400
     else:
         assert response.status_code == 403
