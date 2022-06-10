@@ -1,17 +1,17 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-122-g37dc7b5
+# generated with plugin_template@2021.08.26-137-gaeb6e72
 
 additional_repos:
 - bindings: true
-  branch: 0.13.0
   name: pulp_ansible
   org: pulp
+  revision: 06a7cc92876eec90bd79b1fffed794dda60a7333
 - bindings: true
-  branch: 2.12.1
   name: pulp_container
   org: pulp
+  revision: 20bec438da54ddd6da4102f046f12c9f796a2ce9
 - bindings: false
   branch: v0.4.5
   name: galaxy-importer
@@ -74,9 +74,9 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: 3.19.0
+pulpcore_branch: main
 pulpcore_pip_version_specifier: null
-pulpcore_revision: null
+pulpcore_revision: 6e44fb2fe609f92dc1f502b19c67abd08879148f
 pulpprojectdotorg_key_id: null
 pydocstyle: true
 pypi_username: null
@@ -107,3 +107,4 @@ travis_notifications: null
 update_github: false
 upgrade_range: []
 use_issue_template: false
+

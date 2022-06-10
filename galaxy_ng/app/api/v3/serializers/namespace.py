@@ -8,6 +8,8 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
+from pulpcore.plugin.serializers import IdentityField
+
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
 from galaxy_ng.app.api.base import RelatedFieldsBaseSerializer
@@ -72,9 +74,13 @@ class NamespaceSerializer(serializers.ModelSerializer):
     groups = GroupPermissionField()
     related_fields = NamespaceRelatedFieldSerializer(source="*")
 
+    # Add a pulp href to namespaces so that it can be referenced in the roles API.
+    pulp_href = IdentityField(view_name="pulp_ansible/namespaces-detail", lookup_field="pk")
+
     class Meta:
         model = models.Namespace
         fields = (
+            'pulp_href',
             'id',
             'name',
             'company',
@@ -139,6 +145,7 @@ class NamespaceSummarySerializer(NamespaceSerializer):
     class Meta:
         model = models.Namespace
         fields = (
+            'pulp_href',
             'id',
             'name',
             'company',

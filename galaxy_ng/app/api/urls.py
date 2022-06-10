@@ -41,14 +41,14 @@ content_urlpatterns = [
 
     path("content/<str:path>/",
          views.ApiRootView.as_view(),
-         name="root"),
+         name="content-root"),
 
     # This can be removed when ansible-galaxy stops appending '/api' to the
     # urls.
     path("content/<str:path>/api/",
          views.ApiRedirectView.as_view(),
          name="api-redirect",
-         kwargs={"reverse_url_name": "galaxy:api:content:root"}),
+         kwargs={"reverse_url_name": "galaxy:api:v3:content-root"}),
 ]
 
 v3_combined = [

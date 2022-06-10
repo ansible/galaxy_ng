@@ -9,7 +9,7 @@ from . import namespace as namespace_models
 
 
 class SyncList(
-    LifecycleModel, GroupModelPermissionsMixin, AutoDeleteObjPermsMixin
+    LifecycleModel, GroupModelPermissionsMixin
 ):
 
     POLICY_CHOICES = [

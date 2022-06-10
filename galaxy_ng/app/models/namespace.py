@@ -3,7 +3,6 @@ from django.db import models
 from django.db import transaction
 from django.db import IntegrityError
 from django_lifecycle import LifecycleModel
-from pulpcore.plugin.models import AutoDeleteObjPermsMixin
 from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 
 from galaxy_ng.app.access_control import mixins
@@ -54,7 +53,7 @@ class NamespaceManager(models.Manager):
         return ns, created
 
 
-class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin, AutoDeleteObjPermsMixin):
+class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin):
     """
     A model representing Ansible content namespace.
 
