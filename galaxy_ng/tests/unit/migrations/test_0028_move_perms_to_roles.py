@@ -1,18 +1,15 @@
-from importlib import import_module
-from unicodedata import name
+import importlib
+
+from unittest.case import skipIf
+
 from django.test import TestCase
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission
 
 from galaxy_ng.app.models import User, Group, Namespace
 from pulp_container.app.models import ContainerNamespace
-
-from pulp_ansible.app.models import Collection
 from pulpcore.app.models.role import GroupRole, UserRole, Role
-
-from django.contrib.auth.models import Permission
-from guardian.models import GroupObjectPermission, UserObjectPermission
-from guardian.shortcuts import assign_perm as guardian_assign_perm
 
 
 # Note, this copied from galaxy_ng.app.access_control.statements.roles instead of
@@ -172,7 +169,13 @@ LOCKED_ROLES = {
 }
 
 
+def is_guardian_installed():
+    return importlib.util.find_spec("guardian") is not None
+
+
 class TestMigratingPermissionsToRoles(TestCase):
+    _assign_perm = None
+
     def _get_permission(self, permission_name):
         app_label = permission_name.split('.')[0]
         codename = permission_name.split('.')[1]
@@ -182,7 +185,7 @@ class TestMigratingPermissionsToRoles(TestCase):
         )
     
     def _run_migrations(self):
-        migration = import_module("galaxy_ng.app.migrations.0028_move_perms_to_roles")
+        migration = importlib.import_module("galaxy_ng.app.migrations.0028_move_perms_to_roles")
         migration.migrate_group_permissions_to_roles(apps, None)
         migration.migrate_user_permissions_to_roles(apps, None)
 
@@ -194,7 +197,7 @@ class TestMigratingPermissionsToRoles(TestCase):
 
         if obj:
             for perm in permissions:
-                guardian_assign_perm(self._get_permission(perm), group, obj)
+                self._get_assign_perm(self._get_permission(perm), group, obj)
         else:
             for perm in permissions:
                 group.permissions.add(self._get_permission(perm))
@@ -217,6 +220,15 @@ class TestMigratingPermissionsToRoles(TestCase):
                 group=group,
                 role=role_obj).exists()
 
+    @property
+    def _get_assign_perm(self):
+        if self._assign_perm is None:
+            from guardian.shortcuts import assign_perm as guardian_assign_perm
+            self._assign_perm = guardian_assign_perm
+        
+        return self._assign_perm
+
+
     def test_group_model_locked_role_mapping(self):
         roles = {}
 
@@ -231,11 +243,10 @@ class TestMigratingPermissionsToRoles(TestCase):
         for role in roles:
             permissions = LOCKED_ROLES[role]["permissions"]
             user, group = roles[role]
-            
+
             for perm in permissions:
                 self.assertTrue(user.has_perm(perm))
 
-            print(role)
             self.assertEqual(GroupRole.objects.filter(group=group).count(), 1)
             self.assertTrue(self._has_role(group, role))
 
@@ -274,6 +285,10 @@ class TestMigratingPermissionsToRoles(TestCase):
             self.assertTrue(self._has_role(group, role))
 
 
+    @skipIf(
+        not is_guardian_installed(),
+        "Django guardian is not installed."
+    )
     def test_group_object_locked_role_mapping(self):
         namespace = Namespace.objects.create(name="my_namespace")
         container_namespace = ContainerNamespace.objects.create(name="my_container_ns")
@@ -340,13 +355,16 @@ class TestMigratingPermissionsToRoles(TestCase):
                 container_namespace)
         )
 
-
+    @skipIf(
+        not is_guardian_installed(),
+        "Django guardian is not installed."
+    )
     def test_user_role(self):
         ns = ContainerNamespace.objects.create(name="my_container_namespace")
         user = User.objects.create(username="test")
 
         perm = self._get_permission("container.change_containernamespace")
-        guardian_assign_perm(perm, user, obj=ns)
+        self._get_assign_perm(perm, user, obj=ns)
         c_type = ContentType.objects.get_for_model(ContainerNamespace)
 
         self._run_migrations()

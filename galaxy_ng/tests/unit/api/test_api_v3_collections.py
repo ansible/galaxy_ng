@@ -12,7 +12,7 @@ from pulp_ansible.app.models import (
     CollectionVersion,
 )
 
-from pulp_ansible.app.galaxy.v3.views import get_collection_dependents, get_dependents
+from pulp_ansible.app.galaxy.v3.views import get_collection_dependents, get_unique_dependents
 
 from rest_framework import status
 
@@ -238,7 +238,8 @@ class TestCollectionViewsets(BaseTestCase):
 
     def test_collection_version_delete_dependency_check_positive_match(self):
         baz_collection = Collection.objects.create(namespace=self.namespace, name="baz")
-        for counter, dep_version in enumerate(["1.1.1", ">=1", "<2", "~1", "*"]):
+        # need versions that match 1.1.1, but not 1.1.2
+        for counter, dep_version in enumerate(["1.1.1", "<1.1.2", ">0.0.0,<=1.1.1"]):
             baz_version = _get_create_version_in_repo(
                 self.namespace,
                 baz_collection,
@@ -246,7 +247,7 @@ class TestCollectionViewsets(BaseTestCase):
                 version=counter,
                 dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
             )
-            self.assertIn(baz_version, get_dependents(self.version_1_1_1))
+            self.assertIn(baz_version, get_unique_dependents(self.version_1_1_1))
 
     def test_collection_version_delete_dependency_check_negative_match(self):
         baz_collection = Collection.objects.create(namespace=self.namespace, name="baz")
@@ -258,7 +259,7 @@ class TestCollectionViewsets(BaseTestCase):
                 version=counter,
                 dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
             )
-            self.assertNotIn(baz_version, get_dependents(self.version_1_1_1))
+            self.assertNotIn(baz_version, get_unique_dependents(self.version_1_1_1))
 
     def test_collection_delete_dependency_check(self):
         baz_collection = Collection.objects.create(namespace=self.namespace, name="baz")
