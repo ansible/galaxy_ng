@@ -295,6 +295,9 @@ def add_object_role_for_users_with_permission(role, permission, UserRole, Conten
     batch_create(UserRole, user_roles, flush=True)
 
 
+def does_table_exist(table_name):
+    return table_name in connection.introspection.table_names()
+
 
 def migrate_group_permissions_to_roles(apps, schema_editor):
     """
@@ -326,6 +329,9 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
     if my group has galaxy.change_namespace permissions on namespace foo, but nothing else, give
     them the galaxy.collection_namespace_owner role because they can already escalate their permissions.
     """
+
+    is_guardian_table_available = does_table_exist("guardian_groupobjectpermission")
+
     Group = apps.get_model("galaxy", "Group")
     GroupRole = apps.get_model("core", "GroupRole")
     Role = apps.get_model("core", "Role")
@@ -337,7 +343,11 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
     # Group Permissions
     for group in Group.objects.filter(name__ne="system:partner-engineers"):
         group_roles.extend(get_global_group_permissions(group, Role, GroupRole, Permission))
-        group_roles.extend(get_object_group_permissions(group, Role, GroupRole, ContentType, Permission))
+
+        # Skip migrating object permissions if guardian is not installed.
+        if is_guardian_table_available:
+            group_roles.extend(
+                get_object_group_permissions(group, Role, GroupRole, ContentType, Permission))
 
         batch_create(GroupRole, group_roles)
 
@@ -354,6 +364,11 @@ def migrate_user_permissions_to_roles(apps, schema_editor):
     that the system uses are ones that get automatically added for users that create tasks and
     container namespaces, so these are the only permissions that will get migrated to roles here.
     """
+
+    # Skip the migration if the guardian permission tables don't exist.
+    if not does_table_exist("guardian_userobjectpermission"):
+        return
+
     Permission = apps.get_model("auth", "Permission")
     Role = apps.get_model("core", "Role")
     UserRole = apps.get_model("core", "UserRole")

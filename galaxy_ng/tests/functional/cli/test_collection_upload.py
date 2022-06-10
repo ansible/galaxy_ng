@@ -19,8 +19,8 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
         delete_orphans()
 
         # Create namespace if it doesn't exist
-        data = str(self.namespace_api.list().data)
-        if "pulp" not in data:
+        data = self.namespace_api.list(name="pulp").data
+        if len(data) == 0:
             self.namespace_api.create(namespace={"name": "pulp", "groups": []})
 
         # Preapare ansible.cfg for ansible-galaxy CLI
@@ -35,7 +35,7 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
             cmd = "ansible-galaxy collection publish -vvv -c {}".format(collection_path)
 
-            subprocess.run(cmd.split())
+            subprocess.check_output(cmd.split())
 
         # Verify that the collection was published
         collections = self.collections_api.list("published")
@@ -55,8 +55,8 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
         delete_orphans()
 
         # Create namespace if it doesn't exist
-        data = str(self.namespace_api.list().data)
-        if "pulp" not in data:
+        data = self.namespace_api.list(name="pulp").data
+        if len(data) == 0:
             self.namespace_api.create(namespace={"name": "pulp", "groups": []})
 
         # Preapare ansible.cfg for ansible-galaxy CLI
@@ -71,11 +71,11 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
             cmd = "ansible-galaxy collection publish -vvv -c {}".format(collection_path)
 
-            subprocess.run(cmd.split())
+            subprocess.check_output(cmd.split())
 
             cmd = f"docker cp pulp:/var/log/galaxy_api_access.log {tmp_dir}"
 
-            subprocess.run(cmd.split())
+            subprocess.check_output(cmd.split())
 
             with open(f"{tmp_dir}/galaxy_api_access.log") as f:
                 log_contents = f.readlines()
