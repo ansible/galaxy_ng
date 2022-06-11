@@ -6,10 +6,14 @@ services:
     env_file:
       - './community/galaxy_ng.env'
       - '../.compose.env'
+    volumes:
+      - './community/galaxy-importer.cfg:/etc/galaxy-importer/galaxy-importer.cfg:z'
   worker:
     env_file:
       - './community/galaxy_ng.env'
       - '../.compose.env'
+    volumes:
+      - './community/galaxy-importer.cfg:/etc/galaxy-importer/galaxy-importer.cfg:z'
   content-app:
     env_file:
       - './community/galaxy_ng.env'

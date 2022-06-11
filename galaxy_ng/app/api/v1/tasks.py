@@ -104,6 +104,7 @@ def get_tag_commit_date(git_url, tag, checkout_path=None):
 
     # 2022-06-07 22:18:41 +0000 --> 2022-06-07T22:18:41
     parts = commit_date.split()
+    print(f'COMMIT DATE PARTS: {parts}')
     ts = f"{parts[0]}T{parts[1]}"
 
     return ts
