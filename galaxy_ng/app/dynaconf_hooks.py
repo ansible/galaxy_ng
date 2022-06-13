@@ -273,8 +273,9 @@ def configure_cors(settings: Dynaconf) -> Dict[str, Any]:
 def configure_feature_flags(settings: Dynaconf) -> Dict[str, Any]:
     """Adds conditional feature flags"""
     data = {}
-    data["GALAXY_FEATURE_FLAGS__collection_signing"] = settings.get(
-        "GALAXY_COLLECTION_SIGNING_SERVICE") is not None
+    data["GALAXY_FEATURE_FLAGS__collection_signing"] = bool(
+        settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "")
+    )
     data["GALAXY_FEATURE_FLAGS__collection_auto_sign"] = settings.get(
         "GALAXY_AUTO_SIGN_COLLECTIONS", False)
     return data
