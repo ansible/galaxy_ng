@@ -394,4 +394,21 @@ STANDALONE_STATEMENTS = {
             "condition": "has_distro_permission:container.change_containerdistribution"
         },
     ],
+
+    'groups/roles': [
+        {
+            "action": ["list"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.view_group"
+        },
+    ],
+    'roles': [
+        {
+            "action": ["list"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.view_group"
+        },
+    ]
 }
