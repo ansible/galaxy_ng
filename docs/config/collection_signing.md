@@ -6,8 +6,8 @@ A signature is typically a GPG ASCII Armoured Detached artifact, in other words,
 e.g: `MANIFEST.json.asc` that is created by a GPG compatible script based on the `MANIFEST.json`
 file.
 
-The `MANIFEST.json` file already contains checksums to verify all the other artifacts inside a 
-collection so that is why the signature is created based on this file. 
+The `MANIFEST.json` file already contains checksums to verify all the other artifacts inside a
+collection so that is why the signature is created based on this file.
 
 
 !!! tip "Enabling signing on pulp installer"
@@ -55,7 +55,7 @@ The positional arguments to the `add-signing-service` command:
     a guide on how to create a valid gpg key here [https://access.redhat.com/articles/3359321](https://access.redhat.com/articles/3359321)
 
 !!! important
-    When importing the key to the keyring the trust level must be set to some value higher than 3.  
+    When importing the key to the keyring the trust level must be set to some value higher than 3.
     ex: `echo "${KEY_FINGERPRINT}:6:" | gpg --batch --import-ownertrust`
 
 
@@ -105,17 +105,17 @@ export PULP_GALAXY_AUTO_SIGN_COLLECTIONS=True #(1)
     # 1. Create the GPG key if not exists
     ####################################
 
-    gpg --full-gen-key  
+    gpg --full-gen-key
 
     # Please select what kind of key you want:
     #    (4) RSA (sign only)
     # Your selection? 4
     #
-    # What keysize do you want? (2048) 
+    # What keysize do you want? (2048)
     # Requested keysize is 2048 bits
     #
     # Please specify how long the key should be valid.
-    # Key is valid for? (0) 
+    # Key is valid for? (0)
     # Key does not expire at all
     #
     # Is this correct? (y/N) y
@@ -184,7 +184,7 @@ export PULP_GALAXY_AUTO_SIGN_COLLECTIONS=True #(1)
 
     ####################################################
     # Optionally enable automatic signing upon approval
-    # NOTE: this must be enabled only if 
+    # NOTE: this must be enabled only if
     # `GALAXY_REQUIRE_CONTENT_APPROVAL` is True.
     ####################################################
 
@@ -215,9 +215,9 @@ curl -X POST \
 2. Provide your Galaxy `API token`
 
 !!! tip
-    Omit `version` to sign entire collection  
-    Omit `collection` to sign entire namespace  
-    Omit `namespace` and provide to sign entire repository  
+    Omit `version` to sign entire collection
+    Omit `collection` to sign entire namespace
+    Omit `namespace` and provide to sign entire repository
     Or provide `content_units=["*"]` or `content_units=["pulp_hrefs", ...]`
 
 #### Signing via UI
@@ -236,7 +236,7 @@ On Galaxy UI Signing buttons are available under the pages:
 #### Enabling support for signature upload on the galaxy server
 
 1. Set the variable `GALAXY_SIGNATURE_UPLOAD_ENABLED=True` on the setings file.
-2. Create a keyring on and import the public key able to verify the signature during the upload to that keyring.  
+2. Create a keyring on and import the public key able to verify the signature during the upload to that keyring.
     ```bash
     gpg --batch --no-default-keyring \
         --keyring /etc/pulp/certs/galaxy.kbx \
@@ -250,13 +250,13 @@ On Galaxy UI Signing buttons are available under the pages:
     For example, if the upload will be performed before approval, set the keyring to `staging` repo.
 
 With the above configuration now the repository is able to accept signature uploads and verify the
-signature during the upload process. 
+signature during the upload process.
 
 > **NOTE** if keyring is not set, then upload will be rejected to avoid uploading invalid signatures.
 
 !!! tip "Requiring signature for approval"
-    When Signature upload is enabled and Content Approval is also enabled  
-    It is possible to set `GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL=True`  
+    When Signature upload is enabled and Content Approval is also enabled
+    It is possible to set `GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL=True`
     And then the approval dashboard will allow approvals only of collections having a signature.
 
 #### Manually Signing a Collection
@@ -270,7 +270,7 @@ Signatures can also be manually created locally and uploaded to Galaxy to be att
     ```bash
     # Having the private key set locally
     # (the same private key that matched the repo keyring previously configured)
-    gpg --quiet --batch --pinentry-mode loopback --yes 
+    gpg --quiet --batch --pinentry-mode loopback --yes
     --homedir ~/.gnupg/ --detach-sign --default-key KEY_ID \
     --armor --output MANIFEST.json.asc MANIFEST.json
     ```
@@ -302,7 +302,7 @@ When enabled there will be upload buttons on the pages:
 
 ## Syncing Signatures
 
-When syncing from remote servers, if the signature is served by the remote then Galaxy will also sync all the 
+When syncing from remote servers, if the signature is served by the remote then Galaxy will also sync all the
 existing signatures.
 
 Signatures are additive, so each collection can hold multiple signatures.
@@ -334,3 +334,43 @@ If the signature comes from a remote server then its public key must be found on
 Signature verification is performed by `ansible-galaxy` CLI.
 
 [https://docs.ansible.com/ansible/devel/user_guide/collections_using.html#signature-verification](https://docs.ansible.com/ansible/devel/user_guide/collections_using.html#signature-verification)
+
+
+## Feature flags
+
+The web UI of reads feature flags from `settings.GALAXY_FEATURE_FLAGS` which is a Python `dict` object holding keys to granularly control the signing feature, the flags has default values computed based on
+`settings` and usually **IT IS NOT NEEDED TO CHANGE IT MANUALLY**, however if needed can be manually changed.
+
+For example, to **enable signing feature** + **upload of signatures**
+
+```env
+export PULP_GALAXY_FEATURE_FLAGS__signatures_enabled=true
+export PULP_GALAXY_FEATURE_FLAGS__can_upload_signatures=true
+```
+
+> **TIP** the above can also be defined on `/etc/pulp/settings.py`, remove the `PULP_` prefix and use Python booleans `GALAXY_FEATURE_FLAGS__signatures_enabled = True`
+
+
+### The Signing Flags
+
+- `signatures_enabled`
+    - renaming of  `collection_signing` (which will be kept for compatibility)
+    - **defaults**: the value of `collection_signing` flag
+      (which is true whenever `settings.GALAXY_COLLECTION_SIGNING_SERVICE` is a non-empty string)
+- `require_upload_signatures`
+    - Should approve button be disabled if signature is required?
+    - **defaults**: the value of settings.GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL AND signatures_enabled
+- `can_create_signatures`
+    - Should UI display the links to sign collection on namespace and version pages?
+    - **defaults**: signature_enabled AND settings.COLLECTION_SIGNING_SERVICE is set AND `SigningService` is configured with signing keys.
+- `can_upload_signatures`
+    - Should UI display the upload signature button?
+    - **defaults**: signatures_enabled AND require_upload_signatures or settings.GALAXY_SIGNATURE_UPLOAD_ENABLED is True
+- `collection_auto_sign`
+    - Should collection be automatically signed during manual approval or auto approval?
+    - **defaults**: signatures_enabled AND can_create_signatures and GALAXY_AUTO_SIGN_COLLECTIONS
+-  `display_signatures`
+    - Should UI show: badges, text, signature text, filter?
+    - **defaults**: signatures_enabled AND ( can_create_signatures OR can_upload_signatures)
+
+> The flags above are exposed on `/api/automation-hub/_ui/v1/feature-flags/` URL.
