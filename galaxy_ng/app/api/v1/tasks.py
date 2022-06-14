@@ -6,6 +6,9 @@ import subprocess
 import time
 import tempfile
 
+import requests
+from urllib.parse import urlparse
+
 from pprint import pprint
 
 from django.conf import settings
@@ -221,3 +224,149 @@ def legacy_role_import(github_user=None, github_repo=None, github_reference=None
     print('STOP LEGACY ROLE IMPORT')
     return True
 
+
+def legacy_sync_from_upstream(baseurl=None, github_user=None, role_name=None, role_version=None):
+    print('STARTING LEGACY SYNC!')
+
+    print('SYNC INDEX EXISTING NAMESPACES')
+    nsmap = {}
+    for ns in LegacyNamespace.objects.all():
+        nsmap[ns.name] = ns
+
+    print('SYNC INDEX EXISTING ROLES')
+    rmap = {}
+    #for role in LegacyRole.objects.all():
+    #    key = (role.namespace.name, role.name)
+    #    rmap[key] = role
+    LegacyRole.objects.all().delete()
+
+    parsed = urlparse(baseurl)
+    _baseurl = parsed.scheme + '://' + parsed.netloc
+
+    pagenum = 0
+    next_url = baseurl
+    while next_url:
+        print(f'{pagenum} {next_url}')
+
+        rr = requests.get(next_url)
+
+        try:
+            ds = rr.json()
+            print(f"NEXT: {ds.get('next_link')}")
+        except Exception as e:
+            next_url = next_url.replace(f'page={pagenum}', f'page={pagenum+1}')
+            pagenum += 1
+            continue
+
+        if not ds.get('next_link'):
+            break
+
+        for rdata in ds['results']:
+            #print(f'{rdata}')
+            ruser = rdata.get('github_user')
+            rname = rdata.get('name')
+            rkey = (ruser, rname)
+
+            if ruser not in nsmap:
+                print(f'SYNC NAMESPACE GET_OR_CREATE {ruser}')
+                namespace,_ = LegacyNamespace.objects.get_or_create(name=ruser)
+                nsmap[ruser] = namespace
+            else:
+                namespace = nsmap[ruser]
+
+            remote_id = rdata['id']
+            role_upstream_url = _baseurl + f'/api/v1/roles/{remote_id}/'
+            rrr = requests.get(role_upstream_url)
+            if rrr.status_code == 404:
+                continue
+            try:
+                rds = rrr.json()
+                if rds.get('detail', '').lower().strip() == 'not found':
+                    continue
+            except Exception as e:
+                continue
+
+            if rkey not in rmap:
+                this_role,_ = LegacyRole.objects.get_or_create(
+                    namespace=namespace,
+                    name=rname
+                )
+                rmap[rkey] = this_role
+            else:
+                this_role = rmap[rkey]
+
+            github_repo = rdata['github_repo']
+            github_branch = rdata['github_branch']
+            clone_url = f'https://github.com/{ruser}/{github_repo}'
+            sfields = rdata.get('summary_fields', {})
+            role_tags = sfields.get('tags', [])
+            commit_hash = rdata.get('commit')
+            commit_msg = rdata.get('commit_message')
+            commit_url = rdata.get('commit_url')
+            issue_tracker = rdata.get('issue_tracker_url', clone_url + '/issues')
+            #role_versions = sfields.get('versions', [])
+            role_description = rdata.get('description')
+            role_license = rdata.get('license')
+            role_readme = rdata.get('readme')
+            role_html = rdata.get('readme_html')
+            role_dependencies = sfields.get('dependencies', [])
+            role_min_ansible = rdata.get('min_ansible_version')
+            role_company = rdata.get('company')
+            role_imported = rdata.get('imported', datetime.datetime.now().isoformat())
+            role_created = rdata.get('created', datetime.datetime.now().isoformat())
+            role_modified = rdata.get('modified', datetime.datetime.now().isoformat())
+            role_type = rdata.get('role_type', 'ANS')
+
+            role_versions = []
+            versions_next_url = _baseurl + f'/api/v1/roles/{remote_id}/versions/'
+            while versions_next_url:
+                print(f'GET: {versions_next_url}')
+                rrv = requests.get(versions_next_url)
+                try:
+                    vds = rrv.json()
+                except Exception as e:
+                    print(rrv.text)
+                    raise Exception('invalid json')
+                for _res in vds['results']:
+                    role_versions.append(_res)
+                if not vds.get('next_link'):
+                    break
+                try:
+                    versions_next_url = _baseurl + vds.get('next_link')
+                except TypeError as e:
+                    break
+
+            new_full_metadata = {
+                'upstream_id': remote_id,
+                'role_type': role_type,
+                'imported': role_imported,
+                'created': role_created,
+                'modified': role_modified,
+                'clone_url': clone_url,
+                'tags': role_tags,
+                'commit': commit_hash,
+                'commit_message': commit_msg,
+                'commit_url': commit_url,
+                'github_repo': github_repo,
+                'github_branch': github_branch,
+                #'github_reference': github_reference,
+                'issue_tracker_url': issue_tracker,
+                'dependencies': role_dependencies,
+                'versions': role_versions,
+                'description': role_description,
+                'license': role_license,
+                'readme': role_readme,
+                'readme_html': role_html,
+                'min_ansible_version': role_min_ansible,
+                'company': role_company,
+            }
+
+            if dict(this_role.full_metadata) != new_full_metadata:
+                this_role.full_metadata = new_full_metadata
+                this_role.save()
+
+        next_url = _baseurl + ds.get('next_link')
+        if next_url:
+            pagenum = int(next_url.split('=')[-1])
+
+    print('STOP LEGACY SYNC!')

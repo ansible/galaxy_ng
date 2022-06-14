@@ -18,3 +18,8 @@ services:
     env_file:
       - './community/galaxy_ng.env'
       - '../.compose.env'
+  galaxy-mirror:
+    hostname: galaxy-mirror
+    image: jtanner0/galaxy-mirror:3.0
+    volumes:
+      - './community/data:/data:rw'

@@ -83,11 +83,13 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
     commit = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     summary_fields = serializers.SerializerMethodField()
+    upstream_id = serializers.SerializerMethodField()
 
     class Meta:
         model = LegacyRole
         fields = [
             'id',
+            'upstream_id',
             'created',
             'modified',
             'github_user',
@@ -101,6 +103,9 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
 
     def get_id(self, obj):
         return obj.pulp_id
+
+    def get_upstream_id(self, obj):
+        return obj.full_metadata.get('upstream_id')
 
     def get_url(self, obj):
         return None

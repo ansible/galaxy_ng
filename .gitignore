@@ -108,3 +108,6 @@ venv.bak/
 
 # Galaxy NG
 db_snapshots/
+
+# community
+dev/community/data/*

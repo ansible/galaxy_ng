@@ -26,6 +26,7 @@ from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.access_control import access_policy
 
 from galaxy_ng.app.api.v1.tasks import legacy_role_import
+from galaxy_ng.app.api.v1.tasks import legacy_sync_from_upstream
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.serializers import LegacyRoleSerializer
@@ -120,7 +121,6 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
             'results': transformed.data[:]
         }
         return Response(paginated)
-
 
     def validate_create_kwargs(self, kwargs):
         try:
@@ -253,3 +253,16 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
             }
         ]})
 
+    def run_sync(self, request):
+        kwargs = {
+            'baseurl': request.data.get(
+                'baseurl',
+                'https://galaxy.ansible.com/api/v1/roles/'
+            ),
+            'github_user': request.data.get('github_user'),
+            'role_name': request.data.get('role_name'),
+            'role_version': request.data.get('role_name'),
+        }
+        task = dispatch(legacy_sync_from_upstream, kwargs=kwargs)
+        hashed = abs(hash(str(task.pulp_id)))
+        return Response({'task': hashed})
