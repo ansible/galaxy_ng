@@ -250,6 +250,7 @@ def uncertifiedv2(ansible_config, artifact):
 
     # certify v1
     set_certification(api_client, artifact)
+    time.sleep(SLEEP_SECONDS_ONETIME)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
