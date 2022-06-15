@@ -62,7 +62,7 @@ class LegacyRolesSetPagination(PageNumberPagination):
 
 
 class LegacyRoleViewSet(viewsets.ModelViewSet):
-    queryset = LegacyRole.objects.all()
+    queryset = LegacyRole.objects.all().order_by('full_metadata__created')
     serializer = LegacyRoleSerializer
     serializer_class = LegacyRoleSerializer
     #permission_classes = [access_policy.CollectionAccessPolicy]
