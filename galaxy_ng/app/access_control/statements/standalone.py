@@ -397,11 +397,16 @@ STANDALONE_STATEMENTS = {
 
     'groups/roles': [
         {
-            "action": ["list"],
+            "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_perms:galaxy.view_group"
         },
+        {
+            "action": "*",
+            "principal": "admin",
+            "effect": "allow"
+        }
     ],
     'roles': [
         {
@@ -410,5 +415,10 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_model_perms:galaxy.view_group"
         },
+        {
+            "action": "*",
+            "principal": "admin",
+            "effect": "allow"
+        }
     ]
 }
