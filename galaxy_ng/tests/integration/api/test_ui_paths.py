@@ -578,7 +578,7 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/settings/
-@pytest.mark.standalone_only
+# @pytest.mark.standalone_only
 @pytest.mark.api_ui
 def test_api_ui_v1_settings(ansible_config):
 
