@@ -265,6 +265,25 @@ def wait_for_task(api_client, resp, timeout=300):
     return resp
 
 
+def wait_for_url(api_client, url, timeout_sec=30):
+    """Wait until url stops returning a 404."""
+    ready = False
+    res = None
+    wait_until = time.time() + timeout_sec
+    while not ready:
+        if wait_until < time.time():
+            raise TaskWaitingTimeout()
+        try:
+            res = api_client(url, method="GET")
+        except GalaxyError as e:
+            if "404" not in str(e):
+                raise
+            time.sleep(0.5)
+        else:
+            ready = True
+    return res
+
+
 @contextmanager
 def modify_artifact(artifact):
     filename = artifact.filename
@@ -398,23 +417,10 @@ def set_certification(client, collection):
 
         # give extra time for the backend to settle and "hidden" tasks to finish
         dest_url = (
-            f"v3/collections/{collection.namespace}/"
+            f"content/published/v3/collections/{collection.namespace}/"
             f"{collection.name}/versions/{collection.version}/"
         )
-        ready = False
-        timeout = SLEEP_SECONDS_POLLING * 5
-        res = None
-        while not ready:
-            try:
-                res = client(dest_url, method="GET")
-                # if we aren't done publishing, GalaxyError gets thrown and we skip
-                # past the below line and directly to the `except GalaxyError` line.
-                ready = True
-            except GalaxyError:
-                time.sleep(SLEEP_SECONDS_POLLING)
-                timeout = timeout - 1
-                if timeout < 0:
-                    raise
+        res = wait_for_url(client, dest_url)
 
         return res
 

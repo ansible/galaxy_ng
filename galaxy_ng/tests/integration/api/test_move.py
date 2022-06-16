@@ -3,15 +3,11 @@
 See: https://issues.redhat.com/browse/AAH-1268
 
 """
-import time
-
 import pytest
 from orionutils.generator import build_collection
 
-from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
-
 from ..constants import USERNAME_PUBLISHER
-from ..utils import get_client, set_certification, wait_for_task
+from ..utils import get_client, set_certification, wait_for_task, wait_for_url
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -61,9 +57,11 @@ def test_move_collection_version(ansible_config, upload_artifact):
     resp = upload_artifact(config, api_client, artifact)
     resp = wait_for_task(api_client, resp)
     assert resp['state'] == 'completed'
-
-    # wait for move task from `inbound-<namespace>` repo to `staging` repo
-    time.sleep(SLEEP_SECONDS_ONETIME)
+    dest_url = (
+        f"content/staging/v3/collections/{artifact.namespace}/"
+        f"{artifact.name}/versions/{artifact.version}/"
+    )
+    wait_for_url(api_client, dest_url)
 
     # Make sure it ended up in staging but not in published ...
     before = get_all_collections()
@@ -77,9 +75,6 @@ def test_move_collection_version(ansible_config, upload_artifact):
     assert cert_result['version'] == artifact.version
     assert cert_result['href'] is not None
     assert cert_result['metadata']['tags'] == ['tools']
-
-    # wait for move task from `staging` repo to `published` repo
-    time.sleep(SLEEP_SECONDS_ONETIME)
 
     # Make sure it's moved to the right place ...
     after = get_all_collections()
