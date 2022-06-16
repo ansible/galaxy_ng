@@ -42,7 +42,7 @@ class LegacyUserSetPagination(PageNumberPagination):
 
 
 class LegacyUserViewSet(viewsets.ModelViewSet):
-    queryset = LegacyNamespace.objects.all()
+    queryset = LegacyNamespace.objects.all().order_by('name')
     serializer = LegacyUserSerializer
     serializer_class = LegacyUserSerializer
     permission_classes = [AllowAny]
@@ -53,6 +53,20 @@ class LegacyUserViewSet(viewsets.ModelViewSet):
         user = LegacyNamespace.objects.filter(id=userid).first()
         serializer = LegacyUserSerializer(user)
         return Response(serializer.data)
+
+    def get_queryset(self):
+
+        print(f'QUERY_PARAMS: {self.request.query_params}')
+
+        order_by = 'name'
+        if self.request.query_params.get('order_by'):
+            order_by = self.request.query_params.get('order_by').rstrip('/')
+
+        if self.request.query_params.get('name'):
+            name = self.request.query_params.get('name').rstrip('/')
+            return LegacyNamespace.objects.filter(name=name).order_by(order_by)
+
+        return LegacyNamespace.objects.all().order_by(order_by)
 
 
 class LegacyRolesSetPagination(PageNumberPagination):
@@ -87,18 +101,24 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
                 if github_user is not None:
                     github_user = github_user.rstrip('/')
                 break
+        namespace = None
+        if github_user:
+            if github_user.isdigit():
+                namespace = LegacyNamespace.objects.filter(pk=int(github_user)).first()
+            else:
+                namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
         name = self.request.query_params.get('name')
         if name is not None:
             name = name.rstrip('/')
+
         if github_user and name:
             print('FILTER BY USER AND NAME')
-            namespace = LegacyNamespace.objects.filter(name=github_user).first()
             return LegacyRole.objects.filter(namespace=namespace, name=name).order_by(order_by)
 
         elif github_user:
-            print('FILTER BY USER')
-            namespace = LegacyNamespace.objects.filter(name=github_user).first()
+            print(f'FILTER BY USER: {github_user}')
+            print(f'FILTER BY NAMESPACE: {namespace}')
             return LegacyRole.objects.filter(namespace=namespace).order_by(order_by)
 
         return LegacyRole.objects.all().order_by(order_by)
