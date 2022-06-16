@@ -4,15 +4,14 @@ See: https://issues.redhat.com/browse/AAH-1268
 
 """
 import time
-from urllib.parse import urljoin
 
 import pytest
 from orionutils.generator import build_collection
 
-from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME, SLEEP_SECONDS_POLLING
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 
 from ..constants import USERNAME_PUBLISHER
-from ..utils import get_client, set_certification
+from ..utils import get_client, set_certification, wait_for_task
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -60,12 +59,7 @@ def test_move_collection_version(ansible_config, upload_artifact):
 
     # import and wait ...
     resp = upload_artifact(config, api_client, artifact)
-    ready = False
-    url = urljoin(config["url"], resp["task"])
-    while not ready:
-        resp = api_client(url)
-        ready = resp["state"] not in ("running", "waiting")
-        time.sleep(SLEEP_SECONDS_POLLING)
+    resp = wait_for_task(api_client, resp)
     assert resp['state'] == 'completed'
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo

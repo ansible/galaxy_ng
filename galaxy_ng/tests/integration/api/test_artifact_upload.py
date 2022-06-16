@@ -2,14 +2,12 @@ import json
 import logging
 import os
 import re
-import time
 from unittest.mock import patch
-from urllib.parse import urljoin
 
 import pytest
 from orionutils.generator import build_collection, randstr
 
-from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING, USERNAME_PUBLISHER
+from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
 
 from ..utils import (
     CapturingGalaxyError,
@@ -105,12 +103,7 @@ def test_api_publish_invalid_tarball(ansible_config, artifact, upload_artifact):
         f.write(randstr(1024).encode("utf8"))
 
     resp = upload_artifact(config, api_client, artifact)
-
-    ready = False
-    url = urljoin(config["url"], resp["task"])
-    while not ready:
-        resp = api_client(url)
-        ready = resp["state"] not in ("running", "waiting")
+    resp = wait_for_task(api_client, resp)
 
     assert resp["state"] == "failed"
 
@@ -344,13 +337,7 @@ def test_ansible_lint_exception(ansible_config, upload_artifact):
     )
 
     resp = upload_artifact(config, api_client, artifact)
-
-    ready = False
-    url = urljoin(config["url"], resp["task"])
-    while not ready:
-        resp = api_client(url)
-        ready = resp["state"] not in ("running", "waiting")
-        time.sleep(SLEEP_SECONDS_POLLING)
+    resp = wait_for_task(api_client, resp)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -392,13 +379,7 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
     )
 
     resp = upload_artifact(config, api_client, artifact)
-
-    ready = False
-    url = urljoin(config["url"], resp["task"])
-    while not ready:
-        resp = api_client(url)
-        ready = resp["state"] not in ("running", "waiting")
-        time.sleep(SLEEP_SECONDS_POLLING)
+    resp = wait_for_task(api_client, resp)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -435,13 +416,7 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
     )
 
     resp = upload_artifact(config, api_client, artifact)
-
-    ready = False
-    url = urljoin(config["url"], resp["task"])
-    while not ready:
-        resp = api_client(url)
-        ready = resp["state"] not in ("running", "waiting")
-        time.sleep(SLEEP_SECONDS_POLLING)
+    resp = wait_for_task(api_client, resp)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -473,13 +448,7 @@ def test_publish_fail_required_tag(ansible_config, upload_artifact):
     )
 
     resp = upload_artifact(config, api_client, artifact)
-
-    ready = False
-    url = urljoin(config["url"], resp["task"])
-    while not ready:
-        resp = api_client(url)
-        ready = resp["state"] not in ("running", "waiting")
-        time.sleep(SLEEP_SECONDS_POLLING)
+    resp = wait_for_task(api_client, resp)
 
     assert resp["state"] == "failed"
     assert (
