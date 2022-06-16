@@ -74,24 +74,34 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         print(f'QUERY_PARAMS: {self.request.query_params}')
+
+        order_by = 'full_metadata__created'
+        if self.request.query_params.get('order_by'):
+            order_by = self.request.query_params.get('order_by').rstrip('/')
+            order_by = f'full_metadata__{order_by}'
+
         github_user = None
         for keyword in ['owner__username', 'github_user', 'namespace']:
             if self.request.query_params.get(keyword):
                 github_user = self.request.query_params[keyword]
+                if github_user is not None:
+                    github_user = github_user.rstrip('/')
                 break
 
         name = self.request.query_params.get('name')
+        if name is not None:
+            name = name.rstrip('/')
         if github_user and name:
             print('FILTER BY USER AND NAME')
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
-            return LegacyRole.objects.filter(namespace=namespace, name=name)
+            return LegacyRole.objects.filter(namespace=namespace, name=name).order_by(order_by)
 
         elif github_user:
             print('FILTER BY USER')
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
-            return LegacyRole.objects.filter(namespace=namespace)
+            return LegacyRole.objects.filter(namespace=namespace).order_by(order_by)
 
-        return LegacyRole.objects.all()
+        return LegacyRole.objects.all().order_by(order_by)
 
     def get_role(self, *args, **kwargs):
         roleid = int(kwargs.get('roleid'))
