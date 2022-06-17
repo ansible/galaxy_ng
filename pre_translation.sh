@@ -2,17 +2,15 @@
 cd _clones/galaxy_ng/
 
 # Build Hub Development Environment
-cp .compose.env.example .compose.env
-echo $"ANSIBLE_HUB_UI_PATH='https://github.com/ansible/ansible-hub-ui'" >> .compose.env
-./compose build
+python3 -m venv venv
+source venv/bin/activate
+pip3 install -r dev_requirements.txt
 
 # Extract Strings from API
-./compose run --rm --user=0 \
- -v $(pwd)/translations:/translations \
- api \
- bash -c "cd app/galaxy_ng && django-admin makemessages -l en_us --keep-pot && cp /app/galaxy_ng/locale/django.pot /translations/django.po"
+cd galaxy_ng && django-admin makemessages -l en_us --keep-pot
  
-# cd ..
+cd ..
 
 # Move files to Translations folder
-# mv galaxy_ng/locale/django.pot translations/
+mv galaxy_ng/locale/django.pot translations/
+# cp /app/galaxy_ng/locale/django.pot /translations/django.po
