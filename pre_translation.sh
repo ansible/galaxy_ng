@@ -3,7 +3,7 @@ cd _clones/galaxy_ng/
 
 # Build Hub Development Environment
 cp .compose.env.example .compose.env
-echo $"ANSIBLE_HUB_UI_PATH='#'" >> .compose.env
+echo $"ANSIBLE_HUB_UI_PATH='https://github.com/ansible/ansible-hub-ui'" >> .compose.env
 ./compose build
 
 # Extract Strings from API
