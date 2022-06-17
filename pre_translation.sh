@@ -12,5 +12,5 @@ cd galaxy_ng && django-admin makemessages -l en_us --keep-pot
 cd ..
 
 # Move files to Translations folder
-mv galaxy_ng/locale/django.pot translations/
+mv galaxy_ng/locale/django.pot translations/django.po
 # cp /app/galaxy_ng/locale/django.pot /translations/django.po
