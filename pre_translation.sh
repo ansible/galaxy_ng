@@ -9,7 +9,7 @@ cp .compose.env.example .compose.env
 ./compose run --rm --user=0 \
  -v $(pwd)/translations:/translations \
  api \
- bash -c "django-admin makemessages -l en_us --keep-pot"
+ bash -c "cd app/galaxy_ng && django-admin makemessages -l en_us --keep-pot"
  
 # cd ..
 
