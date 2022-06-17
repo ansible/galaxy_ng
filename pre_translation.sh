@@ -3,7 +3,7 @@ cd _clones
 
 # Build Hub Development Environment
 cp .compose.env.example .compose.env
-./compose build
+# ./compose build
 
 # Extract Strings from API
 # ./compose run --rm --user=0 \
