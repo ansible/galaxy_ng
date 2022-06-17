@@ -7,11 +7,11 @@ cp .compose.env.example .compose.env
 
 # Extract Strings from API
 ./compose run --rm --user=0 \
- -v $(pwd)/_translations:/translations \
+ -v $(pwd)/translations:/translations \
  api \
  bash -c "cd galaxy_ng/ && django-admin makemessages -l en_us --keep-pot"
  
-cd ..
+# cd ..
 
 # Move files to Translations folder
-mv galaxy_ng/locale/django.pot translations/
+# mv galaxy_ng/locale/django.pot translations/
