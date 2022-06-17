@@ -6,10 +6,10 @@ cp .compose.env.example .compose.env
 ./compose build
 
 # Extract Strings from API
-# ./compose run --rm --user=0 \
-#  -v $(pwd)/translations:/translations \
-#  api \
-#  bash -c "cd galaxy_ng/ && django-admin makemessages -l en_us --keep-pot"
+./compose run --rm --user=0 \
+ -v $(pwd)/translations:/translations \
+ api \
+ bash -c "cd galaxy_ng/ && django-admin makemessages -l en_us --keep-pot"
  
 # cd ..
 
