@@ -1,9 +1,9 @@
 # Change Directory to clones
-cd _clones
+cd _clones/galaxy_ng/
 
 # Build Hub Development Environment
 cp .compose.env.example .compose.env
-# ./compose build
+./compose build
 
 # Extract Strings from API
 # ./compose run --rm --user=0 \
