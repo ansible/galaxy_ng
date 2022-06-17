@@ -417,8 +417,8 @@ def set_certification(client, collection):
 
         # give extra time for the backend to settle and "hidden" tasks to finish
         dest_url = (
-            f"content/published/v3/collections/{collection.namespace}/"
-            f"{collection.name}/versions/{collection.version}/"
+            "content/published/v3/plugin/ansible/content/published/collections/index/"
+            f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
         )
         res = wait_for_url(client, dest_url)
 
