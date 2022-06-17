@@ -5,6 +5,8 @@ include integration_requirements.txt
 include unittest_requirements.txt
 include pyproject.toml
 include requirements/requirements.common.txt
+include tools/scripts/l18n/post_translation.sh
+include tools/scripts/l18n/pre_translation.sh
 recursive-include galaxy_ng *.md
 graft galaxy_ng/app/webserver_snippets
 graft galaxy_ng/app/static
