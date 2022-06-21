@@ -382,7 +382,6 @@ def set_certification(client, collection):
 
         task_ids = list(job_tasks.values())
         task_ids = [x for x in task_ids if x]
-        job_results = []
         for task_id in task_ids:
             # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
             ds = {
