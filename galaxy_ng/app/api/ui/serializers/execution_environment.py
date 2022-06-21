@@ -414,7 +414,12 @@ class ContainerRemoteSerializer(
 
         validated_data = {**registry.get_connection_fields(), **validated_data}
 
-        # validated_data['url'] = registry.url
+        # Exclude source tags by default since they don't provide much value to customers and
+        # can cause network issues when syncing.
+        validated_data["exclude_tags"] = validated_data.get("exclude_tags", [])
+        if "*-source" not in validated_data["exclude_tags"]:
+            validated_data["exclude_tags"].append("*-source")
+
         request = self.context['request']
 
         # Create the remote instances using data from the registry

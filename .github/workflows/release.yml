@@ -207,13 +207,6 @@ jobs:
           name: ruby-client.tar
           path: ruby-client.tar
 
-      - name: Upload built docs
-        if: ${{ env.TEST == 'docs' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: docs.tar
-          path: docs/docs.tar
-
       - name: Logs
         if: always()
         run: |
@@ -284,6 +277,16 @@ jobs:
         run: bash .github/workflows/scripts/push_branch_and_tag_to_github.sh ${{ github.event.inputs.release }}
 
       
+
+      - name: Update GitHub
+        continue-on-error: true
+        run: |
+          set -euv
+          export COMMIT_MSG=$(git log --format=%B --no-merges -1)
+          export GH_ISSUES=$(echo $COMMIT_MSG | grep -o "GH Issues: .*" | awk '{print $3}')
+
+          echo "GH Issues $GH_ISSUES"
+          python .ci/scripts/update_github.py
 
       - name: Create release on GitHub
         run: bash .github/workflows/scripts/create_release_from_tag.sh ${{ github.event.inputs.release }}

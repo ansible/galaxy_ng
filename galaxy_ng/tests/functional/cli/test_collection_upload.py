@@ -88,7 +88,7 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
         # Verify that the colletion publishing was logged in the api access log
         collection = self.collections_api.read(path="published", namespace="pulp", name="squeezer")
         for line in log_contents:
-            if "INFO: Collection uploaded: " in line and 'pulp' in line:
+            if "INFO: Collection uploaded by user 'admin': " in line and 'pulp' in line:
                 self.assertIn(collection.namespace, line)
                 self.assertIn(collection.name, line)
                 self.assertIn(collection.highest_version["version"], line)

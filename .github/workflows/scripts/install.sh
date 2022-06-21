@@ -29,13 +29,13 @@ TAG=ci_build
 if [ -e $REPO_ROOT/../pulp_ansible ]; then
   PULP_ANSIBLE=./pulp_ansible
 else
-  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.10.1
+  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.10.3
 fi
 
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
 else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.8.3
+  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.8.6
 fi
 
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
@@ -106,6 +106,10 @@ pulp_container_tag: https
 
 VARSYAML
 
+if [ "$TEST" = "upgrade" ]; then
+  sed -i "/^pulp_container_tag:.*/s//pulp_container_tag: upgrade-https/" vars/main.yaml
+fi
+
 if [ "$TEST" = "s3" ]; then
   export MINIO_ACCESS_KEY=AKIAIT2Z5TDYPX3ARJBA
   export MINIO_SECRET_KEY=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
@@ -137,6 +141,10 @@ if [ "$TEST" = "azure" ]; then
   sed -i -e '$a azure_test: true' vars/main.yaml
 fi
 
+if [ "${PULP_API_ROOT:-}" ]; then
+  sed -i -e '$a api_root: "'"$PULP_API_ROOT"'"' vars/main.yaml
+fi
+
 ansible-playbook build_container.yaml
 ansible-playbook start_container.yaml
 echo ::group::SSL
@@ -159,7 +167,8 @@ sudo update-ca-certificates
 echo ::endgroup::
 
 if [ "$TEST" = "azure" ]; then
-  cat /usr/local/share/ca-certificates/azcert.crt >> /opt/az/lib/python3.6/site-packages/certifi/cacert.pem
+  AZCERTIFI=$(/opt/az/bin/python3 -c 'import certifi; print(certifi.where())')
+  cat /usr/local/share/ca-certificates/azcert.crt >> $AZCERTIFI
   cat /usr/local/share/ca-certificates/azcert.crt | cmd_stdin_prefix tee -a /usr/local/lib/python3.8/site-packages/certifi/cacert.pem > /dev/null
   cat /usr/local/share/ca-certificates/azcert.crt | cmd_stdin_prefix tee -a /etc/pki/tls/cert.pem > /dev/null
   AZURE_STORAGE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=https://ci-azurite:10000/devstoreaccount1;'

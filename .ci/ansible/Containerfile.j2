@@ -1,4 +1,4 @@
-FROM {{ ci_base | default("pulp/pulp-ci-centos:" + pulp_container_tag) }}
+FROM {{ ci_base | default("ghcr.io/pulp/pulp-ci-centos:" + pulp_container_tag) }}
 
 # Add source directories to container
 {% for item in plugins %}
@@ -15,7 +15,7 @@ RUN pip3 install \
 {{ " " }}django-storages[boto3] git+https://github.com/fabricio-aguiar/botocore.git@fix-100-continue
 {%- endif -%}
 {%- if azure_test | default(false) -%}
-{{ " " }}django-storages[azure]>=1.12.2
+{{ " " }}django-storages[azure]>=1.12.2 "azure-storage-blob<12.10.0"
 {%- endif -%}
 {%- for item in plugins -%}
 {%- if item.name == "pulp-certguard" -%}

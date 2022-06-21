@@ -1,3 +1,4 @@
+
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
@@ -7,12 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-15 22:48+0000\n"
+"POT-Creation-Date: 2022-02-17 04:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
-"MIME-Version: 1.0\n"
+"Language: zh\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
@@ -43,14 +43,13 @@ msgstr "组必须是一个组对象的列表"
 #: app/access_control/fields.py:71
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
-msgstr "组名=%s，id=%s 不存在"
+msgstr "组名=%s, id=%s 不存在"
 
 #: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
 msgid "Invalid group name or ID"
 msgstr "无效的组名称或 ID。"
 
 #: app/api/ui/serializers/execution_environment.py:375
-#| msgid "Namespace \"{0}\" does not exist."
 msgid "Selected registry does not exist."
 msgstr "所选 registry 不存在。"
 
@@ -61,7 +60,6 @@ msgid ""
 msgstr "容器名称只能包含字母数字，\".\"、\"_\"、\"-\"，以及最多一个 \"/\"。"
 
 #: app/api/ui/serializers/execution_environment.py:402
-#| msgid "Name cannot begin with '_'"
 msgid "Name cannot be changed."
 msgstr "名称不能更改。"
 
@@ -73,21 +71,21 @@ msgstr "创建同步列表时未找到存储库 \"{pulp_id}\""
 #: app/api/ui/serializers/synclist.py:96
 #, python-format
 msgid "Synclist already exists: %s"
-msgstr "同步类别已存在：%s"
+msgstr "同步列表已存在：%s"
 
 #: app/api/ui/serializers/synclist.py:104
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "创建同步列表 {synclist} 时找不到集合 \"{namespace}.{name}\""
+msgstr "创建同步列表 {synclist} 时未找到集合 \"{namespace}.{name}\""
 
 #: app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "更新同步列表 {synclist} 时找不到集合 \"{namespace}.{name}\""
+msgstr "更新同步列表 {synclist} 时未找到集合 \"{namespace}.{name}\""
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
@@ -102,7 +100,7 @@ msgstr "必须是超级用户才能授予超级用户权限。"
 #: app/api/ui/serializers/user.py:128
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
-msgstr "组 name=%(name)s, id=%(id)s 不存在"
+msgstr "组名=%(name)s, id=%(id)s 不存在"
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
@@ -115,7 +113,6 @@ msgstr "%s 发行版没有任何与之关联的远程设备。"
 
 #: app/api/ui/views/sync.py:51
 #, python-format
-#| msgid "The %s distribution does not have any remotes associated with it."
 msgid "The %s remote does not have any registries associated with it."
 msgstr "%s 远程没有任何 registry 与之关联。"
 
@@ -151,7 +148,7 @@ msgstr "无效的文件名 {filename}。预期的格式：namespace-name-version
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "文件名 {filename} 中的无效版本字符串 {version}。预期语义版本格式。"
+msgstr "来自文件名 {filename} 中的无效版本字符串 {version}。预期语义版本格式。"
 
 #: app/api/utils.py:60
 #, python-format
@@ -187,7 +184,7 @@ msgstr "名称必须大于 2 个字符"
 
 #: app/api/v3/serializers/namespace.py:97
 msgid "Name cannot begin with '_'"
-msgstr "名称不能以 '_' 开头."
+msgstr "名称不能以 '_' 开头"
 
 #: app/api/v3/serializers/sync.py:66
 msgid "Password for proxy authentication."
@@ -229,39 +226,39 @@ msgstr "集合 {namespace}.{name} 无法被删除，因为还有其他集合需�
 msgid ""
 "Collection version {namespace}.{name} {version} could not be deleted because "
 "there are other collections that require it."
-msgstr "集合版本 {namespace}.{name} {version} 无法被删除，因为还有其他集合需要它。"
+msgstr "集合 {namespace}.{name} {version} 无法被删除，因为还有其他集合需要它。"
 
-#: app/api/v3/viewsets/collection.py:289
+#: app/api/v3/viewsets/collection.py:292
 #, python-format
 msgid "Path does not match: \"%s\""
 msgstr "路径不匹配：\"%s\""
 
-#: app/api/v3/viewsets/collection.py:310
+#: app/api/v3/viewsets/collection.py:313
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
 msgstr "命名空间 \"{0}\" 不存在。"
 
-#: app/api/v3/viewsets/collection.py:398
+#: app/api/v3/viewsets/collection.py:401
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
 msgstr "来自内容应用的意外响应。代码：%s。"
 
-#: app/api/v3/viewsets/collection.py:428
+#: app/api/v3/viewsets/collection.py:431
 #, python-format
 msgid "Collection %s not found"
 msgstr "未找到集合 %s"
 
-#: app/api/v3/viewsets/collection.py:436
+#: app/api/v3/viewsets/collection.py:439
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
-msgstr "未找到用于移动集合的存储库 %s"
+msgstr "未找到用于移动集合 %s 的存储库"
 
-#: app/api/v3/viewsets/collection.py:440
+#: app/api/v3/viewsets/collection.py:443
 #, python-format
 msgid "Collection %s not found in source repo"
 msgstr "源仓库中没有找到集合 %s"
 
-#: app/api/v3/viewsets/collection.py:444
+#: app/api/v3/viewsets/collection.py:447
 #, python-format
 msgid "Collection %s already found in destination repo"
 msgstr "目标仓库中已找到集合 %s"
@@ -289,7 +286,7 @@ msgstr "数据与现有实体冲突。"
 #: app/tasks/index_registry.py:26
 #, python-brace-format
 msgid "Failed to create container {remote_name}. {error}"
-msgstr "创建容器 {remote_name} 失败。{error}"
+msgstr "创建容器失败 {remote_name}. {error}"
 
 #: app/tasks/index_registry.py:90
 msgid ""
@@ -298,14 +295,13 @@ msgid ""
 msgstr "具有此名称的远程容器已存在，但不与任何 registry 关联。"
 
 #: app/tasks/index_registry.py:97
-#| msgid "A namespace named %s already exists."
 msgid "A local container with this name already exists."
 msgstr "具有此名称的本地容器已经存在。"
 
-#: app/tasks/publishing.py:54 app/tasks/publishing.py:84
+#: app/tasks/publishing.py:53 app/tasks/publishing.py:91
 #, python-format
 msgid "Could not find staging repository: \"%s\""
-msgstr "无法找到 staging存储库：\"%s\""
+msgstr "无法找到 staging 存储库：\"%s\""
 
 #: app/tasks/synclist.py:45
 #, python-format

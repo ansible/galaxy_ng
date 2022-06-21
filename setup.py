@@ -14,7 +14,7 @@ from setuptools.command.build_py import build_py as _BuildPyCommand
 from setuptools.command.sdist import sdist as _SDistCommand
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-version = "4.4.0"
+version = "4.4.3"
 
 
 class PrepareStaticCommand(Command):
@@ -89,11 +89,11 @@ class BuildPyCommand(_BuildPyCommand):
 
 requirements = [
     "galaxy-importer==0.4.0",
-    "pulpcore>=3.15.0,<3.16.0",
-    "pulp-ansible>=0.10.1,<0.11.0",
+    "pulpcore>=3.15.5,<3.16.0",
+    "pulp-ansible>=0.10.2,<0.11.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container>=2.8.3,<2.9.0",
+    "pulp-container>=2.8.6,<2.9.0",
     "django-automated-logging==6.1.3",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",

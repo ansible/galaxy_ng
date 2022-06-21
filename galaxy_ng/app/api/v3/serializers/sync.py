@@ -1,4 +1,5 @@
 from django.utils.translation import gettext_lazy as _
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -147,6 +148,21 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
                           'requirements file is not allowed.')
                 }
             )
+
+        init_data = self.initial_data
+        if not data.get('proxy_password') and init_data.get('write_only_fields'):
+
+            # filter proxy_password write_only_field
+            proxy_pwd = next(
+                item for item in init_data.get('write_only_fields')
+                if item["name"] == "proxy_password"
+            )
+            repo = get_object_or_404(CollectionRemote, name=init_data.get('name'))
+
+            # update proxy_password by value in db
+            if proxy_pwd.get('is_set') and repo:
+                data['proxy_password'] = repo.proxy_password
+
         return super().validate(data)
 
     @extend_schema_field(AnsibleRepositorySerializer(many=True))

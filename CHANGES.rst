@@ -13,6 +13,64 @@ Changelog
 
 .. towncrier release notes start
 
+
+4.4.3 (2022-03-16)
+Bugfixes
+--------
+
+- Update to the latest pulp_container release
+  `AAH-1373 <https://issues.redhat.com/browse/AAH-1373>`_
+- Make sure orphan_protection_time is not set to zero
+  `AAH-1384 <https://issues.redhat.com/browse/AAH-1384>`_
+- Prevent artifact removal from latest version when deleting images
+  `AAH-1389 <https://issues.redhat.com/browse/AAH-1389>`_
+- Fix intermittent 500 when pulling execution environments.
+  `AAH-1400 <https://issues.redhat.com/browse/AAH-1400>`_
+- Fix intermittent 500 when pushing execution environments.
+  `AAH-1411 <https://issues.redhat.com/browse/AAH-1411>`_
+
+
+----
+
+
+4.4.2 (2022-03-01)
+Bugfixes
+--------
+
+- Log query items to api access log to capture collection details when uploading a collection.
+  `AAH-1018 <https://issues.redhat.com/browse/AAH-1018>`_
+- Update pulpcore to 3.15.4 to pickup CDN related fixes
+  `AAH-1202 <https://issues.redhat.com/browse/AAH-1202>`_
+- Update pulp_ansible to 0.10.2 to pickup proxy authentication fix.
+  `AAH-1243 <https://issues.redhat.com/browse/AAH-1243>`_
+- Add missing proxy_password if field is set on CollectionRemote update
+  `AAH-1254 <https://issues.redhat.com/browse/AAH-1254>`_
+
+
+----
+
+
+4.4.1 (2022-01-06)
+Bugfixes
+--------
+
+- Remote registry sync status not shown on registry page
+  `AAH-1094 <https://issues.redhat.com/browse/AAH-1094>`_
+- Upgrade to pulp-container 2.8.3 to fix azure and S3 storage backends.
+  `AAH-1188 <https://issues.redhat.com/browse/AAH-1188>`_
+- Fix a bug preventing users upgrading from 1.2 to 2.1 from downloading content from the rh-certified repository.
+  `AAH-1200 <https://issues.redhat.com/browse/AAH-1200>`_
+
+
+Misc
+----
+
+- `AAH-804 <https://issues.redhat.com/browse/AAH-804>`_, `AAH-1015 <https://issues.redhat.com/browse/AAH-1015>`_
+
+
+----
+
+
 4.4.0 (2021-11-18)
 ==================
 

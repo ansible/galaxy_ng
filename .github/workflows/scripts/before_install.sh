@@ -111,7 +111,7 @@ fi
 
 
 
-git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.15.2
+git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.15.5
 
 cd pulpcore
 
@@ -122,7 +122,7 @@ fi
 cd ..
 
 
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.10.1
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.10.3
 cd pulp_ansible
 
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
@@ -132,7 +132,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.8.3
+git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.8.6
 cd pulp_container
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
