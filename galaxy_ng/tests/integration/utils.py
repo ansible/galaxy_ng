@@ -375,10 +375,28 @@ def set_certification(client, collection):
             f"{collection.version}/move/staging/published/"
         )
 
-        client(url, method="POST", args=b"{}")
+        job_tasks = client(url, method="POST", args=b"{}")
+        assert 'copy_task_id' in job_tasks
+        assert 'curate_all_synclist_repository_task_id' in job_tasks
+        assert 'remove_task_id' in job_tasks
 
-        # no task url in response from above request, so can't intelligently wait.
-        # so we'll just sleep for 1 second and hope the certification is done by then.
+        # wait for each unique task to finish ...
+        for key in ['copy_task_id', 'curate_all_synclist_repository_task_id', 'remove_task_id']:
+            task_id = job_tasks.get(key)
+
+            # curate is null sometimes? ...
+            if task_id is None:
+                continue
+
+            # The task_id is not a url, so it has to be assembled from known data ...
+            # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
+            ds = {
+                'task': f"{client.config['url']}/pulp/api/v3/tasks/{task_id}"
+            }
+            task_result = wait_for_task(client, ds)
+            assert task_result['state'] == 'completed', task_result
+
+        # give extra time for the backend to settle and "hidden" tasks to finish
         dest_url = (
             f"v3/collections/{collection.namespace}/"
             f"{collection.name}/versions/{collection.version}/"
