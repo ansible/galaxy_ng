@@ -2,6 +2,7 @@ import datetime
 import time
 
 from django.conf import settings
+from django.db.models import Q
 from django.http import HttpResponse
 from django.urls import include, path
 from rest_framework import routers
@@ -58,6 +59,10 @@ class LegacyUserViewSet(viewsets.ModelViewSet):
 
         print(f'QUERY_PARAMS: {self.request.query_params}')
 
+        keywords = None
+        if self.request.query_params.get('keywords'):
+            keywords = self.request.query_params.get('keywords').rstrip('/')
+
         order_by = 'name'
         if self.request.query_params.get('order_by'):
             order_by = self.request.query_params.get('order_by').rstrip('/')
@@ -65,6 +70,11 @@ class LegacyUserViewSet(viewsets.ModelViewSet):
         if self.request.query_params.get('name'):
             name = self.request.query_params.get('name').rstrip('/')
             return LegacyNamespace.objects.filter(name=name).order_by(order_by)
+
+        if keywords:
+            return LegacyNamespace.objects.filter(
+                Q(name__contains=keywords)
+            ).order_by(order_by)
 
         return LegacyNamespace.objects.all().order_by(order_by)
 
@@ -88,6 +98,10 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         print(f'QUERY_PARAMS: {self.request.query_params}')
+
+        keywords = None
+        if self.request.query_params.get('keywords'):
+            keywords = self.request.query_params.get('keywords').rstrip('/')
 
         order_by = 'full_metadata__created'
         if self.request.query_params.get('order_by'):
@@ -120,6 +134,15 @@ class LegacyRoleViewSet(viewsets.ModelViewSet):
             print(f'FILTER BY USER: {github_user}')
             print(f'FILTER BY NAMESPACE: {namespace}')
             return LegacyRole.objects.filter(namespace=namespace).order_by(order_by)
+
+        # Item.objects.filter(Q(creator=owner) | Q(moderated=False))
+        # obj.full_metadata.get('description')
+        if keywords:
+            return LegacyRole.objects.filter(
+                Q(namespace__name__contains=keywords) |
+                Q(name__contains=keywords) |
+                Q(full_metadata__description__contains=keywords)
+            ).order_by(order_by)
 
         return LegacyRole.objects.all().order_by(order_by)
 
