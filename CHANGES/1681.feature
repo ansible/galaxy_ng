@@ -1,0 +1,1 @@
+Make /api/galaxy/pulp/api/v3/ part of the supported API.
