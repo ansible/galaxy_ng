@@ -303,28 +303,6 @@ def modify_artifact(artifact):
             tf.close()
 
 
-def approve_collection(client, collection):
-    """Approve a collection version by moving it from the staging to published repository."""
-    move_collection(client, collection, "staging", "published")
-
-
-def reject_collection(client, collection):
-    """Reject a collection version by moving it from the staging to published repository."""
-    move_collection(client, collection, "staging", "rejected")
-
-
-def move_collection(client, collection, source, destination):
-    """Move a collection version between repositories.
-
-    For use in versions of the API that implement repository-based approval.
-    """
-    namespace = collection.namespace
-    name = collection.name
-    version = collection.version
-    url = f"/v3/collections/{namespace}/{name}/versions/{version}/move/{source}/{destination}"
-    client(url, method="PUT")
-
-
 def uuid4():
     """Return a random UUID4 as a string."""
     return str(uuid.uuid4())
@@ -415,12 +393,12 @@ def set_certification(client, collection):
             task_result = wait_for_task(client, ds)
             assert task_result['state'] == 'completed', task_result
 
-        # callers expect response as part of this method
+        # callers expect response as part of this method, ensure artifact is there
         dest_url = (
             "content/published/v3/plugin/ansible/content/published/collections/index/"
             f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
         )
-        return client(dest_url)
+        return wait_for_url(client, dest_url)
 
 
 def generate_namespace(exclude=None):
