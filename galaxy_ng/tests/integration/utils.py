@@ -415,14 +415,12 @@ def set_certification(client, collection):
             task_result = wait_for_task(client, ds)
             assert task_result['state'] == 'completed', task_result
 
-        # give extra time for the backend to settle and "hidden" tasks to finish
+        # callers expect response as part of this method
         dest_url = (
             "content/published/v3/plugin/ansible/content/published/collections/index/"
             f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
         )
-        res = wait_for_url(client, dest_url)
-
-        return res
+        return client(dest_url)
 
 
 def generate_namespace(exclude=None):
