@@ -15,7 +15,7 @@ services:
       - './standalone-keycloak/galaxy_ng.env'
       - '../.compose.env'
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    image: quay.io/keycloak/keycloak:legacy
     env_file:
       - './standalone-keycloak/keycloak.env'
       - '../.compose.env'
