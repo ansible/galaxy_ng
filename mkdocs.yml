@@ -9,30 +9,31 @@ nav:
     - Install: installation.md
     - Configuration:
         - Configuration options: config/options.md
-        - Enabling auto approval: config/collection_auto_approval.md
-        - Galaxy client configuration: config/galaxy_cli.md
+        # - Enabling auto approval: config/collection_auto_approval.md
+        # - Galaxy client configuration: config/galaxy_cli.md
         - Managing user access: config/user_access.md
         - Enabling collection signing: config/collection_signing.md
-    - Content Management:
-        - How content is organized: content/organization.md
-        - Collections:
-            - Creating namespaces: content/collection_namespaces.md
-            - Publishing collections: content/collection_publishing.md
-            - Syncing from remotes: content/collection_remotes.md
-            - Deleting collections: content/collection_deleting.md
-        - Containers:
-            - Publishing containers: content/container_publishing.md
-            - Signing collections: content/collection_signing.md
-            - Signing containers: content/container_signing.md
+    # - Content Management:
+    #     - How content is organized: content/organization.md
+    #     - Collections:
+    #         - Creating namespaces: content/collection_namespaces.md
+    #         - Publishing collections: content/collection_publishing.md
+    #         - Syncing from remotes: content/collection_remotes.md
+    #         - Deleting collections: content/collection_deleting.md
+    #     - Containers:
+    #         - Publishing containers: content/container_publishing.md
+    #         - Signing collections: content/collection_signing.md
+    #         - Signing containers: content/container_signing.md
     - Integration:
-        - Connecting Ansible Controllers: integration/controller.md
-        - Using Keycloak SSO: integration/keycloak.md
-        - Using S3: integration/s3.md
-        - Using Azure: integration/azure.md
+        # - Connecting Ansible Controllers: integration/controller.md
+        - Using LDAP: integration/ldap.md
+        # - Using Keycloak SSO: integration/keycloak.md
+        # - Using S3: integration/s3.md
+        # - Using Azure: integration/azure.md
     - Contributing: 
-        - Guidelines: dev/guidelines.md
+        # - Guidelines: dev/guidelines.md
         - Development setup: dev/setup.md
-        - Tests: dev/tests.md
+        # - Tests: dev/tests.md
     - Tags: tags.md
 theme:
   features:
