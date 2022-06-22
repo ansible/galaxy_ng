@@ -265,6 +265,25 @@ def wait_for_task(api_client, resp, timeout=300):
     return resp
 
 
+def wait_for_url(api_client, url, timeout_sec=30):
+    """Wait until url stops returning a 404."""
+    ready = False
+    res = None
+    wait_until = time.time() + timeout_sec
+    while not ready:
+        if wait_until < time.time():
+            raise TaskWaitingTimeout()
+        try:
+            res = api_client(url, method="GET")
+        except GalaxyError as e:
+            if "404" not in str(e):
+                raise
+            time.sleep(0.5)
+        else:
+            ready = True
+    return res
+
+
 @contextmanager
 def modify_artifact(artifact):
     filename = artifact.filename
@@ -282,28 +301,6 @@ def modify_artifact(artifact):
             for name in os.listdir(dirpath):
                 tf.add(os.path.join(dirpath, name), name)
             tf.close()
-
-
-def approve_collection(client, collection):
-    """Approve a collection version by moving it from the staging to published repository."""
-    move_collection(client, collection, "staging", "published")
-
-
-def reject_collection(client, collection):
-    """Reject a collection version by moving it from the staging to published repository."""
-    move_collection(client, collection, "staging", "rejected")
-
-
-def move_collection(client, collection, source, destination):
-    """Move a collection version between repositories.
-
-    For use in versions of the API that implement repository-based approval.
-    """
-    namespace = collection.namespace
-    name = collection.name
-    version = collection.version
-    url = f"/v3/collections/{namespace}/{name}/versions/{version}/move/{source}/{destination}"
-    client(url, method="PUT")
 
 
 def uuid4():
@@ -396,27 +393,12 @@ def set_certification(client, collection):
             task_result = wait_for_task(client, ds)
             assert task_result['state'] == 'completed', task_result
 
-        # give extra time for the backend to settle and "hidden" tasks to finish
+        # callers expect response as part of this method, ensure artifact is there
         dest_url = (
-            f"v3/collections/{collection.namespace}/"
-            f"{collection.name}/versions/{collection.version}/"
+            "content/published/v3/plugin/ansible/content/published/collections/index/"
+            f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
         )
-        ready = False
-        timeout = SLEEP_SECONDS_POLLING * 5
-        res = None
-        while not ready:
-            try:
-                res = client(dest_url, method="GET")
-                # if we aren't done publishing, GalaxyError gets thrown and we skip
-                # past the below line and directly to the `except GalaxyError` line.
-                ready = True
-            except GalaxyError:
-                time.sleep(SLEEP_SECONDS_POLLING)
-                timeout = timeout - 1
-                if timeout < 0:
-                    raise
-
-        return res
+        return wait_for_url(client, dest_url)
 
 
 def generate_namespace(exclude=None):

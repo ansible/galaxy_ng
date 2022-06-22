@@ -8,15 +8,19 @@ import os
 import tarfile
 import time
 from tempfile import TemporaryDirectory
-from urllib.parse import urljoin
 
 import pytest
 import requests
 from orionutils.generator import build_collection
 
-from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME, SLEEP_SECONDS_POLLING
-
-from ..utils import get_all_collections_by_repo, get_all_namespaces, get_client, set_certification
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
+from galaxy_ng.tests.integration.utils import (
+    get_all_collections_by_repo,
+    get_all_namespaces,
+    get_client,
+    set_certification,
+    wait_for_task,
+)
 
 log = logging.getLogger(__name__)
 
@@ -52,13 +56,7 @@ def namespace(api_client):
 def import_and_wait(api_client, artifact, upload_artifact, config):
     # import and wait ...
     resp = upload_artifact(config, api_client, artifact)
-    ready = False
-    url = urljoin(config["url"], resp["task"])
-    log.info("Waiting for collection to be imported: %s", url)
-    while not ready:
-        resp = api_client(url)
-        ready = resp["state"] not in ("running", "waiting")
-        time.sleep(SLEEP_SECONDS_POLLING)
+    resp = wait_for_task(api_client, resp)
     assert resp["state"] == "completed"
     return resp
 
