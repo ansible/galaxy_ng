@@ -1,6 +1,5 @@
 import os
 from typing import Any, Dict, List
-
 from dynaconf import Dynaconf, Validator
 
 
@@ -11,6 +10,9 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
 
     settings: A read-only copy of the django.conf.settings
     returns: a dictionary to be merged to django.conf.settings
+
+    NOTES:
+        Feature flags must be loaded directly on `app/api/ui/views/feature_flags.py` view.
     """
     data = {"dynaconf_merge": False}
     # existing keys will be merged if dynaconf_merge is set to True
@@ -19,7 +21,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_logging(settings))
     data.update(configure_keycloak(settings))
     data.update(configure_cors(settings))
-    data.update(configure_feature_flags(settings))
     data.update(configure_pulp_ansible(settings))
     data.update(configure_authentication_classes(settings))
     data.update(configure_password_validators(settings))
@@ -267,16 +268,6 @@ def configure_cors(settings: Dynaconf) -> Dict[str, Any]:
     if settings.get("GALAXY_ENABLE_CORS", default=False):
         corsmiddleware = ["galaxy_ng.app.common.openapi.AllowCorsMiddleware"]
         data["MIDDLEWARE"] = corsmiddleware + settings.get("MIDDLEWARE", [])
-    return data
-
-
-def configure_feature_flags(settings: Dynaconf) -> Dict[str, Any]:
-    """Adds conditional feature flags"""
-    data = {}
-    data["GALAXY_FEATURE_FLAGS__collection_signing"] = settings.get(
-        "GALAXY_COLLECTION_SIGNING_SERVICE") is not None
-    data["GALAXY_FEATURE_FLAGS__collection_auto_sign"] = settings.get(
-        "GALAXY_AUTO_SIGN_COLLECTIONS", False)
     return data
 
 

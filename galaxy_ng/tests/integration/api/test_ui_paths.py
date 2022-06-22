@@ -597,9 +597,6 @@ def test_api_ui_v1_settings(ansible_config):
         assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is False
         assert ds['GALAXY_REQUIRE_CONTENT_APPROVAL'] is True
 
-        ff = ds['GALAXY_FEATURE_FLAGS']
-        validate_json(instance=ff, schema=schema_featureflags)
-
 
 # /api/automation-hub/_ui/v1/synclists/
 # /api/automation-hub/_ui/v1/synclists/{id}/

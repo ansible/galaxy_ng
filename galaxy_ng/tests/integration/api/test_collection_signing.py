@@ -42,6 +42,11 @@ def settings(api_client):
     return api_client("/api/automation-hub/_ui/v1/settings/")
 
 
+@pytest.fixture(scope="function")
+def flags(api_client):
+    return api_client("/api/automation-hub/_ui/v1/feature-flags/")
+
+
 @pytest.fixture(scope="function", autouse=True)
 def namespace(api_client):
     # ensure namespace exists
@@ -75,18 +80,18 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.standalone_only
-def test_collection_auto_sign_on_approval(api_client, config, settings, upload_artifact):
+def test_collection_auto_sign_on_approval(api_client, config, settings, flags, upload_artifact):
     """Test whether a collection is uploaded and automatically signed on approval
     when GALAXY_AUTO_SIGN_COLLECTIONS is set to true.
     """
-    if not settings.get("GALAXY_AUTO_SIGN_COLLECTIONS"):
+    if not flags.get("collection_auto_sign"):
         pytest.skip("GALAXY_AUTO_SIGN_COLLECTIONS is not enabled")
     else:
         log.info("GALAXY_AUTO_SIGN_COLLECTIONS is enabled")
 
-    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
-    if not signing_service:
-        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not set")
+    can_sign = flags.get("can_create_signatures")
+    if not can_sign:
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not configured")
 
     artifact = build_collection(
         "skeleton",
@@ -113,6 +118,8 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, upload_a
     collections = get_all_collections_by_repo(api_client)
     assert ckey not in collections["staging"]
     assert ckey in collections["published"]
+
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
 
     # Assert that the collection is signed on v3 api
     collection = api_client(
@@ -163,7 +170,7 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, upload_a
         ),
     ],
 )
-def test_collection_sign_on_demand(api_client, config, settings, upload_artifact, sign_url):
+def test_collection_sign_on_demand(api_client, config, settings, flags, upload_artifact, sign_url):
     """Test whether a collection can be signed on-demand by calling _ui/v1/collection_signing/"""
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip(
@@ -171,9 +178,9 @@ def test_collection_sign_on_demand(api_client, config, settings, upload_artifact
             "so content is automatically signed during approval"
         )
 
-    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
-    if not signing_service:
-        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not set")
+    can_sign = flags.get("can_create_signatures")
+    if not can_sign:
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not configured")
 
     artifact = build_collection(
         "skeleton",
@@ -192,6 +199,8 @@ def test_collection_sign_on_demand(api_client, config, settings, upload_artifact
     assert ckey in collections["staging"]
     assert ckey not in collections["published"]
 
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
+
     # Sign the collection
     sign_payload = {
         "distro_base_path": "staging",
@@ -200,7 +209,6 @@ def test_collection_sign_on_demand(api_client, config, settings, upload_artifact
         "version": artifact.version,
     }
     sign_on_demand(api_client, signing_service, sign_url.format(**sign_payload), **sign_payload)
-
     # Assert that the collection is signed on v3 api
     collection = api_client(
         "/api/automation-hub/content/staging/v3/collections/"
@@ -235,13 +243,13 @@ def test_collection_sign_on_demand(api_client, config, settings, upload_artifact
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.standalone_only
-def test_collection_move_with_signatures(api_client, config, settings, upload_artifact):
+def test_collection_move_with_signatures(api_client, config, settings, flags, upload_artifact):
     """Test whether a collection can be moved from repo to repo with its
     signatures.
     """
-    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
-    if not signing_service:
-        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not set")
+    can_sign = flags.get("can_create_signatures")
+    if not can_sign:
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not configured")
 
     artifact = build_collection(
         "skeleton",
@@ -259,6 +267,8 @@ def test_collection_move_with_signatures(api_client, config, settings, upload_ar
     collections = get_all_collections_by_repo(api_client)
     assert ckey in collections["staging"]
     assert ckey not in collections["published"]
+
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
 
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         # Sign the collection while still on staging

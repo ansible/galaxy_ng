@@ -113,13 +113,23 @@ schema_featureflags = {
     'type': 'object',
     'additional_properties': False,
     'required': [
-        'collection_auto_sign',
         'collection_signing',
-        'execution_environments'
+        'signatures_enabled',
+        'require_upload_signatures',
+        'can_create_signatures',
+        'can_upload_signatures',
+        'collection_auto_sign',
+        'display_signatures',
+        'execution_environments',
     ],
     'properties': {
-        'collection_auto_sign': {'type': 'boolean'},
         'collection_signing': {'type': 'boolean'},
+        'signatures_enabled': {'type': 'boolean'},
+        'require_upload_signatures': {'type': 'boolean'},
+        'can_create_signatures': {'type': 'boolean'},
+        'can_upload_signatures': {'type': 'boolean'},
+        'collection_auto_sign': {'type': 'boolean'},
+        'display_signatures': {'type': 'boolean'},
         'execution_environments': {'type': 'boolean'},
     }
 }
