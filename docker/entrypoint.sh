@@ -97,9 +97,11 @@ run_service() {
 
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
         setup_signing_keyring
+        setup_repo_keyring &
         setup_signing_service
     elif [[ "$ENABLE_SIGNING" -eq "2" ]]; then
         setup_signing_keyring
+        setup_repo_keyring &
     fi
 
     exec "${service_path}" "$@"
@@ -128,6 +130,25 @@ setup_signing_keyring() {
     export KEY_ID=${KEY_FINGERPRINT: -16}
     gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import /tmp/ansible-sign.key &>/dev/null
     echo "${KEY_FINGERPRINT}:6:" | gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import-ownertrust &>/dev/null
+}
+
+setup_repo_keyring() {
+    # run after a short delay, otherwise the django-admin command hangs
+    sleep 30
+    STAGING_KEYRING=$(django-admin shell -c "from pulp_ansible.app.models import AnsibleRepository;print(AnsibleRepository.objects.get(name='staging').keyring)" 2>/dev/null || true)
+    if [[ "${STAGING_KEYRING}" != "/etc/pulp/certs/galaxy.kbx" ]]; then
+        log_message "Setting keyring for staging repo"
+        django-admin set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y
+    else
+        log_message "Keyring is already set for staging repo."
+    fi
+    PUBLISHED_KEYRING=$(django-admin shell -c "from pulp_ansible.app.models import AnsibleRepository;print(AnsibleRepository.objects.get(name='published').keyring)" 2>/dev/null || true)
+    if [[ "${PUBLISHED_KEYRING}" != "/etc/pulp/certs/galaxy.kbx" ]]; then
+        log_message "Setting keyring for published repo"
+        django-admin set-repo-keyring --repository published --keyring /etc/pulp/certs/galaxy.kbx -y
+    else
+        log_message "Keyring is already set for published repo."
+    fi
 }
 
 setup_signing_service() {
