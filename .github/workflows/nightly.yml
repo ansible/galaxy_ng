@@ -27,13 +27,13 @@ jobs:
           - TEST: s3
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
@@ -61,8 +61,9 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
-      - uses: actions/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
         with:
           ruby-version: "2.6"
@@ -80,6 +81,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Before Script
         
@@ -94,6 +96,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
@@ -125,17 +128,25 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Upload python client packages
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: python-client.tar
           path: python-client.tar
 
+      - name: Upload python client docs
+        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-client-docs.tar
+          path: python-client-docs.tar
+
       - name: Upload ruby client packages
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ruby-client.tar
           path: ruby-client.tar
@@ -144,13 +155,56 @@ jobs:
         if: always()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
-          http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
+          http --timeout 30 --check-status --pretty format --print hb "https://pulp${PULP_API_ROOT}api/v3/status/" || true
           docker images || true
           docker ps -a || true
           docker logs pulp || true
           docker exec pulp ls -latr /etc/yum.repos.d/ || true
           docker exec pulp cat /etc/yum.repos.d/* || true
           docker exec pulp pip3 list
+
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # by default, it uses a depth of 1
+          # this fetches all history so that we can read each commit
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+
+      - name: Install python dependencies
+        run: |
+          echo ::group::PYDEPS
+          pip install gitpython requests packaging
+          echo ::endgroup::
+
+      - name: Configure Git with ansible name and email
+        run: |
+          git config --global user.name 'ansible'
+          git config --global user.email 'ansible-infra@redhat.com'
+
+      - name: Changelog history
+        run: python .ci/scripts/changelog.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+          committer: ansible <ansible-infra@redhat.com>
+          author: ansible <ansible-infra@redhat.com>
+          title: 'Update Changelog'
+          body: 'No-Issue'
+          branch: 'changelog/update'
+          base: master
+          commit-message: |
+            Update Changelog
+
+            No-Issue
+          delete-branch: true
 
   publish:
     runs-on: ubuntu-latest
@@ -160,17 +214,17 @@ jobs:
       TEST: publish
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
-      - uses: actions/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         
         with:
           ruby-version: "2.6"
@@ -205,6 +259,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install
         
@@ -219,6 +274,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install Python client
         
@@ -243,6 +299,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
@@ -261,7 +318,7 @@ jobs:
         if: always()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
-          http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
+          http --timeout 30 --check-status --pretty format --print hb "https://pulp${PULP_API_ROOT}api/v3/status/" || true
           docker images || true
           docker ps -a || true
           docker logs pulp || true

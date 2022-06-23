@@ -30,6 +30,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
           GITHUB_PR_COMMITS_URL: ${{ github.event.pull_request.commits_url }}
           START_COMMIT: ${{ github.event.before }}
           END_COMMIT: ${{ github.event.after }}
@@ -41,13 +42,13 @@ jobs:
     needs: check_commit
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
@@ -62,6 +63,9 @@ jobs:
       # Lint code.
       - name: Run flake8
         run: flake8 --config flake8.cfg
+
+      - name: Run extra lint checks
+        run: "[ ! -x .ci/scripts/extra_linting.sh ] || .ci/scripts/extra_linting.sh"
 
       # check for any files unintentionally left out of MANIFEST.in
       - name: Check manifest
@@ -90,13 +94,13 @@ jobs:
       deprecations-s3: ${{ steps.deprecations.outputs.deprecations-s3 }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
@@ -124,6 +128,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install
         
@@ -138,6 +143,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install Python client
         
@@ -162,6 +168,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
@@ -183,6 +190,7 @@ jobs:
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Extract Deprecations from Logs
         id: deprecations
@@ -192,7 +200,7 @@ jobs:
         if: always()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
-          http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
+          http --timeout 30 --check-status --pretty format --print hb "https://pulp${PULP_API_ROOT}api/v3/status/" || true
           docker images || true
           docker ps -a || true
           docker logs pulp || true
