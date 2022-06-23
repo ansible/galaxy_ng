@@ -113,6 +113,11 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
     # however, some tests need to auth but send request_token=False, so this
     # kwarg is poorly named and confusing.
     token = config.get("token") or None
+
+    # Only use token when in standalone mode
+    if os.getenv("HUB_LOCAL") != "1":
+        token = None  # TODO: refactor
+
     if request_token:
         if token:
             # keycloak must have a unique auth url ...
