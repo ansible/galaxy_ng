@@ -121,6 +121,7 @@ schema_featureflags = {
         'collection_auto_sign',
         'display_signatures',
         'execution_environments',
+        '_messages',
     ],
     'properties': {
         'collection_signing': {'type': 'boolean'},
@@ -131,6 +132,7 @@ schema_featureflags = {
         'collection_auto_sign': {'type': 'boolean'},
         'display_signatures': {'type': 'boolean'},
         'execution_environments': {'type': 'boolean'},
+        '_messages': {'type': 'array'},
     }
 }
 
