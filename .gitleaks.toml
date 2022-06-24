@@ -4,4 +4,5 @@
     ".github/workflows/scripts/install.sh",
     "openshift/clowder/clowd-app.yaml",
     "dev/Dockerfile.base",
+    "dev/standalone-ldap/galaxy_ng.env"
   ]

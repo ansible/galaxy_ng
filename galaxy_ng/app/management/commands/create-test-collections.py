@@ -214,9 +214,9 @@ class Command(BaseCommand):
                 self.echo("No dependencies")
             self.echo(
                 reverse(
-                    "galaxy:api:content:v3:collection-versions-detail",
+                    "galaxy:api:v3:collection-versions-detail",
                     kwargs={
-                        "path": distro,
+                        "distro_base_path": distro,
                         "namespace": np.name,
                         "name": collection.name,
                         "version": collection.version,
@@ -281,9 +281,9 @@ class Command(BaseCommand):
                     self.echo("No dependencies")
                 self.echo(
                     reverse(
-                        "galaxy:api:content:v3:collection-versions-detail",
+                        "galaxy:api:v3:collection-versions-detail",
                         kwargs={
-                            "path": distro,
+                            "distro_base_path": distro,
                             "namespace": np.name,
                             "name": config["name"],
                             "version": config["version"],
@@ -303,9 +303,9 @@ class Command(BaseCommand):
                     self.echo(f"A new version for '{_collection.name}' created")
                     self.echo(
                         reverse(
-                            "galaxy:api:content:v3:collection-versions-detail",
+                            "galaxy:api:v3:collection-versions-detail",
                             kwargs={
-                                "path": distro,
+                                "distro_base_path": distro,
                                 "namespace": np.name,
                                 "name": _config["name"],
                                 "version": _config["version"],
