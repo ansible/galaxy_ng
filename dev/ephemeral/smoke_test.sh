@@ -24,8 +24,6 @@ oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/common/setup_test_users
 echo "Creating test data"
 oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_objects.py
 
-export TEARDOWN_RAN=1
-
 # Force "publishing" uploaded collections
 export HUB_USE_MOVE_ENDPOINT="true"
 
