@@ -33,7 +33,7 @@ PULPY_VARIABLES = [
 def test_galaxy_openapi_no_pulp_variables(ansible_config):
     """Tests whether openapi.json has valid path names"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("basic_user")
     api_client = get_client(
         config=config,
         request_token=True,
@@ -52,7 +52,7 @@ def test_galaxy_openapi_no_pulp_variables(ansible_config):
 def test_galaxy_openapi_validation(ansible_config):
     """Tests whether openapi.json passes openapi linter"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("basic_user")
     api_client = get_client(
         config=config,
         request_token=True,
@@ -63,12 +63,11 @@ def test_galaxy_openapi_validation(ansible_config):
     validate_spec(galaxy_spec)
 
 
-@pytest.mark.standalone_only
 @pytest.mark.openapi
 def test_pulp_openapi_has_variables(ansible_config):
     """Tests whether openapi.json has valid path names for pulp"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("basic_user")
     api_client = get_client(
         config=config,
         request_token=True,
@@ -90,7 +89,7 @@ def test_pulp_openapi_has_variables(ansible_config):
 def test_openapi_bindings_generation(ansible_config):
     """Verify client bindings can be built from the pulp'ish api spec"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("basic_user")
     api_client = get_client(
         config=config,
         request_token=True,

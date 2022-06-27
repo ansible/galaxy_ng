@@ -30,7 +30,7 @@ def test_publish_newer_version_collection(ansible_config, cleanup_collections, u
     # Install collection without version ...
     install_pid = ansible_galaxy(
         f"collection install {v1.namespace}.{v1.name}",
-        ansible_config=ansible_config("ansible_partner"),
+        ansible_config=ansible_config("basic_user"),
         cleanup=False,
         check_retcode=False
     )
@@ -59,8 +59,7 @@ def test_publish_newer_certified_collection_version(
 
     # Ensure v2 gets installed by default ...
     ansible_galaxy(
-        f"collection install {v1.namespace}.{v1.name}",
-        ansible_config=ansible_config("ansible_partner")
+        f"collection install {v1.namespace}.{v1.name}", ansible_config=ansible_config("basic_user")
     )
     collection_path = get_collection_full_path(v1.namespace, v1.name)
     ci = CollectionInspector(directory=collection_path)
@@ -97,7 +96,7 @@ def test_publish_and_install_by_self(ansible_config, published, cleanup_collecti
 
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}:{published.version}",
-        ansible_config=ansible_config("ansible_partner")
+        ansible_config=ansible_config("basic_user"),
     )
 
 

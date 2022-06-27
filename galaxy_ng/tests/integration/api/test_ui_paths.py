@@ -34,7 +34,7 @@ from ..schemas import (
 @pytest.mark.api_ui
 def test_api_ui_v1_login(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config("basic_user")
 
     # an authenticated session has a csrftoken and a sessionid
     with UIClient(config=cfg) as uclient:
@@ -47,7 +47,7 @@ def test_api_ui_v1_login(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_logout(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config("basic_user")
     uclient = UIClient(config=cfg)
 
     # check the auth first
@@ -352,7 +352,7 @@ def test_api_ui_v1_groups_users(ansible_config):
         assert resp.status_code == 200
         users_ds = resp.json()
         validate_json(instance=users_ds, schema=schema_objectlist)
-        assert 'admin' in [x['username'] for x in users_ds['data']]
+        assert "admin" in [x["username"] for x in users_ds["data"]]
 
 
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/{id}/
