@@ -59,15 +59,8 @@ def pytest_configure(config):
 
 class AnsibleConfigFixture(dict):
 
-    # This is "kinda" like how IQE uses dynaconf, but
-    # much simpler and not such a huge tangled mess to
-    # understand ...
-
-    # The class is instantiated with a "namespace" of sorts,
-    # which sets the context for the rest of the config ...
-    #   config = ansible_config("ansible_partner")
-    #   config = ansible_config("ansible_insights")
-
+    # The class is instantiated with a "profile" that sets
+    # which type of user will be used in the test
     PROFILES = {
         "basic_user": {
             "username": "iqe_normal_user",
@@ -95,11 +88,6 @@ class AnsibleConfigFixture(dict):
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
         },
         "ansible_insights": {  # TODO: consolidate into admin user
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
-        "ansible_user": {  # TODO: consolidate into admin user
             "username": "notifications_admin",
             "password": "redhat",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
@@ -133,14 +121,14 @@ class AnsibleConfigFixture(dict):
                 None
             )
 
-        elif key == 'token':
-            return self.PROFILES[self.profile]['token']
+        elif key == "token":
+            return self.PROFILES[self.profile]["token"]
 
-        elif key == 'username':
-            return self.PROFILES[self.profile]['username']
+        elif key == "username":
+            return self.PROFILES[self.profile]["username"]
 
-        elif key == 'password':
-            return self.PROFILES[self.profile]['password']
+        elif key == "password":
+            return self.PROFILES[self.profile]["password"]
 
         elif key == 'hub_use_inbound':
             # This value will be compared to "use_distribution" in the

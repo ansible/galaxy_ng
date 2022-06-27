@@ -4,12 +4,15 @@ from rest_framework.authtoken.models import Token
 # Get or create test users to match keycloak passwords
 basic_user, _ = User.objects.get_or_create(username="iqe_normal_user")
 basic_user.set_password("redhat")
+basic_user.save()
 
 partner_engineer, _ = User.objects.get_or_create(username="jdoe")
 partner_engineer.set_password("redhat")
+partner_engineer.save()
 
 org_admin, _ = User.objects.get_or_create(username="org-admin")
 org_admin.set_password("redhat")
+org_admin.save()
 
 admin, _ = User.objects.get_or_create(username="notifications_admin")
 admin.set_password("redhat")

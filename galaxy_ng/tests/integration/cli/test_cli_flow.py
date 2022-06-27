@@ -109,10 +109,11 @@ def test_publish_and_expect_uncertified_hidden(ansible_config, published, cleanu
     """
 
     ansible_galaxy(
-        f"collection install {published.namespace}.{published.name}", check_retcode=0,
-        ansible_config=ansible_config("ansible_user")
+        f"collection install {published.namespace}.{published.name}",
+        check_retcode=0,
+        ansible_config=ansible_config("basic_user"),
     )
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}:1.0.0",
-        ansible_config=ansible_config("ansible_user")
+        ansible_config=ansible_config("basic_user"),
     )
