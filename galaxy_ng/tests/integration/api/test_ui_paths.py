@@ -346,18 +346,18 @@ def test_api_ui_v1_groups_users(ansible_config):
                 break
         assert pe_id is not None
 
-        # validate the pe user is in the group's userlist
+        # validate username="admin" is in the group's userlist
+        # true when `make docker/loaddata` run after build
         resp = uclient.get(f'_ui/v1/groups/{pe_id}/users/')
         assert resp.status_code == 200
         users_ds = resp.json()
         validate_json(instance=users_ds, schema=schema_objectlist)
-        assert cfg.get('username') in [x['username'] for x in users_ds['data']]
+        assert 'admin' in [x['username'] for x in users_ds['data']]
 
 
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/{id}/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
-@pytest.mark.testme
 def test_api_ui_v1_groups_users_add_delete(ansible_config):
 
     cfg = ansible_config('ansible_partner')
@@ -486,10 +486,7 @@ def test_api_ui_v1_me(ansible_config):
 
         assert not ds['is_anonymous']
         assert ds['username'] == cfg.get('username')
-        assert ds['email'] == 'admin@example.com'
         assert ds['auth_provider'] == ['django']
-        assert ds['groups'] == [{'id': 1, 'name': 'system:partner-engineers'}]
-        assert ds['id'] == 1
 
 
 # /api/automation-hub/_ui/v1/my-distributions/
@@ -675,8 +672,8 @@ def test_api_ui_v1_users_by_id(ansible_config):
         ds = resp.json()
         validate_json(instance=ds, schema=schema_user)
 
+        # true when `make docker/loaddata` run after build
         assert ds['id'] == 1
-        assert ds['username'] == cfg.get('username')
         assert ds['email'] == 'admin@example.com'
         assert ds['is_superuser'] is True
         assert ds['groups'] == [{'id': 1, 'name': 'system:partner-engineers'}]
