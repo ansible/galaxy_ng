@@ -72,7 +72,7 @@ def test_publish_newer_certified_collection_version(
 def test_publish_same_collection_version(ansible_config):
     """Test whether same collection version can be published."""
 
-    api_client = get_client(ansible_config("ansible_insights"))
+    api_client = get_client(ansible_config("basic_user"))
     cnamespace = create_unused_namespace(api_client=api_client)
     ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
     collection = build_collection(namespace=cnamespace)

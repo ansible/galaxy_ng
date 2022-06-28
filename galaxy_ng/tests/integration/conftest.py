@@ -182,7 +182,7 @@ def ansible_config():
 def published(ansible_config, artifact):
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("ansible_insights"))
+    api_client = get_client(ansible_config("partner_engineer"))
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}
@@ -208,7 +208,7 @@ def certifiedv2(ansible_config, artifact):
     """ Create and publish+certify collection version N and N+1 """
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("ansible_insights"))
+    api_client = get_client(ansible_config("partner_engineer"))
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}
@@ -255,7 +255,7 @@ def uncertifiedv2(ansible_config, artifact):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("ansible_insights"))
+    api_client = get_client(ansible_config("partner_engineer"))
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}

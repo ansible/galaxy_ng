@@ -297,7 +297,7 @@ def test_ansible_requires(ansible_config, upload_artifact, spec):
     assert resp["state"] == result
 
     if result == "completed":
-        admin = get_client(ansible_config("ansible_insights"))
+        admin = get_client(ansible_config("ansible_partner"))
         set_certification(admin, artifact)
 
         collection_url = f"v3/collections/{artifact.namespace}/{artifact.name}/versions/1.0.0/"

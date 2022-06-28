@@ -38,7 +38,7 @@ def test_token_auth(profile, ansible_config):
 def test_auth_admin(ansible_config):
     """Test whether admin can not access API root using invalid token."""
 
-    config = ansible_config("ansible_insights")
+    config = ansible_config("admin")
     client = get_client(
         config,
         request_token=False,
@@ -55,7 +55,7 @@ def test_auth_admin(ansible_config):
 def test_auth_exception(ansible_config, published):
     """Test whether an HTTP exception when using an invalid token."""
 
-    config = ansible_config("ansible_insights")
+    config = ansible_config("basic_user")
     client = get_client(
         config,
         request_token=False,
