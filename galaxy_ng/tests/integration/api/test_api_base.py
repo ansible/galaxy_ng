@@ -4,7 +4,8 @@ from ..utils import get_client
 def test_galaxy_api_root(ansible_config, artifact):
     """Test galaxy API root."""
 
-    config = ansible_config("ansible_partner")
+    # TODO: change to `basic_user` profile when can access pulp-v3 api root
+    config = ansible_config("admin")
 
     api_client = get_client(
         config=config,

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Expected to be called by:
+# - GitHub Actions ci_standalone.yml for DeploymentMode.STANDALONE
+# - Developer Env makefile commands for DeploymentMode.STANDALONE
+# - TODO: Ephemeral Env pr_check.sh (merge smoke_test.sh into this) for DeploymentMode.INSIGHTS
+
 set -e
 
 if [[ -z $HUB_LOCAL ]]; then

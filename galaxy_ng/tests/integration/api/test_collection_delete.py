@@ -24,7 +24,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 def test_delete_collection(ansible_config, uncertifiedv2):
     """Tests whether a colleciton can be deleted"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("partner_engineer")
     api_client = get_client(
         config=config,
         request_token=True,
@@ -82,7 +82,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
 def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv2):
     """Tests whether a colleciton version can be deleted"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("partner_engineer")
     api_client = get_client(
         config=config,
         request_token=True,

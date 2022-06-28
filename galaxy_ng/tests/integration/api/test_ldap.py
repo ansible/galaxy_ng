@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 @pytest.fixture(scope="function")
 def config(ansible_config):
-    return ansible_config("ansible_partner")
+    return ansible_config("basic_user")
 
 
 @pytest.fixture(scope="function")
@@ -26,7 +26,7 @@ def config_ldap(ansible_config):
                 return "professor"
             return super().__getitem__(key)
 
-    return AnsibleConfigLDAP("ansible_partner")
+    return AnsibleConfigLDAP("basic_user")
 
 
 @pytest.fixture(scope="function")

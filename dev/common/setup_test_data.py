@@ -6,11 +6,6 @@ from galaxy_ng.app.models.auth import Group, User
 
 """
 Setup test data used in integration tests.
-
-Expected to be called by
-* GitHub Actions CI: ci_standalone.yml via RUN_INTEGRATION.sh
-* Ephemeral PR check: pr_check.sh via smoke_test.sh
-* Local: Makefile commands via RUN_INTEGRATION.sh
 """
 
 # TODO: remove create_objects.py, jdoe_pe_group.py after ahub.sh calls this script
@@ -84,3 +79,7 @@ for nsname in ["autohubtest2", "autohubtest3"]:
     ns, _ = Namespace.objects.get_or_create(name=nsname)
     assign_perm("change_namespace", test_group, ns)
     assign_perm("upload_to_namespace", test_group, ns)
+
+signing_ns, _ = Namespace.objects.get_or_create(name="signing")
+assign_perm("change_namespace", pe_group, signing_ns)
+assign_perm("upload_to_namespace", pe_group, signing_ns)

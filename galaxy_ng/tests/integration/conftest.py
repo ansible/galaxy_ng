@@ -82,16 +82,6 @@ class AnsibleConfigFixture(dict):
             "password": "redhat",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
         },
-        "ansible_partner": {  # TODO: consolidate into admin user
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
-        "ansible_insights": {  # TODO: consolidate into admin user
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
         "APP": {},  # TODO: unsure why used
         "AUTOMATION_HUB": {},  # TODO: unsure why used
     }
@@ -191,7 +181,7 @@ def published(ansible_config, artifact):
     # publish
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -217,7 +207,7 @@ def certifiedv2(ansible_config, artifact):
     # publish v1
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -238,7 +228,7 @@ def certifiedv2(ansible_config, artifact):
     # publish newer version
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -264,7 +254,7 @@ def uncertifiedv2(ansible_config, artifact):
     # publish
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -285,7 +275,7 @@ def uncertifiedv2(ansible_config, artifact):
     # Publish but do -NOT- certify newer version ...
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
