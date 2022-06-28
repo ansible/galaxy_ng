@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd _clones/pinakes/
+cd _clones/galaxy_ng/
 
 # Rename the zh_cn folder 
 mv translations/zh_cn translations/zh
