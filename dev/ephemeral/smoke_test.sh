@@ -18,11 +18,8 @@ AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.
 #echo "Create token for keycloak user"
 #oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_token.py
 
-echo "Setting up test users"
-oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/common/setup_test_users.py
-
-echo "Creating test data"
-oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_objects.py
+echo "Setting up test data"
+oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
 # Force "publishing" uploaded collections
 export HUB_USE_MOVE_ENDPOINT="true"

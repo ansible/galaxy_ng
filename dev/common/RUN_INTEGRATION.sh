@@ -29,8 +29,8 @@ echo "PYTHON: $(which python)"
 pip install -r integration_requirements.txt
 pip show epdb || pip install epdb
 
-echo "Setting up test users"
-docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_users.py
+echo "Setting up test data"
+docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
 # when running user can specify extra pytest arguments such as
 # export HUB_LOCAL=1

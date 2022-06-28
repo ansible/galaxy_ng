@@ -4,8 +4,16 @@ from rest_framework.authtoken.models import Token
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.models.auth import Group, User
 
-# TODO: remove fixuser.py, create_objects.py, jdoe_pe_group.py (if ahub calls this script)
-# TODO: see if can remove create_token.py and create_admin_token.py see what calls them
+"""
+Setup test data used in integration tests.
+
+Expected to be called by
+* GitHub Actions CI: ci_standalone.yml via RUN_INTEGRATION.sh
+* Ephemeral PR check: pr_check.sh via smoke_test.sh
+* Local: Makefile commands via RUN_INTEGRATION.sh
+"""
+
+# TODO: remove create_objects.py, jdoe_pe_group.py after ahub.sh calls this script
 
 print("Add a group that has namespace permissions")
 test_group, _ = Group.objects.get_or_create(name="ns_group_for_tests")

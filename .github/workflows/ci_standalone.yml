@@ -50,12 +50,6 @@ jobs:
       - name: build stack and populate data
         run: make docker/all
 
-      - name: add an api token
-        run: make docker/loadtoken
-
-      - name: add test data
-        run: make docker/load_test_data
-
       - name: start the compose stack
         run: ./compose up -d
 
