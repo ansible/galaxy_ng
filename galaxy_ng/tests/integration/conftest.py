@@ -68,7 +68,50 @@ class AnsibleConfigFixture(dict):
     #   config = ansible_config("ansible_partner")
     #   config = ansible_config("ansible_insights")
 
-    def __init__(self, namespace1, namespace=None):
+    PROFILES = {
+        "basic_user": {
+            "username": "iqe_normal_user",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567891",
+        },
+        "partner_engineer": {
+            "username": "jdoe",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567892",
+        },
+        "org_admin": {  # user is org admin in keycloak
+            "username": "org-admin",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
+        },
+        "admin": {  # this is a superuser
+            "username": "notifications_admin",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
+        },
+        "ansible_partner": {  # TODO: consolidate into admin user
+            "username": "notifications_admin",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
+        },
+        "ansible_insights": {  # TODO: consolidate into admin user
+            "username": "notifications_admin",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
+        },
+        "ansible_user": {  # TODO: consolidate into admin user
+            "username": "notifications_admin",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
+        },
+        "APP": {},  # TODO: unsure why used
+        "AUTOMATION_HUB": {},  # TODO: unsure why used
+    }
+
+    def __init__(self, profile, namespace=None):
+        self.profile = profile
+        if profile not in self.PROFILES.keys():
+            raise Exception("AnsibleConfigFixture profile unknown")
         self.namespace = namespace
 
     def __repr__(self):
@@ -91,22 +134,13 @@ class AnsibleConfigFixture(dict):
             )
 
         elif key == 'token':
-            return os.environ.get(
-                'HUB_TOKEN',
-                None
-            )
+            return self.PROFILES[self.profile]['token']
 
         elif key == 'username':
-            return os.environ.get(
-                'HUB_USERNAME',
-                'admin'
-            )
+            return self.PROFILES[self.profile]['username']
 
         elif key == 'password':
-            return os.environ.get(
-                'HUB_PASSWORD',
-                'admin'
-            )
+            return self.PROFILES[self.profile]['password']
 
         elif key == 'hub_use_inbound':
             # This value will be compared to "use_distribution" in the

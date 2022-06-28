@@ -195,3 +195,36 @@ GALAXY_AUTO_SIGN_COLLECTIONS = False
 
 # This sets the name of the signing service to be used for signing
 GALAXY_COLLECTION_SIGNING_SERVICE = None
+
+AUTH_LDAP_SERVER_URI = None
+AUTH_LDAP_BIND_DN = None
+AUTH_LDAP_BIND_PASSWORD = None
+AUTH_LDAP_USER_SEARCH_BASE_DN = None
+AUTH_LDAP_USER_SEARCH_SCOPE = None
+AUTH_LDAP_USER_SEARCH_FILTER = None
+AUTH_LDAP_GROUP_SEARCH_BASE_DN = None
+AUTH_LDAP_GROUP_SEARCH_SCOPE = None
+AUTH_LDAP_GROUP_SEARCH_FILTER = None
+# Extra LDAP settings are defined on dynaconf_hooks.py
+# to be overriden by the /etc/pulp/settings.py
+# or environment variable PULP_AUTH_LDAP_SERVER_URI etc ...
+
+
+# This allows users to set AUTH backend using `ldap` or `keycloak` without the need
+# to change the backends directly in the settings
+# options are `ldap` and `keycloak` for defined presets
+# `local` to use the unchanged defaults
+# `custom` to allow the override of AUTHENTICATION_BACKENDS variable.
+AUTHENTICATION_BACKEND_PRESET = 'local'  # 'ldap' or 'keycloak' or 'local' or 'custom'
+AUTHENTICATION_BACKEND_PRESETS_DATA = {
+    'ldap': [
+        "django_auth_ldap.backend.LDAPBackend",
+        "django.contrib.auth.backends.ModelBackend",
+        "guardian.backends.ObjectPermissionBackend",
+        "pulpcore.backends.ObjectRolePermissionBackend"
+    ],
+    'keycloak': [
+        "social_core.backends.keycloak.KeycloakOAuth2",
+        "dynaconf_merge",
+    ]
+}

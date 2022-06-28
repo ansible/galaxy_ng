@@ -113,6 +113,11 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
     # however, some tests need to auth but send request_token=False, so this
     # kwarg is poorly named and confusing.
     token = config.get("token") or None
+
+    # Only use token when in standalone mode
+    if os.getenv("HUB_LOCAL") != "1":
+        token = None  # TODO: refactor
+
     if request_token:
         if token:
             # keycloak must have a unique auth url ...
@@ -265,6 +270,25 @@ def wait_for_task(api_client, resp, timeout=300):
     return resp
 
 
+def wait_for_url(api_client, url, timeout_sec=30):
+    """Wait until url stops returning a 404."""
+    ready = False
+    res = None
+    wait_until = time.time() + timeout_sec
+    while not ready:
+        if wait_until < time.time():
+            raise TaskWaitingTimeout()
+        try:
+            res = api_client(url, method="GET")
+        except GalaxyError as e:
+            if "404" not in str(e):
+                raise
+            time.sleep(0.5)
+        else:
+            ready = True
+    return res
+
+
 @contextmanager
 def modify_artifact(artifact):
     filename = artifact.filename
@@ -282,28 +306,6 @@ def modify_artifact(artifact):
             for name in os.listdir(dirpath):
                 tf.add(os.path.join(dirpath, name), name)
             tf.close()
-
-
-def approve_collection(client, collection):
-    """Approve a collection version by moving it from the staging to published repository."""
-    move_collection(client, collection, "staging", "published")
-
-
-def reject_collection(client, collection):
-    """Reject a collection version by moving it from the staging to published repository."""
-    move_collection(client, collection, "staging", "rejected")
-
-
-def move_collection(client, collection, source, destination):
-    """Move a collection version between repositories.
-
-    For use in versions of the API that implement repository-based approval.
-    """
-    namespace = collection.namespace
-    name = collection.name
-    version = collection.version
-    url = f"/v3/collections/{namespace}/{name}/versions/{version}/move/{source}/{destination}"
-    client(url, method="PUT")
 
 
 def uuid4():
@@ -375,30 +377,33 @@ def set_certification(client, collection):
             f"{collection.version}/move/staging/published/"
         )
 
-        client(url, method="POST", args=b"{}")
+        job_tasks = client(url, method="POST", args=b"{}")
+        assert 'copy_task_id' in job_tasks
+        assert 'curate_all_synclist_repository_task_id' in job_tasks
+        assert 'remove_task_id' in job_tasks
 
-        # no task url in response from above request, so can't intelligently wait.
-        # so we'll just sleep for 1 second and hope the certification is done by then.
+        # wait for each unique task to finish ...
+        for key in ['copy_task_id', 'curate_all_synclist_repository_task_id', 'remove_task_id']:
+            task_id = job_tasks.get(key)
+
+            # curate is null sometimes? ...
+            if task_id is None:
+                continue
+
+            # The task_id is not a url, so it has to be assembled from known data ...
+            # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
+            ds = {
+                'task': f"{client.config['url']}/pulp/api/v3/tasks/{task_id}"
+            }
+            task_result = wait_for_task(client, ds)
+            assert task_result['state'] == 'completed', task_result
+
+        # callers expect response as part of this method, ensure artifact is there
         dest_url = (
-            f"v3/collections/{collection.namespace}/"
-            f"{collection.name}/versions/{collection.version}/"
+            "content/published/v3/plugin/ansible/content/published/collections/index/"
+            f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
         )
-        ready = False
-        timeout = SLEEP_SECONDS_POLLING * 5
-        res = None
-        while not ready:
-            try:
-                res = client(dest_url, method="GET")
-                # if we aren't done publishing, GalaxyError gets thrown and we skip
-                # past the below line and directly to the `except GalaxyError` line.
-                ready = True
-            except GalaxyError:
-                time.sleep(SLEEP_SECONDS_POLLING)
-                timeout = timeout - 1
-                if timeout < 0:
-                    raise
-
-        return res
+        return wait_for_url(client, dest_url)
 
 
 def generate_namespace(exclude=None):

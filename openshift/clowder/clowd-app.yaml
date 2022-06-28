@@ -329,13 +329,13 @@ parameters:
 - name: GNUPGHOME
   value: "/tmp/ansible/.gnupg"
 - name: GALAXY_SIGNATURE_UPLOAD_ENABLED
-  value: "True"
+  value: "true"
 - name: GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL
-  value: "True"
+  value: "true"
 - name: GALAXY_COLLECTION_SIGNING_SERVICE
   value: "ansible-default"
 - name: GALAXY_AUTO_SIGN_COLLECTIONS
-  value: "True"
+  value: "true"
 
 # nginx resource requirements
 - name: NGINX_REPLICAS
