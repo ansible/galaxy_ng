@@ -22,14 +22,6 @@ for d in */ ; do
 done
 
 cd ..
-# echo $(pwd)
-
-
-# echo $pwd
-
-# cd to repository
-
-# cd _clones/
 
 galaxy_ng_api_path="galaxy_ng/locale" # locale will be dropped here
 
