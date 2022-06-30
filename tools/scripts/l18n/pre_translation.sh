@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Change Directory to clones
 cd _clones/galaxy_ng/
 

@@ -1,19 +1,19 @@
 #!/bin/bash
 
+# Change directory to pinakes
 cd _clones/galaxy_ng/
 
 # Rename the zh_cn folder 
 mv translations/zh_cn translations/zh
 
 # Create a directory for api (locale)
-# rm -rf locale
 mkdir locale
 
 # Copy all subdirectories to locale
 cp -r translations/ locale/
 
 # Loop over each directory and create another directory LC_Messages
-# Move django.po files to LC_Messages and remove messages.po
+# Move django.po files to LC_Messages
 cd locale/
 for d in */ ; do
     dir=${d%*/}
@@ -23,9 +23,12 @@ done
 
 cd ..
 
-galaxy_ng_api_path="galaxy_ng/locale" # locale will be dropped here
+# locale will be dropped here
+galaxy_ng_api_path="galaxy_ng/locale" 
 
+# Overwrite files
 rsync -av locale/ $galaxy_ng_api_path
 
+# Cleanup
 rm -rf translations/
 rm -rf locale/
