@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2022-06-10 19:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "Veld object_permissions is verplicht"
 
 #: app/access_control/fields.py:21
 msgid "id or name field is required"
-msgstr "Veld id of naam is verplicht."
+msgstr "Veld id of naam is verplicht"
 
 #: app/access_control/fields.py:27
 msgid "object_permissions must be a list of strings"
@@ -50,7 +50,7 @@ msgstr "Groepsnaam=%s, id=%s bestaat niet"
 
 #: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
 msgid "Invalid group name or ID"
-msgstr "Ongeldige groepsnaam of id."
+msgstr "Ongeldige groepsnaam of id"
 
 #: app/api/ui/serializers/execution_environment.py:375
 msgid "Selected registry does not exist."
@@ -66,24 +66,24 @@ msgstr "Containernamen kunnen alleen alfanumerieke getallen, \".\", \"_\", \"-\"
 msgid "Name cannot be changed."
 msgstr "Naam kan niet worden veranderd."
 
-#: app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "Repository \"{pulp_id}\" niet gevonden tijdens aanmaken synclist"
 
-#: app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:77
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "Synclist bestaat al: %s"
 
-#: app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:85
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "Collectie \"{namespace}.{name}\" niet gevonden tijdens het aanmaken van synclist {synclist}"
 
-#: app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:124
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -125,16 +125,16 @@ msgstr "het veld distro_base_path is vereist."
 #: app/api/ui/views/signing.py:108
 #, python-format
 msgid "Distribution %s does not exist."
-msgstr ""
+msgstr "Machtiging %s bestaat niet."
 
 #: app/api/ui/views/signing.py:114
 msgid "signing_service field is required."
-msgstr ""
+msgstr "Het veld signing_service is verplicht."
 
 #: app/api/ui/views/signing.py:117
 #, python-format
 msgid "Signing service \"%s\" does not exist."
-msgstr ""
+msgstr "Ondertekendienst \"%s\" bestaat niet."
 
 #: app/api/ui/views/sync.py:37 app/api/v3/views/sync.py:34
 #, python-format
@@ -202,7 +202,7 @@ msgstr "\"%s\" is geen geldige url."
 
 #: app/api/v3/serializers/namespace.py:94
 msgid "Attribute 'name' is required"
-msgstr "Een 'naam' voor het attribuut is vereist."
+msgstr "Een 'naam' voor het attribuut is vereist"
 
 #: app/api/v3/serializers/namespace.py:97
 msgid "Name can only contain lower case letters, underscores and numbers"
@@ -282,7 +282,14 @@ msgstr "Collectie %s reeds gevonden in doel-repo"
 #: app/api/v3/viewsets/collection.py:289 app/tasks/publishing.py:103
 #, python-format
 msgid "Signing %s service not found"
-msgstr ""
+msgstr "Ondertekeningdienst %s niet gevonden"
+
+#: app/api/v3/viewsets/collection.py:299
+#, python-brace-format
+msgid ""
+"Collection {namespace}.{name} could not be approved because system requires "
+"at least a signature for approval."
+msgstr "Verzameling {namespace}.{name} kon niet worden goedgekeurd omdat het systeem voor goedkeuring ten minste een handtekening vereist."
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format

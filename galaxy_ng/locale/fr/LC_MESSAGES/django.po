@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2022-06-10 19:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,24 +66,24 @@ msgstr "Les noms de conteneurs ne peuvent contenir que des chiffres alphanuméri
 msgid "Name cannot be changed."
 msgstr "Le nom ne peut pas être modifié."
 
-#: app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "Le référentiel \"{pulp_id}\" n'a pas été trouvé lors de la création de la synclist"
 
-#: app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:77
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "Synclist existe déjà : %s"
 
-#: app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:85
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "La collection \"{namespace}.{name}\" n'a pas été trouvée lors de la création de la synclist {synclist}"
 
-#: app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:124
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -165,7 +165,7 @@ msgstr "Récupérer l'importation de la collection"
 #: app/api/ui/viewsets/group.py:45
 #, python-format
 msgid "A group named %s already exists."
-msgstr "Un groupe nommé %s existe déjà."
+msgstr "Un groupe nommé  %s existe déjà."
 
 #: app/api/utils.py:49
 #, python-brace-format
@@ -284,6 +284,13 @@ msgstr "Collection %s déjà trouvée dans le repo de destination"
 msgid "Signing %s service not found"
 msgstr "Le service de signature %s n’a pas été trouvé"
 
+#: app/api/v3/viewsets/collection.py:299
+#, python-brace-format
+msgid ""
+"Collection {namespace}.{name} could not be approved because system requires "
+"at least a signature for approval."
+msgstr "La collection {namespace}.{name} n'a pas pu être approuvée car le système exige au moins une signature pour l'approbation."
+
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
 msgid "A namespace named %s already exists."
@@ -347,7 +354,7 @@ msgstr "Fin de la préparation %s repos synclistes basés sur la mise à jour %s
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr "Application de synclist \"%s\" avec policy=%s au repo curate \"%s\" à partir du repo amont \"%s\""
+msgstr "Application de synclist \"%s\" avec policy=%%s au repo curate \"%s\" à partir du repo amont \"%s\""
 
 #: app/tasks/synclist.py:163
 msgid "Unexpected synclist policy {}"

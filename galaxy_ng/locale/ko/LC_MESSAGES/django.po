@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2022-06-10 19:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,24 +66,24 @@ msgstr "컨테이너 이름에는 영숫자 \".\", \"_\", \"-\" 및 최대 하�
 msgid "Name cannot be changed."
 msgstr "이름은 변경할 수 없습니다."
 
-#: app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "동기화 목록을 생성하는 동안 리포지토리 \"{pulp_id}\"을/를 찾을 수 없습니다"
 
-#: app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:77
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "동기화 목록이 이미 존재합니다. %s"
 
-#: app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:85
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "{synclist}동기화 목록을 생성하는 동안 \"{namespace}.{name}\" 컬렉션을 찾을 수 없습니다."
 
-#: app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:124
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -283,6 +283,13 @@ msgstr "대상 저장소에서 %s 컬렉션을 찾았습니다"
 #, python-format
 msgid "Signing %s service not found"
 msgstr "서명 %s 서비스를 찾을 수 없음"
+
+#: app/api/v3/viewsets/collection.py:299
+#, python-brace-format
+msgid ""
+"Collection {namespace}.{name} could not be approved because system requires "
+"at least a signature for approval."
+msgstr "컬렉션 {namespace}.{name} 시스템에는 승인을 위해 최소한 서명이 필요하기 때문에 승인할 수 없습니다."
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format

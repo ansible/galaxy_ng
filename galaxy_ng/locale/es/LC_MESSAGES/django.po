@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2022-06-10 19:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,24 +66,24 @@ msgstr "Los nombres de los contenedores sólo pueden contener números alfanumé
 msgid "Name cannot be changed."
 msgstr "El nombre no se puede cambiar."
 
-#: app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "No se encontró el repositorio \"{pulp_id}\" al crear la lista de sincronización"
 
-#: app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:77
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "La lista de sincronización ya existe: %s"
 
-#: app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:85
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "No se encontró la colección \"{namespace}.{name}\" al crear la lista de sincronización {synclist}"
 
-#: app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:124
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -283,6 +283,13 @@ msgstr "Ya se encontró la colección %s en el repositorio de destino"
 #, python-format
 msgid "Signing %s service not found"
 msgstr "No se encontró el servicio de firmas %s"
+
+#: app/api/v3/viewsets/collection.py:299
+#, python-brace-format
+msgid ""
+"Collection {namespace}.{name} could not be approved because system requires "
+"at least a signature for approval."
+msgstr "Recogida {namespace}.{name} no ha podido ser aprobada porque el sistema requiere al menos una firma para su aprobación."
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
