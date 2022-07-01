@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2022-06-10 19:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,24 +66,24 @@ msgstr "コンテナー名には、英数字、「.」、「_」、「-」、お
 msgid "Name cannot be changed."
 msgstr "名前を変更できません。"
 
-#: app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "同期リストの作成中にリポジトリー \"{pulp_id}\" が見つかりませんでした"
 
-#: app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:77
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "同期リストはすでに存在します: %s"
 
-#: app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:85
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
 
-#: app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:124
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -283,6 +283,13 @@ msgstr "宛先リポジトリーでコレクション %s がすでに見つか�
 #, python-format
 msgid "Signing %s service not found"
 msgstr "署名 %s サービスが見つかりません"
+
+#: app/api/v3/viewsets/collection.py:299
+#, python-brace-format
+msgid ""
+"Collection {namespace}.{name} could not be approved because system requires "
+"at least a signature for approval."
+msgstr "承認するには少なくとも署名が必要なため、コレクション {namespace}.{name} を承認できませんでした。"
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
