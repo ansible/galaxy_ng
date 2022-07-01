@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2022-06-10 19:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,7 @@ msgstr "无效的组名称或 ID。"
 
 #: app/api/ui/serializers/execution_environment.py:375
 msgid "Selected registry does not exist."
-msgstr "所选 registry 不存在。"
+msgstr "所选注册表不存在。"
 
 #: app/api/ui/serializers/execution_environment.py:384
 msgid ""
@@ -66,24 +66,24 @@ msgstr "容器名称只能包含字母数字，\".\"、\"_\"、\"-\"，以及最
 msgid "Name cannot be changed."
 msgstr "名称不能更改。"
 
-#: app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "创建同步列表时未找到存储库 \"{pulp_id}\""
 
-#: app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:77
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "同步列表已存在：%s"
 
-#: app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:85
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "创建同步列表 {synclist} 时未找到集合 \"{namespace}.{name}\""
 
-#: app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:124
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -107,7 +107,7 @@ msgstr "组名=%(name)s, id=%(id)s 不存在"
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
-msgstr "此 registry 不支持索引执行环境。"
+msgstr "此注册表不支持索引执行环境。"
 
 #: app/api/ui/views/signing.py:71
 msgid "Missing required field: namespace"
@@ -144,7 +144,7 @@ msgstr "%s 发行版没有任何与之关联的远程设备。"
 #: app/api/ui/views/sync.py:51
 #, python-format
 msgid "The %s remote does not have any registries associated with it."
-msgstr "%s 远程没有任何 registry 与之关联。"
+msgstr "%s 远程没有任何注册表与之关联。"
 
 #: app/api/ui/viewsets/collection.py:119
 msgid "Distribution base path is required"
@@ -284,6 +284,13 @@ msgstr "目标仓库中已找到集合 %s"
 msgid "Signing %s service not found"
 msgstr "未找到签名 %s 服务"
 
+#: app/api/v3/viewsets/collection.py:299
+#, python-brace-format
+msgid ""
+"Collection {namespace}.{name} could not be approved because system requires "
+"at least a signature for approval."
+msgstr "集合 {namespace}.{name} 无法批准，因为系统需要至少一个签名才能批准。"
+
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
 msgid "A namespace named %s already exists."
@@ -313,7 +320,7 @@ msgstr "创建容器失败 {remote_name}. {error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "具有此名称的远程容器已存在，但不与任何 registry 关联。"
+msgstr "具有此名称的远程容器已存在，但不与任何注册表关联。"
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
