@@ -2,7 +2,6 @@
 import logging
 import pytest
 
-from ..constants import USERNAME_PUBLISHER
 from ..utils import ansible_galaxy
 from ..utils import get_client
 from ..utils import get_collection_full_path
@@ -68,24 +67,22 @@ def test_publish_newer_certified_collection_version(
 
 
 @pytest.mark.cli
-@pytest.mark.xfail
 def test_publish_same_collection_version(ansible_config):
-    """Test whether same collection version can be published."""
+    """Test you cannot publish same collection version already published."""
 
-    api_client = get_client(ansible_config("basic_user"))
+    api_client = get_client(ansible_config("admin"))
     cnamespace = create_unused_namespace(api_client=api_client)
-    ansible_config("ansible_partner", namespace=USERNAME_PUBLISHER)
     collection = build_collection(namespace=cnamespace)
     ansible_galaxy(
         f"collection publish {collection.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=collection.namespace)
+        ansible_config=ansible_config("admin", namespace=collection.namespace)
     )
     p = ansible_galaxy(
         f"collection publish {collection.filename}",
         check_retcode=1,
-        ansible_config=ansible_config("ansible_partner", namespace=collection.namespace)
+        ansible_config=ansible_config("admin", namespace=collection.namespace)
     )
-    assert "Artifact already exists" in str(p.stderr)
+    assert "duplicate key value violates unique constraint" in str(p.stderr)
 
 
 @pytest.mark.cli
