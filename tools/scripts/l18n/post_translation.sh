@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Change directory to pinakes
+# Change directory to galaxy_ng
 cd _clones/galaxy_ng/
 
 # Rename the zh_cn folder 
