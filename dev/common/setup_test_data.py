@@ -65,6 +65,14 @@ admin.is_superuser = True
 admin.is_staff = True
 admin.save()
 
+# Note: User not used for integration tests, not part of ephemeral keycloak users
+legacy_admin, _ = User.objects.get_or_create(username="admin")
+legacy_admin.set_password("admin")
+legacy_admin.email = "admin@example.com"
+legacy_admin.is_superuser = True
+legacy_admin.is_staff = True
+legacy_admin.save()
+
 
 print("Get or create tokens for test users")
 Token.objects.get_or_create(user=basic_user, key="abcdefghijklmnopqrstuvwxyz1234567891")

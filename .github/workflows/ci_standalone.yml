@@ -47,8 +47,14 @@ jobs:
       - name: disable approval setting override
         run: sed -i.bak 's/PULP_GALAXY_REQUIRE_CONTENT_APPROVAL/#PULP_GALAXY_REQUIRE_CONTENT_APPROVAL/' dev/standalone/galaxy_ng.env
 
-      - name: build stack and populate data
-        run: make docker/all
+      - name: build stack
+        run: make docker/build
+
+      - name: run migrations
+        run: make docker/migrate
+
+      - name: load translations
+        run: make docker/translations
 
       - name: start the compose stack
         run: ./compose up -d

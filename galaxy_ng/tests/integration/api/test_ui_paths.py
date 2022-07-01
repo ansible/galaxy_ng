@@ -666,14 +666,14 @@ def test_api_ui_v1_users_by_id(ansible_config):
     with UIClient(config=cfg) as uclient:
 
         # get the response
-        resp = uclient.get('_ui/v1/users/1')
+        resp = uclient.get('_ui/v1/users/2')
         assert resp.status_code == 200
 
         ds = resp.json()
         validate_json(instance=ds, schema=schema_user)
 
-        # true when `make docker/loaddata` run after build
-        assert ds['id'] == 1
-        assert ds['email'] == 'admin@example.com'
-        assert ds['is_superuser'] is True
-        assert ds['groups'] == [{'id': 1, 'name': 'system:partner-engineers'}]
+        # true when `setup_test_data.py` run after build
+        assert ds['id'] == 2
+        assert ds['username'] == 'jdoe'
+        assert ds['is_superuser'] is False
+        assert {'id': 2, 'name': 'system:partner-engineers'} in ds['groups']
