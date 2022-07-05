@@ -82,8 +82,6 @@ class AnsibleConfigFixture(dict):
             "password": "redhat",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
         },
-        "APP": {},  # TODO: unsure why used
-        "AUTOMATION_HUB": {},  # TODO: unsure why used
     }
 
     def __init__(self, profile, namespace=None):
@@ -120,13 +118,6 @@ class AnsibleConfigFixture(dict):
         elif key == "password":
             return self.PROFILES[self.profile]["password"]
 
-        elif key == 'hub_use_inbound':
-            # This value will be compared to "use_distribution" in the
-            # test_api_publish test. I assume it has to do with pulp's
-            # concept of "distribution" but not sure what it actually
-            # means in this case
-            return True
-
         elif key == 'use_move_endpoint':
             # tells the tests whether or not to try to mark
             # an imported collection as "published". This happens
@@ -151,16 +142,6 @@ class AnsibleConfigFixture(dict):
 
     def get(self, key):
         return self.__getitem__(key)
-
-
-class AnsibleAppFixture():
-    def __init__(self):
-        self.config = AnsibleConfigFixture('APP')
-        setattr(
-            self.config,
-            'AUTOMATION_HUB',
-            AnsibleConfigFixture('AUTOMATION_HUB')
-        )
 
 
 @pytest.fixture
@@ -282,11 +263,6 @@ def uncertifiedv2(ansible_config, artifact):
     time.sleep(SLEEP_SECONDS_ONETIME)
 
     return (artifact, artifact2)
-
-
-@pytest.fixture
-def app():
-    return AnsibleAppFixture()
 
 
 @pytest.fixture(scope="function")
