@@ -104,20 +104,9 @@ docker/test/integration/container:      ## Run integration tests.
 	docker run -it --rm --add-host=localhost:host-gateway galaxy-integration-runner $(FLAGS)
 
 .PHONY: docker/loaddata
-docker/loaddata:  ## Load initial data from fixtures
-	./compose run --rm -e PULP_FIXTURE_DIRS='["/src/galaxy_ng/dev/automation-hub"]' \
- api manage loaddata initial_data.json
-
-.PHONY: docker/loadtoken
-docker/loadtoken:  ##  Load token previously used in integration tests
-	#./compose run api manage shell < dev/standalone/create_admin_token.py
-	# with the below command it runs on existing container
-	$(call exec_or_run, api, bash, -c "django-admin shell < app/dev/standalone/create_admin_token.py")
-
-.PHONY: docker/load_test_data
-docker/load_test_data:  ## Load data previously used in integration tests
-	#./compose run --rm api manage shell < dev/ephemeral/create_objects.py
-	$(call exec_or_run, api, bash, -c "django-admin shell < app/dev/ephemeral/create_objects.py")
+docker/loaddata:  ## Load initial data from python script
+	#./compose run --rm api manage shell < app/dev/common/setup_test_data.py
+	$(call exec_or_run, api, bash, -c "django-admin shell < app/dev/common/setup_test_data.py")
 
 .PHONY: docker/makemigrations
 docker/makemigrations:   ## Run django migrations
