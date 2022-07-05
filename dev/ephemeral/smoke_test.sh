@@ -15,9 +15,6 @@ oc project ${NAMESPACE}
 echo "Find galaxy-api pod"
 AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.metadata.name --no-headers | head -1)
 
-#echo "Create token for keycloak user"
-#oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/ephemeral/create_token.py
-
 echo "Setting up test data"
 oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/common/setup_test_data.py
 

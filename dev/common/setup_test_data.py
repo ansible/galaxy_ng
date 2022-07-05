@@ -8,8 +8,6 @@ from galaxy_ng.app.models.auth import Group, User
 Setup test data used in integration tests.
 """
 
-# TODO: remove create_objects.py, jdoe_pe_group.py after ahub.sh calls this script
-
 print("Add a group that has namespace permissions")
 test_group, _ = Group.objects.get_or_create(name="ns_group_for_tests")
 
