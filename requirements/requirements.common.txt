@@ -233,7 +233,7 @@ pyasn1==0.4.8
     #   python-ldap
 pyasn1-modules==0.2.8
     # via python-ldap
-pycares==4.1.2
+pycares==4.2.0
     # via aiodns
 pycodestyle==2.7.0
     # via flake8
