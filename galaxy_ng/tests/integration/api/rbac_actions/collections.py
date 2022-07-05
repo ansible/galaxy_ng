@@ -10,6 +10,7 @@ from .utils import (
     API_ROOT,
     NAMESPACE,
     cleanup_foo_collection,
+    foo_collection_exists,
     gen_string,
 )
 
@@ -21,10 +22,7 @@ def create_collection_namespace(user, password, expect_pass, cleanup=True):
         f"{API_ROOT}_ui/v1/namespaces/",
         json={
             "name": f"{NAMESPACE}_namespace_{gen_string()}",
-            "groups": [{
-                "name": "system:partner-engineers",
-                "object_roles": ["galaxy.content_admin"]
-            }],
+            "groups": [],
         },
         auth=(user['username'], password),
     )
@@ -88,21 +86,19 @@ def delete_collection_namespace(user, password, expect_pass):
 
 
 def upload_collection_to_namespace(user, password, expect_pass, cleanup=True):
+    cleanup_foo_collection()
     # get auth token for user
     token = requests.post(
         'http://localhost:5001/api/automation-hub/v3/auth/token/',
-        auth=ADMIN_CREDENTIALS,
+        auth=(user['username'], password),
     ).json()['token'] or None
     response = requests.post(
         f"{API_ROOT}_ui/v1/namespaces/",
         json={
             "name": "foo",
-            "groups": [{
-                "name": "system:partner-engineers",
-                "object_roles": ["galaxy.content_admin"]
-            }],
+            "groups": [],
         },
-        auth=ADMIN_CREDENTIALS,
+        auth=(user['username'], password),
     )
     if token is not None and response.status_code == 201:
         cmd = [
@@ -121,12 +117,13 @@ def upload_collection_to_namespace(user, password, expect_pass, cleanup=True):
             assert return_code == 0
         else:
             assert return_code != 0
-    # delete namespace 'foo' and collection 'foo-bar' to avoid collisions in future tests
+            cleanup_foo_collection()
     if cleanup:
         cleanup_foo_collection()
 
 
 def delete_collection(user, password, expect_pass):
+    cleanup_foo_collection()
     upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
     response = requests.delete(
         f"{API_ROOT}v3/plugin/ansible/content/staging/collections/index/foo/bar/",
@@ -194,6 +191,7 @@ def view_sync_configuration(user, password, expect_pass):
 
 
 def approve_collections(user, password, expect_pass, cleanup=True):
+    cleanup_foo_collection()
     upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
     response = requests.post(
         f"{API_ROOT}v3/collections/foo/bar/versions/1.0.0/move/staging/published/",
@@ -208,6 +206,7 @@ def approve_collections(user, password, expect_pass, cleanup=True):
 
 
 def reject_collections(user, password, expect_pass):
+    cleanup_foo_collection()
     upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
     response = requests.post(
         f"{API_ROOT}v3/collections/foo/bar/versions/1.0.0/move/staging/rejected/",
@@ -222,7 +221,7 @@ def reject_collections(user, password, expect_pass):
 
 def deprecate_collections(user, password, expect_pass):
     # Upload and approve collection
-    approve_collections(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+    approve_collections(user, password, True, cleanup=False)
     response = requests.patch(
         f'{API_ROOT}v3/plugin/ansible/content/published/collections/index/foo/bar/',
         json={"deprecated": True},
@@ -237,7 +236,7 @@ def deprecate_collections(user, password, expect_pass):
 
 def undeprecate_collections(user, password, expect_pass):
     # Upload and approve collection
-    approve_collections(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+    approve_collections(user, password, True, cleanup=False)
     response = requests.patch(
         f'{API_ROOT}v3/plugin/ansible/content/published/collections/index/foo/bar/',
         json={"deprecated": False},

@@ -215,6 +215,11 @@ def tag_untag_container_namespace(user, password, expect_pass):
 
 
 def sync_remote_container(user, password, expect_pass):
+    # POST /api/automation-hub/_ui/v1/execution-environments/repositories/<remote_container_name>/_content/sync/
+    response = requests.post(
+        f"{API_ROOT}_ui/v1/execution-environments/repositories/<remote_container_name>/_content/sync/",
+        auth=(user['username'], password),
+    )
     pass
 
 

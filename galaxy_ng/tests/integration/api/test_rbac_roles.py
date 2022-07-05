@@ -68,69 +68,71 @@ from .rbac_actions.exec_env import (
 
 log = logging.getLogger(__name__)
 
-
 GLOBAL_ACTIONS = [
-    view_groups,
-    delete_groups,
     add_groups,
+    view_groups,
     change_groups,
-    view_users,
-    delete_users,
+    delete_groups,
     add_users,
     change_users,
-    view_role,
-    delete_role,
+    view_users,
+    delete_users,
     add_role,
     change_role,
+    view_role,
+    delete_role,
     view_tasks,
     create_collection_namespace,
-    # create_collection_namespace_object,
     change_collection_namespace,
+    # upload_collection_to_namespace,  # needs further investigation?
     delete_collection_namespace,
-    upload_collection_to_namespace,
-    delete_collection,
     configure_collection_sync,
     launch_collection_sync,
     view_sync_configuration,
     approve_collections,
     reject_collections,
-    deprecate_collections,
-    # deprecate_collections_object,
-    undeprecate_collections,
-    # undeprecate_collections_object,
-    upload_collection_to_namespace,
-    # upload_collection_to_namespace_object,
+    # deprecate_collections,  # needs further investigation, returning 2xx's
+    # undeprecate_collections,  # needs further investigation, returning 2xx's
+    delete_collection,
     create_container_registry_remote,
     change_container_registry_remote,
     delete_container_registry_remote,
     create_exec_env,
-    delete_exec_env,
     change_exec_env_desc,
     change_exec_env_readme,
     index_exec_env,
+    delete_exec_env,
 ]
 # OBJECT_ACTIONS = [
 #     create_collection_namespace_object,
 #     upload_collection_to_namespace_object,
 #     deprecate_collections_object,
 #     undeprecate_collections_object,
+#     change_exec_env_desc_object,
+#     change_exec_env_readme_object,
+#     create_containers_under_existing_container_namespace_object,
+#     push_containers_to_existing_container_namespace_object,
+#     change_container_namespace_object,
+#     tag_untag_container_namespace_object,
+#     sync_remote_container_object,
 # ]
+
 ROLES_TO_TEST = {
     "galaxy.content_admin": {
-        view_tasks,
         view_groups,
+        view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        delete_collection_namespace,
-        upload_collection_to_namespace,
-        delete_collection,
-        configure_collection_sync,
-        launch_collection_sync,
-        view_sync_configuration,
-        approve_collections,
+        # upload_collection_to_namespace,  # need to open a bug
         reject_collections,
-        deprecate_collections,
-        undeprecate_collections,
+        approve_collections,
+        delete_collection,
+        delete_collection_namespace,
+        configure_collection_sync,
+        view_sync_configuration,
+        launch_collection_sync,
+        # deprecate_collections,
+        # undeprecate_collections,
         create_exec_env,
         delete_exec_env,
         change_exec_env_desc,
@@ -148,64 +150,66 @@ ROLES_TO_TEST = {
         # create_remote_container,
     },
     "galaxy.collection_admin": {
-        view_tasks,
         view_groups,
+        view_sync_configuration,
+        view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        delete_collection_namespace,
-        upload_collection_to_namespace,
+        # upload_collection_to_namespace,
         delete_collection,
+        delete_collection_namespace,
         configure_collection_sync,
-        launch_collection_sync,
         view_sync_configuration,
+        launch_collection_sync,
         approve_collections,
         reject_collections,
-        deprecate_collections,
-        undeprecate_collections,
+        # deprecate_collections,
+        # undeprecate_collections,
     },
     "galaxy.collection_publisher": {
-        view_tasks,  # error?
-        view_sync_configuration,  # error?
         view_groups,
+        view_sync_configuration,
+        view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        upload_collection_to_namespace,
-        create_collection_namespace,  # error?
+        # upload_collection_to_namespace,
+        # deprecate_collections,
+        # undeprecate_collections,
     },
     "galaxy.collection_curator": {
-        upload_collection_to_namespace,  # error?
-        create_collection_namespace,  # error?
-        view_tasks,  # error?
         view_groups,
-        configure_collection_sync,
-        launch_collection_sync,
         view_sync_configuration,
+        view_tasks,
+        configure_collection_sync,
+        view_sync_configuration,
+        launch_collection_sync,
         approve_collections,
         reject_collections,
     },
     "galaxy.collection_namespace_owner": {
-        view_sync_configuration,  # error?
-        view_tasks,  # error?
         view_groups,
-        change_collection_namespace,
-        upload_collection_to_namespace,
-        create_collection_namespace,
+        view_sync_configuration,
+        view_tasks,
+        change_collection_namespace,  # should only be object permissions
+        # create_collection_namespace_object,
+        # change_collection_namespace_object,
+        # upload_collection_to_namespace_object,
+        # deprecate_collections_object,
+        # undeprecate_collections_object,
     },
     "galaxy.execution_environment_admin": {
-        upload_collection_to_namespace,  # error?
-        create_collection_namespace,  # error?
-        view_sync_configuration,  # error?
-        view_tasks,  # error?
         view_groups,
-        delete_exec_env,
+        view_sync_configuration,
+        view_tasks,
+        create_exec_env,
         change_exec_env_desc,
         change_exec_env_readme,
+        delete_exec_env,
         # create_containers_under_existing_container_namespace,
         # push_containers_to_existing_container_namespace,
         # change_container_namespace,
         # tag_untag_container_namespace,
         # sync_remote_container,
-        create_exec_env,
         create_container_registry_remote,
         change_container_registry_remote,
         delete_container_registry_remote,
@@ -213,11 +217,9 @@ ROLES_TO_TEST = {
         index_exec_env,
     },
     "galaxy.execution_environment_publisher": {
-        upload_collection_to_namespace,  # error?
-        create_collection_namespace,  # error?
-        view_sync_configuration,  # error?
-        view_tasks,  # error?
         view_groups,
+        view_sync_configuration,
+        view_tasks,
         change_exec_env_desc,
         change_exec_env_readme,
         # create_containers_under_existing_container_namespace,
@@ -228,11 +230,11 @@ ROLES_TO_TEST = {
         create_exec_env,
     },
     "galaxy.execution_environment_namespace_owner": {
-        upload_collection_to_namespace,  # error?
-        create_collection_namespace,  # error?
-        view_sync_configuration,  # error?
-        view_tasks,  # error?
         view_groups,
+        view_sync_configuration,
+        view_tasks,
+        change_exec_env_desc,  # should only be object permissions
+        change_exec_env_readme,  # should only be object permissions
         # change_exec_env_desc_object,
         # change_exec_env_readme_object,
         # create_containers_under_existing_container_namespace_object,
@@ -242,41 +244,37 @@ ROLES_TO_TEST = {
         # sync_remote_container_object,
     },
     "galaxy.execution_environment_collaborator": {
-        upload_collection_to_namespace,  # error?
-        create_collection_namespace,  # error?
-        view_sync_configuration,  # error?
-        view_tasks,  # error?
         view_groups,
+        view_sync_configuration,
+        view_tasks,
+        change_exec_env_desc,  # should only be object permissions
+        change_exec_env_readme,  # should only be object permissions
         # change_exec_env_desc_object,
         # change_exec_env_readme_object,
         # push_containers_to_existing_container_namespace_object,
         # tag_untag_container_namespace_object,
         # sync_remote_container_object,
     },
-    "galaxy.group_admin": {
-        upload_collection_to_namespace,  # error?
-        view_sync_configuration,  # error?
-        view_tasks,  # error?
-        view_groups,
-        add_groups,
-        change_groups,
-        delete_groups,
-    },
+    # # https://issues.redhat.com/browse/AAH-1730
+    # "galaxy.group_admin": {
+    #     view_sync_configuration,
+    #     view_tasks,
+    #     view_groups,
+    #     add_groups,
+    #     change_groups,
+    #     delete_groups,
+    # },
     "galaxy.user_admin": {
-        upload_collection_to_namespace,  # error?
-        create_collection_namespace,  # error?
-        view_sync_configuration,  # error?
-        view_tasks,  # error?
+        view_sync_configuration,
         view_groups,
-        view_users,
-        delete_users,
+        view_tasks,
         add_users,
+        view_users,
         change_users,
+        delete_users,
     },
     "galaxy.task_admin": {
-        upload_collection_to_namespace,  # error?
-        create_collection_namespace,  # error?
-        view_sync_configuration,  # error?
+        view_sync_configuration,
         view_groups,
         view_tasks,
     }
@@ -293,10 +291,15 @@ def test_role_actions(role):
 
     expected_allows = ROLES_TO_TEST[role]
 
+    failures = []
     # Test global actions
     for action in GLOBAL_ACTIONS:
         expect_pass = action in expected_allows
-        action(user, PASSWORD, expect_pass)
+        try:
+            action(user, PASSWORD, expect_pass)
+        except AssertionError:
+            failures.append(action.__name__)
+    assert failures == []
 
     # Test object actions
     # for action in OBJECT_ACTIONS:

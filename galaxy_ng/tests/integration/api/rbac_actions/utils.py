@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 from ansible.galaxy.api import GalaxyError
 
-NAMESPACE = "rbac_roles"
+NAMESPACE = "rbac_roles_test"
 PASSWORD = "p@ssword!"
 ADMIN_CREDENTIALS = ("admin", "admin")
 API_ROOT = "http://localhost:5001/api/automation-hub/"
@@ -71,7 +71,8 @@ def cleanup_foo_collection():
             f"{API_ROOT}v3/plugin/ansible/content/staging/collections/index/foo/bar/",
             auth=ADMIN_CREDENTIALS,
         )
-        wait_for_task(response)
+        if response.status_code != 404:
+            wait_for_task(response)
     foo_published_exists = requests.get(
         f"{API_ROOT}v3/plugin/ansible/content/published/collections/index/foo/bar/",
         auth=ADMIN_CREDENTIALS
@@ -81,7 +82,8 @@ def cleanup_foo_collection():
             f"{API_ROOT}v3/plugin/ansible/content/published/collections/index/foo/bar/",
             auth=ADMIN_CREDENTIALS,
         )
-        wait_for_task(response)
+        if response.status_code != 404:
+            wait_for_task(response)
     foo_rejected_exists = requests.get(
         f"{API_ROOT}v3/plugin/ansible/content/rejected/collections/index/foo/bar/",
         auth=ADMIN_CREDENTIALS
@@ -91,7 +93,8 @@ def cleanup_foo_collection():
             f"{API_ROOT}v3/plugin/ansible/content/rejected/collections/index/foo/bar/",
             auth=ADMIN_CREDENTIALS,
         )
-        wait_for_task(response)
+        if response.status_code != 404:
+            wait_for_task(response)
     # cleanup namespace
     response = requests.delete(
         f"{API_ROOT}_ui/v1/namespaces/foo/",
@@ -120,3 +123,17 @@ def wait_for_task(resp, path=None, timeout=300):
             ready = resp.json()["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
+
+
+def foo_collection_exists(repo):
+    return requests.get(
+        f'{API_ROOT}v3/plugin/ansible/content/{repo}/collections/index/foo/bar/',
+        auth=ADMIN_CREDENTIALS
+    ).status_code == 200
+
+
+def foo_namespace_exists():
+    return requests.get(
+        f"{API_ROOT}_ui/v1/namespaces/foo/",
+        auth=ADMIN_CREDENTIALS,
+    ).status_code == 200

@@ -133,9 +133,9 @@ def add_users(user, password, expect_pass, cleanup=True):
     else:
         assert response.status_code == 403
     if response.status_code != 403:
-        user_id = response.json()["id"]
         if cleanup:
-            response = requests.delete(
+            user_id = response.json()["id"]
+            requests.delete(
                 f"{API_ROOT}_ui/v1/users/{user_id}/",
                 auth=(user["username"], password),
             )
