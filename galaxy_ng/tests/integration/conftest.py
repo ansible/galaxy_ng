@@ -59,15 +59,8 @@ def pytest_configure(config):
 
 class AnsibleConfigFixture(dict):
 
-    # This is "kinda" like how IQE uses dynaconf, but
-    # much simpler and not such a huge tangled mess to
-    # understand ...
-
-    # The class is instantiated with a "namespace" of sorts,
-    # which sets the context for the rest of the config ...
-    #   config = ansible_config("ansible_partner")
-    #   config = ansible_config("ansible_insights")
-
+    # The class is instantiated with a "profile" that sets
+    # which type of user will be used in the test
     PROFILES = {
         "basic_user": {
             "username": "iqe_normal_user",
@@ -85,21 +78,6 @@ class AnsibleConfigFixture(dict):
             "token": "abcdefghijklmnopqrstuvwxyz1234567893",
         },
         "admin": {  # this is a superuser
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
-        "ansible_partner": {  # TODO: consolidate into admin user
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
-        "ansible_insights": {  # TODO: consolidate into admin user
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
-        "ansible_user": {  # TODO: consolidate into admin user
             "username": "notifications_admin",
             "password": "redhat",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
@@ -133,14 +111,14 @@ class AnsibleConfigFixture(dict):
                 None
             )
 
-        elif key == 'token':
-            return self.PROFILES[self.profile]['token']
+        elif key == "token":
+            return self.PROFILES[self.profile]["token"]
 
-        elif key == 'username':
-            return self.PROFILES[self.profile]['username']
+        elif key == "username":
+            return self.PROFILES[self.profile]["username"]
 
-        elif key == 'password':
-            return self.PROFILES[self.profile]['password']
+        elif key == "password":
+            return self.PROFILES[self.profile]["password"]
 
         elif key == 'hub_use_inbound':
             # This value will be compared to "use_distribution" in the
@@ -194,7 +172,7 @@ def ansible_config():
 def published(ansible_config, artifact):
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("ansible_insights"))
+    api_client = get_client(ansible_config("partner_engineer"))
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}
@@ -203,7 +181,7 @@ def published(ansible_config, artifact):
     # publish
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -220,7 +198,7 @@ def certifiedv2(ansible_config, artifact):
     """ Create and publish+certify collection version N and N+1 """
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("ansible_insights"))
+    api_client = get_client(ansible_config("partner_engineer"))
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}
@@ -229,7 +207,7 @@ def certifiedv2(ansible_config, artifact):
     # publish v1
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -250,7 +228,7 @@ def certifiedv2(ansible_config, artifact):
     # publish newer version
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -267,7 +245,7 @@ def uncertifiedv2(ansible_config, artifact):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("ansible_insights"))
+    api_client = get_client(ansible_config("partner_engineer"))
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}
@@ -276,7 +254,7 @@ def uncertifiedv2(ansible_config, artifact):
     # publish
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -297,7 +275,7 @@ def uncertifiedv2(ansible_config, artifact):
     # Publish but do -NOT- certify newer version ...
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("ansible_partner", namespace=artifact.namespace)
+        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo

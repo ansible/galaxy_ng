@@ -13,15 +13,15 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.skip(reason="fails in ephemeral")
-@pytest.mark.parametrize("user", ("ansible_user", "ansible_partner", "ansible_insights"))
+@pytest.mark.parametrize("profile", ("basic_user", "partner_engineer", "org_admin", "admin"))
 @pytest.mark.galaxyapi_smoke
-def test_token_auth(user, ansible_config):
+def test_token_auth(profile, ansible_config):
     """Test whether normal auth is required and works to access APIs.
 
     Also tests the settings for all three roles used for testing.
     """
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config(profile)
 
     client = get_client(config, request_token=False, require_auth=False)
     with pytest.raises(GalaxyError) as ctx:
@@ -38,7 +38,7 @@ def test_token_auth(user, ansible_config):
 def test_auth_admin(ansible_config):
     """Test whether admin can not access API root using invalid token."""
 
-    config = ansible_config("ansible_insights")
+    config = ansible_config("admin")
     client = get_client(
         config,
         request_token=False,
@@ -55,7 +55,7 @@ def test_auth_admin(ansible_config):
 def test_auth_exception(ansible_config, published):
     """Test whether an HTTP exception when using an invalid token."""
 
-    config = ansible_config("ansible_insights")
+    config = ansible_config("basic_user")
     client = get_client(
         config,
         request_token=False,

@@ -34,7 +34,7 @@ from ..schemas import (
 @pytest.mark.api_ui
 def test_api_ui_v1_login(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config("basic_user")
 
     # an authenticated session has a csrftoken and a sessionid
     with UIClient(config=cfg) as uclient:
@@ -47,7 +47,7 @@ def test_api_ui_v1_login(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_logout(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config("basic_user")
     uclient = UIClient(config=cfg)
 
     # check the auth first
@@ -66,7 +66,7 @@ def test_api_ui_v1_logout(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
         resp = uclient.get('_ui/v1/collection-versions/')
         assert resp.status_code == 200
@@ -106,7 +106,7 @@ def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
 def test_api_ui_v1_distributions(ansible_config):
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
         resp = uclient.get('_ui/v1/distributions/')
         assert resp.status_code == 200
@@ -130,7 +130,7 @@ def test_api_ui_v1_distributions(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_distributions_by_id(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -163,7 +163,8 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_execution_environments_registries(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    # TODO: refactor to use non-admin
+    cfg = ansible_config('admin')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -281,7 +282,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_feature_flags(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -297,7 +298,7 @@ def test_api_ui_v1_feature_flags(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('admin')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -331,7 +332,7 @@ def test_api_ui_v1_groups(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_users(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
         resp = uclient.get('_ui/v1/groups/')
         assert resp.status_code == 200
@@ -346,13 +347,12 @@ def test_api_ui_v1_groups_users(ansible_config):
                 break
         assert pe_id is not None
 
-        # validate username="admin" is in the group's userlist
-        # true when `make docker/loaddata` run after build
+        # validate username="jdoe" is in the group's userlist
         resp = uclient.get(f'_ui/v1/groups/{pe_id}/users/')
         assert resp.status_code == 200
         users_ds = resp.json()
         validate_json(instance=users_ds, schema=schema_objectlist)
-        assert 'admin' in [x['username'] for x in users_ds['data']]
+        assert "jdoe" in [x["username"] for x in users_ds["data"]]
 
 
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/{id}/
@@ -360,7 +360,7 @@ def test_api_ui_v1_groups_users(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_users_add_delete(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('admin')
     with UIClient(config=cfg) as uclient:
 
         suffix = random.choice(range(0, 1000))
@@ -417,7 +417,7 @@ def test_api_ui_v1_groups_users_add_delete(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_by_id(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -441,7 +441,7 @@ def test_api_ui_v1_groups_by_id(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_imports_collections(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -474,7 +474,7 @@ def test_api_ui_v1_imports_collections(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_me(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -511,7 +511,7 @@ def test_api_ui_v1_me(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_remotes(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -534,7 +534,7 @@ def test_api_ui_v1_remotes(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_remotes_by_id(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -559,7 +559,7 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get each repo by basepath? or is it get a distro by basepath?
@@ -579,7 +579,7 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_settings(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -604,7 +604,7 @@ def test_api_ui_v1_settings(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_tags(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -622,7 +622,7 @@ def test_api_ui_v1_tags(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_users(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('admin')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -662,18 +662,18 @@ def test_api_ui_v1_users(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_users_by_id(ansible_config):
 
-    cfg = ansible_config('ansible_partner')
+    cfg = ansible_config('admin')
     with UIClient(config=cfg) as uclient:
 
         # get the response
-        resp = uclient.get('_ui/v1/users/1')
+        resp = uclient.get('_ui/v1/users/2')
         assert resp.status_code == 200
 
         ds = resp.json()
         validate_json(instance=ds, schema=schema_user)
 
-        # true when `make docker/loaddata` run after build
-        assert ds['id'] == 1
-        assert ds['email'] == 'admin@example.com'
-        assert ds['is_superuser'] is True
-        assert ds['groups'] == [{'id': 1, 'name': 'system:partner-engineers'}]
+        # true when `setup_test_data.py` run after build
+        assert ds['id'] == 2
+        assert ds['username'] == 'jdoe'
+        assert ds['is_superuser'] is False
+        assert {'id': 2, 'name': 'system:partner-engineers'} in ds['groups']

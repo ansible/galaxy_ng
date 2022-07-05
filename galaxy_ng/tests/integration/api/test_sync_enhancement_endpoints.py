@@ -9,9 +9,7 @@ from ..utils import get_client
 def test_pulp_sync_enhancement_endpoints(ansible_config):
     """Tests whether the landing page returns the expected fields and numbers."""
 
-    client = get_client(
-        config=ansible_config("ansible_insights"), request_token=True, require_auth=True
-    )
+    client = get_client(config=ansible_config("admin"), request_token=True, require_auth=True)
 
     # verify that the repo metadate endpoint works
     results = client("/api/automation-hub/v3/")

@@ -92,7 +92,7 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
     # NOTE: on stage env, a toggle action does:
     # PUT https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     # create and certify a new collection

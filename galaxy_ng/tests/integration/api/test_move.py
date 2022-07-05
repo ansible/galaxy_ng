@@ -19,7 +19,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 def test_move_collection_version(ansible_config, upload_artifact):
     """Tests whether a colleciton can be moved from repo to repo"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("partner_engineer")
     api_client = get_client(
         config=config,
         request_token=True,

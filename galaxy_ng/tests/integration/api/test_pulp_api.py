@@ -9,7 +9,7 @@ from ..utils import get_client
 def test_pulp_api_redirect(ansible_config, artifact):
     """Test that /pulp/ is redirecting to /api/galaxy/pulp/"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("admin")
 
     api_client = get_client(config=config, request_token=True, require_auth=True)
 
@@ -42,7 +42,7 @@ def test_pulp_api_redirect(ansible_config, artifact):
 def test_pulp_endpoint_readonly(ansible_config, artifact, url):
     """Ensure authenticated user has readonly access to view"""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     REGEX_40X = r"HTTP Code: 40\d"

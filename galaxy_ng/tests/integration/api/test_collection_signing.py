@@ -29,7 +29,8 @@ NAMESPACE = "signing"
 
 @pytest.fixture(scope="function")
 def config(ansible_config):
-    return ansible_config("ansible_partner")
+    # FIXME: have this run partner_engineer profile
+    return ansible_config("admin")
 
 
 @pytest.fixture(scope="function")
