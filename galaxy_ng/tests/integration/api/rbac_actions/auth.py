@@ -6,7 +6,9 @@ from .utils import (
     API_ROOT,
     NAMESPACE,
     PULP_API_ROOT,
-    gen_string,
+    group_exists,
+    role_exists,
+    user_exists
 )
 
 
@@ -24,8 +26,11 @@ def view_groups(user, password, expect_pass):
 
 def delete_groups(user, password, expect_pass):
     # create a group to delete
-    response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
-    group_id = response.json()["id"]
+    if group_exists():
+        response = group_exists()
+    else:
+        response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+    group_id = response["id"]
     # delete group
     response = requests.delete(
         f"{API_ROOT}_ui/v1/groups/{group_id}/",
@@ -41,35 +46,35 @@ def delete_groups(user, password, expect_pass):
         )
 
 
-def add_groups(user, password, expect_pass, cleanup=True):
+def add_groups(user, password, expect_pass, cleanup=False):
+    if group_exists():
+        response = group_exists()
+        requests.delete(
+            f"{API_ROOT}_ui/v1/groups/{response['id']}/",
+            auth=ADMIN_CREDENTIALS,
+        )
     response = requests.post(
         f"{API_ROOT}_ui/v1/groups/",
-        json={"name": f"{NAMESPACE}_group_{gen_string()}"},
+        json={"name": f"{NAMESPACE}_group"},
         auth=(user["username"], password)
     )
     if expect_pass:
         assert response.status_code == 201
     else:
         assert response.status_code == 403
-    if response.status_code != 403:
-        group_id = response.json()["id"]
-        if cleanup:
-            response = requests.delete(
-                f"{API_ROOT}_ui/v1/groups/{group_id}/",
-                auth=ADMIN_CREDENTIALS
-            )
-        else:
-            return response
+    return response.json()
 
 
 def change_groups(user, password, expect_pass):
-    # Create a group to change
-    response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
-    group_id = response.json()["id"]
+    if group_exists():
+        response = group_exists()
+    else:
+        response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+    group_id = response["id"]
     # Change group
     response = requests.patch(
         f"{PULP_API_ROOT}groups/{group_id}/",
-        json={"name": f"{NAMESPACE}_group_{gen_string()}"},
+        json={"name": f"{NAMESPACE}_group_2"},
         auth=(user["username"], password),
     )
     if expect_pass:
@@ -94,31 +99,17 @@ def view_users(user, password, expect_pass):
         assert response.status_code == 403
 
 
-def delete_users(user, password, expect_pass):
-    # Add user to delete
-    response = add_users(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
-    user_id = response.json()["id"]
-    # Delete user
-    response = requests.delete(
-        f"{API_ROOT}_ui/v1/users/{user_id}/",
-        auth=(user["username"], password),
-    )
-    if expect_pass:
-        assert response.status_code == 204
-    else:
-        assert response.status_code == 403
-        # Cleanup
-        response = requests.delete(
-            f"{API_ROOT}_ui/v1/users/{user_id}/",
-            auth=(user["username"], password),
+def add_users(user, password, expect_pass, cleanup=False):
+    if user_exists():
+        response = user_exists()
+        requests.delete(
+            f"{API_ROOT}_ui/v1/users/{response['id']}/",
+            auth=ADMIN_CREDENTIALS,
         )
-
-
-def add_users(user, password, expect_pass, cleanup=True):
     response = requests.post(
         f"{API_ROOT}_ui/v1/users/",
         json={
-            "username": f"{NAMESPACE}_username_{gen_string()}",
+            "username": f"{NAMESPACE}_user",
             "first_name": "",
             "last_name": "",
             "email": "",
@@ -132,27 +123,20 @@ def add_users(user, password, expect_pass, cleanup=True):
         assert response.status_code == 201
     else:
         assert response.status_code == 403
-    if response.status_code != 403:
-        if cleanup:
-            user_id = response.json()["id"]
-            requests.delete(
-                f"{API_ROOT}_ui/v1/users/{user_id}/",
-                auth=(user["username"], password),
-            )
-        else:
-            return response
+    return response.json()
 
 
 def change_users(user, password, expect_pass):
-    # Add user to change
-    response = add_users(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
-    user_id = response.json()["id"]
-    response.json()
+    if user_exists():
+        response = user_exists()
+    else:
+        response = add_users(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+    user_id = response["id"]
     # Change user
     response = requests.put(
         f"{API_ROOT}_ui/v1/users/{user_id}/",
         json={
-            "username": f"{NAMESPACE}_username_{gen_string()}",
+            "username": f"{NAMESPACE}_user",
             "first_name": "new_first",
             "last_name": "",
             "email": "",
@@ -173,11 +157,35 @@ def change_users(user, password, expect_pass):
     )
 
 
-def add_role(user, password, expect_pass, cleanup=True):
+def delete_users(user, password, expect_pass):
+    if user_exists():
+        response = user_exists()
+    else:
+        response = add_users(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+    user_id = response["id"]
+    # Delete user
+    response = requests.delete(
+        f"{API_ROOT}_ui/v1/users/{user_id}/",
+        auth=(user["username"], password),
+    )
+    if expect_pass:
+        assert response.status_code == 204
+    else:
+        assert response.status_code == 403
+
+
+def add_role(user, password, expect_pass, cleanup=False):
+    if role_exists():
+        response = role_exists()
+        role_id = response['pulp_href'].split('/')[-2]
+        requests.delete(
+            f"{PULP_API_ROOT}roles/{role_id}/",
+            auth=ADMIN_CREDENTIALS,
+        )
     response = requests.post(
         f"{PULP_API_ROOT}roles/",
         json={
-            "name": f"{NAMESPACE}_role_{gen_string()}",
+            "name": f"{NAMESPACE}_role",
             "permissions": [
                 "galaxy.add_group",
                 "galaxy.change_group",
@@ -191,14 +199,7 @@ def add_role(user, password, expect_pass, cleanup=True):
         assert response.status_code == 201
     else:
         assert response.status_code == 403
-    if response.status_code != 403:
-        if cleanup:
-            requests.delete(
-                f'{PULP_API_ROOT}roles/{response.json()["pulp_href"]}/',
-                auth=ADMIN_CREDENTIALS
-            )
-        else:
-            return response
+    return response.json()
 
 
 def view_role(user, password, expect_pass):
@@ -213,9 +214,11 @@ def view_role(user, password, expect_pass):
 
 
 def delete_role(user, password, expect_pass):
-    # Add role to delete
-    create_response = add_role(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
-    role_id = create_response.json()['pulp_href'].split('/')[-2]
+    if role_exists():
+        response = role_exists()
+    else:
+        response = add_role(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+    role_id = response['pulp_href'].split('/')[-2]
     # Delete role
     response = requests.delete(
         f'{PULP_API_ROOT}roles/{role_id}/',
@@ -225,26 +228,22 @@ def delete_role(user, password, expect_pass):
         assert response.status_code == 204
     else:
         assert response.status_code == 403
-        # Cleanup
-        requests.delete(
-            f'{PULP_API_ROOT}roles/{role_id}/',
-            auth=ADMIN_CREDENTIALS
-        )
 
 
 def change_role(user, password, expect_pass):
-    # Add role to change
-    response = add_role(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
-    role_id = response.json()['pulp_href'].split('/')[-2]
+    if role_exists():
+        response = role_exists()
+    else:
+        response = add_role(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+    role_id = response['pulp_href'].split('/')[-2]
     # Change role
     response = requests.patch(
         f'{PULP_API_ROOT}roles/{role_id}/',
         json={
-            "name": f"{NAMESPACE}_role_{gen_string()}",
+            "name": f"{NAMESPACE}_role",
             "permissions": [
                 "galaxy.add_user",
                 "galaxy.change_user",
-                "galaxy.delete_user",
                 "galaxy.view_user",
             ],
         },
@@ -254,8 +253,3 @@ def change_role(user, password, expect_pass):
         assert response.status_code == 200
     else:
         assert response.status_code == 403
-    # Cleanup
-    requests.delete(
-        f'{PULP_API_ROOT}roles/{role_id}/',
-        auth=ADMIN_CREDENTIALS
-    )

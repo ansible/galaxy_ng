@@ -13,6 +13,7 @@ from .rbac_actions.utils import (
     API_ROOT,
     NAMESPACE,
     PASSWORD,
+    cleanup_foo_collection,
     create_group_with_user_and_role,
     create_user,
     gen_string,
@@ -29,7 +30,7 @@ from .rbac_actions.collections import (
     # create_collection_namespace_object,
     change_collection_namespace,
     delete_collection_namespace,
-    # upload_collection_to_namespace,
+    upload_collection_to_namespace,
     # upload_collection_to_namespace_object,
     delete_collection,
     configure_collection_sync,
@@ -37,9 +38,9 @@ from .rbac_actions.collections import (
     view_sync_configuration,
     approve_collections,
     reject_collections,
-    # deprecate_collections,
+    deprecate_collections,
     # deprecate_collections_object,
-    # undeprecate_collections,
+    undeprecate_collections,
     # undeprecate_collections_object,
 )
 from .rbac_actions.exec_env import (
@@ -84,15 +85,15 @@ GLOBAL_ACTIONS = [
     view_tasks,
     create_collection_namespace,
     change_collection_namespace,
-    # upload_collection_to_namespace,  # needs further investigation?
+    upload_collection_to_namespace,  # non-admin users 403 100% of time
     delete_collection_namespace,
     configure_collection_sync,
     launch_collection_sync,
     view_sync_configuration,
     approve_collections,
     reject_collections,
-    # deprecate_collections,  # needs further investigation, returning 2xx's
-    # undeprecate_collections,  # needs further investigation, returning 2xx's
+    deprecate_collections,  # non-admin users 403 100% of time
+    undeprecate_collections,  # non-admin users 403 100% of time
     delete_collection,
     create_container_registry_remote,
     change_container_registry_remote,
@@ -123,7 +124,7 @@ ROLES_TO_TEST = {
         view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        # upload_collection_to_namespace,  # need to open a bug
+        # upload_collection_to_namespace,  # non-admin users 403 100% of time
         reject_collections,
         approve_collections,
         delete_collection,
@@ -131,8 +132,8 @@ ROLES_TO_TEST = {
         configure_collection_sync,
         view_sync_configuration,
         launch_collection_sync,
-        # deprecate_collections,
-        # undeprecate_collections,
+        # deprecate_collections,  # non-admin users 403 100% of time
+        # undeprecate_collections,  # non-admin users 403 100% of time
         create_exec_env,
         delete_exec_env,
         change_exec_env_desc,
@@ -299,6 +300,12 @@ def test_role_actions(role):
             action(user, PASSWORD, expect_pass)
         except AssertionError:
             failures.append(action.__name__)
+
+    # cleanup user, group, foo collection
+    cleanup_foo_collection()
+    requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
+    requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
+
     assert failures == []
 
     # Test object actions
@@ -306,14 +313,14 @@ def test_role_actions(role):
     #     expect_pass = action in expected_allows
     #     action(user, PASSWORD, expect_pass)
 
-    # cleanup user and group
-    requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
-    requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
-
 
 @pytest.mark.role_rbac
 def test_role_actions_for_admin():
+    failures = []
+    # Test global actions
     for action in GLOBAL_ACTIONS:
-        action(ADMIN_USER, ADMIN_PASSWORD, True)
-    # for action in OBJECT_ACTIONS:
-    #     action(ADMIN_USER, ADMIN_PASSWORD, True)
+        try:
+            action(ADMIN_USER, ADMIN_PASSWORD, True)
+        except AssertionError:
+            failures.append(action.__name__)
+    assert failures == []

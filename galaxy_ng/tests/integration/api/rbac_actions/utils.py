@@ -135,5 +135,72 @@ def foo_collection_exists(repo):
 def foo_namespace_exists():
     return requests.get(
         f"{API_ROOT}_ui/v1/namespaces/foo/",
-        auth=ADMIN_CREDENTIALS,
+        auth=ADMIN_CREDENTIALS
     ).status_code == 200
+
+
+def user_exists():
+    response = requests.get(
+        f'{API_ROOT}_ui/v1/users?username=rbac_roles_test_user',
+        auth=ADMIN_CREDENTIALS
+    )
+    if response.json()['meta']['count'] == 1:
+        return response.json()['data'][0]
+    else:
+        return False
+
+
+def role_exists():
+    response = requests.get(
+        f'{PULP_API_ROOT}roles?name=rbac_roles_test_role',
+        auth=ADMIN_CREDENTIALS
+    )
+    if response.json()['count'] == 1:
+        return response.json()['results'][0]
+    else:
+        return False
+
+
+def group_exists():
+    response = requests.get(
+        f'{API_ROOT}_ui/v1/groups?name=rbac_roles_test_group',
+        auth=ADMIN_CREDENTIALS
+    )
+    if response.json()['meta']['count'] == 1:
+        return response.json()['data'][0]
+    else:
+        return False
+
+
+def collection_namespace_exists():
+    response = requests.get(
+        f'{API_ROOT}_ui/v1/namespaces?name=rbac_roles_test_col_ns',
+        auth=ADMIN_CREDENTIALS
+    )
+    if response.json()['meta']['count'] == 1:
+        return response.json()['data'][0]
+    else:
+        return False
+
+
+def container_registry_remote_exists():
+    response = requests.get(
+        f'{API_ROOT}_ui/v1/execution-environments/registries/?name={NAMESPACE}_remote_registry',
+        auth=ADMIN_CREDENTIALS
+    )
+    if response.json()['meta']['count'] == 1:
+        return response.json()['data'][0]
+    else:
+        return False
+
+
+def exec_env_exists():
+    response = requests.get(
+        f'{API_ROOT}_ui/v1/execution-environments/remotes/',
+        auth=ADMIN_CREDENTIALS
+    )
+    remote = next(
+        (item for item in response.json()['data'] if item["name"] == f"{NAMESPACE}_exec_env"),
+        False
+    )
+    return remote
