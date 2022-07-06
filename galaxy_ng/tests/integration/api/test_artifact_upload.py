@@ -50,15 +50,12 @@ def gen_name_for_invalid():
 
 @pytest.mark.stage_health
 @pytest.mark.parametrize("use_distribution", [True, False])
-def test_api_publish(app, ansible_config, artifact, upload_artifact, use_distribution):
+def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution):
     """Test the most basic, valid artifact upload via the API.
 
     Should successfully return a task URL to get updates of the progress,
     which should indicate a successful import.
     """
-
-    if app.config.AUTOMATION_HUB.get("hub_use_inbound") != use_distribution:
-        pytest.xfail()
 
     config = ansible_config("basic_user")
     api_client = get_client(config)

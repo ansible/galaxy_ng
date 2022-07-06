@@ -115,7 +115,7 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
     token = config.get("token") or None
 
     # Only use token when in standalone mode
-    if os.getenv("HUB_LOCAL") != "1":
+    if os.getenv("HUB_LOCAL") is None:
         token = None  # TODO: refactor
 
     if request_token:

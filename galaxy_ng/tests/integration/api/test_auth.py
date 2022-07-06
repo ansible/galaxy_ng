@@ -12,13 +12,13 @@ from ..utils import uuid4
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-@pytest.mark.skip(reason="fails in ephemeral")
 @pytest.mark.parametrize("profile", ("basic_user", "partner_engineer", "org_admin", "admin"))
+@pytest.mark.standalone_only
 @pytest.mark.galaxyapi_smoke
 def test_token_auth(profile, ansible_config):
     """Test whether normal auth is required and works to access APIs.
 
-    Also tests the settings for all three roles used for testing.
+    Also tests the settings for user profiles used for testing.
     """
 
     config = ansible_config(profile)
@@ -33,7 +33,7 @@ def test_token_auth(profile, ansible_config):
     assert "available_versions" in resp
 
 
-@pytest.mark.skip(reason="fails in ephemeral")
+@pytest.mark.standalone_only
 @pytest.mark.galaxyapi_smoke
 def test_auth_admin(ansible_config):
     """Test whether admin can not access API root using invalid token."""
@@ -50,7 +50,7 @@ def test_auth_admin(ansible_config):
     assert ctx.value.http_code == 403
 
 
-@pytest.mark.skip(reason="fails in ephemeral")
+@pytest.mark.standalone_only
 @pytest.mark.galaxyapi_smoke
 def test_auth_exception(ansible_config, published):
     """Test whether an HTTP exception when using an invalid token."""
