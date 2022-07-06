@@ -8,6 +8,12 @@ from pulpcore.plugin.tasking import add_and_remove
 log = logging.getLogger(__name__)
 
 
+def _cleanup_old_versions(repo):
+    """Delete all the old versions of the given repository."""
+    for version in repo.versions.complete().order_by("-number")[1:]:
+        version.delete()
+
+
 def _remove_collection_version_from_repos(collection_version):
     """Remove CollectionVersion from each repo, and ensure no old RepositoryVersion."""
     for repo in collection_version.repositories.all():
@@ -18,6 +24,7 @@ def _remove_collection_version_from_repos(collection_version):
 
         # remove CollectionVersion from latest RepositoryVersion
         add_and_remove(repo.pk, add_content_units=[], remove_content_units=[collection_version.pk])
+        _cleanup_old_versions(repo)
     collection_version.save()
 
 
@@ -36,7 +43,7 @@ def delete_collection_version(collection_version_pk):
     _remove_collection_version_from_repos(collection_version)
 
     log.info("Running orphan_cleanup to delete CollectionVersion object and artifact")
-    orphan_cleanup(content_pks=None, orphan_protection_time=10)
+    orphan_cleanup(content_pks=[collection_version.pk], orphan_protection_time=0)
 
     if not collection.versions.all():
         log.info("Collection has no more versions, deleting collection {}".format(collection))
@@ -53,11 +60,13 @@ def delete_collection(collection_pk):
     """
 
     collection = Collection.objects.get(pk=collection_pk)
+    version_pks = []
     for version in collection.versions.all():
         _remove_collection_version_from_repos(version)
+        version_pks.append(version.pk)
 
     log.info("Running orphan_cleanup to delete CollectionVersion objects and artifacts")
-    orphan_cleanup(content_pks=None, orphan_protection_time=10)
+    orphan_cleanup(content_pks=version_pks, orphan_protection_time=0)
 
     log.info("Deleting collection {}".format(collection))
     collection.delete()
