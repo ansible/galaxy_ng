@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Confirm can skip pr_check.sh and keep CI green
-exit 0
-
 # --------------------------------------------
 # Options that must be configured by app owner
 # --------------------------------------------
@@ -72,10 +69,6 @@ oc patch clowdapp automation-hub \
 
 # source $CICD_ROOT/smoke_test.sh
 
-# source smoke_test.sh
-source dev/ephemeral/smoke_test.sh
-
-
 # Need to make a dummy results file to make tests pass
 mkdir -p artifacts
 cat << EOF > artifacts/junit-dummy.xml
@@ -83,3 +76,9 @@ cat << EOF > artifacts/junit-dummy.xml
     <testcase classname="dummy" name="dummytest"/>
 </testsuite>
 EOF
+
+# Confirm can skip pr_check.sh and keep CI green
+exit 0
+
+# source smoke_test.sh
+source dev/ephemeral/smoke_test.sh
