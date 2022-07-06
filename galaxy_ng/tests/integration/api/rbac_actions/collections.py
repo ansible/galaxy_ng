@@ -10,7 +10,6 @@ from .utils import (
     API_ROOT,
     NAMESPACE,
     cleanup_foo_collection,
-    foo_collection_exists,
     gen_string,
 )
 

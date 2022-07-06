@@ -29,7 +29,7 @@ from .rbac_actions.collections import (
     # create_collection_namespace_object,
     change_collection_namespace,
     delete_collection_namespace,
-    upload_collection_to_namespace,
+    # upload_collection_to_namespace,
     # upload_collection_to_namespace_object,
     delete_collection,
     configure_collection_sync,
@@ -37,9 +37,9 @@ from .rbac_actions.collections import (
     view_sync_configuration,
     approve_collections,
     reject_collections,
-    deprecate_collections,
+    # deprecate_collections,
     # deprecate_collections_object,
-    undeprecate_collections,
+    # undeprecate_collections,
     # undeprecate_collections_object,
 )
 from .rbac_actions.exec_env import (
