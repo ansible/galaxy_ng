@@ -126,10 +126,11 @@ run_manage() {
 
 setup_signing_keyring() {
     log_message "Setting up signing keyring."
-    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
-    export KEY_ID=${KEY_FINGERPRINT: -16}
-    gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import /tmp/ansible-sign.key &>/dev/null
-    echo "${KEY_FINGERPRINT}:6:" | gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import-ownertrust &>/dev/null
+    for KEY_FINGERPRINT in $(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}')
+    do
+        gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import /tmp/ansible-sign.key &>/dev/null
+        echo "${KEY_FINGERPRINT}:6:" | gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import-ownertrust &>/dev/null
+    done
 }
 
 setup_repo_keyring() {
