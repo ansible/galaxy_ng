@@ -135,22 +135,26 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags, u
     assert collection["signatures"][0]["pubkey_fingerprint"] is not None
     assert collection["signatures"][0]["pulp_created"] is not None
 
+    # DISABLED due to https://issues.redhat.com/browse/AAH-1775
     # Assert that the collection is signed on UI API
-    collection_on_ui = api_client(
-        "/api/automation-hub/_ui/v1/repo/published/"
-        f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-        f"&sign_state=signed&version={artifact.version}"
-    )["data"][0]
-    assert collection_on_ui["sign_state"] == "signed"
-    assert collection_on_ui["total_versions"] == 1
-    assert collection_on_ui["signed_versions"] == 1
-    assert collection_on_ui["unsigned_versions"] == 0
-    metadata = collection_on_ui["latest_version"]["metadata"]
-    assert len(metadata["signatures"]) >= 1
-    assert metadata["signatures"][0]["signing_service"] == signing_service
-    assert metadata["signatures"][0]["signature"] is not None
-    assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+    # collection_on_ui = api_client(
+    #     "/api/automation-hub/_ui/v1/repo/published/"
+    #     f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+    #     f"&sign_state=signed&version={artifact.version}"
+    # )["data"][0]
+
+    # Disabled due to https://issues.redhat.com/browse/AAH-1775
+    # assert collection_on_ui["sign_state"] == "signed"
+    # assert collection_on_ui["total_versions"] == 1
+    # assert collection_on_ui["signed_versions"] == 1
+    # assert collection_on_ui["unsigned_versions"] == 0
+
+    # metadata = collection_on_ui["latest_version"]["metadata"]
+    # assert len(metadata["signatures"]) >= 1
+    # assert metadata["signatures"][0]["signing_service"] == signing_service
+    # assert metadata["signatures"][0]["signature"] is not None
+    # assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    # assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
 @pytest.mark.collection_signing
@@ -223,22 +227,23 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
     assert collection["signatures"][0]["pubkey_fingerprint"] is not None
     assert collection["signatures"][0]["pulp_created"] is not None
 
-    # Assert that the collection is signed on UI API
-    collection_on_ui = api_client(
-        "/api/automation-hub/_ui/v1/repo/staging/"
-        f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-        f"&sign_state=signed&version={artifact.version}"
-    )["data"][0]
-    assert collection_on_ui["sign_state"] == "signed"
-    assert collection_on_ui["total_versions"] == 1
-    assert collection_on_ui["signed_versions"] == 1
-    assert collection_on_ui["unsigned_versions"] == 0
-    metadata = collection_on_ui["latest_version"]["metadata"]
-    assert len(metadata["signatures"]) >= 1
-    assert metadata["signatures"][0]["signing_service"] == signing_service
-    assert metadata["signatures"][0]["signature"] is not None
-    assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+    # DISABLED due to https://issues.redhat.com/browse/AAH-1775
+    # # Assert that the collection is signed on UI API
+    # collection_on_ui = api_client(
+    #     "/api/automation-hub/_ui/v1/repo/staging/"
+    #     f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+    #     f"&sign_state=signed&version={artifact.version}"
+    # )["data"][0]
+    # assert collection_on_ui["sign_state"] == "signed"
+    # assert collection_on_ui["total_versions"] == 1
+    # assert collection_on_ui["signed_versions"] == 1
+    # assert collection_on_ui["unsigned_versions"] == 0
+    # metadata = collection_on_ui["latest_version"]["metadata"]
+    # assert len(metadata["signatures"]) >= 1
+    # assert metadata["signatures"][0]["signing_service"] == signing_service
+    # assert metadata["signatures"][0]["signature"] is not None
+    # assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    # assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
 @pytest.mark.collection_signing
@@ -291,7 +296,9 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
 
         # Assert that the collection is signed on UI API
         collections = get_all_collections_by_repo(api_client)
-        assert collections["staging"][ckey]["sign_state"] == "signed"
+
+        # DISABLED due to https://issues.redhat.com/browse/AAH-1775
+        # assert collections["staging"][ckey]["sign_state"] == "signed"
 
         # Move the collection to /published/
         cert_result = set_certification(api_client, artifact)
@@ -316,22 +323,23 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
     assert collection["signatures"][0]["pubkey_fingerprint"] is not None
     assert collection["signatures"][0]["pulp_created"] is not None
 
-    # Assert that the collection is signed on UI API
-    collection_on_ui = api_client(
-        "/api/automation-hub/_ui/v1/repo/published/"
-        f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-        f"&sign_state=signed&version={artifact.version}"
-    )["data"][0]
-    assert collection_on_ui["sign_state"] == "signed"
-    assert collection_on_ui["total_versions"] == 1
-    assert collection_on_ui["signed_versions"] == 1
-    assert collection_on_ui["unsigned_versions"] == 0
-    metadata = collection_on_ui["latest_version"]["metadata"]
-    assert len(metadata["signatures"]) >= 1
-    assert metadata["signatures"][0]["signing_service"] == signing_service
-    assert metadata["signatures"][0]["signature"] is not None
-    assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+    # DISABLED due to https://issues.redhat.com/browse/AAH-1775
+    # # Assert that the collection is signed on UI API
+    # collection_on_ui = api_client(
+    #     "/api/automation-hub/_ui/v1/repo/published/"
+    #     f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+    #     f"&sign_state=signed&version={artifact.version}"
+    # )["data"][0]
+    # assert collection_on_ui["sign_state"] == "signed"
+    # assert collection_on_ui["total_versions"] == 1
+    # assert collection_on_ui["signed_versions"] == 1
+    # assert collection_on_ui["unsigned_versions"] == 0
+    # metadata = collection_on_ui["latest_version"]["metadata"]
+    # assert len(metadata["signatures"]) >= 1
+    # assert metadata["signatures"][0]["signing_service"] == signing_service
+    # assert metadata["signatures"][0]["signature"] is not None
+    # assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    # assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
 @pytest.mark.collection_signing
