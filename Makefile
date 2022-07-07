@@ -125,7 +125,7 @@ docker/resetdb:   ## Cleans database
 	# Databases must be stopped to be able to reset them.
 	./compose down
 	./compose stop
-	./compose run --rm api /bin/bash -c "./entrypoint.sh manage reset_db && django-admin migrate"
+	./compose run --rm api /bin/bash -c "yes yes | ./entrypoint.sh manage reset_db && django-admin migrate"
 
 .PHONY: docker/db_snapshot
 NAME ?= galaxy
