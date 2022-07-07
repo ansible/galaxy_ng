@@ -1,4 +1,5 @@
-from django.db.models import Exists, OuterRef, Q, When, Case, Value, Subquery, F, Func, CharField
+from django.db.models import Exists, OuterRef, Q, Value, F, Func, CharField
+# from django.db.models import When, Case, Subquery
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -71,36 +72,44 @@ class CollectionViewSet(
                 unsigned: all versions are unsigned
                 partial: some versions are signed, some are unsigned
         """
-        # Ensure it filters only the same namespace
-        base_total_qs = base_total_qs.filter(
-            namespace=OuterRef("namespace"), name=OuterRef("name")
-        )
+        # ATTENTION!!!
+        # THIS IS TEMPORARILY DISABLED DUE TO A SLOW IN THE ANNOTATION QUERIES
+        # https://issues.redhat.com/browse/AAH-1775
 
-        total_versions_query = Subquery(
-            base_total_qs.annotate(total=Func(F("pk"), function="count")).values('total')
-        )
+        # # Ensure it filters only the same namespace
+        # base_total_qs = base_total_qs.filter(
+        #     namespace=OuterRef("namespace"), name=OuterRef("name")
+        # )
 
-        signed_versions_query = Subquery(
-            base_total_qs.filter(
-                signatures__isnull=False,
-            ).annotate(
-                total=Func(F("pk"), function="count")
-            ).values('total')
-        )
+        # total_versions_query = Subquery(
+        #     base_total_qs.annotate(total=Func(F("pk"), function="count")).values('total')
+        # )
+        total_versions_query = Value(0)
 
-        unsigned_versions_query = Subquery(
-            base_total_qs.filter(
-                signatures__isnull=True,
-            ).annotate(
-                total=Func(F("pk"), function="count")
-            ).values('total')
-        )
+        # signed_versions_query = Subquery(
+        #     base_total_qs.filter(
+        #         signatures__isnull=False,
+        #     ).annotate(
+        #         total=Func(F("pk"), function="count")
+        #     ).values('total')
+        # )
+        signed_versions_query = Value(0)
 
-        sign_state_query = Case(
-            When(signed_versions=F("total_versions"), then=Value("signed")),
-            When(unsigned_versions=F("total_versions"), then=Value("unsigned")),
-            When(signed_versions__lt=F("total_versions"), then=Value("partial")),
-        )
+        # unsigned_versions_query = Subquery(
+        #     base_total_qs.filter(
+        #         signatures__isnull=True,
+        #     ).annotate(
+        #         total=Func(F("pk"), function="count")
+        #     ).values('total')
+        # )
+        unsigned_versions_query = Value(0)
+
+        # sign_state_query = Case(
+        #     When(signed_versions=F("total_versions"), then=Value("signed")),
+        #     When(unsigned_versions=F("total_versions"), then=Value("unsigned")),
+        #     When(signed_versions__lt=F("total_versions"), then=Value("partial")),
+        # )
+        sign_state_query = Value("unsigned")
 
         return {
             "total_versions": total_versions_query,
