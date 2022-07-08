@@ -37,3 +37,21 @@ docker/build:     ## Build all development images.
 .PHONY: docker/test
 docker/test:      ## Run unit tests.
 	./compose run api manage test galaxy_ng.tests.unit
+
+
+.PHONY: docker/migrate
+docker/migrate:
+	#./compose up -d postgres redis
+	./compose run --rm api manage migrate
+
+
+.PHONY: docker/loaddata
+docker/loaddata:
+	./compose run --rm -e PULP_FIXTURE_DIRS='["/src/galaxy_ng/dev/automation-hub"]' api manage loaddata initial_data.json
+
+
+.PHONY: docker/all
+docker/all:      ## Build, migrate, loaddata, etc
+	make docker/build
+	make docker/migrate
+	make docker/loaddata
