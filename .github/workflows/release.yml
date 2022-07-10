@@ -78,7 +78,6 @@ jobs:
       matrix:
         env:
           - TEST: pulp
-          - TEST: azure
           - TEST: s3
 
     steps:
@@ -107,13 +106,11 @@ jobs:
       - name: Install httpie
         run: |
           echo ::group::HTTPIE
-          pip install httpie
+          sudo apt-get update -yq
+          sudo -E apt-get -yq --no-install-suggests --no-install-recommends install httpie
           echo ::endgroup::
-          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
-
-      - name: Set environment variables
-        run: |
           echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
+          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
 
       - name: Before Install
         
@@ -127,7 +124,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install
@@ -142,7 +139,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
         shell: bash
 
@@ -158,9 +155,8 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
         
@@ -194,7 +190,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Upload python client packages
@@ -204,13 +200,6 @@ jobs:
           name: python-client.tar
           path: python-client.tar
 
-      - name: Upload python client docs
-        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: python-client-docs.tar
-          path: python-client-docs.tar
-
       - name: Upload ruby client packages
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
         uses: actions/upload-artifact@v2
@@ -218,8 +207,15 @@ jobs:
           name: ruby-client.tar
           path: ruby-client.tar
 
-      - name: Logs
-        if: always()
+      - name: Upload built docs
+        if: ${{ env.TEST == 'docs' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs.tar
+          path: docs/docs.tar
+
+      - name: After failure
+        if: failure()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
           http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
@@ -281,7 +277,7 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install gitpython python-redmine requests packaging
+          pip install gitpython python-redmine
           echo ::endgroup::
 
       - name: Push branch and tag to GitHub
@@ -289,16 +285,14 @@ jobs:
 
       
 
-      
-
       - name: Create release on GitHub
         run: bash .github/workflows/scripts/create_release_from_tag.sh ${{ github.event.inputs.release }}
 
       - name: Cleanup repository before making changelog PR
-        run: rm -rf .lock generation galaxy_ng_client* *-client.tar galaxy_ng.tar todo web *docs.tar
+        run: rm -rf .lock generation galaxy_ng_client* *-client.tar galaxy_ng.tar todo web docs.tar
 
       - name: Stage changelog for master branch
-        run: python .github/workflows/scripts/stage-changelog-for-default-branch.py ${{ github.event.inputs.release }}
+        run: python .github/workflows/scripts/stage-changelog-for-master.py ${{ github.event.inputs.release }}
 
       - name: Create Pull Request for Changelog
         uses: peter-evans/create-pull-request@v3
@@ -308,10 +302,10 @@ jobs:
           author: ansible <ansible-infra@redhat.com>
           branch: changelog/${{ github.event.inputs.release }}
           base: master
-          title: 'Cherry pick ${{ github.event.inputs.release }} changelog'
+          title: 'Building changelog for ${{ github.event.inputs.release }}'
           body: '[noissue]'
           commit-message: |
-            ${{ github.event.inputs.release }} changelog
+            Building changelog for ${{ github.event.inputs.release }}
 
             [noissue]
           delete-branch: true

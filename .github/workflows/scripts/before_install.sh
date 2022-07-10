@@ -132,7 +132,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.10.2
+git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.10.3
 cd pulp_container
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
@@ -159,7 +159,7 @@ pip install docker netaddr boto3 ansible
 
 for i in {1..3}
 do
-  ansible-galaxy collection install "amazon.aws:1.5.0" && s=0 && break || s=$? && sleep 3
+  ansible-galaxy collection install amazon.aws && s=0 && break || s=$? && sleep 3
 done
 if [[ $s -gt 0 ]]
 then

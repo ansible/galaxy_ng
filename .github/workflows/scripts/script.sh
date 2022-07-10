@@ -46,9 +46,7 @@ if [[ "$TEST" = "docs" ]]; then
 fi
 
 if [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
-  STATUS_ENDPOINT="${PULP_URL}/pulp/api/v3/status/"
-  echo $STATUS_ENDPOINT
-  REPORTED_VERSION=$(http $STATUS_ENDPOINT | jq --arg plugin galaxy --arg legacy_plugin galaxy_ng -r '.versions[] | select(.component == $plugin or .component == $legacy_plugin) | .version')
+  REPORTED_VERSION=$(http $PULP_URL/pulp/api/v3/status/ | jq --arg plugin galaxy --arg legacy_plugin galaxy_ng -r '.versions[] | select(.component == $plugin or .component == $legacy_plugin) | .version')
   response=$(curl --write-out %{http_code} --silent --output /dev/null https://pypi.org/project/galaxy-ng/$REPORTED_VERSION/)
   if [ "$response" == "200" ];
   then
@@ -95,13 +93,16 @@ fi
 cd $REPO_ROOT
 
 if [[ "$TEST" = 'bindings' ]]; then
-  if [ -f $REPO_ROOT/.ci/assets/bindings/test_bindings.py ]; then
-    python $REPO_ROOT/.ci/assets/bindings/test_bindings.py
-  fi
-  if [ -f $REPO_ROOT/.ci/assets/bindings/test_bindings.rb ]; then
+  python $REPO_ROOT/.ci/assets/bindings/test_bindings.py
+fi
+
+if [[ "$TEST" = 'bindings' ]]; then
+  if [ ! -f $REPO_ROOT/.ci/assets/bindings/test_bindings.rb ]; then
+    exit
+  else
     ruby $REPO_ROOT/.ci/assets/bindings/test_bindings.rb
+    exit
   fi
-  exit
 fi
 
 cat unittest_requirements.txt | cmd_stdin_prefix bash -c "cat > /tmp/unittest_requirements.txt"
@@ -111,17 +112,11 @@ cmd_prefix pip3 install -r /tmp/unittest_requirements.txt
 echo "Checking for uncommitted migrations..."
 cmd_prefix bash -c "django-admin makemigrations --check --dry-run"
 
-if [[ "$TEST" != "upgrade" ]]; then
-  # Run unit tests.
-  cmd_prefix bash -c "PULP_DATABASES__default__USER=postgres django-admin test --noinput /usr/local/lib/python3.8/site-packages/galaxy_ng/tests/unit/"
-fi
+# Run unit tests.
+cmd_prefix bash -c "PULP_DATABASES__default__USER=postgres django-admin test --noinput /usr/local/lib/python3.8/site-packages/galaxy_ng/tests/unit/"
 
 # Run functional tests
-export PYTHONPATH=$REPO_ROOT/../pulp_ansible${PYTHONPATH:+:${PYTHONPATH}}
-export PYTHONPATH=$REPO_ROOT/../pulp_container${PYTHONPATH:+:${PYTHONPATH}}
-export PYTHONPATH=$REPO_ROOT/../galaxy-importer${PYTHONPATH:+:${PYTHONPATH}}
-export PYTHONPATH=$REPO_ROOT/../pulpcore${PYTHONPATH:+:${PYTHONPATH}}
-export PYTHONPATH=$REPO_ROOT${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=$REPO_ROOT:$REPO_ROOT/../pulpcore${PYTHONPATH:+:${PYTHONPATH}}
 
 
 
@@ -137,15 +132,7 @@ fi
 if [ -f $FUNC_TEST_SCRIPT ]; then
   source $FUNC_TEST_SCRIPT
 else
-
-    if [[ "$GITHUB_WORKFLOW" == "Galaxy Nightly CI/CD" ]]; then
-        pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8
-        pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m "not parallel"
-    else
-        pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m "parallel and not nightly" -n 8
-        pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m "not parallel and not nightly"
-    fi
-
+    pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional
 fi
 
 if [ -f $POST_SCRIPT ]; then

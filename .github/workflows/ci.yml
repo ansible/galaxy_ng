@@ -29,7 +29,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
           GITHUB_PR_COMMITS_URL: ${{ github.event.pull_request.commits_url }}
           START_COMMIT: ${{ github.event.before }}
@@ -74,9 +74,6 @@ jobs:
       - name: Run flake8
         run: flake8 --config flake8.cfg
 
-      - name: Run extra lint checks
-        run: "[ ! -x .ci/scripts/extra_linting.sh ] || .ci/scripts/extra_linting.sh"
-
       # check for any files unintentionally left out of MANIFEST.in
       - name: Check manifest
         run: check-manifest
@@ -96,12 +93,7 @@ jobs:
       matrix:
         env:
           - TEST: pulp
-          - TEST: azure
           - TEST: s3
-    outputs:
-      deprecations-pulp: ${{ steps.deprecations.outputs.deprecations-pulp }}
-      deprecations-azure: ${{ steps.deprecations.outputs.deprecations-azure }}
-      deprecations-s3: ${{ steps.deprecations.outputs.deprecations-s3 }}
 
     steps:
       - uses: actions/checkout@v2
@@ -117,13 +109,11 @@ jobs:
       - name: Install httpie
         run: |
           echo ::group::HTTPIE
-          pip install httpie
+          sudo apt-get update -yq
+          sudo -E apt-get -yq --no-install-suggests --no-install-recommends install httpie
           echo ::endgroup::
-          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
-
-      - name: Set environment variables
-        run: |
           echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
+          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
 
       - name: Before Install
         
@@ -137,7 +127,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install
@@ -152,7 +142,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install Python client
@@ -177,9 +167,8 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
         if: github.event_name != 'pull_request'
@@ -199,15 +188,11 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
-      - name: Extract Deprecations from Logs
-        id: deprecations
-        run: echo "::set-output name=deprecations-${{ matrix.env.TEST }}::$(docker logs pulp 2>&1 | grep -i pulpcore.deprecation | base64 -w 0)"
-
-      - name: Logs
-        if: always()
+      - name: After failure
+        if: failure()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
           http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
@@ -217,6 +202,7 @@ jobs:
           docker exec pulp ls -latr /etc/yum.repos.d/ || true
           docker exec pulp cat /etc/yum.repos.d/* || true
           docker exec pulp pip3 list
+
 
   
   update_manifest:

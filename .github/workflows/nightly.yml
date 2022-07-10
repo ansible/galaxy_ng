@@ -12,7 +12,6 @@ on:
     # * is a special character in YAML so you have to quote this string
     # runs at 3:00 UTC daily
     - cron: '00 3 * * *'
-  workflow_dispatch:
 
 jobs:
   test:
@@ -23,7 +22,6 @@ jobs:
       matrix:
         env:
           - TEST: pulp
-          - TEST: azure
           - TEST: s3
 
     steps:
@@ -40,13 +38,11 @@ jobs:
       - name: Install httpie
         run: |
           echo ::group::HTTPIE
-          pip install httpie
+          sudo apt-get update -yq
+          sudo -E apt-get -yq --no-install-suggests --no-install-recommends install httpie
           echo ::endgroup::
-          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
-
-      - name: Set environment variables
-        run: |
           echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
+          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
 
       - name: Before Install
         
@@ -60,7 +56,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - uses: actions/setup-ruby@v1
@@ -80,7 +76,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Before Script
@@ -95,9 +91,8 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
         
@@ -127,7 +122,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Upload python client packages
@@ -137,13 +132,6 @@ jobs:
           name: python-client.tar
           path: python-client.tar
 
-      - name: Upload python client docs
-        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: python-client-docs.tar
-          path: python-client-docs.tar
-
       - name: Upload ruby client packages
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
         uses: actions/upload-artifact@v2
@@ -151,8 +139,15 @@ jobs:
           name: ruby-client.tar
           path: ruby-client.tar
 
-      - name: Logs
-        if: always()
+      - name: Upload built docs
+        if: ${{ env.TEST == 'docs' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs.tar
+          path: docs/docs.tar
+
+      - name: After failure
+        if: failure()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
           http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
@@ -162,49 +157,6 @@ jobs:
           docker exec pulp ls -latr /etc/yum.repos.d/ || true
           docker exec pulp cat /etc/yum.repos.d/* || true
           docker exec pulp pip3 list
-
-  changelog:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          # by default, it uses a depth of 1
-          # this fetches all history so that we can read each commit
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
-
-      - name: Install python dependencies
-        run: |
-          echo ::group::PYDEPS
-          pip install gitpython requests packaging
-          echo ::endgroup::
-
-      - name: Configure Git with ansible name and email
-        run: |
-          git config --global user.name 'ansible'
-          git config --global user.email 'ansible-infra@redhat.com'
-
-      - name: Changelog history
-        run: python .ci/scripts/changelog.py
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          token: ${{ secrets.RELEASE_TOKEN }}
-          committer: ansible <ansible-infra@redhat.com>
-          author: ansible <ansible-infra@redhat.com>
-          title: 'Update Changelog'
-          body: 'No-Issue'
-          branch: 'changelog/update'
-          base: master
-          commit-message: |
-            Update Changelog
-
-            No-Issue
-          delete-branch: true
 
   publish:
     runs-on: ubuntu-latest
@@ -232,13 +184,11 @@ jobs:
       - name: Install httpie
         run: |
           echo ::group::HTTPIE
-          pip install httpie
+          sudo apt-get update -yq
+          sudo -E apt-get -yq --no-install-suggests --no-install-recommends install httpie
           echo ::endgroup::
-          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
-
-      - name: Set environment variables
-        run: |
           echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
+          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
 
       - name: Install python dependencies
         run: |
@@ -258,7 +208,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install
@@ -273,7 +223,7 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
 
       - name: Install Python client
@@ -282,7 +232,7 @@ jobs:
         shell: bash
 
       - name: Install Ruby client
-        
+        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
         run: .github/workflows/scripts/install_ruby_client.sh
         shell: bash
 
@@ -298,9 +248,8 @@ jobs:
           GITHUB_BRANCH: ${{ github.head_ref }}
           GITHUB_REPO_SLUG: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }} 
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
         
@@ -314,8 +263,8 @@ jobs:
 
       
 
-      - name: Logs
-        if: always()
+      - name: After failure
+        if: failure()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
           http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
