@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-149-g27eb598-dirty
+# generated with plugin_template@2021.08.26-106-g556224f
 
 additional_repos:
 - bindings: true
@@ -9,7 +9,7 @@ additional_repos:
   name: pulp_ansible
   org: pulp
 - bindings: true
-  branch: 2.10.3
+  branch: 2.10.2
   name: pulp_container
   org: pulp
 - bindings: false
@@ -17,7 +17,6 @@ additional_repos:
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1
-api_root: /pulp/
 black: false
 check_commit_message: false
 check_gettext: true
@@ -25,8 +24,9 @@ check_manifest: true
 check_openapi_schema: true
 check_stray_pulpcore_imports: true
 cherry_pick_automation: false
-ci_env:
-  GITHUB_USER: ${{ github.event.pull_request.user.login }}
+ci_env: {
+  GITHUB_USER: '${{ github.event.pull_request.user.login }}'
+}
 ci_trigger: '{pull_request: {branches: [''*'']}, push: {branches: [''*'']}}'
 core_import_allowed:
 - pulpcore.app.*viewsets
@@ -48,7 +48,6 @@ github_org: pulp
 issue_tracker: null
 keep_ci_update_for_latest_branches: 5
 keep_ci_update_since_branch: null
-lint_requirements: false
 noissue_marker: No-Issue
 parallel_test_workers: 8
 plugin_app_label: galaxy
@@ -86,13 +85,8 @@ python_version: '3.8'
 redmine_project: null
 release_email: ansible-infra@redhat.com
 release_user: ansible
-run_pulpcore_tests_for_plugins: false
 single_commit_check: false
 stable_branch: stable
-stalebot: true
-stalebot_days_until_close: 30
-stalebot_days_until_stale: 90
-stalebot_limit_to_pulls: true
 sync_ci: false
 tasking_allow_async_unsafe: true
 test_azure: true
@@ -103,7 +97,6 @@ test_performance: false
 test_released_plugin_with_next_pulpcore_release: false
 test_reroute: false
 test_s3: true
-test_stream: false
 travis_addtl_services: []
 travis_notifications: null
 update_github: false

@@ -10,11 +10,6 @@
 name: CI Update
 on:
   workflow_dispatch:
-    inputs:
-      all_branches:
-        description: "Run on all branches"
-        default: 'no'
-        required: false
 
 jobs:
   update:
@@ -24,20 +19,20 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v2
         with:
           python-version: "3.8"
 
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install gitpython requests packaging jinja2 pyyaml
+          pip install gitpython requests packaging
           echo ::endgroup::
 
       - name: Configure Git with ansible name and email
@@ -49,14 +44,18 @@ jobs:
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
-      
+      - name: Dispatching
+        if: github.event_name == 'schedule'
+        run: python .ci/scripts/update_ci_branches.py None
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Run update
         run: |
           .github/workflows/scripts/update_ci.sh
 
       - name: Create Pull Request for CI files
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
           committer: ansible <ansible-infra@redhat.com>

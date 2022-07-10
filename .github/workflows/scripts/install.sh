@@ -15,32 +15,34 @@ set -euv
 
 source .github/workflows/scripts/utils.sh
 
-export PULP_API_ROOT="/pulp/"
-
 if [[ "$TEST" = "docs" || "$TEST" = "publish" ]]; then
   pip install -r ../pulpcore/doc_requirements.txt
   pip install -r doc_requirements.txt
 fi
 
+pip install -r functest_requirements.txt
+
 cd .ci/ansible/
 
 TAG=ci_build
+
 if [ -e $REPO_ROOT/../pulp_ansible ]; then
   PULP_ANSIBLE=./pulp_ansible
 else
   PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.13
 fi
+
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
 else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.10.3
+  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.10.2
 fi
+
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
   GALAXY_IMPORTER=./galaxy-importer
 else
   GALAXY_IMPORTER=git+https://github.com/ansible/galaxy-importer.git@v0.4.2
 fi
-PULPCORE=./pulpcore
 if [[ "$TEST" == "plugin-from-pypi" ]]; then
   PLUGIN_NAME=galaxy_ng
 elif [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
@@ -66,8 +68,11 @@ plugins:
     source: pulp_container
   - name: galaxy-importer
     source: galaxy-importer
-  - name: pulp-smash
-    source: ./pulp-smash
+services:
+  - name: pulp
+    image: "pulp:${TAG}"
+    volumes:
+      - ./settings:/etc/pulp
 VARSYAML
 else
   cat >> vars/main.yaml << VARSYAML
@@ -84,22 +89,14 @@ plugins:
   - name: galaxy-importer
     source: $GALAXY_IMPORTER
   - name: pulpcore
-    source: "${PULPCORE}"
-  - name: pulp-smash
-    source: ./pulp-smash
-VARSYAML
-fi
-
-cat >> vars/main.yaml << VARSYAML
+    source: ./pulpcore
 services:
   - name: pulp
     image: "pulp:${TAG}"
     volumes:
       - ./settings:/etc/pulp
-      - ./ssh:/keys/
-      - ~/.config:/root/.config
-      - ../../../pulp-openapi-generator:/root/pulp-openapi-generator
 VARSYAML
+fi
 
 cat >> vars/main.yaml << VARSYAML
 pulp_settings: {"allowed_export_paths": "/tmp", "allowed_import_paths": "/tmp", "galaxy_api_default_distribution_base_path": "published", "galaxy_enable_api_access_log": true, "galaxy_require_content_approval": false, "rh_entitlement_required": "insights"}
@@ -144,8 +141,6 @@ if [ "$TEST" = "azure" ]; then
   sed -i -e '$a azure_test: true' vars/main.yaml
 fi
 
-echo "PULP_API_ROOT=${PULP_API_ROOT}" >> "$GITHUB_ENV"
-
 if [ "${PULP_API_ROOT:-}" ]; then
   sed -i -e '$a api_root: "'"$PULP_API_ROOT"'"' vars/main.yaml
 fi
@@ -159,7 +154,7 @@ sudo docker cp pulp:/etc/pulp/certs/pulp_webserver.crt /usr/local/share/ca-certi
 # Hack: adding pulp CA to certifi.where()
 CERTIFI=$(python -c 'import certifi; print(certifi.where())')
 cat /usr/local/share/ca-certificates/pulp_webserver.crt | sudo tee -a "$CERTIFI" > /dev/null
-if [[ "$TEST" = "azure" ]]; then
+if [ "$TEST" = "azure" ]; then
   cat /usr/local/share/ca-certificates/azcert.crt | sudo tee -a "$CERTIFI" > /dev/null
 fi
 
@@ -171,7 +166,7 @@ cat "$CERTIFI" | sudo tee -a "$CERT" > /dev/null
 sudo update-ca-certificates
 echo ::endgroup::
 
-if [[ "$TEST" = "azure" ]]; then
+if [ "$TEST" = "azure" ]; then
   AZCERTIFI=$(/opt/az/bin/python3 -c 'import certifi; print(certifi.where())')
   cat /usr/local/share/ca-certificates/azcert.crt >> $AZCERTIFI
   cat /usr/local/share/ca-certificates/azcert.crt | cmd_stdin_prefix tee -a /usr/local/lib/python3.8/site-packages/certifi/cacert.pem > /dev/null
