@@ -52,13 +52,13 @@ jobs:
     needs: check_commit
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
@@ -87,6 +87,8 @@ jobs:
       - name: Check for gettext problems
         run: sh .ci/scripts/check_gettext.sh
 
+      
+
   test:
     runs-on: ubuntu-latest
     # run only after lint finishes
@@ -104,13 +106,13 @@ jobs:
       deprecations-s3: ${{ steps.deprecations.outputs.deprecations-s3 }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
@@ -160,11 +162,6 @@ jobs:
         run: .github/workflows/scripts/install_python_client.sh
         shell: bash
 
-      - name: Install Ruby client
-        if: ${{ env.TEST == 'bindings' }}
-        run: .github/workflows/scripts/install_ruby_client.sh
-        shell: bash
-
       - name: Before Script
         
         run: .github/workflows/scripts/before_script.sh
@@ -210,7 +207,7 @@ jobs:
         if: always()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
-          http --timeout 30 --check-status --pretty format --print hb https://pulp/pulp/api/v3/status/ || true
+          http --timeout 30 --check-status --pretty format --print hb "https://pulp${PULP_API_ROOT}api/v3/status/" || true
           docker images || true
           docker ps -a || true
           docker logs pulp || true

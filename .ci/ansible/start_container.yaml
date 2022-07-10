@@ -12,7 +12,14 @@
         mode: "0755"
       loop:
         - settings
+        - ssh
         - ~/.config/pulp_smash
+
+    - name: Generate an OpenSSH keypair
+      community.crypto.openssh_keypair:
+        path: ssh/id_ed25519
+        type: ed25519
+      when: stream_test | default(false)
 
     - name: "Generate Pulp Settings"
       template:
@@ -34,7 +41,7 @@
         image: "{{ item.image }}"
         auto_remove: true
         recreate: true
-        privileged: false
+        privileged: true
         networks:
           - name: pulp_ci_bridge
             aliases: "{{ item.name }}"

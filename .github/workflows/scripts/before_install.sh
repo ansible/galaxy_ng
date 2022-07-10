@@ -132,7 +132,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.10.2
+git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.10.3
 cd pulp_container
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
@@ -151,8 +151,6 @@ if [ -n "$GALAXY_IMPORTER_PR_NUMBER" ]; then
 fi
 
 cd ..
-
-
 
 # Intall requirements for ansible playbooks
 pip install docker netaddr boto3 ansible
