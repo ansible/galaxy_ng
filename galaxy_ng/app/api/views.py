@@ -7,10 +7,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from pulp_ansible.app.models import AnsibleDistribution
 
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
 
 
@@ -31,7 +31,8 @@ VERSIONS = {
 
 
 class ApiRootView(api_base.APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [access_policy.AppRootAccessPolicy]
+    action = "retrieve"
 
     def get(self, request, *args, **kwargs):
         """
@@ -50,7 +51,8 @@ class ApiRootView(api_base.APIView):
 
 
 class ApiRedirectView(api_base.APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [access_policy.AppRootAccessPolicy]
+    action = "retrieve"
 
     """Redirect requests to /api/automation-hub/api/ to /api/automation-hub/
 

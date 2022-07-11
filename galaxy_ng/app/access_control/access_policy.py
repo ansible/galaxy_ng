@@ -166,6 +166,10 @@ class AccessPolicyBase(AccessPolicyFromDB):
         return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS
 
 
+class AppRootAccessPolicy(AccessPolicyBase):
+    NAME = "AppRootViewSet"
+
+
 class NamespaceAccessPolicy(AccessPolicyBase):
     NAME = "NamespaceViewSet"
 
