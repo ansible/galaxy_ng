@@ -41,22 +41,27 @@ for perm in pe_perms:
 
 
 print("Get or create test users to match keycloak passwords")
+
+# in ephemeral keycloak this user is part of customer account: 6089723
 basic_user, _ = User.objects.get_or_create(username="iqe_normal_user")
 basic_user.set_password("redhat")
 basic_user.groups.add(test_group)
 basic_user.save()
 
+# in ephemeral keycloak this user is part of customer account: 6089719
 partner_engineer, _ = User.objects.get_or_create(username="jdoe")
 partner_engineer.set_password("redhat")
 partner_engineer.groups.add(test_group)
 partner_engineer.groups.add(pe_group)
 partner_engineer.save()
 
+# in ephemeral keycloak this user is part of customer account: 6089720
 org_admin, _ = User.objects.get_or_create(username="org-admin")
 org_admin.set_password("redhat")
 org_admin.groups.add(test_group)
 org_admin.save()
 
+# in ephemeral keycloak this user is part of customer account: 6089726
 admin, _ = User.objects.get_or_create(username="notifications_admin")
 admin.set_password("redhat")
 admin.is_superuser = True
