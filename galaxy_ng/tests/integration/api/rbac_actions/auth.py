@@ -29,7 +29,7 @@ def delete_groups(user, password, expect_pass):
     if group_exists():
         response = group_exists()
     else:
-        response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True)
     group_id = response["id"]
     # delete group
     response = requests.delete(
@@ -46,7 +46,7 @@ def delete_groups(user, password, expect_pass):
         )
 
 
-def add_groups(user, password, expect_pass, cleanup=False):
+def add_groups(user, password, expect_pass):
     if group_exists():
         response = group_exists()
         requests.delete(
@@ -69,7 +69,7 @@ def change_groups(user, password, expect_pass):
     if group_exists():
         response = group_exists()
     else:
-        response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True)
     group_id = response["id"]
     # Change group
     response = requests.patch(
@@ -99,7 +99,7 @@ def view_users(user, password, expect_pass):
         assert response.status_code == 403
 
 
-def add_users(user, password, expect_pass, cleanup=False):
+def add_users(user, password, expect_pass):
     if user_exists():
         response = user_exists()
         requests.delete(
@@ -130,7 +130,7 @@ def change_users(user, password, expect_pass):
     if user_exists():
         response = user_exists()
     else:
-        response = add_users(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        response = add_users(ADMIN_USER, ADMIN_PASSWORD, True)
     user_id = response["id"]
     # Change user
     response = requests.put(
@@ -161,7 +161,7 @@ def delete_users(user, password, expect_pass):
     if user_exists():
         response = user_exists()
     else:
-        response = add_users(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        response = add_users(ADMIN_USER, ADMIN_PASSWORD, True)
     user_id = response["id"]
     # Delete user
     response = requests.delete(
@@ -174,7 +174,7 @@ def delete_users(user, password, expect_pass):
         assert response.status_code == 403
 
 
-def add_role(user, password, expect_pass, cleanup=False):
+def add_role(user, password, expect_pass):
     if role_exists():
         response = role_exists()
         role_id = response['pulp_href'].split('/')[-2]
@@ -217,7 +217,7 @@ def delete_role(user, password, expect_pass):
     if role_exists():
         response = role_exists()
     else:
-        response = add_role(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        response = add_role(ADMIN_USER, ADMIN_PASSWORD, True)
     role_id = response['pulp_href'].split('/')[-2]
     # Delete role
     response = requests.delete(
@@ -234,7 +234,7 @@ def change_role(user, password, expect_pass):
     if role_exists():
         response = role_exists()
     else:
-        response = add_role(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        response = add_role(ADMIN_USER, ADMIN_PASSWORD, True)
     role_id = response['pulp_href'].split('/')[-2]
     # Change role
     response = requests.patch(

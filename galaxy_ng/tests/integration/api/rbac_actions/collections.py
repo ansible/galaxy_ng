@@ -18,7 +18,7 @@ from .utils import (
 requirements_file = "collections:\n  - name: newswangerd.collection_demo\n    version: 1.0.11\n    source: https://galaxy.ansible.com"  # noqa: 501
 
 
-def create_collection_namespace(user, password, expect_pass, cleanup=False):
+def create_collection_namespace(user, password, expect_pass):
     if collection_namespace_exists():
         response = collection_namespace_exists()
         requests.delete(
@@ -40,16 +40,11 @@ def create_collection_namespace(user, password, expect_pass, cleanup=False):
     return response.json()
 
 
-def change_collection_namespace(user, password, expect_pass, namespace_response=None):
+def change_collection_namespace(user, password, expect_pass):
     if collection_namespace_exists():
         ns_response = collection_namespace_exists()
     else:
-        ns_response = create_collection_namespace(
-            ADMIN_USER,
-            ADMIN_PASSWORD,
-            True,
-            cleanup=False
-        )
+        ns_response = create_collection_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
     response = requests.put(
         f"{API_ROOT}_ui/v1/namespaces/{ns_response['name']}/",
         json={
@@ -69,12 +64,7 @@ def delete_collection_namespace(user, password, expect_pass):
     if collection_namespace_exists():
         ns_response = collection_namespace_exists()
     else:
-        ns_response = create_collection_namespace(
-            ADMIN_USER,
-            ADMIN_PASSWORD,
-            True,
-            cleanup=False
-        )
+        ns_response = create_collection_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
     namespace_name = ns_response["name"]
     response = requests.delete(
         f"{API_ROOT}_ui/v1/namespaces/{namespace_name}/",
@@ -86,7 +76,7 @@ def delete_collection_namespace(user, password, expect_pass):
         assert response.status_code == 403
 
 
-def upload_collection_to_namespace(user, password, expect_pass, cleanup=False):
+def upload_collection_to_namespace(user, password, expect_pass):
     cleanup_foo_collection()
     # get auth token for user
     token = requests.post(
@@ -122,7 +112,7 @@ def upload_collection_to_namespace(user, password, expect_pass, cleanup=False):
 
 def delete_collection(user, password, expect_pass):
     if not foo_collection_exists('staging'):
-        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
     response = requests.delete(
         f"{API_ROOT}v3/plugin/ansible/content/staging/collections/index/foo/bar/",
         auth=(user['username'], password),
@@ -187,11 +177,11 @@ def view_sync_configuration(user, password, expect_pass):
         assert response.status_code == 403
 
 
-def approve_collections(user, password, expect_pass, cleanup=False):
+def approve_collections(user, password, expect_pass):
     if foo_collection_exists('published'):
         cleanup_foo_collection()
     if not foo_collection_exists('staging'):
-        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
     response = requests.post(
         f"{API_ROOT}v3/collections/foo/bar/versions/1.0.0/move/staging/published/",
         auth=(user['username'], password),
@@ -206,7 +196,7 @@ def reject_collections(user, password, expect_pass):
     if foo_collection_exists('rejected'):
         cleanup_foo_collection()
     if not foo_collection_exists('staging'):
-        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
     response = requests.post(
         f"{API_ROOT}v3/collections/foo/bar/versions/1.0.0/move/staging/rejected/",
         auth=(user['username'], password),
@@ -220,10 +210,10 @@ def reject_collections(user, password, expect_pass):
 def deprecate_collections(user, password, expect_pass):
     if foo_namespace_exists():
         if foo_collection_exists('staging'):
-            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
         if foo_collection_exists('rejected'):
             cleanup_foo_collection()
-            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
     else:
         approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
     response = requests.patch(
@@ -240,10 +230,10 @@ def deprecate_collections(user, password, expect_pass):
 def undeprecate_collections(user, password, expect_pass):
     if foo_namespace_exists():
         if foo_collection_exists('staging'):
-            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
         if foo_collection_exists('rejected'):
             cleanup_foo_collection()
-            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True, cleanup=False)
+            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
     else:
         approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
     response = requests.patch(
