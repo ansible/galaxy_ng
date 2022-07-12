@@ -47,6 +47,7 @@ package: tests for the pip packaging
 api_ui: tests for the _ui v1 api
 importer: tests related checks in galaxy-importer
 pulp_api: tests related to the pulp api endpoints
+ldap: tests related to the ldap integration
 """
 
 
@@ -80,6 +81,11 @@ class AnsibleConfigFixture(dict):
         "admin": {  # this is a superuser
             "username": "notifications_admin",
             "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
+        },
+        "ldap": {  # this is a superuser in ldap profile
+            "username": "professor",
+            "password": "professor",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
         },
     }
