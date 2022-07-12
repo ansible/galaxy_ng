@@ -128,6 +128,10 @@ objects:
             value: ${GALAXY_COLLECTION_SIGNING_SERVICE}
           - name: PULP_GALAXY_AUTO_SIGN_COLLECTIONS
             value: ${GALAXY_AUTO_SIGN_COLLECTIONS}
+          - name: PULP_GALAXY_FEATURE_FLAGS__display_signatures
+            value: 'false'
+          - name: PULP_GALAXY_FEATURE_FLAGS__execution_environments
+            value: 'false'
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs/database_fields.symmetric.key
