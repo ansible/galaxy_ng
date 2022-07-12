@@ -129,7 +129,7 @@ objects:
           - name: PULP_GALAXY_AUTO_SIGN_COLLECTIONS
             value: ${GALAXY_AUTO_SIGN_COLLECTIONS}
           - name: PULP_GALAXY_FEATURE_FLAGS__display_signatures
-            value: 'false'
+            value: ${GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES}
           - name: PULP_GALAXY_FEATURE_FLAGS__execution_environments
             value: 'false'
         volumeMounts:
@@ -340,6 +340,8 @@ parameters:
   value: "ansible-default"
 - name: GALAXY_AUTO_SIGN_COLLECTIONS
   value: "true"
+- name: GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES
+  value: "false"
 
 # nginx resource requirements
 - name: NGINX_REPLICAS
