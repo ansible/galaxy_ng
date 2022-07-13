@@ -190,6 +190,9 @@ class CurrentUserSerializer(UserSerializer):
             "change_containerdistribution": obj.has_perm('container.change_containerdistribution'),
             "delete_containerdistribution": obj.has_perm('container.delete_containerdistribution'),
 
+            # Tasks
+            "view_task": obj.has_perm('core.view_task'),
+
             # Auth
             "view_user": obj.has_perm('galaxy.view_user'),
             "change_group": obj.has_perm('galaxy.change_group'),
