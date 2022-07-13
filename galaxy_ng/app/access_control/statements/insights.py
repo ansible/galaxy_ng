@@ -125,7 +125,7 @@ INSIGHTS_STATEMENTS = {
     "content/container/manifests": _deny_all,
     "content/container/tags": _deny_all,
 
-   "AppRootViewSet": [
+    "AppRootViewSet": [
         {
             "action": ["retrieve"],
             "principal": "authenticated",
