@@ -400,7 +400,6 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.view_group"
         },
         {
             "action": "*",
