@@ -95,6 +95,18 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
 
+    def paginated_query(client, next_url, key="data"):
+        """Iterate through a paginated url and dump all results into data"""
+        resp = None
+        while next_url:
+            _resp = client(next_url)
+            if resp is None:
+                resp = _resp
+            elif _resp[key]:
+                resp[key].extend(_resp[key])
+            next_url = _resp.get('links', {}).get('next')
+        return resp
+
     # create and certify a new collection
     collection = build_collection("skeleton", config={"namespace": USERNAME_PUBLISHER})
     resp = upload_artifact(config, api_client, collection)
@@ -113,13 +125,13 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
 
     # check collection in viewset {synclist_name}/v3/collections/
     url = f"content/{synclist_name}/v3/collections/?limit=30"
-    resp = api_client(url)
+    resp = paginated_query(api_client, url, key="data")
     collections_before = [(c["namespace"], c["name"]) for c in resp["data"]]
     assert collection_key in collections_before
 
     # check collection not in viewset {synclist_name}/v3/excludes/
     url = f"content/{synclist_name}/v3/excludes/"
-    resp = api_client(url)
+    resp = paginated_query(api_client, url, key="collections")
     excludes = [(c["name"].split(".")[0], c["name"].split(".")[1]) for c in resp["collections"]]
     assert collection_key not in excludes
 
@@ -133,12 +145,12 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
 
     # check collection in viewset {synclist_name}/v3/excludes/
     url = f"content/{synclist_name}/v3/excludes/"
-    resp = api_client(url)
+    resp = paginated_query(api_client, url, key="collections")
     excludes = [(c["name"].split(".")[0], c["name"].split(".")[1]) for c in resp["collections"]]
     assert collection_key in excludes
 
     # check viewset {synclist_name}/v3/collections/ has not changed
     url = f"content/{synclist_name}/v3/collections/?limit=30"
-    resp = api_client(url)
+    resp = paginated_query(api_client, url, key="data")
     collections_after = [(c["namespace"], c["name"]) for c in resp["data"]]
     assert collections_before == collections_after
