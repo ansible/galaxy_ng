@@ -3,26 +3,17 @@
 
 import base64
 import json
-import io
 import os
 import uuid
 import requests
 import tempfile
-import email.mime.application
 from pprint import pprint
-from unittest.mock import patch
 from requests_toolbelt.multipart.encoder import MultipartEncoder
-
-from werkzeug.wsgi import LimitedStream
-from werkzeug.datastructures import ImmutableOrderedMultiDict
-from unittest.mock import patch
 
 import flask
 from flask import Flask
-from flask import Request
 from flask import jsonify
 from flask import request
-from flask import redirect
 
 
 pprint(os.environ)
@@ -98,58 +89,6 @@ if not os.path.exists(FILE_CACHE_DIR):
     os.makedirs(FILE_CACHE_DIR)
 
 
-class LoggingMiddleware(object):
-    def __init__(self, app):
-        self._app = app
-
-    def __call__(self, env, resp):
-        errorlog = env['wsgi.errors']
-        pprint(('REQUEST', env), stream=errorlog)
-
-        def log_response(status, headers, *args):
-            pprint(('RESPONSE', status, headers), stream=errorlog)
-            return resp(status, headers, *args)
-
-        return self._app(env, log_response)
-
-
-"""
-class StreamFixerMiddleware(object):
-    def __init__(self, app):
-        self._app = app
-
-    def __call__(self, env, resp):
-
-
-        if env['REQUEST_METHOD'] == 'POST':
-
-            #env['werkzeug.request'].test_bit = True
-
-            '''
-            req = env['werkzeug.request']
-            print('READ STREAM')
-            sdata = req.stream.read()
-            print('SET STREAM RAW')
-            env['werkzeug.request'].stream_raw = sdata
-            print('REBIND STREAM')
-
-            _stream = io.BytesIO(sdata)
-            env['werkzeug.request'].stream = LimitedStream(_stream, len(sdata))
-            '''
-
-            #import epdb; epdb.st()
-            pass
-
-
-        print('CALL DONE')
-
-        print(f'resp id: {id(resp)}')
-        print(f"w.request id: {id(env['werkzeug.request'])}")
-
-        return self._app(env, resp)
-"""
-
-
 def userid_to_identity(user_id):
     x_rh_identity = {
         'entitlements': ENTITLEMENTS,
@@ -193,8 +132,8 @@ def get_dir(path):
     elif 'Basic' in auth:
         auth = request.authorization
         un = auth['username']
-        pw = auth['password']
-        for k,v in USERS.items():
+        # pw = auth['password']
+        for k, v in USERS.items():
             if v['user']['username'] == un:
                 user_id = k
                 break
@@ -207,7 +146,6 @@ def get_dir(path):
     if request.method == 'POST':
 
         print(f'POST to {path} {request.files}')
-        #import epdb; epdb.st()
 
         if request.files:
             # This is how the CLI uploads a collection
@@ -243,15 +181,10 @@ def get_dir(path):
 
             # This is how upload_artifact in the tests works ...
 
-            #fs = request._get_file_stream(request.content_length, request.content_type)
-            #ds = fs.read()
-            print('STUFF')
-            #ds = request.stream.read()
-
+            # get the stream from the hacked werkzueg
             ds = request.stream._raw_data
-            #ds = request.stream_raw
-            #import epdb; epdb.st()
 
+            """
             body_parts = ds.partition(b'Content-Disposition: form-data; name="sha256"\r\n')
             new_stream = io.BytesIO()
             new_stream.write(body_parts[0])
@@ -260,21 +193,9 @@ def get_dir(path):
                 new_stream.write(b'\r\n')
             new_stream.write(body_parts[2])
             new_stream.seek(0)
+            """
 
             headers['Content-Type'] = request.headers['Content-Type']
-            #import epdb; epdb.st()
-
-            '''
-            if len(ds) != request.content_length:
-                print('BAD content length')
-                import epdb; epdb.st()
-                return jsonify({'errors': [{
-                    'code': 'invalid',
-                    'detail': 'invalid file upload',
-                    'status': '400',
-                    'source': {'parameter': 'file'}
-                }]}), 400
-            '''
 
             print('What now?')
             rr = requests.post(
@@ -283,10 +204,8 @@ def get_dir(path):
                 headers=headers,
                 data=ds
             )
-            #import epdb; epdb.st()
 
             return jsonify(rr.json()), rr.status_code
-
 
         print(f'POST3 to {path}')
         rr = requests.post(
@@ -308,11 +227,6 @@ def get_dir(path):
 
         return resp
 
-
-
-
-    # SERVER_BASE_URL = 'http://localhost:8080'
-    # UPSTREAM_BASE_URL = 'http://localhost:5001'
     get_url = request.url.replace(SERVER_BASE_URL, UPSTREAM_BASE_URL)
     get_url = get_url.replace(_path, _path.replace('//', '/'))
     print(get_url)
@@ -355,7 +269,7 @@ def get_dir(path):
     print(rtxt)
     try:
         pprint(json.loads(rtxt))
-    except:
+    except Exception:
         pass
 
     resp = flask.Response(rtxt)
@@ -368,17 +282,10 @@ def get_dir(path):
     print(resp)
     print('^------------ RESPONSE')
 
-    #if rr.status_code == 405:
-    #    import epdb; epdb.st()
-
     return resp
 
 
-
-
 if __name__ == '__main__':
-    #app.wsgi_app = LoggingMiddleware(app.wsgi_app)
-    #app.wsgi_app = StreamFixerMiddleware(app.wsgi_app)
     if os.environ.get('API_SECURE'):
         app.run(ssl_context='adhoc', host='0.0.0.0', port=8443, debug=True)
     else:
