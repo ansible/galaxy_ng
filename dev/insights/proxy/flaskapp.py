@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 
+###############################################################################
+#
+#   local insights mitm proxy
+#
+#       Proxies requests from a client to the api server in a way that
+#       simulates how the insights platform handles requests. Clients will
+#       authenticate to the proxy with a username+pass or a token and then
+#       the proxy will send the request to the api along with the appropriate
+#       X_RH_IDENTITY header that is required for authentication.
+#
+###############################################################################
+
 
 import base64
 import json
@@ -27,8 +39,8 @@ UPSTREAM_PORT = os.environ.get('UPSTREAM_PORT', '5001')
 UPSTREAM_BASE_URL = f'{UPSTREAM_PROTO}://{UPSTREAM_HOST}:{UPSTREAM_PORT}'
 print(f'UPSTREAM_BASE_URL: {UPSTREAM_BASE_URL}')
 
-BEARER_TOKENS = {}
 
+# Refresh tokens are what the clients use to request a bearer token from keycloak
 REFRESH_TOKENS = {
     '1234567890': '1',
     '1234567891': '2',
@@ -36,6 +48,10 @@ REFRESH_TOKENS = {
     '1234567893': '4',
 }
 
+# Bearer tokens are used for all api calls
+BEARER_TOKENS = {}
+
+# This set of users mimics what is found in the ephemeral environments.
 USERS = {
     '1': {
         'account_number': 6089719,
@@ -76,6 +92,7 @@ USERS = {
     }
 }
 
+# The entitlements server in ephemeral provides this data for each user
 ENTITLEMENTS = {
     'insights': {'is_entitled': True, 'is_trial': False}
 }
@@ -90,6 +107,9 @@ if not os.path.exists(FILE_CACHE_DIR):
 
 
 def userid_to_identity(user_id):
+    """
+    Build the encoded header that will be passed to the api
+    """
     x_rh_identity = {
         'entitlements': ENTITLEMENTS,
         'identity': USERS[user_id]
@@ -102,6 +122,9 @@ def userid_to_identity(user_id):
 
 @app.route('/auth/realms/redhat-external/protocol/openid-connect/token', methods=['POST'])
 def do_login():
+    """
+    Return a bearer token for the user
+    """
     refresh_token = request.form.get('refresh_token')
     user_id = REFRESH_TOKENS[refresh_token]
     bearer_token = str(uuid.uuid4())
@@ -112,6 +135,10 @@ def do_login():
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
 @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def get_dir(path):
+    """
+    Handle all paths not related to keycloak/SSO
+    """
+
     print('\n\n# NEW REQUEST ..........................................')
     print(path)
     print(request.headers)
@@ -124,11 +151,10 @@ def get_dir(path):
     auth = request.headers.get('Authorization')
     print(f'auth: {auth}')
 
+    # Find the userid whether it's basic or token auth ...
     if 'Bearer' in auth:
         bearer_token = auth.replace('Bearer', '').strip()
-        print(bearer_token)
         user_id = BEARER_TOKENS[bearer_token]
-
     elif 'Basic' in auth:
         auth = request.authorization
         un = auth['username']
@@ -140,15 +166,21 @@ def get_dir(path):
 
     print(f'USER: {USERS[user_id]}')
 
+    # assemble the base set of headers with the identity
     headers = {}
     headers['X_RH_IDENTITY'] = userid_to_identity(user_id)
 
     if request.method == 'POST':
 
-        print(f'POST to {path} {request.files}')
+        # Post requests are special when files are involved. A recent ansible client
+        # and most integration tests will POST a multi-part form that includes a base64
+        # encoded blob. Ansible 2.9 has a bug in it's creation of multi-part uploads
+        # that isn't compatible with werkzeug, so some hacking is necessary to get the
+        # raw stream of data so it can be passed to the upstream.
 
         if request.files:
-            # This is how the CLI uploads a collection
+            # This is the easy path where the form data is not malformed ...
+
             print(f'POST1 to {path} {request.files}')
             uploaded_file = request.files['file']
             fn = os.path.join(FILE_CACHE_DIR, uploaded_file.filename)
@@ -170,34 +202,23 @@ def get_dir(path):
             )
 
             os.remove(fn)
-
-            # if rr.status_code == 400:
-            #    import epdb; epdb.st()
-
             return jsonify(rr.json()), rr.status_code
 
         elif request.mimetype == 'multipart/form-data':
-            print(f'POST2 to {path} {request.files}')
+            # This is the workaround path for ansible 2.9 and the integration
+            # tests that intentionally malform the the data to replicate the bug.
 
-            # This is how upload_artifact in the tests works ...
-
-            # get the stream from the hacked werkzueg
+            # The data stream as implemented in werkzeug is read-once and there is
+            # no way to ever get that raw data again once the form parsers have run.
+            # Unfortunately since the form data is bad, the "files" property is empty.
+            # My fork of werkzeug includes a patch to save the data to a private
+            # field immediately after the stream is read.
             ds = request.stream._raw_data
 
-            """
-            body_parts = ds.partition(b'Content-Disposition: form-data; name="sha256"\r\n')
-            new_stream = io.BytesIO()
-            new_stream.write(body_parts[0])
-            new_stream.write(body_parts[1])
-            if not body_parts[2].startswith(b'\r\n'):
-                new_stream.write(b'\r\n')
-            new_stream.write(body_parts[2])
-            new_stream.seek(0)
-            """
-
+            # Replicate the content-type
             headers['Content-Type'] = request.headers['Content-Type']
 
-            print('What now?')
+            # Pass the stream data directly upstream
             rr = requests.post(
                 UPSTREAM_BASE_URL + '/' + path.lstrip('/'),
                 allow_redirects=False,
@@ -207,7 +228,7 @@ def get_dir(path):
 
             return jsonify(rr.json()), rr.status_code
 
-        print(f'POST3 to {path}')
+        # This should be a normal POST request without any form data
         rr = requests.post(
             UPSTREAM_BASE_URL + '/' + path.lstrip('/'),
             allow_redirects=False,
@@ -215,9 +236,16 @@ def get_dir(path):
             json=request.json
         )
 
+        # Make a new response object with the raw text
         resp = flask.Response(rr.text)
+
+        # Set the status code
         resp.status_code = rr.status_code
+
+        # Set the content-type for the client
         resp.headers['Content-Type'] = rr.headers['Content-Type']
+
+        # Make sure the client is told about redirects
         if rr.headers.get('Location'):
             resp.headers['Location'] = rr.headers['Location']
 
@@ -227,13 +255,20 @@ def get_dir(path):
 
         return resp
 
+    ############################################################################
+    #   GET / PUT / DELETE
+    ############################################################################
+
+    # FIXME: This is a workaround for duplicate slashes in the urls
     get_url = request.url.replace(SERVER_BASE_URL, UPSTREAM_BASE_URL)
     get_url = get_url.replace(_path, _path.replace('//', '/'))
     print(get_url)
 
+    # Abstract the method so we don't have to make an algorithm
     func = getattr(requests, request.method.lower())
 
     if request.method == 'PUT':
+        # PUT is like a POST and will usually have data to send
         headers['Content-Type'] = request.headers['Content-Type']
         rr = func(
             get_url,
@@ -242,6 +277,7 @@ def get_dir(path):
             headers=headers
         )
     else:
+        # GET / DELETE
         rr = func(
             get_url,
             allow_redirects=False,
@@ -250,10 +286,7 @@ def get_dir(path):
 
     print(rr.headers)
 
-    rtxt = rr.text
-    if rr.headers['Content-Type'] in ['application/json', 'application/text']:
-        rtxt = rtxt.replace('http://localhost:8002', 'http://localhost:8080/')
-
+    # If the response is a tar file, save it and then send it back to the client.
     if rr.headers['Content-Type'] == 'application/x-tar':
         fn = os.path.basename(path)
         tdir = tempfile.mkdtemp()
@@ -262,16 +295,17 @@ def get_dir(path):
             f.write(rr.content)
         return flask.send_file(fn)
 
+    # Replace internal urls in the response data with the proxy's url
     rtxt = rr.text
     if rr.headers['Content-Type'] in ['application/json', 'application/text']:
         rtxt = rtxt.replace('http://localhost:8002', 'http://localhost:8080/')
 
-    print(rtxt)
     try:
         pprint(json.loads(rtxt))
     except Exception:
-        pass
+        print(rtxt)
 
+    # Assemble a new response
     resp = flask.Response(rtxt)
     resp.status_code = rr.status_code
     resp.headers['Content-Type'] = rr.headers['Content-Type']
