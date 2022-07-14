@@ -35,13 +35,13 @@ jobs:
       - name: create the .compose.env file
         run: rm -f .compose.env; cp .compose.env.example .compose.env
 
-      - name: workaround github worker permissions issues
+      - name: set the compose profile
         run: sed -i.bak 's/COMPOSE_PROFILE=standalone/COMPOSE_PROFILE=insights/' .compose.env
 
-      - name: workaround github worker permissions issues
+      - name: workaround github worker permissions issues - disable editable installs
         run: sed -i.bak 's/PIP_EDITABLE_INSTALL=1/PIP_EDITABLE_INSTALL=0/' .compose.env
 
-      - name: workaround github worker permissions issues
+      - name: workaround github worker permissions issues - disable dev installs
         run: sed -i.bak 's/WITH_DEV_INSTALL=1/WITH_DEV_INSTALL=0/' .compose.env
 
       - name: require approval
