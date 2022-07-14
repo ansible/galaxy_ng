@@ -125,6 +125,20 @@ INSIGHTS_STATEMENTS = {
     "content/container/manifests": _deny_all,
     "content/container/tags": _deny_all,
 
+    "AppRootViewSet": [
+        {
+            "action": ["retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": ["retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "unauthenticated_collection_download_enabled",
+        },
+    ],
+
     "NamespaceViewSet": [
         {
             "action": ["list", "retrieve"],

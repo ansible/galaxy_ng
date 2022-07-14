@@ -98,7 +98,28 @@ STANDALONE_STATEMENTS = {
             "action": "*",
             "principal": "authenticated",
             "effect": "allow",
+        },
+
+        # we need the redirect in order to support anonymous downloads when the options are enabled
+        {
+            "action": "*",
+            "principal": "anonymous",
+            "effect": "allow",
         }
+    ],
+
+    "AppRootViewSet": [
+        {
+            "action": ["retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": ["retrieve"],
+            "principal": "anonymous",
+            "effect": "allow",
+            "condition": "unauthenticated_collection_download_enabled",
+        },
     ],
 
     'NamespaceViewSet': [
