@@ -195,10 +195,7 @@ class UserAccessPolicy(AccessPolicyBase):
 
         user = view.get_object()
 
-        if user.is_superuser and not request.user.is_superuser:
-            return True
-        else:
-            return False
+        return user.is_superuser and not request.user.is_superuser
 
     def is_current_user(self, request, view, action):
         if getattr(self, "swagger_fake_view", False):
