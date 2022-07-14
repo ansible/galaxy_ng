@@ -1,5 +1,5 @@
 ---
-name: Standalone
+name: Insights
 on: 
   pull_request:
     branches:
