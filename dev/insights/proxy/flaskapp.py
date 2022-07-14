@@ -100,10 +100,7 @@ ENTITLEMENTS = {
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = FILE_CACHE_DIR
-
-
-if not os.path.exists(FILE_CACHE_DIR):
-    os.makedirs(FILE_CACHE_DIR)
+os.makedirs(FILE_CACHE_DIR, exist_ok=True)
 
 
 def userid_to_identity(user_id):
