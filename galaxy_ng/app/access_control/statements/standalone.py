@@ -188,6 +188,12 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
             "condition": "has_model_perms:galaxy.change_user"
         },
+        {
+            "action": ["update", "partial_update"],
+            "principal": "authenticated",
+            "effect": "deny",
+            "condition": ["has_model_perms:galaxy.change_user", "can_update_user"]
+        }
     ],
     'MyUserViewSet': [
         {
