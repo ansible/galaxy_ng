@@ -98,6 +98,26 @@ class CollectionInspector:
         return self.manifest['collection_info']['version']
 
 
+def url_safe_join(server, url):
+    """
+    Handle all the oddities of url joins
+    """
+
+    o = urlparse(server)
+    server_path = o.path
+
+    # some urls already contain the server path
+    if url.startswith(server_path):
+        return urljoin(server, url)
+
+    # some urls contain the entire proto + server + port + path
+    if url.startswith(server):
+        return url
+
+    # some urls just need to tack onto the end of the server url
+    return server.rstrip('/') + '/' + url.lstrip('/')
+
+
 def get_client(config, require_auth=True, request_token=True, headers=None):
     """Get an API client given a role."""
     headers = headers or {}
@@ -139,7 +159,7 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
 
     # make an api call with the upstream galaxy client lib from ansible core
     def request(url, *args, **kwargs):
-        url = urljoin(server, url)
+        url = url_safe_join(server, url)
         req_headers = dict(headers)
         kwargs_headers = kwargs.get('headers') or {}
         kwargs_headers_keys = list(kwargs_headers.keys())
@@ -254,7 +274,7 @@ def upload_artifact(
 
 def wait_for_task(api_client, resp, timeout=300):
     ready = False
-    url = urljoin(api_client.config["url"], resp["task"])
+    url = url_safe_join(api_client.config["url"], resp["task"])
     wait_until = time.time() + timeout
     while not ready:
         if wait_until < time.time():
@@ -315,6 +335,7 @@ def uuid4():
 
 def ansible_galaxy(
     command,
+    retries=3,
     check_retcode=0,
     server="automation_hub",
     ansible_config=None,
@@ -340,14 +361,25 @@ def ansible_galaxy(
             f.write(f"token={ansible_config.get('token')}\n")
 
     command_string = f"ansible-galaxy -vvv {command} --server={server} --ignore-certs"
-    p = run(command_string, cwd=tdir, shell=True, stdout=PIPE, stderr=PIPE, env=os.environ)
-    logger.debug(f"RUN {command_string}")
-    logger.debug("STDOUT---")
-    for line in p.stdout.decode("utf8").split("\n"):
-        logger.debug(re.sub("(.\x08)+", "...", line))
-    logger.debug("STDERR---")
-    for line in p.stderr.decode("utf8").split("\n"):
-        logger.debug(re.sub("(.\x08)+", "...", line))
+
+    for x in range(0, retries + 1):
+        try:
+            p = run(command_string, cwd=tdir, shell=True, stdout=PIPE, stderr=PIPE, env=os.environ)
+            logger.debug(f"RUN [retry #{x}] {command_string}")
+            logger.debug("STDOUT---")
+            for line in p.stdout.decode("utf8").split("\n"):
+                logger.debug(re.sub("(.\x08)+", "...", line))
+            logger.debug("STDERR---")
+            for line in p.stderr.decode("utf8").split("\n"):
+                logger.debug(re.sub("(.\x08)+", "...", line))
+            if p.returncode == 0:
+                break
+            if p.returncode != 0 and not check_retcode:
+                break
+        except Exception as e:
+            logger.exception(e)
+            time.sleep(SLEEP_SECONDS_POLLING)
+
     if check_retcode is not False:
         assert p.returncode == check_retcode, p.stderr.decode("utf8")
     if cleanup:
@@ -376,7 +408,6 @@ def set_certification(client, collection):
             f"v3/collections/{collection.namespace}/{collection.name}/versions/"
             f"{collection.version}/move/staging/published/"
         )
-
         job_tasks = client(url, method="POST", args=b"{}")
         assert 'copy_task_id' in job_tasks
         assert 'curate_all_synclist_repository_task_id' in job_tasks
