@@ -267,6 +267,8 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         response_data = {
             "copy_task_id": None,
             "remove_task_id": None,
+            # Can be removed once all synclist stuff is remove
+            # and client compat isnt a concern -akl
             "curate_all_synclist_repository_task_id": None,
         }
         golden_repo = settings.get("GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH", "published")

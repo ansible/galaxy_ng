@@ -383,7 +383,7 @@ def set_certification(client, collection):
         assert 'remove_task_id' in job_tasks
 
         # wait for each unique task to finish ...
-        for key in ['copy_task_id', 'curate_all_synclist_repository_task_id', 'remove_task_id']:
+        for key in ['copy_task_id', 'remove_task_id']:
             task_id = job_tasks.get(key)
 
             # curate is null sometimes? ...
