@@ -36,8 +36,9 @@ class TestRHIdentityAuth(BaseTestCase):
         # check objects exist: user, group, synclist, distro
         User.objects.get(username=username)
         Group.objects.get(name=group_name)
-        SyncList.objects.get(name=synclist_name)
-        AnsibleDistribution.objects.get(name=synclist_name)
+        synclist = SyncList.objects.get(name=synclist_name)
+        distro = AnsibleDistribution.objects.get(name=synclist_name)
+        self.assertEqual(synclist.distribution, distro)
 
         # assert objects do not exist: repo
         self.assertFalse(AnsibleRepository.objects.filter(name=synclist_name))
