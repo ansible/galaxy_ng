@@ -103,6 +103,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, data):
         instance = self._set_password(instance, data)
+        self.validate_password(instance.password)
+
+        user = self.context['request'].user
+
+        if (not user.is_superuser
+            and user.pk != instance.pk
+                and not user.has_perm('galaxy.change_user')):
+            raise ValidationError(detail={
+                "password": _("Must be a super user to change user's password.")
+            })
+
         return super().update(instance, data)
 
     def to_representation(self, instance):
