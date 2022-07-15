@@ -12,46 +12,21 @@ log = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="function")
-def config(ansible_config):
-    return ansible_config("basic_user")
-
-
-@pytest.fixture(scope="function")
-def config_ldap(ansible_config):
-    class AnsibleConfigLDAP(ansible_config):
-        def __getitem__(self, key):
-            if key == "username":
-                return "professor"
-            if key == "password":
-                return "professor"
-            return super().__getitem__(key)
-
-    return AnsibleConfigLDAP("basic_user")
-
-
-@pytest.fixture(scope="function")
-def ldap_api_client(config_ldap):
-    return get_client(
-        config=config_ldap, request_token=False, require_auth=True
-    )
-
-
-@pytest.fixture(scope="function")
-def api_client(config):
-    return get_client(config=config, request_token=True, require_auth=True)
-
-
-@pytest.fixture(scope="function")
-def settings(api_client):
+def settings(ansible_config):
+    config = ansible_config("admin")
+    api_client = get_client(config, request_token=False, require_auth=True)
     return api_client("/api/automation-hub/_ui/v1/settings/")
 
 
 @pytest.mark.standalone_only
-def test_ldap_is_enabled(api_client, settings):
+@pytest.mark.ldap
+def test_ldap_is_enabled(ansible_config, settings):
     """test whether ldap user can login"""
     if not settings.get("GALAXY_AUTH_LDAP_ENABLED"):
         pytest.skip("GALAXY_AUTH_LDAP_ENABLED is not enabled")
 
+    config = ansible_config("admin")
+    api_client = get_client(config, request_token=False, require_auth=True)
     assert (
         api_client("/api/automation-hub/_ui/v1/settings/")[
             "GALAXY_AUTH_LDAP_ENABLED"
@@ -61,14 +36,19 @@ def test_ldap_is_enabled(api_client, settings):
 
 
 @pytest.mark.standalone_only
-def test_ldap_login(ldap_api_client, settings):
+@pytest.mark.ldap
+def test_ldap_login(ansible_config, settings):
     """test whether ldap user can login"""
+
     if not settings.get("GALAXY_AUTH_LDAP_ENABLED"):
         pytest.skip("GALAXY_AUTH_LDAP_ENABLED is not enabled")
 
+    config = ansible_config("ldap")
+    api_client = get_client(config, request_token=False, require_auth=True)
+
     # This test assumes the running ldap server is the
     # testing image from: rroemhild/test-openldap
-    data = ldap_api_client("/api/automation-hub/_ui/v1/me/")
+    data = api_client("/api/automation-hub/_ui/v1/me/")
     assert data["username"] == "professor"
     assert data["email"] == "professor@planetexpress.com"
     assert data["first_name"] == "Hubert"
