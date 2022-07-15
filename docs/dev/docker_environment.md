@@ -5,13 +5,21 @@
 1. Create your own fork of the repository
 2. Clone it to your projects folder
 
+!!! Note
+    It's recommended to put all of your git checkouts in the same directory. This makes it easier to include other projects from source.
+
+    ```
+    galaxy/
+    ├── ansible-hub-ui/
+    ├── galaxy-importer/
+    ├── galaxy_ng/
+    └── pulp_ansible/
+    ```
+
 ```bash
 cd your/preferred/projects/folder
 git clone git@github.com:<YOUR_USER_NAME>/galaxy_ng.git
 ```
-
-!!! important
-    We require all commits to be signed, so configure PGP signing on your git
 
 
 ## Configuring your local code editor
@@ -49,29 +57,9 @@ easiest way to do that is by copying an example script
 cp .compose.env.example .compose.env
 ```
 
-By default, the development environment is configured to run in
-*insights* mode, which requires a 3rd party authentication provider. If
-you're working outside of the Red Hat cloud platform, you'll want to
-switch it to *standalone* mode by modifying your `.compose.env` file,
-and setting the `COMPOSE_PROFILE` variable to `standalone`, as shown in
-the following example:
+All of your local project settings can be set in your `.compose.env` file.
 
-```env
-COMPOSE_PROFILE=standalone
-```
-
-If you want to run in standalone mode while using Keycloak to provide
-single sign-on with a
-`pre-populated LDAP server <https://github.com/rroemhild/docker-test-openldap>`\_
-you'll want to switch it to *standalone-keycloak* mode by modifying your
-`.compose.env` file, and setting the `COMPOSE_PROFILE` variable to
-`standalone-keycloak`, as shown in the following example:
-
-```env
-COMPOSE_PROFILE=standalone-keycloak
-```
-
-## Enable the UI
+### Enable the UI (optional)
 
 If you would like to develop using the UI, simply do the following:
 
@@ -94,38 +82,10 @@ If you would like to develop using the UI, simply do the following:
 3.  Complete the rest of the steps in the next section. Once everything
     is running the UI can be accessed at http://localhost:8002
 
-
-
-???  "Access the UI in insights mode"
-
-    Skip this step if you don't have access to the Red Hat VPN.
-
-    If you want to be able to run the app in insights mode you need to add
-    the following in your `/etc/hosts` file.
-
-    ```bash
-    127.0.0.1 prod.foo.redhat.com 
-    127.0.0.1 stage.foo.redhat.com 
-    127.0.0.1 qa.foo.redhat.com 
-    127.0.0.1 ci.foo.redhat.com
-    ```
-
-    To access the UI when running in insights mode:
-
-    1.  Connect to the Red Hat VPN
-
-    2.  Navigate to
-        https://ci.foo.redhat.com:1337/beta/ansible/automation-hub
-
-    3.  You'll need a Red Hat username and password to authenticate with the
-        dev Red Hat SSO server. Anyone on the Galaxy team should be able to
-        provide you with one.
-
-## Run the Build Steps
+### Run the Build Steps
 
 Next, run the following steps to build your local development
 environment:
-
 
 1. Build the docker image
 
@@ -154,7 +114,7 @@ environment:
     ```
 
 
-**Start the services**
+### Start the services
 
 In foreground keeping terminal opened for watching outputs
 ```bash
@@ -166,54 +126,164 @@ In Background (you can close the terminal later)
 ./compose up -d
 ```
 
-## Keycloak
+By default, the development environment is configured to run in
+*insights* mode, which requires a 3rd party authentication provider. If
+you're working outside of the Red Hat cloud platform, you'll want to
+switch it to *standalone* mode by modifying your `.compose.env` file,
+and setting the `COMPOSE_PROFILE` variable to `standalone`, as shown in
+the following example:
 
-??? tip "Using Keycloak"
+```env
+COMPOSE_PROFILE=standalone
+```
 
-    If using `standalone-keycloak` you will need to initialize your Keycloak
-    instance before running migrations and starting the remaining services.
+If you want to run in standalone mode while using Keycloak to provide
+single sign-on with a
+`pre-populated LDAP server <https://github.com/rroemhild/docker-test-openldap>`\_
+you'll want to switch it to *standalone-keycloak* mode by modifying your
+`.compose.env` file, and setting the `COMPOSE_PROFILE` variable to
+`standalone-keycloak`, as shown in the following example:
 
-    1.  Start the Keycloak instance and dependencies
+```env
+COMPOSE_PROFILE=standalone-keycloak
+```
 
-        ```bash
-        ./compose up -d keycloak kc-postgres ldap
-        ```
+## Other Development Modes
 
-    2.  Bootstrap the Keycloak instance with a Realm and Client then capture
-        the needed public key
+### Insights
 
-        ```bash
-        ansible-playbook ./dev/standalone-keycloak/keycloak-playbook.yaml
-        ```
-        > **NOTE** Try again if it fails at the first run, services might not be
-        available yet.
+"Insights" mode refers to running Galaxy NG as it would be run on console.redhat.com.
 
-    3.  Update your `.compose.env` file with the public key found at the end
-        of the playbook run
+!!! Note
+    This option is only relevant to Red Hat employees. Community contributors should skip this.
 
-        ```bash
-        PULP_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY="keycloak-public-key"
-        ```
+1. In your `.compose.env` file set `COMPOSE_PROFILE=insights` and comment out `ANSIBLE_HUB_UI_PATH` (if its set).
+2. Install node. Node v16+ is known to work. Older versions may work as well.
+3. Switch to your `ansible-hub-ui` checkout and run the following
 
-    After the standard development set up steps, when you access
-    http://localhost:8002 it will redirect to a Keycloak Open ID Connect
-    flow login page, where you can login with one of the development SSO
-    user's credentials (the password is the username). If you want to login
-    with non-Keycloak users, you need to use the
-    `Django admin console <http://localhost:5001/automation-hub/admin/>`\_.
+    ```bash
+    npm install
+    npm run start
+    ```
 
-    If you want to login as a superuser, you can do one of two things:
+The app will run on http://localhost:8002/beta/ansible/automation-hub and proxy requests for `/api/automation-hub` to the api on `http://localhost:5001`.
 
-    1.  Login to the
-        `Django admin console <http://localhost:5001/automation-hub/admin/>`\_
-        with the admin user
+### Keycloak
 
-    2.  Login to the `Keycloak instance <http://localhost:8080/>`\_ with
-        admin/admin to edit the LDAP user's roles: Choose a development SSO
-        user, select Role Mappings \> Client Roles \> automation-hub and add
-        the `hubadmin` role. A user is associated with the appropriate
-        group(s) using the user\_group pipeline.
+Keycloak mode launches an LDAP and keycloak server via docker and configures the app to authenticate using keycloak.
 
+To run in keycloak mode set `COMPOSE_PROFILE=standalone-keycloak` in your `.compose.env`. You will need to initialize your Keycloak
+instance before running migrations and starting the remaining services.
+
+1.  Start the Keycloak instance and dependencies
+
+    ```bash
+    ./compose up -d keycloak kc-postgres ldap
+    ```
+
+2.  Bootstrap the Keycloak instance with a Realm and Client then capture
+    the needed public key
+
+    ```bash
+    ansible-playbook ./dev/standalone-keycloak/keycloak-playbook.yaml
+    ```
+    > **NOTE** Try again if it fails at the first run, services might not be
+    available yet.
+
+3.  Update your `.compose.env` file with the public key found at the end
+    of the playbook run
+
+    ```bash
+    PULP_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY="keycloak-public-key"
+    ```
+
+After the standard development set up steps, when you access
+http://localhost:8002 it will redirect to a Keycloak Open ID Connect
+flow login page, where you can login with one of the development SSO
+user's credentials (the password is the username). If you want to login
+with non-Keycloak users, you need to use the
+`Django admin console <http://localhost:5001/automation-hub/admin/>`\_.
+
+If you want to login as a superuser, you can do one of two things:
+
+1.  Login to the
+    `Django admin console <http://localhost:5001/automation-hub/admin/>`\_
+    with the admin user
+
+2.  Login to the `Keycloak instance <http://localhost:8080/>`\_ with
+    admin/admin to edit the LDAP user's roles: Choose a development SSO
+    user, select Role Mappings \> Client Roles \> automation-hub and add
+    the `hubadmin` role. A user is associated with the appropriate
+    group(s) using the user\_group pipeline.
+
+## Running API tests
+
+Unit and integration tests can be easily run using docker compose. At the moment, there is no easy way to run pulp functional tests with docker.
+
+For more information on tests, refer to [writing tests](dev/writing_tests.md).
+
+### Unit tests
+
+Run unit all unit tests:
+
+```bash
+make docker/test/unit
+```
+
+Run a specific test case:
+
+```bash
+make docker/test/unit TEST=.api.test_api_ui_sync_config
+```
+
+### Integration tests
+
+Integration tests can be run from the host machine or via a docker container. Before running either, the following steps have to be taken:
+
+- set `PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true` in your `.compose.env`.
+- run
+    ```
+    make docker/loadtoken
+    make docker/load_test_data
+    ```
+
+#### Via docker
+
+!!! note
+    Tests that require docker or podman won't run inside docker and will be skipped. If you need to write container tests, run the integration tests via the host machine.
+
+Run all the integration tests:
+
+```bash
+make docker/test/integration/container
+```
+
+Any set of pytest flags can be passed to this command as well:
+
+```bash
+# run any test who's name matches my_test
+make docker/test/integration/container FLAGS="-k my_test"
+
+# run tests marked as galaxyapi_smoke
+make docker/test/integration/container FLAGS="-m galaxyapi_smoke"
+```
+
+#### Via host machine
+
+!!! warning
+    This requires that the `python` executable in your shell be python 3, and may not work on systems synch as Mac OS where `python` refers to `python2`. This also requires that `virtualenv` in installed on your machine.
+
+Run all the integration tests:
+
+```bash
+make docker/test/integration
+```
+
+Run integration tests with a specific mark:
+
+```bash
+make docker/test/integration MARK=galaxyapi_smoke
+```
 
 ## Testing data
 
@@ -324,7 +394,7 @@ development environment with your changes made locally.
         LOCK_REQUIREMENTS=0
 
     **DEV\_SOURCE\_PATH** refers to the repositories you cloned locally,
-    the order is important from the highest to the low dependecy,
+    the order is important from the highest to the low dependency,
     otherwise pip will raise version conflicts.
 
     So **pulpcore** is a dependency to **pulp\_ansible** which is a
@@ -389,21 +459,3 @@ To set your own galaxy-importer.cfg, add something like this to
         && printf "[galaxy-importer]\n \
     REQUIRE_V1_OR_GREATER = True\n \
     LOG_LEVEL_MAIN = INFO\n" | tee /etc/galaxy-importer/galaxy-importer.cfg
-
-
-## Documentation
-
-
-Docs are writen using [mkdocs](https://squidfunk.github.io/mkdocs-material/reference/#usage)
-
-- Markdown files under `/docs` folder are documentation pages.
-- Menu is set on `mkdocs.yml` file.
-
-After the edits to the docs are done you can run
-
-```
-make docs/install
-make docs/serve
-``` 
-
-Then you can open http://localhost:8000 and see your live reloading changes to the docs markdown files.

@@ -1,12 +1,10 @@
-# Developer Guidelines
-
-## Understanding the Galaxy NG Rest API
+# REST API
 
 The API in the developer environment will either be served under `/api/galaxy/` or `/api/automation-hub/`.
 Visiting this endpoint shows that there are two versions available: `v3/` and `pulp/api/v3/`. Understanding
 the purpose of each of these APIs is crucial when contributing new features to the backend.
 
-### v3/
+## v3/
 
 This is the original galaxy_ng API. It is primarily used for content consumption and to fill in some client
 specific gaps that the pulp APIs can't support. API endpoints should be added here that:
@@ -31,14 +29,14 @@ specific gaps that the pulp APIs can't support. API endpoints should be added he
       steps on the pulp API. These endpoints provide a nice abstraction on top of a lot of lower level
       pulp operations.
 
-### pulp/api/v3/
+## pulp/api/v3/
 
 These APIs are provided by pulpcore and can be extended by other plugins (including galaxy_ng). These should
 be used for managing pulp primitives. This includes:
 
 - General content operations
   - Moving, copying and syncing content between repositories.
-- Manging any pulp primitives. This includes:
+- Managing any pulp primitives. This includes:
   - Repos
   - Remotes
   - Distributions
@@ -47,3 +45,7 @@ be used for managing pulp primitives. This includes:
   - RBAC Roles
   - Tasks
   - Pretty much anything else defined in [the pulpcore models](https://github.com/pulp/pulpcore/tree/main/pulpcore/app/models).
+
+## Open API Spec
+
+Pulp uses [drf-spectacular](https://drf-spectacular.readthedocs.io/en/latest/) to automatically generate an open api spec from the API. This spec can be found at `/api/automation-hub/pulp/api/v3/docs/` and describes how the API works. This open api spec is also used to generate the pulp bindings to programmatically interact with the pulp APIs.

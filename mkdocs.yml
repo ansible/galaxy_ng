@@ -31,10 +31,19 @@ nav:
         # - Using Keycloak SSO: integration/keycloak.md
         # - Using S3: integration/s3.md
         # - Using Azure: integration/azure.md
-    - Contributing: 
-        # - Guidelines: dev/guidelines.md
-        - Development setup: dev/setup.md
-        # - Tests: dev/tests.md
+        
+    - Contributing:
+        - Getting Started: dev/getting_started.md
+        - GalaxyNG Basics:
+            - Overview: dev/developer_guide/overview.md
+            - Data Models: dev/developer_guide/data_models.md
+            - REST API: dev/developer_guide/rest_api.md
+            - Services: dev/developer_guide/services.md
+            - RBAC: dev/developer_guide/rbac.md
+        - Docker compose environment: dev/docker_environment.md
+        - Vagrant environment: dev/vagrant.md
+        - Writing documentation: dev/writing_docs.md
+        - Tests: dev/tests.md
     - Tags: tags.md
     - Community:
         - Overview: community/overview.md
@@ -52,9 +61,9 @@ theme:
       media: "(prefers-color-scheme: light)"
       primary: teal
       toggle:
-        icon: material/toggle-switch-off-outline 
+        icon: material/toggle-switch-off-outline
         name: Switch to dark mode
-    - scheme: slate 
+    - scheme: slate
       media: "(prefers-color-scheme: dark)"
       primary: teal
       toggle:
@@ -86,7 +95,7 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tabbed:
-      alternate_style: true 
+      alternate_style: true
   - pymdownx.tilde
   - pymdownx.critic
   - pymdownx.caret
