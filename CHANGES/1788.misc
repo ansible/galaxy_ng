@@ -1,1 +1,1 @@
-Remove existing synclist repo database objects
+Stop creating AnsibleRepository with foreign key to SyncList
