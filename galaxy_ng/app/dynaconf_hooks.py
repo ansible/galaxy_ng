@@ -25,6 +25,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_ldap(settings))
     data.update(configure_logging(settings))
     data.update(configure_keycloak(settings))
+    data.update(configure_socialauth(settings))
     data.update(configure_cors(settings))
     data.update(configure_pulp_ansible(settings))
     data.update(configure_authentication_classes(settings))
@@ -160,6 +161,56 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
                     ],
                 },
             },
+        ]
+
+    return data
+
+def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
+    """Configure social auth settings for galaxy.
+
+    This function returns a dictionary that will be merged to the settings.
+    """
+
+    # SETTING authentication_backends: [
+    #    'django.contrib.auth.backends.ModelBackend',
+    #    'guardian.backends.ObjectPermissionBackend',
+    #    'pulpcore.backends.ObjectRolePermissionBackend',
+    #    'django.contrib.auth.backends.ModelBackend',
+    #    'guardian.backends.ObjectPermissionBackend',
+    #    'pulpcore.backends.ObjectRolePermissionBackend',
+    #    'galaxy_ng.social.GalaxyNGOAuth2'
+    #]
+
+    data = {}
+
+    SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
+    SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
+
+    if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
+
+        backends = settings.get("AUTHENTICATION_BACKENDS", default=[])
+        backends.append("galaxy_ng.social.GalaxyNGOAuth2")
+        backends.append("dynaconf_merge")
+        data["AUTHENTICATION_BACKENDS"] = backends
+        data["DEFAULT_AUTHENTICATION_BACKENDS"] = backends
+        data["GALAXY_AUTHENTICATION_BACKENDS"] = backends
+
+        data['DEFAULT_AUTHENTICATION_CLASSES'] = [
+            "rest_framework.authentication.SessionAuthentication",
+            "rest_framework.authentication.TokenAuthentication",
+            "rest_framework.authentication.BasicAuthentication",
+        ]
+
+        data['GALAXY_AUTHENTICATION_CLASSES'] = [
+            "rest_framework.authentication.SessionAuthentication",
+            "rest_framework.authentication.TokenAuthentication",
+            "rest_framework.authentication.BasicAuthentication",
+        ]
+
+        data['REST_FRAMEWORK_AUTHENTICATION_CLASSES'] = [
+            "rest_framework.authentication.SessionAuthentication",
+            "rest_framework.authentication.TokenAuthentication",
+            "rest_framework.authentication.BasicAuthentication",
         ]
 
     return data
