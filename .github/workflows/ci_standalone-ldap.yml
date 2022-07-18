@@ -1,5 +1,5 @@
 ---
-name: Standalone
+name: Standalone LDAP
 on: 
   pull_request:
     branches:
@@ -38,6 +38,9 @@ jobs:
       - name: create the .compose.env file
         run: rm -f .compose.env; cp .compose.env.example .compose.env
 
+      - name: Enable the LDAP compose profile
+        run: sed -i.bak 's/COMPOSE_PROFILE=standalone/COMPOSE_PROFILE=standalone-ldap/' .compose.env
+
       - name: workaround github worker permissions issues
         run: sed -i.bak 's/PIP_EDITABLE_INSTALL=1/PIP_EDITABLE_INSTALL=0/' .compose.env
 
@@ -69,4 +72,4 @@ jobs:
         run: ./compose exec -T api ./entrypoint.sh manage set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y
 
       - name: run the integration tests
-        run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh
+        run: HUB_LOCAL=1 ./dev/standalone-ldap/RUN_INTEGRATION.sh

@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: "3.8"
 
+      - name: Update apt
+        run: sudo apt -y update
+
       - name: Install LDAP requirements
         run: sudo apt-get install -y libsasl2-dev python-dev libldap2-dev libssl-dev build-essential
 

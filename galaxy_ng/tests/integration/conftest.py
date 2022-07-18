@@ -25,6 +25,7 @@ qa: Mark tests to run in the vortex job.
 galaxyapi_smoke: Smoke tests for galaxy-api backend.
 standalone_only: Tests that should not run against the Insights version of Hub.
 cloud_only: Tests that should not run against the standalone version of Hub.
+community_only: Tests relevant to the community deployment profile.
 cli: Tests that shell out to the real ansible-galaxy cli.
 ui: Tests that navigate the UI via selenium.
 ui_standalone: UI tests that only work in standalone mode.
@@ -47,6 +48,7 @@ package: tests for the pip packaging
 api_ui: tests for the _ui v1 api
 importer: tests related checks in galaxy-importer
 pulp_api: tests related to the pulp api endpoints
+ldap: tests related to the ldap integration
 """
 
 
@@ -62,6 +64,11 @@ class AnsibleConfigFixture(dict):
     # The class is instantiated with a "profile" that sets
     # which type of user will be used in the test
     PROFILES = {
+        "anonymous_user": {
+            "username": None,
+            "password": None,
+            "token": None,
+        },
         "basic_user": {
             "username": "iqe_normal_user",
             "password": "redhat",
@@ -80,6 +87,11 @@ class AnsibleConfigFixture(dict):
         "admin": {  # this is a superuser
             "username": "notifications_admin",
             "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
+        },
+        "ldap": {  # this is a superuser in ldap profile
+            "username": "professor",
+            "password": "professor",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
         },
     }

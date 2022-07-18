@@ -93,13 +93,12 @@ class RHIdentityAuthentication(BaseAuthentication):
                 account_name=group.account_number()
             )
 
-            repository = self._ensure_repository(distro_name)
             self._get_or_create_synclist_distribution(distro_name, upstream_repository)
 
             default_synclist, _ = SyncList.objects.get_or_create(
                 name=distro_name,
                 defaults={
-                    "repository": repository,
+                    "repository": upstream_repository,
                     "upstream_repository": upstream_repository,
                     "policy": SYNCLIST_DEFAULT_POLICY,
                 },
@@ -109,13 +108,6 @@ class RHIdentityAuthentication(BaseAuthentication):
                                                'galaxy.delete_synclist', 'galaxy.change_synclist']}
             default_synclist.save()
         return default_synclist
-
-    @staticmethod
-    def _ensure_repository(name):
-        repository, created = AnsibleRepository.objects.get_or_create(name=name)
-        if created:
-            repository.save()
-        return repository
 
     @staticmethod
     def _ensure_user(username, group, **attrs):

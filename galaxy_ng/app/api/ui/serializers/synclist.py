@@ -39,10 +39,6 @@ class SyncListSerializer(serializers.ModelSerializer):
             raise ValidationError(errmsg.format(pulp_id=repository_id))
 
     def to_internal_value(self, data):
-        repository_data = data.get("repository", None)
-        if repository_data:
-            data["repository"] = self._get_repository(repository_data)
-
         upstream_repository_data = data.get("upstream_repository", None)
         if upstream_repository_data:
             data["upstream_repository"] = self._get_repository(upstream_repository_data)
@@ -52,21 +48,13 @@ class SyncListSerializer(serializers.ModelSerializer):
         return super().to_internal_value(data)
 
     @transaction.atomic
-    def _create_repository(self, name):
-        repository, created = AnsibleRepository.objects.get_or_create(name=name)
-        if created:
-            repository.save()
-        return repository
-
-    @transaction.atomic
     def create(self, validated_data):
         collections_data = validated_data.pop("collections")
         namespaces_data = validated_data.pop("namespaces")
-        repository = validated_data.pop("repository", None)
-        name = validated_data.get("name")
 
-        if not repository:
-            repository = self._create_repository(name)
+        # Match repository to upstream_repository
+        # TODO: remove after SyncList no longer has FK to repositories
+        repository = validated_data.pop("upstream_repository")
 
         try:
             instance = models.SyncList.objects.create(
