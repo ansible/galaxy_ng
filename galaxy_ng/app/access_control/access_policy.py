@@ -188,15 +188,6 @@ class UserAccessPolicy(AccessPolicyBase):
         user = view.get_object()
         return user.is_superuser
 
-    def can_update_user(self, request, view, action):
-        if getattr(self, "swagger_fake_view", False):
-            # If OpenAPI schema is requested, don't check for superuser
-            return False
-
-        user = view.get_object()
-
-        return user.is_superuser and not request.user.is_superuser
-
     def is_current_user(self, request, view, action):
         if getattr(self, "swagger_fake_view", False):
             # If OpenAPI schema is requested, don't check for current user

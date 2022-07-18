@@ -79,37 +79,53 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_is_superuser(self, data):
         request_user = self.context['request'].user
-        if request_user.is_superuser != data:
-            if not request_user.is_superuser:
-                raise ValidationError(detail={
-                    "is_superuser": _("Must be a super user to grant super user permissions.")
-                })
+
+        # If the user is not a super user
+        if not request_user.is_superuser:
+            if self.instance:
+                # Check if is_superuser is being modified, reject the request
+                if self.instance.is_superuser != data:
+                    raise ValidationError(detail={
+                        "is_superuser": _("Must be a super user to grant super user permissions.")
+                    })
+            else:
+                # if a new user is being created, reject the request if it is a super user
+                if data:
+                    raise ValidationError(detail={
+                        "is_superuser": _("Must be a super user to grant super user permissions.")
+                    })
 
         return data
 
-    def _set_password(self, instance, data):
+    def _set_password(self, instance, data, updating):
         # password doesn't get set the same as other data, so delete it
         # before the serializer saves
         password = data.pop('password', None)
         if password:
+            if updating:
+                user = self.context['request'].user
+                if not user.is_superuser and user.pk != instance.pk:
+                    raise ValidationError(detail={
+                        "password": _("Must be a super user to change another user's password.")
+                    })
+
             instance.set_password(password)
+
         return instance
 
     def create(self, data):
         instance = super().create(data)
-        instance = self._set_password(instance, data)
+        instance = self._set_password(instance, data, updating=False)
         instance.save()
         return instance
 
     def update(self, instance, data):
-        instance = self._set_password(instance, data)
-
-        user = self.context['request'].user
-
-        if not user.is_superuser and user.pk != instance.pk:
+        if instance.is_superuser and not self.context['request'].user.is_superuser:
             raise ValidationError(detail={
-                "password": _("Must be a super user to change another user's password.")
+                "username": _("You do not have permissions to modify super users.")
             })
+
+        instance = self._set_password(instance, data, updating=True)
 
         return super().update(instance, data)
 
