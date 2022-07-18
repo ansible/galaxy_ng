@@ -21,6 +21,7 @@ MIDDLEWARE = [
 
 INSTALLED_APPS = [
     'rest_framework.authtoken',
+    'social_django',
     'dynaconf_merge',
 ]
 
