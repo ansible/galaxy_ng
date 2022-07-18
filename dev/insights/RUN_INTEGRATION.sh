@@ -31,7 +31,7 @@ pip show epdb || pip install epdb
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
 
-pytest --capture=no --tb=short -m "not standalone_only" $@ -v galaxy_ng/tests/integration
+pytest --capture=no --tb=short -m "not standalone_only and not community_only" $@ -v galaxy_ng/tests/integration
 RC=$?
 
 exit $RC
