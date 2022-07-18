@@ -181,10 +181,14 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
     #    'galaxy_ng.social.GalaxyNGOAuth2'
     #]
 
+    print('CONFIGURING SOCIAL AUTH')
+
     data = {}
 
     SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
+    print(f'SOCIAL_AUTH_GITHUB_KEY: {SOCIAL_AUTH_GITHUB_KEY}')
     SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
+    print(f'SOCIAL_AUTH_GITHUB_SECRET: {SOCIAL_AUTH_GITHUB_SECRET}')
 
     if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
 

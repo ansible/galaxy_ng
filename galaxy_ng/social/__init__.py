@@ -49,12 +49,6 @@ def logged(func):
 # https://github.com/python-social-auth/social-core
 class GalaxyNGOAuth2(GithubOAuth2):
 
-    '''
-    @logged
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    '''
-
     @logged
     def get_session_state(self):
         param = self.name + '_state'
@@ -64,7 +58,6 @@ class GalaxyNGOAuth2(GithubOAuth2):
         return sstate
 
     @logged
-    #@handle_http_errors
     def do_auth(self, access_token, *args, **kwargs):
         """Finish the auth process once the access_token was retrieved"""
         data = self.get_github_user(access_token)
