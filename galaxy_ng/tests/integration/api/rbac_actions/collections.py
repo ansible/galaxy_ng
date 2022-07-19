@@ -9,10 +9,14 @@ from .utils import (
     ADMIN_USER,
     API_ROOT,
     NAMESPACE,
+    PASSWORD,
     cleanup_foo_collection,
     collection_namespace_exists,
+    create_user,
+    create_group_with_user_and_role,
     foo_collection_exists,
     foo_namespace_exists,
+    object_user_exists,
 )
 
 requirements_file = "collections:\n  - name: newswangerd.collection_demo\n    version: 1.0.11\n    source: https://galaxy.ansible.com"  # noqa: 501
@@ -58,6 +62,60 @@ def change_collection_namespace(user, password, expect_pass):
         assert response.status_code == 200
     else:
         assert response.status_code == 403
+
+
+def change_collection_namespace_object(role, expect_pass):
+    username = f'{NAMESPACE}_user_ns_object'
+    # remove user object if it exists
+    if object_user_exists(username):
+        user = object_user_exists(username)
+        requests.delete(
+            f"{API_ROOT}_ui/v1/users/{user['id']}/",
+            auth=ADMIN_CREDENTIALS,
+        )
+    # create clean user object
+    user = create_user(f'{NAMESPACE}_user_ns_object', PASSWORD)
+    group = create_group_with_user_and_role(user, role, group=f'{NAMESPACE}_group_ns_obj')
+    # remove namespace object if it exists
+    if collection_namespace_exists(f"{NAMESPACE}_col_ns_obj"):
+        response = collection_namespace_exists(f"{NAMESPACE}_col_ns_obj")
+        requests.delete(
+            f"{API_ROOT}_ui/v1/namespaces/{response['name']}/",
+            auth=ADMIN_CREDENTIALS,
+        )
+    # create clean namespace object
+    create_response = requests.post(
+        f"{API_ROOT}_ui/v1/namespaces/",
+        json={
+            "name": f"{NAMESPACE}_col_ns_obj",
+            "groups": [{
+                "id": group["id"],
+                "name": group["name"],
+                "object_roles": [role],
+            }],
+        },
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+    if 'errors' not in create_response.keys():
+        response = requests.post(
+            f"{API_ROOT}_ui/v1/namespaces/",
+            json={
+                "name": f"{create_response['name']}",
+                "groups": [create_response['groups']],
+                "description": "Updated description"
+            },
+            auth=(user['username'], PASSWORD),
+        )
+        if expect_pass:
+            assert response.status_code == 200
+        else:
+            assert response.status_code == 403
+    else:  # no permissions related to object
+        assert not expect_pass and create_response['errors'][0]['status'] == 400
+    # cleanup user, group, namespace
+    requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
+    requests.delete(f"{API_ROOT}_ui/v1/groups/{group['id']}/", auth=ADMIN_CREDENTIALS)
+    requests.delete(f"{API_ROOT}_ui/v1/namespaces/{NAMESPACE}_col_ns_obj/", auth=ADMIN_CREDENTIALS)
 
 
 def delete_collection_namespace(user, password, expect_pass):

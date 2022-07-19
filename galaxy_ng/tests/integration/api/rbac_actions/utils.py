@@ -23,24 +23,33 @@ def gen_string(size=10, chars=string.ascii_lowercase):
     return ''.join(random.choice(chars) for _ in range(size))
 
 
-def create_group_with_user_and_role(user, role):
+def create_group_with_user_and_role(user, role, content_object=None, group=None):
+    if not group:
+        group = f"{NAMESPACE}_group_{gen_string()}"
+    else:
+        if group_exists(group):
+            group_id = group_exists(group)['id']
+            requests.delete(
+                f"{API_ROOT}_ui/v1/groups/{group_id}/",
+                auth=ADMIN_CREDENTIALS,
+            )
     response = requests.post(
         API_ROOT + "_ui/v1/groups/",
-        json={"name": f"{NAMESPACE}_group_{gen_string()}"},
+        json={"name": group},
         auth=ADMIN_CREDENTIALS
     )
     group_id = response.json()["id"]
-    response = requests.post(
+    requests.post(
         f"{API_ROOT}_ui/v1/groups/{group_id}/users/",
         json={"username": user["username"]},
         auth=ADMIN_CREDENTIALS
     )
-    response = requests.post(
+    requests.post(
         f"{PULP_API_ROOT}groups/{group_id}/roles/",
-        json={"role": role, "content_object": None},
+        json={"role": role, "content_object": content_object},
         auth=ADMIN_CREDENTIALS
     )
-    return group_id
+    return response.json()
 
 
 def create_user(username, password):
@@ -161,9 +170,9 @@ def role_exists():
         return False
 
 
-def group_exists():
+def group_exists(group_name='rbac_roles_test_group'):
     response = requests.get(
-        f'{API_ROOT}_ui/v1/groups?name=rbac_roles_test_group',
+        f'{API_ROOT}_ui/v1/groups?name={group_name}',
         auth=ADMIN_CREDENTIALS
     )
     if response.json()['meta']['count'] == 1:
@@ -172,9 +181,9 @@ def group_exists():
         return False
 
 
-def collection_namespace_exists():
+def collection_namespace_exists(ns_name='rbac_roles_test_col_ns'):
     response = requests.get(
-        f'{API_ROOT}_ui/v1/namespaces?name=rbac_roles_test_col_ns',
+        f'{API_ROOT}_ui/v1/namespaces?name={ns_name}',
         auth=ADMIN_CREDENTIALS
     )
     if response.json()['meta']['count'] == 1:
@@ -204,3 +213,11 @@ def exec_env_exists():
         False
     )
     return remote
+
+
+def object_user_exists(username):
+    users = requests.get(f"{API_ROOT}_ui/v1/users/", auth=ADMIN_CREDENTIALS).json()['data']
+    for u in users:
+        if u['username'] == username:
+            return u
+    return False

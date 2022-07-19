@@ -27,7 +27,7 @@ from .rbac_actions.auth import (
 from .rbac_actions.misc import view_tasks
 from .rbac_actions.collections import (
     create_collection_namespace,
-    # create_collection_namespace_object,
+    change_collection_namespace_object,
     change_collection_namespace,
     delete_collection_namespace,
     upload_collection_to_namespace,
@@ -104,19 +104,19 @@ GLOBAL_ACTIONS = [
     index_exec_env,
     delete_exec_env,
 ]
-# OBJECT_ACTIONS = [
-#     create_collection_namespace_object,
-#     upload_collection_to_namespace_object,
-#     deprecate_collections_object,
-#     undeprecate_collections_object,
-#     change_exec_env_desc_object,
-#     change_exec_env_readme_object,
-#     create_containers_under_existing_container_namespace_object,
-#     push_containers_to_existing_container_namespace_object,
-#     change_container_namespace_object,
-#     tag_untag_container_namespace_object,
-#     sync_remote_container_object,
-# ]
+OBJECT_ACTIONS = [
+    change_collection_namespace_object,
+    # upload_collection_to_namespace_object,
+    # deprecate_collections_object,
+    # undeprecate_collections_object,
+    # change_exec_env_desc_object,
+    # change_exec_env_readme_object,
+    # create_containers_under_existing_container_namespace_object,
+    # push_containers_to_existing_container_namespace_object,
+    # change_container_namespace_object,
+    # tag_untag_container_namespace_object,
+    # sync_remote_container_object,
+]
 
 ROLES_TO_TEST = {
     "galaxy.content_admin": {
@@ -156,7 +156,7 @@ ROLES_TO_TEST = {
         view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        # upload_collection_to_namespace,
+        # upload_collection_to_namespace,  # non-admin users 403 100% of time
         delete_collection,
         delete_collection_namespace,
         configure_collection_sync,
@@ -173,7 +173,7 @@ ROLES_TO_TEST = {
         view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        # upload_collection_to_namespace,
+        # upload_collection_to_namespace,  # non-admin users 403 100% of time
         # deprecate_collections,
         # undeprecate_collections,
     },
@@ -192,9 +192,8 @@ ROLES_TO_TEST = {
         view_sync_configuration,
         view_tasks,
         change_collection_namespace,  # should only be object permissions
-        # create_collection_namespace_object,
-        # change_collection_namespace_object,
-        # upload_collection_to_namespace_object,
+        change_collection_namespace_object,
+        # upload_collection_to_namespace_object,  # non-admin users 403 100% of time
         # deprecate_collections_object,
         # undeprecate_collections_object,
     },
@@ -288,7 +287,8 @@ def test_role_actions(role):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
     user = create_user(USERNAME, PASSWORD)
-    group_id = create_group_with_user_and_role(user, role)
+    group = create_group_with_user_and_role(user, role)
+    group_id = group['id']
 
     expected_allows = ROLES_TO_TEST[role]
 
@@ -306,12 +306,15 @@ def test_role_actions(role):
     requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
     requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
 
-    assert failures == []
-
     # Test object actions
-    # for action in OBJECT_ACTIONS:
-    #     expect_pass = action in expected_allows
-    #     action(user, PASSWORD, expect_pass)
+    for action in OBJECT_ACTIONS:
+        expect_pass = action in expected_allows
+        try:
+            action(role, expect_pass)
+        except AssertionError:
+            failures.append(action.__name__)
+
+    assert failures == []
 
 
 @pytest.mark.role_rbac
