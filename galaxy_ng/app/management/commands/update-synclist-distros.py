@@ -26,7 +26,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             synclist_distros = AnsibleDistribution.objects.filter(base_path__endswith="-synclist")
             for distro in synclist_distros:
-                if distro.repository.pk != published_repo.pk:
+                if not distro.repository or distro.repository.pk != published_repo.pk:
                     distro.repository = published_repo
                     distro.save()
                     log.info("distro edited: %s", distro.name)
