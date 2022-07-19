@@ -68,8 +68,9 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
     @logged
     def get_github_access_token(self, code):
+        baseurl = settings.SOCIAL_AUTH_GITHUB_BASE_URL
         rr = requests.post(
-            'https://github.com/login/oauth/access_token',
+            f'{baseurl}/login/oauth/access_token',
             headers={'Accept': 'application/json'},
             json={
                 'code': code,
@@ -84,8 +85,9 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
     @logged
     def get_github_user(self, access_token):
+        api_url = settings.SOCIAL_AUTH_GITHUB_API_URL
         rr = requests.post(
-            'https://api.github.com/user',
+            f'{api_url}/user',
             headers={
                 'Accept': 'application/json',
                 'Authorization': f'token {access_token}'
