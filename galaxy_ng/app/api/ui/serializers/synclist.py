@@ -133,6 +133,7 @@ class SyncListSerializer(serializers.ModelSerializer):
             "policy",
             "upstream_repository",
             "repository",
+            "distribution",
             "collections",
             "namespaces",
             "groups",
