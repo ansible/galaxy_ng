@@ -42,24 +42,26 @@ class Command(BaseCommand):
         synclist_repos = AnsibleRepository.objects.filter(name__endswith="-synclist")
 
         if options["hard"]:
-            log.info("Peforming hard delete")
+            log.info("Peforming delete of all repos")
             for repo in synclist_repos[:number_to_delete]:
+                log.info(f"Deleting repo: {repo}")
                 with transaction.atomic():
                     set_synclist_distro_by_name(repo.name)
                     repo.delete()
 
         else:
-            log.info("Peforming delete, skipping some synclist repos")
+            log.info("Peforming delete, will skip repo if does not find expected distro")
             for repo in synclist_repos[:number_to_delete]:
+                log.info(f"Deleting repo: {repo}")
                 with transaction.atomic():
                     if not AnsibleDistribution.objects.filter(name=repo.name):
-                        print(
+                        log.error(
                             f"No distribution found matching the repo name '{repo.name}', skipping"
                         )
                         continue
                     distro = AnsibleDistribution.objects.filter(name=repo.name).first()
                     if distro.repository.name != "published":
-                        print(
+                        log.error(
                             f"Distribution '{repo.name}' does not point at 'pubished' repo "
                             f"but points at {distro.repository.name}, skipping"
                         )
