@@ -41,14 +41,11 @@ GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH = "staging"
 GALAXY_API_REJECTED_DISTRIBUTION_BASE_PATH = "rejected"
 
 # The format for the name of the per account synclist, and the
-# associated repository, distribution, and distribution base_paths
+# associated distribution name, and distribution base_path
 GALAXY_API_SYNCLIST_NAME_FORMAT = "{account_name}-synclist"
 
 # Require approval for incoming content, which uses a staging repository
 GALAXY_REQUIRE_CONTENT_APPROVAL = True
-
-# Number of synclist to be processed in single task
-SYNCLIST_BATCH_SIZE = 200
 
 # Local rest framework settings
 # -----------------------------
