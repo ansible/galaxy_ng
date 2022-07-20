@@ -27,7 +27,7 @@ from .rbac_actions.auth import (
 from .rbac_actions.misc import view_tasks
 from .rbac_actions.collections import (
     create_collection_namespace,
-    change_collection_namespace_object,
+    change_collection_namespace_object,  # non-admin users 403 100% of time
     change_collection_namespace,
     delete_collection_namespace,
     upload_collection_to_namespace,
@@ -50,7 +50,7 @@ from .rbac_actions.exec_env import (
     # change_exec_env_desc_object,
     change_exec_env_readme,
     # change_exec_env_readme_object,
-    # create_containers_under_existing_container_namespace,
+    create_containers_under_existing_container_namespace,
     # create_containers_under_existing_container_namespace_object,
     # push_containers_to_existing_container_namespace,
     # push_containers_to_existing_container_namespace_object,
@@ -58,7 +58,7 @@ from .rbac_actions.exec_env import (
     # change_container_namespace_object,
     # tag_untag_container_namespace,
     # tag_untag_container_namespace_object,
-    # sync_remote_container,
+    sync_remote_container,
     # sync_remote_container_object,
     create_container_registry_remote,
     change_container_registry_remote,
@@ -69,6 +69,7 @@ from .rbac_actions.exec_env import (
 
 log = logging.getLogger(__name__)
 
+# Order is important, CRU before D actions
 GLOBAL_ACTIONS = [
     add_groups,
     view_groups,
@@ -86,7 +87,6 @@ GLOBAL_ACTIONS = [
     create_collection_namespace,
     change_collection_namespace,
     upload_collection_to_namespace,  # non-admin users 403 100% of time
-    delete_collection_namespace,
     configure_collection_sync,
     launch_collection_sync,
     view_sync_configuration,
@@ -94,15 +94,18 @@ GLOBAL_ACTIONS = [
     reject_collections,
     deprecate_collections,  # non-admin users 403 100% of time
     undeprecate_collections,  # non-admin users 403 100% of time
+    delete_collection_namespace,
     delete_collection,
     create_container_registry_remote,
     change_container_registry_remote,
-    delete_container_registry_remote,
     create_exec_env,
+    sync_remote_container,
     change_exec_env_desc,
     change_exec_env_readme,
     index_exec_env,
     delete_exec_env,
+    delete_container_registry_remote,
+    create_containers_under_existing_container_namespace,
 ]
 OBJECT_ACTIONS = [
     change_collection_namespace_object,
@@ -124,7 +127,7 @@ ROLES_TO_TEST = {
         view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        # upload_collection_to_namespace,  # non-admin users 403 100% of time
+        upload_collection_to_namespace,  # non-admin users 403 100% of time
         reject_collections,
         approve_collections,
         delete_collection,
@@ -132,8 +135,8 @@ ROLES_TO_TEST = {
         configure_collection_sync,
         view_sync_configuration,
         launch_collection_sync,
-        # deprecate_collections,  # non-admin users 403 100% of time
-        # undeprecate_collections,  # non-admin users 403 100% of time
+        deprecate_collections,  # non-admin users 403 100% of time
+        undeprecate_collections,  # non-admin users 403 100% of time
         create_exec_env,
         delete_exec_env,
         change_exec_env_desc,
@@ -142,12 +145,12 @@ ROLES_TO_TEST = {
         change_container_registry_remote,
         delete_container_registry_remote,
         index_exec_env,
-        # create_containers_under_existing_container_namespace,
+        create_containers_under_existing_container_namespace,
         # push_containers_to_existing_container_namespace,
         # change_container_namespace,
         # change_container_namespace_object,
         # tag_untag_container_namespace,
-        # sync_remote_container,
+        sync_remote_container,
         # create_remote_container,
     },
     "galaxy.collection_admin": {
@@ -156,7 +159,7 @@ ROLES_TO_TEST = {
         view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        # upload_collection_to_namespace,  # non-admin users 403 100% of time
+        upload_collection_to_namespace,  # non-admin users 403 100% of time
         delete_collection,
         delete_collection_namespace,
         configure_collection_sync,
@@ -164,8 +167,8 @@ ROLES_TO_TEST = {
         launch_collection_sync,
         approve_collections,
         reject_collections,
-        # deprecate_collections,
-        # undeprecate_collections,
+        deprecate_collections,
+        undeprecate_collections,
     },
     "galaxy.collection_publisher": {
         view_groups,
@@ -173,7 +176,7 @@ ROLES_TO_TEST = {
         view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        # upload_collection_to_namespace,  # non-admin users 403 100% of time
+        upload_collection_to_namespace,  # non-admin users 403 100% of time
         # deprecate_collections,
         # undeprecate_collections,
     },
@@ -192,8 +195,8 @@ ROLES_TO_TEST = {
         view_sync_configuration,
         view_tasks,
         change_collection_namespace,  # should only be object permissions
-        change_collection_namespace_object,
-        # upload_collection_to_namespace_object,  # non-admin users 403 100% of time
+        change_collection_namespace_object,  # non-admin users 403 100% of time
+        # upload_collection_to_namespace_object,
         # deprecate_collections_object,
         # undeprecate_collections_object,
     },
@@ -205,11 +208,11 @@ ROLES_TO_TEST = {
         change_exec_env_desc,
         change_exec_env_readme,
         delete_exec_env,
-        # create_containers_under_existing_container_namespace,
+        create_containers_under_existing_container_namespace,
         # push_containers_to_existing_container_namespace,
         # change_container_namespace,
         # tag_untag_container_namespace,
-        # sync_remote_container,
+        sync_remote_container,
         create_container_registry_remote,
         change_container_registry_remote,
         delete_container_registry_remote,
@@ -222,11 +225,11 @@ ROLES_TO_TEST = {
         view_tasks,
         change_exec_env_desc,
         change_exec_env_readme,
-        # create_containers_under_existing_container_namespace,
+        create_containers_under_existing_container_namespace,
         # push_containers_to_existing_container_namespace,
         # change_container_namespace,
         # tag_untag_container_namespace,
-        # sync_remote_container,
+        sync_remote_container,
         create_exec_env,
     },
     "galaxy.execution_environment_namespace_owner": {
@@ -255,15 +258,14 @@ ROLES_TO_TEST = {
         # tag_untag_container_namespace_object,
         # sync_remote_container_object,
     },
-    # # https://issues.redhat.com/browse/AAH-1730
-    # "galaxy.group_admin": {
-    #     view_sync_configuration,
-    #     view_tasks,
-    #     view_groups,
-    #     add_groups,
-    #     change_groups,
-    #     delete_groups,
-    # },
+    "galaxy.group_admin": {
+        view_sync_configuration,
+        view_tasks,
+        view_groups,
+        add_groups,
+        change_groups,
+        delete_groups,
+    },
     "galaxy.user_admin": {
         view_sync_configuration,
         view_groups,

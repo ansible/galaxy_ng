@@ -5,6 +5,7 @@ include integration_requirements.txt
 include unittest_requirements.txt
 include pyproject.toml
 include requirements/requirements.common.txt
+include galaxy_ng/tests/integration/api/rbac_actions/foo-bar-1.0.0.tar.gz
 graft galaxy_ng/app/webserver_snippets
 graft galaxy_ng/app/static
 graft galaxy_ng/locale
