@@ -94,6 +94,16 @@ class AnsibleConfigFixture(dict):
             "password": "professor",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
         },
+        "github_user_1": {
+            "username": "gh01",
+            "password": "redhat",
+            "token": None,
+        },
+        "github_user_2": {
+            "username": "gh02",
+            "password": "redhat",
+            "token": None,
+        },
     }
 
     def __init__(self, profile, namespace=None):
@@ -146,6 +156,18 @@ class AnsibleConfigFixture(dict):
 
             # cloud ...
             # return True
+
+        elif key == 'github_url':
+            return os.environ.get(
+                'SOCIAL_AUTH_GITHUB_BASE_URL',
+                'http://localhost:8082'
+            )
+
+        elif key == 'github_api_url':
+            return os.environ.get(
+                'SOCIAL_AUTH_GITHUB_API_URL',
+                'http://localhost:8082'
+            )
 
         else:
             raise Exception(f'Uknown config key: {self.namespace}.{key}')

@@ -188,6 +188,30 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
     return request
 
 
+def get_social_client(config):
+    rs = requests.Session()
+
+    base_url = os.environ.get('SOCIAL_AUTH_GITHUB_BASE_URL', 'http://localhost:8082')
+    base_api_url = os.environ.get('SOCIAL_AUTH_GITHUB_API_URL', 'http://localhost:8082')
+
+    # get the initial github login csrftoken
+    rr1 = rs.get(f'{base_url}/login/oauth/authorize')
+    csrftoken = rr1.cookies['csrftoken']
+
+    # post the user+pass
+    rr2 = rs.post(
+        f'{base_url}/login/oauth/authorize',
+        cookies={'csrftoken': csrftoken},
+        json={'username': 'gh01', 'password': 'redhat'}
+    )
+
+    # extract new csrftoken
+    csrftoken = rr2.cookies['csrftoken']
+
+    # extract sessionid
+    sessionid = rr2.cookies['sessionid']
+
+
 def upload_artifact(
     config, client, artifact, hash=True, no_filename=False, no_file=False, use_distribution=True
 ):
@@ -760,4 +784,92 @@ class UIClient:
 
         # get the response
         resp = self._rs.delete(self.baseurl + relative_url, headers=pheaders)
+        return resp
+
+
+class SocialGithubClient:
+
+    """ An HTTP client to mimic github social auth"""
+
+    _rs = None
+    sessionid = None
+    csrftoken = None
+
+    def __init__(self, username=None, password=None, baseurl=None, authurl=None, config=None, github_url=None, github_api_url=None):
+        self.username = username
+        self.password = password
+        self.baseurl = baseurl
+        self.authurl = authurl
+        self.github_url = github_url
+        self.github_api_url = github_api_url
+        self.config = config
+
+        # default to config settings ...
+        if self.config is not None and not self.username:
+            self.username = self.config.get('username')
+        if self.config is not None and not self.password:
+            self.password = self.config.get('password')
+        if self.config is not None and not self.baseurl:
+            self.baseurl = self.config.get('url')
+        if self.config is not None and not self.authurl:
+            self.authurl = self.config.get('auth_url')
+        if self.config is not None and not self.github_url:
+            self.github_url = self.config.get('github_url')
+        if self.config is not None and not self.github_api_url:
+            self.github_api_url = self.config.get('github_api_url')
+
+    @property
+    def cookies(self):
+        return dict(self._rs.cookies)
+
+    def __enter__(self):
+        self.login()
+        return self
+
+    def __exit__(self, a, b, c):
+        self.logout()
+
+    def login(self):
+        self._rs = requests.Session()
+
+        # get the initial github login csrftoken
+        rr1 = self._rs.get(f'{self.github_url}/login/oauth/authorize')
+        csrftoken = rr1.cookies['csrftoken']
+
+        # post the user+pass
+        rr2 = self._rs.post(
+            f'{self.github_url}/login/oauth/authorize',
+            cookies={'csrftoken': csrftoken},
+            json={'username': self.username, 'password': self.password}
+        )
+
+        # extract new csrftoken
+        self.csrftoken = rr2.cookies['csrftoken']
+
+        # extract sessionid
+        self.sessionid = rr2.cookies['sessionid']
+
+
+    def logout(self, expected_code=None):
+
+        if self._rs is None:
+            raise Exception('client is not authenticated')
+
+    def get(self, relative_url: str = None, absolute_url: str = None) -> requests.models.Response:
+
+        pheaders = {
+            'Accept': 'application/json',
+            'X-CSRFToken': self.csrftoken,
+            'Cookie': f'csrftoken={self.csrftoken}; sessionid={self.sessionid}'
+        }
+
+        this_url = None
+        if absolute_url:
+            uri = urlparse(self.baseurl)
+            this_url = f"{uri.scheme}://{uri.netloc}{absolute_url}"
+        else:
+            this_url = self.baseurl + relative_url
+
+        # get the response
+        resp = self._rs.get(this_url, headers=pheaders)
         return resp

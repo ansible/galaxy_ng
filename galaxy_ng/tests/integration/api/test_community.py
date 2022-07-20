@@ -6,6 +6,7 @@ import pytest
 
 from ..utils import (
     get_client,
+    SocialGithubClient
 )
 
 from jsonschema import validate as validate_json
@@ -60,6 +61,17 @@ def test_me_anonymous(ansible_config):
 
 
 @pytest.mark.community_only
+def test_me_social(ansible_config):
+    """ Tests a social authed user can see their user info """
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('_ui/v1/me/')
+        uinfo = resp.json()
+        assert uinfo['username'] == cfg.get('username')
+
+
+@pytest.mark.community_only
 def test_list_collections_anonymous(ansible_config):
     """Tests whether collections can be browsed anonymously"""
 
@@ -72,3 +84,13 @@ def test_list_collections_anonymous(ansible_config):
 
     resp = api_client('/api/v3/collections/', method='GET')
     validate_json(instance=resp, schema=schema_objectlist)
+
+
+@pytest.mark.community_only
+def test_list_collections_social(ansible_config):
+    """ Tests a social authed user can see collections """
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('v3/collections/')
+        validate_json(instance=resp.json(), schema=schema_objectlist)

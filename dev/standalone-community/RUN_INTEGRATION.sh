@@ -20,6 +20,10 @@ pip show epdb || pip install epdb
 echo "Setting up test data"
 docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
+# social logins will happen against the github mock
+export SOCIAL_AUTH_GITHUB_BASE_URL='http://localhost:8082'
+export SOCIAL_AUTH_GITHUB_API_URL='http://localhost:8082'
+
 export HUB_API_ROOT='http://localhost:5001/api/'
 pytest --capture=no -m "community_only" $@ -v galaxy_ng/tests/integration
 RC=$?

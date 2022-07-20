@@ -185,6 +185,11 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
 
     data = {}
 
+    SOCIAL_AUTH_GITHUB_BASE_URL = settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://github.com')
+    print(f'SOCIAL_AUTH_GITHUB_BASE_URL: {SOCIAL_AUTH_GITHUB_BASE_URL}')
+    SOCIAL_AUTH_GITHUB_API_URL = settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://api.github.com')
+    print(f'SOCIAL_AUTH_GITHUB_API_URL: {SOCIAL_AUTH_GITHUB_API_URL}')
+
     SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
     print(f'SOCIAL_AUTH_GITHUB_KEY: {SOCIAL_AUTH_GITHUB_KEY}')
     SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
