@@ -181,19 +181,19 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
     #    'galaxy_ng.social.GalaxyNGOAuth2'
     #]
 
-    print('CONFIGURING SOCIAL AUTH')
+    # print('CONFIGURING SOCIAL AUTH')
 
     data = {}
 
     SOCIAL_AUTH_GITHUB_BASE_URL = settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://github.com')
-    print(f'SOCIAL_AUTH_GITHUB_BASE_URL: {SOCIAL_AUTH_GITHUB_BASE_URL}')
+    # print(f'SOCIAL_AUTH_GITHUB_BASE_URL: {SOCIAL_AUTH_GITHUB_BASE_URL}')
     SOCIAL_AUTH_GITHUB_API_URL = settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://api.github.com')
-    print(f'SOCIAL_AUTH_GITHUB_API_URL: {SOCIAL_AUTH_GITHUB_API_URL}')
+    # print(f'SOCIAL_AUTH_GITHUB_API_URL: {SOCIAL_AUTH_GITHUB_API_URL}')
 
     SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
-    print(f'SOCIAL_AUTH_GITHUB_KEY: {SOCIAL_AUTH_GITHUB_KEY}')
+    # print(f'SOCIAL_AUTH_GITHUB_KEY: {SOCIAL_AUTH_GITHUB_KEY}')
     SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
-    print(f'SOCIAL_AUTH_GITHUB_SECRET: {SOCIAL_AUTH_GITHUB_SECRET}')
+    # print(f'SOCIAL_AUTH_GITHUB_SECRET: {SOCIAL_AUTH_GITHUB_SECRET}')
 
     if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
 
