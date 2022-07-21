@@ -1,39 +1,12 @@
-from django.db import transaction
-#from users.models import User
-from django.contrib.auth import get_user_model
-
-
-from django.contrib.sessions.models import Session
-from social_core.backends.github import GithubOAuth2
-from social_core.exceptions import (
-    AuthCanceled,
-    AuthFailed,
-    AuthMissingParameter,
-    AuthStateForbidden,
-    AuthStateMissing,
-    AuthTokenError,
-    AuthUnknownError
-)
-
-from urllib.parse import urlencode
-
-from rest_framework import status, serializers
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
-from django.urls import reverse
+# from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.shortcuts import redirect
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import exceptions as rest_exceptions
-
-from django.core.exceptions import ValidationError
+from social_core.backends.github import GithubOAuth2
 
 import requests
 
 
-User = get_user_model()
+# User = get_user_model()
 
 
 def logged(func):

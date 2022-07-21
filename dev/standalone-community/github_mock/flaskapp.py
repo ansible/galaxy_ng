@@ -10,16 +10,11 @@
 ###############################################################################
 
 
-import base64
 import copy
-import json
 import os
 import uuid
 import requests
-import tempfile
-from pprint import pprint
 
-import flask
 from flask import Flask
 from flask import jsonify
 from flask import request
@@ -80,7 +75,7 @@ def do_authorization():
     The client is directed here first.
     """
 
-    # The client should do a GET first to grab the 
+    # The client should do a GET first to grab the
     # initial CSRFToken.
     if request.method == 'GET':
         resp = jsonify({})
@@ -136,8 +131,8 @@ def do_authorization():
 def do_access_token():
     ds = request.json
     access_code = ds['code']
-    client_id = ds['client_id']
-    client_secret = ds['client_secret']
+    # client_id = ds['client_id']
+    # client_secret = ds['client_secret']
 
     # Match the acces_code to the username and invalidate it
     username = ACCESS_TOKENS[access_code]

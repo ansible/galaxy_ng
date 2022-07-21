@@ -165,6 +165,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
 
     return data
 
+
 def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
     """Configure social auth settings for galaxy.
 
@@ -173,8 +174,10 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
 
     data = {}
 
-    SOCIAL_AUTH_GITHUB_BASE_URL = settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://github.com')
-    SOCIAL_AUTH_GITHUB_API_URL = settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://api.github.com')
+    # SOCIAL_AUTH_GITHUB_BASE_URL = \
+    #   settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://github.com')
+    # SOCIAL_AUTH_GITHUB_API_URL = \
+    #   settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://api.github.com')
 
     SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
     SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)

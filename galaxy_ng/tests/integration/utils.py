@@ -188,11 +188,12 @@ def get_client(config, require_auth=True, request_token=True, headers=None):
     return request
 
 
+"""
 def get_social_client(config):
     rs = requests.Session()
 
     base_url = os.environ.get('SOCIAL_AUTH_GITHUB_BASE_URL', 'http://localhost:8082')
-    base_api_url = os.environ.get('SOCIAL_AUTH_GITHUB_API_URL', 'http://localhost:8082')
+    # base_api_url = os.environ.get('SOCIAL_AUTH_GITHUB_API_URL', 'http://localhost:8082')
 
     # get the initial github login csrftoken
     rr1 = rs.get(f'{base_url}/login/oauth/authorize')
@@ -210,6 +211,7 @@ def get_social_client(config):
 
     # extract sessionid
     sessionid = rr2.cookies['sessionid']
+"""
 
 
 def upload_artifact(
@@ -795,7 +797,16 @@ class SocialGithubClient:
     sessionid = None
     csrftoken = None
 
-    def __init__(self, username=None, password=None, baseurl=None, authurl=None, config=None, github_url=None, github_api_url=None):
+    def __init__(
+        self,
+        username=None,
+        password=None,
+        baseurl=None,
+        authurl=None,
+        config=None,
+        github_url=None,
+        github_api_url=None
+    ):
         self.username = username
         self.password = password
         self.baseurl = baseurl
@@ -848,7 +859,6 @@ class SocialGithubClient:
 
         # extract sessionid
         self.sessionid = rr2.cookies['sessionid']
-
 
     def logout(self, expected_code=None):
 
