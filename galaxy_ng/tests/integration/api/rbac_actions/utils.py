@@ -1,7 +1,9 @@
+import os
 import random
 import requests
 import string
 import time
+from subprocess import Popen, PIPE, STDOUT
 from urllib.parse import urljoin
 
 from ansible.galaxy.api import GalaxyError
@@ -13,10 +15,26 @@ API_ROOT = "http://localhost:5001/api/automation-hub/"
 PULP_API_ROOT = "http://localhost:5001/api/automation-hub/pulp/api/v3/"
 ADMIN_USER = {'username': 'admin'}
 ADMIN_PASSWORD = "admin"
+TLS_VERIFY = "--tls-verify=false"
+IMAGE_NAME = "ubi9-minimal"
 
 
 class TaskWaitingTimeout(Exception):
     pass
+
+
+class InvalidResponse(Exception):
+    pass
+
+
+def assert_pass(expect_pass, code, pass_status, deny_status):
+    if code not in (pass_status, deny_status):
+        raise InvalidResponse(f'Invalid response status code: {code}')
+
+    if expect_pass:
+        assert code == pass_status
+    else:
+        assert code == deny_status
 
 
 def gen_string(size=10, chars=string.ascii_lowercase):
@@ -221,3 +239,45 @@ def object_user_exists(username):
         if u['username'] == username:
             return u
     return False
+
+
+def podman_login(user, password):
+    cmd = [
+        "podman",
+        "login",
+        "--username",
+        f"{user['username']}",
+        "--password",
+        f"{password}",
+        "localhost:5001",
+        TLS_VERIFY
+    ]
+    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
+    return proc.wait()
+
+
+def podman_build_and_tag(tag):
+    cmd = [
+        "podman",
+        "image",
+        "build",
+        "-t",
+        f"localhost:5001/{IMAGE_NAME}:{tag}",
+        f"{os.path.dirname(__file__)}/",
+        TLS_VERIFY
+    ]
+    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
+    return proc.wait()
+
+
+def podman_push(user):
+    cmd = [
+        "podman",
+        "image",
+        "push",
+        f"localhost:5001/{IMAGE_NAME}:{user['username']}",
+        "--remove-signatures",
+        TLS_VERIFY
+    ]
+    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
+    return proc.wait()

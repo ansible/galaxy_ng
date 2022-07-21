@@ -1,5 +1,5 @@
 import requests
-from .utils import PULP_API_ROOT
+from .utils import PULP_API_ROOT, assert_pass
 
 
 # Tasks
@@ -8,7 +8,4 @@ def view_tasks(user, password, expect_pass):
         f"{PULP_API_ROOT}tasks/",
         auth=(user['username'], password)
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)

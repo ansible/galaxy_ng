@@ -6,6 +6,7 @@ from .utils import (
     API_ROOT,
     NAMESPACE,
     PULP_API_ROOT,
+    assert_pass,
     group_exists,
     role_exists,
     user_exists
@@ -18,10 +19,7 @@ def view_groups(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/groups/",
         auth=(user['username'], password)
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def delete_groups(user, password, expect_pass):
@@ -36,14 +34,7 @@ def delete_groups(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/groups/{group_id}/",
         auth=(user['username'], password)
     )
-    if expect_pass:
-        assert response.status_code == 204
-    else:
-        assert response.status_code == 403
-        response = requests.delete(
-            f"{API_ROOT}_ui/v1/groups/{group_id}/",
-            auth=ADMIN_CREDENTIALS
-        )
+    assert_pass(expect_pass, response.status_code, 204, 403)
 
 
 def add_groups(user, password, expect_pass):
@@ -58,10 +49,7 @@ def add_groups(user, password, expect_pass):
         json={"name": f"{NAMESPACE}_group"},
         auth=(user["username"], password)
     )
-    if expect_pass:
-        assert response.status_code == 201
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 201, 403)
     return response.json()
 
 
@@ -77,14 +65,7 @@ def change_groups(user, password, expect_pass):
         json={"name": f"{NAMESPACE}_group_2"},
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
-    response = requests.delete(
-        f"{API_ROOT}_ui/v1/groups/{group_id}/",
-        auth=ADMIN_CREDENTIALS
-    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 # Users
@@ -93,10 +74,7 @@ def view_users(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/users/",
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def add_users(user, password, expect_pass):
@@ -119,10 +97,7 @@ def add_users(user, password, expect_pass):
         },
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 201
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 201, 403)
     return response.json()
 
 
@@ -146,15 +121,7 @@ def change_users(user, password, expect_pass):
         },
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
-    # Cleanup
-    response = requests.delete(
-        f"{API_ROOT}_ui/v1/users/{user_id}/",
-        auth=(user["username"], password),
-    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def delete_users(user, password, expect_pass):
@@ -168,10 +135,7 @@ def delete_users(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/users/{user_id}/",
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 204
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 204, 403)
 
 
 def add_role(user, password, expect_pass):
@@ -195,10 +159,7 @@ def add_role(user, password, expect_pass):
         },
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 201
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 201, 403)
     return response.json()
 
 
@@ -207,10 +168,7 @@ def view_role(user, password, expect_pass):
         f'{PULP_API_ROOT}roles/',
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def delete_role(user, password, expect_pass):
@@ -224,10 +182,7 @@ def delete_role(user, password, expect_pass):
         f'{PULP_API_ROOT}roles/{role_id}/',
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 204
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 204, 403)
 
 
 def change_role(user, password, expect_pass):
@@ -249,7 +204,4 @@ def change_role(user, password, expect_pass):
         },
         auth=(user["username"], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)

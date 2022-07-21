@@ -2,6 +2,7 @@ import os
 import requests
 from datetime import datetime
 from subprocess import Popen, PIPE, STDOUT
+from time import sleep
 
 from .utils import (
     ADMIN_CREDENTIALS,
@@ -10,6 +11,7 @@ from .utils import (
     API_ROOT,
     NAMESPACE,
     PASSWORD,
+    assert_pass,
     cleanup_foo_collection,
     collection_namespace_exists,
     create_user,
@@ -37,11 +39,7 @@ def create_collection_namespace(user, password, expect_pass):
         },
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 201
-    else:
-        assert response.status_code == 403
-    return response.json()
+    assert_pass(expect_pass, response.status_code, 201, 403)
 
 
 def change_collection_namespace(user, password, expect_pass):
@@ -49,6 +47,8 @@ def change_collection_namespace(user, password, expect_pass):
         ns_response = collection_namespace_exists()
     else:
         ns_response = create_collection_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
+        while not collection_namespace_exists():
+            sleep(5)
     response = requests.put(
         f"{API_ROOT}_ui/v1/namespaces/{ns_response['name']}/",
         json={
@@ -58,10 +58,7 @@ def change_collection_namespace(user, password, expect_pass):
         },
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def change_collection_namespace_object(role, expect_pass):
@@ -128,10 +125,7 @@ def delete_collection_namespace(user, password, expect_pass):
         f"{API_ROOT}_ui/v1/namespaces/{namespace_name}/",
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 204
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 204, 403)
 
 
 def upload_collection_to_namespace(user, password, expect_pass):
@@ -175,10 +169,7 @@ def delete_collection(user, password, expect_pass):
         f"{API_ROOT}v3/plugin/ansible/content/staging/collections/index/foo/bar/",
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 202
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 202, 403)
 
 
 def configure_collection_sync(user, password, expect_pass):
@@ -206,10 +197,7 @@ def configure_collection_sync(user, password, expect_pass):
         },
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def launch_collection_sync(user, password, expect_pass):
@@ -218,10 +206,7 @@ def launch_collection_sync(user, password, expect_pass):
         f"{API_ROOT}content/community/v3/sync/",
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def view_sync_configuration(user, password, expect_pass):
@@ -229,10 +214,7 @@ def view_sync_configuration(user, password, expect_pass):
         f"{API_ROOT}content/community/v3/sync/config/",
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 200
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def approve_collections(user, password, expect_pass):
@@ -244,10 +226,7 @@ def approve_collections(user, password, expect_pass):
         f"{API_ROOT}v3/collections/foo/bar/versions/1.0.0/move/staging/published/",
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 202
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 202, 403)
 
 
 def reject_collections(user, password, expect_pass):
@@ -259,10 +238,7 @@ def reject_collections(user, password, expect_pass):
         f"{API_ROOT}v3/collections/foo/bar/versions/1.0.0/move/staging/rejected/",
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 202
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 202, 403)
 
 
 def deprecate_collections(user, password, expect_pass):
@@ -279,10 +255,7 @@ def deprecate_collections(user, password, expect_pass):
         json={"deprecated": True},
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 202
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 202, 403)
 
 
 def undeprecate_collections(user, password, expect_pass):
@@ -299,7 +272,4 @@ def undeprecate_collections(user, password, expect_pass):
         json={"deprecated": False},
         auth=(user['username'], password),
     )
-    if expect_pass:
-        assert response.status_code == 202
-    else:
-        assert response.status_code == 403
+    assert_pass(expect_pass, response.status_code, 202, 403)
