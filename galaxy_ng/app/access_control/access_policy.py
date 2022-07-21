@@ -33,6 +33,10 @@ def get_view_urlpattern(view):
     return view.urlpattern()
 
 
+def has_model_or_object_permissions(user, permission, obj):
+    return user.has_perm(permission) or user.has_perm(permission, obj)
+
+
 class AccessPolicyBase(AccessPolicyFromDB):
     """
     This class is capable of loading access policy statements from galaxy_ng's hardcoded list of
@@ -127,7 +131,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
             return False
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
-        return request.user.has_perm("galaxy.upload_to_namespace", namespace)
+        return has_model_or_object_permissions(request.user, "galaxy.upload_to_namespace", namespace)
 
     def can_create_collection(self, request, view, permission):
         data = view._get_data(request)
@@ -135,7 +139,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
             namespace = models.Namespace.objects.get(name=data["filename"].namespace)
         except models.Namespace.DoesNotExist:
             raise NotFound(_("Namespace in filename not found."))
-        return request.user.has_perm("galaxy.upload_to_namespace", namespace)
+        return has_model_or_object_permissions(request.user, "galaxy.upload_to_namespace", namespace)
 
     def can_sign_collections(self, request, view, permission):
         # Repository is required on the CollectionSign payload
@@ -150,8 +154,10 @@ class AccessPolicyBase(AccessPolicyFromDB):
                 namespace = models.Namespace.objects.get(name=namespace)
             except models.Namespace.DoesNotExist:
                 raise NotFound(_('Namespace not found.'))
-            return can_modify_repo and request.user.has_perm(
-                'galaxy.upload_to_namespace', namespace
+            return can_modify_repo and has_model_or_object_permissions(
+                request.user,
+                "galaxy.upload_to_namespace",
+                namespace
             )
 
         # the other filtering options are content_units and name/version
@@ -276,9 +282,7 @@ class ContainerReadmeAccessPolicy(AccessPolicyBase):
 
     def has_container_namespace_perms(self, request, view, action, permission):
         readme = view.get_object()
-        return request.user.has_perm(permission) or request.user.has_perm(
-            permission, readme.container.namespace
-        )
+        return has_model_or_object_permissions(request.user, permission, readme.container.namespace)
 
 
 class ContainerNamespaceAccessPolicy(AccessPolicyBase):
