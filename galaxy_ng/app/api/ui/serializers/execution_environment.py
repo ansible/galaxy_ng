@@ -182,7 +182,7 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
     def get_config_blob(self, obj):
         if not obj.config_blob:
             return {}
-        return {"digest": obj.config_blob.digest, "media_type": obj.config_blob.media_type}
+        return {"digest": obj.config_blob.digest}
 
     @extend_schema_field(serializers.ListField)
     def get_tags(self, obj):
@@ -228,7 +228,6 @@ class ContainerManifestDetailSerializer(ContainerManifestSerializer):
 
         return {
             "digest": obj.config_blob.digest,
-            "media_type": obj.config_blob.media_type,
             "data": config_json,
         }
 
