@@ -171,29 +171,13 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
     This function returns a dictionary that will be merged to the settings.
     """
 
-    # SETTING authentication_backends: [
-    #    'django.contrib.auth.backends.ModelBackend',
-    #    'guardian.backends.ObjectPermissionBackend',
-    #    'pulpcore.backends.ObjectRolePermissionBackend',
-    #    'django.contrib.auth.backends.ModelBackend',
-    #    'guardian.backends.ObjectPermissionBackend',
-    #    'pulpcore.backends.ObjectRolePermissionBackend',
-    #    'galaxy_ng.social.GalaxyNGOAuth2'
-    #]
-
-    # print('CONFIGURING SOCIAL AUTH')
-
     data = {}
 
     SOCIAL_AUTH_GITHUB_BASE_URL = settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://github.com')
-    # print(f'SOCIAL_AUTH_GITHUB_BASE_URL: {SOCIAL_AUTH_GITHUB_BASE_URL}')
     SOCIAL_AUTH_GITHUB_API_URL = settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://api.github.com')
-    # print(f'SOCIAL_AUTH_GITHUB_API_URL: {SOCIAL_AUTH_GITHUB_API_URL}')
 
     SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
-    # print(f'SOCIAL_AUTH_GITHUB_KEY: {SOCIAL_AUTH_GITHUB_KEY}')
     SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
-    # print(f'SOCIAL_AUTH_GITHUB_SECRET: {SOCIAL_AUTH_GITHUB_SECRET}')
 
     if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
 

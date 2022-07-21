@@ -52,8 +52,6 @@ class GalaxyNGOAuth2(GithubOAuth2):
     @logged
     def get_session_state(self):
         param = self.name + '_state'
-        print(f'SESSION_STATE PARAM: {param}')
-        print(f'SESSION_STATE STRATEGY: {self.strategy}')
         sstate = self.strategy.session_get(param)
         return sstate
 
@@ -70,7 +68,6 @@ class GalaxyNGOAuth2(GithubOAuth2):
     def get_github_access_token(self, code):
         baseurl = settings.SOCIAL_AUTH_GITHUB_BASE_URL
         url = baseurl + '/login/oauth/access_token'
-        print(f'POST: {url}')
         rr = requests.post(
             f'{url}',
             headers={'Accept': 'application/json'},
@@ -89,7 +86,6 @@ class GalaxyNGOAuth2(GithubOAuth2):
     def get_github_user(self, access_token):
         api_url = settings.SOCIAL_AUTH_GITHUB_API_URL
         url = api_url + '/user'
-        print(f'POST: {url}')
         rr = requests.post(
             f'{url}',
             headers={
