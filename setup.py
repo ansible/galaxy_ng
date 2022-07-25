@@ -86,6 +86,8 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
+# FIXME: this currently works for CI and dev env, but pip-tools misses dependencies when
+# generating requirements.*.txt files. This needs to be fixed before use in the master branch.
 def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pulp"):
     """
     Formats the pulp plugin requirement.
@@ -110,11 +112,11 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
 
 requirements = [
     "galaxy-importer==0.4.5",
-    _format_pulp_requirement("pulpcore", ref="6e44fb2fe609f92dc1f502b19c67abd08879148f"),
-    _format_pulp_requirement("pulp-ansible", ref="06a7cc92876eec90bd79b1fffed794dda60a7333"),
+    "pulpcore==3.20.0",
+    "pulp-ansible==0.14.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    _format_pulp_requirement("pulp-container", ref="20bec438da54ddd6da4102f046f12c9f796a2ce9"),
+    "pulp-container==2.13.0",
     "django-automated-logging==6.1.3",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",
