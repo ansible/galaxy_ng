@@ -25,7 +25,7 @@ from .rbac_actions.auth import (
 from .rbac_actions.misc import view_tasks
 from .rbac_actions.collections import (
     create_collection_namespace,
-    # change_collection_namespace_object,  # non-admin users 403 100% of time
+    change_collection_namespace_object,  # non-admin users 403 100% of time
     change_collection_namespace,
     delete_collection_namespace,
     upload_collection_to_namespace,
@@ -113,19 +113,19 @@ GLOBAL_ACTIONS = [
     # MISC
     view_tasks,
 ]
-# OBJECT_ACTIONS = [
-#     change_collection_namespace_object,
-#     # upload_collection_to_namespace_object,
-#     # deprecate_collections_object,
-#     # undeprecate_collections_object,
-#     # change_exec_env_desc_object,
-#     # change_exec_env_readme_object,
-#     # create_containers_under_existing_container_namespace_object,
-#     # push_containers_to_existing_container_namespace_object,
-#     # change_container_namespace_object,
-#     # tag_untag_container_namespace_object,
-#     # sync_remote_container_object,
-# ]
+OBJECT_ACTIONS = [
+    change_collection_namespace_object,
+    # upload_collection_to_namespace_object,
+    # deprecate_collections_object,
+    # undeprecate_collections_object,
+    # change_exec_env_desc_object,
+    # change_exec_env_readme_object,
+    # create_containers_under_existing_container_namespace_object,
+    # push_containers_to_existing_container_namespace_object,
+    # change_container_namespace_object,
+    # tag_untag_container_namespace_object,
+    # sync_remote_container_object,
+]
 
 ROLES_TO_TEST = {
     "galaxy.content_admin": {
@@ -200,8 +200,8 @@ ROLES_TO_TEST = {
         view_groups,
         view_sync_configuration,
         view_tasks,
-        change_collection_namespace,  # should only be object permissions
-        # change_collection_namespace_object,  # non-admin users 403 100% of time
+        # change_collection_namespace,  # should only be object permissions
+        change_collection_namespace_object,  # non-admin users 403 100% of time
         # upload_collection_to_namespace_object,
         # deprecate_collections_object,
         # undeprecate_collections_object,
@@ -289,7 +289,7 @@ ROLES_TO_TEST = {
 }
 
 
-@pytest.mark.role_rbac
+# @pytest.mark.role_rbac
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
 def test_global_role_actions(role):
     extra = {

@@ -84,11 +84,11 @@ def change_collection_namespace_object(role, expect_pass, extra):
         auth=ADMIN_CREDENTIALS,
     ).json()
     if 'errors' not in create_response.keys():
-        response = requests.post(
-            f"{API_ROOT}_ui/v1/namespaces/",
+        response = requests.put(
+            f"{API_ROOT}_ui/v1/my-namespaces/{create_response['name']}/",
             json={
                 "name": f"{create_response['name']}",
-                "groups": [create_response['groups']],
+                "groups": create_response['groups'],
                 "description": "Updated description"
             },
             auth=(user['username'], PASSWORD),

@@ -170,11 +170,14 @@ def exec_env_exists():
 
 
 def object_user_exists(username):
-    users = requests.get(f"{API_ROOT}_ui/v1/users/", auth=ADMIN_CREDENTIALS).json()['data']
-    for u in users:
-        if u['username'] == username:
-            return u
-    return False
+    response = requests.get(
+        f"{API_ROOT}_ui/v1/users/?username={NAMESPACE}_user_ns_object",
+        auth=ADMIN_CREDENTIALS
+    ).json()
+    if response['meta']['count'] == 1:
+        return response['data'][0]
+    else:
+        return False
 
 
 def podman_login(user, password):
