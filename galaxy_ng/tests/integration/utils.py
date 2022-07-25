@@ -851,22 +851,15 @@ class SocialGithubClient:
         )
         self._github_cookies = dict(rr1.cookies)
 
-        """
-        # get the initial github login csrftoken
-        rr1 = self._rs.get(f'{self.github_url}/login/oauth/authorize')
-        csrftoken = rr1.cookies['csrftoken']
-
-        # post the user+pass
-        rr2 = self._rs.post(
-            f'{self.github_url}/login/oauth/authorize',
-            cookies={'csrftoken': csrftoken},
-            json={'username': self.username, 'password': self.password}
-        )
-        """
+        # The UX code obtains the login url from env vars ...
+        #   const uiExternalLoginURI = process.env.UI_EXTERNAL_LOGIN_URI || '/login'
+        # For the purposes of testing, we'll just construct a static version.
+        client_id = 12345
+        auth_url = f'{self.github_url}/login/oauth/authorize?scope=user&client_id={client_id}'
 
         # authorize the application
         rr2 = self._rs.get(
-            f'{self.github_url}/login/oauth/authorize',
+            auth_url,
             cookies=self._github_cookies,
         )
 

@@ -184,6 +184,8 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
 
     if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
 
+        data["GALAXY_FEATURE_FLAGS__external_authentication"] = True
+
         backends = settings.get("AUTHENTICATION_BACKENDS", default=[])
         backends.append("galaxy_ng.social.GalaxyNGOAuth2")
         backends.append("dynaconf_merge")
