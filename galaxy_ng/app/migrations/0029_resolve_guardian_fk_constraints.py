@@ -49,8 +49,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(
-            code=remove_guardian_fk_constraints, reverse_code=migrations.RunPython.noop,
-        ),
-        # migrations.RunSQL(sql=DROP_GUARDIAN_TABLES, reverse_sql=migrations.RunSQL.noop),
+        # migrations.RunPython(
+        #     code=remove_guardian_fk_constraints, reverse_code=migrations.RunPython.noop,
+        # ),
+        migrations.RunSQL(sql=DROP_GUARDIAN_TABLES, reverse_sql=migrations.RunSQL.noop),
     ]
