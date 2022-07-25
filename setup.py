@@ -86,6 +86,8 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
+# FIXME: this currently works for CI and dev env, but pip-tools misses dependencies when
+# generating requirements.*.txt files. This needs to be fixed before use in the master branch.
 def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pulp"):
     """
     Formats the pulp plugin requirement.
