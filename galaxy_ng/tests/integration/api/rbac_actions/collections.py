@@ -1,9 +1,5 @@
-import os
-from pydoc import describe
 import requests
-from datetime import datetime
 from subprocess import Popen, PIPE, STDOUT
-from time import sleep
 
 from .utils import (
     ADMIN_CREDENTIALS,
@@ -15,7 +11,6 @@ from .utils import (
     create_user,
     create_group_with_user_and_role,
     del_collection,
-    gen_collection,
     object_user_exists,
     del_namespace,
     gen_string,
@@ -24,7 +19,6 @@ from .utils import (
 )
 
 from galaxy_ng.tests.integration.utils import build_collection
-
 
 
 def create_collection_namespace(user, password, expect_pass, extra):
@@ -42,6 +36,7 @@ def create_collection_namespace(user, password, expect_pass, extra):
     del_namespace(ns)
 
     assert_pass(expect_pass, response.status_code, 201, 403)
+    return response.json()
 
 
 def change_collection_namespace(user, password, expect_pass, extra):
@@ -55,8 +50,6 @@ def change_collection_namespace(user, password, expect_pass, extra):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-
-
 # NEEDS TO BE REFACTORED
 def change_collection_namespace_object(role, expect_pass, extra):
     username = f'{NAMESPACE}_user_ns_object'
@@ -68,7 +61,7 @@ def change_collection_namespace_object(role, expect_pass, extra):
             auth=ADMIN_CREDENTIALS,
         )
     # create clean user object
-    user = create_user(f'{NAMESPACE}_user_ns_object', PASSWORD)
+    user = create_user(username, PASSWORD)
     group = create_group_with_user_and_role(user, role, group=f'{NAMESPACE}_group_ns_obj')
     # remove namespace object if it exists
     if collection_namespace_exists(f"{NAMESPACE}_col_ns_obj"):
@@ -100,10 +93,7 @@ def change_collection_namespace_object(role, expect_pass, extra):
             },
             auth=(user['username'], PASSWORD),
         )
-        if expect_pass:
-            assert response.status_code == 200
-        else:
-            assert response.status_code == 403
+        assert_pass(expect_pass, response.status_code, 200, 403)
     else:  # no permissions related to object
         assert not expect_pass and create_response['errors'][0]['status'] == 400
     # cleanup user, group, namespace
@@ -129,13 +119,13 @@ def delete_collection_namespace(user, password, expect_pass, extra):
 
 def upload_collection_to_namespace(user, password, expect_pass, extra):
 
-    name=gen_string()
+    name = gen_string()
 
     artifact = build_collection(
         name=name,
         namespace=extra['collection'].get_namespace()["name"]
     )
-    
+
     token = requests.post(
         f'{API_ROOT}v3/auth/token/',
         auth=(user['username'], password),

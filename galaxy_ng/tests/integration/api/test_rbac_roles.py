@@ -8,8 +8,6 @@ import requests
 
 from .rbac_actions.utils import (
     ADMIN_CREDENTIALS,
-    ADMIN_PASSWORD,
-    ADMIN_USER,
     API_ROOT,
     NAMESPACE,
     PASSWORD,

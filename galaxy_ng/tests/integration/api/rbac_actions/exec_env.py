@@ -198,6 +198,7 @@ def create_container_registry_remote(user, password, expect_pass, extra):
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 201, 403)
+    return response.json()
 
 
 def change_container_registry_remote(user, password, expect_pass, extra):
