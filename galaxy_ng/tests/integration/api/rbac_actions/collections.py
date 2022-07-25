@@ -1,4 +1,5 @@
 import os
+from pydoc import describe
 import requests
 from datetime import datetime
 from subprocess import Popen, PIPE, STDOUT
@@ -6,62 +7,58 @@ from time import sleep
 
 from .utils import (
     ADMIN_CREDENTIALS,
-    ADMIN_PASSWORD,
-    ADMIN_USER,
     API_ROOT,
     NAMESPACE,
     PASSWORD,
     assert_pass,
-    cleanup_foo_collection,
     collection_namespace_exists,
     create_user,
     create_group_with_user_and_role,
-    foo_collection_exists,
-    foo_namespace_exists,
+    del_collection,
+    gen_collection,
     object_user_exists,
+    del_namespace,
+    gen_string,
+    gen_namespace,
+    reset_remote
 )
 
-requirements_file = "collections:\n  - name: newswangerd.collection_demo\n    version: 1.0.11\n    source: https://galaxy.ansible.com"  # noqa: 501
+from galaxy_ng.tests.integration.utils import build_collection
 
 
-def create_collection_namespace(user, password, expect_pass):
-    if collection_namespace_exists():
-        response = collection_namespace_exists()
-        requests.delete(
-            f"{API_ROOT}_ui/v1/namespaces/{response['name']}/",
-            auth=ADMIN_CREDENTIALS,
-        )
+
+def create_collection_namespace(user, password, expect_pass, extra):
+    ns = gen_string()
+
     response = requests.post(
         f"{API_ROOT}_ui/v1/namespaces/",
         json={
-            "name": f"{NAMESPACE}_col_ns",
+            "name": ns,
             "groups": [],
         },
         auth=(user['username'], password),
     )
+
+    del_namespace(ns)
+
     assert_pass(expect_pass, response.status_code, 201, 403)
 
 
-def change_collection_namespace(user, password, expect_pass):
-    if collection_namespace_exists():
-        ns_response = collection_namespace_exists()
-    else:
-        ns_response = create_collection_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
-        while not collection_namespace_exists():
-            sleep(5)
+def change_collection_namespace(user, password, expect_pass, extra):
+    ns = extra['collection'].get_namespace()
+
     response = requests.put(
-        f"{API_ROOT}_ui/v1/namespaces/{ns_response['name']}/",
-        json={
-            "name": ns_response["name"],
-            "groups": ns_response["groups"],
-            "description": "Praise the description!",
-        },
+        f"{API_ROOT}_ui/v1/namespaces/{ns['name']}/",
+        json={**ns, "description": "foo"},
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def change_collection_namespace_object(role, expect_pass):
+
+
+# NEEDS TO BE REFACTORED
+def change_collection_namespace_object(role, expect_pass, extra):
     username = f'{NAMESPACE}_user_ns_object'
     # remove user object if it exists
     if object_user_exists(username):
@@ -115,160 +112,151 @@ def change_collection_namespace_object(role, expect_pass):
     requests.delete(f"{API_ROOT}_ui/v1/namespaces/{NAMESPACE}_col_ns_obj/", auth=ADMIN_CREDENTIALS)
 
 
-def delete_collection_namespace(user, password, expect_pass):
-    if collection_namespace_exists():
-        ns_response = collection_namespace_exists()
-    else:
-        ns_response = create_collection_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
-    namespace_name = ns_response["name"]
+def delete_collection_namespace(user, password, expect_pass, extra):
+    name = gen_string()
+
+    gen_namespace(name)
+
     response = requests.delete(
-        f"{API_ROOT}_ui/v1/namespaces/{namespace_name}/",
+        f"{API_ROOT}_ui/v1/namespaces/{name}/",
         auth=(user['username'], password),
     )
+
+    del_namespace(name)
+
     assert_pass(expect_pass, response.status_code, 204, 403)
 
 
-def upload_collection_to_namespace(user, password, expect_pass):
-    cleanup_foo_collection()
-    # get auth token for user
+def upload_collection_to_namespace(user, password, expect_pass, extra):
+
+    name=gen_string()
+
+    artifact = build_collection(
+        name=name,
+        namespace=extra['collection'].get_namespace()["name"]
+    )
+    
     token = requests.post(
-        'http://localhost:5001/api/automation-hub/v3/auth/token/',
+        f'{API_ROOT}v3/auth/token/',
         auth=(user['username'], password),
     ).json()['token'] or None
-    response = requests.post(
-        f"{API_ROOT}_ui/v1/namespaces/",
-        json={
-            "name": "foo",
-            "groups": [],
-        },
-        auth=ADMIN_CREDENTIALS,
-    )
-    if token is not None and response.status_code == 201:
-        cmd = [
-            "ansible-galaxy",
-            "collection",
-            "publish",
-            "--api-key",
-            token,
-            "--server",
-            API_ROOT,
-            f"{os.path.dirname(__file__)}/foo-bar-1.0.0.tar.gz"
-        ]
-        proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-        return_code = proc.wait()
-        if expect_pass:
-            assert return_code == 0
-        else:
-            assert return_code != 0
 
+    cmd = [
+        "ansible-galaxy",
+        "collection",
+        "publish",
+        "--api-key",
+        token,
+        "--server",
+        API_ROOT,
+        artifact.filename
+    ]
+    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
+    return_code = proc.wait()
 
-def delete_collection(user, password, expect_pass):
-    if not foo_collection_exists('staging'):
-        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
-    response = requests.delete(
-        f"{API_ROOT}v3/plugin/ansible/content/staging/collections/index/foo/bar/",
-        auth=(user['username'], password),
-    )
-    assert_pass(expect_pass, response.status_code, 202, 403)
+    del_collection(name, extra['collection'].get_namespace()["name"])
 
-
-def configure_collection_sync(user, password, expect_pass):
-    response = requests.put(
-        f"{API_ROOT}content/community/v3/sync/config/",
-        json={
-            "url": "https://galaxy.ansible.com/api/",
-            "auth_url": None,
-            "token": None,
-            "policy": "immediate",
-            "requirements_file": requirements_file,
-            "created_at": str(datetime.now()),
-            "updated_at": str(datetime.now()),
-            "username": None,
-            "password": None,
-            "tls_validation": False,
-            "client_key": None,
-            "client_cert": None,
-            "download_concurrency": 10,
-            "proxy_url": None,
-            "proxy_username": None,
-            "proxy_password": None,
-            "rate_limit": 8,
-            "signed_only": False,
-        },
-        auth=(user['username'], password),
-    )
-    assert_pass(expect_pass, response.status_code, 200, 403)
-
-
-def launch_collection_sync(user, password, expect_pass):
-    configure_collection_sync(ADMIN_USER, ADMIN_PASSWORD, True)
-    response = requests.post(
-        f"{API_ROOT}content/community/v3/sync/",
-        auth=(user['username'], password),
-    )
-    assert_pass(expect_pass, response.status_code, 200, 403)
-
-
-def view_sync_configuration(user, password, expect_pass):
-    response = requests.get(
-        f"{API_ROOT}content/community/v3/sync/config/",
-        auth=(user['username'], password),
-    )
-    assert_pass(expect_pass, response.status_code, 200, 403)
-
-
-def approve_collections(user, password, expect_pass):
-    if foo_collection_exists('published'):
-        cleanup_foo_collection()
-    if not foo_collection_exists('staging'):
-        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
-    response = requests.post(
-        f"{API_ROOT}v3/collections/foo/bar/versions/1.0.0/move/staging/published/",
-        auth=(user['username'], password),
-    )
-    assert_pass(expect_pass, response.status_code, 202, 403)
-
-
-def reject_collections(user, password, expect_pass):
-    if foo_collection_exists('rejected'):
-        cleanup_foo_collection()
-    if not foo_collection_exists('staging'):
-        upload_collection_to_namespace(ADMIN_USER, ADMIN_PASSWORD, True)
-    response = requests.post(
-        f"{API_ROOT}v3/collections/foo/bar/versions/1.0.0/move/staging/rejected/",
-        auth=(user['username'], password),
-    )
-    assert_pass(expect_pass, response.status_code, 202, 403)
-
-
-def deprecate_collections(user, password, expect_pass):
-    if foo_namespace_exists():
-        if foo_collection_exists('staging'):
-            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
-        if foo_collection_exists('rejected'):
-            cleanup_foo_collection()
-            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
+    if expect_pass:
+        assert return_code == 0
     else:
-        approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
+        assert return_code != 0
+
+
+def delete_collection(user, password, expect_pass, extra):
+    collection = extra['collection'].get_collection()
+
+    ns = collection['namespace']
+    name = collection['name']
+
+    response = requests.delete(
+        f"{API_ROOT}v3/plugin/ansible/content/staging/collections/index/{ns}/{name}/",
+        auth=(user['username'], password),
+    )
+
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def configure_collection_sync(user, password, expect_pass, extra):
+    remote = reset_remote()
+
+    remote['password'] = "foobar"
+
+    response = requests.put(
+        f"{API_ROOT}content/{remote['name']}/v3/sync/config/",
+        json=remote,
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def launch_collection_sync(user, password, expect_pass, extra):
+    # call get_remote to reset object
+    remote = reset_remote()
+
+    response = requests.post(
+        f"{API_ROOT}content/{remote['name']}/v3/sync/",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def view_sync_configuration(user, password, expect_pass, extra):
+    remote = reset_remote()
+
+    response = requests.get(
+        f"{API_ROOT}content/{remote['name']}/v3/sync/config/",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def approve_collections(user, password, expect_pass, extra):
+    collection = extra['collection'].get_collection()
+    response = requests.post(
+        (
+            f"{API_ROOT}v3/collections/{collection['namespace']}"
+            f"/{collection['name']}/versions/{collection['version']}"
+            "/move/staging/published/"
+        ),
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def reject_collections(user, password, expect_pass, extra):
+    collection = extra['collection'].get_collection()
+    response = requests.post(
+        (
+            f"{API_ROOT}v3/collections/{collection['namespace']}"
+            f"/{collection['name']}/versions/{collection['version']}"
+            "/move/staging/rejected/"
+        ),
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def deprecate_collections(user, password, expect_pass, extra):
+    collection = extra['collection'].get_collection()
     response = requests.patch(
-        f'{API_ROOT}v3/plugin/ansible/content/published/collections/index/foo/bar/',
+        (
+            f"{API_ROOT}v3/plugin/ansible/content/staging/collections"
+            f"/index/{collection['namespace']}/{collection['name']}/"
+        ),
         json={"deprecated": True},
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 202, 403)
 
 
-def undeprecate_collections(user, password, expect_pass):
-    if foo_namespace_exists():
-        if foo_collection_exists('staging'):
-            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
-        if foo_collection_exists('rejected'):
-            cleanup_foo_collection()
-            approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
-    else:
-        approve_collections(ADMIN_USER, ADMIN_PASSWORD, True)
+def undeprecate_collections(user, password, expect_pass, extra):
+    collection = extra['collection'].get_collection()
+
     response = requests.patch(
-        f'{API_ROOT}v3/plugin/ansible/content/published/collections/index/foo/bar/',
+        (
+            f"{API_ROOT}v3/plugin/ansible/content/staging/collections"
+            f"/index/{collection['namespace']}/{collection['name']}/"
+        ),
         json={"deprecated": False},
         auth=(user['username'], password),
     )

@@ -1,20 +1,23 @@
 import requests
 
-from .utils import ADMIN_PASSWORD, ADMIN_USER, PASSWORD as UTIL_PASSWORD
 from .utils import (
-    ADMIN_CREDENTIALS,
     API_ROOT,
     NAMESPACE,
     PULP_API_ROOT,
+    PASSWORD,
+    SERVER,
     assert_pass,
-    group_exists,
-    role_exists,
-    user_exists
+    del_user,
+    del_role,
+    del_group,
+    create_group,
+    create_user,
+    create_role,
+    gen_string
 )
 
 
-# Groups
-def view_groups(user, password, expect_pass):
+def view_groups(user, password, expect_pass, extra):
     response = requests.get(
         f"{API_ROOT}_ui/v1/groups/",
         auth=(user['username'], password)
@@ -22,54 +25,51 @@ def view_groups(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def delete_groups(user, password, expect_pass):
-    # create a group to delete
-    if group_exists():
-        response = group_exists()
-    else:
-        response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True)
-    group_id = response["id"]
+def delete_groups(user, password, expect_pass, extra):
+    g = create_group(gen_string())
     # delete group
     response = requests.delete(
-        f"{API_ROOT}_ui/v1/groups/{group_id}/",
+        f"{API_ROOT}_ui/v1/groups/{g['id']}/",
         auth=(user['username'], password)
     )
+
+    del_group(g['id'])
+
     assert_pass(expect_pass, response.status_code, 204, 403)
 
 
-def add_groups(user, password, expect_pass):
-    if group_exists():
-        response = group_exists()
-        requests.delete(
-            f"{API_ROOT}_ui/v1/groups/{response['id']}/",
-            auth=ADMIN_CREDENTIALS,
-        )
+def add_groups(user, password, expect_pass, extra):
     response = requests.post(
         f"{API_ROOT}_ui/v1/groups/",
         json={"name": f"{NAMESPACE}_group"},
         auth=(user["username"], password)
     )
+
+    data = response.json()
+
+    if "id" in data:
+        del_group(data["id"])
+
     assert_pass(expect_pass, response.status_code, 201, 403)
     return response.json()
 
 
-def change_groups(user, password, expect_pass):
-    if group_exists():
-        response = group_exists()
-    else:
-        response = add_groups(ADMIN_USER, ADMIN_PASSWORD, True)
-    group_id = response["id"]
-    # Change group
+def change_groups(user, password, expect_pass, extra):
+    g = create_group(gen_string())
+    g["name"] = gen_string()
+
     response = requests.patch(
-        f"{PULP_API_ROOT}groups/{group_id}/",
-        json={"name": f"{NAMESPACE}_group_2"},
+        f"{PULP_API_ROOT}groups/{g['id']}/",
+        json=g,
         auth=(user["username"], password),
     )
+
+    del_group(g['id'])
+
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-# Users
-def view_users(user, password, expect_pass):
+def view_users(user, password, expect_pass, extra):
     response = requests.get(
         f"{API_ROOT}_ui/v1/users/",
         auth=(user["username"], password),
@@ -77,79 +77,63 @@ def view_users(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def add_users(user, password, expect_pass):
-    if user_exists():
-        response = user_exists()
-        requests.delete(
-            f"{API_ROOT}_ui/v1/users/{response['id']}/",
-            auth=ADMIN_CREDENTIALS,
-        )
+def add_users(user, password, expect_pass, extra):
     response = requests.post(
         f"{API_ROOT}_ui/v1/users/",
         json={
-            "username": f"{NAMESPACE}_user",
+            "username": gen_string(),
             "first_name": "",
             "last_name": "",
             "email": "",
             "group": "",
-            "password": UTIL_PASSWORD,
+            "password": PASSWORD,
             "description": "",
         },
         auth=(user["username"], password),
     )
+
+    data = response.json()
+
+    if "id" in data:
+        del_user(data["id"])
+
     assert_pass(expect_pass, response.status_code, 201, 403)
-    return response.json()
 
 
-def change_users(user, password, expect_pass):
-    if user_exists():
-        response = user_exists()
-    else:
-        response = add_users(ADMIN_USER, ADMIN_PASSWORD, True)
-    user_id = response["id"]
-    # Change user
+def change_users(user, password, expect_pass, extra):
+    user = create_user(gen_string(), PASSWORD)
+
+    user["first_name"] = "foo"
+
     response = requests.put(
-        f"{API_ROOT}_ui/v1/users/{user_id}/",
-        json={
-            "username": f"{NAMESPACE}_user",
-            "first_name": "new_first",
-            "last_name": "",
-            "email": "",
-            "group": "",
-            "password": UTIL_PASSWORD,
-            "description": "",
-        },
+        f"{API_ROOT}_ui/v1/users/{user['id']}/",
+        json=user,
         auth=(user["username"], password),
     )
+
+    del_user(user["id"])
+
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def delete_users(user, password, expect_pass):
-    if user_exists():
-        response = user_exists()
-    else:
-        response = add_users(ADMIN_USER, ADMIN_PASSWORD, True)
-    user_id = response["id"]
+def delete_users(user, password, expect_pass, extra):
+    user = create_user(gen_string(), PASSWORD)
     # Delete user
     response = requests.delete(
-        f"{API_ROOT}_ui/v1/users/{user_id}/",
+        f"{API_ROOT}_ui/v1/users/{user['id']}/",
         auth=(user["username"], password),
     )
+
+    del_user(user['id'])
+
     assert_pass(expect_pass, response.status_code, 204, 403)
 
 
-def add_role(user, password, expect_pass):
-    if role_exists():
-        response = role_exists()
-        role_id = response['pulp_href'].split('/')[-2]
-        requests.delete(
-            f"{PULP_API_ROOT}roles/{role_id}/",
-            auth=ADMIN_CREDENTIALS,
-        )
+def add_role(user, password, expect_pass, extra):
     response = requests.post(
         f"{PULP_API_ROOT}roles/",
         json={
-            "name": f"{NAMESPACE}_role",
+            "name": gen_string(),
             "permissions": [
                 "galaxy.add_group",
                 "galaxy.change_group",
@@ -159,11 +143,16 @@ def add_role(user, password, expect_pass):
         },
         auth=(user["username"], password),
     )
+
+    data = response.json()
+
+    if "pulp_href" in data:
+        del_role(data["pulp_href"])
+
     assert_pass(expect_pass, response.status_code, 201, 403)
-    return response.json()
 
 
-def view_role(user, password, expect_pass):
+def view_role(user, password, expect_pass, extra):
     response = requests.get(
         f'{PULP_API_ROOT}roles/',
         auth=(user["username"], password),
@@ -171,37 +160,34 @@ def view_role(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def delete_role(user, password, expect_pass):
-    if role_exists():
-        response = role_exists()
-    else:
-        response = add_role(ADMIN_USER, ADMIN_PASSWORD, True)
-    role_id = response['pulp_href'].split('/')[-2]
-    # Delete role
+def delete_role(user, password, expect_pass, extra):
+    r = create_role(gen_string())
+
     response = requests.delete(
-        f'{PULP_API_ROOT}roles/{role_id}/',
+        f'{SERVER}{r["pulp_href"]}',
         auth=(user["username"], password),
     )
+
+    del_role(r["pulp_href"])
+
     assert_pass(expect_pass, response.status_code, 204, 403)
 
 
-def change_role(user, password, expect_pass):
-    if role_exists():
-        response = role_exists()
-    else:
-        response = add_role(ADMIN_USER, ADMIN_PASSWORD, True)
-    role_id = response['pulp_href'].split('/')[-2]
-    # Change role
+def change_role(user, password, expect_pass, extra):
+    role = create_role(gen_string())
+
+    role["permissions"] = [
+        "galaxy.add_user",
+        "galaxy.change_user",
+        "galaxy.view_user",
+    ]
+
     response = requests.patch(
-        f'{PULP_API_ROOT}roles/{role_id}/',
-        json={
-            "name": f"{NAMESPACE}_role",
-            "permissions": [
-                "galaxy.add_user",
-                "galaxy.change_user",
-                "galaxy.view_user",
-            ],
-        },
+        f'{SERVER}{role["pulp_href"]}',
+        json=role,
         auth=(user["username"], password),
     )
+
+    del_role(role["pulp_href"])
+
     assert_pass(expect_pass, response.status_code, 200, 403)

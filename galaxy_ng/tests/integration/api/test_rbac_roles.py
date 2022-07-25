@@ -13,10 +13,10 @@ from .rbac_actions.utils import (
     API_ROOT,
     NAMESPACE,
     PASSWORD,
-    cleanup_foo_collection,
     create_group_with_user_and_role,
     create_user,
     gen_string,
+    ReusableCollection
 )
 
 from .rbac_actions.auth import (
@@ -71,6 +71,8 @@ log = logging.getLogger(__name__)
 
 # Order is important, CRU before D actions
 GLOBAL_ACTIONS = [
+
+    # AUTHENTICATION
     add_groups,
     view_groups,
     change_groups,
@@ -83,10 +85,13 @@ GLOBAL_ACTIONS = [
     change_role,
     view_role,
     delete_role,
-    view_tasks,
+
+    # COLLECTIONS
     create_collection_namespace,
     change_collection_namespace,
+    delete_collection_namespace,
     upload_collection_to_namespace,
+    delete_collection,
     configure_collection_sync,
     launch_collection_sync,
     view_sync_configuration,
@@ -94,18 +99,21 @@ GLOBAL_ACTIONS = [
     reject_collections,
     deprecate_collections,
     undeprecate_collections,
-    delete_collection_namespace,
-    delete_collection,
-    create_container_registry_remote,
-    change_container_registry_remote,
-    create_exec_env_remote,
-    sync_remote_container,
-    change_exec_env_desc,
-    change_exec_env_readme,
-    index_exec_env,
-    delete_exec_env,
-    delete_container_registry_remote,
-    create_containers_under_existing_container_namespace,
+
+    # EEs
+    # create_container_registry_remote,
+    # change_container_registry_remote,
+    # create_exec_env_remote,
+    # sync_remote_container,
+    # change_exec_env_desc,
+    # change_exec_env_readme,
+    # index_exec_env,
+    # delete_exec_env,
+    # delete_container_registry_remote,
+    # create_containers_under_existing_container_namespace,
+
+    # MISC
+    view_tasks,
 ]
 # OBJECT_ACTIONS = [
 #     change_collection_namespace_object,
@@ -159,7 +167,7 @@ ROLES_TO_TEST = {
         view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        upload_collection_to_namespace,
+        upload_collection_to_namespace,  # non-admin users 403 100% of time
         delete_collection,
         delete_collection_namespace,
         configure_collection_sync,
@@ -176,7 +184,7 @@ ROLES_TO_TEST = {
         view_tasks,
         create_collection_namespace,
         change_collection_namespace,
-        upload_collection_to_namespace,
+        upload_collection_to_namespace,  # non-admin users 403 100% of time
         # deprecate_collections,
         # undeprecate_collections,
     },
@@ -204,7 +212,7 @@ ROLES_TO_TEST = {
         view_groups,
         view_sync_configuration,
         view_tasks,
-        create_exec_env_remote,
+        # create_exec_env,
         change_exec_env_desc,
         change_exec_env_readme,
         delete_exec_env,
@@ -230,7 +238,7 @@ ROLES_TO_TEST = {
         # change_container_namespace,
         # tag_untag_container_namespace,
         sync_remote_container,
-        create_exec_env_remote,
+        # create_exec_env,
     },
     "galaxy.execution_environment_namespace_owner": {
         view_groups,
@@ -286,6 +294,10 @@ ROLES_TO_TEST = {
 @pytest.mark.role_rbac
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
 def test_global_role_actions(role):
+    extra = {
+        "collection": ReusableCollection(gen_string())
+    }
+
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
     user = create_user(USERNAME, PASSWORD)
@@ -299,53 +311,34 @@ def test_global_role_actions(role):
     for action in GLOBAL_ACTIONS:
         expect_pass = action in expected_allows
         try:
-            action(user, PASSWORD, expect_pass)
+            action(user, PASSWORD, expect_pass, extra)
         except AssertionError:
             failures.append(action.__name__)
 
     # cleanup user, group, foo collection
-    cleanup_foo_collection()
     requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
     requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
+
+    # # Test object actions
+    # for action in OBJECT_ACTIONS:
+    #     expect_pass = action in expected_allows
+    #     try:
+    #         action(role, expect_pass)
+    #     except AssertionError:
+    #         failures.append(action.__name__)
+
+    extra['collection'].cleanup()
 
     assert failures == []
 
 
 # @pytest.mark.role_rbac
-# @pytest.mark.parametrize("role", ROLES_TO_TEST)
-# def test_object_role_actions(role):
-#     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
-
-#     user = create_user(USERNAME, PASSWORD)
-#     group = create_group_with_user_and_role(user, role)
-#     group_id = group['id']
-
-#     expected_allows = ROLES_TO_TEST[role]
-
+# def test_role_actions_for_admin():
 #     failures = []
-#     # Test object actions
-#     for action in OBJECT_ACTIONS:
-#         expect_pass = action in expected_allows
+#     # Test global actions
+#     for action in GLOBAL_ACTIONS:
 #         try:
-#             action(role, expect_pass)
+#             action(ADMIN_USER, ADMIN_PASSWORD, True)
 #         except AssertionError:
 #             failures.append(action.__name__)
-
 #     assert failures == []
-
-#     # cleanup user, group, foo collection
-#     cleanup_foo_collection()
-#     requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
-#     requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
-
-
-@pytest.mark.role_rbac
-def test_role_actions_for_admin():
-    failures = []
-    # Test global actions
-    for action in GLOBAL_ACTIONS:
-        try:
-            action(ADMIN_USER, ADMIN_PASSWORD, True)
-        except AssertionError:
-            failures.append(action.__name__)
-    assert failures == []

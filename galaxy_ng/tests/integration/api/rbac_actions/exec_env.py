@@ -18,7 +18,7 @@ from .utils import (
 )
 
 
-def create_exec_env_remote(user, password, expect_pass):
+def create_exec_env_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
@@ -43,7 +43,7 @@ def create_exec_env_remote(user, password, expect_pass):
     return response.json()
 
 
-def update_exec_env(user, password, expect_pass):
+def update_exec_env(user, password, expect_pass, extra):
     print(f'46 container_registry_remote_exists():{container_registry_remote_exists()}')
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
@@ -68,7 +68,7 @@ def update_exec_env(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 201, 403)
 
 
-def delete_exec_env(user, password, expect_pass):
+def delete_exec_env(user, password, expect_pass, extra):
     if exec_env_exists():
         ee_create_resp = exec_env_exists()
     else:
@@ -81,7 +81,7 @@ def delete_exec_env(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 202, 403)
 
 
-def change_exec_env_desc(user, password, expect_pass):
+def change_exec_env_desc(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
@@ -102,7 +102,7 @@ def change_exec_env_desc(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def change_exec_env_desc_object(user, password, expect_pass):
+def change_exec_env_desc_object(user, password, expect_pass, extra):
     pass
 
 
@@ -120,11 +120,11 @@ def change_exec_env_readme(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def change_exec_env_readme_object(user, password, expect_pass):
+def change_exec_env_readme_object(user, password, expect_pass, extra):
     pass
 
 
-def create_containers_under_existing_container_namespace(user, password, expect_pass):
+def create_containers_under_existing_container_namespace(user, password, expect_pass, extra):
     # also covers actions
     #   create_execution_environment_local?
     return_code = podman_login(user, password)
@@ -138,23 +138,23 @@ def create_containers_under_existing_container_namespace(user, password, expect_
         assert return_code != 0
 
 
-def push_containers_to_existing_container_namespace(user, password, expect_pass):
+def push_containers_to_existing_container_namespace(user, password, expect_pass, extra):
     pass
 
 
-def change_container_namespace(user, password, expect_pass):
+def change_container_namespace(user, password, expect_pass, extra):
     pass
 
 
-def change_container_namespace_object(user, password, expect_pass):
+def change_container_namespace_object(user, password, expect_pass, extra):
     pass
 
 
-def tag_untag_container_namespace(user, password, expect_pass):
+def tag_untag_container_namespace(user, password, expect_pass, extra):
     pass
 
 
-def sync_remote_container(user, password, expect_pass):
+def sync_remote_container(user, password, expect_pass, extra):
     if not container_registry_remote_exists():
         create_container_registry_remote(ADMIN_USER, ADMIN_PASSWORD, True)
     if exec_env_exists():
@@ -168,7 +168,7 @@ def sync_remote_container(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 202, 403)
 
 
-def create_container_registry_remote(user, password, expect_pass):
+def create_container_registry_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         response = container_registry_remote_exists()
         requests.delete(
@@ -200,7 +200,7 @@ def create_container_registry_remote(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 201, 403)
 
 
-def change_container_registry_remote(user, password, expect_pass):
+def change_container_registry_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
@@ -232,7 +232,7 @@ def change_container_registry_remote(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def delete_container_registry_remote(user, password, expect_pass):
+def delete_container_registry_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
@@ -262,11 +262,11 @@ def delete_container_registry_remote(user, password, expect_pass):
     assert_pass(expect_pass, response.status_code, 204, 403)
 
 
-def create_remote_container(user, password, expect_pass):
+def create_remote_container(user, password, expect_pass, extra):
     pass
 
 
-def index_exec_env(user, password, expect_pass):
+def index_exec_env(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
