@@ -35,14 +35,14 @@ ${VENV_PATH}/bin/pip install --upgrade pip wheel crc-bonfire sh
 ${VENV_PATH}/bin/pip install -r integration_requirements.txt
 
 echo "Running pytest ..."
-${VENV_PATH}/bin/pytest --capture=no -m "cloud_only or (not standalone_only and not community_only)" -v galaxy_ng/tests/integration
+${VENV_PATH}/bin/pytest --capture=no -m "cli and (cloud_only or (not standalone_only and not community_only))" -v galaxy_ng/tests/integration
 
-#echo ""
-#echo "##################################################"
-#echo "# API POD LOGS"
-#echo "##################################################"
-#echo ""
-#oc logs $AH_API_POD
+echo ""
+echo "##################################################"
+echo "# API POD LOGS"
+echo "##################################################"
+echo ""
+oc logs $AH_API_POD
 
 #echo "Starting sleep cycle for 10000s... "
 #for X in $(seq 10000 -1 0); do
