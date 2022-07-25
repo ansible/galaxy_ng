@@ -79,7 +79,7 @@ def do_authorization():
     The client is directed here first from the galaxy UI to allow oauth
     """
 
-    '''
+    """
     # The client should do a GET first to grab the
     # initial CSRFToken.
     if request.method == 'GET':
@@ -101,7 +101,7 @@ def do_authorization():
     password = ds['password']
     assert username in USERS
     assert USERS[username]['password'] == password
-    '''
+    """
 
     # Verify the user is authenticated?
     _gh_sess = request.cookies['_gh_sess']
