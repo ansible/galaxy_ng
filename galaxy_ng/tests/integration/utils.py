@@ -794,6 +794,7 @@ class SocialGithubClient:
     """ An HTTP client to mimic github social auth"""
 
     _rs = None
+    _github_cookies = None
     sessionid = None
     csrftoken = None
 
@@ -843,6 +844,14 @@ class SocialGithubClient:
     def login(self):
         self._rs = requests.Session()
 
+        # authenticate to github first
+        rr1 = self._rs.post(
+            f'{self.github_url}/session',
+            data={'username': self.username, 'password': self.password}
+        )
+        self._github_cookies = dict(rr1.cookies)
+
+        """
         # get the initial github login csrftoken
         rr1 = self._rs.get(f'{self.github_url}/login/oauth/authorize')
         csrftoken = rr1.cookies['csrftoken']
@@ -852,6 +861,13 @@ class SocialGithubClient:
             f'{self.github_url}/login/oauth/authorize',
             cookies={'csrftoken': csrftoken},
             json={'username': self.username, 'password': self.password}
+        )
+        """
+
+        # authorize the application
+        rr2 = self._rs.get(
+            f'{self.github_url}/login/oauth/authorize',
+            cookies=self._github_cookies,
         )
 
         # extract new csrftoken

@@ -61,6 +61,10 @@ CSRF_TOKENS = {
 ACCESS_TOKENS = {
 }
 
+# These are given at login time
+SESSION_IDS = {
+}
+
 
 # Github authorization redirect sequence ...
 # /login/oauth/authorize -> /login -> /session -> /login/oauth/authorize
@@ -72,9 +76,10 @@ ACCESS_TOKENS = {
 @app.route('/login/oauth/authorize', methods=['GET', 'POST'])
 def do_authorization():
     """
-    The client is directed here first.
+    The client is directed here first from the galaxy UI to allow oauth
     """
 
+    '''
     # The client should do a GET first to grab the
     # initial CSRFToken.
     if request.method == 'GET':
@@ -96,6 +101,12 @@ def do_authorization():
     password = ds['password']
     assert username in USERS
     assert USERS[username]['password'] == password
+    '''
+
+    # Verify the user is authenticated?
+    _gh_sess = request.cookies['_gh_sess']
+    assert _gh_sess in SESSION_IDS
+    username = SESSION_IDS[_gh_sess]
 
     # Tell the backend to complete the login for the user ...
     url = f'{API_SERVER}/complete/github/'
@@ -143,6 +154,41 @@ def do_access_token():
     ACCESS_TOKENS[token] = username
 
     return jsonify({'access_token': token})
+
+
+# The github login page will post form data here ...
+@app.route('/session', methods=['POST'])
+def do_session():
+
+    """
+    if request.method == 'GET':
+        resp = jsonify({})
+        csrftoken = str(uuid.uuid4())
+        CSRF_TOKENS[csrftoken] = None
+        resp.set_cookie('csrftoken', csrftoken)
+        return resp
+    """
+
+    # form data ...
+    #   username
+    #   password
+
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    assert username in USERS
+    assert USERS[username]['password'] == password
+
+    sessionid = str(uuid.uuid4())
+    SESSION_IDS[sessionid] = username
+
+    resp = jsonify({})
+    resp.set_cookie('_gh_sess', sessionid)
+    resp.set_cookie('_user_session', sessionid)
+    resp.set_cookie('dotcom_user', username)
+    resp.set_cookie('logged_in', 'yes')
+
+    return resp
 
 
 @app.route('/user', methods=['GET', 'POST'])
