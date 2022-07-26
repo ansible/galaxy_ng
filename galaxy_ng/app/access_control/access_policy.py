@@ -164,6 +164,20 @@ class AccessPolicyBase(AccessPolicyFromDB):
     def unauthenticated_collection_access_enabled(self, request, view, action):
         return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS
 
+    def has_concrete_perms(self, request, view, action, permission):
+        # Function the same as has_model_or_object_perms, but uses the concrete model
+        # instead of the proxy model
+        if request.user.has_perm(permission):
+            return True
+
+        # if the object is a proxy object, get the concrete object and use that for the
+        # permission comparison
+        obj = view.get_object()
+        if obj._meta.proxy:
+            obj = obj._meta.concrete_model.objects.get(pk=obj.pk)
+
+        return request.user.has_perm(permission, obj)
+
 
 class AppRootAccessPolicy(AccessPolicyBase):
     NAME = "AppRootViewSet"
