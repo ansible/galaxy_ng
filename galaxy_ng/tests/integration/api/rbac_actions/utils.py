@@ -169,7 +169,7 @@ def exec_env_exists():
     return remote
 
 
-def object_user_exists(username):
+def object_user_exists():
     response = requests.get(
         f"{API_ROOT}_ui/v1/users/?username={NAMESPACE}_user_ns_object",
         auth=ADMIN_CREDENTIALS
@@ -180,12 +180,12 @@ def object_user_exists(username):
         return False
 
 
-def podman_login(user, password):
+def podman_login(username, password):
     cmd = [
         "podman",
         "login",
         "--username",
-        f"{user['username']}",
+        f"{username}",
         "--password",
         f"{password}",
         "localhost:5001",
@@ -220,6 +220,24 @@ def podman_push(tag='rbac_roles_test', index=0):
     ]
     proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
     return proc.wait()
+
+
+def get_container_image_data():
+    args = 'exclude_child_manifests=true'
+    return requests.get(
+        f'{API_ROOT}_ui/v1/execution-environments/repositories/{CONTAINER_IMAGE[0]}/_content/images/?{args}',  # noqa: 501
+        auth=ADMIN_CREDENTIALS
+    ).json()['data'][0]
+
+
+def get_push_container_pk(index=0):
+    response = requests.get(
+        f'{PULP_API_ROOT}repositories/container/container-push/?name={CONTAINER_IMAGE[index]}',
+        auth=ADMIN_CREDENTIALS).json()
+    if response['count'] == 1:
+        return response['results'][0]['pulp_href'].split('/')[-2]
+    else:
+        return False
 
 
 def del_user(pk):
@@ -399,7 +417,6 @@ class ReusableCollection:
             f"{PULP_API_ROOT}repositories/ansible/ansible/?name={name}",
             auth=ADMIN_CREDENTIALS
         ).json()["results"][0]["pulp_href"]
-    
 
     def _reset_collection(self):
         resp = requests.get(

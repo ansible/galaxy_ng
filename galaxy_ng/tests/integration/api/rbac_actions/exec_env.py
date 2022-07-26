@@ -28,7 +28,12 @@ def create_exec_env_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        create_response = create_container_registry_remote(
+            {'username': ADMIN_USER},
+            ADMIN_PASSWORD,
+            True,
+            extra
+        )
     if exec_env_exists():
         ee_create_resp = exec_env_exists()
         path = "_ui/v1/execution-environments/repositories/"
@@ -54,13 +59,18 @@ def update_exec_env(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        create_response = create_container_registry_remote(
+            {'username': ADMIN_USER},
+            ADMIN_PASSWORD,
+            True,
+            extra
+        )
     print(f'51 exec_env_exists:{exec_env_exists()}')
     if exec_env_exists():
         print(f'53 exec_env_exists:{exec_env_exists()}')
         ee_create_resp = exec_env_exists()
     else:
-        ee_create_resp = create_exec_env_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        ee_create_resp = create_exec_env_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True)
     response = requests.put(
         f"{API_ROOT}_ui/v1/execution-environments/remotes/{ee_create_resp['pulp_id']}/",
         json={
@@ -78,7 +88,12 @@ def delete_exec_env(user, password, expect_pass, extra):
     if exec_env_exists():
         ee_create_resp = exec_env_exists()
     else:
-        ee_create_resp = create_exec_env_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        ee_create_resp = create_exec_env_remote(
+            {'username': ADMIN_USER},
+            ADMIN_PASSWORD,
+            True,
+            extra
+        )
     path = "_ui/v1/execution-environments/repositories/"
     response = requests.delete(
         f"{API_ROOT}{path}{ee_create_resp['name']}/",
@@ -91,11 +106,16 @@ def change_exec_env_desc(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        create_response = create_container_registry_remote(
+            {'username': ADMIN_USER},
+            ADMIN_PASSWORD,
+            True,
+            extra
+        )
     if exec_env_exists():
         ee_create_resp = exec_env_exists()
     else:
-        ee_create_resp = create_exec_env_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        ee_create_resp = create_exec_env_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True)
     response = requests.put(
         f"{API_ROOT}_ui/v1/execution-environments/remotes/{ee_create_resp['pulp_id']}/",
         json={
@@ -112,11 +132,16 @@ def change_exec_env_desc_object(user, password, expect_pass, extra):
     pass
 
 
-def change_exec_env_readme(user, password, expect_pass):
+def change_exec_env_readme(user, password, expect_pass, extra):
     if exec_env_exists():
         ee_create_resp = exec_env_exists()
     else:
-        ee_create_resp = create_exec_env_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        ee_create_resp = create_exec_env_remote(
+            {'username': ADMIN_USER},
+            ADMIN_PASSWORD,
+            True,
+            extra
+        )
     path = "_ui/v1/execution-environments/repositories/"
     response = requests.put(
         f"{API_ROOT}{path}{ee_create_resp['name']}/_content/readme/",
@@ -131,7 +156,7 @@ def change_exec_env_readme_object(user, password, expect_pass, extra):
 
 
 def create_execution_environment_local(user, password, expect_pass, extra):
-    return_code = podman_login(user, password)
+    return_code = podman_login(user['username'], password)
     if return_code == 0:
         return_code = podman_build_and_tag(user['username'], index=0)
     if return_code == 0:
@@ -150,7 +175,7 @@ def create_containers_under_existing_container_namespace(user, password, expect_
         return_code = podman_push(tag=ADMIN_USER, index=0)
 
     # push new container to existing namespace
-    return_code = podman_login(user, password)
+    return_code = podman_login(user['username'], password)
     if return_code == 0:
         return_code = podman_build_and_tag(tag=user['username'], index=1)
     if return_code == 0:
@@ -166,12 +191,12 @@ def push_containers_to_existing_container_namespace(user, password, expect_pass,
     # create container
     return_code = podman_login(ADMIN_USER, ADMIN_PASSWORD)
     if return_code == 0:
-        return_code = podman_build_and_tag(tag=user['username'], index=0)
+        return_code = podman_build_and_tag(tag=ADMIN_USER, index=0)
     if return_code == 0:
         return_code = podman_push(tag=ADMIN_USER, index=0)
 
     # repush existing container
-    return_code = podman_login(user, password)
+    return_code = podman_login(user['username'], password)
     if return_code == 0:
         return_code = podman_build_and_tag(tag=user['username'], index=0)
     if return_code == 0:
@@ -211,7 +236,8 @@ def tag_untag_container_namespace(user, password, expect_pass, extra):
         auth=(user['username'], password)
     )
     assert_pass(expect_pass, response.status_code, 202, 403)
-    wait_for_task(response)
+    if response.status_code == 202:
+        wait_for_task(response)
 
     # Untag
     response = requests.post(
@@ -220,16 +246,17 @@ def tag_untag_container_namespace(user, password, expect_pass, extra):
         auth=(user['username'], password)
     )
     assert_pass(expect_pass, response.status_code, 202, 403)
-    wait_for_task(response)
+    if response.status_code == 202:
+        wait_for_task(response)
 
 
 def sync_remote_container(user, password, expect_pass, extra):
     if not container_registry_remote_exists():
-        create_container_registry_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        create_container_registry_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
     if exec_env_exists():
         ee_resp = exec_env_exists()
     else:
-        ee_resp = create_exec_env_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        ee_resp = create_exec_env_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
     response = requests.post(
         f'{API_ROOT}_ui/v1/execution-environments/repositories/{ee_resp["name"]}/_content/sync/',
         auth=(user['username'], password)
@@ -274,7 +301,7 @@ def change_container_registry_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        create_response = create_container_registry_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
         while not container_registry_remote_exists():
             sleep(5)
     response = requests.put(
@@ -306,7 +333,7 @@ def delete_container_registry_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        create_response = create_container_registry_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
     response = requests.delete(
         f"{API_ROOT}_ui/v1/execution-environments/registries/{create_response['pk']}/",
         json={
@@ -340,7 +367,7 @@ def index_exec_env(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote(ADMIN_USER, ADMIN_PASSWORD, True)
+        create_response = create_container_registry_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
     response = requests.post(
         f"{API_ROOT}_ui/v1/execution-environments/registries/{create_response['pk']}/index/",
         auth=(user['username'], password),

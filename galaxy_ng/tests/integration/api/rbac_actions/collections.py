@@ -54,8 +54,8 @@ def change_collection_namespace(user, password, expect_pass, extra):
 def change_collection_namespace_object(role, expect_pass, extra):
     username = f'{NAMESPACE}_user_ns_object'
     # remove user object if it exists
-    if object_user_exists(username):
-        user = object_user_exists(username)
+    if object_user_exists():
+        user = object_user_exists()
         requests.delete(
             f"{API_ROOT}_ui/v1/users/{user['id']}/",
             auth=ADMIN_CREDENTIALS,
@@ -88,7 +88,7 @@ def change_collection_namespace_object(role, expect_pass, extra):
             f"{API_ROOT}_ui/v1/my-namespaces/{create_response['name']}/",
             json={
                 "name": f"{create_response['name']}",
-                "groups": create_response['groups'],
+                "groups": [create_response['groups']],
                 "description": "Updated description"
             },
             auth=(user['username'], PASSWORD),
