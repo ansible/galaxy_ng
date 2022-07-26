@@ -301,7 +301,12 @@ def change_container_registry_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
+        create_response = create_container_registry_remote(
+            {'username': ADMIN_USER},
+            ADMIN_PASSWORD,
+            True,
+            extra
+        )
         while not container_registry_remote_exists():
             sleep(5)
     response = requests.put(
@@ -333,7 +338,12 @@ def delete_container_registry_remote(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
+        create_response = create_container_registry_remote(
+            {'username': ADMIN_USER},
+            ADMIN_PASSWORD,
+            True,
+            extra
+        )
     response = requests.delete(
         f"{API_ROOT}_ui/v1/execution-environments/registries/{create_response['pk']}/",
         json={
@@ -367,7 +377,12 @@ def index_exec_env(user, password, expect_pass, extra):
     if container_registry_remote_exists():
         create_response = container_registry_remote_exists()
     else:
-        create_response = create_container_registry_remote({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
+        create_response = create_container_registry_remote(
+            {'username': ADMIN_USER},
+            ADMIN_PASSWORD,
+            True,
+            extra
+        )
     response = requests.post(
         f"{API_ROOT}_ui/v1/execution-environments/registries/{create_response['pk']}/index/",
         auth=(user['username'], password),

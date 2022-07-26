@@ -131,7 +131,11 @@ class AccessPolicyBase(AccessPolicyFromDB):
             return False
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
-        return has_model_or_object_permissions(request.user, "galaxy.upload_to_namespace", namespace)
+        return has_model_or_object_permissions(
+            request.user,
+            "galaxy.upload_to_namespace",
+            namespace
+        )
 
     def can_create_collection(self, request, view, permission):
         data = view._get_data(request)
@@ -139,7 +143,11 @@ class AccessPolicyBase(AccessPolicyFromDB):
             namespace = models.Namespace.objects.get(name=data["filename"].namespace)
         except models.Namespace.DoesNotExist:
             raise NotFound(_("Namespace in filename not found."))
-        return has_model_or_object_permissions(request.user, "galaxy.upload_to_namespace", namespace)
+        return has_model_or_object_permissions(
+            request.user,
+            "galaxy.upload_to_namespace",
+            namespace
+        )
 
     def can_sign_collections(self, request, view, permission):
         # Repository is required on the CollectionSign payload
