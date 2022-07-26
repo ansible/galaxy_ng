@@ -1,7 +1,5 @@
 import os
 import random
-from galaxy_ng.tests.integration.api.test_collection_signing import namespace
-from galaxy_ng.tests.integration.conftest import ansible_config, artifact
 import requests
 import string
 import time
@@ -398,7 +396,7 @@ class ReusableCollection:
         requests.post(
             f"{SERVER}{repo_href}modify/",
             json={
-                "add_content_units": [content_href,],
+                "add_content_units": [content_href],
             },
             auth=ADMIN_CREDENTIALS,
         )
@@ -407,7 +405,7 @@ class ReusableCollection:
         requests.post(
             f"{SERVER}{repo_href}modify/",
             json={
-                "remove_content_units": [content_href,],
+                "remove_content_units": [content_href],
             },
             auth=ADMIN_CREDENTIALS,
         )
@@ -441,8 +439,13 @@ class ReusableCollection:
 
         wait_for_all_tasks()
 
+        url = (
+            f'{API_ROOT}v3/plugin/ansible/content/staging/collections/index/'
+            f'{self._namespace_name}/{self._collection_name}/'
+        )
+
         requests.patch(
-            f'{API_ROOT}v3/plugin/ansible/content/staging/collections/index/{self._namespace_name}/{self._collection_name}/',
+            url,
             json={"deprecated": False},
             auth=ADMIN_CREDENTIALS,
         )
