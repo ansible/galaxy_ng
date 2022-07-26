@@ -1,0 +1,1 @@
+Fix bug preventing users with object permissions from adding groups to container namespaces.
