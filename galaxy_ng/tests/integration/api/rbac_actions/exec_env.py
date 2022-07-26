@@ -7,15 +7,21 @@ from .utils import (
     ADMIN_USER,
     ADMIN_PASSWORD,
     API_ROOT,
-    IMAGE_NAME,
+    PULP_API_ROOT,
+    CONTAINER_IMAGE,
     NAMESPACE,
     assert_pass,
     container_registry_remote_exists,
     exec_env_exists,
+    get_container_image_data,
+    get_push_container_pk,
     podman_login,
     podman_build_and_tag,
-    podman_push
+    podman_push,
+    wait_for_task
 )
+
+IMAGE_NAME = CONTAINER_IMAGE[0]
 
 
 def create_exec_env_remote(user, password, expect_pass, extra):
@@ -124,14 +130,32 @@ def change_exec_env_readme_object(user, password, expect_pass, extra):
     pass
 
 
-def create_containers_under_existing_container_namespace(user, password, expect_pass, extra):
-    # also covers actions
-    #   create_execution_environment_local?
+def create_execution_environment_local(user, password, expect_pass, extra):
     return_code = podman_login(user, password)
     if return_code == 0:
-        return_code = podman_build_and_tag(user['username'])
+        return_code = podman_build_and_tag(user['username'], index=0)
     if return_code == 0:
-        return_code = podman_push(user)
+        return_code = podman_push(tag=user['username'], index=0)
+    if expect_pass:
+        assert return_code == 0
+    else:
+        assert return_code != 0
+
+
+def create_containers_under_existing_container_namespace(user, password, expect_pass, extra):
+    return_code = podman_login(ADMIN_USER, ADMIN_PASSWORD)
+    if return_code == 0:
+        return_code = podman_build_and_tag(tag=user['username'], index=0)
+    if return_code == 0:
+        return_code = podman_push(tag=ADMIN_USER, index=0)
+
+    # push new container to existing namespace
+    return_code = podman_login(user, password)
+    if return_code == 0:
+        return_code = podman_build_and_tag(tag=user['username'], index=1)
+    if return_code == 0:
+        return_code = podman_push(tag=user['username'], index=1)
+
     if expect_pass:
         assert return_code == 0
     else:
@@ -139,7 +163,23 @@ def create_containers_under_existing_container_namespace(user, password, expect_
 
 
 def push_containers_to_existing_container_namespace(user, password, expect_pass, extra):
-    pass
+    # create container
+    return_code = podman_login(ADMIN_USER, ADMIN_PASSWORD)
+    if return_code == 0:
+        return_code = podman_build_and_tag(tag=user['username'], index=0)
+    if return_code == 0:
+        return_code = podman_push(tag=ADMIN_USER, index=0)
+
+    # repush existing container
+    return_code = podman_login(user, password)
+    if return_code == 0:
+        return_code = podman_build_and_tag(tag=user['username'], index=0)
+    if return_code == 0:
+        return_code = podman_push(tag=user, index=0)
+    if expect_pass:
+        assert return_code == 0
+    else:
+        assert return_code != 0
 
 
 def change_container_namespace(user, password, expect_pass, extra):
@@ -151,7 +191,36 @@ def change_container_namespace_object(user, password, expect_pass, extra):
 
 
 def tag_untag_container_namespace(user, password, expect_pass, extra):
-    pass
+    # create container namespace
+    return_code = podman_login(ADMIN_USER, ADMIN_PASSWORD)
+    if return_code == 0:
+        return_code = podman_build_and_tag(tag=user['username'], index=0)
+    if return_code == 0:
+        return_code = podman_push(tag=ADMIN_USER, index=0)
+
+    # get image & push container data
+    image_data = get_container_image_data()
+    push_container_pk = get_push_container_pk()
+    # Tag
+    response = requests.post(
+        f'{PULP_API_ROOT}repositories/container/container-push/{push_container_pk}/tag/',
+        json={
+            'digest': image_data['digest'],
+            'tag': user['username']
+        },
+        auth=(user['username'], password)
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+    wait_for_task(response)
+
+    # Untag
+    response = requests.post(
+        f'{PULP_API_ROOT}repositories/container/container-push/{push_container_pk}/untag/',
+        json={'tag': user['username']},
+        auth=(user['username'], password)
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+    wait_for_task(response)
 
 
 def sync_remote_container(user, password, expect_pass, extra):

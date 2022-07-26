@@ -32,7 +32,7 @@ ADMIN_CREDENTIALS = (ADMIN_USER, ADMIN_PASSWORD)
 NAMESPACE = "rbac_roles_test"
 PASSWORD = "p@ssword!"
 TLS_VERIFY = "--tls-verify=false"
-IMAGE_NAME = "ubi9-minimal"
+CONTAINER_IMAGE = ["foo/ubi9-minimal", "foo/ubi8-minimal"]
 
 REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n"  # noqa: 501
 
@@ -195,13 +195,13 @@ def podman_login(user, password):
     return proc.wait()
 
 
-def podman_build_and_tag(tag):
+def podman_build_and_tag(tag='rbac_roles_test', index=0):
     cmd = [
         "podman",
         "image",
         "build",
         "-t",
-        f"localhost:5001/{IMAGE_NAME}:{tag}",
+        f"localhost:5001/{CONTAINER_IMAGE[index]}:{tag}",
         f"{os.path.dirname(__file__)}/",
         TLS_VERIFY
     ]
@@ -209,12 +209,12 @@ def podman_build_and_tag(tag):
     return proc.wait()
 
 
-def podman_push(user):
+def podman_push(tag='rbac_roles_test', index=0):
     cmd = [
         "podman",
         "image",
         "push",
-        f"localhost:5001/{IMAGE_NAME}:{user['username']}",
+        f"localhost:5001/{CONTAINER_IMAGE[index]}:{tag}",
         "--remove-signatures",
         TLS_VERIFY
     ]
@@ -450,5 +450,3 @@ class ReusableEE:
     def __init__(self, name):
         self.namespace_name = f"ns_{gen_string()}"
         self.ee_name = f"ee_{gen_string()}"
-    
-    
