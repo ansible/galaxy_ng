@@ -318,7 +318,7 @@ STANDALONE_STATEMENTS = {
             "action": ["update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:container.change_containernamespace"
+            "condition": "has_concrete_perms:container.change_containernamespace"
         },
     ],
 
