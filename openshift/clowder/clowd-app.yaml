@@ -359,9 +359,9 @@ parameters:
 - name: GALAXY_API_REPLICAS
   value: '1'
 - name: GALAXY_API_MEMORY_REQUEST
-  value: 1024Mi
+  value: 1536Mi
 - name: GALAXY_API_MEMORY_LIMIT
-  value: 1024Mi
+  value: 1536Mi
 - name: GALAXY_API_CPU_REQUEST
   value: 200m
 - name: GALAXY_API_CPU_LIMIT
@@ -371,7 +371,7 @@ parameters:
 - name: PULP_CONTENT_APP_REPLICAS
   value: '1'
 - name: PULP_CONTENT_APP_MEMORY_REQUEST
-  value: 1024Mi
+  value: 1536Mi
 - name: PULP_CONTENT_APP_MEMORY_LIMIT
   value: 1536Mi
 - name: PULP_CONTENT_APP_CPU_REQUEST
