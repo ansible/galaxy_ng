@@ -395,6 +395,31 @@ def migrate_user_permissions_to_roles(apps, schema_editor):
         task_owner, delete_task, UserRole, ContentType, User)
 
 
+def edit_guardian_tables(apps, schema_editor):
+    """
+    Remove foreign key constraints in the guardian tables
+    guardian_groupobjectpermission and guardian_userobjectpermission.
+
+    This allows for objects in other tables to be deleted without
+    violating these foreign key constraints.
+
+    This also allows for the these tables to remain in the database for reference purposes.
+    """
+
+    tables_to_edit = ["guardian_groupobjectpermission", "guardian_userobjectpermission"]
+    for table in tables_to_edit:
+        if not does_table_exist(table):
+            continue
+
+        with connection.cursor() as cursor:
+            constraints = connection.introspection.get_constraints(cursor, table)
+            fk_constraints = [k for (k,v) in constraints.items() if v["foreign_key"]]
+            for name in fk_constraints:
+                cursor.execute(
+                    f"ALTER TABLE {table} DROP CONSTRAINT {name};"
+                )                
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -407,5 +432,8 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(
             code=migrate_user_permissions_to_roles, reverse_code=migrations.RunPython.noop
+        ),
+        migrations.RunPython(
+            code=edit_guardian_tables, reverse_code=migrations.RunPython.noop
         ),
     ]
