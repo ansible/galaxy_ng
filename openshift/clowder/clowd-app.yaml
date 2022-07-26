@@ -174,6 +174,26 @@ objects:
           requests:
             cpu: ${{PULP_CONTENT_APP_CPU_REQUEST}}
             memory: ${{PULP_CONTENT_APP_MEMORY_REQUEST}}
+        livenessProbe:
+          httpGet:
+            path: /api/automation-hub/v3/artifacts/collections/
+            port: 10000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/automation-hub/v3/artifacts/collections/
+            port: 10000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
         env:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
