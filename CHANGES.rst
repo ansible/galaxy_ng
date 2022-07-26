@@ -13,6 +13,32 @@ Changelog
 
 .. towncrier release notes start
 
+4.4.4 (2022-07-26)
+Bugfixes
+--------
+
+- Update pulpcore.
+  `AAH-1202 <https://issues.redhat.com/browse/AAH-1202>`_
+- Combine copy and remove tasks into single task
+  `AAH-1349 <https://issues.redhat.com/browse/AAH-1349>`_
+- Ensure that container remotes exclude source images by default to prevent networking errors when syncing.
+  `AAH-1557 <https://issues.redhat.com/browse/AAH-1557>`_
+- Use v3/excludes to exclude content from sync
+  `AAH-1583 <https://issues.redhat.com/browse/AAH-1583>`_
+- Fix persisting artifacts in collection deletion
+  `AAH-1749 <https://issues.redhat.com/browse/AAH-1749>`_
+- Forbid user with change_user perms to update superuser
+  `AAH-1791 <https://issues.redhat.com/browse/AAH-1791>`_
+
+
+Misc
+----
+
+- `AAH-1737 <https://issues.redhat.com/browse/AAH-1737>`_
+
+
+----
+
 
 4.4.3 (2022-03-16)
 Bugfixes
