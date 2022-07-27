@@ -5,4 +5,4 @@ services:
     environment:
       - "API_PROXY_HOST=api"
       - "API_PROXY_PORT=8000"
-      - "DEPLOYMENT_MODE=${COMPOSE_PROFILE}"
+      - "DEPLOYMENT_MODE=standalone"

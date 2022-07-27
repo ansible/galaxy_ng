@@ -63,4 +63,11 @@ declare -xr DEV_VOLUME_SUFFIX="${DEV_VOLUME_SUFFIX:-${DEV_IMAGE_SUFFIX}}"
 declare -xr COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-galaxy_ng${DEV_IMAGE_SUFFIX:-}}"
 declare -xr WITH_DEV_INSTALL="${WITH_DEV_INSTALL:-1}"
 
+#if [ -v SOCIAL_AUTH_GITHUB_KEY ]; then
+#    declare -xr SOCIAL_AUTH_GITHUB_KEY="${SOCIAL_AUTH_GITHUB_KEY:null}"
+#fi
+#if [ -v SOCIAL_AUTH_GITHUB_SECRET ]; then
+#    declare -xr SOCIAL_AUTH_GITHUB_SECRET="${SOCIAL_AUTH_GITHUB_SECRET:null}"
+#fi
+
 exec docker-compose "${compose_args[@]}" "$@"

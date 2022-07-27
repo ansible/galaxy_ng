@@ -18,8 +18,22 @@ services:
     env_file:
       - './standalone-community/galaxy_ng.env'
       - '../.compose.env'
+
   galaxy-mirror:
     hostname: galaxy-mirror
     image: jtanner0/galaxy-mirror:3.0
     volumes:
       - './standalone-community/data:/data:rw'
+
+  github:
+    build:
+      context: './standalone-community/github_mock'
+    ports:
+      - "8082:8082"
+    environment:
+      UPSTREAM_PROTO: 'http'
+      UPSTREAM_HOST: api
+      UPSTREAM_PORT: 8000
+    volumes:
+      - './standalone-community/github_mock:/app:ro'
+

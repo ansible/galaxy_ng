@@ -44,6 +44,18 @@ jobs:
       - name: workaround github worker permissions issues - disable dev installs
         run: sed -i.bak 's/WITH_DEV_INSTALL=1/WITH_DEV_INSTALL=0/' .compose.env
 
+      - name: set the github key
+        run: echo "SOCIAL_AUTH_GITHUB_KEY='abcd1234'" >> .compose.env
+
+      - name: set the github secret
+        run: echo "SOCIAL_AUTH_GITHUB_SECRET='abcd1234'" >> .compose.env
+
+      - name: set the github base url
+        run: echo "SOCIAL_AUTH_GITHUB_BASE_URL='http://github:8082'" >> .compose.env
+
+      - name: set the github api url
+        run: echo "SOCIAL_AUTH_GITHUB_API_URL='http://github:8082'" >> .compose.env
+
       - name: build everything and load data
         run: make docker/all
 
