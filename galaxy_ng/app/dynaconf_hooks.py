@@ -184,6 +184,10 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
 
     if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
 
+        # Add to installed apps
+        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge"]
+
+        # Make sure the UI knows to do ext auth
         data["GALAXY_FEATURE_FLAGS__external_authentication"] = True
 
         backends = settings.get("AUTHENTICATION_BACKENDS", default=[])
