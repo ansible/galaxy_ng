@@ -75,11 +75,16 @@ class GroupPermissionField(serializers.Field):
 
 
 class MyPermissionsField(serializers.Serializer):
-    def to_representation(self, obj):
+    def to_representation(self, original_obj):
         request = self.context.get('request', None)
         if request is None:
             return []
         user = request.user
+
+        if original_obj._meta.proxy:
+            obj = original_obj._meta.concrete_model.objects.get(pk=original_obj.pk)
+        else:
+            obj = original_obj
 
         my_perms = []
         for perm in get_perms_for_model(type(obj)).all():
