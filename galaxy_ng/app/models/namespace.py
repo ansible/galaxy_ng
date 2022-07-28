@@ -17,7 +17,7 @@ def create_inbound_repo(name):
     with contextlib.suppress(IntegrityError):
         # IntegrityError is suppressed for when the named repo/distro already exists
         # In that cases the error handling is performed on the caller.
-        repo = AnsibleRepository.objects.create(name=inbound_name)
+        repo = AnsibleRepository.objects.create(name=inbound_name, retain_repo_versions=1)
         AnsibleDistribution.objects.create(
             name=inbound_name,
             base_path=inbound_name,
