@@ -2,16 +2,11 @@ import requests
 from subprocess import Popen, PIPE, STDOUT
 
 from .utils import (
-    ADMIN_CREDENTIALS,
     API_ROOT,
-    NAMESPACE,
-    PASSWORD,
+    ADMIN_USER,
+    ADMIN_TOKEN,
     assert_pass,
-    collection_namespace_exists,
-    create_user,
-    create_group_with_user_and_role,
     del_collection,
-    object_user_exists,
     del_namespace,
     gen_string,
     gen_namespace,
@@ -50,58 +45,6 @@ def change_collection_namespace(user, password, expect_pass, extra):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-# NEEDS TO BE REFACTORED
-def change_collection_namespace_object(role, expect_pass, extra):
-    username = f'{NAMESPACE}_user_ns_object'
-    # remove user object if it exists
-    if object_user_exists():
-        user = object_user_exists()
-        requests.delete(
-            f"{API_ROOT}_ui/v1/users/{user['id']}/",
-            auth=ADMIN_CREDENTIALS,
-        )
-    # create clean user object
-    user = create_user(username, PASSWORD)
-    group = create_group_with_user_and_role(user, role, group=f'{NAMESPACE}_group_ns_obj')
-    # remove namespace object if it exists
-    if collection_namespace_exists(f"{NAMESPACE}_col_ns_obj"):
-        response = collection_namespace_exists(f"{NAMESPACE}_col_ns_obj")
-        requests.delete(
-            f"{API_ROOT}_ui/v1/namespaces/{response['name']}/",
-            auth=ADMIN_CREDENTIALS,
-        )
-    # create clean namespace object
-    create_response = requests.post(
-        f"{API_ROOT}_ui/v1/namespaces/",
-        json={
-            "name": f"{NAMESPACE}_col_ns_obj",
-            "groups": [{
-                "id": group["id"],
-                "name": group["name"],
-                "object_roles": [role],
-            }],
-        },
-        auth=ADMIN_CREDENTIALS,
-    ).json()
-    if 'errors' not in create_response.keys():
-        response = requests.put(
-            f"{API_ROOT}_ui/v1/my-namespaces/{create_response['name']}/",
-            json={
-                "name": f"{create_response['name']}",
-                "groups": [create_response['groups']],
-                "description": "Updated description"
-            },
-            auth=(user['username'], PASSWORD),
-        )
-        assert_pass(expect_pass, response.status_code, 200, 403)
-    else:  # no permissions related to object
-        assert not expect_pass and create_response['errors'][0]['status'] == 400
-    # cleanup user, group, namespace
-    requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
-    requests.delete(f"{API_ROOT}_ui/v1/groups/{group['id']}/", auth=ADMIN_CREDENTIALS)
-    requests.delete(f"{API_ROOT}_ui/v1/namespaces/{NAMESPACE}_col_ns_obj/", auth=ADMIN_CREDENTIALS)
-
-
 def delete_collection_namespace(user, password, expect_pass, extra):
     name = gen_string()
 
@@ -126,10 +69,15 @@ def upload_collection_to_namespace(user, password, expect_pass, extra):
         namespace=extra['collection'].get_namespace()["name"]
     )
 
-    token = requests.post(
-        f'{API_ROOT}v3/auth/token/',
-        auth=(user['username'], password),
-    ).json()['token'] or None
+    # Don't reset the admin user's token, or all the other tests
+    # will break
+    if user['username'] == ADMIN_USER:
+        token = ADMIN_TOKEN
+    else:
+        token = requests.post(
+            f'{API_ROOT}v3/auth/token/',
+            auth=(user['username'], password),
+        ).json()['token'] or None
 
     cmd = [
         "ansible-galaxy",

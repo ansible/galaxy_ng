@@ -24,6 +24,7 @@ SERVER = API_ROOT.split("/api/")[0]
 
 ADMIN_USER = CLIENT_CONFIG["username"]
 ADMIN_PASSWORD = CLIENT_CONFIG["password"]
+ADMIN_TOKEN = CLIENT_CONFIG["token"]
 
 ADMIN_CREDENTIALS = (ADMIN_USER, ADMIN_PASSWORD)
 
@@ -54,32 +55,21 @@ def gen_string(size=10, chars=string.ascii_lowercase):
 
 
 def create_group_with_user_and_role(user, role, content_object=None, group=None):
-    if not group:
-        group = f"{NAMESPACE}_group_{gen_string()}"
-    else:
-        if group_exists(group):
-            group_id = group_exists(group)['id']
-            requests.delete(
-                f"{API_ROOT}_ui/v1/groups/{group_id}/",
-                auth=ADMIN_CREDENTIALS,
-            )
-    response = requests.post(
-        API_ROOT + "_ui/v1/groups/",
-        json={"name": group},
-        auth=ADMIN_CREDENTIALS
-    )
-    group_id = response.json()["id"]
+    name = f"{NAMESPACE}_group_{gen_string()}"
+
+    g = create_group(name)
+
     requests.post(
-        f"{API_ROOT}_ui/v1/groups/{group_id}/users/",
+        f"{API_ROOT}_ui/v1/groups/{g['id']}/users/",
         json={"username": user["username"]},
         auth=ADMIN_CREDENTIALS
     )
     requests.post(
-        f"{PULP_API_ROOT}groups/{group_id}/roles/",
+        f"{PULP_API_ROOT}groups/{g['id']}/roles/",
         json={"role": role, "content_object": content_object},
         auth=ADMIN_CREDENTIALS
     )
-    return response.json()
+    return g
 
 
 def create_user(username, password):
@@ -122,62 +112,6 @@ def wait_for_task(resp, path=None, timeout=300):
     return resp
 
 
-def group_exists(group_name='rbac_roles_test_group'):
-    response = requests.get(
-        f'{API_ROOT}_ui/v1/groups?name={group_name}',
-        auth=ADMIN_CREDENTIALS
-    )
-    if response.json()['meta']['count'] == 1:
-        return response.json()['data'][0]
-    else:
-        return False
-
-
-def collection_namespace_exists(ns_name='rbac_roles_test_col_ns'):
-    response = requests.get(
-        f'{API_ROOT}_ui/v1/namespaces?name={ns_name}',
-        auth=ADMIN_CREDENTIALS
-    )
-    if response.json()['meta']['count'] == 1:
-        return response.json()['data'][0]
-    else:
-        return False
-
-
-def container_registry_remote_exists():
-    response = requests.get(
-        f'{API_ROOT}_ui/v1/execution-environments/registries/?name={NAMESPACE}_remote_registry',
-        auth=ADMIN_CREDENTIALS
-    )
-    if response.json()['meta']['count'] == 1:
-        return response.json()['data'][0]
-    else:
-        return False
-
-
-def exec_env_exists():
-    response = requests.get(
-        f'{API_ROOT}_ui/v1/execution-environments/remotes/',
-        auth=ADMIN_CREDENTIALS
-    )
-    remote = next(
-        (item for item in response.json()['data'] if item["name"] == f"{NAMESPACE}_exec_env"),
-        False
-    )
-    return remote
-
-
-def object_user_exists():
-    response = requests.get(
-        f"{API_ROOT}_ui/v1/users/?username={NAMESPACE}_user_ns_object",
-        auth=ADMIN_CREDENTIALS
-    ).json()
-    if response['meta']['count'] == 1:
-        return response['data'][0]
-    else:
-        return False
-
-
 def podman_login(username, password):
     cmd = [
         "podman",
@@ -218,24 +152,6 @@ def podman_push(tag='rbac_roles_test', index=0):
     ]
     proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
     return proc.wait()
-
-
-def get_container_image_data():
-    args = 'exclude_child_manifests=true'
-    return requests.get(
-        f'{API_ROOT}_ui/v1/execution-environments/repositories/{CONTAINER_IMAGE[0]}/_content/images/?{args}',  # noqa: 501
-        auth=ADMIN_CREDENTIALS
-    ).json()['data'][0]
-
-
-def get_push_container_pk(index=0):
-    response = requests.get(
-        f'{PULP_API_ROOT}repositories/container/container-push/?name={CONTAINER_IMAGE[index]}',
-        auth=ADMIN_CREDENTIALS).json()
-    if response['count'] == 1:
-        return response['results'][0]['pulp_href'].split('/')[-2]
-    else:
-        return False
 
 
 def del_user(pk):
@@ -350,10 +266,6 @@ def reset_remote():
     ).json()
 
 
-def gen_ee_namespace(name):
-    pass
-
-
 def wait_for_all_tasks(timeout=300):
     ready = False
     wait_until = time.time() + timeout
@@ -466,7 +378,118 @@ class ReusableCollection:
         del_namespace(namespace['name'])
 
 
-class ReusableEE:
+def cleanup_test_obj(response, pk, del_func):
+    data = response.json()
+
+    if pk in data:
+        del_func(pk)
+
+
+def del_container(name):
+    requests.delete(
+        f"{API_ROOT}_ui/v1/execution-environments/repositories/{name}/",
+        auth=ADMIN_CREDENTIALS,
+    )
+
+
+def gen_remote_container(name, registry_pk):
+    return requests.post(
+        f"{API_ROOT}_ui/v1/execution-environments/remotes/",
+        json={
+            "name": name,
+            "upstream_name": "foo",
+            "registry": registry_pk,
+        },
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+
+
+def del_registry(pk):
+    requests.delete(
+        f"{API_ROOT}_ui/v1/execution-environments/registries/{pk}/",
+        auth=ADMIN_CREDENTIALS,
+    )
+
+
+def gen_registry(name):
+    return requests.post(
+        f"{API_ROOT}_ui/v1/execution-environments/registries/",
+        json={
+            "name": name,
+            "url": "http://example.com",
+        },
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+
+
+class ReusableContainerRegistry:
     def __init__(self, name):
-        self.namespace_name = f"ns_{gen_string()}"
-        self.ee_name = f"ee_{gen_string()}"
+        self._name = f"ee_ns_{name}"
+        self._registry = gen_registry(self._name)
+    
+    # def _reset(self):
+    #     data = requests.get(
+    #         f'{API_ROOT}_ui/v1/execution-environments/registries/?name={self._name}',
+    #         auth=ADMIN_CREDENTIALS
+    #     ).json()
+
+    #     if data['meta']['count'] == 1:
+    #         return data['data'][0]
+    #     else:
+    #         return gen_registry(self._name)
+
+    def get_registry(self):
+        return self._registry
+
+    def cleanup(self):
+        del_registry(self._registry["pk"])
+
+class ReusableRemoteContainer:
+    def __init__(self, name, registry_pk, groups=None):
+        self._ns_name = f"ee_ns_{name}"
+        self._name = f"ee_remote_{name}"
+        self._groups = groups or []
+        self._registry_pk = registry_pk
+
+        self._reset()
+
+    def _reset(self):
+        self._remote = gen_remote_container(f"{self._ns_name}/{self._name}", self._registry_pk)
+        self._namespace = requests.put(
+            f"{API_ROOT}_ui/v1/execution-environments/namespaces/{self._ns_name}/",
+            json={
+                "name": self._ns_name,
+                "groups": self._groups
+
+            },
+            auth=ADMIN_CREDENTIALS
+        ).json()
+        self._container = requests.get(
+            f"{API_ROOT}_ui/v1/execution-environments/repositories/{self._ns_name}/{self._name}/",
+            auth=ADMIN_CREDENTIALS
+        ).json()
+
+    def get_container(self):
+        return self._container
+
+    def get_namespace(self):
+        return self._namespace
+
+    def get_remote(self):
+        return self._remote
+
+    def cleanup(self):
+        del_container(f"{self._ns_name}/{self._name}")
+
+class ReusableLocalContainer:
+    def __init__(self, name, groups):
+        self._ns_name = f"ee_ns_{name}"
+        self._name = f"ee_local_{name}"
+
+        self._groups = groups
+
+    def _reset(self):
+        pass
+
+    def get_container(self):
+        pass

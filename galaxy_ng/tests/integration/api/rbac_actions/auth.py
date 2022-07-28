@@ -56,17 +56,19 @@ def add_groups(user, password, expect_pass, extra):
 
 def change_groups(user, password, expect_pass, extra):
     g = create_group(gen_string())
-    g["name"] = gen_string()
 
-    response = requests.patch(
-        f"{PULP_API_ROOT}groups/{g['id']}/",
-        json=g,
+    response = requests.post(
+        f"{PULP_API_ROOT}groups/{g['id']}/roles/",
+        json={
+            "content_object": None,
+            "role": "galaxy.content_admin",
+        },
         auth=(user["username"], password),
     )
 
     del_group(g['id'])
 
-    assert_pass(expect_pass, response.status_code, 200, 403)
+    assert_pass(expect_pass, response.status_code, 201, 403)
 
 
 def view_users(user, password, expect_pass, extra):
@@ -101,30 +103,29 @@ def add_users(user, password, expect_pass, extra):
 
 
 def change_users(user, password, expect_pass, extra):
-    user = create_user(gen_string(), PASSWORD)
-
-    user["first_name"] = "foo"
+    new_user = create_user(gen_string(), PASSWORD)
+    new_user["first_name"] = "foo"
 
     response = requests.put(
-        f"{API_ROOT}_ui/v1/users/{user['id']}/",
-        json=user,
+        f"{API_ROOT}_ui/v1/users/{new_user['id']}/",
+        json=new_user,
         auth=(user["username"], password),
     )
 
-    del_user(user["id"])
+    del_user(new_user["id"])
 
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
 def delete_users(user, password, expect_pass, extra):
-    user = create_user(gen_string(), PASSWORD)
+    new_user = create_user(gen_string(), PASSWORD)
     # Delete user
     response = requests.delete(
-        f"{API_ROOT}_ui/v1/users/{user['id']}/",
+        f"{API_ROOT}_ui/v1/users/{new_user['id']}/",
         auth=(user["username"], password),
     )
 
-    del_user(user['id'])
+    del_user(new_user['id'])
 
     assert_pass(expect_pass, response.status_code, 204, 403)
 
