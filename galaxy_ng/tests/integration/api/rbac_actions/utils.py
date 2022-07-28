@@ -426,7 +426,7 @@ class ReusableContainerRegistry:
     def __init__(self, name):
         self._name = f"ee_ns_{name}"
         self._registry = gen_registry(self._name)
-    
+
     # def _reset(self):
     #     data = requests.get(
     #         f'{API_ROOT}_ui/v1/execution-environments/registries/?name={self._name}',
@@ -443,6 +443,7 @@ class ReusableContainerRegistry:
 
     def cleanup(self):
         del_registry(self._registry["pk"])
+
 
 class ReusableRemoteContainer:
     def __init__(self, name, registry_pk, groups=None):
@@ -480,6 +481,7 @@ class ReusableRemoteContainer:
 
     def cleanup(self):
         del_container(f"{self._ns_name}/{self._name}")
+
 
 class ReusableLocalContainer:
     def __init__(self, name, groups):

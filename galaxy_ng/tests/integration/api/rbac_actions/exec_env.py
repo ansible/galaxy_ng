@@ -1,6 +1,4 @@
 import requests
-from datetime import datetime
-from time import sleep
 
 from .utils import (
     API_ROOT,
@@ -145,8 +143,12 @@ def change_ee_description(user, password, expect_pass, extra):
 def change_ee_readme(user, password, expect_pass, extra):
     container = extra["remote_ee"].get_container()
 
+    url = (
+        f"{API_ROOT}_ui/v1/execution-environments/repositories/"
+        f"{container['name']}/_content/readme/"
+    )
     response = requests.put(
-        f"{API_ROOT}_ui/v1/execution-environments/repositories/{container['name']}/_content/readme/",
+        url,
         json={"text": "Praise the readme!"},
         auth=(user['username'], password),
     )

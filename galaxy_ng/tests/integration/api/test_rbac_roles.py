@@ -20,7 +20,7 @@ from .rbac_actions.utils import (
     del_group,
     ReusableCollection,
     ReusableContainerRegistry,
-    ReusableLocalContainer,
+    # ReusableLocalContainer,  # waiting on pulp container fix
     ReusableRemoteContainer
 )
 
@@ -56,7 +56,7 @@ from .rbac_actions.exec_env import (
     update_ee_registry,
     create_ee_registry,
 
-    ## Containers
+    # Containers
     delete_ee,
     change_ee_description,
     change_ee_readme,
@@ -65,8 +65,6 @@ from .rbac_actions.exec_env import (
     create_ee_in_existing_namespace,
     push_updates_to_existing_ee,
     change_ee_tags,
-
-
 )
 
 log = logging.getLogger(__name__)
@@ -169,7 +167,7 @@ ROLES_TO_TEST = {
         update_ee_registry,
         create_ee_registry,
 
-        ## Containers
+        # Containers
         delete_ee,
         change_ee_description,
         change_ee_readme,
@@ -294,9 +292,7 @@ ACTIONS_FOR_ALL_USERS = {
     view_sync_configuration,
     view_groups,
     view_tasks,
-
-    # This should be uncommented after rebasing this branch
-    # view_role,
+    view_role,
 }
 
 
