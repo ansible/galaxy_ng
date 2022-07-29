@@ -1,4 +1,4 @@
-from guardian.shortcuts import assign_perm
+from pulpcore.plugin.util import assign_role
 from rest_framework.authtoken.models import Token
 
 from galaxy_ng.app.models import Namespace
@@ -11,33 +11,18 @@ Setup test data used in integration tests.
 print("Add a group that has namespace permissions")
 test_group, _ = Group.objects.get_or_create(name="ns_group_for_tests")
 
-
-print("Add partner-engineers group")
-# TODO: remove when we run mgmt command maintain-pe-group on every crc deploy after roles rbac
+print("Ensure partner-engineers group created and has roles assigned")
 PE_GROUP_NAME = "system:partner-engineers"
 pe_group, _ = Group.objects.get_or_create(name=PE_GROUP_NAME)
-pe_perms = [
-    # groups
-    "galaxy.view_group",
-    "galaxy.delete_group",
-    "galaxy.add_group",
-    "galaxy.change_group",
-    # users
-    "galaxy.view_user",
-    "galaxy.delete_user",
-    "galaxy.add_user",
-    "galaxy.change_user",
-    # collections
-    "ansible.modify_ansible_repo_content",
-    "ansible.delete_collection",
-    # namespaces
-    "galaxy.add_namespace",
-    "galaxy.change_namespace",
-    "galaxy.upload_to_namespace",
-    "galaxy.delete_namespace",
+pe_roles = [
+    "galaxy.group_admin",
+    "galaxy.user_admin",
+    "galaxy.collection_admin",
 ]
-for perm in pe_perms:
-    assign_perm(perm, pe_group)
+roles_in_group = [group_role.role.name for group_role in pe_group.object_roles.all()]
+for role in pe_roles:
+    if role not in roles_in_group:
+        assign_role(rolename=role, entity=pe_group)
 
 
 print("Get or create test users to match keycloak passwords")
@@ -88,9 +73,15 @@ print("Get or create namespaces + add object permissions to group")
 # TODO: after roles rbac, add object permissions to new role, then add role to group
 for nsname in ["autohubtest2", "autohubtest3"]:
     ns, _ = Namespace.objects.get_or_create(name=nsname)
-    assign_perm("change_namespace", test_group, ns)
-    assign_perm("upload_to_namespace", test_group, ns)
+#     assign_perm("change_namespace", test_group, ns)
+#     assign_perm("upload_to_namespace", test_group, ns)
 
 signing_ns, _ = Namespace.objects.get_or_create(name="signing")
-assign_perm("change_namespace", pe_group, signing_ns)
-assign_perm("upload_to_namespace", pe_group, signing_ns)
+# assign_perm("change_namespace", pe_group, signing_ns)
+# assign_perm("upload_to_namespace", pe_group, signing_ns)
+
+# FIXME: debug set users as admin
+basic_user.is_superuser = True
+basic_user.save()
+org_admin.is_superuser = True
+org_admin.save()
