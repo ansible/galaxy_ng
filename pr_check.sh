@@ -1,6 +1,29 @@
 #!/bin/bash
 
 # --------------------------------------------
+# Check if changed files begin with one of the ignored prefixes
+# and if all do then skip running remainder of script
+# Example ignored prefixes: "docs/", "CHANGES/"
+# --------------------------------------------
+FILES_CHANGED=$(git diff origin/master --name-only)
+echo FILES_CHANGED=$FILES_CHANGED
+skip_pr_check="true"
+for line in $FILES_CHANGED; do
+    if ! [[ $line =~ ^("docs/"|"CHANGES/"|"mkdocs.yml"|".github/") ]]; then skip_pr_check="false"; fi
+done
+
+# Need to make a dummy results file to make tests pass
+mkdir -p artifacts
+cat << EOF > artifacts/junit-dummy.xml
+<testsuite tests="1">
+    <testcase classname="dummy" name="dummytest"/>
+</testsuite>
+EOF
+
+if [ $skip_pr_check == "true" ]; then exit 0; fi
+
+
+# --------------------------------------------
 # Options that must be configured by app owner
 # --------------------------------------------
 APP_NAME="automation-hub,gateway,insights-ephemeral"  # name of app-sre "application" folder this component lives in
