@@ -1,3 +1,5 @@
+from django.contrib.contenttypes.models import ContentType
+from pulpcore.plugin.models.role import GroupRole, Role
 from pulpcore.plugin.util import assign_role
 from rest_framework.authtoken.models import Token
 
@@ -70,18 +72,21 @@ Token.objects.get_or_create(user=admin, key="abcdefghijklmnopqrstuvwxyz123456789
 
 
 print("Get or create namespaces + add object permissions to group")
-# TODO: after roles rbac, add object permissions to new role, then add role to group
 for nsname in ["autohubtest2", "autohubtest3"]:
     ns, _ = Namespace.objects.get_or_create(name=nsname)
-#     assign_perm("change_namespace", test_group, ns)
-#     assign_perm("upload_to_namespace", test_group, ns)
+    # connect group to role for this namespace object
+    GroupRole.objects.get_or_create(
+        role=Role.objects.get(name="galaxy.collection_namespace_owner"),
+        group=test_group,
+        content_type=ContentType.objects.get(model="namespace"),
+        object_id=ns.id,
+    )
 
 signing_ns, _ = Namespace.objects.get_or_create(name="signing")
-# assign_perm("change_namespace", pe_group, signing_ns)
-# assign_perm("upload_to_namespace", pe_group, signing_ns)
-
-# FIXME: debug set users as admin
-basic_user.is_superuser = True
-basic_user.save()
-org_admin.is_superuser = True
-org_admin.save()
+# connect group to role for this namespace object
+GroupRole.objects.get_or_create(
+    role=Role.objects.get(name="galaxy.collection_namespace_owner"),
+    group=pe_group,
+    content_type=ContentType.objects.get(model="namespace"),
+    object_id=signing_ns.id,
+)
