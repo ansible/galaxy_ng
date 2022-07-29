@@ -16,7 +16,7 @@ from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture
 
 from ansible.galaxy.api import GalaxyError
 
-CLIENT_CONFIG = AnsibleConfigFixture("ansible_partner")
+CLIENT_CONFIG = AnsibleConfigFixture("admin")
 
 API_ROOT = CLIENT_CONFIG["url"]
 PULP_API_ROOT = f"{API_ROOT}pulp/api/v3/"
@@ -227,7 +227,7 @@ def gen_collection(name, namespace):
         namespace=namespace
     )
 
-    ansible_config = AnsibleConfigFixture("ansible_partner", namespace=artifact.namespace)
+    ansible_config = AnsibleConfigFixture("admin", namespace=artifact.namespace)
 
     client = get_client(ansible_config)
 
