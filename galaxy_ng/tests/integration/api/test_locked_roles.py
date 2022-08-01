@@ -10,7 +10,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.standalone_only
 @pytest.mark.role
 def test_locked_roles_exist(ansible_config):
-    config = ansible_config("ansible_partner")
+    config = ansible_config("admin")
     api_client = get_client(
         config=config,
         require_auth=True,
