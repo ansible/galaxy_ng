@@ -19,7 +19,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 def test_group_role_listing(ansible_config):
     """Tests ability to list roles assigned to a namespace."""
 
-    config = ansible_config("ansible_partner")
+    config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     # Create Group
