@@ -396,7 +396,7 @@ class ContainerRemoteSerializer(
             defaults={'registry': registry, 'repository_remote': instance}
         )
 
-        if(instance.name != validated_data['name']):
+        if (instance.name != validated_data['name']):
             raise serializers.ValidationError(detail={
                 "name": _("Name cannot be changed.")
             })
