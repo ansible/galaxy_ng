@@ -304,21 +304,21 @@ class ReusableCollection:
         self._rejected_href = self._get_repo_href("rejected")
         self._staging_href = self._get_repo_href("staging")
 
-    def _add_to_repo(self, repo_href, content_href):
+    def _reset_collection_repo(self):
         requests.post(
-            f"{SERVER}{repo_href}modify/",
-            json={
-                "add_content_units": [content_href],
-            },
+            (
+                f"{API_ROOT}v3/collections/{self._namespace_name}"
+                f"/{self._collection_name}/versions/{self._collection['version']}"
+                "/move/rejected/staging/"
+            ),
             auth=ADMIN_CREDENTIALS,
         )
-
-    def _remove_from_repo(self, repo_href, content_href):
         requests.post(
-            f"{SERVER}{repo_href}modify/",
-            json={
-                "remove_content_units": [content_href],
-            },
+            (
+                f"{API_ROOT}v3/collections/{self._namespace_name}"
+                f"/{self._collection_name}/versions/{self._collection['version']}"
+                "/move/published/staging/"
+            ),
             auth=ADMIN_CREDENTIALS,
         )
 
@@ -345,9 +345,7 @@ class ReusableCollection:
         else:
 
             # If it doesn't, reset it's state.
-            self._remove_from_repo(self._rejected_href, self._collection_href)
-            self._remove_from_repo(self._published_href, self._collection_href)
-            self._add_to_repo(self._staging_href, self._collection_href)
+            self._reset_collection_repo()
 
         wait_for_all_tasks()
 
