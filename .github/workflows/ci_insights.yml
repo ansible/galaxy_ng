@@ -3,14 +3,14 @@ name: Insights
 on:
   pull_request:
     branches:
-      - '*'
+      - '**'
     paths-ignore:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'CHANGES/**'
   push:
     branches:
-      - '*'
+      - '**'
   workflow_dispatch:
 
 jobs:
