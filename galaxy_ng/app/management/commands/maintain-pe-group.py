@@ -31,8 +31,10 @@ class Command(BaseCommand):
             'galaxy.collection_admin',
         ]
 
+        roles_in_group = [group_role.role.name for group_role in pe_group.object_roles.all()]
         for role in pe_roles:
-            assign_role(rolename=role, entity=pe_group)
+            if role not in roles_in_group:
+                assign_role(rolename=role, entity=pe_group)
 
         self.stdout.write(
             f"Roles assigned to '{PE_GROUP_NAME}'"
