@@ -217,7 +217,6 @@ AUTHENTICATION_BACKEND_PRESETS_DATA = {
     'ldap': [
         "django_auth_ldap.backend.LDAPBackend",
         "django.contrib.auth.backends.ModelBackend",
-        "guardian.backends.ObjectPermissionBackend",
         "pulpcore.backends.ObjectRolePermissionBackend"
     ],
     'keycloak': [
