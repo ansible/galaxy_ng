@@ -1,5 +1,5 @@
 from django.db.models import Exists, OuterRef, Q, Value, F, Func, CharField
-# from django.db.models import When, Case, Subquery
+from django.db.models import When, Case
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -59,65 +59,6 @@ class CollectionViewSet(
     filterset_class = CollectionByCollectionVersionFilter
     permission_classes = [access_policy.CollectionAccessPolicy]
 
-    def build_signing_annotations(self, base_total_qs):
-        """Builds a dict with queryset annotations.
-
-        Containing:
-
-            Count of Versions of the Collection
-            Count of Signed Versions of the Collection
-            Count of Unsigned Versions of the Collection
-            Sign State of the Collection
-                signed: all versions are signed
-                unsigned: all versions are unsigned
-                partial: some versions are signed, some are unsigned
-        """
-        # ATTENTION!!!
-        # THIS IS TEMPORARILY DISABLED DUE TO A SLOW IN THE ANNOTATION QUERIES
-        # https://issues.redhat.com/browse/AAH-1775
-
-        # # Ensure it filters only the same namespace
-        # base_total_qs = base_total_qs.filter(
-        #     namespace=OuterRef("namespace"), name=OuterRef("name")
-        # )
-
-        # total_versions_query = Subquery(
-        #     base_total_qs.annotate(total=Func(F("pk"), function="count")).values('total')
-        # )
-        total_versions_query = Value(0)
-
-        # signed_versions_query = Subquery(
-        #     base_total_qs.filter(
-        #         signatures__isnull=False,
-        #     ).annotate(
-        #         total=Func(F("pk"), function="count")
-        #     ).values('total')
-        # )
-        signed_versions_query = Value(0)
-
-        # unsigned_versions_query = Subquery(
-        #     base_total_qs.filter(
-        #         signatures__isnull=True,
-        #     ).annotate(
-        #         total=Func(F("pk"), function="count")
-        #     ).values('total')
-        # )
-        unsigned_versions_query = Value(0)
-
-        # sign_state_query = Case(
-        #     When(signed_versions=F("total_versions"), then=Value("signed")),
-        #     When(unsigned_versions=F("total_versions"), then=Value("unsigned")),
-        #     When(signed_versions__lt=F("total_versions"), then=Value("partial")),
-        # )
-        sign_state_query = Value("unsigned")
-
-        return {
-            "total_versions": total_versions_query,
-            "signed_versions": signed_versions_query,
-            "unsigned_versions": unsigned_versions_query,
-            "sign_state": sign_state_query,
-        }
-
     def get_queryset(self):
         """Returns a CollectionVersions queryset for specified distribution."""
         if getattr(self, "swagger_fake_view", False):
@@ -166,7 +107,10 @@ class CollectionViewSet(
         version_qs = version_qs.annotate(
             deprecated=Exists(deprecated_query),
             version_identifier=version_identifier_expression,
-            **self.build_signing_annotations(base_versions_query)
+            sign_state=Case(
+                When(signatures__isnull=False, then=Value("signed")),
+                When(signatures__isnull=True, then=Value("unsigned")),
+            )
         )
 
         # AAH-1484 - filtering by version_identifier

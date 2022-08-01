@@ -151,9 +151,6 @@ class _CollectionSerializer(Serializer):
 class CollectionListSerializer(_CollectionSerializer):
     deprecated = serializers.BooleanField()
     sign_state = serializers.CharField()
-    total_versions = serializers.IntegerField(default=0)
-    signed_versions = serializers.IntegerField(default=0)
-    unsigned_versions = serializers.IntegerField(default=0)
 
     @extend_schema_field(CollectionVersionBaseSerializer)
     def get_latest_version(self, obj):
@@ -163,9 +160,6 @@ class CollectionListSerializer(_CollectionSerializer):
 class CollectionDetailSerializer(_CollectionSerializer):
     all_versions = serializers.SerializerMethodField()
     sign_state = serializers.CharField()
-    total_versions = serializers.IntegerField(default=0)
-    signed_versions = serializers.IntegerField(default=0)
-    unsigned_versions = serializers.IntegerField(default=0)
 
     # TODO: rename field to "version_details" since with
     # "version" query param this won't always be the latest version
