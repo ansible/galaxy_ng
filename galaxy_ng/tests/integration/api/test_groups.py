@@ -16,6 +16,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 @pytest.mark.group
 @pytest.mark.role
+@pytest.mark.standalone_only
 def test_group_role_listing(ansible_config):
     """Tests ability to list roles assigned to a namespace."""
 
