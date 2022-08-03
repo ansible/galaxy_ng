@@ -30,17 +30,6 @@ fi
 COMMIT_MSG=$(git log --format=%B --no-merges -1)
 export COMMIT_MSG
 
-if [[ "$TEST" == "upgrade" ]]; then
-  pip install -r functest_requirements.txt
-  git checkout -b ci_upgrade_test
-  cp -R .github /tmp/.github
-  cp -R .ci /tmp/.ci
-  git checkout $FROM_GALAXY_NG_BRANCH
-  rm -rf .ci .github
-  cp -R /tmp/.github .
-  cp -R /tmp/.ci .
-fi
-
 if [[ "$TEST" == "plugin-from-pypi" ]]; then
   COMPONENT_VERSION=$(http https://pypi.org/pypi/galaxy-ng/json | jq -r '.info.version')
 else
@@ -132,7 +121,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.13.0
+git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.13.1
 cd pulp_container
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then

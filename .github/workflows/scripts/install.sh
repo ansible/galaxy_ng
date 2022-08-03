@@ -22,9 +22,6 @@ if [[ "$TEST" = "docs" || "$TEST" = "publish" ]]; then
   pip install -r doc_requirements.txt
 fi
 
-pip install -e ../pulpcore -e ../pulp_ansible -e ../pulp_container -e ../galaxy-importer
-pip install -r functest_requirements.txt
-
 cd .ci/ansible/
 
 TAG=ci_build
@@ -36,7 +33,7 @@ fi
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
 else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.13.0
+  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.13.1
 fi
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
   GALAXY_IMPORTER=./galaxy-importer
@@ -69,6 +66,8 @@ plugins:
     source: pulp_container
   - name: galaxy-importer
     source: galaxy-importer
+  - name: pulp-smash
+    source: ./pulp-smash
 VARSYAML
 else
   cat >> vars/main.yaml << VARSYAML
@@ -86,6 +85,8 @@ plugins:
     source: $GALAXY_IMPORTER
   - name: pulpcore
     source: "${PULPCORE}"
+  - name: pulp-smash
+    source: ./pulp-smash
 VARSYAML
 fi
 
@@ -96,6 +97,8 @@ services:
     volumes:
       - ./settings:/etc/pulp
       - ./ssh:/keys/
+      - ~/.config:/root/.config
+      - ../../../pulp-openapi-generator:/root/pulp-openapi-generator
 VARSYAML
 
 cat >> vars/main.yaml << VARSYAML
@@ -105,10 +108,6 @@ pulp_scheme: https
 pulp_container_tag: https
 
 VARSYAML
-
-if [ "$TEST" = "upgrade" ]; then
-  sed -i "/^pulp_container_tag:.*/s//pulp_container_tag: upgrade-https/" vars/main.yaml
-fi
 
 if [ "$TEST" = "s3" ]; then
   export MINIO_ACCESS_KEY=AKIAIT2Z5TDYPX3ARJBA
