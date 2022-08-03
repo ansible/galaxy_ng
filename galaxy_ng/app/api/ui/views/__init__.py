@@ -8,7 +8,7 @@ from .controller import ControllerListView
 
 from .settings import SettingsView
 from .landing_page import LandingPageView
-from .sync import ContainerSyncRemoteView, ContainerSyncRegistryView
+from .sync import ContainerSyncRegistryView
 from .signing import CollectionSignView
 
 from .index_execution_environments import IndexRegistryEEView
@@ -31,7 +31,6 @@ __all__ = (
     "LandingPageView",
 
     # sync
-    "ContainerSyncRemoteView",
     "ContainerSyncRegistryView",
 
     # index_execution_environments

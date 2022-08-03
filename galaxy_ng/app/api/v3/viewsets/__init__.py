@@ -15,6 +15,13 @@ from .task import (
 
 from .sync import SyncConfigViewSet
 
+from .execution_environments import (
+    ContainerRepositoryViewSet,
+    ContainerRepositoryManifestViewSet,
+    ContainerRepositoryHistoryViewSet,
+    ContainerReadmeViewSet,
+    ContainerTagViewset
+)
 
 __all__ = (
     'CollectionArtifactDownloadView',
@@ -27,4 +34,9 @@ __all__ = (
     'UnpaginatedCollectionViewSet',
     'UnpaginatedCollectionVersionViewSet',
     'RepoMetadataViewSet',
+    'ContainerRepositoryViewSet',
+    'ContainerRepositoryManifestViewSet',
+    'ContainerRepositoryHistoryViewSet',
+    'ContainerReadmeViewSet',
+    'ContainerTagViewset'
 )
