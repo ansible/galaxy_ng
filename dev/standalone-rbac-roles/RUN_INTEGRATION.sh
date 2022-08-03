@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Separate workflow created for rbac_roles tests due to runtime being 10+ minutes.
+# Standalone integration workflow run time is also 10+ minutes.
+
 # Expected to be called by:
 # - GitHub Actions ci_standalone.yml for DeploymentMode.STANDALONE
 # - Developer Env makefile commands for DeploymentMode.STANDALONE
