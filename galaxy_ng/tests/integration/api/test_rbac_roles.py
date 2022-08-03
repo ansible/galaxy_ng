@@ -125,6 +125,8 @@ GLOBAL_ACTIONS = [
     # MISC
     view_tasks,
 ]
+
+# TODO: Update object tests to include delete actions
 OBJECT_ACTIONS = [
     change_collection_namespace,
     upload_collection_to_namespace,
@@ -138,6 +140,57 @@ OBJECT_ACTIONS = [
     change_ee_tags,
     sync_remote_ee,
 ]
+
+OBJECT_ROLES_TO_TEST = {
+    # COLLECTIONS
+    "galaxy.collection_namespace_owner": {
+        change_collection_namespace,
+        upload_collection_to_namespace,
+        deprecate_collections,
+        undeprecate_collections,
+    },
+    "galaxy.collection_publisher": {
+        create_collection_namespace,
+        change_collection_namespace,
+        upload_collection_to_namespace,
+        deprecate_collections,
+        undeprecate_collections,
+    },
+
+    # EEs
+    "galaxy.execution_environment_publisher": {
+        create_ee_remote,
+        update_ee_remote,
+        sync_remote_ee,
+        change_ee_description,
+        change_ee_readme,
+        change_ee_namespace,
+        create_ee_local,
+        create_ee_in_existing_namespace,
+        push_updates_to_existing_ee,
+        change_ee_tags,
+    },
+    "galaxy.execution_environment_namespace_owner": {
+        update_ee_remote,
+        change_ee_description,
+        change_ee_readme,
+        create_ee_in_existing_namespace,
+        push_updates_to_existing_ee,
+        change_ee_namespace,
+        change_ee_tags,
+        sync_remote_ee,
+    },
+    "galaxy.execution_environment_collaborator": {
+        update_ee_remote,
+        change_ee_description,
+        change_ee_readme,
+        push_updates_to_existing_ee,
+        change_ee_tags,
+        sync_remote_ee,
+    },
+
+
+}
 
 ROLES_TO_TEST = {
     "galaxy.content_admin": {
@@ -190,24 +243,11 @@ ROLES_TO_TEST = {
         deprecate_collections,
         undeprecate_collections,
     },
-    "galaxy.collection_publisher": {
-        create_collection_namespace,
-        change_collection_namespace,
-        upload_collection_to_namespace,
-        deprecate_collections,
-        undeprecate_collections,
-    },
     "galaxy.collection_curator": {
         configure_collection_sync,
         launch_collection_sync,
         approve_collections,
         reject_collections,
-    },
-    "galaxy.collection_namespace_owner": {
-        change_collection_namespace,
-        upload_collection_to_namespace,
-        deprecate_collections,
-        undeprecate_collections,
     },
     "galaxy.execution_environment_admin": {
         # EEs
@@ -232,36 +272,6 @@ ROLES_TO_TEST = {
         push_updates_to_existing_ee,
         change_ee_tags,
     },
-    "galaxy.execution_environment_publisher": {
-        create_ee_remote,
-        update_ee_remote,
-        sync_remote_ee,
-        change_ee_description,
-        change_ee_readme,
-        change_ee_namespace,
-        create_ee_local,
-        create_ee_in_existing_namespace,
-        push_updates_to_existing_ee,
-        change_ee_tags,
-    },
-    "galaxy.execution_environment_namespace_owner": {
-        update_ee_remote,
-        change_ee_description,
-        change_ee_readme,
-        create_ee_in_existing_namespace,
-        push_updates_to_existing_ee,
-        change_ee_namespace,
-        change_ee_tags,
-        sync_remote_ee,
-    },
-    "galaxy.execution_environment_collaborator": {
-        update_ee_remote,
-        change_ee_description,
-        change_ee_readme,
-        push_updates_to_existing_ee,
-        change_ee_tags,
-        sync_remote_ee,
-    },
     "galaxy.group_admin": {
         add_groups,
         change_groups,
@@ -276,6 +286,7 @@ ROLES_TO_TEST = {
     },
     "galaxy.task_admin": {}
 }
+ROLES_TO_TEST.update(OBJECT_ROLES_TO_TEST)
 
 ACTIONS_FOR_ALL_USERS = {
     view_sync_configuration,
@@ -341,7 +352,7 @@ def test_object_role_actions():
 
     # Create user/group for each role
     # Populate collection/ee groups for object assignment
-    for role in ROLES_TO_TEST:
+    for role in OBJECT_ROLES_TO_TEST:
         USERNAME = f"{NAMESPACE}_user_{gen_string()}"
         user = create_user(USERNAME, PASSWORD)
         group = create_group_with_user_and_role(user, role)
@@ -371,7 +382,7 @@ def test_object_role_actions():
         "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk, groups=ee_groups)
     }
 
-    for role in ROLES_TO_TEST:
+    for role in OBJECT_ROLES_TO_TEST:
         expected_allows = ROLES_TO_TEST[role]
 
         failures = []
@@ -381,9 +392,10 @@ def test_object_role_actions():
             try:
                 action(users_and_groups[role]['user'], PASSWORD, expect_pass, extra)
             except AssertionError:
-                failures.append(action.__name__)
+                failures.append(f'{role}:{action.__name__}')
 
-        # cleanup user, group
+    # cleanup user, group
+    for role in OBJECT_ROLES_TO_TEST:
         del_user(users_and_groups[role]['user']['id'])
         del_group(users_and_groups[role]['group']['id'])
 
