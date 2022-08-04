@@ -185,7 +185,7 @@ class TestMigratingPermissionsToRoles(TestCase):
         )
     
     def _run_migrations(self):
-        migration = importlib.import_module("galaxy_ng.app.migrations.0028_move_perms_to_roles")
+        migration = importlib.import_module("galaxy_ng.app.migrations.0029_move_perms_to_roles")
         migration.migrate_group_permissions_to_roles(apps, None)
         migration.migrate_user_permissions_to_roles(apps, None)
 

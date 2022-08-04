@@ -423,7 +423,7 @@ def edit_guardian_tables(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("galaxy", "0027_delete_contentredirectcontentguard"),
+        ("galaxy", "0028_update_synclist_model"),
     ]
 
     operations = [
