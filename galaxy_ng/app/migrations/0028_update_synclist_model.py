@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('ansible', '0041_alter_collectionversion_collection'),
-        ('galaxy', '0028_move_perms_to_roles'),
+        ('galaxy', '0027_delete_contentredirectcontentguard'),
     ]
 
     operations = [
