@@ -50,7 +50,7 @@ importer: tests related checks in galaxy-importer
 pulp_api: tests related to the pulp api endpoints
 ldap: tests related to the ldap integration
 role: Related to RBAC Roles
-role_rbac: The test I'm currently working on
+rbac_roles: Tests checking Role permissions
 group: Related to Groups
 """
 
