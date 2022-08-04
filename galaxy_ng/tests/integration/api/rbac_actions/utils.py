@@ -37,6 +37,7 @@ REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n"  # n
 
 TEST_CONTAINER = "alpine"
 
+
 class InvalidResponse(Exception):
     pass
 
@@ -111,9 +112,6 @@ def wait_for_task(resp, path=None, timeout=300):
             ready = resp.json()["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
-
-
-# podman push --creds admin:admin localhost:5001/alpine:latest --remove-signatures --tls-verify=false
 
 
 def ensure_test_container_is_pulled():
@@ -556,6 +554,6 @@ class ReusableLocalContainer:
 
     def get_manifest(self):
         return self._manifest
-    
+
     def cleanup(self):
         del_container(self._name)

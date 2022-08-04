@@ -223,4 +223,3 @@ def change_ee_tags(user, password, expect_pass, extra):
     )
 
     assert_pass(expect_pass, response.status_code, 202, 403)
-
