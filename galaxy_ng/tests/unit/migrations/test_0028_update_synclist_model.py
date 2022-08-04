@@ -19,7 +19,7 @@ This is not tested in a historical context, but uses latest models.
 class TestEditSyncListObj(TestCase):
     def _run_python_operation(self):
         """Calls RunPython operation, passes schema_editor"""
-        migration = import_module("galaxy_ng.app.migrations.0029_update_synclist_model")
+        migration = import_module("galaxy_ng.app.migrations.0028_update_synclist_model")
         migration.populate_synclist_distros(apps, connection.schema_editor())
 
     def test_match_synclist_to_distro(self):
