@@ -1,16 +1,14 @@
 #!/bin/bash
 
+# Separate workflow created for rbac_roles tests due to runtime being 10+ minutes.
+# Standalone integration workflow run time is also 10+ minutes.
+
 # Expected to be called by:
 # - GitHub Actions ci_standalone.yml for DeploymentMode.STANDALONE
 # - Developer Env makefile commands for DeploymentMode.STANDALONE
 # - TODO: Ephemeral Env pr_check.sh (merge smoke_test.sh into this) for DeploymentMode.INSIGHTS
 
 set -e
-
-export HUB_API_ROOT="http://localhost:8080/api/automation-hub/"
-export HUB_AUTH_URL="http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
-export HUB_USE_MOVE_ENDPOINT="true"
-unset HUB_TOKEN
 
 which virtualenv || pip install --user virtualenv
 
@@ -27,11 +25,12 @@ echo "PYTHON: $(which python)"
 pip install -r integration_requirements.txt
 pip show epdb || pip install epdb
 
-# when running user can specify extra pytest arguments such as
-# export HUB_LOCAL=1
-# dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
+echo "Setting up test data"
+docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
-pytest --capture=no --tb=short -m "not standalone_only and not community_only and not rbac_roles" $@ -v galaxy_ng/tests/integration
+
+#export HUB_API_ROOT='http://localhost:5001/api/'
+pytest --capture=no --tb=short -m "rbac_roles" $@ -v galaxy_ng/tests/integration
 RC=$?
 
 exit $RC
