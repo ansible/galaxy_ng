@@ -50,6 +50,7 @@ ignore = [
     "requirements/**",
     "docs/**",
     "galaxy_ng/tests/assets/**",
+    "flake8.cfg",
     "template_config.yml",
     ".travis/**",
     ".travis.yml",
