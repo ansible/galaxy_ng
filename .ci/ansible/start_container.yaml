@@ -41,7 +41,7 @@
         image: "{{ item.image }}"
         auto_remove: true
         recreate: true
-        privileged: true
+        privileged: false
         networks:
           - name: pulp_ci_bridge
             aliases: "{{ item.name }}"
