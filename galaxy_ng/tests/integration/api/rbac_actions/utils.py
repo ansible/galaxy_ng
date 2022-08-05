@@ -142,48 +142,6 @@ def podman_push(username, password, container, tag="latest"):
     return Popen(push_cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8").wait()
 
 
-def podman_login(username, password):
-    cmd = [
-        "podman",
-        "login",
-        "--username",
-        f"{username}",
-        "--password",
-        f"{password}",
-        "localhost:5001",
-        TLS_VERIFY
-    ]
-    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-    return proc.wait()
-
-
-def podman_build_and_tag(tag='rbac_roles_test', index=0):
-    cmd = [
-        "podman",
-        "image",
-        "build",
-        "-t",
-        f"localhost:5001/{CONTAINER_IMAGE[index]}:{tag}",
-        f"{os.path.dirname(__file__)}/",
-        TLS_VERIFY
-    ]
-    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-    return proc.wait()
-
-
-# def podman_push(tag='rbac_roles_test', index=0):
-#     cmd = [
-#         "podman",
-#         "image",
-#         "push",
-#         f"localhost:5001/{CONTAINER_IMAGE[index]}:{tag}",
-#         "--remove-signatures",
-#         TLS_VERIFY
-#     ]
-#     proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-#     return proc.wait()
-
-
 def del_user(pk):
     requests.delete(
         f"{API_ROOT}_ui/v1/users/{pk}/",
