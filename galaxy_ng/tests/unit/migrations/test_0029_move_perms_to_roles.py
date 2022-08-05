@@ -10,6 +10,7 @@ from django.contrib.auth.models import Permission
 from galaxy_ng.app.models import User, Group, Namespace
 from pulp_container.app.models import ContainerNamespace
 from pulpcore.app.models.role import GroupRole, UserRole, Role
+from pulpcore.plugin.util import assign_role
 
 
 # Note, this copied from galaxy_ng.app.access_control.statements.roles instead of
@@ -284,6 +285,43 @@ class TestMigratingPermissionsToRoles(TestCase):
             self.assertEqual(GroupRole.objects.filter(group=group, role=role_obj).count(), 1)
             self.assertTrue(self._has_role(group, role))
 
+
+    def test_group_permissions_post_migration(self):
+        permissions_to_add = LOCKED_ROLES["galaxy.collection_admin"]["permissions"]
+
+        _, group = self._create_user_and_group_with_permissions("test", permissions_to_add)
+
+        # Add permissions directly to a group
+        for perm in permissions_to_add:
+            group.permissions.add(self._get_permission(perm))
+        group.save()
+
+        self.assertTrue(len(permissions_to_add) > 0)
+        self.assertEqual(group.permissions.count(), len(permissions_to_add))
+
+        self._run_migrations()
+
+        expected_role = "galaxy.collection_admin"
+        role_obj = Role.objects.get(name=expected_role)
+        self.assertEqual(GroupRole.objects.filter(group=group).count(), 1)
+        self.assertEqual(GroupRole.objects.filter(group=group, role=role_obj).count(), 1)
+        self.assertTrue(self._has_role(group, expected_role))
+
+        # TODO: enable this check when we clear the permissions
+        # # check that group no longer has any permissions associated
+        # group.refresh_from_db()
+        # self.assertEqual(group.permissions.all().count(), 0)
+
+        # check that assigning a role does not alter permissions
+        perm_count_post_migration = group.permissions.all().count()
+        new_role = "galaxy.collection_namespace_owner"
+        assign_role(rolename=new_role, entity=group)
+        group.refresh_from_db()
+        role_obj = Role.objects.get(name=new_role)
+        self.assertEqual(GroupRole.objects.filter(group=group).count(), 2)
+        self.assertEqual(GroupRole.objects.filter(group=group, role=role_obj).count(), 1)
+        self.assertTrue(self._has_role(group, new_role))
+        self.assertEqual(group.permissions.all().count(), perm_count_post_migration)
 
     @skipIf(
         not is_guardian_installed(),
