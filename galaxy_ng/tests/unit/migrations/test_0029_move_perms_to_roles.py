@@ -307,19 +307,15 @@ class TestMigratingPermissionsToRoles(TestCase):
         self.assertEqual(GroupRole.objects.filter(group=group, role=role_obj).count(), 1)
         self.assertTrue(self._has_role(group, expected_role))
 
-        # TODO: enable this check when we clear the permissions
-        # # check that group no longer has any permissions associated
-        # group.refresh_from_db()
-        # self.assertEqual(group.permissions.all().count(), 0)
+        # check that group no longer has any permissions associated
+        group.refresh_from_db()
+        self.assertEqual(group.permissions.all().count(), 0)
 
         # check that assigning a role does not alter permissions
         perm_count_post_migration = group.permissions.all().count()
         new_role = "galaxy.collection_namespace_owner"
         assign_role(rolename=new_role, entity=group)
         group.refresh_from_db()
-        role_obj = Role.objects.get(name=new_role)
-        self.assertEqual(GroupRole.objects.filter(group=group).count(), 2)
-        self.assertEqual(GroupRole.objects.filter(group=group, role=role_obj).count(), 1)
         self.assertTrue(self._has_role(group, new_role))
         self.assertEqual(group.permissions.all().count(), perm_count_post_migration)
 
