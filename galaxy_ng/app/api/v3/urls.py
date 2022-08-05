@@ -119,6 +119,8 @@ urlpatterns = [
     # should be put here. Please include comments that describe why the override is necesary.
     # Overridding an endpoint should be a measure of last resort.
 
+    path("plugin/", include(plugin_paths)),
+
     # Disable the unpaginated collection views
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
     # For now endpoints are temporary deactivated
@@ -170,6 +172,4 @@ urlpatterns = [
     path("tasks/", viewsets.TaskViewSet.as_view({"get": "list"}), name="tasks-list"),
     path("tasks/<str:pk>/", viewsets.TaskViewSet.as_view({"get": "retrieve"}), name="tasks-detail"),
     path("excludes/", views.ExcludesView.as_view(), name="excludes-file"),
-
-    path("plugin/", include(plugin_paths))
 ]

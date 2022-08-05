@@ -199,7 +199,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
-    pulp_href = DetailIdentityField()
+    pulp_href = DetailIdentityField(view_name='distributions-container/container-detail')
 
     # This serializer is purposfully refraining from using pulp fields directly
     # in the top level response body. This is because future versions of hub will have to
