@@ -349,7 +349,7 @@ tablib[html,ods,xls,xlsx,yaml]==3.2.1
     # via django-import-export
 tomli==2.0.1
     # via pytest
-types-setuptools==63.2.3
+types-setuptools==63.4.0
     # via requirements-parser
 typing-extensions==4.3.0
     # via aioredis
