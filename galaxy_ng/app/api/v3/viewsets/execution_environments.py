@@ -30,10 +30,10 @@ class RepositoryFilter(filterset.FilterSet):
 
     sort = filters.OrderingFilter(
         fields=(
-            ('repository__pulp_created', 'created'),
+            ('repository__pulp_created', 'created_at'),
             ('name', 'name'),
             ('description', 'description'),
-            ('repository__pulp_last_updated', 'updated'),
+            ('repository__pulp_last_updated', 'updated_at'),
         ),
     )
 
@@ -56,7 +56,7 @@ class ManifestFilter(filterset.FilterSet):
 
     sort = filters.OrderingFilter(
         fields=(
-            ('pulp_created', 'created'),
+            ('pulp_created', 'created_at'),
         ),
     )
 
@@ -78,7 +78,7 @@ class ManifestFilter(filterset.FilterSet):
 class HistoryFilter(filterset.FilterSet):
     sort = filters.OrderingFilter(
         fields=(
-            ('pulp_created', 'created'),
+            ('pulp_created', 'created_at'),
             ('number', 'number'),
         ),
     )
@@ -87,8 +87,8 @@ class HistoryFilter(filterset.FilterSet):
 class TagFilter(filterset.FilterSet):
     sort = filters.OrderingFilter(
         fields=(
-            ("pulp_created", "pulp_created"),
-            ("pulp_last_updated", "pulp_last_updated"),
+            ("pulp_created", "created_at"),
+            ("pulp_last_updated", "updated_at"),
             ("name", "name"),
         ),
     )
