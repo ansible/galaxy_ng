@@ -17,7 +17,6 @@ from .root import APIRootView
 from .group import GroupViewSet, GroupUserViewSet
 from .distribution import DistributionViewSet, MyDistributionViewSet
 from .execution_environment import (
-    ContainerNamespaceViewSet,
     ContainerRegistryRemoteViewSet,
     ContainerRemoteViewSet
 )
@@ -39,7 +38,6 @@ __all__ = (
     'GroupUserViewSet',
     'DistributionViewSet',
     'MyDistributionViewSet',
-    'ContainerNamespaceViewSet',
     'ContainerRegistryRemoteViewSet',
     'ContainerRemoteViewSet',
     'ContainerTagViewset'

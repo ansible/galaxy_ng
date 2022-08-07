@@ -8,9 +8,8 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.ui import serializers
-from galaxy_ng.app.tasks.deletion import (
-    delete_container_distribution,
-    delete_container_image_manifest,
+from galaxy_ng.app.api.v3.serializers import (
+    ContainerRemoteSerializer
 )
 
 log = logging.getLogger(__name__)

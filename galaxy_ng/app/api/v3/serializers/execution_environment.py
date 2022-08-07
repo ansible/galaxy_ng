@@ -16,7 +16,7 @@ from pulp_container.app import serializers as container_serializers
 from pulpcore.plugin import models as core_models
 
 from galaxy_ng.app import models
-from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
+from galaxy_ng.app.access_control.fields import MyPermissionsField
 from galaxy_ng.app.api import utils
 
 namespace_fields = ("name", "my_permissions", "owners")
@@ -60,18 +60,6 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
         return get_users_with_perms(
             namespace, with_group_users=False
         ).values_list("username", flat=True)
-
-
-class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):
-    groups = GroupPermissionField()
-
-    class Meta:
-        model = models.ContainerNamespace
-        fields = namespace_fields + ("groups",)
-        read_only_fields = (
-            "name",
-            "my_permissions",
-        )
 
 
 class ContainerRemoteSerializer(

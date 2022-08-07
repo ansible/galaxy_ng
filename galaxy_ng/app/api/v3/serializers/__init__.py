@@ -23,7 +23,6 @@ from .execution_environment import (
     ContainerManifestDetailSerializer,
     ContainerReadmeSerializer,
     ContainerRepositoryHistorySerializer,
-    ContainerNamespaceDetailSerializer,
     ContainerRemoteSerializer
 )
 
@@ -41,6 +40,5 @@ __all__ = (
     'ContainerTagSerializer',
     'ContainerManifestDetailSerializer',
     'ContainerReadmeSerializer',
-    'ContainerNamespaceDetailSerializer',
     'ContainerRemoteSerializer'
 )

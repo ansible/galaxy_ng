@@ -299,10 +299,6 @@ class ContainerReadmeAccessPolicy(AccessPolicyBase):
         return has_model_or_object_permissions(request.user, permission, readme.container.namespace)
 
 
-class ContainerNamespaceAccessPolicy(AccessPolicyBase):
-    NAME = "ContainerNamespaceViewset"
-
-
 class ContainerRegistryRemoteAccessPolicy(AccessPolicyBase):
     NAME = "ContainerRegistryRemoteViewSet"
 

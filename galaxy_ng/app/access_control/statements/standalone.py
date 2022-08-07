@@ -342,20 +342,6 @@ STANDALONE_STATEMENTS = {
         },
     ],
 
-    'ContainerNamespaceViewset': [
-        {
-            "action": ["list", "retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-        {
-            "action": ["update"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_concrete_perms:container.change_containernamespace"
-        },
-    ],
-
     'ContainerRegistryRemoteViewSet': [
         # prevents deletion of registry
         {
