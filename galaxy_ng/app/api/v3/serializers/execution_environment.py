@@ -269,8 +269,8 @@ class ManifestListSerializer(serializers.ModelSerializer):
 class ContainerTagSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='pk')
     pulp_href = DetailIdentityField(view_name='content-container/tags-detail')
-    created_at = serializers.DateTimeField(source='pulp_created')
-    updated_at = serializers.DateTimeField(source='pulp_last_updated')
+    created_at = serializers.DateTimeField(source='pulp_created', required=False)
+    updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
     tagged_manifest = ManifestListSerializer()
 
     class Meta:
@@ -292,8 +292,8 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
     layers = serializers.SerializerMethodField()
     image_manifests = ManifestListManifestSerializer(many=True)
     pulp_href = DetailIdentityField(view_name='galaxy:api:v3:container-repository-images')
-    created_at = serializers.DateTimeField(source='pulp_created')
-    updated_at = serializers.DateTimeField(source='pulp_last_updated')
+    created_at = serializers.DateTimeField(source='pulp_created', required=False)
+    updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
 
     class Meta:
         model = container_models.Manifest
@@ -357,8 +357,8 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='pulp_id')
     added = serializers.SerializerMethodField()
     removed = serializers.SerializerMethodField()
-    created_at = serializers.DateTimeField(source='pulp_created')
-    updated_at = serializers.DateTimeField(source='pulp_last_updated')
+    created_at = serializers.DateTimeField(source='pulp_created', required=False)
+    updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
 
     class Meta:
         model = core_models.RepositoryVersion
@@ -393,8 +393,8 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
 
 
 class ContainerReadmeSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(source='created')
-    updated_at = serializers.DateTimeField(source='updated')
+    created_at = serializers.DateTimeField(source='created', required=False, read_only=True)
+    updated_at = serializers.DateTimeField(source='updated', required=False)
 
     class Meta:
         model = models.ContainerDistroReadme
