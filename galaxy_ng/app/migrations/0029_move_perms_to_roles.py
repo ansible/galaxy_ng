@@ -420,6 +420,18 @@ def edit_guardian_tables(apps, schema_editor):
                 )                
 
 
+def clear_model_permissions(apps, schema_editor):
+    """
+    Clear out the old model level permission assignments.
+    """
+
+    Group = apps.get_model("galaxy", "Group")
+    User = apps.get_model(settings.AUTH_USER_MODEL)
+
+    Group.permissions.through.objects.all().delete()
+    User.user_permissions.through.objects.all().delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -435,5 +447,8 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(
             code=edit_guardian_tables, reverse_code=migrations.RunPython.noop
+        ),
+        migrations.RunPython(
+            code=clear_model_permissions, reverse_code=migrations.RunPython.noop
         ),
     ]
