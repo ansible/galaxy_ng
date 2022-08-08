@@ -10,7 +10,8 @@ from .utils import (
     del_container,
     gen_registry,
     gen_remote_container,
-    cleanup_test_obj
+    cleanup_test_obj,
+    podman_push
 )
 
 IMAGE_NAME = CONTAINER_IMAGE[0]
@@ -168,99 +169,57 @@ def change_ee_namespace(user, password, expect_pass, extra):
 
 
 def create_ee_local(user, password, expect_pass, extra):
-    # waiting on pulp container fix
-    pass
+    name = gen_string()
+    return_code = podman_push(user['username'], password, name)
 
-    # return_code = podman_login(user['username'], password)
-    # if return_code == 0:
-    #     return_code = podman_build_and_tag(user['username'], index=0)
-    # if return_code == 0:
-    #     return_code = podman_push(tag=user['username'], index=0)
-    # if expect_pass:
-    #     assert return_code == 0
-    # else:
-    #     assert return_code != 0
+    if return_code == 0:
+        del_container(name)
+
+    if expect_pass:
+        assert return_code == 0
+    else:
+        assert return_code != 0
 
 
 def create_ee_in_existing_namespace(user, password, expect_pass, extra):
-    # waiting on pulp container fix
-    pass
+    namespace = extra["local_ee"].get_namespace()["name"]
+    name = f"{namespace}/{gen_string()}"
 
-    # return_code = podman_login(ADMIN_USER, ADMIN_PASSWORD)
-    # if return_code == 0:
-    #     return_code = podman_build_and_tag(tag=user['username'], index=0)
-    # if return_code == 0:
-    #     return_code = podman_push(tag=ADMIN_USER, index=0)
+    return_code = podman_push(user['username'], password, name)
 
-    # # push new container to existing namespace
-    # return_code = podman_login(user['username'], password)
-    # if return_code == 0:
-    #     return_code = podman_build_and_tag(tag=user['username'], index=1)
-    # if return_code == 0:
-    #     return_code = podman_push(tag=user['username'], index=1)
+    if return_code == 0:
+        del_container(name)
 
-    # if expect_pass:
-    #     assert return_code == 0
-    # else:
-    #     assert return_code != 0
+    if expect_pass:
+        assert return_code == 0
+    else:
+        assert return_code != 0
 
 
 def push_updates_to_existing_ee(user, password, expect_pass, extra):
-    # waiting on pulp container fix
-    pass
+    container = extra["local_ee"].get_container()["name"]
+    tag = gen_string()
 
-    # # create container
-    # return_code = podman_login(ADMIN_USER, ADMIN_PASSWORD)
-    # if return_code == 0:
-    #     return_code = podman_build_and_tag(tag=ADMIN_USER, index=0)
-    # if return_code == 0:
-    #     return_code = podman_push(tag=ADMIN_USER, index=0)
+    return_code = podman_push(user['username'], password, container, tag=tag)
 
-    # # repush existing container
-    # return_code = podman_login(user['username'], password)
-    # if return_code == 0:
-    #     return_code = podman_build_and_tag(tag=user['username'], index=0)
-    # if return_code == 0:
-    #     return_code = podman_push(tag=user, index=0)
-    # if expect_pass:
-    #     assert return_code == 0
-    # else:
-    #     assert return_code != 0
+    if expect_pass:
+        assert return_code == 0
+    else:
+        assert return_code != 0
 
 
 def change_ee_tags(user, password, expect_pass, extra):
-    # waiting on pulp container fix
-    pass
+    manifest = extra["local_ee"].get_manifest()
+    repo_pk = extra["local_ee"].get_container()["pulp"]["repository"]["pulp_id"]
+    tag = gen_string()
 
-    # # create container namespace
-    # return_code = podman_login(ADMIN_USER, ADMIN_PASSWORD)
-    # if return_code == 0:
-    #     return_code = podman_build_and_tag(tag=user['username'], index=0)
-    # if return_code == 0:
-    #     return_code = podman_push(tag=ADMIN_USER, index=0)
+    response = requests.post(
+        f'{PULP_API_ROOT}repositories/container/container-push/{repo_pk}/tag/',
+        json={
+            'digest': manifest['digest'],
+            'tag': tag
+        },
+        auth=(user['username'], password)
+    )
 
-    # # get image & push container data
-    # image_data = get_container_image_data()
-    # push_container_pk = get_push_container_pk()
-    # # Tag
-    # response = requests.post(
-    #     f'{PULP_API_ROOT}repositories/container/container-push/{push_container_pk}/tag/',
-    #     json={
-    #         'digest': image_data['digest'],
-    #         'tag': user['username']
-    #     },
-    #     auth=(user['username'], password)
-    # )
-    # assert_pass(expect_pass, response.status_code, 202, 403)
-    # if response.status_code == 202:
-    #     wait_for_task(response)
-
-    # # Untag
-    # response = requests.post(
-    #     f'{PULP_API_ROOT}repositories/container/container-push/{push_container_pk}/untag/',
-    #     json={'tag': user['username']},
-    #     auth=(user['username'], password)
-    # )
-    # assert_pass(expect_pass, response.status_code, 202, 403)
-    # if response.status_code == 202:
-    #     wait_for_task(response)
+    assert_pass(expect_pass, response.status_code, 202, 403)
