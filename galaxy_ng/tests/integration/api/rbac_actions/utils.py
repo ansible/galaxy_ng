@@ -2,7 +2,7 @@ import random
 import requests
 import string
 import time
-from subprocess import Popen, PIPE, STDOUT
+import subprocess
 from urllib.parse import urljoin
 from galaxy_ng.tests.integration.utils import (
     build_collection,
@@ -115,10 +115,10 @@ def wait_for_task(resp, path=None, timeout=300):
 
 def ensure_test_container_is_pulled():
     cmd = ["podman", "container", "exists", TEST_CONTAINER]
-    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-    if proc.wait() == 1:
+    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if proc.returncode == 1:
         cmd = ["podman", "image", "pull", "alpine"]
-        Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8").wait()
+        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def podman_push(username, password, container, tag="latest"):
@@ -127,7 +127,7 @@ def podman_push(username, password, container, tag="latest"):
     new_container = f"localhost:5001/{container}:{tag}"
 
     tag_cmd = ["podman", "image", "tag", TEST_CONTAINER, new_container]
-    Popen(tag_cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8").wait()
+    subprocess.run(tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     push_cmd = [
         "podman",
@@ -138,7 +138,7 @@ def podman_push(username, password, container, tag="latest"):
         "--remove-signatures",
         "--tls-verify=false"]
 
-    return Popen(push_cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8").wait()
+    return subprocess.run(push_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode
 
 
 def del_user(pk):
