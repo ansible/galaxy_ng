@@ -13,6 +13,7 @@ from .rbac_actions.utils import (
     API_ROOT,
     NAMESPACE,
     PASSWORD,
+    ReusableLocalContainer,
     create_group_with_user_and_role,
     create_user,
     gen_string,
@@ -305,7 +306,8 @@ def test_global_role_actions(role):
     extra = {
         "collection": ReusableCollection(gen_string()),
         "registry": registry,
-        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk)
+        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk),
+        "local_ee": ReusableLocalContainer(gen_string()),
     }
 
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
@@ -335,6 +337,7 @@ def test_global_role_actions(role):
     extra['collection'].cleanup()
     extra['registry'].cleanup()
     extra['remote_ee'].cleanup()
+    extra['local_ee'].cleanup()
 
     assert failures == []
 
@@ -377,7 +380,8 @@ def test_object_role_actions():
     extra = {
         "collection": ReusableCollection(gen_string(), groups=col_groups),
         "registry": registry,
-        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk, groups=ee_groups)
+        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk, groups=ee_groups),
+        "local_ee": ReusableLocalContainer(gen_string()),
     }
 
     for role in OBJECT_ROLES_TO_TEST:
@@ -400,6 +404,7 @@ def test_object_role_actions():
     extra['collection'].cleanup()
     extra['registry'].cleanup()
     extra['remote_ee'].cleanup()
+    extra['local_ee'].cleanup()
 
     assert failures == []
 
@@ -412,7 +417,8 @@ def test_role_actions_for_admin():
     extra = {
         "collection": ReusableCollection(gen_string()),
         "registry": registry,
-        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk)
+        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk),
+        "local_ee": ReusableLocalContainer(gen_string()),
     }
     failures = []
 
@@ -426,5 +432,6 @@ def test_role_actions_for_admin():
     extra['collection'].cleanup()
     extra['registry'].cleanup()
     extra['remote_ee'].cleanup()
+    extra['local_ee'].cleanup()
 
     assert failures == []

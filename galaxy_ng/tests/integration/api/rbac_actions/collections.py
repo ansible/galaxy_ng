@@ -1,5 +1,5 @@
 import requests
-from subprocess import Popen, PIPE, STDOUT
+import subprocess
 
 from .utils import (
     API_ROOT,
@@ -89,15 +89,14 @@ def upload_collection_to_namespace(user, password, expect_pass, extra):
         API_ROOT,
         artifact.filename
     ]
-    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-    return_code = proc.wait()
+    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     del_collection(name, extra['collection'].get_namespace()["name"])
 
     if expect_pass:
-        assert return_code == 0
+        assert proc.returncode == 0
     else:
-        assert return_code != 0
+        assert proc.returncode != 0
 
 
 def delete_collection(user, password, expect_pass, extra):
