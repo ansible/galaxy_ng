@@ -1,9 +1,8 @@
-import os
 import random
 import requests
 import string
 import time
-from subprocess import Popen, PIPE, STDOUT
+import subprocess
 from urllib.parse import urljoin
 from galaxy_ng.tests.integration.utils import (
     build_collection,
@@ -34,6 +33,8 @@ TLS_VERIFY = "--tls-verify=false"
 CONTAINER_IMAGE = ["foo/ubi9-minimal", "foo/ubi8-minimal"]
 
 REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n"  # noqa: 501
+
+TEST_CONTAINER = "alpine"
 
 
 class InvalidResponse(Exception):
@@ -112,46 +113,32 @@ def wait_for_task(resp, path=None, timeout=300):
     return resp
 
 
-def podman_login(username, password):
-    cmd = [
+def ensure_test_container_is_pulled():
+    cmd = ["podman", "container", "exists", TEST_CONTAINER]
+    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if proc.returncode == 1:
+        cmd = ["podman", "image", "pull", "alpine"]
+        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
+def podman_push(username, password, container, tag="latest"):
+    ensure_test_container_is_pulled()
+
+    new_container = f"localhost:5001/{container}:{tag}"
+
+    tag_cmd = ["podman", "image", "tag", TEST_CONTAINER, new_container]
+    subprocess.run(tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    push_cmd = [
         "podman",
-        "login",
-        "--username",
-        f"{username}",
-        "--password",
-        f"{password}",
-        "localhost:5001",
-        TLS_VERIFY
-    ]
-    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-    return proc.wait()
-
-
-def podman_build_and_tag(tag='rbac_roles_test', index=0):
-    cmd = [
-        "podman",
-        "image",
-        "build",
-        "-t",
-        f"localhost:5001/{CONTAINER_IMAGE[index]}:{tag}",
-        f"{os.path.dirname(__file__)}/",
-        TLS_VERIFY
-    ]
-    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-    return proc.wait()
-
-
-def podman_push(tag='rbac_roles_test', index=0):
-    cmd = [
-        "podman",
-        "image",
         "push",
-        f"localhost:5001/{CONTAINER_IMAGE[index]}:{tag}",
+        "--creds",
+        f"{username}:{password}",
+        new_container,
         "--remove-signatures",
-        TLS_VERIFY
-    ]
-    proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, encoding="utf-8")
-    return proc.wait()
+        "--tls-verify=false"]
+
+    return subprocess.run(push_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode
 
 
 def del_user(pk):
@@ -482,14 +469,48 @@ class ReusableRemoteContainer:
 
 
 class ReusableLocalContainer:
-    def __init__(self, name, groups):
+    def __init__(self, name, groups=None):
         self._ns_name = f"ee_ns_{name}"
-        self._name = f"ee_local_{name}"
+        self._repo_name = f"ee_local_{name}"
+        self._name = f"{self._ns_name}/{self._repo_name}"
+        self._groups = groups or []
 
-        self._groups = groups
+        self._reset()
 
     def _reset(self):
-        pass
+        podman_push(ADMIN_USER, ADMIN_PASSWORD, self._name)
+
+        self._namespace = requests.put(
+            f"{API_ROOT}_ui/v1/execution-environments/namespaces/{self._ns_name}/",
+            json={
+                "name": self._ns_name,
+                "groups": self._groups
+
+            },
+            auth=ADMIN_CREDENTIALS
+        ).json()
+
+        self._container = requests.get(
+            f"{API_ROOT}_ui/v1/execution-environments/repositories/{self._name}/",
+            auth=ADMIN_CREDENTIALS
+        ).json()
+
+        self._manifest = requests.get(
+            (
+                f"{API_ROOT}_ui/v1/execution-environments/"
+                f"repositories/{self._name}/_content/images/latest/"
+            ),
+            auth=ADMIN_CREDENTIALS
+        ).json()
 
     def get_container(self):
-        pass
+        return self._container
+
+    def get_namespace(self):
+        return self._namespace
+
+    def get_manifest(self):
+        return self._manifest
+
+    def cleanup(self):
+        del_container(self._name)

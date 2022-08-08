@@ -1,7 +1,6 @@
 """Utilities for tests for the galaxy plugin."""
 import os
 from functools import partial
-import random
 import requests
 from unittest import SkipTest
 from tempfile import NamedTemporaryFile
@@ -189,11 +188,13 @@ class TestCaseUsingBindings(PulpTestCase):
         cls.container_repo_api = ContainerRepositoryApi(cls.client)
         cls.container_remotes_api = ApiUiV1ExecutionEnvironmentsRemotesApi(cls.client)
         cls.container_registries_api = ApiUiV1ExecutionEnvironmentsRegistriesApi(cls.client)
-        cls.container_remote_sync_api = ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
+        cls.container_remote_sync_api = \
+            ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
         cls.container_registry_sync_api = ApiUiV1ExecutionEnvironmentsRegistriesSyncApi(cls.client)
         cls.container_images_api = ContainerImagesAPI(cls.client)
         cls.get_ansible_cfg_before_test()
-        cls.galaxy_api_prefix = os.getenv("PULP_GALAXY_API_PATH_PREFIX", "/api/galaxy").rstrip("/")
+        cls.galaxy_api_prefix = os.getenv(
+            "PULP_GALAXY_API_PATH_PREFIX", "/api/galaxy").rstrip("/")
 
     def tearDown(self):
         """Clean class-wide variable."""
@@ -244,7 +245,6 @@ class TestCaseUsingBindings(PulpTestCase):
         response = self.sync_api.sync(repo_name)
         api_root = os.environ.get("PULP_API_ROOT", "/pulp/")
         monitor_task(f"{api_root}api/v3/tasks/{response.task}/")
-
 
     def delete_namespace(self, namespace_name):
         """Delete a Namespace"""
