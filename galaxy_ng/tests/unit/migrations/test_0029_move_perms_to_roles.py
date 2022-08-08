@@ -189,6 +189,8 @@ class TestMigratingPermissionsToRoles(TestCase):
         migration = importlib.import_module("galaxy_ng.app.migrations.0029_move_perms_to_roles")
         migration.migrate_group_permissions_to_roles(apps, None)
         migration.migrate_user_permissions_to_roles(apps, None)
+        migration.edit_guardian_tables(apps, None)
+        migration.clear_model_permissions(apps, None)
 
 
     def _create_user_and_group_with_permissions(self, name, permissions, obj=None):
