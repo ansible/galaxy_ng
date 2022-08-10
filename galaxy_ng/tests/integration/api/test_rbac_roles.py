@@ -13,7 +13,6 @@ from .rbac_actions.utils import (
     API_ROOT,
     NAMESPACE,
     PASSWORD,
-    ReusableLocalContainer,
     create_group_with_user_and_role,
     create_user,
     gen_string,
@@ -21,8 +20,8 @@ from .rbac_actions.utils import (
     del_group,
     ReusableCollection,
     ReusableContainerRegistry,
-    # ReusableLocalContainer,  # waiting on pulp container fix
-    ReusableRemoteContainer
+    ReusableRemoteContainer,
+    ReusableLocalContainer,
 )
 
 from .rbac_actions.auth import (
@@ -328,19 +327,33 @@ ACTIONS_FOR_ALL_USERS = {
 }
 
 
+REUSABLE_EXTRA = {}
+
+
+# initialize the extra objects once for all the tests. This saves ~20 seconds per test
+def _get_reusable_extras():
+    global REUSABLE_EXTRA
+
+    if len(REUSABLE_EXTRA) == 0:
+        _registry = ReusableContainerRegistry(gen_string())
+        _registry_pk = _registry.get_registry()["pk"]
+
+        REUSABLE_EXTRA = {
+            "collection": ReusableCollection(gen_string()),
+            "registry": _registry,
+            "remote_ee": ReusableRemoteContainer(gen_string(), _registry_pk),
+            "local_ee": ReusableLocalContainer(gen_string()),
+        }
+
+    return REUSABLE_EXTRA
+
+
 @pytest.mark.rbac_roles
 @pytest.mark.standalone_only
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
 def test_global_role_actions(role):
     registry = ReusableContainerRegistry(gen_string())
     registry_pk = registry.get_registry()["id"]
-
-    extra = {
-        "collection": ReusableCollection(gen_string()),
-        "registry": registry,
-        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk),
-        "local_ee": ReusableLocalContainer(gen_string()),
-    }
 
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
@@ -349,6 +362,8 @@ def test_global_role_actions(role):
     group_id = group['id']
 
     expected_allows = ROLES_TO_TEST[role]
+
+    extra = _get_reusable_extras()
 
     failures = []
     # Test global actions
@@ -365,11 +380,6 @@ def test_global_role_actions(role):
 
     del_user(user['id'])
     del_group(group_id)
-
-    extra['collection'].cleanup()
-    extra['registry'].cleanup()
-    extra['remote_ee'].cleanup()
-    extra['local_ee'].cleanup()
 
     assert failures == []
 
@@ -434,10 +444,10 @@ def test_object_role_actions():
         del_user(users_and_groups[role]['user']['id'])
         del_group(users_and_groups[role]['group']['id'])
 
-    extra['collection'].cleanup()
-    extra['registry'].cleanup()
-    extra['remote_ee'].cleanup()
-    extra['local_ee'].cleanup()
+    del extra['collection']
+    del extra['registry']
+    del extra['remote_ee']
+    del extra['local_ee']
 
     assert failures == []
 
@@ -448,12 +458,7 @@ def test_role_actions_for_admin():
     registry = ReusableContainerRegistry(gen_string())
     registry_pk = registry.get_registry()["id"]
 
-    extra = {
-        "collection": ReusableCollection(gen_string()),
-        "registry": registry,
-        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk),
-        "local_ee": ReusableLocalContainer(gen_string()),
-    }
+    extra = _get_reusable_extras()
     failures = []
 
     # Test global actions
@@ -462,10 +467,5 @@ def test_role_actions_for_admin():
             action({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
         except AssertionError:
             failures.append(action.__name__)
-
-    extra['collection'].cleanup()
-    extra['registry'].cleanup()
-    extra['remote_ee'].cleanup()
-    extra['local_ee'].cleanup()
 
     assert failures == []

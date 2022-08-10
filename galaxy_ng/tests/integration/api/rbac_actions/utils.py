@@ -114,7 +114,7 @@ def wait_for_task(resp, path=None, timeout=300):
 
 
 def ensure_test_container_is_pulled():
-    cmd = ["podman", "container", "exists", TEST_CONTAINER]
+    cmd = ["podman", "image", "exists", TEST_CONTAINER]
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if proc.returncode == 1:
         cmd = ["podman", "image", "pull", "alpine"]
@@ -364,6 +364,9 @@ class ReusableCollection:
         wait_for_all_tasks()
         del_namespace(namespace['name'])
 
+    def __del__(self):
+        self.cleanup()
+
 
 def cleanup_test_obj(response, pk, del_func):
     data = response.json()
@@ -431,6 +434,9 @@ class ReusableContainerRegistry:
     def cleanup(self):
         del_registry(self._registry["id"])
 
+    def __del__(self):
+        self.cleanup()
+
 
 class ReusableRemoteContainer:
     def __init__(self, name, registry_pk, groups=None):
@@ -490,6 +496,9 @@ class ReusableRemoteContainer:
 
     def cleanup(self):
         del_container(f"{self._ns_name}/{self._name}")
+
+    def __del__(self):
+        self.cleanup()
 
 
 class ReusableLocalContainer:
@@ -556,3 +565,6 @@ class ReusableLocalContainer:
 
     def cleanup(self):
         del_container(self._name)
+
+    def __del__(self):
+        self.cleanup()
