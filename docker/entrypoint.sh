@@ -97,7 +97,8 @@ run_service() {
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
         setup_signing_keyring
         setup_repo_keyring &
-        setup_signing_service
+        setup_collection_signing_service & 
+        setup_container_signing_service
     elif [[ "$ENABLE_SIGNING" -eq "2" ]]; then
         setup_signing_keyring
         setup_repo_keyring &
@@ -114,14 +115,14 @@ run_manage() {
 
     if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
         setup_signing_keyring
-        setup_signing_service
+        setup_collection_signing_service &
+        setup_container_signing_service
     elif [[ "$ENABLE_SIGNING" -eq "2" ]]; then
         setup_signing_keyring
     fi
 
     exec django-admin "$@"
 }
-
 
 setup_signing_keyring() {
     log_message "Setting up signing keyring."
@@ -151,8 +152,8 @@ setup_repo_keyring() {
     fi
 }
 
-setup_signing_service() {
-    log_message "Setting up signing service."
+setup_collection_signing_service() {
+    log_message "Setting up collection signing service."
     export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
     export KEY_ID=${KEY_FINGERPRINT: -16}
     gpg --batch --import /tmp/ansible-sign.key &>/dev/null
@@ -164,6 +165,29 @@ setup_signing_service() {
         django-admin add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh ${KEY_ID} 2>/dev/null || true
     else
         log_message "Signing service already exists."
+    fi
+
+}
+
+setup_container_signing_service() {
+
+    if ! skopeo --version > /dev/null; then
+        log_message 'WARNING: skopeo is not installed. Skipping container signing service setup.'
+        return
+    fi
+
+    log_message "Setting up container signing service."
+    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /tmp/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
+    export KEY_ID=${KEY_FINGERPRINT: -16}
+    gpg --batch --import /tmp/ansible-sign.key &>/dev/null
+    echo "${KEY_FINGERPRINT}:6:" | gpg --import-ownertrust &>/dev/null
+
+    HAS_CONTAINER_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="container-default").count())' 2>/dev/null || true)
+    if [[ "$HAS_CONTAINER_SIGNING" -eq "0" ]]; then
+        log_message "Creating container signing service. using key ${KEY_ID}"
+        django-admin add-signing-service container-default /var/lib/pulp/scripts/container_sign.sh ${KEY_ID} --class container:ManifestSigningService 2>/dev/null || true
+    else
+        log_message "Container signing service already exists."
     fi
 }
 

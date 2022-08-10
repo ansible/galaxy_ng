@@ -92,7 +92,8 @@ schema_settings = {
         'GALAXY_REQUIRE_CONTENT_APPROVAL',
         'GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL',
         'GALAXY_SIGNATURE_UPLOAD_ENABLED',
-        'GALAXY_TOKEN_EXPIRATION'
+        'GALAXY_TOKEN_EXPIRATION',
+        'GALAXY_CONTAINER_SIGNING_SERVICE',
     ],
     'properties': {
         'GALAXY_AUTO_SIGN_COLLECTIONS': {'type': 'boolean'},
@@ -105,6 +106,7 @@ schema_settings = {
         'GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL': {'type': 'boolean'},
         'GALAXY_SIGNATURE_UPLOAD_ENABLED': {'type': 'boolean'},
         'GALAXY_TOKEN_EXPIRATION': {'type': ['number', 'null']},  # FIXME
+        'GALAXY_CONTAINER_SIGNING_SERVICE': {'type': 'string'},
     }
 }
 
@@ -121,6 +123,7 @@ schema_featureflags = {
         'collection_auto_sign',
         'display_signatures',
         'execution_environments',
+        'container_signing',
         '_messages',
     ],
     'properties': {
@@ -132,6 +135,7 @@ schema_featureflags = {
         'collection_auto_sign': {'type': 'boolean'},
         'display_signatures': {'type': 'boolean'},
         'execution_environments': {'type': 'boolean'},
+        'container_signing': {'type': 'boolean'},
         '_messages': {'type': 'array'},
     }
 }

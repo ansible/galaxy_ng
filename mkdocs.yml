@@ -13,6 +13,7 @@ nav:
         # - Galaxy client configuration: config/galaxy_cli.md
         - Managing user access: config/user_access.md
         - Enabling collection signing: config/collection_signing.md
+        - Enabling Container signing: config/container_signing.md
     # - Content Management:
     #     - How content is organized: content/organization.md
     #     - Collections:

@@ -155,7 +155,7 @@ PULP_CONTAINER_VIEWSETS = {
                 "condition": "has_namespace_or_obj_perms:container.view_containerpushrepository",
             },
             {
-                "action": ["tag", "untag", "remove_image"],
+                "action": ["tag", "untag", "remove_image", "sign", "remove_signatures"],
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": [

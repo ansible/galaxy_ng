@@ -190,8 +190,11 @@ GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL = False
 # With this set to True, all the approved collections will be also signed
 GALAXY_AUTO_SIGN_COLLECTIONS = False
 
-# This sets the name of the signing service to be used for signing
+# This sets the name of the signing service to be used for signing collections
 GALAXY_COLLECTION_SIGNING_SERVICE = None
+
+# This sets the name of the signing service to be used for signing containers
+GALAXY_CONTAINER_SIGNING_SERVICE = None
 
 AUTH_LDAP_SERVER_URI = None
 AUTH_LDAP_BIND_DN = None
