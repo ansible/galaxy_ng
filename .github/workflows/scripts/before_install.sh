@@ -122,7 +122,7 @@ fi
 cd ..
 
 
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.13
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.13.2
 cd pulp_ansible
 
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
@@ -132,7 +132,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.10.2
+git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.10.5
 cd pulp_container
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
@@ -142,7 +142,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/ansible/galaxy-importer.git --branch v0.4.2
+git clone --depth=1 https://github.com/ansible/galaxy-importer.git --branch v0.4.5
 cd galaxy-importer
 
 if [ -n "$GALAXY_IMPORTER_PR_NUMBER" ]; then
