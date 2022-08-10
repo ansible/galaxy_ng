@@ -5,15 +5,15 @@
 
 additional_repos:
 - bindings: true
-  branch: 0.13
+  branch: 0.13.2
   name: pulp_ansible
   org: pulp
 - bindings: true
-  branch: 2.10.2
+  branch: 2.10.5
   name: pulp_container
   org: pulp
 - bindings: false
-  branch: v0.4.2
+  branch: v0.4.5
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1
