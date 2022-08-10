@@ -1,0 +1,85 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: automation-hub-job
+objects:
+  - apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: automation-hub-job-${IMAGE_TAG}-${JOBID}
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: quay-cloudservices-pull
+          containers:
+            - image: ${IMAGE_NAME}:${IMAGE_TAG}
+              imagePullPolicy: IfNotPresent
+              name: automation-hub-job
+              resources:
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
+              command: ["/bin/sh", "-c"]
+              args: ["${ARGS}"]
+              env:
+                - name: RERUN
+                  value: ${RERUN}
+                - name: ACG_CONFIG
+                  value: /cdapp/cdappconfig.json
+                - name: PULP_GALAXY_DEPLOYMENT_MODE
+                  value: "insights"
+                - name: PULP_CONTENT_ORIGIN
+                  value: ${CONTENT_ORIGIN}
+                - name: PULP_RH_ENTITLEMENT_REQUIRED
+                  value: "insights"
+                - name: PULP_X_PULP_CONTENT_HOST
+                  value: "automation-hub-pulp-content-app-cwa"
+                - name: PULP_X_PULP_CONTENT_PORT
+                  value: "10000"
+                - name: PULP_REDIS_SSL
+                  value: "true"
+              volumeMounts:
+                - name: pulp-key
+                  mountPath: /etc/pulp/certs/database_fields.symmetric.key
+                  subPath: database_fields.symmetric.key
+                - name: config-secret
+                  mountPath: /cdapp
+          volumes:
+            - name: pulp-key
+              secret:
+                secretName: pulp-key
+            - name: config-secret
+              secret:
+                secretName: automation-hub
+
+parameters:
+  - name: ARGS
+    value: echo "please provide ARGS parameter to run a command"
+  - name: RERUN
+    value: "0"
+  - name: CONTENT_ORIGIN
+    value: localhost
+
+  - name: IMAGE_NAME
+    value: quay.io/cloudservices/automation-hub-galaxy-ng
+  - name: IMAGE_TAG
+    required: true
+  - name: JOBID
+    generate: expression
+    from: "[0-9a-z]{5}"
+
+  - name: MEMORY_REQUEST
+    value: 1024Mi
+  - name: MEMORY_LIMIT
+    value: 2048Mi
+  - name: CPU_REQUEST
+    value: 250m
+  - name: CPU_LIMIT
+    value: 1000m
