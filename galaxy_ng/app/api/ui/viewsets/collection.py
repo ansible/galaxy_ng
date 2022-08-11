@@ -141,7 +141,12 @@ class CollectionViewSet(
             name=self.kwargs["name"],
         )
         return get_object_or_404(
-            base_qs.annotate(**self.build_signing_annotations(base_qs)),
+            base_qs.annotate(
+            sign_state=Case(
+                When(signatures__isnull=False, then=Value("signed")),
+                When(signatures__isnull=True, then=Value("unsigned")),
+    )
+),
             version=version,
         )
 
