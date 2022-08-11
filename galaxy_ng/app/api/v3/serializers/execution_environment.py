@@ -9,7 +9,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 
 from pulpcore.plugin.util import get_users_with_perms
-from pulpcore.app.serializers import DetailIdentityField
+from pulpcore.plugin.serializers import IdentityField
 
 from pulp_container.app import models as container_models
 from pulp_container.app import serializers as container_serializers
@@ -187,7 +187,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
-    pulp_href = DetailIdentityField(view_name='distributions-container/container-detail')
+    pulp_href = IdentityField(view_name='distributions-container/container-detail')
 
     # This serializer is purposfully refraining from using pulp fields directly
     # in the top level response body. This is because future versions of hub will have to
@@ -268,7 +268,7 @@ class ManifestListSerializer(serializers.ModelSerializer):
 
 class ContainerTagSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='pk')
-    pulp_href = DetailIdentityField(view_name='content-container/tags-detail')
+    pulp_href = IdentityField(view_name='content-container/tags-detail')
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
     tagged_manifest = ManifestListSerializer()
@@ -291,7 +291,7 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     layers = serializers.SerializerMethodField()
     image_manifests = ManifestListManifestSerializer(many=True)
-    pulp_href = DetailIdentityField(view_name='galaxy:api:v3:container-repository-images')
+    pulp_href = IdentityField(view_name='content-container/manifests-detail')
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
 
