@@ -5,7 +5,7 @@
 
 additional_repos:
 - bindings: true
-  branch: 0.13
+  branch: 0.13.2
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -13,7 +13,7 @@ additional_repos:
   name: pulp_container
   org: pulp
 - bindings: false
-  branch: v0.4.2
+  branch: v0.4.5
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1
@@ -75,7 +75,7 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: 3.18.1
+pulpcore_branch: 3.18.6
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
