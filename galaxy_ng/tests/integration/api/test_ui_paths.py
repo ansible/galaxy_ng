@@ -4,29 +4,31 @@ import random
 import time
 
 import pytest
+from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
 
-from ..constants import DEFAULT_DISTROS
-from ..constants import SLEEP_SECONDS_POLLING
-from ..utils import UIClient
+from ..constants import DEFAULT_DISTROS, SLEEP_SECONDS_POLLING
 from ..schemas import (
-    schema_objectlist,
-    schema_user,
-    schema_me,
-    schema_settings,
-    schema_featureflags,
-    schema_distro,
-    schema_distro_repository,
-    schema_remote,
-    schema_group,
-    schema_collectionversion,
-    schema_collectionversion_metadata,
     schema_collection_import,
     schema_collection_import_detail,
+    schema_collectionversion,
+    schema_collectionversion_metadata,
+    schema_distro,
+    schema_distro_repository,
     schema_ee_registry,
+    schema_featureflags,
+    schema_group,
+    schema_me,
+    schema_objectlist,
+    schema_remote,
+    schema_settings,
     schema_task,
     schema_task_detail,
+    schema_user,
 )
+from ..utils import UIClient, get_client
+
+REGEX_403 = r"HTTP Code: 403"
 
 
 # /api/automation-hub/_ui/v1/auth/login/
@@ -677,3 +679,61 @@ def test_api_ui_v1_users_by_id(ansible_config):
         assert ds['username'] == 'jdoe'
         assert ds['is_superuser'] is False
         assert {'id': 2, 'name': 'system:partner-engineers'} in ds['groups']
+
+
+# /api/automation-hub/_ui/v1/users/
+@pytest.mark.cloud_only
+@pytest.mark.api_ui
+def test_users_list_insights_access(ansible_config):
+    """Check insights mode access to users endpoint"""
+    url = "/api/automation-hub/_ui/v1/users/"
+
+    config = ansible_config("basic_user")
+    api_client = get_client(config, request_token=True, require_auth=True)
+
+    with pytest.raises(GalaxyError, match=REGEX_403):
+        api_client(url, method="GET")
+
+    with pytest.raises(GalaxyError, match=REGEX_403):
+        api_client(url, method="POST", args=b"{}")
+
+    config = ansible_config("partner_engineer")
+    api_client = get_client(config, request_token=True, require_auth=True)
+
+    resp = api_client(url, method="GET")
+    assert "data" in resp.keys()
+
+    with pytest.raises(GalaxyError, match=REGEX_403):
+        api_client(url, method="POST", args=b"{}")
+
+
+# /api/automation-hub/_ui/v1/users/{id}/
+@pytest.mark.cloud_only
+@pytest.mark.api_ui
+def test_users_detail_insights_access(ansible_config):
+    """Check insights mode access to users endpoint"""
+    url = "/api/automation-hub/_ui/v1/users/1/"
+
+    config = ansible_config("basic_user")
+    api_client = get_client(config, request_token=True, require_auth=True)
+
+    with pytest.raises(GalaxyError, match=REGEX_403):
+        api_client(url, method="GET")
+
+    with pytest.raises(GalaxyError, match=REGEX_403):
+        api_client(url, method="PUT")
+
+    with pytest.raises(GalaxyError, match=REGEX_403):
+        api_client(url, method="DELETE")
+
+    config = ansible_config("partner_engineer")
+    api_client = get_client(config, request_token=True, require_auth=True)
+
+    user = api_client(url, method="GET")
+    assert user["id"] == 1
+
+    put_resp = api_client(url, method="PUT", args=user)
+    assert put_resp == user
+
+    with pytest.raises(GalaxyError, match=REGEX_403):
+        api_client(url, method="DELETE")
