@@ -8,12 +8,11 @@ def update_collection_remote_rhcertified_url(apps, schema_editor):
     
     CollectionRemote = apps.get_model('ansible', 'CollectionRemote')
     
-    rh_remote = CollectionRemote.objects.filter(
-        name='rh-certified',
-        url__startswith='https://cloud.redhat.com/')
+    rh_remote = CollectionRemote.objects.get(name='rh-certified')
 
-    if rh_remote:
-        rh_remote.update(url='https://console.redhat.com/api/automation-hub/')
+    if rh_remote and rh_remote.url.startswith('https://cloud.redhat.com/'):
+        rh_remote.url = rh_remote.url.replace('https://cloud.redhat.com/', 'https://console.redhat.com/')
+        rh_remote.save()
 
 
 class Migration(migrations.Migration):
