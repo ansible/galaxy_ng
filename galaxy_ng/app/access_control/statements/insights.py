@@ -174,7 +174,25 @@ INSIGHTS_STATEMENTS = {
             "condition": "has_model_perms:ansible.change_collectionremote",
         },
     ],
-    "UserViewSet": _deny_all,
+    "UserViewSet": [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": ["has_model_perms:galaxy.view_user", "has_rh_entitlements"],
+        },
+        {
+            "action": ["update", "partial_update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": ["has_model_perms:galaxy.change_user", "has_rh_entitlements"],
+        },
+        {
+            "action": ["create", "destroy"],
+            "principal": "*",
+            "effect": "deny",
+        },
+    ],
     "MyUserViewSet": [
         {
             "action": ["retrieve"],
