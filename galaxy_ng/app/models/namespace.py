@@ -3,7 +3,6 @@ from django.db import models
 from django.db import transaction
 from django.db import IntegrityError
 from django_lifecycle import LifecycleModel
-from pulpcore.plugin.models import AutoDeleteObjPermsMixin
 from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution
 
 from galaxy_ng.app.access_control import mixins
@@ -18,7 +17,7 @@ def create_inbound_repo(name):
     with contextlib.suppress(IntegrityError):
         # IntegrityError is suppressed for when the named repo/distro already exists
         # In that cases the error handling is performed on the caller.
-        repo = AnsibleRepository.objects.create(name=inbound_name)
+        repo = AnsibleRepository.objects.create(name=inbound_name, retain_repo_versions=1)
         AnsibleDistribution.objects.create(
             name=inbound_name,
             base_path=inbound_name,
@@ -54,7 +53,7 @@ class NamespaceManager(models.Manager):
         return ns, created
 
 
-class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin, AutoDeleteObjPermsMixin):
+class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin):
     """
     A model representing Ansible content namespace.
 

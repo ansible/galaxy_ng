@@ -84,8 +84,6 @@ PULP_CONTAINER_VIEWSETS = {
                 ],
             },
         ],
-        # Removed permission assignement. Filtering out the container groups
-        # proved to be too much of a challenge.
         "creation_hooks": []
     },
 
@@ -130,28 +128,15 @@ PULP_CONTAINER_VIEWSETS = {
                 "condition": "has_model_or_obj_perms:container.namespace_view_containerdistribution",  # noqa: E501
             },
         ],
-        # Removed group creation for owner. Filtering out the container groups proved to be too
-        # much of a challenge.
         "creation_hooks": [
             {
-                "function": "add_for_object_creator",
-                "parameters": None,
-                "permissions": [
-                    "container.view_containernamespace",
-                    "container.delete_containernamespace",
-                    # Add `container.change_containernamespace` permissions so the namespace
-                    # owner can add additional groups to their namespace.
-                    "container.change_containernamespace",
-                    "container.namespace_add_containerdistribution",
-                    "container.namespace_delete_containerdistribution",
-                    "container.namespace_view_containerdistribution",
-                    "container.namespace_pull_containerdistribution",
-                    "container.namespace_push_containerdistribution",
-                    "container.namespace_change_containerdistribution",
-                    "container.namespace_view_containerpushrepository",
-                    "container.namespace_modify_content_containerpushrepository",
-                ],
-            },
+                "function": "add_roles_for_object_creator",
+                "parameters": {
+                    "roles": [
+                        "galaxy.execution_environment_namespace_owner",
+                    ],
+                },
+            }
         ],
     },
 

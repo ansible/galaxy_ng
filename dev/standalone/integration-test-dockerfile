@@ -4,6 +4,7 @@ WORKDIR /app/
 
 # Install test requirements first to make running the tests faster
 SHELL ["/bin/bash", "-c"] 
+RUN apt-get -y update && apt-get -y install podman
 COPY integration_requirements.txt /app/integration_requirements.txt
 RUN pip install virtualenv && \
     virtualenv /tmp/gng_testing && \

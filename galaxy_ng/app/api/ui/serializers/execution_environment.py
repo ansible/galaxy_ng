@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 
-from guardian.shortcuts import get_users_with_perms
+from pulpcore.plugin.util import get_users_with_perms
 
 from pulp_container.app import models as container_models
 from pulp_container.app import serializers as container_serializers
@@ -38,9 +38,9 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.ListField)
     def get_owners(self, namespace):
-        return get_users_with_perms(namespace, with_group_users=False).values_list(
-            "username", flat=True
-        )
+        return get_users_with_perms(
+            namespace, with_group_users=False, for_concrete_model=True
+        ).values_list("username", flat=True)
 
 
 class ContainerNamespaceDetailSerializer(ContainerNamespaceSerializer):
@@ -182,7 +182,7 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
     def get_config_blob(self, obj):
         if not obj.config_blob:
             return {}
-        return {"digest": obj.config_blob.digest, "media_type": obj.config_blob.media_type}
+        return {"digest": obj.config_blob.digest}
 
     @extend_schema_field(serializers.ListField)
     def get_tags(self, obj):
@@ -228,7 +228,6 @@ class ContainerManifestDetailSerializer(ContainerManifestSerializer):
 
         return {
             "digest": obj.config_blob.digest,
-            "media_type": obj.config_blob.media_type,
             "data": config_json,
         }
 

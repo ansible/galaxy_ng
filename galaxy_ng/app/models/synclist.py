@@ -1,7 +1,6 @@
 from django.db import models
 from django_lifecycle import LifecycleModel
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection
-from pulpcore.plugin.models import AutoDeleteObjPermsMixin
 
 from galaxy_ng.app.access_control.mixins import GroupModelPermissionsMixin
 
@@ -9,7 +8,7 @@ from . import namespace as namespace_models
 
 
 class SyncList(
-    LifecycleModel, GroupModelPermissionsMixin, AutoDeleteObjPermsMixin
+    LifecycleModel, GroupModelPermissionsMixin
 ):
 
     POLICY_CHOICES = [

@@ -2,7 +2,8 @@ import logging
 
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from guardian.shortcuts import get_objects_for_user
+from pulpcore.plugin.util import get_objects_for_user
+
 from rest_framework.decorators import action
 
 from galaxy_ng.app import models
@@ -25,9 +26,8 @@ class MySyncListViewSet(SyncListViewSet):
         return get_objects_for_user(
             self.request.user,
             "galaxy.change_synclist",
-            any_perm=True,
-            accept_global_perms=False,
-            klass=models.SyncList,
+            # any_perm=True,
+            qs=models.SyncList.objects.all(),
         )
 
     # TODO: on UI click of synclist toggle the UI makes 2 calls

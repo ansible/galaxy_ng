@@ -1,15 +1,15 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-129-gf780fda
+# generated with plugin_template@2021.08.26-156-gb5f4d20
 
 additional_repos:
 - bindings: true
-  branch: 0.13.0
+  branch: 0.14.0
   name: pulp_ansible
   org: pulp
 - bindings: true
-  branch: 2.10.2
+  branch: 2.13.1
   name: pulp_container
   org: pulp
 - bindings: false
@@ -17,7 +17,7 @@ additional_repos:
   name: galaxy-importer
   org: ansible
 aiohttp_fixtures_origin: 172.18.0.1
-api_root: "/api/galaxy/pulp/"
+api_root: /api/galaxy/pulp/
 black: false
 check_commit_message: false
 check_gettext: true
@@ -27,7 +27,7 @@ check_stray_pulpcore_imports: true
 cherry_pick_automation: false
 ci_env:
   GITHUB_USER: ${{ github.event.pull_request.user.login }}
-ci_trigger: '{pull_request: {branches: [''*'']}, push: {branches: [''*'']}}'
+ci_trigger: '{pull_request: {branches: [''**'']}, push: {branches: [''**'']}}'
 core_import_allowed:
 - pulpcore.app.*viewsets
 - pulpcore\.app.*admin
@@ -47,6 +47,7 @@ flake8: true
 github_org: ansible
 issue_tracker: null
 keep_ci_update_since_branch: null
+lint_requirements: true
 noissue_marker: No-Issue
 parallel_test_workers: 8
 plugin_app_label: galaxy
@@ -74,7 +75,7 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: 3.18.1
+pulpcore_branch: 3.20.0
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
@@ -87,6 +88,10 @@ release_user: ansible
 run_pulpcore_tests_for_plugins: false
 single_commit_check: false
 stable_branch: stable
+stalebot: true
+stalebot_days_until_close: 30
+stalebot_days_until_stale: 90
+stalebot_limit_to_pulls: true
 sync_ci: false
 tasking_allow_async_unsafe: true
 test_azure: true
@@ -103,3 +108,4 @@ travis_notifications: null
 update_github: false
 upgrade_range: []
 use_issue_template: false
+

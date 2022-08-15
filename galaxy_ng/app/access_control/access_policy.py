@@ -7,7 +7,6 @@ from rest_framework.exceptions import NotFound
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 
-from pulp_container.app.access_policy import NamespacedAccessPolicyMixin
 from pulp_container.app import models as container_models
 
 from galaxy_ng.app import models
@@ -32,6 +31,10 @@ def get_view_urlpattern(view):
     if hasattr(view, "parent_viewset") and view.parent_viewset:
         return os.path.join(view.parent_viewset.urlpattern(), view.urlpattern())
     return view.urlpattern()
+
+
+def has_model_or_object_permissions(user, permission, obj):
+    return user.has_perm(permission) or user.has_perm(permission, obj)
 
 
 class AccessPolicyBase(AccessPolicyFromDB):
@@ -128,7 +131,11 @@ class AccessPolicyBase(AccessPolicyFromDB):
             return False
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
-        return request.user.has_perm("galaxy.upload_to_namespace", namespace)
+        return has_model_or_object_permissions(
+            request.user,
+            "galaxy.upload_to_namespace",
+            namespace
+        )
 
     def can_create_collection(self, request, view, permission):
         data = view._get_data(request)
@@ -136,7 +143,11 @@ class AccessPolicyBase(AccessPolicyFromDB):
             namespace = models.Namespace.objects.get(name=data["filename"].namespace)
         except models.Namespace.DoesNotExist:
             raise NotFound(_("Namespace in filename not found."))
-        return request.user.has_perm("galaxy.upload_to_namespace", namespace)
+        return has_model_or_object_permissions(
+            request.user,
+            "galaxy.upload_to_namespace",
+            namespace
+        )
 
     def can_sign_collections(self, request, view, permission):
         # Repository is required on the CollectionSign payload
@@ -151,8 +162,10 @@ class AccessPolicyBase(AccessPolicyFromDB):
                 namespace = models.Namespace.objects.get(name=namespace)
             except models.Namespace.DoesNotExist:
                 raise NotFound(_('Namespace not found.'))
-            return can_modify_repo and request.user.has_perm(
-                'galaxy.upload_to_namespace', namespace
+            return can_modify_repo and has_model_or_object_permissions(
+                request.user,
+                "galaxy.upload_to_namespace",
+                namespace
             )
 
         # the other filtering options are content_units and name/version
@@ -164,6 +177,20 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
     def unauthenticated_collection_access_enabled(self, request, view, action):
         return settings.GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS
+
+    def has_concrete_perms(self, request, view, action, permission):
+        # Function the same as has_model_or_object_perms, but uses the concrete model
+        # instead of the proxy model
+        if request.user.has_perm(permission):
+            return True
+
+        # if the object is a proxy object, get the concrete object and use that for the
+        # permission comparison
+        obj = view.get_object()
+        if obj._meta.proxy:
+            obj = obj._meta.concrete_model.objects.get(pk=obj.pk)
+
+        return request.user.has_perm(permission, obj)
 
 
 class AppRootAccessPolicy(AccessPolicyBase):
@@ -267,9 +294,7 @@ class ContainerReadmeAccessPolicy(AccessPolicyBase):
 
     def has_container_namespace_perms(self, request, view, action, permission):
         readme = view.get_object()
-        return request.user.has_perm(permission) or request.user.has_perm(
-            permission, readme.container.namespace
-        )
+        return has_model_or_object_permissions(request.user, permission, readme.container.namespace)
 
 
 class ContainerNamespaceAccessPolicy(AccessPolicyBase):
@@ -280,8 +305,43 @@ class ContainerRegistryRemoteAccessPolicy(AccessPolicyBase):
     NAME = "ContainerRegistryRemoteViewSet"
 
 
-class ContainerRemoteAccessPolicy(AccessPolicyBase, NamespacedAccessPolicyMixin):
+class ContainerRemoteAccessPolicy(AccessPolicyBase):
     NAME = "ContainerRemoteViewSet"
+
+    # Copied from pulp_container/app/global_access_conditions.py
+    def has_namespace_or_obj_perms(self, request, view, action, permission):
+        """
+        Check if a user has a namespace-level perms or object-level permission
+        """
+        ns_perm = "container.namespace_{}".format(permission.split(".", 1)[1])
+        if self.has_namespace_obj_perms(request, view, action, ns_perm):
+            return True
+        else:
+            return request.user.has_perm(permission) or request.user.has_perm(
+                permission, view.get_object()
+            )
+
+    # Copied from pulp_container/app/global_access_conditions.py
+    def has_namespace_obj_perms(self, request, view, action, permission):
+        """
+        Check if a user has object-level perms on the namespace associated with the distribution
+        or repository.
+        """
+        if request.user.has_perm(permission):
+            return True
+        obj = view.get_object()
+        if type(obj) == container_models.ContainerDistribution:
+            namespace = obj.namespace
+            return request.user.has_perm(permission, namespace)
+        elif type(obj) == container_models.ContainerPushRepository:
+            for dist in obj.distributions.all():
+                if request.user.has_perm(permission, dist.cast().namespace):
+                    return True
+        elif type(obj) == container_models.ContainerPushRepositoryVersion:
+            for dist in obj.repository.distributions.all():
+                if request.user.has_perm(permission, dist.cast().namespace):
+                    return True
+        return False
 
     def has_distro_permission(self, request, view, action, permission):
         class FakeView:

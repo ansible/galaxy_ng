@@ -349,7 +349,7 @@ STANDALONE_STATEMENTS = {
             "action": ["update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:container.change_containernamespace"
+            "condition": "has_concrete_perms:container.change_containernamespace"
         },
     ],
 
@@ -425,4 +425,41 @@ STANDALONE_STATEMENTS = {
             "condition": "has_distro_permission:container.change_containerdistribution"
         },
     ],
+
+    'groups/roles': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.change_group"
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:galaxy.change_group"
+        },
+        {
+            "action": "*",
+            "principal": "admin",
+            "effect": "allow"
+        }
+    ],
+    'roles': [
+        {
+            "action": ["list"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": "*",
+            "principal": "admin",
+            "effect": "allow"
+        }
+    ]
 }

@@ -126,16 +126,6 @@ group_paths = [
         viewsets.GroupViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}),
         name='group-detail'),
     path(
-        "<str:group_pk>/model-permissions/",
-        viewsets.GroupModelPermissionViewSet.as_view({
-            'get': 'list', 'post': 'create'}),
-        name='group-model-permissions'),
-    path(
-        "<str:group_pk>/model-permissions/<str:pk>/",
-        viewsets.GroupModelPermissionViewSet.as_view({
-            'get': 'retrieve', 'delete': 'destroy'}),
-        name='group-model-permissions-detail'),
-    path(
         "<str:group_pk>/users/",
         viewsets.GroupUserViewSet.as_view({
             'get': 'list', 'post': 'create'}),
