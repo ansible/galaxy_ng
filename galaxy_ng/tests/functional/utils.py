@@ -36,13 +36,13 @@ from pulpcore.client.galaxy_ng import (
     ApiContentV3SyncApi,
     ApiContentV3SyncConfigApi,
     ApiV3NamespacesApi,
-    ApiUiV1ExecutionEnvironmentsRepositoriesContentTagsApi as ContainerRepositoryEndpointApi,
-    ApiUiV1ExecutionEnvironmentsRepositoriesApi as ContainerRepositoryApi,
+    ApiV3PluginExecutionEnvironmentsRepositoriesContentTagsApi as ContainerRepositoryEndpointApi,
+    ApiV3PluginExecutionEnvironmentsRepositoriesApi as ContainerRepositoryApi,
     ApiUiV1ExecutionEnvironmentsRemotesApi,
     ApiUiV1ExecutionEnvironmentsRegistriesApi,
-    ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi,
+    ApiV3PluginExecutionEnvironmentsRepositoriesContentSyncApi,
     ApiUiV1ExecutionEnvironmentsRegistriesSyncApi,
-    ApiUiV1ExecutionEnvironmentsRepositoriesContentImagesApi as ContainerImagesAPI,
+    ApiV3PluginExecutionEnvironmentsRepositoriesContentImagesApi as ContainerImagesAPI,
 )
 from pulpcore.client.pulp_ansible import (
     ApiClient as PulpAnsibleApiClient,
@@ -188,8 +188,7 @@ class TestCaseUsingBindings(PulpTestCase):
         cls.container_repo_api = ContainerRepositoryApi(cls.client)
         cls.container_remotes_api = ApiUiV1ExecutionEnvironmentsRemotesApi(cls.client)
         cls.container_registries_api = ApiUiV1ExecutionEnvironmentsRegistriesApi(cls.client)
-        cls.container_remote_sync_api = \
-            ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
+        cls.container_remote_sync_api = ApiV3PluginExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
         cls.container_registry_sync_api = ApiUiV1ExecutionEnvironmentsRegistriesSyncApi(cls.client)
         cls.container_images_api = ContainerImagesAPI(cls.client)
         cls.get_ansible_cfg_before_test()
