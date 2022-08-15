@@ -18,7 +18,7 @@ def update_collection_remote_rhcertified_url(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('galaxy', '0028_update_synclist_model'),
+        ('galaxy', '0029_move_perms_to_roles'),
     ]
 
     operations = [
