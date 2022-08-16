@@ -5,7 +5,10 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES as GALAXY_LOCKED_ROLES
 from galaxy_ng.app.api.ui import serializers
-from galaxy_ng.app.api.v3.serializers import ContainerRepositorySerializer
+from galaxy_ng.app.api.v3.serializers import (
+    ContainerRepositorySerializer,
+    NamespaceSummarySerializer
+)
 
 # This file is necesary to prevent the DRF web API browser from breaking on all of the
 # pulp/api/v3/repositories/ endpoints.
@@ -43,3 +46,22 @@ class ContainerDistributionViewSet(
     serializer_class = ContainerRepositorySerializer
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     endpoint_name = "galaxy_ng/container-distribution-proxy"
+
+
+# added so that object permissions are viewable for namespaces on the roles api endpoint.
+class NamespaceViewSet(
+    pulp_viewsets.NamedModelViewSet,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+    queryset = models.Namespace.objects.all()
+    serializer_class = NamespaceSummarySerializer
+    permission_classes = [access_policy.NamespaceAccessPolicy]
+    endpoint_name = "pulp_ansible/namespaces"
+
+
+class GroupViewset(
+    pulp_viewsets.NamedModelViewSet,
+):
+    queryset = models.auth.Group.objects.all()
+    endpoint_name = "galaxy_ng/sgroups"
