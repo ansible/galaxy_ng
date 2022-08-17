@@ -220,12 +220,25 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
     assert collection["signatures"][0]["pubkey_fingerprint"] is not None
     assert collection["signatures"][0]["pulp_created"] is not None
 
-    # # Assert that the collection is signed on UI API
+    # Assert that the collection is signed on UI API
     collection_on_ui = api_client(
         "/api/automation-hub/_ui/v1/repo/staging/"
         f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
         f"&sign_state=signed&version={artifact.version}"
     )["data"][0]
+    assert collection_on_ui["sign_state"] == "signed"
+    metadata = collection_on_ui["latest_version"]["metadata"]
+    assert len(metadata["signatures"]) >= 1
+    assert metadata["signatures"][0]["signing_service"] == signing_service
+    assert metadata["signatures"][0]["signature"] is not None
+    assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+
+    # Assert that the collection is signed on UI API (detail )
+    collection_on_ui = api_client(
+        f"/api/automation-hub/_ui/v1/repo/staging/{NAMESPACE}/{artifact.name}"
+        f"/?version={artifact.version}"
+    )
     assert collection_on_ui["sign_state"] == "signed"
     metadata = collection_on_ui["latest_version"]["metadata"]
     assert len(metadata["signatures"]) >= 1
