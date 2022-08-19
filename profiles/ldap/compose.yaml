@@ -1,0 +1,9 @@
+# Add any custom services for your profile here.
+
+# PLEASE DELETE THIS FILE IF IT'S UNMODIFIED.
+
+# version: "3.7"
+#
+# services:
+#  my_custom_service:
+#     image: foo:latest

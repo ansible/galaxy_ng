@@ -1,0 +1,17 @@
+---
+version: "3.7"
+
+services:
+  proxy:
+    build:
+      context: '{COMPOSE_CONTEXT}/../galaxy_ng/profiles/insights/proxy'
+    ports:
+      - "8080:8080"
+    environment:
+      UPSTREAM_PROTO: 'http'
+      UPSTREAM_HOST: pulp
+      UPSTREAM_PORT: "{API_PORT}"
+      PYTHONUNBUFFERED: 1
+      #UPSTREAM_PORT: 5001
+    volumes:
+      - '{COMPOSE_CONTEXT}/../galaxy_ng/profiles/insights/proxy:/app:ro'
