@@ -97,6 +97,11 @@ class AnsibleConfigFixture(dict):
             "password": "professor",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
         },
+        "ee_admin": {
+            "username": "ee_admin",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567895",
+        },
         "github_user_1": {
             "username": "gh01",
             "password": "redhat",

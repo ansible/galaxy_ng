@@ -26,6 +26,12 @@ for role in pe_roles:
     if role not in roles_in_group:
         assign_role(rolename=role, entity=pe_group)
 
+print("Add a group that has registry and registry remote roles assigned")
+ee_group, _ = Group.objects.get_or_create(name="ee_group_for_tests")
+ee_role = 'galaxy.execution_environment_admin'
+roles_in_ee_group = [group_role.role.name for group_role in ee_group.object_roles.all()]
+if ee_role not in roles_in_ee_group:
+    assign_role(rolename=ee_role, entity=ee_group)
 
 print("Get or create test users to match keycloak passwords")
 
@@ -55,6 +61,12 @@ admin.is_superuser = True
 admin.is_staff = True
 admin.save()
 
+# Note: this user is not a part of ephemeral keycloak users
+ee_admin, _ = User.objects.get_or_create(username="ee_admin")
+ee_admin.set_password("redhat")
+ee_admin.groups.add(ee_group)
+ee_admin.save()
+
 # Note: User not used for integration tests, not part of ephemeral keycloak users
 legacy_admin, _ = User.objects.get_or_create(username="admin")
 legacy_admin.set_password("admin")
@@ -69,6 +81,7 @@ Token.objects.get_or_create(user=basic_user, key="abcdefghijklmnopqrstuvwxyz1234
 Token.objects.get_or_create(user=partner_engineer, key="abcdefghijklmnopqrstuvwxyz1234567892")
 Token.objects.get_or_create(user=org_admin, key="abcdefghijklmnopqrstuvwxyz1234567893")
 Token.objects.get_or_create(user=admin, key="abcdefghijklmnopqrstuvwxyz1234567894")
+Token.objects.get_or_create(user=ee_admin, key="abcdefghijklmnopqrstuvwxyz1234567895")
 
 
 print("Get or create namespaces + add object permissions to group")

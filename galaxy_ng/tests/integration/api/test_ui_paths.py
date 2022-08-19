@@ -165,8 +165,7 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_execution_environments_registries(ansible_config):
 
-    # TODO: refactor to use non-admin
-    cfg = ansible_config('admin')
+    cfg = ansible_config('ee_admin')
     with UIClient(config=cfg) as uclient:
 
         # get the response
