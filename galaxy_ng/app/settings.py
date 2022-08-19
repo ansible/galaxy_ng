@@ -85,7 +85,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
-            'min_length': 9,
+            'min_length': 9,  # Overridable by GALAXY_MINIMUM_PASSWORD_LENGTH
         }
     },
     {

@@ -1,11 +1,10 @@
 import json
-import os
-from typing import Any, Dict
-
 import ldap
 import pkg_resources
+import os
+from typing import Any, Dict, List
 from django_auth_ldap.config import LDAPSearch
-from dynaconf import Dynaconf
+from dynaconf import Dynaconf, Validator
 
 
 def post(settings: Dynaconf) -> Dict[str, Any]:
@@ -30,7 +29,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_pulp_ansible(settings))
     data.update(configure_authentication_classes(settings))
     data.update(configure_authentication_backends(settings))
-
+    data.update(configure_password_validators(settings))
     return data
 
 
@@ -417,3 +416,33 @@ def configure_authentication_backends(settings: Dynaconf) -> Dict[str, Any]:
         data["AUTHENTICATION_BACKENDS"] = presets[choosen_preset]
 
     return data
+
+
+def configure_password_validators(settings: Dynaconf) -> Dict[str, Any]:
+    """Configure the password validators"""
+    GALAXY_MINIMUM_PASSWORD_LENGTH: int = settings.get("GALAXY_MINIMUM_PASSWORD_LENGTH", 9)
+    AUTH_PASSWORD_VALIDATORS: List[Dict[str, Any]] = settings.AUTH_PASSWORD_VALIDATORS
+    # NOTE: Dynaconf can't add or merge on dicts inside lists.
+    # So we need to traverse the list to change it until the RFC is implemented
+    # https://github.com/rochacbruno/dynaconf/issues/299#issuecomment-900616706
+    for dict_item in AUTH_PASSWORD_VALIDATORS:
+        if dict_item["NAME"].endswith("MinimumLengthValidator"):
+            dict_item["OPTIONS"]["min_length"] = int(GALAXY_MINIMUM_PASSWORD_LENGTH)
+    return {"AUTH_PASSWORD_VALIDATORS": AUTH_PASSWORD_VALIDATORS}
+
+
+def validate(settings: Dynaconf) -> None:
+    """Validate the configuration, raise ValidationError if invalid"""
+    settings.validators.register(
+        Validator(
+            "GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL",
+            eq=False,
+            when=Validator(
+                "GALAXY_REQUIRE_CONTENT_APPROVAL", eq=False,
+            ),
+            messages={
+                "operations": "{name} cannot be True if GALAXY_REQUIRE_CONTENT_APPROVAL is False"
+            },
+        ),
+    )
+    settings.validators.validate()
