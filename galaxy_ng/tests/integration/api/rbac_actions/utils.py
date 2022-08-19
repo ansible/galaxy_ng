@@ -372,7 +372,7 @@ def cleanup_test_obj(response, pk, del_func):
 
 def del_container(name):
     requests.delete(
-        f"{API_ROOT}_ui/v1/execution-environments/repositories/{name}/",
+        f"{API_ROOT}v3/plugin/execution-environments/repositories/{name}/",
         auth=ADMIN_CREDENTIALS,
     )
 
@@ -441,17 +441,39 @@ class ReusableRemoteContainer:
 
     def _reset(self):
         self._remote = gen_remote_container(f"{self._ns_name}/{self._name}", self._registry_pk)
-        self._namespace = requests.put(
-            f"{API_ROOT}_ui/v1/execution-environments/namespaces/{self._ns_name}/",
-            json={
-                "name": self._ns_name,
-                "groups": self._groups
 
-            },
+        container = requests.get(
+            f"{API_ROOT}v3/plugin/execution-environments/"
+            f"repositories/{self._ns_name}/{self._name}/",
             auth=ADMIN_CREDENTIALS
         ).json()
+
+        namespace_id = container['namespace']['pulp_id']
+        pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
+
+        # get roles first
+        roles = requests.get(
+            f"{API_ROOT}{pulp_namespace_path}/list_roles",
+            auth=ADMIN_CREDENTIALS
+        ).json()
+
+        for role in roles['roles']:
+            self.pulp_namespace = requests.post(
+                f"{API_ROOT}{pulp_namespace_path}/remove_role",
+                json={
+                    'role': role['role']
+                },
+                auth=ADMIN_CREDENTIALS
+            )
+
+        self._namespace = requests.get(
+            f"{API_ROOT}{pulp_namespace_path}",
+            auth=ADMIN_CREDENTIALS
+        ).json()
+
         self._container = requests.get(
-            f"{API_ROOT}_ui/v1/execution-environments/repositories/{self._ns_name}/{self._name}/",
+            f"{API_ROOT}v3/plugin/execution-environments/"
+            f"repositories/{self._ns_name}/{self._name}/",
             auth=ADMIN_CREDENTIALS
         ).json()
 
@@ -480,24 +502,42 @@ class ReusableLocalContainer:
     def _reset(self):
         podman_push(ADMIN_USER, ADMIN_PASSWORD, self._name)
 
-        self._namespace = requests.put(
-            f"{API_ROOT}_ui/v1/execution-environments/namespaces/{self._ns_name}/",
-            json={
-                "name": self._ns_name,
-                "groups": self._groups
+        # reset pulp_container/namespace
+        # 1. get namespace pulp_id from repositories
+        # 2. get roles in namespace
+        # 3. remove roles and groups (clean container namespace)
 
-            },
+        self._container = requests.get(
+            f"{API_ROOT}v3/plugin/execution-environments/repositories/{self._name}/",
             auth=ADMIN_CREDENTIALS
         ).json()
 
-        self._container = requests.get(
-            f"{API_ROOT}_ui/v1/execution-environments/repositories/{self._name}/",
+        namespace_id = self._container['namespace']['pulp_id']
+        pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
+
+        # get roles first
+        roles = requests.get(
+            f"{API_ROOT}{pulp_namespace_path}/list_roles",
+            auth=ADMIN_CREDENTIALS
+        ).json()
+
+        for role in roles['roles']:
+            requests.post(
+                f"{API_ROOT}{pulp_namespace_path}/remove_role",
+                json={
+                    'role': role['role']
+                },
+                auth=ADMIN_CREDENTIALS
+            )
+
+        self._namespace = requests.get(
+            f"{API_ROOT}{pulp_namespace_path}",
             auth=ADMIN_CREDENTIALS
         ).json()
 
         self._manifest = requests.get(
             (
-                f"{API_ROOT}_ui/v1/execution-environments/"
+                f"{API_ROOT}v3/plugin/execution-environments/"
                 f"repositories/{self._name}/_content/images/latest/"
             ),
             auth=ADMIN_CREDENTIALS

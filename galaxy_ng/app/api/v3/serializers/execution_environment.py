@@ -19,7 +19,7 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import MyPermissionsField
 from galaxy_ng.app.api import utils
 
-namespace_fields = ("name", "my_permissions", "owners")
+namespace_fields = ("pulp_id", "pulp_href", "name", "my_permissions", "owners")
 
 VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*/?[A-Za-z0-9._-]*$"
 
@@ -46,13 +46,16 @@ class ManifestListManifestSerializer(serializers.ModelSerializer):
 class ContainerNamespaceSerializer(serializers.ModelSerializer):
     my_permissions = MyPermissionsField(source="*", read_only=True)
     owners = serializers.SerializerMethodField()
+    pulp_href = IdentityField(view_name="pulp_container/namespaces-detail")
 
     class Meta:
         model = models.ContainerNamespace
         fields = namespace_fields
         read_only_fields = (
+            "pulp_id",
+            "pulp_href",
             "name",
-            "my_permissions",
+            "my_permissions"
         )
 
     @extend_schema_field(serializers.ListField)
