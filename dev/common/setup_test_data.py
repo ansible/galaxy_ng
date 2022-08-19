@@ -62,7 +62,7 @@ admin.is_staff = True
 admin.save()
 
 # Note: this user is not a part of ephemeral keycloak users
-ee_admin, _ = User.objects.get_or_create(username="ee-admin")
+ee_admin, _ = User.objects.get_or_create(username="ee_admin")
 ee_admin.set_password("redhat")
 ee_admin.groups.add(ee_group)
 ee_admin.save()
