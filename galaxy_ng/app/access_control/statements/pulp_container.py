@@ -90,7 +90,7 @@ PULP_CONTAINER_VIEWSETS = {
     "pulp_container/namespaces": {
         "statements": [
             {
-                "action": ["list"],
+                "action": ["list", "my_permissions"],
                 "principal": "authenticated",
                 "effect": "allow",
             },
@@ -126,6 +126,12 @@ PULP_CONTAINER_VIEWSETS = {
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": "has_model_or_obj_perms:container.namespace_view_containerdistribution",  # noqa: E501
+            },
+            {
+                "action": ["list_roles", "add_role", "remove_role"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:container.manage_roles_containernamespace",
             },
         ],
         "creation_hooks": [
