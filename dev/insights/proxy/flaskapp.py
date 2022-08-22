@@ -165,7 +165,8 @@ def get_dir(path):
 
     # assemble the base set of headers with the identity
     headers = {}
-    headers['X_RH_IDENTITY'] = userid_to_identity(user_id)
+    # django is going to replace - with _ and prefix with HTTP_
+    headers['X-RH-IDENTITY'] = userid_to_identity(user_id)
 
     if request.method == 'POST':
 
