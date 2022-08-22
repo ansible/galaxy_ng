@@ -21,7 +21,7 @@ class GroupFilter(filterset.FilterSet):
     class Meta:
         model = Group
         fields = {
-            'name': ['exact', 'contains', 'startswith']
+            'name': ['exact', 'contains', 'icontains', 'startswith']
         }
 
 
