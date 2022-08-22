@@ -35,12 +35,20 @@ class CollectionByCollectionVersionFilter(pulp_ansible_viewsets.CollectionVersio
     deprecated = filters.BooleanFilter()
     sign_state = filters.CharFilter(method="filter_by_sign_state")
 
+    # The pulp core filtersets return a 400 on requests that include params that aren't
+    # registered with a filterset. This is a hack to make the include_related fields work
+    # on this viewset.
+    include_related = filters.CharFilter(method="no_op")
+
     def filter_by_sign_state(self, qs, name, value):
         """Filter queryset qs by list of sign_state."""
         query_params = Q()
         for state in value.split(","):
             query_params |= Q(sign_state=state.strip())
         return qs.filter(query_params)
+
+    def no_op(self, qs, name, value):
+        return qs
 
 
 class CollectionViewSet(

@@ -235,6 +235,11 @@ class TestUiCollectionViewSet(BaseTestCase):
         response = self.client.get(self.repo1_collection1_detail_url)
         self.assertEqual(response.data['latest_version']['version'], '1.0.1')
 
+    def test_include_related(self):
+        response = self.client.get(self.repo1_list_url + "?include_related=my_permissions")
+        for c in response.data['data']:
+            self.assertIn("my_permissions", c["namespace"]["related_fields"])
+
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
 class TestUiCollectionRemoteViewSet(BaseTestCase):
