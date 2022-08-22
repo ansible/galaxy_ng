@@ -13,6 +13,33 @@ Changelog
 
 .. towncrier release notes start
 
+4.5.1 (2022-08-22)
+Features
+--------
+
+- Allow set of GALAXY_MINIMUM_PASSWORD_LENGTH for AUTH_PASSWORD_VALIDATORS
+  `AAH-1531 <https://issues.redhat.com/browse/AAH-1531>`_
+- Add LDAP integration
+  `AAH-1593 <https://issues.redhat.com/browse/AAH-1593>`_
+
+
+Bugfixes
+--------
+
+- Fix feature flags for signing
+  `AAH-1690 <https://issues.redhat.com/browse/AAH-1690>`_
+- Forbid user with change_user perms to update superuser
+  `AAH-1791 <https://issues.redhat.com/browse/AAH-1791>`_
+
+
+Misc
+----
+
+- `AAH-1737 <https://issues.redhat.com/browse/AAH-1737>`_
+
+
+----
+
 
 Features
 --------
