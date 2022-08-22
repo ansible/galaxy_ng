@@ -144,9 +144,7 @@ class Command(BaseCommand):
                 pe = Group.objects.get(name="system:partner-engineers")
                 np.groups = {
                     pe: [
-                        "galaxy.upload_to_namespace",
-                        "galaxy.change_namespace",
-                        "galaxy.delete_namespace",
+                        "galaxy.collection_admin"
                     ]
                 }
             np.save()
