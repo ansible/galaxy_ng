@@ -8,7 +8,7 @@ def update_collection_remote_rhcertified_url(apps, schema_editor):
     
     CollectionRemote = apps.get_model('ansible', 'CollectionRemote')
     
-    rh_remote = CollectionRemote.objects.get(name='rh-certified')
+    rh_remote = CollectionRemote.objects.filter(name='rh-certified').first()
 
     if rh_remote and rh_remote.url.startswith('https://cloud.redhat.com/'):
         rh_remote.url = rh_remote.url.replace('https://cloud.redhat.com/', 'https://console.redhat.com/')
