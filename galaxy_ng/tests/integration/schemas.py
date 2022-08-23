@@ -452,3 +452,27 @@ schema_task_detail = {
         'worker': {'type': ['string', 'null']},
     }
 }
+
+schema_namespace_detail = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': [
+        'id',
+        'groups',
+        'name',
+        'pulp_href',
+    ],
+    'properties': {
+        'avatar_url': {'type': 'string'},
+        'company': {'type': 'string'},
+        'description': {'type': 'string'},
+        'email': {'type': 'string'},
+        'groups': {'type': 'array'},
+        'id': {'type': 'number'},
+        'links': {'type': 'array'},
+        'name': {'type': 'string'},
+        'pulp_href': {'type': 'string'},
+        'related_field': {'type': 'object'},
+        'resources': {'type': 'string'},
+    }
+}
