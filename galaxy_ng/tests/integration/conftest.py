@@ -112,6 +112,11 @@ class AnsibleConfigFixture(dict):
             "password": "redhat",
             "token": None,
         },
+        "jctannerTEST": {
+            "username": "jctannerTEST",
+            "password": "redhat",
+            "token": None,
+        },
     }
 
     def __init__(self, profile, namespace=None):

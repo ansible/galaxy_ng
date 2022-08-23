@@ -365,8 +365,14 @@ def ansible_galaxy(
     check_retcode=0,
     server="automation_hub",
     ansible_config=None,
+    token=None,
+    force_token=False,
     cleanup=True
 ):
+
+    # Allow kwargs to override token auth
+    if token is None and ansible_config.get('token'):
+        token = ansible_config.get('token')
 
     tdir = tempfile.mkdtemp(prefix='ansible-galaxy-testing-')
     if not os.path.exists(tdir):
@@ -381,10 +387,11 @@ def ansible_galaxy(
         if ansible_config.get('auth_url'):
             f.write(f"auth_url={ansible_config.get('auth_url')}\n")
         f.write('validate_certs=False\n')
-        f.write(f"username={ansible_config.get('username')}\n")
-        f.write(f"password={ansible_config.get('password')}\n")
-        if ansible_config.get('token'):
-            f.write(f"token={ansible_config.get('token')}\n")
+        if not force_token:
+            f.write(f"username={ansible_config.get('username')}\n")
+            f.write(f"password={ansible_config.get('password')}\n")
+        if token:
+            f.write(f"token={token}\n")
 
     command_string = f"ansible-galaxy -vvv {command} --server={server} --ignore-certs"
 
@@ -795,6 +802,7 @@ class SocialGithubClient:
 
     _rs = None
     _github_cookies = None
+    _api_token = None
     sessionid = None
     csrftoken = None
 
@@ -869,6 +877,23 @@ class SocialGithubClient:
         # extract sessionid
         self.sessionid = rr2.cookies['sessionid']
 
+    def get_hub_token(self):
+
+        if self._api_token is not None:
+            return self._api_token
+
+        # /api/v3/auth/token
+        token_url = self.baseurl.rstrip('/') + '/v3/auth/token/'
+
+        pheaders = {
+            'Accept': 'application/json',
+            'X-CSRFToken': self.csrftoken,
+            'Cookie': f'csrftoken={self.csrftoken}; sessionid={self.sessionid}'
+        }
+        resp = self._rs.post(token_url, headers=pheaders)
+        self._api_token = resp.json().get('token')
+        return self._api_token
+
     def logout(self, expected_code=None):
 
         if self._rs is None:
@@ -891,4 +916,27 @@ class SocialGithubClient:
 
         # get the response
         resp = self._rs.get(this_url, headers=pheaders)
+        return resp
+
+    def delete(
+        self,
+        relative_url: str = None,
+        absolute_url: str = None
+    ) -> requests.models.Response:
+
+        pheaders = {
+            'Accept': 'application/json',
+            'X-CSRFToken': self.csrftoken,
+            'Cookie': f'csrftoken={self.csrftoken}; sessionid={self.sessionid}'
+        }
+
+        this_url = None
+        if absolute_url:
+            uri = urlparse(self.baseurl)
+            this_url = f"{uri.scheme}://{uri.netloc}{absolute_url}"
+        else:
+            this_url = self.baseurl + relative_url
+
+        # call delete
+        resp = self._rs.delete(this_url, headers=pheaders)
         return resp
