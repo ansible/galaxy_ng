@@ -1,11 +1,3 @@
-import unittest
-
-from urllib.parse import urlparse
-
-from pulpcore.client.galaxy_ng.exceptions import ApiException
-from pulp_container.tests.functional.api import rbac_base
-from pulp_container.tests.functional.constants import DOCKERHUB_PULP_FIXTURE_1
-from pulp_smash import cli
 from pulp_smash.pulp3.bindings import monitor_task
 
 from galaxy_ng.tests.functional.utils import TestCaseUsingBindings
