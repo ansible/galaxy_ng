@@ -36,7 +36,7 @@ class TestContainerRegistryRemoteViewset(BaseTestCase):
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(url, new_registry, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        return response.data['pk']
+        return response.data['id']
 
     def test_get_detail_with_data(self):
         name = 'my_registry'

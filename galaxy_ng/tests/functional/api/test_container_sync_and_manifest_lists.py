@@ -34,7 +34,7 @@ class ContainerSyncandManifestListTestCase(TestCaseUsingBindings):
             self.smash_client.delete,
             (
                 f"{self.galaxy_api_prefix}/_ui/v1/execution-environments/"
-                f"registries/{self.docker_registry.pk}/"
+                f"registries/{self.docker_registry.id}/"
             )
         )
 
@@ -46,7 +46,7 @@ class ContainerSyncandManifestListTestCase(TestCaseUsingBindings):
             "name": "test-repo1",
             "upstream_name": "pulp/test-fixture-1",
             "include_tags": ["ml_i", "manifest_b"],
-            "registry": self.docker_registry.pk,
+            "registry": self.docker_registry.id,
         })
 
         self.addCleanup(self._delete_remote_repo, remote_repo)
@@ -84,14 +84,14 @@ class ContainerSyncandManifestListTestCase(TestCaseUsingBindings):
             "name": "test-repo1",
             "upstream_name": "pulp/test-fixture-1",
             "include_tags": ["manifest_b"],
-            "registry": self.docker_registry.pk,
+            "registry": self.docker_registry.id,
         })
 
         remote_repo2 = self.container_remotes_api.create({
             "name": "test-repo2",
             "upstream_name": "pulp/test-fixture-1",
             "include_tags": ["manifest_b"],
-            "registry": self.docker_registry.pk,
+            "registry": self.docker_registry.id,
         })
 
         self.addCleanup(self._delete_remote_repo, remote_repo1)
@@ -99,7 +99,7 @@ class ContainerSyncandManifestListTestCase(TestCaseUsingBindings):
 
         sync_task = self.smash_client.post((
             f"{self.galaxy_api_prefix}/_ui/v1/execution-environments/"
-            f"registries/{self.docker_registry.pk}/sync/"))
+            f"registries/{self.docker_registry.id}/sync/"))
 
         for task in sync_task['child_tasks']:
             monitor_task(task)

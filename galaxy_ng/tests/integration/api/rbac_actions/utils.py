@@ -427,7 +427,7 @@ class ReusableContainerRegistry:
         return self._registry
 
     def cleanup(self):
-        del_registry(self._registry["pk"])
+        del_registry(self._registry["id"])
 
 
 class ReusableRemoteContainer:

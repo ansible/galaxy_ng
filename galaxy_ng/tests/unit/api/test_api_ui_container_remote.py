@@ -88,7 +88,7 @@ class TestContainerRemote(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # test values are copied over from registy
-        remote_obj = container_models.ContainerRemote.objects.get(pk=response.data['pulp_id'])
+        remote_obj = container_models.ContainerRemote.objects.get(pk=response.data['id'])
         self.assertEqual(remote_obj.url, self.registry.url)
         self.assertEqual(remote_obj.proxy_url, self.registry.proxy_url)
         self.assertEqual(remote_obj.password, self.registry.password)
@@ -116,7 +116,7 @@ class TestContainerRemote(BaseTestCase):
         response = self._create_remote(self.admin, 'remote/remote_repo', self.registry.pk)
         obj_data = response.data
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        remote_pk = response.data['pulp_id']
+        remote_pk = response.data['id']
 
         # test unpriviliged users can't update
         response = self._update_remote(
@@ -166,7 +166,7 @@ class TestContainerRemote(BaseTestCase):
         response = self._create_remote(self.admin, 'remote3/remote_repo3', registry.pk)
         obj_data = response.data
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        remote_pk = response.data['pulp_id']
+        remote_pk = response.data['id']
 
         # 3
         registry.delete()
@@ -225,7 +225,7 @@ class TestContainerRemote(BaseTestCase):
 
         # verify exclude source can be removed.
         response = self._update_remote(
-            obj_data['pulp_id'],
+            obj_data['id'],
             self.container_user,
             {**obj_data, "exclude_tags": ["foo"]}
         )

@@ -28,7 +28,7 @@ def create_ee_remote(user, password, expect_pass, extra):
         json={
             "name": gen_string(),
             "upstream_name": "foo",
-            "registry": registry["pk"],
+            "registry": registry["id"],
         },
         auth=(user['username'], password),
     )
@@ -43,7 +43,7 @@ def update_ee_remote(user, password, expect_pass, extra):
     remote["include_tags"] = ["latest"]
 
     response = requests.put(
-        f"{API_ROOT}_ui/v1/execution-environments/remotes/{remote['pulp_id']}/",
+        f"{API_ROOT}_ui/v1/execution-environments/remotes/{remote['id']}/",
         json=remote,
         auth=(user['username'], password),
     )
@@ -67,11 +67,11 @@ def delete_ee_registry(user, password, expect_pass, extra):
     registry = gen_registry(gen_string())
 
     response = requests.delete(
-        f"{API_ROOT}_ui/v1/execution-environments/registries/{registry['pk']}/",
+        f"{API_ROOT}_ui/v1/execution-environments/registries/{registry['id']}/",
         auth=(user['username'], password),
     )
 
-    del_registry(registry["pk"])
+    del_registry(registry["id"])
 
     assert_pass(expect_pass, response.status_code, 204, 403)
 
@@ -80,7 +80,7 @@ def index_ee_registry(user, password, expect_pass, extra):
     registry = extra["registry"].get_registry()
 
     response = requests.post(
-        f"{API_ROOT}_ui/v1/execution-environments/registries/{registry['pk']}/index/",
+        f"{API_ROOT}_ui/v1/execution-environments/registries/{registry['id']}/index/",
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 400, 403)
@@ -92,7 +92,7 @@ def update_ee_registry(user, password, expect_pass, extra):
     registry['rate_limit'] = 2
 
     response = requests.put(
-        f"{API_ROOT}_ui/v1/execution-environments/registries/{registry['pk']}/",
+        f"{API_ROOT}_ui/v1/execution-environments/registries/{registry['id']}/",
         json=registry,
         auth=(user['username'], password),
     )
@@ -109,7 +109,7 @@ def create_ee_registry(user, password, expect_pass, extra):
         auth=(user['username'], password),
     )
 
-    cleanup_test_obj(response, "pk", del_registry)
+    cleanup_test_obj(response, "id", del_registry)
 
     assert_pass(expect_pass, response.status_code, 201, 403)
 
@@ -119,7 +119,7 @@ def delete_ee(user, password, expect_pass, extra):
     registry = extra["registry"].get_registry()
 
     name = gen_string()
-    gen_remote_container(name, registry["pk"])
+    gen_remote_container(name, registry["id"])
 
     response = requests.delete(
         f"{API_ROOT}v3/plugin/execution-environments/repositories/{name}/",

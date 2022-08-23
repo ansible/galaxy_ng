@@ -333,7 +333,7 @@ ACTIONS_FOR_ALL_USERS = {
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
 def test_global_role_actions(role):
     registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["pk"]
+    registry_pk = registry.get_registry()["id"]
 
     extra = {
         "collection": ReusableCollection(gen_string()),
@@ -378,7 +378,7 @@ def test_global_role_actions(role):
 @pytest.mark.standalone_only
 def test_object_role_actions():
     registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["pk"]
+    registry_pk = registry.get_registry()["id"]
 
     users_and_groups = {}
     col_groups = []
@@ -446,7 +446,7 @@ def test_object_role_actions():
 @pytest.mark.standalone_only
 def test_role_actions_for_admin():
     registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["pk"]
+    registry_pk = registry.get_registry()["id"]
 
     extra = {
         "collection": ReusableCollection(gen_string()),

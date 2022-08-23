@@ -203,14 +203,14 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=rds, schema=schema_ee_registry)
 
         # try to get it by pulp_id
-        resp = uclient.get(f"_ui/v1/execution-environments/registries/{rds['pk']}/")
+        resp = uclient.get(f"_ui/v1/execution-environments/registries/{rds['id']}/")
         assert resp.status_code == 200
         rds = resp.json()
         validate_json(instance=rds, schema=schema_ee_registry)
 
         # sync it
         resp = uclient.post(
-            f"_ui/v1/execution-environments/registries/{rds['pk']}/sync/",
+            f"_ui/v1/execution-environments/registries/{rds['id']}/sync/",
             payload={}
         )
         assert resp.status_code == 202
@@ -222,7 +222,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
 
         # index it
         resp = uclient.post(
-            f"_ui/v1/execution-environments/registries/{rds['pk']}/index/",
+            f"_ui/v1/execution-environments/registries/{rds['id']}/index/",
             payload={}
         )
         assert resp.status_code == 202
@@ -233,11 +233,11 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         wait_for_task_ui_client(uclient, task)
 
         # delete the registry
-        resp = uclient.delete(f"_ui/v1/execution-environments/registries/{rds['pk']}/")
+        resp = uclient.delete(f"_ui/v1/execution-environments/registries/{rds['id']}/")
         assert resp.status_code == 204
 
         # make sure it's gone
-        resp = uclient.get(f"_ui/v1/execution-environments/registries/{rds['pk']}/")
+        resp = uclient.get(f"_ui/v1/execution-environments/registries/{rds['id']}/")
         assert resp.status_code == 404
 
 
