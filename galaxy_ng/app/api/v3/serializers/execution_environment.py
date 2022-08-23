@@ -68,6 +68,7 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
 class ContainerRemoteSerializer(
     container_serializers.ContainerRemoteSerializer,
 ):
+    id = serializers.UUIDField(source='pulp_id', required=False)
     created_at = serializers.DateTimeField(source='pulp_created', read_only=True, required=False)
     updated_at = serializers.DateTimeField(
         source='pulp_last_updated', read_only=True, required=False)
@@ -88,7 +89,8 @@ class ContainerRemoteSerializer(
         }
 
         fields = [
-            "pulp_id",
+            "id",
+            "pulp_href",
             "name",
             "upstream_name",
             "registry",
@@ -234,7 +236,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         repo = distro.repository
         remote = None
         if repo.remote:
-            remote = ContainerRemoteSerializer(repo.remote.cast()).data
+            remote = ContainerRemoteSerializer(repo.remote.cast(), context=self.context).data
 
         return {
             "repository": {
