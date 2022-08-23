@@ -45,7 +45,23 @@ class LegacyUserSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class LegacyUserBaseViewSet(viewsets.ModelViewSet):
+class LegacyUsersViewSet(viewsets.ModelViewSet):
+    """
+    A list of legacy users.
+
+    The community UI has a view to list all legacy users.
+    Each user is clickable and brings the browser to a
+    page with a list of roles created by the user.
+
+    Rather than make a hacky unmaintable viewset that
+    aggregates usernames from the roles, this viewset
+    goes directly to the legacy namespace/user table.
+
+    We do not want to create this view from v3 namespaces
+    because many/most legacy namespaces do not conform
+    to the v3 namespace character requirements.
+    """
+
     queryset = LegacyNamespace.objects.all().order_by('name')
     serializer = LegacyUserSerializer
     serializer_class = LegacyUserSerializer
@@ -75,30 +91,9 @@ class LegacyUserBaseViewSet(viewsets.ModelViewSet):
 
         return LegacyNamespace.objects.all().order_by(order_by)
 
-
-class LegacyUsersViewSet(LegacyUserBaseViewSet):
-    """
-    A list of legacy users.
-
-    The community UI has a view to list all legacy users.
-    Each user is clickable and brings the browser to a
-    page with a list of roles created by the user.
-
-    Rather than make a hacky unmaintable viewset that
-    aggregates usernames from the roles, this viewset
-    goes directly to the legacy namespace/user table.
-
-    We do not want to create this view from v3 namespaces
-    because many/most legacy namespaces do not conform
-    to the v3 namespace character requirements.
-    """
-
-
-class LegacyUserViewSet(LegacyUserBaseViewSet):
-    """A single legacy user."""
-
-    def retrieve(self, request, userid):
-        user = LegacyNamespace.objects.filter(id=userid).first()
+    def retrieve(self, request, pk=None):
+        """Get a single user."""
+        user = LegacyNamespace.objects.filter(id=pk).first()
         serializer = LegacyUserSerializer(user)
         return Response(serializer.data)
 
@@ -109,7 +104,7 @@ class LegacyRolesSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class LegacyRolesTaskMixin:
+class LegacyTasksMixin:
     """
     Legacy task helper.
 
@@ -122,23 +117,26 @@ class LegacyRolesTaskMixin:
     """
 
     def legacy_task_hash(self, pulp_id):
+        """Transform a uuid into an integer."""
         return abs(hash(str(pulp_id)))
 
     def legacy_dispatch(self, function, kwargs=None):
+        """Dispatch wrapper for legacy tasks."""
         task = dispatch(legacy_role_import, kwargs=kwargs)
         hashed = self.legacy_task_hash(task.pulp_id)
         return hashed
 
     @action(detail=True, methods=['get'], name="Get task")
     def get_task(self, request):
+        """Get a pulp task via the transformed v1 integer task id."""
         logger.debug(f'GET TASK: {request}')
         task_id = int(request.GET.get('id', None))
         logger.debug(f'GET TASK id: {task_id}')
 
+        # iterate through most recent tasks to find the matching uuid
         this_task = None
         for t in Task.objects.all().order_by('started_at').reverse():
             tid = str(t.pulp_id)
-            # thash = abs(hash(tid))
             thash = self.legacy_task_hash(tid)
             if thash == task_id:
                 this_task = t
@@ -146,8 +144,27 @@ class LegacyRolesTaskMixin:
 
         logger.debug(f'FOUND TASK: {this_task} ..')
 
+        # figure out the v1 compatible state
+        state_map = {
+            'COMPLETED': 'SUCCESS'
+        }
         state = this_task.state.upper()
+        state = state_map.get(state, state)
+
+        # figure out the message type
+        type_map = {
+            'RUNNING': 'INFO',
+            'WAITING': 'INFO',
+            'COMPLETED': 'SUCCESS'
+        }
+        mtype = type_map.get(state, state)
+
+        # generate a message for the response
         msg = ''
+        if state == 'SUCCESS':
+            msg = 'role imported successfully'
+        elif state == 'RUNNING':
+            msg = 'running'
         if this_task.error:
             if this_task.error.get('traceback'):
                 msg = (
@@ -156,23 +173,7 @@ class LegacyRolesTaskMixin:
                     + this_task.error['traceback']
                 )
 
-        type_map = {
-            'RUNNING': 'INFO',
-            'WAITING': 'INFO',
-            'COMPLETED': 'SUCCESS'
-        }
-        mtype = type_map.get(state, state)
         logger.debug(f'STATE:{state} MTYPE:{mtype}')
-
-        state_map = {
-            'COMPLETED': 'SUCCESS'
-        }
-        state = state_map.get(state, state)
-        if state == 'SUCCESS':
-            msg = 'role imported successfully'
-        elif state == 'RUNNING':
-            msg = 'running'
-
         return Response({'results': [
             {
                 'state': state,
@@ -189,7 +190,7 @@ class LegacyRolesTaskMixin:
         ]})
 
 
-class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyRolesTaskMixin):
+class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
     """Base class for legacy roles."""
 
     queryset = LegacyRole.objects.all().order_by('full_metadata__created')
@@ -413,7 +414,7 @@ class LegacyRoleVersionsViewSet(LegacyRoleBaseViewSet):
         return Response(paginated)
 
 
-class LegacyRolesSyncViewSet(viewsets.ViewSet, LegacyRolesTaskMixin):
+class LegacyRolesSyncViewSet(viewsets.ViewSet, LegacyTasksMixin):
     """Load roles from an upstream v1 source."""
 
     def create(self, request):

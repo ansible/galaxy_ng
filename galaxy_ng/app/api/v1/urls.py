@@ -8,7 +8,7 @@ from galaxy_ng.app.api.v1.viewsets import (
     LegacyRoleVersionsViewSet,
     LegacyRolesViewSet,
     LegacyRolesSyncViewSet,
-    LegacyUserViewSet,
+    # LegacyUserViewSet,
     LegacyUsersViewSet
 )
 
@@ -28,18 +28,18 @@ urlpatterns = [
 
     path(
         'roles/<int:roleid>/',
-        LegacyRoleViewSet.as_view({"retrieve": "retrieve", "delete": "destroy"}),
+        LegacyRoleViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
         name='legacy_role-detail'
     ),
 
     path(
         'roles/<int:roleid>/content/',
-        LegacyRoleContentViewSet.as_view({"retrieve": "retrieve"}),
+        LegacyRoleContentViewSet.as_view({"get": "retrieve"}),
         name='legacy_role-content'
     ),
     path(
         'roles/<int:roleid>/versions/',
-        LegacyRoleVersionsViewSet.as_view({"retrieve": "retrieve"}),
+        LegacyRoleVersionsViewSet.as_view({"get": "retrieve"}),
         name='legacy_role-versions'
     ),
 
@@ -51,18 +51,18 @@ urlpatterns = [
 
     path(
         'sync/',
-        LegacyRolesSyncViewSet.as_view({"create": "create", "get": "get_task"}),
+        LegacyRolesSyncViewSet.as_view({"post": "create", "get": "get_task"}),
         name='legacy_role-sync'
     ),
 
     path(
         'users/',
-        LegacyUsersViewSet.as_view({"list": "list"}),
+        LegacyUsersViewSet.as_view({"get": "list"}),
         name='legacy_users-userlist'
     ),
     path(
-        'users/<int:userid>/',
-        LegacyUserViewSet.as_view({"retrieve": "retrieve"}),
+        'users/<int:pk>/',
+        LegacyUsersViewSet.as_view({"get": "retrieve"}),
         name='legacy_user-userdetail'
     ),
 
