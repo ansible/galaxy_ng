@@ -51,8 +51,14 @@ urlpatterns = [
 
     path(
         'sync/',
-        LegacyRolesSyncViewSet.as_view({"post": "create", "get": "get_task"}),
+        LegacyRolesSyncViewSet.as_view({"post": "create"}),
         name='legacy_role-sync'
+    ),
+
+    path(
+        'sync/<int:id>/',
+        LegacyRolesSyncViewSet.as_view({"get": "get_task"}),
+        name='legacy_role-sync-task'
     ),
 
     path(

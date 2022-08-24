@@ -122,15 +122,18 @@ class LegacyTasksMixin:
 
     def legacy_dispatch(self, function, kwargs=None):
         """Dispatch wrapper for legacy tasks."""
-        task = dispatch(legacy_role_import, kwargs=kwargs)
+        task = dispatch(function, kwargs=kwargs)
         hashed = self.legacy_task_hash(task.pulp_id)
         return hashed
 
     @action(detail=True, methods=['get'], name="Get task")
-    def get_task(self, request):
+    def get_task(self, request, id=None):
         """Get a pulp task via the transformed v1 integer task id."""
         logger.debug(f'GET TASK: {request}')
-        task_id = int(request.GET.get('id', None))
+        if id:
+            task_id = id
+        else:
+            task_id = int(request.GET.get('id', None))
         logger.debug(f'GET TASK id: {task_id}')
 
         # iterate through most recent tasks to find the matching uuid
@@ -223,10 +226,11 @@ class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
 
         namespace = None
         if github_user:
-            if github_user.isdigit():
-                namespace = LegacyNamespace.objects.filter(pk=int(github_user)).first()
-            else:
-                namespace = LegacyNamespace.objects.filter(name=github_user).first()
+            #if github_user.isdigit():
+            #    namespace = LegacyNamespace.objects.filter(pk=int(github_user)).first()
+            #else:
+            #    namespace = LegacyNamespace.objects.filter(name=github_user).first()
+            namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
         name = self.request.query_params.get('name')
         if name is not None:
@@ -237,8 +241,8 @@ class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
             return LegacyRole.objects.filter(namespace=namespace, name=name).order_by(order_by)
 
         elif github_user:
-            logger.debug(f'FILTER BY USER: {github_user}')
-            logger.debug(f'FILTER BY NAMESPACE: {namespace}')
+            logger.info(f'FILTER BY USER: {github_user}')
+            logger.info(f'FILTER BY NAMESPACE: {namespace}')
             return LegacyRole.objects.filter(namespace=namespace).order_by(order_by)
 
         if keywords:
@@ -376,10 +380,10 @@ class LegacyRoleViewSet(LegacyRoleBaseViewSet):
 
         # ensure the github_user matches the request user
         username = request.user.get_username()
-        if username != role.namespace.name:
-            raise ValidationError(
-                'you do not have permission to modify this resource'
-            )
+        if username != role.namespace.name and not request.user.is_superuser:
+            raise ValidationError({
+                'default': 'you do not have permission to modify this resource'
+            })
 
         role.delete()
         return Response({'status': 'ok'})
@@ -433,9 +437,12 @@ class LegacyRolesSyncViewSet(viewsets.ViewSet, LegacyTasksMixin):
         logger.debug(f'REQUEST kwargs: {kwargs}')
 
         # only superuser should be able to sync roles
+        print(f'REQUEST.USER: {self.request.user}')
         if not self.request.user.is_superuser:
-            return HttpResponse('invalid permissions', status=403)
+            #return HttpResponse('invalid permissions', status=403)
+            raise ValidationError({
+                'default': 'you do not have permission to modify this resource'
+            }, status=403)
 
-        task = dispatch(legacy_sync_from_upstream, kwargs=kwargs)
-        hashed = abs(hash(str(task.pulp_id)))
-        return Response({'task': hashed})
+        task_id = self.legacy_dispatch(legacy_sync_from_upstream, kwargs=kwargs)
+        return Response({'task': task_id})

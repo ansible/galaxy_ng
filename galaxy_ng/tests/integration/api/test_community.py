@@ -1,7 +1,8 @@
 """test_community.py - Tests related to the community featureset.
 """
 
-
+import json
+import time
 import pytest
 
 from ..utils import (
@@ -94,3 +95,63 @@ def test_list_collections_social(ansible_config):
     with SocialGithubClient(config=cfg) as client:
         resp = client.get('v3/collections/')
         validate_json(instance=resp.json(), schema=schema_objectlist)
+
+
+@pytest.mark.community_only
+def test_v1_sync_with_user_and_limit(ansible_config):
+    """" Tests if v1 sync accepts a user&limit arg """
+
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True
+    )
+
+    github_user = '030'
+    pargs = json.dumps({"github_user": "030", "limit": 1}).encode('utf-8')
+
+    # delete any pre-existing roles from the user
+    pre_existing = []
+    next_url = f'/api/v1/roles/?owner__username={github_user}'
+    while next_url:
+        print(next_url)
+        resp = api_client(next_url)
+        pre_existing.extend(resp['results'])
+        if resp['next'] is None:
+            break
+        next_url = resp['next']
+    if pre_existing:
+        for pe in pre_existing:
+            role_id = pe['id']
+            role_url = f'/api/v1/roles/{role_id}/'
+            resp = api_client(role_url, method='DELETE')
+
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+
+    task_id = resp['task']
+
+    # poll till done or timeout
+    poll_url = f'/api/v1/sync/{task_id}/'
+    state = None
+    counter = 0
+    while state is None or state == 'RUNNING' and counter <= 20:
+        counter += 1
+        task_resp = api_client(poll_url, method='GET')
+        state = task_resp['results'][0]['state']
+        if state != 'RUNNING':
+            break
+        time.sleep(.5)
+    assert state == 'SUCCESS'
+
+    resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
+    assert resp['count'] == 1
+    assert resp['results'][0]['username'] == github_user
+
+    # cleanup
+    role_id = resp['results'][0]['id']
+    role_url = f'/api/v1/roles/{role_id}/'
+    resp = api_client(role_url, method='DELETE')
+
