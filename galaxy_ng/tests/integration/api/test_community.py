@@ -153,4 +153,3 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     role_id = resp['results'][0]['id']
     role_url = f'/api/v1/roles/{role_id}/'
     resp = api_client(role_url, method='DELETE')
-
