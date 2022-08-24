@@ -115,7 +115,6 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     pre_existing = []
     next_url = f'/api/v1/roles/?owner__username={github_user}'
     while next_url:
-        print(next_url)
         resp = api_client(next_url)
         pre_existing.extend(resp['results'])
         if resp['next'] is None:
