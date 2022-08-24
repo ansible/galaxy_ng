@@ -5,6 +5,8 @@ from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
 
+from drf_spectacular.utils import extend_schema_field
+
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -95,6 +97,7 @@ class LegacyUsersViewSet(viewsets.ModelViewSet):
 
         return LegacyNamespace.objects.all().order_by(order_by)
 
+    @extend_schema_field(LegacyUserSerializer)
     def retrieve(self, request, pk=None):
         """Get a single user."""
         user = LegacyNamespace.objects.filter(id=pk).first()
@@ -372,6 +375,7 @@ class LegacyRoleImportsViewSet(LegacyRoleBaseViewSet):
 class LegacyRoleViewSet(LegacyRoleBaseViewSet):
     """A single legacy role."""
 
+    @extend_schema_field(LegacyRoleSerializer)
     def retrieve(self, request, roleid=None):
         """Get a single role."""
         role = LegacyRole.objects.filter(id=roleid).first()
@@ -396,6 +400,7 @@ class LegacyRoleViewSet(LegacyRoleBaseViewSet):
 class LegacyRoleContentViewSet(LegacyRoleBaseViewSet):
     """Documentation for a single legacy role."""
 
+    @extend_schema_field(LegacyRoleContentSerializer)
     def retrieve(self, request, roleid=None):
         """Get content for a single role."""
         role = LegacyRole.objects.filter(id=roleid).first()
@@ -406,6 +411,7 @@ class LegacyRoleContentViewSet(LegacyRoleBaseViewSet):
 class LegacyRoleVersionsViewSet(LegacyRoleBaseViewSet):
     """A list of versions for a single legacy role."""
 
+    @extend_schema_field(LegacyRoleVersionsSerializer)
     def retrieve(self, request, roleid=None):
         """Get versions for a single role."""
         role = LegacyRole.objects.filter(id=roleid).first()
