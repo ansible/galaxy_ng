@@ -85,6 +85,12 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         return obj.pulp_id
 
     def get_upstream_id(self, obj):
+        """
+        Return the upstream id.
+
+        This ID comes from the original source of the role
+        if it was sync'ed from an upstream source.
+        """
         return obj.full_metadata.get('upstream_id')
 
     def get_url(self, obj):
@@ -97,15 +103,36 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         return obj.pulp_created
 
     def get_github_user(self, obj):
+        """
+        Return the github_user.
+
+        The client cli will use this to build the download url
+        of the role in the form of:
+            https://github.com/<github_user>/<github_repo>/...
+        """
         return obj.namespace.name
 
     def get_username(self, obj):
         return obj.namespace.name
 
     def get_github_repo(self, obj):
+        """
+        Return the github_repo.
+
+        The client cli will use this to build the download url
+        of the role in the form of:
+            https://github.com/<github_user>/<github_repo>/...
+        """
         return obj.full_metadata.get('github_repo')
 
     def get_github_branch(self, obj):
+        """
+        Return the github branch.
+
+        If the role has no version, this value will be used as the version
+        at install time. If not branch is given, the cli will default to
+        the "master" branch.
+        """
         return obj.full_metadata.get('github_reference')
 
     def get_commit(self, obj):

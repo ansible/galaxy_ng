@@ -4,6 +4,69 @@ from django.db import models
 from galaxy_ng.app.models import Namespace
 
 
+"""
+The core cli accepts a single string argument for the role as user would like to install.
+The string is parsed by a RoleRequirement class into a dictionary of parts.
+
+    from ansible.playbook.role.requirement import RoleRequirement
+        AnsibleError("Invalid role line (%s). Proper format is 'role_name[,version[,name]]'" % role)
+
+If no commas are in the string, it becomes the name and the src ...
+
+    RoleRequirement.role_yaml_parse('zyun_i.ansible_role_wireguard')
+    {
+        'name': 'zyun_i.ansible_role_wireguard',
+        'src': 'zyun_i.ansible_role_wireguard',
+        'scm': None,
+        'version': None
+    }
+
+If a single comma, the first segment becomes the name+src and the second becomse the version.
+
+    RoleRequirement.role_yaml_parse('zyun_i.ansible_role_wireguard,master')
+    {
+        'name': 'zyun_i.ansible_role_wireguard',
+        'src': 'zyun_i.ansible_role_wireguard',
+        'scm': None,
+        'version': 'master'
+    }
+
+If two commas, the third segment is the name. This is primarily used when
+the first segment is a url which can be git cloned.
+
+    RoleRequirement.role_yaml_parse('zyun_i.ansible_role_wireguard,master,foo')
+    {
+        'name': 'foo',
+        'src': 'zyun_i.ansible_role_wireguard',
+        'scm': None,
+        'version': 'master'
+    }
+
+The above information is important to understand when examining how the cli
+determines what the role version is and how to obtain it.
+
+If an scm is given, the cli clones the repo to a temp dir and continues
+processing from there.
+
+If src is set, which is usually <user>.<name> in most cases, and the version
+is not set, then the code uses an algorithm to figure out the version.
+
+    * get the role data from v1/roles/ by searching
+        owner__username=<user>&name=<name>
+    * retrieve the list of versions via v1/roles/<roleid>
+    * if the role has versions, use the newest according to LooseVersion
+    * if no versions, use the github_branch
+    * if no branch, use "master"
+
+Finally the code will assemble an archive url and fetch that and extact
+it to a temp dir for further processing.
+
+    https://github.com/{user}/{name}/archive/{version}.tar.gz
+
+The key point from all of this is that many roles do not have a true "version".
+"""
+
+
 class LegacyNamespace(models.Model):
     """
     A legacy namespace, aka a github username.
