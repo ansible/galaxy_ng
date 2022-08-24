@@ -60,6 +60,10 @@ class LegacyUsersViewSet(viewsets.ModelViewSet):
     We do not want to create this view from v3 namespaces
     because many/most legacy namespaces do not conform
     to the v3 namespace character requirements.
+
+    TODO: allow edits of the avatar url
+    TODO: allow edits of the "owners"
+    TODO: allow mapping to a real namespace
     """
 
     queryset = LegacyNamespace.objects.all().order_by('name')
