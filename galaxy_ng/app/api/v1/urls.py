@@ -8,7 +8,6 @@ from galaxy_ng.app.api.v1.viewsets import (
     LegacyRoleVersionsViewSet,
     LegacyRolesViewSet,
     LegacyRolesSyncViewSet,
-    # LegacyUserViewSet,
     LegacyUsersViewSet
 )
 
@@ -59,6 +58,12 @@ urlpatterns = [
         'sync/<int:id>/',
         LegacyRolesSyncViewSet.as_view({"get": "get_task"}),
         name='legacy_role-sync-task'
+    ),
+
+    path(
+        'tasks/<int:id>/',
+        LegacyRoleImportsViewSet.as_view({"get": "get_task"}),
+        name='legacy_role-imports'
     ),
 
     path(

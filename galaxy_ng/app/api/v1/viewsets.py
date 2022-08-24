@@ -104,7 +104,7 @@ class LegacyRolesSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class LegacyTasksMixin:
+class LegacyTasksViewset:
     """
     Legacy task helper.
 
@@ -193,7 +193,7 @@ class LegacyTasksMixin:
         ]})
 
 
-class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
+class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyTasksViewset):
     """Base class for legacy roles."""
 
     queryset = LegacyRole.objects.all().order_by('full_metadata__created')
@@ -418,7 +418,7 @@ class LegacyRoleVersionsViewSet(LegacyRoleBaseViewSet):
         return Response(paginated)
 
 
-class LegacyRolesSyncViewSet(viewsets.ViewSet, LegacyTasksMixin):
+class LegacyRolesSyncViewSet(viewsets.ViewSet, LegacyTasksViewset):
     """Load roles from an upstream v1 source."""
 
     def create(self, request):
@@ -437,9 +437,8 @@ class LegacyRolesSyncViewSet(viewsets.ViewSet, LegacyTasksMixin):
         logger.debug(f'REQUEST kwargs: {kwargs}')
 
         # only superuser should be able to sync roles
-        print(f'REQUEST.USER: {self.request.user}')
+        logger.debug(f'REQUEST.USER: {self.request.user}')
         if not self.request.user.is_superuser:
-            #return HttpResponse('invalid permissions', status=403)
             raise ValidationError({
                 'default': 'you do not have permission to modify this resource'
             }, status=403)

@@ -133,7 +133,7 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     task_id = resp['task']
 
     # poll till done or timeout
-    poll_url = f'/api/v1/sync/{task_id}/'
+    poll_url = f'/api/v1/tasks/{task_id}/'
     state = None
     counter = 0
     while state is None or state == 'RUNNING' and counter <= 20:
