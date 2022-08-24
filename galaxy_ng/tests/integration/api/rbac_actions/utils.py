@@ -448,7 +448,7 @@ class ReusableRemoteContainer:
             auth=ADMIN_CREDENTIALS
         ).json()
 
-        namespace_id = container['namespace']['pulp_id']
+        namespace_id = container['namespace']['id']
         pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
 
         # get roles first
@@ -512,7 +512,7 @@ class ReusableLocalContainer:
             auth=ADMIN_CREDENTIALS
         ).json()
 
-        namespace_id = self._container['namespace']['pulp_id']
+        namespace_id = self._container['namespace']['id']
         pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
 
         # get roles first

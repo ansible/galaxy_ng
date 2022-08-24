@@ -257,7 +257,7 @@ def push_updates_to_existing_ee(user, password, expect_pass, extra):
 
 def change_ee_tags(user, password, expect_pass, extra):
     manifest = extra["local_ee"].get_manifest()
-    repo_pk = extra["local_ee"].get_container()["pulp"]["repository"]["pulp_id"]
+    repo_pk = extra["local_ee"].get_container()["pulp"]["repository"]["id"]
     tag = gen_string()
 
     response = requests.post(

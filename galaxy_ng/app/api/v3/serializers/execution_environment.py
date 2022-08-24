@@ -19,7 +19,9 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import MyPermissionsField
 from galaxy_ng.app.api import utils
 
-namespace_fields = ("pulp_id", "pulp_href", "name", "my_permissions", "owners")
+
+namespace_fields = ("id", "pulp_href", "name", "my_permissions",
+                    "owners", "created_at", "updated_at")
 
 VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*/?[A-Za-z0-9._-]*$"
 
@@ -44,15 +46,19 @@ class ManifestListManifestSerializer(serializers.ModelSerializer):
 
 
 class ContainerNamespaceSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source="pulp_id")
+    pulp_href = IdentityField(view_name="pulp_container/namespaces-detail")
     my_permissions = MyPermissionsField(source="*", read_only=True)
     owners = serializers.SerializerMethodField()
-    pulp_href = IdentityField(view_name="pulp_container/namespaces-detail")
+
+    created_at = serializers.DateTimeField(source="pulp_created")
+    updated_at = serializers.DateTimeField(source="pulp_last_updated")
 
     class Meta:
         model = models.ContainerNamespace
         fields = namespace_fields
         read_only_fields = (
-            "pulp_id",
+            "id",
             "pulp_href",
             "name",
             "my_permissions"
@@ -240,19 +246,21 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
 
         return {
             "repository": {
-                "pulp_id": repo.pk,
+                "id": repo.pk,
                 "pulp_type": repo.pulp_type,
                 "version": repo.latest_version().number,
                 "name": repo.name,
                 "description": repo.description,
-                "pulp_created": repo.pulp_created,
+                "created_at": repo.pulp_created,
+                "updated_at": repo.pulp_last_updated,
                 "pulp_labels": {label.key: label.value for label in repo.pulp_labels.all()},
                 "remote": remote
             },
             "distribution": {
-                "pulp_id": distro.pk,
+                "id": distro.pk,
                 "name": distro.name,
-                "pulp_created": distro.pulp_created,
+                "created_at": distro.pulp_created,
+                "updated_at": distro.pulp_last_updated,
                 "base_path": distro.base_path,
                 "pulp_labels": {label.key: label.value for label in distro.pulp_labels.all()},
             },
@@ -360,6 +368,7 @@ class ContainerManifestDetailSerializer(ContainerManifestSerializer):
 
 class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='pulp_id')
+    pulp_href = IdentityField(view_name="repositories-detail")
     added = serializers.SerializerMethodField()
     removed = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
@@ -367,7 +376,7 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = core_models.RepositoryVersion
-        fields = ("id", "added", "removed", "number", "created_at", "updated_at")
+        fields = ("id", "pulp_href", "added", "removed", "number", "created_at", "updated_at")
 
     @extend_schema_field(serializers.ListField(child=serializers.JSONField()))
     def get_added(self, obj):
