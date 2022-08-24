@@ -2,6 +2,8 @@ import re
 import socket
 
 from django.utils.translation import gettext_lazy as _
+from django.http import Http404
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from rest_framework import serializers
 from pulpcore.plugin import models as pulp_models
@@ -150,3 +152,14 @@ class RemoteSyncTaskField(serializers.Field):
                 "finished_at": task.finished_at,
                 "error": task.error
             }
+
+
+class GetObjectByIdMixin:
+    """
+    Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API
+    """
+    def get_object(self):
+        try:
+            return self.get_queryset().get(pk=self.kwargs['id'])
+        except (ObjectDoesNotExist, ValidationError):
+            raise Http404

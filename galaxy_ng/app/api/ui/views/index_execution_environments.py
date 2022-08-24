@@ -27,7 +27,7 @@ class IndexRegistryEEView(api_base.APIView):
         responses={status.HTTP_202_ACCEPTED: AsyncOperationResponseSerializer},
     )
     def post(self, request: Request, *args, **kwargs) -> Response:
-        registry = get_object_or_404(models.ContainerRegistryRemote, pk=kwargs['pk'])
+        registry = get_object_or_404(models.ContainerRegistryRemote, pk=kwargs['id'])
 
         if not registry.get_registry_backend():
             raise ValidationError(

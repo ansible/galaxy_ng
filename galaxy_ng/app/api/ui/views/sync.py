@@ -24,7 +24,7 @@ class ContainerSyncRegistryView(api_base.APIView):
         responses={202: AsyncOperationResponseSerializer},
     )
     def post(self, request: Request, *args, **kwargs) -> Response:
-        registry = get_object_or_404(models.ContainerRegistryRemote, pk=kwargs['pk'])
+        registry = get_object_or_404(models.ContainerRegistryRemote, pk=kwargs['id'])
 
         result = dispatch(
             tasks.sync_all_repos_in_registry,

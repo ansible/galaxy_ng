@@ -40,15 +40,15 @@ class TestContainerRegistryRemoteViewset(BaseTestCase):
 
     def test_get_detail_with_data(self):
         name = 'my_registry'
-        pk = self.create_registry_remote(name)
-        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'pk': pk})
+        id = self.create_registry_remote(name)
+        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'id': id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], name)
 
     def test_get_detail_fail(self):
-        pk = 'this key does not exist'
-        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'pk': pk})
+        id = 'this key does not exist'
+        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'id': id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -66,8 +66,8 @@ class TestContainerRegistryRemoteViewset(BaseTestCase):
     def test_update_detail(self):
         initial_name = 'intial_registry_name'
         updated_name = 'updated_registry_name'
-        pk = self.create_registry_remote(initial_name)
-        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'pk': pk})
+        id = self.create_registry_remote(initial_name)
+        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'id': id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], initial_name)
@@ -80,8 +80,8 @@ class TestContainerRegistryRemoteViewset(BaseTestCase):
     def test_update_detail_fail(self):
         initial_name = 'intial_registry_name'
         updated_name = 'updated_registry_name'
-        pk = self.create_registry_remote(initial_name)
-        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'pk': pk})
+        id = self.create_registry_remote(initial_name)
+        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'id': id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], initial_name)
@@ -91,8 +91,8 @@ class TestContainerRegistryRemoteViewset(BaseTestCase):
 
     def test_delete_registry_remote(self):
         name = 'registry_to_delete'
-        pk = self.create_registry_remote(name)
-        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'pk': pk})
+        id = self.create_registry_remote(name)
+        url = get_current_ui_url('execution-environments-registry-detail', kwargs={'id': id})
         # Get it first
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -32,17 +32,17 @@ auth_views = [
 
 container_paths = [
     path(
-        "registries/<str:pk>/",
+        "registries/<str:id>/",
         viewsets.ContainerRegistryRemoteViewSet.as_view(
             {'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}
         ),
         name='execution-environments-registry-detail'),
     path(
-        "registries/<str:pk>/sync/",
+        "registries/<str:id>/sync/",
         views.ContainerSyncRegistryView.as_view(),
         name='container-registry-sync'),
     path(
-        "registries/<str:pk>/index/",
+        "registries/<str:id>/index/",
         views.IndexRegistryEEView.as_view(),
         name='execution-environments-registry-index'),
     path(
@@ -50,7 +50,7 @@ container_paths = [
         viewsets.ContainerRegistryRemoteViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='execution-environments-registry-list'),
     path(
-        "remotes/<str:pk>/",
+        "remotes/<str:id>/",
         viewsets.ContainerRemoteViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='execution-environments-remote-detail'),
     path(
