@@ -226,9 +226,9 @@ class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyTasksViewset):
 
         namespace = None
         if github_user:
-            #if github_user.isdigit():
+            # if github_user.isdigit():
             #    namespace = LegacyNamespace.objects.filter(pk=int(github_user)).first()
-            #else:
+            # else:
             #    namespace = LegacyNamespace.objects.filter(name=github_user).first()
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
