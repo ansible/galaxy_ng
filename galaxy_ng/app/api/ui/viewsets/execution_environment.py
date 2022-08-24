@@ -8,9 +8,6 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.ui import serializers
-from galaxy_ng.app.api.v3.serializers import (
-    ContainerRemoteSerializer
-)
 
 log = logging.getLogger(__name__)
 
@@ -47,5 +44,5 @@ class ContainerRegistryRemoteViewSet(api_base.ModelViewSet):
 
 class ContainerRemoteViewSet(api_base.ModelViewSet):
     queryset = container_models.ContainerRemote.objects.all()
-    serializer_class = ContainerRemoteSerializer
+    serializer_class = serializers.ContainerRemoteSerializer
     permission_classes = [access_policy.ContainerRemoteAccessPolicy]

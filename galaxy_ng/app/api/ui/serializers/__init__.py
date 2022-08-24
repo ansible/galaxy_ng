@@ -28,7 +28,8 @@ from .distribution import (
 )
 
 from .execution_environment import (
-    ContainerRegistryRemoteSerializer
+    ContainerRegistryRemoteSerializer,
+    ContainerRemoteSerializer
 )
 
 __all__ = (
