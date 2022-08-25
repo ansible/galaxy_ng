@@ -37,6 +37,19 @@ def has_model_or_object_permissions(user, permission, obj):
     return user.has_perm(permission) or user.has_perm(permission, obj)
 
 
+def has_model_permissions(user, permission):
+    return user.has_perm(permission)
+
+
+def is_ns_owner(user, permission, namespace):
+    if len(namespace.groups) == 0:
+        return True
+    if user.has_perm(permission, namespace):
+        return True
+    else:
+        raise NotFound(_("User not a member of Namespace owners."))
+
+
 class AccessPolicyBase(AccessPolicyFromDB):
     """
     This class is capable of loading access policy statements from galaxy_ng's hardcoded list of
@@ -138,16 +151,16 @@ class AccessPolicyBase(AccessPolicyFromDB):
         )
 
     def can_create_collection(self, request, view, permission):
+        perm = "galaxy.upload_to_namespace"
         data = view._get_data(request)
         try:
             namespace = models.Namespace.objects.get(name=data["filename"].namespace)
         except models.Namespace.DoesNotExist:
             raise NotFound(_("Namespace in filename not found."))
-        return has_model_or_object_permissions(
+        return has_model_permissions(
             request.user,
-            "galaxy.upload_to_namespace",
-            namespace
-        )
+            perm
+        ) and is_ns_owner(request.user, perm, namespace)
 
     def can_sign_collections(self, request, view, permission):
         # Repository is required on the CollectionSign payload
