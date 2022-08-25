@@ -49,6 +49,7 @@ services:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "./common/dynaconf_hooks.py:/etc/pulp/dynaconf_hooks.py:z"
       - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
+      - "./common/container_sign.sh:/var/lib/pulp/scripts/container_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
@@ -72,6 +73,7 @@ services:
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
+      - "./common/container_sign.sh:/var/lib/pulp/scripts/container_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:
@@ -97,6 +99,7 @@ services:
     volumes:
       - "./common/settings.py:/etc/pulp/settings.py:z"
       - "./common/collection_sign.sh:/var/lib/pulp/scripts/collection_sign.sh:z"
+      - "./common/container_sign.sh:/var/lib/pulp/scripts/container_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
     tmpfs:

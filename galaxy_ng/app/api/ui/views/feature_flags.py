@@ -78,5 +78,35 @@ def _load_conditional_signing_flags(flags):
         )
         _messages.append(msg)
 
+    # Container Signing
+    execution_environments_enabled = flags.get("execution_environments", False)
+    container_signing_service_name = settings.get("GALAXY_CONTAINER_SIGNING_SERVICE")
+
+    # Is the system configured with a Signing Service for containers?
+    container_signing_service_exists = False
+    if container_signing_service_name:
+        container_signing_service_exists = SigningService.objects.filter(
+            name=container_signing_service_name
+        ).exists()
+        if not container_signing_service_exists:
+            msg = _(
+                "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', "
+                "however the respective SigningService does not exist in the database."
+            )
+            _messages.append(msg.format(container_signing_service_name))
+
+    # This allows users to export GALAXY_FEATURE_FLAGS__container_signing=false|true
+    container_signing_enabled = flags.setdefault(
+        "container_signing", container_signing_service_exists
+    )
+
+    # Is the system with a Signing Service for containers enabled but EEs disabled?
+    if container_signing_enabled and not execution_environments_enabled:
+        msg = _(
+            "WARNING: container_signing is enabled via '{}' SigningService, "
+            "however execution environments are disabled on the system."
+        )
+        _messages.append(msg.format(container_signing_service_name))
+
     # Display messages if any
     flags["_messages"] = _messages
