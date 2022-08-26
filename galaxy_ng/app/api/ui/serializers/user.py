@@ -1,3 +1,4 @@
+from math import perm
 from django.conf import settings
 from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
@@ -171,68 +172,13 @@ class CurrentUserSerializer(UserSerializer):
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_model_permissions(self, obj):
-
-        permissions = {
-            # Collection Namespace
-            "add_namespace": obj.has_perm('galaxy.add_namespace'),
-            "upload_to_namespace": obj.has_perm('galaxy.upload_to_namespace'),
-            "change_namespace": obj.has_perm('galaxy.change_namespace'),
-            "delete_namespace": obj.has_perm('galaxy.delete_namespace'),
-
-            # Collection Repository
-            "move_collection": obj.has_perm('ansible.modify_ansible_repo_content'),
-            "delete_collection": obj.has_perm('ansible.delete_collection'),
-
-            # Collection Remote
-            "add_remote": obj.has_perm('ansible.add_collectionremote'),
-            "change_remote": obj.has_perm('ansible.change_collectionremote'),
-            "delete_remote": obj.has_perm('ansible.delete_collectionremote'),
-
-            # Collection Distribution
-            "view_distribution": obj.has_perm('ansible.view_ansibledistribution'),
-            "add_distribution": obj.has_perm('ansible.add_ansibledistribution'),
-            "change_distribution": obj.has_perm('ansible.change_ansibledistribution'),
-            "delete_distribution": obj.has_perm('ansible.delete_ansibledistribution'),
-
-            # Container Namespace
-            "add_containernamespace": obj.has_perm('container.add_containernamespace'),
-            "change_containernamespace": obj.has_perm('container.change_containernamespace'),
-            "delete_containernamespace": obj.has_perm('container.delete_containernamespace'),
-
-            # Container Repository
-            "add_containerrepository": obj.has_perm('container.add_containerrepository'),
-            "change_containerrepository": obj.has_perm('container.change_containerrepository'),
-            "delete_containerrepository": obj.has_perm('container.delete_containerrepository'),
-
-            # Container Remote
-            "add_containerregistry": obj.has_perm('galaxy.add_containerregistryremote'),
-            "change_containerregistry": obj.has_perm('galaxy.change_containerregistryremote'),
-            "delete_containerregistry": obj.has_perm('galaxy.delete_containerregistryremote'),
-
-            # Container Distribution
-            "add_containerdistribution": obj.has_perm('container.add_containerdistribution'),
-            "change_containerdistribution": obj.has_perm('container.change_containerdistribution'),
-            "delete_containerdistribution": obj.has_perm('container.delete_containerdistribution'),
-
-            # Tasks
-            "view_task": obj.has_perm('core.view_task'),
-
-            # Auth
-            "view_user": obj.has_perm('galaxy.view_user'),
-            "change_group": obj.has_perm('galaxy.change_group'),
-            "view_group": obj.has_perm('galaxy.view_group'),
-            "delete_user": False,
-            "change_user": False,
-            "add_user": False,
-            "add_group": False,
-            "delete_group": False,
-        }
+        permissions = { "permissions": PERMISSIONS}
 
         if not settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
-            permissions["delete_user"] = obj.has_perm('galaxy.delete_user')
-            permissions["change_user"] = obj.has_perm('galaxy.change_user')
-            permissions["add_user"] = obj.has_perm('galaxy.add_user')
-            permissions["add_group"] = obj.has_perm('galaxy.add_group')
-            permissions["delete_group"] = obj.has_perm('galaxy.delete_group')
+            permissions["permissions"]["galaxy.delete_user"] = obj.has_perm('galaxy.delete_user')
+            permissions["permissions"]["galaxy.change_user"] = obj.has_perm('galaxy.change_user')
+            permissions["permissions"]["galaxy.add_user"] = obj.has_perm('galaxy.add_user')
+            permissions["permissions"]["galaxy.add_group"] = obj.has_perm('galaxy.add_group')
+            permissions["permissions"]["galaxy.delete_group"] = obj.has_perm('galaxy.delete_group')
 
         return permissions
