@@ -44,7 +44,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "namespaces"
     },
-      "galaxy.delete_namespace": {
+    "galaxy.delete_namespace": {
         # Short name to display in the UI
         "name": "Delete namespace",
 
@@ -57,7 +57,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "namespaces"
     },
-      "galaxy.upload_to_namespace": {
+    "galaxy.upload_to_namespace": {
         # Short name to display in the UI
         "name": "Upload to namespace",
 
@@ -70,7 +70,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "namespaces"
     },
-      "ansible.delete_collection": {
+    "ansible.delete_collection": {
         # Short name to display in the UI
         "name": "Delete collection",
 
@@ -83,7 +83,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "collections"
     },
-      "ansible.modify_ansible_repo_content": {
+    "ansible.modify_ansible_repo_content": {
         # Short name to display in the UI
         "name": "Modify Ansible repo content",
 
@@ -96,7 +96,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "collection_namespace"
     },
-       "galaxy.add_user": {
+    "galaxy.add_user": {
         # Short name to display in the UI
         "name": "Add user",
 
@@ -109,7 +109,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "users"
     },
-       "galaxy.change_user": {
+    "galaxy.change_user": {
         # Short name to display in the UI
         "name": "Change user",
 
@@ -122,7 +122,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "users"
     },
-       "galaxy.delete_user": {
+    "galaxy.delete_user": {
         # Short name to display in the UI
         "name": "Delete user",
 
@@ -135,7 +135,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "users"
     },
-       "galaxy.view_user": {
+    "galaxy.view_user": {
         # Short name to display in the UI
         "name": "View user",
 
@@ -148,7 +148,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "users"
     },
-        "galaxy.add_group": {
+    "galaxy.add_group": {
         # Short name to display in the UI
         "name": "Add group",
 
@@ -161,7 +161,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "groups"
     },
-        "galaxy.change_group": {
+    "galaxy.change_group": {
         # Short name to display in the UI
         "name": "Change group",
 
@@ -174,7 +174,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "groups"
     },
-      "galaxy.delete_group": {
+    "galaxy.delete_group": {
         # Short name to display in the UI
         "name": "Delete group",
 
@@ -187,7 +187,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "groups"
     },
-        "galaxy.view_group": {
+    "galaxy.view_group": {
         # Short name to display in the UI
         "name": "View group",
 
@@ -200,7 +200,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "groups"
     },
-        "container.change_containernamespace": {
+    "container.change_containernamespace": {
         # Short name to display in the UI
         "name": "Change container namespace permissions",
 
@@ -213,7 +213,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "containers"
     },
-       "container.change_containernamespace": {
+    "container.change_containernamespace": {
         # Short name to display in the UI
         "name": "Change container namespace permissions",
 
@@ -226,7 +226,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "containers"
     },
-       "container.namespace_change_containerdistribution": {
+    "container.namespace_change_containerdistribution": {
         # Short name to display in the UI
         "name": "Change containers",
 
@@ -239,7 +239,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "containers"
     },
-       "container.add_containernamespace": {
+    "container.add_containernamespace": {
         # Short name to display in the UI
         "name": "Create new containers",
 
@@ -252,7 +252,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "containers"
     },
-       "container.delete_containerrepository": {
+    "container.delete_containerrepository": {
         # Short name to display in the UI
         "name": "Delete container repository",
 
@@ -265,7 +265,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "containers"
     },
-       "container.namespace_push_containerdistribution": {
+    "container.namespace_push_containerdistribution": {
         # Short name to display in the UI
         "name": "Push to existing containers",
 
@@ -278,7 +278,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "containers"
     },
-        "ansible.change_collectionremote": {
+    "ansible.change_collectionremote": {
         # Short name to display in the UI
         "name": "Change collection remote",
 
@@ -291,7 +291,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "remotes"
     },
-        "ansible.view_collectionremote": {
+    "ansible.view_collectionremote": {
         # Short name to display in the UI
         "name": "View collection remote",
 
@@ -304,7 +304,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "remotes"
     },
-        "galaxy.add_containerregistryremote": {
+    "galaxy.add_containerregistryremote": {
         # Short name to display in the UI
         "name": "Add remote registry",
 
@@ -317,7 +317,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "registries"
     },
-        "galaxy.change_containerregistryremote": {
+    "galaxy.change_containerregistryremote": {
         # Short name to display in the UI
         "name": "Change remote registry",
 
@@ -330,7 +330,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "registries"
     },
-        "galaxy.delete_containerregistryremote": {
+    "galaxy.delete_containerregistryremote": {
         # Short name to display in the UI
         "name": "Delete remote registry",
 
@@ -343,7 +343,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "registries"
     },
-        "core.change_task": {
+    "core.change_task": {
         # Short name to display in the UI
         "name": "Change task",
 
@@ -356,7 +356,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "task_management"
     },
-        "core.delete_task": {
+    "core.delete_task": {
         # Short name to display in the UI
         "name": "Delete task",
 
@@ -369,7 +369,7 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": "task_management"
     },
-        "core.view_task": {
+    "core.view_task": {
         # Short name to display in the UI
         "name": "View all tasks",
 
