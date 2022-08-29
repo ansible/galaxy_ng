@@ -172,13 +172,13 @@ class CurrentUserSerializer(UserSerializer):
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_model_permissions(self, obj):
-        permissions = { "permissions": PERMISSIONS}
+        permissions = { PERMISSIONS}
 
         if not settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
-            permissions["permissions"]["galaxy.delete_user"] = obj.has_perm('galaxy.delete_user')
-            permissions["permissions"]["galaxy.change_user"] = obj.has_perm('galaxy.change_user')
-            permissions["permissions"]["galaxy.add_user"] = obj.has_perm('galaxy.add_user')
-            permissions["permissions"]["galaxy.add_group"] = obj.has_perm('galaxy.add_group')
-            permissions["permissions"]["galaxy.delete_group"] = obj.has_perm('galaxy.delete_group')
+            permissions["galaxy.delete_user"] = obj.has_perm('galaxy.delete_user')
+            permissions["galaxy.change_user"] = obj.has_perm('galaxy.change_user')
+            permissions["galaxy.add_user"] = obj.has_perm('galaxy.add_user')
+            permissions["galaxy.add_group"] = obj.has_perm('galaxy.add_group')
+            permissions["galaxy.delete_group"] = obj.has_perm('galaxy.delete_group')
 
         return permissions
