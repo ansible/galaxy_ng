@@ -1,5 +1,5 @@
 import enum
-
+from django.utils.translation import gettext_lazy as _
 
 class DeploymentMode(enum.Enum):
     STANDALONE = 'standalone'
@@ -20,7 +20,7 @@ INBOUND_REPO_NAME_FORMAT = "inbound-{namespace_name}"
 PERMISSIONS = {
     "galaxy.add_namespace": {
         # Short name to display in the UI
-        "name": "Add namespace",
+        "name": _("Add namespace"),
 
         # Description to use when the permission is being assigned to a specifc object
         "object_description": None,
@@ -29,217 +29,217 @@ PERMISSIONS = {
         "global_description": "Create a new namespace.",
 
         # Category to group the permission in the UI.
-        "ui_category": "Collection Namespaces"
+        "ui_category": _("Collection Namespaces")
     },
     "galaxy.change_namespace": {
-        "name": "Change namespace",
+        "name": _("Change namespace"),
 
         "object_description": "Edit this namespace.",
 
         "global_description": "Edit any existing namespace.",
 
-        "ui_category": "Collection Namespaces"
+        "ui_category": _("Collection Namespaces")
     },
     "galaxy.delete_namespace": {
-        "name": "Delete namespace",
+        "name": _("Delete namespace"),
 
         "object_description": "Delete this namespace.",
 
         "global_description": "Delete any existing namespace.",
 
-        "ui_category": "Collection Namespaces"
+        "ui_category": _("Collection Namespaces")
     },
     "galaxy.upload_to_namespace": {
-        "name": "Upload to namespace",
+        "name": _("Upload to namespace"),
 
         "object_description": "Upload collections to this namespace.",
 
         "global_description": "Upload collections to any existing namespace.",
 
-        "ui_category": "Collection Namespaces"
+        "ui_category": _("Collection Namespaces")
     },
     "ansible.delete_collection": {
-        "name": "Delete collection",
+        "name": _("Delete collection"),
 
         "object_description": "Delete this collection.",
 
         "global_description": "Delete any existing collection.",
 
-        "ui_category": "Collections"
+        "ui_category": _("Collections")
     },
     "ansible.modify_ansible_repo_content": {
-        "name": "Modify Ansible repo content",
+        "name": _("Modify Ansible repo content"),
 
         "object_description": "Modify content of an Ansible repository.",
 
         "global_description": "Upload collections to any existing namespace.",
 
-        "ui_category": "Collections"
+        "ui_category": _("Collections")
     },
     "galaxy.add_user": {
-        "name": "Add user",
+        "name": _("Add user"),
 
         "object_description": None,
 
         "global_description": "Add new users to the system.",
 
-        "ui_category": "Users"
+        "ui_category": _("Users")
     },
     "galaxy.change_user": {
-        "name": "Change user",
+        "name": _("Change user"),
 
         "object_description": "Edit this user.",
 
         "global_description": "Edit any existing user in the system.",
 
-        "ui_category": "Users"
+        "ui_category": _("Users")
     },
     "galaxy.delete_user": {
-        "name": "Delete user",
+        "name": _("Delete user"),
 
         "object_description": "Delete this user.",
 
         "global_description": "Delete any existing user in the system.",
 
-        "ui_category": "Users"
+        "ui_category": _("Users")
     },
     "galaxy.view_user": {
-        "name": "View user",
+        "name": _("View user"),
 
         "object_description": "View this user.",
 
         "global_description": "View any user in the system.",
 
-        "ui_category": "Users"
+        "ui_category": _("Users")
     },
     "galaxy.add_group": {
-        "name": "Add group",
+        "name": _("Add group"),
 
         "object_description": None,
 
         "global_description": "Create new groups to the system.",
 
-        "ui_category": "Groups"
+        "ui_category": _("Groups")
     },
     "galaxy.change_group": {
-        "name": "Change group",
+        "name": _("Change group"),
 
         "object_description": "Edit this group",
 
         "global_description": "Edit any existing group in the system.",
 
-        "ui_category": "Groups"
+        "ui_category": _("Groups")
     },
     "galaxy.delete_group": {
-        "name": "Delete group",
+        "name": _("Delete group"),
 
         "object_description": "Delete this group.",
 
         "global_description": "Delete any group in the system.",
 
-        "ui_category": "Groups"
+        "ui_category": _("Groups")
     },
     "galaxy.view_group": {
-        "name": "View group",
+        "name": _("View group"),
 
         "object_description": "View this group.",
 
         "global_description": "View any existing group in the system.",
 
-        "ui_category": "Groups"
+        "ui_category": _("Groups")
     },
     "container.change_containernamespace": {
-        "name": "Change container namespace permissions",
+        "name": _("Change container namespace permissions"),
 
         "object_description": "Edit permissions on this namespace.",
 
         "global_description": "Edit permissions on any existing namespace.",
 
-        "ui_category": "Containers"
+        "ui_category": _("Containers")
     },
     "container.change_containernamespace": {
-        "name": "Change container namespace permissions",
+        "name": _("Change container namespace permissions"),
 
         "object_description": "Edit permissions on this namespace.",
 
         "global_description": "Edit permissions on any existing namespace.",
 
-        "ui_category": "Containers"
+        "ui_category": _("Containers")
     },
     "container.namespace_change_containerdistribution": {
-        "name": "Change containers",
+        "name": _("Change containers"),
 
         "object_description": "Edit this container.",
 
         "global_description": "Edit any container existing in the system.",
 
-        "ui_category": "Containers"
+        "ui_category": _("Containers")
     },
     "container.add_containernamespace": {
-        "name": "Create new containers",
+        "name": _("Create new containers"),
 
         "object_description": None,
 
         "global_description": "Add new containers to the system.",
 
-        "ui_category": "Containers"
+        "ui_category": _("Containers")
     },
     "container.delete_containerrepository": {
-        "name": "Delete container repository",
+        "name": _("Delete container repository"),
 
         "object_description": "Delete this container repository.",
 
         "global_description": "Delete any existing container repository in the system.",
 
-        "ui_category": "Containers"
+        "ui_category": _("Containers")
     },
     "container.namespace_push_containerdistribution": {
-        "name": "Push to existing containers",
+        "name": _("Push to existing containers"),
 
         "object_description": "Push to this namespace.",
 
         "global_description": "Push to any existing namespace in the system.",
 
-        "ui_category": "Containers"
+        "ui_category": _("Containers")
     },
     "ansible.change_collectionremote": {
-        "name": "Change collection remote",
+        "name": _("Change collection remote"),
 
         "object_description": "Edit this collection remote.",
 
         "global_description": "Edit any collection remote existing in the system.",
 
-        "ui_category": "Collection Remotes"
+        "ui_category": _("Collection Remotes")
     },
     "ansible.view_collectionremote": {
-        "name": "View collection remote",
+        "name": _("View collection remote"),
 
         "object_description": "View this collection remote.",
 
         "global_description": "View any collection remote existing in the system.",
 
-        "ui_category": "Collection Remotes"
+        "ui_category": _("Collection Remotes")
     },
     "galaxy.add_containerregistryremote": {
-        "name": "Add remote registry",
+        "name": _("Add remote registry"),
 
         "object_description": None,
 
         "global_description": "Add remote registry to the system.",
 
-        "ui_category": "Remote Registries"
+        "ui_category": _("Remote Registries")
     },
     "galaxy.change_containerregistryremote": {
-        "name": "Change remote registry",
+        "name": _("Change remote registry"),
 
         "object_description": "Edit this remote registry.",
 
         "global_description": "Change any remote registry existing in the system.",
 
-        "ui_category": "Remote Registries"
+        "ui_category": _("Remote Registries")
     },
     "galaxy.delete_containerregistryremote": {
-        "name": "Delete remote registry",
+        "name": _("Delete remote registry"),
 
         "object_description": "Delete this remote registry.",
 
