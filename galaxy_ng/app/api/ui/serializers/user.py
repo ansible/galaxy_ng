@@ -1,4 +1,3 @@
-from math import perm
 from django.conf import settings
 from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
@@ -172,7 +171,7 @@ class CurrentUserSerializer(UserSerializer):
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_model_permissions(self, obj):
-        permissions = { PERMISSIONS}
+        permissions =  PERMISSIONS
 
         if not settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
             permissions["galaxy.delete_user"] = obj.has_perm('galaxy.delete_user')
