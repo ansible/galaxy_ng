@@ -189,15 +189,6 @@ class LegacyRoleImportsViewSet(LegacyRoleBaseViewSet):
         )
         logger.debug(f'REQUEST USER USERNAME: {self.request.user.username}')
 
-        '''
-        # validate is admin or gitub_user == auth_user ...
-        if not self.request.user.is_authenticated:
-            return HttpResponse('authentication required', status=403)
-        if not self.request.user.is_superuser and not \
-                self.request.user.username == kwargs['github_user']:
-            return HttpResponse('invalid permissions', status=403)
-        '''
-
         task_id = self.legacy_dispatch(legacy_role_import, kwargs=kwargs)
 
         role_name = kwargs['alternate_role_name'] or \
@@ -235,16 +226,6 @@ class LegacyRoleViewSet(LegacyRoleBaseViewSet):
     def destroy(self, request, roleid=None):
         """Delete a single role."""
         role = LegacyRole.objects.filter(id=roleid).first()
-
-        '''
-        # ensure the github_user matches the request user
-        username = request.user.get_username()
-        if username != role.namespace.name and not request.user.is_superuser:
-            raise ValidationError({
-                'default': 'you do not have permission to modify this resource'
-            })
-        '''
-
         role.delete()
         return Response({'status': 'ok'})
 
