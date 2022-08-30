@@ -162,14 +162,24 @@ PERMISSIONS = {
         "ui_category": _("Groups"),
 
     },
-    "container.change_containernamespace": {
-        "name": _("Change container namespace permissions"),
+        "ansible.change_collectionremote": {
+        "name": _("Change collection remote"),
 
-        "object_description": _("Edit permissions on this namespace."),
+        "object_description": _("Edit this collection remote."),
 
-        "global_description": _("Edit permissions on any existing namespace."),
+        "global_description": _("Edit any collection remote existing in the system."),
 
-        "ui_category": _("Containers"),
+        "ui_category": _("Collection Remotes"),
+
+    },
+    "ansible.view_collectionremote": {
+        "name": _("View collection remote"),
+
+        "object_description": _("View this collection remote."),
+
+        "global_description": _("View any collection remote existing in the system."),
+
+        "ui_category": _("Collection Remotes"),
 
     },
     "container.change_containernamespace": {
@@ -188,6 +198,16 @@ PERMISSIONS = {
         "object_description": _("Edit this container."),
 
         "global_description": _("Edit any container existing in the system."),
+
+        "ui_category": _("Containers"),
+
+    },
+      "container.namespace_modify_content_containerpushrepository" : {
+        "name": _("Change image tags"),
+
+        "object_description": _("Edit this image tag"),
+
+        "global_description": _("Edit any image tag in the system."),
 
         "ui_category": _("Containers"),
 
@@ -220,26 +240,6 @@ PERMISSIONS = {
         "global_description": _("Push to any existing namespace in the system."),
 
         "ui_category": _("Containers"),
-
-    },
-    "ansible.change_collectionremote": {
-        "name": _("Change collection remote"),
-
-        "object_description": _("Edit this collection remote."),
-
-        "global_description": _("Edit any collection remote existing in the system."),
-
-        "ui_category": _("Collection Remotes"),
-
-    },
-    "ansible.view_collectionremote": {
-        "name": _("View collection remote"),
-
-        "object_description": _("View this collection remote."),
-
-        "global_description": _("View any collection remote existing in the system."),
-
-        "ui_category": _("Collection Remotes"),
 
     },
     "galaxy.add_containerregistryremote": {

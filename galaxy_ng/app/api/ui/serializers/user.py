@@ -173,15 +173,15 @@ class CurrentUserSerializer(UserSerializer):
     def get_model_permissions(self, obj):
         permissions = {}
         for i, j in PERMISSIONS.items():
+            print(f'i & j: {i, j}')
             permissions[i] = j
-
-            if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
-                permissions["galaxy.delete_user"] = False
-                permissions["galaxy.change_user"] = False
-                permissions["galaxy.add_user"] = False
-                permissions["galaxy.add_group"] = False
-                permissions["galaxy.delete_group"] = False
-            else:
-                permissions[i]["has_model_permission"] = obj.has_perm(j)
+        for i in permissions:
+            permissions[i]["has_model_permission"] = obj.has_perm(i)
+        if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
+            permissions["galaxy.delete_user"] = False
+            permissions["galaxy.change_user"] = False
+            permissions["galaxy.add_user"] = False
+            permissions["galaxy.add_group"] = False
+            permissions["galaxy.delete_group"] = False
 
         return permissions
