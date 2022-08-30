@@ -950,7 +950,6 @@ class SocialGithubClient:
 
         pheaders = {
             'Accept': 'application/json',
-            #'Content-Type': 'application/json',
             'X-CSRFToken': self.csrftoken,
             'Cookie': f'csrftoken={self.csrftoken}; sessionid={self.sessionid}'
         }

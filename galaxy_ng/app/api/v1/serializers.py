@@ -102,7 +102,6 @@ class LegacyUserSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'date_joined'):
             return obj.date_joined
 
-
     def get_summary_fields(self, obj):
         return {}
 
