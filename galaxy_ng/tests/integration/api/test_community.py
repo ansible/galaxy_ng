@@ -97,6 +97,55 @@ def test_social_auth_creates_legacynamespace(ansible_config):
 
 
 @pytest.mark.community_only
+def test_update_legacynamespace_owners(ansible_config):
+
+    # cleanup the namespace first
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
+    if resp['count'] > 0:
+        for result in resp['results']:
+            ns_url = f"/api/v1/namespaces/{result['id']}/"
+            admin_client(ns_url, method='DELETE')
+    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
+    assert resp['count'] == 0
+
+    # make sure user2 is created
+    cfg = ansible_config('github_user_2')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('_ui/v1/me/')
+        uinfo2 = resp.json()
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+
+        # find the namespace
+        ns_resp = client.get('v1/namespaces/?name=gh01')
+        ns_result = ns_resp.json()
+        ns_id = ns_result['results'][0]['id']
+        ns_url = f'v1/namespaces/{ns_id}/'
+
+        # assemble payload
+        new_owners = {'owners': [{'id': uinfo2['id']}]}
+
+        # put the payload
+        owners_url = ns_url + 'owners/'
+        update_resp = client.put(owners_url, data=new_owners)
+        assert update_resp.status_code == 200
+
+        # get the new data
+        ns_resp2 = client.get(owners_url)
+        owners2 = ns_resp2.json()
+        owners2_usernames = [x['username'] for x in owners2]
+        assert 'gh01' in owners2_usernames
+        assert uinfo2['username'] in owners2_usernames
+
+
+@pytest.mark.community_only
 def test_list_collections_anonymous(ansible_config):
     """Tests whether collections can be browsed anonymously"""
 

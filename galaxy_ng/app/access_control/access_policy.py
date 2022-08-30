@@ -377,6 +377,8 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
     def is_namespace_owner(self, request, viewset, action):
 
+        print(f'IS_NAMESPACE_OWNER: {request} {viewset} {action}')
+
         user = request.user
         if user.is_superuser:
             return True
@@ -395,6 +397,19 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
             # allow other owners to import
             if ns and ns.owners.filter(username=user.username).count() > 0:
+                return True
+
+        # namespace owner edits
+        if action == 'update_owners':
+            ns_id = request.parser_context['kwargs']['pk']
+            ns = LegacyNamespace.objects.filter(id=ns_id).first()
+            if user.username == ns.name or ns.owners.filter(username=user.username).count() > 0:
+                return True
+
+        if action == 'delete_namespace':
+            ns_id = request.parser_context['kwargs']['pk']
+            ns = LegacyNamespace.objects.filter(id=ns_id).first()
+            if user.username == ns.name or ns.owners.filter(username=user.username).count() > 0:
                 return True
 
         if action == 'destroy':

@@ -30,7 +30,10 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
         ]
 
     def get_name(self, obj):
-        return obj.name
+        if hasattr(obj, 'name'):
+            return obj.name
+        if hasattr(obj, 'username'):
+            return obj.username
 
     def get_url(self, obj):
         return ''
@@ -81,7 +84,10 @@ class LegacyUserSerializer(serializers.ModelSerializer):
         ]
 
     def get_username(self, obj):
-        return obj.name
+        if hasattr(obj, 'name'):
+            return obj.name
+        if hasattr(obj, 'username'):
+            return obj.username
 
     def get_url(self, obj):
         return ''
@@ -90,7 +96,12 @@ class LegacyUserSerializer(serializers.ModelSerializer):
         return ''
 
     def get_date_joined(self, obj):
-        return obj.created
+        # return obj.created
+        if hasattr(obj, '_created'):
+            return obj._created
+        if hasattr(obj, 'date_joined'):
+            return obj.date_joined
+
 
     def get_summary_fields(self, obj):
         return {}
@@ -100,7 +111,11 @@ class LegacyUserSerializer(serializers.ModelSerializer):
     #    return True
 
     def get_avatar_url(self, obj):
-        url = f'https://github.com/{obj.name}.png'
+        if hasattr(obj, 'name'):
+            username = obj.name
+        elif hasattr(obj, 'username'):
+            username = obj.username
+        url = f'https://github.com/{username}.png'
         return url
 
 
@@ -148,7 +163,10 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         return None
 
     def get_created(self, obj):
-        return obj._created
+        if hasattr(obj, '_created'):
+            return obj._created
+        if hasattr(obj, 'date_joined'):
+            return obj.date_joined
 
     def get_modified(self, obj):
         return obj.pulp_created

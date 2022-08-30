@@ -11,8 +11,10 @@ from rest_framework.pagination import PageNumberPagination
 
 from galaxy_ng.app.access_control.access_policy import LegacyAccessPolicy
 
+from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import (
     LegacyNamespace,
+    LegacyRole,
 )
 from galaxy_ng.app.api.v1.serializers import (
     LegacyNamespacesSerializer,
@@ -60,7 +62,7 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
     TODO: allow mapping to a real namespace
     """
 
-    queryset = LegacyNamespace.objects.all()
+    queryset = LegacyNamespace.objects.all().order_by('id')
     pagination_class = LegacyNamespacesSetPagination
     serializer = LegacyNamespacesSerializer
     serializer_class = LegacyNamespacesSerializer
@@ -74,9 +76,55 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
     @extend_schema_field(LegacyNamespacesSerializer)
     def retrieve(self, request, pk=None):
         """Get a single namespace."""
-        user = LegacyNamespace.objects.filter(id=pk).first()
-        serializer = LegacyNamespacesSerializer(user)
+        ns = LegacyNamespace.objects.filter(id=pk).first()
+        serializer = LegacyNamespacesSerializer(ns)
         return Response(serializer.data)
+
+    def get_owners(self, request, pk=None):
+        ns = LegacyNamespace.objects.filter(id=pk).first()
+        results = []
+        for user in ns.owners.all():
+            userializer = LegacyUserSerializer(user)
+            results.append(userializer.data)
+        return Response(results)
+
+    def update_owners(self, request, pk=None):
+        ns = LegacyNamespace.objects.filter(id=pk).first()
+        current_owners = [x.username for x in ns.owners.all()]
+
+        # the owners key should be a list
+        print(f'{request.data}')
+        new_owners = request.data.get('owners', [])
+
+        print(f'NEW OWNERS: {new_owners}')
+
+        for owner in new_owners:
+
+            if not isinstance(owner, dict):
+                continue
+
+            if 'id' not in owner:
+                continue
+
+            this_user = User.objects.filter(id=owner['id']).first()
+            if this_user.username not in current_owners:
+                print(f'ADD {this_user.username} to owners')
+                ns.owners.add(this_user)
+
+        return Response({})
+
+    def delete_namespace(self, request, pk=None):
+        ns = LegacyNamespace.objects.filter(id=pk).first()
+
+        # delete all the roles first!
+        roles = LegacyRole.objects.filter(namespace=ns)
+        for role in roles:
+            role.delete()
+
+        # delete the namespace now
+        ns.delete()
+
+        return Response({})
 
 
 class LegacyUsersViewSet(viewsets.ModelViewSet):
@@ -100,7 +148,7 @@ class LegacyUsersViewSet(viewsets.ModelViewSet):
     TODO: allow mapping to a real namespace
     """
 
-    queryset = LegacyNamespace.objects.all()
+    queryset = LegacyNamespace.objects.all().order_by('id')
     pagination_class = LegacyNamespacesSetPagination
     serializer = LegacyUserSerializer
     serializer_class = LegacyUserSerializer

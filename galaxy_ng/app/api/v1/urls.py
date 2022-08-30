@@ -84,8 +84,13 @@ urlpatterns = [
     ),
     path(
         'namespaces/<int:pk>/',
-        LegacyNamespacesViewSet.as_view({"get": "retrieve"}),
+        LegacyNamespacesViewSet.as_view({"get": "retrieve", "delete": "delete_namespace"}),
         name='legacy_namespace-detail'
+    ),
+    path(
+        'namespaces/<int:pk>/owners/',
+        LegacyNamespacesViewSet.as_view({"get": "get_owners", "put": "update_owners"}),
+        name='legacy_namespac_ownerse-list'
     ),
 
     path('', LegacyRootView.as_view(), name='legacy-root')
