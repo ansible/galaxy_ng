@@ -1,6 +1,5 @@
 import logging
 
-from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_spectacular.utils import extend_schema_field
