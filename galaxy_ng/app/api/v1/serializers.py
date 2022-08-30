@@ -7,10 +7,10 @@ from galaxy_ng.app.api.v1.models import LegacyRole
 class LegacyNamespacesSerializer(serializers.ModelSerializer):
 
     summary_fields = serializers.SerializerMethodField()
-    date_joined = serializers.SerializerMethodField()
+    # date_joined = serializers.SerializerMethodField()
     # active = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
-    full_name = serializers.SerializerMethodField()
+    # full_name = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
     avatar_url = serializers.SerializerMethodField()
 
@@ -23,8 +23,8 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
             'created',
             'modified',
             'name',
-            'full_name',
-            'date_joined',
+            # 'full_name',
+            # 'date_joined',
             'avatar_url',
             # 'active'
         ]
@@ -35,14 +35,16 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
     def get_url(self, obj):
         return ''
 
-    def get_full_name(self, obj):
-        return ''
+    # def get_full_name(self, obj):
+    #    return ''
 
     def get_date_joined(self, obj):
         return obj.created
 
     def get_summary_fields(self, obj):
-        return {}
+        owners = obj.owners.all()
+        owners = [{'id': x.id, 'username': x.username} for x in owners]
+        return {'owners': owners}
 
     # TODO: What does this actually mean?
     # def get_active(self, obj):

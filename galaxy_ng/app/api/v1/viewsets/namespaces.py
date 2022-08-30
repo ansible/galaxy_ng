@@ -1,6 +1,7 @@
 import logging
 
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_spectacular.utils import extend_schema_field
 
@@ -18,6 +19,9 @@ from galaxy_ng.app.api.v1.serializers import (
     LegacyUserSerializer
 )
 
+from galaxy_ng.app.api.v1.filtersets import LegacyNamespaceFilter
+from galaxy_ng.app.api.v1.filtersets import LegacyUserFilter
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,41 +32,7 @@ class LegacyNamespacesSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class LegacyUsernameMixin:
-
-    def get_queryset(self):
-
-        logger.debug(f'QUERY_PARAMS: {self.request.query_params}')
-
-        keywords = None
-        if self.request.query_params.get('keywords'):
-            keywords = self.request.query_params.get('keywords').rstrip('/')
-
-        order_by = 'name'
-        if self.request.query_params.get('order_by'):
-            order_by = self.request.query_params.get('order_by').rstrip('/')
-
-        if self.request.query_params.get('name'):
-            print('BY NAME')
-            name = self.request.query_params.get('name').rstrip('/')
-            return LegacyNamespace.objects.filter(name=name).order_by(order_by)
-
-        # users have a username, whereas namespaces have a name
-        if self.request.query_params.get('username'):
-            print('BY USERNAME')
-            name = self.request.query_params.get('username').rstrip('/')
-            return LegacyNamespace.objects.filter(name=name).order_by(order_by)
-
-        if keywords:
-            return LegacyNamespace.objects.filter(
-                Q(name__contains=keywords)
-            ).order_by(order_by)
-
-        print('NO FILTERING')
-        return LegacyNamespace.objects.all().order_by(order_by)
-
-
-class LegacyNamespacesViewSet(LegacyUsernameMixin, viewsets.ModelViewSet):
+class LegacyNamespacesViewSet(viewsets.ModelViewSet):
     """
     A list of legacy namespaces.
 
@@ -83,12 +53,14 @@ class LegacyNamespacesViewSet(LegacyUsernameMixin, viewsets.ModelViewSet):
     TODO: allow mapping to a real namespace
     """
 
-    # queryset = LegacyNamespace.objects.all().order_by('name')
+    queryset = LegacyNamespace.objects.all()
     serializer = LegacyNamespacesSerializer
     serializer_class = LegacyNamespacesSerializer
-    # permission_classes = [AllowAny]
     permission_classes = [LegacyAccessPolicy]
     pagination_class = LegacyNamespacesSetPagination
+
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = LegacyNamespaceFilter
 
     @extend_schema_field(LegacyNamespacesSerializer)
     def retrieve(self, request, pk=None):
@@ -98,7 +70,7 @@ class LegacyNamespacesViewSet(LegacyUsernameMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class LegacyUsersViewSet(LegacyUsernameMixin, viewsets.ModelViewSet):
+class LegacyUsersViewSet(viewsets.ModelViewSet):
     """
     A list of legacy users.
 
@@ -119,12 +91,14 @@ class LegacyUsersViewSet(LegacyUsernameMixin, viewsets.ModelViewSet):
     TODO: allow mapping to a real namespace
     """
 
-    # queryset = LegacyNamespace.objects.all().order_by('name')
+    queryset = LegacyNamespace.objects.all()
     serializer = LegacyUserSerializer
     serializer_class = LegacyUserSerializer
-    # permission_classes = [AllowAny]
     permission_classes = [LegacyAccessPolicy]
     pagination_class = LegacyNamespacesSetPagination
+
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = LegacyUserFilter
 
     @extend_schema_field(LegacyUserSerializer)
     def retrieve(self, request, pk=None):
