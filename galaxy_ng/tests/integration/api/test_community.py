@@ -92,6 +92,9 @@ def test_social_auth_creates_legacynamespace(ansible_config):
         assert result['count'] == 1
         assert result['results'][0]['name'] == 'gh01'
 
+        # the user should have been added as an owner on the namespace
+        assert result['results'][0]['summary_fields']['owners'][0]['username'] == 'gh01'
+
 
 @pytest.mark.community_only
 def test_list_collections_anonymous(ansible_config):
