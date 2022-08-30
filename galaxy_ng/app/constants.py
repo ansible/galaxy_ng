@@ -26,7 +26,7 @@ PERMISSIONS = {
         "object_description": None,
 
         # Description to use when the permission is being assigned globally
-        "global_description": "Create a new namespace.",
+        "global_description": _("Create a new namespace."),
 
         # Category to group the permission in the UI.
         "ui_category": _("Collection Namespaces"),
@@ -35,9 +35,9 @@ PERMISSIONS = {
     "galaxy.change_namespace": {
         "name": _("Change namespace"),
 
-        "object_description": "Edit this namespace.",
+        "object_description":_( "Edit this namespace."),
 
-        "global_description": "Edit any existing namespace.",
+        "global_description": _("Edit any existing namespace."),
 
         "ui_category": _("Collection Namespaces"),
 
@@ -45,9 +45,9 @@ PERMISSIONS = {
     "galaxy.delete_namespace": {
         "name": _("Delete namespace"),
 
-        "object_description": "Delete this namespace.",
+        "object_description": _("Delete this namespace."),
 
-        "global_description": "Delete any existing namespace.",
+        "global_description": _("Delete any existing namespace."),
 
         "ui_category": _("Collection Namespaces"),
 
@@ -55,9 +55,9 @@ PERMISSIONS = {
     "galaxy.upload_to_namespace": {
         "name": _("Upload to namespace"),
 
-        "object_description": "Upload collections to this namespace.",
+        "object_description": _("Upload collections to this namespace."),
 
-        "global_description": "Upload collections to any existing namespace.",
+        "global_description": _("Upload collections to any existing namespace."),
 
         "ui_category": _("Collection Namespaces"),
 
@@ -65,9 +65,9 @@ PERMISSIONS = {
     "ansible.delete_collection": {
         "name": _("Delete collection"),
 
-        "object_description": "Delete this collection.",
+        "object_description": _("Delete this collection."),
 
-        "global_description": "Delete any existing collection.",
+        "global_description": _("Delete any existing collection."),
 
         "ui_category": _("Collections"),
 
@@ -75,9 +75,9 @@ PERMISSIONS = {
     "ansible.modify_ansible_repo_content": {
         "name": _("Modify Ansible repo content"),
 
-        "object_description": "Modify content of an Ansible repository.",
+        "object_description": _("Modify content of an Ansible repository."),
 
-        "global_description": "Upload collections to any existing namespace.",
+        "global_description": _("Upload collections to any existing namespace."),
 
         "ui_category": _("Collections"),
 
@@ -87,7 +87,7 @@ PERMISSIONS = {
 
         "object_description": None,
 
-        "global_description": "Add new users to the system.",
+        "global_description": _("Add new users to the system."),
 
         "ui_category": _("Users"),
 
@@ -95,9 +95,9 @@ PERMISSIONS = {
     "galaxy.change_user": {
         "name": _("Change user"),
 
-        "object_description": "Edit this user.",
+        "object_description": _("Edit this user."),
 
-        "global_description": "Edit any existing user in the system.",
+        "global_description": _("Edit any existing user in the system."),
 
         "ui_category": _("Users"),
 
@@ -105,9 +105,9 @@ PERMISSIONS = {
     "galaxy.delete_user": {
         "name": _("Delete user"),
 
-        "object_description": "Delete this user.",
+        "object_description": _("Delete this user."),
 
-        "global_description": "Delete any existing user in the system.",
+        "global_description": _("Delete any existing user in the system."),
 
         "ui_category": _("Users"),
 
@@ -115,9 +115,9 @@ PERMISSIONS = {
     "galaxy.view_user": {
         "name": _("View user"),
 
-        "object_description": "View this user.",
+        "object_description": _("View this user."),
 
-        "global_description": "View any user in the system.",
+        "global_description": _("View any user in the system."),
 
         "ui_category": _("Users"),
 
@@ -127,7 +127,7 @@ PERMISSIONS = {
 
         "object_description": None,
 
-        "global_description": "Create new groups to the system.",
+        "global_description": _("Create new groups to the system."),
 
         "ui_category": _("Groups"),
 
@@ -135,9 +135,9 @@ PERMISSIONS = {
     "galaxy.change_group": {
         "name": _("Change group"),
 
-        "object_description": "Edit this group",
+        "object_description": _("Edit this group"),
 
-        "global_description": "Edit any existing group in the system.",
+        "global_description": _("Edit any existing group in the system."),
 
         "ui_category": _("Groups"),
 
@@ -145,9 +145,9 @@ PERMISSIONS = {
     "galaxy.delete_group": {
         "name": _("Delete group"),
 
-        "object_description": "Delete this group.",
+        "object_description": _("Delete this group."),
 
-        "global_description": "Delete any group in the system.",
+        "global_description": _("Delete any group in the system."),
 
         "ui_category": _("Groups"),
 
@@ -155,9 +155,9 @@ PERMISSIONS = {
     "galaxy.view_group": {
         "name": _("View group"),
 
-        "object_description": "View this group.",
+        "object_description": _("View this group."),
 
-        "global_description": "View any existing group in the system.",
+        "global_description": _("View any existing group in the system."),
 
         "ui_category": _("Groups"),
 
@@ -165,9 +165,9 @@ PERMISSIONS = {
     "container.change_containernamespace": {
         "name": _("Change container namespace permissions"),
 
-        "object_description": "Edit permissions on this namespace.",
+        "object_description": _("Edit permissions on this namespace."),
 
-        "global_description": "Edit permissions on any existing namespace.",
+        "global_description": _("Edit permissions on any existing namespace."),
 
         "ui_category": _("Containers"),
 
@@ -175,9 +175,9 @@ PERMISSIONS = {
     "container.change_containernamespace": {
         "name": _("Change container namespace permissions"),
 
-        "object_description": "Edit permissions on this namespace.",
+        "object_description": _("Edit permissions on this namespace."),
 
-        "global_description": "Edit permissions on any existing namespace.",
+        "global_description": _("Edit permissions on any existing namespace."),
 
         "ui_category": _("Containers"),
 
@@ -185,9 +185,9 @@ PERMISSIONS = {
     "container.namespace_change_containerdistribution": {
         "name": _("Change containers"),
 
-        "object_description": "Edit this container.",
+        "object_description": _("Edit this container."),
 
-        "global_description": "Edit any container existing in the system.",
+        "global_description": _("Edit any container existing in the system."),
 
         "ui_category": _("Containers"),
 
@@ -197,7 +197,7 @@ PERMISSIONS = {
 
         "object_description": None,
 
-        "global_description": "Add new containers to the system.",
+        "global_description": _("Add new containers to the system."),
 
         "ui_category": _("Containers"),
 
@@ -205,9 +205,9 @@ PERMISSIONS = {
     "container.delete_containerrepository": {
         "name": _("Delete container repository"),
 
-        "object_description": "Delete this container repository.",
+        "object_description": _("Delete this container repository."),
 
-        "global_description": "Delete any existing container repository in the system.",
+        "global_description": _("Delete any existing container repository in the system."),
 
         "ui_category": _("Containers"),
 
@@ -215,9 +215,9 @@ PERMISSIONS = {
     "container.namespace_push_containerdistribution": {
         "name": _("Push to existing containers"),
 
-        "object_description": "Push to this namespace.",
+        "object_description": _("Push to this namespace."),
 
-        "global_description": "Push to any existing namespace in the system.",
+        "global_description": _("Push to any existing namespace in the system."),
 
         "ui_category": _("Containers"),
 
@@ -225,9 +225,9 @@ PERMISSIONS = {
     "ansible.change_collectionremote": {
         "name": _("Change collection remote"),
 
-        "object_description": "Edit this collection remote.",
+        "object_description": _("Edit this collection remote."),
 
-        "global_description": "Edit any collection remote existing in the system.",
+        "global_description": _("Edit any collection remote existing in the system."),
 
         "ui_category": _("Collection Remotes"),
 
@@ -235,9 +235,9 @@ PERMISSIONS = {
     "ansible.view_collectionremote": {
         "name": _("View collection remote"),
 
-        "object_description": "View this collection remote.",
+        "object_description": _("View this collection remote."),
 
-        "global_description": "View any collection remote existing in the system.",
+        "global_description": _("View any collection remote existing in the system."),
 
         "ui_category": _("Collection Remotes"),
 
@@ -247,7 +247,7 @@ PERMISSIONS = {
 
         "object_description": None,
 
-        "global_description": "Add remote registry to the system.",
+        "global_description": _("Add remote registry to the system."),
 
         "ui_category": _("Remote Registries"),
 
@@ -255,9 +255,9 @@ PERMISSIONS = {
     "galaxy.change_containerregistryremote": {
         "name": _("Change remote registry"),
 
-        "object_description": "Edit this remote registry.",
+        "object_description": _("Edit this remote registry."),
 
-        "global_description": "Change any remote registry existing in the system.",
+        "global_description": _("Change any remote registry existing in the system."),
 
         "ui_category": _("Remote Registries"),
 
@@ -265,41 +265,41 @@ PERMISSIONS = {
     "galaxy.delete_containerregistryremote": {
         "name": _("Delete remote registry"),
 
-        "object_description": "Delete this remote registry.",
+        "object_description": _("Delete this remote registry."),
 
-        "global_description": "Delete any remote registry existing in the system.",
+        "global_description": _("Delete any remote registry existing in the system."),
 
         "ui_category": "Remote Registries",
 
     },
     "core.change_task": {
-        "name": "Change task",
+        "name": _("Change task"),
 
-        "object_description": "Edit this task.",
+        "object_description": _("Edit this task."),
 
-        "global_description": "Edit any task existing in the system.",
+        "global_description": _("Edit any task existing in the system."),
 
-        "ui_category": "Task Management",
+        "ui_category": _("Task Management"),
 
     },
     "core.delete_task": {
-        "name": "Delete task",
+        "name": _("Delete task"),
 
-        "object_description": "Delete this task.",
+        "object_description": _("Delete this task."),
 
-        "global_description": "Delete any task existing in the system.",
+        "global_description": _("Delete any task existing in the system."),
 
-        "ui_category": "Task Management",
+        "ui_category": _("Task Management"),
 
     },
     "core.view_task": {
-        "name": "View all tasks",
+        "name": _("View all tasks"),
 
-        "object_description": "View this task.",
+        "object_description": _("View this task."),
 
-        "global_description": "View any task existing in the system.",
+        "global_description": _("View any task existing in the system."),
 
-        "ui_category": "Task Management",
+        "ui_category": _("Task Management"),
 
     },
 }

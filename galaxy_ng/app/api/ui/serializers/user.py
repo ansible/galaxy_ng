@@ -171,9 +171,7 @@ class CurrentUserSerializer(UserSerializer):
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_model_permissions(self, obj):
-
         permissions = {}
-
         for i, j in PERMISSIONS.items():
             permissions[i] = j
 
