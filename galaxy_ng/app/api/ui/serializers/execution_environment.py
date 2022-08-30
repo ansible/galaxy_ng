@@ -22,7 +22,7 @@ VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*/?[A-Za-z0-9._-]*$"
 class ContainerRemoteSerializer(
     container_serializers.ContainerRemoteSerializer,
 ):
-    id = serializers.UUIDField(source='pulp_id', required=False)
+    id = serializers.UUIDField(source='pulp_id', required=False, read_only=True)
     created_at = serializers.DateTimeField(source='pulp_created', read_only=True, required=False)
     updated_at = serializers.DateTimeField(
         source='pulp_last_updated', read_only=True, required=False)

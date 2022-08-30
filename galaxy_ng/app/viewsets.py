@@ -60,6 +60,11 @@ class NamespaceViewSet(
     endpoint_name = "pulp_ansible/namespaces"
 
 
+# This is here because when new objects are created, pulp tries to look up the viewset for
+# the model so that it can run creation hooks to assign permissions. This function fails
+# if the model isn't registered with a pulp viewset
+# https://github.com/pulp/pulpcore/blob/52c8e16997849b9a639aec04945cec98486d54fb/pulpcore
+#   /app/models/access_policy.py#L73
 class GroupViewset(
     pulp_viewsets.NamedModelViewSet,
 ):

@@ -1,1 +1,1 @@
-Move execution-environment repository endpoints to v3 viewsets and remove execution-environment/namespaces
+Promote execution environment APIs into the supported v3/ api
