@@ -8,11 +8,7 @@ from drf_spectacular.utils import extend_schema_field
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.authentication import (
-    BasicAuthentication,
-    SessionAuthentication,
-    TokenAuthentication
-)
+from rest_framework.settings import perform_import
 from rest_framework.pagination import PageNumberPagination
 
 from galaxy_ng.app.access_control.access_policy import LegacyAccessPolicy
@@ -31,8 +27,6 @@ from galaxy_ng.app.api.v1.serializers import (
 
 from galaxy_ng.app.api.v1.viewsets.tasks import LegacyTasksViewset
 from galaxy_ng.app.api.v1.filtersets import LegacyRoleFilter
-
-from rest_framework.settings import perform_import
 
 
 GALAXY_AUTHENTICATION_CLASSES = perform_import(
