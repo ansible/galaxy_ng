@@ -19,6 +19,7 @@ from ..schemas import (
     schema_featureflags,
     schema_group,
     schema_me,
+    schema_namespace_detail,
     schema_objectlist,
     schema_remote,
     schema_settings,
@@ -26,7 +27,7 @@ from ..schemas import (
     schema_task_detail,
     schema_user,
 )
-from ..utils import UIClient, get_client
+from ..utils import UIClient, generate_unused_namespace, get_client
 
 REGEX_403 = r"HTTP Code: 403"
 
@@ -299,7 +300,7 @@ def test_api_ui_v1_feature_flags(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups(ansible_config):
 
-    cfg = ansible_config('admin')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -361,7 +362,7 @@ def test_api_ui_v1_groups_users(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_users_add_delete(ansible_config):
 
-    cfg = ansible_config('admin')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
         suffix = random.choice(range(0, 1000))
@@ -492,8 +493,71 @@ def test_api_ui_v1_me(ansible_config):
 
 # /api/automation-hub/_ui/v1/my-distributions/
 # /api/automation-hub/_ui/v1/my-distributions/{pulp_id}/
+
+
 # /api/automation-hub/_ui/v1/my-namespaces/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_my_namespaces(ansible_config):
+    config = ansible_config("partner_engineer")
+    api_client = get_client(config, request_token=True, require_auth=True)
+    new_namespace = generate_unused_namespace(api_client=api_client, api_version='_ui/v1')
+
+    cfg = ansible_config('partner_engineer')
+    with UIClient(config=cfg) as uclient:
+        # get user
+        resp = uclient.get('_ui/v1/me/')
+        ds = resp.json()
+
+        # create ns with group
+        # TODO: Add user's roles to the me endpoint
+        payload = {
+            'name': new_namespace,
+            'groups': [{
+                'id': ds['groups'][0]['id'],
+                'name': ds['groups'][0]['name'],
+                'object_roles': ["galaxy.collection_admin"],
+            }]
+        }
+        resp = uclient.post('_ui/v1/my-namespaces/', payload=payload)
+        assert resp.status_code == 201
+
+        # get the response
+        resp = uclient.get('_ui/v1/my-namespaces/')
+        assert resp.status_code == 200
+
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_objectlist)
+        ns_names = [x['name'] for x in ds['data']]
+        for expected_ns_name in ['autohubtest2', 'autohubtest3', 'signing', new_namespace]:
+            assert expected_ns_name in ns_names
+
+        # delete
+        resp = uclient.delete(f'_ui/v1/my-namespaces/{new_namespace}')
+        assert resp.status_code == 204
+
+        # get the response
+        resp = uclient.get('_ui/v1/my-namespaces/')
+        assert resp.status_code == 200
+
+        # confirm deletion
+        ds = resp.json()
+        ns_names = [x['name'] for x in ds['data']]
+        assert new_namespace not in ns_names
+
+
 # /api/automation-hub/_ui/v1/my-namespaces/{name}/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_my_namespaces_name(ansible_config):
+    cfg = ansible_config('partner_engineer')
+    with UIClient(config=cfg) as uclient:
+        # get the response
+        resp = uclient.get('_ui/v1/my-namespaces/autohubtest2/')
+        assert resp.status_code == 200
+        validate_json(instance=resp.json(), schema=schema_namespace_detail)
+
+
 # /api/automation-hub/_ui/v1/my-synclists/
 # /api/automation-hub/_ui/v1/my-synclists/{id}/
 # /api/automation-hub/_ui/v1/my-synclists/{id}/curate/
@@ -623,7 +687,7 @@ def test_api_ui_v1_tags(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_users(ansible_config):
 
-    cfg = ansible_config('admin')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -663,7 +727,7 @@ def test_api_ui_v1_users(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_users_by_id(ansible_config):
 
-    cfg = ansible_config('admin')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
         # get the response
