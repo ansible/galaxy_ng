@@ -206,4 +206,4 @@ def test_delete_role_as_not_owner(ansible_config):
         role_id = role['id']
         role_url = f'v1/roles/{role_id}/'
         resp = client.delete(role_url)
-        assert resp.status_code == 400
+        assert resp.status_code == 403

@@ -8,6 +8,7 @@ from galaxy_ng.app.api.v1.viewsets import (
     LegacyRoleVersionsViewSet,
     LegacyRolesViewSet,
     LegacyRolesSyncViewSet,
+    LegacyNamespacesViewSet,
     LegacyUsersViewSet
 )
 
@@ -75,6 +76,16 @@ urlpatterns = [
         'users/<int:pk>/',
         LegacyUsersViewSet.as_view({"get": "retrieve"}),
         name='legacy_user-userdetail'
+    ),
+    path(
+        'namespaces/',
+        LegacyNamespacesViewSet.as_view({"get": "list"}),
+        name='legacy_namespace-list'
+    ),
+    path(
+        'namespaces/<int:pk>/',
+        LegacyNamespacesViewSet.as_view({"get": "retrieve"}),
+        name='legacy_namespace-detail'
     ),
 
     path('', LegacyRootView.as_view(), name='legacy-root')

@@ -1,19 +1,24 @@
-# from django.contrib.auth import get_user_model
-from django.conf import settings
-
-from social_core.backends.github import GithubOAuth2
-
+import logging
 import requests
 
+from django.conf import settings
+from django.db import transaction
+from social_core.backends.github import GithubOAuth2
 
-# User = get_user_model()
+from galaxy_ng.app.models.auth import Group, User
+from galaxy_ng.app.api.v1.models import LegacyNamespace
+
+
+GITHUB_ACCOUNT_SCOPE = 'github'
+
+logger = logging.getLogger(__name__)
 
 
 def logged(func):
     def wrapper(*args, **kwargs):
-        print(f'LOGGED: {func}')
+        logger.debug(f'LOGGED: {func}')
         res = func(*args, **kwargs)
-        print(f'LOGGED: {func} {res}')
+        logger.debug(f'LOGGED: {func} {res}')
         return res
     return wrapper
 
@@ -31,11 +36,55 @@ class GalaxyNGOAuth2(GithubOAuth2):
     @logged
     def do_auth(self, access_token, *args, **kwargs):
         """Finish the auth process once the access_token was retrieved"""
+
+        # userdata = id, login, access_token
         data = self.get_github_user(access_token)
         if data is not None and 'access_token' not in data:
             data['access_token'] = access_token
         kwargs.update({'response': data, 'backend': self})
-        return self.strategy.authenticate(*args, **kwargs)
+
+        auth_response = self.strategy.authenticate(*args, **kwargs)
+
+        # create a group
+        group, _ = self._ensure_group(GITHUB_ACCOUNT_SCOPE, data['login'])
+
+        # create a legacynamespace?
+        legacy_namespace, _ = self._ensure_legacynamespace(data['login'], group)
+
+        # create a v3 namespace?
+
+        # add permissiosn to v3 namespace?
+
+        return auth_response
+
+    def _ensure_group(self, account_scope, login):
+        """Create an auto group for the account"""
+        with transaction.atomic():
+            group, created = Group.objects.get_or_create_identity(account_scope, login)
+
+        # add user to the group
+        user = User.objects.filter(username=login).first()
+        group.user_set.add(user)
+
+        return group, created
+
+    def _ensure_legacynamespace(self, login, group):
+        """Create an auto legacynamespace for the account"""
+
+        # userdata = id, login, access_token
+        user = User.objects.filter(username=login).first()
+
+        # make the namespace
+        with transaction.atomic():
+            legacy_namespace, created = \
+                LegacyNamespace.objects.get_or_create(
+                    name=login
+                )
+
+            # add the user to the owners
+            legacy_namespace.owners.add(user)
+
+        return legacy_namespace, created
 
     @logged
     def get_github_access_token(self, code):

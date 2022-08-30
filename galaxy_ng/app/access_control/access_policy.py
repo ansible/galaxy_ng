@@ -10,6 +10,7 @@ from pulpcore.plugin.access_policy import AccessPolicyFromDB
 from pulp_container.app import models as container_models
 
 from galaxy_ng.app import models
+from galaxy_ng.app.api.v1.models import LegacyNamespace
 
 log = logging.getLogger(__name__)
 
@@ -369,3 +370,41 @@ class ContainerRemoteAccessPolicy(AccessPolicyBase):
 
 class LandingPageAccessPolicy(AccessPolicyBase):
     NAME = "LandingPageViewSet"
+
+
+class LegacyAccessPolicy(AccessPolicyBase):
+    NAME = "LegacyAccessPolicy"
+
+    def is_namespace_owner(self, request, viewset, action):
+
+        user = request.user
+        if user.is_superuser:
+            return True
+
+        if action == 'create':
+
+            github_user = request.data['github_user']
+            if github_user == user.username:
+                return True
+
+            ns = LegacyNamespace.objects.filter(name=github_user).first()
+
+            # allow user to import from self
+            if ns is None and github_user == user.username:
+                return True
+
+            # allow other owners to import
+            if ns and ns.owners.filter(username=user.username).count() > 0:
+                return True
+
+        if action == 'destroy':
+            obj = viewset.get_object()
+            namespace = obj.namespace
+
+            if user.username == namespace.name:
+                return True
+
+            if user in namespace.owners.all():
+                return True
+
+        return False

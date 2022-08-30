@@ -1,7 +1,7 @@
-from django.conf import settings
 from django.db import models
 
 from galaxy_ng.app.models import Namespace
+from galaxy_ng.app.models.auth import User
 
 
 """
@@ -104,8 +104,7 @@ class LegacyNamespace(models.Model):
     )
 
     owners = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='legacy_namespaces',
+        User,
         editable=True
     )
 

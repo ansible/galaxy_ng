@@ -73,6 +73,27 @@ def test_me_social(ansible_config):
 
 
 @pytest.mark.community_only
+def test_social_auth_creates_group(ansible_config):
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('_ui/v1/me/')
+        uinfo = resp.json()
+        assert uinfo['groups'][0]['name'] == 'github:gh01'
+
+
+@pytest.mark.community_only
+def test_social_auth_creates_legacynamespace(ansible_config):
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('v1/namespaces/?name=gh01')
+        result = resp.json()
+        assert result['count'] == 1
+        assert result['results'][0]['name'] == 'gh01'
+
+
+@pytest.mark.community_only
 def test_list_collections_anonymous(ansible_config):
     """Tests whether collections can be browsed anonymously"""
 
