@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -31,6 +32,13 @@ from galaxy_ng.app.api.v1.serializers import (
 from galaxy_ng.app.api.v1.viewsets.tasks import LegacyTasksViewset
 from galaxy_ng.app.api.v1.filtersets import LegacyRoleFilter
 
+from rest_framework.settings import perform_import
+
+
+GALAXY_AUTHENTICATION_CLASSES = perform_import(
+    settings.GALAXY_AUTHENTICATION_CLASSES,
+    'GALAXY_AUTHENTICATION_CLASSES'
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,20 +53,17 @@ class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyTasksViewset):
     """Base class for legacy roles."""
 
     queryset = LegacyRole.objects.all().order_by('full_metadata__created')
-    # queryset = LegacyRole.objects.all()
     ordering_fields = ('full_metadata__created')
     ordering = ('full_metadata__created')
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = LegacyRoleFilter
 
     serializer = LegacyRoleSerializer
     serializer_class = LegacyRoleSerializer
-    # permission_classes = [AllowAny]
-    permission_classes = [LegacyAccessPolicy]
     pagination_class = LegacyRolesSetPagination
-    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
 
-    # filter_backends = (DjangoFilterBackend, filters.OrderingFilter,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = LegacyRoleFilter
+    permission_classes = [LegacyAccessPolicy]
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
 
 class LegacyRolesViewSet(LegacyRoleBaseViewSet):

@@ -15,5 +15,6 @@ class LegacyRootView(api_base.APIView):
             'sync': f'/{API_PATH_PREFIX}/v1/sync/',
             'imports': f'/{API_PATH_PREFIX}/v1/imports/',
             'roles': f'/{API_PATH_PREFIX}/v1/roles/',
-            'users': f'/{API_PATH_PREFIX}/v1/users/'
+            'users': f'/{API_PATH_PREFIX}/v1/users/',
+            'namespaces': f'/{API_PATH_PREFIX}/v1/namespaces/'
         })

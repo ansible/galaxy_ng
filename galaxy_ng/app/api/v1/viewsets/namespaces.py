@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_spectacular.utils import extend_schema_field
@@ -21,6 +22,13 @@ from galaxy_ng.app.api.v1.serializers import (
 from galaxy_ng.app.api.v1.filtersets import LegacyNamespaceFilter
 from galaxy_ng.app.api.v1.filtersets import LegacyUserFilter
 
+from rest_framework.settings import perform_import
+
+
+GALAXY_AUTHENTICATION_CLASSES = perform_import(
+    settings.GALAXY_AUTHENTICATION_CLASSES,
+    'GALAXY_AUTHENTICATION_CLASSES'
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,13 +61,15 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
     """
 
     queryset = LegacyNamespace.objects.all()
+    pagination_class = LegacyNamespacesSetPagination
     serializer = LegacyNamespacesSerializer
     serializer_class = LegacyNamespacesSerializer
-    permission_classes = [LegacyAccessPolicy]
-    pagination_class = LegacyNamespacesSetPagination
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LegacyNamespaceFilter
+
+    permission_classes = [LegacyAccessPolicy]
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
     @extend_schema_field(LegacyNamespacesSerializer)
     def retrieve(self, request, pk=None):
@@ -91,13 +101,14 @@ class LegacyUsersViewSet(viewsets.ModelViewSet):
     """
 
     queryset = LegacyNamespace.objects.all()
+    pagination_class = LegacyNamespacesSetPagination
     serializer = LegacyUserSerializer
     serializer_class = LegacyUserSerializer
-    permission_classes = [LegacyAccessPolicy]
-    pagination_class = LegacyNamespacesSetPagination
-
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LegacyUserFilter
+
+    permission_classes = [LegacyAccessPolicy]
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
     @extend_schema_field(LegacyUserSerializer)
     def retrieve(self, request, pk=None):
