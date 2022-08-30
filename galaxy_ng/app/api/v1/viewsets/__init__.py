@@ -12,6 +12,10 @@ from .roles import (
     LegacyRoleImportsViewSet
 )
 
+from .sync import (
+    LegacyRolesSyncViewSet,
+)
+
 
 __all__ = (
     LegacyNamespacesViewSet,
