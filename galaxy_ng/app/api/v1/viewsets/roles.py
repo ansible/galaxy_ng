@@ -14,13 +14,11 @@ from rest_framework.authentication import (
     TokenAuthentication
 )
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.exceptions import ValidationError
 
 from galaxy_ng.app.access_control.access_policy import LegacyAccessPolicy
 
 from galaxy_ng.app.api.v1.tasks import (
     legacy_role_import,
-    legacy_sync_from_upstream
 )
 from galaxy_ng.app.api.v1.models import (
     LegacyNamespace,
@@ -280,32 +278,3 @@ class LegacyRoleVersionsViewSet(LegacyRoleBaseViewSet):
             'results': transformed.data[:]
         }
         return Response(paginated)
-
-
-class LegacyRolesSyncViewSet(viewsets.ViewSet, LegacyTasksViewset):
-    """Load roles from an upstream v1 source."""
-
-    def create(self, request):
-        """Create a new sync task."""
-        kwargs = {
-            'baseurl': request.data.get(
-                'baseurl',
-                'https://galaxy.ansible.com/api/v1/roles/'
-            ),
-            'github_user': request.data.get('github_user'),
-            'role_name': request.data.get('role_name'),
-            'role_version': request.data.get('role_name'),
-            'limit': request.data.get('limit')
-        }
-        logger.debug(f'REQUEST DATA: {request.data}')
-        logger.debug(f'REQUEST kwargs: {kwargs}')
-
-        # only superuser should be able to sync roles
-        logger.debug(f'REQUEST.USER: {self.request.user}')
-        if not self.request.user.is_superuser:
-            raise ValidationError({
-                'default': 'you do not have permission to modify this resource'
-            }, status=403)
-
-        task_id = self.legacy_dispatch(legacy_sync_from_upstream, kwargs=kwargs)
-        return Response({'task': task_id})

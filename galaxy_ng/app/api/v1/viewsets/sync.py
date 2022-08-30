@@ -2,7 +2,6 @@ import logging
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 
 from galaxy_ng.app.api.v1.tasks import (
     legacy_sync_from_upstream

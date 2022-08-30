@@ -5,7 +5,6 @@ from .namespaces import (
 
 from .roles import (
     LegacyRolesViewSet,
-    LegacyRolesSyncViewSet,
     LegacyRoleViewSet,
     LegacyRoleContentViewSet,
     LegacyRoleVersionsViewSet,
