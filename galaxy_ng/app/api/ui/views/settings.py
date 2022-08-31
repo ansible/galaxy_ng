@@ -23,6 +23,7 @@ class SettingsView(api_base.APIView):
             "GALAXY_MINIMUM_PASSWORD_LENGTH",
             "GALAXY_AUTH_LDAP_ENABLED",
             "GALAXY_CONTAINER_SIGNING_SERVICE",
+            "SIGNATURE_FINGERPRINT_LABELS"
         ]
         data = {key: settings.as_dict().get(key, None) for key in keyset}
         return Response(data)

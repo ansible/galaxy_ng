@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django_filters import filters
 from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
+from django.conf import settings
 from drf_spectacular.utils import extend_schema
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_galaxy_views
 from pulp_ansible.app import viewsets as pulp_ansible_viewsets
@@ -34,6 +35,7 @@ class CollectionByCollectionVersionFilter(pulp_ansible_viewsets.CollectionVersio
     keywords = filters.CharFilter(field_name="keywords", method="filter_by_q")
     deprecated = filters.BooleanFilter()
     sign_state = filters.CharFilter(method="filter_by_sign_state")
+    signature_fingerprint = filters.CharFilter(method="filter_by_signature_fingerprint")
 
     # The pulp core filtersets return a 400 on requests that include params that aren't
     # registered with a filterset. This is a hack to make the include_related fields work
@@ -49,6 +51,14 @@ class CollectionByCollectionVersionFilter(pulp_ansible_viewsets.CollectionVersio
 
     def no_op(self, qs, name, value):
         return qs
+
+    def filter_by_signature_fingerprint(self, qs, name, value):
+        fingerprints = settings.SIGNATURE_FINGERPRINT_LABELS.get(value, [value])
+        query = Q()
+        for f in fingerprints:
+            query = query | Q(signatures__pubkey_fingerprint=f)
+
+        return qs.filter(query)
 
 
 class CollectionViewSet(
