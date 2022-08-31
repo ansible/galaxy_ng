@@ -62,17 +62,15 @@ jobs:
         with:
           python-version: "3.8"
 
-        # dev_requirements contains tools needed for flake8, etc.
+        # lint_requirements contains tools needed for flake8, etc.
       - name: Install requirements
-        run: pip3 install -r dev_requirements.txt
+        run: pip3 install -r lint_requirements.txt
 
       
 
       
 
-      # Lint code.
-      - name: Run flake8
-        run: flake8 --config flake8.cfg
+      
 
       - name: Run extra lint checks
         run: "[ ! -x .ci/scripts/extra_linting.sh ] || .ci/scripts/extra_linting.sh"
@@ -86,6 +84,8 @@ jobs:
 
       - name: Check for gettext problems
         run: sh .ci/scripts/check_gettext.sh
+
+      
 
   test:
     runs-on: ubuntu-latest
@@ -160,11 +160,6 @@ jobs:
         run: .github/workflows/scripts/install_python_client.sh
         shell: bash
 
-      - name: Install Ruby client
-        if: ${{ env.TEST == 'bindings' }}
-        run: .github/workflows/scripts/install_ruby_client.sh
-        shell: bash
-
       - name: Before Script
         
         run: .github/workflows/scripts/before_script.sh
@@ -216,7 +211,7 @@ jobs:
           docker logs pulp || true
           docker exec pulp ls -latr /etc/yum.repos.d/ || true
           docker exec pulp cat /etc/yum.repos.d/* || true
-          docker exec pulp pip3 list
+          docker exec pulp bash -c "pip3 list && pip3 install pipdeptree && pipdeptree"
 
   
   update_manifest:

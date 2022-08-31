@@ -231,7 +231,7 @@ jobs:
           docker logs pulp || true
           docker exec pulp ls -latr /etc/yum.repos.d/ || true
           docker exec pulp cat /etc/yum.repos.d/* || true
-          docker exec pulp pip3 list
+          docker exec pulp bash -c "pip3 list && pip3 install pipdeptree && pipdeptree"
 
 
   publish:
@@ -284,7 +284,7 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install gitpython python-redmine requests packaging
+          pip install gitpython python-redmine requests packaging tweepy
           echo ::endgroup::
 
       - name: Push branch and tag to GitHub
@@ -293,6 +293,10 @@ jobs:
       
 
       
+
+      - name: Tweet
+        continue-on-error: true
+        run: python .ci/scripts/tweet.py ${{ github.event.inputs.release }}
 
       - name: Create release on GitHub
         run: bash .github/workflows/scripts/create_release_from_tag.sh ${{ github.event.inputs.release }}

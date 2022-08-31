@@ -74,9 +74,14 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
             subprocess.check_output(cmd.split())
 
-            cmd = f"docker cp pulp:/var/log/galaxy_api_access.log {tmp_dir}"
-
-            subprocess.check_output(cmd.split())
+            # Try to copy access log from container if tests are running outside of a container
+            # else copy direct because tests are running in the container
+            try:
+                cmd = f"docker cp pulp:/var/log/galaxy_api_access.log {tmp_dir}"
+                subprocess.check_output(cmd.split())
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                cmd = f"cp /var/log/galaxy_api_access.log {tmp_dir}"
+                subprocess.check_output(cmd.split())
 
             with open(f"{tmp_dir}/galaxy_api_access.log") as f:
                 log_contents = f.readlines()

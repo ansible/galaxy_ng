@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-156-gb5f4d20
+# generated with plugin_template@2021.08.26-167-ga2a8251
 
 additional_repos:
 - bindings: true
@@ -43,11 +43,12 @@ deploy_to_pypi: false
 disabled_redis_runners: []
 docker_fixtures: false
 docs_test: false
-flake8: true
+flake8: false
+flake8_ignore: []
 github_org: ansible
 issue_tracker: null
 keep_ci_update_since_branch: null
-lint_requirements: true
+lint_requirements: false
 noissue_marker: No-Issue
 parallel_test_workers: 8
 plugin_app_label: galaxy
