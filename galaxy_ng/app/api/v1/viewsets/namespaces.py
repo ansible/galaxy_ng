@@ -22,7 +22,6 @@ from galaxy_ng.app.api.v1.serializers import (
 )
 
 from galaxy_ng.app.api.v1.filtersets import LegacyNamespaceFilter
-from galaxy_ng.app.api.v1.filtersets import LegacyUserFilter
 
 from rest_framework.settings import perform_import
 
@@ -125,42 +124,3 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
         ns.delete()
 
         return Response({})
-
-
-class LegacyUsersViewSet(viewsets.ModelViewSet):
-    """
-    A list of legacy users.
-
-    The community UI has a view to list all legacy users.
-    Each user is clickable and brings the browser to a
-    page with a list of roles created by the user.
-
-    Rather than make a hacky unmaintable viewset that
-    aggregates usernames from the roles, this viewset
-    goes directly to the legacy namespace/user table.
-
-    We do not want to create this view from v3 namespaces
-    because many/most legacy namespaces do not conform
-    to the v3 namespace character requirements.
-
-    TODO: allow edits of the avatar url
-    TODO: allow edits of the "owners"
-    TODO: allow mapping to a real namespace
-    """
-
-    queryset = LegacyNamespace.objects.all().order_by('id')
-    pagination_class = LegacyNamespacesSetPagination
-    serializer = LegacyUserSerializer
-    serializer_class = LegacyUserSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = LegacyUserFilter
-
-    permission_classes = [LegacyAccessPolicy]
-    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
-
-    @extend_schema_field(LegacyUserSerializer)
-    def retrieve(self, request, pk=None):
-        """Get a single user."""
-        user = LegacyNamespace.objects.filter(id=pk).first()
-        serializer = LegacyUserSerializer(user)
-        return Response(serializer.data)

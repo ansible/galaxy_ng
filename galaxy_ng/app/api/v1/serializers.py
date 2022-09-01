@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 
@@ -62,6 +63,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
 
     summary_fields = serializers.SerializerMethodField()
     date_joined = serializers.SerializerMethodField()
+    created = serializers.SerializerMethodField()
     # active = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
@@ -69,13 +71,13 @@ class LegacyUserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = LegacyNamespace
+        model = User
         fields = [
             'id',
             'url',
             'summary_fields',
             'created',
-            'modified',
+            # 'modified',
             'username',
             'full_name',
             'date_joined',
@@ -94,6 +96,9 @@ class LegacyUserSerializer(serializers.ModelSerializer):
 
     def get_full_name(self, obj):
         return ''
+
+    def get_created(self, obj):
+        return self.get_date_joined(obj)
 
     def get_date_joined(self, obj):
         # return obj.created

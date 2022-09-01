@@ -2,6 +2,7 @@ from django.db.models import Q
 from django_filters import filters
 from django_filters.rest_framework import filterset
 
+from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 
@@ -31,20 +32,21 @@ class LegacyNamespaceFilter(filterset.FilterSet):
         return queryset
 
 
-class LegacyUserFilter(LegacyNamespaceFilter):
+class LegacyUserFilter(filterset.FilterSet):
 
     username = filters.CharFilter(method='username_filter')
 
     sort = filters.OrderingFilter(
         fields=(
-            ('created', 'created'),
-            ('name', 'name')
+            # ('created', 'created'),
+            ('username', 'username')
         )
     )
 
     class Meta:
-        model = LegacyNamespace
-        fields = ['created', 'username']
+        model = User
+        # fields = ['created', 'username']
+        fields = ['username']
 
     def username_filter(self, queryset, name, value):
         username = self.request.query_params.get('username')

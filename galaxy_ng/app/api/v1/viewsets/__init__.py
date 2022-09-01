@@ -1,5 +1,8 @@
 from .namespaces import (
     LegacyNamespacesViewSet,
+)
+
+from .users import (
     LegacyUsersViewSet
 )
 
