@@ -57,7 +57,7 @@ class CollectionInspector:
     def _enumerate(self):
         if self.tarball:
             self._extract_path = tempfile.mkdtemp(prefix='collection-extract-')
-            cmd = f'cd {self._extract_path}; tar xzvf {self.filename}'
+            cmd = f'cd {self._extract_path}; tar xzvf {self.tarball}'
             subprocess.run(
                 cmd,
                 shell=True,
