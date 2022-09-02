@@ -105,6 +105,10 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         if repo.remote:
             remote = ContainerRemoteSerializer(repo.remote.cast()).data
 
+        sign_state = repo.content.filter(
+            pulp_type="container.signature"
+        ).count() > 0 and "signed" or "unsigned"
+
         return {
             "repository": {
                 "pulp_id": repo.pk,
@@ -114,7 +118,8 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "description": repo.description,
                 "pulp_created": repo.pulp_created,
                 "pulp_labels": {label.key: label.value for label in repo.pulp_labels.all()},
-                "remote": remote
+                "remote": remote,
+                "sign_state": sign_state
             },
             "distribution": {
                 "pulp_id": distro.pk,
