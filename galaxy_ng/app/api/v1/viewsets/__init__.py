@@ -1,5 +1,6 @@
 from .namespaces import (
     LegacyNamespacesViewSet,
+    LegacyNamespaceOwnersViewSet,
 )
 
 from .users import (
@@ -21,6 +22,7 @@ from .sync import (
 
 __all__ = (
     LegacyNamespacesViewSet,
+    LegacyNamespaceOwnersViewSet,
     LegacyUsersViewSet,
     LegacyRolesViewSet,
     LegacyRolesSyncViewSet,

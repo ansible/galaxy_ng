@@ -85,6 +85,24 @@ def test_social_auth_creates_group(ansible_config):
 @pytest.mark.community_only
 def test_social_auth_creates_legacynamespace(ansible_config):
 
+    # cleanup the namespace first
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
+    if resp['count'] > 0:
+        for result in resp['results']:
+            ns_url = f"/api/v1/namespaces/{result['id']}/"
+            try:
+                admin_client(ns_url, method='DELETE')
+            except Exception as e:
+                pass
+    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
+    assert resp['count'] == 0
+
     cfg = ansible_config('github_user_1')
     with SocialGithubClient(config=cfg) as client:
         resp = client.get('v1/namespaces/?name=gh01')
@@ -110,7 +128,10 @@ def test_update_legacynamespace_owners(ansible_config):
     if resp['count'] > 0:
         for result in resp['results']:
             ns_url = f"/api/v1/namespaces/{result['id']}/"
-            admin_client(ns_url, method='DELETE')
+            try:
+                admin_client(ns_url, method='DELETE')
+            except Exception as e:
+                pass
     resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
     assert resp['count'] == 0
 
@@ -128,12 +149,12 @@ def test_update_legacynamespace_owners(ansible_config):
         ns_result = ns_resp.json()
         ns_id = ns_result['results'][0]['id']
         ns_url = f'v1/namespaces/{ns_id}/'
+        owners_url = ns_url + 'owners/'
 
         # assemble payload
         new_owners = {'owners': [{'id': uinfo2['id']}]}
 
         # put the payload
-        owners_url = ns_url + 'owners/'
         update_resp = client.put(owners_url, data=new_owners)
         assert update_resp.status_code == 200
 
@@ -141,7 +162,7 @@ def test_update_legacynamespace_owners(ansible_config):
         ns_resp2 = client.get(owners_url)
         owners2 = ns_resp2.json()
         owners2_usernames = [x['username'] for x in owners2]
-        assert 'gh01' in owners2_usernames
+        assert 'gh01' not in owners2_usernames
         assert uinfo2['username'] in owners2_usernames
 
 

@@ -2,10 +2,12 @@ import logging
 
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema_field
 
 from rest_framework import viewsets
+from rest_framework import mixins
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
@@ -72,55 +74,30 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
-    @extend_schema_field(LegacyNamespacesSerializer)
-    def retrieve(self, request, pk=None):
-        """Get a single namespace."""
-        ns = LegacyNamespace.objects.filter(id=pk).first()
-        serializer = LegacyNamespacesSerializer(ns)
-        return Response(serializer.data)
 
-    def get_owners(self, request, pk=None):
-        ns = LegacyNamespace.objects.filter(id=pk).first()
-        results = []
-        for user in ns.owners.all():
-            userializer = LegacyUserSerializer(user)
-            results.append(userializer.data)
-        return Response(results)
+class LegacyNamespaceOwnersViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
-    def update_owners(self, request, pk=None):
-        ns = LegacyNamespace.objects.filter(id=pk).first()
-        current_owners = [x.username for x in ns.owners.all()]
+    serializer_class = LegacyUserSerializer
+    pagination_class = None
+    permission_classes = [LegacyAccessPolicy]
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
-        # the owners key should be a list
-        print(f'{request.data}')
-        new_owners = request.data.get('owners', [])
+    def get_queryset(self):
+        return get_object_or_404(LegacyNamespace, pk=self.kwargs["pk"]).owners.all()
 
-        print(f'NEW OWNERS: {new_owners}')
+    def update(self, request, pk):
+        ns = get_object_or_404(LegacyNamespace, pk=pk)
 
-        for owner in new_owners:
+        try:
+            pks = [user['id'] for user in request.data.get('owners', [])]
+        except KeyError:
+            raise exceptions.ValidationError("id is required", code="invalid")
 
-            if not isinstance(owner, dict):
-                continue
+        new_owners = User.objects.filter(pk__in=pks)
 
-            if 'id' not in owner:
-                continue
+        if len(pks) != new_owners.count():
+            raise exceptions.ValidationError("user doesn't exist", code="invalid")
 
-            this_user = User.objects.filter(id=owner['id']).first()
-            if this_user.username not in current_owners:
-                print(f'ADD {this_user.username} to owners')
-                ns.owners.add(this_user)
+        ns.owners.set(new_owners)
 
-        return Response({})
-
-    def delete_namespace(self, request, pk=None):
-        ns = LegacyNamespace.objects.filter(id=pk).first()
-
-        # delete all the roles first!
-        roles = LegacyRole.objects.filter(namespace=ns)
-        for role in roles:
-            role.delete()
-
-        # delete the namespace now
-        ns.delete()
-
-        return Response({})
+        return Response(self.serializer_class(ns.owners.all(), many=True).data)

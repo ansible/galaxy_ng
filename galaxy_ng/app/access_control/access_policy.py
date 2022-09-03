@@ -400,7 +400,7 @@ class LegacyAccessPolicy(AccessPolicyBase):
                 return True
 
         # namespace owner edits
-        if action == 'update_owners':
+        if action == 'update_owners' or action == 'update':
             ns_id = request.parser_context['kwargs']['pk']
             ns = LegacyNamespace.objects.filter(id=ns_id).first()
             if user.username == ns.name or ns.owners.filter(username=user.username).count() > 0:

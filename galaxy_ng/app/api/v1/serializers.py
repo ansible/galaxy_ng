@@ -296,3 +296,10 @@ class LegacyRoleVersionsSerializer():
             results.append(ds)
 
         return results
+
+
+class LegacyTaskSerializer():
+
+    @property
+    def data(self):
+        return {}

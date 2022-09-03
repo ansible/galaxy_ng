@@ -2,6 +2,7 @@ LEGACY_STATEMENTS = {
     "LegacyAccessPolicy": [
         {
             "action": [
+                "get",
                 "get_task",
                 "get_owners",
                 "list",
@@ -13,7 +14,9 @@ LEGACY_STATEMENTS = {
         {
             "action": [
                 "create",
+                "delete",
                 "destroy",
+                "update",
                 "update_owners",
                 "delete_namespace"
             ],

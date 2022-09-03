@@ -964,3 +964,27 @@ class SocialGithubClient:
         # call put
         resp = self._rs.put(this_url, headers=pheaders, json=data)
         return resp
+
+    def post(
+        self,
+        relative_url: str = None,
+        absolute_url: str = None,
+        data=None
+    ) -> requests.models.Response:
+
+        pheaders = {
+            'Accept': 'application/json',
+            'X-CSRFToken': self.csrftoken,
+            'Cookie': f'csrftoken={self.csrftoken}; sessionid={self.sessionid}'
+        }
+
+        this_url = None
+        if absolute_url:
+            uri = urlparse(self.baseurl)
+            this_url = f"{uri.scheme}://{uri.netloc}{absolute_url}"
+        else:
+            this_url = self.baseurl + relative_url
+
+        # call post
+        resp = self._rs.post(this_url, headers=pheaders, json=data)
+        return resp
