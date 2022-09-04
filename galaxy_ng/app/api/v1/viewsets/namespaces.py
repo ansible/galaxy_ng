@@ -1,5 +1,6 @@
 import logging
 
+from django.db import transaction 
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
@@ -46,9 +47,9 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
     """
     A list of legacy namespaces.
 
-    The community UI has a view to list all legacy users.
-    Each user is clickable and brings the browser to a
-    page with a list of roles created by the user.
+    The community UI has a view to list all legacy authors.
+    Each author is clickable and brings the browser to a
+    page with a list of roles created by the author.
 
     Rather than make a hacky unmaintable viewset that
     aggregates usernames from the roles, this viewset
@@ -59,7 +60,6 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
     to the v3 namespace character requirements.
 
     TODO: allow edits of the avatar url
-    TODO: allow edits of the "owners"
     TODO: allow mapping to a real namespace
     """
 
@@ -73,6 +73,10 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
 
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
+
+    @transaction.atomic
+    def destroy(self, request, pk=None):
+        return super().destroy(self, request, pk)
 
 
 class LegacyNamespaceOwnersViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
