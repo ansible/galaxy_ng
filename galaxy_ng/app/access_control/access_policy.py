@@ -11,6 +11,7 @@ from pulp_container.app import models as container_models
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
+from galaxy_ng.app.api.v1.models import LegacyRole
 
 log = logging.getLogger(__name__)
 
@@ -413,13 +414,21 @@ class LegacyAccessPolicy(AccessPolicyBase):
                 return True
 
         if action == 'destroy':
-            obj = viewset.get_object()
-            namespace = obj.namespace
 
-            if user.username == namespace.name:
+            print(request.parser_context['kwargs'])
+
+            if 'roleid' in request.parser_context['kwargs']:
+                roleid = request.parser_context['kwargs']['roleid']
+                role = LegacyRole.objects.filter(id=roleid).first()
+                ns = role.namespace
+            else:
+                ns_id = request.parser_context['kwargs']['pk']
+                ns = LegacyNamespace.objects.filter(id=ns_id).first()
+
+            if user.username == ns.name:
                 return True
 
-            if user in namespace.owners.all():
+            if user in ns.owners.all():
                 return True
 
         return False

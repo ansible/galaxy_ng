@@ -207,3 +207,60 @@ def test_delete_role_as_not_owner(ansible_config):
         role_url = f'v1/roles/{role_id}/'
         resp = client.delete(role_url)
         assert resp.status_code == 403
+
+
+@pytest.mark.community_only
+def test_delete_namespace_deletes_roles(ansible_config):
+    """ Tests deleting namespace also deletes roles """
+
+    # https://github.com/jctannerTEST/role1
+
+    deleter = 'github_user_1'
+    github_user = "jctannerTEST"
+    github_repo = "role1"
+    role_name = "role1"
+    qs = f'v1/roles/?github_user={github_user}&name={role_name}'
+
+    cfg = ansible_config(github_user)
+    client = SocialGithubClient(config=cfg)
+    client.login()
+    token = client.get_hub_token()
+    assert token is not None
+
+    # cleanup the role if it exists
+    resp = client.get(qs)
+    ds = resp.json()
+    if ds['count'] > 0:
+        role = ds['results'][0]
+        role_id = role['id']
+        role_url = f'v1/roles/{role_id}/'
+        resp = client.delete(role_url)
+        assert resp.status_code == 200
+
+    # Run the import as the owner
+    import_pid = ansible_galaxy(
+        f"role import {github_user} {github_repo}",
+        ansible_config=cfg,
+        token=token,
+        force_token=True,
+        cleanup=False,
+        check_retcode=False
+    )
+    assert import_pid.returncode == 0
+
+    # ensure the role exists
+    resp = client.get(qs)
+    ds = resp.json()
+    assert ds['count'] == 1
+
+    # delete the namespace
+    res = client.get(f"v1/namespaces/?name={cfg['username']}")
+    ns_id = res.json()['results'][0]['id']
+    ns_url = f"v1/namespaces/{ns_id}/"
+    dres = client.delete(ns_url)
+    assert dres.status_code == 204
+
+    # check if role still exists
+    resp = client.get(qs)
+    ds = resp.json()
+    assert ds['count'] == 0

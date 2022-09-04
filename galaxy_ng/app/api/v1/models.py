@@ -138,7 +138,7 @@ class LegacyRole(models.Model):
         'LegacyNamespace',
         related_name='roles',
         editable=False,
-        on_delete=models.PROTECT
+        on_delete=models.CASCADE
     )
 
     name = models.CharField(max_length=64, unique=False, blank=False)
