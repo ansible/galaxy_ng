@@ -28,18 +28,18 @@ urlpatterns = [
     ),
 
     path(
-        'roles/<int:roleid>/',
+        'roles/<int:id>/',
         LegacyRoleViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
         name='legacy_role-detail'
     ),
 
     path(
-        'roles/<int:roleid>/content/',
+        'roles/<int:id>/content/',
         LegacyRoleContentViewSet.as_view({"get": "retrieve"}),
         name='legacy_role-content'
     ),
     path(
-        'roles/<int:roleid>/versions/',
+        'roles/<int:id>/versions/',
         LegacyRoleVersionsViewSet.as_view({"get": "retrieve"}),
         name='legacy_role-versions'
     ),

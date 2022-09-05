@@ -116,19 +116,19 @@ class LegacyRoleViewSet(LegacyRoleBaseViewSet):
 
     def get_object(self):
         """Helper function for access policy"""
-        roleid = self.kwargs['roleid']
-        return LegacyRole.objects.filter(id=roleid).first()
+        id = self.kwargs['id']
+        return LegacyRole.objects.filter(id=id).first()
 
     @extend_schema_field(LegacyRoleSerializer)
-    def retrieve(self, request, roleid=None):
+    def retrieve(self, request, id=None):
         """Get a single role."""
-        role = LegacyRole.objects.filter(id=roleid).first()
+        role = LegacyRole.objects.filter(id=id).first()
         serializer = LegacyRoleSerializer(role)
         return Response(serializer.data)
 
-    def destroy(self, request, roleid=None):
+    def destroy(self, request, id=None):
         """Delete a single role."""
-        role = LegacyRole.objects.filter(id=roleid).first()
+        role = LegacyRole.objects.filter(id=id).first()
         role.delete()
         return Response({'status': 'ok'})
 
@@ -137,9 +137,9 @@ class LegacyRoleContentViewSet(LegacyRoleBaseViewSet):
     """Documentation for a single legacy role."""
 
     @extend_schema_field(LegacyRoleContentSerializer)
-    def retrieve(self, request, roleid=None):
+    def retrieve(self, request, id=None):
         """Get content for a single role."""
-        role = LegacyRole.objects.filter(id=roleid).first()
+        role = LegacyRole.objects.filter(id=id).first()
         serializer = LegacyRoleContentSerializer(role)
         return Response(serializer.data)
 
@@ -148,9 +148,9 @@ class LegacyRoleVersionsViewSet(LegacyRoleBaseViewSet):
     """A list of versions for a single legacy role."""
 
     @extend_schema_field(LegacyRoleVersionsSerializer)
-    def retrieve(self, request, roleid=None):
+    def retrieve(self, request, id=None):
         """Get versions for a single role."""
-        role = LegacyRole.objects.filter(id=roleid).first()
+        role = LegacyRole.objects.filter(id=id).first()
         versions = role.full_metadata.get('versions', [])
         transformed = LegacyRoleVersionsSerializer(versions)
         paginated = {

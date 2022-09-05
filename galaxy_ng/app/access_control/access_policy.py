@@ -408,21 +408,29 @@ class LegacyAccessPolicy(AccessPolicyBase):
                 return True
 
         if action == 'delete_namespace':
-            ns_id = request.parser_context['kwargs']['pk']
+            print(request.parser_context['kwargs'])
+            if 'pk' in request.parser_context['kwargs']:
+                ns_id = request.parser_context['kwargs']['pk']
+            else:
+                ns_id = request.parser_context['kwargs']['id']
             ns = LegacyNamespace.objects.filter(id=ns_id).first()
             if user.username == ns.name or ns.owners.filter(username=user.username).count() > 0:
                 return True
 
         if action == 'destroy':
 
-            print(request.parser_context['kwargs'])
+            # print('META.PATH_INFO: ' + request.META['PATH_INFO'])
+            # print(request.parser_context['kwargs'])
 
-            if 'roleid' in request.parser_context['kwargs']:
-                roleid = request.parser_context['kwargs']['roleid']
+            if '/roles/' in request.META['PATH_INFO']:
+                roleid = request.parser_context['kwargs']['id']
                 role = LegacyRole.objects.filter(id=roleid).first()
                 ns = role.namespace
             else:
-                ns_id = request.parser_context['kwargs']['pk']
+                if 'pk' in request.parser_context['kwargs']:
+                    ns_id = request.parser_context['kwargs']['pk']
+                else:
+                    ns_id = request.parser_context['kwargs']['id']
                 ns = LegacyNamespace.objects.filter(id=ns_id).first()
 
             if user.username == ns.name:
