@@ -99,7 +99,7 @@ def test_social_auth_creates_legacynamespace(ansible_config):
             ns_url = f"/api/v1/namespaces/{result['id']}/"
             try:
                 admin_client(ns_url, method='DELETE')
-            except Exception as e:
+            except Exception:
                 pass
     resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
     assert resp['count'] == 0
@@ -131,7 +131,7 @@ def test_update_legacynamespace_owners(ansible_config):
             ns_url = f"/api/v1/namespaces/{result['id']}/"
             try:
                 admin_client(ns_url, method='DELETE')
-            except Exception as e:
+            except Exception:
                 pass
     resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
     assert resp['count'] == 0

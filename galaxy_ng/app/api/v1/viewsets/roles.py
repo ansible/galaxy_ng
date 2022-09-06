@@ -7,7 +7,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_field
 
 from rest_framework import viewsets
-from rest_framework import mixins
 from rest_framework.response import Response
 from rest_framework.settings import perform_import
 from rest_framework.pagination import PageNumberPagination
@@ -163,4 +162,3 @@ class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
                 }
             }]
         })
-

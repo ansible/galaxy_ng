@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import transaction
 from social_core.backends.github import GithubOAuth2
 
-from galaxy_ng.app.models.auth import Group, User
+from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 
 
@@ -53,7 +53,6 @@ class GalaxyNGOAuth2(GithubOAuth2):
         # add permissiosn to v3 namespace?
 
         return auth_response
-
 
     def _ensure_legacynamespace(self, login):
         """Create an auto legacynamespace for the account"""

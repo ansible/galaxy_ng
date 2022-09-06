@@ -1,14 +1,13 @@
 import logging
 
-from django.db import transaction 
+from django.db import transaction
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
-from drf_spectacular.utils import extend_schema_field
-
 from rest_framework import viewsets
 from rest_framework import mixins
+from rest_framework import exceptions
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
@@ -17,7 +16,6 @@ from galaxy_ng.app.access_control.access_policy import LegacyAccessPolicy
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import (
     LegacyNamespace,
-    LegacyRole,
 )
 from galaxy_ng.app.api.v1.serializers import (
     LegacyNamespacesSerializer,

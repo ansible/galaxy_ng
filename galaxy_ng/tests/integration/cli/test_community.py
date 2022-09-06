@@ -215,7 +215,6 @@ def test_delete_namespace_deletes_roles(ansible_config):
 
     # https://github.com/jctannerTEST/role1
 
-    deleter = 'github_user_1'
     github_user = "jctannerTEST"
     github_repo = "role1"
     role_name = "role1"
