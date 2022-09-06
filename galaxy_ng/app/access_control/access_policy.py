@@ -378,65 +378,37 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
     def is_namespace_owner(self, request, viewset, action):
 
-        print(f'IS_NAMESPACE_OWNER: {request} {viewset} {action}')
-
+        # let superusers do whatever they want.
         user = request.user
         if user.is_superuser:
             return True
 
-        if action == 'create':
+        namespace = None
+        github_user = None
+
+        # enumerate the related namespace for this request
+        if '/imports/' in request.META['PATH_INFO']:
 
             github_user = request.data['github_user']
-            if github_user == user.username:
-                return True
+            namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
-            ns = LegacyNamespace.objects.filter(name=github_user).first()
+        elif '/roles/' in request.META['PATH_INFO']:
 
-            # allow user to import from self
-            if ns is None and github_user == user.username:
-                return True
+            roleid = request.parser_context['kwargs']['id']
+            role = LegacyRole.objects.filter(id=roleid).first()
+            namespace = role.namespace
 
-            # allow other owners to import
-            if ns and ns.owners.filter(username=user.username).count() > 0:
-                return True
+        elif '/namespaces/' in request.META['PATH_INFO']:
 
-        # namespace owner edits
-        if action == 'update_owners' or action == 'update':
             ns_id = request.parser_context['kwargs']['pk']
-            ns = LegacyNamespace.objects.filter(id=ns_id).first()
-            if user.username == ns.name or ns.owners.filter(username=user.username).count() > 0:
-                return True
+            namespace = LegacyNamespace.objects.filter(id=ns_id).first()
 
-        if action == 'delete_namespace':
-            print(request.parser_context['kwargs'])
-            if 'pk' in request.parser_context['kwargs']:
-                ns_id = request.parser_context['kwargs']['pk']
-            else:
-                ns_id = request.parser_context['kwargs']['id']
-            ns = LegacyNamespace.objects.filter(id=ns_id).first()
-            if user.username == ns.name or ns.owners.filter(username=user.username).count() > 0:
-                return True
+        # allow a user to make their own namespace
+        if namespace is None and github_user and user.username == github_user:
+            return True
 
-        if action == 'destroy':
-
-            # print('META.PATH_INFO: ' + request.META['PATH_INFO'])
-            # print(request.parser_context['kwargs'])
-
-            if '/roles/' in request.META['PATH_INFO']:
-                roleid = request.parser_context['kwargs']['id']
-                role = LegacyRole.objects.filter(id=roleid).first()
-                ns = role.namespace
-            else:
-                if 'pk' in request.parser_context['kwargs']:
-                    ns_id = request.parser_context['kwargs']['pk']
-                else:
-                    ns_id = request.parser_context['kwargs']['id']
-                ns = LegacyNamespace.objects.filter(id=ns_id).first()
-
-            if user.username == ns.name:
-                return True
-
-            if user in ns.owners.all():
-                return True
+        # allow owners to do things in the namespace
+        if namespace and user.username in [x.username for x in namespace.owners.all()]:
+            return True
 
         return False
