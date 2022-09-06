@@ -3,7 +3,6 @@ import subprocess
 import tempfile
 from unittest.mock import patch
 
-import pytest
 from orionutils.generator import build_collection, randstr
 
 from ..constants import USERNAME_PUBLISHER
@@ -45,6 +44,8 @@ def test_download_artifact(ansible_config, upload_artifact):
     set_certification(api_client, artifact)
 
     # download collection
+    config = ansible_config("basic_user")
+
     with tempfile.TemporaryDirectory() as dir:
         api_root = config["url"]
         filename = f"{namespace}-{name}-{version}.tar.gz"
