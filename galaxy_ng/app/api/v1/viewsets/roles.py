@@ -44,23 +44,6 @@ class LegacyRolesSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class LegacyRoleBaseViewSet(viewsets.ModelViewSet, LegacyTasksViewset):
-    """Base class for legacy roles."""
-
-    queryset = LegacyRole.objects.all().order_by('full_metadata__created')
-    ordering_fields = ('full_metadata__created')
-    ordering = ('full_metadata__created')
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = LegacyRoleFilter
-
-    serializer = LegacyRoleSerializer
-    serializer_class = LegacyRoleSerializer
-    pagination_class = LegacyRolesSetPagination
-
-    permission_classes = [LegacyAccessPolicy]
-    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
-
-
 class LegacyRolesViewSet(viewsets.ModelViewSet):
     """A list of legacy roles."""
 
@@ -82,47 +65,13 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
         role = LegacyRole.objects.filter(id=pk).first()
         role.delete()
         return Response({'status': 'ok'}, status=204)
-        # return Response({'status': 'ok'})
 
 
-'''
-class LegacyRoleViewSet(viewsets.GenericViewSet):
-    """A single legacy role."""
-
-    #queryset = LegacyRole.objects.all().order_by('full_metadata__created')
-    #ordering_fields = ('full_metadata__created')
-    #ordering = ('full_metadata__created')
-    #filter_backends = (DjangoFilterBackend,)
-    #filterset_class = LegacyRoleFilter
-
-    #serializer = LegacyRoleSerializer
-    #serializer_class = LegacyRoleSerializer
-    #pagination_class = LegacyRolesSetPagination
+class LegacyRoleContentViewSet(viewsets.GenericViewSet):
+    """Documentation for a single legacy role."""
 
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
-
-    def get_object(self):
-        """Helper function for access policy"""
-        id = self.kwargs['id']
-        return LegacyRole.objects.filter(id=id).first()
-
-    @extend_schema_field(LegacyRoleSerializer)
-    def retrieve(self, request, id=None):
-        """Get a single role."""
-        role = LegacyRole.objects.filter(id=id).first()
-        serializer = LegacyRoleSerializer(role)
-        return Response(serializer.data)
-
-    def destroy(self, request, id=None):
-        """Delete a single role."""
-        role = LegacyRole.objects.filter(id=id).first()
-        role.delete()
-        return Response({'status': 'ok'})
-'''
-
-class LegacyRoleContentViewSet(LegacyRoleBaseViewSet):
-    """Documentation for a single legacy role."""
 
     @extend_schema_field(LegacyRoleContentSerializer)
     def retrieve(self, request, pk=None):
@@ -132,8 +81,11 @@ class LegacyRoleContentViewSet(LegacyRoleBaseViewSet):
         return Response(serializer.data)
 
 
-class LegacyRoleVersionsViewSet(LegacyRoleBaseViewSet):
+class LegacyRoleVersionsViewSet(viewsets.GenericViewSet):
     """A list of versions for a single legacy role."""
+
+    permission_classes = [LegacyAccessPolicy]
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
     @extend_schema_field(LegacyRoleVersionsSerializer)
     def retrieve(self, request, pk=None):
