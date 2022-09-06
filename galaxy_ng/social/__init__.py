@@ -45,11 +45,8 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
         auth_response = self.strategy.authenticate(*args, **kwargs)
 
-        # create a group
-        group, _ = self._ensure_group(GITHUB_ACCOUNT_SCOPE, data['login'])
-
         # create a legacynamespace?
-        legacy_namespace, _ = self._ensure_legacynamespace(data['login'], group)
+        legacy_namespace, _ = self._ensure_legacynamespace(data['login'])
 
         # create a v3 namespace?
 
@@ -57,18 +54,8 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
         return auth_response
 
-    def _ensure_group(self, account_scope, login):
-        """Create an auto group for the account"""
-        with transaction.atomic():
-            group, created = Group.objects.get_or_create_identity(account_scope, login)
 
-        # add user to the group
-        user = User.objects.filter(username=login).first()
-        group.user_set.add(user)
-
-        return group, created
-
-    def _ensure_legacynamespace(self, login, group):
+    def _ensure_legacynamespace(self, login):
         """Create an auto legacynamespace for the account"""
 
         # userdata = id, login, access_token

@@ -72,6 +72,7 @@ def test_me_social(ansible_config):
         assert uinfo['username'] == cfg.get('username')
 
 
+@pytest.mark.skip(reason='waiting for rbac')
 @pytest.mark.community_only
 def test_social_auth_creates_group(ansible_config):
 
