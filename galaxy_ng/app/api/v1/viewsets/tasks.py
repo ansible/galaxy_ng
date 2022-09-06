@@ -1,23 +1,12 @@
 import datetime
 import logging
 
-from django.conf import settings
-
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.tasking import dispatch
 
-from galaxy_ng.app.access_control.access_policy import LegacyAccessPolicy
-
-from rest_framework.settings import perform_import
-
-
-GALAXY_AUTHENTICATION_CLASSES = perform_import(
-    settings.GALAXY_AUTHENTICATION_CLASSES,
-    'GALAXY_AUTHENTICATION_CLASSES'
-)
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +22,6 @@ class LegacyTasksMixin:
     something compatible with v1 clients such as the
     galaxy cli.
     """
-
-    permission_classes = [LegacyAccessPolicy]
-    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
     def legacy_task_hash(self, pulp_id):
         """Transform a uuid into an integer."""
