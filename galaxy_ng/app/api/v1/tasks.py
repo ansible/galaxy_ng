@@ -10,6 +10,7 @@ from galaxy_ng.app.utils.git import get_tag_commit_hash
 from galaxy_ng.app.utils.git import get_tag_commit_date
 import galaxy_ng.app.utils.roles as roles_utils
 
+from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def legacy_role_import(
+    request_username=None,
     github_user=None,
     github_repo=None,
     github_reference=None,
@@ -28,6 +30,8 @@ def legacy_role_import(
     """
     Import a legacy role by user, repo and or reference.
 
+    :param request_username:
+        The username of the person making the import.
     :param github_user:
         The github org or username the role lives in.
     :param github_repo:
@@ -56,6 +60,11 @@ def legacy_role_import(
     if LegacyNamespace.objects.filter(name=github_user).count() == 0:
         logger.debug(f'CREATE NEW NAMESPACE {github_user}')
         namespace, _ = LegacyNamespace.objects.get_or_create(name=github_user)
+
+        # set the owner to this request user ...
+        user = User.objects.filter(username=request_username).first()
+        namespace.owners.add(user)
+
     else:
         logger.debug(f'USE EXISTING NAMESPACE {github_user}')
         namespace = LegacyNamespace.objects.filter(name=github_user).first()

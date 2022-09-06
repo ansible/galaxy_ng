@@ -83,6 +83,7 @@ class LegacyRoleImportsViewSet(LegacyRoleBaseViewSet):
         data = request.data
 
         kwargs = {
+            'request_username': request.user.username,
             'github_user': data.get('github_user'),
             'github_repo': data.get('github_repo'),
             'github_reference': data.get('github_reference'),
