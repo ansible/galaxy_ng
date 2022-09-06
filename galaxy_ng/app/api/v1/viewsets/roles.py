@@ -26,7 +26,7 @@ from galaxy_ng.app.api.v1.serializers import (
     LegacyRoleVersionsSerializer,
 )
 
-from galaxy_ng.app.api.v1.viewsets.tasks import LegacyTasksViewset
+from galaxy_ng.app.api.v1.viewsets.tasks import LegacyTasksMixin
 from galaxy_ng.app.api.v1.filtersets import LegacyRoleFilter
 
 
@@ -104,7 +104,7 @@ class LegacyRoleVersionsViewSet(viewsets.GenericViewSet):
         return Response(paginated)
 
 
-class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksViewset):
+class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
     """Legacy role imports."""
 
     queryset = LegacyRole.objects.all().order_by('full_metadata__created')

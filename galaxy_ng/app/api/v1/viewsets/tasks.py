@@ -22,7 +22,7 @@ GALAXY_AUTHENTICATION_CLASSES = perform_import(
 logger = logging.getLogger(__name__)
 
 
-class LegacyTasksViewset:
+class LegacyTasksMixin:
     """
     Legacy task helper.
 
