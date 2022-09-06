@@ -7,7 +7,7 @@ objects:
   - apiVersion: batch/v1
     kind: Job
     metadata:
-      name: automation-hub-job-${IMAGE_TAG}-${JOBID}
+      name: automation-hub-job-${IMAGE_TAG}-${RERUN}
     spec:
       backoffLimit: 0
       template:
@@ -29,8 +29,6 @@ objects:
               command: ["/bin/sh", "-c"]
               args: ["${ARGS}"]
               env:
-                - name: RERUN
-                  value: ${RERUN}
                 - name: ACG_CONFIG
                   value: /cdapp/cdappconfig.json
                 - name: PULP_GALAXY_DEPLOYMENT_MODE
@@ -71,9 +69,6 @@ parameters:
     value: quay.io/cloudservices/automation-hub-galaxy-ng
   - name: IMAGE_TAG
     required: true
-  - name: JOBID
-    generate: expression
-    from: "[0-9a-z]{5}"
 
   - name: MEMORY_REQUEST
     value: 1024Mi
