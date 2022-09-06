@@ -394,7 +394,10 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
         elif '/roles/' in request.META['PATH_INFO']:
 
-            roleid = request.parser_context['kwargs']['id']
+            if 'id' in request.parser_context['kwargs']:
+                roleid = request.parser_context['kwargs']['id']
+            else:
+                roleid = request.parser_context['kwargs']['pk']
             role = LegacyRole.objects.filter(id=roleid).first()
             namespace = role.namespace
 

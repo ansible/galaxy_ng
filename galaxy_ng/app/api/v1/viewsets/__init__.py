@@ -9,7 +9,7 @@ from .users import (
 
 from .roles import (
     LegacyRolesViewSet,
-    LegacyRoleViewSet,
+    # LegacyRoleViewSet,
     LegacyRoleContentViewSet,
     LegacyRoleVersionsViewSet,
     LegacyRoleImportsViewSet
@@ -26,7 +26,7 @@ __all__ = (
     LegacyUsersViewSet,
     LegacyRolesViewSet,
     LegacyRolesSyncViewSet,
-    LegacyRoleViewSet,
+    # LegacyRoleViewSet,
     LegacyRoleContentViewSet,
     LegacyRoleVersionsViewSet,
     LegacyRoleImportsViewSet,

@@ -4,7 +4,6 @@ LEGACY_STATEMENTS = {
             "action": [
                 "get",
                 "get_task",
-                "get_owners",
                 "list",
                 "retrieve"
             ],
@@ -17,8 +16,6 @@ LEGACY_STATEMENTS = {
                 "delete",
                 "destroy",
                 "update",
-                "update_owners",
-                "delete_namespace"
             ],
             "principal": "authenticated",
             "effect": "allow",

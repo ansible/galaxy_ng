@@ -218,7 +218,10 @@ def test_v1_sync_with_user_and_limit(ansible_config):
         for pe in pre_existing:
             role_id = pe['id']
             role_url = f'/api/v1/roles/{role_id}/'
-            resp = api_client(role_url, method='DELETE')
+            try:
+                resp = api_client(role_url, method='DELETE')
+            except Exception:
+                pass
 
     resp = api_client('/api/v1/sync/', method='POST', args=pargs)
     assert isinstance(resp, dict)
@@ -242,8 +245,25 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
     assert resp['count'] == 1
     assert resp['results'][0]['username'] == github_user
+    roleid = resp['results'][0]['id']
+
+    # validate the versions endpoint
+    versions_url = f'/api/v1/roles/{roleid}/versions/'
+    vresp = api_client(versions_url)
+    assert vresp['count'] > 0
+
+    # validate the content endpoint
+    content_url = f'/api/v1/roles/{roleid}/content/'
+    cresp = api_client(content_url)
+    assert 'readme' in cresp
+    assert 'readme_html' in cresp
 
     # cleanup
     role_id = resp['results'][0]['id']
     role_url = f'/api/v1/roles/{role_id}/'
-    resp = api_client(role_url, method='DELETE')
+    try:
+        resp = api_client(role_url, method='DELETE')
+    except Exception:
+        pass
+    resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
+    assert resp['count'] == 0

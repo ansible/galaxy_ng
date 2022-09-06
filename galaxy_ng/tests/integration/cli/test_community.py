@@ -15,7 +15,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.community_only
-def test_import_role(ansible_config):
+def test_import_role_as_owner(ansible_config):
     """ Tests role import workflow with a social auth user and anonymous install """
 
     # https://github.com/jctannerTEST/role1
@@ -39,7 +39,7 @@ def test_import_role(ansible_config):
         role_id = role['id']
         role_url = f'v1/roles/{role_id}/'
         resp = client.delete(role_url)
-        assert resp.status_code == 200
+        assert resp.status_code == 204
 
     # Run the import
     import_pid = ansible_galaxy(
@@ -125,7 +125,7 @@ def test_import_role_as_not_owner(ansible_config):
         role_id = role['id']
         role_url = f'v1/roles/{role_id}/'
         resp = client.delete(role_url)
-        assert resp.status_code == 200
+        assert resp.status_code == 204
 
     # Run the import as someone other than the owner
     cfg = ansible_config(importer)
@@ -235,7 +235,7 @@ def test_delete_namespace_deletes_roles(ansible_config):
         role_id = role['id']
         role_url = f'v1/roles/{role_id}/'
         resp = client.delete(role_url)
-        assert resp.status_code == 200
+        assert resp.status_code == 204
 
     # Run the import as the owner
     import_pid = ansible_galaxy(

@@ -2,7 +2,7 @@ from django.urls import path
 
 from galaxy_ng.app.api.v1.views import LegacyRootView
 from galaxy_ng.app.api.v1.viewsets import (
-    LegacyRoleViewSet,
+    # LegacyRoleViewSet,
     LegacyRoleImportsViewSet,
     LegacyRoleContentViewSet,
     LegacyRoleVersionsViewSet,
@@ -28,25 +28,25 @@ urlpatterns = [
     ),
 
     path(
-        'roles/<int:id>/',
-        LegacyRoleViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
+        'roles/<int:pk>/',
+        LegacyRolesViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
         name='legacy_role-detail'
     ),
 
     path(
-        'roles/<int:id>/content/',
+        'roles/<int:pk>/content/',
         LegacyRoleContentViewSet.as_view({"get": "retrieve"}),
         name='legacy_role-content'
     ),
     path(
-        'roles/<int:id>/versions/',
+        'roles/<int:pk>/versions/',
         LegacyRoleVersionsViewSet.as_view({"get": "retrieve"}),
         name='legacy_role-versions'
     ),
 
     path(
         'search/roles/',
-        LegacyRoleViewSet.as_view({"get": "list"}),
+        LegacyRolesViewSet.as_view({"get": "list"}),
         name='legacy_role-search'
     ),
 
@@ -90,9 +90,8 @@ urlpatterns = [
     ),
     path(
         'namespaces/<int:pk>/owners/',
-        # LegacyNamespacesViewSet.as_view({"get": "get_owners", "put": "update_owners"}),
         LegacyNamespaceOwnersViewSet.as_view({"get": "list", "put": "update"}),
-        name='legacy_namespac_ownerse-list'
+        name='legacy_namespace_owners-list'
     ),
 
     path('', LegacyRootView.as_view(), name='legacy-root')
