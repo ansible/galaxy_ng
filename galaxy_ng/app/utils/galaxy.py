@@ -50,6 +50,8 @@ def upstream_role_iterator(
             params.append(f'name={role_name}')
         next_url = _baseurl + '/api/v1/roles/?' + '&'.join(params)
 
+    namespace_cache = {}
+
     pagenum = 0
     role_count = 0
     while next_url:
@@ -87,13 +89,22 @@ def upstream_role_iterator(
             except Exception:
                 continue
 
+            # Get the namespace+owners
+            ns_id = role_data['summary_fields']['namespace']['id']
+            if ns_id not in namespace_cache:
+                ns_url = _baseurl + f'/api/v1/namespaces/{ns_id}/'
+                namespace_data = requests.get(ns_url).json()
+                namespace_cache[ns_id] = namespace_data
+            else:
+                namespace_data = namespace_cache[ns_id]
+
             # Get all of the versions because they have more info than the summary
             versions_url = role_upstream_url + 'versions'
             role_versions = paginated_results(versions_url)
 
             # send the role
             role_count += 1
-            yield role_data, role_versions
+            yield namespace_data, role_data, role_versions
 
             # break early if count reached
             if limit is not None and role_count >= limit:

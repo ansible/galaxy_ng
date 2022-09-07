@@ -5,6 +5,7 @@ import tempfile
 
 from galaxy_importer.utils import markup as markup_utils
 
+from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.utils.galaxy import upstream_role_iterator
 from galaxy_ng.app.utils.git import get_tag_commit_hash
 from galaxy_ng.app.utils.git import get_tag_commit_date
@@ -223,7 +224,7 @@ def legacy_sync_from_upstream(
         'role_name': role_name,
         'limit': limit
     }
-    for rdata, rversions in upstream_role_iterator(**iterator_kwargs):
+    for ns_data, rdata, rversions in upstream_role_iterator(**iterator_kwargs):
 
         ruser = rdata.get('github_user')
         rname = rdata.get('name')
@@ -255,6 +256,12 @@ def legacy_sync_from_upstream(
         if ruser not in nsmap:
             logger.debug(f'SYNC NAMESPACE GET_OR_CREATE {ruser}')
             namespace, _ = LegacyNamespace.objects.get_or_create(name=ruser)
+
+            # if the ns has owners, create them and set them
+            for owner_info in ns_data['summary_fields']['owners']:
+                user, _ = User.objects.get_or_create(username=owner_info['username'])
+                namespace.owners.add(user)
+
             nsmap[ruser] = namespace
         else:
             namespace = nsmap[ruser]
