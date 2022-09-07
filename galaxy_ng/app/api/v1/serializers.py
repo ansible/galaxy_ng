@@ -303,3 +303,26 @@ class LegacyTaskSerializer():
     @property
     def data(self):
         return {}
+
+
+class LegacySyncSerializer(serializers.Serializer):
+
+    baseurl = serializers.CharField(required=False, default='https://galaxy.ansible.com/api/v1/roles/')
+    github_user = serializers.CharField(required=False)
+    role_name = serializers.CharField(required=False)
+    role_version = serializers.CharField(required=False)
+    limit = serializers.IntegerField(required=False)
+
+    # def validate(self, data):
+    #    print(f'VALIDATE: {data}')
+
+    class Meta:
+        model = None
+        fields = [
+            'baseurl'
+            'github_user',
+            'role_name',
+            'role_version',
+            'limit'
+        ]
+

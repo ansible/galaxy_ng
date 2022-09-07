@@ -46,7 +46,6 @@ class LegacyUsersViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all().order_by('id')
     pagination_class = LegacyUsersSetPagination
-    serializer = LegacyUserSerializer
     serializer_class = LegacyUserSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LegacyUserFilter

@@ -52,7 +52,7 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LegacyRoleFilter
 
-    serializer = LegacyRoleSerializer
+    # serializer = LegacyRoleSerializer
     serializer_class = LegacyRoleSerializer
     pagination_class = LegacyRolesSetPagination
 
@@ -112,7 +112,7 @@ class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LegacyRoleFilter
 
-    serializer = LegacyRoleSerializer
+    # serializer = LegacyRoleSerializer
     serializer_class = LegacyRoleSerializer
     pagination_class = LegacyRolesSetPagination
 
