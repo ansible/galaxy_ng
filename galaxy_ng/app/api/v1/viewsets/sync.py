@@ -7,14 +7,11 @@ from rest_framework import mixins
 from rest_framework.response import Response
 from rest_framework.settings import perform_import
 
-from drf_spectacular.utils import extend_schema_field
-
 from galaxy_ng.app.api.v1.tasks import (
     legacy_sync_from_upstream
 )
 
 from galaxy_ng.app.api.v1.viewsets.tasks import LegacyTasksMixin
-from galaxy_ng.app.api.v1.serializers import LegacyTaskSerializer
 from galaxy_ng.app.api.v1.serializers import LegacySyncSerializer
 from galaxy_ng.app.access_control.access_policy import LegacyAccessPolicy
 
