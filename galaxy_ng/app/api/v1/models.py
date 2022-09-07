@@ -1,5 +1,7 @@
 from django.db import models
 
+from pulpcore.plugin.models import Task
+
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.models.auth import User
 
@@ -147,3 +149,18 @@ class LegacyRole(models.Model):
         null=False,
         default=dict
     )
+
+
+class LegacyTask(models.Model):
+
+    created = models.DateTimeField(auto_now_add=True)
+
+    task_id = models.BigIntegerField()
+
+    pulp_task = models.ForeignKey(
+        Task,
+        related_name='task',
+        editable=False,
+        on_delete=models.CASCADE
+    )
+

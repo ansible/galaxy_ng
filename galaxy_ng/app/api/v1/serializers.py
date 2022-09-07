@@ -257,13 +257,44 @@ class LegacyRoleContentSerializer(serializers.ModelSerializer):
         return obj.full_metadata.get('readme_html', '')
 
 
-class LegacyRoleVersionsSerializer():
+class LegacyRoleVersionsSerializer(serializers.ModelSerializer):
 
-    def __init__(self, versions):
-        self.versions = versions
+    count = serializers.SerializerMethodField()
+    next = serializers.SerializerMethodField()
+    next_link = serializers.SerializerMethodField()
+    previous = serializers.SerializerMethodField()
+    previous_link = serializers.SerializerMethodField()
+    results = serializers.SerializerMethodField()
 
-    @property
-    def data(self):
+    class Meta:
+        model = LegacyRole
+        fields = [
+            'count',
+            'next',
+            'next_link',
+            'previous',
+            'previous_link',
+            'results'
+        ]
+
+    def get_count(self, obj):
+        return len(obj.full_metadata.get('versions', []))
+
+    def get_next(self, obj):
+        return None
+
+    def get_next_link(self, obj):
+        return None
+
+    def get_previous(self, obj):
+        return None
+
+    def get_previous_link(self, obj):
+        return None
+
+    def get_results(self, obj):
+
+        versions = obj.full_metadata.get('versions', [])
 
         fields = [
             'id',
@@ -282,7 +313,7 @@ class LegacyRoleVersionsSerializer():
 
         results = []
 
-        for idv, version in enumerate(self.versions):
+        for idv, version in enumerate(versions):
             ds = {}
             for field in fields:
                 if field in ['created', 'modified'] and field not in version:

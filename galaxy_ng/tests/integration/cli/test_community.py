@@ -58,6 +58,8 @@ def test_import_role_as_owner(ansible_config):
 
     # validate the serializer
     ds = resp.json()
+    role_id = ds['results'][0]['id']
+
     assert ds['count'] == 1
     role = ds['results'][0]
     assert role['name'] == role_name
@@ -66,6 +68,23 @@ def test_import_role_as_owner(ansible_config):
     assert role['github_branch'] is not None
     assert role['commit'] is not None
     assert len(role['summary_fields']['versions']) == 1
+
+    # validate the versions url
+    versions_url = f'v1/roles/{role_id}/versions/'
+    versions_resp = client.get(versions_url)
+    assert versions_resp.status_code == 200
+    versions = versions_resp.json()
+    assert versions['results'][0]['version'] == \
+        role['summary_fields']['versions'][0]['version']
+
+    # validate the content url
+    content_url = f'v1/roles/{role_id}/content/'
+    content_resp = client.get(content_url)
+    assert content_resp.status_code == 200
+    content = content_resp.json()
+    assert 'readme' in content
+    assert 'readme_html' in content
+    assert '<h1>role1</h1>' in content['readme_html']
 
     # validate cli search
     cfg = ansible_config('anonymous_user')

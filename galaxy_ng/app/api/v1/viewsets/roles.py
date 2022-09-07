@@ -2,9 +2,11 @@ import logging
 
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema_field
 
+from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.settings import perform_import
@@ -65,41 +67,26 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
         return Response({'status': 'ok'}, status=204)
 
 
-class LegacyRoleContentViewSet(viewsets.GenericViewSet):
+class LegacyRoleContentViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     """Documentation for a single legacy role."""
 
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
+    serializer_class = LegacyRoleContentSerializer
 
-    @extend_schema_field(LegacyRoleContentSerializer)
-    def retrieve(self, request, pk=None):
-        """Get content for a single role."""
-        role = LegacyRole.objects.filter(id=pk).first()
-        serializer = LegacyRoleContentSerializer(role)
-        return Response(serializer.data)
+    def get_object(self):
+        return get_object_or_404(LegacyRole, id=self.kwargs["pk"])
 
 
-class LegacyRoleVersionsViewSet(viewsets.GenericViewSet):
+class LegacyRoleVersionsViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     """A list of versions for a single legacy role."""
 
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
+    serializer_class = LegacyRoleVersionsSerializer
 
-    @extend_schema_field(LegacyRoleVersionsSerializer)
-    def retrieve(self, request, pk=None):
-        """Get versions for a single role."""
-        role = LegacyRole.objects.filter(id=pk).first()
-        versions = role.full_metadata.get('versions', [])
-        transformed = LegacyRoleVersionsSerializer(versions)
-        paginated = {
-            'count': len(transformed.data),
-            'next': None,
-            'next_link': None,
-            'previous': None,
-            'previous_link': None,
-            'results': transformed.data[:]
-        }
-        return Response(paginated)
+    def get_object(self):
+        return get_object_or_404(LegacyRole, id=self.kwargs["pk"])
 
 
 class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
