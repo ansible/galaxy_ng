@@ -63,7 +63,6 @@ class LegacyNamespacesViewSet(viewsets.ModelViewSet):
 
     queryset = LegacyNamespace.objects.all().order_by('id')
     pagination_class = LegacyNamespacesSetPagination
-    # serializer = LegacyNamespacesSerializer
     serializer_class = LegacyNamespacesSerializer
 
     filter_backends = (DjangoFilterBackend,)

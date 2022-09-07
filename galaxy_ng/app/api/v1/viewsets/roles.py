@@ -20,6 +20,7 @@ from galaxy_ng.app.api.v1.models import (
     LegacyRole
 )
 from galaxy_ng.app.api.v1.serializers import (
+    LegacyImportSerializer,
     LegacyRoleSerializer,
     LegacyRoleContentSerializer,
     LegacyRoleVersionsSerializer,
@@ -52,7 +53,6 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LegacyRoleFilter
 
-    # serializer = LegacyRoleSerializer
     serializer_class = LegacyRoleSerializer
     pagination_class = LegacyRolesSetPagination
 
@@ -106,49 +106,20 @@ class LegacyRoleVersionsViewSet(viewsets.GenericViewSet):
 class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
     """Legacy role imports."""
 
-    queryset = LegacyRole.objects.all().order_by('full_metadata__created')
-    ordering_fields = ('full_metadata__created')
-    ordering = ('full_metadata__created')
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = LegacyRoleFilter
-
-    # serializer = LegacyRoleSerializer
-    serializer_class = LegacyRoleSerializer
-    pagination_class = LegacyRolesSetPagination
-
+    serializer_class = LegacyImportSerializer
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
-    def _validate_create_kwargs(self, kwargs):
-        try:
-            assert kwargs.get('github_user') is not None
-            assert kwargs.get('github_user') != ''
-            assert kwargs.get('github_repo') is not None
-            assert kwargs.get('github_repo') != ''
-            if kwargs.get('alternate_role_name'):
-                assert kwargs.get('alternate_role_name') != ''
-        except Exception as e:
-            return e
-
     def create(self, request):
-        """Import a new role or new role version."""
-        data = request.data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        kwargs = dict(serializer.validated_data)
 
-        kwargs = {
-            'request_username': request.user.username,
-            'github_user': data.get('github_user'),
-            'github_repo': data.get('github_repo'),
-            'github_reference': data.get('github_reference'),
-            'alternate_role_name': data.get('alternate_role_name'),
-        }
-        error = self._validate_create_kwargs(kwargs)
-        if error:
-            return HttpResponse(str(error), status=403)
+        # synthetically create the name for the response
+        role_name = kwargs.get('alternate_role_name') or \
+            kwargs['github_repo'].replace('ansible-role-', '')
 
         task_id = self.legacy_dispatch(legacy_role_import, kwargs=kwargs)
-
-        role_name = kwargs['alternate_role_name'] or \
-            kwargs['github_repo'].replace('ansible-role-', '')
 
         return Response({
             'results': [{
@@ -162,3 +133,4 @@ class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
                 }
             }]
         })
+

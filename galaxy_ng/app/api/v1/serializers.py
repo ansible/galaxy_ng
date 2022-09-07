@@ -313,9 +313,6 @@ class LegacySyncSerializer(serializers.Serializer):
     role_version = serializers.CharField(required=False)
     limit = serializers.IntegerField(required=False)
 
-    # def validate(self, data):
-    #    print(f'VALIDATE: {data}')
-
     class Meta:
         model = None
         fields = [
@@ -326,3 +323,17 @@ class LegacySyncSerializer(serializers.Serializer):
             'limit'
         ]
 
+
+class LegacyImportSerializer(serializers.Serializer):
+
+    github_user = serializers.CharField()
+    github_repo = serializers.CharField()
+    alternate_role_name = serializers.CharField(required=False)
+
+    class Meta:
+        model = None
+        fields = [
+            'github_user',
+            'github_repo',
+            'alternate_role_name'
+        ]
