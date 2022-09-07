@@ -59,6 +59,18 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
         return url
 
 
+class LegacyNamespaceOwnerSerializer(serializers.Serializer):
+
+    id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id']
+
+    def get_id(self, obj):
+        return obj.id
+
+
 class LegacyUserSerializer(serializers.ModelSerializer):
 
     summary_fields = serializers.SerializerMethodField()
@@ -371,3 +383,60 @@ class LegacyImportSerializer(serializers.Serializer):
             'github_repo',
             'alternate_role_name'
         ]
+
+
+class LegacySyncTaskResponseSerializer(serializers.Serializer):
+
+    task = serializers.CharField()
+
+    class Meta:
+        model = None
+        fields = ['task']
+
+
+class LegacyTaskQuerySerializer(serializers.Serializer):
+
+    class Meta:
+        model = None
+        fields = ['id']
+
+
+class LegacyTaskSummaryTaskMessagesFieldsSerializer(serializers.Serializer):
+
+    id = serializers.DateTimeField()
+    message_type = serializers.CharField()
+    message_text = serializers.CharField()
+    state = serializers.CharField()
+
+    class Meta:
+        model = None
+        fields = ['id', 'message_type', 'message_text', 'state']
+
+
+class LegacyTaskSummaryFieldsSerializer(serializers.Serializer):
+
+    task_messages = LegacyTaskSummaryTaskMessagesFieldsSerializer(many=True)
+
+    class Meta:
+        model = None
+        fields = ['task_messages']
+
+
+class LegacyTaskResultsSerializer(serializers.Serializer):
+
+    state = serializers.CharField()
+    id = serializers.IntegerField()
+    summary_fields = LegacyTaskSummaryFieldsSerializer()
+
+    class Meta:
+        model = None
+        fields = ['id', 'state', 'summary_fields']
+
+
+class LegacyTaskDetailSerializer(serializers.Serializer):
+
+    results = LegacyTaskResultsSerializer()
+
+    class Meta:
+        model = None
+        fields = ['results']

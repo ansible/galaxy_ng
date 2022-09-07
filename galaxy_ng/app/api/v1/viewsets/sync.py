@@ -2,6 +2,8 @@ import logging
 
 from django.conf import settings
 
+from drf_spectacular.utils import extend_schema
+
 from rest_framework import viewsets
 from rest_framework import mixins
 from rest_framework.response import Response
@@ -13,6 +15,7 @@ from galaxy_ng.app.api.v1.tasks import (
 
 from galaxy_ng.app.api.v1.viewsets.tasks import LegacyTasksMixin
 from galaxy_ng.app.api.v1.serializers import LegacySyncSerializer
+from galaxy_ng.app.api.v1.serializers import LegacySyncTaskResponseSerializer
 from galaxy_ng.app.access_control.access_policy import LegacyAccessPolicy
 
 
@@ -33,6 +36,11 @@ class LegacyRolesSyncViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, L
 
     serializer_class = LegacySyncSerializer
 
+    @extend_schema(
+        parameters=[],
+        request=LegacySyncSerializer(),
+        responses=LegacySyncTaskResponseSerializer()
+    )
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

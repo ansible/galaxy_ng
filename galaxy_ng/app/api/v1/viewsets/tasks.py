@@ -3,12 +3,15 @@ import logging
 
 from django.shortcuts import get_object_or_404
 
-from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema
+
 from rest_framework.response import Response
 
 from pulpcore.plugin.tasking import dispatch
 
 from galaxy_ng.app.api.v1.models import LegacyTask
+from galaxy_ng.app.api.v1.serializers import LegacyTaskQuerySerializer
+from galaxy_ng.app.api.v1.serializers import LegacyTaskDetailSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -40,7 +43,11 @@ class LegacyTasksMixin:
 
         return hashed
 
-    @action(detail=True, methods=['get'], name="Get task")
+    @extend_schema(
+        parameters=[],
+        request=LegacyTaskQuerySerializer(),
+        responses=LegacyTaskDetailSerializer()
+    )
     def get_task(self, request, id=None):
         """Get a pulp task via the transformed v1 integer task id."""
         if id:
