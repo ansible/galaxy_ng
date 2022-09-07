@@ -15,7 +15,11 @@ class TestGalaxyUtils(TestCase):
 
     def test_upstream_role_iterator_with_user_and_name(self):
         roles = []
-        for namespace, role, versions in upstream_role_iterator(github_user="geerlingguy", role_name="docker"):
+        iterator_kwargs = {
+            'github_user': 'geerlingguy',
+            'role_name': 'docker'
+        }
+        for namespace, role, versions in upstream_role_iterator(**iterator_kwargs):
             roles.append(role)
         assert len(roles) == 1
         assert roles[0]['github_user'] == 'geerlingguy'

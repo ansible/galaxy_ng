@@ -163,4 +163,3 @@ class LegacyTask(models.Model):
         editable=False,
         on_delete=models.CASCADE
     )
-

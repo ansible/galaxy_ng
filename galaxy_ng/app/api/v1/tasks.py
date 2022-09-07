@@ -11,7 +11,6 @@ from galaxy_ng.app.utils.git import get_tag_commit_hash
 from galaxy_ng.app.utils.git import get_tag_commit_date
 import galaxy_ng.app.utils.roles as roles_utils
 
-from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 

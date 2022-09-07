@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from pulpcore.plugin.models import Task
 from pulpcore.plugin.tasking import dispatch
 
 from galaxy_ng.app.api.v1.models import LegacyTask
