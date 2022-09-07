@@ -114,6 +114,9 @@ class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
         serializer.is_valid(raise_exception=True)
         kwargs = dict(serializer.validated_data)
 
+        # tell the defered task who started this job
+        kwargs['request_username'] = request.user.username
+
         # synthetically create the name for the response
         role_name = kwargs.get('alternate_role_name') or \
             kwargs['github_repo'].replace('ansible-role-', '')
