@@ -8,10 +8,16 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 
 from pulpcore.plugin.tasking import dispatch
+from pulpcore.plugin.models import Task
 
-from galaxy_ng.app.api.v1.models import LegacyTask
-from galaxy_ng.app.api.v1.serializers import LegacyTaskQuerySerializer
-from galaxy_ng.app.api.v1.serializers import LegacyTaskDetailSerializer
+from galaxy_ng.app.utils.galaxy import (
+    uuid_to_int,
+    int_to_uuid
+)
+from galaxy_ng.app.api.v1.serializers import (
+    LegacyTaskQuerySerializer,
+    LegacyTaskDetailSerializer
+)
 
 
 logger = logging.getLogger(__name__)
@@ -29,19 +35,11 @@ class LegacyTasksMixin:
     galaxy cli.
     """
 
-    def legacy_task_hash(self, pulp_id):
-        """Transform a uuid into an integer."""
-        return abs(hash(str(pulp_id)))
-
     def legacy_dispatch(self, function, kwargs=None):
         """Dispatch wrapper for legacy tasks."""
         task = dispatch(function, kwargs=kwargs)
-        hashed = self.legacy_task_hash(task.pulp_id)
-
-        # add this task to the translation table
-        legacy_task, _ = LegacyTask.objects.get_or_create(task_id=hashed, pulp_task=task)
-
-        return hashed
+        legacy_id = uuid_to_int(str(task.pulp_id))
+        return legacy_id
 
     @extend_schema(
         parameters=[],
@@ -56,8 +54,8 @@ class LegacyTasksMixin:
             task_id = int(request.GET.get('id', None))
 
         # get the pulp task from the translation table
-        legacy_task = get_object_or_404(LegacyTask, task_id=task_id)
-        this_task = legacy_task.pulp_task
+        pulp_task_id = int_to_uuid(task_id)
+        this_task = get_object_or_404(Task, pulp_id=pulp_task_id)
 
         # figure out the v1 compatible state
         state_map = {
