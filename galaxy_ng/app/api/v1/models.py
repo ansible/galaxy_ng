@@ -1,7 +1,5 @@
 from django.db import models
 
-from pulpcore.plugin.models import Task
-
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.models.auth import User
 
