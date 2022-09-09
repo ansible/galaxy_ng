@@ -32,6 +32,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_authentication_backends(settings))
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
+    data.update(configure_legacy_roles(settings))
 
     validate(settings)
     return data
@@ -492,6 +493,14 @@ def configure_authentication_backends(settings: Dynaconf) -> Dict[str, Any]:
     if choosen_preset in presets:
         data["AUTHENTICATION_BACKENDS"] = presets[choosen_preset]
 
+    return data
+
+
+def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
+    """Set the feature flag for legacy roles from the setting"""
+    data = {}
+    legacy_roles = settings.get("GALAXY_ENABLE_LEGACY_ROLES")
+    data["GALAXY_FEATURE_FLAGS__legacy_roles"] = legacy_roles
     return data
 
 

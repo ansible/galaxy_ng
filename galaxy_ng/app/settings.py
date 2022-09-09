@@ -73,6 +73,7 @@ GALAXY_DEPLOYMENT_MODE = 'standalone'
 # Dictionary with True|False values for the application to turn on/off features
 GALAXY_FEATURE_FLAGS = {
     'execution_environments': True,  # False will make execution_environments endpoints 404
+    'legacy_roles': False,
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -228,6 +229,9 @@ AUTHENTICATION_BACKEND_PRESETS_DATA = {
     ]
 }
 
+
+# Enable the api/$PREFIX/v1 api for legacy roles.
+GALAXY_ENABLE_LEGACY_ROLES = False
 
 SOCIAL_AUTH_GITHUB_BASE_URL = os.environ.get('SOCIAL_AUTH_GITHUB_BASE_URL', 'https://github.com')
 SOCIAL_AUTH_GITHUB_API_URL = os.environ.get('SOCIAL_AUTH_GITHUB_BASE_URL', 'https://api.github.com')

@@ -19,6 +19,14 @@ services:
       - './standalone-community/galaxy_ng.env'
       - '../.compose.env'
 
+  # NOTE: you will need https://addons.mozilla.org/en-US/firefox/addon/cross-domain-cors/
+  swagger-ui:
+   image: swaggerapi/swagger-ui
+   ports:
+      - "8003:8080"
+   environment:
+      API_URL: http://0.0.0.0:5001/api/v3/openapi.json
+
   galaxy-mirror:
     hostname: galaxy-mirror
     image: jtanner0/galaxy-mirror:3.0

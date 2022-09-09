@@ -3,6 +3,9 @@
 # functionality of these viewsets to all be roughly the same, so instead of duplicating
 # the statenents for these viewsets, they're stored here and reused on a bunch of different
 # policies.
+
+from galaxy_ng.app.access_control.statements.legacy import LEGACY_STATEMENTS
+
 _collection_statements = [
     {
         "action": ["list", "retrieve"],
@@ -463,3 +466,5 @@ STANDALONE_STATEMENTS = {
         }
     ]
 }
+
+STANDALONE_STATEMENTS.update(LEGACY_STATEMENTS)

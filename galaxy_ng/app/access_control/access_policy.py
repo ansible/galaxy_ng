@@ -10,6 +10,8 @@ from pulpcore.plugin.access_policy import AccessPolicyFromDB
 from pulp_container.app import models as container_models
 
 from galaxy_ng.app import models
+from galaxy_ng.app.api.v1.models import LegacyNamespace
+from galaxy_ng.app.api.v1.models import LegacyRole
 
 log = logging.getLogger(__name__)
 
@@ -369,3 +371,47 @@ class ContainerRemoteAccessPolicy(AccessPolicyBase):
 
 class LandingPageAccessPolicy(AccessPolicyBase):
     NAME = "LandingPageViewSet"
+
+
+class LegacyAccessPolicy(AccessPolicyBase):
+    NAME = "LegacyAccessPolicy"
+
+    def is_namespace_owner(self, request, viewset, action):
+
+        # let superusers do whatever they want.
+        user = request.user
+        if user.is_superuser:
+            return True
+
+        namespace = None
+        github_user = None
+
+        # enumerate the related namespace for this request
+        if '/imports/' in request.META['PATH_INFO']:
+
+            github_user = request.data['github_user']
+            namespace = LegacyNamespace.objects.filter(name=github_user).first()
+
+        elif '/roles/' in request.META['PATH_INFO']:
+
+            if 'id' in request.parser_context['kwargs']:
+                roleid = request.parser_context['kwargs']['id']
+            else:
+                roleid = request.parser_context['kwargs']['pk']
+            role = LegacyRole.objects.filter(id=roleid).first()
+            namespace = role.namespace
+
+        elif '/namespaces/' in request.META['PATH_INFO']:
+
+            ns_id = request.parser_context['kwargs']['pk']
+            namespace = LegacyNamespace.objects.filter(id=ns_id).first()
+
+        # allow a user to make their own namespace
+        if namespace is None and github_user and user.username == github_user:
+            return True
+
+        # allow owners to do things in the namespace
+        if namespace and user.username in [x.username for x in namespace.owners.all()]:
+            return True
+
+        return False

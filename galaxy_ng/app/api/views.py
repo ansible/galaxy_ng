@@ -3,6 +3,7 @@ import os
 import galaxy_importer
 
 from django.apps import apps
+from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from pulp_ansible.app.models import AnsibleDistribution
@@ -28,6 +29,11 @@ VERSIONS = {
     "pulp_ansible_version": apps.get_app_config('ansible').version,
     "pulp_container_version": apps.get_app_config('container').version,
 }
+
+
+# Add in v1 support if configured
+if settings.GALAXY_ENABLE_LEGACY_ROLES:
+    VERSIONS["available_versions"]["v1"] = "v1/"
 
 
 class ApiRootView(api_base.APIView):
