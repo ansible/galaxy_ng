@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 from unittest.mock import patch
 
+import pytest
 from orionutils.generator import build_collection, randstr
 
 from ..constants import USERNAME_PUBLISHER
@@ -17,6 +18,8 @@ from ..utils import (
 logger = logging.getLogger(__name__)
 
 
+# TODO Refactor get_client to provide access to bearer token
+@pytest.mark.standalone_only
 def test_download_artifact(ansible_config, upload_artifact):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
