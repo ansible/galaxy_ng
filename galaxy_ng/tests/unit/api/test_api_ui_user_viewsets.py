@@ -392,7 +392,19 @@ class TestUiUserViewSet(BaseTestCase):
             "groups": [{"id": group.id, "name": group.name}],
         }
 
-        excluded_model_permissions = [ ]
+        excluded_model_permissions = [
+            "core.change_task",
+            "core.delete_task",
+            "core.view_task",
+            "galaxy.delete_containerregistryremote",
+            "galaxy.view_user",
+            "galaxy.change_group",
+            "galaxy.view_group",
+            "galaxy.delete_user",
+            "galaxy.change_user",
+            "galaxy.add_user",
+            "galaxy.add_group",
+            "galaxy.delete_group"]
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             self._test_create_or_update(
@@ -403,7 +415,9 @@ class TestUiUserViewSet(BaseTestCase):
             response = self.client.get(self.me_url)
             content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
             for i in content_admin_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {True})
+                self.assertTrue({response.data["model_permissions"][i]["has_model_permission"]})
+            for i in excluded_model_permissions:
+                self.assertFalse({response.data["model_permissions"][i]["has_model_permission"]})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self.client.force_authenticate(user=self.admin_user)
@@ -411,121 +425,8 @@ class TestUiUserViewSet(BaseTestCase):
             content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
             for i in content_admin_permissions:
                 self.assertTrue({response.data["model_permissions"][i]["has_model_permission"]})
-
-    def test_me_collection_admin_permissions(self):
-        user = auth_models.User.objects.create(username="collection_admin_user")
-        user.save()
-
-        group = self._create_group(
-            "",
-            "users_with_collection_admin_permissions",
-            users=[user],
-            roles=["galaxy.collection_admin"],
-        )
-        self.client.force_authenticate(user=user)
-
-        new_user_data = {
-            "username": "collection_admin_user",
-            "first_name": "Tsrif",
-            "last_name": "Tsal",
-            "email": "email@email.com",
-            "groups": [{"id": group.id, "name": group.name}],
-        }
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            self._test_create_or_update(
-            self.client.put, self.me_url, new_user_data, status.HTTP_200_OK, user
-        )
-            client = APIClient(raise_request_exception=True)
-            client.force_authenticate(user=user)
-            response = self.client.get(self.me_url)
-            collection_admin_permissions = LOCKED_ROLES["galaxy.collection_admin"]["permissions"]
-            for i in collection_admin_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {True})
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            self.client.force_authenticate(user=self.admin_user)
-            response = self.client.get(self.me_url)
-            collection_admin_permissions = LOCKED_ROLES["galaxy.collection_admin"]["permissions"]
-            for i in collection_admin_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {True})
-
-    def test_me_execution_environment_admin_permissions(self):
-        user = auth_models.User.objects.create(username="execution_environment_admin_user")
-        user.save()
-
-        group = self._create_group(
-            "",
-            "users_with_execution_environment_admin_permissions",
-            users=[user],
-            roles=["galaxy.execution_environment_admin"],
-        )
-        self.client.force_authenticate(user=user)
-
-        new_user_data = {
-            "username": "execution_environment_admin_user",
-            "first_name": "Tsrif",
-            "last_name": "Tsal",
-            "email": "email@email.com",
-            "groups": [{"id": group.id, "name": group.name}],
-        }
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            self._test_create_or_update(
-            self.client.put, self.me_url, new_user_data, status.HTTP_200_OK, user
-        )
-            client = APIClient(raise_request_exception=True)
-            client.force_authenticate(user=user)
-            response = self.client.get(self.me_url)
-            execution_environment_admin_permissions = LOCKED_ROLES["galaxy.execution_environment_admin"]["permissions"]
-            for i in execution_environment_admin_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {True})
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            self.client.force_authenticate(user=self.admin_user)
-            response = self.client.get(self.me_url)
-            execution_environment_admin_permissions = LOCKED_ROLES["galaxy.execution_environment_admin"]["permissions"]
-            for i in execution_environment_admin_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {True})
-
-
-    def test_me_group_admin_permissions(self):
-        user = auth_models.User.objects.create(username="group_admin_user")
-        user.save()
-
-        group = self._create_group(
-            "",
-            "users_with_group_admin_permissions",
-            users=[user],
-            roles=["galaxy.group_admin"],
-        )
-        self.client.force_authenticate(user=user)
-
-        new_user_data = {
-            "username": "group_admin_user",
-            "first_name": "Tsrif",
-            "last_name": "Tsal",
-            "email": "email@email.com",
-            "groups": [{"id": group.id, "name": group.name}],
-        }
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            self._test_create_or_update(
-            self.client.put, self.me_url, new_user_data, status.HTTP_200_OK, user
-        )
-            client = APIClient(raise_request_exception=True)
-            client.force_authenticate(user=user)
-            response = self.client.get(self.me_url)
-            group_admin_permissions = LOCKED_ROLES["galaxy.group_admin"]["permissions"]
-            for i in group_admin_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {True})
-
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            self.client.force_authenticate(user=self.admin_user)
-            response = self.client.get(self.me_url)
-            group_admin_permissions = LOCKED_ROLES["galaxy.group_admin"]["permissions"]
-            for i in group_admin_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {True})
+            for i in excluded_model_permissions:
+                self.assertFalse({response.data["model_permissions"][i]["has_model_permission"]})
 
     @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
     def test_superuser_can_not_be_deleted(self):
