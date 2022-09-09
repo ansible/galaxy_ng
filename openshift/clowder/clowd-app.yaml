@@ -385,7 +385,7 @@ parameters:
 - name: GALAXY_API_CPU_REQUEST
   value: 200m
 - name: GALAXY_API_CPU_LIMIT
-  value: 600m
+  value: '1'
 
 # pulp-content-app resource requirements
 - name: PULP_CONTENT_APP_REPLICAS
@@ -397,7 +397,7 @@ parameters:
 - name: PULP_CONTENT_APP_CPU_REQUEST
   value: 200m
 - name: PULP_CONTENT_APP_CPU_LIMIT
-  value: 600m
+  value: '1'
 
 # pulp-worker resource requirements
 - name: PULP_WORKER_REPLICAS
