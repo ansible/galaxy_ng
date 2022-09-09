@@ -28,11 +28,17 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_socialauth(settings))
     data.update(configure_cors(settings))
     data.update(configure_pulp_ansible(settings))
-    data.update(configure_authentication_classes(settings))
     data.update(configure_authentication_backends(settings))
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
+
+    # This should go last, and it needs to receive the data from the previous configuration
+    # functions because this function configures the rest framework auth classes based off
+    # of the galaxy auth classes, and if galaxy auth classes are overridden by any of the 
+    # other dynaconf hooks (such as keycloak), those changes need to be applied to the
+    # rest framework auth classes too.
+    data.update(configure_authentication_classes(settings, data))
 
     validate(settings)
     return data
@@ -344,7 +350,7 @@ def configure_pulp_ansible(settings: Dynaconf) -> Dict[str, Any]:
     }
 
 
-def configure_authentication_classes(settings: Dynaconf) -> Dict[str, Any]:
+def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -> Dict[str, Any]:
     # GALAXY_AUTHENTICATION_CLASSES is used to configure the galaxy api authentication
     # pretty much everywhere (on prem, cloud, dev environments, CI environments etc).
     # We need to set the REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES variable so that
@@ -353,7 +359,10 @@ def configure_authentication_classes(settings: Dynaconf) -> Dict[str, Any]:
     # default rest framework auth classes to the galaxy auth classes. Ideally we should
     # switch everything to use the default DRF auth classes, but given how many
     # environments would have to be reconfigured, this is a lot easier.
-    galaxy_auth_classes = settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
+    galaxy_auth_classes = data.get(
+        "GALAXY_AUTHENTICATION_CLASSES",
+        settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
+    )
 
     if galaxy_auth_classes:
         return {
