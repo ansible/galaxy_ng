@@ -17,6 +17,7 @@ objects:
       curl -X POST -H "Authorization: Bearer ${JENKINS_TOKEN}" ${JENKINS_JOB_URL}/buildWithParameters
 
       # verify build started
+      sleep 10
       while true; do
         QUEUE_ITEM=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.queueItem')
         if [ "${QUEUE_ITEM}" = "null" ]; then
