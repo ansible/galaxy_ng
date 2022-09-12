@@ -519,18 +519,24 @@ def test_api_ui_v1_my_namespaces(ansible_config):
                 'object_roles': ["galaxy.collection_admin"],
             }]
         }
-        resp = uclient.post('_ui/v1/my-namespaces/', payload=payload)
-        assert resp.status_code == 201
+        presp = uclient.post('_ui/v1/my-namespaces/', payload=payload)
+        assert presp.status_code == 201
 
-        # get the response
+        # get the my-namespaces view
         resp = uclient.get('_ui/v1/my-namespaces/')
         assert resp.status_code == 200
 
+        # assert the correct response serializer
         ds = resp.json()
         validate_json(instance=ds, schema=schema_objectlist)
-        ns_names = [x['name'] for x in ds['data']]
+
+        # get all the namespaces in the view
+        namespace_names = uclient.get_paginated('_ui/v1/my-namespaces/')
+        namespace_names = [x['name'] for x in namespace_names]
+
+        # validate the new one shows up
         for expected_ns_name in ['autohubtest2', 'autohubtest3', 'signing', new_namespace]:
-            assert expected_ns_name in ns_names
+            assert expected_ns_name in namespace_names
 
         # delete
         resp = uclient.delete(f'_ui/v1/my-namespaces/{new_namespace}')
@@ -541,9 +547,9 @@ def test_api_ui_v1_my_namespaces(ansible_config):
         assert resp.status_code == 200
 
         # confirm deletion
-        ds = resp.json()
-        ns_names = [x['name'] for x in ds['data']]
-        assert new_namespace not in ns_names
+        namespace_names = uclient.get_paginated('_ui/v1/my-namespaces/')
+        namespace_names = [x['name'] for x in namespace_names]
+        assert new_namespace not in namespace_names
 
 
 # /api/automation-hub/_ui/v1/my-namespaces/{name}/
