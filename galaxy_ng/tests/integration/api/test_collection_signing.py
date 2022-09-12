@@ -398,17 +398,17 @@ def test_upload_signature(api_client, config, settings, upload_artifact):
         if not os.path.exists(signature_filename):
             pytest.skip("Signature cannot be created")
 
+        baseurl = config.get('url').rstrip('/') + '/' + 'pulp/api/v3/'
+
         collection_version_pk = collections["staging"][ckey]["id"]
         staging_resp = requests.get(
-            "http://localhost:8002/api/automation-hub/pulp/api/v3/"
-            "repositories/ansible/ansible/?name=staging",
+            baseurl + "repositories/ansible/ansible/?name=staging",
             auth=("admin", "admin"),
         )
         repo_href = staging_resp.json()["results"][0]["pulp_href"]
         signature_file = open(signature_filename, "rb")
         response = requests.post(
-            "http://localhost:8002/api/automation-hub/pulp/api/v3/"
-            "content/ansible/collection_signatures/",
+            baseurl + "content/ansible/collection_signatures/",
             files={"file": signature_file},
             data={
                 "repository": repo_href,
