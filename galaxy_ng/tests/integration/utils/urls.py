@@ -2,6 +2,7 @@
 
 import os
 import time
+import uuid
 
 from urllib.parse import urljoin
 from urllib.parse import urlparse
@@ -13,25 +14,52 @@ from .errors import TaskWaitingTimeout
 
 def test_url_safe_join():
     """Validate url_safe_join function."""
-    this_file = __file__
-    this_dir = os.path.dirname(this_file)
-    fn = os.path.join(this_dir, 'testurls.txt')
-    with open(fn, 'r') as f:
-        fdata = f.read()
-    flines = fdata.split('\n')
-    for fline in flines:
-        if not fline.strip():
-            continue
-        if fline.startswith('"""'):
-            continue
-        parts = fline.split(',')
+    testcases = [
+        [
+            'http://localhost:5001/api/<prefix>/',
+            '/api/<prefix>/pulp/api/v3/docs/api.json',
+            'http://localhost:5001/api/<prefix>/pulp/api/v3/docs/api.json',
+        ],
+        [
+            'http://localhost:5001/api/<prefix>/',
+            '/api/<prefix>/pulp/api/v3/',
+            'http://localhost:5001/api/<prefix>/pulp/api/v3/'
+        ],
+        [
 
-        server = parts[0]
-        url = parts[1]
-        expected = parts[2]
+            'http://localhost:5001/api/<prefix>/',
+            '/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/',
+            'http://localhost:5001/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/'
+        ],
+        [
+            'http://localhost:5001/api/<prefix>/',
+            'http://localhost:5001/pulp/api/v3/tasks/<uuid>',
+            'http://localhost:5001/pulp/api/v3/tasks/<uuid>'
+        ],
+        [
+            'http://localhost:5001/api/<prefix>/',
+            'http://localhost:5001/api/<prefix>//pulp/api/v3/tasks/<uuid>',
+            'http://localhost:5001/api/<prefix>/pulp/api/v3/tasks/<uuid>'
+        ],
+        [
+            'http://localhost:5001/api/<prefix>/',
+            '/api/<prefix>/_ui/v1/collection-versions/?limit=10&offset=10&repository=published',
+            'http://localhost:5001/api/<prefix>/_ui/v1/collection-versions/?limit=10&offset=10&repository=published'
+        ],
+        [
+            'http://localhost:5001/api/<prefix>/',
+            'v3/collections/autohubtest2/autohubtest2_teawkayi/versions/1.0.0/move/staging/published/',
+            'http://localhost:5001/api/<prefix>/v3/collections/autohubtest2/autohubtest2_teawkayi/versions/1.0.0/move/staging/published/'
+        ]
+    ]
 
-        res = url_safe_join(server, url) == expected
-        assert url_safe_join(server, url) == expected, f"{res} != {expected}"
+    for idt,tc in enumerate(testcases):
+        server = tc[0]
+        url = tc[1]
+        expected = tc[2]
+
+        res = url_safe_join(server, url)
+        assert res == expected, f"{res} != {expected} ... \n\t{server}\n\t{url}"
 
 
 def url_safe_join(server, url):
@@ -39,18 +67,17 @@ def url_safe_join(server, url):
     Handle all the oddities of url joins
     """
 
-    def validate(this_url):
-        if 'automation-hub' in this_url and '/pulp' in this_url:
-            raise Exception('bad url join on {server} {url}')
-        return this_url
-
     # parse both urls
     o = urlparse(server)
     o2 = urlparse(url)
 
     # strip the path from both urls
     server_path = o.path
-    url_path = o2.path.replace(server_path, '')
+    url_path = o2.path
+
+    # remove double slashes
+    if '//' in url_path:
+        url_path = url_path.replace('//', '/')
 
     # append the query params if any to the url_path
     if o2.query:
@@ -59,35 +86,24 @@ def url_safe_join(server, url):
     # start a new base url
     new_url = o.scheme + '://' + o.netloc
 
-    # Task urls are coming back malformed ...
-    # http://localhost:5001/api/automation-hub//pulp/api/v3/tasks/b7218b84-e9e3-4995-8c9e-0a170558037d
-    # http://localhost:5001pulp/api/v3/tasks/675ed6d5-a76a-4964-a9d2-9a0c941edca4
-    if '/pulp' in url_path:
-        url_path = url_path.replace(server_path, '')
-    if url_path.startswith('pulp/'):
-        url_path = '/' + url_path
+    # url contains the base path
+    if not url.startswith(new_url) and url_path.startswith(server_path):
+        return new_url + url_path
 
-    if not url_path:
-        return validate(new_url + server_path)
-    elif url_path.startswith(server_path):
-        return validate(urljoin(new_url, url_path))
-    elif url_path.startswith('v3/') or url_path.startswith('_ui/'):
-        return validate(new_url + urljoin(server_path.rstrip('/') + '/', url_path.lstrip('/')))
-    elif url_path.startswith('/pulp/'):
-        return validate(new_url.rstrip('/') + '/' + url_path.lstrip('/'))
-    elif url_path.startswith('/api/v3') and server_path == '/api/automation-hub/':
-        return validate(new_url + url_path.replace('/api/', server_path))
-    elif url_path.startswith('content/'):
-        # /api/automation-hub/content/<str:path>/v3/collections/<str:namespace>/<str:name>/versions/
-        return validate(new_url + urljoin(server_path, url_path))
-    elif url_path.startswith('collections/'):
-        # /api/automation-hub/content/<str:path>/v3/collections/<str:namespace>/<str:name>/versions/
-        return validate(new_url + urljoin(server_path, 'v3/' + url_path))
+    # url contains the base url
+    if url.startswith(new_url) and server_path in url_path:
+        return (
+            new_url
+            + server_path.rstrip('/')
+            + '/'
+            + url_path.replace(server_path, '').lstrip('/')
+        )
 
-    # Fallback ...
-    if url.startswith('http'):
-        return url
-    return urljoin(server, url)
+    # url path is a pulp root
+    if url.startswith(new_url) and url_path.startswith('/pulp'):
+        return new_url + url_path
+
+    return urljoin(server.rstrip('/') + '/', url.lstrip('/'))
 
 
 def wait_for_url(api_client, url, timeout_sec=30):
