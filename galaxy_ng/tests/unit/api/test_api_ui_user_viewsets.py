@@ -396,7 +396,6 @@ class TestUiUserViewSet(BaseTestCase):
             "core.change_task",
             "core.delete_task",
             "core.view_task",
-            "galaxy.delete_containerregistryremote",
             "galaxy.view_user",
             "galaxy.change_group",
             "galaxy.view_group",
@@ -417,16 +416,16 @@ class TestUiUserViewSet(BaseTestCase):
             for i in content_admin_permissions:
                 self.assertTrue({response.data["model_permissions"][i]["has_model_permission"]})
             for i in excluded_model_permissions:
-                self.assertFalse({response.data["model_permissions"][i]["has_model_permission"]})
+                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {False})
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            self.client.force_authenticate(user=self.admin_user)
+            self.client.force_authenticate(user=user)
             response = self.client.get(self.me_url)
             content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
             for i in content_admin_permissions:
                 self.assertTrue({response.data["model_permissions"][i]["has_model_permission"]})
             for i in excluded_model_permissions:
-                self.assertFalse({response.data["model_permissions"][i]["has_model_permission"]})
+                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]},  {False})
 
     @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
     def test_superuser_can_not_be_deleted(self):
