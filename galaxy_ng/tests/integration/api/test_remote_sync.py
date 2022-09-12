@@ -9,7 +9,7 @@ from ..schemas import (
 )
 from ..utils import get_client, wait_for_task
 
-REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo"
+REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n    version: 1.0.11"
 
 
 # /api/automation-hub/content/community/v3/sync/config/
