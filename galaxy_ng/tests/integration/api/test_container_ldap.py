@@ -28,5 +28,9 @@ def test_push_container_as_ldap_user(ansible_config):
     subprocess.check_call(["docker", "login", "-u", username, "-p", password, "localhost:5001"])
 
     # Push image to local registry
-    pid = subprocess.run(["docker", "push", "-d", "localhost:5001/alpine:latest"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    pid = subprocess.run(
+        ["docker", "--debug", "push", "localhost:5001/alpine:latest"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
     assert pid.returncode == 0, pid.stdout
