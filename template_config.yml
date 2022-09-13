@@ -5,7 +5,7 @@
 
 additional_repos:
 - bindings: true
-  branch: 0.14.0
+  ref: 38b3ac1814d6d2119d17fbb2b16f0de027b52f36
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -76,7 +76,7 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
-pulpcore_branch: 3.20.0
+pulpcore_branch: 3.21.0
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
@@ -109,4 +109,3 @@ travis_notifications: null
 update_github: false
 upgrade_range: []
 use_issue_template: false
-
