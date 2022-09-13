@@ -134,7 +134,7 @@ class AnsibleConfigFixture(dict):
             # The "url" key is actually the full url to the api root.
             return os.environ.get(
                 'HUB_API_ROOT',
-                'http://localhost:8002/api/automation-hub/'
+                'http://localhost:5001/api/automation-hub/'
             )
 
         elif key == 'auth_url':
