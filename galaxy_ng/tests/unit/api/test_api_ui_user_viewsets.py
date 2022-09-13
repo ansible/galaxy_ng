@@ -414,18 +414,18 @@ class TestUiUserViewSet(BaseTestCase):
             response = self.client.get(self.me_url)
             content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
             for i in content_admin_permissions:
-                self.assertTrue({response.data["model_permissions"][i]["has_model_permission"]})
+                self.assertTrue(response.data["model_permissions"][i]["has_model_permission"])
             for i in excluded_model_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]}, {False})
+                self.assertFalse(response.data["model_permissions"][i]["has_model_permission"])
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self.client.force_authenticate(user=user)
             response = self.client.get(self.me_url)
             content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
             for i in content_admin_permissions:
-                self.assertTrue({response.data["model_permissions"][i]["has_model_permission"]})
+                self.assertTrue(response.data["model_permissions"][i]["has_model_permission"])
             for i in excluded_model_permissions:
-                self.assertEqual({response.data["model_permissions"][i]["has_model_permission"]},  {False})
+                self.assertFalse(response.data["model_permissions"][i]["has_model_permission"])
 
     @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
     def test_superuser_can_not_be_deleted(self):
