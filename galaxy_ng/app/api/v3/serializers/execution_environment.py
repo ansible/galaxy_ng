@@ -62,7 +62,7 @@ class ContainerNamespaceSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.ListField)
     def get_owners(self, namespace):
         return get_users_with_perms(
-            namespace, with_group_users=False
+            namespace, with_group_users=False, for_concrete_model=True
         ).values_list("username", flat=True)
 
 
@@ -119,6 +119,10 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             remote = ui_serializers.ContainerRemoteSerializer(
                 repo.remote.cast(), context=self.context).data
 
+        sign_state = repo.content.filter(
+            pulp_type="container.signature"
+        ).count() > 0 and "signed" or "unsigned"
+
         return {
             "repository": {
                 "id": repo.pk,
@@ -129,7 +133,8 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "created_at": repo.pulp_created,
                 "updated_at": repo.pulp_last_updated,
                 "pulp_labels": {label.key: label.value for label in repo.pulp_labels.all()},
-                "remote": remote
+                "remote": remote,
+                "sign_state": sign_state
             },
             "distribution": {
                 "id": distro.pk,
