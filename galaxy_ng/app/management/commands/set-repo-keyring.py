@@ -25,7 +25,7 @@ class Command(BaseCommand):
         self.stdout.write(style(message))
 
     def add_arguments(self, parser):
-        parser.add_argument("--keyring", "--gpgkey", type=str, help="Keyring", required=True)
+        parser.add_argument( "--gpgkey", type=str, help="Keyring", required=True)
         parser.add_argument("--repository", type=str, help="Repository name", required=True)
         parser.add_argument(
             "-y",
