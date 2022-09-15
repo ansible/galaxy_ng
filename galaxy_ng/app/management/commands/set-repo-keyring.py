@@ -49,6 +49,7 @@ class Command(BaseCommand):
 
         certs_dir = settings.get("ANSIBLE_CERTS_DIR", "/etc/pulp/certs")
         keyring_path = os.path.join(certs_dir, keyring)
+
         if not os.path.exists(keyring_path):
             self.echo(f"Keyring {keyring_path} does not exist", self.style.ERROR)
             sys.exit(1)
@@ -83,8 +84,16 @@ class Command(BaseCommand):
             self.echo(f"Task failed with error: {task.error}", self.style.ERROR)
             sys.exit(1)
 
-        if AnsibleRepository.objects.get(pk=repo.pk).keyring == keyring:
-            self.echo(f"Keyring {keyring} set successfully to {repository} repository")
+
+
+        gpgkey_path = os.path('/app/dev/common/ansible-sign-pub.txt')
+
+        with open(gpgkey_path, 'rb') as f:
+            new_gpgkey = f.read()
+            self.echo(new_gpgkey)
+
+        if AnsibleRepository.objects.get(pk=repo.pk).keyring == new_gpgkey:
+            self.echo(f"Keyring {new_gpgkey} set successfully to {repository} repository")
 
 
 def set_repo_keyring(repo_id, keyring):
