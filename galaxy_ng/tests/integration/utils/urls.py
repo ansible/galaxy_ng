@@ -1,8 +1,6 @@
 """Utility functions for AH tests."""
 
-import os
 import time
-import uuid
 
 from urllib.parse import urljoin
 from urllib.parse import urlparse
@@ -44,16 +42,19 @@ def test_url_safe_join():
         [
             'http://localhost:5001/api/<prefix>/',
             '/api/<prefix>/_ui/v1/collection-versions/?limit=10&offset=10&repository=published',
-            'http://localhost:5001/api/<prefix>/_ui/v1/collection-versions/?limit=10&offset=10&repository=published'
+            'http://localhost:5001/api/<prefix>/_ui/v1/collection-versions/'
+            '?limit=10&offset=10&repository=published'
         ],
         [
             'http://localhost:5001/api/<prefix>/',
-            'v3/collections/autohubtest2/autohubtest2_teawkayi/versions/1.0.0/move/staging/published/',
-            'http://localhost:5001/api/<prefix>/v3/collections/autohubtest2/autohubtest2_teawkayi/versions/1.0.0/move/staging/published/'
+            'v3/collections/autohubtest2/autohubtest2_teawkayi/versions/1.0.0/move/staging/'
+            'published/',
+            'http://localhost:5001/api/<prefix>/v3/collections/autohubtest2/autohubtest2_teawkayi/'
+            'versions/1.0.0/move/staging/published/'
         ]
     ]
 
-    for idt,tc in enumerate(testcases):
+    for idt, tc in enumerate(testcases):
         server = tc[0]
         url = tc[1]
         expected = tc[2]
