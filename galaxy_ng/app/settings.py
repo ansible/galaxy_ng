@@ -188,6 +188,9 @@ GALAXY_SIGNATURE_UPLOAD_ENABLED = False
 # This can only be set to True if GALAXY_REQUIRE_CONTENT_APPROVAL is also True
 GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL = False
 
+#
+GALAXY_REQUIRE_VERIFICATION_ON_UPLOAD = False
+
 # With this set to True, all the approved collections will be also signed
 GALAXY_AUTO_SIGN_COLLECTIONS = False
 

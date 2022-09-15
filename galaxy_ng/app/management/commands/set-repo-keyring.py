@@ -25,7 +25,7 @@ class Command(BaseCommand):
         self.stdout.write(style(message))
 
     def add_arguments(self, parser):
-        parser.add_argument( "--gpgkey", type=str, help="Keyring", required=True)
+        parser.add_argument("--keyring", type=str, help="Keyring", required=True)
         parser.add_argument("--repository", type=str, help="Repository name", required=True)
         parser.add_argument(
             "-y",
@@ -87,10 +87,10 @@ class Command(BaseCommand):
             self.echo(f"Keyring {keyring} set successfully to {repository} repository")
 
 
-def set_repo_keyring(repo_id, gpgkey):
+def set_repo_keyring(repo_id, keyring):
     """Set keyring for repository"""
 
     with transaction.atomic():
         repo = AnsibleRepository.objects.get(pk=repo_id)
-        repo.gpgkey = gpgkey
+        repo.keyring = keyring
         repo.save()

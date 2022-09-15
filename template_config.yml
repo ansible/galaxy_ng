@@ -5,7 +5,7 @@
 
 additional_repos:
 - bindings: true
-  ref: 38b3ac1814d6d2119d17fbb2b16f0de027b52f36
+  revision: 38b3ac1814d6d2119d17fbb2b16f0de027b52f36
   name: pulp_ansible
   org: pulp
 - bindings: true
