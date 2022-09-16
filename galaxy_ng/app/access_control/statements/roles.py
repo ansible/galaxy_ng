@@ -1,4 +1,5 @@
 LOCKED_ROLES = {
+    # Manage all content types.
     "galaxy.content_admin": {
         "permissions": [
             "galaxy.add_namespace",
@@ -20,10 +21,13 @@ LOCKED_ROLES = {
             "galaxy.change_containerregistryremote",
             "galaxy.delete_containerregistryremote",
         ],
-        "description": "Manage all content types."
     },
 
     # COLLECTIONS
+
+    # Create, delete and change collection namespaces.
+    # Upload and delete collections. Sync collections from remotes.
+    # Approve and reject collections.
     "galaxy.collection_admin": {
         "permissions": [
             "galaxy.add_namespace",
@@ -35,36 +39,35 @@ LOCKED_ROLES = {
             "ansible.view_collectionremote",
             "ansible.modify_ansible_repo_content",
         ],
-        "description": (
-            "Create, delete and change collection namespaces. "
-            "Upload and delete collections. Sync collections from remotes. "
-            "Approve and reject collections.")
     },
+    # Upload and modify collections.
     "galaxy.collection_publisher": {
         "permissions": [
             "galaxy.add_namespace",
             "galaxy.change_namespace",
             "galaxy.upload_to_namespace",
         ],
-        "description": "Upload and modify collections."
     },
+    # Approve, reject and sync collections from remotes.
     "galaxy.collection_curator": {
         "permissions": [
             "ansible.change_collectionremote",
             "ansible.view_collectionremote",
             "ansible.modify_ansible_repo_content",
         ],
-        "description": "Approve, reject and sync collections from remotes.",
     },
+    # Change and upload collections to namespaces.
     "galaxy.collection_namespace_owner": {
         "permissions": [
             "galaxy.change_namespace",
             "galaxy.upload_to_namespace",
         ],
-        "description": "Change and upload collections to namespaces."
     },
 
     # EXECUTION ENVIRONMENTS
+
+    # Push, delete and change execution environments.
+    # Create, delete and change remote registries.
     "galaxy.execution_environment_admin": {
         "permissions": [
             "container.delete_containerrepository",
@@ -78,10 +81,8 @@ LOCKED_ROLES = {
             "galaxy.change_containerregistryremote",
             "galaxy.delete_containerregistryremote",
         ],
-        "description": (
-            "Push, delete, and change execution environments. "
-            "Create, delete and change remote registries.")
     },
+    # Push and change execution environments.
     "galaxy.execution_environment_publisher": {
         "permissions": [
             "container.namespace_change_containerdistribution",
@@ -91,8 +92,8 @@ LOCKED_ROLES = {
             "container.change_containernamespace",
             "container.namespace_add_containerdistribution",
         ],
-        "description": "Push, and change execution environments."
     },
+    # Create and update execution environments under existing container namespaces.
     "galaxy.execution_environment_namespace_owner": {
         "permissions": [
             "container.change_containernamespace",
@@ -101,20 +102,19 @@ LOCKED_ROLES = {
             "container.namespace_modify_content_containerpushrepository",
             "container.namespace_add_containerdistribution",
         ],
-        "description": (
-            "Create and update execution environments under existing "
-            "container namespaces.")
     },
+    # Change existing execution environments.
     "galaxy.execution_environment_collaborator": {
         "permissions": [
             "container.namespace_push_containerdistribution",
             "container.namespace_change_containerdistribution",
             "container.namespace_modify_content_containerpushrepository",
         ],
-        "description": "Change existing execution environments."
     },
 
     # ADMIN STUFF
+
+    # View, add, remove and change groups.
     "galaxy.group_admin": {
         "permissions": [
             "galaxy.view_group",
@@ -122,8 +122,8 @@ LOCKED_ROLES = {
             "galaxy.add_group",
             "galaxy.change_group",
         ],
-        "description": "View, add, remove and change groups."
     },
+    # View, add, remove and change users.
     "galaxy.user_admin": {
         "permissions": [
             "galaxy.view_user",
@@ -131,8 +131,8 @@ LOCKED_ROLES = {
             "galaxy.add_user",
             "galaxy.change_user",
         ],
-        "description": "View, add, remove and change users."
     },
+    # View, add, remove and change synclists.
     "galaxy.synclist_owner": {
         "permissions": [
             "galaxy.add_synclist",
@@ -140,14 +140,13 @@ LOCKED_ROLES = {
             "galaxy.delete_synclist",
             "galaxy.view_synclist",
         ],
-        "description": "View, add, remove and change synclists."
     },
+    # View and cancel any task.
     "galaxy.task_admin": {
         "permissions": [
             "core.change_task",
             "core.delete_task",
             "core.view_task"
         ],
-        "description": "View, and cancel any task."
     },
 }
