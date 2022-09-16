@@ -201,7 +201,7 @@ multidict==6.0.2
     #   yarl
 naya==1.1.1
     # via pulpcore
-oauthlib==3.2.0
+oauthlib==3.2.1
     # via
     #   requests-oauthlib
     #   social-auth-core
