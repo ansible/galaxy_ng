@@ -1,0 +1,1 @@
+Update set-repo-keyring management command to load the public key from a gpg keyring and save it to the database instead of saving the filepath to the database.

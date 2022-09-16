@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import subprocess
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -55,7 +56,7 @@ class Command(BaseCommand):
 
         if not options["yes"]:
             confirm = input(
-                f"This will set keyring to {keyring} for {repository} repository, " "Proceed? (Y/n)"
+                f"This will set keyring to {keyring_path} for {repository} repository, " "Proceed? (Y/n)"
             ).lower()
             while True:
                 if confirm not in ("y", "n", "yes", "no"):
@@ -67,9 +68,15 @@ class Command(BaseCommand):
                     self.echo("Process canceled.")
                     return
 
+        proc = subprocess.run([
+            "gpg", "--keyring", keyring_path, "--export", "-a"
+        ], capture_output=True)
+
+        pubkey = proc.stdout.decode().strip()
+
         task = dispatch(
-            set_repo_keyring,
-            kwargs={"repo_id": repo.pk, "keyring": keyring},
+            set_repo_gpgkey,
+            kwargs={"repo_id": repo.pk, "gpgkey": pubkey},
             exclusive_resources=[repo],
         )
 
@@ -83,14 +90,14 @@ class Command(BaseCommand):
             self.echo(f"Task failed with error: {task.error}", self.style.ERROR)
             sys.exit(1)
 
-        if AnsibleRepository.objects.get(pk=repo.pk).keyring == keyring:
+        if AnsibleRepository.objects.get(pk=repo.pk).gpgkey == pubkey:
             self.echo(f"Keyring {keyring} set successfully to {repository} repository")
 
 
-def set_repo_keyring(repo_id, keyring):
+def set_repo_gpgkey(repo_id, gpgkey):
     """Set keyring for repository"""
 
     with transaction.atomic():
         repo = AnsibleRepository.objects.get(pk=repo_id)
-        repo.keyring = keyring
+        repo.gpgkey = gpgkey
         repo.save()
