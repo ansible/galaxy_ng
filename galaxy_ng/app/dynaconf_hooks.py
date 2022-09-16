@@ -35,7 +35,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
 
     # This should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
-    # of the galaxy auth classes, and if galaxy auth classes are overridden by any of the 
+    # of the galaxy auth classes, and if galaxy auth classes are overridden by any of the
     # other dynaconf hooks (such as keycloak), those changes need to be applied to the
     # rest framework auth classes too.
     data.update(configure_authentication_classes(settings, data))
