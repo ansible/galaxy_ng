@@ -196,3 +196,6 @@ Galaxy forces the final value for those variables.
 - `ANSIBLE_URL_NAMESPACE` (defaults to fixed value `"galaxy:api:v3:"`)
 - `ANSIBLE_DEFAULT_DISTRIBUTION_PATH` (defaults to value of `GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH`)
 
+### Enable collection download log
+
+To log collection download set `ANSIBLE_COLLECT_DOWNLOAD_LOG=True`. Logged downloads can be viewed with `pulpcore-manager download-log`
