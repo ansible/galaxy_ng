@@ -4,6 +4,7 @@ from pulp_ansible.app import models as pulp_models
 
 class RepositorySerializer(serializers.ModelSerializer):
     content_count = serializers.SerializerMethodField()
+    gpgkey = serializers.CharField(source="ansible_ansiblerepository.gpgkey")
 
     class Meta:
         model = pulp_models.AnsibleRepository

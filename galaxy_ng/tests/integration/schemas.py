@@ -173,7 +173,7 @@ schema_distro_repository = {
     'properties': {
         'countent_count': {'type': 'number'},
         'description': {'type': ['string', 'null']},
-        'gpgkey': {'type': 'string'},
+        'gpgkey': {'type': ['string', 'null']},
         'name': {'type': 'string'},
         'pulp_id': {'type': 'string'},
         'pulp_last_updated': {'type': 'string'},
