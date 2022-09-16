@@ -343,7 +343,7 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
 @pytest.mark.standalone_only  # This test can't run on cloud yet
 def test_upload_signature(api_client, config, settings, upload_artifact):
     """
-    1. If staging repository doesn't have a keyring, skip test
+    1. If staging repository doesn't have a gpgkey, skip test
     2. Generate a collection
     3. Upload collection to staging
     4. Sign the collection MANIFEST.json file
@@ -357,15 +357,15 @@ def test_upload_signature(api_client, config, settings, upload_artifact):
     if not distributions:
         pytest.skip("No distribution found")
 
-    staging_has_keyring = False
+    staging_has_gpgkey = False
     for distribution in distributions["data"]:
         if distribution["name"] == "staging":
-            if distribution["repository"]["keyring"]:
-                staging_has_keyring = True
+            if distribution["repository"]["gpgkey"]:
+                staging_has_gpgkey = True
                 break
 
-    if not staging_has_keyring:
-        pytest.skip("Staging repository doesn't have a keyring")
+    if not staging_has_gpgkey:
+        pytest.skip("Staging repository doesn't have a gpgkey")
 
     artifact = build_collection(
         "skeleton",

@@ -3,7 +3,6 @@
 See: https://issues.redhat.com/browse/AAH-1358
 """
 import subprocess
-import time
 from urllib.parse import urlparse
 
 import pytest

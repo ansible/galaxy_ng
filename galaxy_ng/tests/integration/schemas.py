@@ -165,7 +165,7 @@ schema_distro_repository = {
     'required': [
         'content_count',
         'description',
-        'keyring',
+        'gpgkey',
         'name',
         'pulp_id',
         'pulp_last_updated'
@@ -173,7 +173,7 @@ schema_distro_repository = {
     'properties': {
         'countent_count': {'type': 'number'},
         'description': {'type': ['string', 'null']},
-        'keyring': {'type': 'string'},
+        'gpgkey': {'type': 'string'},
         'name': {'type': 'string'},
         'pulp_id': {'type': 'string'},
         'pulp_last_updated': {'type': 'string'},
