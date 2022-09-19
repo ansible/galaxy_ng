@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import subprocess
+import tempfile
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -69,8 +70,9 @@ class Command(BaseCommand):
                     self.echo("Process canceled.")
                     return
 
+        tempdir_path = tempfile.mkdtemp()
         proc = subprocess.run([
-            "gpg", "--keyring", keyring_path, "--export", "-a"
+            "gpg", "--homedir", tempdir_path, "--keyring", keyring_path, "--export", "-a"
         ], capture_output=True)
 
         pubkey = proc.stdout.decode().strip()
