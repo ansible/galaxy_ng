@@ -42,10 +42,18 @@ print(f'UPSTREAM_BASE_URL: {UPSTREAM_BASE_URL}')
 
 # Refresh tokens are what the clients use to request a bearer token from keycloak
 REFRESH_TOKENS = {
+    # jdoe
     '1234567890': '1',
+    'abcdefghijklmnopqrstuvwxyz1234567892': '1',
+    # iqe_normal_user
     '1234567891': '2',
+    'abcdefghijklmnopqrstuvwxyz1234567891': '2',
+    # org-admin
     '1234567892': '3',
+    'abcdefghijklmnopqrstuvwxyz1234567893': '3',
+    # notifications-admin
     '1234567893': '4',
+    'abcdefghijklmnopqrstuvwxyz1234567894': '4',
 }
 
 # Bearer tokens are used for all api calls
