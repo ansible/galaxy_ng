@@ -129,12 +129,47 @@ class AnsibeGalaxyHttpClient:
             self._token = None
             self._token_type = None
 
+    def get_bearer_token(self):
+        # payload
+        #   grant_type=refresh_token&client_id=cloud-services&refresh_token=abcdefghijklmnopqrstuvwxyz1234567894
+        # POST
+        # auth_url
+        #   'https://mocks-keycloak-ephemeral-ydabku.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com
+        #       /auth/realms/redhat-external/protocol/openid-connect/token'
+
+        payload = {
+            'grant_type': 'refresh_token',
+            'client_id': 'cloud-services',
+            'refresh_token': self.config.get('token')
+        }
+
+        payload = {
+            'grant_type': 'password',
+            'client_id': 'cloud-services',
+            'username': self.config.get('username'),
+            'password': self.config.get('password'),
+        }
+
+
+        session = requests.Session()
+        rr = session.post(
+            self.config.get('auth_url'),
+            headers={
+                'User-Agent': 'ansible-galaxy/2.10.17 (Linux; python:3.10.6)'
+            },
+            data=payload,
+            #json=payload,
+            verify=False
+        )
+
+        return rr.json()['access_token']
+
     def request(
         self,
         url: str = None,
         args=None,
         headers: dict = None,
-        method: str = None,
+        method: str = 'GET',
         auth_required: bool = False,
         #error_context_msg=None,
     ) -> dict:
@@ -147,7 +182,6 @@ class AnsibeGalaxyHttpClient:
 
         # the callers are only sending partial urls most of the time
         url = url_safe_join(self._server, url)
-        print(f'{method} {url} {args}')
 
         # detect args type and cast as needed
         is_json = False
@@ -177,50 +211,11 @@ class AnsibeGalaxyHttpClient:
             # fallback to text for NoneType
             headers["Content-Type"] = "application/text"
 
-        # payload
-        #   grant_type=refresh_token&client_id=cloud-services&refresh_token=abcdefghijklmnopqrstuvwxyz1234567894
-        # POST
-        # auth_url
-        #   'https://mocks-keycloak-ephemeral-ydabku.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/auth/realms/redhat-external/protocol/openid-connect/token'
-
-        payload = {
-            'grant_type': 'refresh_token',
-            'client_id': 'cloud-services',
-            'refresh_token': self.config.get('token')
-        }
-
-        payload = {
-            'grant_type': 'password',
-            'client_id': 'cloud-services',
-            'username': self.config.get('username'),
-            'password': self.config.get('password'),
-        }
-
-        session = requests.Session()
-
-        rr = session.post(
-            self.config.get('auth_url'),
-            headers={
-                'User-Agent': 'ansible-galaxy/2.10.17 (Linux; python:3.10.6)'
-            },
-            data=payload,
-            #json=payload,
-            verify=False
-        )
-        bearer_token = rr.json()['access_token']
-        headers['Authorization'] = f'Bearer {bearer_token}'
-        #import epdb; epdb.st()
-
-        rr2 = session.get(url, headers=headers, verify=False)
-        import epdb; epdb.st()
-
         # https://tinyurl.com/53m2scen
         return self._galaxy_api_client._call_galaxy(
             url,
             args=args,
             headers=headers,
             method=method,
-            #auth_required=auth_required,
-            auth_required=False,
-            #error_context_msg=error_context_msg,
+            auth_required=auth_required,
         )
