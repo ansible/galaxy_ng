@@ -150,7 +150,6 @@ class AnsibeGalaxyHttpClient:
             'password': self.config.get('password'),
         }
 
-
         session = requests.Session()
         rr = session.post(
             self.config.get('auth_url'),
@@ -158,7 +157,6 @@ class AnsibeGalaxyHttpClient:
                 'User-Agent': 'ansible-galaxy/2.10.17 (Linux; python:3.10.6)'
             },
             data=payload,
-            #json=payload,
             verify=False
         )
 
@@ -171,14 +169,11 @@ class AnsibeGalaxyHttpClient:
         headers: dict = None,
         method: str = 'GET',
         auth_required: bool = False,
-        #error_context_msg=None,
     ) -> dict:
 
         """
         Make an api call with the upstream galaxy client lib from ansible core.
         """
-
-        _args = args
 
         # the callers are only sending partial urls most of the time
         url = url_safe_join(self._server, url)
