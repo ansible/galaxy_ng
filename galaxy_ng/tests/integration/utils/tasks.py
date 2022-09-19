@@ -27,3 +27,20 @@ def wait_for_task(api_client, resp, timeout=300):
             ready = resp["state"] not in ("running", "waiting")
         time.sleep(SLEEP_SECONDS_POLLING)
     return resp
+
+
+def wait_for_task_ui_client(uclient, task):
+    counter = 0
+    state = None
+    while state in [None, 'waiting', 'running']:
+        counter += 1
+        if counter >= 60:
+            raise Exception('Task is taking too long')
+        resp = uclient.get(absolute_url=task['task'])
+        assert resp.status_code == 200
+        ds = resp.json()
+        state = ds['state']
+        if state == 'completed':
+            break
+        time.sleep(SLEEP_SECONDS_POLLING)
+    assert state == 'completed'

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 import random
-import time
 
 import pytest
 from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
 
-from ..constants import DEFAULT_DISTROS, SLEEP_SECONDS_POLLING
+from ..constants import DEFAULT_DISTROS
 from ..schemas import (
     schema_collection_import,
     schema_collection_import_detail,
@@ -16,6 +15,7 @@ from ..schemas import (
     schema_distro,
     schema_distro_repository,
     schema_ee_registry,
+    schema_ee_namespace_detail,
     schema_featureflags,
     schema_group,
     schema_me,
@@ -24,10 +24,12 @@ from ..schemas import (
     schema_remote,
     schema_settings,
     schema_task,
-    schema_task_detail,
     schema_user,
 )
-from ..utils import UIClient, generate_unused_namespace, get_client
+from ..utils import UIClient, generate_unused_namespace, get_client, wait_for_task_ui_client
+from .rbac_actions.utils import podman_push
+
+from orionutils.generator import randstr
 
 REGEX_403 = r"HTTP Code: 403"
 
@@ -157,10 +159,6 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
             assert _ds['pulp_id'] == distro_id
 
 
-# /api/automation-hub/_ui/v1/execution-environments/namespaces/
-# /api/automation-hub/_ui/v1/execution-environments/namespaces/{name}/
-
-
 # /api/automation-hub/_ui/v1/execution-environments/registries/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
@@ -204,21 +202,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=task, schema=schema_task)
 
         # wait for sync to finish
-        counter = 0
-        state = None
-        while state in [None, 'waiting', 'running']:
-            counter += 1
-            if counter >= 60:
-                raise Exception('ee registry sync task is taking too long')
-            resp = uclient.get(absolute_url=task['task'])
-            assert resp.status_code == 200
-            ds = resp.json()
-            validate_json(instance=ds, schema=schema_task_detail)
-            state = ds['state']
-            if state == 'completed':
-                break
-            time.sleep(SLEEP_SECONDS_POLLING)
-        assert state == 'completed'
+        wait_for_task_ui_client(uclient, task)
 
         # index it
         resp = uclient.post(
@@ -230,21 +214,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=task, schema=schema_task)
 
         # wait for index to finish
-        counter = 0
-        state = None
-        while state in [None, 'waiting', 'running']:
-            counter += 1
-            if counter >= 60:
-                raise Exception('ee registry index task is taking too long')
-            resp = uclient.get(absolute_url=task['task'])
-            assert resp.status_code == 200
-            ds = resp.json()
-            validate_json(instance=ds, schema=schema_task_detail)
-            state = ds['state']
-            if state == 'completed':
-                break
-            time.sleep(SLEEP_SECONDS_POLLING)
-        assert state == 'completed'
+        wait_for_task_ui_client(uclient, task)
 
         # delete the registry
         resp = uclient.delete(f"_ui/v1/execution-environments/registries/{rds['pk']}/")
@@ -269,14 +239,80 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
 
 # /api/automation-hub/_ui/v1/execution-environments/remotes/
 # /api/automation-hub/_ui/v1/execution-environments/remotes/{pulp_id}/
-# /api/automation-hub/_ui/v1/execution-environments/repositories/
-# /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/history/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/images/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/images/{manifest_ref}/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/readme/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/sync/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/tags/
+
+# /api/automation-hub/_ui/v1/execution-environments/repositories/
+# /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/
+# /api/automation-hub/_ui/v1/execution-environments/namespaces/
+# /api/automation-hub/_ui/v1/execution-environments/namespaces/{name}/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_execution_environments_repositories(ansible_config):
+    cfg = ansible_config('ee_admin')
+    new_namespace = f'ns_{randstr()}'
+    new_repository = f'repo_{randstr()}'
+    new_name = f'{new_namespace}/{new_repository}'
+
+    podman_push(cfg['username'], cfg['password'], new_name)
+
+    with UIClient(config=cfg) as uclient:
+
+        # get the ee repositories view
+        repository_resp = uclient.get('_ui/v1/execution-environments/repositories/')
+        assert repository_resp.status_code == 200
+
+        # assert the correct response serializer
+        repository_ds = repository_resp.json()
+        validate_json(instance=repository_ds, schema=schema_objectlist)
+
+        # validate new repository was created
+        repository_names = [x['name'] for x in repository_ds['data']]
+        assert new_name in repository_names
+
+        # get the namespaces list
+        namespace_resp = uclient.get('_ui/v1/execution-environments/namespaces/')
+        assert namespace_resp.status_code == 200
+
+        # assert correct response serializer
+        namespace_ds = namespace_resp.json()
+        validate_json(instance=namespace_ds, schema=schema_objectlist)
+
+        # assert new namespace was created
+        assert new_namespace in [x['name'] for x in namespace_ds['data']]
+
+        ns_detail_resp = uclient.get(f'_ui/v1/execution-environments/namespaces/{new_namespace}')
+        assert ns_detail_resp.status_code == 200
+
+        # assert correct response serializer
+        ns_detail_ds = ns_detail_resp.json()
+        validate_json(instance=ns_detail_ds, schema=schema_ee_namespace_detail)
+
+        # assert new namespace was created
+        assert new_namespace == ns_detail_ds['name']
+        assert cfg['username'] in ns_detail_ds['owners']
+
+        # delete the respository
+        delete_repository_resp = uclient.delete(
+            f'_ui/v1/execution-environments/repositories/{new_name}/'
+        )
+        assert delete_repository_resp.status_code == 202
+        task = delete_repository_resp.json()
+        wait_for_task_ui_client(uclient, task)
+
+        # get the repositories list again
+        repository_resp = uclient.get('_ui/v1/execution-environments/repositories/')
+        assert repository_resp.status_code == 200
+
+        # assert the new repository has been deleted
+        repository_ds = repository_resp.json()
+        repository_names = [x['name'] for x in repository_ds['data']]
+
+        assert new_name not in repository_names
 
 
 # /api/automation-hub/_ui/v1/feature-flags/
