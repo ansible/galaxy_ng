@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 import random
-import time
 
 import pytest
 from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
 
-from ..constants import DEFAULT_DISTROS, SLEEP_SECONDS_POLLING
+from ..constants import DEFAULT_DISTROS
 from ..schemas import (
     schema_collection_import,
     schema_collection_import_detail,
@@ -25,33 +24,14 @@ from ..schemas import (
     schema_remote,
     schema_settings,
     schema_task,
-    schema_task_detail,
     schema_user,
 )
-from ..utils import UIClient, generate_unused_namespace, get_client
+from ..utils import UIClient, generate_unused_namespace, get_client, wait_for_task_ui_client
 from .rbac_actions.utils import podman_push
 
 from orionutils.generator import randstr
 
 REGEX_403 = r"HTTP Code: 403"
-
-
-def wait_for_task(uclient, task):
-    counter = 0
-    state = None
-    while state in [None, 'waiting', 'running']:
-        counter += 1
-        if counter >= 60:
-            raise Exception('Task is taking too long')
-        resp = uclient.get(absolute_url=task['task'])
-        assert resp.status_code == 200
-        ds = resp.json()
-        validate_json(instance=ds, schema=schema_task_detail)
-        state = ds['state']
-        if state == 'completed':
-            break
-        time.sleep(SLEEP_SECONDS_POLLING)
-    assert state == 'completed'
 
 
 # /api/automation-hub/_ui/v1/auth/login/
@@ -222,7 +202,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=task, schema=schema_task)
 
         # wait for sync to finish
-        wait_for_task(uclient, task)
+        wait_for_task_ui_client(uclient, task)
 
         # index it
         resp = uclient.post(
@@ -234,21 +214,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=task, schema=schema_task)
 
         # wait for index to finish
-        counter = 0
-        state = None
-        while state in [None, 'waiting', 'running']:
-            counter += 1
-            if counter >= 60:
-                raise Exception('ee registry index task is taking too long')
-            resp = uclient.get(absolute_url=task['task'])
-            assert resp.status_code == 200
-            ds = resp.json()
-            validate_json(instance=ds, schema=schema_task_detail)
-            state = ds['state']
-            if state == 'completed':
-                break
-            time.sleep(SLEEP_SECONDS_POLLING)
-        assert state == 'completed'
+        wait_for_task_ui_client(uclient, task)
 
         # delete the registry
         resp = uclient.delete(f"_ui/v1/execution-environments/registries/{rds['pk']}/")
@@ -336,7 +302,7 @@ def test_api_ui_v1_execution_environments_repositories(ansible_config):
         )
         assert delete_repository_resp.status_code == 202
         task = delete_repository_resp.json()
-        wait_for_task(uclient, task)
+        wait_for_task_ui_client(uclient, task)
 
         # get the repositories list again
         repository_resp = uclient.get('_ui/v1/execution-environments/repositories/')

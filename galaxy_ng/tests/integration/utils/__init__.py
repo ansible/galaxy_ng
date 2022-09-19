@@ -25,7 +25,7 @@ from .namespaces import (
     generate_unused_namespace,
     create_unused_namespace
 )
-from .tasks import wait_for_task
+from .tasks import wait_for_task, wait_for_task_ui_client
 from .tools import is_docker_installed, uuid4
 from .urls import (
     url_safe_join,
@@ -54,6 +54,7 @@ __all__ = (
     generate_unused_namespace,
     create_unused_namespace,
     wait_for_task,
+    wait_for_task_ui_client,
     is_docker_installed,
     uuid4,
     url_safe_join,
