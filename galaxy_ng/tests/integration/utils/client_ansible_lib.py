@@ -168,12 +168,16 @@ class AnsibeGalaxyHttpClient:
         args=None,
         headers: dict = None,
         method: str = 'GET',
-        auth_required: bool = False,
+        auth_required: bool = None,
     ) -> dict:
 
         """
         Make an api call with the upstream galaxy client lib from ansible core.
         """
+
+        # default back to the auth_required value set at client init
+        if auth_required is None:
+            auth_required = self._require_auth
 
         # the callers are only sending partial urls most of the time
         url = url_safe_join(self._server, url)
