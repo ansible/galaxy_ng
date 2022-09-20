@@ -13,6 +13,17 @@ Changelog
 
 .. towncrier release notes start
 
+4.5.3 (2022-09-20)
+Bugfixes
+--------
+
+- Fix 500s on the certified repository when syncing signed collections.
+  `AAH-1932 <https://issues.redhat.com/browse/AAH-1932>`_
+
+
+----
+
+
 4.5.2 (2022-08-23)
 ==================
 
