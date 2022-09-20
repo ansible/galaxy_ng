@@ -224,6 +224,7 @@ def test_v1_sync_with_user_and_limit(ansible_config):
             except Exception:
                 pass
 
+    # start the sync
     resp = api_client('/api/v1/sync/', method='POST', args=pargs)
     assert isinstance(resp, dict)
     assert resp.get('task') is not None
@@ -234,7 +235,7 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     poll_url = f'/api/v1/tasks/{task_id}/'
     state = None
     counter = 0
-    while state is None or state == 'RUNNING' and counter <= 20:
+    while state is None or state == 'RUNNING' and counter <= 100:
         counter += 1
         task_resp = api_client(poll_url, method='GET')
         state = task_resp['results'][0]['state']
