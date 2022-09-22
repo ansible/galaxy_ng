@@ -72,6 +72,33 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
             assert resp["state"] == "completed"
 
 
+def test_validated_publish(ansible_config, artifact, upload_artifact):
+    """
+    Publish a collection to the validated repo.
+    """
+
+    config = ansible_config("basic_user")
+    api_client = get_client(config)
+
+    with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
+        try:
+            resp = upload_artifact(config, api_client, artifact)
+        except CapturingGalaxyError as capture:
+            error_body = capture.http_error.read()
+            logger.error("Upload failed with error response: %s", error_body)
+            raise
+        else:
+            resp = wait_for_task(api_client, resp)
+            assert resp["state"] == "completed"
+        
+        set_certification(api_client, artifact, level="validated")
+
+        collection_url = f"/content/validated/v3/collections/{artifact.namespace}/{artifact.name}/versions/1.0.0/"
+        collection_resp = api_client(collection_url)
+        assert collection_resp["name"] == artifact.name
+
+
+
 @pytest.mark.skip
 def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
     """Test error responses when posting to the collections endpoint."""

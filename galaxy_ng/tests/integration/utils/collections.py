@@ -190,7 +190,7 @@ def get_collection_full_path(namespace, collection_name):
     return os.path.join(get_collections_namespace_path(namespace), collection_name)
 
 
-def set_certification(client, collection):
+def set_certification(client, collection, level="rh-certified"):
     """Moves a collection from the `staging` to the `published` repository.
 
     For use in instances that use repository-based certification and that
@@ -199,7 +199,7 @@ def set_certification(client, collection):
     if client.config["use_move_endpoint"]:
         url = (
             f"v3/collections/{collection.namespace}/{collection.name}/versions/"
-            f"{collection.version}/move/staging/published/"
+            f"{collection.version}/move/staging/{level}/"
         )
         job_tasks = client(url, method="POST", args=b"{}")
         assert 'copy_task_id' in job_tasks
