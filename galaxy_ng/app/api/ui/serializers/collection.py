@@ -65,7 +65,7 @@ class CollectionMetadataSerializer(Serializer):
         data = []
         for signature in obj.signatures.all():
             sig = {}
-            sig["signature"] = bytes(signature.data).decode("utf-8")
+            sig["signature"] = signature.data
             sig["pubkey_fingerprint"] = signature.pubkey_fingerprint
             sig["signing_service"] = getattr(signature.signing_service, "name", None)
             data.append(sig)

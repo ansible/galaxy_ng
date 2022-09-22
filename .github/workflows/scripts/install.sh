@@ -28,7 +28,7 @@ TAG=ci_build
 if [ -e $REPO_ROOT/../pulp_ansible ]; then
   PULP_ANSIBLE=./pulp_ansible
 else
-  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.14.0
+  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@0.15.0
 fi
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
@@ -99,6 +99,8 @@ services:
       - ./ssh:/keys/
       - ~/.config:/root/.config
       - ../../../pulp-openapi-generator:/root/pulp-openapi-generator
+    env:
+      PULP_WORKERS: "4"
 VARSYAML
 
 cat >> vars/main.yaml << VARSYAML
@@ -121,7 +123,9 @@ if [ "$TEST" = "s3" ]; then
     command: "server /data"' vars/main.yaml
   sed -i -e '$a s3_test: true\
 minio_access_key: "'$MINIO_ACCESS_KEY'"\
-minio_secret_key: "'$MINIO_SECRET_KEY'"' vars/main.yaml
+minio_secret_key: "'$MINIO_SECRET_KEY'"\
+pulp_scenario_settings: null\
+' vars/main.yaml
 fi
 
 if [ "$TEST" = "azure" ]; then
@@ -137,7 +141,9 @@ if [ "$TEST" = "azure" ]; then
     volumes:\
       - ./azurite:/etc/pulp\
     command: "azurite-blob --blobHost 0.0.0.0 --cert /etc/pulp/azcert.pem --key /etc/pulp/azkey.pem"' vars/main.yaml
-  sed -i -e '$a azure_test: true' vars/main.yaml
+  sed -i -e '$a azure_test: true\
+pulp_scenario_settings: null\
+' vars/main.yaml
 fi
 
 echo "PULP_API_ROOT=${PULP_API_ROOT}" >> "$GITHUB_ENV"

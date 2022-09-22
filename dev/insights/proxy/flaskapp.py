@@ -293,7 +293,7 @@ def get_dir(path):
     print(rr.headers)
 
     # If the response is a tar file, save it and then send it back to the client.
-    if rr.headers['Content-Type'] == 'application/x-tar':
+    if rr.headers['Content-Type'] == 'application/gzip':
         fn = os.path.basename(path)
         tdir = tempfile.mkdtemp()
         fn = os.path.join(tdir, fn)

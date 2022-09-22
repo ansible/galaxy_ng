@@ -189,6 +189,11 @@ class CollectionArtifactDownloadView(api_base.APIView):
         prefix = settings.CONTENT_PATH_PREFIX.strip('/')
         distribution = self._get_ansible_distribution(distro_base_path)
 
+        if settings.ANSIBLE_COLLECT_DOWNLOAD_LOG:
+            pulp_ansible_views.CollectionArtifactDownloadView.log_download(
+                request, filename, distro_base_path
+            )
+
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
                 host=settings.X_PULP_CONTENT_HOST,
