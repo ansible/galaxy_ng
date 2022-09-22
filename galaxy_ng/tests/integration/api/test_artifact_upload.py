@@ -77,7 +77,7 @@ def test_validated_publish(ansible_config, artifact, upload_artifact):
     Publish a collection to the validated repo.
     """
 
-    config = ansible_config("basic_user")
+    config = ansible_config("admin")
     api_client = get_client(config)
 
     with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
@@ -90,13 +90,15 @@ def test_validated_publish(ansible_config, artifact, upload_artifact):
         else:
             resp = wait_for_task(api_client, resp)
             assert resp["state"] == "completed"
-        
+
         set_certification(api_client, artifact, level="validated")
 
-        collection_url = f"/content/validated/v3/collections/{artifact.namespace}/{artifact.name}/versions/1.0.0/"
+        collection_url = (
+            "/content/validated/v3/collections/"
+            f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
+        )
         collection_resp = api_client(collection_url)
         assert collection_resp["name"] == artifact.name
-
 
 
 @pytest.mark.skip

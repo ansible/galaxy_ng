@@ -190,7 +190,7 @@ def get_collection_full_path(namespace, collection_name):
     return os.path.join(get_collections_namespace_path(namespace), collection_name)
 
 
-def set_certification(client, collection, level="rh-certified"):
+def set_certification(client, collection, level="published"):
     """Moves a collection from the `staging` to the `published` repository.
 
     For use in instances that use repository-based certification and that
@@ -224,7 +224,7 @@ def set_certification(client, collection, level="rh-certified"):
 
         # callers expect response as part of this method, ensure artifact is there
         dest_url = (
-            "content/published/v3/plugin/ansible/content/published/collections/index/"
+            f"v3/plugin/ansible/content/{level}/collections/index/"
             f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
         )
         return wait_for_url(client, dest_url)
