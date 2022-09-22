@@ -111,11 +111,8 @@ fi
 cd ..
 
 
-git clone --depth=1 https://github.com/pulp/pulp_ansible.git
+git clone --depth=1 https://github.com/pulp/pulp_ansible.git --branch 0.15.0
 cd pulp_ansible
-
-git fetch --depth=1 origin 38b3ac1814d6d2119d17fbb2b16f0de027b52f36
-git checkout 38b3ac1814d6d2119d17fbb2b16f0de027b52f36
 
 if [ -n "$PULP_ANSIBLE_PR_NUMBER" ]; then
   git fetch --depth=1 origin pull/$PULP_ANSIBLE_PR_NUMBER/head:$PULP_ANSIBLE_PR_NUMBER

@@ -1,11 +1,11 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-167-ga2a8251
+# generated with plugin_template@2021.08.26-174-g56e0727
 
 additional_repos:
 - bindings: true
-  revision: 38b3ac1814d6d2119d17fbb2b16f0de027b52f36
+  branch: 0.15.0
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -28,6 +28,7 @@ cherry_pick_automation: false
 ci_env:
   GITHUB_USER: ${{ github.event.pull_request.user.login }}
 ci_trigger: '{pull_request: {branches: [''**'']}, push: {branches: [''**'']}}'
+ci_update_branches: []
 core_import_allowed:
 - pulpcore.app.*viewsets
 - pulpcore\.app.*admin
@@ -47,7 +48,7 @@ flake8: false
 flake8_ignore: []
 github_org: ansible
 issue_tracker: null
-keep_ci_update_since_branch: null
+kanban: false
 lint_requirements: false
 noissue_marker: No-Issue
 parallel_test_workers: 8
@@ -76,6 +77,9 @@ pulp_settings:
   galaxy_enable_api_access_log: true
   galaxy_require_content_approval: false
   rh_entitlement_required: insights
+pulp_settings_azure: null
+pulp_settings_s3: null
+pulp_settings_stream: null
 pulpcore_branch: 3.21.0
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
