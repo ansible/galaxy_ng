@@ -82,9 +82,15 @@ class TestUIDistributions(BaseTestCase):
             self.client.force_authenticate(user=self.user)
             data = self.client.get(self.distro_url).data
 
+            # We expect 6 distros from migrations:
+            # - rh-certified
+            # - community
+            # - validated
+            # - published
+            # - staging
+            # - rejected
+            # and one extra distro created for testing
             self.assertEqual(len(data['data']), 7)
-            # 5 distros created by data migration and one `other-repo` created
-            # on test setUp.
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self.client.force_authenticate(user=self.user)
