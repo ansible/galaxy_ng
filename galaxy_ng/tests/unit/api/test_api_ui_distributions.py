@@ -82,7 +82,7 @@ class TestUIDistributions(BaseTestCase):
             self.client.force_authenticate(user=self.user)
             data = self.client.get(self.distro_url).data
 
-            self.assertEqual(len(data['data']), 6)
+            self.assertEqual(len(data['data']), 7)
             # 5 distros created by data migration and one `other-repo` created
             # on test setUp.
 
