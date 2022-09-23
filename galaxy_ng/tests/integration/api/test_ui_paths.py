@@ -22,14 +22,13 @@ from ..schemas import (
     schema_namespace_detail,
     schema_objectlist,
     schema_remote,
+    schema_remote_readme,
     schema_settings,
     schema_task,
     schema_user,
 )
 from ..utils import UIClient, generate_unused_namespace, get_client, wait_for_task_ui_client
-from .rbac_actions.utils import podman_push
-
-from orionutils.generator import randstr
+from .rbac_actions.utils import ReusableLocalContainer
 
 REGEX_403 = r"HTTP Code: 403"
 
@@ -239,27 +238,138 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
 
 # /api/automation-hub/_ui/v1/execution-environments/remotes/
 # /api/automation-hub/_ui/v1/execution-environments/remotes/{pulp_id}/
+
+# /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/sync/
+
+@pytest.fixture
+def local_container():
+    return ReusableLocalContainer('int_tests')
+
+
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/history/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_execution_environments_repositories_content_history(
+    ansible_config,
+    local_container
+):
+    name = local_container.get_container()['name']
+    cfg = ansible_config('ee_admin')
+    with UIClient(config=cfg) as uclient:
+        # get the view
+        resp = uclient.get(f'_ui/v1/execution-environments/repositories/{name}/_content/history/')
+        assert resp.status_code == 200
+
+        # assert the correct response serializer
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_objectlist)
+
+        # assert on the expected minimum length of the dataset
+        assert ds['data'][0]['number'] >= 3
+
+
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/images/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/images/{manifest_ref}/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_execution_environments_repositories_content_images(
+    ansible_config,
+    local_container
+):
+    name = local_container.get_container()['name']
+    manifest = local_container.get_manifest()
+    cfg = ansible_config('ee_admin')
+    with UIClient(config=cfg) as uclient:
+        # get the view
+        resp = uclient.get(f'_ui/v1/execution-environments/repositories/{name}/_content/images/')
+        assert resp.status_code == 200
+
+        # assert the correct response serializer
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_objectlist)
+
+        # assert we have the pulp object we're expecting
+        assert ds['data'][0]['pulp_id'] == manifest['pulp_id']
+
+
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/readme/
-# /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/sync/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_execution_environments_repositories_content_readme(
+    ansible_config,
+    local_container
+):
+    name = local_container.get_container()['name']
+    cfg = ansible_config('ee_admin')
+    url = f'_ui/v1/execution-environments/repositories/{name}/_content/readme/'
+    with UIClient(config=cfg) as uclient:
+        # get the view
+        resp = uclient.get(url)
+        assert resp.status_code == 200
+
+        # assert the correct response serializer
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_remote_readme)
+
+        # assert the readme is currently an empty string
+        assert ds['text'] == ''
+
+        # update the readme
+        updated_text = 'Informative text goes here'
+        update_resp = uclient.put(url, payload={'text': updated_text})
+        assert update_resp.status_code == 200
+
+        update_ds = resp.json()
+        validate_json(instance=update_ds, schema=schema_remote_readme)
+
+        # check for the updated readme
+        resp = uclient.get(url)
+        assert resp.status_code == 200
+
+        # assert the correct response serializer
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_remote_readme)
+
+        # assert the readme matches the updated text
+        assert ds['text'] == updated_text
+
+
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/tags/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_execution_environments_repositories_content_tags(
+    ansible_config,
+    local_container
+):
+    manifest = local_container.get_manifest()
+    name = local_container.get_container()['name']
+    cfg = ansible_config('ee_admin')
+    with UIClient(config=cfg) as uclient:
+        # get the view
+        resp = uclient.get(f'_ui/v1/execution-environments/repositories/{name}/_content/tags/')
+        assert resp.status_code == 200
+
+        # assert the correct response serializer
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_objectlist)
+
+        # assert on the expected number of tags, object and actual tag
+        assert len(ds['data']) == 1
+        assert ds['data'][0]['tagged_manifest']['pulp_id'] == manifest['pulp_id']
+        assert ds['data'][0]['name'] in manifest['tags']
+
 
 # /api/automation-hub/_ui/v1/execution-environments/repositories/
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/
 # /api/automation-hub/_ui/v1/execution-environments/namespaces/
 # /api/automation-hub/_ui/v1/execution-environments/namespaces/{name}/
+@pytest.mark.ee_repo
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
-def test_api_ui_v1_execution_environments_repositories(ansible_config):
+def test_api_ui_v1_execution_environments_repositories(ansible_config, local_container):
+    ns_name = local_container.get_namespace()['name']
+    name = local_container.get_container()['name']
     cfg = ansible_config('ee_admin')
-    new_namespace = f'ns_{randstr()}'
-    new_repository = f'repo_{randstr()}'
-    new_name = f'{new_namespace}/{new_repository}'
-
-    podman_push(cfg['username'], cfg['password'], new_name)
-
     with UIClient(config=cfg) as uclient:
 
         # get the ee repositories view
@@ -272,20 +382,29 @@ def test_api_ui_v1_execution_environments_repositories(ansible_config):
 
         # validate new repository was created
         repository_names = [x['name'] for x in repository_ds['data']]
-        assert new_name in repository_names
+        assert name in repository_names
 
         # get the namespaces list
         namespace_resp = uclient.get('_ui/v1/execution-environments/namespaces/')
         assert namespace_resp.status_code == 200
+
+        # get the repository using the base_path
+        repository_resp = uclient.get(
+            f'_ui/v1/execution-environments/repositories/{name}/'
+        )
+        assert repository_resp.status_code == 200
+
+        rds = repository_resp.json()
+        assert rds['name'] == name
 
         # assert correct response serializer
         namespace_ds = namespace_resp.json()
         validate_json(instance=namespace_ds, schema=schema_objectlist)
 
         # assert new namespace was created
-        assert new_namespace in [x['name'] for x in namespace_ds['data']]
+        assert ns_name in [x['name'] for x in namespace_ds['data']]
 
-        ns_detail_resp = uclient.get(f'_ui/v1/execution-environments/namespaces/{new_namespace}')
+        ns_detail_resp = uclient.get(f'_ui/v1/execution-environments/namespaces/{ns_name}')
         assert ns_detail_resp.status_code == 200
 
         # assert correct response serializer
@@ -293,12 +412,11 @@ def test_api_ui_v1_execution_environments_repositories(ansible_config):
         validate_json(instance=ns_detail_ds, schema=schema_ee_namespace_detail)
 
         # assert new namespace was created
-        assert new_namespace == ns_detail_ds['name']
-        assert cfg['username'] in ns_detail_ds['owners']
+        assert ns_name == ns_detail_ds['name']
 
         # delete the respository
         delete_repository_resp = uclient.delete(
-            f'_ui/v1/execution-environments/repositories/{new_name}/'
+            f'_ui/v1/execution-environments/repositories/{name}/'
         )
         assert delete_repository_resp.status_code == 202
         task = delete_repository_resp.json()
@@ -312,7 +430,7 @@ def test_api_ui_v1_execution_environments_repositories(ansible_config):
         repository_ds = repository_resp.json()
         repository_names = [x['name'] for x in repository_ds['data']]
 
-        assert new_name not in repository_names
+        assert name not in repository_names
 
 
 # /api/automation-hub/_ui/v1/feature-flags/

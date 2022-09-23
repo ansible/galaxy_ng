@@ -157,6 +157,26 @@ class UIClient:
         resp = self._rs.post(self.baseurl + relative_url, json=payload, headers=pheaders)
         return resp
 
+    def put(self, relative_url: str, payload: dict) -> requests.models.Response:
+        pheaders = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+
+        # send cookies whenever possible ...
+        if self.cookies is not None:
+            cookie = []
+            if self.cookies.get('csrftoken'):
+                pheaders['X-CSRFToken'] = self.cookies['csrftoken']
+                cookie.append(f"csrftoken={self.cookies['csrftoken']}")
+            if self.cookies.get('sessionid'):
+                cookie.append(f"sessionid={self.cookies['sessionid']}")
+            pheaders['Cookie'] = '; '.join(cookie)
+
+        # get the response
+        resp = self._rs.put(self.baseurl + relative_url, json=payload, headers=pheaders)
+        return resp
+
     def delete(self, relative_url: str) -> requests.models.Response:
         pheaders = {
             'Accept': 'application/json',
