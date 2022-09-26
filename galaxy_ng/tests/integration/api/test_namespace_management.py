@@ -31,13 +31,15 @@ def test_namespace_create_and_delete(ansible_config, api_version):
 
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
+    api_prefix = config.get("api_prefix")
+    api_prefix = api_prefix.rstrip("/")
 
-    new_namespace = generate_unused_namespace(api_client=api_client, api_version=api_version)
+    new_namespace = generate_unused_namespace(api_client=api_client, api_version=api_version, api_prefix=api_prefix)
     payload = {'name': new_namespace, 'groups': []}
-    resp = api_client(f'/api/automation-hub/{api_version}/namespaces/', args=payload, method='POST')
+    resp = api_client(f'{api_prefix}/{api_version}/namespaces/', args=payload, method='POST')
     assert resp['name'] == new_namespace
 
-    existing2 = get_all_namespaces(api_client=api_client, api_version=api_version)
+    existing2 = get_all_namespaces(api_client=api_client, api_version=api_version, api_prefix=api_prefix)
     existing2 = dict((x['name'], x) for x in existing2)
     assert new_namespace in existing2
 
@@ -45,12 +47,12 @@ def test_namespace_create_and_delete(ansible_config, api_version):
     # empty string and can not be parsed to JSON
     try:
         resp = api_client(
-            f'/api/automation-hub/{api_version}/namespaces/{new_namespace}/',
+            f'{api_prefix}/{api_version}/namespaces/{new_namespace}/',
             method='DELETE'
         )
     except AnsibleError:
         pass
 
-    existing3 = get_all_namespaces(api_client=api_client, api_version=api_version)
+    existing3 = get_all_namespaces(api_client=api_client, api_version=api_version, api_prefix=api_prefix)
     existing3 = dict((x['name'], x) for x in existing3)
     assert new_namespace not in existing3

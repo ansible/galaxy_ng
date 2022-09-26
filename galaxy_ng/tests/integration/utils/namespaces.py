@@ -41,12 +41,15 @@ def generate_namespace(exclude=None):
     return namespace
 
 
-def get_all_namespaces(api_client=None, api_version='v3'):
+def get_all_namespaces(api_client=None, api_version='v3', api_prefix='/api/automation-hub'):
     """ Create a list of namespaces visible to the client """
+
+    if 'galaxy' not in api_prefix:
+        import epdb; epdb.st()
 
     assert api_client is not None, "api_client is a required param"
     namespaces = []
-    next_page = f'/api/automation-hub/{api_version}/namespaces/'
+    next_page = f'{api_prefix}/{api_version}/namespaces/'
     while next_page:
         resp = api_client(next_page)
         namespaces.extend(resp['data'])
@@ -54,20 +57,20 @@ def get_all_namespaces(api_client=None, api_version='v3'):
     return namespaces
 
 
-def generate_unused_namespace(api_client=None, api_version='v3'):
+def generate_unused_namespace(api_client=None, api_version='v3', api_prefix='/api/automation-hub'):
     """ Make a random namespace string that does not exist """
 
     assert api_client is not None, "api_client is a required param"
-    existing = get_all_namespaces(api_client=api_client, api_version=api_version)
+    existing = get_all_namespaces(api_client=api_client, api_version=api_version, api_prefix=api_prefix)
     existing = dict((x['name'], x) for x in existing)
     return generate_namespace(exclude=list(existing.keys()))
 
 
-def create_unused_namespace(api_client=None):
+def create_unused_namespace(api_client=None, api_prefix='/api/automation-hub'):
     """ Make a namespace for testing """
 
     assert api_client is not None, "api_client is a required param"
     ns = generate_unused_namespace(api_client=api_client)
     payload = {'name': ns, 'groups': []}
-    api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
+    api_client('{api_prefix}/v3/namespaces/', args=payload, method='POST')
     return ns
