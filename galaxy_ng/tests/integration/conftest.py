@@ -209,11 +209,14 @@ def ansible_config():
 def published(ansible_config, artifact):
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("partner_engineer"))
+    config = ansible_config("partner_engineer")
+    api_prefix = config.get("api_prefix")
+    api_prefix = api_prefix.rstrip("/")
+    api_client = get_client(config)
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}
-        api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
+        api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
     ansible_galaxy(
@@ -235,11 +238,14 @@ def certifiedv2(ansible_config, artifact):
     """ Create and publish+certify collection version N and N+1 """
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("partner_engineer"))
+    config = ansible_config("partner_engineer")
+    api_prefix = config.get("api_prefix")
+    api_prefix = api_prefix.rstrip("/")
+    api_client = get_client(config)
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}
-        api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
+        api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish v1
     ansible_galaxy(
@@ -282,11 +288,14 @@ def uncertifiedv2(ansible_config, artifact):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...
-    api_client = get_client(ansible_config("partner_engineer"))
+    config = ansible_config("partner_engineer")
+    api_prefix = config.get("api_prefix")
+    api_prefix = api_prefix.rstrip("/")
+    api_client = get_client(config)
     existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
     if artifact.namespace not in existing:
         payload = {'name': artifact.namespace, 'groups': []}
-        api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
+        api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
     ansible_galaxy(
