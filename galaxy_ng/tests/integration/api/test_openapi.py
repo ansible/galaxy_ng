@@ -34,13 +34,14 @@ def test_galaxy_openapi_no_pulp_variables(ansible_config):
     """Tests whether openapi.json has valid path names"""
 
     config = ansible_config("basic_user")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
         request_token=True,
         require_auth=True
     )
 
-    galaxy_spec = api_client('/api/automation-hub/v3/openapi.json')
+    galaxy_spec = api_client(f'{api_prefix}/v3/openapi.json')
     assert 'paths' in galaxy_spec
 
     paths_keys = list(galaxy_spec['paths'].keys())
@@ -53,13 +54,14 @@ def test_galaxy_openapi_validation(ansible_config):
     """Tests whether openapi.json passes openapi linter"""
 
     config = ansible_config("basic_user")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
         request_token=True,
         require_auth=True
     )
 
-    galaxy_spec = api_client('/api/automation-hub/v3/openapi.json')
+    galaxy_spec = api_client(f'{api_prefix}/v3/openapi.json')
     validate_spec(galaxy_spec)
 
 
@@ -68,13 +70,14 @@ def test_pulp_openapi_has_variables(ansible_config):
     """Tests whether openapi.json has valid path names for pulp"""
 
     config = ansible_config("basic_user")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
         request_token=True,
         require_auth=True
     )
 
-    pulp_spec = api_client('/api/automation-hub/pulp/api/v3/docs/api.json')
+    pulp_spec = api_client(f'{api_prefix}/pulp/api/v3/docs/api.json')
     assert 'paths' in pulp_spec
 
     paths_keys = list(pulp_spec['paths'].keys())
@@ -90,14 +93,15 @@ def test_openapi_bindings_generation(ansible_config):
     """Verify client bindings can be built from the pulp'ish api spec"""
 
     config = ansible_config("basic_user")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
         request_token=True,
         require_auth=True
     )
 
-    pulp_spec = api_client('/api/automation-hub/pulp/api/v3/docs/api.json')
-    status = api_client('/api/automation-hub/pulp/api/v3/status/')
+    pulp_spec = api_client(f'{api_prefix}/pulp/api/v3/docs/api.json')
+    status = api_client(f'{api_prefix}/pulp/api/v3/status/')
     version = [x['version'] for x in status['versions'] if x['component'] == 'galaxy'][0]
     my_id = subprocess.run(
         'id -u',
