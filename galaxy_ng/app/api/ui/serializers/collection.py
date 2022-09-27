@@ -59,11 +59,38 @@ class CollectionMetadataSerializer(Serializer):
     tags = serializers.SerializerMethodField()
     signatures = serializers.SerializerMethodField()
 
+    def _get_current_distro(self):
+        """Get current distribution from request information."""
+        request = self.context.get("request")
+        try:
+            # on URLS like _ui/v1/repo/rh-certified/namespace/name
+            # the distro_base_path can be parsed from the URL
+            path = request.parser_context['kwargs']['distro_base_path']
+        except KeyError:
+            # this same serializer is used on /_ui/v1/collection-versions/
+            # which can have the distro_base_path passed in as a query param
+            # on the `?repository=` field
+            path = request.query_params.get('repository')
+
+        if not path:
+            # A bare /_ui/v1/collection-versions/ is not scoped to a single distro
+            return None
+
+        distro = AnsibleDistribution.objects.get(base_path=path)
+
+        return distro
+
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_signatures(self, obj):
         """Returns signature info for each signature."""
+        distro = self._get_current_distro()
+        if not distro:
+            signatures = obj.signatures.all()
+        else:
+            signatures = obj.signatures.filter(repositories=distro.repository)
+
         data = []
-        for signature in obj.signatures.all():
+        for signature in signatures:
             sig = {}
             sig["signature"] = signature.data
             sig["pubkey_fingerprint"] = signature.pubkey_fingerprint
@@ -95,9 +122,13 @@ class CollectionVersionBaseSerializer(CollectionVersionSignStateMixin, Serialize
     version = serializers.CharField()
     requires_ansible = serializers.CharField()
     created_at = serializers.DateTimeField(source='pulp_created')
-    metadata = CollectionMetadataSerializer(source='*')
+    metadata = serializers.SerializerMethodField()
     contents = serializers.ListField(child=ContentSerializer())
     sign_state = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.JSONField)
+    def get_metadata(self, obj):
+        return CollectionMetadataSerializer(obj, context=self.context).data
 
 
 class CollectionVersionSerializer(CollectionVersionBaseSerializer):
@@ -154,7 +185,7 @@ class CollectionListSerializer(_CollectionSerializer):
 
     @extend_schema_field(CollectionVersionBaseSerializer)
     def get_latest_version(self, obj):
-        return CollectionVersionBaseSerializer(obj).data
+        return CollectionVersionBaseSerializer(obj, context=self.context).data
 
 
 class CollectionDetailSerializer(_CollectionSerializer):
@@ -165,7 +196,7 @@ class CollectionDetailSerializer(_CollectionSerializer):
     # "version" query param this won't always be the latest version
     @extend_schema_field(CollectionVersionDetailSerializer)
     def get_latest_version(self, obj):
-        return CollectionVersionDetailSerializer(obj).data
+        return CollectionVersionDetailSerializer(obj, context=self.context).data
 
     @extend_schema_field(CollectionVersionSummarySerializer(many=True))
     def get_all_versions(self, obj):
