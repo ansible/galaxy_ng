@@ -10,3 +10,6 @@ backport-4.4:
 
 backport-4.5:
 - galaxy_ng/app/**/*
+
+backport-4.6:
+- galaxy_ng/app/**/*

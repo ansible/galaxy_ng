@@ -1,11 +1,12 @@
-# Add labels to pull request
+# Add labels to pull requests against master
 # uses logic in .github/labeler.yml
 
 ---
 name: "Add labels to pull request"
 
 on:
-- pull_request_target
+  pull_request_target:
+    branches: [ "master" ]
 
 jobs:
   triage:
