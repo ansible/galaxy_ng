@@ -498,3 +498,18 @@ schema_namespace_detail = {
         'resources': {'type': 'string'},
     }
 }
+
+schema_remote_readme = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': [
+        'created',
+        'text',
+        'updated',
+    ],
+    'properties': {
+        'created': {'type': 'string'},
+        'text': {'type': 'string'},
+        'updated': {'type': 'string'},
+    }
+}
