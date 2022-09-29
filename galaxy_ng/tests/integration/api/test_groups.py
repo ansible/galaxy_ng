@@ -9,15 +9,22 @@ import uuid
 
 import pytest
 
-from ..utils import get_client
+from ..utils import UIClient, get_client
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
+@pytest.mark.parametrize(
+    "url",
+    [
+        "/api/automation-hub/_ui/v1/groups/",
+        "/api/automation-hub/pulp/api/v3/groups/"
+    ],
+)
 @pytest.mark.group
 @pytest.mark.role
 @pytest.mark.standalone_only
-def test_group_role_listing(ansible_config):
+def test_group_role_listing(ansible_config, url):
     """Tests ability to list roles assigned to a namespace."""
 
     config = ansible_config("admin")
@@ -26,7 +33,7 @@ def test_group_role_listing(ansible_config):
     # Create Group
     group_name = str(uuid.uuid4())
     payload = {"name": group_name}
-    group_response = api_client("/api/automation-hub/_ui/v1/groups/", args=payload, method="POST")
+    group_response = api_client(url, args=payload, method="POST")
     assert group_response["name"] == group_name
 
     # Create Namespace
@@ -51,3 +58,11 @@ def test_group_role_listing(ansible_config):
     assert group_roles_response["count"] == 1
     assert group_roles_response["results"][0]["role"] == "galaxy.collection_namespace_owner"
     assert f'/groups/{group_response["id"]}/' in group_roles_response["results"][0]["pulp_href"]
+
+    #  Delete Group
+    with UIClient(config=config) as uclient:
+        del_group_resp = uclient.delete(f'pulp/api/v3/groups/{group_response["id"]}/')
+        assert del_group_resp.status_code == 204
+
+        detail_group_response = uclient.get(f'pulp/api/v3/groups/{group_response["id"]}/')
+        assert detail_group_response.status_code == 404
