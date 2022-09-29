@@ -40,12 +40,14 @@ def api_client(config):
 
 @pytest.fixture(scope="function")
 def settings(api_client):
-    return api_client("/api/automation-hub/_ui/v1/settings/")
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    return api_client(f"{api_prefix}/_ui/v1/settings/")
 
 
 @pytest.fixture(scope="function")
 def flags(api_client):
-    return api_client("/api/automation-hub/_ui/v1/feature-flags/")
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -54,7 +56,8 @@ def namespace(api_client):
     existing = dict((x["name"], x) for x in get_all_namespaces(api_client=api_client))
     if NAMESPACE not in existing:
         payload = {"name": NAMESPACE, "groups": []}
-        api_client("/api/automation-hub/v3/namespaces/", args=payload, method="POST")
+        api_prefix = api_client.config.get("api_prefix").rstrip("/")
+        api_client(f"{api_prefix}/v3/namespaces/", args=payload, method="POST")
         return True  # created
     return False  # not created
 
@@ -69,7 +72,8 @@ def import_and_wait(api_client, artifact, upload_artifact, config):
 
 def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
     """Sign a collection on demand calling /sign/collections/"""
-    sign_url = sign_url or "/api/automation-hub/_ui/v1/collection_signing/"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    sign_url = sign_url or f"{api_prefix}/_ui/v1/collection_signing/"
     sign_payload = {"signing_service": signing_service, **payload}
     resp = api_client(sign_url, method="POST", args=sign_payload)
     log.info("Sign Task: %s", resp)
@@ -123,8 +127,9 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags, u
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
 
     # Assert that the collection is signed on v3 api
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
     collection = api_client(
-        "/api/automation-hub/content/published/v3/collections/"
+        f"{api_prefix}/content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
     assert len(collection["signatures"]) >= 1
@@ -155,15 +160,15 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags, u
 @pytest.mark.parametrize(
     "sign_url",
     [
-        "/api/automation-hub/_ui/v1/collection_signing/",
-        "/api/automation-hub/_ui/v1/collection_signing/{distro_base_path}/",
-        "/api/automation-hub/_ui/v1/collection_signing/{distro_base_path}/{namespace}/",
+        "{api_prefix}/_ui/v1/collection_signing/",
+        "{api_prefix}/_ui/v1/collection_signing/{distro_base_path}/",
+        "{api_prefix}/_ui/v1/collection_signing/{distro_base_path}/{namespace}/",
         (
-            "/api/automation-hub/_ui/v1/collection_signing/"
+            "{api_prefix}/_ui/v1/collection_signing/"
             "{distro_base_path}/{namespace}/{collection}/"
         ),
         (
-            "/api/automation-hub/_ui/v1/collection_signing/"
+            "{api_prefix}/_ui/v1/collection_signing/"
             "{distro_base_path}/{namespace}/{collection}/{version}/"
         ),
     ],
@@ -200,7 +205,9 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
 
     # Sign the collection
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
     sign_payload = {
+        "api_prefix": api_prefix,
         "distro_base_path": "staging",
         "namespace": NAMESPACE,
         "collection": artifact.name,
@@ -209,7 +216,7 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
     sign_on_demand(api_client, signing_service, sign_url.format(**sign_payload), **sign_payload)
     # Assert that the collection is signed on v3 api
     collection = api_client(
-        "/api/automation-hub/content/staging/v3/collections/"
+        f"{api_prefix}/content/staging/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
     assert len(collection["signatures"]) == 0
@@ -290,8 +297,9 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
         sign_on_demand(api_client, signing_service, **sign_payload)
 
         # Assert that the collection is signed on v3 api
+        api_prefix = api_client.config.get("api_prefix").rstrip("/")
         collection = api_client(
-            "/api/automation-hub/content/staging/v3/collections/"
+            f"{api_prefix}/content/staging/v3/collections/"
             f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
         )
         assert len(collection["signatures"]) == 0
@@ -313,8 +321,9 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
 
     # After moving to /published/
     # Assert that the collection is signed on v3 api
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
     collection = api_client(
-        "/api/automation-hub/content/published/v3/collections/"
+        f"{api_prefix}/content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
     assert len(collection["signatures"]) == 0
@@ -356,7 +365,8 @@ def test_upload_signature(api_client, config, settings, upload_artifact):
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is not set")
 
-    distributions = api_client("/api/automation-hub/_ui/v1/distributions/")
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    distributions = api_client(f"{api_prefix}/_ui/v1/distributions/")
     if not distributions:
         pytest.skip("No distribution found")
 
@@ -416,7 +426,7 @@ def test_upload_signature(api_client, config, settings, upload_artifact):
             data={
                 "repository": repo_href,
                 "signed_collection": (
-                    "/api/automation-hub/pulp/api/v3/"
+                    f"{api_prefix}/pulp/api/v3/"
                     f"content/ansible/collection_versions/{collection_version_pk}/"
                 ),
             },
@@ -428,7 +438,7 @@ def test_upload_signature(api_client, config, settings, upload_artifact):
 
     # Assert that the collection is signed on v3 api
     collection = api_client(
-        "/api/automation-hub/content/staging/v3/collections/"
+        f"{api_prefix}/content/staging/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
     assert len(collection["signatures"]) == 0

@@ -233,12 +233,13 @@ def set_certification(client, collection, level="published"):
 def get_all_collections_by_repo(api_client=None):
     """ Return a dict of each repo and their collections """
     assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
     collections = {
         'staging': {},
         'published': {}
     }
     for repo in collections.keys():
-        next_page = f'/api/automation-hub/_ui/v1/collection-versions/?repository={repo}'
+        next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
         while next_page:
             resp = api_client(next_page)
             for _collection in resp['data']:
@@ -255,6 +256,9 @@ def get_all_collections_by_repo(api_client=None):
 def get_all_repository_collection_versions(api_client):
     """ Return a dict of each repo and their collection versions """
 
+    assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
     repositories = [
         'staging',
         'published'
@@ -262,7 +266,7 @@ def get_all_repository_collection_versions(api_client):
 
     collections = []
     for repo in repositories:
-        next_page = f'/api/automation-hub/content/{repo}/v3/collections/'
+        next_page = f'{api_prefix}/content/{repo}/v3/collections/'
         while next_page:
             resp = api_client(next_page)
             collections.extend(resp['data'])

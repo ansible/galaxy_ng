@@ -31,10 +31,11 @@ def test_namespace_create_and_delete(ansible_config, api_version):
 
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
+    api_prefix = config.get("api_prefix").rstrip("/")
 
     new_namespace = generate_unused_namespace(api_client=api_client, api_version=api_version)
     payload = {'name': new_namespace, 'groups': []}
-    resp = api_client(f'/api/automation-hub/{api_version}/namespaces/', args=payload, method='POST')
+    resp = api_client(f'{api_prefix}/{api_version}/namespaces/', args=payload, method='POST')
     assert resp['name'] == new_namespace
 
     existing2 = get_all_namespaces(api_client=api_client, api_version=api_version)
@@ -45,7 +46,7 @@ def test_namespace_create_and_delete(ansible_config, api_version):
     # empty string and can not be parsed to JSON
     try:
         resp = api_client(
-            f'/api/automation-hub/{api_version}/namespaces/{new_namespace}/',
+            f'{api_prefix}/{api_version}/namespaces/{new_namespace}/',
             method='DELETE'
         )
     except AnsibleError:

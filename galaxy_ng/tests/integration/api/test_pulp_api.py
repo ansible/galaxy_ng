@@ -35,7 +35,7 @@ def test_pulp_api_redirect(ansible_config, artifact):
 @pytest.mark.parametrize(
     "url",
     [
-        "/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/",
+        "{api_prefix}/pulp/api/v3/repositories/ansible/ansible/",
     ],
 )
 @pytest.mark.pulp_api
@@ -43,11 +43,13 @@ def test_pulp_endpoint_readonly(ansible_config, artifact, url):
     """Ensure authenticated user has readonly access to view"""
 
     config = ansible_config("admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     REGEX_40X = r"HTTP Code: 40\d"
 
     # NOTE: with `count` this only applies to lists, can be adjusted for future views
+    url = url.format(api_prefix=api_prefix)
     response = api_client(url, method="GET")
     assert "count" in response
 

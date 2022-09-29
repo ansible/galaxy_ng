@@ -45,8 +45,10 @@ def get_all_namespaces(api_client=None, api_version='v3'):
     """ Create a list of namespaces visible to the client """
 
     assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
     namespaces = []
-    next_page = f'/api/automation-hub/{api_version}/namespaces/'
+    next_page = f'{api_prefix}/{api_version}/namespaces/'
     while next_page:
         resp = api_client(next_page)
         namespaces.extend(resp['data'])
@@ -67,7 +69,9 @@ def create_unused_namespace(api_client=None):
     """ Make a namespace for testing """
 
     assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
     ns = generate_unused_namespace(api_client=api_client)
     payload = {'name': ns, 'groups': []}
-    api_client('/api/automation-hub/v3/namespaces/', args=payload, method='POST')
+    api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
     return ns

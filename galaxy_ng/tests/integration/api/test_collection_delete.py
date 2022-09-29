@@ -25,6 +25,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
     """Tests whether a colleciton can be deleted"""
 
     config = ansible_config("partner_engineer")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
         request_token=True,
@@ -41,7 +42,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
 
     # Try deleting the whole collection ...
     resp = api_client(
-        ('/api/automation-hub/v3/plugin/ansible/content'
+        (f'{api_prefix}/v3/plugin/ansible/content'
          f'/published/collections/index/{cnamespace}/{cname}/'),
         method='DELETE'
     )
@@ -65,7 +66,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
     # Does the collection still exist?
     failed = None
     try:
-        api_client(f'/api/automation-hub/collections/{cnamespace}/{cname}/')
+        api_client(f'{api_prefix}/collections/{cnamespace}/{cname}/')
         failed = False
     except GalaxyError as ge:
         if ge.http_code in [403, 404]:
@@ -83,6 +84,7 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
     """Tests whether a colleciton version can be deleted"""
 
     config = ansible_config("partner_engineer")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
         request_token=True,
@@ -133,7 +135,7 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
     # since all of it's children were deleted ...
     failed = None
     try:
-        api_client(f'/api/automation-hub/collections/{cnamespace}/{cname}/')
+        api_client(f'{api_prefix}/collections/{cnamespace}/{cname}/')
         failed = False
     except GalaxyError as ge:
         if ge.http_code in [403, 404]:
