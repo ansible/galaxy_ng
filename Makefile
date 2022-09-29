@@ -2,6 +2,8 @@
 DOCKER_IMAGE_NAME = localhost/galaxy_ng/galaxy_ng
 RUNNING = $(shell docker ps -q -f name=api)
 
+# test
+
 # if running is empty, then DJ_MANAGER = manage, else DJ_MANAGER = django-admin
 DJ_MANAGER = $(shell if [ "$(RUNNING)" = "" ]; then echo manage; else echo django-admin; fi)
 
