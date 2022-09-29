@@ -81,15 +81,6 @@ urlpatterns = [
         name="collection-artifact-upload",
     ),
 
-    # This endpoint is defined here so we can temporarily override the serializer
-    # to avoid displaying signatures due to AAH-1932
-    path(
-        "plugin/ansible/content/<path:distro_base_path>/collections/index/"
-        "<str:namespace>/<str:name>/versions/<str:version>/",
-        viewsets.CollectionVersionViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
-        name="collection-versions-detail",
-    ),
-
     # >>>> END OVERRIDDEN PULP ANSIBLE ENDPOINTS <<<<<
 
     # TODO: Endpoints that have not been moved to pulp ansible yet
