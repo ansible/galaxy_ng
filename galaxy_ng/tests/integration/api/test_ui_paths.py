@@ -46,6 +46,23 @@ def test_api_ui_v1_login(ansible_config):
         assert uclient.cookies['sessionid'] is not None
 
 
+# /api/automation-hub/_ui/v1/auth/login/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
+def test_api_ui_v1_login_cache_header(ansible_config):
+
+    cfg = ansible_config("basic_user")
+
+    # an authenticated session has a csrftoken and a sessionid
+    with UIClient(config=cfg) as uclient:
+        assert uclient.cookies['csrftoken'] is not None
+        assert uclient.cookies['sessionid'] is not None
+
+        # verify the auth/login related urls provide a must-revalidate cache type
+        resp = uclient.get('_ui/v1/auth/login/')
+        assert resp.headers['Cache-Control'] == 'no-cache, no-store, must-revalidate'
+
+
 # /api/automation-hub/_ui/v1/auth/logout/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui

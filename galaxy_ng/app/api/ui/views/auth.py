@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import auth as django_auth
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.cache import patch_cache_control
 from rest_framework.authentication import SessionAuthentication
 
 from rest_framework.response import Response
@@ -40,7 +41,11 @@ class LoginView(api_base.GenericAPIView):
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, *args, **kwargs):
-        return Response(status=http_code.HTTP_204_NO_CONTENT)
+        response = Response(status=http_code.HTTP_204_NO_CONTENT)
+        patch_cache_control(response, no_cache=True, no_store=True,
+                            must_revalidate=True)
+
+        return response
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=self.request.data)
@@ -55,7 +60,12 @@ class LoginView(api_base.GenericAPIView):
             return Response(status=http_code.HTTP_403_FORBIDDEN)
 
         django_auth.login(request, user)
-        return Response(status=http_code.HTTP_204_NO_CONTENT)
+
+        response = Response(status=http_code.HTTP_204_NO_CONTENT)
+        # Ensure login responses are not cached. See issue:AAH-1323
+        patch_cache_control(response, no_cache=True, no_store=True,
+                            must_revalidate=True)
+        return response
 
 
 class LogoutView(api_base.APIView):
