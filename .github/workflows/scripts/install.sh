@@ -13,6 +13,7 @@ REPO_ROOT="$PWD"
 
 set -euv
 
+shopt -s expand_aliases
 source .github/workflows/scripts/utils.sh
 
 export PULP_API_ROOT="/api/galaxy/pulp/"
@@ -97,7 +98,7 @@ services:
     volumes:
       - ./settings:/etc/pulp
       - ./ssh:/keys/
-      - ~/.config:/root/.config
+      - ~/.config:/var/lib/pulp/.config
       - ../../../pulp-openapi-generator:/root/pulp-openapi-generator
     env:
       PULP_WORKERS: "4"
