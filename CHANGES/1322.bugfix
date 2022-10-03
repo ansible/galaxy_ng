@@ -1,0 +1,1 @@
+Add CSRF_COOKIE_SECURE setting to only set cookies on https connections
