@@ -3,7 +3,6 @@ import mimetypes
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, _get_error_details
-from pulp_ansible.app.galaxy.v3 import serializers as pulp_ansible_serializers
 
 from galaxy_ng.app.api.ui.serializers.base import Serializer
 from galaxy_ng.app.api.utils import parse_collection_filename
@@ -47,10 +46,3 @@ class CollectionUploadSerializer(Serializer):
             "mimetype": (mimetypes.guess_type(filename)[0] or 'application/octet-stream')
         })
         return data
-
-
-class CollectionVersionSerializer(pulp_ansible_serializers.CollectionVersionSerializer):
-    signatures = serializers.SerializerMethodField()
-
-    def get_signatures(self, obj):
-        return []
