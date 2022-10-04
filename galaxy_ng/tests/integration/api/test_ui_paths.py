@@ -363,7 +363,6 @@ def test_api_ui_v1_execution_environments_repositories_content_tags(
 # /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/
 # /api/automation-hub/_ui/v1/execution-environments/namespaces/
 # /api/automation-hub/_ui/v1/execution-environments/namespaces/{name}/
-@pytest.mark.ee_repo
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
 def test_api_ui_v1_execution_environments_repositories(ansible_config, local_container):
