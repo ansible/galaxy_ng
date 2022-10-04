@@ -366,22 +366,22 @@ schema_collection_import_detail = {
 }
 
 
-schema_ee_namespace_detail = {
-    'type': 'object',
-    'additional_properties': False,
-    'required': [
-        'name',
-        'my_permissions',
-        'owners',
-        'groups',
-    ],
-    'properties': {
-        'name': {'type': 'string'},
-        'my_permissions': {'type': ['array', 'null']},
-        'owners': {'type': ['array', 'null']},
-        'groups': {'type': ['array', 'null']},
-    }
-}
+# schema_ee_namespace_detail = {
+#     'type': 'object',
+#     'additional_properties': False,
+#     'required': [
+#         'name',
+#         'my_permissions',
+#         'owners',
+#         'groups',
+#     ],
+#     'properties': {
+#         'name': {'type': 'string'},
+#         'my_permissions': {'type': ['array', 'null']},
+#         'owners': {'type': ['array', 'null']},
+#         'groups': {'type': ['array', 'null']},
+#     }
+# }
 
 
 schema_ee_registry = {
