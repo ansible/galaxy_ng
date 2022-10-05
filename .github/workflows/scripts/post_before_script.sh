@@ -10,3 +10,7 @@ password password
 " > ~/.netrc
 
 chmod og-rw ~/.netrc
+
+# Needed for the tests that write this out
+cmd_prefix touch /ansible.cfg
+cmd_prefix chown pulp:pulp /ansible.cfg
