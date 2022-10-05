@@ -198,7 +198,7 @@ class TestCaseUsingBindings(PulpTestCase):
 
     def tearDown(self):
         """Clean class-wide variable."""
-        with open("ansible.cfg", "w") as f:
+        with open(os.environ['HOME'] + "/ansible.cfg", "w") as f:
             f.write(self.previous_ansible_cfg)
         delete_orphans()
 
@@ -211,7 +211,7 @@ class TestCaseUsingBindings(PulpTestCase):
     def get_ansible_cfg_before_test(cls):
         """Update ansible.cfg to use the given base_path."""
         try:
-            with open("ansible.cfg", "r") as f:
+            with open(os.environ['HOME'] + "/ansible.cfg", "r") as f:
                 cls.previous_ansible_cfg = f.read()
         except FileNotFoundError:
             cls.previous_ansible_cfg = (
@@ -234,7 +234,7 @@ class TestCaseUsingBindings(PulpTestCase):
             f"{self.galaxy_api_prefix}/content/{base_path}/\n"
             f"{token}"
         )
-        with open("ansible.cfg", "w") as f:
+        with open(os.environ['HOME'] + "/ansible.cfg", "w") as f:
             f.write(ansible_cfg)
 
     def sync_repo(self, requirements_file, **kwargs):
