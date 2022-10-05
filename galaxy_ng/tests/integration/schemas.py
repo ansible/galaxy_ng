@@ -13,6 +13,30 @@ schema_objectlist = {
 }
 
 
+schema_pulp_objectlist = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': ['count', 'next', 'previous', 'results'],
+    'properties': {
+        'count': {'type': 'number'},
+        'next': {'type': ['string', 'null']},
+        'previous': {'type': ['string', 'null']},
+        'results': {'type': 'array'},
+    }
+}
+
+schema_pulp_container_namespace_detail = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': ['pulp_href', 'pulp_created', 'name'],
+    'properties': {
+        'pulp_href': {'type': 'string'},
+        'pulp_created': {'type': 'string'},
+        'name': {'type': 'string'},
+    }
+}
+
+
 schema_userlist = {
     'type': 'object',
     'additional_properties': False,
@@ -503,14 +527,14 @@ schema_remote_readme = {
     'type': 'object',
     'additional_properties': False,
     'required': [
-        'created',
+        'created_at',
         'text',
-        'updated',
+        'updated_at',
     ],
     'properties': {
-        'created': {'type': 'string'},
+        'created_at': {'type': 'string'},
         'text': {'type': 'string'},
-        'updated': {'type': 'string'},
+        'updated_at': {'type': 'string'},
     }
 }
 

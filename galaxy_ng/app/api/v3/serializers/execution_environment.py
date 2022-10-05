@@ -248,7 +248,6 @@ class ContainerManifestDetailSerializer(ContainerManifestSerializer):
 
 class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='pulp_id')
-    pulp_href = IdentityField(view_name="repositories-detail")
     added = serializers.SerializerMethodField()
     removed = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
@@ -256,7 +255,7 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = core_models.RepositoryVersion
-        fields = ("id", "pulp_href", "added", "removed", "number", "created_at", "updated_at")
+        fields = ("id", "added", "removed", "number", "created_at", "updated_at")
 
     @extend_schema_field(serializers.ListField(child=serializers.JSONField()))
     def get_added(self, obj):
