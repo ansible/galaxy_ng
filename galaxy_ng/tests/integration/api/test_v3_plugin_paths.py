@@ -126,7 +126,6 @@ def test_api_v3_plugin_execution_environments_repositories_content_tags(
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/
-@pytest.mark.ee_repo
 @pytest.mark.standalone_only
 def test_api_v3_plugin_execution_environments_repositories(ansible_config, local_container):
     ns_name = local_container.get_namespace()['name']
