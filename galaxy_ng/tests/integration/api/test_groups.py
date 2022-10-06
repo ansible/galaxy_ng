@@ -11,23 +11,30 @@ import pytest
 
 from ..utils import UIClient, get_client
 
+from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture
+
+
 pytestmark = pytest.mark.qa  # noqa: F821
+CLIENT_CONFIG = AnsibleConfigFixture("admin")
+API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
 
 
 @pytest.mark.parametrize(
     "url",
     [
-        "/api/automation-hub/_ui/v1/groups/",
-        "/api/automation-hub/pulp/api/v3/groups/"
+        f"{API_PREFIX}/_ui/v1/groups/",
+        f"{API_PREFIX}/pulp/api/v3/groups/"
     ],
 )
 @pytest.mark.group
 @pytest.mark.role
+@pytest.mark.pulp_api
 @pytest.mark.standalone_only
 def test_group_role_listing(ansible_config, url):
     """Tests ability to list roles assigned to a namespace."""
 
     config = ansible_config("admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     # Create Group
@@ -47,7 +54,7 @@ def test_group_role_listing(ansible_config, url):
             }
         ],
     }
-    ns_response = api_client("/api/automation-hub/v3/namespaces/", args=payload, method="POST")
+    ns_response = api_client(f"{api_prefix}/v3/namespaces/", args=payload, method="POST")
     assert ns_response["name"] == ns_name
     assert ns_response["groups"][0]["name"] == group_response["name"]
 
