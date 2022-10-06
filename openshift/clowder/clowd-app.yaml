@@ -68,6 +68,26 @@ objects:
           requests:
             cpu: ${{NGINX_CPU_REQUEST}}
             memory: ${{NGINX_MEMORY_REQUEST}}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 6
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
         env:
           - name: LISTEN_PORT
             value: '8000'
@@ -101,6 +121,26 @@ objects:
           requests:
             cpu: ${{GALAXY_API_CPU_REQUEST}}
             memory: ${{GALAXY_API_MEMORY_REQUEST}}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 6
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
         env:
           - name: PULP_GALAXY_DEPLOYMENT_MODE
             value: 'insights'
@@ -179,18 +219,18 @@ objects:
             path: /api/automation-hub/v3/artifacts/collections/
             port: 10000
             scheme: HTTP
-          initialDelaySeconds: 10
-          timeoutSeconds: 1
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
           periodSeconds: 30
           successThreshold: 1
-          failureThreshold: 3
+          failureThreshold: 6
         readinessProbe:
           httpGet:
             path: /api/automation-hub/v3/artifacts/collections/
             port: 10000
             scheme: HTTP
           initialDelaySeconds: 30
-          timeoutSeconds: 1
+          timeoutSeconds: 10
           periodSeconds: 30
           successThreshold: 1
           failureThreshold: 3
