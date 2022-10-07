@@ -1,12 +1,15 @@
 #!/bin/bash
 
-set -e
 
-# if [ ! grep -Fxq "SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY" /etc/pulp/settings.py ]
-# then
-#     echo "Keycloak already initialized."
-#     exit 0
-# elif
+cat /etc/pulp/settings.py | grep -q SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY
+
+STATUS=$?
+if [ $STATUS -eq 0 ]; then
+   echo "Keycloak already configured"
+   exit 0
+fi
+
+set -e
 
 # intialize keycloak
 ansible-galaxy collection install /src/galaxy_ng/profiles/keycloak/community-general-5.7.0.tar.gz
