@@ -22,8 +22,6 @@ services:
       - DB_PASSWORD=keycloak
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
-    env_file:
-      - '{COMPOSE_CONTEXT}/.compose.env'
     ports:
       - 8080:8080
     depends_on:
@@ -39,9 +37,6 @@ services:
       - POSTGRES_PASSWORD=keycloak
       - POSTGRES_DB=keycloak
 
-    env_file:
-      - '{COMPOSE_CONTEXT}/.compose.env'
-    
   ldap:
     image: "rroemhild/test-openldap"
     ports:
@@ -50,4 +45,4 @@ services:
 
 volumes:
   kc_pg_data:
-    name: "{COMPOSE_PROJECT_NAME}kc_pg_data{DEV_VOLUME_SUFFIX}"
+    name: "{COMPOSE_PROJECT_NAME}kc_pg_data"
