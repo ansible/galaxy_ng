@@ -2,18 +2,15 @@
 
 ## Usage
 
-*Add a description detailing what this profile does and any extra instructions for using it.*
+Launch galaxy_ng with configuration for running ldap authentication.
 
-## Extra Variables
+Galaxy will launch as it normally does. You can either login with the normal admin user or one of the following
+LDAP users (username/password):
 
-*List any extra variables that user's can configure in their .compose.env*
-
-- `MY_VAR_1`
-    - Description: My custom variable.
-    - Options:
-        - 1: do thing 1.
-        - 2: do thing 2.
-    - Default: 1
-- `MY_VAR_2`
-    - Description: path to the file that does the thing.
-    - Default: Unset
+- amy/amy
+- bender/bender
+- fry/fry
+- hermes/hermes
+- leela/leela
+- professor/professor
+- zoidberg/zoidberg

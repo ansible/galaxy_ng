@@ -2,8 +2,6 @@
 
 ## Usage
 
-*Add a description detailing what this profile does and any extra instructions for using it.*
-
 **NOTE**: This will not work with the galaxy_ng/ui profile. To run the UI follow the instructions here: https://github.com/ansible/ansible-hub-ui#develop-in-insights-mode.
 
 Run galaxy ng with the configurations required to launch in insights mode for developing on console.redhat.com.

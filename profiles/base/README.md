@@ -2,8 +2,6 @@
 
 ## Usage
 
-*Add a description detailing what this profile does and any extra instructions for using it.*
-
 This provides the basic settings required to run Galaxy NG.
 
 ## Extra Variables

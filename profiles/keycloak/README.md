@@ -2,8 +2,6 @@
 
 ## Usage
 
-*Add a description detailing what this profile does and any extra instructions for using it.*
-
 Launch galaxy_ng with configuration for running Keycloak.
 
 This will automatically configure keycloak and pulp with the correct `SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY` setting
@@ -16,10 +14,11 @@ To assign a role, select the user from the list of users, navegate to the "Role 
 select "Filter by clients" from the filter dropdown and assign the `hubadmin` role.
 
 The login for each user is the same as their username. Some users you can choose from are (username/password):
+
 - amy/amy
--	bender/bender
--	fry/fry
--	hermes/hermes
--	leela/leela
--	professor/professor
--	zoidberg/zoidberg
+- bender/bender
+- fry/fry
+- hermes/hermes
+- leela/leela
+- professor/professor
+- zoidberg/zoidberg
