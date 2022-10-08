@@ -7,6 +7,7 @@ from .client_ui import UIClient
 from .collection_inspector import CollectionInspector
 from .collections import (
     build_collection,
+    copy_collection_version,
     upload_artifact,
     modify_artifact,
     get_collections_namespace_path,
@@ -36,6 +37,7 @@ from .urls import (
 __all__ = (
     get_client,
     ansible_galaxy,
+    copy_collection_version,
     SocialGithubClient,
     UIClient,
     CollectionInspector,

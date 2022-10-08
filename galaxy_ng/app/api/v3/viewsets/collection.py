@@ -17,7 +17,7 @@ from pulpcore.plugin.models import Content
 from pulpcore.plugin.models import SigningService
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
-from pulpcore.plugin.tasking import dispatch
+from pulpcore.plugin.tasking import add_and_remove, dispatch
 from rest_framework import status
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
@@ -233,7 +233,58 @@ class CollectionArtifactDownloadView(api_base.APIView):
             return redirect(distribution.content_guard.cast().preauthenticate_url(url))
 
 
-class CollectionVersionMoveViewSet(api_base.ViewSet):
+class CollectionRepositoryMixing:
+
+    @property
+    def version_str(self):
+        """Build version_str from request."""
+        return '-'.join([self.kwargs[key] for key in ('namespace', 'name', 'version')])
+
+    def get_collection_version(self):
+        """Get collection version entity."""
+        try:
+            return CollectionVersion.objects.get(
+                namespace=self.kwargs['namespace'],
+                name=self.kwargs['name'],
+                version=self.kwargs['version'],
+            )
+        except ObjectDoesNotExist:
+            raise NotFound(_('Collection %s not found') % self.version_str)
+
+    def get_repos(self):
+        """Get src and dest repos."""
+        try:
+            src_repo = AnsibleDistribution.objects.get(
+                base_path=self.kwargs['source_path']).repository
+            dest_repo = AnsibleDistribution.objects.get(
+                base_path=self.kwargs['dest_path']).repository
+        except ObjectDoesNotExist:
+            raise NotFound(_('Repo(s) for moving collection %s not found') % self.version_str)
+        return src_repo, dest_repo
+
+
+class CollectionVersionCopyViewSet(api_base.ViewSet, CollectionRepositoryMixing):
+    permission_classes = [access_policy.CollectionAccessPolicy]
+
+    def copy_content(self, request, *args, **kwargs):
+        """Copy collection version from one  repository to another."""
+
+        collection_version = self.get_collection_version()
+        src_repo, dest_repo = self.get_repos()
+        copy_task = dispatch(
+            add_and_remove,
+            exclusive_resources=[dest_repo],
+            shared_resources=[src_repo],
+            kwargs={
+                "repository_pk": dest_repo.pk,
+                "add_content_units": [collection_version.pk],
+                "remove_content_units": [],
+            }
+        )
+        return Response(data={"task_id": copy_task.pk}, status='202')
+
+
+class CollectionVersionMoveViewSet(api_base.ViewSet, CollectionRepositoryMixing):
     permission_classes = [access_policy.CollectionAccessPolicy]
 
     def move_content(self, request, *args, **kwargs):
@@ -243,31 +294,14 @@ class CollectionVersionMoveViewSet(api_base.ViewSet):
         Creates new RepositoryVersion of destination repo with content included.
         """
 
-        version_str = '-'.join([self.kwargs[key] for key in ('namespace', 'name', 'version')])
-        try:
-            collection_version = CollectionVersion.objects.get(
-                namespace=self.kwargs['namespace'],
-                name=self.kwargs['name'],
-                version=self.kwargs['version'],
-            )
-        except ObjectDoesNotExist:
-            raise NotFound(_('Collection %s not found') % version_str)
-
-        try:
-            src_repo = AnsibleDistribution.objects.get(
-                base_path=self.kwargs['source_path']).repository
-            dest_repo = AnsibleDistribution.objects.get(
-                base_path=self.kwargs['dest_path']).repository
-        except ObjectDoesNotExist:
-            raise NotFound(_('Repo(s) for moving collection %s not found') % version_str)
-
+        collection_version = self.get_collection_version()
+        src_repo, dest_repo = self.get_repos()
         content_obj = Content.objects.get(pk=collection_version.pk)
-
         if content_obj not in src_repo.latest_version().content:
-            raise NotFound(_('Collection %s not found in source repo') % version_str)
+            raise NotFound(_('Collection %s not found in source repo') % self.version_str)
 
         if content_obj in dest_repo.latest_version().content:
-            raise NotFound(_('Collection %s already found in destination repo') % version_str)
+            raise NotFound(_('Collection %s already found in destination repo') % self.version_str)
 
         response_data = {
             "copy_task_id": None,

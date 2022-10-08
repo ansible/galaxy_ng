@@ -38,7 +38,7 @@ _collection_statements = [
         "condition": ["can_update_collection", "has_rh_entitlements"],
     },
     {
-        "action": "move_content",
+        "action": ["copy_content", "move_content"],
         "principal": "authenticated",
         "effect": "allow",
         "condition": [

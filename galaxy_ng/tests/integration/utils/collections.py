@@ -230,13 +230,43 @@ def set_certification(client, collection, level="published"):
         return wait_for_url(client, dest_url)
 
 
+def copy_collection_version(client, collection, src_repo_name, dest_repo_name):
+    """Copies a collection from the `src_repo` to the src_repo to dest_repo."""
+    url = (
+        f"v3/collections/{collection.namespace}/{collection.name}/versions/"
+        f"{collection.version}/copy/{src_repo_name}/{dest_repo_name}/"
+    )
+    job_tasks = client(url, method="POST", args=b"{}")
+    assert 'task_id' in job_tasks
+
+    # await task completion
+
+    task_id = job_tasks.get("task_id")
+
+    # The task_id is not a url, so it has to be assembled from known data ...
+    # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
+    ds = {
+        'task': f"{client.config['url']}/pulp/api/v3/tasks/{task_id}"
+    }
+    task_result = wait_for_task(client, ds)
+    assert task_result['state'] == 'completed', task_result
+
+    # callers expect response as part of this method, ensure artifact is there
+    dest_url = (
+        f"v3/plugin/ansible/content/{dest_repo_name}/collections/index/"
+        f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
+    )
+    return wait_for_url(client, dest_url)
+
+
 def get_all_collections_by_repo(api_client=None):
     """ Return a dict of each repo and their collections """
     assert api_client is not None, "api_client is a required param"
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
     collections = {
         'staging': {},
-        'published': {}
+        'published': {},
+        'community': {},
     }
     for repo in collections.keys():
         next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'

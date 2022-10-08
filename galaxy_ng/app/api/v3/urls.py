@@ -99,6 +99,12 @@ urlpatterns = [
         viewsets.CollectionVersionMoveViewSet.as_view({"post": "move_content"}),
         name="collection-version-move",
     ),
+    path(
+        "collections/<str:namespace>/<str:name>/versions/<str:version>/copy/"
+        "<str:source_path>/<str:dest_path>/",
+        viewsets.CollectionVersionCopyViewSet.as_view({"post": "copy_content"}),
+        name="collection-version-copy",
+    ),
 
     path("", include(v3_urls)),
 

@@ -43,7 +43,36 @@ class ContentSerializer(Serializer):
     description = serializers.CharField()
 
 
-class CollectionMetadataSerializer(Serializer):
+class RequestDistroMixin:
+    """This provides _get_current_distro() to all serializers that inherit from it."""
+
+    def _get_current_distro(self):
+        """Get current distribution from request information."""
+        request = self.context.get("request")
+        try:
+            # on URLS like _ui/v1/repo/rh-certified/namespace/name and
+            # /api/automation-hub/_ui/v1/repo/community/
+            # the distro_base_path can be parsed from the URL
+            path = request.parser_context['kwargs']['distro_base_path']
+        except KeyError:
+            # this same serializer is used on /_ui/v1/collection-versions/
+            # which can have the distro_base_path passed in as a query param
+            # on the `?repository=` field
+            path = request.query_params.get('repository')
+        except AttributeError:
+            # if there is no request, we are probably in a unit test
+            return None
+
+        if not path:
+            # A bare /_ui/v1/collection-versions/ is not scoped to a single distro
+            return None
+
+        distro = AnsibleDistribution.objects.get(base_path=path)
+
+        return distro
+
+
+class CollectionMetadataSerializer(RequestDistroMixin, Serializer):
     dependencies = serializers.JSONField()
     contents = serializers.JSONField()
 
@@ -58,27 +87,6 @@ class CollectionMetadataSerializer(Serializer):
     license = serializers.ListField(child=serializers.CharField())
     tags = serializers.SerializerMethodField()
     signatures = serializers.SerializerMethodField()
-
-    def _get_current_distro(self):
-        """Get current distribution from request information."""
-        request = self.context.get("request")
-        try:
-            # on URLS like _ui/v1/repo/rh-certified/namespace/name
-            # the distro_base_path can be parsed from the URL
-            path = request.parser_context['kwargs']['distro_base_path']
-        except KeyError:
-            # this same serializer is used on /_ui/v1/collection-versions/
-            # which can have the distro_base_path passed in as a query param
-            # on the `?repository=` field
-            path = request.query_params.get('repository')
-
-        if not path:
-            # A bare /_ui/v1/collection-versions/ is not scoped to a single distro
-            return None
-
-        distro = AnsibleDistribution.objects.get(base_path=path)
-
-        return distro
 
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_signatures(self, obj):
@@ -107,12 +115,18 @@ class CollectionMetadataSerializer(Serializer):
         return [tag.name for tag in collection_version.tags.all()]
 
 
-class CollectionVersionSignStateMixin:
+class CollectionVersionSignStateMixin(RequestDistroMixin):
 
     @extend_schema_field(serializers.CharField())
     def get_sign_state(self, obj):
         """Returns the state of the signature."""
-        return "unsigned" if obj.signatures.count() == 0 else "signed"
+        distro = self._get_current_distro()
+        if not distro:
+            signature_count = obj.signatures.count()
+        else:
+            signature_count = obj.signatures.filter(repositories=distro.repository).count()
+
+        return "unsigned" if signature_count == 0 else "signed"
 
 
 class CollectionVersionBaseSerializer(CollectionVersionSignStateMixin, Serializer):

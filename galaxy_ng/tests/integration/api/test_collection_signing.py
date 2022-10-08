@@ -15,6 +15,7 @@ from orionutils.generator import build_collection
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
+    copy_collection_version,
     get_all_collections_by_repo,
     get_all_namespaces,
     get_client,
@@ -219,6 +220,9 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
         f"{api_prefix}/content/staging/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
+
+    # The line below is temporary until we have
+    # https://github.com/ansible/galaxy_ng/pull/1455 reverted
     assert len(collection["signatures"]) == 0
     # assert len(collection["signatures"]) >= 1
     # assert collection["signatures"][0]["signing_service"] == signing_service
@@ -302,6 +306,9 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
             f"{api_prefix}/content/staging/v3/collections/"
             f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
         )
+
+        # The line below is temporary until we have
+        # https://github.com/ansible/galaxy_ng/pull/1455 reverted
         assert len(collection["signatures"]) == 0
         # assert len(collection["signatures"]) >= 1
         # assert collection["signatures"][0]["signing_service"] == signing_service
@@ -326,6 +333,9 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
         f"{api_prefix}/content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
+
+    # The line below is temporary until we have
+    # https://github.com/ansible/galaxy_ng/pull/1455 reverted
     assert len(collection["signatures"]) == 0
     # assert len(collection["signatures"]) >= 1
     # assert collection["signatures"][0]["signing_service"] == signing_service
@@ -348,6 +358,79 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
     # assert metadata["signatures"][0]["signature"] is not None
     # assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
     # assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+
+
+@pytest.mark.collection_signing
+@pytest.mark.collection_move
+@pytest.mark.standalone_only
+def test_copy_collection_without_signatures(api_client, config, settings, flags, upload_artifact):
+    """Test whether a collection can be added to a second repo without its signatures."""
+    can_sign = flags.get("can_create_signatures")
+    if not can_sign:
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is not configured")
+
+    if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
+        pytest.skip("Approval is automatically done")
+
+    artifact = build_collection(
+        "skeleton",
+        config={
+            "namespace": NAMESPACE,
+            "tags": ["tools", "copytest"],
+        },
+    )
+    ckey = (artifact.namespace, artifact.name, artifact.version)
+
+    # import and wait ...
+    import_and_wait(api_client, artifact, upload_artifact, config)
+
+    # Collection must be on /staging/
+    collections = get_all_collections_by_repo(api_client)
+    assert ckey in collections["staging"]
+
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
+
+    # Sign the collection while still on staging
+    sign_payload = {
+        "distro_base_path": "staging",
+        "namespace": NAMESPACE,
+        "collection": artifact.name,
+        "version": artifact.version,
+    }
+    sign_on_demand(api_client, signing_service, **sign_payload)
+
+    # Assert that the collection is signed on v3 api
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    collection = api_client(
+        f"{api_prefix}/content/staging/v3/collections/"
+        f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
+    )
+
+    # The line below is temporary until we have
+    # https://github.com/ansible/galaxy_ng/pull/1455 reverted
+    assert len(collection["signatures"]) == 0
+    # assert len(collection["signatures"]) >= 1
+    # assert collection["signatures"][0]["signing_service"] == signing_service
+
+    # Copy the collection to /community/
+    copy_result = copy_collection_version(
+        api_client,
+        artifact,
+        src_repo_name="staging",
+        dest_repo_name="community"
+    )
+
+    assert copy_result["namespace"]["name"] == artifact.namespace
+    assert copy_result["name"] == artifact.name
+    assert copy_result["version"] == artifact.version
+    assert copy_result["href"] is not None
+    assert copy_result["metadata"]["tags"] == ["tools", "copytest"]
+    assert len(copy_result["signatures"]) == 0
+
+    # Assert that the collection is signed on ui/stating but not on ui/community
+    collections = get_all_collections_by_repo(api_client)
+    assert collections["staging"][ckey]["sign_state"] == "signed"
+    assert collections["community"][ckey]["sign_state"] == "unsigned"
 
 
 @pytest.mark.collection_signing
