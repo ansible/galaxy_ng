@@ -9,7 +9,7 @@ additional_repos:
   name: pulp_ansible
   org: pulp
 - bindings: true
-  branch: 2.14.0
+  branch: 2.14.1
   name: pulp_container
   org: pulp
 - bindings: false

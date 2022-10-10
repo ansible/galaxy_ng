@@ -53,12 +53,12 @@ bleach==3.3.1
     # via galaxy-importer
 bleach-allowlist==1.0.3
     # via galaxy-importer
-boto3==1.24.82
+boto3==1.24.89
     # via
     #   -r requirements/requirements.insights.in
     #   django-storages
     #   watchtower
-botocore==1.27.82
+botocore==1.27.89
     # via
     #   boto3
     #   s3transfer
@@ -95,7 +95,7 @@ diff-match-patch==20200713
     # via django-import-export
 distro==1.7.0
     # via bindep
-django==3.2.15
+django==3.2.16
     # via
     #   django-auth-ldap
     #   django-automated-logging
@@ -172,7 +172,7 @@ galaxy-importer==0.4.5
     #   pulp-ansible
 gitdb==4.0.9
     # via gitpython
-gitpython==3.1.27
+gitpython==3.1.28
     # via pulp-ansible
 gunicorn==20.1.0
     # via pulpcore
@@ -180,9 +180,9 @@ idna==3.4
     # via
     #   requests
     #   yarl
-importlib-metadata==4.12.0
+importlib-metadata==5.0.0
     # via markdown
-importlib-resources==5.9.0
+importlib-resources==5.10.0
     # via jsonschema
 inflection==0.5.1
     # via drf-spectacular
@@ -252,13 +252,13 @@ pluggy==1.0.0
     # via pytest
 prometheus-client==0.14.1
     # via django-prometheus
-protobuf==4.21.6
+protobuf==4.21.7
     # via pulpcore
-psycopg2==2.9.3
+psycopg2==2.9.4
     # via pulpcore
 pulp-ansible==0.15.0
     # via galaxy-ng (setup.py)
-pulp-container==2.14.0
+pulp-container==2.14.1
     # via galaxy-ng (setup.py)
 pulpcore==3.21.0
     # via
@@ -309,7 +309,7 @@ python-ldap==3.4.3
     # via django-auth-ldap
 python3-openid==3.2.0
     # via social-auth-core
-pytz==2022.2.1
+pytz==2022.4
     # via
     #   django
     #   djangorestframework
@@ -339,7 +339,7 @@ requirements-parser==0.5.0
     # via ansible-builder
 resolvelib==0.8.1
     # via ansible-core
-rich==12.5.1
+rich==12.6.0
     # via
     #   ansible-lint
     #   enrich
@@ -380,9 +380,9 @@ tomli==2.0.1
     # via pytest
 types-cryptography==3.3.23
     # via pyjwt
-types-setuptools==65.3.0
+types-setuptools==65.4.0.0
     # via requirements-parser
-typing-extensions==4.3.0
+typing-extensions==4.4.0
     # via
     #   aioredis
     #   rich
@@ -416,7 +416,7 @@ yarl==1.8.1
     # via
     #   aiohttp
     #   pulpcore
-zipp==3.8.1
+zipp==3.9.0
     # via
     #   importlib-metadata
     #   importlib-resources
