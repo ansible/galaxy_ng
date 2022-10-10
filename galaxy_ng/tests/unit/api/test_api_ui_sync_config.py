@@ -159,10 +159,10 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         self.assertNotIn('token', response.data)
         self.assertNotIn('proxy_password', response.data)
 
-    def test_write_only_fields(self):
+    def test_hidden_fields(self):
         self.client.force_authenticate(user=self.admin_user)
         api_url = self.build_config_url(self.certified_remote.name)
-        write_only_fields = [
+        hidden_fields = [
             'client_key',
             'token',
             'password',
@@ -177,24 +177,24 @@ class TestUiSyncConfigViewSet(BaseTestCase):
             "proxy_password": "1234",
         }
 
-        for field in write_only_fields:
+        for field in hidden_fields:
             request_data[field] = "value_is_set"
 
         self.client.put(api_url, request_data, format='json')
 
-        write_only = self.client.get(api_url).data['write_only_fields']
+        hidden_fields_data = self.client.get(api_url).data['hidden_fields']
         response_names = set()
-        # Check that all write only fields are set
-        for field in write_only:
+        # Check that all hidden (write only) fields are set
+        for field in hidden_fields_data:
             self.assertEqual(field['is_set'], True)
 
-            # unset all write only fields
+            # unset all hidden fields
             request_data[field['name']] = None
             response_names.add(field['name'])
 
         # proxy username and password can only be specified together
         request_data["proxy_username"] = None
-        self.assertEqual(set(write_only_fields), response_names)
+        self.assertEqual(set(hidden_fields), response_names)
         response = self.client.put(api_url, request_data, format='json')
         self.assertEqual(response.status_code, 200)
 
@@ -204,16 +204,16 @@ class TestUiSyncConfigViewSet(BaseTestCase):
         # Check that proxy_username is unset
         self.assertIsNone(response.data['proxy_username'])
 
-        # Check that all write only fields are unset
-        write_only = response.data['write_only_fields']
-        for field in write_only:
+        # Check that all hidden fields are unset
+        hidden_fields = response.data['hidden_fields']
+        for field in hidden_fields:
             self.assertEqual(field['is_set'], False)
             request_data[field['name']] = ""
 
         self.client.put(api_url, request_data, format='json')
 
-        write_only = self.client.get(api_url).data['write_only_fields']
-        for field in write_only:
+        hidden_fields = self.client.get(api_url).data['hidden_fields']
+        for field in hidden_fields:
             self.assertEqual(field['is_set'], False)
 
     def test_proxy_fields(self):

@@ -205,7 +205,7 @@ schema_remote = {
         'updated_at',
         'url',
         'username',
-        'write_only_fields',
+        'hidden_fields',
     ],
     'properties': {
         'auth_url': {'type': ['string', 'null']},
@@ -228,7 +228,7 @@ schema_remote = {
         'updated_at': {'type': 'string'},
         'url': {'type': 'string'},
         'username': {'type': ['string', 'null']},
-        'write_only_fields': {'type': 'array'},
+        'hidden_fields': {'type': 'array'},
     }
 }
 
@@ -402,7 +402,7 @@ schema_ee_registry = {
         'tls_validation',
         'updated_at',
         'url',
-        'write_only_fields',
+        'hidden_fields',
     ],
     'properties': {
         'ca_cert': {'type': ['string', 'null']},
@@ -419,7 +419,7 @@ schema_ee_registry = {
         'tls_validation': {'type': 'boolean'},
         'updated_at': {'type': 'string'},
         'url': {'type': 'string'},
-        'write_only_fields': {'type': 'array'},
+        'hidden_fields': {'type': 'array'},
     }
 }
 

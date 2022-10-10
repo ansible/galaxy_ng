@@ -58,8 +58,6 @@ class AnsibleRepositorySerializer(serializers.ModelSerializer):
 
 class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
     last_sync_task = utils.RemoteSyncTaskField(source='*')
-
-    write_only_fields = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
 
@@ -124,7 +122,7 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
             'proxy_url',
             'proxy_username',
             'proxy_password',
-            'write_only_fields',
+            'hidden_fields',
             'rate_limit',
             'signed_only',
         )
@@ -133,10 +131,6 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
             'pulp_href': {'read_only': True},
             'client_key': {'write_only': True},
         }
-
-    @extend_schema_field(serializers.ListField)
-    def get_write_only_fields(self, obj):
-        return utils.get_write_only_fields(self, obj)
 
     def validate(self, data):
         if not data.get('requirements_file') and any(
@@ -151,11 +145,11 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
             )
 
         init_data = self.initial_data
-        if not data.get('proxy_password') and init_data.get('write_only_fields'):
+        if not data.get('proxy_password') and init_data.get('hidden_fields'):
 
             # filter proxy_password write_only_field
             proxy_pwd = next(
-                item for item in init_data.get('write_only_fields')
+                item for item in init_data.get('hidden_fields')
                 if item["name"] == "proxy_password"
             )
             repo = get_object_or_404(CollectionRemote, name=init_data.get('name'))

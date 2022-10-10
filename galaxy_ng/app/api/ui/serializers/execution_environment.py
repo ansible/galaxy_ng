@@ -294,7 +294,6 @@ class ContainerRegistryRemoteSerializer(
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)
     last_sync_task = utils.RemoteSyncTaskField(source="*")
-    write_only_fields = serializers.SerializerMethodField()
     is_indexable = serializers.SerializerMethodField()
 
     class Meta:
@@ -317,7 +316,7 @@ class ContainerRegistryRemoteSerializer(
             "proxy_url",
             "proxy_username",
             "proxy_password",
-            "write_only_fields",
+            "hidden_fields",
             "rate_limit",
             "is_indexable"
         ]
@@ -325,10 +324,6 @@ class ContainerRegistryRemoteSerializer(
             'name': {'read_only': True},
             'client_key': {'write_only': True},
         }
-
-    @extend_schema_field(serializers.ListField)
-    def get_write_only_fields(self, obj):
-        return utils.get_write_only_fields(self, obj)
 
     def get_is_indexable(self, obj) -> bool:
         if obj.get_registry_backend():
