@@ -16,8 +16,15 @@ def flags(ansible_config):
     return api_client("/api/automation-hub/_ui/v1/feature-flags/")
 
 
+@pytest.mark.parametrize(
+    "require_auth",
+    [
+        True,
+        False,
+    ],
+)
 @pytest.mark.standalone_only
-def test_push_and_sign_a_container(ansible_config, flags):
+def test_push_and_sign_a_container(ansible_config, flags, require_auth):
     can_sign = flags.get("container_signing")
     if not can_sign:
         pytest.skip("GALAXY_CONTAINER_SIGNING_SERVICE is not configured")
@@ -33,7 +40,11 @@ def test_push_and_sign_a_container(ansible_config, flags):
     subprocess.check_call(["docker", "push", "localhost:5001/alpine:latest"])
 
     # Get an API client running with admin user credentials
-    client = get_client(config=ansible_config("admin"), request_token=True, require_auth=True)
+    client = get_client(
+        config=ansible_config("admin"),
+        request_token=True,
+        require_auth=require_auth
+    )
 
     # Get the pulp_href for the pushed image
     image = client(
