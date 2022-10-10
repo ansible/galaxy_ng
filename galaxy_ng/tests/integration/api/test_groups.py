@@ -9,24 +9,38 @@ import uuid
 
 import pytest
 
-from ..utils import get_client
+from ..utils import UIClient, get_client
+
+from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture
+
 
 pytestmark = pytest.mark.qa  # noqa: F821
+CLIENT_CONFIG = AnsibleConfigFixture("admin")
+API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
 
 
+@pytest.mark.parametrize(
+    "url",
+    [
+        f"{API_PREFIX}/_ui/v1/groups/",
+        f"{API_PREFIX}/pulp/api/v3/groups/"
+    ],
+)
 @pytest.mark.group
 @pytest.mark.role
+@pytest.mark.pulp_api
 @pytest.mark.standalone_only
-def test_group_role_listing(ansible_config):
+def test_group_role_listing(ansible_config, url):
     """Tests ability to list roles assigned to a namespace."""
 
     config = ansible_config("admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     # Create Group
     group_name = str(uuid.uuid4())
     payload = {"name": group_name}
-    group_response = api_client("/api/automation-hub/_ui/v1/groups/", args=payload, method="POST")
+    group_response = api_client(url, args=payload, method="POST")
     assert group_response["name"] == group_name
 
     # Create Namespace
@@ -40,7 +54,7 @@ def test_group_role_listing(ansible_config):
             }
         ],
     }
-    ns_response = api_client("/api/automation-hub/v3/namespaces/", args=payload, method="POST")
+    ns_response = api_client(f"{api_prefix}/v3/namespaces/", args=payload, method="POST")
     assert ns_response["name"] == ns_name
     assert ns_response["groups"][0]["name"] == group_response["name"]
 
@@ -51,3 +65,11 @@ def test_group_role_listing(ansible_config):
     assert group_roles_response["count"] == 1
     assert group_roles_response["results"][0]["role"] == "galaxy.collection_namespace_owner"
     assert f'/groups/{group_response["id"]}/' in group_roles_response["results"][0]["pulp_href"]
+
+    #  Delete Group
+    with UIClient(config=config) as uclient:
+        del_group_resp = uclient.delete(f'pulp/api/v3/groups/{group_response["id"]}/')
+        assert del_group_resp.status_code == 204
+
+        detail_group_response = uclient.get(f'pulp/api/v3/groups/{group_response["id"]}/')
+        assert detail_group_response.status_code == 404

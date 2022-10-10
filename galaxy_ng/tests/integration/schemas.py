@@ -513,3 +513,29 @@ schema_remote_readme = {
         'updated': {'type': 'string'},
     }
 }
+
+schema_pulp_objectlist = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': ['count', 'next', 'previous', 'results'],
+    'properties': {
+        'count': {'type': 'number'},
+        'next': {'type': ['string', 'null']},
+        'previous': {'type': ['string', 'null']},
+        'results': {'type': 'array'},
+    }
+}
+
+schema_pulp_roledetail = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': ['pulp_href', 'pulp_created', 'name', 'description', 'permissions', 'locked'],
+    'properties': {
+        'pulp_href': {'type': 'string'},
+        'pulp_created': {'type': 'string'},
+        'name': {'type': 'string'},
+        'description': {'type': 'string'},
+        'permissions': {'type': 'array'},
+        'locked': {'type': 'boolean'},
+    }
+}
