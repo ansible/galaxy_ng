@@ -2,22 +2,33 @@
 
 import logging
 import os
+import shutil
+import subprocess
 import tarfile
 import tempfile
+import time
 import uuid
+import yaml
 
 from contextlib import contextmanager
 
+from ansible.galaxy.api import GalaxyError
 from orionutils.generator import build_collection as _build_collection
 from orionutils.generator import randstr
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 
 from .tasks import wait_for_task
 from .urls import wait_for_url
 
 
 logger = logging.getLogger(__name__)
+
+
+class ArtifactFile:
+    def __init__(self, fn):
+        self.filename = fn
 
 
 def build_collection(
@@ -31,7 +42,8 @@ def build_collection(
     name=None,
     tags=None,
     version=None,
-    dependencies=None
+    dependencies=None,
+    use_orionutils=True
 ):
 
     if base is None:
@@ -67,14 +79,66 @@ def build_collection(
     if 'tools' not in config['tags']:
         config['tags'].append('tools')
 
-    return _build_collection(
-        base,
-        config=config,
-        filename=filename,
-        key=key,
-        pre_build=pre_build,
-        extra_files=extra_files
-    )
+    if use_orionutils:
+        return _build_collection(
+            base,
+            config=config,
+            filename=filename,
+            key=key,
+            pre_build=pre_build,
+            extra_files=extra_files
+        )
+
+    # use galaxy cli to build it ...
+    dstdir = tempfile.mkdtemp(prefix='collection-artifact-')
+    dst = None
+    with tempfile.TemporaryDirectory(prefix='collection-build-') as tdir:
+
+        cmd = f"ansible-galaxy collection init {namespace}.{name}"
+        pid = subprocess.run(cmd, shell=True, cwd=tdir, stdout=subprocess.PIPE)
+        assert pid.returncode == 0
+        basedir = os.path.join(tdir, namespace, name)
+        rolesdir = os.path.join(basedir, 'roles')
+
+        # make a role
+        cmd = "ansible-galaxy role init docker_role"
+        pid2 = subprocess.run(cmd, shell=True, cwd=rolesdir, stdout=subprocess.PIPE)
+        assert pid2.returncode == 0
+
+        # fix galaxy.yml
+        galaxy_file = os.path.join(basedir, 'galaxy.yml')
+        with open(galaxy_file, 'r') as f:
+            meta = yaml.safe_load(f.read())
+        meta.update(config)
+        with open(galaxy_file, 'w') as f:
+            f.write(yaml.dump(meta))
+
+        # need the meta/runtime.yml file ...
+        meta_dir = os.path.join(basedir, 'meta')
+        if not os.path.exists(meta_dir):
+            os.makedirs(meta_dir)
+        runtime_file = os.path.join(meta_dir, 'runtime.yml')
+        if not os.path.exists(runtime_file):
+            with open(runtime_file, 'w') as f:
+                f.write(yaml.dump({'requires_ansible': '>=2.13.0'}))
+
+        # build it
+        cmd = "ansible-galaxy collection build ."
+        pid3 = subprocess.run(
+            cmd,
+            shell=True,
+            cwd=basedir,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE
+        )
+        assert pid3.returncode == 0
+        fn = pid3.stdout.decode('utf-8').strip().split('\n')[-1].split()[-1]
+
+        # Copy to permanent location
+        dst = os.path.join(dstdir, os.path.basename(fn))
+        shutil.copy(fn, dst)
+
+    return ArtifactFile(dst)
 
 
 def upload_artifact(
@@ -291,7 +355,9 @@ def get_all_repository_collection_versions(api_client):
 
     repositories = [
         'staging',
-        'published'
+        'published',
+        # 'verified',
+        # 'community'
     ]
 
     collections = []
@@ -312,8 +378,14 @@ def get_all_repository_collection_versions(api_client):
                 cv['name'] = collection['name']
                 if 'staging' in cv['href']:
                     cv['repository'] = 'staging'
-                else:
+                elif 'published' in cv['href']:
                     cv['repository'] = 'published'
+                elif 'verified' in cv['href']:
+                    cv['repository'] = 'verified'
+                elif 'community' in cv['href']:
+                    cv['repository'] = 'community'
+                else:
+                    cv['repository'] = None
                 collection_versions.append(cv)
             next_page = resp.get('links', {}).get('next')
 
@@ -325,3 +397,40 @@ def get_all_repository_collection_versions(api_client):
         for x in collection_versions
     )
     return rcv
+
+
+def delete_all_collections_in_namespace(api_client, namespace_name):
+
+    assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
+    # accumlate a list of matching collections in each repo
+    ctuples = set()
+    cmap = get_all_collections_by_repo(api_client)
+    for repo, cvs in cmap.items():
+        for cv_spec in cvs.keys():
+            if cv_spec[0] == namespace_name:
+                ctuples.add((repo, cv_spec[0], cv_spec[1]))
+
+    # delete each collection ...
+    for ctuple in ctuples:
+
+        crepo = ctuple[0]
+        cname = ctuple[2]
+
+        # Try deleting the whole collection ...
+        resp = api_client(
+            (f'{api_prefix}/v3/plugin/ansible/content'
+             f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
+            method='DELETE'
+        )
+
+        # wait for the orphan_cleanup job to finish ...
+        try:
+            wait_for_task(api_client, resp, timeout=10000)
+        except GalaxyError as ge:
+            # FIXME - pulp tasks do not seem to accept token auth
+            if ge.http_code in [403, 404]:
+                time.sleep(SLEEP_SECONDS_ONETIME)
+            else:
+                raise Exception(ge)

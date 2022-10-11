@@ -6,8 +6,12 @@ import time
 import pytest
 
 from ..utils import (
+    ansible_galaxy,
+    build_collection,
+    cleanup_namespace,
     get_client,
     SocialGithubClient,
+    delete_group,
     create_user,
     delete_user
 )
@@ -20,6 +24,57 @@ from ..schemas import (
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
+
+
+def cleanup_social_user(username, ansible_config):
+    """ Should delete everything related to a social auth'ed user. """
+
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+
+    # delete any pre-existing roles from the user
+    pre_existing = []
+    next_url = f'/api/v1/roles/?owner__username={username}'
+    while next_url:
+        resp = admin_client(next_url)
+        pre_existing.extend(resp['results'])
+        if resp['next'] is None:
+            break
+        next_url = resp['next']
+    if pre_existing:
+        for pe in pre_existing:
+            role_id = pe['id']
+            role_url = f'/api/v1/roles/{role_id}/'
+            try:
+                resp = admin_client(role_url, method='DELETE')
+            except Exception:
+                pass
+
+    # cleanup the v1 namespace
+    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
+    if resp['count'] > 0:
+        for result in resp['results']:
+            ns_url = f"/api/v1/namespaces/{result['id']}/"
+            try:
+                admin_client(ns_url, method='DELETE')
+            except Exception:
+                pass
+    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
+    assert resp['count'] == 0
+
+    # cleanup the v3 namespace
+    cleanup_namespace(username, api_client=get_client(config=ansible_config("admin")))
+
+    # cleanup the group
+    delete_group(username, api_client=get_client(config=ansible_config("admin")))
+    delete_group('github:' + username, api_client=get_client(config=ansible_config("admin")))
+
+    # cleanup the user
+    delete_user(username, api_client=get_client(config=ansible_config("admin")))
 
 
 @pytest.mark.community_only
@@ -67,6 +122,8 @@ def test_me_anonymous(ansible_config):
 def test_me_social(ansible_config):
     """ Tests a social authed user can see their user info """
 
+    cleanup_social_user('gh01', ansible_config)
+
     cfg = ansible_config('github_user_1')
     with SocialGithubClient(config=cfg) as client:
         resp = client.get('_ui/v1/me/')
@@ -78,6 +135,8 @@ def test_me_social(ansible_config):
 def test_me_social_with_precreated_user(ansible_config):
     """ Make sure social auth associates to the correct username """
 
+    cleanup_social_user('gh01', ansible_config)
+
     # set the social config ...
     cfg = ansible_config('github_user_1')
 
@@ -88,7 +147,6 @@ def test_me_social_with_precreated_user(ansible_config):
         request_token=False,
         require_auth=True
     )
-    delete_user(cfg.get('username'), api_client=admin_client)
     create_user(cfg.get('username'), None, api_client=admin_client)
 
     # login and verify matching username
@@ -98,9 +156,10 @@ def test_me_social_with_precreated_user(ansible_config):
         assert uinfo['username'] == cfg.get('username')
 
 
-@pytest.mark.skip(reason='waiting for rbac')
 @pytest.mark.community_only
 def test_social_auth_creates_group(ansible_config):
+
+    cleanup_social_user('gh01', ansible_config)
 
     cfg = ansible_config('github_user_1')
     with SocialGithubClient(config=cfg) as client:
@@ -110,25 +169,39 @@ def test_social_auth_creates_group(ansible_config):
 
 
 @pytest.mark.community_only
+def test_social_auth_creates_v3_namespace(ansible_config):
+
+    cleanup_social_user('gh01', ansible_config)
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+
+        resp = client.get('v3/namespaces/?name=gh01')
+        result = resp.json()
+        assert result['meta']['count'] == 1
+        assert result['data'][0]['name'] == 'gh01'
+
+        # make a collection
+        collection = build_collection(
+            use_orionutils=False,
+            namespace='gh01',
+            name='mystuff',
+            version='1.0.0'
+        )
+
+        # verify the user can publish to the namespace ...
+        ansible_galaxy(
+            f"collection publish {collection.filename}",
+            ansible_config=ansible_config("github_user_1"),
+            force_token=True,
+            token=client.get_hub_token()
+        )
+
+
+@pytest.mark.community_only
 def test_social_auth_creates_legacynamespace(ansible_config):
 
-    # cleanup the namespace first
-    admin_config = ansible_config("admin")
-    admin_client = get_client(
-        config=admin_config,
-        request_token=False,
-        require_auth=True
-    )
-    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
-    if resp['count'] > 0:
-        for result in resp['results']:
-            ns_url = f"/api/v1/namespaces/{result['id']}/"
-            try:
-                admin_client(ns_url, method='DELETE')
-            except Exception:
-                pass
-    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
-    assert resp['count'] == 0
+    cleanup_social_user('gh01', ansible_config)
 
     cfg = ansible_config('github_user_1')
     with SocialGithubClient(config=cfg) as client:
@@ -144,23 +217,7 @@ def test_social_auth_creates_legacynamespace(ansible_config):
 @pytest.mark.community_only
 def test_update_legacynamespace_owners(ansible_config):
 
-    # cleanup the namespace first
-    admin_config = ansible_config("admin")
-    admin_client = get_client(
-        config=admin_config,
-        request_token=False,
-        require_auth=True
-    )
-    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
-    if resp['count'] > 0:
-        for result in resp['results']:
-            ns_url = f"/api/v1/namespaces/{result['id']}/"
-            try:
-                admin_client(ns_url, method='DELETE')
-            except Exception:
-                pass
-    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
-    assert resp['count'] == 0
+    cleanup_social_user('gh01', ansible_config)
 
     # make sure user2 is created
     cfg = ansible_config('github_user_2')
@@ -230,27 +287,10 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     )
 
     github_user = '030'
-    pargs = json.dumps({"github_user": "030", "limit": 1}).encode('utf-8')
-
-    # delete any pre-existing roles from the user
-    pre_existing = []
-    next_url = f'/api/v1/roles/?owner__username={github_user}'
-    while next_url:
-        resp = api_client(next_url)
-        pre_existing.extend(resp['results'])
-        if resp['next'] is None:
-            break
-        next_url = resp['next']
-    if pre_existing:
-        for pe in pre_existing:
-            role_id = pe['id']
-            role_url = f'/api/v1/roles/{role_id}/'
-            try:
-                resp = api_client(role_url, method='DELETE')
-            except Exception:
-                pass
+    cleanup_social_user(github_user, ansible_config)
 
     # start the sync
+    pargs = json.dumps({"github_user": "030", "limit": 1}).encode('utf-8')
     resp = api_client('/api/v1/sync/', method='POST', args=pargs)
     assert isinstance(resp, dict)
     assert resp.get('task') is not None
@@ -287,11 +327,4 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     assert 'readme_html' in cresp
 
     # cleanup
-    role_id = resp['results'][0]['id']
-    role_url = f'/api/v1/roles/{role_id}/'
-    try:
-        resp = api_client(role_url, method='DELETE')
-    except Exception:
-        pass
-    resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
-    assert resp['count'] == 0
+    cleanup_social_user(github_user, ansible_config)

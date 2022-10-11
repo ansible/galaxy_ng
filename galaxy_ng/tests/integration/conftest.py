@@ -126,6 +126,14 @@ class AnsibleConfigFixture(dict):
             raise Exception("AnsibleConfigFixture profile unknown")
         self.namespace = namespace
 
+        # workaround for a weird error with the galaxy cli lib ...
+        galaxy_token_fn = os.path.expanduser('~/.ansible/galaxy_token')
+        if not os.path.exists(os.path.dirname(galaxy_token_fn)):
+            os.makedirs(os.path.dirname(galaxy_token_fn))
+        if not os.path.exists(galaxy_token_fn):
+            with open(galaxy_token_fn, 'w') as f:
+                f.write('')
+
     def __repr__(self):
         return f'<AnsibleConfigFixture: {self.namespace}>'
 

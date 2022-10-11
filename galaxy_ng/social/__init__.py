@@ -5,8 +5,12 @@ from django.conf import settings
 from django.db import transaction
 from social_core.backends.github import GithubOAuth2
 
-from galaxy_ng.app.models.auth import User
+from galaxy_ng.app.models.auth import Group, User
+from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api.v1.models import LegacyNamespace
+from galaxy_ng.app.utils import rbac
+
+from galaxy_importer.constants import NAME_REGEXP
 
 
 GITHUB_ACCOUNT_SCOPE = 'github'
@@ -39,20 +43,64 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
         # userdata = id, login, access_token
         data = self.get_github_user(access_token)
+        # print('-' * 100)
+        # from pprint import pprint
+        # pprint(data)
+        # print('-' * 100)
+
+        # extract the login now to prevent mutation
+        login = data['login']
+
+        # ensure access_token is passed in as a kwarg
         if data is not None and 'access_token' not in data:
             data['access_token'] = access_token
+
         kwargs.update({'response': data, 'backend': self})
 
+        # use upstream auth method
         auth_response = self.strategy.authenticate(*args, **kwargs)
 
         # create a legacynamespace?
-        legacy_namespace, _ = self._ensure_legacynamespace(data['login'])
+        legacy_namespace, _ = self._ensure_legacynamespace(login)
+
+        # create a group for the namespace?
+        user = User.objects.filter(username=login).first()
+        group, _ = self._ensure_group(login, user)
 
         # create a v3 namespace?
-
-        # add permissiosn to v3 namespace?
+        user = User.objects.filter(username=login).first()
+        namespace, _ = self._ensure_namespace(login, user, group)
 
         return auth_response
+
+    def _ensure_group(self, login, user):
+        """Create a group in the form of github:<login>"""
+        with transaction.atomic():
+            group, created = \
+                Group.objects.get_or_create_identity('github', login)
+            if created:
+                rbac.add_user_to_group(user, group)
+        return group, created
+
+    def _ensure_namespace(self, name, user, group):
+        """Create an auto v3 namespace for the account"""
+
+        # galaxy has "extra" requirements for a namespace ...
+        # https://github.com/ansible/galaxy-importer/blob/master/galaxy_importer/constants.py#L45
+        # NAME_REGEXP = re.compile(r"^(?!.*__)[a-z]+[0-9a-z_]*$")
+        name = name.replace('-', '_').lower()
+        if not NAME_REGEXP.match(name):
+            return None, False
+
+        with transaction.atomic():
+            namespace, created = Namespace.objects.get_or_create(name=name)
+            owners = rbac.get_v3_namespace_owners(namespace)
+            if created or not owners:
+                # Binding by user breaks the UI workflow ...
+                # rbac.add_user_to_v3_namespace(user, namespace)
+                rbac.add_group_to_v3_namespace(group, namespace)
+
+        return namespace, created
 
     def _ensure_legacynamespace(self, login):
         """Create an auto legacynamespace for the account"""
@@ -94,7 +142,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
     def get_github_user(self, access_token):
         api_url = settings.SOCIAL_AUTH_GITHUB_API_URL
         url = api_url + '/user'
-        rr = requests.post(
+        rr = requests.get(
             f'{url}',
             headers={
                 'Accept': 'application/json',

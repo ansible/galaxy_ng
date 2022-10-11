@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -e
+if [[ -z $DUMP_LOGS ]]; then
+    set -e
+fi
 
 which virtualenv || pip install --user virtualenv
 
@@ -27,5 +29,15 @@ export SOCIAL_AUTH_GITHUB_API_URL='http://localhost:8082'
 export HUB_API_ROOT='http://localhost:5001/api/'
 pytest --capture=no -m "community_only" $@ -v galaxy_ng/tests/integration
 RC=$?
+
+if [[ $RC != 0 && ! -z $DUMP_LOGS ]]; then
+    echo "DUMPING LOGS!"
+    for CNAME in $(docker ps --format '{{ .Names }}'); do
+        echo "----------------------------------------"
+        echo $CNAME
+        echo "----------------------------------------"
+        docker logs $CNAME
+    done
+fi
 
 exit $RC
