@@ -3,6 +3,7 @@ import string
 
 from .client_ui import UIClient
 
+
 def create_user(username, password, api_client=None):
     assert api_client is not None, "api_client is a required param"
 
@@ -20,7 +21,7 @@ def create_user(username, password, api_client=None):
     }
 
     if isinstance(api_client, UIClient):
-        rr = api_client.post(f'_ui/v1/users/', payload=payload)
+        rr = api_client.post('_ui/v1/users/', payload=payload)
         assert rr.status_code == 201, rr.text
         return rr.json()
 
@@ -51,9 +52,9 @@ def delete_user(username, api_client=None):
         rr = api_client.delete(f'_ui/v1/users/{uid}')
         assert rr.status_code == 204
         return
-    else:
-        try:
-            resp = api_client(api_prefix + f'/_ui/v1/users/{uid}/', method='DELETE')
-        except Exception as e:
-            error = str(e)
-            assert 'as JSON' in error, e
+
+    try:
+        resp = api_client(api_prefix + f'/_ui/v1/users/{uid}/', method='DELETE')
+    except Exception as e:
+        error = str(e)
+        assert 'as JSON' in error, e
