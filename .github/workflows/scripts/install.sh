@@ -33,7 +33,7 @@ fi
 if [ -e $REPO_ROOT/../pulp_container ]; then
   PULP_CONTAINER=./pulp_container
 else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.13.1
+  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.14.1
 fi
 if [ -e $REPO_ROOT/../galaxy-importer ]; then
   GALAXY_IMPORTER=./galaxy-importer
@@ -155,6 +155,10 @@ fi
 ansible-playbook build_container.yaml
 ansible-playbook start_container.yaml
 
+# .config needs to be accessible by the pulp user in the container, but some
+# files will likely be modified on the host by post/pre scripts.
+chmod 777 ~/.config/pulp_smash/
+chmod 666 ~/.config/pulp_smash/settings.json
 sudo chown -R 700:700 ~runner/.config
 echo ::group::SSL
 # Copy pulp CA
