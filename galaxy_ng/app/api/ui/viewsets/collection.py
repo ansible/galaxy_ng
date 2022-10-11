@@ -116,8 +116,8 @@ class CollectionViewSet(
             deprecated=Exists(deprecated_query),
             version_identifier=version_identifier_expression,
             sign_state=Case(
-                When(signatures__isnull=False, then=Value("signed")),
-                When(signatures__isnull=True, then=Value("unsigned")),
+                When(signatures__pk__in=self._distro_content, then=Value("signed")),
+                default=Value("unsigned"),
             )
         )
 
@@ -151,8 +151,8 @@ class CollectionViewSet(
         return get_object_or_404(
             base_qs.annotate(
                 sign_state=Case(
-                    When(signatures__isnull=False, then=Value("signed")),
-                    When(signatures__isnull=True, then=Value("unsigned")),
+                    When(signatures__pk__in=self._distro_content, then=Value("signed")),
+                    default=Value("unsigned")
                 )
             ),
             version=version,

@@ -48,7 +48,7 @@ _collection_statements = [
         "condition": "can_update_collection"
     },
     {
-        "action": "move_content",
+        "action": ["copy_content", "move_content"],
         "principal": "authenticated",
         "effect": "allow",
         "condition": "has_model_perms:ansible.modify_ansible_repo_content"
