@@ -31,6 +31,10 @@ from .urls import (
     url_safe_join,
     wait_for_url
 )
+from .users import (
+    create_user,
+    delete_user
+)
 
 
 __all__ = (
@@ -59,4 +63,6 @@ __all__ = (
     uuid4,
     url_safe_join,
     wait_for_url,
+    create_user,
+    delete_user,
 )
