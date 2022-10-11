@@ -7,7 +7,9 @@ import pytest
 
 from ..utils import (
     get_client,
-    SocialGithubClient
+    SocialGithubClient,
+    create_user,
+    delete_user
 )
 
 from jsonschema import validate as validate_json
@@ -66,6 +68,30 @@ def test_me_social(ansible_config):
     """ Tests a social authed user can see their user info """
 
     cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('_ui/v1/me/')
+        uinfo = resp.json()
+        assert uinfo['username'] == cfg.get('username')
+
+
+@pytest.mark.community_only
+def test_me_social_with_precreated_user(ansible_config):
+    """ Make sure social auth associates to the correct username """
+
+    # set the social config ...
+    cfg = ansible_config('github_user_1')
+
+    # make a normal user first
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+    delete_user(cfg.get('username'), api_client=admin_client)
+    create_user(cfg.get('username'), None, api_client=admin_client)
+
+    # login and verify matching username
     with SocialGithubClient(config=cfg) as client:
         resp = client.get('_ui/v1/me/')
         uinfo = resp.json()
