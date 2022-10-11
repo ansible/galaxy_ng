@@ -13,6 +13,7 @@ objects:
       template:
         spec:
           restartPolicy: Never
+          serviceAccountName: automation-hub-app
           imagePullSecrets:
             - name: quay-cloudservices-pull
           containers:
