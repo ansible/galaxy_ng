@@ -64,6 +64,7 @@ class SocialGithubClient:
             f'{self.github_url}/session',
             data={'username': self.username, 'password': self.password}
         )
+        assert rr1.status_code == 200, f"Failed to auth to github: {rr1.text}"
         self._github_cookies = dict(rr1.cookies)
 
         # The UX code obtains the login url from env vars ...
@@ -77,6 +78,7 @@ class SocialGithubClient:
             auth_url,
             cookies=self._github_cookies,
         )
+        assert rr2.status_code == 200, f"Failed to GET auth url {auth_url}"
 
         # extract new csrftoken
         self.csrftoken = rr2.cookies['csrftoken']

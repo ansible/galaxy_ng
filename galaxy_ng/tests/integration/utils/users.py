@@ -4,6 +4,37 @@ import string
 from .client_ui import UIClient
 
 
+def delete_group(groupname, api_client=None):
+    assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
+    # DELETE http://localhost:8002/api/_ui/v1/groups/5/
+
+    # Find the group first
+    if isinstance(api_client, UIClient):
+        rr = api_client.get(f'_ui/v1/groups/?name={groupname}')
+        resp = rr.json()
+    else:
+        resp = api_client(api_prefix + f'/_ui/v1/groups/?name={groupname}')
+
+    if resp['meta']['count'] == 0:
+        return
+
+    ginfo = resp['data'][0]
+    gid = ginfo['id']
+
+    if isinstance(api_client, UIClient):
+        rr = api_client.delete(f'_ui/v1/groups/{gid}')
+        assert rr.status_code == 204
+        return
+
+    try:
+        resp = api_client(api_prefix + f'/_ui/v1/groups/{gid}/', method='DELETE')
+    except Exception as e:
+        error = str(e)
+        assert 'as JSON' in error, e
+
+
 def create_user(username, password, api_client=None):
     assert api_client is not None, "api_client is a required param"
 

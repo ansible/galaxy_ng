@@ -24,7 +24,8 @@ from .namespaces import (
     generate_namespace,
     get_all_namespaces,
     generate_unused_namespace,
-    create_unused_namespace
+    create_unused_namespace,
+    cleanup_namespace
 )
 from .tasks import wait_for_task, wait_for_task_ui_client
 from .tools import is_docker_installed, uuid4
@@ -33,6 +34,7 @@ from .urls import (
     wait_for_url
 )
 from .users import (
+    delete_group,
     create_user,
     delete_user
 )
@@ -59,12 +61,14 @@ __all__ = (
     get_all_namespaces,
     generate_unused_namespace,
     create_unused_namespace,
+    cleanup_namespace,
     wait_for_task,
     wait_for_task_ui_client,
     is_docker_installed,
     uuid4,
     url_safe_join,
     wait_for_url,
+    delete_group,
     create_user,
     delete_user,
 )

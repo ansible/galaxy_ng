@@ -70,4 +70,4 @@ jobs:
         run: sleep 120
 
       - name: run the integration tests
-        run: ./dev/standalone-community/RUN_INTEGRATION.sh
+        run: DUMP_LOGS=1 ./dev/standalone-community/RUN_INTEGRATION.sh

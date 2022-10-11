@@ -4,6 +4,8 @@ import logging
 import random
 import string
 
+from .collections import delete_all_collections_in_namespace
+
 
 logger = logging.getLogger(__name__)
 
@@ -75,3 +77,26 @@ def create_unused_namespace(api_client=None):
     payload = {'name': ns, 'groups': []}
     api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
     return ns
+
+
+def cleanup_namespace(name, api_client=None):
+
+    assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
+    resp = api_client(f'{api_prefix}/v3/namespaces/?name={name}', method='GET')
+    if resp['meta']['count'] > 0:
+        delete_all_collections_in_namespace(api_client, name)
+
+        for result in resp['data']:
+            ns_name = result['name']
+            ns_url = f"{api_prefix}/v3/namespaces/{ns_name}/"
+
+            # exception on json parsing expected ...
+            try:
+                api_client(ns_url, method='DELETE')
+            except Exception:
+                pass
+
+        resp = api_client(f'{api_prefix}/v3/namespaces/?name={name}', method='GET')
+        assert resp['meta']['count'] == 0
