@@ -113,6 +113,11 @@ class AnsibleConfigFixture(dict):
             "password": "redhat",
             "token": None,
         },
+        "geerlingguy": {
+            "username": "geerlingguy",
+            "password": "redhat",
+            "token": None,
+        },
         "jctannerTEST": {
             "username": "jctannerTEST",
             "password": "redhat",

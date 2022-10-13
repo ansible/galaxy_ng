@@ -12,9 +12,9 @@ class TestGalaxyUtils(TestCase):
 
     def test_upstream_role_iterator_with_user(self):
         roles = []
-        for namespace, role, versions in upstream_role_iterator(github_user="geerlingguy"):
+        for namespace, role, versions in upstream_role_iterator(github_user="jctanner"):
             roles.append(role)
-        assert sorted(set([x['github_user'] for x in roles])) == ['geerlingguy']
+        assert sorted(set([x['github_user'] for x in roles])) == ['jctanner']
 
     def test_upstream_role_iterator_with_user_and_name(self):
         roles = []
@@ -29,10 +29,11 @@ class TestGalaxyUtils(TestCase):
         assert roles[0]['name'] == 'docker'
 
     def test_upstream_role_iterator_with_limit(self):
+        limit = 10
         count = 0
-        for namespace, role, versions in upstream_role_iterator(limit=20):
+        for namespace, role, versions in upstream_role_iterator(limit=limit):
             count += 1
-        assert count == 20
+        assert count == limit
 
 
 class UUIDConversionTestCase(TestCase):
