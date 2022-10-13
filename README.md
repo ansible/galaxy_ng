@@ -12,6 +12,10 @@ To see what we're currently working on, [view the Roadmap](/ROADMAP.rst).
 
 To learn more about Pulp, [view the Pulp project page](https://pulpproject.org/).
 
+## Documentation
+
+Project documentation is hosted on [netlify](https://galaxyng.netlify.app/).
+
 ## OpenAPI Spec
 
 View the latest version of the spec by [clicking here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/ansible/galaxy_ng/master/openapi/openapi.yaml).
