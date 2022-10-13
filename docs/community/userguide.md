@@ -62,6 +62,11 @@ Collections do have search support in the UI.
 3. Choose keywords or tag
 4. Type the term or select a tag to filter the list of results
 
+!!! What repository?
+
+    We're currently synchronizing all collections from https://galaxy.ansible.com into the "community" repository,
+    but will soon attempt to change that to the "published" repository.
+
 Future support for collection search in the ansible-galaxy CLI is [TBD](https://issues.redhat.com/browse/AAH-1968)
 
 
