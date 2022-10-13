@@ -232,7 +232,7 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
             'social_core.pipeline.social_auth.social_user',
             # 'social_core.pipeline.user.get_username',
             'galaxy_ng.social.pipeline.user.get_username',
-            #'social_core.pipeline.user.create_user',
+            # 'social_core.pipeline.user.create_user',
             'galaxy_ng.social.pipeline.user.create_user',
             'social_core.pipeline.social_auth.associate_user',
             'social_core.pipeline.social_auth.load_extra_data',
