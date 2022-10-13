@@ -1,1 +1,65 @@
 # Community User Guide
+
+## Logging in
+
+Visit https://beta-galaxy.ansible.com/ in any modern web browser. Once the site loads, click on the "login" link
+at the top right of the page. On your first attempt, you'll be brought to a github authorization page. This is
+to be expected because github social auth is the default and only supported login mechanism in https://galaxy.ansible.com and for the future replacement. Once authorized, you should be redirected back to the main page and see your github username replace the word "login" at the top right of the page.
+
+## Generating an API token
+
+The UI path for GalaxyNG to retrieve an api token differs from Galaxy. In the left hand nav menu, click on "Collections" > "Api token management". Click the blue "Load Token" button to reveal your API token.
+
+
+!!! info
+    Each time you click on "Load Token", it will invalidate the old token and make a new one. Be sure to save
+    your token somewhere safe and secure and not rely on the token management page to keep track of it for you. 
+
+## Ansible Core CLI setup
+
+To configure ansible core to talk to the beta galaxy_ng server, create an ansible.cfg file with the following content.
+
+```ini
+[galaxy]
+server_list = beta
+
+[galaxy_server.beta]
+url = https://beta-galaxy.ansible.com/api/
+token = <your-api-token>
+```
+
+!!! tip When do I need a token?
+    You only need a token set in the config if you plan on importing or uploading content. Anonymous
+    read-only operations are fully supported.
+
+
+## Installing Roles
+
+Role installs should work as they did before with https://galaxy.ansible.com
+
+
+## Installing Collections
+
+Collection installs should work as they did before with https://galaxy.ansible.com
+
+
+## Importing Roles
+
+Role imports are only supported through the ansible galaxy cli. Once a valid ansible.cfg is setup, run the `ansible-galaxy role import` command to import one of your roles hosted on https://github.com
+
+## Uploading Collections
+
+Collections can be uploaded either by the ansible galaxy CLI or in the GalaxyNG web interface.
+
+### Galaxy CLI
+
+`ansible-galaxy collection publish --help`
+
+### Web Interface
+
+1. In the left-nav click on "Collections"
+2. Click on "Namespace"
+3. In the center page, click on the tab in the upper middle that says "My namespaces"
+4. Click "view collections" on one of the namespaces listed.
+5. If the collection has no previous versions, click on the blue "Upload Collection" button and follow the prompts.
+6. If the collection has previous verisons, click the vertical 3 dot hamburger menu on the upper right and choose "upload new version" and then follow the prompts.
