@@ -1,1 +1,0 @@
-Add option to log collection downloads.
