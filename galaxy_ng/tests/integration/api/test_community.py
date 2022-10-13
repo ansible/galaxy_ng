@@ -55,7 +55,7 @@ def cleanup_social_user(username, ansible_config):
                 pass
 
     # cleanup the v1 namespace
-    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
+    resp = admin_client(f'/api/v1/namespaces/?name={username}', method='GET')
     if resp['count'] > 0:
         for result in resp['results']:
             ns_url = f"/api/v1/namespaces/{result['id']}/"
@@ -63,7 +63,7 @@ def cleanup_social_user(username, ansible_config):
                 admin_client(ns_url, method='DELETE')
             except Exception:
                 pass
-    resp = admin_client('/api/v1/namespaces/?name=gh01', method='GET')
+    resp = admin_client(f'/api/v1/namespaces/?name={username}', method='GET')
     assert resp['count'] == 0
 
     # cleanup the v3 namespace
@@ -75,6 +75,27 @@ def cleanup_social_user(username, ansible_config):
 
     # cleanup the user
     delete_user(username, api_client=get_client(config=ansible_config("admin")))
+
+
+def wait_for_v1_task(task_id=None, resp=None, api_client=None):
+
+    if task_id is None:
+        task_id = resp['task']
+
+    # poll till done or timeout
+    poll_url = f'/api/v1/tasks/{task_id}/'
+
+    state = None
+    counter = 0
+    while state is None or state == 'RUNNING' and counter <= 100:
+        counter += 1
+        task_resp = api_client(poll_url, method='GET')
+        state = task_resp['results'][0]['state']
+        if state != 'RUNNING':
+            break
+        time.sleep(.5)
+
+    assert state == 'SUCCESS'
 
 
 @pytest.mark.community_only
@@ -152,6 +173,36 @@ def test_me_social_with_precreated_user(ansible_config):
     # login and verify matching username
     with SocialGithubClient(config=cfg) as client:
         resp = client.get('_ui/v1/me/')
+        uinfo = resp.json()
+        assert uinfo['username'] == cfg.get('username')
+
+
+@pytest.mark.community_only
+def test_me_social_with_v1_synced_user(ansible_config):
+    """ Make sure social auth associates to the correct username """
+
+    username = 'geerlingguy'
+    cleanup_social_user(username, ansible_config)
+
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+
+    # v1 sync the user's roles and namespace ...
+    pargs = json.dumps({"github_user": username, "limit": 1}).encode('utf-8')
+    resp = admin_client('/api/v1/sync/', method='POST', args=pargs)
+    wait_for_v1_task(resp=resp, api_client=admin_client)
+
+    # set the social config ...
+    cfg = ansible_config(username)
+
+    # login and verify matching username
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('_ui/v1/me/')
+        assert resp.status_code == 200
         uinfo = resp.json()
         assert uinfo['username'] == cfg.get('username')
 
@@ -294,21 +345,7 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     resp = api_client('/api/v1/sync/', method='POST', args=pargs)
     assert isinstance(resp, dict)
     assert resp.get('task') is not None
-
-    task_id = resp['task']
-
-    # poll till done or timeout
-    poll_url = f'/api/v1/tasks/{task_id}/'
-    state = None
-    counter = 0
-    while state is None or state == 'RUNNING' and counter <= 100:
-        counter += 1
-        task_resp = api_client(poll_url, method='GET')
-        state = task_resp['results'][0]['state']
-        if state != 'RUNNING':
-            break
-        time.sleep(.5)
-    assert state == 'SUCCESS'
+    wait_for_v1_task(resp=resp, api_client=api_client)
 
     resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
     assert resp['count'] == 1

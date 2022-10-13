@@ -55,6 +55,11 @@ USERS = {
         'id': 1003,
         'login': 'jctannerTEST',
         'password': 'redhat'
+    },
+    'geerlingguy': {
+        'id': 1004,
+        'login': 'geerlingguy',
+        'password': 'redhat'
     }
 }
 
