@@ -71,6 +71,43 @@ def change_groups(user, password, expect_pass, extra):
     assert_pass(expect_pass, response.status_code, 201, 403)
 
 
+def view_pulp_groups(user, password, expect_pass, extra):
+    response = requests.get(
+        f"{PULP_API_ROOT}groups/",
+        auth=(user['username'], password)
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def delete_pulp_groups(user, password, expect_pass, extra):
+    g = create_group(gen_string())
+    # delete group
+    response = requests.delete(
+        f"{PULP_API_ROOT}groups/{g['id']}/",
+        auth=(user['username'], password)
+    )
+
+    del_group(g['id'])
+
+    assert_pass(expect_pass, response.status_code, 204, 403)
+
+
+def add_pulp_groups(user, password, expect_pass, extra):
+    response = requests.post(
+        f"{PULP_API_ROOT}groups/",
+        json={"name": f"{NAMESPACE}_group"},
+        auth=(user["username"], password)
+    )
+
+    data = response.json()
+
+    if "id" in data:
+        del_group(data["id"])
+
+    assert_pass(expect_pass, response.status_code, 201, 403)
+    return response.json()
+
+
 def view_users(user, password, expect_pass, extra):
     response = requests.get(
         f"{API_ROOT}_ui/v1/users/",

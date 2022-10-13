@@ -27,6 +27,7 @@ from .rbac_actions.utils import (
 
 from .rbac_actions.auth import (
     view_groups, delete_groups, add_groups, change_groups,
+    add_pulp_groups, delete_pulp_groups, view_pulp_groups,
     view_users, delete_users, add_users, change_users,
     view_role, delete_role, add_role, change_role,
 )
@@ -278,6 +279,9 @@ ROLES_TO_TEST = {
         change_groups,
         delete_groups,
         view_role,
+        add_pulp_groups,
+        delete_pulp_groups,
+        view_pulp_groups,
     },
     "galaxy.user_admin": {
         add_users,
