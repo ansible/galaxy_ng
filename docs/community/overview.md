@@ -7,7 +7,7 @@ around https://galaxy.ansible.com.
 
 # History
 
-## Galaxy
+### Galaxy
 
 Galaxy launched in 2013 by the company later known as "Ansible". The [release announcement](https://groups.google.com/g/ansible-project/c/W40GgVxbU6U/m/uk1ruEdC-TAJ) gives an interesting perspective
 of the original intent for the site that helps provide context for where we need the future of the galaxy_ng project to go.
@@ -22,7 +22,7 @@ of the original intent for the site that helps provide context for where we need
 
 > When we started Galaxy, a lot of our design influences were from consumer sites — things like iTunes, Flickr (Explore), and most significantly … beeradvocate.com!  For this reason you’ll see linked reviews and ratings, ratings with structure, and highlighted reviews from AnsibleWorks employees.   It’s designed to help you find what’s good very very clearly, and explore other things you might be interested in.
 
-## Galaxy NG
+### Galaxy NG
 
 GalaxyNG is a total rewrite of some features from galaxy but catered to serving collections to Red Hat customers as a SaaS on https://cloud.redhat.com (now https://console.redhat.com) and as an on-premise deployment known as "Private Automation HUB". The new codebase did not include support for standalone roles and solely focused instead on collections.
 
