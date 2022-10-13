@@ -1,10 +1,23 @@
 # Community User Guide
 
+## Servers
+
+We have multiple instances of the beta site running to cover the dev, staging and production lifecycle.
+
+1. https://beta-galaxy.ansible.com/
+2. https://beta-galaxy-stage.ansible.com/
+3. https://beta-galaxy-dev.ansible.com/
+
+The "dev" instance is auto-deployed from new commits to the master branch of https://github.com/ansible/galaxy_ng. Staging and Production deployments are triggered manually or via new tags on the git repository.
+
+All instances are wired up for github social auth, so you can log into any of them with your github account.
+
 ## Logging in
 
 Visit https://beta-galaxy.ansible.com/ in any modern web browser. Once the site loads, click on the "login" link
 at the top right of the page. On your first attempt, you'll be brought to a github authorization page. This is
 to be expected because github social auth is the default and only supported login mechanism in https://galaxy.ansible.com and for the future replacement. Once authorized, you should be redirected back to the main page and see your github username replace the word "login" at the top right of the page.
+
 
 ## Generating an API token
 
@@ -14,6 +27,7 @@ The UI path for GalaxyNG to retrieve an api token differs from Galaxy. In the le
 !!! info
     Each time you click on "Load Token", it will invalidate the old token and make a new one. Be sure to save
     your token somewhere safe and secure and not rely on the token management page to keep track of it for you. 
+
 
 ## Ansible Core CLI setup
 
