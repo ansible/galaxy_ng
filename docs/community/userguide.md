@@ -17,7 +17,8 @@ The UI path for GalaxyNG to retrieve an api token differs from Galaxy. In the le
 
 ## Ansible Core CLI setup
 
-To configure ansible core to talk to the beta galaxy_ng server, create an ansible.cfg file with the following content.
+The ansible-galaxy cli is configured by default to talk to https://galaxy.ansible.com. To configure ansible core to talk 
+to the beta galaxy_ng server, create an ansible.cfg file with the following content.
 
 ```ini
 [galaxy]
@@ -31,6 +32,37 @@ token = <your-api-token>
 !!! tip When do I need a token?
     You only need a token set in the config if you plan on importing or uploading content. Anonymous
     read-only operations are fully supported.
+
+## Finding Roles
+
+Standalone roles are not yet presented in the UI, so search is only availabe via the api or galaxy cli.
+
+The v1 rest api has filter parameter support similar to the current code on https://galaxy.ansible.com.
+
+```bash
+# Find all roles created by a specific github user.
+curl 'https://beta-galaxy.ansible.com/api/v1/roles/?github_user=geerlingguy'
+
+# Find all roles containing a keyword in the namespace, name or description.
+curl 'https://beta-galaxy.ansible.com/api/v1/roles/?keyword=docker'
+```
+
+The ansible-galaxy CLI also support role search
+
+```bash
+ansible-galaxy role search --help
+```
+
+
+## Finding Collections
+Collections do have search support in the UI.
+
+1. In the left-nav click "Collections"
+2. choose the appropriate repository in the dropdown.
+3. Choose keywords or tag
+4. Type the term or select a tag to filter the list of results
+
+Future support for collection search in the ansible-galaxy CLI is [TBD](https://issues.redhat.com/browse/AAH-1968)
 
 
 ## Installing Roles
