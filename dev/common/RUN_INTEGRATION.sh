@@ -23,6 +23,7 @@ which virtualenv || pip install --user virtualenv
 
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
+TEST_CASES=${TEST_CASES:-galaxy_ng/tests/integration}
 
 if [[ ! -d $VENVPATH ]]; then
     virtualenv $VENVPATH
@@ -41,10 +42,10 @@ docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_te
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
 if [[ -z $HUB_LOCAL ]]; then
-    pytest --capture=no -m "not standalone_only and not community_only and not rbac_roles" $@ -v galaxy_ng/tests/integration
+    pytest --capture=no -m "not standalone_only and not community_only and not rbac_roles" $@ -v "${TEST_CASES}"
     RC=$?
 else
-    pytest --capture=no -m "not cloud_only and not community_only and not rbac_roles" -v $@ galaxy_ng/tests/integration
+    pytest --capture=no -m "not cloud_only and not community_only and not rbac_roles" -v $@ "${TEST_CASES}"
     RC=$?
 
     if [[ $RC != 0 ]]; then

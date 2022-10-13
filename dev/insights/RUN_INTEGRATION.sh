@@ -16,6 +16,7 @@ which virtualenv || pip install --user virtualenv
 
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
+TEST_CASES=${TEST_CASES:-galaxy_ng/tests/integration}
 
 if [[ ! -d $VENVPATH ]]; then
     virtualenv $VENVPATH
@@ -31,7 +32,7 @@ pip show epdb || pip install epdb
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
 
-pytest --capture=no --tb=short -m "not standalone_only and not community_only and not rbac_roles" $@ -v galaxy_ng/tests/integration
+pytest --capture=no --tb=short -m "not standalone_only and not community_only and not rbac_roles" $@ -v "${TEST_CASES}"
 RC=$?
 
 exit $RC

@@ -9,6 +9,9 @@ cat /etc/issue
 echo "RPM packges ..."
 rpm -qa
 
+# let env override the default test cases to run
+TEST_CASES=${TEST_CASES:-galaxy_ng/tests/integration}
+
 echo "Set project to ${NAMESPACE}"
 oc project ${NAMESPACE}
 
@@ -35,7 +38,7 @@ ${VENV_PATH}/bin/pip install --upgrade pip wheel crc-bonfire sh
 ${VENV_PATH}/bin/pip install -r integration_requirements.txt
 
 echo "Running pytest ..."
-${VENV_PATH}/bin/pytest --capture=no -m "cloud_only or (not standalone_only and not community_only)" -v galaxy_ng/tests/integration
+${VENV_PATH}/bin/pytest --capture=no -m "cloud_only or (not standalone_only and not community_only)" -v "${TEST_CASES}"
 
 #echo ""
 #echo "##################################################"

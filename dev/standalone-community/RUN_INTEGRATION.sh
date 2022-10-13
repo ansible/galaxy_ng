@@ -8,6 +8,7 @@ which virtualenv || pip install --user virtualenv
 
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
+TEST_CASES=${TEST_CASES:-galaxy_ng/tests/integration}
 
 if [[ ! -d $VENVPATH ]]; then
     virtualenv $VENVPATH
@@ -27,7 +28,7 @@ export SOCIAL_AUTH_GITHUB_BASE_URL='http://localhost:8082'
 export SOCIAL_AUTH_GITHUB_API_URL='http://localhost:8082'
 
 export HUB_API_ROOT='http://localhost:5001/api/'
-pytest --capture=no -m "community_only" $@ -v galaxy_ng/tests/integration
+pytest --capture=no -m "community_only" $@ -v "${TEST_CASES}"
 RC=$?
 
 if [[ $RC != 0 && ! -z $DUMP_LOGS ]]; then
