@@ -29,6 +29,9 @@ GalaxyNG is a total rewrite of some features from galaxy but catered to serving 
 The biggest change with GalaxyNG is that it is no longer a standalone django application with an AngularJS+Bootstrap frontend. As part of the rewrite, the project became a "pulp plugin", meaning it heavily relies on the family of projects in the https://github.com/pulp organization. Galaxy's v2 api makes use of "repositories" from pulp, but it was added on top of the previous codebase rather then conforming to the pure defintion of [pulp plugin](https://docs.pulpproject.org/pulpcore/plugins/index.html).
 
 
+---
+
+
 # Future
 
 We would like to consolidate the features of https://github.com/ansible/galaxy and https://github.com/ansible/galaxy_ng
