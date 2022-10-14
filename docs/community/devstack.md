@@ -74,7 +74,7 @@ Afterwards, the stack can be created and spun up via:
 You can how reach the api at http://localhost:5001. The makefile targets created a couple test users, namely admin:admin for the primary superuser. This is purely an API stack with no UI. That makes it difficult to test and use github users, so see the next section about adding the UI.
 
 
-### The UI
+### React.js UI
 
 To connect to UI, the default address is http://localhost:8002. If social auth is enabled, you'll be forced to auth via github if clicking on the "login" link at the top right of the page. The presence of SOCIAL_AUTH_GITHUB_KEY & SOCIAL_AUTH_GITHUB_SECRET in the backend configuration triggers dynaconf to set a feature flag for external auth that the UI reads and alters the login link accordingly.
 
@@ -92,3 +92,50 @@ For development work on the UI, it's easier to launch the webpack dev server out
 3. Clone the [ansible-hub-ui](https://github.com/ansible/ansible-hub-ui) repo to the desired location.
 4. From the checkout, run "npm install"
 5. From the checkout, run "npm run start-community"
+
+## Testing
+
+The GalaxyNG project is a "test driven development" (TDD) project. Our interpretation of TDD is that -every- PR to the master branch -must- have some sort of test or test changes. It can be unit, functional or integration, but something must be written. It doesn't matter if the PR is a bugfix or a feature, tests must be written. This is how we avoid regressions and keep track of how new code is meant to work inside a very complex and spread out architecture with many different configurable behaviors.
+
+### Unit
+
+More focus has been spent on the integration tests, but there are a few unit tests in the project. The compose stack must be running to launch unit tests, as they are using django and postgres with a temporary database to do real SQL calls that are incompatible with sqlite.
+
+To launch units, execute "make docker/test/unit". Specific tests can be selected by running "TEST=xyz make docker/test/unit".
+
+
+### Functional
+
+Pulp has a testing concept known as [functional tests](https://docs.pulpproject.org/pulpcore/en/master/nightly/contributing/tests.html#functional-tests). These are mostly using a suite of fixtures, auto-generated api clients and strict style to do integration testing. The environment needed to run functional tests is somewhat complicated to setup, so the GalaxyNG project instead writes integration tests. However, if you end up writing patches for any of the repositories in https://github.com/pulp, you will be required to write functional tests.
+
+
+### Integration
+
+The GalaxyNG project backs the Red Hat product named "Automation HUB". As it is a product, it had a formal inside QE team testing release features with their own internal frameworks built around pytest. We decided to "shift left" on integration testing and put it on developers to write integration tests along with their pullrequests (TDD). The initial batch of integration tests came from forking the internal tests and pulling out elements of the testing framework that were either too complicated or reliant on systems behind the corporate firewall. Since that time, the tests have grown substantially and comprise a much larger level of coverage. The integration tests aim to be as simple as possible to run and "framework light" in the sense that you really only need pytest, python-requests and ansible-core. Most integration tests are instantiating a REST api client that then talks to the api and asserts certain behaviors such as return codes, response types/shape and errors.
+
+Each docker-compose profile has it's own RUN_INTEGRATION.sh file in the dev/<profile>/ directory that sets necessary variables and pytest marks suitable for that environment. The community script (dev/standalone-community/RUN_INTEGRATIO.sh) is mostly just setting the '-m community' argument for pytest so that it only runs the tests that have been [marked](https://docs.pytest.org/en/7.1.x/how-to/mark.html) as such. Once you have the stack running with the appropriate config, you can execute ./dev/standalone-community/RUN_INTEGRATION.sh to launch the tests. Specific test are easiest to call by appending -k "<testname>" to the command.
+
+If you write a new test specific to the community profile, please add a "@pytest.mark.community" decorator to the test function. Currently, all community related test are in https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/api/test_community.py and https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/cli/test_community.py. Other files can be added as needed as long as they have a suitable filename and the relevant pytest marks.
+
+
+## Commits
+
+We have strict checks on commit messages to ensure proper reference to https://issues.redhat.com and that all are cryptographically signed. Creating a gpg signing key for git and configuring github to use it is beyond the scope of this document, but the end result is that you should be able to start your commits by running:
+
+```bash
+git commit -s -S
+```
+
+The message needs to be in the format:
+
+```
+<Short commit title>
+
+<Longer commit description and notes>
+
+Issue: AAH-XXX
+
+Signed-off-by: First Last <email@domain>
+```
+
+If you are working on a bug or feature not tracked in a jira ticket, its' fine to use "No-Issue" instead of "Issue: AAH-XXX". If you are working on a jira ticket, you will need to create a suitable changelog file in [CHANGES](https://github.com/ansible/galaxy_ng/tree/master/CHANGES) folder.
