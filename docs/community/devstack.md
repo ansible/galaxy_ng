@@ -76,9 +76,7 @@ You can how reach the api at http://localhost:5001. The makefile targets created
 
 ### React.js UI
 
-To connect to UI, the default address is http://localhost:8002. If social auth is enabled, you'll be forced to auth via github if clicking on the "login" link at the top right of the page. The presence of SOCIAL_AUTH_GITHUB_KEY & SOCIAL_AUTH_GITHUB_SECRET in the backend configuration triggers dynaconf to set a feature flag for external auth that the UI reads and alters the login link accordingly.
-
-If you want to bypass that and use a local django user, go directly to the http://localhost:8002/ui/login url and login that way.
+To connect to UI, the default address is http://localhost:8002. If social auth is enabled, you'll be forced to auth via github if clicking on the "login" link at the top right of the page. The presence of SOCIAL_AUTH_GITHUB_KEY & SOCIAL_AUTH_GITHUB_SECRET in the backend configuration triggers dynaconf to set a feature flag for external auth that the UI reads and alters the login link accordingly. If you want to bypass github and use a local django user, go directly to the http://localhost:8002/ui/login url and login that way.
 
 #### docker-compose
 Inside .compose.env, you'll find a commented out line referencing ANSIBLE_HUB_UI_PATH. If you want to add a UI to the compose stack, this needs to be uncommented and set to a valid absolute path for a checkout of [ansible-hub-ui](https://github.com/ansible/ansible-hub-ui). The compose spinup should properly allocate an alpine container with the appropriate node.js version and install+build+launch the UI.
