@@ -43,7 +43,7 @@ url = https://beta-galaxy.ansible.com/api/
 token = <your-api-token>
 ```
 
-!!! tip When do I need a token?
+!!! important
     You only need a token set in the config if you plan on importing or uploading content. Anonymous
     read-only operations are fully supported.
 
