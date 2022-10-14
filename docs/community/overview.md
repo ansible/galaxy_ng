@@ -17,18 +17,18 @@ of the original intent for the site that helps provide context for where we need
 
 > What’s Galaxy?  Ansible Galaxy is an automation content site designed from the ground up with an emphasis on being very dynamic — offering up a lot of new ways to find content.
 
-...
+---
 
 > Galaxy is structured around roles.   You download the roles you like, then you write very simple play books that assemble all the roles together with roles you also write yourself.
 ...
 
 > At the initial phase, we’ve made signup as painless as we could — you can login with a local account, but you can also login with OAuth from Twitter, GitHub, or Google+.   (We just use this for login, so we won’t tweet for you or anything).   You can also link social accounts later if you sign up first with a local account, but we expect social auth is the way to go for many of you.
 
-...
+---
 
 > Once you log in, from the “Explore” page, you can see not only the top roles in each category, but also the top reviewers, top authors, new roles, and new authors.  You can browse the users arbitrarily and see what they have contributed and reviewed.
 
-...
+---
 
 > When we started Galaxy, a lot of our design influences were from consumer sites — things like iTunes, Flickr (Explore), and most significantly … beeradvocate.com!  For this reason you’ll see linked reviews and ratings, ratings with structure, and highlighted reviews from AnsibleWorks employees.   It’s designed to help you find what’s good very very clearly, and explore other things you might be interested in.
 
@@ -37,9 +37,6 @@ of the original intent for the site that helps provide context for where we need
 GalaxyNG is a total rewrite of some features from galaxy but catered to serving collections to Red Hat customers as a SaaS on https://cloud.redhat.com (now https://console.redhat.com) and as an on-premise deployment known as "Private Automation HUB". The new codebase did not include support for standalone roles and solely focused instead on collections.
 
 The biggest change with GalaxyNG is that it is no longer a standalone django application with an AngularJS+Bootstrap frontend. As part of the rewrite, the project became a "pulp plugin", meaning it heavily relies on the family of projects in the https://github.com/pulp organization. Galaxy's v2 api makes use of "repositories" from pulp, but it was added on top of the previous codebase rather then conforming to the pure defintion of [pulp plugin](https://docs.pulpproject.org/pulpcore/plugins/index.html).
-
-
----
 
 
 ## Future
