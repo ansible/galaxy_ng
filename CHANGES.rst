@@ -13,6 +13,23 @@ Changelog
 
 .. towncrier release notes start
 
+4.6.1 (2022-10-14)
+Features
+--------
+
+- Add limited v1 support for legacy roles specific for use in galaxy.ansible.com
+  `AAH-1812 <https://issues.redhat.com/browse/AAH-1812>`_
+
+
+Misc
+----
+
+- `AAH-1950 <https://issues.redhat.com/browse/AAH-1950>`_
+
+
+----
+
+
 4.6.0 (2022-10-13)
 Features
 --------
