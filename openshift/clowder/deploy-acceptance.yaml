@@ -51,6 +51,11 @@ objects:
         exit 1
       fi
 
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: automation-hub-app
+
 - apiVersion: batch/v1
   kind: Job
   metadata:
@@ -62,6 +67,7 @@ objects:
         restartPolicy: Never
         imagePullSecrets:
           - name: quay-cloudservices-pull
+        serviceAccountName: automation-hub-app
         containers:
           - image: quay.io/cloudservices/iqe-tests:automation-hub
             imagePullPolicy: Always
