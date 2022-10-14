@@ -122,7 +122,6 @@ requirements = [
     "social-auth-app-django>=3.1.0,<4.0.0",
     "dynaconf>=3.1.9",
     "django-auth-ldap==4.0.0",
-    "ansible-lint==6.2.2",  # keeping this pinned due to jsonschema dep mismatch with pulp pkgs
 ]
 
 
