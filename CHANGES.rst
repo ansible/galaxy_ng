@@ -14,25 +14,15 @@ Changelog
 .. towncrier release notes start
 
 4.6.1 (2022-10-14)
-Features
---------
-
-- Add limited v1 support for legacy roles specific for use in galaxy.ansible.com
-  `AAH-1812 <https://issues.redhat.com/browse/AAH-1812>`_
-
-
-Misc
-----
-
-- `AAH-1950 <https://issues.redhat.com/browse/AAH-1950>`_
-
-
-----
+Upgrading ansible-lint.
 
 
 4.6.0 (2022-10-13)
 Features
 --------
+
+- Add limited v1 support for legacy roles specific for use in galaxy.ansible.com
+  `AAH-1812 <https://issues.redhat.com/browse/AAH-1812>`_
 
 - Change 'requires_ansible' to use custom ansible ver spec instead of semver
   `AAH-981 <https://issues.redhat.com/browse/AAH-981>`_
@@ -92,6 +82,7 @@ Bugfixes
 Misc
 ----
 
+- `AAH-1950 <https://issues.redhat.com/browse/AAH-1950>`_
 - `AAH-1092 <https://issues.redhat.com/browse/AAH-1092>`_, `AAH-1093 <https://issues.redhat.com/browse/AAH-1093>`_, `AAH-1127 <https://issues.redhat.com/browse/AAH-1127>`_, `AAH-1128 <https://issues.redhat.com/browse/AAH-1128>`_, `AAH-1360 <https://issues.redhat.com/browse/AAH-1360>`_, `AAH-1371 <https://issues.redhat.com/browse/AAH-1371>`_, `AAH-1443 <https://issues.redhat.com/browse/AAH-1443>`_, `AAH-1449 <https://issues.redhat.com/browse/AAH-1449>`_, `AAH-1468 <https://issues.redhat.com/browse/AAH-1468>`_, `AAH-1492 <https://issues.redhat.com/browse/AAH-1492>`_, `AAH-1493 <https://issues.redhat.com/browse/AAH-1493>`_, `AAH-1526 <https://issues.redhat.com/browse/AAH-1526>`_, `AAH-1530 <https://issues.redhat.com/browse/AAH-1530>`_, `AAH-1556 <https://issues.redhat.com/browse/AAH-1556>`_, `AAH-1585 <https://issues.redhat.com/browse/AAH-1585>`_, `AAH-1586 <https://issues.redhat.com/browse/AAH-1586>`_, `AAH-1587 <https://issues.redhat.com/browse/AAH-1587>`_, `AAH-1588 <https://issues.redhat.com/browse/AAH-1588>`_, `AAH-1589 <https://issues.redhat.com/browse/AAH-1589>`_, `AAH-1608 <https://issues.redhat.com/browse/AAH-1608>`_, `AAH-1609 <https://issues.redhat.com/browse/AAH-1609>`_, `AAH-1643 <https://issues.redhat.com/browse/AAH-1643>`_, `AAH-1654 <https://issues.redhat.com/browse/AAH-1654>`_, `AAH-1697 <https://issues.redhat.com/browse/AAH-1697>`_, `AAH-1712 <https://issues.redhat.com/browse/AAH-1712>`_, `AAH-1737 <https://issues.redhat.com/browse/AAH-1737>`_, `AAH-1738 <https://issues.redhat.com/browse/AAH-1738>`_, `AAH-1757 <https://issues.redhat.com/browse/AAH-1757>`_, `AAH-1768 <https://issues.redhat.com/browse/AAH-1768>`_, `AAH-1770 <https://issues.redhat.com/browse/AAH-1770>`_, `AAH-1780 <https://issues.redhat.com/browse/AAH-1780>`_, `AAH-1781 <https://issues.redhat.com/browse/AAH-1781>`_, `AAH-1788 <https://issues.redhat.com/browse/AAH-1788>`_, `AAH-1796 <https://issues.redhat.com/browse/AAH-1796>`_, `AAH-1821 <https://issues.redhat.com/browse/AAH-1821>`_, `AAH-1828 <https://issues.redhat.com/browse/AAH-1828>`_, `AAH-1846 <https://issues.redhat.com/browse/AAH-1846>`_, `AAH-1850 <https://issues.redhat.com/browse/AAH-1850>`_, `AAH-1906 <https://issues.redhat.com/browse/AAH-1906>`_, `AAH-1908 <https://issues.redhat.com/browse/AAH-1908>`_
 
 
