@@ -6,7 +6,6 @@ repo_url: "https://github.com/ansible/galaxy_ng"
 edit_uri: edit/master/docs/
 nav:
     - Home: index.md
-    - Install: installation.md
     - Configuration:
         - Configuration options: config/options.md
         # - Enabling auto approval: config/collection_auto_approval.md
@@ -14,17 +13,11 @@ nav:
         - Managing user access: config/user_access.md
         - Enabling collection signing: config/collection_signing.md
         - Enabling Container signing: config/container_signing.md
-    # - Content Management:
-    #     - How content is organized: content/organization.md
-    #     - Collections:
-    #         - Creating namespaces: content/collection_namespaces.md
-    #         - Publishing collections: content/collection_publishing.md
-    #         - Syncing from remotes: content/collection_remotes.md
-    #         - Deleting collections: content/collection_deleting.md
-    #     - Containers:
-    #         - Publishing containers: content/container_publishing.md
-    #         - Signing collections: content/collection_signing.md
-    #         - Signing containers: content/container_signing.md
+    - User Guides:
+        - Installation: usage_guide/installation.md
+        - Collections: usage_guide/collections.md
+        - Execution Environments: usage_guide/execution_environments.md
+        - RBAC and User Management: usage_guide/rbac.md
     - Integration:
         # - Connecting Ansible Controllers: integration/controller.md
         - Using LDAP: integration/ldap.md
