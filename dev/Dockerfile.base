@@ -32,6 +32,7 @@ RUN set -ex; \
 RUN set -ex; \
     touch /var/lib/rpm/* \
     && dnf -y install \
+        gettext \
         git \
         gcc \
         glibc-langpack-en \

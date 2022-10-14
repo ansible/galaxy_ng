@@ -33,12 +33,6 @@ jobs:
       - name: Install docker-compose
         run: pip3 install --upgrade docker-compose
 
-      - name: collect system info
-        run: whoami; id; pwd; ls -al; uname -a ; df -h .; mount ; cat /etc/issue; docker --version ; ps aux | fgrep -i docker; ls -al /var/run/containerd/containerd.sock
-
-      - name: clone the hub ui repo
-        run: git clone https://github.com/ansible/ansible-hub-ui /tmp/ansible-hub-ui 
-
       - name: create the .compose.env file
         run: rm -f .compose.env; cp .compose.env.example .compose.env
 
@@ -58,13 +52,7 @@ jobs:
         run: sed -i.bak 's/ENABLE_SIGNING=1/ENABLE_SIGNING=0/' .compose.env
 
       - name: build stack
-        run: make docker/build
-
-      - name: run migrations
-        run: make docker/migrate
-
-      - name: load test data
-        run: make docker/loaddata
+        run: make docker/all
 
       - name: start the compose stack
         run: ./compose up -d
