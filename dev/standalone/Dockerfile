@@ -8,9 +8,3 @@ RUN set -ex; \
     if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
     pip install --no-cache-dir --requirement /tmp/requirements.standalone.txt; \
     fi
-
-USER root
-
-RUN dnf install -y gettext;
-
-USER galaxy
