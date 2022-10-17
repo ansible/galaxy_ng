@@ -57,6 +57,8 @@ class LegacyRoleFilter(filterset.FilterSet):
 
     github_user = filters.CharFilter(method='github_user_filter')
     keywords = filters.CharFilter(method='keywords_filter')
+    autocomplete = filters.CharFilter(method='autocomplete_filter')
+    owner__username = filters.CharFilter(method='owner__username_filter')
 
     sort = filters.OrderingFilter(
         fields=(
@@ -72,6 +74,9 @@ class LegacyRoleFilter(filterset.FilterSet):
     def github_user_filter(self, queryset, name, value):
         return queryset.filter(namespace__name=value)
 
+    def owner__username_filter(self, queryset, name, value):
+        return queryset.filter(namespace__owners__username=value)
+
     def keywords_filter(self, queryset, name, value):
 
         keywords = self.request.query_params.getlist('keywords')
@@ -84,3 +89,17 @@ class LegacyRoleFilter(filterset.FilterSet):
             )
 
         return queryset
+
+    def autocomplete_filter(self, queryset, name, value):
+
+        keywords = self.request.query_params.getlist('autocomplete')
+
+        for keyword in keywords:
+            queryset = queryset.filter(
+                Q(namespace__name__contains=keyword)
+                | Q(name__contains=keyword)
+                | Q(full_metadata__description__contains=keyword)
+            )
+
+        return queryset
+
