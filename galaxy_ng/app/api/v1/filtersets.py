@@ -102,4 +102,3 @@ class LegacyRoleFilter(filterset.FilterSet):
             )
 
         return queryset
-
