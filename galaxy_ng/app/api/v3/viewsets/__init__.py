@@ -3,7 +3,6 @@ from .collection import (
     CollectionUploadViewSet,
     CollectionVersionMoveViewSet,
     CollectionVersionCopyViewSet,
-    CollectionVersionViewSet,
 )
 
 from .namespace import (
@@ -28,5 +27,4 @@ __all__ = (
     'UnpaginatedCollectionViewSet',
     'UnpaginatedCollectionVersionViewSet',
     'RepoMetadataViewSet',
-    'CollectionVersionViewSet',
 )

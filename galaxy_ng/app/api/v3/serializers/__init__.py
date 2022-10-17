@@ -1,6 +1,5 @@
 from .collection import (
     CollectionUploadSerializer,
-    CollectionVersionSerializer,
 )
 
 from .namespace import (
@@ -25,5 +24,4 @@ __all__ = (
     'TaskSerializer',
     'TaskSummarySerializer',
     'UnpaginatedCollectionVersionSerializer',
-    'CollectionVersionSerializer',
 )
