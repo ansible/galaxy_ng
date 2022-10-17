@@ -365,3 +365,48 @@ def test_v1_sync_with_user_and_limit(ansible_config):
 
     # cleanup
     cleanup_social_user(github_user, ansible_config)
+
+
+@pytest.mark.community_only
+def test_v1_autocomplete_search(ansible_config):
+    """" Tests if v1 sync accepts a user&limit arg """
+
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True
+    )
+
+    github_user = 'geerlingguy'
+    github_user2 = '030'
+    cleanup_social_user(github_user, ansible_config)
+    cleanup_social_user(github_user2, ansible_config)
+
+    # start the sync
+    pargs = json.dumps({"github_user": github_user, "limit": 10}).encode('utf-8')
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+    wait_for_v1_task(resp=resp, api_client=api_client)
+
+    # start the second sync to ensure second user doesn't get found
+    pargs = json.dumps({"github_user": github_user2, "limit": 10}).encode('utf-8')
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+    wait_for_v1_task(resp=resp, api_client=api_client)
+
+    # query by user
+    resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
+    assert resp['count'] > 0
+    usernames = sorted(set([x['username'] for x in resp['results']]))
+    assert usernames == [github_user]
+
+    # validate autocomplete search only finds the relevant roles
+    resp2 = api_client(f'/api/v1/roles/?autocomplete={github_user}')
+    assert resp2['count'] == resp['count']
+
+    # cleanup
+    cleanup_social_user(github_user, ansible_config)
+    cleanup_social_user(github_user2, ansible_config)
