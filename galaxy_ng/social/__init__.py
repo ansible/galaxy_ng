@@ -63,34 +63,51 @@ class GalaxyNGOAuth2(GithubOAuth2):
         # create a legacynamespace?
         legacy_namespace, _ = self._ensure_legacynamespace(login)
 
-        # create a group for the namespace?
-        user = User.objects.filter(username=login).first()
-        group, _ = self._ensure_group(login, user)
+        # define namespace, validate and create ...
+        namespace_name = transform_namespace_name(login)
+        if validate_namespace_name(namespace_name):
 
-        # create a v3 namespace?
-        user = User.objects.filter(username=login).first()
-        namespace, _ = self._ensure_namespace(login, user, group)
+            # Need user for group and rbac binding
+            user = User.objects.filter(username=login).first()
+
+            # Create a group to bind rbac perms.
+            group, _ = self._ensure_group(namespace_name, user)
+
+            # create a v3 namespace?
+            namespace, _ = self._ensure_namespace(namespace_name, user, group)
 
         return auth_response
 
-    def _ensure_group(self, login, user):
-        """Create a group in the form of github:<login>"""
+    def validate_namespace_name(self, name):
+        """Similar validation to the v3 namespace serializer."""
+
+        # galaxy has "extra" requirements for a namespace ...
+        # https://github.com/ansible/galaxy-importer/blob/master/galaxy_importer/constants.py#L45
+        # NAME_REGEXP = re.compile(r"^(?!.*__)[a-z]+[0-9a-z_]*$")
+
+        if not NAME_REGEXP.match(name):
+            return False
+        if len(name) < 2:
+            return False
+        if name.startswith('_'):
+            return False
+        return True
+
+    def transform_namespace_name(self, name):
+        """Convert namespace name to valid v3 name."""
+        return name.replace('-', '_').lower()
+
+    def _ensure_group(self, namespace_name, user, namespace_name):
+        """Create a group in the form of <namespace>:<login>"""
         with transaction.atomic():
             group, created = \
-                Group.objects.get_or_create_identity('github', login)
+                Group.objects.get_or_create_identity(namespace_name, login)
             if created:
                 rbac.add_user_to_group(user, group)
         return group, created
 
     def _ensure_namespace(self, name, user, group):
         """Create an auto v3 namespace for the account"""
-
-        # galaxy has "extra" requirements for a namespace ...
-        # https://github.com/ansible/galaxy-importer/blob/master/galaxy_importer/constants.py#L45
-        # NAME_REGEXP = re.compile(r"^(?!.*__)[a-z]+[0-9a-z_]*$")
-        name = name.replace('-', '_').lower()
-        if not NAME_REGEXP.match(name):
-            return None, False
 
         with transaction.atomic():
             namespace, created = Namespace.objects.get_or_create(name=name)
