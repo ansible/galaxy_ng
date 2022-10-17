@@ -133,7 +133,8 @@ class GalaxyNGOAuth2(GithubOAuth2):
                 )
 
             # add the user to the owners
-            legacy_namespace.owners.add(user)
+            if created:
+                legacy_namespace.owners.add(user)
 
         return legacy_namespace, created
 
