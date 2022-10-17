@@ -404,8 +404,8 @@ def test_v1_autocomplete_search(ansible_config):
     assert usernames == [github_user]
 
     # validate autocomplete search only finds the relevant roles
-    sresp = api_client(f'/api/v1/roles/?autocomplete={github_user}')
-    assert sresp['count'] == resp['count']
+    resp2 = api_client(f'/api/v1/roles/?autocomplete={github_user}')
+    assert resp2['count'] == resp['count']
 
     # cleanup
     cleanup_social_user(github_user, ansible_config)
