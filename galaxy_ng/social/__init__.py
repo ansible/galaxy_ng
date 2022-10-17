@@ -101,7 +101,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
         """Create a group in the form of <namespace>:<namespae_name>"""
         with transaction.atomic():
             group, created = \
-                Group.objects.get_or_create_identity(namespace_name, user.username)
+                Group.objects.get_or_create_identity('namespace', namespace_name)
             if created:
                 rbac.add_user_to_group(user, group)
         return group, created
