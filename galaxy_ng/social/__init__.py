@@ -98,7 +98,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
         return name.replace('-', '_').lower()
 
     def _ensure_group(self, namespace_name, user):
-        """Create a group in the form of <namespace>:<namespae_name>"""
+        """Create a group in the form of <namespace>:<namespace_name>"""
         with transaction.atomic():
             group, created = \
                 Group.objects.get_or_create_identity('namespace', namespace_name)
