@@ -64,8 +64,8 @@ class GalaxyNGOAuth2(GithubOAuth2):
         legacy_namespace, _ = self._ensure_legacynamespace(login)
 
         # define namespace, validate and create ...
-        namespace_name = transform_namespace_name(login)
-        if validate_namespace_name(namespace_name):
+        namespace_name = self.transform_namespace_name(login)
+        if self.validate_namespace_name(namespace_name):
 
             # Need user for group and rbac binding
             user = User.objects.filter(username=login).first()
@@ -97,11 +97,11 @@ class GalaxyNGOAuth2(GithubOAuth2):
         """Convert namespace name to valid v3 name."""
         return name.replace('-', '_').lower()
 
-    def _ensure_group(self, namespace_name, user, namespace_name):
-        """Create a group in the form of <namespace>:<login>"""
+    def _ensure_group(self, namespace_name, user):
+        """Create a group in the form of <namespace>:<namespae_name>"""
         with transaction.atomic():
             group, created = \
-                Group.objects.get_or_create_identity(namespace_name, login)
+                Group.objects.get_or_create_identity(namespace_name, user.username)
             if created:
                 rbac.add_user_to_group(user, group)
         return group, created

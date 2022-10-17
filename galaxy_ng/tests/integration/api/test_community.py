@@ -73,7 +73,10 @@ def cleanup_social_user(username, ansible_config):
 
     # cleanup the group
     delete_group(username, api_client=get_client(config=ansible_config("admin")))
-    delete_group(namespace_name  + ':' + username, api_client=get_client(config=ansible_config("admin")))
+    delete_group(
+        namespace_name + ':' + username,
+        api_client=get_client(config=ansible_config("admin"))
+    )
 
     # cleanup the user
     delete_user(username, api_client=get_client(config=ansible_config("admin")))
