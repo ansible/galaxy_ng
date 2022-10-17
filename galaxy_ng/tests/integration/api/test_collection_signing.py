@@ -394,11 +394,8 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
 
-    # The line below is temporary until we have
-    # https://github.com/ansible/galaxy_ng/pull/1455 reverted
-    assert len(collection["signatures"]) == 0
-    # assert len(collection["signatures"]) >= 1
-    # assert collection["signatures"][0]["signing_service"] == signing_service
+    assert len(collection["signatures"]) >= 1
+    assert collection["signatures"][0]["signing_service"] == signing_service
 
     # Copy the collection to /community/
     copy_result = copy_collection_version(
