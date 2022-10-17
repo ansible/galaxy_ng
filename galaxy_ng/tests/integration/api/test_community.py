@@ -390,7 +390,7 @@ def test_v1_autocomplete_search(ansible_config):
     assert resp.get('task') is not None
     wait_for_v1_task(resp=resp, api_client=api_client)
 
-    # start the second sync
+    # start the second sync to ensure second user doesn't get found
     pargs = json.dumps({"github_user": github_user2, "limit": 10}).encode('utf-8')
     resp = api_client('/api/v1/sync/', method='POST', args=pargs)
     assert isinstance(resp, dict)
@@ -409,3 +409,4 @@ def test_v1_autocomplete_search(ansible_config):
 
     # cleanup
     cleanup_social_user(github_user, ansible_config)
+    cleanup_social_user(github_user2, ansible_config)
