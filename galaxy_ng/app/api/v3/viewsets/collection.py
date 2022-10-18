@@ -25,7 +25,7 @@ from rest_framework.response import Response
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.v3.serializers import CollectionUploadSerializer, CollectionVersionSerializer
+from galaxy_ng.app.api.v3.serializers import CollectionUploadSerializer
 from galaxy_ng.app.common import metrics
 from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
 from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT, DeploymentMode
@@ -356,7 +356,3 @@ class CollectionVersionMoveViewSet(api_base.ViewSet, CollectionRepositoryMixing)
             ).repository
 
         return Response(data=response_data, status='202')
-
-
-class CollectionVersionViewSet(pulp_ansible_views.CollectionVersionViewSet):
-    serializer_class = CollectionVersionSerializer

@@ -142,18 +142,18 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags, u
     assert collection["signatures"][0]["pulp_created"] is not None
 
     # Assert that the collection is signed on UI API
-    # collection_on_ui = api_client(
-    #     "/api/automation-hub/_ui/v1/repo/published/"
-    #     f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-    #     f"&sign_state=signed&version={artifact.version}"
-    # )["data"][0]
-    # assert collection_on_ui["sign_state"] == "signed"
-    # metadata = collection_on_ui["latest_version"]["metadata"]
-    # assert len(metadata["signatures"]) >= 1
-    # assert metadata["signatures"][0]["signing_service"] == signing_service
-    # assert metadata["signatures"][0]["signature"] is not None
-    # assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    # assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+    collection_on_ui = api_client(
+        "/api/automation-hub/_ui/v1/repo/published/"
+        f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+        f"&sign_state=signed&version={artifact.version}"
+    )["data"][0]
+    assert collection_on_ui["sign_state"] == "signed"
+    metadata = collection_on_ui["latest_version"]["metadata"]
+    assert len(metadata["signatures"]) >= 1
+    assert metadata["signatures"][0]["signing_service"] == signing_service
+    assert metadata["signatures"][0]["signature"] is not None
+    assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
 @pytest.mark.collection_signing
@@ -220,44 +220,40 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
         f"{api_prefix}/content/staging/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
-
-    # The line below is temporary until we have
-    # https://github.com/ansible/galaxy_ng/pull/1455 reverted
-    assert len(collection["signatures"]) == 0
-    # assert len(collection["signatures"]) >= 1
-    # assert collection["signatures"][0]["signing_service"] == signing_service
-    # assert collection["signatures"][0]["signature"] is not None
-    # assert collection["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    # assert len(collection["signatures"][0]["signature"]) >= 256
-    # assert collection["signatures"][0]["pubkey_fingerprint"] is not None
-    # assert collection["signatures"][0]["pulp_created"] is not None
+    assert len(collection["signatures"]) >= 1
+    assert collection["signatures"][0]["signing_service"] == signing_service
+    assert collection["signatures"][0]["signature"] is not None
+    assert collection["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    assert len(collection["signatures"][0]["signature"]) >= 256
+    assert collection["signatures"][0]["pubkey_fingerprint"] is not None
+    assert collection["signatures"][0]["pulp_created"] is not None
 
     # Assert that the collection is signed on UI API
-    # collection_on_ui = api_client(
-    #     "/api/automation-hub/_ui/v1/repo/staging/"
-    #     f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-    #     f"&sign_state=signed&version={artifact.version}"
-    # )["data"][0]
-    # assert collection_on_ui["sign_state"] == "signed"
-    # metadata = collection_on_ui["latest_version"]["metadata"]
-    # assert len(metadata["signatures"]) >= 1
-    # assert metadata["signatures"][0]["signing_service"] == signing_service
-    # assert metadata["signatures"][0]["signature"] is not None
-    # assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    # assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+    collection_on_ui = api_client(
+        "/api/automation-hub/_ui/v1/repo/staging/"
+        f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+        f"&sign_state=signed&version={artifact.version}"
+    )["data"][0]
+    assert collection_on_ui["sign_state"] == "signed"
+    metadata = collection_on_ui["latest_version"]["metadata"]
+    assert len(metadata["signatures"]) >= 1
+    assert metadata["signatures"][0]["signing_service"] == signing_service
+    assert metadata["signatures"][0]["signature"] is not None
+    assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
     # Assert that the collection is signed on UI API (detail )
-    # collection_on_ui = api_client(
-    #     f"/api/automation-hub/_ui/v1/repo/staging/{NAMESPACE}/{artifact.name}"
-    #     f"/?version={artifact.version}"
-    # )
-    # assert collection_on_ui["sign_state"] == "signed"
-    # metadata = collection_on_ui["latest_version"]["metadata"]
-    # assert len(metadata["signatures"]) >= 1
-    # assert metadata["signatures"][0]["signing_service"] == signing_service
-    # assert metadata["signatures"][0]["signature"] is not None
-    # assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    # assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+    collection_on_ui = api_client(
+        f"/api/automation-hub/_ui/v1/repo/staging/{NAMESPACE}/{artifact.name}"
+        f"/?version={artifact.version}"
+    )
+    assert collection_on_ui["sign_state"] == "signed"
+    metadata = collection_on_ui["latest_version"]["metadata"]
+    assert len(metadata["signatures"]) >= 1
+    assert metadata["signatures"][0]["signing_service"] == signing_service
+    assert metadata["signatures"][0]["signature"] is not None
+    assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
 @pytest.mark.collection_signing
@@ -306,16 +302,12 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
             f"{api_prefix}/content/staging/v3/collections/"
             f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
         )
-
-        # The line below is temporary until we have
-        # https://github.com/ansible/galaxy_ng/pull/1455 reverted
-        assert len(collection["signatures"]) == 0
-        # assert len(collection["signatures"]) >= 1
-        # assert collection["signatures"][0]["signing_service"] == signing_service
+        assert len(collection["signatures"]) >= 1
+        assert collection["signatures"][0]["signing_service"] == signing_service
 
         # Assert that the collection is signed on UI API
-        # collections = get_all_collections_by_repo(api_client)
-        # assert collections["staging"][ckey]["sign_state"] == "signed"
+        collections = get_all_collections_by_repo(api_client)
+        assert collections["staging"][ckey]["sign_state"] == "signed"
 
         # Move the collection to /published/
         cert_result = set_certification(api_client, artifact)
@@ -324,7 +316,7 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
         assert cert_result["version"] == artifact.version
         assert cert_result["href"] is not None
         assert cert_result["metadata"]["tags"] == ["tools"]
-        # assert len(cert_result["signatures"]) >= 1
+        assert len(cert_result["signatures"]) >= 1
 
     # After moving to /published/
     # Assert that the collection is signed on v3 api
@@ -333,31 +325,27 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
         f"{api_prefix}/content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
-
-    # The line below is temporary until we have
-    # https://github.com/ansible/galaxy_ng/pull/1455 reverted
-    assert len(collection["signatures"]) == 0
-    # assert len(collection["signatures"]) >= 1
-    # assert collection["signatures"][0]["signing_service"] == signing_service
-    # assert collection["signatures"][0]["signature"] is not None
-    # assert collection["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    # assert len(collection["signatures"][0]["signature"]) >= 256
-    # assert collection["signatures"][0]["pubkey_fingerprint"] is not None
-    # assert collection["signatures"][0]["pulp_created"] is not None
+    assert len(collection["signatures"]) >= 1
+    assert collection["signatures"][0]["signing_service"] == signing_service
+    assert collection["signatures"][0]["signature"] is not None
+    assert collection["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    assert len(collection["signatures"][0]["signature"]) >= 256
+    assert collection["signatures"][0]["pubkey_fingerprint"] is not None
+    assert collection["signatures"][0]["pulp_created"] is not None
 
     # # Assert that the collection is signed on UI API
-    # collection_on_ui = api_client(
-    #     "/api/automation-hub/_ui/v1/repo/published/"
-    #     f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-    #     f"&sign_state=signed&version={artifact.version}"
-    # )["data"][0]
-    # assert collection_on_ui["sign_state"] == "signed"
-    # metadata = collection_on_ui["latest_version"]["metadata"]
-    # assert len(metadata["signatures"]) >= 1
-    # assert metadata["signatures"][0]["signing_service"] == signing_service
-    # assert metadata["signatures"][0]["signature"] is not None
-    # assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
-    # assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
+    collection_on_ui = api_client(
+        "/api/automation-hub/_ui/v1/repo/published/"
+        f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+        f"&sign_state=signed&version={artifact.version}"
+    )["data"][0]
+    assert collection_on_ui["sign_state"] == "signed"
+    metadata = collection_on_ui["latest_version"]["metadata"]
+    assert len(metadata["signatures"]) >= 1
+    assert metadata["signatures"][0]["signing_service"] == signing_service
+    assert metadata["signatures"][0]["signature"] is not None
+    assert metadata["signatures"][0]["signature"].startswith("-----BEGIN PGP SIGNATURE-----")
+    assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
 @pytest.mark.collection_signing
@@ -406,11 +394,8 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
 
-    # The line below is temporary until we have
-    # https://github.com/ansible/galaxy_ng/pull/1455 reverted
-    assert len(collection["signatures"]) == 0
-    # assert len(collection["signatures"]) >= 1
-    # assert collection["signatures"][0]["signing_service"] == signing_service
+    assert len(collection["signatures"]) >= 1
+    assert collection["signatures"][0]["signing_service"] == signing_service
 
     # Copy the collection to /community/
     copy_result = copy_collection_version(
@@ -524,5 +509,5 @@ def test_upload_signature(api_client, config, settings, upload_artifact):
         f"{api_prefix}/content/staging/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
-    assert len(collection["signatures"]) == 0
-    # assert collection["signatures"][0]["signing_service"] is None
+    assert len(collection["signatures"]) >= 1
+    assert collection["signatures"][0]["signing_service"] is None
