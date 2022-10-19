@@ -413,10 +413,9 @@ class TestUiUserViewSet(BaseTestCase):
             client.force_authenticate(user=user)
             response = self.client.get(self.me_url)
             content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
-            for i in content_admin_permissions:
-                self.assertTrue(response.data["model_permissions"][i]["has_model_permission"])
-            for i in excluded_model_permissions:
-                self.assertFalse(response.data["model_permissions"][i]["has_model_permission"])
+            my_permissions = response.data["model_permissions"]
+            for permission in my_permissions:
+                self.assertEqual(my_permissions[permission]["has_model_permission"], permission in content_admin_permissions)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self.client.force_authenticate(user=user)
