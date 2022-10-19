@@ -421,7 +421,14 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.standalone_only  # This test can't run on cloud yet
-def test_upload_signature(api_client, config, settings, upload_artifact):
+@pytest.mark.parametrize(
+    "require_auth",
+    [
+        True,
+        False,
+    ],
+)
+def test_upload_signature(config, require_auth, settings, upload_artifact):
     """
     1. If staging repository doesn't have a gpgkey, skip test
     2. Generate a collection
@@ -430,6 +437,8 @@ def test_upload_signature(api_client, config, settings, upload_artifact):
     5. Upload the signature to staging
     6. assert collection signature task has spawned
     """
+    api_client = get_client(config=config, request_token=True, require_auth=require_auth)
+
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is not set")
 

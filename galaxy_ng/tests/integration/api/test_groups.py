@@ -20,27 +20,29 @@ API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
 
 
 @pytest.mark.parametrize(
-    "url",
+    'test_data',
     [
-        f"{API_PREFIX}/_ui/v1/groups/",
-        f"{API_PREFIX}/pulp/api/v3/groups/"
-    ],
+        {"url": f"{API_PREFIX}/_ui/v1/groups/", "require_auth": True},
+        {"url": f"{API_PREFIX}/_ui/v1/groups/", "require_auth": False},
+        {"url": f"{API_PREFIX}/pulp/api/v3/groups/", "require_auth": True},
+        {"url": f"{API_PREFIX}/pulp/api/v3/groups/", "require_auth": False},
+    ]
 )
 @pytest.mark.group
 @pytest.mark.role
 @pytest.mark.pulp_api
 @pytest.mark.standalone_only
-def test_group_role_listing(ansible_config, url):
+def test_group_role_listing(ansible_config, test_data):
     """Tests ability to list roles assigned to a namespace."""
 
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(config, request_token=True, require_auth=True)
+    api_client = get_client(config, request_token=True, require_auth=test_data["require_auth"])
 
     # Create Group
     group_name = str(uuid.uuid4())
     payload = {"name": group_name}
-    group_response = api_client(url, args=payload, method="POST")
+    group_response = api_client(test_data["url"], args=payload, method="POST")
     assert group_response["name"] == group_name
 
     # Create Namespace
