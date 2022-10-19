@@ -12,6 +12,7 @@ class SocialGithubClient:
     _api_token = None
     sessionid = None
     csrftoken = None
+    last_response = None
 
     def __init__(
         self,
@@ -64,6 +65,8 @@ class SocialGithubClient:
             f'{self.github_url}/session',
             data={'username': self.username, 'password': self.password}
         )
+        self.last_response = rr1
+
         assert rr1.status_code == 200, f"Failed to auth to github: {rr1.text}"
         self._github_cookies = dict(rr1.cookies)
 
@@ -73,11 +76,28 @@ class SocialGithubClient:
         client_id = 12345
         auth_url = f'{self.github_url}/login/oauth/authorize?scope=user&client_id={client_id}'
 
-        # authorize the application
+        # authorize the application and exepect a redirect to api/complete
         rr2 = self._rs.get(
             auth_url,
             cookies=self._github_cookies,
+            allow_redirects=False
         )
+        self.last_response = rr2
+        assert rr2.status_code == 302, f"Failed to get a redirect from github authorize"
+
+        # Follow redirect to /complete
+        rr3 = self._rs.get(
+            rr2.headers['Location'],
+            cookies=self._github_cookies,
+            allow_redirects=False
+        )
+        self.last_response = rr3
+
+        # Make sure we were redirected to / ...
+        assert rr3.status_code == 302, f"Failed to get redirect from /complete"
+        assert rr3.headers['Location'] == '/', f"Failed to get redirected to / from /complete"
+
+        '''
         assert rr2.status_code == 200, f"Failed to GET auth url {auth_url}"
 
         # extract new csrftoken
@@ -85,6 +105,13 @@ class SocialGithubClient:
 
         # extract sessionid
         self.sessionid = rr2.cookies['sessionid']
+        '''
+
+        # extract new csrftoken
+        self.csrftoken = rr3.cookies['csrftoken']
+
+        # extract sessionid
+        self.sessionid = rr3.cookies['sessionid']
 
     def get_hub_token(self):
 

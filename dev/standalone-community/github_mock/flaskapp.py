@@ -18,6 +18,7 @@ import requests
 from flask import Flask
 from flask import jsonify
 from flask import request
+from flask import redirect
 
 
 app = Flask(__name__)
@@ -36,6 +37,9 @@ else:
 
 # Make it simple to set the API server url or default to upstream
 API_SERVER = os.environ.get('GALAXY_API_SERVER', UPSTREAM)
+
+# How does the client talk to the API?
+CLIENT_API_SERVER = os.environ.get('CLIENT_GALAXY_API_SERVER', 'http://localhost:5001')
 
 print(f'API_SERVER: {API_SERVER}')
 
@@ -119,10 +123,18 @@ def do_authorization():
     username = SESSION_IDS[_gh_sess]
 
     # Tell the backend to complete the login for the user ...
-    url = f'{API_SERVER}/complete/github/'
+    #url = f'{API_SERVER}/complete/github/'
+    url = f'{CLIENT_API_SERVER}/complete/github/'
     token = str(uuid.uuid4())
     ACCESS_TOKENS[token] = username
     url += f'?code={token}'
+
+    # FIXME
+    print(f'REDIRECT_URL: {url}')
+    resp = redirect(url, code=302)
+    return resp
+
+    '''
     print(f'GET {url}')
     rr = requests.get(url, allow_redirects=False)
 
@@ -146,6 +158,7 @@ def do_authorization():
         resp.set_cookie('sessionid', sessionid, samesite='Lax')
 
     return resp
+    '''
 
 
 @app.route('/login/oauth/access_token', methods=['GET', 'POST'])
