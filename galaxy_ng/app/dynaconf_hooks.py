@@ -32,7 +32,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
-    data.update(configure_execution_environments(settings))
 
     # This should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
@@ -528,14 +527,6 @@ def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
     data = {}
     legacy_roles = settings.get("GALAXY_ENABLE_LEGACY_ROLES", False)
     data["GALAXY_FEATURE_FLAGS__legacy_roles"] = legacy_roles
-    return data
-
-
-def configure_execution_environments(settings: Dynaconf) -> Dict[str, Any]:
-    """Set the feature flag for legacy roles from the setting"""
-    data = {}
-    execution_environments = settings.get("GALAXY_ENABLE_EXECUTION_ENVIRONMENTS", True)
-    data["GALAXY_FEATURE_FLAGS__execution_environments"] = execution_environments
     return data
 
 
