@@ -66,12 +66,17 @@ def cleanup_social_user(username, ansible_config):
     resp = admin_client(f'/api/v1/namespaces/?name={username}', method='GET')
     assert resp['count'] == 0
 
+    namespace_name = username.replace('-', '_').lower()
+
     # cleanup the v3 namespace
-    cleanup_namespace(username, api_client=get_client(config=ansible_config("admin")))
+    cleanup_namespace(namespace_name, api_client=get_client(config=ansible_config("admin")))
 
     # cleanup the group
     delete_group(username, api_client=get_client(config=ansible_config("admin")))
-    delete_group('github:' + username, api_client=get_client(config=ansible_config("admin")))
+    delete_group(
+        'namespace:' + namespace_name,
+        api_client=get_client(config=ansible_config("admin"))
+    )
 
     # cleanup the user
     delete_user(username, api_client=get_client(config=ansible_config("admin")))
@@ -216,7 +221,7 @@ def test_social_auth_creates_group(ansible_config):
     with SocialGithubClient(config=cfg) as client:
         resp = client.get('_ui/v1/me/')
         uinfo = resp.json()
-        assert uinfo['groups'][0]['name'] == 'github:gh01'
+        assert uinfo['groups'][0]['name'] == 'namespace:gh01'
 
 
 @pytest.mark.community_only
