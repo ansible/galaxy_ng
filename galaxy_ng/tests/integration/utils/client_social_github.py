@@ -83,7 +83,7 @@ class SocialGithubClient:
             allow_redirects=False
         )
         self.last_response = rr2
-        assert rr2.status_code == 302, f"Failed to get a redirect from github authorize"
+        assert rr2.status_code == 302, "Failed to get a redirect from github authorize"
 
         # Follow redirect to /complete
         rr3 = self._rs.get(
@@ -94,8 +94,8 @@ class SocialGithubClient:
         self.last_response = rr3
 
         # Make sure we were redirected to / ...
-        assert rr3.status_code == 302, f"Failed to get redirect from /complete"
-        assert rr3.headers['Location'] == '/', f"Failed to get redirected to / from /complete"
+        assert rr3.status_code == 302, "Failed to get redirect from /complete"
+        assert rr3.headers['Location'] == '/', "Failed to get redirected to / from /complete"
 
         '''
         assert rr2.status_code == 200, f"Failed to GET auth url {auth_url}"

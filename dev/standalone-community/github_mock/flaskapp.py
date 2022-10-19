@@ -13,7 +13,7 @@
 import copy
 import os
 import uuid
-import requests
+# import requests
 
 from flask import Flask
 from flask import jsonify
@@ -123,14 +123,14 @@ def do_authorization():
     username = SESSION_IDS[_gh_sess]
 
     # Tell the backend to complete the login for the user ...
-    #url = f'{API_SERVER}/complete/github/'
+    # url = f'{API_SERVER}/complete/github/'
     url = f'{CLIENT_API_SERVER}/complete/github/'
     token = str(uuid.uuid4())
     ACCESS_TOKENS[token] = username
     url += f'?code={token}'
 
     # FIXME
-    print(f'REDIRECT_URL: {url}')
+    # print(f'REDIRECT_URL: {url}')
     resp = redirect(url, code=302)
     return resp
 
