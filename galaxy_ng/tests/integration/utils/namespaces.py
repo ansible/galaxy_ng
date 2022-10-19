@@ -52,6 +52,7 @@ def get_all_namespaces(api_client=None, api_version='v3'):
     namespaces = []
     next_page = f'{api_prefix}/{api_version}/namespaces/'
     while next_page:
+        print(f'\n\n\n namespaces next_page:{next_page} \n\n\n')
         resp = api_client(next_page)
         namespaces.extend(resp['data'])
         next_page = resp.get('links', {}).get('next')

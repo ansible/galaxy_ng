@@ -220,6 +220,7 @@ def upload_artifact(
     else:
         n_url = _urljoin(config["url"], "v3", "artifacts", "collections") + "/"
 
+    print(f"\n\n\n upload_artifact n_url:{n_url} \n\n\n")
     resp = client(n_url, args=data, headers=headers, method="POST", auth_required=True)
 
     return resp

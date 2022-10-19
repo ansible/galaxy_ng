@@ -81,6 +81,7 @@ class AnsibeGalaxyHttpClient:
         Make the class callable so that tests won't
         need a complete refactor.
         """
+        print(f"\n\n\n __call__ url:{url} \n\n\n")
         return self.request(url, *args, **kwargs)
 
     @property
