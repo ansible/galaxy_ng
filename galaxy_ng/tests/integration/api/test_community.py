@@ -123,6 +123,9 @@ def test_community_settings(ansible_config):
     assert resp['GALAXY_SIGNATURE_UPLOAD_ENABLED'] is False
     assert resp['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'] is True
     assert resp['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is True
+    assert resp['GALAXY_FEATURE_FLAGS']['execution_environments'] is False
+    assert resp['GALAXY_FEATURE_FLAGS']['legacy_roles'] is True
+    assert resp['GALAXY_CONTAINER_SIGNING_SERVICE'] is None
 
 
 @pytest.mark.community_only
@@ -155,6 +158,22 @@ def test_me_social(ansible_config):
         resp = client.get('_ui/v1/me/')
         uinfo = resp.json()
         assert uinfo['username'] == cfg.get('username')
+
+
+@pytest.mark.community_only
+def test_social_redirect(ansible_config):
+    """ Tests a social auth is redirected to / so the UI doesn't load some incorrect repo path."""
+
+    # Github authorization redirects the client to ...
+    #   <galaxy_ng>/complete/github/?code=d9e30acd653247152bf1&state=vdt3CD6wOtpFDX4PnLsBfi25v1o0f89E
+    # Django responds with 302 redirect to /
+
+    cleanup_social_user('gh01', ansible_config)
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        assert client.last_response.status_code == 302
+        assert client.last_response.headers['Location'] == '/'
 
 
 @pytest.mark.community_only
