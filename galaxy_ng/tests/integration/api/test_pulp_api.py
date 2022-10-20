@@ -100,7 +100,7 @@ def test_pulp_roles_endpoint(ansible_config, require_auth):
     )
     assert TEST_ROLE_NAME == create_resp["name"]
     assert permission in create_resp["permissions"]
-    pulp_href = f"http://localhost:5001{create_resp['pulp_href']}"
+    pulp_href = f"{create_resp['pulp_href']}"
 
     # list roles
     list_response = api_client(f"{api_prefix}/pulp/api/v3/roles/", method="GET")
