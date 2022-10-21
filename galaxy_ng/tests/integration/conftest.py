@@ -18,7 +18,6 @@ from .utils import (
     set_certification,
 )
 from .utils import upload_artifact as _upload_artifact
-from .utils.vault_loading import VaultSecretFetcher
 
 # from orionutils.generator import build_collection
 
@@ -435,6 +434,7 @@ def cleanup_collections(request):
 
 @lru_cache()
 def get_vault_loader():
+    from .utils.vault_loading import VaultSecretFetcher
     vault_settings = {
         'IQE_VAULT_VERIFY': True,
         'IQE_VAULT_URL': 'https://vault.devshift.net',
