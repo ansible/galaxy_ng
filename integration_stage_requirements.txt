@@ -1,0 +1,10 @@
+epdb
+requests
+#ansible-core
+ansible-base
+pytest
+orionutils
+openapi-spec-validator
+jsonschema
+hvac
+importlib_resources

@@ -59,7 +59,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
         ansible_galaxy(
             f"collection publish {artifact2.filename} --server=automation_hub",
             check_retcode=retcode,
-            ansible_config=ansible_config("basic_user", namespace=published.namespace)
+            ansible_config=ansible_config("partner_engineer", namespace=published.namespace)
         )
     except AssertionError:
         if params.xfail:
@@ -82,7 +82,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
             f"collection install -vvv --ignore-cert \
                 {artifact2.namespace}.{artifact2.name}:{artifact2.version} --server=automation_hub",
             check_retcode=False,
-            ansible_config=ansible_config("basic_user"),
+            ansible_config=ansible_config("partner_engineer"),
             # cleanup=False
         )
 
