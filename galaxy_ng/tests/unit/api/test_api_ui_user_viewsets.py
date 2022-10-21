@@ -406,16 +406,16 @@ class TestUiUserViewSet(BaseTestCase):
             "galaxy.delete_group"]
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            self._test_create_or_update(
-            self.client.put, self.me_url, new_user_data, status.HTTP_200_OK, user
-        )
+            self._test_create_or_update(self.client.put, self.me_url,
+                                        new_user_data, status.HTTP_200_OK, user)
             client = APIClient(raise_request_exception=True)
             client.force_authenticate(user=user)
             response = self.client.get(self.me_url)
             content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
             my_permissions = response.data["model_permissions"]
             for permission in my_permissions:
-                self.assertEqual(my_permissions[permission]["has_model_permission"], permission in content_admin_permissions)
+                self.assertEqual(my_permissions[permission]
+                                 ["has_model_permission"], permission in content_admin_permissions)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self.client.force_authenticate(user=user)

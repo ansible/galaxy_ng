@@ -10,6 +10,7 @@ from rest_framework.exceptions import ValidationError
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import PERMISSIONS
 
+
 class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
