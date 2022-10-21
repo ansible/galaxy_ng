@@ -132,24 +132,34 @@ class AnsibleConfigFixture(dict):
     if is_stage_environment():
         PROFILES = {
             "basic_user": {
-                "username": {"vault_path": "secrets/qe/stage/users/aa_no_access", "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/aa_no_access", "vault_key": "password"},
+                "username": {"vault_path": "secrets/qe/stage/users/aa_no_access",
+                             "vault_key": "username"},
+                "password": {"vault_path": "secrets/qe/stage/users/aa_no_access",
+                             "vault_key": "password"},
                 "token": None,
             },
             "partner_engineer": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible_insights", "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible_insights", "vault_key": "password"},
-                "token": {"vault_path": "secrets/qe/stage/users/ansible_insights", "vault_key": "token"},
+                "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                             "vault_key": "username"},
+                "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                             "vault_key": "password"},
+                "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                          "vault_key": "token"},
             },
             "org_admin": {
-                "username": {"vault_path": "secrets/qe/stage/users/rbac_org_admin", "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/rbac_org_admin", "vault_key": "password"},
+                "username": {"vault_path": "secrets/qe/stage/users/rbac_org_admin",
+                             "vault_key": "username"},
+                "password": {"vault_path": "secrets/qe/stage/users/rbac_org_admin",
+                             "vault_key": "password"},
                 "token": None,
             },
             "admin": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible_insights", "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible_insights", "vault_key": "password"},
-                "token": {"vault_path": "secrets/qe/stage/users/ansible_insights", "vault_key": "token"},
+                "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                             "vault_key": "username"},
+                "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                             "vault_key": "password"},
+                "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                          "vault_key": "token"},
             }
         }
 
