@@ -1,5 +1,6 @@
 from django.db import migrations, connection
 from django.conf import settings
+from django.contrib.auth.management import create_permissions
 
 
 OBJECT_PERMISSION_TRANSLATOR = [
@@ -135,6 +136,16 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("core", "view_task"),
     ), "galaxy.task_admin"),
 ]
+
+
+# Ensures that the new permissions are added to the database so that they can
+# be assigned during migrations
+# based off of https://stackoverflow.com/a/40092780
+def initialize_permissions(apps, schema_editor):
+    for app_config in apps.get_app_configs():
+        app_config.models_module = True
+        create_permissions(app_config, apps=apps, verbosity=0)
+        app_config.models_module = None
 
 
 def batch_create(model, objects, flush=False):
@@ -440,13 +451,16 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
+            code=edit_guardian_tables, reverse_code=migrations.RunPython.noop
+        ),
+        migrations.RunPython(
+            code=initialize_permissions,
+        ),
+        migrations.RunPython(
             code=migrate_group_permissions_to_roles, reverse_code=migrations.RunPython.noop,
         ),
         migrations.RunPython(
             code=migrate_user_permissions_to_roles, reverse_code=migrations.RunPython.noop
-        ),
-        migrations.RunPython(
-            code=edit_guardian_tables, reverse_code=migrations.RunPython.noop
         ),
         migrations.RunPython(
             code=clear_model_permissions, reverse_code=migrations.RunPython.noop
