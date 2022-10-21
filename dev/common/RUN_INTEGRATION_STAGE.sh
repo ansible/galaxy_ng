@@ -19,6 +19,6 @@ source "${venv_path}/bin/activate"
 echo "PYTHON: $(which python)"
 pip3 install --upgrade pip wheel
 
-pip3 install -r galaxy_ng/integration_requirements.txt
+pip3 install -r galaxy_ng/integration_stage_requirements.txt
 
 pytest --log-cli-level=DEBUG -m "not standalone_only and not community_only and not rbac_roles and not slow_in_cloud" --junitxml=galaxy_ng-results.xml -v galaxy_ng/galaxy_ng/tests/integration
