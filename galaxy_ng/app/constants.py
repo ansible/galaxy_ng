@@ -1,6 +1,7 @@
 import enum
 from django.utils.translation import gettext_lazy as _
 
+
 class DeploymentMode(enum.Enum):
     STANDALONE = 'standalone'
     INSIGHTS = 'insights'
@@ -30,7 +31,7 @@ PERMISSIONS = {
     },
     "galaxy.change_namespace": {
         "name": _("Change namespace"),
-        "object_description":_( "Edit this namespace."),
+        "object_description": _("Edit this namespace."),
         "global_description": _("Edit any existing namespace."),
         "ui_category": _("Collection Namespaces"),
     },
@@ -106,7 +107,7 @@ PERMISSIONS = {
         "global_description": _("View any existing group in the system."),
         "ui_category": _("Groups"),
     },
-        "ansible.change_collectionremote": {
+    "ansible.change_collectionremote": {
         "name": _("Change collection remote"),
         "object_description": _("Edit this collection remote."),
         "global_description": _("Edit any collection remote existing in the system."),
@@ -130,7 +131,7 @@ PERMISSIONS = {
         "global_description": _("Edit all objects in any container namespace in the system."),
         "ui_category": _("Execution Environments"),
     },
-      "container.namespace_modify_content_containerpushrepository" : {
+    "container.namespace_modify_content_containerpushrepository" : {
         "name": _("Change image tags"),
         "object_description": _("Edit an image's tag in this container namespace"),
         "global_description": _("Edit an image's tag in any container namespace the system."),
