@@ -6,10 +6,15 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+import json
 import time
 import uuid
-import yaml
+from typing import List, Union
+from ansible.galaxy.api import _urljoin
 
+import yaml
+from urllib.parse import urljoin
+from urllib.parse import urlparse
 from contextlib import contextmanager
 
 from ansible.galaxy.api import GalaxyError
@@ -22,6 +27,10 @@ from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from .tasks import wait_for_task
 from .urls import wait_for_url
 
+try:
+    import importlib.resources as pkg_resources
+except ModuleNotFoundError:
+    import importlib_resources as pkg_resources
 
 logger = logging.getLogger(__name__)
 
@@ -260,6 +269,78 @@ def set_certification(client, collection, level="published"):
     For use in instances that use repository-based certification and that
     do not have auto-certification enabled.
     """
+
+    if client.config["upload_signatures"]:
+        # Write manifest to temp file
+        tf = tarfile.open(collection.filename, mode="r:gz")
+        tdir = tempfile.TemporaryDirectory()
+        keyring = tempfile.NamedTemporaryFile("w")
+        tf.extract("MANIFEST.json", tdir.name)
+
+        # Setup local keystore
+        # gpg --no-default-keyring --keyring trustedkeys.gpg
+        # gpg --import clowder-data.key
+        with pkg_resources.path("dev.data", "ansible-sign.gpg") as keyfilename:
+            subprocess.run(
+                [
+                    "gpg",
+                    "--quiet",
+                    "--batch",
+                    "--pinentry-mode",
+                    "loopback",
+                    "--yes",
+                    "--no-default-keyring",
+                    "--keyring",
+                    keyring.name,
+                    "--import",
+                    keyfilename,
+                ]
+            )
+
+        # Run gpg to generate signature
+        with pkg_resources.path("dev.data", "collection_sign.sh") as collection_sign:
+            result = subprocess.check_output(
+                [collection_sign, os.path.join(tdir.name, "MANIFEST.json")],
+                env={
+                    "KEYRING": keyring.name,
+                },
+            )
+            signature_filename = json.loads(result)["signature"]
+
+        # Prepare API endpoint URLs needed to POST signature
+        sig_url = urljoin(
+            client.config["url"],
+            "pulp/api/v3/content/ansible/collection_signatures/",
+        )
+        rep_obj_url = urljoin(
+            client.config["url"],
+            "pulp/api/v3/repositories/ansible/ansible/?name=staging",
+        )
+        repository_pulp_href = client(rep_obj_url)["results"][0]["pulp_href"]
+
+        artifact_obj_url = f"_ui/v1/repo/staging/{collection.namespace}/" f"{collection.name}/"
+        all_versions = client(artifact_obj_url)["all_versions"]
+        one_version = [v for v in all_versions if v["version"] == collection.version][0]
+        artifact_pulp_id = one_version["id"]
+        # FIXME: used unified uirl join utility below
+        artifact_pulp_href = (
+            "/"
+            + _urljoin(
+                urlparse(client.config["url"]).path,
+                "pulp/api/v3/content/ansible/collection_versions/",
+                artifact_pulp_id,
+            )
+            + "/"
+        )
+
+        data = {
+            "repository": repository_pulp_href,
+            "signed_collection": artifact_pulp_href,
+        }
+        kwargs = setup_multipart(signature_filename, data)
+        resp = client(sig_url, method="POST", auth_required=True, **kwargs)
+        wait_for_task(client, resp)
+
     if client.config["use_move_endpoint"]:
         url = (
             f"v3/collections/{collection.namespace}/{collection.name}/versions/"
@@ -434,3 +515,55 @@ def delete_all_collections_in_namespace(api_client, namespace_name):
                 time.sleep(SLEEP_SECONDS_ONETIME)
             else:
                 raise Exception(ge)
+
+
+def setup_multipart(path: str, data: dict) -> dict:
+    buffer = []
+    boundary = b"--" + uuid.uuid4().hex.encode("ascii")
+    filename = os.path.basename(path)
+    # part_boundary = b'--' + to_bytes(boundary)
+
+    buffer += [
+        boundary,
+        b'Content-Disposition: file; name="file"; filename="%s"' % filename.encode("ascii"),
+        b"Content-Type: application/octet-stream",
+    ]
+    buffer += [
+        b"",
+        open(path, "rb").read(),
+    ]
+
+    for name, value in data.items():
+        add_multipart_field(boundary, buffer, name, value)
+
+    buffer += [
+        boundary + b"--",
+    ]
+
+    data = b"\r\n".join(buffer)
+    headers = {
+        "Content-type": "multipart/form-data; boundary=%s"
+        % boundary[2:].decode("ascii"),  # strip --
+        "Content-length": len(data),
+    }
+
+    return {
+        "args": data,
+        "headers": headers,
+    }
+
+
+def add_multipart_field(
+    boundary: bytes, buffer: List[bytes], name: Union[str, bytes], value: Union[str, bytes]
+):
+    if isinstance(name, str):
+        name = name.encode("utf8")
+    if isinstance(value, str):
+        value = value.encode("utf8")
+    buffer += [
+        boundary,
+        b'Content-Disposition: form-data; name="%s"' % name,
+        b"Content-Type: text/plain",
+        b"",
+        value,
+    ]

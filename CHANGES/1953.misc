@@ -1,0 +1,1 @@
+Implement methods to fetch stage credentials from Vault and update integration tests to be run against stage

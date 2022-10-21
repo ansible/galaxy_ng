@@ -83,6 +83,7 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.synclist
 @pytest.mark.cloud_only
+@pytest.mark.slow_in_cloud
 def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
     """Edit SyncList object to exclude a collection,
     confirm see in content/{SyncList.name}/v3/excludes/
