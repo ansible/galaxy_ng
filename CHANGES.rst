@@ -13,6 +13,17 @@ Changelog
 
 .. towncrier release notes start
 
+4.6.2 (2022-10-21)
+Bugfixes
+--------
+
+- Fix migration 0029 when upgrading from 4.2 to 4.6.
+  `AAH-1994 <https://issues.redhat.com/browse/AAH-1994>`_
+
+
+----
+
+
 4.6.1 (2022-10-14)
 Upgrading ansible-lint.
 
