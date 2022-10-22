@@ -79,6 +79,17 @@ def create_unused_namespace(api_client=None):
     return ns
 
 
+def create_namespace(name, api_client=None):
+    """ Make a namespace for testing """
+
+    assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
+    payload = {'name': name, 'groups': []}
+    api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
+    return name
+
+
 def cleanup_namespace(name, api_client=None):
 
     assert api_client is not None, "api_client is a required param"

@@ -21,6 +21,7 @@ from .errors import (
     CapturingGalaxyError,
 )
 from .namespaces import (
+    create_namespace,
     generate_namespace,
     get_all_namespaces,
     generate_unused_namespace,
@@ -57,6 +58,7 @@ __all__ = (
     get_all_repository_collection_versions,
     TaskWaitingTimeout,
     CapturingGalaxyError,
+    create_namespace,
     generate_namespace,
     get_all_namespaces,
     generate_unused_namespace,

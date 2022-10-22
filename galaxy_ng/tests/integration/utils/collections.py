@@ -27,8 +27,11 @@ logger = logging.getLogger(__name__)
 
 
 class ArtifactFile:
-    def __init__(self, fn):
+    def __init__(self, fn, namespace=None, name=None, version=None):
         self.filename = fn
+        self.namespace = namespace
+        self.name = name
+        self.version = version
 
 
 def build_collection(
@@ -40,9 +43,16 @@ def build_collection(
     extra_files=None,
     namespace=None,
     name=None,
+    roles=None,
+    readme=None,
     tags=None,
     version=None,
     dependencies=None,
+    description='your collection description',
+    documentation='http://docs.example.com',
+    homepage='http://example.com',
+    issues='http://example.com/issue/tracker',
+    repository='http://example.com/repository',
     use_orionutils=True
 ):
 
@@ -72,12 +82,15 @@ def build_collection(
     if dependencies is not None:
         config['dependencies'] = dependencies
 
+    if roles is None:
+        roles = ['role1']
+
     if tags is not None:
         config['tags'] = tags
 
     # workaround for cloud importer config
-    if 'tools' not in config['tags']:
-        config['tags'].append('tools')
+    if tags is None:
+        config['tags'] = ['tools']
 
     if use_orionutils:
         return _build_collection(
@@ -101,15 +114,21 @@ def build_collection(
         rolesdir = os.path.join(basedir, 'roles')
 
         # make a role
-        cmd = "ansible-galaxy role init docker_role"
-        pid2 = subprocess.run(cmd, shell=True, cwd=rolesdir, stdout=subprocess.PIPE)
-        assert pid2.returncode == 0
+        for role_name in roles:
+            cmd = f"ansible-galaxy role init {role_name}"
+            pid2 = subprocess.run(cmd, shell=True, cwd=rolesdir, stdout=subprocess.PIPE)
+            assert pid2.returncode == 0
 
         # fix galaxy.yml
         galaxy_file = os.path.join(basedir, 'galaxy.yml')
         with open(galaxy_file, 'r') as f:
             meta = yaml.safe_load(f.read())
         meta.update(config)
+        meta['description'] = description
+        meta['documentation'] = documentation
+        meta['homepage'] = homepage
+        meta['issues'] = issues
+        meta['repository'] = repository
         with open(galaxy_file, 'w') as f:
             f.write(yaml.dump(meta))
 
@@ -121,6 +140,15 @@ def build_collection(
         if not os.path.exists(runtime_file):
             with open(runtime_file, 'w') as f:
                 f.write(yaml.dump({'requires_ansible': '>=2.13.0'}))
+
+        if readme is not None:
+            with open(os.path.join(basedir, 'README.md'), 'w') as f:
+                f.write(readme)
+
+        # cleanup the default readme in plugins
+        preadme = os.path.join(basedir, 'plugins', 'README.md')
+        if os.path.exists(preadme):
+            os.remove(preadme)
 
         # build it
         cmd = "ansible-galaxy collection build ."
@@ -138,7 +166,7 @@ def build_collection(
         dst = os.path.join(dstdir, os.path.basename(fn))
         shutil.copy(fn, dst)
 
-    return ArtifactFile(dst)
+    return ArtifactFile(dst, namespace=namespace, name=name, version=version)
 
 
 def upload_artifact(
