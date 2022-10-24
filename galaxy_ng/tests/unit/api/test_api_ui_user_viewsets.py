@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app.models import auth as auth_models
-
+from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES
 from .base import BaseTestCase, get_current_ui_url
 
 log = logging.getLogger(__name__)
@@ -371,6 +371,60 @@ class TestUiUserViewSet(BaseTestCase):
             self.client.force_authenticate(user=self.admin_user)
             response = client.delete(url, format="json")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_me_content_admin_permissions(self):
+        user = auth_models.User.objects.create(username="content_admin_user")
+        user.save()
+
+        group = self._create_group(
+            "",
+            "users_with_content_admin_permissions",
+            users=[user],
+            roles=["galaxy.content_admin"],
+        )
+        self.client.force_authenticate(user=user)
+
+        new_user_data = {
+            "username": "content_admin_user",
+            "first_name": "Tsrif",
+            "last_name": "Tsal",
+            "email": "email@email.com",
+            "groups": [{"id": group.id, "name": group.name}],
+        }
+
+        excluded_model_permissions = [
+            "core.change_task",
+            "core.delete_task",
+            "core.view_task",
+            "galaxy.view_user",
+            "galaxy.change_group",
+            "galaxy.view_group",
+            "galaxy.delete_user",
+            "galaxy.change_user",
+            "galaxy.add_user",
+            "galaxy.add_group",
+            "galaxy.delete_group"]
+
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
+            self._test_create_or_update(self.client.put, self.me_url,
+                                        new_user_data, status.HTTP_200_OK, user)
+            client = APIClient(raise_request_exception=True)
+            client.force_authenticate(user=user)
+            response = self.client.get(self.me_url)
+            content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
+            my_permissions = response.data["model_permissions"]
+            for permission in my_permissions:
+                self.assertEqual(my_permissions[permission]
+                                 ["has_model_permission"], permission in content_admin_permissions)
+
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
+            self.client.force_authenticate(user=user)
+            response = self.client.get(self.me_url)
+            content_admin_permissions = LOCKED_ROLES["galaxy.content_admin"]["permissions"]
+            for i in content_admin_permissions:
+                self.assertTrue(response.data["model_permissions"][i]["has_model_permission"])
+            for i in excluded_model_permissions:
+                self.assertFalse(response.data["model_permissions"][i]["has_model_permission"])
 
     @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
     def test_superuser_can_not_be_deleted(self):
