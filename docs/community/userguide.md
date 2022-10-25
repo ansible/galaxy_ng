@@ -113,4 +113,4 @@ Collections can be uploaded either by the ansible galaxy CLI or in the GalaxyNG 
 3. In the center page, click on the tab in the upper middle that says "My namespaces"
 4. Click "view collections" on one of the namespaces listed.
 5. If the collection has no previous versions, click on the blue "Upload Collection" button and follow the prompts.
-6. If the collection has previous verisons, click the vertical 3 dot hamburger menu on the upper right and choose "upload new version" and then follow the prompts.
+6. If the collection has previous versions, click the vertical 3 dot hamburger menu on the upper right and choose "upload new version" and then follow the prompts.
