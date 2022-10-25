@@ -468,7 +468,11 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
             group_type_class = pkg_resources.EntryPoint.parse(
                 f"__name = {classpath}"
             ).resolve()
-            data["AUTH_LDAP_GROUP_TYPE"] = group_type_class(name_attr="cn")
+            group_type_params = settings.get(
+                "AUTH_LDAP_GROUP_TYPE_PARAMS",
+                default={"name_attr": "cn"}
+            )
+            data["AUTH_LDAP_GROUP_TYPE"] = group_type_class(**group_type_params)
 
         if isinstance(AUTH_LDAP_USER_ATTR_MAP, str):
             try:
