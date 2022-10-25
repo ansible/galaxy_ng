@@ -1,3 +1,4 @@
+import os
 import re
 import socket
 
@@ -14,6 +15,7 @@ from urllib3.connection import HTTPConnection
 from urllib3.connectionpool import HTTPConnectionPool
 
 from galaxy_importer.schema import MAX_LENGTH_NAME, MAX_LENGTH_VERSION
+from galaxy_ng.app.constants import AAP_VERSION_FILE_PATH
 
 CollectionFilename = namedtuple("CollectionFilename", ["namespace", "name", "version"])
 
@@ -163,3 +165,10 @@ class GetObjectByIdMixin:
             return self.get_queryset().get(pk=self.kwargs['id'])
         except (ObjectDoesNotExist, ValidationError):
             raise Http404
+
+
+def get_aap_version():
+    if os.path.isfile(AAP_VERSION_FILE_PATH):
+        with open(AAP_VERSION_FILE_PATH, "r") as f:
+            return f.read().strip('\n')
+    return None

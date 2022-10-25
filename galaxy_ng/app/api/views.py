@@ -13,6 +13,7 @@ from rest_framework.reverse import reverse
 
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api.utils import get_aap_version
 
 
 # define the version matrix at the module level to avoid the redefinition on every API call.
@@ -30,6 +31,9 @@ VERSIONS = {
     "pulp_container_version": apps.get_app_config('container').version,
 }
 
+aap_version = get_aap_version()
+if aap_version:
+    VERSIONS.update({"aap_version": aap_version})
 
 # Add in v1 support if configured
 if settings.GALAXY_ENABLE_LEGACY_ROLES:
