@@ -48,10 +48,10 @@ def test_search_collections(ansible_config):
 
     # define some collections
     specs = [
-        ('community', 'cloud', '1.0.0'),
-        ('ibm', 'blue', '2.0.0', ['big', 'parent']),
-        ('redhat', 'red', '3.0.0', ['openshift', 'valueadd', 'child']),
-        ('alma', 'notred', '4.0.0'),
+        ('community', 'cloud', '1.0.0', ['tag1']),
+        ('ibm', 'blue', '2.0.0', ['tag2']),
+        ('redhat', 'red', '3.0.0', ['tag3']),
+        ('alma', 'notred', '4.0.0', ['tag4']),
         # ('community', 'cloud', '1.0.1'),
     ]
 
