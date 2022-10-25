@@ -49,7 +49,7 @@ token = <your-api-token>
 
 ## Finding Roles
 
-Standalone roles are not yet presented in the UI, so search is only availabe via the api or galaxy cli.
+Standalone roles are not yet presented in the UI, so search is only available via the api or galaxy cli.
 
 The v1 rest api has filter parameter support similar to the current code on https://galaxy.ansible.com.
 
