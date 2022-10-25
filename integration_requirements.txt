@@ -1,7 +1,7 @@
 epdb
 requests
-#ansible-core
-ansible-base
+ansible-core
+#ansible-base
 pytest
 orionutils
 openapi-spec-validator
