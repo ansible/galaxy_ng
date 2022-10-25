@@ -27,12 +27,7 @@ def test_ldap_is_enabled(ansible_config, settings):
 
     config = ansible_config("admin")
     api_client = get_client(config, request_token=False, require_auth=True)
-    assert (
-        api_client("/api/automation-hub/_ui/v1/settings/")[
-            "GALAXY_AUTH_LDAP_ENABLED"
-        ]
-        is True
-    )
+    assert api_client("/api/automation-hub/_ui/v1/settings/")["GALAXY_AUTH_LDAP_ENABLED"] is True
 
 
 @pytest.mark.standalone_only
