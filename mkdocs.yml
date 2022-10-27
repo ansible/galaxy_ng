@@ -36,6 +36,10 @@ nav:
         - Development setup: dev/setup.md
         # - Tests: dev/tests.md
     - Tags: tags.md
+    - Community:
+        - Overview: community/overview.md
+        - User Guide: community/userguide.md
+        - Development: community/devstack.md
 theme:
   features:
       - search.suggest
