@@ -90,10 +90,14 @@ Future support for collection search in the ansible-galaxy CLI is [TBD](https://
 
 Role installs should work as they did before with https://galaxy.ansible.com
 
+`ansible-galaxy role install geerlingguy.docker`
+
 
 ## Installing Collections
 
 Collection installs should work as they did before with https://galaxy.ansible.com
+
+`ansible-galaxy collection install community.general`
 
 
 ## Importing Roles

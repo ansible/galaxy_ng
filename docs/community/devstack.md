@@ -45,7 +45,7 @@ Access control over collections is controlled by the v3 collection namespaces an
 
 ## Docker compose
 
-For development work on the galaxy_ng project or when integration testing a pulp_ansible+galaxy_ng feature, docker-compose is the preferred pathway. With all the moving parts in the stack, docker-compose is the simplest way to spin up a functional dev environment.
+**For development work on the galaxy_ng project or when integration testing a pulp_ansible+galaxy_ng feature, docker-compose is the preferred pathway. With all the moving parts in the stack, docker-compose is the simplest way to spin up a functional dev environment.**
 
 !!! warning
     docker-compose 2.x (the golang rewrite) has compatibility issues with our current stack, so please use the 1.x version that was written in python.
