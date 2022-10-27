@@ -85,11 +85,11 @@ Inside .compose.env, you'll find a commented out line referencing `ANSIBLE_HUB_U
 
 For development work on the UI, it's easier to launch the webpack dev server outside the compose stack. The npm start scripts and configuration will have it redirect api calls to http://localhost:5001 by default, so no hacking is necessary to make it work locally.
 
-1. Install [NVM](https://github.com/nvm-sh/nvm)
-2. Use NVM to install and set the version to 16. "nvm install 16"
+1. Install [NVM](https://github.com/nvm-sh/nvm) to easily manage node.js versions.
+2. Use NVM to install and set the version to 16: `nvm install 16`,
 3. Clone the [ansible-hub-ui](https://github.com/ansible/ansible-hub-ui) repo to the desired location.
-4. From the checkout, run "npm install"
-5. From the checkout, run "npm run start-community"
+4. From the checkout, run `npm install`.
+5. From the checkout, run `npm run start-community`.
 
 ## Testing
 
@@ -99,7 +99,7 @@ The GalaxyNG project is a "test driven development" (TDD) project. Our interpret
 
 More focus has been spent on the integration tests, but there are a few unit tests in the project. The compose stack must be running to launch unit tests, as they are using django and postgres with a temporary database to do real SQL calls that are incompatible with sqlite.
 
-To launch units, execute "make docker/test/unit". Specific tests can be selected by running "TEST=xyz make docker/test/unit".
+To launch units, execute `make docker/test/unit`. Specific tests can be selected by running `TEST=xyz make docker/test/unit`.
 
 
 ### Functional
@@ -109,11 +109,11 @@ Pulp has a testing concept known as [functional tests](https://docs.pulpproject.
 
 ### Integration
 
-The GalaxyNG project backs the Red Hat product named "Automation HUB". As it is a product, it had a formal inside QE team testing release features with their own internal frameworks built around pytest. We decided to "shift left" on integration testing and put it on developers to write integration tests along with their pullrequests (TDD). The initial batch of integration tests came from forking the internal tests and pulling out elements of the testing framework that were either too complicated or reliant on systems behind the corporate firewall. Since that time, the tests have grown substantially and comprise a much larger level of coverage. The integration tests aim to be as simple as possible to run and "framework light" in the sense that you really only need pytest, python-requests and ansible-core. Most integration tests are instantiating a REST api client that then talks to the api and asserts certain behaviors such as return codes, response types/shape and errors.
+The GalaxyNG project backs the Red Hat product named "Automation HUB". As it is a product, it has a formal QE team testing release features with their own private internal frameworks built around pytest. We decided to "shift left" on integration testing and put it on developers to write integration tests along with their pullrequests (TDD). The initial batch of integration tests came from forking the internal tests and pulling out elements of the testing framework that were either too complicated or reliant on systems behind the corporate firewall. Since that time, the tests have grown substantially and comprise a much larger level of coverage. The integration tests aim to be as simple as possible to run and "framework light" in the sense that you really only need pytest, python-requests and ansible-core. Most integration tests are instantiating a REST api client that then talks to the api and asserts certain behaviors such as return codes, response types/shape and errors.
 
-Each docker-compose profile has it's own RUN_INTEGRATION.sh file in the dev/<profile>/ directory that sets necessary variables and pytest marks suitable for that environment. The community script (dev/standalone-community/RUN_INTEGRATION.sh) is mostly just setting the '-m community' argument for pytest so that it only runs the tests that have been [marked](https://docs.pytest.org/en/7.1.x/how-to/mark.html) as such. Once you have the stack running with the appropriate config, you can execute ./dev/standalone-community/RUN_INTEGRATION.sh to launch the tests. Specific test are easiest to call by appending -k "<testname>" to the command.
+Each docker-compose profile has it's own `RUN_INTEGRATION.sh` file in the `dev/<profile>/` directory that sets necessary variables and pytest marks suitable for that environment. The community script `dev/standalone-community/RUN_INTEGRATION.sh` is mostly just setting the `-m community` argument for pytest so that it only runs the tests that have been [marked](https://docs.pytest.org/en/7.1.x/how-to/mark.html) as such. Once you have the stack running with the appropriate config, you can execute ./dev/standalone-community/RUN_INTEGRATION.sh to launch the tests. Specific test are easiest to call by appending -k "<testname>" to the command.
 
-If you write a new test specific to the community profile, please add a "@pytest.mark.community" decorator to the test function. Currently, all community related test are in https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/api/test_community.py and https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/cli/test_community.py. Other files can be added as needed as long as they have a suitable filename and the relevant pytest marks.
+If you write a new test specific to the community profile, please add a `@pytest.mark.community` decorator to the test function. Currently, all community related test are in https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/api/test_community.py and https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/cli/test_community.py. Other files can be added as needed as long as they have a suitable filename and the relevant pytest marks.
 
 
 ## Commits
@@ -136,4 +136,4 @@ Issue: AAH-XXX
 Signed-off-by: First Last <email@domain>
 ```
 
-If you are working on a bug or feature not tracked in a jira ticket, its' fine to use "No-Issue" instead of "Issue: AAH-XXX". If you are working on a jira ticket, you will need to create a suitable changelog file in [CHANGES](https://github.com/ansible/galaxy_ng/tree/master/CHANGES) folder.
+If you are working on a bug or feature not tracked in a jira ticket, it's fine to use "No-Issue" instead of "Issue: AAH-XXX". If you are working on a jira ticket, you will need to create a suitable changelog file in [CHANGES](https://github.com/ansible/galaxy_ng/tree/master/CHANGES) folder.
