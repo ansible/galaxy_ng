@@ -61,7 +61,7 @@ curl 'https://beta-galaxy.ansible.com/api/v1/roles/?github_user=geerlingguy'
 curl 'https://beta-galaxy.ansible.com/api/v1/roles/?keyword=docker'
 ```
 
-The ansible-galaxy CLI also support role search
+The ansible-galaxy CLI also supports role search
 
 ```bash
 ansible-galaxy role search --help
@@ -71,17 +71,17 @@ ansible-galaxy role search --help
 ## Finding Collections
 Collections do have search support in the UI.
 
-1. In the left-nav click "Collections"
-2. choose the appropriate repository in the dropdown.
-3. Choose keywords or tag
-4. Type the term or select a tag to filter the list of results
+1. In the left-nav click "Collections".
+2. Choose the appropriate repository in the dropdown.
+3. Choose keywords or tag.
+4. Type the term or select a tag to filter the list of results.
 
 !!! What repository?
 
     We're currently synchronizing all collections from https://galaxy.ansible.com into the "community" repository,
     but will soon attempt to change that to the "published" repository.
 
-Future support for collection search in the ansible-galaxy CLI is [TBD](https://issues.redhat.com/browse/AAH-1968)
+Future support for collection search in the ansible-galaxy CLI is [TBD](https://issues.redhat.com/browse/AAH-1968).
 
 
 ## Installing Roles

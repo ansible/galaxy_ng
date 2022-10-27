@@ -57,29 +57,29 @@ The galaxy_ng project is a highly configurable application, but only at startup 
 The "community" profile of galaxy_ng is a combination of settings driven by the docker-compose files found in [the standalone-community directory](https://github.com/ansible/galaxy_ng/tree/master/dev/standalone-community). To get his profile to run, you must do a few things:
 
 1. Copy the ".compose.env.example" file at the root of the repository to a new file named ".compose.env".
-2. Change the COMPOSE_PROFILE value in ".compose.env" from "standalone" to "standalone-community".
-3. Add SOCIAL_AUTH_GITHUB_KEY=<value> to the bottom of ".compose.env".
-4. Add SOCIAL_AUTH_GITHUB_SECRET=<value> to the bottom of ".compose.env".
-5. Add SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/" to the bottom of galaxy_ng/app/settings.py
-6. Add SOCIAL_AUTH_REDIRECT_IS_HTTPS = True to the bottom of galaxy_ng/app/settings.py if your stack will be behind an http server with SSL enabled.
+2. Change the `COMPOSE_PROFILE` value in ".compose.env" from "standalone" to "standalone-community".
+3. Add `SOCIAL_AUTH_GITHUB_KEY=<value>` to the bottom of ".compose.env".
+4. Add `SOCIAL_AUTH_GITHUB_SECRET=<value>` to the bottom of ".compose.env".
+5. Add `SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/"` to the bottom of galaxy_ng/app/settings.py
+6. Add `SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to the bottom of galaxy_ng/app/settings.py if your stack will be behind an http server with SSL enabled.
 
-The github key and secret are provided by configuring an oauth account on github.com under your user's developer settings. The oauth application config needs to have a valid+resolvable homepage url and the callback url should be the same host with "/complete/github/" as the path. For local testing, you can use something like http://localhost:8002 as the host.
+The github key and secret are provided by configuring an oauth account on github.com under your user's developer settings. The oauth application config needs to have a valid and resolvable homepage url and the callback url should be the same host with "/complete/github/" as the path. For local testing, you can use http://localhost:8002 as base url.
 
 Afterwards, the stack can be created and spun up via:
 
-1. make docker/all
-2. ./compose up
+1. `make docker/all`
+2. `./compose up`
 
 
-You can how reach the api at http://localhost:5001. The makefile targets created a couple test users, namely admin:admin for the primary superuser. This is purely an API stack with no UI. That makes it difficult to test and use github users, so see the next section about adding the UI.
+You can now reach the api at http://localhost:5001. The makefile targets created a couple test users, namely admin:admin for the primary superuser. This is purely an API stack with no UI. That makes it difficult to test and use github users, so see the next section about adding the UI.
 
 
 ### React.js UI
 
-To connect to UI, the default address is http://localhost:8002. If social auth is enabled, you'll be forced to auth via github if clicking on the "login" link at the top right of the page. The presence of SOCIAL_AUTH_GITHUB_KEY & SOCIAL_AUTH_GITHUB_SECRET in the backend configuration triggers dynaconf to set a feature flag for external auth that the UI reads and alters the login link accordingly. If you want to bypass github and use a local django user, go directly to the http://localhost:8002/ui/login url and login that way.
+To connect to the UI, the default address is http://localhost:8002. If social auth is enabled, you'll be forced to auth via Github if clicking on the "login" link at the top right of the page. The presence of `SOCIAL_AUTH_GITHUB_KEY` & `SOCIAL_AUTH_GITHUB_SECRET` in the backend configuration triggers dynaconf to set a feature flag for external auth that the UI reads and alters the login link accordingly. If you want to bypass github and use a local django user, go directly to the http://localhost:8002/ui/login url and login that way.
 
 #### docker-compose
-Inside .compose.env, you'll find a commented out line referencing ANSIBLE_HUB_UI_PATH. If you want to add a UI to the compose stack, this needs to be uncommented and set to a valid absolute path for a checkout of [ansible-hub-ui](https://github.com/ansible/ansible-hub-ui). The compose spin up should properly allocate an alpine container with the appropriate node.js version and install+build+launch the UI.
+Inside .compose.env, you'll find a commented out line referencing `ANSIBLE_HUB_UI_PATH`. If you want to add a UI to the compose stack, this needs to be uncommented and set to a valid absolute path for a checkout of [ansible-hub-ui](https://github.com/ansible/ansible-hub-ui). The compose spin up should properly allocate an alpine container with the appropriate node.js version and install+build+launch the UI.
 
 #### starting directly
 
