@@ -254,8 +254,6 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
 # /api/automation-hub/_ui/v1/execution-environments/remotes/
 # /api/automation-hub/_ui/v1/execution-environments/remotes/{pulp_id}/
 
-# /api/automation-hub/_ui/v1/execution-environments/repositories/{base_path}/_content/sync/
-
 @pytest.fixture
 def local_container():
     return ReusableLocalContainer('int_tests')

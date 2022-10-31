@@ -157,7 +157,7 @@ def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
     api_client = get_client(config, request_token=True, require_auth=require_auth)
 
     delete_resp = api_client(
-        f"{api_prefix}/_ui/v1/execution-environments/repositories/{name}/", method="DELETE"
+        f"{api_prefix}/v3/plugin/execution-environments/repositories/{name}/", method="DELETE"
     )
     task_url = delete_resp["task"][len('/api/automation-hub/'):]
 
@@ -166,4 +166,5 @@ def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
 
     wait_for_task(api_client, delete_resp)
     with pytest.raises(GalaxyError, match=REGEX_40X):
-        api_client(f"{api_prefix}/_ui/v1/execution-environments/repositories/{name}/", method="GET")
+        api_client(
+            f"{api_prefix}/v3/plugin/execution-environments/repositories/{name}/", method="GET")
