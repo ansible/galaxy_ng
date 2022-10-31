@@ -59,14 +59,18 @@ https://docs.pulpproject.org/pulp_container/authentication.html
 PULP_TOKEN_AUTH_DISABLED=true
 ```
 
+### Required setting
+
 `django_auth_ldap` must be included as the first authentication backend, there is a preset called
-`ldap` (you can set it to `custom` if you really want to override `PULP_AUTHENTICATION_BACKENDS` variable)
+`ldap`
 
 ```bash
 PULP_AUTHENTICATION_BACKEND_PRESET=ldap
 ```
 
-Specific django_auth_ldap settings
+> You can set it to `custom` if you really want to override `PULP_AUTHENTICATION_BACKENDS` variable.
+
+### Required Specific django_auth_ldap settings
 
 !!! tip
     depending on the LDAP server some of the following settings might need change.
@@ -86,7 +90,23 @@ PULP_AUTH_LDAP_GROUP_SEARCH_FILTER = "(objectClass=Group)"
 PULP_AUTH_LDAP_GROUP_TYPE_CLASS="django_auth_ldap.config:GroupOfNamesType"
 ```
 
-Optional variables:
+### Customizing Group Type
+
+In some cases you might want to use a different group type class, for example if you want to use
+`MemberDNGroupType` you can set it but also have to set AUTH_LDAP_GROUP_TYPE_PARAMS as follows:
+
+```bash
+PULP_AUTH_LDAP_GROUP_TYPE_CLASS="django_auth_ldap.config:MemberDNGroupType"
+PULP_AUTH_LDAP_GROUP_TYPE_PARAMS={name_attr="cn", member_attr="member"}
+```
+
+> NOTE: the above example exports data as environment variables so it uses the TOML format
+> to describe a dictionary object, if you are adding those settings to `/etc/pulp/settings.py`
+> you need to declare it as a regular python dictionary object.
+> another option is to export as 
+> `PULP_AUTH_LDAP_GROUP_TYPE_PARAMS='@json {"name_attr": "cn", "member_attr": "member"}'`
+
+### Optional variables:
 
 ```bash
 PULP_AUTH_LDAP_USER_ATTR_MAP={first_name="givenName", last_name="sn", email="mail"}
@@ -138,7 +158,7 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
 }
 ```
 
-TLS verification
+### TLS verification
 
 ```bash
 # Make ldap to call start_tls on connections
@@ -148,14 +168,14 @@ PULP_AUTH_LDAP_START_TLS=true
 PULP_GALAXY_LDAP_SELF_SIGNED_CERT=true
 ```
 
-Logging:
+### Logging:
 
 ```bash
 # Enable LDAP logging handler
 PULP_GALAXY_LDAP_LOGGING=true
 ```
 
-Cache
+### Cache
 
 ```bash
 # Change the caching lifetime in seconds (for groups and users search)
