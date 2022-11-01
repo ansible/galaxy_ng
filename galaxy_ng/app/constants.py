@@ -161,6 +161,12 @@ PERMISSIONS = {
         "global_description": _("Push a new containers to any namespace in the system."),
         "ui_category": _("Execution Environments"),
     },
+    "container.manage_roles_containernamespace": {
+        "name": _("Manage container namespace roles"),
+        "object_description": _("Manage container namespace roles."),
+        "global_description": _("Manage container namespace roles existing in the system."),
+        "ui_category": _("Execution Environments"),
+    },
     "galaxy.add_containerregistryremote": {
         "name": _("Add remote registry"),
         "object_description": None,

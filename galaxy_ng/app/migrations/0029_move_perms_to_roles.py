@@ -45,6 +45,7 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("container", "add_containernamespace"),
         ("container", "change_containernamespace"),
         # ("container", "namespace_add_containerdistribution"),
+        ("container", "manage_roles_containernamespace"),
         ("galaxy", "add_containerregistryremote"),
         ("galaxy", "change_containerregistryremote"),
         ("galaxy", "delete_containerregistryremote"),
