@@ -16,6 +16,15 @@ from .task import (
     TaskSummarySerializer,
 )
 
+from .execution_environment import (
+    ContainerRepositorySerializer,
+    ContainerTagSerializer,
+    ContainerManifestSerializer,
+    ContainerManifestDetailSerializer,
+    ContainerReadmeSerializer,
+    ContainerRepositoryHistorySerializer
+)
+
 __all__ = (
     'CollectionUploadSerializer',
     'GroupSummarySerializer',
@@ -24,4 +33,10 @@ __all__ = (
     'TaskSerializer',
     'TaskSummarySerializer',
     'UnpaginatedCollectionVersionSerializer',
+    'ContainerRepositorySerializer',
+    'ContainerRepositoryHistorySerializer',
+    'ContainerManifestSerializer',
+    'ContainerTagSerializer',
+    'ContainerManifestDetailSerializer',
+    'ContainerReadmeSerializer',
 )

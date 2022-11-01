@@ -5,7 +5,10 @@ from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES as GALAXY_LOCKED_ROLES
 from galaxy_ng.app.api.ui import serializers
-from galaxy_ng.app.api.v3.serializers import NamespaceSummarySerializer
+from galaxy_ng.app.api.v3.serializers import (
+    ContainerRepositorySerializer,
+    NamespaceSummarySerializer
+)
 
 # This file is necesary to prevent the DRF web API browser from breaking on all of the
 # pulp/api/v3/repositories/ endpoints.
@@ -40,7 +43,7 @@ class ContainerDistributionViewSet(
     mixins.RetrieveModelMixin,
 ):
     queryset = models.ContainerDistribution.objects.all()
-    serializer_class = serializers.ContainerRepositorySerializer
+    serializer_class = ContainerRepositorySerializer
     permission_classes = [access_policy.ContainerRepositoryAccessPolicy]
     endpoint_name = "galaxy_ng/container-distribution-proxy"
 

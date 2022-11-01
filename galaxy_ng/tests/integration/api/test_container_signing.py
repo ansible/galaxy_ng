@@ -72,5 +72,5 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth):
     assert latest_version["content_summary"]["added"]["container.signature"]["count"] > 0
 
     # Check the sign state is set on the UI API
-    ee = client("/api/automation-hub/_ui/v1/execution-environments/repositories/?name=alpine")
+    ee = client("/api/automation-hub/v3/plugin/execution-environments/repositories/?name=alpine")
     assert ee["data"][0]["pulp"]["repository"]["sign_state"] == "signed"

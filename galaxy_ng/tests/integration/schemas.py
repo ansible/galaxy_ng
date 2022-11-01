@@ -13,6 +13,30 @@ schema_objectlist = {
 }
 
 
+schema_pulp_objectlist = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': ['count', 'next', 'previous', 'results'],
+    'properties': {
+        'count': {'type': 'number'},
+        'next': {'type': ['string', 'null']},
+        'previous': {'type': ['string', 'null']},
+        'results': {'type': 'array'},
+    }
+}
+
+schema_pulp_container_namespace_detail = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': ['pulp_href', 'pulp_created', 'name'],
+    'properties': {
+        'pulp_href': {'type': 'string'},
+        'pulp_created': {'type': 'string'},
+        'name': {'type': 'string'},
+    }
+}
+
+
 schema_userlist = {
     'type': 'object',
     'additional_properties': False,
@@ -366,22 +390,22 @@ schema_collection_import_detail = {
 }
 
 
-schema_ee_namespace_detail = {
-    'type': 'object',
-    'additional_properties': False,
-    'required': [
-        'name',
-        'my_permissions',
-        'owners',
-        'groups',
-    ],
-    'properties': {
-        'name': {'type': 'string'},
-        'my_permissions': {'type': ['array', 'null']},
-        'owners': {'type': ['array', 'null']},
-        'groups': {'type': ['array', 'null']},
-    }
-}
+# schema_ee_namespace_detail = {
+#     'type': 'object',
+#     'additional_properties': False,
+#     'required': [
+#         'name',
+#         'my_permissions',
+#         'owners',
+#         'groups',
+#     ],
+#     'properties': {
+#         'name': {'type': 'string'},
+#         'my_permissions': {'type': ['array', 'null']},
+#         'owners': {'type': ['array', 'null']},
+#         'groups': {'type': ['array', 'null']},
+#     }
+# }
 
 
 schema_ee_registry = {
@@ -395,7 +419,7 @@ schema_ee_registry = {
         'is_indexable',
         'last_sync_task',
         'name',
-        'pk',
+        'id',
         'policy',
         'proxy_url',
         'rate_limit',
@@ -412,7 +436,7 @@ schema_ee_registry = {
         'is_indexable': {'type': 'boolean'},
         'last_sync_task': {'type': 'object'},
         'name': {'type': 'string'},
-        'pk': {'type': 'string'},
+        'id': {'type': 'string'},
         'policy': {'type': 'string'},
         'proxy_url': {'type': ['string', 'null']},
         'rate_limit': {'type': ['number', 'null']},
@@ -503,14 +527,14 @@ schema_remote_readme = {
     'type': 'object',
     'additional_properties': False,
     'required': [
-        'created',
+        'created_at',
         'text',
-        'updated',
+        'updated_at',
     ],
     'properties': {
-        'created': {'type': 'string'},
+        'created_at': {'type': 'string'},
         'text': {'type': 'string'},
-        'updated': {'type': 'string'},
+        'updated_at': {'type': 'string'},
     }
 }
 

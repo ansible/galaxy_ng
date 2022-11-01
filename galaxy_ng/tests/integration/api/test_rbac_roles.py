@@ -62,11 +62,16 @@ from .rbac_actions.exec_env import (
     delete_ee,
     change_ee_description,
     change_ee_readme,
-    change_ee_namespace,
     create_ee_local,
     create_ee_in_existing_namespace,
     push_updates_to_existing_ee,
     change_ee_tags,
+
+    # Container namespace
+    ee_namespace_list_roles,
+    ee_namespace_my_permissions,
+    ee_namespace_add_role,
+    ee_namespace_remove_role
 )
 
 log = logging.getLogger(__name__)
@@ -118,7 +123,6 @@ GLOBAL_ACTIONS = [
     delete_ee,
     change_ee_description,
     change_ee_readme,
-    change_ee_namespace,
     create_ee_local,
     create_ee_in_existing_namespace,
     push_updates_to_existing_ee,
@@ -138,9 +142,13 @@ OBJECT_ACTIONS = [
     change_ee_readme,
     create_ee_in_existing_namespace,
     push_updates_to_existing_ee,
-    change_ee_namespace,
     change_ee_tags,
     sync_remote_ee,
+
+    ee_namespace_list_roles,
+    ee_namespace_my_permissions,
+    ee_namespace_add_role,
+    ee_namespace_remove_role
 ]
 
 OBJECT_ROLES_TO_TEST = {
@@ -166,11 +174,14 @@ OBJECT_ROLES_TO_TEST = {
         sync_remote_ee,
         change_ee_description,
         change_ee_readme,
-        change_ee_namespace,
         create_ee_local,
         create_ee_in_existing_namespace,
         push_updates_to_existing_ee,
         change_ee_tags,
+        ee_namespace_list_roles,
+        ee_namespace_my_permissions,
+        ee_namespace_add_role,
+        ee_namespace_remove_role
     },
     "galaxy.execution_environment_namespace_owner": {
         update_ee_remote,
@@ -178,9 +189,12 @@ OBJECT_ROLES_TO_TEST = {
         change_ee_readme,
         create_ee_in_existing_namespace,
         push_updates_to_existing_ee,
-        change_ee_namespace,
         change_ee_tags,
         sync_remote_ee,
+        ee_namespace_list_roles,
+        ee_namespace_my_permissions,
+        ee_namespace_add_role,
+        ee_namespace_remove_role
     },
     "galaxy.execution_environment_collaborator": {
         update_ee_remote,
@@ -189,6 +203,7 @@ OBJECT_ROLES_TO_TEST = {
         push_updates_to_existing_ee,
         change_ee_tags,
         sync_remote_ee,
+        ee_namespace_my_permissions
     },
 
 
@@ -226,11 +241,17 @@ ROLES_TO_TEST = {
         delete_ee,
         change_ee_description,
         change_ee_readme,
-        change_ee_namespace,
         create_ee_local,
         create_ee_in_existing_namespace,
         push_updates_to_existing_ee,
         change_ee_tags,
+
+        # Container namespace
+        ee_namespace_list_roles,
+        ee_namespace_my_permissions,
+        ee_namespace_add_role,
+        ee_namespace_remove_role
+
     },
     "galaxy.collection_admin": {
         create_collection_namespace,
@@ -268,11 +289,17 @@ ROLES_TO_TEST = {
         delete_ee,
         change_ee_description,
         change_ee_readme,
-        change_ee_namespace,
         create_ee_local,
         create_ee_in_existing_namespace,
         push_updates_to_existing_ee,
         change_ee_tags,
+
+        # Container namespace
+        ee_namespace_list_roles,
+        ee_namespace_my_permissions,
+        ee_namespace_add_role,
+        ee_namespace_remove_role
+
     },
     "galaxy.group_admin": {
         add_groups,
@@ -306,7 +333,7 @@ ACTIONS_FOR_ALL_USERS = {
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
 def test_global_role_actions(role):
     registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["pk"]
+    registry_pk = registry.get_registry()["id"]
 
     extra = {
         "collection": ReusableCollection(gen_string()),
@@ -351,7 +378,7 @@ def test_global_role_actions(role):
 @pytest.mark.standalone_only
 def test_object_role_actions():
     registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["pk"]
+    registry_pk = registry.get_registry()["id"]
 
     users_and_groups = {}
     col_groups = []
@@ -419,7 +446,7 @@ def test_object_role_actions():
 @pytest.mark.standalone_only
 def test_role_actions_for_admin():
     registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["pk"]
+    registry_pk = registry.get_registry()["id"]
 
     extra = {
         "collection": ReusableCollection(gen_string()),

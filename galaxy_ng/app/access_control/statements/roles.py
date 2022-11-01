@@ -17,6 +17,7 @@ LOCKED_ROLES = {
             "container.add_containernamespace",
             "container.change_containernamespace",
             "container.namespace_add_containerdistribution",
+            "container.manage_roles_containernamespace",
             "galaxy.add_containerregistryremote",
             "galaxy.change_containerregistryremote",
             "galaxy.delete_containerregistryremote",
@@ -77,6 +78,7 @@ LOCKED_ROLES = {
             "container.add_containernamespace",
             "container.change_containernamespace",
             "container.namespace_add_containerdistribution",
+            "container.manage_roles_containernamespace",
             "galaxy.add_containerregistryremote",
             "galaxy.change_containerregistryremote",
             "galaxy.delete_containerregistryremote",
@@ -101,6 +103,7 @@ LOCKED_ROLES = {
             "container.namespace_change_containerdistribution",
             "container.namespace_modify_content_containerpushrepository",
             "container.namespace_add_containerdistribution",
+            "container.manage_roles_containernamespace"
         ],
     },
     # Change existing execution environments.

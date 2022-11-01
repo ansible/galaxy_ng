@@ -45,6 +45,7 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("container", "add_containernamespace"),
         ("container", "change_containernamespace"),
         # ("container", "namespace_add_containerdistribution"),
+        ("container", "manage_roles_containernamespace"),
         ("galaxy", "add_containerregistryremote"),
         ("galaxy", "change_containerregistryremote"),
         ("galaxy", "delete_containerregistryremote"),
@@ -84,6 +85,7 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("container", "namespace_push_containerdistribution"),
         ("container", "add_containernamespace"),
         ("container", "change_containernamespace"),
+        ("container", "manage_roles_containernamespace"),
         # Excluding this because it's only used for object assignment, not model
         # ("container", "namespace_add_containerdistribution"),
         ("galaxy", "add_containerregistryremote"),
@@ -103,6 +105,7 @@ GLOBAL_PERMISSION_TRANSLATOR = [
         ("container", "namespace_push_containerdistribution"),
         ("container", "namespace_change_containerdistribution"),
         ("container", "namespace_modify_content_containerpushrepository"),
+        ("container", "manage_roles_containernamespace"),
         # ("container", "namespace_add_containerdistribution"),
     ), "galaxy.execution_environment_namespace_owner"),
     ((

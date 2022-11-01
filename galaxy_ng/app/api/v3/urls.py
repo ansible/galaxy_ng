@@ -1,4 +1,5 @@
-from django.urls import include, path
+from django.conf import settings
+from django.urls import include, path, re_path
 from rest_framework import routers
 from pulp_ansible.app.urls import (
     v3_urls
@@ -31,6 +32,83 @@ sync_urls = [
     ),
 ]
 
+container_repo_paths = [
+    path(
+        'images/',
+        viewsets.ContainerRepositoryManifestViewSet.as_view({'get': 'list'}),
+        name='container-repository-images'),
+    path(
+        'images/<str:manifest_ref>/',
+        viewsets.ContainerRepositoryManifestViewSet.as_view(
+            {"get": "retrieve", "delete": "destroy"}
+        ),
+        name='container-repository-images-config-blob'),
+    path(
+        'history/',
+        viewsets.ContainerRepositoryHistoryViewSet.as_view({'get': 'list'}),
+        name='container-repository-history'),
+    path(
+        'readme/',
+        viewsets.ContainerReadmeViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+        name='container-repository-readme'),
+    path(
+        'tags/',
+        viewsets.ContainerTagViewset.as_view({'get': 'list'}),
+        name='container-repository-tags'),
+    path(
+        "sync/",
+        views.ContainerSyncRemoteView.as_view(),
+        name='container-repository-sync'),
+]
+
+
+container_paths = [
+    path(
+        "repositories/",
+        viewsets.ContainerRepositoryViewSet.as_view({'get': 'list'}),
+        name='container-repository-list'),
+
+    # image names can't start with _, so namespacing all the nested views
+    # under _content prevents cases where an image could be named foo/images
+    # and conflict with our URL paths.
+    re_path(
+        r'repositories/(?P<base_path>[-\w.]+\/{0,1}[-\w.]+)/_content/',
+        include(container_repo_paths)),
+
+    # This regex can capture "namespace/name" and "name"
+    re_path(
+        r"repositories/(?P<base_path>[-\w.]+\/{0,1}[-\w.]+)/",
+        viewsets.ContainerRepositoryViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
+        name="container-repository-detail",
+    ),
+]
+
+plugin_paths = [
+
+    # At the moment Automation Hub on console.redhat.com has a nonstandard configuration
+    # for collection download as well as prometheus metrics that are used to track the
+    # health of the service. Until https://issues.redhat.com/browse/AAH-1385 can be resolved
+    # we need to continue providing this endpoint from galaxy_ng.
+    path(
+        "ansible/content/<path:distro_base_path>/collections/artifacts/<str:filename>",
+        viewsets.CollectionArtifactDownloadView.as_view(),
+        name="collection-artifact-download",
+    ),
+
+    # This is the same endpoint as `artifacts/collections/`. It can't be redirected because
+    # redirects break on collection publish.
+    path(
+        "ansible/content/<path:distro_base_path>/collections/artifacts/",
+        viewsets.CollectionUploadViewSet.as_view({"post": "create"}),
+        name="collection-artifact-upload",
+    ),
+]
+
+if settings.GALAXY_FEATURE_FLAGS['execution_environments']:
+    plugin_paths.append(
+        path('execution-environments/', include(container_paths)),
+    )
+
 urlpatterns = [
     # >>>> OVERRIDDEN PULP ANSIBLE ENDPOINTS <<<<<
 
@@ -40,6 +118,8 @@ urlpatterns = [
     # we have for this problem is to just override the viewset. Overridden API endpoints
     # should be put here. Please include comments that describe why the override is necesary.
     # Overridding an endpoint should be a measure of last resort.
+
+    path("plugin/", include(plugin_paths)),
 
     # Disable the unpaginated collection views
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
@@ -53,16 +133,6 @@ urlpatterns = [
         "collection_versions/all/",
         views.NotFoundView.as_view(),
         name="legacy-v3-metadata-collection-versions-list",
-    ),
-
-    # At the moment Automation Hub on console.redhat.com has a nonstandard configuration
-    # for collection download as well as prometheus metrics that are used to track the
-    # health of the service. Until https://issues.redhat.com/browse/AAH-1385 can be resolved
-    # we need to continue providing this endpoint from galaxy_ng.
-    path(
-        "plugin/ansible/content/<path:distro_base_path>/collections/artifacts/<str:filename>",
-        viewsets.CollectionArtifactDownloadView.as_view(),
-        name="collection-artifact-download",
     ),
 
     # Overridden because the galaxy_ng endpoints only allow collections to be uploaded into

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import include, path, re_path
+from django.urls import include, path
 from rest_framework import routers
 
 from galaxy_ng.app import constants
@@ -30,60 +30,19 @@ auth_views = [
     path("logout/", views.LogoutView.as_view(), name="auth-logout"),
 ]
 
-container_repo_paths = [
-    path(
-        'images/',
-        viewsets.ContainerRepositoryManifestViewSet.as_view({'get': 'list'}),
-        name='container-repository-images'),
-    path(
-        'images/<str:manifest_ref>/',
-        viewsets.ContainerRepositoryManifestViewSet.as_view(
-            {"get": "retrieve", "delete": "destroy"}
-        ),
-        name='container-repository-images-config-blob'),
-    path(
-        'history/',
-        viewsets.ContainerRepositoryHistoryViewSet.as_view({'get': 'list'}),
-        name='container-repository-history'),
-    path(
-        'readme/',
-        viewsets.ContainerReadmeViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
-        name='container-repository-readme'),
-    path(
-        'tags/',
-        viewsets.ContainerTagViewset.as_view({'get': 'list'}),
-        name='container-repository-tags'),
-    path(
-        "sync/",
-        views.ContainerSyncRemoteView.as_view(),
-        name='container-repository-sync'),
-]
-
 container_paths = [
     path(
-        "repositories/",
-        viewsets.ContainerRepositoryViewSet.as_view({'get': 'list'}),
-        name='container-repository-list'),
-    path(
-        "namespaces/<str:name>/",
-        viewsets.ContainerNamespaceViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
-        name='container-namespace-detail'),
-    path(
-        "namespaces/",
-        viewsets.ContainerNamespaceViewSet.as_view({'get': 'list'}),
-        name='container-namespace-list'),
-    path(
-        "registries/<str:pk>/",
+        "registries/<str:id>/",
         viewsets.ContainerRegistryRemoteViewSet.as_view(
             {'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}
         ),
         name='execution-environments-registry-detail'),
     path(
-        "registries/<str:pk>/sync/",
+        "registries/<str:id>/sync/",
         views.ContainerSyncRegistryView.as_view(),
         name='container-registry-sync'),
     path(
-        "registries/<str:pk>/index/",
+        "registries/<str:id>/index/",
         views.IndexRegistryEEView.as_view(),
         name='execution-environments-registry-index'),
     path(
@@ -91,27 +50,13 @@ container_paths = [
         viewsets.ContainerRegistryRemoteViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='execution-environments-registry-list'),
     path(
-        "remotes/<str:pk>/",
+        "remotes/<str:id>/",
         viewsets.ContainerRemoteViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
         name='execution-environments-remote-detail'),
     path(
         "remotes/",
         viewsets.ContainerRemoteViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='execution-environments-remote-list'),
-
-    # image names can't start with _, so namespacing all the nested views
-    # under _content prevents cases where an image could be named foo/images
-    # and conflict with our URL paths.
-    re_path(
-        r'repositories/(?P<base_path>[-\w.]+\/{0,1}[-\w.]+)/_content/',
-        include(container_repo_paths)),
-
-    # This regex can capture "namespace/name" and "name"
-    re_path(
-        r"repositories/(?P<base_path>[-\w.]+\/{0,1}[-\w.]+)/",
-        viewsets.ContainerRepositoryViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
-        name="container-repository-detail",
-    ),
 ]
 
 # Groups are subclassed from pulpcore and use nested viewsets, so router.register

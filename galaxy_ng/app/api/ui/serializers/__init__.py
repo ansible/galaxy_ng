@@ -28,15 +28,8 @@ from .distribution import (
 )
 
 from .execution_environment import (
-    ContainerRepositorySerializer,
-    ContainerManifestSerializer,
-    ContainerRepositoryHistorySerializer,
-    ContainerReadmeSerializer,
-    ContainerManifestDetailSerializer,
-    ContainerNamespaceDetailSerializer,
     ContainerRegistryRemoteSerializer,
-    ContainerTagSerializer,
-    ContainerRemoteSerializer,
+    ContainerRemoteSerializer
 )
 
 __all__ = (
@@ -63,12 +56,6 @@ __all__ = (
     # container
     'ContainerRepositorySerializer',
     'ContainerRepositoryImageSerializer',
-    'ContainerRepositoryHistorySerializer',
-    'ContainerManifestSerializer',
-    'ContainerManifestDetailSerializer',
-    'ContainerReadmeSerializer',
-    'ContainerNamespaceDetailSerializer',
     'ContainerRegistryRemoteSerializer',
-    'ContainerRemoteSerializer',
-    'ContainerTagSerializer'
+    'ContainerRemoteSerializer'
 )

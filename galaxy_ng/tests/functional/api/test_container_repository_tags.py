@@ -62,6 +62,6 @@ class ContainerRepositoryTagsTestCase(TestCaseUsingBindings, rbac_base.BaseRegis
         # Delete created Execution Environment
         # api does not currently support delete
         ee_delete_response = self.smash_client.delete(
-            f"{self.galaxy_api_prefix}/_ui/v1/execution-environments/repositories/{image_name}/"
+            f"{self.galaxy_api_prefix}/v3/plugin/execution-environments/repositories/{image_name}/"
         )
         print(f"Delete execution environment: {ee_delete_response['state']}")
