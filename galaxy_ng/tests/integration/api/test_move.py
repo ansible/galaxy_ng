@@ -22,6 +22,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.certification
 @pytest.mark.collection_move
 @pytest.mark.move
+@pytest.mark.slow_in_cloud
 def test_move_collection_version(ansible_config, upload_artifact):
     """Tests whether a colleciton can be moved from repo to repo"""
 
@@ -101,6 +102,7 @@ def test_move_collection_version(ansible_config, upload_artifact):
 @pytest.mark.certification
 @pytest.mark.collection_move
 @pytest.mark.move
+@pytest.mark.slow_in_cloud
 def test_copy_collection_version(ansible_config, upload_artifact):
     """Tests whether a colleciton can be copied from repo to repo"""
 

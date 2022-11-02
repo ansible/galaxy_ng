@@ -1,6 +1,7 @@
 import os
 import shutil
 import time
+from functools import lru_cache
 from urllib.parse import urlparse
 
 import pytest
@@ -53,6 +54,7 @@ ldap: tests related to the ldap integration
 role: Related to RBAC Roles
 rbac_roles: Tests checking Role permissions
 group: Related to Groups
+slow_in_cloud: tests that take too long to be run against stage
 """
 
 
@@ -63,8 +65,11 @@ def pytest_configure(config):
         config.addinivalue_line('markers', line)
 
 
-class AnsibleConfigFixture(dict):
+def is_stage_environment():
+    return os.getenv('TESTS_AGAINST_STAGE', False)
 
+
+class AnsibleConfigFixture(dict):
     # The class is instantiated with a "profile" that sets
     # which type of user will be used in the test
     PROFILES = {
@@ -124,6 +129,39 @@ class AnsibleConfigFixture(dict):
             "token": None,
         },
     }
+    if is_stage_environment():
+        PROFILES = {
+            "basic_user": {
+                "username": {"vault_path": "secrets/qe/stage/users/aa_no_access",
+                             "vault_key": "username"},
+                "password": {"vault_path": "secrets/qe/stage/users/aa_no_access",
+                             "vault_key": "password"},
+                "token": None,
+            },
+            "partner_engineer": {
+                "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                             "vault_key": "username"},
+                "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                             "vault_key": "password"},
+                "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                          "vault_key": "token"},
+            },
+            "org_admin": {
+                "username": {"vault_path": "secrets/qe/stage/users/rbac_org_admin",
+                             "vault_key": "username"},
+                "password": {"vault_path": "secrets/qe/stage/users/rbac_org_admin",
+                             "vault_key": "password"},
+                "token": None,
+            },
+            "admin": {
+                "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                             "vault_key": "username"},
+                "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                             "vault_key": "password"},
+                "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                          "vault_key": "token"},
+            }
+        }
 
     def __init__(self, profile, namespace=None):
         self.profile = profile
@@ -138,6 +176,20 @@ class AnsibleConfigFixture(dict):
         if not os.path.exists(galaxy_token_fn):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
+
+        if isinstance(self.PROFILES[self.profile]["username"], dict):
+            # credentials from vault
+            loader = get_vault_loader()
+            self._set_profile_from_vault(loader, self.profile, "username")
+            self._set_profile_from_vault(loader, self.profile, "password")
+            if self.PROFILES[self.profile]["token"]:
+                self._set_profile_from_vault(loader, self.profile, "token")
+
+    def _set_profile_from_vault(self, loader, profile, param):
+        param_vault_path = self.PROFILES[profile][param]["vault_path"]
+        param_vault_key = self.PROFILES[profile][param]["vault_key"]
+        param_from_vault = loader.get_value_from_vault(path=param_vault_path, key=param_vault_key)
+        self.PROFILES[profile][param] = param_from_vault
 
     def __repr__(self):
         return f'<AnsibleConfigFixture: {self.namespace}>'
@@ -192,6 +244,20 @@ class AnsibleConfigFixture(dict):
             # cloud ...
             # return True
 
+        elif key == 'upload_signatures':
+            # tells the tests whether or not to try to mark
+            # an imported collection as "published". This happens
+            # automatically in the default config for standalone,
+            # so should return False in that case ...
+
+            if os.environ.get('HUB_UPLOAD_SIGNATURES'):
+                val = os.environ['HUB_UPLOAD_SIGNATURES']
+                if str(val) in ['1', 'True', 'true']:
+                    return True
+
+            # standalone ...
+            return False
+
         elif key == 'github_url':
             return os.environ.get(
                 'SOCIAL_AUTH_GITHUB_BASE_URL',
@@ -205,7 +271,7 @@ class AnsibleConfigFixture(dict):
             )
 
         else:
-            raise Exception(f'Uknown config key: {self.namespace}.{key}')
+            raise Exception(f'Unknown config key: {self.namespace}.{key}')
 
         return super().__getitem__(key)
 
@@ -340,7 +406,7 @@ def uncertifiedv2(ansible_config, artifact):
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
     time.sleep(SLEEP_SECONDS_ONETIME)
 
-    return (artifact, artifact2)
+    return artifact, artifact2
 
 
 @pytest.fixture(scope="function")
@@ -374,3 +440,18 @@ def cleanup_collections(request):
             shutil.rmtree(path)
 
     request.addfinalizer(cleanup)
+
+
+@lru_cache()
+def get_vault_loader():
+    from .utils.vault_loading import VaultSecretFetcher
+    vault_settings = {
+        'IQE_VAULT_VERIFY': True,
+        'IQE_VAULT_URL': 'https://vault.devshift.net',
+        'IQE_VAULT_GITHUB_TOKEN': os.environ.get('IQE_VAULT_GITHUB_TOKEN'),
+        'IQE_VAULT_ROLE_ID': os.environ.get('IQE_VAULT_ROLE_ID'),
+        'IQE_VAULT_SECRET_ID': os.environ.get('IQE_VAULT_SECRET_ID'),
+        'IQE_VAULT_LOADER_ENABLED': True,
+        'IQE_VAULT_MOUNT_POINT': 'insights'
+    }
+    return VaultSecretFetcher.from_settings(vault_settings)
