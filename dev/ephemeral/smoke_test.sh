@@ -28,9 +28,9 @@ oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/common/setup_test_data.
 export HUB_USE_MOVE_ENDPOINT="true"
 
 # What is the api root?
-export HUB_API_ROOT="https://front-end-aggregator-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/api/automation-hub/"
+export HUB_API_ROOT=$(oc get route -l frontend=automation-hub -o jsonpath='https://{.items[0].spec.host}')
 echo "HUB_API_ROOT: ${HUB_API_ROOT}"
-export HUB_AUTH_URL="https://mocks-keycloak-${NAMESPACE}.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/auth/realms/redhat-external/protocol/openid-connect/token"
+export HUB_AUTH_URL="$(oc get route -l app=env-${NAMESPACE} -o jsonpath='https://{.items[0].spec.host}')/auth/realms/redhat-external/protocol/openid-connect/token"
 echo "HUB_AUTH_URL: ${HUB_AUTH_URL}"
 
 
