@@ -81,6 +81,7 @@ TEST_ROLE_NAME = "test_role_".join(random.choices(string.ascii_lowercase, k=10))
     ],
 )
 @pytest.mark.pulp_api
+@pytest.mark.standalone_only
 def test_pulp_roles_endpoint(ansible_config, require_auth):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
