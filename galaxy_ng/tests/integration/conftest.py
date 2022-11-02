@@ -379,7 +379,7 @@ def uncertifiedv2(ansible_config, artifact):
     # publish
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
+        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
@@ -400,7 +400,7 @@ def uncertifiedv2(ansible_config, artifact):
     # Publish but do -NOT- certify newer version ...
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
+        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
 
     # wait for move task from `inbound-<namespace>` repo to `staging` repo
