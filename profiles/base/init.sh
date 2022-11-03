@@ -5,6 +5,8 @@ set -o errexit
 set -o pipefail
 
 readonly ENABLE_SIGNING="${ENABLE_SIGNING:-0}"
+readonly UPDATE_UI="${UPDATE_UI:-1}"
+readonly SETUP_TEST_DATA="${SETUP_TEST_DATA:-0}"
 
 log_message() {
     echo "$@" >&2
@@ -97,6 +99,15 @@ download_ui() {
     echo "yes" | django-admin collectstatic
 }
 
+set_up_test_data() {
+    cd /src/galaxy_ng
+    # make docker/loaddata
+    django-admin shell < ./dev/common/setup_test_data.py
+
+    # make docker/translations
+    django-admin makemessages --all
+}
+
 
 if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
     setup_signing_keyring
@@ -110,4 +121,10 @@ elif [[ "$ENABLE_SIGNING" -eq "2" ]]; then
     set_pulp_user_perms
 fi
 
-download_ui
+if [[ "$UPDATE_UI" -eq "1" ]]; then
+    download_ui
+fi
+
+if [[ "$SETUP_TEST_DATA" -eq "1" ]]; then
+    set_up_test_data
+fi
