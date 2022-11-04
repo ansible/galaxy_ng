@@ -144,7 +144,7 @@ paths = [
     ),
 ]
 
-if settings.GALAXY_FEATURE_FLAGS['execution_environments']:
+if settings.GALAXY_FEATURE_FLAGS.get('execution_environments') is True:
     paths.append(
         path('execution-environments/', include(container_paths)),
     )

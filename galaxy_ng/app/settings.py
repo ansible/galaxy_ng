@@ -151,7 +151,7 @@ GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS = False
 GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD = False
 
 GALAXY_ENABLE_API_ACCESS_LOG = False
-# Extra AUTOMATED_LOGGING settings are defined on dynaconf_hooks.py
+# Extra AUTOMATED_LOGGING settings are defined on dynaconf_hooks/logging_hooks.py
 # to be overridden by the /etc/pulp/settings.py
 # or environment variable PULP_GALAXY_ENABLE_API_ACCESS_LOG
 
@@ -162,7 +162,7 @@ KEYCLOAK_PROTOCOL = None
 KEYCLOAK_HOST = None
 KEYCLOAK_PORT = None
 KEYCLOAK_REALM = None
-# Extra KEYCLOAK settings are defined on dynaconf_hooks.py
+# Extra KEYCLOAK settings are defined on dynaconf_hooks/keycloak_hooks.py
 # to be overridden by the /etc/pulp/settings.py
 # or environment variable PULP_SOCIAL_AUTH_KEYCLOAK_KEY etc...
 
@@ -206,7 +206,7 @@ AUTH_LDAP_USER_SEARCH_FILTER = None
 AUTH_LDAP_GROUP_SEARCH_BASE_DN = None
 AUTH_LDAP_GROUP_SEARCH_SCOPE = None
 AUTH_LDAP_GROUP_SEARCH_FILTER = None
-# Extra LDAP settings are defined on dynaconf_hooks.py
+# Extra LDAP settings are defined on dynaconf_hooks/ldap_hooks.py
 # to be overriden by the /etc/pulp/settings.py
 # or environment variable PULP_AUTH_LDAP_SERVER_URI etc ...
 
