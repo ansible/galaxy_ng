@@ -74,4 +74,5 @@ ignore = [
     "compose",
     "pr_check.sh",
     "lint_requirements.txt",
+    "profiles/**",
 ]
