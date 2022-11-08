@@ -70,7 +70,7 @@ class AnsibeGalaxyHttpClient:
             None,
             "automation_hub",
             url=self._server,
-            token=self.token
+            token=self._token
         )
 
         # Fix for 2.12+
@@ -129,7 +129,7 @@ class AnsibeGalaxyHttpClient:
             self._token = None
             self._token_type = None
 
-    def get_bearer_token(self):
+    def get_bearer_token(self, grant_type='password'):
         # payload
         #   grant_type=refresh_token&client_id=cloud-services&refresh_token=abcdefghijklmnopqrstuvwxyz1234567894
         # POST
@@ -137,18 +137,22 @@ class AnsibeGalaxyHttpClient:
         #   'https://mocks-keycloak-ephemeral-ydabku.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com
         #       /auth/realms/redhat-external/protocol/openid-connect/token'
 
-        payload = {
-            'grant_type': 'refresh_token',
-            'client_id': 'cloud-services',
-            'refresh_token': self.config.get('token')
-        }
-
-        payload = {
-            'grant_type': 'password',
-            'client_id': 'cloud-services',
-            'username': self.config.get('username'),
-            'password': self.config.get('password'),
-        }
+        if grant_type != 'password':
+            # Production workflows on CRC will use refresh_tokens ...
+            payload = {
+                'grant_type': 'refresh_token',
+                'client_id': 'cloud-services',
+                'refresh_token': self.config.get('token')
+            }
+        else:
+            # ephemeral/keycloak doesn't have any way for us to set pre-defined
+            # refresh tokens, so we have to use a password grant instead ...
+            payload = {
+                'grant_type': 'password',
+                'client_id': 'cloud-services',
+                'username': self.config.get('username'),
+                'password': self.config.get('password'),
+            }
 
         session = requests.Session()
         rr = session.post(
@@ -159,6 +163,22 @@ class AnsibeGalaxyHttpClient:
             data=payload,
             verify=False
         )
+
+        # construct a helpful error message ...
+        msg = (
+            self.config.get('auth_url')
+            + '\n'
+            + str(payload)
+            + '\n'
+            + str(rr.status_code)
+            + '\n'
+            + rr.text
+        )
+
+        # bail out early if auth failed ...
+        assert rr.status_code >= 200 and rr.status_code < 300, msg
+        assert rr.headers.get('Content-Type') == 'application/json', msg
+        assert 'access_token' in rr.json(), msg
 
         return rr.json()['access_token']
 
@@ -209,6 +229,12 @@ class AnsibeGalaxyHttpClient:
         elif args is None:
             # fallback to text for NoneType
             headers["Content-Type"] = "application/text"
+
+        # ephemeral workaround ...
+        if self._auth_url and 'localhost' not in self._auth_url and auth_required:
+            btoken = self.get_bearer_token(grant_type='password')
+            # btoken = self.get_bearer_token(grant_type='refresh_token')
+            headers['Authorization'] = f'Bearer {btoken}'
 
         # https://tinyurl.com/53m2scen
         return self._galaxy_api_client._call_galaxy(

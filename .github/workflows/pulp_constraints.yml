@@ -10,5 +10,5 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run script to validate commits for both pull request and a push
+      - name: Ensure sanity with plugin-template managed files
         run: make pulp/plugin-template-check

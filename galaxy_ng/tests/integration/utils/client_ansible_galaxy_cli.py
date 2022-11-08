@@ -25,6 +25,11 @@ def ansible_galaxy(
 ):
 
     # Allow kwargs to override token auth
+    # NOTE: the core code ignores the token&auth_url if a username is given
+    #       and uses basic auth instead ... ephemeral doesn't have predefined
+    #       refresh tokens, so you'd have to get an access token from the
+    #       auth_url with a "password" grant OR skip the auth_url and go
+    #       straight to the api urls with a basic auth header
     if token is None and ansible_config.get('token'):
         token = ansible_config.get('token')
 
@@ -41,9 +46,13 @@ def ansible_galaxy(
         if ansible_config.get('auth_url'):
             f.write(f"auth_url={ansible_config.get('auth_url')}\n")
         f.write('validate_certs=False\n')
+
+        # if force_token we can't set a user&pass or core will always
+        # use basic auth ...
         if not force_token:
             f.write(f"username={ansible_config.get('username')}\n")
             f.write(f"password={ansible_config.get('password')}\n")
+
         if token:
             f.write(f"token={token}\n")
 
