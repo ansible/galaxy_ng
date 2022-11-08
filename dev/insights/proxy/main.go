@@ -26,6 +26,13 @@ var refreshTokens = map[string]string{
 	"abcdefghijklmnopqrstuvwxyz1234567894": "notifications_admin",
 }
 
+var passwordMap = map[string]string{
+	"jdoe":                "redhat",
+	"iqe_normal_user":     "redhat",
+	"org-admin":           "redhat",
+	"notifications_admin": "redhat",
+}
+
 // Access tokens will be stored here, and they can be generated using the refresh
 // tokens listed above using the:
 // curl -X POST localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token -d refresh_token=1234567890
@@ -109,7 +116,10 @@ func randomString(length int) string {
 
 func getAccessToken(rw http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
+    grant_type := req.FormValue("grant_type")
 	refresh_token := req.FormValue("refresh_token")
+    username := req.FormValue("username")
+    password := req.FormValue("password")
 
 	if accountID, ok := refreshTokens[refresh_token]; ok {
 		fmt.Printf("Creating refresh token for: %s", accountID)
@@ -124,12 +134,33 @@ func getAccessToken(rw http.ResponseWriter, req *http.Request) {
 
 		rw.WriteHeader(http.StatusAccepted)
 		json.NewEncoder(rw).Encode(resp)
+
+    } else if _, found := passwordMap[username]; found{
+
+        if grant_type == "password" && passwordMap[username] == password {
+            fmt.Printf("Creating refresh token for: %s", accountID)
+
+            acces_token := randomString(32)
+            accessTokens[acces_token] = accountID
+
+            rw.Header().Set("Content-Type", "application/json")
+            resp := map[string]string{
+                "access_token": acces_token,
+            }
+
+            rw.WriteHeader(http.StatusAccepted)
+            json.NewEncoder(rw).Encode(resp)
+
+        } else {
+		    rw.WriteHeader(http.StatusUnauthorized)
+        }
+
 	} else {
 		rw.WriteHeader(http.StatusUnauthorized)
 	}
 }
 
-func userToIentityHeader(account Account) string {
+func userToIdentityHeader(account Account) string {
 
 	data, _ := json.Marshal(XRHItentity{
 		Entitlements: Entitlement{
@@ -156,12 +187,13 @@ func setRHIdentityHeader(req *http.Request) {
 			fmt.Printf("Authenticating with basic auth: %s:%s\n", user, pass)
 
 			if account, ok := accounts[user]; ok {
-				req.Header.Set("X-RH-IDENTITY", userToIentityHeader(account))
+				req.Header.Set("X-RH-IDENTITY", userToIdentityHeader(account))
 			} else {
 				fmt.Printf("User not found: %s", user)
 			}
 
 		} else if strings.Contains(auth_header, "Bearer") {
+
 			reqToken := req.Header.Get("Authorization")
 			splitToken := strings.Split(reqToken, "Bearer ")
 			reqToken = splitToken[1]
@@ -169,7 +201,7 @@ func setRHIdentityHeader(req *http.Request) {
 			fmt.Printf("Authenticating with refresh token: %s\n", reqToken)
 
 			if userID, ok := accessTokens[reqToken]; ok {
-				req.Header.Set("X-RH-IDENTITY", userToIentityHeader(accounts[userID]))
+				req.Header.Set("X-RH-IDENTITY", userToIdentityHeader(accounts[userID]))
 			} else {
 				fmt.Printf("Token not found: %s", reqToken)
 			}
@@ -209,8 +241,9 @@ func main() {
 
 		// Handle the keycloak auth url
 		if req.URL.Path == "/auth/realms/redhat-external/protocol/openid-connect/token" {
+            fmt.Println(req.URL.Path)
 			getAccessToken(rw, req)
-			fmt.Println("")
+
 			return
 		}
 

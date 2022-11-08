@@ -77,7 +77,7 @@ TEST_ROLE_NAME = "test_role_".join(random.choices(string.ascii_lowercase, k=10))
     "require_auth",
     [
         True,
-        False,
+        # False,
     ],
 )
 @pytest.mark.pulp_api

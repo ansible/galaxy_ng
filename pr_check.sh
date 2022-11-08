@@ -91,10 +91,9 @@ oc patch clowdapp automation-hub \
         }]'
 
 # source $CICD_ROOT/smoke_test.sh
-
 # source smoke_test.sh
-source dev/ephemeral/smoke_test.sh
-
+bash dev/ephemeral/smoke_test.sh
+RC=$?
 
 # Need to make a dummy results file to make tests pass
 mkdir -p artifacts
@@ -103,3 +102,5 @@ cat << EOF > artifacts/junit-dummy.xml
     <testcase classname="dummy" name="dummytest"/>
 </testsuite>
 EOF
+
+exit $RC

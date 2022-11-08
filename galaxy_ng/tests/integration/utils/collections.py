@@ -36,8 +36,13 @@ logger = logging.getLogger(__name__)
 
 
 class ArtifactFile:
-    def __init__(self, fn):
+    """Shim to emulate the return object from orionutils.build."""
+    def __init__(self, fn, namespace=None, name=None, version=None, key=None):
         self.filename = fn
+        self.namespace = namespace
+        self.name = name
+        self.version = version
+        self.key = key
 
 
 def build_collection(
@@ -52,8 +57,34 @@ def build_collection(
     tags=None,
     version=None,
     dependencies=None,
-    use_orionutils=True
-):
+    requires_ansible='>=2.13.0',
+    roles=['docker_role'],
+    # use_orionutils=True
+    use_orionutils=False
+) -> ArtifactFile:
+
+    """Assemble a collection tarball from given parameters.
+
+    Use the ansible-galaxy cli to init and build a collection artifact.
+
+    Args:
+        base: the template for orion to use (default to "skeleton")
+        config: a mapping for most other args
+        filename: use an alternate filename for the artifact
+        key: used to add entropy to the collection name
+        pre_build: ?
+        extra_files: a dict with filenames as the key and content as the value
+        namespace: collection namespace (USERNAME_PUBLISHER by default)
+        name: collection name (random by default)
+        tags: tags to add to galaxy.yml
+        version: semantic version string
+        dependencies: a list of dependencies
+        requires_ansible: this yaml'ized string will go into meta/requirements.yml
+        use_orionurls: defer building to orionutils or not
+
+    Returns:
+        An "ArtifactFile" object with the tarball filename set as the .filename
+    """
 
     if base is None:
         base = "skeleton"
@@ -77,6 +108,8 @@ def build_collection(
 
     if version is not None:
         config['version'] = version
+    else:
+        config['version'] = '1.0.0'
 
     if dependencies is not None:
         config['dependencies'] = dependencies
@@ -88,6 +121,7 @@ def build_collection(
     if 'tools' not in config['tags']:
         config['tags'].append('tools')
 
+    # https://github.com/peaqe/orion-utils/blob/master/orionutils/generator.py#L147
     if use_orionutils:
         return _build_collection(
             base,
@@ -98,21 +132,44 @@ def build_collection(
             extra_files=extra_files
         )
 
+    # orionutils uses the key to "randomize" the name
+    if key is not None:
+        name = config['name'] + "_" + key
+        config['name'] = name
+
     # use galaxy cli to build it ...
     dstdir = tempfile.mkdtemp(prefix='collection-artifact-')
     dst = None
     with tempfile.TemporaryDirectory(prefix='collection-build-') as tdir:
 
-        cmd = f"ansible-galaxy collection init {namespace}.{name}"
-        pid = subprocess.run(cmd, shell=True, cwd=tdir, stdout=subprocess.PIPE)
-        assert pid.returncode == 0
-        basedir = os.path.join(tdir, namespace, name)
+        basedir = os.path.join(tdir, config['namespace'], config['name'])
         rolesdir = os.path.join(basedir, 'roles')
 
-        # make a role
-        cmd = "ansible-galaxy role init docker_role"
-        pid2 = subprocess.run(cmd, shell=True, cwd=rolesdir, stdout=subprocess.PIPE)
-        assert pid2.returncode == 0
+        # init the skeleton ...
+        cmd = f"ansible-galaxy collection init {config['namespace']}.{config['name']}"
+        pid = subprocess.run(
+            cmd,
+            shell=True,
+            cwd=tdir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        assert pid.returncode == 0, str(pid.stdout.decode('utf-8')) \
+            + str(pid.stderr.decode('utf-8'))
+
+        # make roles ...
+        if roles:
+            for role_name in roles:
+                cmd = f"ansible-galaxy role init {role_name}"
+                pid2 = subprocess.run(
+                    cmd,
+                    shell=True,
+                    cwd=rolesdir,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                assert pid2.returncode == 0, str(pid2.stdout.decode('utf-8')) \
+                    + str(pid2.stderr.decode('utf-8'))
 
         # fix galaxy.yml
         galaxy_file = os.path.join(basedir, 'galaxy.yml')
@@ -123,13 +180,19 @@ def build_collection(
             f.write(yaml.dump(meta))
 
         # need the meta/runtime.yml file ...
-        meta_dir = os.path.join(basedir, 'meta')
-        if not os.path.exists(meta_dir):
-            os.makedirs(meta_dir)
-        runtime_file = os.path.join(meta_dir, 'runtime.yml')
-        if not os.path.exists(runtime_file):
+        if requires_ansible is not None:
+            meta_dir = os.path.join(basedir, 'meta')
+            if not os.path.exists(meta_dir):
+                os.makedirs(meta_dir)
+            runtime_file = os.path.join(meta_dir, 'runtime.yml')
             with open(runtime_file, 'w') as f:
-                f.write(yaml.dump({'requires_ansible': '>=2.13.0'}))
+                f.write(yaml.dump({'requires_ansible': requires_ansible}))
+
+        if extra_files:
+            raise Exception('extra_files not yet implemented')
+
+        if pre_build:
+            raise Exception('pre_build not yet implemented')
 
         # build it
         cmd = "ansible-galaxy collection build ."
@@ -140,14 +203,24 @@ def build_collection(
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE
         )
-        assert pid3.returncode == 0
+        assert pid3.returncode == 0, str(pid3.stdout.decode('utf-8')) \
+            + str(pid3.stderr.decode('utf-8'))
         fn = pid3.stdout.decode('utf-8').strip().split('\n')[-1].split()[-1]
 
         # Copy to permanent location
         dst = os.path.join(dstdir, os.path.basename(fn))
         shutil.copy(fn, dst)
 
-    return ArtifactFile(dst)
+        if filename:
+            raise Exception('filename not yet implemented')
+
+    return ArtifactFile(
+        dst,
+        namespace=config['namespace'],
+        name=config['name'],
+        version=config['version'],
+        key=key
+    )
 
 
 def upload_artifact(
