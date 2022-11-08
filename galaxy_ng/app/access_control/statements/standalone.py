@@ -85,7 +85,32 @@ STANDALONE_STATEMENTS = {
     'pulp_ansible/v3/collections/imports': _collection_statements,
     'pulp_ansible/v3/repo-metadata': _collection_statements,
 
-    'repositories/ansible/ansible': _read_only,
+    'repositories/ansible/ansible': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.view_ansiblerepository"
+        },
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.add_ansiblerepository"
+        },
+        {
+            "action": ["modify", "sync", "rebuild_metadata", "sign"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.change_ansiblerepository"
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.delete_ansiblerepository"
+        },
+    ],
 
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
     # For now endpoints are temporary deactivated
