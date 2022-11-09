@@ -7,62 +7,69 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-05 08:50-0400\n"
+"POT-Creation-Date: 2022-10-28 11:07-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: ko\n"
+"Language: \n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app/access_control/access_policy.py:138
+#: app/access_control/access_policy.py:147
 msgid "Namespace in filename not found."
 msgstr "파일 이름의 네임스페이스를 찾을 수 없습니다."
 
-#: app/access_control/access_policy.py:153
+#: app/access_control/access_policy.py:166
 msgid "Namespace not found."
 msgstr "네임스페이스를 찾을 수 없습니다."
 
 #: app/access_control/fields.py:17
-msgid "object_permissions field is required"
-msgstr "object_permissions 필드가 필요합니다."
+msgid "object_roles field is required"
+msgstr "object_roles 필드는 필수입니다"
 
 #: app/access_control/fields.py:21
 msgid "id or name field is required"
-msgstr "id 또는 name 필드는 필수입니다"
+msgstr "ID 또는 이름 필드는 필수입니다"
 
 #: app/access_control/fields.py:27
-msgid "object_permissions must be a list of strings"
-msgstr "object_permissions는 문자열 목록이어야 합니다."
+msgid "object_roles must be a list of strings"
+msgstr "object_roles는 문자열 목록이어야 합니다"
 
-#: app/access_control/fields.py:41
-msgid "Permission {} does not exist"
-msgstr "permission {}이 존재하지 않습니다."
+#: app/access_control/fields.py:35
+msgid "Role {} does not exist"
+msgstr "역할 {} 이/가 존재하지 않습니다"
 
-#: app/access_control/fields.py:56
+#: app/access_control/fields.py:50
 msgid "Groups must be a list of group objects"
 msgstr "그룹은 그룹 오브젝트 목록이어야 합니다."
 
-#: app/access_control/fields.py:71
+#: app/access_control/fields.py:68
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
 msgstr "그룹 이름=%s, id=%s이/가 존재하지 않습니다."
 
-#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
+#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
-msgstr "잘못된 그룹 이름 또는 ID입니다."
+msgstr "잘못된 그룹 이름 또는 ID"
 
-#: app/api/ui/serializers/execution_environment.py:375
+#: app/access_control/mixins.py:55
+#, python-brace-format
+msgid ""
+"Role {role} does not exist or does not have any permissions related to this "
+"object."
+msgstr "역할 {role} 이 존재하지 않거나 이 오브젝트와 관련된 권한이 없습니다."
+
+#: app/api/ui/serializers/execution_environment.py:379
 msgid "Selected registry does not exist."
 msgstr "선택한 레지스트리가 존재하지 않습니다."
 
-#: app/api/ui/serializers/execution_environment.py:384
+#: app/api/ui/serializers/execution_environment.py:388
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
 msgstr "컨테이너 이름에는 영숫자 \".\", \"_\", \"-\" 및 최대 하나의 \"/\"만 포함할 수 있습니다."
 
-#: app/api/ui/serializers/execution_environment.py:402
+#: app/api/ui/serializers/execution_environment.py:406
 msgid "Name cannot be changed."
 msgstr "이름은 변경할 수 없습니다."
 
@@ -71,19 +78,19 @@ msgstr "이름은 변경할 수 없습니다."
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "동기화 목록을 생성하는 동안 리포지토리 \"{pulp_id}\"을/를 찾을 수 없습니다"
 
-#: app/api/ui/serializers/synclist.py:77
+#: app/api/ui/serializers/synclist.py:65
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "동기화 목록이 이미 존재합니다. %s"
 
-#: app/api/ui/serializers/synclist.py:85
+#: app/api/ui/serializers/synclist.py:73
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "{synclist}동기화 목록을 생성하는 동안 \"{namespace}.{name}\" 컬렉션을 찾을 수 없습니다."
 
-#: app/api/ui/serializers/synclist.py:124
+#: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -96,14 +103,52 @@ msgid ""
 "the requesting user is not in."
 msgstr "변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 않습니다."
 
-#: app/api/ui/serializers/user.py:85
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr "슈퍼유저 권한을 부여하려면 슈퍼유저여야 합니다."
 
-#: app/api/ui/serializers/user.py:128
+#: app/api/ui/serializers/user.py:109
+msgid "Must be a super user to change another user's password."
+msgstr "다른 사용자의 암호를 변경하려면 슈퍼유저여야 합니다."
+
+#: app/api/ui/serializers/user.py:125
+msgid "You do not have permissions to modify super users."
+msgstr "슈퍼 유저를 수정할 수 있는 권한이 없습니다."
+
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "그룹 이름=%(name)s, id=%(id)s이/가 존재하지 않습니다."
+
+#: app/api/ui/views/feature_flags.py:50
+msgid ""
+"WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
+"respective SigningService does not exist in the database."
+msgstr "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE는 '{}'로 설정되어 있지만 해당 서명 서비스는 데이터베이스에 존재하지 않습니다."
+
+#: app/api/ui/views/feature_flags.py:65
+msgid ""
+"WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
+"not configured with a SigningService to create signatures."
+msgstr "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS가 True로 설정되어 있지만 시스템은 서명을 생성하기 위해 SigningService로 구성되지 않습니다."
+
+#: app/api/ui/views/feature_flags.py:76
+msgid ""
+"INFO:System is configured to display signatures (coming from remote syncs) "
+"but is not configured to create or accept upload of signatures."
+msgstr "INFO:System은 서명을 표시하도록 구성되었지만(원격 동기화에서 수신됨) 서명 업로드를을 생성하거나 수락하도록 구성되지 않았습니다."
+
+#: app/api/ui/views/feature_flags.py:93
+msgid ""
+"WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
+"respective SigningService does not exist in the database."
+msgstr "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE는 '{}'로 설정되어 있지만 해당 서명 서비스는 데이터베이스에 존재하지 않습니다."
+
+#: app/api/ui/views/feature_flags.py:106
+msgid ""
+"WARNING: container_signing is enabled via '{}' SigningService, however "
+"execution environments are disabled on the system."
+msgstr "WARNING: container_signing은 '{}' SigningService를 통해 활성화되지만 실행 환경은 시스템에서 비활성화되어 있습니다."
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
@@ -146,19 +191,19 @@ msgstr "%s 배포에 연결된 원격 장치가 없습니다."
 msgid "The %s remote does not have any registries associated with it."
 msgstr "%s 원격 장치에 연결된 레지스트리가 없습니다."
 
-#: app/api/ui/viewsets/collection.py:119
+#: app/api/ui/viewsets/collection.py:77
 msgid "Distribution base path is required"
 msgstr "배포 기본 경로가 필요합니다."
 
-#: app/api/ui/viewsets/collection.py:255
+#: app/api/ui/viewsets/collection.py:221
 msgid "Retrieve collection version"
 msgstr "컬렉션 버전 검색"
 
-#: app/api/ui/viewsets/collection.py:266
+#: app/api/ui/viewsets/collection.py:232
 msgid "Collection version not found for: {}"
 msgstr "컬렉션 버전을 찾을 수 없음: {}"
 
-#: app/api/ui/viewsets/collection.py:322
+#: app/api/ui/viewsets/collection.py:288
 msgid "Retrieve collection import"
 msgstr "컬렉션 가져오기 검색"
 
@@ -195,24 +240,24 @@ msgstr "예상되는 최대 이름 길이는 %s입니다"
 msgid "Expected version to be max length of %s"
 msgstr "예상 버전의 최대 길이는 %s입니다"
 
-#: app/api/v3/serializers/namespace.py:65
+#: app/api/v3/serializers/namespace.py:67
 #, python-format
 msgid "'%s' is not a valid url."
 msgstr "\"%s\"은/는 유효한 URL이 아닙니다."
 
-#: app/api/v3/serializers/namespace.py:94
+#: app/api/v3/serializers/namespace.py:100
 msgid "Attribute 'name' is required"
 msgstr "'name' 속성이 필요합니다."
 
-#: app/api/v3/serializers/namespace.py:97
+#: app/api/v3/serializers/namespace.py:103
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr "이름에는 소문자, 밑줄 및 숫자만 포함할 수 있습니다."
 
-#: app/api/v3/serializers/namespace.py:100
+#: app/api/v3/serializers/namespace.py:106
 msgid "Name must be longer than 2 characters"
 msgstr "이름은 2자 이상이어야 합니다."
 
-#: app/api/v3/serializers/namespace.py:103
+#: app/api/v3/serializers/namespace.py:109
 msgid "Name cannot begin with '_'"
 msgstr "이름은 '_'로 시작할 수 없습니다."
 
@@ -254,37 +299,37 @@ msgstr "경로가 일치하지 않습니다. \"%s\""
 msgid "Namespace \"{0}\" does not exist."
 msgstr "\"{0}\" 네임스페이스가 존재하지 않습니다."
 
-#: app/api/v3/viewsets/collection.py:219
+#: app/api/v3/viewsets/collection.py:224
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
 msgstr "콘텐츠 앱에서 예기치 않은 응답이 발생했습니다. 코드: %s."
 
-#: app/api/v3/viewsets/collection.py:249
+#: app/api/v3/viewsets/collection.py:254
 #, python-format
 msgid "Collection %s not found"
 msgstr "컬렉션%s을/를 찾을 수 없습니다."
 
-#: app/api/v3/viewsets/collection.py:257
+#: app/api/v3/viewsets/collection.py:262
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
 msgstr "이동 컬렉션%s의 리포지터리를 찾을 수 없습니다"
 
-#: app/api/v3/viewsets/collection.py:262
+#: app/api/v3/viewsets/collection.py:267
 #, python-format
 msgid "Collection %s not found in source repo"
 msgstr "소스 저장소에서 컬렉션 %s을/를 찾을 수 없습니다"
 
-#: app/api/v3/viewsets/collection.py:265
+#: app/api/v3/viewsets/collection.py:270
 #, python-format
 msgid "Collection %s already found in destination repo"
 msgstr "대상 저장소에서 %s 컬렉션을 찾았습니다"
 
-#: app/api/v3/viewsets/collection.py:289 app/tasks/publishing.py:103
+#: app/api/v3/viewsets/collection.py:296 app/tasks/publishing.py:103
 #, python-format
 msgid "Signing %s service not found"
 msgstr "서명 %s 서비스를 찾을 수 없음"
 
-#: app/api/v3/viewsets/collection.py:299
+#: app/api/v3/viewsets/collection.py:306
 #, python-brace-format
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
@@ -330,33 +375,4 @@ msgstr "이 이름을 가진 로컬 컨테이너가 이미 존재합니다."
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "스테이징 리포지토리를 찾을 수 없음: \"%s\""
-
-#: app/tasks/synclist.py:45
-#, python-format
-msgid "Curating all synclists repos that curate from %s"
-msgstr "%s에서 큐레이트된 모든 동기화 목록 리포지토리 선별"
-
-#: app/tasks/synclist.py:56
-msgid "Synclists curating upstream repo"
-msgstr "큐레이트된 업스트림 리포지토리 동기화 목록"
-
-#: app/tasks/synclist.py:63
-msgid "Synclists curating upstream repo task"
-msgstr "큐레이트된 업스트림 리포지토리 작업 동기화 목록"
-
-#: app/tasks/synclist.py:92
-#, python-format
-msgid "Finishing curating %s synclist repos based on %s update"
-msgstr "%s 업데이트를 기반으로 큐레이트된 %s 동기화 목록 리포지토리 사용을 완료"
-
-#: app/tasks/synclist.py:121
-#, python-format
-msgid ""
-"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
-"repo \"%s\""
-msgstr "policy=%s와 동기화 목록 \"%s\"을 적용하여 업스트림 리포지토리 \"%s\"에서 리포지토리 \"%s\"을 처리"
-
-#: app/tasks/synclist.py:163
-msgid "Unexpected synclist policy {}"
-msgstr "예기치 않은 동기화 목록 정책 {}"
 

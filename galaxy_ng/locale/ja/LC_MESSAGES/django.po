@@ -7,62 +7,69 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-05 08:50-0400\n"
+"POT-Creation-Date: 2022-10-28 11:07-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: ja\n"
+"Language: \n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app/access_control/access_policy.py:138
+#: app/access_control/access_policy.py:147
 msgid "Namespace in filename not found."
 msgstr "ファイル名の名前空間が見つかりません。"
 
-#: app/access_control/access_policy.py:153
+#: app/access_control/access_policy.py:166
 msgid "Namespace not found."
 msgstr "名前空間が見つかりません。"
 
 #: app/access_control/fields.py:17
-msgid "object_permissions field is required"
-msgstr "object_permissions フィールドは必須です。"
+msgid "object_roles field is required"
+msgstr "object_roles フィールドは必須です"
 
 #: app/access_control/fields.py:21
 msgid "id or name field is required"
-msgstr "ID または名前のフィールドは必須です。"
+msgstr "ID または名前のフィールドは必須です"
 
 #: app/access_control/fields.py:27
-msgid "object_permissions must be a list of strings"
-msgstr "object_permissions は文字列のリストでなければなりません"
+msgid "object_roles must be a list of strings"
+msgstr "object_roles は文字列のリストでなければなりません"
 
-#: app/access_control/fields.py:41
-msgid "Permission {} does not exist"
-msgstr "パーミッション {} は存在しません"
+#: app/access_control/fields.py:35
+msgid "Role {} does not exist"
+msgstr "ロール {} が存在しません"
 
-#: app/access_control/fields.py:56
+#: app/access_control/fields.py:50
 msgid "Groups must be a list of group objects"
 msgstr "グループは、グループオブジェクトの一覧でなければなりません"
 
-#: app/access_control/fields.py:71
+#: app/access_control/fields.py:68
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
 msgstr "グループ名=%s、id=%s は存在しません"
 
-#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
+#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "無効なグループ名または ID"
 
-#: app/api/ui/serializers/execution_environment.py:375
+#: app/access_control/mixins.py:55
+#, python-brace-format
+msgid ""
+"Role {role} does not exist or does not have any permissions related to this "
+"object."
+msgstr "ロール {role} が存在しないか、このオブジェクトに関連するパーミッションがありません。"
+
+#: app/api/ui/serializers/execution_environment.py:379
 msgid "Selected registry does not exist."
 msgstr "選択したレジストリーが存在しません。"
 
-#: app/api/ui/serializers/execution_environment.py:384
+#: app/api/ui/serializers/execution_environment.py:388
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
 msgstr "コンテナー名には、英数字、「.」、「_」、「-」、および 1 つまでの「/」しか使用することができません。"
 
-#: app/api/ui/serializers/execution_environment.py:402
+#: app/api/ui/serializers/execution_environment.py:406
 msgid "Name cannot be changed."
 msgstr "名前を変更できません。"
 
@@ -71,19 +78,19 @@ msgstr "名前を変更できません。"
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "同期リストの作成中にリポジトリー \"{pulp_id}\" が見つかりませんでした"
 
-#: app/api/ui/serializers/synclist.py:77
+#: app/api/ui/serializers/synclist.py:65
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "同期リストはすでに存在します: %s"
 
-#: app/api/ui/serializers/synclist.py:85
+#: app/api/ui/serializers/synclist.py:73
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
 
-#: app/api/ui/serializers/synclist.py:124
+#: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -96,14 +103,52 @@ msgid ""
 "the requesting user is not in."
 msgstr "要求するユーザーが所属しないユーザーグループを変更するには、「galaxy.change_group」パーミッションが必要です。"
 
-#: app/api/ui/serializers/user.py:85
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr "スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があります。"
 
-#: app/api/ui/serializers/user.py:128
+#: app/api/ui/serializers/user.py:109
+msgid "Must be a super user to change another user's password."
+msgstr "別のユーザーのパスワードを変更するには、スーパーユーザーである必要があります。"
+
+#: app/api/ui/serializers/user.py:125
+msgid "You do not have permissions to modify super users."
+msgstr "スーパーユーザーを変更するパーミッションがありません。"
+
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "グループ名=%(name)s、id=%(id)s は存在しません"
+
+#: app/api/ui/views/feature_flags.py:50
+msgid ""
+"WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
+"respective SigningService does not exist in the database."
+msgstr "警告:GALAXY_COLLECTION_SIGNING_SERVICE は '{}' に設定されていますが、それぞれの SigningService がデータベースに存在しません。"
+
+#: app/api/ui/views/feature_flags.py:65
+msgid ""
+"WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
+"not configured with a SigningService to create signatures."
+msgstr "警告:GALAXY_AUTO_SIGN_COLLECTIONS は True に設定されていますが、システムには署名を作成する SigningService が設定されていません。"
+
+#: app/api/ui/views/feature_flags.py:76
+msgid ""
+"INFO:System is configured to display signatures (coming from remote syncs) "
+"but is not configured to create or accept upload of signatures."
+msgstr "情報: システムは、(リモート同期からの) 署名を表示するように設定されていますが、署名を作成したり、署名のアップロードを受け入れるように設定されていません。"
+
+#: app/api/ui/views/feature_flags.py:93
+msgid ""
+"WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
+"respective SigningService does not exist in the database."
+msgstr "警告:GALAXY_CONTAINER_SIGNING_SERVICE は '{}' に設定されていますが、それぞれの SigningService はデータベースに存在しません。"
+
+#: app/api/ui/views/feature_flags.py:106
+msgid ""
+"WARNING: container_signing is enabled via '{}' SigningService, however "
+"execution environments are disabled on the system."
+msgstr "警告: container_signing は '{}' SigningService を介して有効になっていますが、実行環境はシステムで無効になっています。"
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
@@ -146,19 +191,19 @@ msgstr "%s ディストリビューションには、リモートが関連付け
 msgid "The %s remote does not have any registries associated with it."
 msgstr "%s リモートには、レジストリーが関連付けられていません。"
 
-#: app/api/ui/viewsets/collection.py:119
+#: app/api/ui/viewsets/collection.py:77
 msgid "Distribution base path is required"
 msgstr "ディストリビューションベースパスが必要です"
 
-#: app/api/ui/viewsets/collection.py:255
+#: app/api/ui/viewsets/collection.py:221
 msgid "Retrieve collection version"
 msgstr "コレクションバージョンの取得"
 
-#: app/api/ui/viewsets/collection.py:266
+#: app/api/ui/viewsets/collection.py:232
 msgid "Collection version not found for: {}"
 msgstr "コレクションバージョンが見つかりません: {}"
 
-#: app/api/ui/viewsets/collection.py:322
+#: app/api/ui/viewsets/collection.py:288
 msgid "Retrieve collection import"
 msgstr "コレクションインポートの取得"
 
@@ -195,24 +240,24 @@ msgstr "想定される名前の最大長は %s です"
 msgid "Expected version to be max length of %s"
 msgstr "想定されるバージョンの最大長は %s です"
 
-#: app/api/v3/serializers/namespace.py:65
+#: app/api/v3/serializers/namespace.py:67
 #, python-format
 msgid "'%s' is not a valid url."
 msgstr "「%s」は有効な URL ではありません。"
 
-#: app/api/v3/serializers/namespace.py:94
+#: app/api/v3/serializers/namespace.py:100
 msgid "Attribute 'name' is required"
 msgstr "属性「名」が必要です。"
 
-#: app/api/v3/serializers/namespace.py:97
+#: app/api/v3/serializers/namespace.py:103
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr "名前に使用できる値は小文字、アンダースコア、数字のみです"
 
-#: app/api/v3/serializers/namespace.py:100
+#: app/api/v3/serializers/namespace.py:106
 msgid "Name must be longer than 2 characters"
 msgstr "名前は 2 文字以上にする必要があります"
 
-#: app/api/v3/serializers/namespace.py:103
+#: app/api/v3/serializers/namespace.py:109
 msgid "Name cannot begin with '_'"
 msgstr "名前は '_' で開始できません"
 
@@ -254,37 +299,37 @@ msgstr "パスが一致しません: \"%s\""
 msgid "Namespace \"{0}\" does not exist."
 msgstr "名前空間 \"{0}\" は存在しません。"
 
-#: app/api/v3/viewsets/collection.py:219
+#: app/api/v3/viewsets/collection.py:224
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
 msgstr "コンテンツアプリからの予期しない応答。コード: %s"
 
-#: app/api/v3/viewsets/collection.py:249
+#: app/api/v3/viewsets/collection.py:254
 #, python-format
 msgid "Collection %s not found"
 msgstr "コレクション %s が見つかりません"
 
-#: app/api/v3/viewsets/collection.py:257
+#: app/api/v3/viewsets/collection.py:262
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
 msgstr "コレクション %s を移動するためのリポジトリーが見つかりません"
 
-#: app/api/v3/viewsets/collection.py:262
+#: app/api/v3/viewsets/collection.py:267
 #, python-format
 msgid "Collection %s not found in source repo"
 msgstr "ソースリポジトリーでコレクション %s が見つかりません"
 
-#: app/api/v3/viewsets/collection.py:265
+#: app/api/v3/viewsets/collection.py:270
 #, python-format
 msgid "Collection %s already found in destination repo"
 msgstr "宛先リポジトリーでコレクション %s がすでに見つかっています"
 
-#: app/api/v3/viewsets/collection.py:289 app/tasks/publishing.py:103
+#: app/api/v3/viewsets/collection.py:296 app/tasks/publishing.py:103
 #, python-format
 msgid "Signing %s service not found"
 msgstr "署名 %s サービスが見つかりません"
 
-#: app/api/v3/viewsets/collection.py:299
+#: app/api/v3/viewsets/collection.py:306
 #, python-brace-format
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
@@ -330,33 +375,4 @@ msgstr "この名前が指定されたローカルコンテナーはすでに存
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "ステージングリポジトリーが見つかりませんでした: \"%s\""
-
-#: app/tasks/synclist.py:45
-#, python-format
-msgid "Curating all synclists repos that curate from %s"
-msgstr "%s からキュレートするすべての同期リストリポジトリーをキュレート中"
-
-#: app/tasks/synclist.py:56
-msgid "Synclists curating upstream repo"
-msgstr "アップストリームリポジトリーをキュレート中の同期リスト"
-
-#: app/tasks/synclist.py:63
-msgid "Synclists curating upstream repo task"
-msgstr "アップストリームリポジトリータスクをキュレート中の同期リスト"
-
-#: app/tasks/synclist.py:92
-#, python-format
-msgid "Finishing curating %s synclist repos based on %s update"
-msgstr "%s 更新に基づく %s 同期リストリポジトリーのキュレートの完了"
-
-#: app/tasks/synclist.py:121
-#, python-format
-msgid ""
-"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
-"repo \"%s\""
-msgstr "アップストリームリポジトリー \"%s\" からリポジトリー \"%s\" をキュレートするために policy=%s で同期リスト \"%s\" を適用中"
-
-#: app/tasks/synclist.py:163
-msgid "Unexpected synclist policy {}"
-msgstr "予期せぬ同期リストポリシー {}"
 
