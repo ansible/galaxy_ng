@@ -107,16 +107,28 @@ PERMISSIONS = {
         "global_description": _("View any existing group in the system."),
         "ui_category": _("Groups"),
     },
+    "ansible.view_collectionremote": {
+        "name": _("View collection remote"),
+        "object_description": _("View this collection remote."),
+        "global_description": _("View any collection remote existing in the system."),
+        "ui_category": _("Collection Remotes"),
+    },
+    "ansible.add_collectionremote": {
+        "name": _("Add collection remote"),
+        "object_description": _("Add this collection remote."),
+        "global_description": _("Add any collection remote existing in the system."),
+        "ui_category": _("Collection Remotes"),
+    },
     "ansible.change_collectionremote": {
         "name": _("Change collection remote"),
         "object_description": _("Edit this collection remote."),
         "global_description": _("Edit any collection remote existing in the system."),
         "ui_category": _("Collection Remotes"),
     },
-    "ansible.view_collectionremote": {
-        "name": _("View collection remote"),
-        "object_description": _("View this collection remote."),
-        "global_description": _("View any collection remote existing in the system."),
+    "ansible.delete_collectionremote": {
+        "name": _("Delete collection remote"),
+        "object_description": _("Delete this collection remote."),
+        "global_description": _("Delete any collection remote existing in the system."),
         "ui_category": _("Collection Remotes"),
     },
     "ansible.view_ansiblerepository": {

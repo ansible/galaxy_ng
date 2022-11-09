@@ -118,6 +118,33 @@ INSIGHTS_STATEMENTS = {
             "action": ["modify", "sync", "rebuild_metadata", "sign"],
             "principal": "authenticated",
             "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.change_ansiblerepository"
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.delete_ansiblerepository"
+        },
+    ],
+
+    "distributions/ansible/ansible": [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.view_ansiblerepository"
+        },
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.add_ansiblerepository"
+        },
+        {
+            "action": "update",
+            "principal": "authenticated",
+            "effect": "allow",
             "condition": "has_model_perms:ansible.change_ansiblerepository"
         },
         {
@@ -125,6 +152,33 @@ INSIGHTS_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_perms:ansible.delete_ansiblerepository"
+        },
+    ],
+
+    'remotes/ansible/collection': [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.view_collectionremote"
+        },
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.add_collectionremote"
+        },
+        {
+            "action": "update",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.change_collectionremote"
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.delete_collectionremote"
         },
     ],
 
