@@ -204,3 +204,5 @@ PERMISSIONS = {
         "ui_category": _("Task Management"),
     },
 }
+
+AAP_VERSION_FILE_PATH = '/etc/ansible-automation-platform/VERSION'

@@ -6,6 +6,7 @@ from django.apps import apps
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 from pulp_ansible.app.models import AnsibleDistribution
 
 from rest_framework.response import Response
@@ -13,6 +14,7 @@ from rest_framework.reverse import reverse
 
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api.utils import get_aap_version
 
 
 # define the version matrix at the module level to avoid the redefinition on every API call.
@@ -30,7 +32,6 @@ VERSIONS = {
     "pulp_container_version": apps.get_app_config('container').version,
 }
 
-
 # Add in v1 support if configured
 if settings.GALAXY_ENABLE_LEGACY_ROLES:
     VERSIONS["available_versions"]["v1"] = "v1/"
@@ -44,6 +45,16 @@ class ApiRootView(api_base.APIView):
         """
         Returns the version matrix for the API + the current distro.
         """
+        cached_aap_version = cache.get('aap_version')
+        if cached_aap_version is None:
+            aap_version = get_aap_version()
+            if aap_version:
+                cached_aap_version = aap_version
+                cache.set('aap_version', aap_version)
+
+        if cached_aap_version:
+            VERSIONS.update({"aap_version": cached_aap_version})
+
         data = {**VERSIONS}
 
         if kwargs.get("path"):
