@@ -131,7 +131,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/ansible/galaxy-importer.git --branch v0.4.5
+git clone --depth=1 https://github.com/ansible/galaxy-importer.git --branch v0.4.6
 cd galaxy-importer
 
 if [ -n "$GALAXY_IMPORTER_PR_NUMBER" ]; then
