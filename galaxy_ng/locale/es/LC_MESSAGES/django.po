@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2022-10-28 11:07-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,75 +15,82 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app/access_control/access_policy.py:138
+#: app/access_control/access_policy.py:147
 msgid "Namespace in filename not found."
 msgstr "No se ha encontrado el espacio de nombres en el nombre del archivo."
 
-#: app/access_control/access_policy.py:153
+#: app/access_control/access_policy.py:166
 msgid "Namespace not found."
 msgstr "No se encontró el nombre del espacio."
 
 #: app/access_control/fields.py:17
-msgid "object_permissions field is required"
-msgstr "el campo object_permissions es obligatorio"
+msgid "object_roles field is required"
+msgstr "Este campo es obligatorio."
 
 #: app/access_control/fields.py:21
 msgid "id or name field is required"
 msgstr "el campo id o nombre es obligatorio"
 
 #: app/access_control/fields.py:27
-msgid "object_permissions must be a list of strings"
+msgid "object_roles must be a list of strings"
 msgstr "object_permissions debe ser una lista de cadenas"
 
-#: app/access_control/fields.py:41
-msgid "Permission {} does not exist"
-msgstr "El permiso {} no existe"
+#: app/access_control/fields.py:35
+msgid "Role {} does not exist"
+msgstr "El grupo no existe"
 
-#: app/access_control/fields.py:56
+#: app/access_control/fields.py:50
 msgid "Groups must be a list of group objects"
 msgstr "Los grupos deben ser una lista de objetos de grupo"
 
-#: app/access_control/fields.py:71
+#: app/access_control/fields.py:68
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
 msgstr "El grupo name=%s, id=%s no existe"
 
-#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
+#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "Nombre o ID de grupo no válido"
 
-#: app/api/ui/serializers/execution_environment.py:375
+#: app/access_control/mixins.py:55
+#, python-brace-format
+msgid ""
+"Role {role} does not exist or does not have any permissions related to this "
+"object."
+msgstr "El rol {role} no existe o no tiene ningún permiso relacionado con este objeto."
+
+#: app/api/ui/serializers/execution_environment.py:379
 msgid "Selected registry does not exist."
 msgstr "El registro seleccionado no existe."
 
-#: app/api/ui/serializers/execution_environment.py:384
+#: app/api/ui/serializers/execution_environment.py:388
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
 msgstr "Los nombres de los contenedores sólo pueden contener números alfanuméricos, \".\", \"_\", \"-\" y un máximo de un \"/\"."
 
-#: app/api/ui/serializers/execution_environment.py:402
+#: app/api/ui/serializers/execution_environment.py:406
 msgid "Name cannot be changed."
 msgstr "El nombre no se puede cambiar."
 
-#: app/api/ui/serializers/synclist.py:41
+#: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "No se encontró el repositorio \"{pulp_id}\" al crear la lista de sincronización"
 
-#: app/api/ui/serializers/synclist.py:96
+#: app/api/ui/serializers/synclist.py:65
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "La lista de sincronización ya existe: %s"
 
-#: app/api/ui/serializers/synclist.py:104
+#: app/api/ui/serializers/synclist.py:73
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "No se encontró la colección \"{namespace}.{name}\" al crear la lista de sincronización {synclist}"
 
-#: app/api/ui/serializers/synclist.py:143
+#: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -96,14 +103,52 @@ msgid ""
 "the requesting user is not in."
 msgstr "El permiso 'galaxy.change_group' es necesario para cambiar un grupo de usuarios en el que el usuario solicitante no está."
 
-#: app/api/ui/serializers/user.py:85
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr "Debe ser un superusuario para conceder permisos de superusuario."
 
-#: app/api/ui/serializers/user.py:128
+#: app/api/ui/serializers/user.py:109
+msgid "Must be a super user to change another user's password."
+msgstr "Debe ser un superusuario para cambiar la contraseña de otro usuario."
+
+#: app/api/ui/serializers/user.py:125
+msgid "You do not have permissions to modify super users."
+msgstr "No tienes permisos para modificar los superusuarios."
+
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "El grupo name=%(name)s, id=%(id)s no existe"
+
+#: app/api/ui/views/feature_flags.py:50
+msgid ""
+"WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
+"respective SigningService does not exist in the database."
+msgstr "ADVERTENCIA: GALAXY_COLLECTION_SIGNING_SERVICE está establecido en '{}', pero el SigningService correspondiente no existe en la base de datos."
+
+#: app/api/ui/views/feature_flags.py:65
+msgid ""
+"WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
+"not configured with a SigningService to create signatures."
+msgstr "ADVERTENCIA:GALAXY_AUTO_SIGN_COLLECTIONS está establecido en True, pero el sistema no está configurado con un SigningService para crear firmas."
+
+#: app/api/ui/views/feature_flags.py:76
+msgid ""
+"INFO:System is configured to display signatures (coming from remote syncs) "
+"but is not configured to create or accept upload of signatures."
+msgstr "INFO:El sistema está configurado para mostrar firmas (procedentes de sincronizaciones remotas) pero no está configurado para crear o aceptar la carga de firmas."
+
+#: app/api/ui/views/feature_flags.py:93
+msgid ""
+"WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
+"respective SigningService does not exist in the database."
+msgstr "ADVERTENCIA: GALAXY_CONTAINER_SIGNING_SERVICE está establecido en '{}', pero el SigningService correspondiente no existe en la base de datos."
+
+#: app/api/ui/views/feature_flags.py:106
+msgid ""
+"WARNING: container_signing is enabled via '{}' SigningService, however "
+"execution environments are disabled on the system."
+msgstr "ADVERTENCIA: container_signing está habilitado a través de '{}' SigningService, sin embargo los entornos de ejecución están deshabilitados en el sistema."
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
@@ -146,19 +191,19 @@ msgstr "La distribución %s no tiene ningún mando a distancia asociado."
 msgid "The %s remote does not have any registries associated with it."
 msgstr "El mando a distancia %s no tiene ningún registro asociado."
 
-#: app/api/ui/viewsets/collection.py:119
+#: app/api/ui/viewsets/collection.py:77
 msgid "Distribution base path is required"
 msgstr "Se requiere una ruta base de distribución"
 
-#: app/api/ui/viewsets/collection.py:255
+#: app/api/ui/viewsets/collection.py:221
 msgid "Retrieve collection version"
 msgstr "Recuperar la versión de la colección"
 
-#: app/api/ui/viewsets/collection.py:266
+#: app/api/ui/viewsets/collection.py:232
 msgid "Collection version not found for: {}"
 msgstr "No se ha encontrado la versión de la colección para: {}"
 
-#: app/api/ui/viewsets/collection.py:322
+#: app/api/ui/viewsets/collection.py:288
 msgid "Retrieve collection import"
 msgstr "Recuperación de la colección de importación"
 
@@ -195,24 +240,24 @@ msgstr "Se espera que el nombre tenga una longitud máxima de %s"
 msgid "Expected version to be max length of %s"
 msgstr "Se espera que la versión tenga una longitud máxima de %s"
 
-#: app/api/v3/serializers/namespace.py:65
+#: app/api/v3/serializers/namespace.py:67
 #, python-format
 msgid "'%s' is not a valid url."
 msgstr "'%s' no es una url válida."
 
-#: app/api/v3/serializers/namespace.py:94
+#: app/api/v3/serializers/namespace.py:100
 msgid "Attribute 'name' is required"
 msgstr "El atributo \"nombre\" es obligatorio"
 
-#: app/api/v3/serializers/namespace.py:97
+#: app/api/v3/serializers/namespace.py:103
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr "El nombre sólo puede contener letras minúsculas, guiones bajos y números"
 
-#: app/api/v3/serializers/namespace.py:100
+#: app/api/v3/serializers/namespace.py:106
 msgid "Name must be longer than 2 characters"
 msgstr "El nombre debe tener más de 2 caracteres"
 
-#: app/api/v3/serializers/namespace.py:103
+#: app/api/v3/serializers/namespace.py:109
 msgid "Name cannot begin with '_'"
 msgstr "El nombre no puede empezar por \"_\""
 
@@ -254,35 +299,42 @@ msgstr "La ruta no coincide: \"%s\""
 msgid "Namespace \"{0}\" does not exist."
 msgstr "El espacio de nombres \"{0}\" no existe."
 
-#: app/api/v3/viewsets/collection.py:219
+#: app/api/v3/viewsets/collection.py:224
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
 msgstr "Respuesta inesperada de la aplicación de contenido. Código: %s."
 
-#: app/api/v3/viewsets/collection.py:249
+#: app/api/v3/viewsets/collection.py:254
 #, python-format
 msgid "Collection %s not found"
 msgstr "No se encontró la colección %s"
 
-#: app/api/v3/viewsets/collection.py:257
+#: app/api/v3/viewsets/collection.py:262
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
 msgstr "No se encontraron los repositorios para mover la colección %s"
 
-#: app/api/v3/viewsets/collection.py:262
+#: app/api/v3/viewsets/collection.py:267
 #, python-format
 msgid "Collection %s not found in source repo"
 msgstr "No se encontró la colección %s en el repositorio de origen"
 
-#: app/api/v3/viewsets/collection.py:265
+#: app/api/v3/viewsets/collection.py:270
 #, python-format
 msgid "Collection %s already found in destination repo"
 msgstr "Ya se encontró la colección %s en el repositorio de destino"
 
-#: app/api/v3/viewsets/collection.py:289 app/tasks/publishing.py:103
+#: app/api/v3/viewsets/collection.py:296 app/tasks/publishing.py:103
 #, python-format
 msgid "Signing %s service not found"
 msgstr "No se encontró el servicio de firmas %s"
+
+#: app/api/v3/viewsets/collection.py:306
+#, python-brace-format
+msgid ""
+"Collection {namespace}.{name} could not be approved because system requires "
+"at least a signature for approval."
+msgstr "Recogida {namespace}.{name} no ha podido ser aprobada porque el sistema requiere al menos una firma para su aprobación."
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
@@ -324,31 +376,3 @@ msgstr "Ya existe un contenedor local con este nombre."
 msgid "Could not find staging repository: \"%s\""
 msgstr "No se pudo encontrar el repositorio de puesta en escena: \"%s\""
 
-#: app/tasks/synclist.py:45
-#, python-format
-msgid "Curating all synclists repos that curate from %s"
-msgstr "Curando todos los repositorios de listas de sincronización que curan de %s"
-
-#: app/tasks/synclist.py:56
-msgid "Synclists curating upstream repo"
-msgstr "Listas de sincronización curando el repo del upstream"
-
-#: app/tasks/synclist.py:63
-msgid "Synclists curating upstream repo task"
-msgstr "Tarea de curado de repo de listas de sincronización"
-
-#: app/tasks/synclist.py:92
-#, python-format
-msgid "Finishing curating %s synclist repos based on %s update"
-msgstr "Terminando de curar los repos de listas de sincronización %s basados en la actualización de %s"
-
-#: app/tasks/synclist.py:121
-#, python-format
-msgid ""
-"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
-"repo \"%s\""
-msgstr "Aplicando lista de sincronización \"%s\" con policy=%s para curar el repositorio \"%s\" desde el repositorio \"%s\""
-
-#: app/tasks/synclist.py:163
-msgid "Unexpected synclist policy {}"
-msgstr "Política de lista de sincronización inesperada {}"
