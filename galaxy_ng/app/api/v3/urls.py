@@ -121,20 +121,6 @@ urlpatterns = [
 
     path("plugin/", include(plugin_paths)),
 
-    # Disable the unpaginated collection views
-    # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
-    # For now endpoints are temporary deactivated
-    path(
-        "collections/all/",
-        views.NotFoundView.as_view(),
-        name="legacy-v3-metadata-collection-list",
-    ),
-    path(
-        "collection_versions/all/",
-        views.NotFoundView.as_view(),
-        name="legacy-v3-metadata-collection-versions-list",
-    ),
-
     # Overridden because the galaxy_ng endpoints only allow collections to be uploaded into
     # specific repositories.
     path(
