@@ -15,20 +15,11 @@ cat /etc/issue
 echo "RPM packages ..."
 rpm -qa | sort
 
-echo "Set project to ${NAMESPACE}"
-oc project ${NAMESPACE}
-
-echo "Find galaxy-api pod"
-AH_API_POD=$(oc get pod -l pod=automation-hub-galaxy-api -o custom-columns=POD:.metadata.name --no-headers | head -1)
-
-echo "Setting up test data"
-oc exec -i $AH_API_POD /entrypoint.sh manage shell < dev/common/setup_test_data.py
-
 # Force "publishing" uploaded collections
 export HUB_USE_MOVE_ENDPOINT="true"
 
 # What is the api root?
-export HUB_API_ROOT=$(oc get route -l frontend=automation-hub -o jsonpath='https://{.items[0].spec.host}')
+export HUB_API_ROOT="$(oc get route -l frontend=automation-hub -o jsonpath='https://{.items[0].spec.host}')/api/automation-hub/"
 echo "HUB_API_ROOT: ${HUB_API_ROOT}"
 export HUB_AUTH_URL="$(oc get route -l app=env-${NAMESPACE} -o jsonpath='https://{.items[0].spec.host}')/auth/realms/redhat-external/protocol/openid-connect/token"
 echo "HUB_AUTH_URL: ${HUB_AUTH_URL}"

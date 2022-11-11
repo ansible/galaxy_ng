@@ -74,28 +74,8 @@ bonfire deploy \
 bonfire namespace describe ${NAMESPACE}
 oc project ${NAMESPACE}
 
-# Set the CONTENT_ORIGIN URL
-CONTENT_ORIGIN=$(oc get route -l frontend=automation-hub -o jsonpath='https://{.items[0].spec.host}')
-oc patch clowdapp automation-hub --type=json \
-    -p '[{"op": "replace",
-            "path": "/spec/deployments/1/podSpec/env/1/value",
-            "value": "'"${CONTENT_ORIGIN}"'"
-        }]'
-sleep 5
-oc rollout status deploy/automation-hub-galaxy-api
-
-# Fix the routing for minio and artifact urls
-oc create route edge minio --service=env-${NAMESPACE}-minio --insecure-policy=Redirect
-MINIO_ROUTE=$(oc get route minio -o jsonpath='https://{.spec.host}{"\n"}')
-oc patch clowdapp automation-hub \
-    --type=json \
-    -p '[{"op": "add", "path": "/spec/deployments/2/podSpec/env/-", "value": {
-                "name": "PULP_AWS_S3_ENDPOINT_URL",
-                "value": "'"${MINIO_ROUTE}"'"
-            }
-        }]'
-sleep 5
-oc rollout status deploy/automation-hub-pulp-content-app
+dev/ephemeral/patch_ephemeral.sh
+dev/ephemeral/create_keycloak_users.sh
 
 # source $CICD_ROOT/smoke_test.sh
 # source smoke_test.sh
