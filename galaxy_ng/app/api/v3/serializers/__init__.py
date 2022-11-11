@@ -32,7 +32,6 @@ __all__ = (
     'NamespaceSummarySerializer',
     'TaskSerializer',
     'TaskSummarySerializer',
-    'UnpaginatedCollectionVersionSerializer',
     'ContainerRepositorySerializer',
     'ContainerRepositoryHistorySerializer',
     'ContainerManifestSerializer',
