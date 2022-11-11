@@ -25,7 +25,7 @@ msgstr "Namespace niet gevonden."
 
 #: app/access_control/fields.py:17
 msgid "object_roles field is required"
-msgstr "Dit veld is vereist."
+msgstr "Veld object_roles is verplicht."
 
 #: app/access_control/fields.py:21
 msgid "id or name field is required"
@@ -33,11 +33,11 @@ msgstr "Veld id of naam is verplicht"
 
 #: app/access_control/fields.py:27
 msgid "object_roles must be a list of strings"
-msgstr "object_permissions moet een lijst van tekenreeksen zijn"
+msgstr "object_roles moet een lijst van tekenreeksen zijn"
 
 #: app/access_control/fields.py:35
 msgid "Role {} does not exist"
-msgstr "Groep bestaat niet"
+msgstr "Rol bestaat niet"
 
 #: app/access_control/fields.py:50
 msgid "Groups must be a list of group objects"
@@ -170,7 +170,7 @@ msgstr "het veld distro_base_path is vereist."
 #: app/api/ui/views/signing.py:108
 #, python-format
 msgid "Distribution %s does not exist."
-msgstr "Machtiging %s bestaat niet."
+msgstr "Distributie %s bestaat niet."
 
 #: app/api/ui/views/signing.py:114
 msgid "signing_service field is required."

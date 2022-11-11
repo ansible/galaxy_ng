@@ -37,7 +37,7 @@ msgstr "object_roles 必须是一个字符串列表"
 
 #: app/access_control/fields.py:35
 msgid "Role {} does not exist"
-msgstr "角色 {} d不存在"
+msgstr "角色 {} 不存在"
 
 #: app/access_control/fields.py:50
 msgid "Groups must be a list of group objects"

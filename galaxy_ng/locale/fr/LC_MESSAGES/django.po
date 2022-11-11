@@ -189,7 +189,7 @@ msgstr "La distribution %s n'a pas d’utilisateurs distants associés."
 #: app/api/ui/views/sync.py:51
 #, python-format
 msgid "The %s remote does not have any registries associated with it."
-msgstr "La distribution%s n'a pas de registres associés."
+msgstr "La distribution %s n'a pas de registres associés."
 
 #: app/api/ui/viewsets/collection.py:77
 msgid "Distribution base path is required"
