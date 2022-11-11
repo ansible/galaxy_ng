@@ -84,6 +84,8 @@ STANDALONE_STATEMENTS = {
     'pulp_ansible/v3/collection-versions/docs': _collection_statements,
     'pulp_ansible/v3/collections/imports': _collection_statements,
     'pulp_ansible/v3/repo-metadata': _collection_statements,
+    'pulp_ansible/v3/collection-versions/all': _collection_statements,
+    'pulp_ansible/v3/collections/all': _collection_statements,
 
     'repositories/ansible/ansible': [
         {
@@ -216,11 +218,6 @@ STANDALONE_STATEMENTS = {
             "condition": "has_repository_model_or_obj_perms:ansible.delete_ansiblerepository"
         },
     ],
-
-    # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
-    # For now endpoints are temporary deactivated
-    'pulp_ansible/v3/collection-versions/all': _deny_all,
-    'pulp_ansible/v3/collections/all': _deny_all,
 
     # disable upload and download APIs since we're not using them yet
     'pulp_ansible/v3/collections/upload': _deny_all,
