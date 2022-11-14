@@ -103,7 +103,13 @@ INSIGHTS_STATEMENTS = {
 
     'repositories/ansible/ansible': [
         {
-            "action": ["list", "retrieve"],
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.view_ansiblerepository"
+        },
+        {
+            "action": "list",
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_perms:ansible.view_ansiblerepository"
@@ -112,7 +118,7 @@ INSIGHTS_STATEMENTS = {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.add_ansiblerepository"
+            "condition": "has_model_or_obj_perms:ansible.add_ansiblerepository"
         },
         {
             "action": ["modify", "sync", "rebuild_metadata", "sign"],
@@ -130,7 +136,13 @@ INSIGHTS_STATEMENTS = {
 
     "distributions/ansible/ansible": [
         {
-            "action": ["list", "retrieve"],
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.view_ansiblerepository"
+        },
+        {
+            "action": "list",
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_perms:ansible.view_ansiblerepository"
@@ -139,7 +151,7 @@ INSIGHTS_STATEMENTS = {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.add_ansiblerepository"
+            "condition": "has_model_or_obj_perms:ansible.add_ansiblerepository"
         },
         {
             "action": "update",
@@ -157,7 +169,13 @@ INSIGHTS_STATEMENTS = {
 
     'remotes/ansible/collection': [
         {
-            "action": ["list", "retrieve"],
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.view_collectionremote"
+        },
+        {
+            "action": "list",
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_perms:ansible.view_collectionremote"
