@@ -6,6 +6,8 @@ from django.core import exceptions
 from django.utils.translation import gettext_lazy as _
 from django.http.request import HttpRequest
 
+from rest_framework.exceptions import ValidationError
+
 from pulpcore.plugin.tasking import dispatch
 
 from pulp_container.app import models as container_models
@@ -110,7 +112,7 @@ def create_or_update_remote_container(container_data, registry_pk, request_data)
 
         try:
             serializer.is_valid(raise_exception=True)
-        except serializers.ValidationError as e:
+        except ValidationError as e:
             CouldNotCreateContainerError(
                 container_data['name'],
                 error=str(e)
