@@ -1,0 +1,1 @@
+Fix AttributeError in index_registry task when handing serializer errors
