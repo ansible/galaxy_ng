@@ -106,31 +106,40 @@ INSIGHTS_STATEMENTS = {
             "action": "retrieve",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.view_ansiblerepository"
+            "condition": [
+                "has_model_or_obj_perms:ansible.view_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
         {
             "action": "list",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.view_ansiblerepository"
+            "condition": ["has_model_perms:ansible.view_ansiblerepository", "has_rh_entitlements"]
         },
         {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.add_ansiblerepository"
+            "condition": ["has_model_perms:ansible.add_ansiblerepository", "has_rh_entitlements"]
         },
         {
             "action": ["modify", "sync", "rebuild_metadata", "sign"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.change_ansiblerepository"
+            "condition": [
+                "has_model_or_obj_perms:ansible.change_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
         {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.delete_ansiblerepository"
+            "condition": [
+                "has_model_or_obj_perms:ansible.delete_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
     ],
 
@@ -139,31 +148,46 @@ INSIGHTS_STATEMENTS = {
             "action": "retrieve",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.view_ansiblerepository"
+            "condition": [
+                "has_distribution_repo_perms:ansible.view_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
         {
             "action": "list",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.view_ansiblerepository"
+            "condition": [
+                "has_distribution_repo_perms:ansible.view_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
         {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.add_ansiblerepository"
+            "condition": [
+                "has_distribution_repo_perms:ansible.add_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
         {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.change_ansiblerepository"
+            "condition": [
+                "has_distribution_repo_perms:ansible.change_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
         {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.delete_ansiblerepository"
+            "condition": [
+                "has_distribution_repo_perms:ansible.delete_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
     ],
 
@@ -172,31 +196,88 @@ INSIGHTS_STATEMENTS = {
             "action": "retrieve",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.view_collectionremote"
+            "condition": [
+                "has_model_or_obj_perms:ansible.view_collectionremote",
+                "has_rh_entitlements"
+            ]
         },
         {
             "action": "list",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.view_collectionremote"
+            "condition": ["has_model_perms:ansible.view_collectionremote", "has_rh_entitlements"]
         },
         {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.add_collectionremote"
+            "condition": ["has_model_perms:ansible.add_collectionremote", "has_rh_entitlements"]
         },
         {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.change_collectionremote"
+            "condition": [
+                "has_model_or_obj_perms:ansible.change_collectionremote",
+                "has_rh_entitlements"
+            ]
         },
         {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.delete_collectionremote"
+            "condition": [
+                "has_model_or_obj_perms:ansible.delete_collectionremote",
+                "has_rh_entitlements"
+            ]
+        },
+    ],
+
+    'repositories/ansible/ansible/versions': [
+        {
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
+                "has_rh_entitlements"
+            ]
+        },
+        {
+            "action": "list",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
+                "has_rh_entitlements"
+            ]
+        },
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "has_repository_model_or_obj_perms:ansible.add_ansiblerepository",
+                "has_rh_entitlements"
+            ]
+        },
+        {
+            "action": ["rebuild_metadata", "repair"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "has_repository_model_or_obj_perms:ansible.change_ansiblerepository",
+                "has_rh_entitlements"
+            ]
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": [
+                "has_repository_model_or_obj_perms:ansible.delete_ansiblerepository",
+                "has_rh_entitlements"
+            ]
         },
     ],
 

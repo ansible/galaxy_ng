@@ -194,6 +194,20 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
         return request.user.has_perm(permission, obj)
 
+    def has_distribution_repo_perms(self, request, view, action, permission):
+        """
+        Check if the user has model or object-level permissions
+        on the distribution associated with ansible repository.
+        """
+        if request.user.has_perm(permission):
+            return True
+
+        if "pk" in view.kwargs:
+            obj = view.get_object()
+            return request.user.has_perm(permission, obj.repository.cast())
+
+        return False
+
 
 class AppRootAccessPolicy(AccessPolicyBase):
     NAME = "AppRootViewSet"
