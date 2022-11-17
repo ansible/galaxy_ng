@@ -7,11 +7,10 @@ from galaxykit.utils import GalaxyClientError, wait_for_task
 from galaxykit.container_images import delete_container as delete_image_container
 from orionutils.generator import build_collection
 
-from build.lib.galaxy_ng.tests.integration.utils import uuid4
 from galaxykit.collections import get_collection, upload_artifact
 
 from build.lib.galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version
-
+from galaxy_ng.tests.integration.utils import uuid4
 
 logger = logging.getLogger(__name__)
 
