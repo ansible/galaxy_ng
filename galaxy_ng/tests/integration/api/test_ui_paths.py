@@ -735,9 +735,10 @@ def test_api_ui_v1_users_by_id(ansible_config):
 @pytest.mark.api_ui
 def test_users_list_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
-    url = "/api/automation-hub/_ui/v1/users/"
 
     config = ansible_config("basic_user")
+    api_prefix = config.get("api_prefix").rstrip("/")
+    url = f"{api_prefix}/_ui/v1/users/"
     api_client = get_client(config, request_token=True, require_auth=True)
 
     with pytest.raises(GalaxyError, match=REGEX_403):
@@ -761,9 +762,10 @@ def test_users_list_insights_access(ansible_config):
 @pytest.mark.api_ui
 def test_users_detail_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
-    url = "/api/automation-hub/_ui/v1/users/1/"
 
     config = ansible_config("basic_user")
+    api_prefix = config.get("api_prefix").rstrip("/")
+    url = f"{api_prefix}/_ui/v1/users/1/"
     api_client = get_client(config, request_token=True, require_auth=True)
 
     with pytest.raises(GalaxyError, match=REGEX_403):

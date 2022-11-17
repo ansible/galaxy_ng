@@ -26,6 +26,7 @@ def test_api_ui_v1_remote_sync(ansible_config):
 
     # update the community remote
     cfg = ansible_config('admin')
+    api_prefix = cfg.get("api_prefix").rstrip("/")
     payload = {
         'url': 'https://galaxy.ansible.com/api/',
         'auth_url': None,
@@ -54,14 +55,13 @@ def test_api_ui_v1_remote_sync(ansible_config):
 
     # sync
     resp = api_client("content/community/v3/sync/", args=payload, method="POST")
-    task = {'task': f'/api/automation-hub/pulp/api/v3/tasks/{resp["task"]}/'}
+    task = {'task': f'{api_prefix}/pulp/api/v3/tasks/{resp["task"]}/'}
     validate_json(instance=task, schema=schema_task)
     resp = wait_for_task(api_client, task)
 
     # search collections for synced collection
-    cfg = ansible_config('admin')
     resp = api_client(
-        "_ui/v1/repo/community/?namespace=newswangerd&name=collection_demo",
+        f"{api_prefix}/_ui/v1/repo/community/?namespace=newswangerd&name=collection_demo",
         args={},
         method="GET"
     )

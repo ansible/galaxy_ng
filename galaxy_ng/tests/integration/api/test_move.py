@@ -27,6 +27,7 @@ def test_move_collection_version(ansible_config, upload_artifact):
     """Tests whether a colleciton can be moved from repo to repo"""
 
     config = ansible_config("partner_engineer")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
         request_token=True,
@@ -39,7 +40,7 @@ def test_move_collection_version(ansible_config, upload_artifact):
             'published': {}
         }
         for repo in collections.keys():
-            next_page = f'/api/automation-hub/_ui/v1/collection-versions/?repository={repo}'
+            next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
             while next_page:
                 resp = api_client(next_page)
                 for _collection in resp['data']:
@@ -107,6 +108,7 @@ def test_copy_collection_version(ansible_config, upload_artifact):
     """Tests whether a colleciton can be copied from repo to repo"""
 
     config = ansible_config("partner_engineer")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
         request_token=True,
@@ -119,7 +121,7 @@ def test_copy_collection_version(ansible_config, upload_artifact):
             'community': {}
         }
         for repo in collections.keys():
-            next_page = f'/api/automation-hub/_ui/v1/collection-versions/?repository={repo}'
+            next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
             while next_page:
                 resp = api_client(next_page)
                 for _collection in resp['data']:

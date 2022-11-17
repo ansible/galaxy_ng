@@ -160,7 +160,7 @@ def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
     delete_resp = api_client(
         f"{api_prefix}/v3/plugin/execution-environments/repositories/{name}/", method="DELETE"
     )
-    task_url = delete_resp["task"][len('/api/automation-hub/'):]
+    task_url = delete_resp["task"][len(f'{api_prefix}/'):]
 
     task_detail = api_client(f"{api_prefix}/{task_url}", method="GET")
     validate_json(instance=task_detail, schema=schema_task_detail)
