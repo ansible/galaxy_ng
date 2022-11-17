@@ -104,7 +104,7 @@ class AnsibleConfigFixture(dict):
         "admin": {  # this is a superuser
             "username": "notifications_admin",
             "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
+            "token": None,
         },
         "ldap": {  # this is a superuser in ldap profile
             "username": "professor",
