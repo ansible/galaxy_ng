@@ -7,3 +7,5 @@ openapi-spec-validator
 jsonschema
 hvac
 importlib_resources
+galaxykit
+ansible==2.10.7

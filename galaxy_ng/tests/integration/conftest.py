@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import time
@@ -6,6 +7,7 @@ from urllib.parse import urlparse
 
 import pytest
 from orionutils.utils import increment_version
+from pkg_resources import parse_version
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 
@@ -18,6 +20,7 @@ from .utils import (
     set_certification,
 )
 from .utils import upload_artifact as _upload_artifact
+from .utils.iqe_utils import GalaxyKitClient, get_hub_version
 
 # from orionutils.generator import build_collection
 
@@ -55,7 +58,12 @@ role: Related to RBAC Roles
 rbac_roles: Tests checking Role permissions
 group: Related to Groups
 slow_in_cloud: tests that take too long to be run against stage
+max_hub_version: This marker takes an argument that indicates the maximum hub version
+min_hub_version: This marker takes an argument that indicates the minimum hub version
 """
+
+
+logger = logging.getLogger(__name__)
 
 
 def pytest_configure(config):
@@ -163,10 +171,8 @@ class AnsibleConfigFixture(dict):
             }
         }
 
-    def __init__(self, profile, namespace=None):
+    def __init__(self, profile=None, namespace=None):
         self.profile = profile
-        if profile not in self.PROFILES.keys():
-            raise Exception("AnsibleConfigFixture profile unknown")
         self.namespace = namespace
 
         # workaround for a weird error with the galaxy cli lib ...
@@ -177,13 +183,14 @@ class AnsibleConfigFixture(dict):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
 
-        if isinstance(self.PROFILES[self.profile]["username"], dict):
-            # credentials from vault
-            loader = get_vault_loader()
-            self._set_profile_from_vault(loader, self.profile, "username")
-            self._set_profile_from_vault(loader, self.profile, "password")
-            if self.PROFILES[self.profile]["token"]:
-                self._set_profile_from_vault(loader, self.profile, "token")
+        if self.profile:
+            if isinstance(self.PROFILES[self.profile]["username"], dict):
+                # credentials from vault
+                loader = get_vault_loader()
+                self._set_profile_from_vault(loader, self.profile, "username")
+                self._set_profile_from_vault(loader, self.profile, "password")
+                if self.PROFILES[self.profile]["token"]:
+                    self._set_profile_from_vault(loader, self.profile, "token")
 
     def _set_profile_from_vault(self, loader, profile, param):
         param_vault_path = self.PROFILES[profile][param]["vault_path"]
@@ -270,6 +277,24 @@ class AnsibleConfigFixture(dict):
                 'http://localhost:8082'
             )
 
+        elif key == 'ssl_verify':
+            return os.environ.get(
+                'SSL_VERIFY',
+                False
+            )
+
+        elif key == 'container_engine':
+            return os.environ.get(
+                'CONTAINER_ENGINE',
+                'podman'
+            )
+
+        elif key == 'container_registry':
+            return os.environ.get(
+                'CONTAINER_REGISTRY',
+                'http://localhost:5001/'
+            )
+
         else:
             raise Exception(f'Unknown config key: {self.namespace}.{key}')
 
@@ -278,9 +303,18 @@ class AnsibleConfigFixture(dict):
     def get(self, key):
         return self.__getitem__(key)
 
+    def get_profile_data(self):
+        if self.profile:
+            return self.PROFILES[self.profile]
+        raise Exception("No profile has been set")
 
-@pytest.fixture
+
+@pytest.fixture(scope="session")
 def ansible_config():
+    return get_ansible_config()
+
+
+def get_ansible_config():
     return AnsibleConfigFixture
 
 
@@ -455,3 +489,38 @@ def get_vault_loader():
         'IQE_VAULT_MOUNT_POINT': 'insights'
     }
     return VaultSecretFetcher.from_settings(vault_settings)
+
+
+@pytest.fixture(scope="session")
+def galaxy_client(ansible_config):
+    """
+    Returns a function that, when called with one of the users listed in the settings.local.yaml
+    file will login using hub and galaxykit, returning the constructed GalaxyClient object.
+    """
+    galaxy_kit_client = GalaxyKitClient(ansible_config)
+    return galaxy_kit_client.gen_authorized_client
+
+
+def pytest_sessionstart(session):
+    hub_version = get_hub_version(get_ansible_config())
+    logger.debug(f"Running tests against hub version {hub_version}")
+
+
+def pytest_runtest_setup(item):
+    test_min_versions = [mark.args[0] for mark in item.iter_markers(name="min_hub_version")]
+    test_max_versions = [mark.args[0] for mark in item.iter_markers(name="max_hub_version")]
+
+    hub_version = get_hub_version(get_ansible_config())
+
+    for min_version in test_min_versions:
+        if parse_version(hub_version) < parse_version(min_version):
+            pytest.skip(
+                f"Minimum hub version to run tests is {min_version} "
+                f"but hub version {hub_version} was found"
+            )
+    for max_version in test_max_versions:
+        if parse_version(hub_version) > parse_version(max_version):
+            pytest.skip(
+                f"Maximum hub version to run tests is {max_version} "
+                f"but hub version {hub_version} was found"
+            )
