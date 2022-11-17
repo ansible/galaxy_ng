@@ -52,12 +52,12 @@ def create_namespace(client, group, object_roles=None):
     return namespace_name
 
 
-def create_local_image_container(app, client):
+def create_local_image_container(config, client):
     """
     This method is used to create an empty container to push images later in the tests.
     To do so, an image is pushed and deleted afterwards.
     """
-    container_engine = app.automation_hub.config.get("container_engine", "podman")
+    container_engine = config.get("container_engine")
     unauth_ctn = ContainerClient(auth=None, engine=container_engine)
     unauth_ctn.pull_image("alpine")
     ee_name = f"ee_{uuid4()}"

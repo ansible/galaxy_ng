@@ -740,13 +740,13 @@ class TestRBAC:
         get_community_remote(gc_user)
 
     @pytest.mark.standalone_only
-    def test_missing_object_role_push_image_to_ee(self, app, galaxy_client):
+    def test_missing_object_role_push_image_to_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
         object permissions to push an image, the user can't push an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(app, gc)
+        ee_name = create_local_image_container(ansible_config(), gc)
         user, _ = add_new_user_to_new_group(gc)
         gc_user = galaxy_client(user)
         try:
@@ -758,13 +758,13 @@ class TestRBAC:
             assert "retcode" in str(e)
 
     @pytest.mark.standalone_only
-    def test_object_role_push_image_to_ee(self, app, galaxy_client):
+    def test_object_role_push_image_to_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user has object permissions to push an image,
         the user can push an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(app, gc)
+        ee_name = create_local_image_container(ansible_config(), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["container.namespace_push_containerdistribution"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -774,7 +774,7 @@ class TestRBAC:
         gc_user.push_image(ee_name + ":latest")
 
     @pytest.mark.standalone_only
-    def test_global_role_push_image_to_ee(self, app, galaxy_client):
+    def test_global_role_push_image_to_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user has global permissions
         to push an image, the user can push an image
@@ -788,12 +788,12 @@ class TestRBAC:
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
-        ee_name = create_local_image_container(app, gc)
+        ee_name = create_local_image_container(ansible_config(), gc)
         gc_user = galaxy_client(user)
         gc_user.push_image(ee_name + ":latest")
 
     @pytest.mark.standalone_only
-    def test_missing_global_role_push_image_to_ee(self, app, galaxy_client):
+    def test_missing_global_role_push_image_to_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
         global permissions to push an image, the user can't push an image
@@ -804,7 +804,7 @@ class TestRBAC:
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
-        ee_name = create_local_image_container(app, gc)
+        ee_name = create_local_image_container(ansible_config(), gc)
         gc_user = galaxy_client(user)
         try:
             gc_user.push_image(ee_name + ":latest")
@@ -815,13 +815,13 @@ class TestRBAC:
             assert "retcode" in str(e)
 
     @pytest.mark.standalone_only
-    def test_missing_object_role_delete_image_from_ee(self, app, galaxy_client):
+    def test_missing_object_role_delete_image_from_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
         object permissions to delete an image, the user can't delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(app, gc)
+        ee_name = create_local_image_container(ansible_config(), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.add_containernamespace",
@@ -838,13 +838,13 @@ class TestRBAC:
         assert ctx.value.args[0] == 403
 
     @pytest.mark.standalone_only
-    def test_global_role_delete_image_from_ee(self, app, galaxy_client):
+    def test_global_role_delete_image_from_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user has
         global permissions to delete an image, the user can delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(app, gc)
+        ee_name = create_local_image_container(ansible_config(), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.delete_containerrepository",
@@ -859,13 +859,13 @@ class TestRBAC:
         delete_image_container(gc_user, ee_name, all_images["data"][0]["digest"])
 
     @pytest.mark.standalone_only
-    def test_missing_global_role_delete_image_from_ee(self, app, galaxy_client):
+    def test_missing_global_role_delete_image_from_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
         global permissions to delete an image, the user can't delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(app, gc)
+        ee_name = create_local_image_container(ansible_config(), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.add_containernamespace",
