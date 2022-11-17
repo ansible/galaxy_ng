@@ -99,12 +99,12 @@ class AnsibleConfigFixture(dict):
         "org_admin": {  # user is org admin in keycloak
             "username": "org-admin",
             "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
+            "token": None,
         },
         "admin": {  # this is a superuser
             "username": "notifications_admin",
             "password": "redhat",
-            "token": None,
+            "token": "abcdefghijklmnopqrstuvwxyz1234567892",
         },
         "ldap": {  # this is a superuser in ldap profile
             "username": "professor",
