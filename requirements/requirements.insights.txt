@@ -234,7 +234,7 @@ prometheus-client==0.14.1
     # via django-prometheus
 psycopg2==2.9.3
     # via pulpcore
-pulp-ansible==0.13.2
+pulp-ansible==0.13.5
     # via galaxy-ng (setup.py)
 pulp-container==2.10.7
     # via galaxy-ng (setup.py)
