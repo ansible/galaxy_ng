@@ -204,7 +204,6 @@ class GalaxyKitClient:
                 container_tls_verify=ssl_verify,
                 https_verify=ssl_verify,
             )
-
             if ignore_cache:
                 return g_client
             else:
