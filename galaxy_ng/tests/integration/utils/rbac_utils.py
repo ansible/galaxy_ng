@@ -9,8 +9,8 @@ from orionutils.generator import build_collection
 
 from galaxykit.collections import get_collection, upload_artifact
 
-from build.lib.galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version
 from galaxy_ng.tests.integration.utils import uuid4
+from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version
 
 logger = logging.getLogger(__name__)
 
