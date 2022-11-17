@@ -8,4 +8,4 @@ jsonschema
 hvac
 importlib_resources
 galaxykit
-ansible==2.10.7
+ansible
