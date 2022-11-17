@@ -25,9 +25,9 @@ Content ultimately references one or more artifacts, however the artifact may no
 
 A big bucket of content. Think of this like a folder that has a set of collections (or any other pulp content) in it. Repositories store pointers to content, not the actual content itself.
 
-Repositories are versioned and repository versions are immutable. What this means is that whenever content is added or removed from a repository a new repository version is created that references the list of changes that happened on the repository. This is similar to how git works where code in a git repository is a long list of commits that reference changes that were made to the code over time. Versions allow for repositories to be rolled back to a previous state
+Repositories are versioned and repository versions are immutable. What this means is that whenever content is added or removed from a repository a new repository version is created that references the list of changes that happened on the repository. This is similar to how git works where code in a git repository is a long list of commits that reference changes that were made to the code over time. Versions allow for repositories to be rolled back to a previous state.
 
-The repository object in the database points to whatever the latest repository version is, however content can be referenced in any version of a repository, not just the latest version.
+The repository object in the database points to whatever the latest repository version is; however, content can be referenced in any version of a repository, not just the latest version.
 
 **Example**
 
@@ -89,7 +89,7 @@ Pulp ansible provides the following models:
 - Distribution
     - AnsibleDistrbution
 
-Additionally Pulp Ansible defines the following models that don't extend any of the pulp base classes:
+Additionally, Pulp Ansible defines the following models that don't extend any of the pulp base classes:
 
 - Collection: This is used to group CollectionVersions by namespace and name.
 - Namespace: Contains information about the publisher of a collection. This also defines who can publish collections within a given namespace.
@@ -101,7 +101,7 @@ Additionally Pulp Ansible defines the following models that don't extend any of 
 
 ## Pulp Container Content Model
 
-The pulp container data model is a little bit counter-intuitive and bears some additional explanation. For this example lets assume we have a container registry running on my-registry.example.com with the following containers:
+The pulp container data model is a little bit counter-intuitive and merits some additional explanation. For this example lets assume we have a container registry running on my-registry.example.com with the following containers:
 
 - container1:latest
 - container1:v1
