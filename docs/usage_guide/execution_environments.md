@@ -6,7 +6,7 @@ Galaxy NG provides a container registry for pushing container images. It functio
 
 ## Pushing Images
 
-!!! note:
+!!! note
     Pushing images requires permissions.
 
 1. Authenticate with the galaxy registry: `podman login localhost:5001`

@@ -13,7 +13,13 @@ This is recommended for beginners. It's less error prone and easier to setup, ho
 - are developing using a Mac
 - writing documentation
 
-[Docker environment developer setup guide](dev/docker_environment.md).
+[Docker environment developer setup guide](/galaxy_ng/dev/docker_environment).
+
+### OCI Env
+
+This is the new preferred way to develop with pulp. It provides a flexible, containerized environment that's easy to set up. It supports running integration and functional tests as well as developing the UI. It supports all the features from the docker and vagrant environments, but isn't as heavily tested as the docker environment.
+
+[OCI Env developer setup guide](/galaxy_ng/dev/oci_env)
 
 ### Vagrant Environment
 
@@ -24,7 +30,7 @@ This uses the [Pulp developer environment](https://docs.pulpproject.org/pulpcore
 - need to run pulpcore and pulp_ansible without the galaxy_ng plugin installed
 - need to debug an issue on an operating system other than RHEL/Centos
 
-[Vagrant environment developer setup guide](dev/vagrant.md)
+[Vagrant environment developer setup guide](/galaxy_ng/dev/vagrant)
 
 ## Issue Tracker
 
@@ -50,11 +56,3 @@ PRs for the backend also require:
 - All commits must be signed. [How to set up commit signing](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
 - Any changes to the app require updates to the tests in `galaxy_ng/tests/`. This can include adding new tests or updating existing tests to cover changes. See [dev/writing_tests] for more information.
 PRs will be reviewed by two members of the team.
-
-## Familiarize yourself with Galaxy NG
-
-TODO
-
-- Architecture
-- Getting started guide
-- Developer guidelines

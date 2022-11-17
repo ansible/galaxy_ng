@@ -34,9 +34,9 @@ nav:
             - Services: dev/developer_guide/services.md
             - RBAC: dev/developer_guide/rbac.md
         - Docker compose environment: dev/docker_environment.md
+        - OCI Env Environment: dev/oci_env.md
         - Vagrant environment: dev/vagrant.md
         - Writing documentation: dev/writing_docs.md
-        - Tests: dev/tests.md
     - Tags: tags.md
     - Community:
         - Overview: community/overview.md
