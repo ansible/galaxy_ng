@@ -5,7 +5,7 @@
 
 additional_repos:
 - bindings: true
-  branch: 0.13.2
+  branch: 0.13.5
   name: pulp_ansible
   org: pulp
 - bindings: true
