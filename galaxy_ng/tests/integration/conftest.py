@@ -99,9 +99,14 @@ class AnsibleConfigFixture(dict):
         "org_admin": {  # user is org admin in keycloak
             "username": "org-admin",
             "password": "redhat",
-            "token": None,
+            "token": "abcdefghijklmnopqrstuvwxyz1234567892",
         },
         "admin": {  # this is a superuser
+            "username": "notifications_admin",
+            "password": "redhat",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567892",
+        },
+        "no_token_admin": {  # this is a superuser
             "username": "notifications_admin",
             "password": "redhat",
             "token": None,
