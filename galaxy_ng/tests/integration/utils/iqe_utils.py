@@ -3,10 +3,6 @@ from unittest.mock import patch
 
 from galaxykit import GalaxyClient
 
-try:
-    import importlib.resources as pkg_resources
-except ModuleNotFoundError:
-    import importlib_resources as pkg_resources
 import json
 import logging
 from functools import lru_cache

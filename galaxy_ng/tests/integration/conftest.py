@@ -498,6 +498,10 @@ def get_vault_loader():
 
 @pytest.fixture(scope="session")
 def galaxy_client(ansible_config):
+    return get_galaxy_client(ansible_config)
+
+
+def get_galaxy_client(ansible_config):
     """
     Returns a function that, when called with one of the users listed in the settings.local.yaml
     file will login using hub and galaxykit, returning the constructed GalaxyClient object.

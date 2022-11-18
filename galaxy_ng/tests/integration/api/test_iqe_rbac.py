@@ -19,6 +19,7 @@ from galaxykit.users import get_user
 from galaxykit.users import update_user
 from galaxykit.utils import GalaxyClientError
 
+from galaxy_ng.tests.integration.conftest import get_ansible_config, get_galaxy_client
 from galaxy_ng.tests.integration.utils import uuid4
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group, \
     create_test_user, create_local_image_container, create_namespace, \
@@ -27,6 +28,11 @@ from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_gro
 
 @pytest.mark.min_hub_version("4.6dev")
 class TestRBAC:
+    @classmethod
+    def setup_class(cls):
+        config = get_ansible_config()
+        client = get_galaxy_client(config)
+        client("no_token_admin", ignore_cache=True)
 
     @pytest.mark.standalone_only
     def test_role_create_user(self, galaxy_client):
