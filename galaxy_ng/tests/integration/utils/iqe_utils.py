@@ -129,7 +129,7 @@ def get_client(config, request_token=True, headers=None):
 
 @lru_cache()
 def get_hub_version(ansible_config):
-    gc = GalaxyKitClient(ansible_config).gen_authorized_client("no_token_admin")
+    gc = GalaxyKitClient(ansible_config).gen_authorized_client("admin")
     return gc.get(gc.galaxy_root)["galaxy_ng_version"]
 
 
@@ -183,7 +183,7 @@ class GalaxyKitClient:
                 auth = {
                     "username": user["username"],
                     "password": user["password"],
-                    "auth_url": user.get("auth_url"),
+                    "auth_url": profile_config.get("auth_url"),
                     "token": token,
                 }
             else:
