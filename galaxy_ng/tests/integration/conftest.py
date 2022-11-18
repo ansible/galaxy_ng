@@ -20,7 +20,7 @@ from .utils import (
     set_certification,
 )
 from .utils import upload_artifact as _upload_artifact
-from .utils.iqe_utils import GalaxyKitClient, get_hub_version
+from .utils.iqe_utils import GalaxyKitClient, get_hub_version, is_stage_environment
 
 # from orionutils.generator import build_collection
 
@@ -71,14 +71,6 @@ def pytest_configure(config):
         if not line:
             continue
         config.addinivalue_line('markers', line)
-
-
-def is_stage_environment():
-    return os.getenv('TESTS_AGAINST_STAGE', False)
-
-
-def is_standalone():
-    return os.getenv('HUB_LOCAL', False)
 
 
 class AnsibleConfigFixture(dict):

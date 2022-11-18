@@ -1,4 +1,5 @@
 """Utility functions for AH tests."""
+import os
 from unittest.mock import patch
 
 from galaxykit import GalaxyClient
@@ -16,7 +17,6 @@ from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
 
-from galaxy_ng.tests.integration.conftest import is_standalone
 
 logger = logging.getLogger(__name__)
 
@@ -247,3 +247,11 @@ def get_standalone_token(user, server, *, ignore_cache=False, ssl_verify=True):
             token_cache[cache_key] = resp["token"]
 
     return token_cache[cache_key]
+
+
+def is_standalone():
+    return os.getenv('HUB_LOCAL', False)
+
+
+def is_stage_environment():
+    return os.getenv('TESTS_AGAINST_STAGE', False)
