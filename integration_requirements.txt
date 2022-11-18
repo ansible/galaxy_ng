@@ -8,4 +8,3 @@ jsonschema
 hvac
 importlib_resources
 galaxykit
-ansible
