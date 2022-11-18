@@ -61,6 +61,13 @@ admin.is_superuser = True
 admin.is_staff = True
 admin.save()
 
+# in ephemeral keycloak this user is part of customer account: 6089726
+admin, _ = User.objects.get_or_create(username="iqe_admin")
+admin.set_password("redhat")
+admin.is_superuser = True
+admin.is_staff = True
+admin.save()
+
 # Note: this user is not a part of ephemeral keycloak users
 ee_admin, _ = User.objects.get_or_create(username="ee_admin")
 ee_admin.set_password("redhat")

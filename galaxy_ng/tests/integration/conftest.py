@@ -77,6 +77,10 @@ def is_stage_environment():
     return os.getenv('TESTS_AGAINST_STAGE', False)
 
 
+def is_standalone():
+    return os.getenv('HUB_LOCAL', False)
+
+
 class AnsibleConfigFixture(dict):
     # The class is instantiated with a "profile" that sets
     # which type of user will be used in the test
@@ -106,8 +110,8 @@ class AnsibleConfigFixture(dict):
             "password": "redhat",
             "token": "abcdefghijklmnopqrstuvwxyz1234567894",
         },
-        "no_token_admin": {  # this is a superuser
-            "username": "notifications_admin",
+        "iqe_admin": {  # this is a superuser
+            "username": "iqe_admin",
             "password": "redhat",
             "token": None,
         },

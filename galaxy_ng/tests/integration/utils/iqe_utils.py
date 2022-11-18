@@ -16,6 +16,7 @@ from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
 
+from galaxy_ng.tests.integration.conftest import is_standalone
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +126,10 @@ def get_client(config, request_token=True, headers=None):
 
 @lru_cache()
 def get_hub_version(ansible_config):
-    gc = GalaxyKitClient(ansible_config).gen_authorized_client("admin")
+    role = "admin"
+    if is_standalone():
+        role = "iqe_admin"
+    gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
     return gc.get(gc.galaxy_root)["galaxy_ng_version"]
 
 
