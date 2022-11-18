@@ -75,3 +75,43 @@ def test_download_artifact(ansible_config, upload_artifact):
         assert ci.namespace == namespace
         assert ci.name == name
         assert ci.version == version
+
+
+# TODO: make download logic more DRY in these tests
+def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
+    config = ansible_config("partner_engineer")
+    api_client = get_client(config, request_token=True, require_auth=True)
+
+    resp = upload_artifact(config, api_client, artifact)
+    resp = wait_for_task(api_client, resp)
+    set_certification(api_client, artifact, level="validated")
+
+    # download collection
+    config = ansible_config("basic_user")
+
+    with tempfile.TemporaryDirectory() as dir:
+        api_root = config["url"]
+        filename = f"{artifact.namespace}-{artifact.name}-{artifact.version}.tar.gz"
+        tarball_path = f"{dir}/{filename}"
+        url = f"{api_root}v3/plugin/ansible/content/validated/collections/artifacts/{filename}"
+
+        cmd = [
+            "curl",
+            "-L",
+            "-H",
+            "'Content-Type: application/json'",
+            "-u",
+            f"{config['username']}:{config['password']}",
+            "-o",
+            tarball_path,
+            url
+        ]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        returncode = proc.wait()
+        assert returncode == 0
+
+        # Extract tarball, verify information in manifest
+        ci = CollectionInspector(tarball=tarball_path)
+        assert ci.namespace == artifact.namespace
+        assert ci.name == artifact.name
+        assert ci.version == artifact.version
