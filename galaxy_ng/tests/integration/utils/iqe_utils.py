@@ -4,14 +4,12 @@ from unittest.mock import patch
 
 from galaxykit import GalaxyClient
 
-import json
 import logging
 from functools import lru_cache
 from pkg_resources import Requirement
 from urllib.parse import urljoin
 
 
-from ansible import context
 from ansible.galaxy.api import GalaxyAPI
 from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
@@ -61,74 +59,12 @@ class CompletedProcessError(Exception):
     pass
 
 
-def get_client(config, request_token=True, headers=None):
-    """Get an API client given a role."""
-    headers = headers or {}
-    server = config["url"]
-    auth_url = config.get("auth_url")
-    grant_type = config.get("grant_type")
-    username = None
-    password = None
-    if grant_type == "password":
-        username = config.get("username")
-        password = config.get("password")
-
-    context.CLIARGS = {
-        "ignore_certs": config["ssl_verify"],
-    }
-
-    token = config.get("token") or None
-    if request_token:
-        if token:
-            if auth_url:
-                token = KeycloakToken(config["token"], auth_url=auth_url)
-            else:
-                token = GalaxyToken(config["token"])
-        else:
-            if auth_url and grant_type == "password":
-                token = KeycloakPassword(
-                    auth_url=auth_url,
-                    username=username,
-                    password=password,
-                )
-            else:
-                token = BasicAuthToken(config["username"], config["password"])
-    else:
-        token = None
-
-    validate_certs = config["ssl_verify"]
-    client = GalaxyAPI(
-        None, "automation_hub", url=server, token=token, validate_certs=validate_certs
-    )
-
-    def request(url, *args, **kwargs):
-        url = urljoin(server, url)
-
-        if isinstance(kwargs.get("args"), dict):
-            kwargs["args"] = json.dumps(kwargs["args"])
-            headers["Content-Type"] = "application/json"
-
-        if headers:
-            if "headers" in kwargs:
-                kwargs["headers"].update(headers)
-            else:
-                kwargs["headers"] = headers
-        logger.debug(f"Calling galaxy url: \n{url}")
-        logger.debug(f"args: \n{args}")
-        logger.debug(f"kwargs: \n{kwargs}")
-        result = client._call_galaxy(url, *args, **kwargs)
-        logger.debug(f"result: \n{result}")
-        return result
-
-    request.config = config
-    return request
-
-
 @lru_cache()
 def get_hub_version(ansible_config):
-    role = "admin"
     if is_standalone():
         role = "iqe_admin"
+    else:
+        role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
     return gc.get(gc.galaxy_root)["galaxy_ng_version"]
 
