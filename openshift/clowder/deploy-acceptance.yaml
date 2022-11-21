@@ -12,44 +12,91 @@ objects:
     run_iqe.sh: |
       #!/bin/bash
 
-      # trigger build
-      BUILD_NUM=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.nextBuildNumber')
-      curl -X POST -H "Authorization: Bearer ${JENKINS_TOKEN}" ${JENKINS_JOB_URL}/buildWithParameters
+      EXITCODE=0
 
-      # verify build started
-      sleep 10
-      while true; do
-        QUEUE_ITEM=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.queueItem')
-        if [ "${QUEUE_ITEM}" = "null" ]; then
-          break
+      trigger_job () {
+        # trigger build
+        URL=$1
+        BUILD_NUM=$(curl --silent ${URL}/api/json | jq '.nextBuildNumber')
+        curl -X POST -H "Authorization: Bearer ${JENKINS_TOKEN}" ${URL}/buildWithParameters
+
+        # verify build started
+        sleep 10
+        while true; do
+          QUEUE_ITEM=$(curl --silent ${URL}/api/json | jq '.queueItem')
+          if [ "${QUEUE_ITEM}" = "null" ]; then
+            break
+          else
+            sleep 10
+          fi
+        done
+        BUILD_STATUS=$(curl --silent ${URL}/${BUILD_NUM}/api/json | jq '.building')
+        if [ -n "${BUILD_STATUS}" ]; then
+          BUILD_STATUS="running"
+          echo "Jenkins job triggered: ${URL}/${BUILD_NUM}/"
         else
-          sleep 10
+          BUILD_STATUS="failed"
+          echo "ERROR: Failed to trigger ${URL}"
+          ((EXITCODE+=1))
+        fi
+      }
+
+      # trigger build 1
+      trigger_job "${JENKINS_JOB_URL}"
+      BUILD_1_NUM=${BUILD_NUM}
+      BUILD_1_STATUS=${BUILD_STATUS}
+
+      # trigger build 2
+      trigger_job "${JENKINS_JOB_URL_2}"
+      BUILD_2_NUM=${BUILD_NUM}
+      BUILD_2_STATUS=${BUILD_STATUS}
+
+      # wait for builds to complete and get results
+      while [ "${BUILD_1_STATUS}" = "running" ] || [ "${BUILD_2_STATUS}" = "running" ];; do
+        sleep 60
+        if [ "${BUILD_1_STATUS}" = "running" ]; then
+          LAST_COMPLETE_BUILD_1=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.lastCompletedBuild.number')
+          if [ ${LAST_COMPLETE_BUILD_1} -ge ${BUILD_1_NUM} ]; then
+            BUILD_1_STATUS="complete"
+            BUILD_1_RESULT=$(curl --silent ${JENKINS_JOB_URL}/${BUILD_1_NUM}/api/json | jq '.result')
+            if [ "${BUILD_1_RESULT}" != "\"SUCCESS\"" ]; then
+              echo "ERROR: Jenkins job did not finish successfully: ${JENKINS_JOB_URL}/${BUILD_1_NUM}/"
+              TEXT="Failure"
+              EMOJI=":red_jenkins_circle:"
+              ((EXITCODE+=1))
+            else
+              echo "Jenkins job finished running: ${JENKINS_JOB_URL}/${BUILD_1_NUM}/"
+              TEXT="Success"
+              EMOJI=":green_jenkins_circle:"
+            fi
+            if [ -n "${SLACK_TOKEN}" ] && [ -n "${SLACK_CHANNEL}" ]; then
+              curl -X POST -H "Content-type: application/json" -H "Authorization: Bearer ${SLACK_TOKEN}" --data "{\"channel\":\"${SLACK_CHANNEL}\",\"icon_emoji\":\"${EMOJI}\",\"text\":\"${JENKINS_JOB_URL}/${BUILD_1_NUM}/: ${TEXT}\"}" https://slack.com/api/chat.postMessage
+            fi
+          fi
+        fi
+        if [ "${BUILD_2_STATUS}" = "running" ]; then
+          LAST_COMPLETE_BUILD_2=$(curl --silent ${JENKINS_JOB_URL_2}/api/json | jq '.lastCompletedBuild.number')
+          if [ ${LAST_COMPLETE_BUILD_2} -ge ${BUILD_2_NUM} ]; then
+            BUILD_2_STATUS="complete"
+            BUILD_2_RESULT=$(curl --silent ${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/api/json | jq '.result')
+            if [ "${BUILD_2_RESULT}" != "\"SUCCESS\"" ]; then
+              echo "ERROR: Jenkins job did not finish successfully: ${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/"
+              TEXT="Failure"
+              EMOJI=":red_jenkins_circle:"
+              ((EXITCODE+=1))
+            else
+              echo "Jenkins job finished running: ${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/"
+              TEXT="Success"
+              EMOJI=":green_jenkins_circle:"
+            fi
+            if [ -n "${SLACK_TOKEN}" ] && [ -n "${SLACK_CHANNEL}" ]; then
+              curl -X POST -H "Content-type: application/json" -H "Authorization: Bearer ${SLACK_TOKEN}" --data "{\"channel\":\"${SLACK_CHANNEL}\",\"icon_emoji\":\"${EMOJI}\",\"text\":\"${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/: ${TEXT}\"}" https://slack.com/api/chat.postMessage
+            fi
+          fi
         fi
       done
-      BUILD_STATUS=$(curl --silent ${JENKINS_JOB_URL}/${BUILD_NUM}/api/json | jq '.building')
-      if [ -n "${BUILD_STATUS}" ]; then
-        echo "Jenkins job triggered: ${JENKINS_JOB_URL}/${BUILD_NUM}/"
-        echo "waiting for build to complete..."
-      else
-        echo "Failed to trigger ${JENKINS_JOB_URL}"
-        exit 1
-      fi
 
-      # wait for build to complete
-      LAST_COMPLETE_BUILD=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.lastCompletedBuild.number')
-      while [ ${LAST_COMPLETE_BUILD} -lt ${BUILD_NUM} ]; do
-        sleep 60
-        LAST_COMPLETE_BUILD=$(curl --silent ${JENKINS_JOB_URL}/api/json | jq '.lastCompletedBuild.number')
-      done
-
-      # get build status
-      curl --silent ${JENKINS_JOB_URL}/${BUILD_NUM}/consoleText
-      BUILD_RESULT=$(curl --silent ${JENKINS_JOB_URL}/${BUILD_NUM}/api/json | jq '.result')
-      if [ "${BUILD_RESULT}" = "\"SUCCESS\"" ]; then
-        exit 0
-      else
-        exit 1
-      fi
+      exit $EXITCODE
 
 - apiVersion: v1
   kind: ServiceAccount
@@ -87,11 +134,23 @@ objects:
                   secretKeyRef:
                     name: iqe-jenkins
                     key: job-url
+              - name: JENKINS_JOB_URL_2
+                valueFrom:
+                  secretKeyRef:
+                    name: iqe-jenkins
+                    key: job-url-2
               - name: JENKINS_TOKEN
                 valueFrom:
                   secretKeyRef:
                     name: iqe-jenkins
                     key: token
+              - name: SLACK_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: iqe-jenkins
+                    key: slack-token
+              - name: SLACK_CHANNEL
+                value: ${SLACK_CHANNEL}
             volumeMounts:
             - name: entrypoint
               mountPath: /run_iqe.sh
@@ -121,3 +180,5 @@ parameters:
     value: 50m
   - name: IQE_CPU_LIMIT
     value: 200m
+  - name: SLACK_CHANNEL
+    value: ""
