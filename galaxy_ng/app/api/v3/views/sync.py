@@ -56,7 +56,28 @@ class SyncRemoteView(api_base.APIView):
                 "remote_pk": remote.pk,
                 "repository_pk": distro.repository.pk,
                 "mirror": True,
-                "optimize": True,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                # DON'T MERGE THIS
+                "optimize": False,
             },
             exclusive_resources=[distro.repository, remote],
         )

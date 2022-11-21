@@ -18,6 +18,8 @@ from .utils import (
     get_all_namespaces,
     get_client,
     set_certification,
+    set_synclist,
+    iterate_all
 )
 from .utils import upload_artifact as _upload_artifact
 from .utils.iqe_utils import GalaxyKitClient, get_hub_version, is_stage_environment, is_sync_testing
@@ -174,7 +176,9 @@ class AnsibleConfigFixture(dict):
             }
         }
 
-    def __init__(self, profile=None, namespace=None):
+    def __init__(self, profile=None, namespace=None, url=None, auth_url=None):
+        self.url = url
+        self.auth_url = auth_url
         self.profile = profile
         self.namespace = namespace
 
@@ -208,10 +212,13 @@ class AnsibleConfigFixture(dict):
 
         if key == 'url':
             # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'HUB_API_ROOT',
-                'http://localhost:5001/api/automation-hub/'
-            )
+            if self.url:
+                return self.url
+            else:
+                return os.environ.get(
+                    'HUB_API_ROOT',
+                    'http://localhost:5001/api/automation-hub/'
+                )
         elif key == 'api_prefix':
             # strip the proto+host+port from the api root
             api_root = os.environ.get(
@@ -223,10 +230,13 @@ class AnsibleConfigFixture(dict):
 
         elif key == 'auth_url':
             # The auth_url value should be None for a standalone stack.
-            return os.environ.get(
-                'HUB_AUTH_URL',
-                None
-            )
+            if self.auth_url:
+                return self.auth_url
+            else:
+                return os.environ.get(
+                    'HUB_AUTH_URL',
+                    None
+                )
 
         elif key == "token":
             return self.PROFILES[self.profile]["token"]
@@ -587,3 +597,67 @@ def pytest_runtest_setup(item):
                 f"Maximum hub version to run tests is {max_version} "
                 f"but hub version {hub_version} was found"
             )
+
+
+@pytest.fixture
+def sync_instance_crc():
+    """
+    Returns a configuration for connecting to a CRC instance for performing tests
+    and a manifest of collections installed on the instance.
+
+    Needs to:
+    - create a manifest of the collections in the remote
+    - validate the data
+        - 1 deprecated collection
+        - 1 signed collection
+    - clear out the user's synclist
+    """
+
+    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
+    auth_url = os.getenv(
+        "TEST_CRC_AUTH_URL",
+        "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
+    )
+
+    config = AnsibleConfigFixture(url=url, auth_url=auth_url, profile="org_admin")
+    manifest = []
+
+    client = get_client(
+        config=config,
+        request_token=True,
+        require_auth=True
+    )
+
+    for cv in iterate_all(client, "_ui/v1/collection-versions/?repository=published"):
+        ns = cv["namespace"]
+        name = cv["name"]
+
+        is_deprecated = client(f"v3/collections/{ns}/{name}")["deprecated"]
+
+        manifest.append({
+            "namespace": ns,
+            "name": name,
+            "version": cv["version"],
+            "is_deprecated": is_deprecated,
+            "is_signed": cv["sign_state"] == "signed",
+            "content_count": len(cv["contents"]),
+            "signatures": cv["metadata"]["signatures"]
+        })
+
+    signed_count = 0
+    deprecated_count = 0
+
+    for cv in manifest:
+        if cv["is_signed"]:
+            signed_count += 1
+        if cv["is_deprecated"]:
+            deprecated_count += 1
+
+    # ensure that the target as at least one signed and deprecated collection
+    assert signed_count >= 1
+    assert deprecated_count >= 1
+
+    # reset the user's synclist
+    set_synclist(client, [])
+
+    return (manifest, config)

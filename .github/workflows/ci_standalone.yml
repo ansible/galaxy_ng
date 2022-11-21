@@ -24,6 +24,11 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Set environment variables
+        run: |
+          echo "OCI_ENV_PATH=${HOME}/work/galaxy_ng/oci_env" >> $GITHUB_ENV
+          echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> $GITHUB_ENV
+
       - name: Update apt
         run: sudo apt -y update
 
@@ -32,6 +37,30 @@ jobs:
 
       - name: Install docker-compose
         run: pip3 install --upgrade docker-compose
+
+      - name: setup insights test instance
+        run: |
+          git clone https://github.com/newswangerd/oci_env.git --branch feature/db-snapshot $OCI_ENV_PATH
+          pip install -e $OCI_ENV_PATH/client/
+          mkdir $OCI_ENV_PATH/db_back/
+          cp dev/sync_tests/fixture.tar.gz $OCI_ENV_PATH/db_back/fixture.tar.gz
+          oci-env -e dev/sync_tests/sync-test.compose.env compose build
+          oci-env -e dev/sync_tests/sync-test.compose.env compose up -d
+
+
+
+
+      - name: finish insights instance setup
+        run: |
+          oci-env -e dev/sync_tests/sync-test.compose.env poll --attempts 30 || true
+          oci-env -e dev/sync_tests/sync-test.compose.env compose logs
+          oci-env -e dev/sync_tests/sync-test.compose.env db restore -f fixture
+          oci-env -e dev/sync_tests/sync-test.compose.env pulpcore-manager migrate
+          oci-env -e dev/sync_tests/sync-test.compose.env poll
+
+
+
+
 
       - name: create the .compose.env file
         run: rm -f .compose.env; cp .compose.env.example .compose.env
@@ -50,6 +79,14 @@ jobs:
 
       - name: give stack some time to spin up
         run: sleep 120
+
+      - name: finish insights instance setup
+        run: |
+          oci-env -e dev/sync_tests/sync-test.compose.env poll
+          oci-env -e dev/sync_tests/sync-test.compose.env db restore -f fixture
+          oci-env -e dev/sync_tests/sync-test.compose.env
+          oci-env -e dev/sync_tests/sync-test.compose.env pulpcore-manager migrate
+          oci-env -e dev/sync_tests/sync-test.compose.env poll
 
       - name: set keyring on staging repo for signature upload
         run: ./compose exec -T api ./entrypoint.sh manage set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y

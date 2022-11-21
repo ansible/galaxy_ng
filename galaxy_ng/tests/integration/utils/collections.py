@@ -26,6 +26,7 @@ from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 
 from .tasks import wait_for_task
 from .urls import wait_for_url
+from .tools import iterate_all
 
 try:
     import importlib.resources as pkg_resources
@@ -491,6 +492,7 @@ def get_all_collections_by_repo(api_client=None):
         'staging': {},
         'published': {},
         'community': {},
+        'rh-certified': {},
     }
     for repo in collections.keys():
         next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
@@ -562,7 +564,6 @@ def get_all_repository_collection_versions(api_client):
 def delete_all_collections_in_namespace(api_client, namespace_name):
 
     assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
 
     # accumlate a list of matching collections in each repo
     ctuples = set()
@@ -574,26 +575,46 @@ def delete_all_collections_in_namespace(api_client, namespace_name):
 
     # delete each collection ...
     for ctuple in ctuples:
-
         crepo = ctuple[0]
         cname = ctuple[2]
 
-        # Try deleting the whole collection ...
+        recursvive_delete(api_client, namespace_name, cname, crepo)
+
+
+def recursvive_delete(api_client, namespace_name, cname, crepo):
+    """Recursively delete a collection along with every other collection that depends on it."""
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
+    dependants = set([
+        (cv["namespace"], cv["name"]) for cv in iterate_all(
+            api_client,
+            f"_ui/v1/collection-versions/?dependency={namespace_name}.{cname}"
+        )
+    ])
+
+    if dependants:
+        for ns, name in dependants:
+            recursvive_delete(api_client, ns, name, crepo)
+
+    # Try deleting the whole collection ...
+    try:
         resp = api_client(
             (f'{api_prefix}/v3/plugin/ansible/content'
-             f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
+                f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
             method='DELETE'
         )
-
-        # wait for the orphan_cleanup job to finish ...
-        try:
-            wait_for_task(api_client, resp, timeout=10000)
-        except GalaxyError as ge:
-            # FIXME - pulp tasks do not seem to accept token auth
-            if ge.http_code in [403, 404]:
-                time.sleep(SLEEP_SECONDS_ONETIME)
-            else:
-                raise Exception(ge)
+    except GalaxyError as ge:
+        if ge.http_code in [404]:
+            return
+    # wait for the orphan_cleanup job to finish ...
+    try:
+        wait_for_task(api_client, resp, timeout=10000)
+    except GalaxyError as ge:
+        # FIXME - pulp tasks do not seem to accept token auth
+        if ge.http_code in [403, 404]:
+            time.sleep(SLEEP_SECONDS_ONETIME)
+        else:
+            raise Exception(ge)
 
 
 def setup_multipart(path: str, data: dict) -> dict:
