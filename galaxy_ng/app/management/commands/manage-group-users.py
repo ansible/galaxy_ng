@@ -11,11 +11,11 @@ class Command(BaseCommand):
     Django management command for creating groups
     """
 
-    help = 'Add or remove users from an access group'
+    help = "Add or remove users from an access group"
 
     def add_arguments(self, parser):
-        parser.add_argument('users', nargs='+')
-        parser.add_argument('group')
+        parser.add_argument("users", nargs="+")
+        parser.add_argument("group")
         parser.add_argument(
             "--remove",
             action="store_true",
@@ -25,13 +25,13 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        group_name = options['group']
+        group_name = options["group"]
         try:
             group = Group.objects.get(name=group_name)
         except User.DoesNotExist:
             self.stdout.write("Group '{}' not found. Skipping.".format(group_name))
         else:
-            for username in options['users']:
+            for username in options["users"]:
                 try:
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
@@ -42,5 +42,11 @@ class Command(BaseCommand):
                 else:
                     user.groups.add(group)
                 user.save()
-                self.stdout.write("{} group '{}' {} user '{}'".format(("Removed" if options["remove"] else "Assigned"), group_name, ("from" if options["remove"] else "to"), username))
-
+                self.stdout.write(
+                    "{} group '{}' {} user '{}'".format(
+                        ("Removed" if options["remove"] else "Assigned"),
+                        group_name,
+                        ("from" if options["remove"] else "to"),
+                        username,
+                    )
+                )
