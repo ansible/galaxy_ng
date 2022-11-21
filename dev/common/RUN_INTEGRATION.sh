@@ -35,13 +35,6 @@ echo "PYTHON: $(which python)"
 $VENVPATH/bin/pip install -r integration_requirements.txt
 $VENVPATH/bin/pip show epdb || pip install epdb
 
-if ! [ -x "$(command -v docker)" ]; then
-    echo "Docker not available, skipping test data."
-else
-    echo "Setting up test data"
-    docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
-fi
-
 # when running user can specify extra pytest arguments such as
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest

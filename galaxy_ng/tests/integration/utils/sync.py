@@ -43,6 +43,19 @@ def perform_sync(api_client, crc_config, repo=None, remote_params=None):
     if repo:
         url = url + f"/content/{repo}/"
 
+    # update the remote config with dummy data first, so that it forces
+    # an update to the remote and resyncs
+    api_client(
+        "content/rh-certified/v3/sync/config/",
+        method="PUT",
+        args={
+            "url": "http://example.com/",
+            "auth_url": "http://example.com/",
+            "token": "foo",
+            **remote_params,
+        }
+    )
+
     api_client(
         "content/rh-certified/v3/sync/config/",
         method="PUT",
