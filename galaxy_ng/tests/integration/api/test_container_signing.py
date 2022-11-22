@@ -13,7 +13,8 @@ from galaxy_ng.tests.integration.utils import get_client
 @pytest.fixture(scope="function")
 def flags(ansible_config):
     api_client = get_client(config=ansible_config("admin"), request_token=True, require_auth=True)
-    return api_client("/api/automation-hub/_ui/v1/feature-flags/")
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
 
 
 @pytest.mark.parametrize(
@@ -45,16 +46,17 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth):
         request_token=True,
         require_auth=require_auth
     )
+    api_prefix = client.config.get("api_prefix").rstrip("/")
 
     # Get the pulp_href for the pushed image
     image = client(
-        "/api/automation-hub/pulp/api/v3/repositories/container/container-push/?name=alpine"
+        f"{api_prefix}/pulp/api/v3/repositories/container/container-push/?name=alpine"
     )
     container_href = image["results"][0]["pulp_href"]
 
     # Get the pulp_href for signing service
     signing_service = client(
-        "/api/automation-hub/pulp/api/v3/signing-services/?name=container-default"
+        f"{api_prefix}/pulp/api/v3/signing-services/?name=container-default"
     )
     ss_href = signing_service["results"][0]["pulp_href"]
 
@@ -72,5 +74,5 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth):
     assert latest_version["content_summary"]["added"]["container.signature"]["count"] > 0
 
     # Check the sign state is set on the UI API
-    ee = client("/api/automation-hub/v3/plugin/execution-environments/repositories/?name=alpine")
+    ee = client(f"{api_prefix}/v3/plugin/execution-environments/repositories/?name=alpine")
     assert ee["data"][0]["pulp"]["repository"]["sign_state"] == "signed"

@@ -26,11 +26,12 @@ def test_api_v3_plugin_execution_environments_repositories_content_history(
 ):
     name = local_container.get_container()['name']
     cfg = ansible_config('ee_admin')
+    api_prefix = cfg.get("api_prefix").rstrip("/")
     api_client = get_client(cfg)
 
     # get the view
     resp = api_client(
-        f'v3/plugin/execution-environments/repositories/{name}/_content/history/',
+        f'{api_prefix}/v3/plugin/execution-environments/repositories/{name}/_content/history/',
         method="GET")
 
     # assert the correct response serializer
@@ -50,9 +51,12 @@ def test_api_v3_plugin_execution_environments_repositories_content_images(
     name = local_container.get_container()['name']
     manifest = local_container.get_manifest()
     cfg = ansible_config('ee_admin')
+    api_prefix = cfg.get("api_prefix").rstrip("/")
     api_client = get_client(cfg)
     # get the view
-    resp = api_client(f'v3/plugin/execution-environments/repositories/{name}/_content/images/')
+    resp = api_client(
+        f'{api_prefix}/v3/plugin/execution-environments/repositories/{name}/_content/images/'
+    )
 
     # assert the correct response serializer
     validate_json(instance=resp, schema=schema_objectlist)
@@ -69,10 +73,12 @@ def test_api_v3_plugin_execution_environments_repositories_content_readme(
 ):
     name = local_container.get_container()['name']
     cfg = ansible_config('ee_admin')
-    url = f'v3/plugin/execution-environments/repositories/{name}/_content/readme/'
+    api_prefix = cfg.get("api_prefix").rstrip("/")
+    url = f'{api_prefix}/v3/plugin/execution-environments/repositories/{name}/_content/readme/'
     api_client = get_client(cfg)
     # get the view
     resp = api_client(url, method="GET")
+    print(f'\n\n\n resp:{resp} \n\n\n')
 
     # assert the correct response serializer
     validate_json(instance=resp, schema=schema_remote_readme)
@@ -108,11 +114,12 @@ def test_api_v3_plugin_execution_environments_repositories_content_tags(
     manifest = local_container.get_manifest()
     name = local_container.get_container()['name']
     cfg = ansible_config('ee_admin')
+    api_prefix = cfg.get("api_prefix").rstrip("/")
     api_client = get_client(cfg)
 
     # get the view
     resp = api_client(
-        f'v3/plugin/execution-environments/repositories/{name}/_content/tags/',
+        f'{api_prefix}/v3/plugin/execution-environments/repositories/{name}/_content/tags/',
         method="GET")
 
     # assert the correct response serializer
@@ -131,11 +138,14 @@ def test_api_v3_plugin_execution_environments_repositories(ansible_config, local
     ns_name = local_container.get_namespace()['name']
     name = local_container.get_container()['name']
     cfg = ansible_config('admin')
+    api_prefix = cfg.get("api_prefix").rstrip("/")
     api_client = get_client(cfg)
 
     # get the ee repositories view
     repository_resp = api_client(
-        'v3/plugin/execution-environments/repositories/?limit=100', method="GET")
+        f'{api_prefix}/v3/plugin/execution-environments/repositories/?limit=100',
+        method="GET"
+    )
 
     # assert the correct response serializer
     validate_json(instance=repository_resp, schema=schema_objectlist)
@@ -173,7 +183,7 @@ def test_api_v3_plugin_execution_environments_repositories(ansible_config, local
 
     # delete the respository
     delete_repository_resp = api_client(
-        f'v3/plugin/execution-environments/repositories/{name}/',
+        f'{api_prefix}/v3/plugin/execution-environments/repositories/{name}/',
         method="DELETE"
     )
     # assert delete_repository_resp.status_code == 202
@@ -181,7 +191,10 @@ def test_api_v3_plugin_execution_environments_repositories(ansible_config, local
     wait_for_task(api_client, task)
 
     # # get the repositories list again
-    repository_resp = api_client('v3/plugin/execution-environments/repositories/', method="GET")
+    repository_resp = api_client(
+        f'{api_prefix}/v3/plugin/execution-environments/repositories/',
+        method="GET"
+    )
 
     # assert the new repository has been deleted
     repository_names = [x['name'] for x in repository_resp['data']]

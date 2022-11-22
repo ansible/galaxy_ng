@@ -12,8 +12,9 @@ def test_landing_page(ansible_config):
     api_client = get_client(
         config=ansible_config("basic_user"), request_token=True, require_auth=True
     )
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
 
-    resultsDict = api_client("/api/automation-hub/_ui/v1/landing-page")
+    resultsDict = api_client(f"{api_prefix}/_ui/v1/landing-page")
 
     assert resultsDict["estate"]["items"][0]
     assert resultsDict["estate"]["items"][0]["shape"]["title"] == "Collections"
