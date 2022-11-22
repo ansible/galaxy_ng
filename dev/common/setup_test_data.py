@@ -66,6 +66,7 @@ iqe_admin, _ = User.objects.get_or_create(username="iqe_admin")
 iqe_admin.set_password("redhat")
 iqe_admin.is_superuser = True
 iqe_admin.is_staff = True
+iqe_admin.groups.add(pe_group)
 iqe_admin.save()
 
 # Note: this user is not a part of ephemeral keycloak users
