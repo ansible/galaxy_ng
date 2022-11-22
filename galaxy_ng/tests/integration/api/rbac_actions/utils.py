@@ -261,12 +261,14 @@ def wait_for_all_tasks(timeout=300):
         if wait_until < time.time():
             raise TaskWaitingTimeout()
         running_count = requests.get(
-            PULP_API_ROOT + "tasks/?state=running",
+            f"{PULP_API_ROOT}tasks/",
+            params={"state": "running"},
             auth=ADMIN_CREDENTIALS
         ).json()["count"]
 
         waiting_count = requests.get(
-            PULP_API_ROOT + "tasks/?state=waiting",
+            f"{PULP_API_ROOT}tasks/",
+            params={"state": "waiting"},
             auth=ADMIN_CREDENTIALS
         ).json()["count"]
 
