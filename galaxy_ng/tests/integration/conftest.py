@@ -602,15 +602,20 @@ def pytest_runtest_setup(item):
 @pytest.fixture
 def sync_instance_crc():
     """
-    Returns a configuration for connecting to a CRC instance for performing tests
-    and a manifest of collections installed on the instance.
+    Returns a configuration for connecting to an instance of galaxy ng running in
+    insights mode to perform syncs from.
 
-    Needs to:
-    - create a manifest of the collections in the remote
-    - validate the data
-        - 1 deprecated collection
-        - 1 signed collection
-    - clear out the user's synclist
+    The URL and auth URL for the instance can be set with the TEST_CRC_API_ROOT
+    and TEST_CRC_AUTH_URL environment variables.
+
+    The environment that these URLs point to must:
+    - contain the test fixture credentials from AnsibleConfigFixture
+    - contain at least two collections
+    - contain at least one deprecated collection
+    - contain at least one signed collection
+
+    A target for this can be loaded using the database dump found in 
+    dev/data/insights-fixture.tar.gz
     """
 
     url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")

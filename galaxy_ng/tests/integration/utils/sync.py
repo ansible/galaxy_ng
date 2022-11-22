@@ -43,8 +43,10 @@ def perform_sync(api_client, crc_config, repo=None, remote_params=None):
     if repo:
         url = url + f"/content/{repo}/"
 
-    # update the remote config with dummy data first, so that it forces
-    # an update to the remote and resyncs
+    # pulp_ansible will only perform a sync if the remote source is updated
+    # or if the remote itself is modified. Since the remote source doesn't
+    # change in the tests, force the remote to update bu setting the data
+    # to dummy values before updating it.
     api_client(
         "content/rh-certified/v3/sync/config/",
         method="PUT",

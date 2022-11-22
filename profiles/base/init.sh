@@ -16,8 +16,6 @@ log_message() {
 # so this is a workaround to install the pulp container snippets
 setup_webserver_snippets() {
     log_message "setting up pulp container webserver snippets"
-    which pip
-    pip show pulp-container | grep  Location: | awk '{print$2}'
     LOCATION=$(pip show pulp-container | grep  Location: | awk '{print$2}')
     cp $LOCATION/pulp_container/app/webserver_snippets/nginx.conf /etc/nginx/pulp/pulp_container.conf || true
 }

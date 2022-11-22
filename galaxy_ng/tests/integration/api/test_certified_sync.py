@@ -5,11 +5,18 @@ from ..utils import get_client, clear_certified, perform_sync, iterate_all, set_
 
 def _assert_sync(manifest, client):
     """
-    Test that all the expected collections show up on:
-    - _ui/v1/repo/rh-certified/
-    - v3/collections/
-    - _ui/v1/collection-versions/
-    - v3/namespaces
+    Compares a manifest of expected collections with the state of the current system.
+
+    Ensures that:
+    - namespaces are created correctly
+    - all the selected collections are available on
+        - v3/
+        - _ui/v1/repo/
+    - all the selected collection versions are available on
+        - _ui/v1/collection-versions/
+    - deprecated content types are synced correctly
+    - signatures are synced correctly
+    - collection metadata is synced correctly 
     """
 
     namespaces = set()
