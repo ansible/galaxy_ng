@@ -293,7 +293,7 @@ class AnsibleConfigFixture(dict):
         elif key == 'container_registry':
             return os.environ.get(
                 'CONTAINER_REGISTRY',
-                'http://localhost:5001/'
+                'localhost:5001'
             )
 
         else:
