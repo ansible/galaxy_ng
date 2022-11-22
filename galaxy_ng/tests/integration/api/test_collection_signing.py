@@ -143,7 +143,7 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags, u
 
     # Assert that the collection is signed on UI API
     collection_on_ui = api_client(
-        "/api/automation-hub/_ui/v1/repo/published/"
+        f"{api_prefix}/_ui/v1/repo/published/"
         f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
         f"&sign_state=signed&version={artifact.version}"
     )["data"][0]
@@ -230,7 +230,7 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
 
     # Assert that the collection is signed on UI API
     collection_on_ui = api_client(
-        "/api/automation-hub/_ui/v1/repo/staging/"
+        f"{api_prefix}/_ui/v1/repo/staging/"
         f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
         f"&sign_state=signed&version={artifact.version}"
     )["data"][0]
@@ -244,7 +244,7 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
 
     # Assert that the collection is signed on UI API (detail )
     collection_on_ui = api_client(
-        f"/api/automation-hub/_ui/v1/repo/staging/{NAMESPACE}/{artifact.name}"
+        f"{api_prefix}/_ui/v1/repo/staging/{NAMESPACE}/{artifact.name}"
         f"/?version={artifact.version}"
     )
     assert collection_on_ui["sign_state"] == "signed"
@@ -335,7 +335,7 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
 
     # # Assert that the collection is signed on UI API
     collection_on_ui = api_client(
-        "/api/automation-hub/_ui/v1/repo/published/"
+        f"{api_prefix}/_ui/v1/repo/published/"
         f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
         f"&sign_state=signed&version={artifact.version}"
     )["data"][0]

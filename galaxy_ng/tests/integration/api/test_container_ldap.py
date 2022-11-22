@@ -13,8 +13,9 @@ from galaxy_ng.tests.integration.utils import get_client
 @pytest.fixture(scope="function")
 def settings(ansible_config):
     config = ansible_config("admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=False, require_auth=True)
-    return api_client("/api/automation-hub/_ui/v1/settings/")
+    return api_client(f"{api_prefix}/_ui/v1/settings/")
 
 
 @pytest.mark.ldap
