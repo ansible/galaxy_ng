@@ -6,7 +6,6 @@ repo_url: "https://github.com/ansible/galaxy_ng"
 edit_uri: edit/master/docs/
 nav:
     - Home: index.md
-    - Install: installation.md
     - Configuration:
         - Configuration options: config/options.md
         # - Enabling auto approval: config/collection_auto_approval.md
@@ -14,27 +13,30 @@ nav:
         - Managing user access: config/user_access.md
         - Enabling collection signing: config/collection_signing.md
         - Enabling Container signing: config/container_signing.md
-    # - Content Management:
-    #     - How content is organized: content/organization.md
-    #     - Collections:
-    #         - Creating namespaces: content/collection_namespaces.md
-    #         - Publishing collections: content/collection_publishing.md
-    #         - Syncing from remotes: content/collection_remotes.md
-    #         - Deleting collections: content/collection_deleting.md
-    #     - Containers:
-    #         - Publishing containers: content/container_publishing.md
-    #         - Signing collections: content/collection_signing.md
-    #         - Signing containers: content/container_signing.md
+    - User Guides:
+        - Installation: usage_guide/installation.md
+        - Collections: usage_guide/collections.md
+        - Execution Environments: usage_guide/execution_environments.md
+        - RBAC and User Management: usage_guide/rbac.md
     - Integration:
         # - Connecting Ansible Controllers: integration/controller.md
         - Using LDAP: integration/ldap.md
         # - Using Keycloak SSO: integration/keycloak.md
         # - Using S3: integration/s3.md
         # - Using Azure: integration/azure.md
-    - Contributing: 
-        # - Guidelines: dev/guidelines.md
-        - Development setup: dev/setup.md
-        # - Tests: dev/tests.md
+        
+    - Contributing:
+        - Getting Started: dev/getting_started.md
+        - GalaxyNG Basics:
+            - Overview: dev/developer_guide/overview.md
+            - Data Models: dev/developer_guide/data_models.md
+            - REST API: dev/developer_guide/rest_api.md
+            - Services: dev/developer_guide/services.md
+            - RBAC: dev/developer_guide/rbac.md
+        - Docker compose environment: dev/docker_environment.md
+        - OCI Env Environment: dev/oci_env.md
+        - Vagrant environment: dev/vagrant.md
+        - Writing documentation: dev/writing_docs.md
     - Tags: tags.md
     - Community:
         - Overview: community/overview.md
@@ -52,9 +54,9 @@ theme:
       media: "(prefers-color-scheme: light)"
       primary: teal
       toggle:
-        icon: material/toggle-switch-off-outline 
+        icon: material/toggle-switch-off-outline
         name: Switch to dark mode
-    - scheme: slate 
+    - scheme: slate
       media: "(prefers-color-scheme: dark)"
       primary: teal
       toggle:
@@ -86,7 +88,7 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tabbed:
-      alternate_style: true 
+      alternate_style: true
   - pymdownx.tilde
   - pymdownx.critic
   - pymdownx.caret
