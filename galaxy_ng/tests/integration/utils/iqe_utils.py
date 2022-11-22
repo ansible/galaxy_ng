@@ -16,7 +16,6 @@ from ansible.galaxy.token import KeycloakToken
 
 logger = logging.getLogger(__name__)
 
-
 # FILENAME_INCLUDED
 # FILENAME_EXCLUDED
 # FILENAME_MISSING
