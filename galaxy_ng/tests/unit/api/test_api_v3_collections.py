@@ -1,19 +1,17 @@
 import logging
-from unittest.case import skip
 from uuid import uuid4
 
+from django.http import StreamingHttpResponse
 from django.test.utils import override_settings
 from django.urls.base import reverse
 from orionutils.generator import build_collection
+from pulp_ansible.app.galaxy.v3.views import get_collection_dependents, get_unique_dependents
 from pulp_ansible.app.models import (
     AnsibleDistribution,
     AnsibleRepository,
     Collection,
     CollectionVersion,
 )
-
-from pulp_ansible.app.galaxy.v3.views import get_collection_dependents, get_unique_dependents
-
 from rest_framework import status
 
 from galaxy_ng.app import models
@@ -118,29 +116,26 @@ class TestCollectionViewsets(BaseTestCase):
             "galaxy:api:v3:collection-artifact-upload"
         )
 
-        # The following tests use endpoints related to
-        # issue https://issues.redhat.com/browse/AAH-224
-        # For now endpoints are temporary deactivated
-        # self.all_collections_url = reverse(
-        #     "galaxy:api:v3:all-collections-list",
-        #     kwargs={
-        #         "distro_base_path": self.repo.name,
-        #     },
-        # )
-        #
-        # self.all_versions_url = reverse(
-        #     "galaxy:api:v3:all-collection-versions-list",
-        #     kwargs={
-        #         "distro_base_path": self.repo.name,
-        #     },
-        # )
-        #
-        # self.metadata_url = reverse(
-        #     "galaxy:api:v3:repo-metadata",
-        #     kwargs={
-        #         "distro_base_path": self.repo.name,
-        #     },
-        # )
+        self.all_collections_url = reverse(
+            "galaxy:api:v3:metadata-collection-list",
+            kwargs={
+                "distro_base_path": self.repo.name,
+            },
+        )
+
+        self.all_versions_url = reverse(
+            "galaxy:api:v3:metadata-collection-versions-list",
+            kwargs={
+                "distro_base_path": self.repo.name,
+            },
+        )
+
+        self.metadata_url = reverse(
+            "galaxy:api:v3:repo-metadata",
+            kwargs={
+                "distro_base_path": self.repo.name,
+            },
+        )
 
         # used for href tests
         self.pulp_href_fragment = "pulp_ansible/galaxy"
@@ -199,7 +194,6 @@ class TestCollectionViewsets(BaseTestCase):
             self.pulp_href_fragment, response.data["data"][0]["highest_version"]["href"]
         )
 
-    @skip("https://issues.redhat.com/browse/AAH-224")
     def test_unpaginated_collections_list(self):
         """Assert the call to v3/collections/all returns correct
         collections and versions
@@ -299,25 +293,24 @@ class TestCollectionViewsets(BaseTestCase):
         #         self.assertNotIn(self.pulp_href_fragment, vresponse.data["collection"]["href"])
         #         self.assertNotIn(self.pulp_href_fragment, vresponse.data["download_url"])
 
-    # def test_unpaginated_collection_versions_list(self):
-    #     """Assert the call to v3/collections/all returns correct
-    #     collections and versions
-    #     """
-    #     self.client.force_authenticate(user=self.admin_user)
-    #     response = self.client.get(self.all_versions_url)
-    #     self.assertEqual(response.data[0]['version'], '1.1.2')
+    def test_repo_metadata_url(self):
+        """Assert the timestamp of the repo metadata url matches when repo was updatedg
+        """
+        self.client.force_authenticate(user=self.admin_user)
+        response = self.client.get(self.metadata_url)
 
-    #     # Ensure href is overwritten
-    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["href"])
-    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["collection"]["href"])
-    #     self.assertNotIn(self.pulp_href_fragment, response.data[0]["download_url"])
+        # NOTE: "published" does not refer to a repo name, but the last time
+        # that the repo was updated/published
+        api_timestamp = response.data["published"]
+        db_timestamp = self.repo.latest_version().pulp_created
+        assert str(db_timestamp.microsecond) in api_timestamp
 
-    #     # Ensure some fields are in
-    #     for field in ('metadata', 'namespace', 'name', 'artifact'):
-    #         with self.subTest(field=field):
-    #             self.assertIn(field, response.data[0])
+    def test_unpaginated_collection_versions_list(self):
+        """Assert the call to v3/collections/all returns StreamingHttpResponse
 
-    #     # Ensure some fields are not in
-    #     for field in ('manifest', 'files'):
-    #         with self.subTest(field=field):
-    #             self.assertNotIn(field, response.data[0])
+        Cannot test if collection versions are present in unit tests because
+        query requires ContentArtifact to exist.
+        """
+        self.client.force_authenticate(user=self.admin_user)
+        response = self.client.get(self.all_versions_url)
+        assert type(response) == StreamingHttpResponse
