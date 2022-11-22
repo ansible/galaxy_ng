@@ -9,14 +9,13 @@ from functools import lru_cache
 from pkg_resources import Requirement
 from urllib.parse import urljoin
 
-
 from ansible.galaxy.api import GalaxyAPI
 from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
 
-
 logger = logging.getLogger(__name__)
+
 
 # FILENAME_INCLUDED
 # FILENAME_EXCLUDED
@@ -61,7 +60,7 @@ class CompletedProcessError(Exception):
 
 @lru_cache()
 def get_hub_version(ansible_config):
-    if is_standalone():
+    if is_standalone() or is_ephemeral_env():
         role = "iqe_admin"
     else:
         role = "admin"
@@ -187,6 +186,10 @@ def get_standalone_token(user, server, *, ignore_cache=False, ssl_verify=True):
 
 def is_standalone():
     return os.getenv('HUB_LOCAL', False)
+
+
+def is_ephemeral_env():
+    return 'ephemeral' in os.getenv('HUB_API_ROOT', 'http://localhost:5001/api/automation-hub/')
 
 
 def is_stage_environment():
