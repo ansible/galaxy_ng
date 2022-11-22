@@ -59,8 +59,10 @@ class CompletedProcessError(Exception):
 
 @lru_cache()
 def get_hub_version(ansible_config):
-    if is_standalone() or is_ephemeral_env():
+    if is_standalone():
         role = "iqe_admin"
+    elif is_ephemeral_env():
+        role = "org_admin"
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
