@@ -59,10 +59,8 @@ class CompletedProcessError(Exception):
 
 @lru_cache()
 def get_hub_version(ansible_config):
-    if is_standalone():
+    if is_standalone() or is_ephemeral_env():
         role = "iqe_admin"
-    elif is_ephemeral_env():
-        role = "org_admin"
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
@@ -168,19 +166,20 @@ def get_standalone_token(user, server, *, ignore_cache=False, ssl_verify=True):
                 token_cache[cache_key] = GalaxyToken(token_value).config["token"]
         else:
             token = BasicAuthToken(username, password)
-            with patch("ansible.context.CLIARGS", {"ignore_certs": True}):
-                anon_client = GalaxyAPI(
-                    None,
-                    "automation_hub",
-                    url=server,
-                    token=token,
-                    validate_certs=ssl_verify,
-                )
-
-            url = urljoin(server, "v3/auth/token/")
-            resp = anon_client._call_galaxy(url, method="POST", auth_required=True)
-
-            token_cache[cache_key] = resp["token"]
+            if is_ephemeral_env():
+                token_cache[cache_key] = token.get()
+            else:
+                with patch("ansible.context.CLIARGS", {"ignore_certs": True}):
+                    anon_client = GalaxyAPI(
+                        None,
+                        "automation_hub",
+                        url=server,
+                        token=token,
+                        validate_certs=ssl_verify,
+                    )
+                url = urljoin(server, "v3/auth/token/")
+                resp = anon_client._call_galaxy(url, method="POST", auth_required=True)
+                token_cache[cache_key] = resp["token"]
 
     return token_cache[cache_key]
 
