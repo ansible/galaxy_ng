@@ -12,6 +12,14 @@ log_message() {
     echo "$@" >&2
 }
 
+# oci-env can't install webserver snippets for plugins that aren't in SRC_PATH yet
+# so this is a workaround to install the pulp container snippets
+setup_webserver_snippets() {
+    LOCATION=$(pip show pulp-container | grep  Location: | awk '{print$2}')
+    cp $LOCATION/pulp_container/app/webserver_snippets/nginx.conf /etc/nginx/pulp/pulp_container.conf || true
+    s6-rc -u change nginx
+}
+
 setup_signing_keyring() {
     log_message "Setting up signing keyring."
     for KEY_FINGERPRINT in $(gpg --show-keys --with-colons --with-fingerprint /src/galaxy_ng/dev/common/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}')
@@ -105,9 +113,11 @@ set_up_test_data() {
     django-admin shell < ./dev/common/setup_test_data.py
 
     # make docker/translations
+    cd galaxy_ng
     django-admin makemessages --all
 }
 
+setup_webserver_snippets
 
 if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
     setup_signing_keyring
