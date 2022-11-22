@@ -134,7 +134,7 @@ def test_api_v3_plugin_execution_environments_repositories(ansible_config, local
     api_client = get_client(cfg)
 
     # get the ee repositories view
-    repository_resp = api_client('v3/plugin/execution-environments/repositories/', method="GET")
+    repository_resp = api_client('v3/plugin/execution-environments/repositories/?limit=100', method="GET")
 
     # assert the correct response serializer
     validate_json(instance=repository_resp, schema=schema_objectlist)
