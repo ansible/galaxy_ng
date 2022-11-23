@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="85.793" timestamp="2022-11-23T22:09:54.418785" hostname="fedora"><testcase classname="galaxy_ng.tests.integration.api.test_sync_stage" name="test_sync" time="82.884" /></testsuite></testsuites>
