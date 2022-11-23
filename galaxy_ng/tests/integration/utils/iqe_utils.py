@@ -14,6 +14,8 @@ from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
 
+from galaxy_ng.tests.integration.utils import get_client
+
 logger = logging.getLogger(__name__)
 
 # FILENAME_INCLUDED
@@ -62,8 +64,10 @@ def get_hub_version(ansible_config):
     if is_standalone():
         role = "iqe_admin"
     elif is_ephemeral_env():
-        profile_config = ansible_config("iqe_admin")
-        role = profile_config.get_profile_data()
+        # TODO: this call should be done by galaxykit
+        config = ansible_config("org_admin")
+        api_client = get_client(config, request_token=True, require_auth=True)
+        return api_client("/", args={}, method="GET")["galaxy_ng_version"]
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
