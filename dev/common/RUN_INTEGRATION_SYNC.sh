@@ -26,6 +26,6 @@ echo "PYTHON: $(which python)"
 
 pip3 install --upgrade pip wheel
 
-pip3 install -r galaxy_ng/integration_requirements.txt
+pip3 install -r integration_requirements.txt
 
-pytest --log-cli-level=DEBUG -m "sync" --junitxml=galaxy_ng-results.xml -v galaxy_ng/galaxy_ng/tests/integration
+pytest --log-cli-level=DEBUG -m "sync" --junitxml=galaxy_ng-results.xml -v galaxy_ng/tests/integration
