@@ -12,7 +12,7 @@ export HUB_USE_MOVE_ENDPOINT=true
 export HUB_API_ROOT="https://console.stage.redhat.com/api/automation-hub/"
 export HUB_AUTH_URL="https://sso.stage.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token/"
 
-which virtualenv || pip3 install virtualenv
+which virtualenv || pip install virtualenv
 
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
@@ -24,8 +24,8 @@ fi
 source $VENVPATH/bin/activate
 echo "PYTHON: $(which python)"
 
-pip3 install --upgrade pip wheel
+pip install --upgrade pip wheel
 
-pip3 install -r integration_requirements.txt
+pip install -r integration_requirements.txt
 
 pytest --log-cli-level=DEBUG -m "sync" --junitxml=galaxy_ng-results.xml -v galaxy_ng/tests/integration
