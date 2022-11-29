@@ -3,6 +3,7 @@ name: "Build and publish galaxy_ng package"
 
 on:
   release:
+    types: [published]
     tags:
       - '*'
     branches:
@@ -18,7 +19,7 @@ jobs:
 
     - name: Set up Python
       uses: actions/setup-python@v4
-    
+
     - name: Get galaxy_ng package version
       shell: bash
       run: echo "galaxy_ng_version=$(python3 setup.py --version)" >> $GITHUB_ENV
@@ -43,7 +44,7 @@ jobs:
       shell: bash
       run: "django-admin compilemessages"
       if: steps.version_check.outputs.is_translatable == 'True'
-    
+
     - name: Check if UI has corresponding tag
       shell: bash
       run: |
@@ -60,11 +61,11 @@ jobs:
     - name: Install twine
       run: "pip install twine"
 
-    # - name: verify twine 
-    #   run: "twine check dist/*" 
+    # - name: Verify correct PyPI package 
+    #  run: "twine check dist/*" 
 
-    # - name: Publish galaxy_ng to pypi
+    # - name: Publish galaxy_ng to PyPI
     #  run: "python3 -m twine upload --repository testpypi dist/*"
     #  env:
     #    TWINE_USERNAME: __token__
-    #    TWINE_PASSWORD: ${{ secrets.TWINE_TOKEN }}
+    #    TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
