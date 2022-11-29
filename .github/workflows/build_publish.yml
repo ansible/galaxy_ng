@@ -25,13 +25,13 @@ jobs:
       run: echo "galaxy_ng_version=$(python3 setup.py --version)" >> $GITHUB_ENV
 
     - name: Install LDAP requirements
-      run: sudo apt-get install -y libsasl2-dev python-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
+      run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
 
     - name: Upgrade pip
       run: pip install pip --upgrade
 
-    - name: Install galaxy_ng
-      run: "pip install -e ."
+    - name: Install galaxy_ng editable
+      run: pip install -e .
 
     - name: Check galaxy_ng version for translations
       shell: bash
