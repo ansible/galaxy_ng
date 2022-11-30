@@ -614,7 +614,7 @@ def sync_instance_crc():
     - contain at least one deprecated collection
     - contain at least one signed collection
 
-    A target for this can be loaded using the database dump found in 
+    A target for this can be loaded using the database dump found in
     dev/data/insights-fixture.tar.gz
     """
 

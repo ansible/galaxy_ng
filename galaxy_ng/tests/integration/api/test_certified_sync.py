@@ -16,7 +16,7 @@ def _assert_sync(manifest, client):
         - _ui/v1/collection-versions/
     - deprecated content types are synced correctly
     - signatures are synced correctly
-    - collection metadata is synced correctly 
+    - collection metadata is synced correctly
     """
 
     namespaces = set()

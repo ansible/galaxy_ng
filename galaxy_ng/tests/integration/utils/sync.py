@@ -1,4 +1,3 @@
-from ansible.errors import AnsibleError
 from ..utils import wait_for_task, cleanup_namespace, iterate_all
 
 
