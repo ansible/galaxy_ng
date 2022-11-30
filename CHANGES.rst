@@ -13,6 +13,73 @@ Changelog
 
 .. towncrier release notes start
 
+4.6.0 (2022-10-13)
+Features
+--------
+
+- Change 'requires_ansible' to use custom ansible ver spec instead of semver
+  `AAH-981 <https://issues.redhat.com/browse/AAH-981>`_
+- Allow signature upload, expose public_keys on API
+  `AAH-1055 <https://issues.redhat.com/browse/AAH-1055>`_
+- Add option to log collection downloads.
+  `AAH-1118 <https://issues.redhat.com/browse/AAH-1118>`_
+- Add Container Signing Service
+  `AAH-1358 <https://issues.redhat.com/browse/AAH-1358>`_
+- Output an error if no changelog.rst file is present in the root of the collection
+  `AAH-1460 <https://issues.redhat.com/browse/AAH-1460>`_
+- Changed import_collection to work off of a fileobject without requiring an filesystem entry
+  `AAH-1506 <https://issues.redhat.com/browse/AAH-1506>`_
+- Allow set of GALAXY_MINIMUM_PASSWORD_LENGTH for AUTH_PASSWORD_VALIDATORS
+  `AAH-1531 <https://issues.redhat.com/browse/AAH-1531>`_
+- Serve all collections at synclist distro, stop curation
+  `AAH-1540 <https://issues.redhat.com/browse/AAH-1540>`_
+- Serve the pulp api at /api/automation-hub/pulp/api/v3/
+  `AAH-1544 <https://issues.redhat.com/browse/AAH-1544>`_
+- Add LDAP integration
+  `AAH-1593 <https://issues.redhat.com/browse/AAH-1593>`_
+- Make /api/galaxy/pulp/api/v3/ part of the supported API.
+  `AAH-1681 <https://issues.redhat.com/browse/AAH-1681>`_
+- Add validated content repo.
+  `AAH-1943 <https://issues.redhat.com/browse/AAH-1943>`_
+
+
+Bugfixes
+--------
+
+- Fixes forbidden message when installing from ansible-galaxy a public collection and the settings has enable unautheticated download.
+  `AAH-1386 <https://issues.redhat.com/browse/AAH-1386>`_
+- Fix 500 error when listing Group Roles
+  `AAH-1595 <https://issues.redhat.com/browse/AAH-1595>`_
+- Redirect requests from /pulp/api/v3/ to /api/galaxy/pulp/api/v3/.
+  `AAH-1646 <https://issues.redhat.com/browse/AAH-1646>`_
+- Fix feature flags for signing
+  `AAH-1690 <https://issues.redhat.com/browse/AAH-1690>`_
+- add signature upload statements
+  `AAH-1700 <https://issues.redhat.com/browse/AAH-1700>`_
+- Remove guardian foreign key contraints in rbac migration
+  `AAH-1765 <https://issues.redhat.com/browse/AAH-1765>`_
+- Allow roles assignment to group with `change_group` permission
+  `AAH-1766 <https://issues.redhat.com/browse/AAH-1766>`_
+- Forbid user with change_user perms to update superuser
+  `AAH-1791 <https://issues.redhat.com/browse/AAH-1791>`_
+- Return only the sign state of the latest version of a collection.
+  `AAH-1794 <https://issues.redhat.com/browse/AAH-1794>`_
+- Remove conditional `view_task`.
+  `AAH-1805 <https://issues.redhat.com/browse/AAH-1805>`_
+- Fix a bug preventing keycloak SSO users from logging in to the container registry with podman/docker login.
+  `AAH-1921 <https://issues.redhat.com/browse/AAH-1921>`_
+- Disable signatures in the v3 collection detail serializer
+  `AAH-1937 <https://issues.redhat.com/browse/AAH-1937>`_
+
+
+Misc
+----
+
+- `AAH-1092 <https://issues.redhat.com/browse/AAH-1092>`_, `AAH-1093 <https://issues.redhat.com/browse/AAH-1093>`_, `AAH-1127 <https://issues.redhat.com/browse/AAH-1127>`_, `AAH-1128 <https://issues.redhat.com/browse/AAH-1128>`_, `AAH-1360 <https://issues.redhat.com/browse/AAH-1360>`_, `AAH-1371 <https://issues.redhat.com/browse/AAH-1371>`_, `AAH-1443 <https://issues.redhat.com/browse/AAH-1443>`_, `AAH-1449 <https://issues.redhat.com/browse/AAH-1449>`_, `AAH-1468 <https://issues.redhat.com/browse/AAH-1468>`_, `AAH-1492 <https://issues.redhat.com/browse/AAH-1492>`_, `AAH-1493 <https://issues.redhat.com/browse/AAH-1493>`_, `AAH-1526 <https://issues.redhat.com/browse/AAH-1526>`_, `AAH-1530 <https://issues.redhat.com/browse/AAH-1530>`_, `AAH-1556 <https://issues.redhat.com/browse/AAH-1556>`_, `AAH-1585 <https://issues.redhat.com/browse/AAH-1585>`_, `AAH-1586 <https://issues.redhat.com/browse/AAH-1586>`_, `AAH-1587 <https://issues.redhat.com/browse/AAH-1587>`_, `AAH-1588 <https://issues.redhat.com/browse/AAH-1588>`_, `AAH-1589 <https://issues.redhat.com/browse/AAH-1589>`_, `AAH-1608 <https://issues.redhat.com/browse/AAH-1608>`_, `AAH-1609 <https://issues.redhat.com/browse/AAH-1609>`_, `AAH-1643 <https://issues.redhat.com/browse/AAH-1643>`_, `AAH-1654 <https://issues.redhat.com/browse/AAH-1654>`_, `AAH-1697 <https://issues.redhat.com/browse/AAH-1697>`_, `AAH-1712 <https://issues.redhat.com/browse/AAH-1712>`_, `AAH-1737 <https://issues.redhat.com/browse/AAH-1737>`_, `AAH-1738 <https://issues.redhat.com/browse/AAH-1738>`_, `AAH-1757 <https://issues.redhat.com/browse/AAH-1757>`_, `AAH-1768 <https://issues.redhat.com/browse/AAH-1768>`_, `AAH-1770 <https://issues.redhat.com/browse/AAH-1770>`_, `AAH-1780 <https://issues.redhat.com/browse/AAH-1780>`_, `AAH-1781 <https://issues.redhat.com/browse/AAH-1781>`_, `AAH-1788 <https://issues.redhat.com/browse/AAH-1788>`_, `AAH-1796 <https://issues.redhat.com/browse/AAH-1796>`_, `AAH-1821 <https://issues.redhat.com/browse/AAH-1821>`_, `AAH-1828 <https://issues.redhat.com/browse/AAH-1828>`_, `AAH-1846 <https://issues.redhat.com/browse/AAH-1846>`_, `AAH-1850 <https://issues.redhat.com/browse/AAH-1850>`_, `AAH-1906 <https://issues.redhat.com/browse/AAH-1906>`_, `AAH-1908 <https://issues.redhat.com/browse/AAH-1908>`_
+
+
+----
+
 
 4.5.0 (2022-05-04)
 ==================
