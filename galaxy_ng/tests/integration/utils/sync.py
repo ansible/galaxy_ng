@@ -11,12 +11,6 @@ def set_synclist(api_client, collections):
     synclist["collections"] = collections
     api_client(f"_ui/v1/my-synclists/{synclist_id}/", method="PUT", args=synclist)
 
-    # the ansible-galaxy client doesn't know how to handle an empty response
-    try:
-        api_client(f"_ui/v1/my-synclists/{synclist_id}/curate/", method="POST")
-    except AnsibleError:
-        pass
-
     return r["data"][0]
 
 

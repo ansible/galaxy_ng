@@ -64,7 +64,7 @@ def _assert_sync(manifest, client):
     )])
     assert synced_collections == collections
 
-    # Test that the _ui/v1/repo/ api returns all the synced collections
+    # Test that the _ui/v1/repo/ api returns all the synced signed collections
     synced_collections = set([(x["namespace"]["name"], x["name"]) for x in iterate_all(
         client,
         "_ui/v1/repo/rh-certified/?sign_state=signed"
