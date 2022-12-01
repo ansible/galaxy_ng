@@ -60,6 +60,7 @@ group: Related to Groups
 slow_in_cloud: tests that take too long to be run against stage
 max_hub_version: This marker takes an argument that indicates the maximum hub version
 min_hub_version: This marker takes an argument that indicates the minimum hub version
+iqe_rbac_test: imported iqe tests checking role permissions
 """
 
 
