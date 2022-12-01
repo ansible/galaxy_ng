@@ -531,25 +531,26 @@ class AnsibleConfigSync(AnsibleConfigFixture):
         if key == 'remote_hub':
             # The "url" key is actually the full url to the api root.
             return os.environ.get(
-                'DUMMY',
+                'REMOTE_HUB',
                 'https://console.stage.redhat.com/api/automation-hub/'
             )
         if key == 'remote_auth_url':
             # The "url" key is actually the full url to the api root.
             return os.environ.get(
-                'DUMMY',
-                'https://sso.stage.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token/'
+                'REMOTE_AUTH_URL',
+                'https://sso.stage.redhat.com/auth/realms/'
+                'redhat-external/protocol/openid-connect/token/'
             )
         if key == 'local_hub':
             # The "url" key is actually the full url to the api root.
             return os.environ.get(
-                'DUMMY',
+                'LOCAL_HUB',
                 'http://localhost:5001/api/automation-hub/'
             )
         if key == 'local_auth_url':
             # The "url" key is actually the full url to the api root.
             return os.environ.get(
-                'DUMMY',
+                'LOCAL_AUTH_URL',
                 None
             )
         return super().__getitem__(key)

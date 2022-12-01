@@ -28,7 +28,6 @@ def start_sync(api_client, repo):
 def test_sync():
     config_sync = get_ansible_config_sync()
     galaxy_client = get_galaxy_client(config_sync)
-    gc_local = galaxy_client("local_admin", remote=False)
     gc_remote = galaxy_client("remote_admin", remote=True)
     user_stage = gc_remote.username
     pass_stage = gc_remote.password
@@ -45,7 +44,8 @@ def test_sync():
     logger.debug(f"Uploading artifact name {artifact.name} version {artifact.version}")
     resp = upload_artifact(None, gc_remote, artifact)
     api_client_remote = get_client(
-        {"url": "https://console.stage.redhat.com/api/automation-hub/", "username": user_stage, "password": pass_stage,
+        {"url": "https://console.stage.redhat.com/api/automation-hub/",
+         "username": user_stage, "password": pass_stage,
          "use_move_endpoint": True, "upload_signatures": True},
         request_token=True, require_auth=True)
     resp = wait_for_task(api_client_remote, resp, raise_on_error=True)
@@ -54,16 +54,20 @@ def test_sync():
     set_certification(api_client_remote, artifact)
 
     # sync and check
-    api_client = get_client({"url": "http://localhost:5001/api/automation-hub/", "username": "admin", "password": "admin"}, request_token=True, require_auth=True)
+    api_client = get_client({"url": "http://localhost:5001/api/automation-hub/",
+                             "username": "admin", "password": "admin"},
+                            request_token=True, require_auth=True)
 
     body = {
-        "url": "https://console.stage.redhat.com/api/automation-hub/content/1237261-synclist/",
+        "url": "https://console.stage.redhat.com/api/"
+               "automation-hub/content/1237261-synclist/",
         "username": user_stage,
         "password": pass_stage,
         "tls_validation": False,
         "signed_only": False,
         "proxy_url": "http://squid.corp.redhat.com:3128",
-        "requirements_file": f"---\ncollections:\n- {artifact.namespace}.{artifact.name}"
+        "requirements_file":
+            f"---\ncollections:\n- {artifact.namespace}.{artifact.name}"
     }
     url = "content/community/v3/sync/config/"
     api_client(url, method="PUT", args=body)
