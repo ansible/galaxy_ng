@@ -1,5 +1,5 @@
 ---
-name: Standalone
+name: Standalone IQE RBAC tests
 on: 
   pull_request:
     branches:
