@@ -143,7 +143,7 @@ def test_api_v3_plugin_execution_environments_repositories(ansible_config, local
 
     # get the ee repositories view
     repository_resp = api_client(
-        f'{api_prefix}/v3/plugin/execution-environments/repositories/',
+        f'{api_prefix}/v3/plugin/execution-environments/repositories/?limit=100',
         method="GET"
     )
 
