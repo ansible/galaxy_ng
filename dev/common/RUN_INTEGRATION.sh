@@ -35,21 +35,17 @@ echo "PYTHON: $(which python)"
 $VENVPATH/bin/pip install -r integration_requirements.txt
 $VENVPATH/bin/pip show epdb || pip install epdb
 
-if ! [ -x "$(command -v docker)" ]; then
-    echo "Docker not available, skipping test data."
-else
-    echo "Setting up test data"
-    docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
-fi
+echo "Setting up test data"
+docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
 # when running user can specify extra pytest arguments such as
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
 if [[ -z $HUB_LOCAL ]]; then
-    $VENVPATH/bin/pytest --capture=no -m "not standalone_only and not community_only and not rbac_roles" $@ -v galaxy_ng/tests/integration
+    $VENVPATH/bin/pytest --capture=no -m "not standalone_only and not community_only and not rbac_roles and not iqe_rbac_test" $@ -v galaxy_ng/tests/integration
     RC=$?
 else
-    $VENVPATH/bin/pytest --capture=no -m "not cloud_only and not community_only and not rbac_roles" -v $@ galaxy_ng/tests/integration
+    $VENVPATH/bin/pytest --capture=no -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test" -v $@ galaxy_ng/tests/integration
     RC=$?
 
     if [[ $RC != 0 ]]; then
