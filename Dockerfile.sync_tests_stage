@@ -20,4 +20,4 @@ ENV SYNC_TESTS_STAGE=true \
     HUB_USE_MOVE_ENDPOINT=true \
     HUB_API_ROOT="https://console.stage.redhat.com/api/automation-hub/" \
     HUB_AUTH_URL="https://sso.stage.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token/"
-CMD ["pytest", "--log-cli-level=DEBUG", "-m", "sync", "-v", "galaxy_ng/tests/integration"]
+CMD ["pytest", "--log-cli-level=DEBUG", "-m", "sync", "--junitxml=galaxy_ng-results.xml", "-v", "galaxy_ng/tests/integration"]
