@@ -18,7 +18,7 @@ def start_sync(api_client, repo):
     logger.debug(f"Syncing {repo} repo")
     url = f'content/{repo}/v3/sync/'
     resp = api_client(url, method="POST")
-    resp = wait_for_task(api_client, resp["task"], raise_on_error=True)
+    resp = wait_for_task(api_client, resp=None, task_id=resp["task"], raise_on_error=True)
     logger.debug(f"Response from wait_for_task_id {resp}!")
 
 
@@ -47,7 +47,8 @@ def test_sync():
          "username": user_stage, "password": pass_stage,
          "use_move_endpoint": True, "upload_signatures": True},
         request_token=True, require_auth=True)
-    resp = wait_for_task(api_client_remote, resp, raise_on_error=True)
+
+    resp = wait_for_task(api_client_remote, resp=resp, raise_on_error=True)
     assert resp["state"] == "completed"
 
     set_certification(api_client_remote, artifact)

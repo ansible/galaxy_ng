@@ -13,11 +13,11 @@ from .errors import (
 logger = logging.getLogger(__name__)
 
 
-def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
-    if isinstance(task, dict):
-        url = url_safe_join(api_client.config["url"], task["task"])
+def wait_for_task(api_client, resp, task_id=None, timeout=300, raise_on_error=False):
+    if task_id:
+        url = f"v3/tasks/{task_id}/"
     else:
-        url = f"v3/tasks/{task}/"
+        url = url_safe_join(api_client.config["url"], resp["task"])
 
     ready = False
     wait_until = time.time() + timeout
