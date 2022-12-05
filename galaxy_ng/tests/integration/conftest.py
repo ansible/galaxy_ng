@@ -20,7 +20,7 @@ from .utils import (
     set_certification,
 )
 from .utils import upload_artifact as _upload_artifact
-from .utils.iqe_utils import GalaxyKitClient, get_hub_version, is_stage_environment
+from .utils.iqe_utils import GalaxyKitClient, get_hub_version, is_stage_environment, is_sync_testing
 
 # from orionutils.generator import build_collection
 
@@ -318,7 +318,10 @@ def ansible_config():
 
 
 def get_ansible_config():
-    return AnsibleConfigFixture
+    if is_sync_testing():
+        return AnsibleConfigSync
+    else:
+        return AnsibleConfigFixture
 
 
 def get_ansible_config_sync():
