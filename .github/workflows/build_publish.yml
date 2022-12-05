@@ -64,8 +64,8 @@ jobs:
     # - name: Verify correct PyPI package 
     #  run: "twine check dist/*" 
 
-    # - name: Publish galaxy_ng to PyPI
-    #  run: "python3 -m twine upload --repository testpypi dist/*"
-    #  env:
-    #    TWINE_USERNAME: __token__
-    #    TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+    - name: Publish galaxy_ng to PyPI
+      run: "python3 -m twine upload --repository testpypi dist/*"
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
