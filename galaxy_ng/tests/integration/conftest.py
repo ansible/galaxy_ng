@@ -20,7 +20,7 @@ from .utils import (
     set_certification,
 )
 from .utils import upload_artifact as _upload_artifact
-from .utils.iqe_utils import GalaxyKitClient, get_hub_version, is_stage_environment
+from .utils.iqe_utils import GalaxyKitClient, get_hub_version, is_stage_environment, is_sync_testing
 
 # from orionutils.generator import build_collection
 
@@ -61,6 +61,7 @@ slow_in_cloud: tests that take too long to be run against stage
 max_hub_version: This marker takes an argument that indicates the maximum hub version
 min_hub_version: This marker takes an argument that indicates the minimum hub version
 iqe_rbac_test: imported iqe tests checking role permissions
+sync: sync tests against stage
 """
 
 
@@ -317,7 +318,14 @@ def ansible_config():
 
 
 def get_ansible_config():
-    return AnsibleConfigFixture
+    if is_sync_testing():
+        return AnsibleConfigSync
+    else:
+        return AnsibleConfigFixture
+
+
+def get_ansible_config_sync():
+    return AnsibleConfigSync
 
 
 @pytest.fixture(scope="function")
@@ -496,6 +504,55 @@ def get_vault_loader():
 @pytest.fixture(scope="session")
 def galaxy_client(ansible_config):
     return get_galaxy_client(ansible_config)
+
+
+class AnsibleConfigSync(AnsibleConfigFixture):
+    PROFILES = {
+        "remote_admin": {
+            "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                         "vault_key": "username"},
+            "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                         "vault_key": "password"},
+            "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                      "vault_key": "token"},
+        },
+        "local_admin": {  # this is a superuser
+            "username": "admin",
+            "password": "admin",
+            "token": None,
+        }
+    }
+
+    def __init__(self, profile=None, namespace=None):
+        super().__init__(profile, namespace)
+
+    def __getitem__(self, key):
+        if key == 'remote_hub':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'REMOTE_HUB',
+                'https://console.stage.redhat.com/api/automation-hub/'
+            )
+        if key == 'remote_auth_url':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'REMOTE_AUTH_URL',
+                'https://sso.stage.redhat.com/auth/realms/'
+                'redhat-external/protocol/openid-connect/token/'
+            )
+        if key == 'local_hub':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'LOCAL_HUB',
+                'http://localhost:5001/api/automation-hub/'
+            )
+        if key == 'local_auth_url':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'LOCAL_AUTH_URL',
+                None
+            )
+        return super().__getitem__(key)
 
 
 def get_galaxy_client(ansible_config):

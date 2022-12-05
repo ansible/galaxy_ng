@@ -28,4 +28,4 @@ pip3 install --upgrade pip wheel
 
 pip3 install -r integration_requirements.txt
 
-pytest --log-cli-level=DEBUG -m "not standalone_only and not community_only and not rbac_roles and not slow_in_cloud and not iqe_rbac_test" --junitxml=galaxy_ng-results.xml -v galaxy_ng/tests/integration
+pytest --log-cli-level=DEBUG -m "not standalone_only and not community_only and not rbac_roles and not slow_in_cloud and not iqe_rbac_test and not sync" --junitxml=galaxy_ng-results.xml -v galaxy_ng/tests/integration
