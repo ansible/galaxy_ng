@@ -33,6 +33,8 @@ jobs:
     - name: Install galaxy_ng editable
       run: pip install -e .
 
+      # set variable for the next step, so only versions higher than 4.4 gets translated
+      # 4.2 and 4.3 don't support translations
     - name: Check galaxy_ng version for translations
       shell: bash
       id: version_check
