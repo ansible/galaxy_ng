@@ -13,6 +13,27 @@ Changelog
 
 .. towncrier release notes start
 
+4.6.3 (2022-12-05)
+==================
+
+Bugfixes
+--------
+
+- Add option to customize ldap group params
+  `AAH-1957 <https://issues.redhat.com/browse/AAH-1957>`_
+- Add content_guard to validated repo via migration
+  `AAH-2038 <https://issues.redhat.com/browse/AAH-2038>`_
+
+
+Misc
+----
+
+- `AAH-1920 <https://issues.redhat.com/browse/AAH-1920>`_
+
+
+----
+
+
 4.6.2 (2022-10-21)
 Bugfixes
 --------
