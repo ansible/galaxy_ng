@@ -1,5 +1,5 @@
 """Utility functions for AH tests."""
-
+import logging
 import time
 
 from ansible.galaxy.api import GalaxyError
@@ -10,22 +10,32 @@ from .errors import (
     TaskWaitingTimeout
 )
 
+logger = logging.getLogger(__name__)
 
-def wait_for_task(api_client, resp, timeout=300):
+
+def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
+    if isinstance(task, dict):
+        url = url_safe_join(api_client.config["url"], task["task"])
+    else:
+        url = f"v3/tasks/{task}/"
+
     ready = False
-    url = url_safe_join(api_client.config["url"], resp["task"])
     wait_until = time.time() + timeout
     while not ready:
         if wait_until < time.time():
             raise TaskWaitingTimeout()
         try:
             resp = api_client(url)
+            if resp["state"] == "failed":
+                logger.error(resp["error"])
+                if raise_on_error:
+                    raise TaskFailed(resp["error"])
         except GalaxyError as e:
             if "500" not in str(e):
                 raise
         else:
             ready = resp["state"] not in ("running", "waiting")
-        time.sleep(SLEEP_SECONDS_POLLING)
+        time.sleep(5)
     return resp
 
 
@@ -44,3 +54,8 @@ def wait_for_task_ui_client(uclient, task):
             break
         time.sleep(SLEEP_SECONDS_POLLING)
     assert state == 'completed'
+
+
+class TaskFailed(Exception):
+    def __init__(self, message):
+        self.message = message

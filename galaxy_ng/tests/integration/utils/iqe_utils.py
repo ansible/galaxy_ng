@@ -99,6 +99,7 @@ class GalaxyKitClient:
         *,
         ignore_cache=False,
         token=None,
+        remote=False
     ):
         config = self.config()
         # role can be either be the name of a user (like `ansible_insights`)
@@ -110,9 +111,10 @@ class GalaxyKitClient:
             cache_key = (role, container_engine, container_registry, token)
         ssl_verify = config.get("ssl_verify")
         if cache_key not in client_cache or ignore_cache:
-            url = config.get("url")
-            if isinstance(role, str):
-                profile_config = self.config(role)
+            if is_sync_testing():
+                url = config.get("remote_hub") if remote else config.get("local_hub")
+                profile_config = self.config("remote_admin") \
+                    if remote else self.config("local_admin")
                 user = profile_config.get_profile_data()
                 if profile_config.get("auth_url"):
                     token = profile_config.get("token")
@@ -124,15 +126,34 @@ class GalaxyKitClient:
                 auth = {
                     "username": user["username"],
                     "password": user["password"],
-                    "auth_url": profile_config.get("auth_url"),
+                    "auth_url": profile_config.get("remote_auth_url")
+                    if remote else profile_config.get("local_auth_url"),
                     "token": token,
                 }
             else:
-                token = get_standalone_token(
-                    role, url, ignore_cache=ignore_cache, ssl_verify=ssl_verify
-                )  # ignore_cache=True
-                role.update(token=token)
-                auth = role
+                url = config.get("url")
+                if isinstance(role, str):
+                    profile_config = self.config(role)
+                    user = profile_config.get_profile_data()
+                    if profile_config.get("auth_url"):
+                        token = profile_config.get("token")
+                    if token is None:
+                        token = get_standalone_token(
+                            user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache
+                        )
+
+                    auth = {
+                        "username": user["username"],
+                        "password": user["password"],
+                        "auth_url": profile_config.get("auth_url"),
+                        "token": token,
+                    }
+                else:
+                    token = get_standalone_token(
+                        role, url, ignore_cache=ignore_cache, ssl_verify=ssl_verify
+                    )  # ignore_cache=True
+                    role.update(token=token)
+                    auth = role
 
             container_engine = config.get("container_engine")
             container_registry = config.get("container_registry")
@@ -201,3 +222,38 @@ def is_ephemeral_env():
 
 def is_stage_environment():
     return os.getenv('TESTS_AGAINST_STAGE', False)
+
+
+def is_sync_testing():
+    return os.getenv('SYNC_TESTS_STAGE', False)
+
+
+def get_all_collections(api_client, repo):
+    """
+    This will get a maximum of 100 collections. If the system has more,
+    we'll only get 100 so tests using this method might fail as the
+    order of the collections is not guaranteed and the expected collection
+    might not be returned within the 100 collections.
+    """
+    url = f'content/{repo}/v3/collections/?limit=100&offset=0'
+    return api_client(url)
+
+
+def retrieve_collection(artifact, collections):
+    """looks for a given artifact in the collections list and returns
+     the element if found or None otherwise
+
+    Args:
+        artifact: The artifact to be found.
+        collections: List of collections to iterate over.
+
+    Returns:
+        If the artifact is present in the list, it returns the artifact.
+        It returns None if the artifact is not found in the list.
+    """
+    local_collection_found = None
+    for local_collection in collections["data"]:
+        if local_collection["name"] == artifact.name and \
+                local_collection["namespace"] == artifact.namespace:
+            local_collection_found = local_collection
+    return local_collection_found

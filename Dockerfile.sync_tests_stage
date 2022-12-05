@@ -1,0 +1,23 @@
+FROM registry.access.redhat.com/ubi8/python-39
+WORKDIR /opt/app-root/src
+COPY . /opt/app-root/src
+ENV VENVS=$HOME/venvs
+ENV VENV_PATH=$HOME/venvs/ahub-tests-venv
+RUN \
+    mkdir -p $VENVS && \
+    python3 -m venv $VENV_PATH && \
+    source $VENV_PATH/bin/activate
+
+RUN pip install --upgrade pip wheel
+RUN pip install -r integration_requirements.txt
+ENV SYNC_TESTS_STAGE=true \
+    HTTPS_PROXY="http://squid.corp.redhat.com:3128" \
+    HUB_UPLOAD_SIGNATURES=true \
+    IQE_VAULT_GITHUB_TOKEN=$IQE_VAULT_GITHUB_TOKEN \
+    IQE_VAULT_ROLE_ID=$IQE_VAULT_ROLE_ID \
+    IQE_VAULT_SECRET_ID=$IQE_VAULT_SECRET_ID \
+    TESTS_AGAINST_STAGE=true \
+    HUB_USE_MOVE_ENDPOINT=true \
+    HUB_API_ROOT="https://console.stage.redhat.com/api/automation-hub/" \
+    HUB_AUTH_URL="https://sso.stage.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token/"
+CMD ["pytest", "--log-cli-level=DEBUG", "-m", "sync", "--junitxml=galaxy_ng-results.xml", "-v", "galaxy_ng/tests/integration"]
