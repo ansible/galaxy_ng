@@ -35,7 +35,7 @@ def wait_for_task(api_client, task, timeout=300, raise_on_error=False):
                 raise
         else:
             ready = resp["state"] not in ("running", "waiting")
-        time.sleep(5)
+        time.sleep(SLEEP_SECONDS_POLLING)
     return resp
 
 
