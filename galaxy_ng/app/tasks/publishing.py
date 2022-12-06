@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, CollectionVersion
-from pulp_ansible.app.tasks.collections import import_collection
+from pulpcore.plugin.tasking import general_create
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.models import SigningService
 
@@ -34,29 +34,23 @@ def get_created_collection_versions():
     return created_collection_versions
 
 
-def import_and_move_to_staging(temp_file_pk, **kwargs):
+def import_and_move_to_staging(username, repository_pk=None, **kwargs):
     """Import collection version and move to staging repository.
 
-    Custom task to call pulp_ansible's import_collection() task then
+    Custom task to call pulpcore's general_create() task then
     enqueue two tasks to add to staging repo and remove from inbound repo.
 
     This task will not wait for the enqueued tasks to finish.
     """
-    inbound_repository_pk = kwargs.get('repository_pk')
-    import_collection(
-        temp_file_pk=temp_file_pk,
-        repository_pk=inbound_repository_pk,
-        expected_namespace=kwargs['expected_namespace'],
-        expected_name=kwargs['expected_name'],
-        expected_version=kwargs['expected_version'],
-    )
+    general_args = kwargs.pop("general_args")
+    general_create(*general_args, **kwargs)
 
     try:
         staging_repo = AnsibleDistribution.objects.get(name=STAGING_NAME).repository
     except AnsibleRepository.DoesNotExist:
         raise RuntimeError(_('Could not find staging repository: "%s"') % STAGING_NAME)
 
-    inbound_repo = AnsibleRepository.objects.get(pk=inbound_repository_pk)
+    inbound_repo = AnsibleRepository.objects.get(pk=repository_pk)
 
     created_collection_versions = get_created_collection_versions()
 
@@ -65,35 +59,29 @@ def import_and_move_to_staging(temp_file_pk, **kwargs):
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(
-                kwargs["username"],
-                kwargs["expected_namespace"],
-                kwargs["expected_name"],
-                kwargs["expected_version"]
+                username,
+                collection_version.namespace,
+                collection_version.name,
+                collection_version.version,
             )
 
 
-def import_and_auto_approve(temp_file_pk, **kwargs):
+def import_and_auto_approve(username, repository_pk=None, **kwargs):
     """Import collection version and automatically approve.
 
-    Custom task to call pulp_ansible's import_collection() task
+    Custom task to call pulpcore's general_create() task
     then automatically approve collection version so no
     manual approval action needs to occur.
     """
-    inbound_repository_pk = kwargs.get('repository_pk')
-    import_collection(
-        temp_file_pk=temp_file_pk,
-        repository_pk=inbound_repository_pk,
-        expected_namespace=kwargs['expected_namespace'],
-        expected_name=kwargs['expected_name'],
-        expected_version=kwargs['expected_version'],
-    )
+    general_args = kwargs.pop("general_args")
+    general_create(*general_args, **kwargs)
 
     try:
         golden_repo = AnsibleDistribution.objects.get(name=GOLDEN_NAME).repository
     except AnsibleRepository.DoesNotExist:
         raise RuntimeError(_('Could not find staging repository: "%s"') % GOLDEN_NAME)
 
-    inbound_repo = AnsibleRepository.objects.get(pk=inbound_repository_pk)
+    inbound_repo = AnsibleRepository.objects.get(pk=repository_pk)
 
     created_collection_versions = get_created_collection_versions()
 
@@ -121,10 +109,10 @@ def import_and_auto_approve(temp_file_pk, **kwargs):
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(
-                kwargs["username"],
-                kwargs["expected_namespace"],
-                kwargs["expected_name"],
-                kwargs["expected_version"]
+                username,
+                collection_version.namespace,
+                collection_version.name,
+                collection_version.version,
             )
 
 

@@ -82,7 +82,7 @@ def test_publish_same_collection_version(ansible_config):
         check_retcode=1,
         ansible_config=ansible_config("admin", namespace=collection.namespace)
     )
-    assert "duplicate key value violates unique constraint" in str(p.stderr)
+    assert "Artifact already exists" in str(p.stderr)
 
 
 @pytest.mark.cli
