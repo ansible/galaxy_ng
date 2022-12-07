@@ -716,18 +716,23 @@ def test_api_ui_v1_users_by_id(ansible_config):
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
+        resp = uclient.get('_ui/v1/users/?username=jdoe')
+        id = resp.json()["data"][0]["id"]
+
+        resp = uclient.get('_ui/v1/groups/?name=system:partner-engineers')
+        group_id = resp.json()["data"][0]["id"]
+
         # get the response
-        resp = uclient.get('_ui/v1/users/2')
+        resp = uclient.get(f'_ui/v1/users/{id}')
         assert resp.status_code == 200
 
         ds = resp.json()
         validate_json(instance=ds, schema=schema_user)
 
-        # true when `setup_test_data.py` run after build
-        assert ds['id'] == 2
+        assert ds['id'] == id
         assert ds['username'] == 'jdoe'
         assert ds['is_superuser'] is False
-        assert {'id': 2, 'name': 'system:partner-engineers'} in ds['groups']
+        assert {'id': group_id, 'name': 'system:partner-engineers'} in ds['groups']
 
 
 # /api/automation-hub/_ui/v1/users/

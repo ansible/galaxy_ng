@@ -28,7 +28,8 @@ from .namespaces import (
     cleanup_namespace
 )
 from .tasks import wait_for_task, wait_for_task_ui_client
-from .tools import is_docker_installed, uuid4
+from .tools import is_docker_installed, uuid4, iterate_all
+
 from .urls import (
     url_safe_join,
     wait_for_url
@@ -37,6 +38,11 @@ from .users import (
     delete_group,
     create_user,
     delete_user
+)
+from .sync import (
+    set_synclist,
+    clear_certified,
+    perform_sync,
 )
 
 
@@ -71,4 +77,8 @@ __all__ = (
     delete_group,
     create_user,
     delete_user,
+    set_synclist,
+    clear_certified,
+    perform_sync,
+    iterate_all,
 )

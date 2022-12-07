@@ -24,6 +24,12 @@ jobs:
         with:
           python-version: "3.10"
 
+      # Note: COMPOSE_INTERACTIVE_NO_CLI=1 is required for oci-env to work correctly when there's no interactive terminal
+      - name: Set environment variables
+        run: |
+          echo "OCI_ENV_PATH=${HOME}/work/galaxy_ng/oci_env" >> $GITHUB_ENV
+          echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> $GITHUB_ENV
+
       - name: Update apt
         run: sudo apt -y update
 
@@ -33,29 +39,31 @@ jobs:
       - name: Install docker-compose
         run: pip3 install --upgrade docker-compose
 
-      - name: create the .compose.env file
-        run: rm -f .compose.env; cp .compose.env.example .compose.env
 
-      - name: workaround github worker permissions issues
-        run: sed -i.bak 's/PIP_EDITABLE_INSTALL=1/PIP_EDITABLE_INSTALL=0/' .compose.env
+      # TODO: change this to the main oci_env branch once db snapshot/restore is merged.
+      - name: setup oci-env
+        run: |
+          git clone https://github.com/newswangerd/oci_env.git --branch feature/db-snapshot $OCI_ENV_PATH
+          pip install -e $OCI_ENV_PATH/client/
+          mkdir $OCI_ENV_PATH/db_backup/
+          cp dev/data/insights-fixture.tar.gz $OCI_ENV_PATH/db_backup/insights-fixture.tar.gz
 
-      - name: workaround github worker permissions issues
-        run: sed -i.bak 's/WITH_DEV_INSTALL=1/WITH_DEV_INSTALL=0/' .compose.env
+      - name: launch test instances
+        run: |
+          oci-env -e dev/oci_env_configs/sync-test.compose.env compose build
+          oci-env -e dev/oci_env_configs/sync-test.compose.env compose up -d
+          oci-env -e dev/oci_env_configs/standalone.compose.env compose up -d
 
-      - name: build stack
-        run: make docker/all
+      - name: wait for test instances to come online
+        run: |
+          oci-env -e dev/oci_env_configs/standalone.compose.env poll --wait 10 --attempts 30
+          oci-env -e dev/oci_env_configs/sync-test.compose.env poll
 
-      - name: start the compose stack
-        run: ./compose up -d
-
-      - name: give stack some time to spin up
-        run: sleep 120
-
-      - name: set keyring on staging repo for signature upload
-        run: ./compose exec -T api ./entrypoint.sh manage set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y
-
-      #- name: install python 3.10
-      #  run: sudo apt install software-properties-common -y; sudo add-apt-repository --yes ppa:deadsnakes/ppa; sudo apt install python3.10
+      - name: finish insights instance setup
+        run: |
+          oci-env -e dev/oci_env_configs/sync-test.compose.env db restore -f insights-fixture
+          oci-env -e dev/oci_env_configs/sync-test.compose.env pulpcore-manager migrate
+          oci-env -e dev/oci_env_configs/sync-test.compose.env poll
 
       - name: run the integration tests
         run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh
