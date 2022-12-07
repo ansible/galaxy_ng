@@ -45,8 +45,8 @@ jobs:
         run: |
           git clone https://github.com/newswangerd/oci_env.git --branch feature/db-snapshot $OCI_ENV_PATH
           pip install -e $OCI_ENV_PATH/client/
-          mkdir $OCI_ENV_PATH/db_back/
-          cp dev/data/insights-fixture.tar.gz $OCI_ENV_PATH/db_back/insights-fixture.tar.gz
+          mkdir $OCI_ENV_PATH/db_backup/
+          cp dev/data/insights-fixture.tar.gz $OCI_ENV_PATH/db_backup/insights-fixture.tar.gz
 
       - name: launch test instances
         run: |
