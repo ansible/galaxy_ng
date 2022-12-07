@@ -71,7 +71,7 @@ jobs:
       run: "pip install twine"
 
     - name: Publish galaxy_ng to PyPI
-      run: "python3 -m twine upload --repository testpypi dist/*"
+      run: "python3 -m twine upload dist/*"
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_RELEASE_TOKEN }}
