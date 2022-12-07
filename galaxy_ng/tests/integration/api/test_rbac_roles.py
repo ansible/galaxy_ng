@@ -336,7 +336,7 @@ def _get_reusable_extras():
 
     if len(REUSABLE_EXTRA) == 0:
         _registry = ReusableContainerRegistry(gen_string())
-        _registry_pk = _registry.get_registry()["pk"]
+        _registry_pk = _registry.get_registry()["id"]
 
         REUSABLE_EXTRA = {
             "collection": ReusableCollection(gen_string()),
