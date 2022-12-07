@@ -224,12 +224,18 @@ def build_collection(
 
 
 def upload_artifact(
-    config, client, artifact, hash=True, no_filename=False, no_file=False, use_distribution=True
+    config, client, artifact, hash=True, no_filename=False, no_file=False, use_distribution=False
 ):
     """
     Publishes a collection to a Galaxy server and returns the import task URI.
 
-    :param collection_path: The path to the collection tarball to publish.
+    :param config: The ansibleconfig object.
+    :param client: The galaxyclient object.
+    :param artifact: The artifact object.
+    :param hash: compute and send a sha256 sum for the payload.
+    :param no_filename: Skip sending the filename in the form.
+    :param no_file: Skip sneding the file in the form.
+    :param use_distribution: If true, upload to the inbound-<namespace> endpoint.
     :return: The import task URI that contains the import results.
     """
     collection_path = artifact.filename
