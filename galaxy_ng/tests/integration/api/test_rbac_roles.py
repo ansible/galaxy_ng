@@ -352,9 +352,6 @@ def _get_reusable_extras():
 @pytest.mark.standalone_only
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
 def test_global_role_actions(role):
-    registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["id"]
-
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
     user = create_user(USERNAME, PASSWORD)
@@ -455,9 +452,6 @@ def test_object_role_actions():
 @pytest.mark.rbac_roles
 @pytest.mark.standalone_only
 def test_role_actions_for_admin():
-    registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["id"]
-
     extra = _get_reusable_extras()
     failures = []
 
