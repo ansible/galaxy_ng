@@ -194,7 +194,7 @@ class CollectionVersionFilter(filterset.FilterSet):
 
             return queryset.filter(version__in=version_list)
         except ValueError:
-            raise ValidationError(_(f'{name} must be a valid semantic version range.'))
+            raise ValidationError(_('%s must be a valid semantic version range.' % name))
 
     sort = OrderingFilter(
         fields=(
