@@ -18,7 +18,7 @@ from pulp_ansible.app.models import (
 )
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from rest_framework import mixins
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 import semantic_version
 
@@ -169,6 +169,7 @@ class CollectionVersionFilter(filterset.FilterSet):
     dependency = filters.CharFilter(field_name="dependency", method="dependency_filter")
     repository = filters.CharFilter(field_name="repository", method="repo_filter")
     versioning_class = versioning.UIVersioning
+    version_range = filters.CharFilter(field_name="version_range", method="version_range_filter")
 
     def dependency_filter(self, queryset, name, value):
         """Return all CollectionVersions that have a dependency on the Collection
@@ -183,6 +184,17 @@ class CollectionVersionFilter(filterset.FilterSet):
             return queryset.filter(pk__in=repository_version.content)
         except ObjectDoesNotExist:
             return CollectionVersion.objects.none()
+
+    def version_range_filter(self, queryset, name, value):
+        try:
+            s = semantic_version.SimpleSpec(value)
+            full_version_list = [semantic_version.Version(v) for v in queryset.values_list('version', flat=True)]
+            version_list = [str(v) for v in s.filter(full_version_list)]
+
+            return queryset.filter(version__in=version_list)
+        except ValueError:
+            raise ValidationError(_(f'{name} must be a valid semantic version range.'))
+
 
     sort = OrderingFilter(
         fields=(
