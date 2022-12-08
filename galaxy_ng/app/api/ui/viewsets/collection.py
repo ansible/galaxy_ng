@@ -188,13 +188,13 @@ class CollectionVersionFilter(filterset.FilterSet):
     def version_range_filter(self, queryset, name, value):
         try:
             s = semantic_version.SimpleSpec(value)
-            full_version_list = [semantic_version.Version(v) for v in queryset.values_list('version', flat=True)]
+            full_version_list = [
+                semantic_version.Version(v) for v in queryset.values_list('version', flat=True)]
             version_list = [str(v) for v in s.filter(full_version_list)]
 
             return queryset.filter(version__in=version_list)
         except ValueError:
             raise ValidationError(_(f'{name} must be a valid semantic version range.'))
-
 
     sort = OrderingFilter(
         fields=(
