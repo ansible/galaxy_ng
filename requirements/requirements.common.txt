@@ -52,7 +52,7 @@ bleach-allowlist==1.0.3
     # via galaxy-importer
 bracex==2.3.post1
     # via wcmatch
-certifi==2022.9.24
+certifi==2022.12.7
     # via requests
 cffi==1.15.1
     # via
