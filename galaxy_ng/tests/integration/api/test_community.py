@@ -466,12 +466,29 @@ def test_v1_autocomplete_search(ansible_config):
 def test_v1_role_pagination(ansible_config):
     """" Tests if v1 roles are auto-sorted by created """
 
+
     config = ansible_config("admin")
     api_client = get_client(
         config=config,
         request_token=False,
         require_auth=True
     )
+
+    def get_roles(page_size=1, order_by='created'):
+        roles = []
+        urls = []
+        next_url = f'/api/v1/roles/?page_size={page_size}&order_by={order_by}'
+        while next_url:
+            urls.append(next_url)
+            resp = api_client(next_url)
+            roles.extend(resp['results'])
+            next_url = resp['next']
+            if next_url:
+                o = urlparse(next_url)
+                baseurl = o.scheme + '://' + o.netloc.replace(':80', '')
+                next_url = next_url.replace(baseurl, '')
+
+        return urls, roles
 
     # clean all roles ...
     clean_all_roles(ansible_config)
@@ -484,18 +501,8 @@ def test_v1_role_pagination(ansible_config):
     wait_for_v1_task(resp=resp, api_client=api_client)
 
     # make tuples of created,id for all roles ...
-    roles = []
-    urls = []
-    next_url = '/api/v1/roles/?page_size=1'
-    while next_url:
-        urls.append(next_url)
-        resp = api_client(next_url)
-        roles.extend([[x['created'], x['id']] for x in resp['results']])
-        next_url = resp['next']
-        if next_url:
-            o = urlparse(next_url)
-            baseurl = o.scheme + '://' + o.netloc.replace(':80', '')
-            next_url = next_url.replace(baseurl, '')
+    urls, all_roles = get_roles(page_size=1, order_by='created')
+    roles = [[x['created'], x['id']] for x in all_roles]
 
     # make sure all 10 show up ...
     assert len(roles) == 10
@@ -508,6 +515,13 @@ def test_v1_role_pagination(ansible_config):
 
     # validate roles are ordered by created by default
     assert roles == sorted(roles)
+
+    # repeat with ordered by name ...
+    urls, all_roles = get_roles(page_size=1, order_by='name')
+    roles = [x['name'] for x in all_roles]
+    assert roles == sorted(roles)
+    assert len(roles) == 10
+    assert len(sorted(set(roles))) == 10
 
     # cleanup
     clean_all_roles(ansible_config)
