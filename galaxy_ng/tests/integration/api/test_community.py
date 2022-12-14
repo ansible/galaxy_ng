@@ -5,6 +5,8 @@ import json
 import time
 import pytest
 
+from urllib.parse import urlparse
+
 from ..utils import (
     ansible_galaxy,
     build_collection,
@@ -24,6 +26,30 @@ from ..schemas import (
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
+
+
+def clean_all_roles(ansible_config):
+
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+
+    pre_existing = []
+    next_url = f'/api/v1/roles/'
+    while next_url:
+        resp = admin_client(next_url)
+        pre_existing.extend(resp['results'])
+        if resp['next'] is None:
+            break
+        next_url = resp['next']
+
+    usernames = [x['username'] for x in pre_existing]
+    usernames = sorted(set(usernames))
+    for username in usernames:
+        cleanup_social_user(username, ansible_config)
 
 
 def cleanup_social_user(username, ansible_config):
@@ -92,7 +118,7 @@ def wait_for_v1_task(task_id=None, resp=None, api_client=None):
 
     state = None
     counter = 0
-    while state is None or state == 'RUNNING' and counter <= 100:
+    while state is None or state == 'RUNNING' and counter <= 500:
         counter += 1
         task_resp = api_client(poll_url, method='GET')
         state = task_resp['results'][0]['state']
@@ -434,3 +460,54 @@ def test_v1_autocomplete_search(ansible_config):
     # cleanup
     cleanup_social_user(github_user, ansible_config)
     cleanup_social_user(github_user2, ansible_config)
+
+
+@pytest.mark.community_only
+def test_v1_role_pagination(ansible_config):
+    """" Tests if v1 roles are auto-sorted by created """
+
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True
+    )
+
+    # clean all roles ...
+    clean_all_roles(ansible_config)
+
+    # start the sync
+    pargs = json.dumps({"limit": 10}).encode('utf-8')
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+    wait_for_v1_task(resp=resp, api_client=api_client)
+
+    # make tuples of created,id for all roles ...
+    roles = []
+    urls = []
+    next_url = '/api/v1/roles/?page_size=1'
+    while next_url:
+        urls.append(next_url)
+        resp = api_client(next_url)
+        roles.extend([[x['created'], x['id']] for x in resp['results']])
+        next_url = resp['next']
+        if next_url:
+            o = urlparse(next_url)
+            baseurl = o.scheme + '://' + o.netloc.replace(':80', '')
+            next_url = next_url.replace(baseurl, '')
+
+    # make sure all 10 show up ...
+    assert len(roles) == 10
+
+    # make sure all pages were visited
+    assert len(urls) == 10
+
+    # make sure no duplicates found
+    assert [x[1] for x in roles] == sorted(set([x[1] for x in roles]))
+
+    # validate roles are ordered by created by default
+    assert roles == sorted(roles)
+
+    # cleanup
+    clean_all_roles(ansible_config)
