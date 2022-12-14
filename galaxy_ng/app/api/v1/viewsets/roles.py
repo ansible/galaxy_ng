@@ -46,9 +46,9 @@ class LegacyRolesSetPagination(PageNumberPagination):
 class LegacyRolesViewSet(viewsets.ModelViewSet):
     """A list of legacy roles."""
 
-    queryset = LegacyRole.objects.all().order_by('full_metadata__created')
-    ordering_fields = ('full_metadata__created')
-    ordering = ('full_metadata__created')
+    queryset = LegacyRole.objects.all().order_by('created')
+    ordering_fields = ('created')
+    ordering = ('created')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LegacyRoleFilter
 
