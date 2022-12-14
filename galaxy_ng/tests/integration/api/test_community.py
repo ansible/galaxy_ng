@@ -466,7 +466,6 @@ def test_v1_autocomplete_search(ansible_config):
 def test_v1_role_pagination(ansible_config):
     """" Tests if v1 roles are auto-sorted by created """
 
-
     config = ansible_config("admin")
     api_client = get_client(
         config=config,
