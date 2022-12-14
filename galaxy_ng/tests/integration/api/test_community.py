@@ -38,7 +38,7 @@ def clean_all_roles(ansible_config):
     )
 
     pre_existing = []
-    next_url = f'/api/v1/roles/'
+    next_url = '/api/v1/roles/'
     while next_url:
         resp = admin_client(next_url)
         pre_existing.extend(resp['results'])
