@@ -19,6 +19,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         with connection.cursor() as cursor:
-            cursor.execute(
-                "REASSIGN OWNED BY galaxy_ng TO postgres;"
-        )
+            cursor.execute("REASSIGN OWNED BY galaxy_ng TO postgres;")
