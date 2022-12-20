@@ -204,6 +204,11 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
         if "pk" in view.kwargs:
             obj = view.get_object()
+
+            # user can't have object permission to not existing repository
+            if obj.repository is None:
+                return False
+
             return request.user.has_perm(permission, obj.repository.cast())
 
         return False

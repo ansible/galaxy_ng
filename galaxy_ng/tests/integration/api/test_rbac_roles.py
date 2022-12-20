@@ -44,6 +44,33 @@ from .rbac_actions.collections import (
     reject_collections,
     deprecate_collections,
     undeprecate_collections,
+
+    # ansible repository
+    view_ansible_repository,
+    add_ansible_repository,
+    modify_ansible_repository,
+    rebuild_metadata_ansible_repository,
+    sign_ansible_repository,
+    sync_ansible_repository,
+    delete_ansible_repository,
+
+    # ansible repository version
+    view_ansible_repository_version,
+    # rebuild_metadata_ansible_repository_version,
+    repair_ansible_repository_version,
+    delete_ansible_repository_version,
+
+    # ansible distribution
+    view_ansible_distribution,
+    add_ansible_distribution,
+    change_ansible_distribution,
+    delete_ansible_distribution,
+
+    # ansible collection remote
+    view_ansible_remote,
+    add_ansible_remote,
+    change_ansible_remote,
+    delete_ansible_remote
 )
 from .rbac_actions.exec_env import (
     # Remotes
@@ -129,6 +156,34 @@ GLOBAL_ACTIONS = [
 
     # MISC
     view_tasks,
+
+    # ansible repository
+    view_ansible_repository,
+    add_ansible_repository,
+    modify_ansible_repository,
+    rebuild_metadata_ansible_repository,
+    sign_ansible_repository,
+    sync_ansible_repository,
+    delete_ansible_repository,
+
+    # ansible repository version
+    view_ansible_repository_version,
+    # FIXME: https://github.com/pulp/pulp_ansible/pull/1311
+    # rebuild_metadata_ansible_repository_version,
+    repair_ansible_repository_version,
+    delete_ansible_repository_version,
+
+    # ansible distribution
+    view_ansible_distribution,
+    add_ansible_distribution,
+    change_ansible_distribution,
+    delete_ansible_distribution,
+
+    # ansible collection remote
+    view_ansible_remote,
+    add_ansible_remote,
+    change_ansible_remote,
+    delete_ansible_remote
 ]
 
 # TODO: Update object tests to include delete actions
@@ -224,6 +279,33 @@ ROLES_TO_TEST = {
         deprecate_collections,
         undeprecate_collections,
 
+        # ansible repository
+        view_ansible_repository,
+        add_ansible_repository,
+        modify_ansible_repository,
+        rebuild_metadata_ansible_repository,
+        sign_ansible_repository,
+        sync_ansible_repository,
+        delete_ansible_repository,
+
+        # ansible repository version
+        view_ansible_repository_version,
+        # rebuild_metadata_ansible_repository_version,
+        repair_ansible_repository_version,
+        delete_ansible_repository_version,
+
+        # ansible distribution
+        view_ansible_distribution,
+        add_ansible_distribution,
+        change_ansible_distribution,
+        delete_ansible_distribution,
+
+        # ansible collection remote
+        view_ansible_remote,
+        add_ansible_remote,
+        change_ansible_remote,
+        delete_ansible_remote,
+
         # EEs
         # Remotes
         create_ee_remote,
@@ -264,12 +346,66 @@ ROLES_TO_TEST = {
         reject_collections,
         deprecate_collections,
         undeprecate_collections,
+
+        # ansible repository
+        view_ansible_repository,
+        add_ansible_repository,
+        modify_ansible_repository,
+        rebuild_metadata_ansible_repository,
+        sign_ansible_repository,
+        sync_ansible_repository,
+        delete_ansible_repository,
+
+        # ansible repository version
+        view_ansible_repository_version,
+        # rebuild_metadata_ansible_repository_version,
+        repair_ansible_repository_version,
+        delete_ansible_repository_version,
+
+        # ansible distribution
+        view_ansible_distribution,
+        add_ansible_distribution,
+        change_ansible_distribution,
+        delete_ansible_distribution,
+
+        # ansible collection remote
+        view_ansible_remote,
+        add_ansible_remote,
+        change_ansible_remote,
+        delete_ansible_remote
     },
     "galaxy.collection_curator": {
         configure_collection_sync,
         launch_collection_sync,
         approve_collections,
         reject_collections,
+
+        # ansible repository
+        view_ansible_repository,
+        add_ansible_repository,
+        modify_ansible_repository,
+        rebuild_metadata_ansible_repository,
+        sign_ansible_repository,
+        sync_ansible_repository,
+        delete_ansible_repository,
+
+        # ansible repository version
+        view_ansible_repository_version,
+        # rebuild_metadata_ansible_repository_version,
+        repair_ansible_repository_version,
+        delete_ansible_repository_version,
+
+        # ansible distribution
+        view_ansible_distribution,
+        add_ansible_distribution,
+        change_ansible_distribution,
+        delete_ansible_distribution,
+
+        # ansible collection remote
+        view_ansible_remote,
+        add_ansible_remote,
+        change_ansible_remote,
+        delete_ansible_remote
     },
     "galaxy.execution_environment_admin": {
         # EEs

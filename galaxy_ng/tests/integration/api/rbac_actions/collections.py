@@ -3,14 +3,21 @@ import subprocess
 
 from .utils import (
     API_ROOT,
+    PULP_API_ROOT,
+    SERVER,
     ADMIN_USER,
+    ADMIN_PASSWORD,
     ADMIN_TOKEN,
+    ADMIN_CREDENTIALS,
     assert_pass,
     del_collection,
     del_namespace,
     gen_string,
     gen_namespace,
-    reset_remote
+    reset_remote,
+    create_ansible_repo,
+    create_ansible_distro,
+    create_ansible_remote
 )
 
 from galaxy_ng.tests.integration.utils import build_collection
@@ -195,6 +202,211 @@ def undeprecate_collections(user, password, expect_pass, extra):
             f"/index/{collection['namespace']}/{collection['name']}/"
         ),
         json={"deprecated": False},
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def view_ansible_repository(user, password, expect_pass, extra):
+    response = requests.get(
+        f"{PULP_API_ROOT}repositories/ansible/ansible",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def add_ansible_repository(user, password, expect_pass, extra):
+    create_ansible_repo(user['username'], password, expect_pass)
+
+
+def modify_ansible_repository(user, password, expect_pass, extra):
+    ansible_repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+    base_ansible_repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    base_ansible_repo_version = f"{base_ansible_repo['pulp_href']}versions/0/"
+
+    response = requests.post(
+        f"{SERVER}{ansible_repo['pulp_href']}modify/",
+        json={"base_version": base_ansible_repo_version},
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def rebuild_metadata_ansible_repository(user, password, expect_pass, extra):
+    ansible_repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    response = requests.post(
+        f"{SERVER}{ansible_repo['pulp_href']}rebuild_metadata/",
+        json={
+            "namespace": "foo",
+            "name": "bar",
+            "version": "123"
+        },
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def sign_ansible_repository(user, password, expect_pass, extra):
+    ansible_repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    sign_serv_response = requests.get(
+        f"{PULP_API_ROOT}signing-services/?name=ansible-default",
+        auth=ADMIN_CREDENTIALS,
+    )
+    assert_pass(True, sign_serv_response.status_code, 200, 403)
+
+    sign_serv_href = sign_serv_response.json()['results'][0]['pulp_href']
+    response = requests.post(
+        f"{SERVER}{ansible_repo['pulp_href']}sign/",
+        json={
+            "content_units": ["*"],
+            "signing_service": sign_serv_href
+        },
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def sync_ansible_repository(user, password, expect_pass, extra):
+    ansible_repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+    remote_response = create_ansible_remote(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    response = requests.post(
+        f"{SERVER}{ansible_repo['pulp_href']}sync/",
+        json={"remote": remote_response["pulp_href"]},
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def delete_ansible_repository(user, password, expect_pass, extra):
+    repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True)
+
+    response = requests.delete(
+        f"{SERVER}{repo.json()['pulp_href']}",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def view_ansible_repository_version(user, password, expect_pass, extra):
+    repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    response = requests.get(
+        f"{SERVER}{repo['versions_href']}",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+# FIXME: pulp_1   | TypeError: rebuild_metadata() got an unexpected keyword argument 'repository_pk'
+def rebuild_metadata_ansible_repository_version(user, password, expect_pass, extra):
+    repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    response = requests.post(
+        f"{SERVER}{repo['versions_href']}0/rebuild_metadata/",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def repair_ansible_repository_version(user, password, expect_pass, extra):
+    repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    response = requests.post(
+        f"{SERVER}{repo['versions_href']}0/repair/",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def delete_ansible_repository_version(user, password, expect_pass, extra):
+    repo = create_ansible_repo(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    response = requests.delete(
+        f"{SERVER}{repo['versions_href']}0/",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def view_ansible_distribution(user, password, expect_pass, extra):
+    response = requests.get(
+        f"{PULP_API_ROOT}distributions/ansible/ansible/",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def add_ansible_distribution(user, password, expect_pass, extra):
+    response = requests.post(
+        f"{PULP_API_ROOT}distributions/ansible/ansible/",
+        {
+            "name": f"foobar-{gen_string()}",
+            "base_path": f"foobar-{gen_string()}"
+        },
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def change_ansible_distribution(user, password, expect_pass, extra):
+    ansible_distro = create_ansible_distro(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    response = requests.put(
+        f"{SERVER}{ansible_distro['pulp_href']}",
+        {
+            "name": f"bazqux-{gen_string()}",
+            "base_path": f"bazqux-{gen_string()}"
+        },
+        # auth=ADMIN_CREDENTIALS,
+        auth=(user['username'], password),
+    )
+
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def delete_ansible_distribution(user, password, expect_pass, extra):
+    ansible_distro = create_ansible_distro(ADMIN_USER, ADMIN_PASSWORD, True).json()
+
+    response = requests.delete(
+        f"{SERVER}{ansible_distro['pulp_href']}",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def view_ansible_remote(user, password, expect_pass, extra):
+    response = requests.get(
+        f"{PULP_API_ROOT}remotes/ansible/collection/",
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def add_ansible_remote(user, password, expect_pass, extra):
+    create_ansible_remote(user['username'], password, expect_pass)
+
+
+def change_ansible_remote(user, password, expect_pass, extra):
+    ansible_remote = create_ansible_remote(ADMIN_USER, ADMIN_PASSWORD, True).json()
+    response = requests.put(
+        f"{SERVER}{ansible_remote['pulp_href']}",
+        json={
+            "name": f"bazqux-{gen_string()}",
+            "url": "baz.qux/api/"
+        },
+        auth=(user['username'], password),
+    )
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def delete_ansible_remote(user, password, expect_pass, extra):
+    ansible_remote = create_ansible_remote(ADMIN_USER, ADMIN_PASSWORD, True).json()
+    response = requests.delete(
+        f"{SERVER}{ansible_remote['pulp_href']}",
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 202, 403)
