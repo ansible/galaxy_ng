@@ -350,6 +350,17 @@ def set_certification(client, collection, level="published"):
     do not have auto-certification enabled.
     """
 
+    # exit early if config is set to auto approve
+    if not client.config["use_move_endpoint"]:
+        return
+
+    # check if artifact is in staging repo, if not wait
+    staging_artifact_url = (
+        f"v3/plugin/ansible/content/staging/collections/index/"
+        f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
+    )
+    wait_for_url(client, staging_artifact_url)
+
     if client.config["upload_signatures"]:
         # Write manifest to temp file
         tf = tarfile.open(collection.filename, mode="r:gz")
@@ -420,17 +431,6 @@ def set_certification(client, collection, level="published"):
         kwargs = setup_multipart(signature_filename, data)
         resp = client(sig_url, method="POST", auth_required=True, **kwargs)
         wait_for_task(client, resp)
-
-    # exit early if config is set to auto approve
-    if not client.config["use_move_endpoint"]:
-        return
-
-    # check if artifact is in staging repo, if not wait
-    staging_artifact_url = (
-        f"v3/plugin/ansible/content/staging/collections/index/"
-        f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
-    )
-    wait_for_url(client, staging_artifact_url)
 
     # move the artifact from staging to destination repo
     url = (

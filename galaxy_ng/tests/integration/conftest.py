@@ -262,17 +262,10 @@ class AnsibleConfigFixture(dict):
             # return True
 
         elif key == 'upload_signatures':
-            # tells the tests whether or not to try to mark
-            # an imported collection as "published". This happens
-            # automatically in the default config for standalone,
-            # so should return False in that case ...
-
             if os.environ.get('HUB_UPLOAD_SIGNATURES'):
                 val = os.environ['HUB_UPLOAD_SIGNATURES']
                 if str(val) in ['1', 'True', 'true']:
                     return True
-
-            # standalone ...
             return False
 
         elif key == 'github_url':
