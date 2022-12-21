@@ -60,17 +60,15 @@ objects:
             BUILD_1_STATUS="complete"
             BUILD_1_RESULT=$(curl --silent ${JENKINS_JOB_URL}/${BUILD_1_NUM}/api/json | jq '.result')
             if [ "${BUILD_1_RESULT}" != "\"SUCCESS\"" ]; then
-              echo "ERROR: Jenkins job did not finish successfully: ${JENKINS_JOB_URL}/${BUILD_1_NUM}/"
-              TEXT="Failure"
-              EMOJI=":red_jenkins_circle:"
+              TEXT="Stage test FAILURE:"
               ((EXITCODE+=1))
             else
-              echo "Jenkins job finished running: ${JENKINS_JOB_URL}/${BUILD_1_NUM}/"
-              TEXT="Success"
-              EMOJI=":green_jenkins_circle:"
+              TEXT="Stage test SUCCESS:"
             fi
-            if [ -n "${SLACK_TOKEN}" ] && [ -n "${SLACK_CHANNEL}" ]; then
-              curl -X POST -H "Content-type: application/json" -H "Authorization: Bearer ${SLACK_TOKEN}" --data "{\"channel\":\"${SLACK_CHANNEL}\",\"icon_emoji\":\"${EMOJI}\",\"text\":\"${JENKINS_JOB_URL}/${BUILD_1_NUM}/: ${TEXT}\"}" https://slack.com/api/chat.postMessage
+            TEXT="${TEXT} ${JENKINS_JOB_URL}/${BUILD_1_NUM}/"
+            echo "${TEXT}"
+            if [ -n "${SLACK_URL}" ] && [ "${SLACK_NOTIFY}" = "true" ]; then
+              curl --silent -X POST -H 'Content-type: application/json' --data "{\"text\":\"${TEXT}\"}" ${SLACK_URL}
             fi
           fi
         fi
@@ -80,17 +78,15 @@ objects:
             BUILD_2_STATUS="complete"
             BUILD_2_RESULT=$(curl --silent ${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/api/json | jq '.result')
             if [ "${BUILD_2_RESULT}" != "\"SUCCESS\"" ]; then
-              echo "ERROR: Jenkins job did not finish successfully: ${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/"
-              TEXT="Failure"
-              EMOJI=":red_jenkins_circle:"
+              TEXT="Stage test FAILURE:"
               ((EXITCODE+=1))
             else
-              echo "Jenkins job finished running: ${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/"
-              TEXT="Success"
-              EMOJI=":green_jenkins_circle:"
+              TEXT="Stage test SUCCESS:"
             fi
-            if [ -n "${SLACK_TOKEN}" ] && [ -n "${SLACK_CHANNEL}" ]; then
-              curl -X POST -H "Content-type: application/json" -H "Authorization: Bearer ${SLACK_TOKEN}" --data "{\"channel\":\"${SLACK_CHANNEL}\",\"icon_emoji\":\"${EMOJI}\",\"text\":\"${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/: ${TEXT}\"}" https://slack.com/api/chat.postMessage
+            TEXT="${TEXT} ${JENKINS_JOB_URL_2}/${BUILD_2_NUM}/"
+            echo "${TEXT}"
+            if [ -n "${SLACK_URL}" ] && [ "${SLACK_NOTIFY}" = "true" ]; then
+              curl --silent -X POST -H 'Content-type: application/json' --data "{\"text\":\"${TEXT}\"}" ${SLACK_URL}
             fi
           fi
         fi
@@ -144,13 +140,13 @@ objects:
                   secretKeyRef:
                     name: iqe-jenkins
                     key: token
-              - name: SLACK_TOKEN
+              - name: SLACK_URL
                 valueFrom:
                   secretKeyRef:
                     name: iqe-jenkins
-                    key: slack-token
-              - name: SLACK_CHANNEL
-                value: ${SLACK_CHANNEL}
+                    key: slack-url
+              - name: SLACK_NOTIFY
+                value: ${SLACK_NOTIFY}
             volumeMounts:
             - name: entrypoint
               mountPath: /run_iqe.sh
@@ -180,5 +176,5 @@ parameters:
     value: 50m
   - name: IQE_CPU_LIMIT
     value: 200m
-  - name: SLACK_CHANNEL
-    value: ""
+  - name: SLACK_NOTIFY
+    value: "false"
