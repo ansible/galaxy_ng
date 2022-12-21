@@ -1,18 +1,19 @@
 import logging
 import subprocess
 import tempfile
+import time
 from unittest.mock import patch
 
 import pytest
 from orionutils.generator import build_collection, randstr
 
-from ..constants import USERNAME_PUBLISHER
+from ..constants import SLEEP_SECONDS_ONETIME, USERNAME_PUBLISHER
 from ..utils import (
     CapturingGalaxyError,
     CollectionInspector,
     get_client,
     set_certification,
-    wait_for_task
+    wait_for_task,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,6 +45,10 @@ def test_download_artifact(ansible_config, upload_artifact):
         else:
             resp = wait_for_task(api_client, resp)
             assert resp["state"] == "completed"
+
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
+
     set_certification(api_client, artifact)
 
     # download collection
@@ -84,6 +89,10 @@ def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
 
     resp = upload_artifact(config, api_client, artifact)
     resp = wait_for_task(api_client, resp)
+
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
+
     set_certification(api_client, artifact, level="validated")
 
     # download collection

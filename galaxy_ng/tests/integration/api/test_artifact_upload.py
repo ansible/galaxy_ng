@@ -2,12 +2,13 @@ import json
 import logging
 import os
 import re
+import time
 from unittest.mock import patch
 
 import pytest
 from orionutils.generator import build_collection, randstr
 
-from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME, USERNAME_PUBLISHER
 
 from ..utils import (
     CapturingGalaxyError,
@@ -90,6 +91,9 @@ def test_validated_publish(ansible_config, artifact, upload_artifact):
         else:
             resp = wait_for_task(api_client, resp)
             assert resp["state"] == "completed"
+
+        # wait for move task from `inbound-<namespace>` repo to `staging` repo
+        time.sleep(SLEEP_SECONDS_ONETIME)
 
         set_certification(api_client, artifact, level="validated")
 
@@ -321,6 +325,9 @@ def test_ansible_requires(ansible_config, upload_artifact, spec):
     resp = wait_for_task(api_client, resp)
 
     assert resp["state"] == result
+
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
 
     if result == "completed":
         partner_engineer_client = get_client(ansible_config("partner_engineer"))
