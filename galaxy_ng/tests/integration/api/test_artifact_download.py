@@ -62,6 +62,8 @@ def test_download_artifact(ansible_config, upload_artifact):
 
         cmd = [
             "curl",
+            "--retry",
+            "5",
             "-L",
             "-H",
             "'Content-Type: application/json'",
@@ -106,6 +108,8 @@ def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
 
         cmd = [
             "curl",
+            "--retry",
+            "5",
             "-L",
             "-H",
             "'Content-Type: application/json'",
