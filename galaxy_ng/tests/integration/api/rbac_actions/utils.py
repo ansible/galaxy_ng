@@ -566,5 +566,54 @@ class ReusableLocalContainer:
     def cleanup(self):
         del_container(self._name)
 
-    def __del__(self):
-        self.cleanup()
+
+def create_ansible_repo(user, password, expect_pass):
+    response = requests.post(
+        f"{PULP_API_ROOT}repositories/ansible/ansible/",
+        json={
+            "pulp_labels": {},
+            "name": f"repo_ansible-{gen_string()}",
+            "description": "foobar",
+            "gpgkey": "foobar"
+        },
+        auth=(user, password),
+    )
+    assert_pass(expect_pass, response.status_code, 201, 403)
+    return response
+
+
+def create_ansible_distro(user, password, expect_pass):
+    task_response = requests.post(
+        f"{PULP_API_ROOT}distributions/ansible/ansible/",
+        {
+            "name": f"foobar-{gen_string()}",
+            "base_path": f"foobar-{gen_string()}"
+        },
+        auth=(user, password),
+    )
+
+    assert_pass(expect_pass, task_response.status_code, 202, 403)
+
+    finished_task_response = wait_for_task(task_response)
+    assert_pass(expect_pass, finished_task_response.status_code, 200, 403)
+
+    created_resources = finished_task_response.json()['created_resources'][0]
+    response = requests.get(
+        f"{SERVER}{created_resources}",
+        auth=(user, password),
+    )
+    assert_pass(expect_pass, response.status_code, 200, 403)
+    return response
+
+
+def create_ansible_remote(user, password, expect_pass):
+    response = requests.post(
+        f"{PULP_API_ROOT}remotes/ansible/collection/",
+        json={
+            "name": f"foobar-{gen_string()}",
+            "url": "foo.bar/api/"
+        },
+        auth=(user, password),
+    )
+    assert_pass(expect_pass, response.status_code, 201, 403)
+    return response
