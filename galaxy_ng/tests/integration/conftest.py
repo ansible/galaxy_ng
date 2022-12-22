@@ -1,15 +1,12 @@
 import logging
 import os
 import shutil
-import time
 from functools import lru_cache
 from urllib.parse import urlparse
 
 import pytest
 from orionutils.utils import increment_version
 from pkg_resources import parse_version
-
-from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 
 from .constants import USERNAME_PUBLISHER
 from .utils import (
@@ -265,17 +262,10 @@ class AnsibleConfigFixture(dict):
             # return True
 
         elif key == 'upload_signatures':
-            # tells the tests whether or not to try to mark
-            # an imported collection as "published". This happens
-            # automatically in the default config for standalone,
-            # so should return False in that case ...
-
             if os.environ.get('HUB_UPLOAD_SIGNATURES'):
                 val = os.environ['HUB_UPLOAD_SIGNATURES']
                 if str(val) in ['1', 'True', 'true']:
                     return True
-
-            # standalone ...
             return False
 
         elif key == 'github_url':
@@ -357,9 +347,6 @@ def published(ansible_config, artifact):
         ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
 
-    # wait for move task from `inbound-<namespace>` repo to `staging` repo
-    time.sleep(SLEEP_SECONDS_ONETIME)
-
     # certify
     set_certification(api_client, artifact)
 
@@ -386,9 +373,6 @@ def certifiedv2(ansible_config, artifact):
         ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
 
-    # wait for move task from `inbound-<namespace>` repo to `staging` repo
-    time.sleep(SLEEP_SECONDS_ONETIME)
-
     # certify v1
     set_certification(api_client, artifact)
 
@@ -406,9 +390,6 @@ def certifiedv2(ansible_config, artifact):
         f"collection publish {artifact2.filename}",
         ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
     )
-
-    # wait for move task from `inbound-<namespace>` repo to `staging` repo
-    time.sleep(SLEEP_SECONDS_ONETIME)
 
     # certify newer version
     set_certification(api_client, artifact2)
@@ -436,9 +417,6 @@ def uncertifiedv2(ansible_config, artifact):
         ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
 
-    # wait for move task from `inbound-<namespace>` repo to `staging` repo
-    time.sleep(SLEEP_SECONDS_ONETIME)
-
     # certify v1
     set_certification(api_client, artifact)
 
@@ -456,9 +434,6 @@ def uncertifiedv2(ansible_config, artifact):
         f"collection publish {artifact2.filename}",
         ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
-
-    # wait for move task from `inbound-<namespace>` repo to `staging` repo
-    time.sleep(SLEEP_SECONDS_ONETIME)
 
     return artifact, artifact2
 

@@ -350,6 +350,17 @@ def set_certification(client, collection, level="published"):
     do not have auto-certification enabled.
     """
 
+    # exit early if config is set to auto approve
+    if not client.config["use_move_endpoint"]:
+        return
+
+    # check if artifact is in staging repo, if not wait
+    staging_artifact_url = (
+        f"v3/plugin/ansible/content/staging/collections/index/"
+        f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
+    )
+    wait_for_url(client, staging_artifact_url)
+
     if client.config["upload_signatures"]:
         # Write manifest to temp file
         tf = tarfile.open(collection.filename, mode="r:gz")
@@ -421,38 +432,31 @@ def set_certification(client, collection, level="published"):
         resp = client(sig_url, method="POST", auth_required=True, **kwargs)
         wait_for_task(client, resp)
 
-    if client.config["use_move_endpoint"]:
-        url = (
-            f"v3/collections/{collection.namespace}/{collection.name}/versions/"
-            f"{collection.version}/move/staging/{level}/"
-        )
-        job_tasks = client(url, method="POST", args=b"{}")
-        assert 'copy_task_id' in job_tasks
-        assert 'curate_all_synclist_repository_task_id' in job_tasks
-        assert 'remove_task_id' in job_tasks
+    # move the artifact from staging to destination repo
+    url = (
+        f"v3/collections/{collection.namespace}/{collection.name}/versions/"
+        f"{collection.version}/move/staging/{level}/"
+    )
+    job_tasks = client(url, method="POST", args=b"{}")
+    assert "copy_task_id" in job_tasks
+    assert "remove_task_id" in job_tasks
 
-        # wait for each unique task to finish ...
-        for key in ['copy_task_id', 'remove_task_id']:
-            task_id = job_tasks.get(key)
+    # wait for each unique task to finish ...
+    for key in ["copy_task_id", "remove_task_id"]:
+        task_id = job_tasks.get(key)
 
-            # curate is null sometimes? ...
-            if task_id is None:
-                continue
+        # The task_id is not a url, so it has to be assembled from known data ...
+        # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
+        ds = {"task": f"{client.config['url']}/pulp/api/v3/tasks/{task_id}"}
+        task_result = wait_for_task(client, ds)
+        assert task_result["state"] == "completed", task_result
 
-            # The task_id is not a url, so it has to be assembled from known data ...
-            # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
-            ds = {
-                'task': f"{client.config['url']}/pulp/api/v3/tasks/{task_id}"
-            }
-            task_result = wait_for_task(client, ds)
-            assert task_result['state'] == 'completed', task_result
-
-        # callers expect response as part of this method, ensure artifact is there
-        dest_url = (
-            f"v3/plugin/ansible/content/{level}/collections/index/"
-            f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
-        )
-        return wait_for_url(client, dest_url)
+    # callers expect response as part of this method, ensure artifact is there
+    dest_url = (
+        f"v3/plugin/ansible/content/{level}/collections/index/"
+        f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
+    )
+    return wait_for_url(client, dest_url)
 
 
 def copy_collection_version(client, collection, src_repo_name, dest_repo_name):
