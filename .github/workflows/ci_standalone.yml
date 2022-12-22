@@ -39,11 +39,9 @@ jobs:
       - name: Install docker-compose
         run: pip3 install --upgrade docker-compose
 
-
-      # TODO: change this to the main oci_env branch once db snapshot/restore is merged.
       - name: setup oci-env
         run: |
-          git clone https://github.com/newswangerd/oci_env.git --branch feature/db-snapshot $OCI_ENV_PATH
+          git clone https://github.com/pulp/oci_env.git $OCI_ENV_PATH
           pip install -e $OCI_ENV_PATH/client/
           mkdir $OCI_ENV_PATH/db_backup/
           cp dev/data/insights-fixture.tar.gz $OCI_ENV_PATH/db_backup/insights-fixture.tar.gz
