@@ -11,7 +11,7 @@ import yaml
 def get_dynaconf_variable(varname):
     '''Run the dynaconf get subcommand for a specific key'''
     cmd = f'dynaconf get {varname}'
-    cmd = f'./compose exec api bash -c "{cmd}"'
+    cmd = f'./compose exec -T api bash -c "{cmd}"'
     pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if pid.returncode != 0:
         print(f'ERROR: {pid.stderr.decode("utf-8")}')
