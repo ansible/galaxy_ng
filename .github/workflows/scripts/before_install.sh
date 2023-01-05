@@ -156,6 +156,11 @@ fi
 
 cd galaxy_ng
 
+if [[ "$TEST" = "lowerbounds" ]]; then
+  python3 .ci/scripts/calc_deps_lowerbounds.py > lowerbounds_requirements.txt
+  mv lowerbounds_requirements.txt requirements.txt
+fi
+
 if [ -f $POST_BEFORE_INSTALL ]; then
   source $POST_BEFORE_INSTALL
 fi
