@@ -1,5 +1,5 @@
 ---
-name: Standalone Certified Sync
+name: Local Standalone Sync Against Local Insights
 on: 
   pull_request:
     branches:
