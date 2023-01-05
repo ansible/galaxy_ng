@@ -1,5 +1,5 @@
 ---
-name: Standalone Sync
+name: Standalone Certified Sync
 on: 
   pull_request:
     branches:
@@ -15,7 +15,7 @@ on:
 
 jobs:
 
-  sync_integration:
+  integration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -64,4 +64,4 @@ jobs:
           oci-env -e dev/oci_env_configs/sync-test.compose.env poll
 
       - name: run the integration tests
-        run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh
+        run: ./dev/standalone-certified-sync/RUN_INTEGRATION.sh
