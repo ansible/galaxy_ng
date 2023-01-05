@@ -1,5 +1,5 @@
 ---
-name: Standalone
+name: Standalone Sync
 on: 
   pull_request:
     branches:
@@ -15,7 +15,7 @@ on:
 
 jobs:
 
-  integration:
+  sync_integration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
