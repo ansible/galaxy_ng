@@ -49,7 +49,7 @@ jobs:
         run: ./compose up -d
 
       - name: give stack some time to spin up
-        run: sleep 120
+        run: python dev/common/poll.py
 
       - name: set keyring on staging repo for signature upload
         run: ./compose exec -T api ./entrypoint.sh manage set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y
