@@ -35,4 +35,13 @@ pytest \
     -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync" \
     -v $@ galaxy_ng/tests/integration
 RC=$?
+
+if [[ ! -z DUMP_LOGS ]] && [[ $RC != 0 ]]; then
+    # dump the api logs
+    docker logs galaxy_ng_api_1
+
+    # dump the worker logs
+    docker logs galaxy_ng_worker_1
+fi
+
 exit $RC

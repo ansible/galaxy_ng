@@ -55,4 +55,4 @@ jobs:
         run: ./compose exec -T api ./entrypoint.sh manage set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y
 
       - name: run the integration tests
-        run: HUB_LOCAL=1 ./dev/standalone/RUN_INTEGRATION.sh
+        run: DUMP_LOGS=1 ./dev/standalone/RUN_INTEGRATION.sh
