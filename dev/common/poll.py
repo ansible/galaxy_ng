@@ -46,14 +46,18 @@ def poll(attempts=100, wait_time=1):
         print(f"Waiting for API to start (attempt {i+1} of {attempts})")
         # re request the api root each time because it's not alwasy available until the
         # app boots
+
+        print(f'\tHOSTNAME: {hostname}')
+
         api_root = get_dynaconf_variable("API_ROOT")
+        print(f'\tAPI_ROOT: {api_root}')
         if api_root is None:
             print('\tAPI_ROOT is null')
             time.sleep(wait_time)
             continue
 
         url = f"{hostname}{api_root}api/v3/status/"
-        print(f'\tenumerated url: {url}')
+        print(f'\tURL: {url}')
         try:
             rr = requests.get(url)
             print(f'\tresponse: {rr.status_code}')
