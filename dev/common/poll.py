@@ -2,13 +2,10 @@
 
 # Poll the api until it is ready.
 
-import json
 import requests
 import subprocess
 import time
 import yaml
-
-from json import JSONEncoder
 
 
 def get_dynaconf_variable(varname):
