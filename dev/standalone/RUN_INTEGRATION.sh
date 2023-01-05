@@ -32,7 +32,16 @@ export HUB_USE_MOVE_ENDPOINT=true
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
 pytest \
     --capture=no \
-    -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync" \
+    -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync and not certified_sync" \
     -v $@ galaxy_ng/tests/integration
 RC=$?
+
+if [[ ! -z DUMP_LOGS ]] && [[ $RC != 0 ]]; then
+    # dump the api logs
+    docker logs galaxy_ng_api_1
+
+    # dump the worker logs
+    docker logs galaxy_ng_worker_1
+fi
+
 exit $RC
