@@ -88,6 +88,8 @@ def get_dynaconf_variable(varname):
     pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout = pid.stdout.decode('utf-8')
     parsed = parse_dynaconf_list(stdout)
+    if varname not in parsed:
+        return None
     return parsed[varname]['value']
 
 
@@ -119,6 +121,11 @@ def poll(attempts=100, wait_time=1):
         # re request the api root each time because it's not alwasy available until the
         # app boots
         api_root = get_dynaconf_variable("API_ROOT")
+        if api_root is None:
+            print(f'\tAPI_ROOT is null')
+            time.sleep(wait_time)
+            continue
+
         url = f"{hostname}{api_root}api/v3/status/"
         print(f'\tenumerated url: {url}')
         try:
