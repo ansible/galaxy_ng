@@ -3,7 +3,6 @@
 # Poll the api until it is ready.
 
 import json
-import re
 import requests
 import subprocess
 import time
@@ -46,10 +45,10 @@ def parse_dynaconf_list(rawtxt):
     # split all the key&vals
     lines = rawtxt.split('\n')
     bits = ['']
-    for idx,x in enumerate(lines):
+    for idx, x in enumerate(lines):
         if '<' in x and '>' in x:
             bits.append('')
-        bits[-1]+= x
+        bits[-1] += x
 
     # parse all the key&vals
     bits = [x.strip() for x in bits if x.strip()]
@@ -122,7 +121,7 @@ def poll(attempts=100, wait_time=1):
         # app boots
         api_root = get_dynaconf_variable("API_ROOT")
         if api_root is None:
-            print(f'\tAPI_ROOT is null')
+            print('\tAPI_ROOT is null')
             time.sleep(wait_time)
             continue
 
@@ -138,7 +137,7 @@ def poll(attempts=100, wait_time=1):
             print(e)
             time.sleep(wait_time)
 
-    raise Exception(f"polling the api service failed to complete in the allowed timeframe")
+    raise Exception("polling the api service failed to complete in the allowed timeframe")
 
 
 def main():
