@@ -14,6 +14,7 @@ def get_dynaconf_variable(varname):
     cmd = f'./compose exec api bash -c "{cmd}"'
     pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if pid.returncode != 0:
+        print(f'ERROR: {pid.stderr.decode("utf-8")}')
         return None
     stdout = pid.stdout.decode('utf-8')
     return stdout.strip()
