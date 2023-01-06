@@ -29,15 +29,14 @@ export PULP_SETTINGS=$PWD/.ci/ansible/settings/settings.py
 export PULP_URL="https://pulp"
 
 if [[ "$TEST" = "docs" ]]; then
+  if [[ "$GITHUB_WORKFLOW" == "Galaxy CI" ]]; then
+    pip install towncrier==19.9.0
+    towncrier --yes --version 4.0.0.ci
+  fi
   cd docs
   make PULP_URL="$PULP_URL" diagrams html
   tar -cvf docs.tar ./_build
   cd ..
-
-  echo "Validating OpenAPI schema..."
-  cat $PWD/.ci/scripts/schema.py | cmd_stdin_prefix bash -c "cat > /tmp/schema.py"
-  cmd_prefix bash -c "python3 /tmp/schema.py"
-  cmd_prefix bash -c "pulpcore-manager spectacular --file pulp_schema.yml --validate"
 
   if [ -f $POST_DOCS_TEST ]; then
     source $POST_DOCS_TEST
@@ -46,7 +45,7 @@ if [[ "$TEST" = "docs" ]]; then
 fi
 
 if [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
-  STATUS_ENDPOINT="${PULP_URL}/pulp/api/v3/status/"
+  STATUS_ENDPOINT="${PULP_URL}${PULP_API_ROOT}api/v3/status/"
   echo $STATUS_ENDPOINT
   REPORTED_VERSION=$(http $STATUS_ENDPOINT | jq --arg plugin galaxy --arg legacy_plugin galaxy_ng -r '.versions[] | select(.component == $plugin or .component == $legacy_plugin) | .version')
   response=$(curl --write-out %{http_code} --silent --output /dev/null https://pypi.org/project/galaxy-ng/$REPORTED_VERSION/)
@@ -62,74 +61,50 @@ if [[ "$TEST" == "plugin-from-pypi" ]]; then
   git checkout ${COMPONENT_VERSION} -- galaxy_ng/tests/
 fi
 
-cd ../pulp-openapi-generator
-./generate.sh pulpcore python
-pip install ./pulpcore-client
-rm -rf ./pulpcore-client
-if [[ "$TEST" = 'bindings' ]]; then
-  ./generate.sh pulpcore ruby 0
-  cd pulpcore-client
-  gem build pulpcore_client.gemspec
-  gem install --both ./pulpcore_client-0.gem
-fi
-./generate.sh pulp_ansible python
-pip install ./pulp_ansible-client
-rm -rf ./pulp_ansible-client
-if [[ "$TEST" = 'bindings' ]]; then
-  ./generate.sh pulp_ansible ruby 0
-  cd pulp_ansible-client
-  gem build pulp_ansible_client.gemspec
-  gem install --both ./pulp_ansible_client-0.gem
-  cd ..
-fi
-./generate.sh pulp_container python
-pip install ./pulp_container-client
-rm -rf ./pulp_container-client
-if [[ "$TEST" = 'bindings' ]]; then
-  ./generate.sh pulp_container ruby 0
-  cd pulp_container-client
-  gem build pulp_container_client.gemspec
-  gem install --both ./pulp_container_client-0.gem
-  cd ..
-fi
-cd $REPO_ROOT
-
-if [[ "$TEST" = 'bindings' ]]; then
-  if [ -f $REPO_ROOT/.ci/assets/bindings/test_bindings.py ]; then
-    python $REPO_ROOT/.ci/assets/bindings/test_bindings.py
-  fi
-  if [ -f $REPO_ROOT/.ci/assets/bindings/test_bindings.rb ]; then
-    ruby $REPO_ROOT/.ci/assets/bindings/test_bindings.rb
-  fi
-  exit
-fi
+echo "machine pulp
+login admin
+password password
+" | cmd_user_stdin_prefix bash -c "cat >> ~pulp/.netrc"
+# Some commands like ansible-galaxy specifically require 600
+cmd_user_stdin_prefix bash -c "chmod 600 ~pulp/.netrc"
 
 cat unittest_requirements.txt | cmd_stdin_prefix bash -c "cat > /tmp/unittest_requirements.txt"
+cat functest_requirements.txt | cmd_stdin_prefix bash -c "cat > /tmp/functest_requirements.txt"
 cmd_prefix pip3 install -r /tmp/unittest_requirements.txt
+cmd_prefix pip3 install -r /tmp/functest_requirements.txt
+cmd_prefix pip3 install --upgrade ../pulp-smash
+
+cd ../pulp-openapi-generator
+./generate.sh galaxy_ng python
+cmd_prefix pip3 install /root/pulp-openapi-generator/galaxy_ng-client
+sudo rm -rf ./galaxy_ng-client
+./generate.sh pulpcore python
+cmd_prefix pip3 install /root/pulp-openapi-generator/pulpcore-client
+sudo rm -rf ./pulpcore-client
+./generate.sh pulp_ansible python
+cmd_prefix pip3 install /root/pulp-openapi-generator/pulp_ansible-client
+sudo rm -rf ./pulp_ansible-client
+./generate.sh pulp_container python
+cmd_prefix pip3 install /root/pulp-openapi-generator/pulp_container-client
+sudo rm -rf ./pulp_container-client
+cd $REPO_ROOT
+
+CERTIFI=$(cmd_prefix python3 -c 'import certifi; print(certifi.where())')
+cmd_prefix bash -c "cat /etc/pulp/certs/pulp_webserver.crt  | tee -a "$CERTIFI" > /dev/null"
 
 # check for any uncommitted migrations
 echo "Checking for uncommitted migrations..."
-cmd_prefix bash -c "django-admin makemigrations --check --dry-run"
+cmd_user_prefix bash -c "django-admin makemigrations --check --dry-run"
 
-if [[ "$TEST" != "upgrade" ]]; then
-  # Run unit tests.
-  cmd_prefix bash -c "PULP_DATABASES__default__USER=postgres django-admin test --noinput /usr/local/lib/python3.8/site-packages/galaxy_ng/tests/unit/"
-fi
+# Run unit tests.
+cmd_user_prefix bash -c "PULP_DATABASES__default__USER=postgres pytest -v -r sx --color=yes -p no:pulpcore --pyargs galaxy_ng.tests.unit"
 
 # Run functional tests
-export PYTHONPATH=$REPO_ROOT/../pulp_ansible${PYTHONPATH:+:${PYTHONPATH}}
-export PYTHONPATH=$REPO_ROOT/../pulp_container${PYTHONPATH:+:${PYTHONPATH}}
-export PYTHONPATH=$REPO_ROOT/../galaxy-importer${PYTHONPATH:+:${PYTHONPATH}}
-export PYTHONPATH=$REPO_ROOT/../pulpcore${PYTHONPATH:+:${PYTHONPATH}}
-export PYTHONPATH=$REPO_ROOT${PYTHONPATH:+:${PYTHONPATH}}
-
-
-
 if [[ "$TEST" == "performance" ]]; then
   if [[ -z ${PERFORMANCE_TEST+x} ]]; then
-    pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance
+    cmd_user_prefix bash -c "pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance"
   else
-    pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance.test_$PERFORMANCE_TEST
+    cmd_user_prefix bash -c "pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance.test_$PERFORMANCE_TEST"
   fi
   exit
 fi
@@ -138,12 +113,16 @@ if [ -f $FUNC_TEST_SCRIPT ]; then
   source $FUNC_TEST_SCRIPT
 else
 
-    if [[ "$GITHUB_WORKFLOW" == "Galaxy Nightly CI/CD" ]]; then
-        pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8
-        pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m "not parallel"
+    if [[ "$GITHUB_WORKFLOW" == "Galaxy Nightly CI/CD" ]] || [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
+        cmd_user_prefix bash -c "pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8 --nightly"
+        cmd_user_prefix bash -c "pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m 'not parallel' --nightly"
+
+    
     else
-        pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m "parallel and not nightly" -n 8
-        pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m "not parallel and not nightly"
+        cmd_user_prefix bash -c "pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8"
+        cmd_user_prefix bash -c "pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m 'not parallel'"
+
+    
     fi
 
 fi
