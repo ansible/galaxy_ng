@@ -4,6 +4,7 @@
 
 import requests
 import subprocess
+import sys
 import time
 import yaml
 
@@ -29,41 +30,47 @@ def get_compose_config():
     return config
 
 
-def poll(attempts=100, wait_time=1):
+def poll(url=None, attempts=100, wait_time=1):
     '''Wait for the API to report status or abnormal exit'''
-    # get the compose config
-    config = get_compose_config()
 
-    # extract the api service
-    api = config['services']['api']
+    if url is None:
 
-    # get the api's env
-    env = api['environment']
+        # get the compose config
+        config = get_compose_config()
 
-    # hostname includes the prefix
-    hostname = env['PULP_ANSIBLE_API_HOSTNAME']
+        # extract the api service
+        api = config['services']['api']
+
+        # get the api's env
+        env = api['environment']
+
+        # hostname includes the prefix
+        hostname = env['PULP_ANSIBLE_API_HOSTNAME']
 
     for i in range(attempts):
         print(f"Waiting for API to start (attempt {i+1} of {attempts})")
         # re request the api root each time because it's not alwasy available until the
         # app boots
 
-        print(f'\tHOSTNAME: {hostname}')
+        if url is not None:
+            this_url = url
+        else:
+            print(f'\tHOSTNAME: {hostname}')
+            api_root = get_dynaconf_variable("API_ROOT")
+            print(f'\tAPI_ROOT: {api_root}')
+            if api_root is None:
+                print('\tAPI_ROOT is null')
+                time.sleep(wait_time)
+                continue
 
-        api_root = get_dynaconf_variable("API_ROOT")
-        print(f'\tAPI_ROOT: {api_root}')
-        if api_root is None:
-            print('\tAPI_ROOT is null')
-            time.sleep(wait_time)
-            continue
+            this_url = f"{hostname}{api_root}api/v3/status/"
 
-        url = f"{hostname}{api_root}api/v3/status/"
-        print(f'\tURL: {url}')
+        print(f'\tURL: {this_url}')
         try:
-            rr = requests.get(url)
+            rr = requests.get(this_url)
             print(f'\tresponse: {rr.status_code}')
             if rr.status_code == 200:
-                print(f"{url} online after {(i * wait_time)} seconds")
+                print(f"{this_url} online after {(i * wait_time)} seconds")
                 return
         except Exception as e:
             print(e)
@@ -73,7 +80,10 @@ def poll(attempts=100, wait_time=1):
 
 
 def main():
-    poll()
+    url = None
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+    poll(url=url)
 
 
 if __name__ == "__main__":

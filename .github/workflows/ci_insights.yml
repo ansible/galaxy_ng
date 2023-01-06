@@ -58,7 +58,7 @@ jobs:
         run: ./compose up -d
 
       - name: give stack some time to spin up
-        run: COMPOSE_INTERACTIVE_NO_CLI=1 python dev/common/poll.py
+        run: COMPOSE_INTERACTIVE_NO_CLI=1 python dev/common/poll.py http://localhost:8080/api/automation-hub/pulp/api/v3/status/
 
       - name: run the integration tests
         run: ./dev/insights/RUN_INTEGRATION.sh
