@@ -44,13 +44,12 @@ deploy_to_pypi: false
 disabled_redis_runners: []
 docker_fixtures: false
 docs_test: false
-flake8: true
+flake8: false
 flake8_ignore: []
-github_org: pulp
+github_org: ansible
 issue_tracker: null
-kanban: true
-keep_ci_update_for_latest_branches: 5
-lint_requirements: true
+kanban: false
+lint_requirements: false
 noissue_marker: No-Issue
 parallel_test_workers: 8
 plugin_app_label: galaxy

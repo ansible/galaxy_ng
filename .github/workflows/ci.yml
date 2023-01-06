@@ -70,9 +70,7 @@ jobs:
 
       
 
-      # Lint code.
-      - name: Run flake8
-        run: flake8
+      
 
       - name: Run extra lint checks
         run: "[ ! -x .ci/scripts/extra_linting.sh ] || .ci/scripts/extra_linting.sh"
@@ -87,8 +85,7 @@ jobs:
       - name: Check for gettext problems
         run: sh .ci/scripts/check_gettext.sh
 
-      - name: Verify upper bound requirements
-        run: python .ci/scripts/upper_bound.py
+      
 
   test:
     runs-on: ubuntu-latest

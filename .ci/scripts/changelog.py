@@ -5,7 +5,7 @@ from packaging.version import Version
 from git import Repo
 
 repo = Repo(os.getcwd())
-heads = repo.git.ls_remote("--heads", "https://github.com/pulp/galaxy_ng.git").split("\n")
+heads = repo.git.ls_remote("--heads", "https://github.com/ansible/galaxy_ng.git").split("\n")
 branches = [h.split("/")[-1] for h in heads if re.search(r"^([0-9]+)\.([0-9]+)$", h.split("/")[-1])]
 branches.sort(key=lambda ver: Version(ver), reverse=True)
 
@@ -16,7 +16,7 @@ def get_changelog(branch):
 
     """
     return requests.get(
-        f"https://raw.githubusercontent.com/pulp/galaxy_ng/{branch}/CHANGES.rst"
+        f"https://raw.githubusercontent.com/ansible/galaxy_ng/{branch}/CHANGES.rst"
     ).text
 
 

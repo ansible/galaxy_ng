@@ -18,7 +18,7 @@ headers = {
 
 github_api = "https://api.github.com"
 workflow_path = "/actions/workflows/update_ci.yml/dispatches"
-url = f"{github_api}/repos/pulp/galaxy_ng{workflow_path}"
+url = f"{github_api}/repos/ansible/galaxy_ng{workflow_path}"
 
 for branch in branches:
     print(f"Updating {branch}")
