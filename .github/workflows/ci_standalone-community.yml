@@ -64,7 +64,7 @@ jobs:
         run: ./compose up -d
 
       - name: give stack some time to spin up
-        run: sleep 120
+        run: COMPOSE_INTERACTIVE_NO_CLI=1 python dev/common/poll.py
 
       - name: run the integration tests
         run: DUMP_LOGS=1 ./dev/standalone-community/RUN_INTEGRATION.sh
