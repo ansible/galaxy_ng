@@ -1,13 +1,11 @@
 """Utility functions for AH tests."""
 
 import time
-
-from urllib.parse import urljoin
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 from ansible.galaxy.api import GalaxyError
 
-from .errors import TaskWaitingTimeout
+from .errors import CapturingGalaxyError, TaskWaitingTimeout
 
 
 def test_url_safe_join():
@@ -124,7 +122,7 @@ def wait_for_url(api_client, url, timeout_sec=30):
             raise TaskWaitingTimeout()
         try:
             res = api_client(url, method="GET")
-        except GalaxyError as e:
+        except (GalaxyError, CapturingGalaxyError) as e:
             if "404" not in str(e):
                 raise
             time.sleep(0.5)
