@@ -2,11 +2,13 @@ import logging
 
 import pytest
 from galaxykit.collections import upload_artifact, delete_collection
+from pkg_resources import parse_version
 
 from ..conftest import get_galaxy_client, get_ansible_config_sync
 from ..utils import wait_for_task, get_client, set_certification
 from orionutils.generator import build_collection
-from ..utils.iqe_utils import is_sync_testing, get_all_collections, retrieve_collection
+from ..utils.iqe_utils import is_sync_testing, get_all_collections,\
+    retrieve_collection, get_hub_version
 from ..utils.tools import generate_random_artifact_version, uuid4
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -69,6 +71,11 @@ def test_sync():
         "requirements_file":
             f"---\ncollections:\n- {artifact.namespace}.{artifact.name}"
     }
+
+    hub_version = get_hub_version(config_sync)
+    if parse_version(hub_version) < parse_version('4.5'):
+        del body["signed_only"]
+
     url = "content/community/v3/sync/config/"
     api_client(url, method="PUT", args=body)
 
