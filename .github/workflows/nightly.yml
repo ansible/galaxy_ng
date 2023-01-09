@@ -25,7 +25,6 @@ jobs:
           - TEST: pulp
           - TEST: azure
           - TEST: s3
-          - TEST: lowerbounds
 
     steps:
       - uses: actions/checkout@v3
