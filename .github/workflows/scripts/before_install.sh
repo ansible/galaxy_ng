@@ -30,17 +30,6 @@ fi
 COMMIT_MSG=$(git log --format=%B --no-merges -1)
 export COMMIT_MSG
 
-if [[ "$TEST" == "upgrade" ]]; then
-  pip install -r functest_requirements.txt
-  git checkout -b ci_upgrade_test
-  cp -R .github /tmp/.github
-  cp -R .ci /tmp/.ci
-  git checkout $FROM_GALAXY_NG_BRANCH
-  rm -rf .ci .github
-  cp -R /tmp/.github .
-  cp -R /tmp/.ci .
-fi
-
 if [[ "$TEST" == "plugin-from-pypi" ]]; then
   COMPONENT_VERSION=$(http https://pypi.org/pypi/galaxy-ng/json | jq -r '.info.version')
 else
@@ -152,8 +141,6 @@ fi
 
 cd ..
 
-
-
 # Intall requirements for ansible playbooks
 pip install docker netaddr boto3 ansible
 
@@ -168,6 +155,11 @@ then
 fi
 
 cd galaxy_ng
+
+if [[ "$TEST" = "lowerbounds" ]]; then
+  python3 .ci/scripts/calc_deps_lowerbounds.py > lowerbounds_requirements.txt
+  mv lowerbounds_requirements.txt requirements.txt
+fi
 
 if [ -f $POST_BEFORE_INSTALL ]; then
   source $POST_BEFORE_INSTALL

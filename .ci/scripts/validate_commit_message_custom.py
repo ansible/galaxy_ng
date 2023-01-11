@@ -148,7 +148,7 @@ def main():
     end_commit = os.environ["END_COMMIT"]
     skip_users = ['dependabot[bot]', 'patchback[bot]']
 
-    if github_user in skip_users:  ## NOTE: patchback[bot] not included in GITHUB_USER
+    if github_user in skip_users:  # NOTE: patchback[bot] not included in GITHUB_USER
         is_valid = True
     elif github_actor in skip_users:
         is_valid = True

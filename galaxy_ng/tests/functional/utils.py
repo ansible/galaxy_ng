@@ -1,7 +1,6 @@
 """Utilities for tests for the galaxy plugin."""
 import os
 from functools import partial
-import random
 import requests
 from unittest import SkipTest
 from tempfile import NamedTemporaryFile
@@ -189,7 +188,8 @@ class TestCaseUsingBindings(PulpTestCase):
         cls.container_repo_api = ContainerRepositoryApi(cls.client)
         cls.container_remotes_api = ApiUiV1ExecutionEnvironmentsRemotesApi(cls.client)
         cls.container_registries_api = ApiUiV1ExecutionEnvironmentsRegistriesApi(cls.client)
-        cls.container_remote_sync_api = ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
+        cls.container_remote_sync_api = \
+            ApiUiV1ExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
         cls.container_registry_sync_api = ApiUiV1ExecutionEnvironmentsRegistriesSyncApi(cls.client)
         cls.container_images_api = ContainerImagesAPI(cls.client)
         cls.get_ansible_cfg_before_test()
@@ -209,8 +209,15 @@ class TestCaseUsingBindings(PulpTestCase):
     @classmethod
     def get_ansible_cfg_before_test(cls):
         """Update ansible.cfg to use the given base_path."""
-        with open("ansible.cfg", "r") as f:
-            cls.previous_ansible_cfg = f.read()
+        try:
+            with open("ansible.cfg", "r") as f:
+                cls.previous_ansible_cfg = f.read()
+        except FileNotFoundError:
+            cls.previous_ansible_cfg = (
+                "[defaults]\n"
+                "remote_tmp = /tmp/ansible\n"
+                "local_tmp = /tmp/ansible\n"
+            )
 
     def update_ansible_cfg(self, base_path):
         """Update ansible.cfg to use the given base_path."""
@@ -243,7 +250,6 @@ class TestCaseUsingBindings(PulpTestCase):
 
         response = self.sync_api.sync(repo_name)
         monitor_task(f"/pulp/api/v3/tasks/{response.task}/")
-
 
     def delete_namespace(self, namespace_name):
         """Delete a Namespace"""

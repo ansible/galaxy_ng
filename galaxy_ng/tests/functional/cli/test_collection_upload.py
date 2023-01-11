@@ -2,7 +2,6 @@
 
 import subprocess
 import tempfile
-from unittest.case import skip
 
 from pulp_smash.pulp3.bindings import delete_orphans
 from pulp_smash.utils import http_get
@@ -51,12 +50,15 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
         self.delete_namespace(collection.namespace)
 
     def test_uploaded_collection_logged(self):
-        """Test whether a Collection uploaded via ansible-galaxy is logged correctly in API Access Log."""
+        """
+        Test whether a Collection uploaded via ansible-galaxy is
+        logged correctly in API Access Log.
+        """
         delete_orphans()
 
         # Create namespace if it doesn't exist
-        data = str(self.namespace_api.list().data)
-        if "pulp" not in data:
+        data = self.namespace_api.list(name="pulp").data
+        if len(data) == 0:
             self.namespace_api.create(namespace={"name": "pulp", "groups": []})
 
         # Preapare ansible.cfg for ansible-galaxy CLI
@@ -71,11 +73,16 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
             cmd = "ansible-galaxy collection publish -vvv -c {}".format(collection_path)
 
-            subprocess.run(cmd.split())
+            subprocess.check_output(cmd.split())
 
-            cmd = f"docker cp pulp:/var/log/galaxy_api_access.log {tmp_dir}"
-
-            subprocess.run(cmd.split())
+            # Try to copy access log from container if tests are running outside of a container
+            # else copy direct because tests are running in the container
+            try:
+                cmd = f"docker cp pulp:/var/log/galaxy_api_access.log {tmp_dir}"
+                subprocess.check_output(cmd.split())
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                cmd = f"cp /var/log/galaxy_api_access.log {tmp_dir}"
+                subprocess.check_output(cmd.split())
 
             with open(f"{tmp_dir}/galaxy_api_access.log") as f:
                 log_contents = f.readlines()
