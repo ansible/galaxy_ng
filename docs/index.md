@@ -1,7 +1,7 @@
 ![](imgs/medium.png)
 
-!!! WARNING
-    This documentation is a **Work In Progress** some pages are incomplete.
+<!-- !!! WARNING
+    This documentation is a **Work In Progress** some pages are incomplete. -->
 
 # Galaxy NG
 
