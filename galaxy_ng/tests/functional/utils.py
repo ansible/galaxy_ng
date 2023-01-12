@@ -202,8 +202,15 @@ class TestCaseUsingBindings(PulpTestCase):
     @classmethod
     def get_ansible_cfg_before_test(cls):
         """Update ansible.cfg to use the given base_path."""
-        with open("ansible.cfg", "r") as f:
-            cls.previous_ansible_cfg = f.read()
+        try:
+            with open("ansible.cfg", "r") as f:
+                cls.previous_ansible_cfg = f.read()
+        except FileNotFoundError:
+            cls.previous_ansible_cfg = (
+                "[defaults]\n"
+                "remote_tmp = /tmp/ansible\n"
+                "local_tmp = /tmp/ansible\n"
+            )
 
     def update_ansible_cfg(self, base_path):
         """Update ansible.cfg to use the given base_path."""
