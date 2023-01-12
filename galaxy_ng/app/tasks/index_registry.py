@@ -130,7 +130,10 @@ def index_execution_environments_from_redhat_registry(registry_pk, request_data)
     remotes = []
 
     query = {
-        "filter": "build_categories=in=('Automation execution environment')",
+        "filter": (
+            "build_categories=in=('Automation execution environment') "
+            "and release_categories=in=('Generally Available')"
+        ),
         "page": 0,
         "sort_by": "creation_date[asc]"
     }
