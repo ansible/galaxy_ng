@@ -2,7 +2,6 @@
 
 import subprocess
 import tempfile
-from unittest.case import skip
 
 from pulp_smash.pulp3.bindings import delete_orphans
 from pulp_smash.utils import http_get
@@ -51,7 +50,10 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
         self.delete_namespace(collection.namespace)
 
     def test_uploaded_collection_logged(self):
-        """Test whether a Collection uploaded via ansible-galaxy is logged correctly in API Access Log."""
+        """
+            Test whether a Collection uploaded via ansible-galaxy
+            is logged correctly in API Access Log.
+        """
         delete_orphans()
 
         # Create namespace if it doesn't exist
