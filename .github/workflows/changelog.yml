@@ -24,13 +24,13 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
@@ -47,7 +47,9 @@ jobs:
           mkdir -p docs/_static
           echo "{}" > docs/_static/api.json
       - name:
-        run: make diagrams html
+        run: |
+          pip install "Jinja2<3.1"
+          make diagrams html
         working-directory: ./docs
         env:
           PULP_CONTENT_ORIGIN: "http://localhost/"

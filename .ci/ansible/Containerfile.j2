@@ -1,4 +1,4 @@
-FROM {{ ci_base | default("ghcr.io/pulp/pulp-ci-centos@sha256:66dc18a2f201ae9359629b2bcbe0ea67d05fbc8efb9151fab5c6ca0c711eea34") }}
+FROM {{ ci_base | default("ghcr.io/pulp/pulp-ci-centos:" + pulp_container_tag) }}
 
 # Add source directories to container
 {% for item in plugins %}
@@ -11,11 +11,17 @@ ADD {{ item.source }} {{ item.source }}
 # Hacking botocore (https://github.com/boto/botocore/pull/1990)
 
 RUN pip3 install \
+{%- if stream_test | default(false) -%}
+{{ " " }}django-storages[sftp]
+{%- endif -%}
 {%- if s3_test | default(false) -%}
 {{ " " }}django-storages[boto3] git+https://github.com/fabricio-aguiar/botocore.git@fix-100-continue
 {%- endif -%}
 {%- if azure_test | default(false) -%}
-{{ " " }}django-storages[azure]>=1.12.2 "azure-storage-blob<12.10.0"
+{{ " " }}django-storages[azure]>=1.12.2
+{%- endif -%}
+{%- if gcp_test | default(false) -%}
+{{ " " }}django-storages[google]>=1.13.2
 {%- endif -%}
 {%- for item in plugins -%}
 {%- if item.name == "pulp-certguard" -%}
@@ -24,7 +30,11 @@ RUN pip3 install \
 {{ " " }}"{{ item.source }}"
 {%- endfor %}
 
-RUN mkdir -p /etc/nginx/pulp/
+USER pulp:pulp
+RUN PULP_STATIC_ROOT=/var/lib/operator/static/ PULP_CONTENT_ORIGIN=localhost \
+       /usr/local/bin/pulpcore-manager collectstatic --clear --noinput --link
+USER root:root
+
 {% for item in plugins %}
 RUN export plugin_path="$(pip3 show {{ item.name }} | sed -n -e 's/Location: //p')/{{ item.name }}" && \
     ln $plugin_path/app/webserver_snippets/nginx.conf /etc/nginx/pulp/{{ item.name }}.conf || true
