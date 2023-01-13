@@ -29,13 +29,18 @@ tail -v -n +1 .ci/ansible/vars/main.yaml
 echo "PULP CONFIG:"
 tail -v -n +1 .ci/ansible/settings/settings.* ~/.config/pulp_smash/settings.json
 
-if [[ "$TEST" == 'pulp' || "$TEST" == 'performance' || "$TEST" == 'upgrade' || "$TEST" == 's3' || "$TEST" == 'azure' || "$TEST" == "plugin-from-pypi" || "$TEST" == "generate-bindings" ]]; then
+# Needed for some functional tests
+cmd_prefix bash -c "echo '%wheel        ALL=(ALL)       NOPASSWD: ALL' > /etc/sudoers.d/nopasswd"
+cmd_prefix bash -c "usermod -a -G wheel pulp"
+
+SCENARIOS=("pulp" "performance" "azure" "gcp" "s3" "stream" "plugin-from-pypi" "generate-bindings" "lowerbounds")
+if [[ " ${SCENARIOS[*]} " =~ " ${TEST} " ]]; then
   # Many functional tests require these
-  cmd_prefix dnf install -yq lsof which dnf-plugins-core
+  cmd_prefix dnf install -yq lsof which
 fi
 
 if [[ "${REDIS_DISABLED:-false}" == true ]]; then
-  cmd_prefix bash -c "s6-svc -d /var/run/s6/services/redis"
+  cmd_prefix bash -c "s6-rc -d change redis"
   echo "The Redis service was disabled for $TEST"
 fi
 
