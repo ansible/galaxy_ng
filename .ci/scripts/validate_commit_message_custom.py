@@ -92,7 +92,9 @@ def check_commit(commit_sha):
     if not issue_labels:
         no_issue_match = NO_ISSUE_REGEX.search(commit_message)
         if not no_issue_match:
-            LOG.error(f"Commit {commit_sha[:8]} has no issue attached")
+            LOG.error(
+                f"Commit {commit_sha[:8]} has no issue attached. It must contain either 'No-Issue' or something like 'Issue: AAH-1111' which points to https://issues.redhat.com/projects/AAH project."
+            )
             return False
 
     repo = os.environ.get('GITHUB_REPOSITORY')
