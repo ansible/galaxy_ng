@@ -14,6 +14,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'django_guid.middleware.guid_middleware',
     # END: Pulp standard middleware
     'django_prometheus.middleware.PrometheusAfterMiddleware',
     'django_currentuser.middleware.ThreadLocalUserMiddleware',
