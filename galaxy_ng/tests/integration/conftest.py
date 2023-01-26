@@ -61,6 +61,7 @@ max_hub_version: This marker takes an argument that indicates the maximum hub ve
 min_hub_version: This marker takes an argument that indicates the minimum hub version
 iqe_rbac_test: imported iqe tests checking role permissions
 sync: sync tests against stage
+certified_sync: sync tests container against container
 """
 
 
