@@ -5,7 +5,7 @@
 # - Developer Env makefile commands for DeploymentMode.STANDALONE
 # - TODO: Ephemeral Env pr_check.sh (merge smoke_test.sh into this) for DeploymentMode.INSIGHTS
 
-set -e
+set -ex
 
 if [[ -z $HUB_LOCAL ]]; then
     export NAMESPACE="ephemeral-1riioj"
