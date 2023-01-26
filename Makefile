@@ -93,9 +93,9 @@ docker/test/integration:      ## Run integration tests with optional MARK param 
 		exit 1;\
 	fi
 	if [ "$(MARK)" ]; then\
-	  HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh "-m $(MARK)";\
+	  HUB_LOCAL=1 ./dev/standalone/RUN_INTEGRATION.sh "-m $(MARK)";\
 	else\
-		HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh;\
+		HUB_LOCAL=1 ./dev/standalone/RUN_INTEGRATION.sh;\
 	fi
 
 .PHONY: docker/test/integration/container
