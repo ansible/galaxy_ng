@@ -72,9 +72,10 @@ class LogoutView(api_base.APIView):
     permission_classes = [access_policy.LogoutAccessPolicy]
 
     def _oidc_logout(self, request):
-        logout_url_str = "{keycloak}/auth/realms/{realm}/protocol/openid-connect/logout"
-        logout_url = logout_url_str.format(keycloak=settings.KEYCLOAK_URL,
-                                           realm=settings.KEYCLOAK_REALM)
+        logout_url = settings.SOCIAL_AUTH_KEYCLOAK_LOGOUT_URL or (
+            f"{settings.KEYCLOAK_URL}/auth/realms/"
+            f"{settings.KEYCLOAK_REALM}/protocol/openid-connect/logout"
+            )
 
         if not hasattr(request.user, 'social_auth'):
             return
