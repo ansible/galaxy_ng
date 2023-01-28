@@ -13,9 +13,7 @@ from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import CollectionVersion
 
-from pulpcore.plugin.models import Content
-from pulpcore.plugin.models import SigningService
-from pulpcore.plugin.models import Task
+from pulpcore.plugin.models import Content, SigningService, Task, TaskGroup
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import add_and_remove, dispatch
 from rest_framework import status
@@ -48,7 +46,6 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
     def _dispatch_upload_collection_task(self, args=None, kwargs=None, repository=None):
         """Dispatch a pulp task started on upload of collection version."""
-        locks = []
         context = super().get_serializer_context()
         request = context.get("request", None)
 
@@ -57,13 +54,14 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         kwargs["username"] = request.user.username
 
-        if repository:
-            locks.append(repository)
-            kwargs["repository_pk"] = repository.pk
+        kwargs["repository_pk"] = repository.pk
+
+        task_group = TaskGroup.objects.create(description=f"Import collection to {repository.name}")
 
         if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
-            return dispatch(import_and_move_to_staging, exclusive_resources=locks, kwargs=kwargs)
-        return dispatch(import_and_auto_approve, exclusive_resources=locks, kwargs=kwargs)
+            return dispatch(import_and_move_to_staging, kwargs=kwargs, task_group=task_group)
+
+        return dispatch(import_and_auto_approve, kwargs=kwargs, task_group=task_group)
 
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
     # the import task and the collection artifact details

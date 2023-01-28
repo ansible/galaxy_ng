@@ -1,5 +1,6 @@
 import logging
 from pulpcore.plugin.tasking import dispatch
+from pulpcore.plugin.models import TaskGroup
 from pulp_ansible.app.tasks.signature import sign
 from pulp_ansible.app.models import AnsibleRepository, CollectionVersionSignature
 
@@ -22,9 +23,12 @@ def call_sign_and_move_task(signing_service, collection_version, source_repo, de
         dest_repo.name
     )
 
+    task_group = TaskGroup.current()
+
     return dispatch(
         sign_and_move,
         exclusive_resources=[source_repo, dest_repo],
+        task_group=task_group,
         kwargs=dict(
             signing_service_pk=signing_service.pk,
             collection_version_pk=collection_version.pk,

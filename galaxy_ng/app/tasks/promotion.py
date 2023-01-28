@@ -1,5 +1,6 @@
 from pulpcore.plugin.tasking import add_and_remove, dispatch
 from pulp_ansible.app.models import CollectionVersionSignature
+from pulpcore.plugin.models import TaskGroup
 
 
 def call_move_content_task(collection_version, source_repo, dest_repo):
@@ -15,9 +16,12 @@ def call_move_content_task(collection_version, source_repo, dest_repo):
         pk__in=source_repo.content.values_list("pk", flat=True)
     ).values_list("pk", flat=True)
 
+    task_group = TaskGroup.current()
+
     return dispatch(
         move_content,
         exclusive_resources=[source_repo, dest_repo],
+        task_group=task_group,
         kwargs=dict(
             collection_version_pk=collection_version.pk,
             source_repo_pk=source_repo.pk,
