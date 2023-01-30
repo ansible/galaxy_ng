@@ -234,7 +234,7 @@ psycopg2==2.9.4
     # via pulpcore
 pulp-ansible==0.16.0
     # via galaxy-ng (setup.py)
-pulp-container==2.14.1
+pulp-container==2.14.3
     # via galaxy-ng (setup.py)
 pulpcore==3.22.1
     # via
