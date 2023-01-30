@@ -14,7 +14,6 @@ from galaxy_ng.app.access_control.access_policy import NamespaceAccessPolicy
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.v3 import serializers
 from galaxy_ng.app.exceptions import ConflictError
-from galaxy_ng.app.models.namespace import delete_inbound_repo
 
 
 class NamespaceFilter(filterset.FilterSet):
@@ -74,7 +73,7 @@ class NamespaceViewSet(api_base.ModelViewSet):
 
         1. Perform a check to see if there are any collections in the namespace.
            If there are, return a failure.
-        2. Delete the inbound pulp distro and repository
+        2. Delete the pulp distro and repository
         3. Delete the namespace object.
 
         return: Response(status=204)
@@ -89,11 +88,6 @@ class NamespaceViewSet(api_base.ModelViewSet):
                     "there are still collections associated with it."
                 ).format(name=namespace.name)
             )
-
-        # 2. Delete the inbound pulp distro and repository
-        #    the Namespace model delete will handle this but
-        #    was kept here for better clarity.
-        delete_inbound_repo(namespace.name)
 
         # 3. Delete the namespace object.
         self.perform_destroy(namespace)

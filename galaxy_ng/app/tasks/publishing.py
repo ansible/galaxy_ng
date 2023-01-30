@@ -38,7 +38,7 @@ def import_and_move_to_staging(username, repository_pk=None, **kwargs):
     """Import collection version and move to staging repository.
 
     Custom task to call pulpcore's general_create() task then
-    enqueue two tasks to add to staging repo and remove from inbound repo.
+    enqueue two tasks to add to staging repo.
 
     This task will not wait for the enqueued tasks to finish.
     """
@@ -50,12 +50,12 @@ def import_and_move_to_staging(username, repository_pk=None, **kwargs):
     except AnsibleRepository.DoesNotExist:
         raise RuntimeError(_('Could not find staging repository: "%s"') % STAGING_NAME)
 
-    inbound_repo = AnsibleRepository.objects.get(pk=repository_pk)
+    repo = AnsibleRepository.objects.get(pk=repository_pk)
 
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        call_move_content_task(collection_version, inbound_repo, staging_repo)
+        call_move_content_task(collection_version, repo, staging_repo)
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(
@@ -81,7 +81,7 @@ def import_and_auto_approve(username, repository_pk=None, **kwargs):
     except AnsibleRepository.DoesNotExist:
         raise RuntimeError(_('Could not find staging repository: "%s"') % GOLDEN_NAME)
 
-    inbound_repo = AnsibleRepository.objects.get(pk=repository_pk)
+    repo = AnsibleRepository.objects.get(pk=repository_pk)
 
     created_collection_versions = get_created_collection_versions()
 
@@ -93,7 +93,7 @@ def import_and_auto_approve(username, repository_pk=None, **kwargs):
     for collection_version in created_collection_versions:
         move_task_params = {
             "collection_version": collection_version,
-            "source_repo": inbound_repo,
+            "source_repo": repo,
             "dest_repo": golden_repo,
         }
         if AUTO_SIGN:

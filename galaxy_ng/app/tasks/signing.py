@@ -58,7 +58,7 @@ def sign_and_move(signing_service_pk, collection_version_pk, source_repo_pk, des
     # Move content from source to destination
     move_content(
         collection_version_pk=collection_version_pk,
-        source_repo_pk=source_repo_pk,
+        source_repo_pk=None,
         dest_repo_pk=dest_repo_pk,
         signatures_pks=list(signatures_pks),
     )
