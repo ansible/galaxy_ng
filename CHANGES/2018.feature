@@ -1,0 +1,1 @@
+Add version_range parameter to the _ui/v1/collection-versions/ endpoint.
