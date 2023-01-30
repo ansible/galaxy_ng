@@ -8,7 +8,7 @@ from rest_framework import status
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
-from galaxy_ng.app.constants import DeploymentMode, INBOUND_REPO_NAME_FORMAT
+from galaxy_ng.app.constants import DeploymentMode
 
 from .base import BaseTestCase
 
@@ -171,10 +171,9 @@ class TestV3NamespaceViewSet(BaseTestCase):
 
             self.assertEqual(len(data['groups']), self.admin_user.groups.all().count())
 
-    def test_namespace_api_creates_deletes_inbound_repo(self):
+    def test_namespace_api_doesnt_create_delete_repo(self):
         self.client.force_authenticate(user=self.admin_user)
         ns1_name = "unittestnamespace1"
-        repo_name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=ns1_name)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
             # Create namespace + repo
@@ -196,8 +195,10 @@ class TestV3NamespaceViewSet(BaseTestCase):
             )
             print(f"\n\n response: {response} \n\n")
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(1, len(AnsibleRepository.objects.filter(name=repo_name)))
-            self.assertEqual(1, len(AnsibleDistribution.objects.filter(name=repo_name)))
+
+            created_ns_name = response.data["name"]
+            self.assertNotIn(created_ns_name, AnsibleRepository.objects.filter(name=ns1_name))
+            self.assertNotIn(created_ns_name, AnsibleDistribution.objects.filter(name=ns1_name))
 
             # List namespace
             response = self.client.get(self.ns_url)
@@ -210,13 +211,13 @@ class TestV3NamespaceViewSet(BaseTestCase):
             ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1_name})
             response = self.client.delete(ns_detail_url)
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-            self.assertEqual(0, len(AnsibleRepository.objects.filter(name=repo_name)))
-            self.assertEqual(0, len(AnsibleDistribution.objects.filter(name=repo_name)))
+            self.assertNotIn(created_ns_name, AnsibleRepository.objects.filter(name=ns1_name))
+            self.assertNotIn(created_ns_name, AnsibleDistribution.objects.filter(name=ns1_name))
             self.assertEqual(0, len(Namespace.objects.filter(name=ns1_name)))
 
     def test_unauthorized_user_cant_delete_namespace(self):
         ns1_name = "unittestnamespacefordeletion"
-        repo_name = INBOUND_REPO_NAME_FORMAT.format(namespace_name=ns1_name)
+        repo_name = ns1_name
         self._create_namespace(ns1_name, groups=[self.pe_group])
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
