@@ -24,6 +24,7 @@ import logging
 from pulp_container.app import tasks as pulp_container_tasks
 from pulpcore.app.tasks import orphan_cleanup, reclaim_space
 from pulpcore.plugin.tasking import general_multi_delete
+from pulpcore.plugin.models import RepositoryContent
 
 log = logging.getLogger(__name__)
 
@@ -34,8 +35,11 @@ def delete_container_distribution(instance_ids):
     log.info("Running core.general_multi_delete to delete distro and repo")
     general_multi_delete(instance_ids=instance_ids)
 
+    repository_ids = [item[0] for item in instance_ids]
+    repository_content_pks = RepositoryContent.objects.filter(repository__pk__in = repository_ids).values_list("content__pk", flat=True)
+
     log.info("Running orphan_cleanup to delete Container objects and artifacts")
-    orphan_cleanup(content_pks=None, orphan_protection_time=0)
+    orphan_cleanup(content_pks=repository_content_pks, orphan_protection_time=0)
 
 
 def delete_container_image_manifest(repository_pk, content_unit_pks, repo_latest_version_pk):
