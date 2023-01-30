@@ -149,7 +149,7 @@ class ContainerRepositoryViewSet(api_base.ModelViewSet):
         # Delete the distribution, repository, and perform orphan cleanup
         async_result = dispatch(
             delete_container_distribution,
-            args=(ids_for_multi_delete, ),
+            args=(ids_for_multi_delete,),
             exclusive_resources=reservations
         )
 
