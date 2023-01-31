@@ -61,7 +61,6 @@ def sync_remote_ee(user, password, expect_pass, extra):
     )
     assert_pass(expect_pass, response.status_code, 202, 403)
 
-
 # REGISTRIES
 def delete_ee_registry(user, password, expect_pass, extra):
     registry = gen_registry(gen_string())
