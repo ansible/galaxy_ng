@@ -132,7 +132,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "description": repo.description,
                 "created_at": repo.pulp_created,
                 "updated_at": repo.pulp_last_updated,
-                "pulp_labels": {label.key: label.value for label in repo.pulp_labels.all()},
+                "pulp_labels": repo.pulp_labels,
                 "remote": remote,
                 "sign_state": sign_state
             },
@@ -142,7 +142,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
                 "created_at": distro.pulp_created,
                 "updated_at": distro.pulp_last_updated,
                 "base_path": distro.base_path,
-                "pulp_labels": {label.key: label.value for label in distro.pulp_labels.all()},
+                "pulp_labels": distro.pulp_labels,
             },
         }
 

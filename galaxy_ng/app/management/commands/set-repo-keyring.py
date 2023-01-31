@@ -1,15 +1,19 @@
 import os
-import sys
-import time
 import subprocess
+import sys
 import tempfile
+import time
 
+import django_guid
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from pulp_ansible.app.models import AnsibleRepository
 from pulpcore.plugin.constants import TASK_FINAL_STATES, TASK_STATES
 from pulpcore.plugin.tasking import dispatch
+
+# Set logging_uid, this does not seem to get generated when task called via management command
+django_guid.set_guid(django_guid.utils.generate_guid)
 
 
 class Command(BaseCommand):

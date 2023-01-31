@@ -100,7 +100,7 @@ fi
 
 
 
-git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.21.3
+git clone --depth=1 https://github.com/pulp/pulpcore.git --branch 3.22.1
 
 cd pulpcore
 
@@ -121,7 +121,7 @@ fi
 
 cd ..
 
-git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.14.1
+git clone --depth=1 https://github.com/pulp/pulp_container.git --branch 2.14.3
 cd pulp_container
 
 if [ -n "$PULP_CONTAINER_PR_NUMBER" ]; then
