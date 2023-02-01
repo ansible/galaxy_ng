@@ -39,7 +39,7 @@ def delete_container_distribution(instance_ids):
     repository_content_pks = RepositoryContent.objects.filter(repository__pk__in = repository_ids).values_list("content__pk", flat=True)
 
     log.info("Running orphan_cleanup to delete Container objects and artifacts")
-    orphan_cleanup(content_pks=repository_content_pks, orphan_protection_time=0)
+    orphan_cleanup(content_pks=repository_content_pks, orphan_protection_time=10)
 
 
 def delete_container_image_manifest(repository_pk, content_unit_pks, repo_latest_version_pk):
