@@ -14,7 +14,8 @@ def delete_ee_and_content(user, password, ansible_config):
 
     # Go to the container distribution list and select the distribution via the base path.
     distro_response = requests.get(
-        f"{api_prefix}/api/automation-hub/pulp/api/v3/distributions/container/container/?base_path=alpine",
+        f"{api_prefix}/api/automation-hub/pulp/api/v3/distributions/\
+            container/container/?base_path=alpine",
         auth=(user['username'], password),
     )
     assert distro_response["results"][0]["base_path"] == 'alpine'
@@ -36,7 +37,8 @@ def delete_ee_and_content(user, password, ansible_config):
     assert content_list["results"].length > 0
 
     # Delete repository, contents, and artifacts
-    delete_response = requests.delete(f"{api_prefix}/api/automation-hub/v3/plugin/execution-environments/repositories/alpine/")
+    delete_response = requests.delete(f"{api_prefix}/api/\
+        automation-hub/v3/plugin/execution-environments/repositories/alpine/")
     assert delete_response.status_code == 200
 
     # Ensure content list is empty
