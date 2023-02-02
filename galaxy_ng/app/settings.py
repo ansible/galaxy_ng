@@ -224,7 +224,7 @@ AUTH_LDAP_GROUP_SEARCH_FILTER = None
 AUTHENTICATION_BACKEND_PRESET = 'local'  # 'ldap' or 'keycloak' or 'local' or 'custom'
 AUTHENTICATION_BACKEND_PRESETS_DATA = {
     'ldap': [
-        "django_auth_ldap.backend.LDAPBackend",
+        "galaxy_ng.app.auth.ldap.PulpLDAPBackend",
         "django.contrib.auth.backends.ModelBackend",
         "pulpcore.backends.ObjectRolePermissionBackend"
     ],
