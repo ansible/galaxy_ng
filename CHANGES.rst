@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.5.4 (2023-02-01)
+==================
+
+Features
+--------
+
+- Add version_range parameter to the _ui/v1/collection-versions/ endpoint.
+  `AAH-2018 <https://issues.redhat.com/browse/AAH-2018>`_
+
+
+----
+
+
 4.5.4 (2022-11-21)
 ==================
 
