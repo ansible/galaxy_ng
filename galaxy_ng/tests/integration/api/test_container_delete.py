@@ -46,7 +46,7 @@ def test_delete_ee_and_content(ansible_config):
     )
 
     # View content before deleting
-    assert content_list["results"].length > 0
+    assert len(content_list["results"]) > 0
 
     # Delete repository, contents, and artifacts
     delete_response = client(f"{api_prefix}/api/automation-hub/v3/"
@@ -54,4 +54,4 @@ def test_delete_ee_and_content(ansible_config):
     assert delete_response.status_code == 200
 
     # Ensure content list is empty
-    assert content_list["results"].length == 0
+    assert len(content_list["results"]) == 0
