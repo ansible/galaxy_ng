@@ -7,6 +7,7 @@ Issue: AAH-####
 #### Reviewers must know:
 <!-- e.g: Testing steps, dependencies, needed branches etc. -->
 
+
 #### Notes: 
 
 **PR Author**: Add a QE reviewer ([exceptions](https://docs.engineering.redhat.com/display/AUTOHUB/Other+Team+Processes#OtherTeamProcesses-galaxy_ngrepo)); 
