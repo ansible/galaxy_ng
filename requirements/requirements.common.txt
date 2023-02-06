@@ -198,7 +198,7 @@ mypy-extensions==0.4.3
     # via black
 naya==1.1.1
     # via pulpcore
-oauthlib==3.2.1
+oauthlib==3.2.2
     # via
     #   requests-oauthlib
     #   social-auth-core
