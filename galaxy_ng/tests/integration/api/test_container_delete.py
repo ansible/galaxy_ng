@@ -1,7 +1,6 @@
 import subprocess
 import pytest
-from ..utils import get_client
-from pulp_smash.pulp3.bindings import monitor_task
+from ..utils import get_client, wait_for_task
 
 
 @pytest.mark.standalone_only
@@ -52,8 +51,8 @@ def test_delete_ee_and_content(ansible_config):
     # Delete repository, contents, and artifacts
     delete_response = client(f"{api_prefix}/v3/"
                              "plugin/execution-environments/repositories/alpine/", method='DELETE')
-    task = monitor_task(delete_response)
-    assert len(task.created_resources) == 1
+    resp = wait_for_task(client, delete_response)
+    assert resp["state"] == "completed"
 
     # Ensure content list is empty by checking each content href
     content_hrefs = [item["pulp_href"] for item in content_list["results"]]

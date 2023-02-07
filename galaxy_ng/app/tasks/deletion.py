@@ -32,14 +32,12 @@ log = logging.getLogger(__name__)
 def delete_container_distribution(instance_ids):
     """Deletes a container distribution and push repository related."""
 
-    log.info("Running core.general_multi_delete to delete distro and repo")
-    general_multi_delete(instance_ids=instance_ids)
-
     repository_ids = [item[0] for item in instance_ids]
     repository_content_pks = \
         RepositoryContent.objects.filter(repository__pk__in=repository_ids)\
         .values_list("content__pk", flat=True)
-
+    log.info("Running core.general_multi_delete to delete distro and repo")
+    general_multi_delete(instance_ids=instance_ids)
     log.info("Running orphan_cleanup to delete Container objects and artifacts")
     orphan_cleanup(content_pks=repository_content_pks, orphan_protection_time=0)
 
