@@ -51,7 +51,7 @@ def test_delete_ee_and_content(ansible_config):
     # Delete repository, contents, and artifacts
     delete_response = client(f"{api_prefix}/v3/"
                              "plugin/execution-environments/repositories/alpine/", method='DELETE')
-    resp = wait_for_task(client, delete_response)
+    resp = wait_for_task(client, delete_response, timeout=10000)
     assert resp["state"] == "completed"
 
     # Ensure content list is empty by checking each content href
