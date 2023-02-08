@@ -20,7 +20,7 @@ associated with.
 """
 
 import logging
-
+from django.db.models import Count
 from pulp_container.app import tasks as pulp_container_tasks
 from pulpcore.app.tasks import orphan_cleanup, reclaim_space
 from pulpcore.plugin.tasking import general_multi_delete
@@ -33,12 +33,9 @@ def delete_container_distribution(instance_ids):
     """Deletes a container distribution and push repository related."""
 
     repository_ids = [item[0] for item in instance_ids]
-    repository_content_pks = \
-        RepositoryContent.objects.filter(repository__pk__in=repository_ids)\
-        .values_list("content__pk", flat=True)
 
     #exclude removing content that is shared by one or more repositories
-
+    repository_content_pks = RepositoryContent.objects.annotate(num_repos=Count("repository")).filter(repository__pk__in=repository_ids, num_repos=1).values_list("content__pk", flat=True)
 
     log.info("Running core.general_multi_delete to delete distro and repo")
     general_multi_delete(instance_ids=instance_ids)

@@ -59,5 +59,4 @@ def test_delete_ee_and_content(ansible_config):
 
     for item in content_hrefs:
         resp = client(f"{api_prefix}{item}")
-        print(resp)
-        # assert resp == 404
+        assert resp["status_code"] == 404
