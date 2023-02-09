@@ -33,9 +33,9 @@ def delete_container_distribution(instance_ids):
     """Deletes a container distribution and push repository related."""
 
     repository_ids = [item[0] for item in instance_ids]
-
-    #exclude removing content that is shared by one or more repositories
-    repository_content_pks = RepositoryContent.objects.annotate(num_repos=Count("repository")).filter(repository__pk__in=repository_ids, num_repos=1).values_list("content__pk", flat=True)
+    repository_content_pks = RepositoryContent.objects.annotate(
+        num_repos=Count("repository")).filter(
+        repository__pk__in=repository_ids, num_repos=1).values_list("content__pk", flat=True)
 
     log.info("Running core.general_multi_delete to delete distro and repo")
     general_multi_delete(instance_ids=instance_ids)
