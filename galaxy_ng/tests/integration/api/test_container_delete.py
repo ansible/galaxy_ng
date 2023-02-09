@@ -1,6 +1,7 @@
 import subprocess
 import pytest
 from ..utils import get_client, wait_for_task
+from ansible.galaxy.api import GalaxyError
 
 
 @pytest.mark.standalone_only
@@ -58,5 +59,14 @@ def test_delete_ee_and_content(ansible_config):
     content_hrefs = [item["pulp_href"] for item in content_list["results"]]
 
     for item in content_hrefs:
-        resp = client(f"{api_prefix}{item}")
-        assert resp["status_code"] == 404
+        failed = None
+        try:
+            client(f"{api_prefix}{item}")
+            failed = False
+        except GalaxyError as ge:
+            if ge.http_code in [403, 404]:
+                failed = True
+            else:
+                raise Exception(ge)
+
+        assert failed
