@@ -13,7 +13,7 @@ from pulpcore.plugin.constants import TASK_FINAL_STATES, TASK_STATES
 from pulpcore.plugin.tasking import dispatch
 
 # Set logging_uid, this does not seem to get generated when task called via management command
-django_guid.set_guid(django_guid.utils.generate_guid)
+django_guid.set_guid(django_guid.utils.generate_guid())
 
 
 class Command(BaseCommand):
