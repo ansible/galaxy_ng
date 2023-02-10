@@ -80,16 +80,17 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
            then use a distribution based on filename namespace.
         """
 
-        # the legacy collection upload views don't get redirected and still have to use the
-        # old path arg
-        path = kwargs.get(
-            'distro_base_path',
-            kwargs.get('path', settings.ANSIBLE_DEFAULT_DISTRIBUTION_PATH)
-        )
-
         self.kwargs['filename_ns'] = filename_ns
 
-        return path
+        if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
+            return settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
+        else:
+            # the legacy collection upload views don't get redirected and still have to use the
+            # old path arg
+            return kwargs.get(
+                'distro_base_path',
+                kwargs.get('path', settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH)
+            )
 
     @extend_schema(
         description="Create an artifact and trigger an asynchronous task to create "
