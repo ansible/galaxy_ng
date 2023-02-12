@@ -32,11 +32,9 @@ class TestUIDistributions(BaseTestCase):
         )
 
         self.synclist_repo = self._create_repository('123-synclist')
-        self.repo2 = self._create_repository('other-repo')
         self.test_repo = self._create_repository('test')
 
         self.synclist_distro = self._create_distribution(self.synclist_repo)
-        self.repo2_distro = self._create_distribution(self.repo2)
         self.test_distro = self._create_distribution(self.test_repo)
 
         upstream_repo = self._create_repository('upstream')

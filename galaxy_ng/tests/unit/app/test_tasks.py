@@ -125,7 +125,6 @@ class TestTaskPublish(TestCase):
 
         import_and_move_to_staging(
             '',  # username
-            repo.pk,
             **{"general_args": ()}
         )
 
@@ -139,7 +138,6 @@ class TestTaskPublish(TestCase):
         with self.assertRaises(AnsibleDistribution.DoesNotExist):
             import_and_move_to_staging(
                 '',  # username
-                repo.pk,
                 **{"general_args": ()}
             )
 

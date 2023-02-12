@@ -217,7 +217,11 @@ class TestV3NamespaceViewSet(BaseTestCase):
 
     def test_unauthorized_user_cant_delete_namespace(self):
         ns1_name = "unittestnamespacefordeletion"
-        repo_name = ns1_name
+
+        num_existing_repos = len(AnsibleRepository.objects.all())
+        num_existing_distros = len(AnsibleDistribution.objects.all())
+        self.assertEqual(num_existing_distros, num_existing_repos)
+
         self._create_namespace(ns1_name, groups=[self.pe_group])
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
@@ -226,8 +230,11 @@ class TestV3NamespaceViewSet(BaseTestCase):
             response = self.client.delete(ns_detail_url)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             self.assertEqual(1, len(Namespace.objects.filter(name=ns1_name)))
-            self.assertEqual(1, len(AnsibleRepository.objects.filter(name=repo_name)))
-            self.assertEqual(1, len(AnsibleDistribution.objects.filter(name=repo_name)))
+
+            # test that number of repos and distros remains unchanged
+            self.assertEqual(num_existing_repos, len(AnsibleRepository.objects.all()))
+            self.assertEqual(num_existing_distros, len(AnsibleDistribution.objects.all()))
+            self.assertEqual(num_existing_distros, num_existing_repos)
 
     def test_delete_namespace_no_error_if_no_repo_exist(self):
         ns2_name = "unittestnamespace2"
