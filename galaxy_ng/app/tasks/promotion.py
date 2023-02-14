@@ -16,7 +16,7 @@ def call_add_content_task(collection_version, repo):
 
     task_group = TaskGroup.current()
 
-    return dispatch(
+    add_content_task = dispatch(
         add_content,
         exclusive_resources=[repo],
         task_group=task_group,
@@ -26,6 +26,10 @@ def call_add_content_task(collection_version, repo):
             signatures_pks=list(signatures_pks),
         ),
     )
+
+    task_group.finish()
+
+    return add_content_task
 
 
 def call_move_content_task(collection_version, source_repo, dest_repo):

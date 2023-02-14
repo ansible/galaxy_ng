@@ -24,7 +24,7 @@ def call_sign_and_add_task(signing_service, collection_version, repo):
 
     task_group = TaskGroup.current()
 
-    return dispatch(
+    sign_and_add_task = dispatch(
         sign_and_add,
         exclusive_resources=[repo],
         task_group=task_group,
@@ -34,6 +34,10 @@ def call_sign_and_add_task(signing_service, collection_version, repo):
             repo_pk=repo.pk,
         )
     )
+
+    task_group.finish()
+
+    return sign_and_add_task
 
 
 def call_sign_and_move_task(signing_service, collection_version, source_repo, dest_repo):

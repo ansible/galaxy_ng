@@ -16,10 +16,6 @@ def remove_inbound_repos(apps, schema_editor):
         repository_id=staging_repo.pk
     )
 
-    # is "inbound-{namespace}" RepositoryContent always empty?
-    for repo in repos:
-        RepositoryContent.objects.filter(repository=repo.pk).update(repository=staging_repo)
-
     repos.delete()
 
 class Migration(migrations.Migration):
