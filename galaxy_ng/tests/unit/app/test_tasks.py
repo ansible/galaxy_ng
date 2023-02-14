@@ -82,7 +82,10 @@ class TestTaskPublish(TestCase):
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.general_create')
     @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
-    def test_import_and_auto_approve(self, mocked_dispatch, mocked_create, mocked_get_created):
+    @mock.patch('galaxy_ng.app.tasks.promotion.TaskGroup')
+    def test_import_and_auto_approve(
+        self, mocked_task_group, mocked_dispatch, mocked_create, mocked_get_created
+    ):
         repo = AnsibleRepository.objects.get(name=staging_name)
 
         golden_repo = AnsibleRepository.objects.get(name=golden_name)
@@ -112,7 +115,10 @@ class TestTaskPublish(TestCase):
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.general_create')
     @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
-    def test_import_and_move_to_staging(self, mocked_dispatch, mocked_create, mocked_get_created):
+    @mock.patch('galaxy_ng.app.tasks.promotion.TaskGroup')
+    def test_import_and_move_to_staging(
+        self, mocked_task_group, mocked_dispatch, mocked_create, mocked_get_created
+    ):
         staging_repo = AnsibleRepository.objects.get(name=staging_name)
 
         repo_name = 'the_incoming_repo'
