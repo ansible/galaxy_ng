@@ -50,6 +50,10 @@ def test_galaxy_openapi_no_pulp_variables(ansible_config):
 
 
 @pytest.mark.openapi
+@pytest.mark.skip(
+    reason="uncomment after https://github.com/pulp/pulpcore/pull/3564 is merged"
+           " and pulpcore version is upgraded"
+)
 def test_galaxy_openapi_validation(ansible_config):
     """Tests whether openapi.json passes openapi linter"""
 
