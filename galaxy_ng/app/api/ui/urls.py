@@ -82,6 +82,27 @@ group_paths = [
         name='group-model-permissions-detail'),
 ]
 
+ai_index_paths = [
+    # GET _ui/v1/ai_index/
+    path(
+        "",
+        views.AIIndexListView.as_view(),
+        name='ai-index-list',
+    ),
+    # POST _ui/v1/ai_index/scope/
+    path(
+        "<str:scope>/",
+        views.AIIndexAddView.as_view(),
+        name='ai-index-add',
+    ),
+    # DELETE _ui/v1/ai_index/scope/reference/
+    path(
+        "<str:scope>/<str:reference>/",
+        views.AIIndexDetailView.as_view(),
+        name='ai-index-delete',
+    )
+]
+
 signing_paths = [
     # _ui/v1/collection_signing/
     path(
@@ -125,6 +146,7 @@ paths = [
     path('controllers/', views.ControllerListView.as_view(), name='controllers'),
     path('groups/', include(group_paths)),
     path('collection_signing/', include(signing_paths)),
+    path('ai_index/', include(ai_index_paths)),
     path(
         'repo/<str:distro_base_path>/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),

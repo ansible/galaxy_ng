@@ -5,7 +5,8 @@ LEGACY_STATEMENTS = {
                 "get",
                 "get_task",
                 "list",
-                "retrieve"
+                "retrieve",
+                "ai-index-list",
             ],
             "principal": "*",
             "effect": "allow",
@@ -17,6 +18,8 @@ LEGACY_STATEMENTS = {
                 "delete_by_url_params",
                 "destroy",
                 "update",
+                "ai-index-add",
+                "ai-index-delete",
             ],
             "principal": "authenticated",
             "effect": "allow",

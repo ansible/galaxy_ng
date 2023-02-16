@@ -23,6 +23,8 @@ from .container import (
 
 )
 
+from .aiindex import AIIndexDenyList
+
 __all__ = (
     'Group',
     'User',
@@ -35,4 +37,5 @@ __all__ = (
     'ContainerNamespace',
     'ContainerRegistryRemote',
     'ContainerRegistryRepos',
+    'AIIndexDenyList',
 )
