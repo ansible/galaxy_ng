@@ -26,6 +26,9 @@ NamespaceOrLegacyNamespace = (
 class AIIndexBaseView(api_base.APIView):
     permission_classes = [NamespaceOrLegacyNamespace]
 
+    def get_object(self):
+        """Pulp requires this method even when not used,e.g: Not a Model ViewSet"""
+
     def _verify_permission_for_namespace_object(self, request, scope, reference):
         """Checks if the user has permission to modify the namespace object."""
 
@@ -112,11 +115,24 @@ class AIIndexListView(AIIndexBaseView):
         responses={
             200: inline_serializer(
                 name="AIIndexDenyList",
-                fields={"items": serializers.ListField(child=serializers.CharField())}
+                fields={
+                    "results": serializers.ListField(child=serializers.CharField()),
+                    "count": serializers.IntegerField(),
+                }
             )
         },
         parameters=[
-            OpenApiParameter("scope", OpenApiTypes.STR, enum=["namespace", "legacy_namespace"])
+            OpenApiParameter(
+                "scope",
+                OpenApiTypes.STR,
+                enum=["namespace", "legacy_namespace"],
+                description="Filter by scope",
+            ),
+            OpenApiParameter(
+                "reference",
+                OpenApiTypes.STR,
+                description="Filter by reference (namespace name)",
+            ),
         ]
     )
     def get(self, request, *args, **kwargs):
@@ -127,18 +143,21 @@ class AIIndexListView(AIIndexBaseView):
             GET _ui/v1/ai_index/?scope=namespace
 
         responses:
-            200: Ok {items: ["..."]}
+            200: Ok {"results": ["..."], "count": 1}
 
         Query params:
             scope: "namespace" or "legacy_namespace" to filter
+            reference: filter by reference (namespace name)
 
         Sorted by reference field.
         """
         qs = AIIndexDenyList.objects.all().order_by("reference")
         if scope := request.GET.get("scope"):
-            qs = qs.filter(scope=scope)
+            qs = qs.filter(scope__iexact=scope)
+        if reference := request.GET.get("reference"):
+            qs = qs.filter(reference__iexact=reference)
         items = qs.values_list("reference", flat=True)
-        return Response({"items": list(items)})
+        return Response({"results": list(items), "count": len(items)})
 
 
 class AIIndexDetailView(AIIndexBaseView):
@@ -147,9 +166,9 @@ class AIIndexDetailView(AIIndexBaseView):
 
     @extend_schema(
         responses={
-            200: "Ok (deleted)",
-            204: "No Content (not found)",
-            403: "Forbidden"
+            204: "No Content (deleted)",
+            403: "Forbidden",
+            404: "Not Found",
         },
         parameters=[
             OpenApiParameter(
@@ -165,16 +184,17 @@ class AIIndexDetailView(AIIndexBaseView):
             DELETE _ui/v1/ai_index/{scope}/{reference}/
 
         responses:
-            200: Ok (deleted)
-            204: No Content (not found)
+            204: No content (deleted)
+            403: Forbidden
+            404: Item for deletion not found
         """
         try:
             obj = AIIndexDenyList.objects.get(scope=scope, reference=reference)
         except ObjectDoesNotExist:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         self._verify_permission_for_namespace_object(request, scope, reference)
 
         obj.delete()
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
