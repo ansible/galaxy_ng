@@ -66,7 +66,8 @@ def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace):
         # 3. Assert namespace is listed  on _ui/v1/ai_index/
         response = client.get("_ui/v1/ai_index/")
         assert response.status_code == 200
-        assert namespace in response.json()["results"]
+        expected = {"scope": "namespace", "reference": namespace}
+        assert expected in response.json()["results"]
 
         # 4. Assert ai_index filters works for scope and name
         assert (
@@ -86,7 +87,8 @@ def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace):
         # 6. Assert namespace is not listed on _ui/v1/ai_index/
         response = client.get("_ui/v1/ai_index/")
         assert response.status_code == 200
-        assert namespace not in response.json()["results"]
+        expected = {"scope": "namespace", "reference": namespace}
+        assert expected not in response.json()["results"]
 
     # 7. Repeat step 2 with a basic user
     with UIClient(config=ansible_config("basic_user")) as uclient:
@@ -108,4 +110,5 @@ def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace):
         # 11. Assert the namespace is listed on _ui/v1/ai_index/
         response = uclient.get("_ui/v1/ai_index/")
         assert response.status_code == 200
-        assert pe_namespace in response.json()["results"]
+        expected = {"scope": "namespace", "reference": pe_namespace}
+        assert expected in response.json()["results"]

@@ -87,6 +87,8 @@ class AIIndexAddView(AIIndexBaseView):
         """
         data = {"scope": scope, "reference": request.data.get("reference")}
         obj = AIIndexDenyList(**data)
+        # For now it will not cast the entry across name matching
+        # namespaces and legacy namespaces.
         try:
             obj.full_clean(validate_unique=False)
         except ValidationError as e:
@@ -114,9 +116,17 @@ class AIIndexListView(AIIndexBaseView):
     @extend_schema(
         responses={
             200: inline_serializer(
-                name="AIIndexDenyList",
+                name="AIIndexDenyResults",
                 fields={
-                    "results": serializers.ListField(child=serializers.CharField()),
+                    "results": serializers.ListField(
+                        child=inline_serializer(
+                            name="AIIndexDenyList",
+                            fields={
+                                "scope": serializers.CharField(),
+                                "reference": serializers.CharField(),
+                            }
+                        )
+                    ),
                     "count": serializers.IntegerField(),
                 }
             )
@@ -156,8 +166,15 @@ class AIIndexListView(AIIndexBaseView):
             qs = qs.filter(scope__iexact=scope)
         if reference := request.GET.get("reference"):
             qs = qs.filter(reference__iexact=reference)
-        items = qs.values_list("reference", flat=True)
-        return Response({"results": list(items), "count": len(items)})
+        return Response(
+            {
+                "results": [
+                    {"scope": item.scope, "reference": item.reference}
+                    for item in qs
+                ],
+                "count": qs.count(),
+            }
+        )
 
 
 class AIIndexDetailView(AIIndexBaseView):
