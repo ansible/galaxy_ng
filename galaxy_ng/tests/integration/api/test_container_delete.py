@@ -144,7 +144,7 @@ def test_shared_content_is_not_deleted(ansible_config):
     for item in content_hrefs:
         success = None
         try:
-            client(f"{api_prefix}{item}")
+            client(item)
             success = True
         except GalaxyError as ge:
             if ge.http_code in [403, 404]:
