@@ -257,12 +257,12 @@ STANDALONE_STATEMENTS = {
 
     'NamespaceViewSet': [
         {
-            "action": ["ai-index-list"],
+            "action": ["ai-deny-index-list"],
             "principal": "*",
             "effect": "allow",
         },
         {
-            "action": ["ai-index-add", "ai-index-delete"],
+            "action": ["ai-deny-index-add", "ai-deny-index-delete"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:galaxy.change_namespace",

@@ -49,43 +49,50 @@ def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace):
 
     1. Create a new namespace (by fixture)
     2. Add namespace to AIIndex
-    3. Assert namespace is listed  on _ui/v1/ai_index/
-    4. Assert ai_index filters works for scope and name
+    3. Assert namespace is listed  on _ui/v1/ai_deny_index/
+    4. Assert ai_deny_index filters works for scope and name
     5. Remove namespace from AIIndex
-    6. Assert namespace is not listed on _ui/v1/ai_index/
+    6. Assert namespace is not listed on _ui/v1/ai_deny_index/
     7. Repeat step 2 with a basic user
     8. Assert permission error raises
     """
     with UIClient(config=ansible_config("admin")) as client:
         # 2. Add namespace to AIIndex
         assert (
-            client.post("_ui/v1/ai_index/namespace/", payload={"reference": namespace}).status_code
-            == 201
+            client.post(
+                "_ui/v1/ai_deny_index/namespace/",
+                payload={"reference": namespace}
+            ).status_code == 201
         )
 
-        # 3. Assert namespace is listed  on _ui/v1/ai_index/
-        response = client.get("_ui/v1/ai_index/")
+        # 3. Assert namespace is listed  on _ui/v1/ai_deny_index/
+        response = client.get("_ui/v1/ai_deny_index/")
         assert response.status_code == 200
         expected = {"scope": "namespace", "reference": namespace}
         assert expected in response.json()["results"]
 
-        # 4. Assert ai_index filters works for scope and name
+        # 4. Assert ai_deny_index filters works for scope and name
         assert (
-            client.get(f"_ui/v1/ai_index/?scope=namespace&reference={namespace}").json()["count"]
-            == 1
+            client.get(
+                f"_ui/v1/ai_deny_index/?scope=namespace&reference={namespace}"
+            ).json()["count"] == 1
         )
-        assert client.get(f"_ui/v1/ai_index/?reference={namespace}").json()["count"] == 1
+        assert client.get(
+            f"_ui/v1/ai_deny_index/?reference={namespace}"
+        ).json()["count"] == 1
         assert (
-            client.get("_ui/v1/ai_index/?scope=legacy_namespace&reference=xyz_123").json()["count"]
+            client.get(
+                "_ui/v1/ai_deny_index/?scope=legacy_namespace&reference=xyz_123"
+            ).json()["count"]
             == 0
         )
 
         # 5. Remove namespace from AIIndex
-        response = client.delete(f"_ui/v1/ai_index/namespace/{namespace}")
+        response = client.delete(f"_ui/v1/ai_deny_index/namespace/{namespace}")
         assert response.status_code == 204
 
-        # 6. Assert namespace is not listed on _ui/v1/ai_index/
-        response = client.get("_ui/v1/ai_index/")
+        # 6. Assert namespace is not listed on _ui/v1/ai_deny_index/
+        response = client.get("_ui/v1/ai_deny_index/")
         assert response.status_code == 200
         expected = {"scope": "namespace", "reference": namespace}
         assert expected not in response.json()["results"]
@@ -94,21 +101,23 @@ def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace):
     with UIClient(config=ansible_config("basic_user")) as uclient:
         # 8. Assert permission error raises
         assert (
-            uclient.post("_ui/v1/ai_index/namespace/", payload={"reference": namespace}).status_code
-            == 403
+            uclient.post(
+                "_ui/v1/ai_deny_index/namespace/",
+                payload={"reference": namespace}
+            ).status_code == 403
         )
 
     with UIClient(config=ansible_config("partner_engineer")) as uclient:
         # 9. add to the AI Index, a namespace owned by PE
         assert (
             uclient.post(
-                "_ui/v1/ai_index/namespace/", payload={"reference": pe_namespace}
-            ).status_code
-            == 201
+                "_ui/v1/ai_deny_index/namespace/",
+                payload={"reference": pe_namespace}
+            ).status_code == 201
         )
 
-        # 11. Assert the namespace is listed on _ui/v1/ai_index/
-        response = uclient.get("_ui/v1/ai_index/")
+        # 11. Assert the namespace is listed on _ui/v1/ai_deny_index/
+        response = uclient.get("_ui/v1/ai_deny_index/")
         assert response.status_code == 200
         expected = {"scope": "namespace", "reference": pe_namespace}
         assert expected in response.json()["results"]

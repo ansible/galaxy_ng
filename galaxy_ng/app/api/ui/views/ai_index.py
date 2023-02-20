@@ -23,7 +23,7 @@ NamespaceOrLegacyNamespace = (
 )  # DRF 3+ allows composed access policies using & or |
 
 
-class AIIndexBaseView(api_base.APIView):
+class AIDenyIndexBaseView(api_base.APIView):
     permission_classes = [NamespaceOrLegacyNamespace]
 
     def get_object(self):
@@ -46,9 +46,9 @@ class AIIndexBaseView(api_base.APIView):
         self.check_object_permissions(request, namespace)  # will raise permission error
 
 
-class AIIndexAddView(AIIndexBaseView):
+class AIDenyIndexAddView(AIDenyIndexBaseView):
     """Allows to add a namespace to AIIndexDenyList."""
-    action = "ai-index-add"
+    action = "ai-deny-index-add"
 
     @extend_schema(
         request=inline_serializer(
@@ -75,7 +75,7 @@ class AIIndexAddView(AIIndexBaseView):
         """Adds a collection to the AI Index deny list.
 
         http::
-            POST _ui/v1/ai_index/{namespace|legacy_namespace}/
+            POST _ui/v1/ai_deny_index/{namespace|legacy_namespace}/
             {
                 "reference": "some_name"
             }
@@ -107,11 +107,11 @@ class AIIndexAddView(AIIndexBaseView):
         )
 
 
-class AIIndexListView(AIIndexBaseView):
+class AIDenyIndexListView(AIDenyIndexBaseView):
     """Lists all entries in the AIIndexDenyList.
     Open without auth.
     """
-    action = "ai-index-list"
+    action = "ai-deny-index-list"
 
     @extend_schema(
         responses={
@@ -149,8 +149,8 @@ class AIIndexListView(AIIndexBaseView):
         """Returns a list of all entries in the AI Index deny list.
 
         http::
-            GET _ui/v1/ai_index/
-            GET _ui/v1/ai_index/?scope=namespace
+            GET _ui/v1/ai_deny_index/
+            GET _ui/v1/ai_deny_index/?scope=namespace
 
         responses:
             200: Ok {"results": ["..."], "count": 1}
@@ -177,9 +177,9 @@ class AIIndexListView(AIIndexBaseView):
         )
 
 
-class AIIndexDetailView(AIIndexBaseView):
+class AIDenyIndexDetailView(AIDenyIndexBaseView):
     """Access specific AIIndexDenyList Object and allow deletion."""
-    action = "ai-index-delete"
+    action = "ai-deny-index-delete"
 
     @extend_schema(
         responses={
@@ -198,7 +198,7 @@ class AIIndexDetailView(AIIndexBaseView):
         """Deletes an entry from the AI Index deny list.
 
         http::
-            DELETE _ui/v1/ai_index/{scope}/{reference}/
+            DELETE _ui/v1/ai_deny_index/{scope}/{reference}/
 
         responses:
             204: No content (deleted)

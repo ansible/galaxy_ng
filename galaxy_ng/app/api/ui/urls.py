@@ -83,23 +83,23 @@ group_paths = [
 ]
 
 ai_index_paths = [
-    # GET _ui/v1/ai_index/
+    # GET _ui/v1/ai_deny_index/
     path(
         "",
-        views.AIIndexListView.as_view(),
-        name='ai-index-list',
+        views.AIDenyIndexListView.as_view(),
+        name='ai-deny-index-list',
     ),
-    # POST _ui/v1/ai_index/scope/
+    # POST _ui/v1/ai_deny_index/{scope}/
     path(
         "<str:scope>/",
-        views.AIIndexAddView.as_view(),
-        name='ai-index-add',
+        views.AIDenyIndexAddView.as_view(),
+        name='ai-deny-index-add',
     ),
-    # DELETE _ui/v1/ai_index/scope/reference/
+    # DELETE _ui/v1/ai_deny_index/{scope}/{reference}/
     path(
         "<str:scope>/<str:reference>/",
-        views.AIIndexDetailView.as_view(),
-        name='ai-index-delete',
+        views.AIDenyIndexDetailView.as_view(),
+        name='ai-deny-index-delete',
     )
 ]
 
@@ -146,7 +146,7 @@ paths = [
     path('controllers/', views.ControllerListView.as_view(), name='controllers'),
     path('groups/', include(group_paths)),
     path('collection_signing/', include(signing_paths)),
-    path('ai_index/', include(ai_index_paths)),
+    path('ai_deny_index/', include(ai_index_paths)),
     path(
         'repo/<str:distro_base_path>/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
