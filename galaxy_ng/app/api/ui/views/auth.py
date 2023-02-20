@@ -75,7 +75,7 @@ class LogoutView(api_base.APIView):
         logout_url = settings.SOCIAL_AUTH_KEYCLOAK_LOGOUT_URL or (
             f"{settings.KEYCLOAK_URL}/auth/realms/"
             f"{settings.KEYCLOAK_REALM}/protocol/openid-connect/logout"
-            )
+        )
 
         if not hasattr(request.user, 'social_auth'):
             return
