@@ -8,8 +8,8 @@ from pulpcore.plugin.tasking import general_create
 from pulpcore.plugin.models import Task
 from pulpcore.plugin.models import SigningService
 
-from .promotion import call_move_content_task
-from .signing import call_sign_and_move_task
+from .promotion import call_add_content_task
+from .signing import call_sign_and_add_task
 
 log = logging.getLogger(__name__)
 
@@ -34,11 +34,11 @@ def get_created_collection_versions():
     return created_collection_versions
 
 
-def import_and_move_to_staging(username, repository_pk=None, **kwargs):
+def import_and_move_to_staging(username, **kwargs):
     """Import collection version and move to staging repository.
 
     Custom task to call pulpcore's general_create() task then
-    enqueue two tasks to add to staging repo and remove from inbound repo.
+    enqueue two tasks to add to staging repo.
 
     This task will not wait for the enqueued tasks to finish.
     """
@@ -50,12 +50,10 @@ def import_and_move_to_staging(username, repository_pk=None, **kwargs):
     except AnsibleRepository.DoesNotExist:
         raise RuntimeError(_('Could not find staging repository: "%s"') % STAGING_NAME)
 
-    inbound_repo = AnsibleRepository.objects.get(pk=repository_pk)
-
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        call_move_content_task(collection_version, inbound_repo, staging_repo)
+        call_add_content_task(collection_version, staging_repo)
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(
@@ -81,7 +79,11 @@ def import_and_auto_approve(username, repository_pk=None, **kwargs):
     except AnsibleRepository.DoesNotExist:
         raise RuntimeError(_('Could not find staging repository: "%s"') % GOLDEN_NAME)
 
-    inbound_repo = AnsibleRepository.objects.get(pk=repository_pk)
+    repo = AnsibleRepository.objects.get(pk=repository_pk)
+
+    add_task_params = {
+        "repo": repo if repo.name != golden_repo.name else golden_repo,
+    }
 
     created_collection_versions = get_created_collection_versions()
 
@@ -91,15 +93,12 @@ def import_and_auto_approve(username, repository_pk=None, **kwargs):
         raise RuntimeError(_('Signing %s service not found') % SIGNING_SERVICE_NAME)
 
     for collection_version in created_collection_versions:
-        move_task_params = {
-            "collection_version": collection_version,
-            "source_repo": inbound_repo,
-            "dest_repo": golden_repo,
-        }
+        add_task_params.update({"collection_version": collection_version})
+
         if AUTO_SIGN:
-            call_sign_and_move_task(signing_service, **move_task_params)
+            call_sign_and_add_task(signing_service, **add_task_params)
         else:
-            call_move_content_task(**move_task_params)
+            call_add_content_task(**add_task_params)
 
         log.info(
             'Imported and auto approved collection artifact %s to repository %s',

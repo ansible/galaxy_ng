@@ -8,9 +8,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.urls.base import reverse
 from rest_framework.test import APIClient
 
-from galaxy_ng.app.constants import INBOUND_REPO_NAME_FORMAT
 from galaxy_ng.app.models.auth import Group, User
-from galaxy_ng.app.models.namespace import Namespace, create_inbound_repo
+from galaxy_ng.app.models.namespace import Namespace
 from galaxy_ng.tests.constants import TAGS, TEST_COLLECTION_CONFIGS
 
 STRATEGIES = ["test", "faux"]
@@ -180,14 +179,13 @@ class Command(BaseCommand):
         """Use constants.TEST_COLLECTION_CONFIGS to generate collections"""
         for config in TEST_COLLECTION_CONFIGS:
             namespace_name = config["namespace"]
-            create_inbound_repo(namespace_name)
             np = self.create_namespace(namespace_name)
             config["namespace"] = np.name
 
             if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
-                distro = INBOUND_REPO_NAME_FORMAT.format(namespace_name=np.name)
+                distro = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
             else:
-                distro = "published"
+                distro = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 
             _new_deps = {}
             if config.get("dependencies"):
@@ -234,14 +232,13 @@ class Command(BaseCommand):
                 tries=100,
                 default=self.faux.gen_string("alpha", 8),
             ).lower()
-            create_inbound_repo(namespace_name)
             np = self.create_namespace(namespace_name)
             _collections = []
 
             if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
-                distro = INBOUND_REPO_NAME_FORMAT.format(namespace_name=namespace_name)
+                distro = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
             else:
-                distro = "published"
+                distro = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 
             for i in range(options["cols"]):
                 config = {

@@ -82,8 +82,11 @@ class TestTaskPublish(TestCase):
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.general_create')
     @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
-    def test_import_and_auto_approve(self, mocked_dispatch, mocked_create, mocked_get_created):
-        inbound_repo = AnsibleRepository.objects.get(name=staging_name)
+    @mock.patch('galaxy_ng.app.tasks.promotion.TaskGroup')
+    def test_import_and_auto_approve(
+        self, mocked_task_group, mocked_dispatch, mocked_create, mocked_get_created
+    ):
+        repo = AnsibleRepository.objects.get(name=staging_name)
 
         golden_repo = AnsibleRepository.objects.get(name=golden_name)
 
@@ -91,7 +94,7 @@ class TestTaskPublish(TestCase):
 
         import_and_auto_approve(
             '',  # username
-            inbound_repo.pk,
+            repo.pk,
             **{"general_args": ()}
         )
 
@@ -105,27 +108,29 @@ class TestTaskPublish(TestCase):
         with self.assertRaises(AnsibleDistribution.DoesNotExist):
             import_and_auto_approve(
                 '',  # username
-                inbound_repo.pk,
+                repo.pk,
                 **{"general_args": ()}
             )
 
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.general_create')
     @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
-    def test_import_and_move_to_staging(self, mocked_dispatch, mocked_create, mocked_get_created):
+    @mock.patch('galaxy_ng.app.tasks.promotion.TaskGroup')
+    def test_import_and_move_to_staging(
+        self, mocked_task_group, mocked_dispatch, mocked_create, mocked_get_created
+    ):
         staging_repo = AnsibleRepository.objects.get(name=staging_name)
 
-        inbound_name = 'the_incoming_repo'
-        inbound_repo = AnsibleRepository.objects.create(name=inbound_name)
-        inbound_dist = AnsibleDistribution(name=inbound_name, base_path=inbound_name)
-        inbound_dist.repository = inbound_repo
-        inbound_dist.save()
+        repo_name = 'the_incoming_repo'
+        repo = AnsibleRepository.objects.create(name=repo_name)
+        dist = AnsibleDistribution(name=repo_name, base_path=repo_name)
+        dist.repository = repo
+        dist.save()
 
         mocked_get_created.return_value = [self.collection_version]
 
         import_and_move_to_staging(
             '',  # username
-            inbound_repo.pk,
             **{"general_args": ()}
         )
 
@@ -139,7 +144,6 @@ class TestTaskPublish(TestCase):
         with self.assertRaises(AnsibleDistribution.DoesNotExist):
             import_and_move_to_staging(
                 '',  # username
-                inbound_repo.pk,
                 **{"general_args": ()}
             )
 

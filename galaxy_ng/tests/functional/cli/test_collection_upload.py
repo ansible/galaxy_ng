@@ -21,8 +21,8 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
         if len(data) == 0:
             self.namespace_api.create(namespace={"name": "pulp", "groups": []})
 
-        # Preapare ansible.cfg for ansible-galaxy CLI
-        self.update_ansible_cfg("inbound-pulp")
+        # Prepare ansible.cfg for ansible-galaxy CLI
+        self.update_ansible_cfg("published")
 
         # In a temp dir, publish a collection using ansible-galaxy CLI
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -61,7 +61,7 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
             self.namespace_api.create(namespace={"name": "pulp", "groups": []})
 
         # Preapare ansible.cfg for ansible-galaxy CLI
-        self.update_ansible_cfg("inbound-pulp")
+        self.update_ansible_cfg("published")
 
         # In a temp dir, publish a collection using ansible-galaxy CLI
         with tempfile.TemporaryDirectory() as tmp_dir:
