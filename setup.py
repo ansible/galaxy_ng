@@ -112,8 +112,8 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
 
 requirements = [
     "galaxy-importer>=0.4.6,<0.5.0",
-    "pulpcore@git+https://git@github.com/pulp/pulpcore.git#egg=pulpcore",
-    "pulp_ansible@git+https://git@github.com/pulp/pulp_ansible.git#egg=pulp_ansible",
+    "pulpcore@git+https://git@github.com/pulp/pulpcore.git@main#egg=pulpcore",
+    "pulp_ansible@git+https://git@github.com/pulp/pulp_ansible.git@main#egg=pulp_ansible",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.14.3,<2.15.0",
@@ -122,6 +122,8 @@ requirements = [
     "social-auth-app-django>=3.1.0,<4.0.0",
     "dynaconf>=3.1.9",
     "django-auth-ldap==4.0.0",
+    # ansible 2.14+ requires a newer version of python (3.9). Can we upgrade to that? 
+    "ansible-core<2.14",
 ]
 
 
