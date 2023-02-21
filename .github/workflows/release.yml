@@ -43,7 +43,7 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install packaging~=21.3 bandersnatch bump2version gitpython python-redmine towncrier==19.9.0 wheel
+          pip install packaging~=21.3 bandersnatch bump2version gitpython towncrier==19.9.0 wheel
           echo ::endgroup::
 
       - name: Configure Git with ansible name and email
@@ -284,13 +284,11 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install gitpython python-redmine requests packaging~=21.3 tweepy
+          pip install gitpython requests packaging~=21.3 tweepy
           echo ::endgroup::
 
       - name: Push branch and tag to GitHub
         run: bash .github/workflows/scripts/push_branch_and_tag_to_github.sh ${{ github.event.inputs.release }}
-
-      
 
       
 

@@ -25,6 +25,7 @@ jobs:
           - TEST: pulp
           - TEST: azure
           - TEST: s3
+          
 
     steps:
       - uses: actions/checkout@v3
@@ -307,10 +308,6 @@ jobs:
         run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
-
-      
-
-      
 
       
 
