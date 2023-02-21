@@ -148,6 +148,7 @@ schema_featureflags = {
         'display_signatures',
         'execution_environments',
         'container_signing',
+        'ai_deny_index',
         '_messages',
     ],
     'properties': {
@@ -160,6 +161,7 @@ schema_featureflags = {
         'display_signatures': {'type': 'boolean'},
         'execution_environments': {'type': 'boolean'},
         'container_signing': {'type': 'boolean'},
+        'ai_deny_index': {'type': 'boolean'},
         '_messages': {'type': 'array'},
     }
 }

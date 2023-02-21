@@ -9,6 +9,14 @@ from ..utils import (
 
 
 @pytest.fixture(scope="function")
+def flags(ansible_config):
+    config = ansible_config("admin")
+    api_client = get_client(config, request_token=True, require_auth=True)
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
+
+
+@pytest.fixture(scope="function")
 def namespace(ansible_config) -> str:
     """create a new namespace."""
     config = ansible_config("admin")
@@ -42,9 +50,8 @@ def pe_namespace(ansible_config) -> str:
     return new_namespace
 
 
-@pytest.mark.standalone_only
-@pytest.mark.api_ui
-def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace):
+@pytest.mark.community_only
+def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace, flags):
     """Test the whole workflow for AIindex.
 
     1. Create a new namespace (by fixture)
@@ -56,6 +63,9 @@ def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace):
     7. Repeat step 2 with a basic user
     8. Assert permission error raises
     """
+    if not flags.get("ai_deny_index"):
+        pytest.skip("ai_deny_index flag is not enabled")
+
     with UIClient(config=ansible_config("admin")) as client:
         # 2. Add namespace to AIIndex
         assert (

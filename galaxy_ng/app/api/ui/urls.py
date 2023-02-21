@@ -146,7 +146,6 @@ paths = [
     path('controllers/', views.ControllerListView.as_view(), name='controllers'),
     path('groups/', include(group_paths)),
     path('collection_signing/', include(signing_paths)),
-    path('ai_deny_index/', include(ai_index_paths)),
     path(
         'repo/<str:distro_base_path>/',
         viewsets.CollectionViewSet.as_view({'get': 'list'}),
@@ -169,6 +168,11 @@ paths = [
 if settings.GALAXY_FEATURE_FLAGS['execution_environments']:
     paths.append(
         path('execution-environments/', include(container_paths)),
+    )
+
+if settings.GALAXY_FEATURE_FLAGS['ai_deny_index']:
+    paths.append(
+        path('ai_deny_index/', include(ai_index_paths)),
     )
 
 app_name = "ui"
