@@ -1,4 +1,7 @@
-from django.db.models import Q
+import json
+
+from django.db.models import F, Q, Value
+from django.db.models.functions import Concat
 from django_filters import filters
 from django_filters.rest_framework import filterset
 
@@ -57,6 +60,8 @@ class LegacyRoleFilter(filterset.FilterSet):
 
     github_user = filters.CharFilter(method='github_user_filter')
     keywords = filters.CharFilter(method='keywords_filter')
+    tags = filters.CharFilter(method='tags_filter')
+    tag = filters.CharFilter(method='tags_filter')
     autocomplete = filters.CharFilter(method='autocomplete_filter')
     owner__username = filters.CharFilter(method='owner__username_filter')
 
@@ -76,6 +81,12 @@ class LegacyRoleFilter(filterset.FilterSet):
 
     def owner__username_filter(self, queryset, name, value):
         return queryset.filter(namespace__owners__username=value)
+
+    def tags_filter(self, queryset, name, value):
+
+        queryset = queryset.filter(Q(full_metadata__tags__contains=value))
+
+        return queryset
 
     def keywords_filter(self, queryset, name, value):
 
