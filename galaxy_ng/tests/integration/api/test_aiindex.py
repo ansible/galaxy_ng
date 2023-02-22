@@ -2,10 +2,15 @@ import pytest
 
 from ..utils import (
     UIClient,
+    SocialGithubClient,
     create_unused_namespace,
     generate_unused_namespace,
     get_client
 )
+
+# should we import this like this
+# or move that function to utils?
+from .test_community import cleanup_social_user
 
 
 @pytest.fixture(scope="function")
@@ -50,8 +55,89 @@ def pe_namespace(ansible_config) -> str:
     return new_namespace
 
 
+@pytest.fixture(scope="function")
+def legacy_namespace(ansible_config):
+    """Creates a new legacy namespace owned by gh01 user"""
+
+    cleanup_social_user('gh01', ansible_config)
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('v1/namespaces/?name=gh01')
+        result = resp.json()
+        assert result['count'] == 1
+        assert result['results'][0]['name'] == 'gh01'
+
+        # the user should have been added as an owner on the namespace
+        assert result['results'][0]['summary_fields']['owners'][0]['username'] == 'gh01'
+
+    return 'gh01'
+
+
 @pytest.mark.community_only
-def test_add_list_remove_aiindex(ansible_config, namespace, pe_namespace, flags):
+def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespace, flags):
+    """Test the whole workflow for AIindex.
+
+    1. Create a new legacy_namespace (by fixture)
+    2. Add legacy_namespace to AIIndex
+    3. Assert legacy_namespace is listed  on _ui/v1/ai_deny_index/
+    4. Assert ai_deny_index filters works for scope and name
+    5. Remove legacy_namespace from AIIndex
+    6. Assert legacy_namespace is not listed on _ui/v1/ai_deny_index/
+    7. Repeat step 2 with github_user_2
+    8. Assert permission error raises
+    """
+    if not flags.get("ai_deny_index"):
+        pytest.skip("ai_deny_index flag is not enabled")
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        assert (
+            client.post(
+                "_ui/v1/ai_deny_index/legacy_namespace/",
+                data={"reference": legacy_namespace}
+            ).status_code == 201
+        )
+
+        # 3. Assert legacy_namespace is listed  on _ui/v1/ai_deny_index/
+        response = client.get("_ui/v1/ai_deny_index/")
+        assert response.status_code == 200
+        expected = {"scope": "legacy_namespace", "reference": legacy_namespace}
+        assert expected in response.json()["results"]
+
+        # 4. Assert ai_deny_index filters works for scope and name
+        assert (
+            client.get(
+                f"_ui/v1/ai_deny_index/?scope=legacy_namespace&reference={legacy_namespace}"
+            ).json()["results"][0]["reference"] == legacy_namespace
+        )
+
+        # 5. Remove legacy_namespace from AIIndex
+        assert (
+            client.delete(
+                f"_ui/v1/ai_deny_index/legacy_namespace/{legacy_namespace}/"
+            ).status_code == 204
+        )
+
+        # 6. Assert legacy_namespace is not listed on _ui/v1/ai_deny_index/
+        response = client.get("_ui/v1/ai_deny_index/")
+        assert response.status_code == 200
+        expected = {"scope": "legacy_namespace", "reference": legacy_namespace}
+        assert expected not in response.json()["results"]
+
+    cfg = ansible_config('github_user_2')
+    with SocialGithubClient(config=cfg) as client:
+        # 7. Repeat step 2 with github_user_2
+        assert (
+            client.post(
+                "_ui/v1/ai_deny_index/legacy_namespace/",
+                data={"reference": legacy_namespace}
+            ).status_code == 403
+        )
+
+
+@pytest.mark.community_only
+def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespace, flags):
     """Test the whole workflow for AIindex.
 
     1. Create a new namespace (by fixture)
