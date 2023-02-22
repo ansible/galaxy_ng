@@ -1,3 +1,4 @@
+import logging
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError, transaction
 from drf_spectacular.types import OpenApiTypes
@@ -17,6 +18,9 @@ from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.models.aiindex import AIIndexDenyList
 from galaxy_ng.app.models.namespace import Namespace
+
+log = logging.getLogger(__name__)
+
 
 NamespaceOrLegacyNamespace = (
     access_policy.NamespaceAccessPolicy | access_policy.LegacyAccessPolicy
@@ -100,6 +104,11 @@ class AIDenyIndexAddView(AIDenyIndexBaseView):
             obj.save()
         except IntegrityError as e:
             return Response(str(e), status=status.HTTP_409_CONFLICT)
+        else:
+            user = request.user.username
+            log.info(
+                f"{user} added {obj.scope}/{obj.reference} to AIIndexDenyList"
+            )
 
         return Response(
             {"scope": obj.scope, "reference": obj.reference},
@@ -213,5 +222,10 @@ class AIDenyIndexDetailView(AIDenyIndexBaseView):
         self._verify_permission_for_namespace_object(request, scope, reference)
 
         obj.delete()
+
+        user = request.user.username
+        log.info(
+            f"{user} deleted {obj.scope}/{obj.reference} from AIIndexDenyList"
+        )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
