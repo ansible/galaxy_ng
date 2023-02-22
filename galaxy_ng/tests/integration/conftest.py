@@ -143,18 +143,18 @@ class AnsibleConfigFixture(dict):
     if is_stage_environment():
         PROFILES = {
             "basic_user": {
-                "username": {"vault_path": "secrets/qe/stage/users/aa_no_access",
+                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
                              "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/aa_no_access",
+                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
                              "vault_key": "password"},
                 "token": None,
             },
             "partner_engineer": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe",
                              "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe",
                              "vault_key": "password"},
-                "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe",
                           "vault_key": "token"},
             },
             "org_admin": {
@@ -165,11 +165,11 @@ class AnsibleConfigFixture(dict):
                 "token": None,
             },
             "admin": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe",
                              "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe",
                              "vault_key": "password"},
-                "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe",
                           "vault_key": "token"},
             }
         }
