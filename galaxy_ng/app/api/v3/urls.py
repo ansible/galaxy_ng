@@ -8,11 +8,6 @@ from pulp_ansible.app.urls import (
 from . import views, viewsets
 
 router = routers.SimpleRouter()
-router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
-
-namespace_urls = [
-    path("", include(router.urls)),
-]
 
 auth_urls = [
     path("auth/token/", views.TokenView.as_view(), name="auth-token"),

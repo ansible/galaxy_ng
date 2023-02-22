@@ -8,8 +8,6 @@ from . import views, viewsets
 
 router = routers.SimpleRouter()
 # TODO: Replace with a RedirectView
-router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
-router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='my-namespaces')
 router.register('my-synclists', viewsets.MySyncListViewSet, basename='my-synclists')
 router.register('users', viewsets.UserViewSet, basename='users')
 router.register('collection-versions',
