@@ -1,7 +1,3 @@
-from .namespace import (
-    NamespaceViewSet,
-)
-
 from .collection import (
     CollectionViewSet,
     CollectionVersionViewSet,
@@ -22,8 +18,6 @@ from .execution_environment import (
 )
 
 __all__ = (
-    'NamespaceViewSet',
-    'MyNamespaceViewSet',
     'MySyncListViewSet',
     'CollectionViewSet',
     'CollectionVersionViewSet',
