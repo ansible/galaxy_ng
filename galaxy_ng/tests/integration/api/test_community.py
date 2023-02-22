@@ -524,3 +524,62 @@ def test_v1_role_pagination(ansible_config):
 
     # cleanup
     clean_all_roles(ansible_config)
+
+
+@pytest.mark.community_only
+def test_v1_role_tag_filter(ansible_config):
+    """" Tests if v1 roles are auto-sorted by created """
+
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True
+    )
+
+    def get_roles(page_size=1, order_by='created'):
+        roles = []
+        urls = []
+        next_url = f'/api/v1/roles/?page_size={page_size}&order_by={order_by}'
+        while next_url:
+            urls.append(next_url)
+            resp = api_client(next_url)
+            roles.extend(resp['results'])
+            next_url = resp['next']
+            if next_url:
+                o = urlparse(next_url)
+                baseurl = o.scheme + '://' + o.netloc.replace(':80', '')
+                next_url = next_url.replace(baseurl, '')
+
+        return urls, roles
+
+    # clean all roles ...
+    clean_all_roles(ansible_config)
+
+    # start the sync
+    pargs = json.dumps({"limit": 10}).encode('utf-8')
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+    wait_for_v1_task(resp=resp, api_client=api_client)
+
+    # make tuples of created,id for all roles ...
+    urls, all_roles = get_roles(page_size=1, order_by='created')
+
+    # make a map of the tags
+    tagmap = {}
+    for role in all_roles:
+        tags = role['summary_fields']['tags']
+        for tag in tags:
+            if tag not in tagmap:
+                tagmap[tag] = []
+            tagmap[tag].append(role['id'])
+
+    # validate we can filter on every tag possible
+    for tag, role_ids in tagmap.items():
+        tresp = api_client(f'/api/v1/roles/?tag={tag}')
+        assert tresp['count'] == len(role_ids)
+        assert sorted(role_ids) == sorted([x['id'] for x in tresp['results']])
+
+    # cleanup
+    clean_all_roles(ansible_config)
