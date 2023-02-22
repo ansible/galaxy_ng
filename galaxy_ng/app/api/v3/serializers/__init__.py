@@ -2,11 +2,6 @@ from .collection import (
     CollectionUploadSerializer,
 )
 
-from .namespace import (
-    NamespaceSerializer,
-    NamespaceSummarySerializer,
-)
-
 from .group import (
     GroupSummarySerializer,
 )
@@ -28,8 +23,6 @@ from .execution_environment import (
 __all__ = (
     'CollectionUploadSerializer',
     'GroupSummarySerializer',
-    'NamespaceSerializer',
-    'NamespaceSummarySerializer',
     'TaskSerializer',
     'TaskSummarySerializer',
     'UnpaginatedCollectionVersionSerializer',
