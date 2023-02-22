@@ -59,7 +59,7 @@ jobs:
 
       - name: finish insights instance setup
         run: |
-          oci-env -e dev/oci_env_configs/sync-test.compose.env db restore -f insights-fixture
+          oci-env -e dev/oci_env_configs/sync-test.compose.env db restore -f insights-fixture --migrate
           oci-env -e dev/oci_env_configs/sync-test.compose.env pulpcore-manager migrate
           oci-env -e dev/oci_env_configs/sync-test.compose.env poll
 
