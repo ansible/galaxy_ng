@@ -158,9 +158,9 @@ class AnsibleConfigFixture(dict):
                           "vault_key": "token"},
             },
             "org_admin": {
-                "username": {"vault_path": "secrets/qe/stage/users/rbac_org_admin",
+                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-rbac",
                              "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/rbac_org_admin",
+                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-rbac",
                              "vault_key": "password"},
                 "token": None,
             },
