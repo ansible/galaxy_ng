@@ -22,6 +22,12 @@ urlpatterns = [
     ),
 
     path(
+        'removerole/',
+        LegacyRolesViewSet.as_view({"delete": "delete_by_url_params"}),
+        name='legacy_role-remove'
+    ),
+
+    path(
         'roles/',
         LegacyRolesViewSet.as_view({"list": "list", "get": "list"}),
         name='legacy_role-list'
