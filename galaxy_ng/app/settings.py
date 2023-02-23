@@ -224,7 +224,7 @@ AUTH_LDAP_GROUP_SEARCH_FILTER = None
 AUTHENTICATION_BACKEND_PRESET = 'local'  # 'ldap' or 'keycloak' or 'local' or 'custom'
 AUTHENTICATION_BACKEND_PRESETS_DATA = {
     'ldap': [
-        "galaxy_ng.app.auth.ldap.PulpLDAPBackend",
+        "galaxy_ng.app.auth.ldap.GalaxyLDAPBackend",
         "django.contrib.auth.backends.ModelBackend",
         "pulpcore.backends.ObjectRolePermissionBackend"
     ],
@@ -242,3 +242,10 @@ SOCIAL_AUTH_GITHUB_BASE_URL = os.environ.get('SOCIAL_AUTH_GITHUB_BASE_URL', 'htt
 SOCIAL_AUTH_GITHUB_API_URL = os.environ.get('SOCIAL_AUTH_GITHUB_BASE_URL', 'https://api.github.com')
 SOCIAL_AUTH_GITHUB_KEY = os.environ.get('SOCIAL_AUTH_GITHUB_KEY')
 SOCIAL_AUTH_GITHUB_SECRET = os.environ.get('SOCIAL_AUTH_GITHUB_SECRET')
+
+
+# When set to True, galaxy will only load ldap groups into local
+# groups that already exist in the database. Ex: if user with ldap
+# groups foo and bar login and only group foo exists in the system,
+# the user will be added to foo and bar will be ignored.
+GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS = False
