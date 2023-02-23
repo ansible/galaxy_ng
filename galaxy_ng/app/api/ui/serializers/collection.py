@@ -4,12 +4,12 @@ from pulp_ansible.app.models import (
     AnsibleDistribution,
     CollectionVersion,
 )
+from pulp_ansible.app.serializers import AnsibleNamespaceMetadataSerializer
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 import semantic_version
 
 from .base import Serializer
-from galaxy_ng.app.api.v3.serializers.namespace import NamespaceSummarySerializer
 from galaxy_ng.app.models import Namespace
 
 log = logging.getLogger(__name__)
@@ -186,10 +186,10 @@ class _CollectionSerializer(Serializer):
     download_count = serializers.IntegerField(default=0)
     latest_version = serializers.SerializerMethodField()
 
-    @extend_schema_field(NamespaceSummarySerializer)
+    @extend_schema_field(AnsibleNamespaceMetadataSerializer)
     def get_namespace(self, obj):
         namespace = Namespace.objects.get(name=obj.namespace)
-        return NamespaceSummarySerializer(namespace, context=self.context).data
+        return AnsibleNamespaceMetadataSerializer(namespace, context=self.context).data
 
 
 class CollectionListSerializer(_CollectionSerializer):
