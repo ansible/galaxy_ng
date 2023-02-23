@@ -14,6 +14,7 @@ LEGACY_STATEMENTS = {
             "action": [
                 "create",
                 "delete",
+                "delete_by_url_params",
                 "destroy",
                 "update",
             ],

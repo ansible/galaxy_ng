@@ -407,6 +407,11 @@ class LegacyAccessPolicy(AccessPolicyBase):
             github_user = request.data['github_user']
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
+        elif '/removerole/' in request.META['PATH_INFO']:
+
+            github_user = request.query_params['github_user']
+            namespace = LegacyNamespace.objects.filter(name=github_user).first()
+
         elif '/roles/' in request.META['PATH_INFO']:
 
             if 'id' in request.parser_context['kwargs']:

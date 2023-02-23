@@ -4,11 +4,14 @@
 import os
 import tempfile
 import pytest
+import subprocess
 
 from ..utils import (
     ansible_galaxy,
     SocialGithubClient
 )
+
+from ..utils.legacy import cleanup_social_user
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -282,3 +285,86 @@ def test_delete_namespace_deletes_roles(ansible_config):
     resp = client.get(qs)
     ds = resp.json()
     assert ds['count'] == 0
+
+
+@pytest.mark.community_only
+def test_delete_role_with_cli(ansible_config):
+    """ Tests role delete with CLI """
+
+    # https://github.com/jctannerTEST/role1
+
+    github_user = "jctannerTEST"
+    github_repo = "role1"
+    role_name = "role1"
+
+    # pre-clean the user, the namespace and the role
+    cleanup_social_user(github_user, ansible_config)
+
+    # Run the import as the owner
+    cfg = ansible_config(github_user)
+    client = SocialGithubClient(config=cfg)
+    client.login()
+    token = client.get_hub_token()
+    import_pid = ansible_galaxy(
+        f"role import {github_user} {github_repo}",
+        ansible_config=cfg,
+        token=token,
+        force_token=True,
+        cleanup=False,
+        check_retcode=False
+    )
+    assert import_pid.returncode == 0
+
+    # check namespace owners ...
+    ns_resp = client.get(f'v1/namespaces/?name={github_user}')
+    ns_ds = ns_resp.json()
+    ns_owners = [x['username'] for x in ns_ds['results'][0]['summary_fields']['owners']]
+    assert ns_owners == [github_user]
+
+    # validate delete command
+    url = client.baseurl.replace('/api/', '')
+    cmd = (
+        'ansible-galaxy role delete'
+        + ' -vvvv'
+        + f' --server={url}'
+        + f' --token={token}'
+        + f' {github_user}'
+        + f' {role_name}'
+    )
+    delete_pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert delete_pid.returncode == 0, delete_pid.stderr.decode('utf-8')
+
+
+@pytest.mark.community_only
+def test_delete_missing_role_with_cli(ansible_config):
+    """ Tests missing role delete with CLI """
+
+    # https://github.com/jctannerTEST/role1
+
+    github_user = "jctannerTEST"
+    github_repo = "CANTFINDMEANYWHERE"
+
+    # pre-clean the user, the namespace and the role
+    cleanup_social_user(github_user, ansible_config)
+
+    cfg = ansible_config(github_user)
+    client = SocialGithubClient(config=cfg)
+    client.login()
+    token = client.get_hub_token()
+
+    # validate delete command
+    url = client.baseurl.replace('/api/', '')
+    cmd = (
+        'ansible-galaxy role delete'
+        + ' -vvvv'
+        + f' --server={url}'
+        + f' --token={token}'
+        + f' {github_user}'
+        + f' {github_repo}'
+    )
+    delete_pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert delete_pid.returncode == 0, delete_pid.stderr.decode('utf-8')
+
+    stdout = delete_pid.stdout.decode('utf-8')
+    expected_msg = 'not found. Maybe it was deleted'
+    assert expected_msg in stdout, stdout

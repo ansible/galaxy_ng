@@ -70,6 +70,47 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
         role.delete()
         return Response({'status': 'ok'}, status=204)
 
+    def delete_by_url_params(self, request):
+        github_user = request.query_params.get('github_user')
+        github_repo = request.query_params.get('github_repo')
+
+        qs = LegacyRole.objects
+        qs = qs.filter(namespace__name=github_user)
+        qs = qs.filter(full_metadata__github_repo=github_repo)
+
+        if qs.count() == 0:
+            return Response({
+                'status': (
+                    f'Role {github_user}.{github_repo} not found.'
+                    + ' Maybe it was deleted previously?'
+                ),
+                'deleted_roles': []
+            })
+
+        deleted_roles = []
+        for role in qs:
+            role.delete()
+            deleted_roles.append({
+                'id': role.id,
+                'namespace': role.namespace.name,
+                'name': role.name,
+                'github_user': github_user,
+                'github_repo': github_repo,
+            })
+
+        if len(deleted_roles) == 1:
+            status = f'Role {github_user}.{github_repo} deleted'
+        else:
+            status = (
+                f'Deleted {len(deleted_roles)} roles'
+                + f' associated with {github_user}/{github_repo}'
+            )
+
+        return Response({
+            'status': status,
+            'deleted_roles': deleted_roles,
+        })
+
 
 class LegacyRoleContentViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     """Documentation for a single legacy role."""
