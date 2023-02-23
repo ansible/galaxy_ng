@@ -218,10 +218,6 @@ class AppRootAccessPolicy(AccessPolicyBase):
     NAME = "AppRootViewSet"
 
 
-class NamespaceAccessPolicy(AccessPolicyBase):
-    NAME = "NamespaceViewSet"
-
-
 class CollectionAccessPolicy(AccessPolicyBase):
     NAME = "CollectionViewSet"
 
