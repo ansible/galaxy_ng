@@ -1,5 +1,6 @@
 import logging
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
@@ -7,6 +8,7 @@ from drf_spectacular.utils import (
     extend_schema,
     inline_serializer
 )
+from rest_framework.settings import perform_import
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import serializers
@@ -21,33 +23,29 @@ from galaxy_ng.app.models.namespace import Namespace
 
 log = logging.getLogger(__name__)
 
-
-NamespaceOrLegacyNamespace = (
-    access_policy.NamespaceAccessPolicy | access_policy.LegacyAccessPolicy
-)  # DRF 3+ allows composed access policies using & or |
+GALAXY_AUTHENTICATION_CLASSES = perform_import(
+    settings.GALAXY_AUTHENTICATION_CLASSES,
+    'GALAXY_AUTHENTICATION_CLASSES'
+)
 
 
 class AIDenyIndexBaseView(api_base.APIView):
-    permission_classes = [NamespaceOrLegacyNamespace]
+    permission_classes = [access_policy.AIDenyIndexAccessPolicy]
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
     def get_object(self):
-        """Pulp requires this method even when not used,e.g: Not a Model ViewSet"""
-
-    def _verify_permission_for_namespace_object(self, request, scope, reference):
-        """Checks if the user has permission to modify the namespace object."""
-
+        """This method returns the object for permission checking"""
         model = {"namespace": Namespace, "legacy_namespace": LegacyNamespace}
+        scope = self.kwargs["scope"]
+        reference = self.kwargs.get(
+            "reference", self.request.data.get("reference")
+        )
         try:
-            namespace = model[scope].objects.get(name=reference)
+            return model[scope].objects.get(name=reference)
         except ObjectDoesNotExist:
             raise DRFValidationError(f"Referenced {scope} {reference!r} does not exist")
         except KeyError:
             raise DRFValidationError(f"Invalid scope {scope!r}")
-
-        # This is a method on DRF that will use permission_classes to check
-        # for object permissions, because this is not a ModelViewSet, this method
-        # must be called manually.
-        self.check_object_permissions(request, namespace)  # will raise permission error
 
 
 class AIDenyIndexAddView(AIDenyIndexBaseView):
@@ -97,8 +95,6 @@ class AIDenyIndexAddView(AIDenyIndexBaseView):
             obj.full_clean(validate_unique=False)
         except ValidationError as e:
             return Response(e, status=status.HTTP_400_BAD_REQUEST)
-
-        self._verify_permission_for_namespace_object(request, **data)
 
         try:
             obj.save()
@@ -218,8 +214,6 @@ class AIDenyIndexDetailView(AIDenyIndexBaseView):
             obj = AIIndexDenyList.objects.get(scope=scope, reference=reference)
         except ObjectDoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-        self._verify_permission_for_namespace_object(request, scope, reference)
 
         obj.delete()
 

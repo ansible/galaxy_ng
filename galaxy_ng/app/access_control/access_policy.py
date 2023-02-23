@@ -214,6 +214,26 @@ class AccessPolicyBase(AccessPolicyFromDB):
         return False
 
 
+class AIDenyIndexAccessPolicy(AccessPolicyBase):
+    NAME = "AIDenyIndexView"
+
+    def can_edit_ai_deny_index(self, request, view, permission):
+        """This permission applies to Namespace or LegacyNamespace on ai_deny_index/."""
+        object = view.get_object()
+        has_permission = False
+        if isinstance(object, models.Namespace):
+            has_permission = has_model_or_object_permissions(
+                request.user,
+                "galaxy.change_namespace",
+                object
+            )
+        elif isinstance(object, LegacyNamespace):
+            has_permission = LegacyAccessPolicy().is_namespace_owner(
+                request, view, permission
+            )
+        return has_permission
+
+
 class AppRootAccessPolicy(AccessPolicyBase):
     NAME = "AppRootViewSet"
 
@@ -400,10 +420,10 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
         namespace = None
         github_user = None
+        kwargs = request.parser_context['kwargs']
 
         # enumerate the related namespace for this request
         if '/imports/' in request.META['PATH_INFO']:
-
             github_user = request.data['github_user']
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
@@ -413,18 +433,17 @@ class LegacyAccessPolicy(AccessPolicyBase):
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
         elif '/roles/' in request.META['PATH_INFO']:
-
-            if 'id' in request.parser_context['kwargs']:
-                roleid = request.parser_context['kwargs']['id']
-            else:
-                roleid = request.parser_context['kwargs']['pk']
+            roleid = kwargs.get("id", kwargs.get("pk"))
             role = LegacyRole.objects.filter(id=roleid).first()
             namespace = role.namespace
 
         elif '/namespaces/' in request.META['PATH_INFO']:
-
-            ns_id = request.parser_context['kwargs']['pk']
+            ns_id = kwargs['pk']
             namespace = LegacyNamespace.objects.filter(id=ns_id).first()
+
+        elif '/ai_deny_index/' in request.META["PATH_INFO"]:
+            ns_name = kwargs.get("reference", request.data.get("reference"))
+            namespace = LegacyNamespace.objects.filter(name=ns_name).first()
 
         # allow a user to make their own namespace
         if namespace is None and github_user and user.username == github_user:

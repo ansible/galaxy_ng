@@ -255,7 +255,7 @@ STANDALONE_STATEMENTS = {
         },
     ],
 
-    'NamespaceViewSet': [
+    'AIDenyIndexView': [
         {
             "action": ["ai-deny-index-list"],
             "principal": "*",
@@ -265,13 +265,11 @@ STANDALONE_STATEMENTS = {
             "action": ["ai-deny-index-add", "ai-deny-index-delete"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:galaxy.change_namespace",
+            "condition": "can_edit_ai_deny_index",
         },
-        {
-            "action": ["ai-index-list"],
-            "principal": "anonymous",
-            "effect": "allow",
-        },
+    ],
+
+    'NamespaceViewSet': [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
