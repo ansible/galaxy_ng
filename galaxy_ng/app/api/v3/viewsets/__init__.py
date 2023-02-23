@@ -5,10 +5,6 @@ from .collection import (
     CollectionVersionCopyViewSet,
 )
 
-from .namespace import (
-    NamespaceViewSet,
-)
-
 from .task import (
     TaskViewSet,
 )
@@ -28,7 +24,6 @@ __all__ = (
     'CollectionUploadViewSet',
     'CollectionVersionMoveViewSet',
     'CollectionVersionCopyViewSet',
-    'NamespaceViewSet',
     'SyncConfigViewSet',
     'TaskViewSet',
     'UnpaginatedCollectionViewSet',

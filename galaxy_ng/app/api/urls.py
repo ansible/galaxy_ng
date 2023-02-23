@@ -13,7 +13,6 @@ app_name = "api"
 
 v3_urlpatterns = [
     path("", include(v3_urls.auth_urls)),
-    path("", include(v3_urls.namespace_urls)),
 
     # Set an instance of the v3 urls/viewsets at the same
     # url path as the former galaxy_api.api.v3.viewsets

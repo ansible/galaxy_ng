@@ -4,7 +4,6 @@ from .collection import (
     CollectionImportViewSet,
     CollectionRemoteViewSet
 )
-from .my_namespace import MyNamespaceViewSet
 from .my_synclist import MySyncListViewSet
 from .tags import TagsViewSet
 from .user import UserViewSet, CurrentUserViewSet
