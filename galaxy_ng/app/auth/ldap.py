@@ -12,12 +12,13 @@ class GalaxyLDAPSettings(LDAPSettings):
     def MIRROR_GROUPS(self):
         print(self._cached_groups)
         if settings.GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS:
-            self._cached_groups = self._cached_groups or set(Group.objects.all().values_list("name", flat=True))
+            self._cached_groups = self._cached_groups \
+                or set(Group.objects.all().values_list("name", flat=True))
             if isinstance(self._mirror_groups, (set, frozenset)):
                 return self._mirror_groups.union(self._cached_groups)
             else:
                 return self._cached_groups
-        
+
         return self._mirror_groups
 
     @MIRROR_GROUPS.setter
@@ -33,4 +34,3 @@ class GalaxyLDAPBackend(LDAPBackend):
 
     def __init__(self):
         self.settings = GalaxyLDAPSettings(self.settings_prefix, self.default_settings)
-
