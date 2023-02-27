@@ -43,7 +43,7 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install packaging~=21.3 bandersnatch bump2version gitpython python-redmine towncrier==19.9.0 wheel
+          pip install packaging~=21.3 bandersnatch bump2version gitpython towncrier==19.9.0 wheel
           echo ::endgroup::
 
       - name: Configure Git with ansible name and email
@@ -132,6 +132,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
 
       - name: Install
         run: |
@@ -147,6 +148,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
         shell: bash
 
       - name: Before Script
@@ -163,6 +165,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
@@ -199,6 +202,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
 
       - name: Upload python client packages
         if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
@@ -284,13 +288,11 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install gitpython python-redmine requests packaging~=21.3 tweepy
+          pip install gitpython requests packaging~=21.3 tweepy
           echo ::endgroup::
 
       - name: Push branch and tag to GitHub
         run: bash .github/workflows/scripts/push_branch_and_tag_to_github.sh ${{ github.event.inputs.release }}
-
-      
 
       
 

@@ -31,6 +31,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
           GITHUB_PR_COMMITS_URL: ${{ github.event.pull_request.commits_url }}
           START_COMMIT: ${{ github.event.before }}
           END_COMMIT: ${{ github.event.after }}
@@ -139,6 +140,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
 
       - name: Install
         
@@ -154,6 +156,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
 
       - name: Install Python client
         
@@ -174,6 +177,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
@@ -196,6 +200,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
+          LOCK_REQUIREMENTS: 0
 
       - name: Extract Deprecations from Logs
         id: deprecations
