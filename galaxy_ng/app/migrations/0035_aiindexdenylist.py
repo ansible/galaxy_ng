@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('galaxy', '0033_update_validated_repo'),
+        ('galaxy', '0034_remove_inbound_repos'),
     ]
 
     operations = [
