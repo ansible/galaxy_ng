@@ -11,7 +11,12 @@ from drf_spectacular.utils import extend_schema
 from pulp_ansible.app.galaxy.v3 import views as pulp_ansible_views
 from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
-from pulp_ansible.app.models import CollectionVersion
+from pulp_ansible.app.models import (
+    CollectionVersion,
+    CollectionVersionSignature,
+    AnsibleCollectionDeprecated,
+    CollectionVersionMark
+)
 
 from pulpcore.plugin.models import Content, SigningService, Task, TaskGroup
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
@@ -251,13 +256,49 @@ class CollectionVersionCopyViewSet(api_base.ViewSet, CollectionRepositoryMixing)
 
         collection_version = self.get_collection_version()
         src_repo, dest_repo = self.get_repos()
+        source_pks = src_repo.content.values_list("pk", flat=True)
+        content_types = src_repo.content.values_list('pulp_type', flat=True)
+        cv_pk = collection_version.pk
+
+        content = [cv_pk]
+
+        # collection signatures
+        if 'ansible.collection_signature' in content_types:
+            signatures_pks = CollectionVersionSignature.objects.filter(
+                signed_collection=cv_pk,
+                pk__in=source_pks
+            ).values_list("pk", flat=True)
+            if signatures_pks:
+                content.append(*signatures_pks)
+
+        # collection version mark
+        if 'ansible.collection_mark' in content_types:
+            marks_pks = CollectionVersionMark.objects.filter(
+                marked_collection=cv_pk,
+                pk__in=source_pks
+            ).values_list("pk", flat=True)
+            if marks_pks:
+                content.append(*marks_pks)
+
+        # collection deprecation
+        if 'ansible.collection_deprecation' in content_types:
+            deprecations_pks = AnsibleCollectionDeprecated.objects.filter(
+                pk__in=source_pks,
+                namespace=collection_version.namespace,
+                name=collection_version.name,
+            ).values_list("pk", flat=True)
+            if deprecations_pks:
+                content.append(*deprecations_pks)
+
+        # TODO: copy ansible namespace metadata
+
         copy_task = dispatch(
             add_and_remove,
-            exclusive_resources=[dest_repo],
+            exclusive_resources=[src_repo, dest_repo],
             shared_resources=[src_repo],
             kwargs={
                 "repository_pk": dest_repo.pk,
-                "add_content_units": [collection_version.pk],
+                "add_content_units": content,
                 "remove_content_units": [],
             }
         )
