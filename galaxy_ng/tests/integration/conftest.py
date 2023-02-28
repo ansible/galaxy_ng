@@ -150,7 +150,7 @@ class AnsibleConfigFixture(dict):
                              "vault_key": "password"},
                 "token": None,
             },
-            # in partner engineer group, not an SSO org admin
+            # in partner engineer group, not an SSO org admin username: ansible-hub-qe-pe2
             "partner_engineer": {
                 "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
                              "vault_key": "username"},
