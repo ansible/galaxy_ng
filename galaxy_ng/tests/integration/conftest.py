@@ -142,7 +142,7 @@ class AnsibleConfigFixture(dict):
     }
     if is_stage_environment():
         PROFILES = {
-            # ns owner to autohubtest2, not in partner engineer group, not an SSO org admin
+            # ns owner to autohubtest2 , not in partner engineer group, not an SSO org admin
             "basic_user": {
                 "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
                              "vault_key": "username"},
