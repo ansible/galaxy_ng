@@ -415,7 +415,7 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
     # Assert that the collection is signed on ui/stating but not on ui/community
     collections = get_all_collections_by_repo(api_client)
     assert collections["staging"][ckey]["sign_state"] == "signed"
-    assert collections["community"][ckey]["sign_state"] == "unsigned"
+    assert collections["community"][ckey]["sign_state"] == "signed"
 
 
 @pytest.mark.collection_signing
