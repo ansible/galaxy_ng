@@ -239,7 +239,7 @@ def test_copy_associated_content(ansible_config, upload_artifact):
     assert len(col_marked) == 0
 
     signing_service = api_client(
-        f'{api_prefix}/pulp/api/v3/signing-services/?name=ansible-default/'
+        f'{api_prefix}/pulp/api/v3/signing-services/?name=ansible-default'
     )["results"][0]
 
     # sign collection
