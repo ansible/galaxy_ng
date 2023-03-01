@@ -257,7 +257,7 @@ class CollectionVersionCopyViewSet(api_base.ViewSet, CollectionRepositoryMixing)
         collection_version = self.get_collection_version()
         src_repo, dest_repo = self.get_repos()
         source_pks = src_repo.content.values_list("pk", flat=True)
-        content_types = src_repo.content.values_list('pulp_type', flat=True)
+        content_types = src_repo.content.values_list('pulp_type', flat=True).distinct()
         cv_pk = collection_version.pk
 
         content = [cv_pk]
