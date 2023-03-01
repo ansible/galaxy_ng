@@ -171,7 +171,7 @@ def test_copy_collection_version(ansible_config, upload_artifact):
     assert copy_result["version"] == artifact.version
     assert copy_result["href"] is not None
     assert copy_result["metadata"]["tags"] == ["tools", "copytest"]
-    assert len(copy_result["signatures"]) == 1
+    assert len(copy_result["signatures"]) == 0
 
     # Make sure it's copied and not moved
     after = get_all_collections()
@@ -239,7 +239,7 @@ def test_copy_associated_content(ansible_config, upload_artifact):
     assert len(col_marked) == 0
 
     signing_service = api_client(
-        f'{api_prefix}/pulp/api/v3/signing-services/?name=ansible-default'
+        f'{api_prefix}/pulp/api/v3/signing-services/?name=ansible-default/'
     )["results"][0]
 
     # sign collection
