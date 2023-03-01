@@ -179,11 +179,7 @@ def test_copy_collection_version(ansible_config, upload_artifact):
     assert ckey in after['community']
 
 
-@pytest.mark.galaxyapi_smoke
-@pytest.mark.certification
-@pytest.mark.collection_move
-@pytest.mark.move
-@pytest.mark.slow_in_cloud
+@pytest.mark.standalone_only
 def test_copy_associated_content(ansible_config, upload_artifact):
     """Tests whether a collection and associated content is copied from repo to repo"""
 
