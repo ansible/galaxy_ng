@@ -15,7 +15,8 @@ from pulp_ansible.app.models import (
     CollectionVersion,
     CollectionVersionSignature,
     AnsibleCollectionDeprecated,
-    CollectionVersionMark
+    CollectionVersionMark,
+    AnsibleNamespaceMetadata,
 )
 
 from pulpcore.plugin.models import Content, SigningService, Task, TaskGroup
@@ -290,7 +291,12 @@ class CollectionVersionCopyViewSet(api_base.ViewSet, CollectionRepositoryMixing)
             if deprecations_pks:
                 content.append(*deprecations_pks)
 
-        # TODO: copy ansible namespace metadata
+        namespaces_pks = AnsibleNamespaceMetadata.objects.filter(
+            pk__in=source_pks,
+            name=collection_version.namespace
+        ).values_list("pk", flat=True)
+        if namespaces_pks:
+            content.append(*namespaces_pks)
 
         copy_task = dispatch(
             add_and_remove,
