@@ -5,7 +5,7 @@ LEGACY_STATEMENTS = {
                 "get",
                 "get_task",
                 "list",
-                "retrieve"
+                "retrieve",
             ],
             "principal": "*",
             "effect": "allow",

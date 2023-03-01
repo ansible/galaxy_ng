@@ -82,6 +82,27 @@ group_paths = [
         name='group-model-permissions-detail'),
 ]
 
+ai_index_paths = [
+    # GET _ui/v1/ai_deny_index/
+    path(
+        "",
+        views.AIDenyIndexListView.as_view(),
+        name='ai-deny-index-list',
+    ),
+    # POST _ui/v1/ai_deny_index/{scope}/
+    path(
+        "<str:scope>/",
+        views.AIDenyIndexAddView.as_view(),
+        name='ai-deny-index-add',
+    ),
+    # DELETE _ui/v1/ai_deny_index/{scope}/{reference}/
+    path(
+        "<str:scope>/<str:reference>/",
+        views.AIDenyIndexDetailView.as_view(),
+        name='ai-deny-index-delete',
+    )
+]
+
 signing_paths = [
     # _ui/v1/collection_signing/
     path(
@@ -147,6 +168,11 @@ paths = [
 if settings.GALAXY_FEATURE_FLAGS['execution_environments']:
     paths.append(
         path('execution-environments/', include(container_paths)),
+    )
+
+if settings.GALAXY_FEATURE_FLAGS['ai_deny_index']:
+    paths.append(
+        path('ai_deny_index/', include(ai_index_paths)),
     )
 
 app_name = "ui"

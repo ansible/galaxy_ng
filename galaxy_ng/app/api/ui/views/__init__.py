@@ -13,6 +13,12 @@ from .signing import CollectionSignView
 
 from .index_execution_environments import IndexRegistryEEView
 
+from .ai_index import (
+    AIDenyIndexAddView,
+    AIDenyIndexListView,
+    AIDenyIndexDetailView,
+)
+
 __all__ = (
     # auth
     "LoginView",
@@ -39,4 +45,8 @@ __all__ = (
     # Signing
     "CollectionSignView",
 
+    # AI/Wisdom
+    "AIDenyIndexAddView",
+    "AIDenyIndexListView",
+    "AIDenyIndexDetailView"
 )

@@ -255,6 +255,20 @@ STANDALONE_STATEMENTS = {
         },
     ],
 
+    'AIDenyIndexView': [
+        {
+            "action": ["ai-deny-index-list"],
+            "principal": "*",
+            "effect": "allow",
+        },
+        {
+            "action": ["ai-deny-index-add", "ai-deny-index-delete"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "can_edit_ai_deny_index",
+        },
+    ],
+
     'NamespaceViewSet': [
         {
             "action": ["list", "retrieve"],

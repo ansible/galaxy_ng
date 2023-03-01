@@ -75,6 +75,7 @@ GALAXY_DEPLOYMENT_MODE = 'standalone'
 GALAXY_FEATURE_FLAGS = {
     'execution_environments': True,  # False will make execution_environments endpoints 404
     'legacy_roles': False,
+    'ai_deny_index': False,  # False will make _ui/v1/ai_deny_index/ to 404
 }
 
 AUTH_PASSWORD_VALIDATORS = [
