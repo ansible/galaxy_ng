@@ -122,8 +122,6 @@ requirements = [
     "social-auth-app-django>=3.1.0,<4.0.0",
     "dynaconf>=3.1.9",
     "django-auth-ldap==4.0.0",
-    # ansible 2.14+ requires a newer version of python (3.9). Can we upgrade to that?
-    "ansible-core<2.14",
 ]
 
 

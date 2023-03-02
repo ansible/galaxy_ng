@@ -36,7 +36,7 @@ RUN set -ex; \
         git \
         gcc \
         glibc-langpack-en \
-        python38-devel \
+        python39-devel \
         libpq \
         libpq-devel \
         pinentry \
