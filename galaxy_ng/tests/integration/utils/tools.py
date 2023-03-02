@@ -19,9 +19,13 @@ def iterate_all(api_client, url):
     next = url
     while next is not None:
         r = api_client(next)
-        for x in r["data"]:
+        # pulp uses "results"
+        for x in r.get("data", r["results"]):
             yield x
-        next = r["links"]["next"]
+        if "next" in r:
+            next = r["next"]
+        else:
+            next = r["links"]["next"]
 
 
 def generate_random_artifact_version():
