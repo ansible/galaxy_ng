@@ -13,11 +13,9 @@ def add_repository_labels(apps, schema_editor):
     AnsibleRepository = apps.get_model('ansible', 'AnsibleRepository')
     AnsibleDistribution = apps.get_model('ansible', 'AnsibleDistribution')
 
-    for repo in AnsibleRepository.objects.filter(
-        Q(name__startswith="inbound-") | Q(name__startswith="inbound-")):
-
-        repo.pulp_labels = {"hide_from_search": ""}
-        repo.save()
+    AnsibleRepository.objects.filter(
+        Q(name__startswith="inbound-") | Q(name__endswith="-synclist")
+    ).update(pulp_labels = {"hide_from_search": ""})
 
     # some of the earlier versions of hub have a different name for the repositories,
     # so we're going to use their distribution base path's since those are more reliable

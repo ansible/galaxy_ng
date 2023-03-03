@@ -17,10 +17,13 @@ def uuid4():
 def iterate_all(api_client, url):
     """Iterate through all of the items on every page in a paginated list view."""
     next = url
+    key = "data"
     while next is not None:
         r = api_client(next)
         # pulp uses "results"
-        for x in r.get("data", r["results"]):
+        if "data" not in r:
+            key = "results"
+        for x in r[key]:
             yield x
         if "next" in r:
             next = r["next"]
