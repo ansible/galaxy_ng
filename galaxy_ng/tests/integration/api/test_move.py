@@ -177,3 +177,140 @@ def test_copy_collection_version(ansible_config, upload_artifact):
     after = get_all_collections()
     assert ckey in after['staging']
     assert ckey in after['community']
+
+
+@pytest.mark.standalone_only
+def test_copy_associated_content(ansible_config, upload_artifact):
+    """Tests whether a collection and associated content is copied from repo to repo"""
+
+    # TODO: add check for ansible namespace metadata
+
+    config = ansible_config("admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
+    api_client = get_client(
+        config=config,
+        request_token=True,
+        require_auth=True
+    )
+
+    artifact = build_collection(
+        "skeleton",
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["tools", "copytest"],
+        }
+    )
+
+    # import and wait ...
+    resp = upload_artifact(config, api_client, artifact)
+    resp = wait_for_task(api_client, resp)
+    assert resp['state'] == 'completed'
+
+    # get staging repo version
+    staging_repo = api_client(
+        f'{api_prefix}/pulp/api/v3/repositories/ansible/ansible/?name=staging'
+    )["results"][0]
+
+    pulp_href = staging_repo["pulp_href"]
+
+    collection_version = api_client(
+        f'{api_prefix}/pulp/api/v3/content/ansible/collection_versions/'
+        f'?namespace={artifact.namespace}&name={artifact.name}&version={artifact.version}'
+    )["results"][0]
+
+    cv_href = collection_version["pulp_href"]
+
+    collection = f'content/staging/v3/collections/{artifact.namespace}/{artifact.name}/'
+    collection_version = f'{collection}versions/{artifact.version}/'
+    collection_mark = (
+        f'{api_prefix}/pulp/api/v3/content/ansible/collection_marks/'
+        f'?marked_collection={cv_href}'
+    )
+
+    col_deprecation = api_client(collection)["deprecated"]
+    assert col_deprecation is False
+
+    col_signature = api_client(collection_version)["signatures"]
+    assert len(col_signature) == 0
+
+    col_marked = api_client(collection_mark)["results"]
+    assert len(col_marked) == 0
+
+    signing_service = api_client(
+        f'{api_prefix}/pulp/api/v3/signing-services/?name=ansible-default'
+    )["results"][0]
+
+    # sign collection
+    signed_collection = api_client(
+        f'{pulp_href}sign/',
+        args={
+            "content_units": [cv_href],
+            "signing_service": signing_service["pulp_href"]
+        },
+        method="POST"
+    )
+
+    resp = wait_for_task(api_client, signed_collection)
+    assert resp['state'] == 'completed'
+
+    # mark collection
+    marked_collection = api_client(
+        f'{pulp_href}mark/',
+        args={
+            "content_units": [cv_href],
+            "value": "marked"
+        },
+        method="POST"
+    )
+
+    resp = wait_for_task(api_client, marked_collection)
+    assert resp['state'] == 'completed'
+
+    # deprecate collection
+    deprecate_collection = api_client(
+        f'{api_prefix}/v3/plugin/ansible/content/staging/collections/'
+        f'index/{artifact.namespace}/{artifact.name}/',
+        args={
+            "deprecated": True
+        },
+        method="PATCH"
+    )
+
+    resp = wait_for_task(api_client, deprecate_collection)
+    assert resp['state'] == 'completed'
+
+    col_deprecation = api_client(collection)["deprecated"]
+    assert col_deprecation is True
+
+    col_signature = api_client(collection_version)["signatures"]
+    assert len(col_signature) == 1
+
+    col_marked = api_client(collection_mark)["results"]
+    assert len(col_marked) == 1
+
+    # Copy the collection to /community/
+    copy_result = copy_collection_version(
+        api_client,
+        artifact,
+        src_repo_name="staging",
+        dest_repo_name="community"
+    )
+
+    assert copy_result["namespace"]["name"] == artifact.namespace
+    assert copy_result["name"] == artifact.name
+    assert copy_result["version"] == artifact.version
+
+    collection = f'content/community/v3/collections/{artifact.namespace}/{artifact.name}/'
+    collection_version = f'{collection}versions/{artifact.version}/'
+    collection_mark = (
+        f'{api_prefix}/pulp/api/v3/content/ansible/collection_marks/'
+        f'?marked_collection={cv_href}'
+    )
+
+    col_deprecation = api_client(collection)["deprecated"]
+    assert col_deprecation is True
+
+    col_signature = api_client(collection_version)["signatures"]
+    assert len(col_signature) == 1
+
+    assert "marked" in copy_result["marks"]

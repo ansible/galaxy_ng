@@ -105,7 +105,7 @@ STANDALONE_STATEMENTS = {
             "condition": "has_model_perms:ansible.add_ansiblerepository"
         },
         {
-            "action": ["modify", "sync", "rebuild_metadata", "sign"],
+            "action": ["modify", "sync", "rebuild_metadata", "sign", "mark", "unmark"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.change_ansiblerepository"
