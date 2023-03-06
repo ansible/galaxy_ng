@@ -17,11 +17,18 @@ def uuid4():
 def iterate_all(api_client, url):
     """Iterate through all of the items on every page in a paginated list view."""
     next = url
+    key = "data"
     while next is not None:
         r = api_client(next)
-        for x in r["data"]:
+        # pulp uses "results"
+        if "data" not in r:
+            key = "results"
+        for x in r[key]:
             yield x
-        next = r["links"]["next"]
+        if "next" in r:
+            next = r["next"]
+        else:
+            next = r["links"]["next"]
 
 
 def generate_random_artifact_version():
