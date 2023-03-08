@@ -9,6 +9,7 @@ from rest_framework.exceptions import NotFound
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 
 from pulp_container.app import models as container_models
+from pulp_ansible.app import models as ansible_models
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
@@ -194,11 +195,39 @@ class AccessPolicyBase(AccessPolicyFromDB):
             namespace = models.Namespace.objects.get(name=data["filename"].namespace)
         except models.Namespace.DoesNotExist:
             raise NotFound(_("Namespace in filename not found."))
-        return has_model_or_object_permissions(
+
+        can_upload_to_namespace = has_model_or_object_permissions(
             request.user,
             "galaxy.upload_to_namespace",
             namespace
         )
+
+        if not can_upload_to_namespace:
+            return False
+
+        path = view._get_path()
+        try:
+            repo = ansible_models.AnsibleDistribution.objects.get(base_path=path).repository.cast()
+            pipeline = repo.pulp_labels.get("pipeline", None)
+
+            # if uploading to a staging repo, don't check any additional perms
+            if pipeline == "staging":
+                return True
+
+            # if no pipeline is declared on the repo, verify that the user can modify the
+            # repo contents.
+            elif pipeline is None:
+                return has_model_or_object_permissions(
+                    request.user,
+                    "ansible.modify_ansible_repo_content",
+                    repo
+                )
+
+            # if pipeline is anything other staging, reject the request.
+            return False
+
+        except ansible_models.AnsibleDistribution.DoesNotExist:
+            raise NotFound(_("Distribution does not exist."))
 
     def can_sign_collections(self, request, view, permission):
         # Repository is required on the CollectionSign payload

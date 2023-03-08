@@ -80,23 +80,18 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         return serializer.validated_data
 
-    def _get_path(self, kwargs, filename_ns):
+    def _get_path(self):
         """Use path from '/content/<path>/v3/' or
            if user does not specify distribution base path
            then use a distribution based on filename namespace.
         """
 
-        self.kwargs['filename_ns'] = filename_ns
-
-        if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
-            return settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
-        else:
-            # the legacy collection upload views don't get redirected and still have to use the
-            # old path arg
-            return kwargs.get(
-                'distro_base_path',
-                kwargs.get('path', settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH)
-            )
+        # the legacy collection upload views don't get redirected and still have to use the
+        # old path arg
+        return self.kwargs.get(
+            'distro_base_path',
+            self.kwargs.get('path', settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH)
+        )
 
     @extend_schema(
         description="Create an artifact and trigger an asynchronous task to create "
@@ -109,7 +104,9 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         data = self._get_data(request)
         filename = data['filename']
 
-        path = self._get_path(kwargs, filename_ns=filename.namespace)
+        self.kwargs['filename_ns'] = filename.namespace
+
+        path = self._get_path()
 
         try:
             namespace = models.Namespace.objects.get(name=filename.namespace)
