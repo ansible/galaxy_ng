@@ -171,18 +171,6 @@ def ee_namespace_list_roles(user, password, expect_pass, extra):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-def ee_namespace_my_permissions(user, password, expect_pass, extra):
-    pulp_href = extra["local_ee"].get_namespace()['pulp_href']
-
-    PULP_CONTAINER_NAMESPACE = f"{SERVER}{pulp_href}"
-    response = requests.get(
-        f"{PULP_CONTAINER_NAMESPACE}my_permissions/",
-        auth=(user['username'], password)
-    )
-
-    assert_pass(expect_pass, response.status_code, 200, 403)
-
-
 def ee_namespace_add_role(user, password, expect_pass, extra):
     pulp_href = extra["local_ee"].get_namespace()['pulp_href']
     group_name = create_group(gen_string())["name"]

@@ -13,15 +13,17 @@ from .rbac_actions.utils import (
     API_ROOT,
     NAMESPACE,
     PASSWORD,
-    create_group_with_user_and_role,
+    create_group_for_user,
     create_user,
     gen_string,
     del_user,
     del_group,
+    add_group_role,
     ReusableCollection,
     ReusableContainerRegistry,
     ReusableRemoteContainer,
     ReusableLocalContainer,
+    ReusableAnsibleRepository
 )
 
 from .rbac_actions.auth import (
@@ -36,6 +38,8 @@ from .rbac_actions.collections import (
     change_collection_namespace,
     delete_collection_namespace,
     upload_collection_to_namespace,
+    upload_collection_to_custom_staging_repo,
+    upload_collection_to_custom_repo,
     delete_collection,
     configure_collection_sync,
     launch_collection_sync,
@@ -44,6 +48,7 @@ from .rbac_actions.collections import (
     reject_collections,
     deprecate_collections,
     undeprecate_collections,
+    upload_collection_to_other_pipeline_repo,
 
     # ansible repository
     view_ansible_repository,
@@ -95,7 +100,6 @@ from .rbac_actions.exec_env import (
 
     # Container namespace
     ee_namespace_list_roles,
-    ee_namespace_my_permissions,
     ee_namespace_add_role,
     ee_namespace_remove_role
 )
@@ -104,7 +108,6 @@ log = logging.getLogger(__name__)
 
 # Order is important, CRU before D actions
 GLOBAL_ACTIONS = [
-
     # AUTHENTICATION
     add_groups,
     view_groups,
@@ -132,6 +135,9 @@ GLOBAL_ACTIONS = [
     reject_collections,
     deprecate_collections,
     undeprecate_collections,
+    upload_collection_to_custom_staging_repo,
+    upload_collection_to_custom_repo,
+    upload_collection_to_other_pipeline_repo,
 
     # EEs
     # Remotes
@@ -153,6 +159,9 @@ GLOBAL_ACTIONS = [
     create_ee_in_existing_namespace,
     push_updates_to_existing_ee,
     change_ee_tags,
+    ee_namespace_list_roles,
+    ee_namespace_add_role,
+    ee_namespace_remove_role,
 
     # MISC
     view_tasks,
@@ -188,19 +197,22 @@ GLOBAL_ACTIONS = [
 
 # TODO: Update object tests to include delete actions
 OBJECT_ACTIONS = [
+    # ansible
     change_collection_namespace,
     upload_collection_to_namespace,
     deprecate_collections,
     undeprecate_collections,
+    upload_collection_to_custom_repo,
+    upload_collection_to_custom_staging_repo,
+
+    # ee
     change_ee_description,
     change_ee_readme,
     create_ee_in_existing_namespace,
     push_updates_to_existing_ee,
     change_ee_tags,
     sync_remote_ee,
-
     ee_namespace_list_roles,
-    ee_namespace_my_permissions,
     ee_namespace_add_role,
     ee_namespace_remove_role
 ]
@@ -210,6 +222,7 @@ OBJECT_ROLES_TO_TEST = {
     "galaxy.collection_namespace_owner": {
         change_collection_namespace,
         upload_collection_to_namespace,
+        upload_collection_to_custom_staging_repo,
         deprecate_collections,
         undeprecate_collections,
     },
@@ -217,8 +230,33 @@ OBJECT_ROLES_TO_TEST = {
         create_collection_namespace,
         change_collection_namespace,
         upload_collection_to_namespace,
+        upload_collection_to_custom_staging_repo,
         deprecate_collections,
         undeprecate_collections,
+    },
+    "galaxy.ansible_repository_owner": {
+        # ansible repository
+        view_ansible_repository,
+        add_ansible_repository,
+        modify_ansible_repository,
+        rebuild_metadata_ansible_repository,
+        sign_ansible_repository,
+        sync_ansible_repository,
+        delete_ansible_repository,
+        approve_collections,
+        reject_collections,
+
+        # ansible repository version
+        view_ansible_repository_version,
+        # rebuild_metadata_ansible_repository_version,
+        repair_ansible_repository_version,
+        delete_ansible_repository_version,
+
+        # ansible distribution
+        view_ansible_distribution,
+        add_ansible_distribution,
+        change_ansible_distribution,
+        delete_ansible_distribution,
     },
 
     # EEs
@@ -233,7 +271,6 @@ OBJECT_ROLES_TO_TEST = {
         push_updates_to_existing_ee,
         change_ee_tags,
         ee_namespace_list_roles,
-        ee_namespace_my_permissions,
         ee_namespace_add_role,
         ee_namespace_remove_role
     },
@@ -246,7 +283,6 @@ OBJECT_ROLES_TO_TEST = {
         change_ee_tags,
         sync_remote_ee,
         ee_namespace_list_roles,
-        ee_namespace_my_permissions,
         ee_namespace_add_role,
         ee_namespace_remove_role
     },
@@ -257,7 +293,6 @@ OBJECT_ROLES_TO_TEST = {
         push_updates_to_existing_ee,
         change_ee_tags,
         sync_remote_ee,
-        ee_namespace_my_permissions
     },
 
 
@@ -270,6 +305,8 @@ ROLES_TO_TEST = {
         change_collection_namespace,
         delete_collection_namespace,
         upload_collection_to_namespace,
+        upload_collection_to_custom_repo,
+        upload_collection_to_custom_staging_repo,
         delete_collection,
         configure_collection_sync,
         launch_collection_sync,
@@ -329,7 +366,6 @@ ROLES_TO_TEST = {
 
         # Container namespace
         ee_namespace_list_roles,
-        ee_namespace_my_permissions,
         ee_namespace_add_role,
         ee_namespace_remove_role
 
@@ -338,6 +374,8 @@ ROLES_TO_TEST = {
         create_collection_namespace,
         change_collection_namespace,
         upload_collection_to_namespace,
+        upload_collection_to_custom_repo,
+        upload_collection_to_custom_staging_repo,
         delete_collection,
         delete_collection_namespace,
         configure_collection_sync,
@@ -431,7 +469,6 @@ ROLES_TO_TEST = {
 
         # Container namespace
         ee_namespace_list_roles,
-        ee_namespace_my_permissions,
         ee_namespace_add_role,
         ee_namespace_remove_role
 
@@ -462,6 +499,10 @@ ACTIONS_FOR_ALL_USERS = {
     view_role,
 }
 
+DENIED_FOR_ALL_USERS = {
+    upload_collection_to_other_pipeline_repo,
+}
+
 
 REUSABLE_EXTRA = {}
 
@@ -479,6 +520,10 @@ def _get_reusable_extras():
             "registry": _registry,
             "remote_ee": ReusableRemoteContainer(gen_string(), _registry_pk),
             "local_ee": ReusableLocalContainer(gen_string()),
+            "custom_staging_repo": ReusableAnsibleRepository(
+                gen_string(), is_staging=True),
+            "custom_repo": ReusableAnsibleRepository(
+                gen_string(), is_staging=False),
         }
 
     return REUSABLE_EXTRA
@@ -491,7 +536,7 @@ def test_global_role_actions(role):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
     user = create_user(USERNAME, PASSWORD)
-    group = create_group_with_user_and_role(user, role)
+    group = create_group_for_user(user, role)
     group_id = group['id']
 
     expected_allows = ROLES_TO_TEST[role]
@@ -511,76 +556,66 @@ def test_global_role_actions(role):
     requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
     requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
 
-    del_user(user['id'])
-    del_group(group_id)
-
     assert failures == []
 
 
 @pytest.mark.rbac_roles
 @pytest.mark.standalone_only
-def test_object_role_actions():
-    registry = ReusableContainerRegistry(gen_string())
-    registry_pk = registry.get_registry()["id"]
+@pytest.mark.parametrize("role", OBJECT_ROLES_TO_TEST)
+def test_object_role_actions(role):
+    USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
-    users_and_groups = {}
-    col_groups = []
-    ee_groups = []
+    extra = _get_reusable_extras()
 
-    # Create user/group for each role
-    # Populate collection/ee groups for object assignment
-    for role in OBJECT_ROLES_TO_TEST:
-        USERNAME = f"{NAMESPACE}_user_{gen_string()}"
-        user = create_user(USERNAME, PASSWORD)
-        group = create_group_with_user_and_role(user, role)
-        users_and_groups[role] = {
-            'user': user,
-            'group': group
-        }
-        if role in ['galaxy.collection_namespace_owner']:
-            col_groups.append({
-                'id': users_and_groups[role]['group']['id'],
-                'name': users_and_groups[role]['group']['name'],
-                'object_roles': [role]
-            })
-        if role in [
-            'galaxy.execution_environment_namespace_owner',
-            'galaxy.execution_environment_collaborator'
-        ]:
-            ee_groups.append({
-                'id': users_and_groups[role]['group']['id'],
-                'name': users_and_groups[role]['group']['name'],
-                'object_roles': [role]
-            })
+    namespace_href = extra["collection"].get_namespace()["pulp_href"]
+    repo_href = extra["custom_repo"].get_repo()["pulp_href"]
+    local_ee_href = extra["local_ee"].get_namespace()["pulp_href"]
+    remote_ee_href = extra["remote_ee"].get_namespace()["pulp_href"]
 
-    extra = {
-        "collection": ReusableCollection(gen_string(), groups=col_groups),
-        "registry": registry,
-        "remote_ee": ReusableRemoteContainer(gen_string(), registry_pk, groups=ee_groups),
-        "local_ee": ReusableLocalContainer(gen_string()),
-    }
+    user = create_user(USERNAME, PASSWORD)
+    # create group without any global roles
+    group = create_group_for_user(user)
+    group_id = group['id']
 
-    for role in OBJECT_ROLES_TO_TEST:
-        expected_allows = ROLES_TO_TEST[role]
+    def _apply_roles():
+        # assign object roles
+        if "collection" in role:
+            add_group_role(group["pulp_href"], role, namespace_href)
 
-        failures = []
-        # Test object actions
-        for action in OBJECT_ACTIONS:
-            expect_pass = action in expected_allows or action in ACTIONS_FOR_ALL_USERS
-            try:
-                action(users_and_groups[role]['user'], PASSWORD, expect_pass, extra)
-            except AssertionError:
-                failures.append(f'{role}:{action.__name__}')
+        if "execution_environment" in role:
+            add_group_role(group["pulp_href"], role, local_ee_href)
+            add_group_role(group["pulp_href"], role, remote_ee_href)
+
+        # for the repo owner role, grant them collection namespace permissions
+        # too so that they can upload collections to their repository.
+        if role == "galaxy.ansible_repository_owner":
+            add_group_role(group["pulp_href"], "galaxy.collection_namespace_owner", namespace_href)
+            add_group_role(group["pulp_href"], role, repo_href)
+
+    failures = []
+    expected_allows = OBJECT_ROLES_TO_TEST[role]
+
+    # since we're also applying the namespace owner role to test if the user can
+    # upload to repositories they own (when they have namespace perms), we also
+    # need to add the namespace owner actions to the list of expected allows
+    if role == "galaxy.ansible_repository_owner":
+        expected_allows = expected_allows.union({upload_collection_to_custom_repo})
+        expected_allows = expected_allows.union(
+            OBJECT_ROLES_TO_TEST["galaxy.collection_namespace_owner"])
+
+    # Test global actions
+    for action in OBJECT_ACTIONS:
+        # re apply roles in case they get reset
+        _apply_roles()
+        expect_pass = action in expected_allows or action in ACTIONS_FOR_ALL_USERS
+        try:
+            action(user, PASSWORD, expect_pass, extra)
+        except AssertionError:
+            failures.append(action.__name__)
 
     # cleanup user, group
-    for role in OBJECT_ROLES_TO_TEST:
-        del_user(users_and_groups[role]['user']['id'])
-        del_group(users_and_groups[role]['group']['id'])
-
-    del extra['collection']
-    del extra['registry']
-    del extra['remote_ee']
-    del extra['local_ee']
+    requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
+    requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
 
     assert failures == []
 
@@ -593,9 +628,33 @@ def test_role_actions_for_admin():
 
     # Test global actions
     for action in GLOBAL_ACTIONS:
+        expect_pass = action not in DENIED_FOR_ALL_USERS
         try:
-            action({'username': ADMIN_USER}, ADMIN_PASSWORD, True, extra)
+            action({'username': ADMIN_USER}, ADMIN_PASSWORD, expect_pass, extra)
         except AssertionError:
             failures.append(action.__name__)
 
     assert failures == []
+
+
+@pytest.mark.rbac_roles
+@pytest.mark.standalone_only
+def test_all_actions_are_tested():
+    """
+    Ensures that all of the actions defined in ROLES_TO_TEST and OBJECT_ROLES_TO_TEST
+    are also included in GLOBAL_ACTIONS
+    """
+
+    tested_actions = set(GLOBAL_ACTIONS)
+    defined_actions = set()
+
+    for role in ROLES_TO_TEST:
+        defined_actions = defined_actions.union(OBJECT_ACTIONS[role])
+
+    for role in OBJECT_ROLES_TO_TEST:
+        defined_actions = defined_actions.union(OBJECT_ACTIONS[role])
+
+    defined_actions = defined_actions.union(ACTIONS_FOR_ALL_USERS)
+    defined_actions = defined_actions.union(DENIED_FOR_ALL_USERS)
+
+    assert tested_actions == defined_actions

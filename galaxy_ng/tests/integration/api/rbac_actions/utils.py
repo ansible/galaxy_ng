@@ -55,7 +55,7 @@ def gen_string(size=10, chars=string.ascii_lowercase):
     return ''.join(random.choice(chars) for _ in range(size))
 
 
-def create_group_with_user_and_role(user, role, content_object=None, group=None):
+def create_group_for_user(user, role=None):
     name = f"{NAMESPACE}_group_{gen_string()}"
 
     g = create_group(name)
@@ -65,12 +65,19 @@ def create_group_with_user_and_role(user, role, content_object=None, group=None)
         json={"username": user["username"]},
         auth=ADMIN_CREDENTIALS
     )
+
+    if role:
+        add_group_role(g["pulp_href"], role)
+
+    return g
+
+
+def add_group_role(group_href, role, object_href=None):
     requests.post(
-        f"{PULP_API_ROOT}groups/{g['id']}/roles/",
-        json={"role": role, "content_object": content_object},
+        SERVER + group_href + "roles/",
+        json={"role": role, "content_object": object_href},
         auth=ADMIN_CREDENTIALS
     )
-    return g
 
 
 def create_user(username, password):
@@ -319,6 +326,8 @@ class ReusableCollection:
         ).json()["results"][0]["pulp_href"]
 
     def _reset_collection(self):
+        wait_for_all_tasks()
+
         resp = requests.get(
             (
                 f"{PULP_API_ROOT}content/ansible/collection_versions/"
@@ -333,7 +342,6 @@ class ReusableCollection:
                 self._collection_name, self._namespace_name)
             self._collection_href = self._collection["pulp_href"]
         else:
-
             # If it doesn't, reset it's state.
             self._reset_collection_repo()
 
@@ -413,6 +421,48 @@ def gen_registry(name):
     ).json()
 
 
+def gen_ansible_repo(name, labels={}):
+    repo = requests.post(
+        f"{PULP_API_ROOT}repositories/ansible/ansible/",
+        json={
+            "pulp_labels": labels,
+            "name": name,
+            "description": "foobar",
+            "gpgkey": "foobar"
+        },
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+
+    resp = requests.post(
+        f"{PULP_API_ROOT}distributions/ansible/ansible/",
+        json={
+            "name": name,
+            "repository": repo["pulp_href"],
+            "base_path": name
+        },
+        auth=ADMIN_CREDENTIALS
+    )
+
+    wait_for_task(resp)
+
+    distro = requests.get(
+        f"{PULP_API_ROOT}distributions/ansible/ansible/?name={name}",
+        auth=ADMIN_CREDENTIALS
+    ).json()["results"][0]
+
+    return repo, distro
+
+
+def del_ansible_repo(name):
+    distro = requests.get(
+        f"{PULP_API_ROOT}distributions/ansible/ansible/?name={name}",
+        auth=ADMIN_CREDENTIALS
+    ).json()["results"][0]
+
+    requests.delete(SERVER + distro["pulp_href"], auth=ADMIN_CREDENTIALS)
+    requests.delete(SERVER + distro["repository"], auth=ADMIN_CREDENTIALS)
+
+
 class ReusableContainerRegistry:
     def __init__(self, name):
         self._name = f"ee_ns_{name}"
@@ -439,11 +489,33 @@ class ReusableContainerRegistry:
         self.cleanup()
 
 
+class ReusableAnsibleRepository:
+    def __init__(self, name, is_staging):
+        self._name = name
+        self.is_staging = is_staging
+        labels = {}
+        if is_staging:
+            labels["pipeline"] = "staging"
+
+        self._repo, self._distro = gen_ansible_repo(self._name, labels=labels)
+
+    def get_distro(self):
+        return self._distro
+
+    def get_repo(self):
+        return self._repo
+
+    def cleanup(self):
+        del_ansible_repo(self._name)
+
+    def __del__(self):
+        self.cleanup()
+
+
 class ReusableRemoteContainer:
-    def __init__(self, name, registry_pk, groups=None):
+    def __init__(self, name, registry_pk):
         self._ns_name = f"ee_ns_{name}"
         self._name = f"ee_remote_{name}"
-        self._groups = groups or []
         self._registry_pk = registry_pk
 
         self._reset()
@@ -503,11 +575,10 @@ class ReusableRemoteContainer:
 
 
 class ReusableLocalContainer:
-    def __init__(self, name, groups=None):
+    def __init__(self, name):
         self._ns_name = f"ee_ns_{name}"
         self._repo_name = f"ee_local_{name}"
         self._name = f"{self._ns_name}/{self._repo_name}"
-        self._groups = groups or []
 
         self._reset()
 
@@ -567,54 +638,3 @@ class ReusableLocalContainer:
     def cleanup(self):
         del_container(self._name)
 
-
-def create_ansible_repo(user, password, expect_pass):
-    response = requests.post(
-        f"{PULP_API_ROOT}repositories/ansible/ansible/",
-        json={
-            "pulp_labels": {},
-            "name": f"repo_ansible-{gen_string()}",
-            "description": "foobar",
-            "gpgkey": "foobar"
-        },
-        auth=(user, password),
-    )
-    assert_pass(expect_pass, response.status_code, 201, 403)
-    return response
-
-
-def create_ansible_distro(user, password, expect_pass):
-    task_response = requests.post(
-        f"{PULP_API_ROOT}distributions/ansible/ansible/",
-        {
-            "name": f"foobar-{gen_string()}",
-            "base_path": f"foobar-{gen_string()}"
-        },
-        auth=(user, password),
-    )
-
-    assert_pass(expect_pass, task_response.status_code, 202, 403)
-
-    finished_task_response = wait_for_task(task_response)
-    assert_pass(expect_pass, finished_task_response.status_code, 200, 403)
-
-    created_resources = finished_task_response.json()['created_resources'][0]
-    response = requests.get(
-        f"{SERVER}{created_resources}",
-        auth=(user, password),
-    )
-    assert_pass(expect_pass, response.status_code, 200, 403)
-    return response
-
-
-def create_ansible_remote(user, password, expect_pass):
-    response = requests.post(
-        f"{PULP_API_ROOT}remotes/ansible/collection/",
-        json={
-            "name": f"foobar-{gen_string()}",
-            "url": "foo.bar/api/"
-        },
-        auth=(user, password),
-    )
-    assert_pass(expect_pass, response.status_code, 201, 403)
-    return response
