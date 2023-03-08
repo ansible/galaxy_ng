@@ -9,6 +9,7 @@ import logging
 from galaxy_ng.tests.integration.utils import uuid4
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group, \
     create_test_user, upload_test_artifact
+from orionutils.generator import build_collection
 from galaxykit.namespaces import create_namespace
 from galaxykit.repositories import get_all_repositories, delete_repository, create_repository, search_collection, \
     set_certification
@@ -71,10 +72,9 @@ class TestRM:
         # POST http://localhost:5001/api/automation-hub/v3/collections/namespace_1ca591cc66f04b9daee8a9ebeabd83c9/collection_dep_a_ejrhoshf/versions/42.100.59/move/published/christian-repo/
         # "detail": "Repo(s) for moving collection namespace_1ca591cc66f04b9daee8a9ebeabd83c9-collection_dep_a_ejrhoshf-42.100.59 not found"
 
-
 # http://localhost:5001/pulp_ansible/galaxy/default/api/v3/plugin/ansible/search/collection-versions/?repository=published&name=collection_dep_a_ejrhoshf
 
-    @pytest.mark.rm
+    # @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search(self, galaxy_client):
         """
@@ -94,3 +94,123 @@ class TestRM:
         wait_for_task(gc, resp_task)
         result = search_collection(gc, search_string=artifact.name)
         logger.debug(result)
+
+    @pytest.mark.rm
+    @pytest.mark.standalone_only
+    def test_search_upload_same_colection_same_repo_diff_versions(self, galaxy_client):
+        """
+        Verifies
+        """
+        test_repo_name = f"repo-test-{uuid4()}"
+        gc = galaxy_client("iqe_admin")
+        repo_res = create_repository(gc, test_repo_name)
+        namespace_name = f"namespace_{uuid4()}"
+        namespace_name = namespace_name.replace("-", "")
+        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        key = f"test_{uuid4()}"
+        key = key.replace("-", "")
+
+        artifact_1 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name}, key=key
+        )
+
+        artifact_1 = upload_test_artifact(gc, namespace_name, test_repo_name, artifact_1)
+        set_certification(gc, artifact_1)
+
+        artifact_2 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name}, key=key
+        )
+
+        artifact_2 = upload_test_artifact(gc, namespace_name, test_repo_name, artifact_2)
+        set_certification(gc, artifact_2)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
+        payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
+        resp_task = gc.post(f"{repo_res['pulp_href']}modify/", body=payload)
+        wait_for_task(gc, resp_task)
+        result = search_collection(gc, repository=test_repo_name, search_string=artifact_1.name)
+        logger.debug(result)
+
+    # @pytest.mark.rm
+    @pytest.mark.standalone_only
+    def test_search_upload_same_colection_diff_repo_diff_versions(self, galaxy_client):
+        """
+        Verifies TODO
+        """
+        test_repo_name_1 = f"repo-test-{uuid4()}"
+        test_repo_name_2 = f"repo-test-{uuid4()}"
+
+        gc = galaxy_client("iqe_admin")
+        repo_res = create_repository(gc, test_repo_name_1)
+        repo_res = create_repository(gc, test_repo_name_2)
+
+        namespace_name = f"namespace_{uuid4()}"
+        namespace_name = namespace_name.replace("-", "")
+        create_namespace(gc, namespace_name, "ns_group_for_tests")
+
+        artifact_1 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1}, key="test_rm_1"
+        )
+
+        artifact_1 = upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_1)
+        set_certification(gc, artifact_1)
+
+        artifact_2 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name_2}, key="test_rm_1"
+        )
+
+        artifact_2 = upload_test_artifact(gc, namespace_name, test_repo_name_2, artifact_2)
+        set_certification(gc, artifact_2)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
+        payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
+        resp_task = gc.post(f"{repo_res['pulp_href']}modify/", body=payload)
+        wait_for_task(gc, resp_task)
+        result = search_collection(gc, search_string=artifact_1.name)
+        logger.debug(result)
+
+    # @pytest.mark.rm
+    @pytest.mark.standalone_only
+    def test_search_upload_same_colection_diff_repo_same_versions(self, galaxy_client):
+        """
+        Verifies TODO
+        """
+        test_repo_name_1 = f"repo-test-{uuid4()}"
+        test_repo_name_2 = f"repo-test-{uuid4()}"
+
+        gc = galaxy_client("iqe_admin")
+        repo_res = create_repository(gc, test_repo_name_1)
+        repo_res = create_repository(gc, test_repo_name_2)
+
+        namespace_name = f"namespace_{uuid4()}"
+        namespace_name = namespace_name.replace("-", "")
+        create_namespace(gc, namespace_name, "ns_group_for_tests")
+
+        artifact_1 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1}, key="test_rm_2"
+        )
+
+        artifact_1 = upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_1)
+        set_certification(gc, artifact_1)
+
+        artifact_2 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_2}, key="test_rm_2"
+        )
+
+        artifact_2 = upload_test_artifact(gc, namespace_name, test_repo_name_2, artifact_2)
+        set_certification(gc, artifact_2)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
+        payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
+        resp_task = gc.post(f"{repo_res['pulp_href']}modify/", body=payload)
+        wait_for_task(gc, resp_task)
+        result = search_collection(gc, search_string=artifact_1.name)
+        logger.debug(result)
+
+# upload same collection same version same repo
