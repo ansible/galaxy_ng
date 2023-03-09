@@ -1,6 +1,4 @@
-import random
 import requests
-import string
 import time
 import subprocess
 from urllib.parse import urljoin
@@ -9,13 +7,17 @@ from galaxy_ng.tests.integration.utils import (
     upload_artifact,
     get_client,
     wait_for_task as wait_for_task_fixtures,
-    TaskWaitingTimeout
+    TaskWaitingTimeout,
+    gen_string,
+    wait_for_all_tasks as wait_for_all_tasks_fixtures,
+    AnsibleDistroAndRepo
 )
 from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture
 
 from ansible.galaxy.api import GalaxyError
 
 CLIENT_CONFIG = AnsibleConfigFixture("admin")
+ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 
 API_ROOT = CLIENT_CONFIG["url"]
 PULP_API_ROOT = f"{API_ROOT}pulp/api/v3/"
@@ -49,10 +51,6 @@ def assert_pass(expect_pass, code, pass_status, deny_status):
         assert code == pass_status
     else:
         assert code == deny_status
-
-
-def gen_string(size=10, chars=string.ascii_lowercase):
-    return ''.join(random.choice(chars) for _ in range(size))
 
 
 def create_group_for_user(user, role=None):
@@ -118,6 +116,10 @@ def wait_for_task(resp, path=None, timeout=300):
             ready = resp.json()["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
+
+
+def wait_for_all_tasks():
+    wait_for_all_tasks_fixtures(ADMIN_CLIENT)
 
 
 def ensure_test_container_is_pulled():
@@ -223,7 +225,7 @@ def gen_collection(name, namespace):
 
     ansible_config = AnsibleConfigFixture("admin", namespace=artifact.namespace)
 
-    client = get_client(ansible_config)
+    client = ADMIN_CLIENT
 
     wait_for_task_fixtures(client, upload_artifact(ansible_config, client, artifact))
 
@@ -258,30 +260,6 @@ def reset_remote():
         },
         auth=ADMIN_CREDENTIALS,
     ).json()
-
-
-def wait_for_all_tasks(timeout=300):
-    ready = False
-    wait_until = time.time() + timeout
-
-    while not ready:
-        if wait_until < time.time():
-            raise TaskWaitingTimeout()
-        running_count = requests.get(
-            f"{PULP_API_ROOT}tasks/",
-            params={"state": "running"},
-            auth=ADMIN_CREDENTIALS
-        ).json()["count"]
-
-        waiting_count = requests.get(
-            f"{PULP_API_ROOT}tasks/",
-            params={"state": "waiting"},
-            auth=ADMIN_CREDENTIALS
-        ).json()["count"]
-
-        ready = running_count == 0 and waiting_count == 0
-
-        time.sleep(1)
 
 
 class ReusableCollection:
@@ -421,63 +399,10 @@ def gen_registry(name):
     ).json()
 
 
-def gen_ansible_repo(name, labels={}):
-    repo = requests.post(
-        f"{PULP_API_ROOT}repositories/ansible/ansible/",
-        json={
-            "pulp_labels": labels,
-            "name": name,
-            "description": "foobar",
-            "gpgkey": "foobar"
-        },
-        auth=ADMIN_CREDENTIALS,
-    ).json()
-
-    resp = requests.post(
-        f"{PULP_API_ROOT}distributions/ansible/ansible/",
-        json={
-            "name": name,
-            "repository": repo["pulp_href"],
-            "base_path": name
-        },
-        auth=ADMIN_CREDENTIALS
-    )
-
-    wait_for_task(resp)
-
-    distro = requests.get(
-        f"{PULP_API_ROOT}distributions/ansible/ansible/?name={name}",
-        auth=ADMIN_CREDENTIALS
-    ).json()["results"][0]
-
-    return repo, distro
-
-
-def del_ansible_repo(name):
-    distro = requests.get(
-        f"{PULP_API_ROOT}distributions/ansible/ansible/?name={name}",
-        auth=ADMIN_CREDENTIALS
-    ).json()["results"][0]
-
-    requests.delete(SERVER + distro["pulp_href"], auth=ADMIN_CREDENTIALS)
-    requests.delete(SERVER + distro["repository"], auth=ADMIN_CREDENTIALS)
-
-
 class ReusableContainerRegistry:
     def __init__(self, name):
         self._name = f"ee_ns_{name}"
         self._registry = gen_registry(self._name)
-
-    # def _reset(self):
-    #     data = requests.get(
-    #         f'{API_ROOT}_ui/v1/execution-environments/registries/?name={self._name}',
-    #         auth=ADMIN_CREDENTIALS
-    #     ).json()
-
-    #     if data['meta']['count'] == 1:
-    #         return data['data'][0]
-    #     else:
-    #         return gen_registry(self._name)
 
     def get_registry(self):
         return self._registry
@@ -489,27 +414,13 @@ class ReusableContainerRegistry:
         self.cleanup()
 
 
-class ReusableAnsibleRepository:
+class ReusableAnsibleRepository(AnsibleDistroAndRepo):
     def __init__(self, name, is_staging):
-        self._name = name
-        self.is_staging = is_staging
-        labels = {}
+        repo_body = {}
         if is_staging:
-            labels["pipeline"] = "staging"
-
-        self._repo, self._distro = gen_ansible_repo(self._name, labels=labels)
-
-    def get_distro(self):
-        return self._distro
-
-    def get_repo(self):
-        return self._repo
-
-    def cleanup(self):
-        del_ansible_repo(self._name)
-
-    def __del__(self):
-        self.cleanup()
+            repo_body["pulp_labels"] = {"pipeline": "staging"}
+        super().__init__(
+            ADMIN_CLIENT, name, repo_body=repo_body, distro_body=None)
 
 
 class ReusableRemoteContainer:

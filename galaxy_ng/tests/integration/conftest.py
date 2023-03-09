@@ -62,6 +62,7 @@ min_hub_version: This marker takes an argument that indicates the minimum hub ve
 iqe_rbac_test: imported iqe tests checking role permissions
 sync: sync tests against stage
 certified_sync: sync tests container against container
+auto_approve: run tests that require AUTO_APPROVE to be set to true
 """
 
 

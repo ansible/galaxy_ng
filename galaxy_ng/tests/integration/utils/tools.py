@@ -3,6 +3,8 @@
 import shutil
 import uuid
 from random import randint
+import random
+import string
 
 
 def is_docker_installed():
@@ -34,3 +36,7 @@ def iterate_all(api_client, url):
 def generate_random_artifact_version():
     """Return a string with random integers using format xx.yy.xx."""
     return f"{randint(0, 100)}.{randint(0, 100)}.{randint(1, 100)}"
+
+
+def gen_string(size=10, chars=string.ascii_lowercase):
+    return ''.join(random.choice(chars) for _ in range(size))

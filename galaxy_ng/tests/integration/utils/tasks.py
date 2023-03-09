@@ -13,6 +13,26 @@ from .errors import (
 logger = logging.getLogger(__name__)
 
 
+def wait_for_all_tasks(client, timeout=300):
+    ready = False
+    wait_until = time.time() + timeout
+
+    while not ready:
+        if wait_until < time.time():
+            raise TaskWaitingTimeout()
+        running_count = client(
+            "pulp/api/v3/tasks/?state=running",
+        )["count"]
+
+        waiting_count = client(
+            "pulp/api/v3/tasks/?state=waiting",
+        )["count"]
+
+        ready = running_count == 0 and waiting_count == 0
+
+        time.sleep(1)
+
+
 def wait_for_task(api_client, resp, task_id=None, timeout=300, raise_on_error=False):
     if task_id:
         url = f"v3/tasks/{task_id}/"

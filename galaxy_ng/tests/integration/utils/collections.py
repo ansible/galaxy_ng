@@ -236,7 +236,7 @@ def upload_artifact(
     :param hash: compute and send a sha256 sum for the payload.
     :param no_filename: Skip sending the filename in the form.
     :param no_file: Skip sneding the file in the form.
-    :param use_distribution: If true, upload to the <namespace> endpoint.
+    :param use_distribution: If true, upload to the inbound-<namespace> endpoint.
     :return: The import task URI that contains the import results.
     """
     collection_path = artifact.filename
@@ -299,7 +299,7 @@ def upload_artifact(
             _urljoin(
                 config["url"],
                 "content",
-                artifact.namespace,
+                f"inbound-{artifact.namespace}",
                 "v3",
                 "artifacts",
                 "collections",
