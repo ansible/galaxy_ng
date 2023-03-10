@@ -64,7 +64,10 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
     # legacy clients
     if use_distribution:
         admin_client = get_client(ansible_config(profile="admin"))
-        if admin_client(f"pulp/api/v3/distributions/ansible/ansible/?name=inbound-{artifact.namespace}")["count"] == 0:
+        distros = admin_client("pulp/api/v3/distributions/ansible/"
+                               f"ansible/?name=inbound-{artifact.namespace}")
+
+        if distros["count"] == 0:
             repo = admin_client(
                 "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]
             wait_for_task(admin_client, admin_client(

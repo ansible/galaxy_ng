@@ -548,4 +548,3 @@ class ReusableLocalContainer:
 
     def cleanup(self):
         del_container(self._name)
-

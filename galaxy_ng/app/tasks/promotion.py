@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 from pulpcore.plugin.tasking import add_and_remove, dispatch
 from pulp_ansible.app.models import (

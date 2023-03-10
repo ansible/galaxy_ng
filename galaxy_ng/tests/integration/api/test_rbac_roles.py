@@ -16,8 +16,6 @@ from .rbac_actions.utils import (
     create_group_for_user,
     create_user,
     gen_string,
-    del_user,
-    del_group,
     add_group_role,
     ReusableCollection,
     ReusableContainerRegistry,
@@ -192,7 +190,15 @@ GLOBAL_ACTIONS = [
     view_ansible_remote,
     add_ansible_remote,
     change_ansible_remote,
-    delete_ansible_remote
+    delete_ansible_remote,
+
+    add_groups,
+    change_groups,
+    delete_groups,
+    view_role,
+    add_pulp_groups,
+    delete_pulp_groups,
+    view_pulp_groups,
 ]
 
 # TODO: Update object tests to include delete actions
@@ -645,16 +651,14 @@ def test_all_actions_are_tested():
     are also included in GLOBAL_ACTIONS
     """
 
-    tested_actions = set(GLOBAL_ACTIONS)
-    defined_actions = set()
+    tested_actions = set([action.__name__ for action in GLOBAL_ACTIONS])
+    role_actions = set()
 
     for role in ROLES_TO_TEST:
-        defined_actions = defined_actions.union(OBJECT_ACTIONS[role])
+        role_actions = role_actions.union([action.__name__ for action in ROLES_TO_TEST[role]])
 
     for role in OBJECT_ROLES_TO_TEST:
-        defined_actions = defined_actions.union(OBJECT_ACTIONS[role])
+        role_actions = role_actions.union(
+            [action.__name__ for action in OBJECT_ROLES_TO_TEST[role]])
 
-    defined_actions = defined_actions.union(ACTIONS_FOR_ALL_USERS)
-    defined_actions = defined_actions.union(DENIED_FOR_ALL_USERS)
-
-    assert tested_actions == defined_actions
+    assert role_actions.issubset(tested_actions)

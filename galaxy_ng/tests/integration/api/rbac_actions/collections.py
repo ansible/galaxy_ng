@@ -114,7 +114,6 @@ def _upload_collection_common(user, password, expect_pass, extra, base_path=None
         assert proc.returncode != 0
 
 
-
 def create_collection_namespace(user, password, expect_pass, extra):
     ns = gen_string()
 
