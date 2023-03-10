@@ -39,7 +39,12 @@ class ContainerSyncandManifestListTestCase(TestCaseUsingBindings):
         )
 
     def _delete_remote_repo(self, remote):
-        self.smash_client.delete(f"{self.galaxy_api_prefix}/v3/plugin/execution-environments/repositories/{remote.name}/")
+        self.smash_client.delete(
+            "{}/v3/plugin/execution-environments/repositories/{}/".format(
+                self.galaxy_api_prefix,
+                remote.name
+            )
+        )
 
     def test_manifests_and_remote_sync(self):
         remote_repo = self.container_remotes_api.create({
@@ -53,7 +58,12 @@ class ContainerSyncandManifestListTestCase(TestCaseUsingBindings):
 
         # the galaxy_ng client doesn't seem to return anything with the sync function, so we're
         # using the api directly instead
-        self.smash_client.post(f"{self.galaxy_api_prefix}/v3/plugin/execution-environments/repositories/{remote_repo.name}/_content/sync/")
+        self.smash_client.post(
+            "{}/v3/plugin/execution-environments/repositories/{}/_content/sync/".format(
+                self.galaxy_api_prefix,
+                remote_repo.name
+            )
+        )
 
         tags_list = self.container_repo_tags_api.list(remote_repo.name)
         self.assertEqual(tags_list.meta.count, 2)

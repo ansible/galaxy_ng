@@ -188,7 +188,8 @@ class TestCaseUsingBindings(PulpTestCase):
         cls.container_repo_api = ContainerRepositoryApi(cls.client)
         cls.container_remotes_api = ApiUiV1ExecutionEnvironmentsRemotesApi(cls.client)
         cls.container_registries_api = ApiUiV1ExecutionEnvironmentsRegistriesApi(cls.client)
-        cls.container_remote_sync_api = ApiV3PluginExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
+        cls.container_remote_sync_api = \
+            ApiV3PluginExecutionEnvironmentsRepositoriesContentSyncApi(cls.client)
         cls.container_registry_sync_api = ApiUiV1ExecutionEnvironmentsRegistriesSyncApi(cls.client)
         cls.container_images_api = ContainerImagesAPI(cls.client)
         cls.get_ansible_cfg_before_test()
@@ -218,7 +219,6 @@ class TestCaseUsingBindings(PulpTestCase):
                 "remote_tmp = /tmp/ansible\n"
                 "local_tmp = /tmp/ansible\n"
             )
-
 
     def update_ansible_cfg(self, base_path, auth=True):
         """Update ansible.cfg to use the given base_path."""
