@@ -35,6 +35,22 @@ def create_repo_and_dist(client, repo_name):
     return dist_data
 
 
+def edit_results_for_verification(results):
+    _results = results["data"]
+    new_results = []
+    for data in _results:
+        repo_name = data["repository"]["name"]
+        cv_name = data["collection_version"]["name"]
+        cv_version = data["collection_version"]["version"]
+        is_highest = data["is_highest"]
+        is_deprecated = data["is_deprecated"]
+        is_signed = data["is_signed"]
+        new_result = {"repo_name": repo_name, "cv_name": cv_name, "cv_version": cv_version, "is_highest": is_highest,
+                      "is_deprecated": is_deprecated, "is_signed": is_signed}
+        new_results.append(new_result)
+    return new_results
+
+
 @pytest.mark.min_hub_version("4.6dev")  # set correct min hub version
 class TestRM:
 
@@ -105,7 +121,7 @@ class TestRM:
         result = search_collection(gc, search_string=artifact.name)
         logger.debug(result)
 
-    @pytest.mark.rm
+    # @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_colection_same_repo_diff_versions(self, galaxy_client):
         """
@@ -150,47 +166,56 @@ class TestRM:
         assert result["data"][0]["collection_version"]["version"] == "0.0.2"
         assert result["data"][0]["repository"]["name"] == test_repo_name
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_colection_diff_repo_diff_versions(self, galaxy_client):
         """
-        Verifies TODO
+        Verifies
         """
         test_repo_name_1 = f"repo-test-{uuid4()}"
         test_repo_name_2 = f"repo-test-{uuid4()}"
 
         gc = galaxy_client("iqe_admin")
-        repo_res = create_repository(gc, test_repo_name_1)
-        repo_res = create_repository(gc, test_repo_name_2)
+        dist_data_1 = create_repo_and_dist(gc, test_repo_name_1)
+        dist_data_2 = create_repo_and_dist(gc, test_repo_name_2)
 
         namespace_name = f"namespace_{uuid4()}"
         namespace_name = namespace_name.replace("-", "")
         create_namespace(gc, namespace_name, "ns_group_for_tests")
+        key = f"test_{uuid4()}"
+        key = key.replace("-", "")
 
         artifact_1 = build_collection(
             "skeleton",
             config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
-            key="test_rm_1"
+            key=key
         )
 
-        artifact_1 = upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_1)
-        set_certification(gc, artifact_1)
+        upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_1)
 
         artifact_2 = build_collection(
             "skeleton",
             config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name_2},
-            key="test_rm_1"
+            key=key
         )
 
-        artifact_2 = upload_test_artifact(gc, namespace_name, test_repo_name_2, artifact_2)
-        set_certification(gc, artifact_2)
+        upload_test_artifact(gc, namespace_name, test_repo_name_2, artifact_2)
 
         collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
-        payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
-        resp_task = gc.post(f"{repo_res['pulp_href']}modify/", body=payload)
+
+        payload_1 = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
+        payload_2 = {"add_content_units": [collection_resp["results"][1]["pulp_href"]]}
+
+        resp_task = gc.post(f"{dist_data_1['repository']}modify/", body=payload_1)
         wait_for_task(gc, resp_task)
-        result = search_collection(gc, search_string=artifact_1.name)
-        logger.debug(result)
+        resp_task = gc.post(f"{dist_data_2['repository']}modify/", body=payload_2)
+        wait_for_task(gc, resp_task)
+
+        results = search_collection(gc, search_string=artifact_1.name)
+        logger.debug(results)
+        new_results = edit_results_for_verification(results)
+        logger.debug(new_results)
+
 
     # @pytest.mark.rm
     @pytest.mark.standalone_only
