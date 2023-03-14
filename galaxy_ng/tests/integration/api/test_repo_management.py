@@ -10,7 +10,7 @@ from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_gro
     create_test_user, upload_test_artifact
 from orionutils.generator import build_collection
 
-from galaxykit.collections import delete_collection
+from galaxykit.collections import delete_collection, deprecate_collection
 from galaxykit.namespaces import create_namespace
 from galaxykit.repositories import get_all_repositories, delete_repository, create_repository, search_collection, \
     set_certification
@@ -56,7 +56,7 @@ def edit_results_for_verification(results):
 @pytest.mark.min_hub_version("4.6dev")  # set correct min hub version
 class TestRM:
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_create_repository(self, galaxy_client):
         """
@@ -68,7 +68,7 @@ class TestRM:
         repos = get_all_repositories(gc)
         assert repo_exists(test_repo_name, repos)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_delete_repository(self, galaxy_client):
         """
@@ -85,7 +85,7 @@ class TestRM:
 
     # http://localhost:5001/pulp_ansible/galaxy/default/api/v3/plugin/ansible/search/collection-versions/?repository=published&name=collection_dep_a_ejrhoshf
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search(self, galaxy_client):
         """
@@ -106,7 +106,7 @@ class TestRM:
         result = search_collection(gc, search_string=artifact.name)
         logger.debug(result)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_same_repo_diff_versions(self, galaxy_client):
         """
@@ -151,7 +151,7 @@ class TestRM:
         assert result["data"][0]["collection_version"]["version"] == "0.0.2"
         assert result["data"][0]["repository"]["name"] == test_repo_name
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_diff_repo_diff_versions(self, galaxy_client):
         """
@@ -205,7 +205,7 @@ class TestRM:
                 assert data["cv_name"] == artifact_1.name
 
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_diff_repo_same_versions(self, galaxy_client):
         """
@@ -249,7 +249,7 @@ class TestRM:
             if data["repo_name"] == test_repo_name_1:
                 assert data["cv_name"] == artifact_1.name
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_same_repo_same_versions(self, galaxy_client):
         """
@@ -277,7 +277,7 @@ class TestRM:
         assert ctx.value.response.status_code == 400
 
 
-    #@pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_diff_collection_diff_namespaces(self, galaxy_client):
         """
@@ -321,9 +321,9 @@ class TestRM:
         new_results = edit_results_for_verification(results)
         logger.debug(new_results)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
-    def test_search_upload_same_collection_diff_repo_diff_versions_delete_check_is_highest(self, galaxy_client):
+    def test_search_upload_same_collection_diff_repo_diff_versions_check_both_is_highest(self, galaxy_client):
         """
         Verifies
         """
@@ -370,12 +370,74 @@ class TestRM:
         logger.debug(results)
         new_results = edit_results_for_verification(results)
         logger.debug(new_results)
-        # FAIL, why doesn't it find the collection?
-        delete_collection(gc, namespace_name, artifact_1.name, version="0.0.2", repository=test_repo_name_2)
+        for data in new_results:
+            if data["repo_name"] == test_repo_name_1:
+                assert data["cv_name"] == artifact_1.name
+                assert data["is_highest"] is True
+            if data["repo_name"] == test_repo_name_2:
+                assert data["cv_name"] == artifact_1.name
+                assert data["is_highest"] is True
+
+    @pytest.mark.rm
+    @pytest.mark.standalone_only
+    def test_search_upload_same_collection_same_repo_diff_versions_delete_check_is_highest(self, galaxy_client):
+        """
+        Verifies TODO
+        """
+        test_repo_name = f"repo-test-{uuid4()}"
+
+        gc = galaxy_client("iqe_admin")
+        dist_data = create_repo_and_dist(gc, test_repo_name)
+
+        namespace_name = f"namespace_{uuid4()}"
+        namespace_name = namespace_name.replace("-", "")
+        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        key = f"test_{uuid4()}"
+        key = key.replace("-", "")
+
+        artifact_1 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name},
+            key=key
+        )
+
+        upload_test_artifact(gc, namespace_name, test_repo_name, artifact_1)
+
+        artifact_2 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name},
+            key=key
+        )
+
+        upload_test_artifact(gc, namespace_name, test_repo_name, artifact_2)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
+
+        payload_1 = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
+        payload_2 = {"add_content_units": [collection_resp["results"][1]["pulp_href"]]}
+
+        resp_task = gc.post(f"{dist_data['repository']}modify/", body=payload_1)
+        wait_for_task(gc, resp_task)
+        resp_task = gc.post(f"{dist_data['repository']}modify/", body=payload_2)
+        wait_for_task(gc, resp_task)
+
         results = search_collection(gc, search_string=artifact_1.name)
         logger.debug(results)
         new_results = edit_results_for_verification(results)
         logger.debug(new_results)
+        for data in new_results:
+            if data["cv_version"] == "0.0.2":
+                assert data["is_highest"] is True
+            if data["cv_version"] == "0.0.1":
+                assert data["is_highest"] is False
+        delete_collection(gc, namespace_name, artifact_1.name, version="0.0.2", repository=test_repo_name)
+        results = search_collection(gc, search_string=artifact_1.name)
+        logger.debug(results)
+        new_results = edit_results_for_verification(results)
+        logger.debug(new_results)
+        for data in new_results:
+            if data["cv_version"] == "0.0.1":
+                assert data["is_highest"] is True
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
@@ -410,6 +472,41 @@ class TestRM:
         results = search_collection(gc, search_string=artifact.name)
         logger.debug(results)
 
+
+    @pytest.mark.rm
+    @pytest.mark.standalone_only
+    def test_search_deprecate_collection(self, galaxy_client):
+        """
+        Verifies
+        """
+        test_repo_name = f"repo-test-{uuid4()}"
+        gc = galaxy_client("iqe_admin")
+        dist_data = create_repo_and_dist(gc, test_repo_name)
+
+        namespace_name = f"namespace_{uuid4()}"
+        namespace_name = namespace_name.replace("-", "")
+        create_namespace(gc, namespace_name, "ns_group_for_tests")
+
+        artifact = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name},
+        )
+
+        upload_test_artifact(gc, namespace_name, test_repo_name, artifact)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+
+        payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
+
+        resp_task = gc.post(f"{dist_data['repository']}modify/", body=payload)
+        wait_for_task(gc, resp_task)
+
+        deprecate_collection(gc, namespace_name, artifact.name, repository=test_repo_name)
+
+        results = search_collection(gc, repository=test_repo_name, search_string=artifact.name)
+        logger.debug(results)
+        new_results = edit_results_for_verification(results)
+        assert new_results[0]["is_deprecated"] is True
 
 # delete is_highest, check the other is_highest
 # is highest is in the context of the repo
