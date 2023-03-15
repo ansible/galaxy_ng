@@ -1,13 +1,8 @@
-"""
-(iqe) tests for rbac
-Imported from https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugin/
-"""
 import pytest
 import logging
 
 from galaxy_ng.tests.integration.utils import uuid4
-from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group, \
-    create_test_user, upload_test_artifact
+from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact
 from orionutils.generator import build_collection
 
 from galaxykit.collections import delete_collection, deprecate_collection
@@ -53,6 +48,13 @@ def edit_results_for_verification(results):
         new_results.append(new_result)
     return new_results
 
+
+def search_collection_endpoint(client, repository='', by='name', search_string=''):
+    result = search_collection(client, repository, by, search_string)
+    new_results = edit_results_for_verification(result)
+    return result["meta"]["count"], new_results
+
+
 def verify_repo_data(expected_repos, actual_repos):
     def is_dict_included(dict1, dict2):
         # Check if all key-value pairs in dict1 are present in dict2
@@ -66,13 +68,14 @@ def verify_repo_data(expected_repos, actual_repos):
             if is_dict_included(expected_repo, actual_repo):
                 found = True
         if not found:
+            logger.debug(f"{expected_repo} not found in actual repos")
             return False
     return True
 
 
 @pytest.mark.min_hub_version("4.6dev")  # set correct min hub version
 class TestRM:
-    #@pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_create_repository(self, galaxy_client):
         """
@@ -84,7 +87,7 @@ class TestRM:
         repos = get_all_repositories(gc)
         assert repo_exists(test_repo_name, repos)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_delete_repository(self, galaxy_client):
         """
@@ -99,9 +102,8 @@ class TestRM:
         repos = get_all_repositories(gc)
         assert not repo_exists(test_repo_name, repos)
 
-    # http://localhost:5001/pulp_ansible/galaxy/default/api/v3/plugin/ansible/search/collection-versions/?repository=published&name=collection_dep_a_ejrhoshf
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search(self, galaxy_client):
         """
@@ -119,10 +121,12 @@ class TestRM:
         payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
         resp_task = gc.post(f"{repo_res['pulp_href']}modify/", body=payload)
         wait_for_task(gc, resp_task)
-        result = search_collection(gc, search_string=artifact.name)
-        logger.debug(result)
+        matches, result = search_collection_endpoint(gc, search_string=artifact.name)
+        expected = [{"repo_name": test_repo_name, "cv_name": artifact.name}]
+        assert verify_repo_data(expected, result)
+        assert matches == 2  # +1 (staging)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_same_repo_diff_versions(self, galaxy_client):
         """
@@ -132,7 +136,6 @@ class TestRM:
         gc = galaxy_client("iqe_admin")
 
         dist_data = create_repo_and_dist(gc, test_repo_name)
-        logger.debug(dist_data)
 
         namespace_name = f"namespace_{uuid4()}"
         namespace_name = namespace_name.replace("-", "")
@@ -159,15 +162,14 @@ class TestRM:
                                          collection_resp["results"][1]["pulp_href"]]}
         resp_task = gc.post(f"{dist_data['repository']}modify/", body=payload)
         wait_for_task(gc, resp_task)
-        result = search_collection(gc, repository=test_repo_name, search_string=artifact_1.name)
-        logger.debug(result)
-        assert result["meta"]["count"] == 2
-        assert result["data"][1]["is_highest"] is False
-        assert result["data"][0]["is_highest"] is True
-        assert result["data"][0]["collection_version"]["version"] == "0.0.2"
-        assert result["data"][0]["repository"]["name"] == test_repo_name
+        matches, result = search_collection_endpoint(gc, repository=test_repo_name, search_string=artifact_1.name)
 
-    # @pytest.mark.rm
+        assert matches == 2
+        expected = [{"repo_name": test_repo_name, "cv_version": "0.0.2", "is_highest": True},
+                    {"is_highest": False, "cv_version": "0.0.1"}]
+        assert verify_repo_data(expected, result)
+
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_diff_repo_diff_versions(self, galaxy_client):
         """
@@ -212,15 +214,11 @@ class TestRM:
         resp_task = gc.post(f"{dist_data_2['repository']}modify/", body=payload_2)
         wait_for_task(gc, resp_task)
 
-        results = search_collection(gc, search_string=artifact_1.name)
-        logger.debug(results)
-        new_results = edit_results_for_verification(results)
-        logger.debug(new_results)
-        for data in new_results:
-            if data["repo_name"] == test_repo_name_1:
-                assert data["cv_name"] == artifact_1.name
+        _, results = search_collection_endpoint(gc, search_string=artifact_1.name)
+        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1.name}]
+        assert verify_repo_data(expected, results)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_diff_repo_same_versions(self, galaxy_client):
         """
@@ -256,15 +254,11 @@ class TestRM:
         resp_task = gc.post(f"{dist_data_2['repository']}modify/", body=payload_1)
         wait_for_task(gc, resp_task)
 
-        results = search_collection(gc, search_string=artifact_1.name)
-        logger.debug(results)
-        new_results = edit_results_for_verification(results)
-        logger.debug(new_results)
-        for data in new_results:
-            if data["repo_name"] == test_repo_name_1:
-                assert data["cv_name"] == artifact_1.name
+        _, results = search_collection_endpoint(gc, search_string=artifact_1.name)
+        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1.name}]
+        assert verify_repo_data(expected, results)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_same_repo_same_versions(self, galaxy_client):
         """
@@ -291,7 +285,7 @@ class TestRM:
             upload_test_artifact(gc, namespace_name, test_repo_name, artifact)
         assert ctx.value.response.status_code == 400
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_diff_collection_diff_namespaces(self, galaxy_client):
         """
@@ -330,12 +324,9 @@ class TestRM:
         resp_task = gc.post(f"{dist_data['repository']}modify/", body=payload)
         wait_for_task(gc, resp_task)
 
-        results = search_collection(gc, repository=test_repo_name)
-        logger.debug(results)
-        new_results = edit_results_for_verification(results)
-        logger.debug(new_results)
+        _, results = search_collection_endpoint(gc, repository=test_repo_name)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_diff_repo_diff_versions_check_both_is_highest(self, galaxy_client):
         """
@@ -380,23 +371,12 @@ class TestRM:
         resp_task = gc.post(f"{dist_data_2['repository']}modify/", body=payload_2)
         wait_for_task(gc, resp_task)
 
-        results = search_collection(gc, search_string=artifact_1.name)
-        logger.debug(results)
-        new_results = edit_results_for_verification(results)
-        logger.debug(new_results)
+        _, results = search_collection_endpoint(gc, search_string=artifact_1.name)
 
         expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1.name, "is_highest": True},
                     {"repo_name": test_repo_name_2, "cv_name": artifact_1.name, "is_highest": True}]
-        verify_repo_data(expected, new_results)
-        '''
-        for data in new_results:
-            if data["repo_name"] == test_repo_name_1:
-                assert data["cv_name"] == artifact_1.name
-                assert data["is_highest"] is True
-            if data["repo_name"] == test_repo_name_2:
-                assert data["cv_name"] == artifact_1.name
-                assert data["is_highest"] is True
-        '''
+        assert verify_repo_data(expected, results)
+
     @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_same_repo_diff_versions_delete_check_is_highest(self, galaxy_client):
@@ -440,29 +420,15 @@ class TestRM:
         resp_task = gc.post(f"{dist_data['repository']}modify/", body=payload_2)
         wait_for_task(gc, resp_task)
 
-        results = search_collection(gc, search_string=artifact_1.name)
-        logger.debug(results)
-        new_results = edit_results_for_verification(results)
-        logger.debug(new_results)
-        '''
-        for data in new_results:
-            if data["cv_version"] == "0.0.2":
-                assert data["is_highest"] is True
-            if data["cv_version"] == "0.0.1":
-                assert data["is_highest"] is False
-        '''
-
+        _, results = search_collection_endpoint(gc, search_string=artifact_1.name)
         expected = [{"cv_version": "0.0.2", "is_highest": True}, {"cv_version": "0.0.1", "is_highest": False}]
-        assert verify_repo_data(expected, new_results)
+        assert verify_repo_data(expected, results)
         delete_collection(gc, namespace_name, artifact_1.name, version="0.0.2", repository=test_repo_name)
-        results = search_collection(gc, search_string=artifact_1.name)
-        logger.debug(results)
-        new_results = edit_results_for_verification(results)
-        logger.debug(new_results)
+        _, results = search_collection_endpoint(gc, search_string=artifact_1.name)
         expected = [{"cv_version": "0.0.1", "is_highest": True}]
-        assert verify_repo_data(expected, new_results)
+        assert verify_repo_data(expected, results)
 
-    # @pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_delete_repo_with_contents(self, galaxy_client):
         """
@@ -492,10 +458,9 @@ class TestRM:
         delete_repository(gc, test_repo_name)
         repos = get_all_repositories(gc)
         assert not repo_exists(test_repo_name, repos)
-        results = search_collection(gc, search_string=artifact.name)
-        logger.debug(results)
+        _, results = search_collection_endpoint(gc, search_string=artifact.name)
 
-    #@pytest.mark.rm
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_deprecate_collection(self, galaxy_client):
         """
@@ -525,8 +490,123 @@ class TestRM:
 
         deprecate_collection(gc, namespace_name, artifact.name, repository=test_repo_name)
 
-        results = search_collection(gc, repository=test_repo_name, search_string=artifact.name)
-        logger.debug(results)
-        new_results = edit_results_for_verification(results)
-        expected = {"repo_name": test_repo_name, "is_deprecated": True}
-        verify_repo_data(expected, new_results)
+        _, results = search_collection_endpoint(gc, repository=test_repo_name, search_string=artifact.name)
+        expected = [{"repo_name": test_repo_name, "is_deprecated": True}]
+        assert verify_repo_data(expected, results)
+
+    @pytest.mark.rm
+    @pytest.mark.standalone_only
+    def test_search_cv_that_does_not_exist(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc = galaxy_client("iqe_admin")
+        matches, _ = search_collection_endpoint(gc, search_string=f"does-not-exist-{uuid4()}")
+        assert matches == 0
+
+    @pytest.mark.rm
+    @pytest.mark.standalone_only
+    def test_search_cv_that_does_not_exit(self, galaxy_client):
+        """
+        Verifies
+        """
+        test_repo_name_1 = f"repo-1-{uuid4()}"
+        test_repo_name_2 = f"repo-2-{uuid4()}"
+        test_repo_name_3 = f"repo-3-{uuid4()}"
+
+        gc = galaxy_client("iqe_admin")
+        dist_data_1 = create_repo_and_dist(gc, test_repo_name_1)
+        dist_data_2 = create_repo_and_dist(gc, test_repo_name_2)
+        dist_data_3 = create_repo_and_dist(gc, test_repo_name_3)
+
+        namespace_name = f"namespace_{uuid4()}"
+        namespace_name = namespace_name.replace("-", "")
+        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        key_1 = f"test_{uuid4()}"
+        key_1 = key_1.replace("-", "")
+
+        key_2 = f"test_{uuid4()}"
+        key_2 = key_2.replace("-", "")
+
+        key_3 = f"test_{uuid4()}"
+        key_3 = key_3.replace("-", "")
+
+        artifact_1v1 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
+            key=key_1
+        )
+        upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_1v1)
+
+        artifact_2v2 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name_1},
+            key=key_2
+        )
+        upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_2v2)
+
+        artifact_2v1 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_2},
+            key=key_2
+        )
+
+        upload_test_artifact(gc, namespace_name, test_repo_name_2, artifact_2v1)
+
+        artifact_3v1 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_2},
+            key=key_3
+        )
+
+        upload_test_artifact(gc, namespace_name, test_repo_name_2, artifact_3v1)
+
+        collection_resp_1 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1v1.name}")
+        collection_resp_2 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_2v1.name}")
+        collection_resp_3 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_3v1.name}")
+
+        payload_1 = {"add_content_units": [collection_resp_1["results"][0]["pulp_href"], collection_resp_2["results"][1]["pulp_href"]]}
+        payload_2 = {"add_content_units": [collection_resp_2["results"][0]["pulp_href"], collection_resp_3["results"][0]["pulp_href"]]}
+        payload_3 = {"add_content_units": [collection_resp_3["results"][0]["pulp_href"]]}
+
+        resp_task = gc.post(f"{dist_data_1['repository']}modify/", body=payload_1)
+        wait_for_task(gc, resp_task)
+        resp_task = gc.post(f"{dist_data_2['repository']}modify/", body=payload_2)
+        wait_for_task(gc, resp_task)
+        resp_task = gc.post(f"{dist_data_3['repository']}modify/", body=payload_3)
+        wait_for_task(gc, resp_task)
+
+        _, results = search_collection_endpoint(gc, search_string=artifact_1v1.name)
+        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1v1.name, "is_highest": True}]
+        assert verify_repo_data(expected, results)
+
+        _, results = search_collection_endpoint(gc, search_string=artifact_2v1.name)
+        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_2v1.name, "cv_version": "0.0.2", "is_highest": True},
+                    {"repo_name": test_repo_name_2, "cv_name": artifact_2v1.name, "cv_version": "0.0.1", "is_highest": True}]
+        assert verify_repo_data(expected, results)
+
+        _, results = search_collection_endpoint(gc, search_string=artifact_3v1.name)
+        expected = [{"repo_name": test_repo_name_2, "cv_name": artifact_3v1.name, "cv_version": "0.0.1", "is_highest": True},
+                    {"repo_name": test_repo_name_3, "cv_name": artifact_3v1.name, "cv_version": "0.0.1", "is_highest": True}]
+        assert verify_repo_data(expected, results)
+
+        matches, _ = search_collection_endpoint(gc, repository=f"does-not-exist-{uuid4()}")
+        assert matches == 0
+
+        matches, _ = search_collection_endpoint(gc, repository=f"does-not-exist-{uuid4()}", search_string=artifact_1v1.name)
+        assert matches == 0
+
+        matches, _ = search_collection_endpoint(gc, repository=test_repo_name_2, search_string=artifact_1v1.name)
+        assert matches == 0
+
+        matches, _ = search_collection_endpoint(gc, repository=test_repo_name_1, search_string=artifact_1v1.name)
+        assert matches == 1
+
+        matches, _ = search_collection_endpoint(gc, search_string=artifact_3v1.name)
+        assert matches == 3  # +1 because it's staging
+
+        delete_collection(gc, namespace_name, artifact_3v1.name, version="0.0.1", repository=test_repo_name_3)
+        matches, results = search_collection_endpoint(gc, search_string=artifact_3v1.name)
+        expected = [{"repo_name": test_repo_name_2, "cv_name": artifact_3v1.name}]
+        assert matches == 2  # +1 because it's staging
+        assert verify_repo_data(expected, results)
