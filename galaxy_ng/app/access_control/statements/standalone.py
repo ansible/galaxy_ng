@@ -114,7 +114,7 @@ STANDALONE_STATEMENTS = {
                 "sync",
                 "rebuild_metadata",
                 "sign",
-                "mark", 
+                "mark",
                 "unmark"
             ],
             "principal": "authenticated",
