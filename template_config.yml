@@ -84,7 +84,7 @@ pulp_settings_azure: null
 pulp_settings_gcp: null
 pulp_settings_s3: null
 pulp_settings_stream: null
-pulpcore_branch: main
+pulpcore_branch: 3.23
 pulpcore_pip_version_specifier: null
 pulpcore_revision: null
 pulpprojectdotorg_key_id: null
