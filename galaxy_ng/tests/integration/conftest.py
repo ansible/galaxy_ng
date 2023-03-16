@@ -304,6 +304,9 @@ class AnsibleConfigFixture(dict):
                 'localhost:5001'
             )
 
+        elif key == 'server':
+            return self["url"].split("/api/")[0]
+
         else:
             raise Exception(f'Unknown config key: {self.namespace}.{key}')
 

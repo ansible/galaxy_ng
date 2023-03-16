@@ -49,7 +49,7 @@ def _upload_collection(**kwargs):
     return repo
 
 
-def import_and_move_to_staging(username, **kwargs):
+def import_to_staging(username, **kwargs):
     """Import collection version and move to staging repository.
 
     Custom task to call pulpcore's general_create() task then

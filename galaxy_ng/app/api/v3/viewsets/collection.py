@@ -22,6 +22,7 @@ from pulpcore.plugin.tasking import dispatch
 from rest_framework import status
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
+from pulp_ansible.app.tasks.copy import copy_collection
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
@@ -34,8 +35,7 @@ from galaxy_ng.app.tasks import (
     call_move_content_task,
     call_sign_and_move_task,
     import_and_auto_approve,
-    import_and_move_to_staging,
-    copy_collection,
+    import_to_staging,
 )
 
 
@@ -62,7 +62,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         task_group = TaskGroup.objects.create(description=f"Import collection to {repository.name}")
 
         if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
-            return dispatch(import_and_move_to_staging, kwargs=kwargs, task_group=task_group)
+            return dispatch(import_to_staging, kwargs=kwargs, task_group=task_group)
 
         return dispatch(import_and_auto_approve, kwargs=kwargs, task_group=task_group)
 
@@ -262,7 +262,7 @@ class CollectionVersionCopyViewSet(api_base.ViewSet, CollectionRepositoryMixing)
             exclusive_resources=[src_repo, dest_repo],
             shared_resources=[src_repo],
             kwargs={
-                "cv_pk": collection_version.pk,
+                "cv_pk_list": [collection_version.pk],
                 "src_repo_pk": src_repo.pk,
                 "dest_repo_list": [dest_repo.pk],
             }

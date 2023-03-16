@@ -13,7 +13,7 @@ from pulp_ansible.app.models import (
 )
 from pulpcore.plugin.models import Artifact, ContentArtifact, PulpTemporaryFile
 
-from galaxy_ng.app.tasks import import_and_auto_approve, import_and_move_to_staging
+from galaxy_ng.app.tasks import import_and_auto_approve, import_to_staging
 from galaxy_ng.app.tasks.promotion import move_content
 from galaxy_ng.app.tasks.publishing import _log_collection_upload
 
@@ -119,7 +119,7 @@ class TestTaskPublish(TestCase):
     @mock.patch('galaxy_ng.app.tasks.publishing.general_create')
     @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
     @mock.patch('galaxy_ng.app.tasks.promotion.TaskGroup')
-    def test_import_and_move_to_staging(
+    def test_import_to_staging(
         self, mocked_task_group, mocked_dispatch, mocked_create, mocked_get_created
     ):
         staging_repo = AnsibleRepository.objects.get(name=staging_name)
@@ -132,7 +132,7 @@ class TestTaskPublish(TestCase):
 
         mocked_get_created.return_value = [self.collection_version]
 
-        import_and_move_to_staging(
+        import_to_staging(
             '',  # username
             **{"general_args": ()}
         )
@@ -145,7 +145,7 @@ class TestTaskPublish(TestCase):
         staging_repo.save()
         mocked_get_created.side_effect = AnsibleDistribution.DoesNotExist
         with self.assertRaises(AnsibleDistribution.DoesNotExist):
-            import_and_move_to_staging(
+            import_to_staging(
                 '',  # username
                 **{"general_args": ()}
             )

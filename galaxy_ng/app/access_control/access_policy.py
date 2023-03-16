@@ -4,12 +4,13 @@ from functools import lru_cache
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 
 from pulp_container.app import models as container_models
 from pulp_ansible.app import models as ansible_models
+from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
@@ -290,6 +291,56 @@ class AccessPolicyBase(AccessPolicyFromDB):
             return request.user.has_perm(permission, obj.repository.cast())
 
         return False
+
+    def signatures_not_required_for_repo(self, request, view, action):
+        """
+        Validate that collections are being added with signatures to approved repos
+        when signatures are required.
+        """
+        print("______--------____------__------__-----__--------")
+        repo = view.get_object()
+        repo_version = repo.latest_version()
+
+        src_pipeline = repo.pulp_labels.get("pipeline", None)
+
+        if settings.GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL:
+            if src_pipeline == "approved":
+                return True
+        else:
+            return True
+
+        serializer = CollectionVersionCopyMoveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        signing_service = data.get("signing_service", None)
+
+        if signing_service:
+            return True
+
+        is_any_approved = False
+        for repo in data["destination_repositories"]:
+            if repo.pulp_labels.get("pipeline", None) == "approved":
+                is_any_approved = True
+                break
+
+        # If any destination repo is marked as approved, check that the signatures
+        # are available
+        if not is_any_approved:
+            return True
+
+        for cv in data["collection_versions"]:
+            sig_exists = repo_version.get_content(
+                ansible_models.CollectionVersionSignature.objects
+            ).filter(signed_collection=cv).exists()
+
+            if not sig_exists:
+                raise ValidationError(detail={"collection_versions": _(
+                    "Signatures are required in order to add collections into any 'approved'"
+                    "repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
+                )})
+
+        return True
 
 
 class AIDenyIndexAccessPolicy(AccessPolicyBase):

@@ -103,7 +103,7 @@ def test_publish_to_custom_repo(ansible_config, artifact):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
 
 
-@pytest.mark.skip(reason="Requires GALAXY_REQUIRE_CONTENT_APPROVAL=false")
+# @pytest.mark.skip(reason="Requires GALAXY_REQUIRE_CONTENT_APPROVAL=false")
 @pytest.mark.standalone_only
 @pytest.mark.auto_approve
 def test_publish_and_auto_approve(ansible_config, artifact):
@@ -128,7 +128,7 @@ def test_publish_and_auto_approve(ansible_config, artifact):
     assert len(cv["signatures"]) >= 1
 
 
-@pytest.mark.skip(reason="Requires GALAXY_REQUIRE_CONTENT_APPROVAL=false")
+# @pytest.mark.skip(reason="Requires GALAXY_REQUIRE_CONTENT_APPROVAL=false")
 @pytest.mark.standalone_only
 @pytest.mark.auto_approve
 def test_auto_approve_muliple(ansible_config, artifact):
