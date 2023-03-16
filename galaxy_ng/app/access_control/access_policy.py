@@ -297,16 +297,10 @@ class AccessPolicyBase(AccessPolicyFromDB):
         Validate that collections are being added with signatures to approved repos
         when signatures are required.
         """
-        print("______--------____------__------__-----__--------")
         repo = view.get_object()
         repo_version = repo.latest_version()
 
-        src_pipeline = repo.pulp_labels.get("pipeline", None)
-
         if settings.GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL:
-            if src_pipeline == "approved":
-                return True
-        else:
             return True
 
         serializer = CollectionVersionCopyMoveSerializer(data=request.data)
