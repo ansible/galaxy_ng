@@ -650,3 +650,9 @@ def sync_instance_crc():
     set_synclist(client, [])
 
     return (manifest, config)
+
+
+@pytest.fixture(scope="function")
+def settings(ansible_config):
+    api_client = get_client(ansible_config("admin"))
+    return api_client("_ui/v1/settings/")

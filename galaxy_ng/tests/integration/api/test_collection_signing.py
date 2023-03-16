@@ -40,12 +40,6 @@ def api_client(config):
 
 
 @pytest.fixture(scope="function")
-def settings(api_client):
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    return api_client(f"{api_prefix}/_ui/v1/settings/")
-
-
-@pytest.fixture(scope="function")
 def flags(api_client):
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
     return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
