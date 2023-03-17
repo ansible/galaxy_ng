@@ -9,7 +9,7 @@ from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_ver
 from galaxykit.collections import delete_collection, deprecate_collection, collection_sign, sign_collection
 from galaxykit.namespaces import create_namespace
 from galaxykit.repositories import get_all_repositories, delete_repository, create_repository, search_collection, \
-    set_certification
+    set_certification, get_distribution_id
 from galaxykit.utils import wait_for_task, GalaxyClientError
 
 logger = logging.getLogger(__name__)
@@ -1153,12 +1153,46 @@ class TestRM:
         expected = [{"cv_name": artifact_2.name}]
         assert verify_repo_data(expected, results)
         assert matches == 1
+
+    @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_search_distribution_id(self, galaxy_client):
+        """
+        Verifies WIP
+        """
+        test_repo_name = f"repo-test-{uuid4()}"
+        gc = galaxy_client("iqe_admin")
+        repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
+
+        namespace_name = f"namespace_{uuid4()}"
+        namespace_name = namespace_name.replace("-", "")
+        create_namespace(gc, namespace_name, "ns_group_for_tests")
+
+        artifact_1 = build_collection(
+            "skeleton",
+            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name},
+        )
+
+        upload_test_artifact(gc, namespace_name, test_repo_name, artifact_1)
+        collection_resp_1 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
+        payload = {"add_content_units": [collection_resp_1["results"][0]["pulp_href"]]}
+
+        resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload)
+        wait_for_task(gc, resp_task)
+        distribution_id = get_distribution_id(gc, test_repo_name)
+        matches, results = search_collection_endpoint(gc, distribution=distribution_id)
+        # returns 500
+        # check logs
+        # pulpcore-manager show_urls | fgrep search
+        expected = [{"cv_name": artifact_1.name, "repository_name": test_repo_name}]
+        assert verify_repo_data(expected, results)
+        assert matches == 1
+
     # hide from searching field ?
     # pipeline: approved no one can upload
     # pipeline: staging, those with rbac permissions can upload
     # both are hidden from search
 
-    # filter_by_distribution_id
     # filter_by_base_path
     # filter_by_dependency
     # version_range
