@@ -11,6 +11,7 @@ from rest_framework import serializers
 from pulpcore.plugin.serializers import IdentityField
 
 from galaxy_ng.app import models
+from galaxy_ng.app.tasks import dispatch_create_pulp_namespace_metadata
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
 from galaxy_ng.app.api.base import RelatedFieldsBaseSerializer
 
@@ -123,6 +124,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
             new_links.append(ns_link)
 
         instance.links.set(new_links)
+
+        dispatch_create_pulp_namespace_metadata(instance)
         return instance
 
     @transaction.atomic
@@ -134,6 +137,7 @@ class NamespaceSerializer(serializers.ModelSerializer):
 
         instance = super().update(instance, validated_data)
         instance.save()
+        dispatch_create_pulp_namespace_metadata(instance)
         return instance
 
 
