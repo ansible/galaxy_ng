@@ -27,7 +27,7 @@ def test_package_install(env_vars):
     with tempfile.TemporaryDirectory(prefix='galaxy_ng_testing_') as basedir:
 
         # make a venv
-        pid = subprocess.run(f'python3 -m venv {basedir}/venv', shell=True)
+        pid = subprocess.run(f'python3.10 -m venv {basedir}/venv', shell=True)
         assert pid.returncode == 0
 
         # install the package
