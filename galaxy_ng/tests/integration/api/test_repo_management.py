@@ -5,11 +5,11 @@ from galaxy_ng.tests.integration.utils import uuid4
 from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact
 from orionutils.generator import build_collection
 
-from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version
-from galaxykit.collections import delete_collection, deprecate_collection, collection_sign, sign_collection
+from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version, generate_random_string
+from galaxykit.collections import delete_collection, deprecate_collection, sign_collection
 from galaxykit.namespaces import create_namespace
 from galaxykit.repositories import get_all_repositories, delete_repository, create_repository, search_collection, \
-    set_certification, get_distribution_id
+    get_distribution_id
 from galaxykit.utils import wait_for_task, GalaxyClientError
 
 logger = logging.getLogger(__name__)
@@ -56,6 +56,27 @@ def search_collection_endpoint(client, **params):
     return result["meta"]["count"], new_results
 
 
+def create_test_namespace(gc):
+    namespace_name = f"ns_test_{generate_random_string()}"
+    create_namespace(gc, namespace_name, "ns_group_for_tests")
+    return namespace_name
+
+
+def upload_new_artifact(gc, namespace, repository, version, key=None):
+    artifact = build_collection(
+        "skeleton",
+        config={"namespace": namespace, "version": version, "repository_name": repository}, key=key
+    )
+    upload_test_artifact(gc, namespace, repository, artifact)
+    return artifact
+
+
+def add_content_units(gc, content_units, repo_pulp_href):
+    payload = {"add_content_units": content_units}
+    resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload)
+    wait_for_task(gc, resp_task)
+
+
 def verify_repo_data(expected_repos, actual_repos):
     def is_dict_included(dict1, dict2):
         # Check if all key-value pairs in dict1 are present in dict2
@@ -82,65 +103,24 @@ class TestRM:
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
-    def test_search(self, galaxy_client):
+    def test_search_same_collection_diff_versions_same_repo(self, galaxy_client):
         """
-        Verifies
+        Verifies that one collection with diff versions in the same repo
+        is found and the is_highest flag is correct
         """
-        test_repo_name = f"repo-test-{uuid4()}"
-        gc = galaxy_client("iqe_admin")
-        repo_res = create_repository(gc, test_repo_name)
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-        artifact = upload_test_artifact(gc, namespace_name, test_repo_name)
-        set_certification(gc, artifact)
-        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-        payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
-        resp_task = gc.post(f"{repo_res['pulp_href']}modify/", body=payload)
-        wait_for_task(gc, resp_task)
-        matches, result = search_collection_endpoint(gc, name=artifact.name)
-        expected = [{"repo_name": test_repo_name, "cv_name": artifact.name}]
-        assert verify_repo_data(expected, result)
-        assert matches == 2  # +1 (staging)
-
-    @pytest.mark.rm
-    @pytest.mark.standalone_only
-    def test_search_upload_same_collection_same_repo_diff_versions(self, galaxy_client):
-        """
-        Verifies
-        """
-        test_repo_name = f"repo-test-{uuid4()}"
+        test_repo_name = f"repo-test-{generate_random_string()}"
         gc = galaxy_client("iqe_admin")
 
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
+        namespace_name = create_test_namespace(gc)
+        key = generate_random_string()
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-        key = f"test_{uuid4()}"
-        key = key.replace("-", "")
-
-        artifact_1 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name}, key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name, artifact_1)
-
-        artifact_2 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name}, key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name, artifact_2)
-
-        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
-        payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"],
-                                         collection_resp["results"][1]["pulp_href"]]}
-        resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload)
-        wait_for_task(gc, resp_task)
-        matches, result = search_collection_endpoint(gc, repository_name=test_repo_name, name=artifact_1.name)
-
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"], collection_resp["results"][1]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
+        matches, result = search_collection_endpoint(gc, repository_name=test_repo_name, name=artifact.name)
         assert matches == 2
         expected = [{"repo_name": test_repo_name, "cv_version": "0.0.2", "is_highest": True},
                     {"is_highest": False, "cv_version": "0.0.1"}]
@@ -148,116 +128,68 @@ class TestRM:
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
-    def test_search_upload_same_collection_diff_repo_diff_versions(self, galaxy_client):
+    def test_search_same_collection_diff_versions_diff_repo(self, galaxy_client):
         """
-        Verifies
+        Verifies that one collection with diff versions in diff repos is found
         """
-        test_repo_name_1 = f"repo-test-{uuid4()}"
-        test_repo_name_2 = f"repo-test-{uuid4()}"
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
 
         gc = galaxy_client("iqe_admin")
         repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
         repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-        key = f"test_{uuid4()}"
-        key = key.replace("-", "")
-
-        artifact_1 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
-            key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_1)
-
-        artifact_2 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name_2},
-            key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name_2, artifact_2)
+        namespace_name = create_test_namespace(gc)
+        key = generate_random_string()
+        artifact_1 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name_2, "0.0.2", key)
 
         collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
 
-        payload_1 = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
-        payload_2 = {"add_content_units": [collection_resp["results"][1]["pulp_href"]]}
+        content_units_1 = [collection_resp["results"][1]["pulp_href"]]
+        content_units_2 = [collection_resp["results"][0]["pulp_href"]]
 
-        resp_task = gc.post(f"{repo_pulp_href_1}modify/", body=payload_1)
-        wait_for_task(gc, resp_task)
-        resp_task = gc.post(f"{repo_pulp_href_2}modify/", body=payload_2)
-        wait_for_task(gc, resp_task)
+        add_content_units(gc, content_units_1, repo_pulp_href_1)
+        add_content_units(gc, content_units_2, repo_pulp_href_2)
 
         _, results = search_collection_endpoint(gc, name=artifact_1.name)
-        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1.name}]
+        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1.name, "cv_version": "0.0.1"},
+                    {"repo_name": test_repo_name_2, "cv_name": artifact_1.name, "cv_version": "0.0.2"}]
         assert verify_repo_data(expected, results)
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
-    def test_search_upload_same_collection_diff_repo_same_versions(self, galaxy_client):
+    def test_search_same_collection_diff_repo_same_versions(self, galaxy_client):
         """
-        Verifies
+        Verifies that one collection with the same version in diff repos is found
         """
-        test_repo_name_1 = f"repo-test-{uuid4()}"
-        test_repo_name_2 = f"repo-test-{uuid4()}"
-
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
         repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-        key = f"test_{uuid4()}"
-        key = key.replace("-", "")
-
-        artifact_1 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
-            key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_1)
-
-        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
-
-        payload_1 = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
-
-        resp_task = gc.post(f"{repo_pulp_href_1}modify/", body=payload_1)
-        wait_for_task(gc, resp_task)
-        resp_task = gc.post(f"{repo_pulp_href_2}modify/", body=payload_1)
-        wait_for_task(gc, resp_task)
-
-        _, results = search_collection_endpoint(gc, name=artifact_1.name)
-        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1.name}]
+        namespace_name = create_test_namespace(gc)
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href_1)
+        add_content_units(gc, content_units, repo_pulp_href_2)
+        _, results = search_collection_endpoint(gc, name=artifact.name)
+        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact.name, "cv_version": "0.0.1"},
+                    {"repo_name": test_repo_name_2, "cv_name": artifact.name, "cv_version": "0.0.1"}]
         assert verify_repo_data(expected, results)
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
-    def test_search_upload_same_collection_same_repo_same_versions(self, galaxy_client):
+    def test_cant_upload_same_collection_same_repo(self, galaxy_client):
         """
-        Verifies
+        Verifies that the same collection / version cannot be uploaded to the same repo
         """
-        test_repo_name = f"repo-test-{uuid4()}"
+        test_repo_name = f"repo-test-{generate_random_string()}"
         gc = galaxy_client("iqe_admin")
         create_repo_and_dist(gc, test_repo_name)
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-        key = f"test_{uuid4()}"
-        key = key.replace("-", "")
-
-        artifact = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name},
-            key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name, artifact)
-
+        namespace_name = create_test_namespace(gc)
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1")
         with pytest.raises(GalaxyClientError) as ctx:
             upload_test_artifact(gc, namespace_name, test_repo_name, artifact)
         assert ctx.value.response.status_code == 400
@@ -266,87 +198,52 @@ class TestRM:
     @pytest.mark.standalone_only
     def test_search_upload_diff_collection_diff_namespaces(self, galaxy_client):
         """
-        Verifies
+        Verifies that two collections in different namespaces in the same repo are found
         """
-        test_repo_name = f"repo-test-{uuid4()}"
-
+        test_repo_name = f"repo-test-{generate_random_string()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
+        namespace_name = f"ns_{generate_random_string()}"
         namespace_name_mod = namespace_name + "_mod"
         create_namespace(gc, namespace_name, "ns_group_for_tests")
         create_namespace(gc, namespace_name + "_mod", "ns_group_for_tests")
 
-        artifact_1 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name}
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name, artifact_1)
-
-        artifact_2 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name_mod, "version": "0.0.2", "repository_name": test_repo_name}
-        )
-
-        upload_test_artifact(gc, namespace_name_mod, test_repo_name, artifact_2)
+        artifact_1 = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1")
+        artifact_2 = upload_new_artifact(gc, namespace_name_mod, test_repo_name, "0.0.2")
 
         collection_resp_1 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
         collection_resp_2 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_2.name}")
 
-        payload = {"add_content_units": [collection_resp_1["results"][0]["pulp_href"],
-                                         collection_resp_2["results"][0]["pulp_href"]]}
-        resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload)
-        wait_for_task(gc, resp_task)
-
+        content_units = [collection_resp_1["results"][0]["pulp_href"], collection_resp_2["results"][0]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
         _, results = search_collection_endpoint(gc, repository_name=test_repo_name)
+        expected = [{"repo_name": test_repo_name, "cv_name": artifact_1.name, "cv_version": "0.0.1"},
+                    {"repo_name": test_repo_name, "cv_name": artifact_2.name, "cv_version": "0.0.2"}]
+        assert verify_repo_data(expected, results)
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_diff_repo_diff_versions_check_both_is_highest(self, galaxy_client):
         """
-        Verifies
+        Verifies that same collection name with two different versions
+        in two different repos is_highest is True for both versions
         """
-        test_repo_name_1 = f"repo-test-{uuid4()}"
-        test_repo_name_2 = f"repo-test-{uuid4()}"
-
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
         repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
+        namespace_name = create_test_namespace(gc)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-        key = f"test_{uuid4()}"
-        key = key.replace("-", "")
-
-        artifact_1 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
-            key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name_1, artifact_1)
-
-        artifact_2 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name_2},
-            key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name_2, artifact_2)
+        key = generate_random_string()
+        artifact_1 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name_2, "0.0.2", key)
 
         collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
-
-        payload_1 = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
-        payload_2 = {"add_content_units": [collection_resp["results"][1]["pulp_href"]]}
-
-        resp_task = gc.post(f"{repo_pulp_href_1}modify/", body=payload_1)
-        wait_for_task(gc, resp_task)
-        resp_task = gc.post(f"{repo_pulp_href_2}modify/", body=payload_2)
-        wait_for_task(gc, resp_task)
+        content_units_1 = [collection_resp["results"][0]["pulp_href"]]
+        content_units_2 = [collection_resp["results"][1]["pulp_href"]]
+        add_content_units(gc, content_units_1, repo_pulp_href_1)
+        add_content_units(gc, content_units_2, repo_pulp_href_2)
 
         _, results = search_collection_endpoint(gc, name=artifact_1.name)
 
@@ -356,86 +253,52 @@ class TestRM:
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
-    def test_search_upload_same_collection_same_repo_diff_versions_delete_check_is_highest(self, galaxy_client):
+    def test_search_is_highest_changes_after_deletion(self, galaxy_client):
         """
-        Verifies
+        Verifies that lower version becomes is_highest True when higher version is deleted
         """
-        test_repo_name = f"repo-test-{uuid4()}"
-
+        test_repo_name = f"repo-test-{generate_random_string()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
+        namespace_name = create_test_namespace(gc)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-        key = f"test_{uuid4()}"
-        key = key.replace("-", "")
+        key = generate_random_string()
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
 
-        artifact_1 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name},
-            key=key
-        )
+        content_units_1 = [collection_resp["results"][0]["pulp_href"]]
+        content_units_2 = [collection_resp["results"][1]["pulp_href"]]
+        add_content_units(gc, content_units_1, repo_pulp_href)
+        add_content_units(gc, content_units_2, repo_pulp_href)
 
-        upload_test_artifact(gc, namespace_name, test_repo_name, artifact_1)
-
-        artifact_2 = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.2", "repository_name": test_repo_name},
-            key=key
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name, artifact_2)
-
-        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1.name}")
-
-        payload_1 = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
-        payload_2 = {"add_content_units": [collection_resp["results"][1]["pulp_href"]]}
-
-        resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload_1)
-        wait_for_task(gc, resp_task)
-        resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload_2)
-        wait_for_task(gc, resp_task)
-
-        _, results = search_collection_endpoint(gc, name=artifact_1.name)
+        _, results = search_collection_endpoint(gc, name=artifact.name)
         expected = [{"cv_version": "0.0.2", "is_highest": True}, {"cv_version": "0.0.1", "is_highest": False}]
         assert verify_repo_data(expected, results)
-        delete_collection(gc, namespace_name, artifact_1.name, version="0.0.2", repository=test_repo_name)
-        _, results = search_collection_endpoint(gc, name=artifact_1.name)
+        delete_collection(gc, namespace_name, artifact.name, version="0.0.2", repository=test_repo_name)
+        _, results = search_collection_endpoint(gc, name=artifact.name)
         expected = [{"cv_version": "0.0.1", "is_highest": True}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.rm
+    @pytest.mark.this
     @pytest.mark.standalone_only
-    def test_search_delete_repo_with_contents(self, galaxy_client):
+    def test_delete_repo_with_contents(self, galaxy_client):
         """
-        Verifies
+        Verifies a non-empty repo can be deleted
         """
-        test_repo_name = f"repo-test-{uuid4()}"
+        test_repo_name = f"repo-test-{generate_random_string()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-
-        artifact = build_collection(
-            "skeleton",
-            config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name},
-        )
-
-        upload_test_artifact(gc, namespace_name, test_repo_name, artifact)
-
+        namespace_name = create_test_namespace(gc)
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1")
         collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-
-        payload = {"add_content_units": [collection_resp["results"][0]["pulp_href"]]}
-
-        resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload)
-        wait_for_task(gc, resp_task)
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
         delete_repository(gc, test_repo_name)
         repos = get_all_repositories(gc)
         assert not repo_exists(test_repo_name, repos)
-        _, results = search_collection_endpoint(gc, name=artifact.name)
+        matches, results = search_collection_endpoint(gc, name=artifact.name, repository_name=test_repo_name)
+        assert matches == 0
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
@@ -447,9 +310,7 @@ class TestRM:
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        namespace_name = create_test_namespace(gc)
 
         artifact = build_collection(
             "skeleton",
@@ -495,10 +356,8 @@ class TestRM:
         repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
         repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
         repo_pulp_href_3 = create_repo_and_dist(gc, test_repo_name_3)
+        namespace_name = create_test_namespace(gc)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
         key_1 = f"test_{uuid4()}"
         key_1 = key_1.replace("-", "")
 
@@ -604,10 +463,8 @@ class TestRM:
         gc = galaxy_client("iqe_admin")
         repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
         repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
+        namespace_name = create_test_namespace(gc)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
         artifact_1 = build_collection(
             "skeleton",
             config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
@@ -655,9 +512,8 @@ class TestRM:
         repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
         repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        namespace_name = create_test_namespace(gc)
+
         artifact_1 = build_collection(
             "skeleton",
             config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
@@ -704,9 +560,8 @@ class TestRM:
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name_1)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        namespace_name = create_test_namespace(gc)
+
         artifact_1 = build_collection(
             "skeleton",
             config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
@@ -734,10 +589,8 @@ class TestRM:
 
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name_1)
+        namespace_name = create_test_namespace(gc)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
         artifact_1 = build_collection(
             "skeleton",
             config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name_1},
@@ -764,10 +617,8 @@ class TestRM:
 
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name_1)
+        namespace_name = create_test_namespace(gc)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
         version = generate_random_artifact_version()
         artifact_1 = build_collection(
             "skeleton",
@@ -794,10 +645,7 @@ class TestRM:
 
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-
+        namespace_name = create_test_namespace(gc)
         key = f"test_{uuid4()}"
         key = key.replace("-", "")
 
@@ -836,10 +684,7 @@ class TestRM:
 
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-
+        namespace_name = create_test_namespace(gc)
         key = f"test_{uuid4()}"
         key = key.replace("-", "")
 
@@ -877,10 +722,7 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        namespace_name = create_test_namespace(gc)
 
         artifact_1 = build_collection(
             "skeleton",
@@ -920,10 +762,7 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        namespace_name = create_test_namespace(gc)
 
         artifact_1 = build_collection(
             "skeleton",
@@ -963,10 +802,8 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
+        namespace_name = create_test_namespace(gc)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
         tag = f"tag{uuid4()}"
         tag = tag.replace("-", "")
         tags = ["test_tag_1", "test_tag_2", tag]
@@ -1008,10 +845,7 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        namespace_name = create_test_namespace(gc)
 
         key = f"test_{uuid4()}"
         key = key.replace("-", "")
@@ -1054,10 +888,8 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
+        namespace_name = create_test_namespace(gc)
 
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
         tag = f"tag{uuid4()}"
         tag = tag.replace("-", "")
         tags = ["test_tag_1", "test_tag_2", tag]
@@ -1107,11 +939,7 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-
+        namespace_name = create_test_namespace(gc)
         artifact_1 = build_collection(
             "skeleton",
             config={"namespace": namespace_name, "version": "0.0.1", "repository_name": test_repo_name},
@@ -1138,10 +966,7 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        namespace_name = create_test_namespace(gc)
 
         artifact_1 = build_collection(
             "skeleton",
@@ -1168,10 +993,7 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
+        namespace_name = create_test_namespace(gc)
 
         dep = f"dep{uuid4()}"
         dep = dep.replace("-", "")
@@ -1201,11 +1023,7 @@ class TestRM:
         test_repo_name = f"repo-test-{uuid4()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-
-        namespace_name = f"namespace_{uuid4()}"
-        namespace_name = namespace_name.replace("-", "")
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-
+        namespace_name = create_test_namespace(gc)
         artifact_1 = build_collection(
             "skeleton",
             config={"namespace": namespace_name, "version": "6.6.6", "repository_name": test_repo_name},

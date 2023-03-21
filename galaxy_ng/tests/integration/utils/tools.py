@@ -16,6 +16,10 @@ def uuid4():
     return str(uuid.uuid4())
 
 
+def generate_random_string(length=8):
+    return str(uuid.uuid4().hex)[:length]
+
+
 def iterate_all(api_client, url):
     """Iterate through all of the items on every page in a paginated list view."""
     next = url
