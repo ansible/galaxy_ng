@@ -92,6 +92,7 @@ class NamespaceSerializer(serializers.ModelSerializer):
             'groups',
             'resources',
             'related_fields',
+            'metadata_sha256'
         )
 
     # replace with a NamespaceNameSerializer and validate_name() ?
@@ -158,6 +159,7 @@ class NamespaceSummarySerializer(NamespaceSerializer):
             'description',
             'groups',
             'related_fields',
+            'metadata_sha256'
         )
 
         read_only_fields = ('name', )
