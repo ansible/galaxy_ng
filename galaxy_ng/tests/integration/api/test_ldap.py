@@ -1,6 +1,13 @@
 """test_ldap.py - tests related to ldap authentication.
 
 See: AAH-1593
+
+These tests cases must run and pass also when
+the LDAP server has REFERRALS enabled
+python-ldap can't chase the referral links
+so the galaxy system might be set with
+GALAXY_LDAP_DISABLE_REFERRALS=True
+See: AAH-2150
 """
 import pytest
 import logging

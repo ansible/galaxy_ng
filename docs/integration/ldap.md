@@ -86,7 +86,7 @@ PULP_AUTH_LDAP_USER_SEARCH_SCOPE="SUBTREE"
 PULP_AUTH_LDAP_USER_SEARCH_FILTER="(uid=%(user)s)"
 PULP_AUTH_LDAP_GROUP_SEARCH_BASE_DN="ou=people,dc=planetexpress,dc=com"
 PULP_AUTH_LDAP_GROUP_SEARCH_SCOPE="SUBTREE"
-PULP_AUTH_LDAP_GROUP_SEARCH_FILTER = "(objectClass=Group)"
+PULP_AUTH_LDAP_GROUP_SEARCH_FILTER="(objectClass=Group)"
 PULP_AUTH_LDAP_GROUP_TYPE_CLASS="django_auth_ldap.config:GroupOfNamesType"
 ```
 
@@ -114,6 +114,8 @@ PULP_AUTH_LDAP_USER_ATTR_MAP={first_name="givenName", last_name="sn", email="mai
 
 PULP_AUTH_LDAP_MIRROR_GROUPS=true
 # The above is what enabled group mirroring
+# the same variable also accepts a list of groups to mirror
+PULP_AUTH_LDAP_MIRROR_GROUPS=['admin_staff', 'ship_crew']
 ```
 
 You can limit which groups are mirrored if you don't want all the groups to be added do Hub.
@@ -182,5 +184,18 @@ PULP_GALAXY_LDAP_LOGGING=true
 PULP_AUTH_LDAP_CACHE_TIMEOUT=3600
 ```
 
+### LDAP REferrals
+
+MS Active Directory but search operation may result in the exception `ldap.OPERATIONS_ERROR` with the diagnostic message text “In order to perform this operation a successful bind must be completed on the connection.” Alternatively, a Samba 4 AD returns the diagnostic message “Operation unavailable without authentication”. 
+
+To fix that problem the LDAP REFERALS lookup can be disabled:
+
+```bash
+PULP_GALAXY_LDAP_DISABLE_REFERRALS=true
+```
+
+The above will set the proper option to `AUTH_LDAP_CONNECTION_OPTIONS` in the settings.
+
+---
 
 More settings can be found on https://django-auth-ldap.readthedocs.io/en/latest/reference.html#settings
