@@ -57,6 +57,12 @@ jobs:
       - name: set the github api url
         run: echo "SOCIAL_AUTH_GITHUB_API_URL='http://github:8082'" >> .compose.env
 
+      - name: set the galaxy api path prefix
+        run: echo "PULP_GALAXY_API_PATH_PREFIX='/api/'" >> .compose.env
+
+      - name: set the pulp content path prefix
+        run: echo "PULP_CONTENT_PATH_PREFIX='/api/v3/artifacts/collections/'" >> .compose.env
+
       - name: build everything and load data
         run: make docker/all
 
