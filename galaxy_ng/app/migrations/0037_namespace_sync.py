@@ -138,7 +138,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('galaxy', '0036_repository_labels'),
-        ('ansible', '0049_ansiblenamespacemetadata_avatar_url'),
+        ('ansible', '0047_ansible_namespace'),
     ]
 
     operations = [
