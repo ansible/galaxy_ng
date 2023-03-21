@@ -186,6 +186,18 @@ PULP_CONTAINER_VIEWSETS = {
         # that don't exist
         "creation_hooks": [],
     },
+    "content/ansible/namespaces": [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": "avatar",
+            "principal": "*",
+            "effect": "allow",
+        }
+    ],
 }
 
 
