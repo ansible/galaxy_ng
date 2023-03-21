@@ -506,6 +506,11 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
                 "loggers": {"django_auth_ldap": {"level": "DEBUG", "handlers": ["console"]}},
             }
 
+        connection_options = settings.get("AUTH_LDAP_CONNECTION_OPTIONS", {})
+        if settings.get("GALAXY_LDAP_DISABLE_REFERRALS"):
+            connection_options[ldap.OPT_REFERRALS] = 0
+        data["AUTH_LDAP_CONNECTION_OPTIONS"] = connection_options
+
     return data
 
 
