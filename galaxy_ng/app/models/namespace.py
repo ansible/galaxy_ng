@@ -5,6 +5,8 @@ from django.db import models
 from django.db import transaction
 from django_lifecycle import LifecycleModel
 
+from pulp_ansible.app.models import AnsibleNamespaceMetadata
+
 from galaxy_ng.app.access_control import mixins
 
 __all__ = ("Namespace", "NamespaceLink")
@@ -36,6 +38,15 @@ class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin):
     avatar_url = models.URLField(max_length=256, blank=True)
     description = models.CharField(max_length=256, blank=True)
     resources = models.TextField(blank=True)
+
+    # Used to track the last namespace metadata object that was created
+    # from this namespace
+    last_created_pulp_metadata = models.ForeignKey(
+        AnsibleNamespaceMetadata,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="galaxy_namespace"
+    )
 
     def __str__(self):
         return self.name

@@ -12,14 +12,18 @@ SIGNING_SERVICE_NAME = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansibl
 AUTO_SIGN = settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False)
 
 
-def auto_approve(src_repo_pk, cv_pk):
+def auto_approve(src_repo_pk, cv_pk, ns_pk=None):
     published_repos = AnsibleRepository.objects.filter(pulp_labels__pipeline="approved")
     published_pks = list(published_repos.values_list("pk", flat=True))
     staging_repo = AnsibleRepository.objects.get(pk=src_repo_pk)
 
+    add = [cv_pk]
+    if ns_pk:
+        add.append(ns_pk)
+
     add_and_remove(
         src_repo_pk,
-        add_content_units=[cv_pk],
+        add_content_units=add,
         remove_content_units=[],
     )
 
@@ -50,7 +54,7 @@ def auto_approve(src_repo_pk, cv_pk):
     )
 
 
-def call_auto_approve_task(collection_version, repo):
+def call_auto_approve_task(collection_version, repo, ns_pk):
     """
     Dispatches the auto approve task
     """

@@ -8,6 +8,8 @@ from pulp_ansible.app.models import AnsibleRepository, CollectionVersion
 from pulpcore.plugin.tasking import general_create, add_and_remove, dispatch
 from pulpcore.plugin.models import Task
 
+from galaxy_ng.app.models import Namespace
+
 from .promotion import call_auto_approve_task
 
 log = logging.getLogger(__name__)
@@ -62,11 +64,15 @@ def import_to_staging(username, **kwargs):
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
+        add = [collection_version.pk]
+        ns = Namespace.objects.get(name=collection_version.namespace)
+        if ns.last_created_pulp_metadata:
+            add.append(ns.last_created_pulp_metadata.pk)
         dispatch(
             add_and_remove,
             exclusive_resources=[repo],
             kwargs=dict(
-                add_content_units=[collection_version.pk],
+                add_content_units=add,
                 repository_pk=repo.pk,
                 remove_content_units=[],
             ),
@@ -95,7 +101,11 @@ def import_and_auto_approve(username, **kwargs):
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        call_auto_approve_task(collection_version, repo)
+        ns = Namespace.objects.get(name=collection_version.namespace)
+        ns_pk = None
+        if ns.last_created_pulp_metadata:
+            ns_pk = ns.last_created_pulp_metadata.pk
+        call_auto_approve_task(collection_version, repo, ns_pk)
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(

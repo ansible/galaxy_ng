@@ -6,6 +6,7 @@ from pulpcore.plugin.models import RepositoryContent
 def dispatch_create_pulp_namespace_metadata(galaxy_ns):
     # get metadata values
     links = {x.name: x.url for x in galaxy_ns.links.all()}
+
     namespace_data = {
         "company": galaxy_ns.company,
         "email": galaxy_ns.email,
@@ -28,8 +29,13 @@ def dispatch_create_pulp_namespace_metadata(galaxy_ns):
     # If the metadata already exists, don't do anything
     if content:
         content.touch()
+        galaxy_ns.last_created_pulp_metadata = content
+        galaxy_ns.save
+
     else:
         metadata.save()
+        galaxy_ns.last_created_pulp_metadata = metadata
+        galaxy_ns.save
 
         # get list of local repositories that have a collection with the matching
         # namespace
