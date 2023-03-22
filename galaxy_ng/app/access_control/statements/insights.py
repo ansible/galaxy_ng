@@ -1,83 +1,11 @@
-# Pulp ansible has the collections api broken down into a bunch of separate viewsets
-# (ie: collection versions, collections, download, upload etc.) Galaxy NG expects the
-# functionality of these viewsets to all be roughly the same, so instead of duplicating
-# the statenents for these viewsets, they're stored here and reused on a bunch of different
-# policies.
-_collection_statements = [
-    {
-        "action": ["list", "retrieve"],
-        "principal": "authenticated",
-        "effect": "allow",
-        "condition": "has_rh_entitlements",
-    },
-    {
-        "action": "destroy",
-        "principal": "authenticated",
-        "effect": "allow",
-        "condition": [
-            "has_model_perms:ansible.delete_collection",
-            "has_rh_entitlements",
-        ],
-    },
-    {
-        "action": ["download"],
-        "principal": "authenticated",
-        "effect": "allow",
-        "condition": "has_rh_entitlements",
-    },
-    {
-        "action": "create",
-        "principal": "authenticated",
-        "effect": "allow",
-        "condition": ["can_create_collection", "has_rh_entitlements"],
-    },
-    {
-        "action": "update",
-        "principal": "authenticated",
-        "effect": "allow",
-        "condition": ["can_update_collection", "has_rh_entitlements"],
-    },
-    {
-        "action": ["copy_content", "move_content"],
-        "principal": "authenticated",
-        "effect": "allow",
-        "condition": [
-            "has_model_perms:ansible.modify_ansible_repo_content",
-            "has_rh_entitlements",
-        ],
-    },
-    {
-        "action": "curate",
-        "principal": "authenticated",
-        "effect": "allow",
-        "condition": [
-            "has_model_perms:ansible.modify_ansible_repo_content",
-            "has_rh_entitlements",
-        ],
-    },
-    {
-        "action": "sign",
-        "principal": "authenticated",
-        "effect": "allow",
-        "condition": [
-            "can_sign_collections",
-            "has_rh_entitlements"]
-    },
-]
+from galaxy_ng.app.access_control.statements.standalone import STANDALONE_STATEMENTS
+
 
 _deny_all = [
     {
         "principal": "*",
         "action": "*",
         "effect": "deny"
-    },
-]
-
-_read_only = [
-    {
-        "action": ["list", "retrieve"],
-        "principal": "authenticated",
-        "effect": "allow",
     },
 ]
 
@@ -88,209 +16,15 @@ _signature_upload_statements = [
         "effect": "allow",
         "condition": [
             "has_model_perms:ansible.modify_ansible_repo_content",
-            "has_rh_entitlements",
         ],
     },
 ]
 
-INSIGHTS_STATEMENTS = {
-    'CollectionViewSet': _collection_statements,
-    'pulp_ansible/v3/collections': _collection_statements,
-    'pulp_ansible/v3/collection-versions': _collection_statements,
-    'pulp_ansible/v3/collection-versions/docs': _collection_statements,
-    'pulp_ansible/v3/collections/imports': _collection_statements,
-    'pulp_ansible/v3/repo-metadata': _collection_statements,
-
-    'repositories/ansible/ansible': [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_or_obj_perms:ansible.view_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "list",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_perms:ansible.view_ansiblerepository", "has_rh_entitlements"]
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_perms:ansible.add_ansiblerepository", "has_rh_entitlements"]
-        },
-        {
-            "action": ["modify", "sync", "rebuild_metadata", "sign"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_or_obj_perms:ansible.change_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_or_obj_perms:ansible.delete_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-    ],
-
-    "distributions/ansible/ansible": [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_distribution_repo_perms:ansible.view_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "list",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_distribution_repo_perms:ansible.view_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_distribution_repo_perms:ansible.add_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_distribution_repo_perms:ansible.change_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_distribution_repo_perms:ansible.delete_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-    ],
-
-    'remotes/ansible/collection': [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_or_obj_perms:ansible.view_collectionremote",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "list",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_perms:ansible.view_collectionremote", "has_rh_entitlements"]
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_perms:ansible.add_collectionremote", "has_rh_entitlements"]
-        },
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_or_obj_perms:ansible.change_collectionremote",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_model_or_obj_perms:ansible.delete_collectionremote",
-                "has_rh_entitlements"
-            ]
-        },
-    ],
-
-    'repositories/ansible/ansible/versions': [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "list",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_repository_model_or_obj_perms:ansible.add_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": ["rebuild_metadata", "repair"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_repository_model_or_obj_perms:ansible.change_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": [
-                "has_repository_model_or_obj_perms:ansible.delete_ansiblerepository",
-                "has_rh_entitlements"
-            ]
-        },
-    ],
+_INSIGHTS_STATEMENTS = {
+    **STANDALONE_STATEMENTS,
 
     'content/ansible/collection_signatures': _signature_upload_statements,
-
-    # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
-    # For now endpoints are temporary deactivated
-    'pulp_ansible/v3/collection-versions/all': _deny_all,
-    'pulp_ansible/v3/collections/all': _deny_all,
-
-    # disable upload and download APIs since we're not using them yet
-    'pulp_ansible/v3/collections/upload': _deny_all,
-    'pulp_ansible/v3/collections/download': _deny_all,
+    'AIDenyIndexView': _deny_all,
 
     # The pulp viewsets are now accessible in GALAXY_DEPLOYMENT_MODE=insights
     # via the pulpcore api rerouted under api/automation-hub/
@@ -304,67 +38,18 @@ INSIGHTS_STATEMENTS = {
     "content/container/manifests": _deny_all,
     "content/container/tags": _deny_all,
 
-    "AppRootViewSet": [
-        {
-            "action": ["retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-        {
-            "action": ["retrieve"],
-            "principal": "anonymous",
-            "effect": "allow",
-            "condition": "unauthenticated_collection_download_enabled",
-        },
-    ],
-
-    "NamespaceViewSet": [
-        {
-            "action": ["list", "retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_rh_entitlements",
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_perms:galaxy.add_namespace", "has_rh_entitlements"],
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_or_obj_perms:galaxy.delete_namespace", "has_rh_entitlements"],
-        },
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_or_obj_perms:galaxy.change_namespace", "has_rh_entitlements"],
-        },
-    ],
-    "CollectionRemoteViewSet": [
-        {"action": ["list", "retrieve"], "principal": "authenticated", "effect": "allow"},
-        {
-            "action": ["sync", "update", "partial_update"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:ansible.change_collectionremote",
-        },
-    ],
     "UserViewSet": [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_perms:galaxy.view_user", "has_rh_entitlements"],
+            "condition": ["has_model_perms:galaxy.view_user"],
         },
         {
             "action": ["update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_perms:galaxy.change_user", "has_rh_entitlements"],
+            "condition": ["has_model_perms:galaxy.change_user"],
         },
         {
             "action": ["create", "destroy"],
@@ -385,31 +70,31 @@ INSIGHTS_STATEMENTS = {
             "action": ["list"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_perms:galaxy.view_synclist", "has_rh_entitlements"],
+            "condition": ["has_model_perms:galaxy.view_synclist"],
         },
         {
             "action": ["retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_or_obj_perms:galaxy.view_synclist", "has_rh_entitlements"],
+            "condition": ["has_model_or_obj_perms:galaxy.view_synclist"],
         },
         {
             "action": ["destroy"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_perms:galaxy.delete_synclist", "has_rh_entitlements"],
+            "condition": ["has_model_perms:galaxy.delete_synclist"],
         },
         {
             "action": ["create"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_perms:galaxy.add_synclist", "has_rh_entitlements"],
+            "condition": ["has_model_perms:galaxy.add_synclist"],
         },
         {
             "action": ["update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_perms:galaxy.change_synclist", "has_rh_entitlements"],
+            "condition": ["has_model_perms:galaxy.change_synclist"],
         },
     ],
     "MySyncListViewSet": [
@@ -417,21 +102,7 @@ INSIGHTS_STATEMENTS = {
             "action": ["retrieve", "list", "update", "partial_update", "curate"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_rh_entitlements", "is_org_admin"],
-        },
-    ],
-    "TaskViewSet": [
-        {
-            "action": ["list", "retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-    ],
-    "TagViewSet": [
-        {
-            "action": ["list", "retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
+            "condition": ["is_org_admin"],
         },
     ],
     "GroupViewSet": [
@@ -439,16 +110,13 @@ INSIGHTS_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_rh_entitlements",
         },
     ],
-    "DistributionViewSet": _deny_all,
     "MyDistributionViewSet": [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_rh_entitlements",
         },
     ],
     "ContainerRepositoryViewSet": _deny_all,
@@ -457,7 +125,6 @@ INSIGHTS_STATEMENTS = {
             "action": ["retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_rh_entitlements",
         },
     ],
 
@@ -471,13 +138,11 @@ INSIGHTS_STATEMENTS = {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.change_group"
         },
         {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.change_group"
         },
         {
             "action": "*",
@@ -498,3 +163,34 @@ INSIGHTS_STATEMENTS = {
         }
     ]
 }
+
+
+def _entitelify(policy):
+    new_policy = {}
+
+    for view in policy:
+        statements = []
+        for statement in policy[view]:
+            new_statement = {**statement}
+
+            # don't set conditions on deny statements. Otherwise, that will make it so
+            # that users will only get denied if they have entitleements.
+            if new_statement["effect"] == "allow":
+                condition = new_statement.get("condition", None)
+
+                if condition is None:
+                    new_statement["condition"] = ["has_rh_entitlements"]
+                elif isinstance(condition, list):
+                    if "has_rh_entitlements" not in condition:
+                        new_statement["condition"].append("has_rh_entitlements")
+                elif isinstance(condition, str):
+                    new_statement["condition"] = list({condition, "has_rh_entitlements"})
+
+            statements.append(new_statement)
+
+        new_policy[view] = statements
+
+    return new_policy
+
+
+INSIGHTS_STATEMENTS = _entitelify(_INSIGHTS_STATEMENTS)

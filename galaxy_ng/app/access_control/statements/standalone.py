@@ -131,11 +131,6 @@ STANDALONE_STATEMENTS = {
 
     "distributions/ansible/ansible": [
         {
-            "action": "*",
-            "principal": "admin",
-            "effect": "allow",
-        },
-        {
             "action": "retrieve",
             "principal": "authenticated",
             "effect": "allow",
