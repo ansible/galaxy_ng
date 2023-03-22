@@ -1,6 +1,10 @@
+import logging
 from django_auth_ldap.backend import LDAPBackend, LDAPSettings
 from galaxy_ng.app.models.auth import Group
 from django.conf import settings
+
+
+log = logging.getLogger(__name__)
 
 
 class GalaxyLDAPSettings(LDAPSettings):
@@ -10,10 +14,12 @@ class GalaxyLDAPSettings(LDAPSettings):
 
     @property
     def MIRROR_GROUPS(self):
-        print(self._cached_groups)
-        if settings.GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS:
-            self._cached_groups = self._cached_groups \
+        log.debug("Cached LDAP groups: %s", str(self._cached_groups))
+        if settings.get("GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS"):
+            self._cached_groups = (
+                self._cached_groups
                 or set(Group.objects.all().values_list("name", flat=True))
+            )
             if isinstance(self._mirror_groups, (set, frozenset)):
                 return self._mirror_groups.union(self._cached_groups)
             else:

@@ -115,6 +115,11 @@ class AnsibleConfigFixture(dict):
             "password": "professor",
             "token": None,
         },
+        "ldap_non_admin": {  # this is a regular user in ldap profile
+            "username": "fry",
+            "password": "fry",
+            "token": None,
+        },
         "ee_admin": {
             "username": "ee_admin",
             "password": "redhat",

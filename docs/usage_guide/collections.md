@@ -12,7 +12,7 @@ New namespaces can be created from here. To create a namespace, click the "creat
 
 To edit a namespace, select the namespace from "My namespaces" and  click the "Edit namespace" button from the kebab in the header. 
 
-![Namespace kebab](assets/namespace_kebab.png.png)
+![Namespace kebab](assets/namespace_kebab.png)
 
 From here you can add links to documentation, manage user access, set a description and write a readme for your namespace from the Edit Resources tab.
 
