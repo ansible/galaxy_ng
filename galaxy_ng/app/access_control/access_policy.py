@@ -329,7 +329,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
             ).filter(signed_collection=cv).exists()
 
             if not sig_exists:
-                raise ValidationError(detail={"collection_versions": (
+                raise ValidationError(detail={"collection_versions": _(
                     "Signatures are required in order to add collections into any 'approved'"
                     "repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
                 )})
