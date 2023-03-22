@@ -68,22 +68,23 @@ _group_statements = [
         "effect": "allow",
     },
     {
+        "action": "destroy",
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": "has_model_perms:galaxy.delete_group"
+    },
+    {
         "action": "create",
         "principal": "authenticated",
         "effect": "allow",
         "condition": "has_model_perms:galaxy.add_group"
     },
     {
-        "action": "destroy",
+        "action": "update",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:galaxy.change_group"
+        "condition": "has_model_perms:galaxy.update_group"
     },
-    {
-        "action": "*",
-        "principal": "admin",
-        "effect": "allow"
-    }
 ]
 
 _deny_all = [
