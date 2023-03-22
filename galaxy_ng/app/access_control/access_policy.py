@@ -300,7 +300,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
         repo = view.get_object()
         repo_version = repo.latest_version()
 
-        if settings.GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL:
+        if not settings.GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL:
             return True
 
         serializer = CollectionVersionCopyMoveSerializer(data=request.data)
@@ -329,7 +329,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
             ).filter(signed_collection=cv).exists()
 
             if not sig_exists:
-                raise ValidationError(detail={"collection_versions": _(
+                raise ValidationError(detail={"collection_versions": (
                     "Signatures are required in order to add collections into any 'approved'"
                     "repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
                 )})
