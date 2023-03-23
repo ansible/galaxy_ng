@@ -38,7 +38,10 @@ class TestTaskPublish(TestCase):
         self.artifact = Artifact.from_pulp_temporary_file(self.pulp_temp_file)
 
         collection = Collection.objects.create(namespace='my_ns', name='my_name')
-        self.collection_version = CollectionVersion.objects.create(collection=collection)
+        self.collection_version = CollectionVersion.objects.create(
+            collection=collection,
+            version='1.0.0',
+        )
         self.collection_version.save()
 
         content_artifact = ContentArtifact.objects.create(

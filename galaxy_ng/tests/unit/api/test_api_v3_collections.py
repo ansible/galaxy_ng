@@ -244,7 +244,7 @@ class TestCollectionViewsets(BaseTestCase):
                 self.namespace,
                 baz_collection,
                 self.repo,
-                version=counter,
+                version=f"{counter}.1.0",
                 dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
             )
             self.assertIn(baz_version, get_unique_dependents(self.version_1_1_1))
@@ -256,7 +256,7 @@ class TestCollectionViewsets(BaseTestCase):
                 self.namespace,
                 baz_collection,
                 self.repo,
-                version=counter,
+                version=f"{counter}.1.0",
                 dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
             )
             self.assertNotIn(baz_version, get_unique_dependents(self.version_1_1_1))
@@ -268,7 +268,7 @@ class TestCollectionViewsets(BaseTestCase):
                 self.namespace,
                 baz_collection,
                 self.repo,
-                version=counter,
+                version=f"{counter}.1.0",
                 dependencies={f"{self.namespace.name}.{self.collection.name}": dep_version},
             )
             self.assertIn(baz_version, get_collection_dependents(self.collection))
