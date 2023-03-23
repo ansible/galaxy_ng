@@ -3,10 +3,14 @@ import os
 from functools import lru_cache
 
 from django.conf import settings
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
+from pulpcore.plugin.util import get_objects_for_user
+
+from pulp_ansible.app import models as ansible_models
 
 from pulp_container.app import models as container_models
 from pulp_ansible.app import models as ansible_models
@@ -146,9 +150,42 @@ class AccessPolicyBase(AccessPolicyFromDB):
             }
         )
 
+    def _get_public_repo_pks(self):
+        return ansible_models.AnsibleRepository.objects.filter(private=False)
+
+    def _get_private_repo_pks(self, view, perm):
+        return get_objects_for_user(
+            view.request.user,
+            perm,
+            ansible_models.AnsibleRepository.objects.filter(private=True),
+        )
+
     # if not defined, defaults to parent qs of None breaking Group Detail
     def scope_queryset(self, view, qs):
-        return qs
+        distro_perm = "ansible.view_ansibledistribution"
+        repo_perm = "ansible.view_ansiblerepository"
+        if "AnsibleRepository" in str(type(view)):
+            qs = ansible_models.AnsibleRepository.objects.all()
+            if view.request.user.has_perm(repo_perm):
+                return qs
+            else:
+                public_repository_pks = self._get_public_repo_pks()
+                private_repository_pks = self._get_private_repo_pks(view, repo_perm)
+                return qs.filter(Q(pk__in=public_repository_pks) | Q(pk__in=private_repository_pks))
+        elif "AnsibleDistribution" in str(type(view)):
+            qs = ansible_models.AnsibleDistribution.objects.all()
+            if view.request.user.has_perms([distro_perm, repo_perm]):
+                return qs
+            else:
+                public_repository_pks = self._get_public_repo_pks()
+                private_repository_pks = self._get_private_repo_pks(view, repo_perm)
+                return qs.filter(
+                    Q(repository__pk__in=public_repository_pks)
+                    | Q(repository__pk__in=private_repository_pks)
+                    | Q(repository=None)
+                )
+        else:
+            return qs
 
     # Define global conditions here
     def _get_rh_identity(self, request):
