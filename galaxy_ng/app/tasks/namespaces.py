@@ -1,11 +1,75 @@
+from django.forms.fields import ImageField
+from django.core.exceptions import ValidationError
+import aiohttp
+from pulpcore.plugin.files import PulpTemporaryUploadedFile
+
+from pulpcore.download.http import HttpDownloader
+
 from pulp_ansible.app.models import AnsibleNamespaceMetadata, AnsibleNamespace
 from pulpcore.plugin.tasking import add_and_remove, dispatch
-from pulpcore.plugin.models import RepositoryContent
+from pulpcore.plugin.models import RepositoryContent, Artifact, ContentArtifact
+
+from galaxy_ng.app.models import Namespace
 
 
 def dispatch_create_pulp_namespace_metadata(galaxy_ns):
+
+    dispatch(
+        _create_pulp_namespace,
+        kwargs={
+            "galaxy_ns_pk": galaxy_ns.pk
+        }
+    )
+
+
+def _download_avatar(url):
+    timeout = aiohttp.ClientTimeout(total=None, sock_connect=600, sock_read=600)
+    conn = aiohttp.TCPConnector(force_close=True)
+    session = aiohttp.ClientSession(
+        connector=conn, timeout=timeout, headers=None, requote_redirect_url=False
+    )
+
+    try:
+        downloader = HttpDownloader(url, session=session)
+        img = downloader.fetch()
+    except:  # noqa
+        return
+
+    try:
+        return Artifact.objects.get(sha256=img.artifact_attributes["sha256"])
+    except Artifact.DoesNotExist:
+        pass
+
+    with open(img.path, "rb") as f:
+        tf = PulpTemporaryUploadedFile.from_file(f)
+
+        try:
+            ImageField().to_python(tf)
+        except ValidationError:
+            print("file is not an image")
+            return
+
+    return Artifact.init_and_validate(tf)
+
+
+def _create_pulp_namespace(galaxy_ns_pk):
     # get metadata values
+    galaxy_ns = Namespace.objects.get(pk=galaxy_ns_pk)
     links = {x.name: x.url for x in galaxy_ns.links.all()}
+
+    avatar_artifact = None
+
+    # Download the avatar if there's an avatar url set on the namespace and it's been updated
+    # or the existing metadata doesn't have an avatar
+    if galaxy_ns.avatar_url:
+        old_ns = galaxy_ns.last_created_pulp_metadata
+        if old_ns:
+            if galaxy_ns.avatar_url != old_ns.avatar_url or not old_ns.avatar_sha256:
+                avatar_artifact = _download_avatar(galaxy_ns.avatar_url)
+
+    avatar_sha = None
+    if avatar_artifact:
+        avatar_sha = avatar_artifact.sha256
 
     namespace_data = {
         "company": galaxy_ns.company,
@@ -13,8 +77,7 @@ def dispatch_create_pulp_namespace_metadata(galaxy_ns):
         "description": galaxy_ns.description,
         "resources": galaxy_ns.resources,
         "links": links,
-        "avatar_sha256": None,
-        "avatar_url": galaxy_ns.avatar_url,
+        "avatar_sha256": avatar_sha,
         "name": galaxy_ns.name,
     }
 
@@ -30,12 +93,19 @@ def dispatch_create_pulp_namespace_metadata(galaxy_ns):
     if content:
         content.touch()
         galaxy_ns.last_created_pulp_metadata = content
-        galaxy_ns.save
+        galaxy_ns.save()
 
     else:
         metadata.save()
+        if avatar_artifact:
+            avatar_artifact.save()
+        ContentArtifact.objects.create(
+            artifact=avatar_artifact,
+            content=metadata,
+            relative_path=f"{metadata.name}-avatar"
+        )
         galaxy_ns.last_created_pulp_metadata = metadata
-        galaxy_ns.save
+        galaxy_ns.save()
 
         # get list of local repositories that have a collection with the matching
         # namespace

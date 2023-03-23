@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
+from rest_framework import fields
 
 from pulpcore.plugin.serializers import IdentityField
 
@@ -74,6 +75,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
     links = NamespaceLinkSerializer(many=True, required=False)
     groups = GroupPermissionField()
     related_fields = NamespaceRelatedFieldSerializer(source="*")
+    avatar_url = fields.URLField(required=False)
+    avatar_sha256 = serializers.SerializerMethodField()
 
     # Add a pulp href to namespaces so that it can be referenced in the roles API.
     pulp_href = IdentityField(view_name="pulp_ansible/namespaces-detail", lookup_field="pk")
@@ -92,7 +95,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
             'groups',
             'resources',
             'related_fields',
-            'metadata_sha256'
+            'metadata_sha256',
+            'avatar_sha256',
         )
 
     # replace with a NamespaceNameSerializer and validate_name() ?
@@ -110,6 +114,11 @@ class NamespaceSerializer(serializers.ModelSerializer):
             raise ValidationError(detail={
                 'name': _("Name cannot begin with '_'")})
         return name
+
+    def get_avatar_sha256(self, obj):
+        if obj.last_created_pulp_metadata:
+            return obj.last_created_pulp_metadata.avatar_sha256
+        return None
 
     @transaction.atomic
     def create(self, validated_data):

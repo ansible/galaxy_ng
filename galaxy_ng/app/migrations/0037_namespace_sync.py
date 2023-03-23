@@ -51,7 +51,6 @@ def add_pulp_ansible_namespace_metadata_objects(apps, schema_editor):
             "resources": old_ns.resources,
             "links": links,
             "avatar_sha256": None,
-            "avatar_url": old_ns.avatar_url,
         }
 
         # skip metadata creation for namespaces with no data.
@@ -157,5 +156,10 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             code=add_namespace_metadata_to_published_repository,
             reverse_code=migrations.RunPython.noop
-        )
+        ),
+        migrations.RenameField(
+            model_name='namespace',
+            old_name='avatar_url',
+            new_name='_avatar_url',
+        ),
     ]
