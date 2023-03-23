@@ -45,7 +45,7 @@ def sign_and_move(signing_service_pk, collection_version_pk, source_repo_pk, des
 
     # Move content from source to destination
     move_collection(
-        cv_pk=collection_version_pk,
+        cv_pk_list=[collection_version_pk, ],
         src_repo_pk=source_repo_pk,
         dest_repo_list=[dest_repo_pk],
     )
