@@ -304,7 +304,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 "condition": "has_distribution_repo_perms:ansible.add_ansiblerepository",
             },
             {
-                "action": "update",
+                "action": ["update", "partial_update"],
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": "has_distribution_repo_perms:ansible.change_ansiblerepository",
@@ -338,7 +338,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 "condition": "has_model_perms:ansible.add_collectionremote",
             },
             {
-                "action": "update",
+                "action": ["update", "partial_update"],
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": "has_model_or_obj_perms:ansible.change_collectionremote",
