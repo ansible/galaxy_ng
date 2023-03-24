@@ -1,6 +1,8 @@
+import aiohttp
+
+from django.db import transaction
 from django.forms.fields import ImageField
 from django.core.exceptions import ValidationError
-import aiohttp
 from pulpcore.plugin.files import PulpTemporaryUploadedFile
 
 from pulpcore.download.http import HttpDownloader
@@ -92,16 +94,17 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
         galaxy_ns.save()
 
     else:
-        metadata.save()
-        if avatar_artifact:
-            avatar_artifact.save()
-        ContentArtifact.objects.create(
-            artifact=avatar_artifact,
-            content=metadata,
-            relative_path=f"{metadata.name}-avatar"
-        )
-        galaxy_ns.last_created_pulp_metadata = metadata
-        galaxy_ns.save()
+        with transaction.atomic():
+            metadata.save()
+            if avatar_artifact:
+                avatar_artifact.save()
+            ContentArtifact.objects.create(
+                artifact=avatar_artifact,
+                content=metadata,
+                relative_path=f"{metadata.name}-avatar"
+            )
+            galaxy_ns.last_created_pulp_metadata = metadata
+            galaxy_ns.save()
 
         # get list of local repositories that have a collection with the matching
         # namespace

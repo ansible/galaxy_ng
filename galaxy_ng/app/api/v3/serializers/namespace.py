@@ -75,7 +75,7 @@ class NamespaceSerializer(serializers.ModelSerializer):
     links = NamespaceLinkSerializer(many=True, required=False)
     groups = GroupPermissionField()
     related_fields = NamespaceRelatedFieldSerializer(source="*")
-    avatar_url = fields.URLField(required=False)
+    avatar_url = fields.URLField(required=False, allow_blank=True)
     avatar_sha256 = serializers.SerializerMethodField()
 
     # Add a pulp href to namespaces so that it can be referenced in the roles API.
