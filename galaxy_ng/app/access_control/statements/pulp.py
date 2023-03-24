@@ -189,6 +189,27 @@ PULP_CONTAINER_VIEWSETS = {
 }
 
 
+"""
+                "sync",
+            ],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.modify_ansible_repo_content"
+        },
+        {
+            "action": [
+                "copy_collection_version",
+                "move_collection_version",
+            ],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "signatures_not_required_for_repo"
+        },
+        {
+            "action": [
+"""
+
+
 PULP_ANSIBLE_VIEWSETS = {
     "pulp_ansible/v3/collections": _collection_statements,
     "pulp_ansible/v3/collection-versions": _collection_statements,
@@ -219,12 +240,28 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": [
                     "copy_collection_version",
                     "move_collection_version",
+                ],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "signatures_not_required_for_repo"
+            },
+            {
+                "action": [
+                    "copy_collection_version",
+                    "move_collection_version",
                     "modify",
+                    "sync",
+                ],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.modify_ansible_repo_content"
+            },
+            {
+                "action": [
                     "update",
                     "partial_update",
                     "sync",
                     "rebuild_metadata",
-                    "sign",
                     "mark",
                     "unmark",
                 ],
