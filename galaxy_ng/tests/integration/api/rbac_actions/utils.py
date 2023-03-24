@@ -294,6 +294,7 @@ class ReusableCollection:
         self._staging_href = self._get_repo_href("staging")
 
     def _reset_collection_repo(self):
+        wait_for_all_tasks()
         requests.post(
             (
                 f"{API_ROOT}v3/collections/{self._namespace_name}"

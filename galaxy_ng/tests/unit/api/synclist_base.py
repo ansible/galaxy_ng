@@ -42,7 +42,7 @@ class BaseSyncListViewSet(base.BaseTestCase):
 
         from galaxy_ng.app.access_control.statements import INSIGHTS_STATEMENTS  # noqa
         patcher = mock.patch(
-            "galaxy_ng.app.access_control." "access_policy.AccessPolicyBase._get_statements",
+            "galaxy_ng.app.access_control." "access_policy.GalaxyStatements._get_statements",
             return_value=INSIGHTS_STATEMENTS,
         )
         patcher.start()

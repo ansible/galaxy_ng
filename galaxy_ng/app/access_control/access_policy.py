@@ -1,5 +1,6 @@
 import logging
 import os
+from functools import lru_cache
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -12,6 +13,8 @@ from pulp_container.app import models as container_models
 from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
+
+from galaxy_ng.app.access_control.statements import PULP_VIEWSETS
 
 log = logging.getLogger(__name__)
 
@@ -39,26 +42,18 @@ def has_model_or_object_permissions(user, permission, obj):
     return user.has_perm(permission) or user.has_perm(permission, obj)
 
 
-class AccessPolicyBase(AccessPolicyFromDB):
-    """
-    This class is capable of loading access policy statements from galaxy_ng's hardcoded list of
-    statements as well as from pulp's access policy database table. Priority is given to statements
-    that are found in the hardcoded list of statements, so if a view name for a pulp viewset is
-    found there, it will be loaded over whatever is in the database. If no viewset is found that
-    matches the pulp viewset name, the statements will be loaded from the database as they would
-    normally be loaded in pulp ansible.
+class MockPulpAccessPolicy:
+    statements = None
+    creation_hooks = None
+    queryset_scoping = None
 
-    This class has two main functions.
-    1. It is configured as the default permission class in settings.py. This means it will be used
-       to load access policy definitions for all of the pulp viewsets and provides a mechanism to
-       override pulp viewset access policies as well as create custom policy conditions
-    2. It can be subclassed and used as a permission class for viewsets in galaxy_ng. This allows
-       for custom policy conditions to be declared for specific viewsets, rather than putting them
-       in the base class.
-    """
+    def __init__(self, access_policy):
+        for x in access_policy:
+            setattr(self, x, access_policy[x])
 
+
+class GalaxyStatements:
     _STATEMENTS = None
-    NAME = None
 
     @property
     def galaxy_statements(self):
@@ -77,23 +72,77 @@ class AccessPolicyBase(AccessPolicyFromDB):
     def _get_statements(self):
         return self.galaxy_statements[settings.GALAXY_DEPLOYMENT_MODE]
 
-    def get_policy_statements(self, request, view):
-        statements = self._get_statements()
-        if self.NAME:
-            return statements.get(self.NAME, [])
+    def get_pulp_access_policy(self, name, default=None):
+        """
+        Converts the statement list into the full pulp access policy.
+        """
 
+        statements = self._get_statements().get(name, default)
+
+        if not statements and default is None:
+            return None
+
+        return MockPulpAccessPolicy({
+            "statements": statements,
+        })
+
+
+GALAXY_STATEMENTS = GalaxyStatements()
+
+
+class AccessPolicyBase(AccessPolicyFromDB):
+    """
+    This class is capable of loading access policy statements from galaxy_ng's hardcoded list of
+    statements as well as from pulp's access policy database table. Priority is given to statements
+    that are found in the hardcoded list of statements, so if a view name for a pulp viewset is
+    found there, it will be loaded over whatever is in the database. If no viewset is found that
+    matches the pulp viewset name, the statements will be loaded from the database as they would
+    normally be loaded in pulp ansible.
+
+    This class has two main functions.
+    1. It is configured as the default permission class in settings.py. This means it will be used
+       to load access policy definitions for all of the pulp viewsets and provides a mechanism to
+       override pulp viewset access policies as well as create custom policy conditions
+    2. It can be subclassed and used as a permission class for viewsets in galaxy_ng. This allows
+       for custom policy conditions to be declared for specific viewsets, rather than putting them
+       in the base class.
+    """
+
+    NAME = None
+
+    @classmethod
+    @lru_cache
+    def get_access_policy(cls, view):
+        statements = GALAXY_STATEMENTS
+
+        # If this is a galaxy access policy, load from the statement file
+        if cls.NAME:
+            return statements.get_pulp_access_policy(cls.NAME, default=[])
+
+        # Check if the view has a url pattern. If it does, check for customized
+        # policies from statements/pulp.py
         try:
             viewname = get_view_urlpattern(view)
-            override_ap = statements.get(viewname, None)
 
+            override_ap = PULP_VIEWSETS.get(viewname, None)
             if override_ap:
-                return override_ap
+                return MockPulpAccessPolicy(override_ap)
+
         except AttributeError:
             pass
 
-        # Note: for the time being, pulp-container access policies should still be loaded from
-        # the databse, because we can't override the get creation hooks like this.
-        return super().get_policy_statements(request, view)
+        # If no customized policies exist, try to load the one defined on the view itself
+        try:
+            return MockPulpAccessPolicy(view.DEFAULT_ACCESS_POLICY)
+        except AttributeError:
+            pass
+
+        # As a last resort, require admin rights
+        return MockPulpAccessPolicy(
+            {
+                "statements": [{"action": "*", "principal": "admin", "effect": "allow"}],
+            }
+        )
 
     # if not defined, defaults to parent qs of None breaking Group Detail
     def scope_queryset(self, view, qs):

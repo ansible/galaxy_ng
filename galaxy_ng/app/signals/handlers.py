@@ -3,11 +3,9 @@ Signal handlers for the Galaxy application.
 Those signals are loaded by
 galaxy_ng.app.__init__:PulpGalaxyPluginAppConfig.ready() method.
 """
-from django.apps import apps
 from django.dispatch import receiver
-from django.db.models.signals import post_save, post_migrate
+from django.db.models.signals import post_save
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection
-from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
 from galaxy_ng.app.models import Namespace
 from pulpcore.plugin.models import ContentRedirectContentGuard
 
@@ -47,22 +45,3 @@ def create_namespace_if_not_present(sender, instance, created, **kwargs):
     """
 
     Namespace.objects.get_or_create(name=instance.namespace)
-
-
-def set_pulp_container_access_policies(sender, **kwargs):
-    apps = kwargs.get("apps")
-    if apps is None:
-        from django.apps import apps
-    AccessPolicy = apps.get_model("core", "AccessPolicy")
-
-    print("Overriding pulp_container access policy")
-    for view in PULP_CONTAINER_VIEWSETS:
-        policy, created = AccessPolicy.objects.update_or_create(
-            viewset_name=view, defaults={**PULP_CONTAINER_VIEWSETS[view], "customized": True})
-
-
-post_migrate.connect(
-    set_pulp_container_access_policies,
-    sender=apps.get_app_config("galaxy"),
-    dispatch_uid="override_pulp_container_access_policies"
-)
