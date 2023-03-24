@@ -123,7 +123,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
         # policies from statements/pulp.py
         try:
             viewname = get_view_urlpattern(view)
-            print(viewname)
 
             override_ap = PULP_VIEWSETS.get(viewname, None)
             if override_ap:
