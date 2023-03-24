@@ -198,10 +198,16 @@ PULP_ANSIBLE_VIEWSETS = {
     "repositories/ansible/ansible": {
         "statements": [
             {
-                "action": ["retrieve", "my_permissions", "list"],
+                "action": ["retrieve", "my_permissions"],
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": "has_model_or_obj_perms:ansible.view_ansiblerepository",
+            },
+            {
+                "action": "list",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_perms:ansible.view_ansiblerepository"
             },
             {
                 "action": "create",
@@ -277,10 +283,16 @@ PULP_ANSIBLE_VIEWSETS = {
     "remotes/ansible/collection": {
         "statements": [
             {
-                "action": ["retrieve", "my_permissions", "list"],
+                "action": ["retrieve", "my_permissions"],
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": "has_model_or_obj_perms:ansible.view_collectionremote",
+            },
+            {
+                "action": "list",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_perms:ansible.view_collectionremote"
             },
             {
                 "action": "create",
