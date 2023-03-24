@@ -87,7 +87,7 @@ STANDALONE_STATEMENTS = {
 
     'repositories/ansible/ansible': [
         {
-            "action": "retrieve",
+            "action": ["retrieve", "my_permissions"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.view_ansiblerepository"
@@ -126,6 +126,12 @@ STANDALONE_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.delete_ansiblerepository"
+        },
+        {
+            "action": ["list_roles", "add_role", "remove_role"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.manage_roles_ansiblerepository",
         },
     ],
 
@@ -169,7 +175,7 @@ STANDALONE_STATEMENTS = {
 
     'remotes/ansible/collection': [
         {
-            "action": "retrieve",
+            "action": ["retrieve", "my_permissions"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.view_collectionremote"
@@ -197,6 +203,12 @@ STANDALONE_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.delete_collectionremote"
+        },
+        {
+            "action": ["list_roles", "add_role", "remove_role"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.manage_roles_collectionremote",
         },
     ],
 
