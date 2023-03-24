@@ -12,12 +12,13 @@ from pulpcore.plugin.models import RepositoryContent, Artifact, ContentArtifact
 from galaxy_ng.app.models import Namespace
 
 
-def dispatch_create_pulp_namespace_metadata(galaxy_ns):
+def dispatch_create_pulp_namespace_metadata(galaxy_ns, download_logo):
 
     dispatch(
         _create_pulp_namespace,
         kwargs={
-            "galaxy_ns_pk": galaxy_ns.pk
+            "galaxy_ns_pk": galaxy_ns.pk,
+            "download_logo": download_logo,
         }
     )
 
@@ -52,20 +53,15 @@ def _download_avatar(url):
     return Artifact.init_and_validate(tf)
 
 
-def _create_pulp_namespace(galaxy_ns_pk):
+def _create_pulp_namespace(galaxy_ns_pk, download_logo):
     # get metadata values
     galaxy_ns = Namespace.objects.get(pk=galaxy_ns_pk)
     links = {x.name: x.url for x in galaxy_ns.links.all()}
 
     avatar_artifact = None
 
-    # Download the avatar if there's an avatar url set on the namespace and it's been updated
-    # or the existing metadata doesn't have an avatar
-    if galaxy_ns.avatar_url:
-        old_ns = galaxy_ns.last_created_pulp_metadata
-        if old_ns:
-            if galaxy_ns.avatar_url != old_ns.avatar_url or not old_ns.avatar_sha256:
-                avatar_artifact = _download_avatar(galaxy_ns.avatar_url)
+    if download_logo:
+        avatar_artifact = _download_avatar(galaxy_ns.avatar_url)
 
     avatar_sha = None
     if avatar_artifact:

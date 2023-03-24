@@ -135,19 +135,22 @@ class NamespaceSerializer(serializers.ModelSerializer):
 
         instance.links.set(new_links)
 
-        dispatch_create_pulp_namespace_metadata(instance)
+        dispatch_create_pulp_namespace_metadata(instance, True)
         return instance
 
     @transaction.atomic
     def update(self, instance, validated_data):
         links = validated_data.pop('links', None)
+        download_logo = False
+        if "avatar_url" in validated_data and instance.avatar_url != validated_data["avatar_url"]:
+            download_logo = True
 
         if links is not None:
             instance.set_links(links)
 
         instance = super().update(instance, validated_data)
         instance.save()
-        dispatch_create_pulp_namespace_metadata(instance)
+        dispatch_create_pulp_namespace_metadata(instance, download_logo)
         return instance
 
 
