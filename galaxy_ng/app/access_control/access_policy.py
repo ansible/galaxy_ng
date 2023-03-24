@@ -113,9 +113,12 @@ class AccessPolicyBase(AccessPolicyFromDB):
     def get_access_policy(cls, view):
         statements = GALAXY_STATEMENTS
 
+        # If this is a galaxy access policy, load from the statement file
         if cls.NAME:
             return statements.get_pulp_access_policy(cls.NAME, default=[])
 
+        # Check if the view has a url pattern. If it does, check for customized
+        # policies from statements/pulp.py
         try:
             viewname = get_view_urlpattern(view)
             print(viewname)
@@ -127,7 +130,20 @@ class AccessPolicyBase(AccessPolicyFromDB):
         except AttributeError:
             pass
 
-        return AccessPolicyFromDB.get_access_policy(view)
+        # If no customized policies exist, try to load the one defined on the view itself
+        try:
+            return MockPulpAccessPolicy(view.DEFAULT_ACCESS_POLICY)
+        except AttributeError:
+            pass
+
+        # As a last resort, deny all access to the API
+        return MockPulpAccessPolicy(
+            {
+                "statements": [{"action": "*", "principal": "*", "effect": "deny"}],
+                "creation_hooks": None,
+                "queryset_scoping": {"function": "scope_queryset"},
+            }
+        )
 
     # if not defined, defaults to parent qs of None breaking Group Detail
     def scope_queryset(self, view, qs):
