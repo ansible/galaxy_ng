@@ -43,6 +43,10 @@ def has_model_or_object_permissions(user, permission, obj):
 
 
 class MockPulpAccessPolicy:
+    statements = None
+    creation_hooks = None
+    queryset_scoping = None
+
     def __init__(self, access_policy):
         for x in access_policy:
             setattr(self, x, access_policy[x])
@@ -80,8 +84,6 @@ class GalaxyStatements:
 
         return MockPulpAccessPolicy({
             "statements": statements,
-            "creation_hooks": None,
-            "queryset_scoping": {"function": "scope_queryset"},
         })
 
 
@@ -136,12 +138,10 @@ class AccessPolicyBase(AccessPolicyFromDB):
         except AttributeError:
             pass
 
-        # As a last resort, deny all access to the API
+        # As a last resort, require admin rights
         return MockPulpAccessPolicy(
             {
-                "statements": [{"action": "*", "principal": "*", "effect": "deny"}],
-                "creation_hooks": None,
-                "queryset_scoping": {"function": "scope_queryset"},
+                "statements": [{"action": "*", "principal": "admin", "effect": "allow"}],
             }
         )
 

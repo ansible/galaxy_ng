@@ -1,27 +1,20 @@
 from galaxy_ng.app.access_control.statements.standalone import (
-    _collection_statements,
-    _group_statements,
+    _collection_statements as _galaxy_collection_statements,
+    _group_statements as _galaxy_group_statements,
 )
 
 
-def _add_default(statements):
-    """
-    Converts a list of statements into a pulp access policy.
-    """
-    return {
-        "statements": statements,
-        "creation_hooks": None,
-        "queryset_scoping": {"function": "scope_queryset"},
-    }
+_collection_statements = {"statements": _galaxy_collection_statements}
 
 
-_deny_all = _add_default([
-    {
-        "principal": "*",
-        "action": "*",
-        "effect": "deny"
-    },
-])
+_group_statements = {"statements": _galaxy_group_statements}
+
+
+_deny_all = {
+    "statements": [
+        {"principal": "*", "action": "*", "effect": "deny"},
+    ]
+}
 
 
 PULP_CONTAINER_VIEWSETS = {
@@ -107,9 +100,8 @@ PULP_CONTAINER_VIEWSETS = {
                 ],
             },
         ],
-        "creation_hooks": []
+        "creation_hooks": [],
     },
-
     "pulp_container/namespaces": {
         "statements": [
             {
@@ -168,8 +160,6 @@ PULP_CONTAINER_VIEWSETS = {
             }
         ],
     },
-
-
     "repositories/container/container-push": {
         "statements": [
             {
@@ -195,200 +185,202 @@ PULP_CONTAINER_VIEWSETS = {
         # Remove permission assignment since it's trying to add permissions to groups
         # that don't exist
         "creation_hooks": [],
-    }
-
+    },
 }
 
 
 PULP_ANSIBLE_VIEWSETS = {
-    'pulp_ansible/v3/collections': _add_default(_collection_statements),
-    'pulp_ansible/v3/collection-versions': _add_default(_collection_statements),
-    'pulp_ansible/v3/collection-versions/docs': _add_default(_collection_statements),
-    'pulp_ansible/v3/collections/imports': _add_default(_collection_statements),
-    'pulp_ansible/v3/repo-metadata': _add_default(_collection_statements),
-
-    'repositories/ansible/ansible': _add_default([
-        {
-            "action": ["retrieve", "my_permissions", "list"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.view_ansiblerepository"
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:ansible.add_ansiblerepository"
-        },
-        {
-            "action": [
-                "copy_collection_version",
-                "move_collection_version",
-                "modify",
-                "update",
-                "partial_update",
-                "sync",
-                "rebuild_metadata",
-                "sign",
-                "mark",
-                "unmark"
-            ],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.change_ansiblerepository"
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.delete_ansiblerepository"
-        },
-        {
-            "action": ["list_roles", "add_role", "remove_role"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.manage_roles_ansiblerepository",
-        },
-    ]),
-
-    "distributions/ansible/ansible": _add_default([
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_distribution_repo_perms:ansible.view_ansiblerepository"
-        },
-        {
-            "action": "list",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_distribution_repo_perms:ansible.view_ansiblerepository"
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_distribution_repo_perms:ansible.add_ansiblerepository"
-        },
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_distribution_repo_perms:ansible.change_ansiblerepository"
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_distribution_repo_perms:ansible.delete_ansiblerepository"
-        },
-    ]),
-
-    'remotes/ansible/collection': _add_default([
-        {
-            "action": ["retrieve", "my_permissions", "list"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.view_collectionremote"
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:ansible.add_collectionremote"
-        },
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.change_collectionremote"
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.delete_collectionremote"
-        },
-        {
-            "action": ["list_roles", "add_role", "remove_role"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_or_obj_perms:ansible.manage_roles_collectionremote",
-        },
-    ]),
-
-    'repositories/ansible/ansible/versions': _add_default([
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_repository_model_or_obj_perms:ansible.view_ansiblerepository"
-        },
-        {
-            "action": "list",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_repository_model_or_obj_perms:ansible.view_ansiblerepository"
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_repository_model_or_obj_perms:ansible.add_ansiblerepository"
-        },
-        {
-            "action": ["rebuild_metadata", "repair"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_repository_model_or_obj_perms:ansible.change_ansiblerepository"
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_repository_model_or_obj_perms:ansible.delete_ansiblerepository"
-        },
-    ]),
-
+    "pulp_ansible/v3/collections": _collection_statements,
+    "pulp_ansible/v3/collection-versions": _collection_statements,
+    "pulp_ansible/v3/collection-versions/docs": _collection_statements,
+    "pulp_ansible/v3/collections/imports": _collection_statements,
+    "pulp_ansible/v3/repo-metadata": _collection_statements,
+    "repositories/ansible/ansible": {
+        "statements": [
+            {
+                "action": ["retrieve", "my_permissions", "list"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.view_ansiblerepository",
+            },
+            {
+                "action": "create",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_perms:ansible.add_ansiblerepository",
+            },
+            {
+                "action": [
+                    "copy_collection_version",
+                    "move_collection_version",
+                    "modify",
+                    "update",
+                    "partial_update",
+                    "sync",
+                    "rebuild_metadata",
+                    "sign",
+                    "mark",
+                    "unmark",
+                ],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.change_ansiblerepository",
+            },
+            {
+                "action": "destroy",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.delete_ansiblerepository",
+            },
+            {
+                "action": ["list_roles", "add_role", "remove_role"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.manage_roles_ansiblerepository",
+            },
+        ]
+    },
+    "distributions/ansible/ansible": {
+        "statements": [
+            {
+                "action": "retrieve",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_distribution_repo_perms:ansible.view_ansiblerepository",
+            },
+            {
+                "action": "list",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_distribution_repo_perms:ansible.view_ansiblerepository",
+            },
+            {
+                "action": "create",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_distribution_repo_perms:ansible.add_ansiblerepository",
+            },
+            {
+                "action": "update",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_distribution_repo_perms:ansible.change_ansiblerepository",
+            },
+            {
+                "action": "destroy",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_distribution_repo_perms:ansible.delete_ansiblerepository",
+            },
+        ]
+    },
+    "remotes/ansible/collection": {
+        "statements": [
+            {
+                "action": ["retrieve", "my_permissions", "list"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.view_collectionremote",
+            },
+            {
+                "action": "create",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_perms:ansible.add_collectionremote",
+            },
+            {
+                "action": "update",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.change_collectionremote",
+            },
+            {
+                "action": "destroy",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.delete_collectionremote",
+            },
+            {
+                "action": ["list_roles", "add_role", "remove_role"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_obj_perms:ansible.manage_roles_collectionremote",
+            },
+        ]
+    },
+    "repositories/ansible/ansible/versions": {
+        "statements": [
+            {
+                "action": "retrieve",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
+            },
+            {
+                "action": "list",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
+            },
+            {
+                "action": "create",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_repository_model_or_obj_perms:ansible.add_ansiblerepository",
+            },
+            {
+                "action": ["rebuild_metadata", "repair"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_repository_model_or_obj_perms:ansible.change_ansiblerepository",
+            },
+            {
+                "action": "destroy",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_repository_model_or_obj_perms:ansible.delete_ansiblerepository",
+            },
+        ]
+    },
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
     # For now endpoints are temporary deactivated
-    'pulp_ansible/v3/collection-versions/all': _deny_all,
-    'pulp_ansible/v3/collections/all': _deny_all,
-
+    "pulp_ansible/v3/collection-versions/all": _deny_all,
+    "pulp_ansible/v3/collections/all": _deny_all,
     # disable upload and download APIs since we're not using them yet
-    'pulp_ansible/v3/collections/upload': _deny_all,
-    'pulp_ansible/v3/collections/download': _deny_all,
-
-    'pulp_ansible/v3/legacy-redirected-viewset': _add_default([
-        {
-            "action": "*",
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-
-        # we need the redirect in order to support anonymous downloads when the options are enabled
-        {
-            "action": "*",
-            "principal": "anonymous",
-            "effect": "allow",
-        }
-    ]),
+    "pulp_ansible/v3/collections/upload": _deny_all,
+    "pulp_ansible/v3/collections/download": _deny_all,
+    "pulp_ansible/v3/legacy-redirected-viewset": {
+        "statements": [
+            {
+                "action": "*",
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+            # we need the redirect in order to support anonymous downloads when the options
+            # are enabled
+            {
+                "action": "*",
+                "principal": "anonymous",
+                "effect": "allow",
+            },
+        ]
+    },
 }
+
 
 PULP_CORE_VIEWSETS = {
-    'groups/roles': _add_default(_group_statements),
-    'roles': _add_default([
-        {
-            "action": ["list"],
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-        {
-            "action": "*",
-            "principal": "admin",
-            "effect": "allow"
-        }
-    ])
+    "groups/roles": _group_statements,
+    "roles": {
+        "statements": [
+            {
+                "action": ["list"],
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+            {"action": "*", "principal": "admin", "effect": "allow"},
+        ]
+    },
 }
+
 
 PULP_VIEWSETS = {**PULP_CONTAINER_VIEWSETS, **PULP_ANSIBLE_VIEWSETS, **PULP_CORE_VIEWSETS}

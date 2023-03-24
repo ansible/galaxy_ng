@@ -71,7 +71,7 @@ _group_statements = [
         "action": "create",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:galaxy.change_group"
+        "condition": "has_model_perms:galaxy.add_group"
     },
     {
         "action": "destroy",
