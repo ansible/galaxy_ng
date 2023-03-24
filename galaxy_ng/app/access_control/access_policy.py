@@ -14,7 +14,7 @@ from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 
-from galaxy_ng.app.access_control.statements import PULP_CONTAINER_VIEWSETS
+from galaxy_ng.app.access_control.statements import PULP_VIEWSETS
 
 log = logging.getLogger(__name__)
 
@@ -79,7 +79,7 @@ class GalaxyStatements:
             return None
 
         return MockPulpAccessPolicy({
-            "statements": self._get_statements().get(name, default),
+            "statements": statements,
             "creation_hooks": None,
             "queryset_scoping": {"function": "scope_queryset"},
         })
@@ -118,17 +118,11 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
         try:
             viewname = get_view_urlpattern(view)
-            override_ap = statements.get_pulp_access_policy(viewname)
+            print(viewname)
 
+            override_ap = PULP_VIEWSETS.get(viewname, None)
             if override_ap:
-                return override_ap
-
-            # The container policy should be merged into the standalone policy
-            # at some point, but the schema for the standalone policy needs to be
-            # updated to support creation hooks and queryset scoping first.
-            container_policy = PULP_CONTAINER_VIEWSETS.get(viewname, None)
-            if container_policy:
-                return MockPulpAccessPolicy(container_policy)
+                return MockPulpAccessPolicy(override_ap)
 
         except AttributeError:
             pass

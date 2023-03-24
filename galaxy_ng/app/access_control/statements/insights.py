@@ -37,6 +37,7 @@ _INSIGHTS_STATEMENTS = {
     "repositories/container/container": _deny_all,
     "content/container/manifests": _deny_all,
     "content/container/tags": _deny_all,
+    "LegacyAccessPolicy": _deny_all,
 
     "UserViewSet": [
         {
@@ -133,44 +134,6 @@ _INSIGHTS_STATEMENTS = {
             "effect": "allow",
         },
     ],
-
-    'groups/roles': [
-        {
-            "action": ["list", "retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.change_group"
-
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.change_group"
-        },
-        {
-            "action": "*",
-            "principal": "admin",
-            "effect": "allow"
-        }
-    ],
-    'roles': [
-        {
-            "action": ["list"],
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-        {
-            "action": "*",
-            "principal": "admin",
-            "effect": "allow"
-        }
-    ]
 }
 
 
