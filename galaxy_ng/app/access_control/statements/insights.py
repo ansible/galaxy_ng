@@ -112,6 +112,7 @@ _INSIGHTS_STATEMENTS = {
             "effect": "allow",
         },
     ],
+    "DistributionViewSet": _deny_all,
     "MyDistributionViewSet": [
         {
             "action": ["list", "retrieve"],
@@ -120,6 +121,11 @@ _INSIGHTS_STATEMENTS = {
         },
     ],
     "ContainerRepositoryViewSet": _deny_all,
+    'ContainerReadmeViewset': _deny_all,
+    'ContainerRegistryRemoteViewSet': _deny_all,
+    'ContainerRemoteViewSet': _deny_all,
+
+
     "LandingPageViewSet": [
         {
             "action": ["retrieve"],
