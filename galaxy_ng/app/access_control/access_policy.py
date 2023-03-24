@@ -113,15 +113,12 @@ class AccessPolicyBase(AccessPolicyFromDB):
     def get_access_policy(cls, view):
         statements = GALAXY_STATEMENTS
 
-        print(cls.NAME)
         if cls.NAME:
             return statements.get_pulp_access_policy(cls.NAME, default=[])
 
         try:
             viewname = get_view_urlpattern(view)
             override_ap = statements.get_pulp_access_policy(viewname)
-
-            print(override_ap.statements)
 
             if override_ap:
                 return override_ap

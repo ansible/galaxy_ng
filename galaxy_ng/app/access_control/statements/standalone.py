@@ -87,16 +87,10 @@ STANDALONE_STATEMENTS = {
 
     'repositories/ansible/ansible': [
         {
-            "action": "retrieve",
+            "action": ["retrieve", "my_permissions", "list"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.view_ansiblerepository"
-        },
-        {
-            "action": "list",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:ansible.view_ansiblerepository"
         },
         {
             "action": "create",
@@ -126,6 +120,12 @@ STANDALONE_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.delete_ansiblerepository"
+        },
+        {
+            "action": ["list_roles", "add_role", "remove_role"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.manage_roles_ansiblerepository",
         },
     ],
 
@@ -164,16 +164,10 @@ STANDALONE_STATEMENTS = {
 
     'remotes/ansible/collection': [
         {
-            "action": "retrieve",
+            "action": ["retrieve", "my_permissions", "list"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.view_collectionremote"
-        },
-        {
-            "action": "list",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:ansible.view_collectionremote"
         },
         {
             "action": "create",
@@ -192,6 +186,12 @@ STANDALONE_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": "has_model_or_obj_perms:ansible.delete_collectionremote"
+        },
+        {
+            "action": ["list_roles", "add_role", "remove_role"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.manage_roles_collectionremote",
         },
     ],
 
