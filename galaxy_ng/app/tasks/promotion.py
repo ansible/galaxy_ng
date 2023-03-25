@@ -67,6 +67,7 @@ def call_auto_approve_task(collection_version, repo, ns_pk):
         kwargs=dict(
             cv_pk=collection_version.pk,
             src_repo_pk=repo.pk,
+            ns_pk=ns_pk,
         ),
     )
 
