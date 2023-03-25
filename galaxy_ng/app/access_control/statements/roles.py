@@ -42,6 +42,7 @@ _LOCKED_ROLES = {
             "ansible.add_ansiblerepository",
             "ansible.change_ansiblerepository",
             "ansible.delete_ansiblerepository",
+            "ansible.sign_ansiblerepository",
         },
         "inherit_from": [],
     },

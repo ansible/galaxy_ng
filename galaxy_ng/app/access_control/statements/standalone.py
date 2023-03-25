@@ -80,7 +80,7 @@ _group_statements = [
         "condition": "has_model_perms:galaxy.add_group"
     },
     {
-        "action": "update",
+        "action": ["update", "partial_update"],
         "principal": "authenticated",
         "effect": "allow",
         "condition": "has_model_perms:galaxy.update_group"

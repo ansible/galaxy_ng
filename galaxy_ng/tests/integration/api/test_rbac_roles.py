@@ -25,10 +25,21 @@ from .rbac_actions.utils import (
 )
 
 from .rbac_actions.auth import (
-    view_groups, delete_groups, add_groups, change_groups,
-    add_pulp_groups, delete_pulp_groups, view_pulp_groups,
-    view_users, delete_users, add_users, change_users,
-    view_role, delete_role, add_role, change_role,
+    view_groups,
+    delete_groups,
+    add_groups,
+    change_groups,
+    add_pulp_groups,
+    delete_pulp_groups,
+    view_pulp_groups,
+    view_users,
+    delete_users,
+    add_users,
+    change_users,
+    view_role,
+    delete_role,
+    add_role,
+    change_role,
 )
 from .rbac_actions.misc import view_tasks
 from .rbac_actions.collections import (
@@ -105,7 +116,7 @@ from .rbac_actions.exec_env import (
 log = logging.getLogger(__name__)
 
 # Order is important, CRU before D actions
-GLOBAL_ACTIONS = [
+GLOBAL_ACTIONS = {
     # AUTHENTICATION
     add_groups,
     view_groups,
@@ -119,6 +130,9 @@ GLOBAL_ACTIONS = [
     change_role,
     view_role,
     delete_role,
+    add_pulp_groups,
+    delete_pulp_groups,
+    view_pulp_groups,
 
     # COLLECTIONS
     create_collection_namespace,
@@ -191,18 +205,10 @@ GLOBAL_ACTIONS = [
     add_ansible_remote,
     change_ansible_remote,
     delete_ansible_remote,
-
-    add_groups,
-    change_groups,
-    delete_groups,
-    view_role,
-    add_pulp_groups,
-    delete_pulp_groups,
-    view_pulp_groups,
-]
+}
 
 # TODO: Update object tests to include delete actions
-OBJECT_ACTIONS = [
+OBJECT_ACTIONS = {
     # ansible
     change_collection_namespace,
     upload_collection_to_namespace,
@@ -221,7 +227,7 @@ OBJECT_ACTIONS = [
     ee_namespace_list_roles,
     ee_namespace_add_role,
     ee_namespace_remove_role
-]
+}
 
 OBJECT_ROLES_TO_TEST = {
     # COLLECTIONS
@@ -652,7 +658,7 @@ def test_all_actions_are_tested():
     are also included in GLOBAL_ACTIONS
     """
 
-    tested_actions = set([action.__name__ for action in GLOBAL_ACTIONS])
+    tested_actions = {action.__name__ for action in GLOBAL_ACTIONS}
     role_actions = set()
 
     for role in ROLES_TO_TEST:
@@ -662,4 +668,7 @@ def test_all_actions_are_tested():
         role_actions = role_actions.union(
             [action.__name__ for action in OBJECT_ROLES_TO_TEST[role]])
 
-    assert role_actions.issubset(tested_actions)
+    # assert that all of the actions declared on the roles are also declared
+    # in the global set of tests
+    diff = role_actions.difference(tested_actions)
+    assert diff == set()
