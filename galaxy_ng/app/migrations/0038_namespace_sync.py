@@ -139,7 +139,7 @@ def add_namespace_metadata_to_published_repository(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('galaxy', '0036_repository_labels'),
+        ('galaxy', '0037_pulp_ansible_permissions'),
         ('ansible', '0047_ansible_namespace'),
     ]
 
