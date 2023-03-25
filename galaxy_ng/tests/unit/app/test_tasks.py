@@ -13,8 +13,7 @@ from pulp_ansible.app.models import (
 )
 from pulpcore.plugin.models import Artifact, ContentArtifact, PulpTemporaryFile
 
-from galaxy_ng.app.tasks import import_and_auto_approve, import_and_move_to_staging
-from galaxy_ng.app.tasks.promotion import move_content
+from galaxy_ng.app.tasks import import_and_auto_approve
 from galaxy_ng.app.tasks.publishing import _log_collection_upload
 
 log = logging.getLogger(__name__)
@@ -50,38 +49,6 @@ class TestTaskPublish(TestCase):
         )
         content_artifact.save()
 
-    def test_task_move_content(self):
-        repo1 = AnsibleRepository.objects.get(name=staging_name)
-        repo1_version_number = repo1.latest_version().number
-        repo2 = AnsibleRepository.objects.get(name='rejected')
-        repo2_version_number = repo2.latest_version().number
-
-        self.assertNotIn(
-            self.collection_version,
-            CollectionVersion.objects.filter(pk__in=repo1.latest_version().content))
-        self.assertNotIn(
-            self.collection_version,
-            CollectionVersion.objects.filter(pk__in=repo2.latest_version().content))
-
-        qs = CollectionVersion.objects.filter(pk=self.collection_version.pk)
-        with repo1.new_version() as new_version:
-            new_version.add_content(qs)
-
-        self.assertEqual(repo1_version_number + 1, repo1.latest_version().number)
-        self.assertIn(
-            self.collection_version,
-            CollectionVersion.objects.filter(pk__in=repo1.latest_version().content))
-
-        move_content(self.collection_version.pk, repo1.pk, repo2.pk)
-
-        self.assertNotIn(
-            self.collection_version,
-            CollectionVersion.objects.filter(pk__in=repo1.latest_version().content))
-        self.assertIn(
-            self.collection_version,
-            CollectionVersion.objects.filter(pk__in=repo2.latest_version().content))
-        self.assertEqual(repo2_version_number + 1, repo2.latest_version().number)
-
     @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
     @mock.patch('galaxy_ng.app.tasks.publishing.general_create')
     @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
@@ -97,7 +64,7 @@ class TestTaskPublish(TestCase):
 
         import_and_auto_approve(
             '',  # username
-            repo.pk,
+            repository_pk=repo.pk,
             **{"general_args": ()}
         )
 
@@ -111,42 +78,7 @@ class TestTaskPublish(TestCase):
         with self.assertRaises(AnsibleDistribution.DoesNotExist):
             import_and_auto_approve(
                 '',  # username
-                repo.pk,
-                **{"general_args": ()}
-            )
-
-    @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
-    @mock.patch('galaxy_ng.app.tasks.publishing.general_create')
-    @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
-    @mock.patch('galaxy_ng.app.tasks.promotion.TaskGroup')
-    def test_import_and_move_to_staging(
-        self, mocked_task_group, mocked_dispatch, mocked_create, mocked_get_created
-    ):
-        staging_repo = AnsibleRepository.objects.get(name=staging_name)
-
-        repo_name = 'the_incoming_repo'
-        repo = AnsibleRepository.objects.create(name=repo_name)
-        dist = AnsibleDistribution(name=repo_name, base_path=repo_name)
-        dist.repository = repo
-        dist.save()
-
-        mocked_get_created.return_value = [self.collection_version]
-
-        import_and_move_to_staging(
-            '',  # username
-            **{"general_args": ()}
-        )
-
-        self.assertTrue(mocked_create.call_count == 1)
-        self.assertTrue(mocked_dispatch.call_count == 1)
-
-        # test cannot find staging repo
-        staging_repo.name = 'a_different_name_for_staging'
-        staging_repo.save()
-        mocked_get_created.side_effect = AnsibleDistribution.DoesNotExist
-        with self.assertRaises(AnsibleDistribution.DoesNotExist):
-            import_and_move_to_staging(
-                '',  # username
+                repository_pk=repo.pk,
                 **{"general_args": ()}
             )
 

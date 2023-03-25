@@ -62,6 +62,7 @@ min_hub_version: This marker takes an argument that indicates the minimum hub ve
 iqe_rbac_test: imported iqe tests checking role permissions
 sync: sync tests against stage
 certified_sync: sync tests container against container
+auto_approve: run tests that require AUTO_APPROVE to be set to true
 """
 
 
@@ -302,6 +303,9 @@ class AnsibleConfigFixture(dict):
                 'CONTAINER_REGISTRY',
                 'localhost:5001'
             )
+
+        elif key == 'server':
+            return self["url"].split("/api/")[0]
 
         else:
             raise Exception(f'Unknown config key: {self.namespace}.{key}')
@@ -646,3 +650,9 @@ def sync_instance_crc():
     set_synclist(client, [])
 
     return (manifest, config)
+
+
+@pytest.fixture(scope="function")
+def settings(ansible_config):
+    api_client = get_client(ansible_config("admin"))
+    return api_client("_ui/v1/settings/")

@@ -4,11 +4,13 @@ from functools import lru_cache
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 
 from pulp_container.app import models as container_models
+from pulp_ansible.app import models as ansible_models
+from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
@@ -194,11 +196,39 @@ class AccessPolicyBase(AccessPolicyFromDB):
             namespace = models.Namespace.objects.get(name=data["filename"].namespace)
         except models.Namespace.DoesNotExist:
             raise NotFound(_("Namespace in filename not found."))
-        return has_model_or_object_permissions(
+
+        can_upload_to_namespace = has_model_or_object_permissions(
             request.user,
             "galaxy.upload_to_namespace",
             namespace
         )
+
+        if not can_upload_to_namespace:
+            return False
+
+        path = view._get_path()
+        try:
+            repo = ansible_models.AnsibleDistribution.objects.get(base_path=path).repository.cast()
+            pipeline = repo.pulp_labels.get("pipeline", None)
+
+            # if uploading to a staging repo, don't check any additional perms
+            if pipeline == "staging":
+                return True
+
+            # if no pipeline is declared on the repo, verify that the user can modify the
+            # repo contents.
+            elif pipeline is None:
+                return has_model_or_object_permissions(
+                    request.user,
+                    "ansible.modify_ansible_repo_content",
+                    repo
+                )
+
+            # if pipeline is anything other staging, reject the request.
+            return False
+
+        except ansible_models.AnsibleDistribution.DoesNotExist:
+            raise NotFound(_("Distribution does not exist."))
 
     def can_sign_collections(self, request, view, permission):
         # Repository is required on the CollectionSign payload
@@ -261,6 +291,50 @@ class AccessPolicyBase(AccessPolicyFromDB):
             return request.user.has_perm(permission, obj.repository.cast())
 
         return False
+
+    def signatures_not_required_for_repo(self, request, view, action):
+        """
+        Validate that collections are being added with signatures to approved repos
+        when signatures are required.
+        """
+        repo = view.get_object()
+        repo_version = repo.latest_version()
+
+        if not settings.GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL:
+            return True
+
+        serializer = CollectionVersionCopyMoveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        signing_service = data.get("signing_service", None)
+
+        if signing_service:
+            return True
+
+        is_any_approved = False
+        for repo in data["destination_repositories"]:
+            if repo.pulp_labels.get("pipeline", None) == "approved":
+                is_any_approved = True
+                break
+
+        # If any destination repo is marked as approved, check that the signatures
+        # are available
+        if not is_any_approved:
+            return True
+
+        for cv in data["collection_versions"]:
+            sig_exists = repo_version.get_content(
+                ansible_models.CollectionVersionSignature.objects
+            ).filter(signed_collection=cv).exists()
+
+            if not sig_exists:
+                raise ValidationError(detail={"collection_versions": _(
+                    "Signatures are required in order to add collections into any 'approved'"
+                    "repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
+                )})
+
+        return True
 
 
 class AIDenyIndexAccessPolicy(AccessPolicyBase):

@@ -3,19 +3,17 @@ import logging
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
-from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, CollectionVersion
-from pulpcore.plugin.tasking import general_create
-from pulpcore.plugin.models import Task
-from pulpcore.plugin.models import SigningService
+from pulp_ansible.app.models import AnsibleRepository, CollectionVersion
 
-from .promotion import call_add_content_task
-from .signing import call_sign_and_add_task
+from pulpcore.plugin.tasking import general_create, add_and_remove, dispatch
+from pulpcore.plugin.models import Task
+
+from .promotion import call_auto_approve_task
 
 log = logging.getLogger(__name__)
 
 GOLDEN_NAME = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 STAGING_NAME = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
-AUTO_SIGN = settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False)
 SIGNING_SERVICE_NAME = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
 
 
@@ -34,7 +32,24 @@ def get_created_collection_versions():
     return created_collection_versions
 
 
-def import_and_move_to_staging(username, **kwargs):
+def _upload_collection(**kwargs):
+    # don't add the collection to the repository in general_create, so that
+    # we don't have to lock the repo while the import is running
+    repo_pk = kwargs.pop("repository_pk")
+    general_args = kwargs.pop("general_args")
+    try:
+        repo = AnsibleRepository.objects.get(pk=repo_pk)
+    except AnsibleRepository.DoesNotExist:
+        raise RuntimeError(_('Could not find staging repository: "%s"') % STAGING_NAME)
+
+    # kick off the upload and import task via the
+    # pulp_ansible.app.serializers.CollectionVersionUploadSerializer serializer
+    general_create(*general_args, **kwargs)
+
+    return repo
+
+
+def import_to_staging(username, **kwargs):
     """Import collection version and move to staging repository.
 
     Custom task to call pulpcore's general_create() task then
@@ -42,18 +57,20 @@ def import_and_move_to_staging(username, **kwargs):
 
     This task will not wait for the enqueued tasks to finish.
     """
-    general_args = kwargs.pop("general_args")
-    general_create(*general_args, **kwargs)
-
-    try:
-        staging_repo = AnsibleDistribution.objects.get(name=STAGING_NAME).repository
-    except AnsibleRepository.DoesNotExist:
-        raise RuntimeError(_('Could not find staging repository: "%s"') % STAGING_NAME)
+    repo = _upload_collection(**kwargs)
 
     created_collection_versions = get_created_collection_versions()
 
     for collection_version in created_collection_versions:
-        call_add_content_task(collection_version, staging_repo)
+        dispatch(
+            add_and_remove,
+            exclusive_resources=[repo],
+            kwargs=dict(
+                add_content_units=[collection_version.pk],
+                repository_pk=repo.pk,
+                remove_content_units=[],
+            ),
+        )
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(
@@ -64,47 +81,21 @@ def import_and_move_to_staging(username, **kwargs):
             )
 
 
-def import_and_auto_approve(username, repository_pk=None, **kwargs):
+def import_and_auto_approve(username, **kwargs):
     """Import collection version and automatically approve.
 
     Custom task to call pulpcore's general_create() task
     then automatically approve collection version so no
     manual approval action needs to occur.
     """
-    general_args = kwargs.pop("general_args")
-    general_create(*general_args, **kwargs)
 
-    try:
-        golden_repo = AnsibleDistribution.objects.get(name=GOLDEN_NAME).repository
-    except AnsibleRepository.DoesNotExist:
-        raise RuntimeError(_('Could not find staging repository: "%s"') % GOLDEN_NAME)
-
-    repo = AnsibleRepository.objects.get(pk=repository_pk)
-
-    add_task_params = {
-        "repo": repo if repo.name != golden_repo.name else golden_repo,
-    }
+    # add the content to the staging repo.
+    repo = _upload_collection(**kwargs)
 
     created_collection_versions = get_created_collection_versions()
 
-    try:
-        signing_service = AUTO_SIGN and SigningService.objects.get(name=SIGNING_SERVICE_NAME)
-    except SigningService.DoesNotExist:
-        raise RuntimeError(_('Signing %s service not found') % SIGNING_SERVICE_NAME)
-
     for collection_version in created_collection_versions:
-        add_task_params.update({"collection_version": collection_version})
-
-        if AUTO_SIGN:
-            call_sign_and_add_task(signing_service, **add_task_params)
-        else:
-            call_add_content_task(**add_task_params)
-
-        log.info(
-            'Imported and auto approved collection artifact %s to repository %s',
-            collection_version.relative_path,
-            golden_repo.latest_version()
-        )
+        call_auto_approve_task(collection_version, repo)
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:
             _log_collection_upload(

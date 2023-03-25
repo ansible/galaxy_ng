@@ -7,4 +7,4 @@ openapi-spec-validator
 jsonschema
 hvac
 importlib_resources
-galaxykit==0.12
+galaxykit==0.13

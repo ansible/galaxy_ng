@@ -40,12 +40,6 @@ def api_client(config):
 
 
 @pytest.fixture(scope="function")
-def settings(api_client):
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    return api_client(f"{api_prefix}/_ui/v1/settings/")
-
-
-@pytest.fixture(scope="function")
 def flags(api_client):
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
     return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
@@ -520,3 +514,120 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     )
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] is None
+
+
+def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact, settings):
+    """
+    Test signature validation on the pulp {repo_href}/move_collection_version/ api when
+    signatures are required.
+    """
+
+    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
+
+    if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
+
+    config = ansible_config("admin")
+    api_client = get_client(config, request_token=True, require_auth=True)
+
+    resp = upload_artifact(config, api_client, artifact)
+    resp = wait_for_task(api_client, resp)
+    staging_href = api_client(
+        "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]["pulp_href"]
+    published_href = api_client(
+        "pulp/api/v3/repositories/ansible/ansible/?name=published")["results"][0]["pulp_href"]
+    collection_href = api_client(
+        f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+    )["results"][0]["pulp_href"]
+
+    # test moving collection without signature
+    resp = requests.post(
+        config["server"] + staging_href + "move_collection_version/",
+        json={
+            "collection_versions": [collection_href],
+            "destination_repositories": [published_href]
+        },
+        auth=(config["username"], config["password"])
+    )
+
+    assert resp.status_code == 400
+    err = resp.json().get("collection_versions", None)
+    assert err is not None
+
+    assert "Signatures are required" in err
+
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
+
+    # Test signing the collection before moving
+    sign_payload = {
+        "distro_base_path": "staging",
+        "namespace": artifact.namespace,
+        "collection": artifact.name,
+        "version": artifact.version,
+    }
+    sign_on_demand(api_client, signing_service, **sign_payload)
+
+    resp = requests.post(
+        config["server"] + staging_href + "move_collection_version/",
+        json={
+            "collection_versions": [collection_href],
+            "destination_repositories": [published_href]
+        },
+        auth=(config["username"], config["password"])
+    )
+
+    assert resp.status_code == 202
+    assert "task" in resp.json()
+
+    wait_for_task(api_client, resp.json())
+
+    assert api_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
+
+
+def test_move_with_signing_service(ansible_config, artifact, upload_artifact, settings):
+    """
+    Test signature validation on the pulp {repo_href}/move_collection_version/ api when
+    signatures are required.
+    """
+
+    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
+
+    if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
+
+    config = ansible_config("admin")
+    api_client = get_client(config, request_token=True, require_auth=True)
+
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
+
+    resp = upload_artifact(config, api_client, artifact)
+    resp = wait_for_task(api_client, resp)
+    staging_href = api_client(
+        "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]["pulp_href"]
+    published_href = api_client(
+        "pulp/api/v3/repositories/ansible/ansible/?name=published")["results"][0]["pulp_href"]
+    collection_href = api_client(
+        f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+    )["results"][0]["pulp_href"]
+    signing_href = api_client(
+        f"pulp/api/v3/signing-services/?name={signing_service}"
+    )["results"][0]["pulp_href"]
+
+    resp = requests.post(
+        config["server"] + staging_href + "move_collection_version/",
+        json={
+            "collection_versions": [collection_href],
+            "destination_repositories": [published_href],
+            "signing_service": signing_href
+        },
+        auth=(config["username"], config["password"])
+    )
+
+    assert resp.status_code == 202
+    assert "task" in resp.json()
+
+    wait_for_task(api_client, resp.json())
+
+    assert api_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1

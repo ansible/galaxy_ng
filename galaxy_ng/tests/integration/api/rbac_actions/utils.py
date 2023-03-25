@@ -1,6 +1,4 @@
-import random
 import requests
-import string
 import time
 import subprocess
 from urllib.parse import urljoin
@@ -9,13 +7,17 @@ from galaxy_ng.tests.integration.utils import (
     upload_artifact,
     get_client,
     wait_for_task as wait_for_task_fixtures,
-    TaskWaitingTimeout
+    TaskWaitingTimeout,
+    gen_string,
+    wait_for_all_tasks as wait_for_all_tasks_fixtures,
+    AnsibleDistroAndRepo
 )
 from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture
 
 from ansible.galaxy.api import GalaxyError
 
 CLIENT_CONFIG = AnsibleConfigFixture("admin")
+ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 
 API_ROOT = CLIENT_CONFIG["url"]
 PULP_API_ROOT = f"{API_ROOT}pulp/api/v3/"
@@ -51,11 +53,7 @@ def assert_pass(expect_pass, code, pass_status, deny_status):
         assert code == deny_status
 
 
-def gen_string(size=10, chars=string.ascii_lowercase):
-    return ''.join(random.choice(chars) for _ in range(size))
-
-
-def create_group_with_user_and_role(user, role, content_object=None, group=None):
+def create_group_for_user(user, role=None):
     name = f"{NAMESPACE}_group_{gen_string()}"
 
     g = create_group(name)
@@ -65,12 +63,19 @@ def create_group_with_user_and_role(user, role, content_object=None, group=None)
         json={"username": user["username"]},
         auth=ADMIN_CREDENTIALS
     )
+
+    if role:
+        add_group_role(g["pulp_href"], role)
+
+    return g
+
+
+def add_group_role(group_href, role, object_href=None):
     requests.post(
-        f"{PULP_API_ROOT}groups/{g['id']}/roles/",
-        json={"role": role, "content_object": content_object},
+        SERVER + group_href + "roles/",
+        json={"role": role, "content_object": object_href},
         auth=ADMIN_CREDENTIALS
     )
-    return g
 
 
 def create_user(username, password):
@@ -111,6 +116,10 @@ def wait_for_task(resp, path=None, timeout=300):
             ready = resp.json()["state"] not in ("running", "waiting")
         time.sleep(5)
     return resp
+
+
+def wait_for_all_tasks():
+    wait_for_all_tasks_fixtures(ADMIN_CLIENT)
 
 
 def ensure_test_container_is_pulled():
@@ -216,7 +225,7 @@ def gen_collection(name, namespace):
 
     ansible_config = AnsibleConfigFixture("admin", namespace=artifact.namespace)
 
-    client = get_client(ansible_config)
+    client = ADMIN_CLIENT
 
     wait_for_task_fixtures(client, upload_artifact(ansible_config, client, artifact))
 
@@ -251,30 +260,6 @@ def reset_remote():
         },
         auth=ADMIN_CREDENTIALS,
     ).json()
-
-
-def wait_for_all_tasks(timeout=300):
-    ready = False
-    wait_until = time.time() + timeout
-
-    while not ready:
-        if wait_until < time.time():
-            raise TaskWaitingTimeout()
-        running_count = requests.get(
-            f"{PULP_API_ROOT}tasks/",
-            params={"state": "running"},
-            auth=ADMIN_CREDENTIALS
-        ).json()["count"]
-
-        waiting_count = requests.get(
-            f"{PULP_API_ROOT}tasks/",
-            params={"state": "waiting"},
-            auth=ADMIN_CREDENTIALS
-        ).json()["count"]
-
-        ready = running_count == 0 and waiting_count == 0
-
-        time.sleep(1)
 
 
 class ReusableCollection:
@@ -319,6 +304,8 @@ class ReusableCollection:
         ).json()["results"][0]["pulp_href"]
 
     def _reset_collection(self):
+        wait_for_all_tasks()
+
         resp = requests.get(
             (
                 f"{PULP_API_ROOT}content/ansible/collection_versions/"
@@ -333,7 +320,6 @@ class ReusableCollection:
                 self._collection_name, self._namespace_name)
             self._collection_href = self._collection["pulp_href"]
         else:
-
             # If it doesn't, reset it's state.
             self._reset_collection_repo()
 
@@ -418,17 +404,6 @@ class ReusableContainerRegistry:
         self._name = f"ee_ns_{name}"
         self._registry = gen_registry(self._name)
 
-    # def _reset(self):
-    #     data = requests.get(
-    #         f'{API_ROOT}_ui/v1/execution-environments/registries/?name={self._name}',
-    #         auth=ADMIN_CREDENTIALS
-    #     ).json()
-
-    #     if data['meta']['count'] == 1:
-    #         return data['data'][0]
-    #     else:
-    #         return gen_registry(self._name)
-
     def get_registry(self):
         return self._registry
 
@@ -439,11 +414,19 @@ class ReusableContainerRegistry:
         self.cleanup()
 
 
+class ReusableAnsibleRepository(AnsibleDistroAndRepo):
+    def __init__(self, name, is_staging):
+        repo_body = {}
+        if is_staging:
+            repo_body["pulp_labels"] = {"pipeline": "staging"}
+        super().__init__(
+            ADMIN_CLIENT, name, repo_body=repo_body, distro_body=None)
+
+
 class ReusableRemoteContainer:
-    def __init__(self, name, registry_pk, groups=None):
+    def __init__(self, name, registry_pk):
         self._ns_name = f"ee_ns_{name}"
         self._name = f"ee_remote_{name}"
-        self._groups = groups or []
         self._registry_pk = registry_pk
 
         self._reset()
@@ -503,11 +486,10 @@ class ReusableRemoteContainer:
 
 
 class ReusableLocalContainer:
-    def __init__(self, name, groups=None):
+    def __init__(self, name):
         self._ns_name = f"ee_ns_{name}"
         self._repo_name = f"ee_local_{name}"
         self._name = f"{self._ns_name}/{self._repo_name}"
-        self._groups = groups or []
 
         self._reset()
 
@@ -566,55 +548,3 @@ class ReusableLocalContainer:
 
     def cleanup(self):
         del_container(self._name)
-
-
-def create_ansible_repo(user, password, expect_pass):
-    response = requests.post(
-        f"{PULP_API_ROOT}repositories/ansible/ansible/",
-        json={
-            "pulp_labels": {},
-            "name": f"repo_ansible-{gen_string()}",
-            "description": "foobar",
-            "gpgkey": "foobar"
-        },
-        auth=(user, password),
-    )
-    assert_pass(expect_pass, response.status_code, 201, 403)
-    return response
-
-
-def create_ansible_distro(user, password, expect_pass):
-    task_response = requests.post(
-        f"{PULP_API_ROOT}distributions/ansible/ansible/",
-        {
-            "name": f"foobar-{gen_string()}",
-            "base_path": f"foobar-{gen_string()}"
-        },
-        auth=(user, password),
-    )
-
-    assert_pass(expect_pass, task_response.status_code, 202, 403)
-
-    finished_task_response = wait_for_task(task_response)
-    assert_pass(expect_pass, finished_task_response.status_code, 200, 403)
-
-    created_resources = finished_task_response.json()['created_resources'][0]
-    response = requests.get(
-        f"{SERVER}{created_resources}",
-        auth=(user, password),
-    )
-    assert_pass(expect_pass, response.status_code, 200, 403)
-    return response
-
-
-def create_ansible_remote(user, password, expect_pass):
-    response = requests.post(
-        f"{PULP_API_ROOT}remotes/ansible/collection/",
-        json={
-            "name": f"foobar-{gen_string()}",
-            "url": "foo.bar/api/"
-        },
-        auth=(user, password),
-    )
-    assert_pass(expect_pass, response.status_code, 201, 403)
-    return response

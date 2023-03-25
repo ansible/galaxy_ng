@@ -1,43 +1,10 @@
 import logging
 from pulpcore.plugin.tasking import dispatch
-from pulpcore.plugin.models import TaskGroup
 from pulp_ansible.app.tasks.signature import sign
-from pulp_ansible.app.models import AnsibleRepository, CollectionVersionSignature
 
-from .promotion import move_content, add_content
+from .promotion import move_collection
 
 log = logging.getLogger(__name__)
-
-
-def call_sign_and_add_task(signing_service, collection_version, repo):
-    """Dispatches sign and add task
-
-    This is a wrapper to group sign, copy_content tasks
-    because those must run in sequence ensuring the same locks.
-    """
-    log.info(
-        'Signing with `%s` and adding collection version `%s` to `%s`',
-        signing_service.name,
-        collection_version.pk,
-        repo.name,
-    )
-
-    task_group = TaskGroup.current()
-
-    sign_and_add_task = dispatch(
-        sign_and_add,
-        exclusive_resources=[repo],
-        task_group=task_group,
-        kwargs=dict(
-            signing_service_pk=signing_service.pk,
-            collection_version_pk=collection_version.pk,
-            repo_pk=repo.pk,
-        )
-    )
-
-    task_group.finish()
-
-    return sign_and_add_task
 
 
 def call_sign_and_move_task(signing_service, collection_version, source_repo, dest_repo):
@@ -76,45 +43,11 @@ def sign_and_move(signing_service_pk, collection_version_pk, source_repo_pk, des
         signing_service_href=signing_service_pk
     )
 
-    # Read signatures created on the source repository
-    source_repo = AnsibleRepository.objects.get(pk=source_repo_pk)
-    signatures_pks = CollectionVersionSignature.objects.filter(
-        signed_collection=collection_version_pk,
-        pk__in=source_repo.content.values_list("pk", flat=True)
-    ).values_list("pk", flat=True)
-
     # Move content from source to destination
-    move_content(
-        collection_version_pk=collection_version_pk,
-        source_repo_pk=source_repo_pk,
-        dest_repo_pk=dest_repo_pk,
-        signatures_pks=list(signatures_pks),
-    )
-
-
-def sign_and_add(signing_service_pk, collection_version_pk, repo_pk):
-    """Sign collection version and then add to the repo"""
-
-    # Sign while in the source repository
-    sign(
-        repository_href=repo_pk,
-        content_hrefs=[collection_version_pk],
-        signing_service_href=signing_service_pk
-    )
-
-    # Read signatures created on the source repository
-    source_repo = AnsibleRepository.objects.get(pk=repo_pk)
-
-    signatures_pks = CollectionVersionSignature.objects.filter(
-        signed_collection=collection_version_pk,
-        pk__in=source_repo.content.values_list("pk", flat=True)
-    ).values_list("pk", flat=True)
-
-    # Add content from source to destination
-    add_content(
-        collection_version_pk=collection_version_pk,
-        repo_pk=repo_pk,
-        signatures_pks=list(signatures_pks),
+    move_collection(
+        cv_pk_list=[collection_version_pk, ],
+        src_repo_pk=source_repo_pk,
+        dest_repo_list=[dest_repo_pk],
     )
 
 

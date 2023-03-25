@@ -60,6 +60,26 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
     config = ansible_config("basic_user")
     api_client = get_client(config)
 
+    # inbound repos aren't created anymore. This will create one to verify that they still work on
+    # legacy clients
+    if use_distribution:
+        admin_client = get_client(ansible_config(profile="admin"))
+        distros = admin_client("pulp/api/v3/distributions/ansible/"
+                               f"ansible/?name=inbound-{artifact.namespace}")
+
+        if distros["count"] == 0:
+            repo = admin_client(
+                "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]
+            wait_for_task(admin_client, admin_client(
+                "pulp/api/v3/distributions/ansible/ansible/",
+                args={
+                    "repository": repo["pulp_href"],
+                    "name": f"inbound-{artifact.namespace}",
+                    "base_path": f"inbound-{artifact.namespace}",
+                },
+                method="POST"
+            ))
+
     with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
         try:
             resp = upload_artifact(config, api_client, artifact, use_distribution=use_distribution)

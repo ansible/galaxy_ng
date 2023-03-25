@@ -59,6 +59,12 @@ PERMISSIONS = {
         "global_description": _("Upload collections to any existing namespace."),
         "ui_category": _("Collections"),
     },
+    "ansible.sign_ansiblerepository": {
+        "name": _("Sign collections"),
+        "object_description": _("Sign collections in this repository."),
+        "global_description": _("Sign collections in any repository."),
+        "ui_category": _("Collections"),
+    },
     "galaxy.add_user": {
         "name": _("Add user"),
         "object_description": None,

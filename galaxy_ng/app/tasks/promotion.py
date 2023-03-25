@@ -1,92 +1,87 @@
+from django.conf import settings
+
 from pulpcore.plugin.tasking import add_and_remove, dispatch
-from pulp_ansible.app.models import CollectionVersionSignature
-from pulpcore.plugin.models import TaskGroup
+from pulp_ansible.app.models import AnsibleRepository
+from pulp_ansible.app.tasks.signature import sign
+from pulp_ansible.app.tasks.copy import move_collection
+
+from pulpcore.plugin.models import TaskGroup, SigningService
 
 
-def call_add_content_task(collection_version, repo):
-    """Dispatches the add content task
+SIGNING_SERVICE_NAME = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
+AUTO_SIGN = settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False)
 
-    This is a wrapper to copy_content task
+
+def auto_approve(src_repo_pk, cv_pk):
+    published_repos = AnsibleRepository.objects.filter(pulp_labels__pipeline="approved")
+    published_pks = list(published_repos.values_list("pk", flat=True))
+    staging_repo = AnsibleRepository.objects.get(pk=src_repo_pk)
+
+    add_and_remove(
+        src_repo_pk,
+        add_content_units=[cv_pk],
+        remove_content_units=[],
+    )
+
+    try:
+        signing_service = AUTO_SIGN and SigningService.objects.get(name=SIGNING_SERVICE_NAME)
+    except SigningService.DoesNotExist:
+        raise RuntimeError('Signing %s service not found' % SIGNING_SERVICE_NAME)
+
+    # Sign the collection if auto sign is enabled
+    if AUTO_SIGN:
+        sign(
+            repository_href=staging_repo,
+            content_hrefs=[cv_pk],
+            signing_service_href=signing_service.pk
+        )
+
+    # move the new collection (along with all it's associated objects) into
+    # all of the approved repos.
+    dispatch(
+        move_collection,
+        exclusive_resources=published_repos,
+        shared_resources=[staging_repo],
+        kwargs={
+            "cv_pk_list": [cv_pk],
+            "src_repo_pk": staging_repo.pk,
+            "dest_repo_list": published_pks,
+        }
+    )
+
+
+def call_auto_approve_task(collection_version, repo):
     """
-
-    signatures_pks = CollectionVersionSignature.objects.filter(
-        signed_collection=collection_version.pk,
-        pk__in=repo.content.values_list("pk", flat=True)
-    ).values_list("pk", flat=True)
-
+    Dispatches the auto approve task
+    """
     task_group = TaskGroup.current()
 
-    add_content_task = dispatch(
-        add_content,
+    auto_approve_task = dispatch(
+        auto_approve,
         exclusive_resources=[repo],
         task_group=task_group,
         kwargs=dict(
-            collection_version_pk=collection_version.pk,
-            repo_pk=repo.pk,
-            signatures_pks=list(signatures_pks),
+            cv_pk=collection_version.pk,
+            src_repo_pk=repo.pk,
         ),
     )
 
     task_group.finish()
 
-    return add_content_task
+    return auto_approve_task
 
 
 def call_move_content_task(collection_version, source_repo, dest_repo):
-    """Dispatches the move content task
-    This is a wrapper to group copy_content and remove_content tasks
-    because those 2 must run in sequence ensuring the same locks.
+    """
+    Dispatches the move collection task
     """
 
-    signatures_pks = CollectionVersionSignature.objects.filter(
-        signed_collection=collection_version.pk,
-        pk__in=source_repo.content.values_list("pk", flat=True)
-    ).values_list("pk", flat=True)
-
     return dispatch(
-        move_content,
+        move_collection,
         exclusive_resources=[source_repo, dest_repo],
         kwargs=dict(
-            collection_version_pk=collection_version.pk,
-            source_repo_pk=source_repo.pk,
-            dest_repo_pk=dest_repo.pk,
-            signatures_pks=list(signatures_pks),
+            cv_pk_list=[collection_version.pk],
+            src_repo_pk=source_repo.pk,
+            dest_repo_list=[dest_repo.pk],
         ),
-    )
-
-
-def add_content(collection_version_pk, repo_pk, signatures_pks=None):
-    """Import collection version + signatures to repository"""
-
-    content = [collection_version_pk]
-    if signatures_pks:
-        content += signatures_pks
-
-    # add content to the repo
-    add_and_remove(
-        repo_pk,
-        add_content_units=content,
-        remove_content_units=[],
-    )
-
-
-def move_content(collection_version_pk, source_repo_pk, dest_repo_pk, signatures_pks=None):
-    """Move collection version + signatures from one repository to another"""
-
-    content = [collection_version_pk]
-    if signatures_pks:
-        content += signatures_pks
-
-    # add content to the destination repo
-    add_and_remove(
-        dest_repo_pk,
-        add_content_units=content,
-        remove_content_units=[],
-    )
-
-    # remove content from source repo
-    add_and_remove(
-        source_repo_pk,
-        add_content_units=[],
-        remove_content_units=content,
     )

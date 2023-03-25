@@ -27,8 +27,8 @@ from .namespaces import (
     create_unused_namespace,
     cleanup_namespace
 )
-from .tasks import wait_for_task, wait_for_task_ui_client
-from .tools import is_docker_installed, uuid4, iterate_all
+from .tasks import wait_for_task, wait_for_task_ui_client, wait_for_all_tasks
+from .tools import is_docker_installed, uuid4, iterate_all, gen_string
 
 from .urls import (
     url_safe_join,
@@ -44,6 +44,7 @@ from .sync import (
     clear_certified,
     perform_sync,
 )
+from .pulp_interfaces import AnsibleDistroAndRepo
 
 
 __all__ = (
@@ -81,4 +82,7 @@ __all__ = (
     clear_certified,
     perform_sync,
     iterate_all,
+    wait_for_all_tasks,
+    gen_string,
+    AnsibleDistroAndRepo,
 )

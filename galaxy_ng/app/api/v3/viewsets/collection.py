@@ -13,18 +13,16 @@ from pulp_ansible.app.models import AnsibleDistribution
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
 from pulp_ansible.app.models import (
     CollectionVersion,
-    CollectionVersionSignature,
-    AnsibleCollectionDeprecated,
-    CollectionVersionMark,
-    AnsibleNamespaceMetadata,
+
 )
 
 from pulpcore.plugin.models import Content, SigningService, Task, TaskGroup
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
-from pulpcore.plugin.tasking import add_and_remove, dispatch
+from pulpcore.plugin.tasking import dispatch
 from rest_framework import status
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
+from pulp_ansible.app.tasks.copy import copy_collection
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
@@ -37,7 +35,7 @@ from galaxy_ng.app.tasks import (
     call_move_content_task,
     call_sign_and_move_task,
     import_and_auto_approve,
-    import_and_move_to_staging,
+    import_to_staging,
 )
 
 
@@ -57,17 +55,14 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         kwargs = kwargs or {}
         kwargs["general_args"] = args
-
         kwargs["username"] = request.user.username
-
         kwargs["repository_pk"] = repository.pk
-
         kwargs['filename_ns'] = self.kwargs.get('filename_ns')
 
         task_group = TaskGroup.objects.create(description=f"Import collection to {repository.name}")
 
         if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
-            return dispatch(import_and_move_to_staging, kwargs=kwargs, task_group=task_group)
+            return dispatch(import_to_staging, kwargs=kwargs, task_group=task_group)
 
         return dispatch(import_and_auto_approve, kwargs=kwargs, task_group=task_group)
 
@@ -80,23 +75,25 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
 
         return serializer.validated_data
 
-    def _get_path(self, kwargs, filename_ns):
+    def _get_path(self):
         """Use path from '/content/<path>/v3/' or
            if user does not specify distribution base path
            then use a distribution based on filename namespace.
         """
 
-        self.kwargs['filename_ns'] = filename_ns
+        # the legacy collection upload views don't get redirected and still have to use the
+        # old path arg
+        path = self.kwargs.get(
+            'distro_base_path',
+            self.kwargs.get('path', settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH)
+        )
 
-        if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
+        # for backwards compatibility, if the user selects the published repo to upload,
+        # send it to staging instead
+        if path == settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH:
             return settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
-        else:
-            # the legacy collection upload views don't get redirected and still have to use the
-            # old path arg
-            return kwargs.get(
-                'distro_base_path',
-                kwargs.get('path', settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH)
-            )
+
+        return path
 
     @extend_schema(
         description="Create an artifact and trigger an asynchronous task to create "
@@ -109,7 +106,9 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         data = self._get_data(request)
         filename = data['filename']
 
-        path = self._get_path(kwargs, filename_ns=filename.namespace)
+        self.kwargs['filename_ns'] = filename.namespace
+
+        path = self._get_path()
 
         try:
             namespace = models.Namespace.objects.get(name=filename.namespace)
@@ -257,55 +256,15 @@ class CollectionVersionCopyViewSet(api_base.ViewSet, CollectionRepositoryMixing)
 
         collection_version = self.get_collection_version()
         src_repo, dest_repo = self.get_repos()
-        source_pks = src_repo.content.values_list("pk", flat=True)
-        content_types = src_repo.content.values_list('pulp_type', flat=True).distinct()
-        cv_pk = collection_version.pk
-
-        content = [cv_pk]
-
-        # collection signatures
-        if 'ansible.collection_signature' in content_types:
-            signatures_pks = CollectionVersionSignature.objects.filter(
-                signed_collection=cv_pk,
-                pk__in=source_pks
-            ).values_list("pk", flat=True)
-            if signatures_pks:
-                content.append(*signatures_pks)
-
-        # collection version mark
-        if 'ansible.collection_mark' in content_types:
-            marks_pks = CollectionVersionMark.objects.filter(
-                marked_collection=cv_pk,
-                pk__in=source_pks
-            ).values_list("pk", flat=True)
-            if marks_pks:
-                content.append(*marks_pks)
-
-        # collection deprecation
-        if 'ansible.collection_deprecation' in content_types:
-            deprecations_pks = AnsibleCollectionDeprecated.objects.filter(
-                pk__in=source_pks,
-                namespace=collection_version.namespace,
-                name=collection_version.name,
-            ).values_list("pk", flat=True)
-            if deprecations_pks:
-                content.append(*deprecations_pks)
-
-        namespaces_pks = AnsibleNamespaceMetadata.objects.filter(
-            pk__in=source_pks,
-            name=collection_version.namespace
-        ).values_list("pk", flat=True)
-        if namespaces_pks:
-            content.append(*namespaces_pks)
 
         copy_task = dispatch(
-            add_and_remove,
+            copy_collection,
             exclusive_resources=[src_repo, dest_repo],
             shared_resources=[src_repo],
             kwargs={
-                "repository_pk": dest_repo.pk,
-                "add_content_units": content,
-                "remove_content_units": [],
+                "cv_pk_list": [collection_version.pk],
+                "src_repo_pk": src_repo.pk,
+                "dest_repo_list": [dest_repo.pk],
             }
         )
         return Response(data={"task_id": copy_task.pk}, status='202')
