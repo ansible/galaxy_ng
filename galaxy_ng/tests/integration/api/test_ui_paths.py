@@ -658,6 +658,8 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/
+@pytest.mark.standalone_only
+@pytest.mark.api_ui
 def test_api_ui_v1_collection_detail_view(ansible_config, published):
 
     namespace = published.namespace
