@@ -23,6 +23,7 @@ from ..schemas import (
     schema_remote,
     schema_settings,
     schema_task,
+    schema_ui_collection_summary,
     schema_user,
 )
 from ..utils import UIClient, generate_unused_namespace, get_client, wait_for_task_ui_client
@@ -657,7 +658,25 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/
-# ^ FIXME - need some examples
+def test_api_ui_v1_collection_detail_view(ansible_config, published):
+
+    namespace = published.namespace
+    name = published.name
+    version = published.version
+
+    cfg = ansible_config('basic_user')
+    with UIClient(config=cfg) as uclient:
+        resp = uclient.get(f'_ui/v1/repo/published/{namespace}/{name}/')
+        assert resp.status_code == 200
+
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_ui_collection_summary)
+
+        assert ds['namespace']['name'] == namespace
+        assert ds['name'] == name
+        assert ds['latest_version']['version'] == version
+        all_versions = [x['version'] for x in ds['all_versions']]
+        assert version in all_versions
 
 
 # /api/automation-hub/_ui/v1/settings/
