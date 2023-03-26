@@ -219,7 +219,7 @@ class CollectionDetailSerializer(_CollectionSerializer):
         versions_in_repo = CollectionVersion.objects.filter(
             pk__in=repository_version.content,
             collection=obj.collection,
-        )
+        ).only("content_ptr_id", "version")
         versions_in_repo = sorted(
             versions_in_repo, key=lambda obj: semantic_version.Version(obj.version), reverse=True
         )
