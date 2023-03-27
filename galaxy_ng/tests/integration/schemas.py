@@ -565,3 +565,26 @@ schema_pulp_roledetail = {
         'locked': {'type': 'boolean'},
     }
 }
+
+schema_ui_collection_summary = {
+    'type': 'object',
+    'additional_properties': False,
+    'required': [
+        'all_versions',
+        'download_count',
+        'id',
+        'latest_version',
+        'namespace',
+        'name',
+        'sign_state'
+    ],
+    'properties': {
+        'id': {'type': 'string'},
+        'namespace': {'type': 'object'},
+        'name': {'type': 'string'},
+        'download_count': {'type': 'number'},
+        'all_versions': {'type': 'array'},
+        'latest_version': {'type': 'object'},
+        'sign_state': {'type': 'string'},
+    }
+}
