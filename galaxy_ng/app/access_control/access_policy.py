@@ -8,12 +8,12 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
+from pulpcore.plugin.models import RepositoryVersion
 from pulpcore.plugin.util import get_objects_for_user
 
 from pulp_ansible.app import models as ansible_models
 
 from pulp_container.app import models as container_models
-from pulp_ansible.app import models as ansible_models
 from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
 
 from galaxy_ng.app import models
@@ -153,41 +153,82 @@ class AccessPolicyBase(AccessPolicyFromDB):
     def _get_public_repo_pks(self):
         return ansible_models.AnsibleRepository.objects.filter(private=False)
 
-    def _get_private_repo_pks(self, view, perm):
+    def _get_private_repo_pks(self, user, perm):
         return get_objects_for_user(
-            view.request.user,
+            user,
             perm,
             ansible_models.AnsibleRepository.objects.filter(private=True),
         )
 
+    def get_ansible_repository_qs(self, view, qs, repo_perm):
+        qs = ansible_models.AnsibleRepository.objects.all()
+        if view.request.user.has_perm(repo_perm):
+            return qs
+        else:
+            public_repository_qs = self._get_public_repo_pks()
+            private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
+            return public_repository_qs | private_repository_qs
+
+    def get_ansible_repository_versions_qs(self, qs, repo_perm):
+        qs = RepositoryVersion.objects.all()
+        if self.request.user.has_perm(repo_perm):
+            return qs
+        else:
+            public_repository_qs = self._get_public_repo_pks()
+            private_repository_qs = self._get_private_repo_pks()
+            return public_repository_qs | private_repository_qs
+
+    def get_ansible_distribution_qs(self, view, qs, repo_perm):
+        qs = ansible_models.AnsibleDistribution.objects.all()
+        if view.request.user.has_perm(repo_perm):
+            return qs
+        else:
+            public_repository_qs = self._get_public_repo_pks()
+            private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
+            repository_qs = public_repository_qs | private_repository_qs
+            return qs.filter(
+                Q(repository__pk__in=repository_qs)
+                | Q(repository=None)
+            )
+
     # if not defined, defaults to parent qs of None breaking Group Detail
     def scope_queryset(self, view, qs):
-        distro_perm = "ansible.view_ansibledistribution"
-        repo_perm = "ansible.view_ansiblerepository"
-        if "AnsibleRepository" in str(type(view)):
-            qs = ansible_models.AnsibleRepository.objects.all()
-            if view.request.user.has_perm(repo_perm):
-                return qs
-            else:
-                public_repository_pks = self._get_public_repo_pks()
-                private_repository_pks = self._get_private_repo_pks(view, repo_perm)
-                return qs.filter(Q(pk__in=public_repository_pks) | Q(pk__in=private_repository_pks))
-        elif "AnsibleDistribution" in str(type(view)):
-            qs = ansible_models.AnsibleDistribution.objects.all()
-            if view.request.user.has_perms([distro_perm, repo_perm]):
-                return qs
-            else:
-                public_repository_pks = self._get_public_repo_pks()
-                private_repository_pks = self._get_private_repo_pks(view, repo_perm)
-                return qs.filter(
-                    Q(repository__pk__in=public_repository_pks)
-                    | Q(repository__pk__in=private_repository_pks)
-                    | Q(repository=None)
-                )
-        else:
-            return qs
+        """
+        Scope the queryset based on the access policy `scope_queryset` method if present.
+        """
+        if access_policy := self.get_access_policy(view):
+            if access_policy.queryset_scoping:
+                scope = access_policy.queryset_scoping["function"]
+                if scope == "scope_queryset" or not (function := getattr(self, scope, None)):
+                    return qs
+                kwargs = access_policy.queryset_scoping.get("parameters") or {}
+                qs = function(view, qs, **kwargs)
+        return qs
 
     # Define global conditions here
+    def can_view_repo_content(self, request, view, action):
+        """
+        Check if the repo is private, only let users with view repository permissions
+        view the collections here.
+        """
+        if "distro_base_path" in view.kwargs:
+            distro_base_path = view.kwargs["distro_base_path"]
+            print(f'\n\n\n distro_base_path: {distro_base_path} \n\n\n')
+            distro = models.AnsibleDistribution.objects.select_related(
+                "repository", "repository_version"
+            ).get(base_path=distro_base_path)
+            if not (repo := distro.repository):
+                if not (repo_ver := distro.repository_version):
+                    return False
+                repo = repo_ver.repository
+            repo = repo.cast()
+
+            if repo.private:
+                perm = "ansible.view_ansiblerepository"
+                return request.user.has_perm(perm) or request.user.has_perm(perm, repo)
+
+        return True
+
     def _get_rh_identity(self, request):
         if not isinstance(request.auth, dict):
             log.debug("No request rh_identity request.auth found for request %s", request)
