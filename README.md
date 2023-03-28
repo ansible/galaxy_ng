@@ -29,7 +29,7 @@ View the latest version of the spec by [clicking here](https://petstore.swagger.
 
 ## Installation
 
-To install and run a local GalaxyNG server [view the End User Installation guide](https://github.com/ansible/galaxy_ng/wiki/End-User-Installation).
+To install and run a local GalaxyNG server [view the End User Installation guide](https://github.com/ansible/galaxy_ng/wiki/End-User-Installation). Foo.
 
 # License
 
