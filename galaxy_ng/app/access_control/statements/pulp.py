@@ -195,6 +195,7 @@ PULP_ANSIBLE_VIEWSETS = {
     "pulp_ansible/v3/collection-versions/docs": _collection_statements,
     "pulp_ansible/v3/collections/imports": _collection_statements,
     "pulp_ansible/v3/repo-metadata": _collection_statements,
+    "pulp_ansible/v3/search/collection_versions": _collection_statements,
     "repositories/ansible/ansible": {
         "statements": [
             {
