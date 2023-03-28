@@ -23,6 +23,8 @@ class SettingsView(api_base.APIView):
             "GALAXY_MINIMUM_PASSWORD_LENGTH",
             "GALAXY_AUTH_LDAP_ENABLED",
             "GALAXY_CONTAINER_SIGNING_SERVICE",
+            "GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS",
+            "GALAXY_LDAP_DISABLE_REFERRALS",
         ]
         data = {key: settings.as_dict().get(key, None) for key in keyset}
         return Response(data)

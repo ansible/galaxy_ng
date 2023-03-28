@@ -13,6 +13,7 @@ nav:
         - Managing user access: config/user_access.md
         - Enabling collection signing: config/collection_signing.md
         - Enabling Container signing: config/container_signing.md
+        - Feature Flags: config/featureflags.md  
     - User Guides:
         - Installation: usage_guide/installation.md
         - Collections: usage_guide/collections.md

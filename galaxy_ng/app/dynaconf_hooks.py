@@ -511,6 +511,10 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
             connection_options[ldap.OPT_REFERRALS] = 0
         data["AUTH_LDAP_CONNECTION_OPTIONS"] = connection_options
 
+        if settings.get("GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS"):
+            data["AUTH_LDAP_MIRROR_GROUPS"] = True
+            data["AUTH_LDAP_MIRROR_GROUPS_EXCEPT"] = None
+
     return data
 
 

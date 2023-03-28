@@ -102,6 +102,7 @@ for nsname in ["autohubtest2", "autohubtest3"]:
         object_id=ns.id,
     )
 
+print("Create a signing namespace and roles")
 signing_ns, _ = Namespace.objects.get_or_create(name="signing")
 # connect group to role for this namespace object
 GroupRole.objects.get_or_create(
@@ -110,3 +111,6 @@ GroupRole.objects.get_or_create(
     content_type=ContentType.objects.get(model="namespace"),
     object_id=signing_ns.id,
 )
+
+print("Add a group that exists in the testing LDAP container")
+ldap_group, _ = Group.objects.get_or_create(name="admin_staff")
