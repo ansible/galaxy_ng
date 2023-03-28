@@ -6,7 +6,7 @@ from django.forms.fields import ImageField
 from django.core.exceptions import ValidationError
 from pulpcore.plugin.files import PulpTemporaryUploadedFile
 
-from pulpcore.download.http import HttpDownloader
+from pulpcore.plugin.download import HttpDownloader
 
 from pulp_ansible.app.models import AnsibleNamespaceMetadata, AnsibleNamespace
 from pulpcore.plugin.tasking import add_and_remove, dispatch
