@@ -105,20 +105,19 @@ def _assert_sync(manifest, client):
 def _assert_namespace_sync(pah_client, crc_client, namespace):
     crc_ns = crc_client(f"v3/namespaces/{namespace['name']}/")
     pah_ns = pah_client(f"v3/plugin/ansible/content/rh-certified/namespaces/{namespace['name']}")
+    pah_galaxy_ns = pah_client(f"v3/namespaces/{namespace['name']}/")
 
     # test the fields
-    for field in ("metadata_sha256", "links", "email", "description", "resources"):
+    for field in ("metadata_sha256", "links", "email", "description", "resources", "company"):
         assert crc_ns[field] == pah_ns[field]
+        assert crc_ns[field] == pah_galaxy_ns[field]
 
     # the url on the local namespace should be different from the remote
     assert crc_ns["avatar_url"] != pah_ns["avatar_url"]
 
     # test that the image downloaded correctly
     crc_avatar = requests.get(crc_ns["avatar_url"], allow_redirects=True).content
-    pah_avatar = requests.get(
-        pah_ns["avatar_url"],
-        allow_redirects=True,
-    ).content
+    pah_avatar = requests.get(pah_ns["avatar_url"], allow_redirects=True).content
 
     crc_sha = hashlib.sha256(crc_avatar).hexdigest()
     pah_sha = hashlib.sha256(pah_avatar).hexdigest()
@@ -220,6 +219,7 @@ def test_namespace_sync(sync_instance_crc, ansible_config):
 
     ns_data = {
         "name": "ansible",
+        "company": "Red Hat",
         "avatar_url": "https://avatars.githubusercontent.com/u/2103606",
         "groups": [],
         "links": [
