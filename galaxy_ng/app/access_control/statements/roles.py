@@ -26,13 +26,18 @@ _LOCKED_ROLES = {
     },
     # Approve, reject and sync collections from remotes.
     "galaxy.collection_curator": {
+        "permissions": {},
+        "inherit_from": ["galaxy.ansible_repository_owner", "galaxy.collection_remote_owner"],
+    },
+    # Create and managing collection remotes
+    "galaxy.collection_remote_owner": {
         "permissions": {
             "ansible.view_collectionremote",
             "ansible.add_collectionremote",
             "ansible.change_collectionremote",
             "ansible.delete_collectionremote",
         },
-        "inherit_from": ["galaxy.ansible_repository_owner"],
+        "inherit_from": []
     },
     # Manager ansible collection repositories
     "galaxy.ansible_repository_owner": {

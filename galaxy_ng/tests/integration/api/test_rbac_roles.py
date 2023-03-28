@@ -457,6 +457,14 @@ ROLES_TO_TEST = {
         change_ansible_remote,
         delete_ansible_remote
     },
+    "galaxy.collection_remote_owner": {
+        configure_collection_sync,
+        launch_collection_sync,
+        view_ansible_remote,
+        add_ansible_remote,
+        change_ansible_remote,
+        delete_ansible_remote
+    },
     "galaxy.execution_environment_admin": {
         # EEs
         # Remotes
