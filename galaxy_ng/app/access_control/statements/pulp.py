@@ -286,6 +286,12 @@ PULP_ANSIBLE_VIEWSETS = {
                 "condition": "has_distribution_repo_perms:ansible.view_ansiblerepository",
             },
             {
+                "action": ["list", "retrieve"],
+                "principal": "anonymous",
+                "effect": "allow",
+                "condition": "unauthenticated_collection_access_enabled"
+            },
+            {
                 "action": "create",
                 "principal": "authenticated",
                 "effect": "allow",
@@ -379,6 +385,32 @@ PULP_ANSIBLE_VIEWSETS = {
             },
         ]
     },
+    "content/ansible/collection_versions": {
+        "statements": [
+            {
+                "action": ["list", "retrieve"],
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+            {
+                "action": ["list", "retrieve"],
+                "principal": "anonymous",
+                "effect": "allow",
+                "condition": "unauthenticated_collection_access_enabled"
+            },
+            {
+                "action": "create",
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+            {
+                "action": "*",
+                "principal": "admin",
+                "effect": "allow"
+            }
+        ]
+    },
+
     # The following endpoints are related to issue https://issues.redhat.com/browse/AAH-224
     # For now endpoints are temporary deactivated
     "pulp_ansible/v3/collection-versions/all": _deny_all,
