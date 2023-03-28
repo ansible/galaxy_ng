@@ -4,8 +4,13 @@ Those signals are loaded by
 galaxy_ng.app.__init__:PulpGalaxyPluginAppConfig.ready() method.
 """
 from django.dispatch import receiver
-from django.db.models.signals import post_save, post_migrate
-from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection, AnsibleNamespaceMetadata
+from django.db.models.signals import post_save
+from pulp_ansible.app.models import (
+    AnsibleDistribution,
+    AnsibleRepository,
+    Collection,
+    AnsibleNamespaceMetadata
+)
 from galaxy_ng.app.models import Namespace
 from pulpcore.plugin.models import ContentRedirectContentGuard
 
