@@ -179,7 +179,8 @@ class NamespaceSummarySerializer(NamespaceSerializer):
             'description',
             'groups',
             'related_fields',
-            'metadata_sha256'
+            'metadata_sha256',
+            'avatar_sha256'
         )
 
         read_only_fields = ('name', )

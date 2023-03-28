@@ -1,4 +1,5 @@
 import aiohttp
+import asyncio
 
 from django.db import transaction
 from django.forms.fields import ImageField
@@ -37,6 +38,8 @@ def _download_avatar(url):
         img = downloader.fetch()
     except:  # noqa
         return
+    finally:
+        asyncio.get_event_loop().run_until_complete(session.close())
 
     try:
         return Artifact.objects.get(sha256=img.artifact_attributes["sha256"])
