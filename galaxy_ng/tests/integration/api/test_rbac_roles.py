@@ -552,6 +552,9 @@ ROLES_TO_TEST = {
 ROLES_TO_TEST.update(OBJECT_ROLES_TO_TEST)
 
 ACTIONS_FOR_ALL_USERS = {
+    view_ansible_distribution,
+    view_ansible_repository,
+    view_ansible_repository_version,
     view_sync_configuration,
     view_groups,
     view_tasks,

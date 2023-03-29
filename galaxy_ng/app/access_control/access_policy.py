@@ -199,7 +199,9 @@ class AccessPolicyBase(AccessPolicyFromDB):
         """
         Scope the queryset based on the access policy `scope_queryset` method if present.
         """
-        if access_policy := self.get_access_policy(view):
+        access_policy = self.get_access_policy(view)
+        if view.action == "list" and access_policy:
+            # if access_policy := self.get_access_policy(view):
             if access_policy.queryset_scoping:
                 scope = access_policy.queryset_scoping["function"]
                 if scope == "scope_queryset" or not (function := getattr(self, scope, None)):
