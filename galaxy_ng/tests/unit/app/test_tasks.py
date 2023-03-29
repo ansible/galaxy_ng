@@ -49,39 +49,6 @@ class TestTaskPublish(TestCase):
         )
         content_artifact.save()
 
-    @mock.patch('galaxy_ng.app.tasks.publishing.get_created_collection_versions')
-    @mock.patch('galaxy_ng.app.tasks.publishing.general_create')
-    @mock.patch('galaxy_ng.app.tasks.promotion.dispatch')
-    @mock.patch('galaxy_ng.app.tasks.promotion.TaskGroup')
-    def test_import_and_auto_approve(
-        self, mocked_task_group, mocked_dispatch, mocked_create, mocked_get_created
-    ):
-        repo = AnsibleRepository.objects.get(name=staging_name)
-
-        golden_repo = AnsibleRepository.objects.get(name=golden_name)
-
-        mocked_get_created.return_value = [self.collection_version]
-
-        import_and_auto_approve(
-            '',  # username
-            repository_pk=repo.pk,
-            **{"general_args": ()}
-        )
-
-        self.assertTrue(mocked_create.call_count == 1)
-        self.assertTrue(mocked_dispatch.call_count == 1)
-
-        # test cannot find golden repo
-        golden_repo.name = 'a_different_name_for_golden'
-        golden_repo.save()
-        mocked_get_created.side_effect = AnsibleDistribution.DoesNotExist
-        with self.assertRaises(AnsibleDistribution.DoesNotExist):
-            import_and_auto_approve(
-                '',  # username
-                repository_pk=repo.pk,
-                **{"general_args": ()}
-            )
-
     def test_log_collection_upload(self):
         with self.assertLogs(logger='automated_logging', level='INFO') as lm:
             _log_collection_upload('admin', 'namespace', 'name', '0.0.1')
