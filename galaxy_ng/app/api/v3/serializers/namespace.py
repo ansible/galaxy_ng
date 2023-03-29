@@ -7,10 +7,12 @@ from django.utils.translation import gettext_lazy as _
 
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
+from rest_framework import fields
 
 from pulpcore.plugin.serializers import IdentityField
 
 from galaxy_ng.app import models
+from galaxy_ng.app.tasks import dispatch_create_pulp_namespace_metadata
 from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
 from galaxy_ng.app.api.base import RelatedFieldsBaseSerializer
 
@@ -73,6 +75,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
     links = NamespaceLinkSerializer(many=True, required=False)
     groups = GroupPermissionField()
     related_fields = NamespaceRelatedFieldSerializer(source="*")
+    avatar_url = fields.URLField(required=False, allow_blank=True)
+    avatar_sha256 = serializers.SerializerMethodField()
 
     # Add a pulp href to namespaces so that it can be referenced in the roles API.
     pulp_href = IdentityField(view_name="pulp_ansible/namespaces-detail", lookup_field="pk")
@@ -91,6 +95,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
             'groups',
             'resources',
             'related_fields',
+            'metadata_sha256',
+            'avatar_sha256',
         )
 
     # replace with a NamespaceNameSerializer and validate_name() ?
@@ -109,6 +115,11 @@ class NamespaceSerializer(serializers.ModelSerializer):
                 'name': _("Name cannot begin with '_'")})
         return name
 
+    def get_avatar_sha256(self, obj):
+        if obj.last_created_pulp_metadata:
+            return obj.last_created_pulp_metadata.avatar_sha256
+        return None
+
     @transaction.atomic
     def create(self, validated_data):
         links_data = validated_data.pop('links', [])
@@ -123,17 +134,31 @@ class NamespaceSerializer(serializers.ModelSerializer):
             new_links.append(ns_link)
 
         instance.links.set(new_links)
+
+        dispatch_create_pulp_namespace_metadata(instance, True)
         return instance
 
     @transaction.atomic
     def update(self, instance, validated_data):
         links = validated_data.pop('links', None)
+        download_logo = False
+        if "avatar_url" in validated_data:
+            if instance.avatar_url != validated_data["avatar_url"]:
+                if validated_data["avatar_url"]:
+                    download_logo = True
+                else:
+                    download_logo = False
+
+            if (instance.last_created_pulp_metadata
+                    and instance.last_created_pulp_metadata.avatar_sha256 is None):
+                download_logo = True
 
         if links is not None:
             instance.set_links(links)
 
         instance = super().update(instance, validated_data)
         instance.save()
+        dispatch_create_pulp_namespace_metadata(instance, download_logo)
         return instance
 
 
@@ -154,6 +179,8 @@ class NamespaceSummarySerializer(NamespaceSerializer):
             'description',
             'groups',
             'related_fields',
+            'metadata_sha256',
+            'avatar_sha256'
         )
 
         read_only_fields = ('name', )

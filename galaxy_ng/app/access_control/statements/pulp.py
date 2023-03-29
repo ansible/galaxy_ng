@@ -196,6 +196,20 @@ PULP_ANSIBLE_VIEWSETS = {
     "pulp_ansible/v3/collections/imports": _collection_statements,
     "pulp_ansible/v3/repo-metadata": _collection_statements,
     "pulp_ansible/v3/search/collection_versions": _collection_statements,
+    "content/ansible/namespaces": {
+        "statements": [
+            {
+                "action": ["list", "retrieve"],
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+            {
+                "action": "avatar",
+                "principal": "*",
+                "effect": "allow",
+            }
+        ]
+    },
     "repositories/ansible/ansible": {
         "statements": [
             {

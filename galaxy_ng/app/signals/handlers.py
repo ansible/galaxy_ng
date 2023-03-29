@@ -5,7 +5,12 @@ galaxy_ng.app.__init__:PulpGalaxyPluginAppConfig.ready() method.
 """
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository, Collection
+from pulp_ansible.app.models import (
+    AnsibleDistribution,
+    AnsibleRepository,
+    Collection,
+    AnsibleNamespaceMetadata
+)
 from galaxy_ng.app.models import Namespace
 from pulpcore.plugin.models import ContentRedirectContentGuard
 
@@ -45,3 +50,29 @@ def create_namespace_if_not_present(sender, instance, created, **kwargs):
     """
 
     Namespace.objects.get_or_create(name=instance.namespace)
+
+
+@receiver(post_save, sender=AnsibleNamespaceMetadata)
+def associate_namespace_metadata(sender, instance, created, **kwargs):
+    """
+    Update the galaxy namespace when a new pulp ansible namespace
+    object is added to the system.
+    """
+
+    ns, created = Namespace.objects.get_or_create(name=instance.name)
+    ns_metadata = ns.last_created_pulp_metadata
+
+    def _update_metadata():
+        ns.last_created_pulp_metadata = instance
+        ns.company = instance.company
+        ns.email = instance.email
+        ns.description = instance.description
+        ns.resources = instance.resources
+        ns.set_links([{"name": x, "url": instance.links[x]} for x in instance.links])
+        ns.save()
+
+    if created or ns_metadata is None:
+        _update_metadata()
+
+    elif ns.metadata_sha256 != instance.metadata_sha256:
+        _update_metadata()

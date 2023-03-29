@@ -1,0 +1,1 @@
+Add support for namespace and logo sync.
