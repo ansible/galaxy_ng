@@ -218,7 +218,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
         """
         if "distro_base_path" in view.kwargs:
             distro_base_path = view.kwargs["distro_base_path"]
-            print(f'\n\n\n distro_base_path: {distro_base_path} \n\n\n')
             distro = models.AnsibleDistribution.objects.select_related(
                 "repository", "repository_version"
             ).get(base_path=distro_base_path)
