@@ -55,6 +55,7 @@ def distro_factory(admin_client):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.private_repos
 def test_private_repositories(admin_client, basic_user_client, repo_factory):
     api_prefix = admin_client.config.get("api_prefix").rstrip("/")
     url = f"{api_prefix}/pulp/api/v3/repositories/ansible/ansible/"
@@ -79,6 +80,51 @@ def test_private_repositories(admin_client, basic_user_client, repo_factory):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.private_repos
+def test_private_repository_versions(admin_client, basic_user_client, repo_factory):
+    api_prefix = admin_client.config.get("api_prefix").rstrip("/")
+    url = f"{api_prefix}/pulp/api/v3/repositories/ansible/ansible/"
+
+    # Create private & public repos
+    private_repo_resp = repo_factory(url, True)
+    assert private_repo_resp["private"] is True
+    public_repo_resp = repo_factory(url)
+    assert public_repo_resp["private"] is False
+
+    private_repo_versions_url = f'{private_repo_resp["pulp_href"]}/versions/'
+    public_repo_versions_url = f'{public_repo_resp["pulp_href"]}/versions/'
+
+    admin_private_rv_list_resp = admin_client(private_repo_versions_url, method="GET")
+    admin_public_rv_list_resp = admin_client(public_repo_versions_url, method="GET")
+    bu_private_rv_list_resp = basic_user_client(private_repo_versions_url, method="GET")
+    bu_public_rv_list_resp = basic_user_client(public_repo_versions_url, method="GET")
+
+    admin_private_rv_list_pulp_hrefs = [
+        rv["pulp_href"] for rv in admin_private_rv_list_resp["results"]
+    ]
+    admin_public_rv_list_pulp_hrefs = [
+        rv["pulp_href"] for rv in admin_public_rv_list_resp["results"]
+    ]
+    bu_private_rv_list_pulp_hrefs = [
+        rv["pulp_href"] for rv in bu_private_rv_list_resp["results"]
+    ]
+    bu_public_rv_list_pulp_hrefs = [
+        rv["pulp_href"] for rv in bu_public_rv_list_resp["results"]
+    ]
+
+    assert private_repo_resp["latest_version_href"] in admin_private_rv_list_pulp_hrefs
+    assert private_repo_resp["latest_version_href"] not in bu_private_rv_list_pulp_hrefs
+    assert private_repo_resp["latest_version_href"] not in bu_public_rv_list_pulp_hrefs
+    assert public_repo_resp["latest_version_href"] in admin_public_rv_list_pulp_hrefs
+    assert public_repo_resp["latest_version_href"] in bu_public_rv_list_pulp_hrefs
+
+    # Cleanup
+    admin_client(f'{private_repo_resp["pulp_href"]}', method="DELETE")
+    admin_client(f'{public_repo_resp["pulp_href"]}', method="DELETE")
+
+
+@pytest.mark.standalone_only
+@pytest.mark.private_repos
 def test_distributions_with_private_repositories(
     admin_client, basic_user_client, distro_factory, repo_factory
 ):

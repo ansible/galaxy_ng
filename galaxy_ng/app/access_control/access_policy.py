@@ -169,14 +169,17 @@ class AccessPolicyBase(AccessPolicyFromDB):
             private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
             return public_repository_qs | private_repository_qs
 
-    def get_ansible_repository_versions_qs(self, qs, repo_perm):
+    def get_ansible_repository_versions_qs(self, view, qs, repo_perm):
         qs = RepositoryVersion.objects.all()
-        if self.request.user.has_perm(repo_perm):
+        if view.request.user.has_perm(repo_perm):
             return qs
         else:
             public_repository_qs = self._get_public_repo_pks()
-            private_repository_qs = self._get_private_repo_pks()
-            return public_repository_qs | private_repository_qs
+            private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
+            repository_qs = public_repository_qs | private_repository_qs
+            return qs.filter(
+                Q(repository__pk__in=repository_qs)
+            )
 
     def get_ansible_distribution_qs(self, view, qs, repo_perm):
         qs = ansible_models.AnsibleDistribution.objects.all()

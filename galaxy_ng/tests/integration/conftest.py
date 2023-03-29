@@ -63,6 +63,7 @@ iqe_rbac_test: imported iqe tests checking role permissions
 sync: sync tests against stage
 certified_sync: sync tests container against container
 auto_approve: run tests that require AUTO_APPROVE to be set to true
+private_repos: run tests verifying private repositories
 """
 
 
