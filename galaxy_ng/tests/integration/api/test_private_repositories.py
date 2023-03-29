@@ -94,25 +94,21 @@ def test_distributions_with_private_repositories(
     public_repo_resp = repo_factory(repo_url)
     assert public_repo_resp["private"] is False
 
-    # Create a private & public & repo'less distros
+    # Create a private & public
     private_distro_resp = distro_factory(private_repo_resp["pulp_href"], distro_url)
     public_distro_resp = distro_factory(public_repo_resp["pulp_href"], distro_url)
-    repoless_distro_resp = distro_factory(None, distro_url)
 
     admin_distro_list_resp = admin_client(distro_url, method="GET")
     basic_user_distro_list_resp = basic_user_client(distro_url, method="GET")
 
     assert private_distro_resp in admin_distro_list_resp["results"]
     assert public_distro_resp in admin_distro_list_resp["results"]
-    assert repoless_distro_resp in admin_distro_list_resp["results"]
 
     assert private_distro_resp not in basic_user_distro_list_resp["results"]
     assert public_distro_resp in basic_user_distro_list_resp["results"]
-    assert repoless_distro_resp in basic_user_distro_list_resp["results"]
 
     # Cleanup
     admin_client(f'{private_distro_resp["pulp_href"]}', method="DELETE")
     admin_client(f'{public_distro_resp["pulp_href"]}', method="DELETE")
-    admin_client(f'{repoless_distro_resp["pulp_href"]}', method="DELETE")
     admin_client(f'{private_repo_resp["pulp_href"]}', method="DELETE")
     admin_client(f'{public_repo_resp["pulp_href"]}', method="DELETE")

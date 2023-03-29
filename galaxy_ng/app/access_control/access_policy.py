@@ -3,11 +3,14 @@ import os
 from functools import lru_cache
 
 from django.conf import settings
-from django.db.models import Q
+from django.contrib.auth.models import Permission
+from django.db.models import Q, Exists, OuterRef, CharField
+from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
+from pulpcore.plugin.models.role import GroupRole, UserRole
 from pulpcore.plugin.util import get_objects_for_user
 
 from pulp_ansible.app import models as ansible_models
@@ -168,18 +171,47 @@ class AccessPolicyBase(AccessPolicyFromDB):
             private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
             return public_repository_qs | private_repository_qs
 
-    def get_ansible_distribution_qs(self, view, qs, repo_perm):
-        qs = ansible_models.AnsibleDistribution.objects.all()
-        if view.request.user.has_perm(repo_perm):
+    def scope_by_view_repository_permissions(self, view, qs, is_generic=True):
+        """
+        Returns objects with a repository foreign key that are connected to a public
+        repository or a private repository that the user has permissions on
+
+        is_generic should be set to True when repository is a FK to the generic Repository
+        object and False when it's a FK to AnsibleRepository
+        """
+        user = view.request.user
+        if user.has_perm("ansible.view_ansiblerepository"):
             return qs
-        else:
-            public_repository_qs = self._get_public_repo_pks()
-            private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
-            repository_qs = public_repository_qs | private_repository_qs
-            return qs.filter(
-                Q(repository__pk__in=repository_qs)
-                | Q(repository=None)
-            )
+        view_perm = Permission.objects.get(
+            content_type__app_label="ansible", codename="view_ansiblerepository")
+
+        user_roles = UserRole.objects.filter(user=user, role__permissions=view_perm).filter(
+            object_id=OuterRef("repo_pk_str"))
+
+        group_roles = GroupRole.objects.filter(
+            group__in=user.groups.all(),
+            role__permissions=view_perm
+        ).filter(
+            object_id=OuterRef("repo_pk_str"))
+
+        private_q = Q(repository__private=False)
+        if is_generic:
+            private_q = Q(repository__ansible_ansiblerepository__private=False)
+            qs = qs.select_related("repository__ansible_ansiblerepository")
+
+        qs = qs.annotate(
+            repo_pk_str=Cast("repository__pk", output_field=CharField())
+        ).annotate(
+            has_user_role=Exists(user_roles)
+        ).annotate(
+            has_group_roles=Exists(group_roles)
+        ).filter(
+            private_q
+            | Q(has_user_role=True)
+            | Q(has_group_roles=True)
+        )
+
+        return qs
 
     # if not defined, defaults to parent qs of None breaking Group Detail
     def scope_queryset(self, view, qs):
