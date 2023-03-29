@@ -20,6 +20,8 @@ from galaxy_ng.app.access_control.statements import PULP_VIEWSETS
 
 log = logging.getLogger(__name__)
 
+NAMESPACE_ADMIN_GROUP = "admin_namespaces"
+
 
 # TODO this is a function in pulpcore that needs to get moved ot the plugin api.
 # from pulpcore.plugin.util import get_view_urlpattern
@@ -536,10 +538,12 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
     def is_namespace_owner(self, request, viewset, action):
 
-        # let superusers do whatever they want.
-        user = request.user
-        if user.is_superuser:
-            return True
+        # allow users in namespace admin group to have access
+        namespace_admin_group = models.Group.objects.filter(name=NAMESPACE_ADMIN_GROUP)
+        if namespace_admin_group:
+            user = request.user
+            if namespace_admin_group[0] in user.groups.all():
+                return True
 
         namespace = None
         github_user = None
