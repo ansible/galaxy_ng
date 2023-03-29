@@ -1,19 +1,15 @@
 import logging
 import os
 import tempfile
-from unittest import mock
 
 from django.conf import settings
 from django.test import TestCase, override_settings
 from pulp_ansible.app.models import (
-    AnsibleDistribution,
-    AnsibleRepository,
     Collection,
     CollectionVersion,
 )
 from pulpcore.plugin.models import Artifact, ContentArtifact, PulpTemporaryFile
 
-from galaxy_ng.app.tasks import import_and_auto_approve
 from galaxy_ng.app.tasks.publishing import _log_collection_upload
 
 log = logging.getLogger(__name__)
