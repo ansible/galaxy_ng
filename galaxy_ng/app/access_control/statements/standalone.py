@@ -11,35 +11,37 @@ _collection_statements = [
         "action": ["list", "retrieve"],
         "principal": "authenticated",
         "effect": "allow",
+        "condition": "can_view_repo_content",
     },
     {
         "action": ["list", "retrieve"],
         "principal": "anonymous",
         "effect": "allow",
-        "condition": "unauthenticated_collection_access_enabled"
+        "condition": ["unauthenticated_collection_access_enabled", "can_view_repo_content"],
     },
     {
         "action": "destroy",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:ansible.delete_collection",
+        "condition": ["has_model_perms:ansible.delete_collection", "can_view_repo_content"],
     },
     {
         "action": ["download"],
         "principal": 'authenticated',
         "effect": "allow",
+        "condition": "can_view_repo_content",
     },
     {
         "action": ["download"],
         "principal": 'anonymous',
         "effect": "allow",
-        "condition": "unauthenticated_collection_download_enabled",
+        "condition": ["unauthenticated_collection_download_enabled", "can_view_repo_content"],
     },
     {
         "action": "create",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "can_create_collection"
+        "condition": ["can_create_collection", "can_view_repo_content"]
     },
     {
         "action": "update",
@@ -139,12 +141,13 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
+            "condition": "can_view_repo_content"
         },
         {
             "action": ["list", "retrieve"],
             "principal": "anonymous",
             "effect": "allow",
-            "condition": "unauthenticated_collection_access_enabled"
+            "condition": ["unauthenticated_collection_access_enabled", "can_view_repo_content"]
         },
         {
             "action": "destroy",
@@ -156,13 +159,13 @@ STANDALONE_STATEMENTS = {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.add_namespace"
+            "condition": ["has_model_perms:galaxy.add_namespace", "can_view_repo_content"]
         },
         {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:galaxy.change_namespace"
+            "condition": ["has_model_or_obj_perms:galaxy.change_namespace", "can_view_repo_content"]
         },
     ],
     'CollectionRemoteViewSet': [

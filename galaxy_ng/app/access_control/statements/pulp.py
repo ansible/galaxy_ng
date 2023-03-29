@@ -224,6 +224,12 @@ PULP_ANSIBLE_VIEWSETS = {
                 "effect": "allow",
             },
             {
+                "action": ["list", "retrieve"],
+                "principal": "anonymous",
+                "effect": "allow",
+                "condition": ["unauthenticated_collection_access_enabled", "can_view_repo_content"]
+            },
+            {
                 "action": "create",
                 "principal": "authenticated",
                 "effect": "allow",
