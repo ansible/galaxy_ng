@@ -20,10 +20,8 @@ msgid "Namespace in filename not found."
 msgstr "L'espace de nommage n'a pas été trouvé dans le nom de fichier."
 
 #: app/access_control/access_policy.py:231
-#, fuzzy
-#| msgid "Distribution %s does not exist."
 msgid "Distribution does not exist."
-msgstr "Distribution %s non existante"
+msgstr ""
 
 #: app/access_control/access_policy.py:245
 msgid "Namespace not found."
@@ -456,10 +454,8 @@ msgid "Upload collections to any existing namespace."
 msgstr ""
 
 #: app/constants.py:51
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "Delete collection"
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:52
 msgid "Delete this collection."
@@ -470,10 +466,8 @@ msgid "Delete any existing collection."
 msgstr ""
 
 #: app/constants.py:54 app/constants.py:60 app/constants.py:66
-#, fuzzy
-#| msgid "Collection %s not found"
 msgid "Collections"
-msgstr "Collection %s non trouvée"
+msgstr ""
 
 #: app/constants.py:57
 msgid "Modify Ansible repo content"
@@ -484,10 +478,8 @@ msgid "Modify content of this Ansible repository."
 msgstr ""
 
 #: app/constants.py:63
-#, fuzzy
-#| msgid "Retrieve collection version"
 msgid "Sign collections"
-msgstr "Récupérer la version de la collection"
+msgstr ""
 
 #: app/constants.py:64
 msgid "Sign collections in this repository."
@@ -523,16 +515,12 @@ msgid "Edit any existing user in the system."
 msgstr ""
 
 #: app/constants.py:81
-#, fuzzy
-#| msgid "Remote user."
 msgid "Delete user"
-msgstr "Utilisateur distant."
+msgstr ""
 
 #: app/constants.py:82
-#, fuzzy
-#| msgid "Remote user."
 msgid "Delete this user."
-msgstr "Utilisateur distant."
+msgstr ""
 
 #: app/constants.py:83
 msgid "Delete any existing user in the system."
@@ -600,16 +588,12 @@ msgid "View any existing group in the system."
 msgstr ""
 
 #: app/constants.py:117
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "View collection remote"
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:118
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "View this collection remote."
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:119
 msgid "View any collection remote existing in the system."
@@ -617,54 +601,40 @@ msgstr ""
 
 #: app/constants.py:120 app/constants.py:126 app/constants.py:132
 #: app/constants.py:138
-#, fuzzy
-#| msgid "Collection %s not found"
 msgid "Collection Remotes"
-msgstr "Collection %s non trouvée"
+msgstr ""
 
 #: app/constants.py:123
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "Add collection remote"
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:124
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "Add this collection remote."
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:125
 msgid "Add any collection remote existing in the system."
 msgstr ""
 
 #: app/constants.py:129
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "Change collection remote"
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:130
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "Edit this collection remote."
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:131
 msgid "Edit any collection remote existing in the system."
 msgstr ""
 
 #: app/constants.py:135
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "Delete collection remote"
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:136
-#, fuzzy
-#| msgid "Retrieve collection import"
 msgid "Delete this collection remote."
-msgstr "Récupérer l'importation de la collection"
+msgstr ""
 
 #: app/constants.py:137
 msgid "Delete any collection remote existing in the system."
@@ -802,10 +772,8 @@ msgid "Push new containers"
 msgstr ""
 
 #: app/constants.py:202
-#, fuzzy
-#| msgid "A local container with this name already exists."
 msgid "Push a new container to this namespace."
-msgstr "Un conteneur local portant ce nom existe déjà."
+msgstr ""
 
 #: app/constants.py:203
 msgid "Push a new containers to any namespace in the system."
