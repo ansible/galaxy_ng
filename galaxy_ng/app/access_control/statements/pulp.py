@@ -388,6 +388,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": "list",
                 "principal": "authenticated",
                 "effect": "allow",
+                "condition": "can_view_repo_content",
             },
             {
                 "action": "create",
@@ -408,12 +409,6 @@ PULP_ANSIBLE_VIEWSETS = {
                 "condition": "has_repository_model_or_obj_perms:ansible.delete_ansiblerepository",
             },
         ],
-        "queryset_scoping": {
-            "function": "get_ansible_repository_versions_qs",
-            "parameters": {
-                "repo_perm": "ansible.view_ansiblerepository",
-            },
-        },
     },
     "content/ansible/collection_versions": {
         "statements": [

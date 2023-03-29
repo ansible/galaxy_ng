@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
-from pulpcore.plugin.models import RepositoryVersion
 from pulpcore.plugin.util import get_objects_for_user
 
 from pulp_ansible.app import models as ansible_models
@@ -169,18 +168,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
             private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
             return public_repository_qs | private_repository_qs
 
-    def get_ansible_repository_versions_qs(self, view, qs, repo_perm):
-        qs = RepositoryVersion.objects.all()
-        if view.request.user.has_perm(repo_perm):
-            return qs
-        else:
-            public_repository_qs = self._get_public_repo_pks()
-            private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
-            repository_qs = public_repository_qs | private_repository_qs
-            return qs.filter(
-                Q(repository__pk__in=repository_qs)
-            )
-
     def get_ansible_distribution_qs(self, view, qs, repo_perm):
         qs = ansible_models.AnsibleDistribution.objects.all()
         if view.request.user.has_perm(repo_perm):
@@ -218,7 +205,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
         """
         if "distro_base_path" in view.kwargs:
             distro_base_path = view.kwargs["distro_base_path"]
-            distro = models.AnsibleDistribution.objects.select_related(
+            distro = ansible_models.AnsibleDistribution.objects.select_related(
                 "repository", "repository_version"
             ).get(base_path=distro_base_path)
             if not (repo := distro.repository):
