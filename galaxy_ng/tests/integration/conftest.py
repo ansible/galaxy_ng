@@ -135,6 +135,11 @@ class AnsibleConfigFixture(dict):
             "password": "redhat",
             "token": None,
         },
+        "gh_user_ns_admin": {
+            "username": "gh_user_ns_admin",
+            "password": "redhat",
+            "token": None,
+        },
         "geerlingguy": {
             "username": "geerlingguy",
             "password": "redhat",

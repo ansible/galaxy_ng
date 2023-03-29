@@ -64,7 +64,12 @@ USERS = {
         'id': 1004,
         'login': 'geerlingguy',
         'password': 'redhat'
-    }
+    },
+    'gh_user_ns_admin': {
+        'id': 1005,
+        'login': 'gh_user_ns_admin',
+        'password': 'redhat'
+    },
 }
 
 # These are used for initial form GET+POST

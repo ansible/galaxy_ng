@@ -114,3 +114,8 @@ GroupRole.objects.get_or_create(
 
 print("Add a group that exists in the testing LDAP container")
 ldap_group, _ = Group.objects.get_or_create(name="admin_staff")
+
+print("Add a namespace admin group for commuinty to manage namespaces")
+namespace_admin_group, _ = Group.objects.get_or_create(name="admin_namespaces")
+gh_user, _ = User.objects.get_or_create(username="gh_user_ns_admin")
+gh_user.groups.add(namespace_admin_group)

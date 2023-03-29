@@ -253,6 +253,48 @@ def test_update_legacynamespace_owners(ansible_config):
 
 
 @pytest.mark.community_only
+def test_admin_update_legacynamespace_owners(ansible_config):
+
+    cleanup_social_user('gh01', ansible_config)
+
+    # make sure user1 is created
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('_ui/v1/me/')
+
+    # make sure user2 is created
+    cfg = ansible_config('github_user_2')
+    with SocialGithubClient(config=cfg) as client:
+        resp = client.get('_ui/v1/me/')
+        uinfo2 = resp.json()
+
+    # use namespace admin to edit another namespace's owners
+    cfg = ansible_config('gh_user_ns_admin')
+    with SocialGithubClient(config=cfg) as client:
+
+        # find the namespace
+        ns_resp = client.get('v1/namespaces/?name=gh01')
+        ns_result = ns_resp.json()
+        ns_id = ns_result['results'][0]['id']
+        ns_url = f'v1/namespaces/{ns_id}/'
+        owners_url = ns_url + 'owners/'
+
+        # assemble payload
+        new_owners = {'owners': [{'id': uinfo2['id']}]}
+
+        # put the payload
+        update_resp = client.put(owners_url, data=new_owners)
+        assert update_resp.status_code == 200
+
+        # get the new data
+        ns_resp2 = client.get(owners_url)
+        owners2 = ns_resp2.json()
+        owners2_usernames = [x['username'] for x in owners2]
+        assert 'gh01' not in owners2_usernames
+        assert uinfo2['username'] in owners2_usernames
+
+
+@pytest.mark.community_only
 def test_list_collections_anonymous(ansible_config):
     """Tests whether collections can be browsed anonymously"""
 
