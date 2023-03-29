@@ -95,6 +95,10 @@ objects:
             value: "automation-hub-galaxy-api${SUFFIX}"
           - name: GALAXY_API_PORT
             value: '8000'
+          - name: CONTENT_APP_HOST
+            value: "automation-hub-pulp-content-app${SUFFIX}"
+          - name: CONTENT_APP_PORT
+            value: '10000'
         volumeMounts:
           - name: cache
             mountPath: /var/cache/nginx
