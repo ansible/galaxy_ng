@@ -186,63 +186,73 @@ PULP_CONTAINER_VIEWSETS = {
 
 
 PULP_ANSIBLE_VIEWSETS = {
-    "pulp_ansible/v3/collections": [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "can_view_repo_content",
-        },
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["can_update_collection", "can_view_repo_content"]
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_perms:ansible.delete_collection", "can_view_repo_content"],
-        },
-    ],
-    "pulp_ansible/v3/collection-versions": [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "can_view_repo_content",
-        },
-        {
-            "action": "destroy",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["has_model_perms:ansible.delete_collection", "can_view_repo_content"],
-        },
-    ],
-    "pulp_ansible/v3/collection-versions/docs": [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "can_view_repo_content",
-        },
-    ],
-    "pulp_ansible/v3/collections/imports": [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-    ],
-    "pulp_ansible/v3/repo-metadata": [
-        {
-            "action": "retrieve",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "can_view_repo_content",
-        },
-    ],
+    "pulp_ansible/v3/collections": {
+        "statements": [
+            {
+                "action": "retrieve",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "can_view_repo_content",
+            },
+            {
+                "action": "update",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": ["can_update_collection", "can_view_repo_content"]
+            },
+            {
+                "action": "destroy",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": ["has_model_perms:ansible.delete_collection", "can_view_repo_content"],
+            },
+        ],
+    },
+    "pulp_ansible/v3/collection-versions": {
+        "statements": [
+            {
+                "action": "retrieve",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "can_view_repo_content",
+            },
+            {
+                "action": "destroy",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": ["has_model_perms:ansible.delete_collection", "can_view_repo_content"],
+            },
+        ],
+    },
+    "pulp_ansible/v3/collection-versions/docs": {
+        "statements": [
+            {
+                "action": "retrieve",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "can_view_repo_content",
+            },
+        ],
+    },
+    "pulp_ansible/v3/collections/imports": {
+        "statements": [
+            {
+                "action": "retrieve",
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+        ],
+    },
+    "pulp_ansible/v3/repo-metadata": {
+        "statements": [
+            {
+                "action": "retrieve",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "can_view_repo_content",
+            },
+        ],
+    },
     "pulp_ansible/v3/search/collection_versions": {
         "statements": [
             {
