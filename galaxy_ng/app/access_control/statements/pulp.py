@@ -266,7 +266,6 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": ["list", "retrieve"],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "can_view_repo_content",
             },
             {
                 "action": "avatar",
