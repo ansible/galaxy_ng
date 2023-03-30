@@ -173,7 +173,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
             private_q = Q(**{f"{field_name}ansible_ansiblerepository__private": False})
             qs = qs.select_related(f"{field_name}ansible_ansiblerepository")
 
-        if user.is_anonymous():
+        if user.is_anonymous:
             qs = qs.filter(private_q)
         else:
             user_roles = UserRole.objects.filter(user=user, role__permissions=view_perm).filter(
