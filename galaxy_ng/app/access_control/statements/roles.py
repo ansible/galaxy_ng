@@ -36,6 +36,7 @@ _LOCKED_ROLES = {
             "ansible.add_collectionremote",
             "ansible.change_collectionremote",
             "ansible.delete_collectionremote",
+            "ansible.manage_roles_collectionremote",
         },
         "inherit_from": []
     },
@@ -48,6 +49,7 @@ _LOCKED_ROLES = {
             "ansible.change_ansiblerepository",
             "ansible.delete_ansiblerepository",
             "ansible.sign_ansiblerepository",
+            "ansible.manage_roles_ansiblerepository",
         },
         "inherit_from": [],
     },

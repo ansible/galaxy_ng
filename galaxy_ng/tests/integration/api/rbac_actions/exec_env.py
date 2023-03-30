@@ -3,7 +3,6 @@ import requests
 from .utils import (
     API_ROOT,
     PULP_API_ROOT,
-    SERVER,
     CONTAINER_IMAGE,
     assert_pass,
     gen_string,
@@ -13,7 +12,9 @@ from .utils import (
     gen_remote_container,
     cleanup_test_obj,
     podman_push,
-    create_group
+    add_role_common,
+    remove_role_common,
+    list_roles_common,
 )
 
 IMAGE_NAME = CONTAINER_IMAGE[0]
@@ -161,46 +162,17 @@ def change_ee_readme(user, password, expect_pass, extra):
 
 def ee_namespace_list_roles(user, password, expect_pass, extra):
     pulp_href = extra["local_ee"].get_namespace()['pulp_href']
-
-    PULP_CONTAINER_NAMESPACE = f"{SERVER}{pulp_href}"
-    response = requests.get(
-        f"{PULP_CONTAINER_NAMESPACE}list_roles/",
-        auth=(user['username'], password)
-    )
-
-    assert_pass(expect_pass, response.status_code, 200, 403)
+    list_roles_common(user, password, expect_pass, pulp_href)
 
 
 def ee_namespace_add_role(user, password, expect_pass, extra):
     pulp_href = extra["local_ee"].get_namespace()['pulp_href']
-    group_name = create_group(gen_string())["name"]
-
-    PULP_CONTAINER_NAMESPACE = f"{SERVER}{pulp_href}"
-    response = requests.post(
-        f"{PULP_CONTAINER_NAMESPACE}add_role/",
-        json={
-            "role": "galaxy.execution_environment_admin",
-            "groups": [group_name]
-        },
-        auth=(user['username'], password)
-    )
-
-    assert_pass(expect_pass, response.status_code, 201, 403)
+    add_role_common(user, password, expect_pass, pulp_href, "galaxy.execution_environment_admin")
 
 
 def ee_namespace_remove_role(user, password, expect_pass, extra):
     pulp_href = extra["local_ee"].get_namespace()['pulp_href']
-
-    PULP_CONTAINER_NAMESPACE = f"{SERVER}{pulp_href}"
-    response = requests.post(
-        f"{PULP_CONTAINER_NAMESPACE}remove_role/",
-        json={
-            "role": "galaxy.execution_environment_admin"
-        },
-        auth=(user['username'], password)
-    )
-
-    assert_pass(expect_pass, response.status_code, 201, 403)
+    remove_role_common(user, password, expect_pass, pulp_href, "galaxy.execution_environment_admin")
 
 
 def create_ee_local(user, password, expect_pass, extra):
