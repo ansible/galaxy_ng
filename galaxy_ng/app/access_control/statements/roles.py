@@ -13,6 +13,7 @@ _LOCKED_ROLES = {
     "galaxy.collection_admin": {
         "permissions": {
             "ansible.delete_collection",
+            "ansible.repair_ansiblerepository",
             "galaxy.delete_namespace",
         },
         "inherit_from": ["galaxy.collection_publisher", "galaxy.collection_curator"],
@@ -48,6 +49,7 @@ _LOCKED_ROLES = {
             "ansible.add_ansiblerepository",
             "ansible.change_ansiblerepository",
             "ansible.delete_ansiblerepository",
+            "ansible.repair_ansiblerepository",
             "ansible.sign_ansiblerepository",
             "ansible.manage_roles_ansiblerepository",
         },

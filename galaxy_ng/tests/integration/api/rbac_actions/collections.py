@@ -20,6 +20,7 @@ from .utils import (
     add_role_common,
     remove_role_common,
     list_roles_common,
+    InvalidResponse,
 )
 
 
@@ -396,10 +397,9 @@ def delete_ansible_repository(user, password, expect_pass, extra):
 
 
 def view_ansible_repository_version(user, password, expect_pass, extra):
-    repo = _create_ansible_repo_common(ADMIN_USER, ADMIN_PASSWORD, True).json()
-
+    repo_href = extra["custom_repo"].get_repo()["pulp_href"]
     response = requests.get(
-        f"{SERVER}{repo['versions_href']}",
+        f"{SERVER}{repo_href}",
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 200, 403)
@@ -407,10 +407,10 @@ def view_ansible_repository_version(user, password, expect_pass, extra):
 
 # FIXME: pulp_1   | TypeError: rebuild_metadata() got an unexpected keyword argument 'repository_pk'
 def rebuild_metadata_ansible_repository_version(user, password, expect_pass, extra):
-    repo = _create_ansible_repo_common(ADMIN_USER, ADMIN_PASSWORD, True).json()
+    repo_href = extra["custom_repo"].get_repo()["pulp_href"]
 
     response = requests.post(
-        f"{SERVER}{repo['versions_href']}0/rebuild_metadata/",
+        f"{SERVER}{repo_href}0/rebuild_metadata/",
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 200, 403)
@@ -538,3 +538,65 @@ def collection_remote_remove_role(user, password, expect_pass, extra):
         auth=ADMIN_CREDENTIALS
     ).json()["results"][0]["pulp_href"]
     remove_role_common(user, password, expect_pass, pulp_href, "galaxy.collection_remote_owner")
+
+
+def _private_repo_assert_pass(response, results, expect_pass):
+    if response.status_code != 200:
+        raise InvalidResponse("200 expected from this API")
+
+    if expect_pass:
+        assert len(results) == 1
+    else:
+        assert len(results) == 0
+
+
+def private_repo_list(user, password, expect_pass, extra):
+    repo = extra["private_repo"].get_repo()
+    response = requests.get(
+        f"{PULP_API_ROOT}repositories/ansible/ansible/?name={repo['name']}",
+        auth=(user['username'], password),
+    )
+
+    _private_repo_assert_pass(response, response.json()["results"], expect_pass)
+
+
+def private_distro_list(user, password, expect_pass, extra):
+    distro = extra["private_repo"].get_distro()
+    response = requests.get(
+        f"{PULP_API_ROOT}distributions/ansible/ansible/?name={distro['name']}",
+        auth=(user['username'], password),
+    )
+
+    _private_repo_assert_pass(response, response.json()["results"], expect_pass)
+
+
+def private_collection_version_list(user, password, expect_pass, extra):
+    repo = extra["private_repo"].get_repo()
+    response = requests.get(
+        f"{API_ROOT}v3/plugin/ansible/search/collection-versions/?repository_name={repo['name']}",
+        auth=(user['username'], password),
+    )
+
+    _private_repo_assert_pass(response, response.json()["data"], expect_pass)
+
+
+def view_private_repository_version(user, password, expect_pass, extra):
+    repo = extra["private_repo"].get_repo()
+    response = requests.get(
+        f"{SERVER}{repo['versions_href']}",
+        auth=(user['username'], password),
+    )
+
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def private_repo_v3(user, password, expect_pass, extra):
+    distro = extra["private_repo"].get_distro()
+
+    response = requests.get(
+        f"{API_ROOT}content/{distro['base_path']}/v3/collections",
+        allow_redirects=True,
+        auth=(user['username'], password),
+    )
+
+    assert_pass(expect_pass, response.status_code, 200, 403)

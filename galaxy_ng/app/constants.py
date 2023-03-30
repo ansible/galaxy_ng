@@ -173,6 +173,14 @@ PERMISSIONS = {
         "global_description": _("Configure who has permissions on any repository."),
         "ui_category": _("Ansible Repository"),
     },
+    "ansible.repair_ansiblerepository": {
+        "name": _("Repair Ansible repository"),
+        "object_description": _("Repair artifacts associated with this Ansible repository."),
+        "global_description": _(
+            "Repair artifacts associated with any Ansible repository existing in the system."
+        ),
+        "ui_category": _("Ansible Repository"),
+    },
     "container.change_containernamespace": {
         "name": _("Change container namespace permissions"),
         "object_description": _("Edit permissions on this container namespace."),

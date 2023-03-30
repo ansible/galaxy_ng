@@ -3,13 +3,18 @@ import os
 from functools import lru_cache
 
 from django.conf import settings
+from django.contrib.auth.models import Permission
+from django.db.models import Q, Exists, OuterRef, CharField
+from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
+from pulpcore.plugin.models.role import GroupRole, UserRole
+
+from pulp_ansible.app import models as ansible_models
 
 from pulp_container.app import models as container_models
-from pulp_ansible.app import models as ansible_models
 from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
 
 from galaxy_ng.app import models
@@ -146,11 +151,127 @@ class AccessPolicyBase(AccessPolicyFromDB):
             }
         )
 
+    def scope_by_view_repository_permissions(self, view, qs, field_name="", is_generic=True):
+        """
+        Returns objects with a repository foreign key that are connected to a public
+        repository or a private repository that the user has permissions on
+
+        is_generic should be set to True when repository is a FK to the generic Repository
+        object and False when it's a FK to AnsibleRepository
+        """
+        user = view.request.user
+        if user.has_perm("ansible.view_ansiblerepository"):
+            return qs
+        view_perm = Permission.objects.get(
+            content_type__app_label="ansible", codename="view_ansiblerepository")
+
+        if field_name:
+            field_name = field_name + "__"
+
+        private_q = Q(**{f"{field_name}private": False})
+        if is_generic:
+            private_q = Q(**{f"{field_name}ansible_ansiblerepository__private": False})
+            qs = qs.select_related(f"{field_name}ansible_ansiblerepository")
+
+        if user.is_anonymous:
+            qs = qs.filter(private_q)
+        else:
+            user_roles = UserRole.objects.filter(user=user, role__permissions=view_perm).filter(
+                object_id=OuterRef("repo_pk_str"))
+
+            group_roles = GroupRole.objects.filter(
+                group__in=user.groups.all(),
+                role__permissions=view_perm
+            ).filter(
+                object_id=OuterRef("repo_pk_str"))
+
+            qs = qs.annotate(
+                repo_pk_str=Cast(f"{field_name}pk", output_field=CharField())
+            ).annotate(
+                has_user_role=Exists(user_roles)
+            ).annotate(
+                has_group_roles=Exists(group_roles)
+            ).filter(
+                private_q
+                | Q(has_user_role=True)
+                | Q(has_group_roles=True)
+            )
+
+        return qs
+
     # if not defined, defaults to parent qs of None breaking Group Detail
     def scope_queryset(self, view, qs):
+        """
+        Scope the queryset based on the access policy `scope_queryset` method if present.
+        """
+        access_policy = self.get_access_policy(view)
+        if view.action == "list" and access_policy:
+            # if access_policy := self.get_access_policy(view):
+            if access_policy.queryset_scoping:
+                scope = access_policy.queryset_scoping["function"]
+                if scope == "scope_queryset" or not (function := getattr(self, scope, None)):
+                    return qs
+                kwargs = access_policy.queryset_scoping.get("parameters") or {}
+                qs = function(view, qs, **kwargs)
         return qs
 
     # Define global conditions here
+    def v3_can_view_repo_content(self, request, view, action):
+        """
+        Check if the repo is private, only let users with view repository permissions
+        view the collections here.
+        """
+
+        path = view.kwargs.get(
+            "distro_base_path",
+            view.kwargs.get(
+                "path",
+                None
+            )
+        )
+
+        if path:
+            distro = ansible_models.AnsibleDistribution.objects.get(base_path=path)
+            repo = distro.repository
+            repo = repo.cast()
+
+            if repo.private:
+                perm = "ansible.view_ansiblerepository"
+                return request.user.has_perm(perm) or request.user.has_perm(perm, repo)
+
+        return True
+
+    def has_ansible_repo_perms(self, request, view, action, permission):
+        """
+        Check if the user has model or object-level permissions
+        on the repository or associated repository.
+
+        View actions are only enforced when the repo is private.
+        """
+        if request.user.has_perm(permission):
+            return True
+
+        try:
+            obj = view.get_object()
+        except AssertionError:
+            obj = view.get_parent_object()
+
+        if isinstance(obj, ansible_models.AnsibleRepository):
+            repo = obj
+
+        else:
+            # user can't have object permission to not existing repository
+            if obj.repository is None:
+                return False
+
+            repo = obj.repository.cast()
+
+        if permission == "ansible.view_ansiblerepository":
+            if not repo.private:
+                return True
+
+        return request.user.has_perm(permission, repo)
+
     def _get_rh_identity(self, request):
         if not isinstance(request.auth, dict):
             log.debug("No request rh_identity request.auth found for request %s", request)
@@ -272,25 +393,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
             obj = obj._meta.concrete_model.objects.get(pk=obj.pk)
 
         return request.user.has_perm(permission, obj)
-
-    def has_distribution_repo_perms(self, request, view, action, permission):
-        """
-        Check if the user has model or object-level permissions
-        on the distribution associated with ansible repository.
-        """
-        if request.user.has_perm(permission):
-            return True
-
-        if "pk" in view.kwargs:
-            obj = view.get_object()
-
-            # user can't have object permission to not existing repository
-            if obj.repository is None:
-                return False
-
-            return request.user.has_perm(permission, obj.repository.cast())
-
-        return False
 
     def signatures_not_required_for_repo(self, request, view, action):
         """
