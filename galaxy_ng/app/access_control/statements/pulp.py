@@ -416,16 +416,10 @@ PULP_ANSIBLE_VIEWSETS = {
     "repositories/ansible/ansible/versions": {
         "statements": [
             {
-                "action": "retrieve",
+                "action": "list, retrieve",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
-            },
-            {
-                "action": "list",
-                "principal": "authenticated",
-                "effect": "allow",
-                "condition": "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
+                "condition": "can_view_repo_content",
             },
             {
                 "action": "create",
