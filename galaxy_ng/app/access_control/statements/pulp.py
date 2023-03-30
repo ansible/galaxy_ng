@@ -196,17 +196,20 @@ PULP_ANSIBLE_VIEWSETS = {
     "pulp_ansible/v3/collections/imports": _collection_statements,
     "pulp_ansible/v3/repo-metadata": _collection_statements,
 
-    "pulp_ansible/v3/search/collection_versions": [
-        {
-            "action": ["list", "rebuild"],
-            "principal": "authenticated",
-            "effect": "allow",
-        },
-    ],
-    "queryset_scoping": {
-        "function": "scope_by_view_repository_permissions",
-        "parameters": {
-            "repo_perm": "ansible.view_ansiblerepository",
+    "pulp_ansible/v3/search/collection_versions": {
+        "statements": [
+            {
+                "action": ["list"],
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+        ],
+        "queryset_scoping": {
+            "function": "scope_by_view_repository_permissions",
+            "parameters": {
+                "is_generic": False,
+                "field_name": "repository"
+            },
         },
     },
 
@@ -307,7 +310,7 @@ PULP_ANSIBLE_VIEWSETS = {
         "queryset_scoping": {
             "function": "scope_by_view_repository_permissions",
             "parameters": {
-                "is_generic": "True",
+                "is_generic": False,
             },
         },
     },
@@ -352,7 +355,8 @@ PULP_ANSIBLE_VIEWSETS = {
         "queryset_scoping": {
             "function": "scope_by_view_repository_permissions",
             "parameters": {
-                "is_generic": "True",
+                "is_generic": True,
+                "field_name": "repository"
             },
         },
     },
@@ -408,6 +412,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": "list",
                 "principal": "authenticated",
                 "effect": "allow",
+                "condition": "has_repository_model_or_obj_perms:ansible.view_ansiblerepository",
             },
             {
                 "action": "create",
@@ -427,13 +432,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 "effect": "allow",
                 "condition": "has_repository_model_or_obj_perms:ansible.delete_ansiblerepository",
             },
-        ],
-        "queryset_scoping": {
-            "function": "scope_by_view_repository_permissions",
-            "parameters": {
-                "is_generic": "True",
-            },
-        },
+        ]
     },
     "content/ansible/collection_versions": {
         "statements": [

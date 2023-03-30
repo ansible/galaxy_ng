@@ -171,7 +171,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
             private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
             return public_repository_qs | private_repository_qs
 
-    def scope_by_view_repository_permissions(self, view, qs, is_generic=True):
+    def scope_by_view_repository_permissions(self, view, qs, field_name="", is_generic=True):
         """
         Returns objects with a repository foreign key that are connected to a public
         repository or a private repository that the user has permissions on
@@ -185,6 +185,9 @@ class AccessPolicyBase(AccessPolicyFromDB):
         view_perm = Permission.objects.get(
             content_type__app_label="ansible", codename="view_ansiblerepository")
 
+        if field_name:
+            field_name = field_name + "__"
+
         user_roles = UserRole.objects.filter(user=user, role__permissions=view_perm).filter(
             object_id=OuterRef("repo_pk_str"))
 
@@ -194,13 +197,13 @@ class AccessPolicyBase(AccessPolicyFromDB):
         ).filter(
             object_id=OuterRef("repo_pk_str"))
 
-        private_q = Q(repository__private=False)
+        private_q = Q(**{f"{field_name}private": False})
         if is_generic:
-            private_q = Q(repository__ansible_ansiblerepository__private=False)
-            qs = qs.select_related("repository__ansible_ansiblerepository")
+            private_q = Q(**{f"{field_name}ansible_ansiblerepository__private": False})
+            qs = qs.select_related(f"{field_name}ansible_ansiblerepository")
 
         qs = qs.annotate(
-            repo_pk_str=Cast("repository__pk", output_field=CharField())
+            repo_pk_str=Cast(f"{field_name}pk", output_field=CharField())
         ).annotate(
             has_user_role=Exists(user_roles)
         ).annotate(
