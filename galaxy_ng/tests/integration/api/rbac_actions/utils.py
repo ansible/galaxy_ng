@@ -207,14 +207,17 @@ def del_collection(name, namespace, repo="staging"):
 def gen_namespace(name, groups=None):
     groups = groups or []
 
-    return requests.post(
-        f"{API_ROOT}_ui/v1/namespaces/",
+    resp = requests.post(
+        f"{API_ROOT}v3/namespaces/",
         json={
             "name": name,
             "groups": groups,
         },
         auth=ADMIN_CREDENTIALS,
-    ).json()
+    )
+
+    assert resp.status_code == 201
+    return resp.json()
 
 
 def gen_collection(name, namespace):
@@ -415,12 +418,40 @@ class ReusableContainerRegistry:
 
 
 class ReusableAnsibleRepository(AnsibleDistroAndRepo):
-    def __init__(self, name, is_staging):
+    def __init__(self, name, is_staging, is_private=False, add_collection=False):
         repo_body = {}
         if is_staging:
             repo_body["pulp_labels"] = {"pipeline": "staging"}
+        if is_private:
+            repo_body["private"] = True
         super().__init__(
             ADMIN_CLIENT, name, repo_body=repo_body, distro_body=None)
+
+        if add_collection:
+            self._add_collection()
+
+    def _add_collection(self):
+        namespace = gen_namespace(gen_string())
+        artifact = build_collection(
+            name=gen_string(),
+            namespace=namespace["name"]
+        )
+
+        server = API_ROOT + f"content/{self.get_distro()['base_path']}/"
+
+        cmd = [
+            "ansible-galaxy",
+            "collection",
+            "publish",
+            "--api-key",
+            ADMIN_TOKEN,
+            "--server",
+            server,
+            artifact.filename
+        ]
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        assert proc.returncode == 0
+        wait_for_all_tasks()
 
 
 class ReusableRemoteContainer:

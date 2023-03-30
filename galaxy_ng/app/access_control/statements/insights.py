@@ -1,3 +1,4 @@
+import copy
 from galaxy_ng.app.access_control.statements.standalone import STANDALONE_STATEMENTS
 
 
@@ -21,7 +22,7 @@ _signature_upload_statements = [
 ]
 
 _INSIGHTS_STATEMENTS = {
-    **STANDALONE_STATEMENTS,
+    **copy.deepcopy(STANDALONE_STATEMENTS),
 
     'content/ansible/collection_signatures': _signature_upload_statements,
     'AIDenyIndexView': _deny_all,

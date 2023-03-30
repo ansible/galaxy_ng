@@ -70,6 +70,10 @@ from .rbac_actions.collections import (
     collection_repo_list_roles,
     collection_repo_add_role,
     collection_repo_remove_role,
+    private_repo_list,
+    private_distro_list,
+    private_collection_version_list,
+    view_repository_version,
 
     # ansible repository version
     view_ansible_repository_version,
@@ -156,6 +160,10 @@ GLOBAL_ACTIONS = {
     upload_collection_to_custom_staging_repo,
     upload_collection_to_custom_repo,
     upload_collection_to_other_pipeline_repo,
+    private_repo_list,
+    private_distro_list,
+    private_collection_version_list,
+    view_repository_version,
 
     # EEs
     # Remotes
@@ -231,6 +239,10 @@ OBJECT_ACTIONS = {
     collection_repo_list_roles,
     collection_repo_add_role,
     collection_repo_remove_role,
+    private_repo_list,
+    private_distro_list,
+    private_collection_version_list,
+    view_repository_version,
 
     # ee
     change_ee_description,
@@ -272,6 +284,10 @@ OBJECT_ROLES_TO_TEST = {
         delete_ansible_repository,
         approve_collections,
         reject_collections,
+        private_repo_list,
+        private_distro_list,
+        private_collection_version_list,
+        view_repository_version,
 
         # ansible repository version
         view_ansible_repository_version,
@@ -345,6 +361,10 @@ ROLES_TO_TEST = {
         reject_collections,
         deprecate_collections,
         undeprecate_collections,
+        private_repo_list,
+        private_distro_list,
+        private_collection_version_list,
+        view_repository_version,
 
         # ansible repository
         view_ansible_repository,
@@ -420,6 +440,10 @@ ROLES_TO_TEST = {
         reject_collections,
         deprecate_collections,
         undeprecate_collections,
+        private_repo_list,
+        private_distro_list,
+        private_collection_version_list,
+        view_repository_version,
 
         # ansible repository
         view_ansible_repository,
@@ -468,6 +492,10 @@ ROLES_TO_TEST = {
         sign_ansible_repository,
         sync_ansible_repository,
         delete_ansible_repository,
+        private_repo_list,
+        private_distro_list,
+        private_collection_version_list,
+        view_repository_version,
 
         # ansible repository version
         view_ansible_repository_version,
@@ -587,6 +615,8 @@ def _get_reusable_extras():
                 gen_string(), is_staging=True),
             "custom_repo": ReusableAnsibleRepository(
                 gen_string(), is_staging=False),
+            "private_repo": ReusableAnsibleRepository(
+                gen_string(), is_staging=False, is_private=True, add_collection=True),
         }
 
     return REUSABLE_EXTRA
@@ -632,6 +662,7 @@ def test_object_role_actions(role):
 
     namespace_href = extra["collection"].get_namespace()["pulp_href"]
     repo_href = extra["custom_repo"].get_repo()["pulp_href"]
+    private_repo_href = extra["private_repo"].get_repo()["pulp_href"]
     local_ee_href = extra["local_ee"].get_namespace()["pulp_href"]
     remote_ee_href = extra["remote_ee"].get_namespace()["pulp_href"]
 
@@ -654,6 +685,7 @@ def test_object_role_actions(role):
         if role == "galaxy.ansible_repository_owner":
             add_group_role(group["pulp_href"], "galaxy.collection_namespace_owner", namespace_href)
             add_group_role(group["pulp_href"], role, repo_href)
+            add_group_role(group["pulp_href"], role, private_repo_href)
 
     failures = []
     expected_allows = OBJECT_ROLES_TO_TEST[role]
