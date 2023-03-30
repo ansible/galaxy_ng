@@ -2,13 +2,16 @@ import pytest
 import logging
 
 from galaxy_ng.tests.integration.api.test_repo_management import create_repo_and_dist, create_test_namespace, \
-    upload_new_artifact, add_content_units
+    upload_new_artifact, add_content_units, search_collection_endpoint
 from galaxy_ng.tests.integration.utils import uuid4
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 
 from galaxy_ng.tests.integration.utils.tools import generate_random_string
-from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository
-from galaxykit.utils import GalaxyClientError
+from galaxykit.collections import sign_collection
+from galaxykit.remotes import create_remote
+from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository, \
+    copy_content_between_repos, move_content_between_repos
+from galaxykit.utils import GalaxyClientError, wait_for_task
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +19,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.min_hub_version("4.6dev")  # set correct min hub version
 class TestRBACRepos:
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_missing_role_create_repo(self, galaxy_client):
         """
@@ -34,7 +37,7 @@ class TestRBACRepos:
             create_repository(gc, test_repo_name)
         assert ctx.value.response.status_code == 403
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_role_create_repo(self, galaxy_client):
         """
@@ -51,7 +54,7 @@ class TestRBACRepos:
         # create_repository(gc, test_repo_name)
         create_repo_and_dist(gc, test_repo_name)
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_missing_role_delete_repo(self, galaxy_client):
         """
@@ -70,7 +73,7 @@ class TestRBACRepos:
             delete_repository(gc, test_repo_name)
         assert ctx.value.response.status_code == 403
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_role_delete_repo(self, galaxy_client):
         """
@@ -87,7 +90,7 @@ class TestRBACRepos:
         gc_user = galaxy_client(user)
         delete_repository(gc_user, test_repo_name)
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_missing_role_upload_to_repo(self, galaxy_client):
         """
@@ -110,7 +113,7 @@ class TestRBACRepos:
             add_content_units(gc_user, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
         assert ctx.value.response.status_code == 403
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_role_upload_to_repo(self, galaxy_client):
         """
@@ -132,7 +135,7 @@ class TestRBACRepos:
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_user, content_units, repo_pulp_href)  # (change_ansiblerepository)
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_role_patch_update_repo(self, galaxy_client):
         """
@@ -150,7 +153,7 @@ class TestRBACRepos:
         updated_body = {"description": "updated description"}
         patch_update_repository(gc_user, resp["pulp_href"].split("/")[-2], updated_body)
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_missing_role_patch_update_repo(self, galaxy_client):
         """
@@ -170,7 +173,7 @@ class TestRBACRepos:
             patch_update_repository(gc_user, resp["pulp_href"].split("/")[-2], updated_body)
         assert ctx.value.response.status_code == 403
 
-    # @pytest.mark.rbac_repos
+    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_role_put_update_repo(self, galaxy_client):
         """
@@ -208,4 +211,202 @@ class TestRBACRepos:
             put_update_repository(gc_user, resp["pulp_href"].split("/")[-2], updated_body)
         assert ctx.value.response.status_code == 403
 
+    @pytest.mark.rbac_repos
+    @pytest.mark.standalone_only
+    def test_user_cannot_use_x_repo_search_endpoint(self, galaxy_client):
+        """
+        Verifies that a user with permissions can search in repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.change_ansiblerepository", "galaxy.upload_to_namespace"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            search_collection_endpoint(gc_user, repository_name=test_repo_name)
+        assert ctx.value.response.status_code == 403
+
         # all users can list repos, is it correct?
+
+    # @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_copy(self, galaxy_client):
+        """
+        Verifies
+        """
+        # unsigned
+        gc_admin = galaxy_client("iqe_admin")
+
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
+
+        namespace_name = create_test_namespace(gc_admin)
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc_admin, content_units, repo_pulp_href_1)
+
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
+
+        copy_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
+        # verify cv is in both repos
+        pass
+
+    # @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_move(self, galaxy_client):
+        """
+        Verifies
+        """
+        # usigned
+        gc_admin = galaxy_client("iqe_admin")
+
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
+
+        namespace_name = create_test_namespace(gc_admin)
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc_admin, content_units, repo_pulp_href_1)
+
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
+
+        move_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
+        # verify cv is gone from source_repo
+        pass
+
+    # @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_copy_signed(self, galaxy_client):
+        """
+        Verifies
+        """
+        # signed
+        gc_admin = galaxy_client("iqe_admin")
+
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
+
+        namespace_name = create_test_namespace(gc_admin)
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc_admin, content_units, repo_pulp_href_1)
+
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
+
+        sign_collection(gc_admin, content_units[0], repo_pulp_href_1)
+
+        copy_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
+        # verify cv is in both repos
+        pass
+
+    # @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_move_signed(self, galaxy_client):
+        """
+        Verifies
+        """
+        # signed
+        gc_admin = galaxy_client("iqe_admin")
+
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
+
+        namespace_name = create_test_namespace(gc_admin)
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc_admin, content_units, repo_pulp_href_1)
+
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
+
+        sign_collection(gc_admin, content_units[0], repo_pulp_href_1)
+
+        move_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
+        # verify cv is in both repos
+        pass
+
+    # @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_copy_rbac(self, galaxy_client):
+        """
+        Verifies
+        """
+        # unsigned
+        gc_admin = galaxy_client("iqe_admin")
+
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
+
+        namespace_name = create_test_namespace(gc_admin)
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc_admin, content_units, repo_pulp_href_1)
+
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
+
+        # new user
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.change_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        gc_user = galaxy_client(user)
+
+        copy_content_between_repos(gc_user, content_units, repo_pulp_href_1, [repo_pulp_href_2])
+
+    # @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_copy_missing_rbac_perm(self, galaxy_client):
+        """
+        Verifies
+        """
+        # unsigned
+        gc_admin = galaxy_client("iqe_admin")
+
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
+
+        namespace_name = create_test_namespace(gc_admin)
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc_admin, content_units, repo_pulp_href_1)
+
+        test_repo_name_2 = f"repo-test-{generate_random_string()}"
+        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
+
+        # new user
+        user, group = add_new_user_to_new_group(gc_admin)
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            copy_content_between_repos(gc_user, content_units, repo_pulp_href_1, [repo_pulp_href_2])
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_remote(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        respuesta = create_remote(gc_admin, test_remote_name, "https://www.pepe.com/")
+        remote_pulp_href = respuesta["pulp_href"]
+        test_repo_name_1 = f"repo-test-{generate_random_string()}"
+        ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
+        repo_res = create_repository(gc_admin, test_repo_name_1, remote=remote_pulp_href)
+        dist_data = {"base_path": test_repo_name_1, "name": test_repo_name_1, "repository": repo_res['pulp_href']}
+        task_resp = gc_admin.post(ansible_distribution_path, dist_data)
+        wait_for_task(gc_admin, task_resp)

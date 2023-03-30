@@ -100,7 +100,7 @@ def verify_repo_data(expected_repos, actual_repos):
 @pytest.mark.min_hub_version("4.6dev")  # set correct min hub version
 class TestRM:
 
-    @pytest.mark.rm
+    @pytest.mark.this
     @pytest.mark.standalone_only
     def test_search_same_collection_diff_versions_same_repo(self, galaxy_client):
         """
