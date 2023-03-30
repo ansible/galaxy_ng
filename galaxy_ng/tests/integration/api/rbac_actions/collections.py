@@ -17,6 +17,9 @@ from .utils import (
     del_collection,
     build_collection,
     ADMIN_TOKEN,
+    add_role_common,
+    remove_role_common,
+    list_roles_common,
 )
 
 
@@ -301,6 +304,21 @@ def view_ansible_repository(user, password, expect_pass, extra):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
+def collection_repo_list_roles(user, password, expect_pass, extra):
+    pulp_href = extra["custom_repo"].get_repo()['pulp_href']
+    list_roles_common(user, password, expect_pass, pulp_href)
+
+
+def collection_repo_add_role(user, password, expect_pass, extra):
+    pulp_href = extra["custom_repo"].get_repo()['pulp_href']
+    add_role_common(user, password, expect_pass, pulp_href, "galaxy.ansible_repository_owner")
+
+
+def collection_repo_remove_role(user, password, expect_pass, extra):
+    pulp_href = extra["custom_repo"].get_repo()['pulp_href']
+    remove_role_common(user, password, expect_pass, pulp_href, "galaxy.ansible_repository_owner")
+
+
 def add_ansible_repository(user, password, expect_pass, extra):
     _create_ansible_repo_common(user['username'], password, expect_pass)
 
@@ -496,3 +514,27 @@ def delete_ansible_remote(user, password, expect_pass, extra):
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def collection_remote_list_roles(user, password, expect_pass, extra):
+    pulp_href = requests.get(
+        f"{PULP_API_ROOT}remotes/ansible/collection/?name=community",
+        auth=ADMIN_CREDENTIALS
+    ).json()["results"][0]["pulp_href"]
+    list_roles_common(user, password, expect_pass, pulp_href)
+
+
+def collection_remote_add_role(user, password, expect_pass, extra):
+    pulp_href = requests.get(
+        f"{PULP_API_ROOT}remotes/ansible/collection/?name=community",
+        auth=ADMIN_CREDENTIALS
+    ).json()["results"][0]["pulp_href"]
+    add_role_common(user, password, expect_pass, pulp_href, "galaxy.collection_remote_owner")
+
+
+def collection_remote_remove_role(user, password, expect_pass, extra):
+    pulp_href = requests.get(
+        f"{PULP_API_ROOT}remotes/ansible/collection/?name=community",
+        auth=ADMIN_CREDENTIALS
+    ).json()["results"][0]["pulp_href"]
+    remove_role_common(user, password, expect_pass, pulp_href, "galaxy.collection_remote_owner")

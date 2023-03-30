@@ -548,3 +548,39 @@ class ReusableLocalContainer:
 
     def cleanup(self):
         del_container(self._name)
+
+
+def add_role_common(user, password, expect_pass, pulp_href, role):
+    group_name = create_group(gen_string())["name"]
+
+    response = requests.post(
+        f"{SERVER}{pulp_href}add_role/",
+        json={
+            "role": role,
+            "groups": [group_name]
+        },
+        auth=(user['username'], password)
+    )
+
+    assert_pass(expect_pass, response.status_code, 201, 403)
+
+
+def remove_role_common(user, password, expect_pass, pulp_href, role):
+    response = requests.post(
+        f"{SERVER}{pulp_href}remove_role/",
+        json={
+            "role": role
+        },
+        auth=(user['username'], password)
+    )
+
+    assert_pass(expect_pass, response.status_code, 201, 403)
+
+
+def list_roles_common(user, password, expect_pass, pulp_href):
+    response = requests.get(
+        f"{SERVER}{pulp_href}list_roles/",
+        auth=(user['username'], password)
+    )
+
+    assert_pass(expect_pass, response.status_code, 200, 403)

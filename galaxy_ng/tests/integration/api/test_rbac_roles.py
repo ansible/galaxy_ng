@@ -67,6 +67,9 @@ from .rbac_actions.collections import (
     sign_ansible_repository,
     sync_ansible_repository,
     delete_ansible_repository,
+    collection_repo_list_roles,
+    collection_repo_add_role,
+    collection_repo_remove_role,
 
     # ansible repository version
     view_ansible_repository_version,
@@ -84,7 +87,10 @@ from .rbac_actions.collections import (
     view_ansible_remote,
     add_ansible_remote,
     change_ansible_remote,
-    delete_ansible_remote
+    delete_ansible_remote,
+    collection_remote_list_roles,
+    collection_remote_add_role,
+    collection_remote_remove_role,
 )
 from .rbac_actions.exec_env import (
     # Remotes
@@ -186,6 +192,9 @@ GLOBAL_ACTIONS = {
     sign_ansible_repository,
     sync_ansible_repository,
     delete_ansible_repository,
+    collection_repo_list_roles,
+    collection_repo_add_role,
+    collection_repo_remove_role,
 
     # ansible repository version
     view_ansible_repository_version,
@@ -205,6 +214,9 @@ GLOBAL_ACTIONS = {
     add_ansible_remote,
     change_ansible_remote,
     delete_ansible_remote,
+    collection_remote_list_roles,
+    collection_remote_add_role,
+    collection_remote_remove_role,
 }
 
 # TODO: Update object tests to include delete actions
@@ -216,6 +228,9 @@ OBJECT_ACTIONS = {
     undeprecate_collections,
     upload_collection_to_custom_repo,
     upload_collection_to_custom_staging_repo,
+    collection_repo_list_roles,
+    collection_repo_add_role,
+    collection_repo_remove_role,
 
     # ee
     change_ee_description,
@@ -263,6 +278,9 @@ OBJECT_ROLES_TO_TEST = {
         # rebuild_metadata_ansible_repository_version,
         repair_ansible_repository_version,
         delete_ansible_repository_version,
+        collection_repo_list_roles,
+        collection_repo_add_role,
+        collection_repo_remove_role,
 
         # ansible distribution
         view_ansible_distribution,
@@ -336,6 +354,9 @@ ROLES_TO_TEST = {
         sign_ansible_repository,
         sync_ansible_repository,
         delete_ansible_repository,
+        collection_repo_list_roles,
+        collection_repo_add_role,
+        collection_repo_remove_role,
 
         # ansible repository version
         view_ansible_repository_version,
@@ -354,6 +375,9 @@ ROLES_TO_TEST = {
         add_ansible_remote,
         change_ansible_remote,
         delete_ansible_remote,
+        collection_remote_list_roles,
+        collection_remote_add_role,
+        collection_remote_remove_role,
 
         # EEs
         # Remotes
@@ -405,6 +429,9 @@ ROLES_TO_TEST = {
         sign_ansible_repository,
         sync_ansible_repository,
         delete_ansible_repository,
+        collection_repo_list_roles,
+        collection_repo_add_role,
+        collection_repo_remove_role,
 
         # ansible repository version
         view_ansible_repository_version,
@@ -422,7 +449,10 @@ ROLES_TO_TEST = {
         view_ansible_remote,
         add_ansible_remote,
         change_ansible_remote,
-        delete_ansible_remote
+        delete_ansible_remote,
+        collection_remote_list_roles,
+        collection_remote_add_role,
+        collection_remote_remove_role,
     },
     "galaxy.collection_curator": {
         configure_collection_sync,
@@ -444,6 +474,9 @@ ROLES_TO_TEST = {
         # rebuild_metadata_ansible_repository_version,
         repair_ansible_repository_version,
         delete_ansible_repository_version,
+        collection_repo_list_roles,
+        collection_repo_add_role,
+        collection_repo_remove_role,
 
         # ansible distribution
         view_ansible_distribution,
@@ -455,7 +488,21 @@ ROLES_TO_TEST = {
         view_ansible_remote,
         add_ansible_remote,
         change_ansible_remote,
-        delete_ansible_remote
+        delete_ansible_remote,
+        collection_remote_list_roles,
+        collection_remote_add_role,
+        collection_remote_remove_role,
+    },
+    "galaxy.collection_remote_owner": {
+        configure_collection_sync,
+        launch_collection_sync,
+        view_ansible_remote,
+        add_ansible_remote,
+        change_ansible_remote,
+        delete_ansible_remote,
+        collection_remote_list_roles,
+        collection_remote_add_role,
+        collection_remote_remove_role,
     },
     "galaxy.execution_environment_admin": {
         # EEs

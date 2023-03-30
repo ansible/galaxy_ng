@@ -137,6 +137,12 @@ PERMISSIONS = {
         "global_description": _("Delete any collection remote existing in the system."),
         "ui_category": _("Collection Remotes"),
     },
+    "ansible.manage_roles_collectionremote": {
+        "name": _("Manage remote roles"),
+        "object_description": _("Configure who has permissions on this remote."),
+        "global_description": _("Configure who has permissions on any remote."),
+        "ui_category": _("Collection Remotes"),
+    },
     "ansible.view_ansiblerepository": {
         "name": _("View Ansible repository"),
         "object_description": _("View this Ansible repository."),
@@ -159,6 +165,12 @@ PERMISSIONS = {
         "name": _("Delete Ansible repository"),
         "object_description": _("Delete this Ansible repository."),
         "global_description": _("Delete any Ansible repository existing in the system."),
+        "ui_category": _("Ansible Repository"),
+    },
+    "ansible.manage_roles_ansiblerepository": {
+        "name": _("Manage repository roles"),
+        "object_description": _("Configure who has permissions on this repository."),
+        "global_description": _("Configure who has permissions on any repository."),
         "ui_category": _("Ansible Repository"),
     },
     "container.change_containernamespace": {
