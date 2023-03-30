@@ -168,31 +168,34 @@ class AccessPolicyBase(AccessPolicyFromDB):
         if field_name:
             field_name = field_name + "__"
 
-        user_roles = UserRole.objects.filter(user=user, role__permissions=view_perm).filter(
-            object_id=OuterRef("repo_pk_str"))
-
-        group_roles = GroupRole.objects.filter(
-            group__in=user.groups.all(),
-            role__permissions=view_perm
-        ).filter(
-            object_id=OuterRef("repo_pk_str"))
-
         private_q = Q(**{f"{field_name}private": False})
         if is_generic:
             private_q = Q(**{f"{field_name}ansible_ansiblerepository__private": False})
             qs = qs.select_related(f"{field_name}ansible_ansiblerepository")
 
-        qs = qs.annotate(
-            repo_pk_str=Cast(f"{field_name}pk", output_field=CharField())
-        ).annotate(
-            has_user_role=Exists(user_roles)
-        ).annotate(
-            has_group_roles=Exists(group_roles)
-        ).filter(
-            private_q
-            | Q(has_user_role=True)
-            | Q(has_group_roles=True)
-        )
+        if user.is_anonymous():
+            qs = qs.filter(private_q)
+        else:
+            user_roles = UserRole.objects.filter(user=user, role__permissions=view_perm).filter(
+                object_id=OuterRef("repo_pk_str"))
+
+            group_roles = GroupRole.objects.filter(
+                group__in=user.groups.all(),
+                role__permissions=view_perm
+            ).filter(
+                object_id=OuterRef("repo_pk_str"))
+
+            qs = qs.annotate(
+                repo_pk_str=Cast(f"{field_name}pk", output_field=CharField())
+            ).annotate(
+                has_user_role=Exists(user_roles)
+            ).annotate(
+                has_group_roles=Exists(group_roles)
+            ).filter(
+                private_q
+                | Q(has_user_role=True)
+                | Q(has_group_roles=True)
+            )
 
         return qs
 
