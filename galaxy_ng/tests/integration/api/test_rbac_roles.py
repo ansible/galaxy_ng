@@ -73,7 +73,8 @@ from .rbac_actions.collections import (
     private_repo_list,
     private_distro_list,
     private_collection_version_list,
-    view_repository_version,
+    view_private_repository_version,
+    private_repo_v3,
 
     # ansible repository version
     view_ansible_repository_version,
@@ -163,7 +164,8 @@ GLOBAL_ACTIONS = {
     private_repo_list,
     private_distro_list,
     private_collection_version_list,
-    view_repository_version,
+    view_private_repository_version,
+    private_repo_v3,
 
     # EEs
     # Remotes
@@ -242,7 +244,8 @@ OBJECT_ACTIONS = {
     private_repo_list,
     private_distro_list,
     private_collection_version_list,
-    view_repository_version,
+    view_private_repository_version,
+    private_repo_v3,
 
     # ee
     change_ee_description,
@@ -287,7 +290,8 @@ OBJECT_ROLES_TO_TEST = {
         private_repo_list,
         private_distro_list,
         private_collection_version_list,
-        view_repository_version,
+        view_private_repository_version,
+        private_repo_v3,
 
         # ansible repository version
         view_ansible_repository_version,
@@ -364,7 +368,8 @@ ROLES_TO_TEST = {
         private_repo_list,
         private_distro_list,
         private_collection_version_list,
-        view_repository_version,
+        view_private_repository_version,
+        private_repo_v3,
 
         # ansible repository
         view_ansible_repository,
@@ -443,7 +448,8 @@ ROLES_TO_TEST = {
         private_repo_list,
         private_distro_list,
         private_collection_version_list,
-        view_repository_version,
+        view_private_repository_version,
+        private_repo_v3,
 
         # ansible repository
         view_ansible_repository,
@@ -495,7 +501,8 @@ ROLES_TO_TEST = {
         private_repo_list,
         private_distro_list,
         private_collection_version_list,
-        view_repository_version,
+        view_private_repository_version,
+        private_repo_v3,
 
         # ansible repository version
         view_ansible_repository_version,

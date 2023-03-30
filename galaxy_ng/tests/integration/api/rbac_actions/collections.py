@@ -581,10 +581,22 @@ def private_collection_version_list(user, password, expect_pass, extra):
     _private_repo_assert_pass(response, response.json()["data"], expect_pass)
 
 
-def view_repository_version(user, password, expect_pass, extra):
+def view_private_repository_version(user, password, expect_pass, extra):
     repo = extra["private_repo"].get_repo()
     response = requests.get(
         f"{SERVER}{repo['versions_href']}",
+        auth=(user['username'], password),
+    )
+
+    assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+def private_repo_v3(user, password, expect_pass, extra):
+    distro = extra["private_repo"].get_distro()
+
+    response = requests.get(
+        f"{API_ROOT}content/{distro['base_path']}/v3/collections",
+        allow_redirects=True,
         auth=(user['username'], password),
     )
 

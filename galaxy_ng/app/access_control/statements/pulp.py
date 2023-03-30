@@ -210,6 +210,12 @@ PULP_ANSIBLE_VIEWSETS = {
                 "principal": "authenticated",
                 "effect": "allow",
             },
+            {
+                "action": "list",
+                "principal": "anonymous",
+                "effect": "allow",
+                "condition": "unauthenticated_collection_access_enabled",
+            },
         ],
         "queryset_scoping": {
             "function": "scope_by_view_repository_permissions",
