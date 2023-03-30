@@ -8,13 +8,24 @@ from galaxy_ng.app.access_control.statements.legacy import LEGACY_STATEMENTS
 
 _collection_statements = [
     {
-        "action": ["list", "retrieve"],
+        "action": "list",
+        "principal": "authenticated",
+        "effect": "allow",
+    },
+    {
+        "action": "list",
+        "principal": "anonymous",
+        "effect": "allow",
+        "condition": "unauthenticated_collection_access_enabled",
+    },
+    {
+        "action": "retrieve",
         "principal": "authenticated",
         "effect": "allow",
         "condition": "can_view_repo_content",
     },
     {
-        "action": ["list", "retrieve"],
+        "action": "retrieve",
         "principal": "anonymous",
         "effect": "allow",
         "condition": ["unauthenticated_collection_access_enabled", "can_view_repo_content"],
@@ -29,25 +40,24 @@ _collection_statements = [
         "action": ["download"],
         "principal": 'authenticated',
         "effect": "allow",
-        "condition": "can_view_repo_content",
     },
     {
         "action": ["download"],
         "principal": 'anonymous',
         "effect": "allow",
-        "condition": ["unauthenticated_collection_download_enabled", "can_view_repo_content"],
+        "condition": "unauthenticated_collection_download_enabled",
     },
     {
         "action": "create",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": ["can_create_collection", "can_view_repo_content"]
+        "condition": "can_create_collection",
     },
     {
         "action": "update",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "can_update_collection"
+        "condition": ["can_update_collection", "can_view_repo_content"]
     },
     {
         "action": ["copy_content", "move_content"],
