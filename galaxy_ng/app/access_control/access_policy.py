@@ -11,7 +11,6 @@ from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 from pulpcore.plugin.models.role import GroupRole, UserRole
-from pulpcore.plugin.util import get_objects_for_user
 
 from pulp_ansible.app import models as ansible_models
 
