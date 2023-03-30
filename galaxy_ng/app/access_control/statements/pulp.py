@@ -1,10 +1,6 @@
 from galaxy_ng.app.access_control.statements.standalone import (
-    _collection_statements as _galaxy_collection_statements,
     _group_statements as _galaxy_group_statements,
 )
-
-
-_collection_statements = {"statements": _galaxy_collection_statements}
 
 
 _group_statements = {"statements": _galaxy_group_statements}
@@ -190,12 +186,63 @@ PULP_CONTAINER_VIEWSETS = {
 
 
 PULP_ANSIBLE_VIEWSETS = {
-    "pulp_ansible/v3/collections": _collection_statements,
-    "pulp_ansible/v3/collection-versions": _collection_statements,
-    "pulp_ansible/v3/collection-versions/docs": _collection_statements,
-    "pulp_ansible/v3/collections/imports": _collection_statements,
-    "pulp_ansible/v3/repo-metadata": _collection_statements,
-
+    "pulp_ansible/v3/collections": [
+        {
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "can_view_repo_content",
+        },
+        {
+            "action": "update",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": ["can_update_collection", "can_view_repo_content"]
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": ["has_model_perms:ansible.delete_collection", "can_view_repo_content"],
+        },
+    ],
+    "pulp_ansible/v3/collection-versions": [
+        {
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "can_view_repo_content",
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": ["has_model_perms:ansible.delete_collection", "can_view_repo_content"],
+        },
+    ],
+    "pulp_ansible/v3/collection-versions/docs": [
+        {
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "can_view_repo_content",
+        },
+    ],
+    "pulp_ansible/v3/collections/imports": [
+        {
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+    ],
+    "pulp_ansible/v3/repo-metadata": [
+        {
+            "action": "retrieve",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "can_view_repo_content",
+        },
+    ],
     "pulp_ansible/v3/search/collection_versions": {
         "statements": [
             {
@@ -219,6 +266,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": ["list", "retrieve"],
                 "principal": "authenticated",
                 "effect": "allow",
+                "condition": "can_view_repo_content",
             },
             {
                 "action": "avatar",
