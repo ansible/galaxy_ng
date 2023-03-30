@@ -152,25 +152,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
             }
         )
 
-    def _get_public_repo_pks(self):
-        return ansible_models.AnsibleRepository.objects.filter(private=False)
-
-    def _get_private_repo_pks(self, user, perm):
-        return get_objects_for_user(
-            user,
-            perm,
-            ansible_models.AnsibleRepository.objects.filter(private=True),
-        )
-
-    def get_ansible_repository_qs(self, view, qs, repo_perm):
-        qs = ansible_models.AnsibleRepository.objects.all()
-        if view.request.user.has_perm(repo_perm):
-            return qs
-        else:
-            public_repository_qs = self._get_public_repo_pks()
-            private_repository_qs = self._get_private_repo_pks(view.request.user, repo_perm)
-            return public_repository_qs | private_repository_qs
-
     def scope_by_view_repository_permissions(self, view, qs, field_name="", is_generic=True):
         """
         Returns objects with a repository foreign key that are connected to a public
@@ -238,15 +219,18 @@ class AccessPolicyBase(AccessPolicyFromDB):
         Check if the repo is private, only let users with view repository permissions
         view the collections here.
         """
-        if "distro_base_path" in view.kwargs:
-            distro_base_path = view.kwargs["distro_base_path"]
-            distro = ansible_models.AnsibleDistribution.objects.select_related(
-                "repository", "repository_version"
-            ).get(base_path=distro_base_path)
-            if not (repo := distro.repository):
-                if not (repo_ver := distro.repository_version):
-                    return False
-                repo = repo_ver.repository
+
+        path = view.kwargs.get(
+            "distro_base_path",
+            view.kwargs.get(
+                "path",
+                None
+            )
+        )
+
+        if path:
+            distro = ansible_models.AnsibleDistribution.objects.get(base_path=path)
+            repo = distro.repository
             repo = repo.cast()
 
             if repo.private:
