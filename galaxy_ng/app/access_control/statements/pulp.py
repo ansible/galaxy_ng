@@ -243,21 +243,30 @@ PULP_ANSIBLE_VIEWSETS = {
     "repositories/ansible/ansible": {
         "statements": [
             {
+                "action": ["list"],
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+            {
                 "action": ["retrieve", "my_permissions"],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_model_or_obj_perms:ansible.view_ansiblerepository",
+                "condition": "has_ansible_repo_perms:ansible.view_ansiblerepository"
             },
             {
-                "action": "list",
-                "principal": "authenticated",
-                "effect": "allow",
-            },
-            {
-                "action": ["list", "retrieve"],
+                "action": ["list"],
                 "principal": "anonymous",
                 "effect": "allow",
-                "condition": ["unauthenticated_collection_access_enabled", "can_view_repo_content"]
+                "condition": ["unauthenticated_collection_access_enabled"]
+            },
+            {
+                "action": ["retrieve", "my_permissions"],
+                "principal": "anonymous",
+                "effect": "allow",
+                "condition": [
+                    "unauthenticated_collection_access_enabled",
+                    "has_ansible_repo_perms:ansible.view_ansiblerepository"
+                ]
             },
             {
                 "action": "create",
@@ -284,7 +293,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 ],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_model_or_obj_perms:ansible.modify_ansible_repo_content"
+                "condition": "has_ansible_repo_perms:ansible.modify_ansible_repo_content"
             },
             {
                 "action": [
@@ -292,7 +301,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 ],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_model_or_obj_perms:ansible.sign_ansiblerepository"
+                "condition": "has_ansible_repo_perms:ansible.sign_ansiblerepository"
             },
             {
                 "action": [
@@ -305,19 +314,19 @@ PULP_ANSIBLE_VIEWSETS = {
                 ],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_model_or_obj_perms:ansible.change_ansiblerepository",
+                "condition": "has_ansible_repo_perms:ansible.change_ansiblerepository",
             },
             {
                 "action": "destroy",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_model_or_obj_perms:ansible.delete_ansiblerepository",
+                "condition": "has_ansible_repo_perms:ansible.delete_ansiblerepository",
             },
             {
                 "action": ["list_roles", "add_role", "remove_role"],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_model_or_obj_perms:ansible.manage_roles_ansiblerepository",
+                "condition": "has_ansible_repo_perms:ansible.manage_roles_ansiblerepository",
             },
         ],
         "queryset_scoping": {
@@ -333,7 +342,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": "retrieve",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_distribution_repo_perms:ansible.view_ansiblerepository",
+                "condition": "has_ansible_repo_perms:ansible.view_ansiblerepository",
             },
             {
                 "action": "list",
@@ -341,28 +350,39 @@ PULP_ANSIBLE_VIEWSETS = {
                 "effect": "allow",
             },
             {
-                "action": ["list", "retrieve"],
+                "action": ["list"],
                 "principal": "anonymous",
                 "effect": "allow",
-                "condition": "unauthenticated_collection_access_enabled"
+                "condition": [
+                    "unauthenticated_collection_access_enabled",
+                ]
+            },
+            {
+                "action": ["retrieve"],
+                "principal": "anonymous",
+                "effect": "allow",
+                "condition": [
+                    "unauthenticated_collection_access_enabled",
+                    "has_ansible_repo_perms:ansible.view_ansiblerepository"
+                ]
             },
             {
                 "action": "create",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_distribution_repo_perms:ansible.add_ansiblerepository",
+                "condition": "has_model_perms:ansible.add_ansiblerepository",
             },
             {
                 "action": ["update", "partial_update"],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_distribution_repo_perms:ansible.change_ansiblerepository",
+                "condition": "has_ansible_repo_perms:ansible.change_ansiblerepository",
             },
             {
                 "action": "destroy",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_distribution_repo_perms:ansible.delete_ansiblerepository",
+                "condition": "has_ansible_repo_perms:ansible.delete_ansiblerepository",
             },
         ],
         "queryset_scoping": {
@@ -372,6 +392,59 @@ PULP_ANSIBLE_VIEWSETS = {
                 "field_name": "repository"
             },
         },
+    },
+    "repositories/ansible/ansible/versions": {
+        "statements": [
+            # since the queryset is scoped, this should throw a 404 on the detail page for private
+            # repos
+            {
+                "action": "list",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_ansible_repo_perms:ansible.view_ansiblerepository",
+            },
+            {
+                "action": "retrieve",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_ansible_repo_perms:ansible.view_ansiblerepository",
+            },
+            {
+                "action": ["list"],
+                "principal": "anonymous",
+                "effect": "allow",
+                "condition": [
+                    "unauthenticated_collection_access_enabled",
+                ]
+            },
+            {
+                "action": ["retrieve"],
+                "principal": "anonymous",
+                "effect": "allow",
+                "condition": [
+                    "unauthenticated_collection_access_enabled",
+                    "has_ansible_repo_perms:ansible.view_ansiblerepository"
+                ]
+            },
+            {
+                "action": "create",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_ansible_repo_perms:ansible.add_ansiblerepository",
+            },
+            {
+                "action": ["rebuild_metadata", "repair"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_ansible_repo_perms:ansible.change_ansiblerepository",
+            },
+            {
+                "action": "destroy",
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_ansible_repo_perms:ansible.delete_ansiblerepository",
+            },
+        ]
     },
     "remotes/ansible/collection": {
         "statements": [
@@ -410,34 +483,6 @@ PULP_ANSIBLE_VIEWSETS = {
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": "has_model_or_obj_perms:ansible.manage_roles_collectionremote",
-            },
-        ]
-    },
-    "repositories/ansible/ansible/versions": {
-        "statements": [
-            {
-                "action": "list, retrieve",
-                "principal": "authenticated",
-                "effect": "allow",
-                "condition": "can_view_repo_content",
-            },
-            {
-                "action": "create",
-                "principal": "authenticated",
-                "effect": "allow",
-                "condition": "has_repository_model_or_obj_perms:ansible.add_ansiblerepository",
-            },
-            {
-                "action": ["rebuild_metadata", "repair"],
-                "principal": "authenticated",
-                "effect": "allow",
-                "condition": "has_repository_model_or_obj_perms:ansible.change_ansiblerepository",
-            },
-            {
-                "action": "destroy",
-                "principal": "authenticated",
-                "effect": "allow",
-                "condition": "has_repository_model_or_obj_perms:ansible.delete_ansiblerepository",
             },
         ]
     },

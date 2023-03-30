@@ -397,10 +397,9 @@ def delete_ansible_repository(user, password, expect_pass, extra):
 
 
 def view_ansible_repository_version(user, password, expect_pass, extra):
-    repo = _create_ansible_repo_common(ADMIN_USER, ADMIN_PASSWORD, True).json()
-
+    repo_href = extra["custom_repo"].get_repo()["pulp_href"]
     response = requests.get(
-        f"{SERVER}{repo['versions_href']}",
+        f"{SERVER}{repo_href}",
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 200, 403)
@@ -408,10 +407,10 @@ def view_ansible_repository_version(user, password, expect_pass, extra):
 
 # FIXME: pulp_1   | TypeError: rebuild_metadata() got an unexpected keyword argument 'repository_pk'
 def rebuild_metadata_ansible_repository_version(user, password, expect_pass, extra):
-    repo = _create_ansible_repo_common(ADMIN_USER, ADMIN_PASSWORD, True).json()
+    repo_href = extra["custom_repo"].get_repo()["pulp_href"]
 
     response = requests.post(
-        f"{SERVER}{repo['versions_href']}0/rebuild_metadata/",
+        f"{SERVER}{repo_href}0/rebuild_metadata/",
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 200, 403)

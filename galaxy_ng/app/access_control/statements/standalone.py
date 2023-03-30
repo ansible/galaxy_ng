@@ -11,65 +11,68 @@ _collection_statements = [
         "action": "list",
         "principal": "authenticated",
         "effect": "allow",
+        "condition": "v3_can_view_repo_content"
     },
     {
         "action": "list",
         "principal": "anonymous",
         "effect": "allow",
-        "condition": "unauthenticated_collection_access_enabled",
+        "condition": ["unauthenticated_collection_access_enabled", "v3_can_view_repo_content"],
     },
     {
         "action": "retrieve",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "can_view_repo_content",
+        "condition": "v3_can_view_repo_content",
     },
     {
         "action": "retrieve",
         "principal": "anonymous",
         "effect": "allow",
-        "condition": ["unauthenticated_collection_access_enabled", "can_view_repo_content"],
+        "condition": ["unauthenticated_collection_access_enabled", "v3_can_view_repo_content"],
     },
     {
         "action": "destroy",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": ["has_model_perms:ansible.delete_collection", "can_view_repo_content"],
+        "condition": ["has_model_perms:ansible.delete_collection", "v3_can_view_repo_content"],
     },
     {
         "action": ["download"],
         "principal": 'authenticated',
         "effect": "allow",
+        "condition": "v3_can_view_repo_content"
     },
     {
         "action": ["download"],
         "principal": 'anonymous',
         "effect": "allow",
-        "condition": "unauthenticated_collection_download_enabled",
+        "condition": ["unauthenticated_collection_download_enabled", "v3_can_view_repo_content"],
     },
     {
         "action": "create",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "can_create_collection",
+        "condition": ["can_create_collection", "v3_can_view_repo_content"],
     },
     {
         "action": "update",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": ["can_update_collection", "can_view_repo_content"]
+        "condition": ["can_update_collection", "v3_can_view_repo_content"]
     },
     {
         "action": ["copy_content", "move_content"],
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:ansible.modify_ansible_repo_content"
+        "condition": [
+            "has_model_perms:ansible.modify_ansible_repo_content", "v3_can_view_repo_content"]
     },
     {
         "action": "sign",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "can_sign_collections"
+        "condition": ["can_sign_collections", "v3_can_view_repo_content"]
     }
 ]
 

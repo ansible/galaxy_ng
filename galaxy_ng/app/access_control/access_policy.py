@@ -213,7 +213,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
         return qs
 
     # Define global conditions here
-    def can_view_repo_content(self, request, view, action):
+    def v3_can_view_repo_content(self, request, view, action):
         """
         Check if the repo is private, only let users with view repository permissions
         view the collections here.
@@ -237,6 +237,37 @@ class AccessPolicyBase(AccessPolicyFromDB):
                 return request.user.has_perm(perm) or request.user.has_perm(perm, repo)
 
         return True
+
+    def has_ansible_repo_perms(self, request, view, action, permission):
+        """
+        Check if the user has model or object-level permissions
+        on the repository or associated repository.
+
+        View actions are only enforced when the repo is private.
+        """
+        if request.user.has_perm(permission):
+            return True
+
+        try:
+            obj = view.get_object()
+        except AssertionError:
+            obj = view.get_parent_object()
+
+        if isinstance(obj, ansible_models.AnsibleRepository):
+            repo = obj
+
+        else:
+            # user can't have object permission to not existing repository
+            if obj.repository is None:
+                return False
+
+            repo = obj.repository.cast()
+
+        if permission == "ansible.view_ansiblerepository":
+            if not repo.private:
+                return True
+
+        return request.user.has_perm(permission, repo)
 
     def _get_rh_identity(self, request):
         if not isinstance(request.auth, dict):
@@ -359,25 +390,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
             obj = obj._meta.concrete_model.objects.get(pk=obj.pk)
 
         return request.user.has_perm(permission, obj)
-
-    def has_distribution_repo_perms(self, request, view, action, permission):
-        """
-        Check if the user has model or object-level permissions
-        on the distribution associated with ansible repository.
-        """
-        if request.user.has_perm(permission):
-            return True
-
-        if "pk" in view.kwargs:
-            obj = view.get_object()
-
-            # user can't have object permission to not existing repository
-            if obj.repository is None:
-                return False
-
-            return request.user.has_perm(permission, obj.repository.cast())
-
-        return False
 
     def signatures_not_required_for_repo(self, request, view, action):
         """
