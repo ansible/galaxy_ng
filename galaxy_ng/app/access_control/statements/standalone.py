@@ -141,13 +141,12 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "can_view_repo_content"
         },
         {
             "action": ["list", "retrieve"],
             "principal": "anonymous",
             "effect": "allow",
-            "condition": ["unauthenticated_collection_access_enabled", "can_view_repo_content"]
+            "condition": ["unauthenticated_collection_access_enabled"]
         },
         {
             "action": "destroy",
@@ -159,13 +158,13 @@ STANDALONE_STATEMENTS = {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_perms:galaxy.add_namespace", "can_view_repo_content"]
+            "condition": "has_model_perms:galaxy.add_namespace"
         },
         {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ["has_model_or_obj_perms:galaxy.change_namespace", "can_view_repo_content"]
+            "condition": "has_model_or_obj_perms:galaxy.change_namespace"
         },
     ],
     'CollectionRemoteViewSet': [
