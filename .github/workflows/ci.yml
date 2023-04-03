@@ -9,7 +9,6 @@
 name: Galaxy CI
 on: {pull_request: {branches: ['**']}, push: {branches: ['**']}}
 jobs:
-
   check_commit:
 
     runs-on: ubuntu-latest
@@ -31,7 +30,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
           GITHUB_PR_COMMITS_URL: ${{ github.event.pull_request.commits_url }}
           START_COMMIT: ${{ github.event.before }}
           END_COMMIT: ${{ github.event.after }}
@@ -55,19 +53,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # by default, it uses a depth of 1
-          # this fetches all history so that we can read each commit
-          fetch-depth: 0
-
+          fetch-depth: 1
       - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
-
-        # lint_requirements contains tools needed for flake8, etc.
+      # lint_requirements contains tools needed for flake8, etc.
       - name: Install requirements
         run: pip3 install -r lint_requirements.txt
-
-      
 
       
 
@@ -85,8 +77,6 @@ jobs:
 
       - name: Check for gettext problems
         run: sh .ci/scripts/check_gettext.sh
-
-      
 
   test:
     runs-on: ubuntu-latest
@@ -107,9 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # by default, it uses a depth of 1
-          # this fetches all history so that we can read each commit
-          fetch-depth: 0
+          fetch-depth: 1
 
       - uses: actions/setup-python@v3
         with:
@@ -127,7 +115,6 @@ jobs:
           echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
 
       - name: Before Install
-        
         run: .github/workflows/scripts/before_install.sh
         shell: bash
         env:
@@ -140,10 +127,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
 
       - name: Install
-        
         run: .github/workflows/scripts/install.sh
         shell: bash
         env:
@@ -156,15 +141,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
-
-      - name: Install Python client
-        
-        run: .github/workflows/scripts/install_python_client.sh
-        shell: bash
 
       - name: Before Script
-        
         run: .github/workflows/scripts/before_script.sh
         shell: bash
         env:
@@ -177,7 +155,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
@@ -187,7 +164,6 @@ jobs:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
 
       - name: Script
-        
         run: .github/workflows/scripts/script.sh
         shell: bash
         env:
@@ -200,7 +176,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          LOCK_REQUIREMENTS: 0
 
       - name: Extract Deprecations from Logs
         id: deprecations
