@@ -136,7 +136,7 @@ et-xmlfile==1.1.0
     # via openpyxl
 filelock==3.10.0
     # via ansible-lint
-flake8==3.9.2
+flake8==6.0.0
     # via galaxy-importer
 frozenlist==1.3.3
     # via
@@ -144,7 +144,7 @@ frozenlist==1.3.3
     #   aiosignal
 future==0.18.3
     # via pyjwkest
-galaxy-importer==0.4.6
+galaxy-importer==0.4.7
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -180,7 +180,7 @@ markupsafe==2.1.2
     # via jinja2
 marshmallow==3.19.0
     # via django-automated-logging
-mccabe==0.6.1
+mccabe==0.7.0
     # via flake8
 mdurl==0.1.2
     # via markdown-it-py
@@ -247,13 +247,13 @@ pyasn1-modules==0.2.8
     # via python-ldap
 pycares==4.3.0
     # via aiodns
-pycodestyle==2.7.0
+pycodestyle==2.10.0
     # via flake8
 pycparser==2.21
     # via cffi
 pycryptodomex==3.17
     # via pyjwkest
-pyflakes==2.3.1
+pyflakes==3.0.1
     # via flake8
 pygments==2.14.0
     # via rich
