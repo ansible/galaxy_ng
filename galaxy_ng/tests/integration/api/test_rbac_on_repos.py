@@ -8,7 +8,7 @@ from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_gro
 
 from galaxy_ng.tests.integration.utils.tools import generate_random_string
 from galaxykit.collections import sign_collection
-from galaxykit.remotes import create_remote, view_remotes, update_remote, delete_remote
+from galaxykit.remotes import create_remote, view_remotes, update_remote, delete_remote, add_permissions_to_remote
 from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository, \
     copy_content_between_repos, move_content_between_repos
 from galaxykit.utils import GalaxyClientError, wait_for_task
@@ -524,7 +524,7 @@ class TestRBACRepos:
         delete_remote(gc_user, test_remote_name)
 
     @pytest.mark.standalone_only
-    @pytest.mark.this
+    # @pytest.mark.this
     def test_delete_remote_missing_role(self, galaxy_client):
         """
         Verifies
@@ -541,3 +541,38 @@ class TestRBACRepos:
         with pytest.raises(GalaxyClientError) as ctx:
             delete_remote(gc_user, test_remote_name)
         assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    # @pytest.mark.this
+    def test_manage_roles_remotes_missing_role(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
+        user, group = add_new_user_to_new_group(gc_admin)
+
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            add_permissions_to_remote(gc_user, test_remote_name, "role_name", [])
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    @pytest.mark.this
+    def test_manage_roles_remotes(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
+        user, group = add_new_user_to_new_group(gc_admin)
+
+        permissions = ["ansible.view_collectionremote", "ansible.manage_roles_collectionremote"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+
+        gc_user = galaxy_client(user)
+        add_permissions_to_remote(gc_user, test_remote_name, "galaxy.collection_remote_owner", [group["name"]])
