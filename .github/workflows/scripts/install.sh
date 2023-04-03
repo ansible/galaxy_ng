@@ -18,82 +18,38 @@ source .github/workflows/scripts/utils.sh
 export PULP_API_ROOT="/api/galaxy/pulp/"
 
 if [[ "$TEST" = "docs" || "$TEST" = "publish" ]]; then
+  cd ..
+  git clone https://github.com/pulp/pulpcore.git
+  cd -
   pip install -r ../pulpcore/doc_requirements.txt
   pip install -r doc_requirements.txt
 fi
 
 cd .ci/ansible/
 
-TAG=ci_build
-if [ -e $REPO_ROOT/../pulp_ansible ]; then
-  PULP_ANSIBLE=./pulp_ansible
-else
-  PULP_ANSIBLE=git+https://github.com/pulp/pulp_ansible.git@main
-fi
-if [ -e $REPO_ROOT/../pulp_container ]; then
-  PULP_CONTAINER=./pulp_container
-else
-  PULP_CONTAINER=git+https://github.com/pulp/pulp_container.git@2.14.3
-fi
-if [ -e $REPO_ROOT/../galaxy-importer ]; then
-  GALAXY_IMPORTER=./galaxy-importer
-else
-  GALAXY_IMPORTER=git+https://github.com/ansible/galaxy-importer.git@v0.4.6
-fi
-PULPCORE=./pulpcore
-if [[ "$TEST" == "plugin-from-pypi" ]]; then
-  PLUGIN_NAME=galaxy_ng
-elif [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
+if [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
   PLUGIN_NAME=./galaxy_ng/dist/galaxy_ng-$PLUGIN_VERSION-py3-none-any.whl
 else
   PLUGIN_NAME=./galaxy_ng
 fi
-if [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
-  # Install the plugin only and use published PyPI packages for the rest
-  # Quoting ${TAG} ensures Ansible casts the tag as a string.
-  cat >> vars/main.yaml << VARSYAML
+cat >> vars/main.yaml << VARSYAML
 image:
   name: pulp
-  tag: "${TAG}"
-plugins:
-  - name: pulpcore
-    source: pulpcore
-  - name: galaxy_ng
-    source:  "${PLUGIN_NAME}"
-  - name: pulp_ansible
-    source: pulp_ansible
-  - name: pulp_container
-    source: pulp_container
-  - name: galaxy-importer
-    source: galaxy-importer
-  - name: pulp-smash
-    source: ./pulp-smash
-VARSYAML
-else
-  cat >> vars/main.yaml << VARSYAML
-image:
-  name: pulp
-  tag: "${TAG}"
+  tag: "ci_build"
 plugins:
   - name: galaxy_ng
     source: "${PLUGIN_NAME}"
-  - name: pulp_ansible
-    source: $PULP_ANSIBLE
-  - name: pulp_container
-    source: $PULP_CONTAINER
-  - name: galaxy-importer
-    source: $GALAXY_IMPORTER
-  - name: pulpcore
-    source: "${PULPCORE}"
-  - name: pulp-smash
-    source: ./pulp-smash
+VARSYAML
+if [[ -f ../../ci_requirements.txt ]]; then
+  cat >> vars/main.yaml << VARSYAML
+    ci_requirements: true
 VARSYAML
 fi
 
 cat >> vars/main.yaml << VARSYAML
 services:
   - name: pulp
-    image: "pulp:${TAG}"
+    image: "pulp:ci_build"
     volumes:
       - ./settings:/etc/pulp
       - ./ssh:/keys/
@@ -152,6 +108,9 @@ if [ "${PULP_API_ROOT:-}" ]; then
   sed -i -e '$a api_root: "'"$PULP_API_ROOT"'"' vars/main.yaml
 fi
 
+pulp config create --base-url https://pulp --api-root "$PULP_API_ROOT"
+
+
 ansible-playbook build_container.yaml
 ansible-playbook start_container.yaml
 
@@ -159,8 +118,8 @@ ansible-playbook start_container.yaml
 # files will likely be modified on the host by post/pre scripts.
 chmod 777 ~/.config/pulp_smash/
 chmod 666 ~/.config/pulp_smash/settings.json
-sudo chown -R 700:700 ~runner/.config
 
+sudo chown -R 700:700 ~/.config
 echo ::group::SSL
 # Copy pulp CA
 sudo docker cp pulp:/etc/pulp/certs/pulp_webserver.crt /usr/local/share/ca-certificates/pulp_webserver.crt

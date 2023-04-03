@@ -1,11 +1,11 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-191-g8c3448a
+# generated with plugin_template@2021.08.26-208-g15b1f3d
 
 additional_repos:
 - bindings: true
-  branch: main
+  branch: 0.17.0
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -16,33 +16,26 @@ additional_repos:
   branch: v0.4.6
   name: galaxy-importer
   org: ansible
-aiohttp_fixtures_origin: 172.18.0.1
 api_root: /api/galaxy/pulp/
 black: false
 check_commit_message: false
 check_gettext: true
 check_manifest: true
-check_openapi_schema: true
 check_stray_pulpcore_imports: true
-cherry_pick_automation: false
 ci_env:
   GITHUB_USER: ${{ github.event.pull_request.user.login }}
-
-  # TODO: disable this when we go back to the stable branch 
-  LOCK_REQUIREMENTS: 0
 ci_trigger: '{pull_request: {branches: [''**'']}, push: {branches: [''**'']}}'
 ci_update_branches: []
+cli_package: pulp-cli
+cli_repo: https://github.com/pulp/pulp-cli.git
 core_import_allowed:
 - pulpcore.app.*viewsets
 - pulpcore\.app.*admin
 - ProgressReportSerializer
 - pulpcore.app.*tasks
 - pulpcore.openapi.*
-coverage: false
 deploy_client_to_pypi: false
 deploy_client_to_rubygems: false
-deploy_daily_client_to_pypi: false
-deploy_daily_client_to_rubygems: false
 deploy_to_pypi: false
 disabled_redis_runners: []
 docker_fixtures: false
@@ -84,39 +77,28 @@ pulp_settings_azure: null
 pulp_settings_gcp: null
 pulp_settings_s3: null
 pulp_settings_stream: null
-pulpcore_branch: 3.23
-pulpcore_pip_version_specifier: null
-pulpcore_revision: null
 pulpprojectdotorg_key_id: null
 pydocstyle: true
 pypi_username: null
 python_version: '3.8'
-redmine_project: null
 release_email: ansible-infra@redhat.com
 release_user: ansible
 run_pulpcore_tests_for_plugins: false
 single_commit_check: false
-stable_branch: stable
 stalebot: true
 stalebot_days_until_close: 30
 stalebot_days_until_stale: 90
 stalebot_limit_to_pulls: true
 sync_ci: false
-tasking_allow_async_unsafe: true
 test_azure: true
-test_bindings: false
 test_cli: false
 test_deprecations: false
 test_gcp: false
 test_lowerbounds: false
 test_performance: false
-test_released_plugin_with_next_pulpcore_release: false
 test_reroute: false
 test_s3: true
 test_stream: false
-travis_addtl_services: []
-travis_notifications: null
 update_github: false
-upgrade_range: []
 use_issue_template: false
 

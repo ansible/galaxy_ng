@@ -8,16 +8,6 @@
 from packaging.requirements import Requirement
 
 
-# We install these from source, but it would be really handy if we could test pulpcore
-# compatibility that way too.
-EXCEPTIONS = [
-    "pulpcore",
-    "pulp_ansible".replace("-", "_"),
-    "pulp_container".replace("-", "_"),
-    "galaxy-importer".replace("-", "_"),
-]
-
-
 def main():
     """Calculate the lower bound of dependencies where possible."""
     with open("requirements.txt") as req_file:
@@ -27,16 +17,17 @@ def main():
             except ValueError:
                 print(line.strip())
             else:
-                if requirement.name.replace("-", "_") in EXCEPTIONS:
-                    print(line.strip())
+                for spec in requirement.specifier:
+                    if spec.operator == ">=":
+                        if requirement.name == "pulpcore":
+                            operator = "~="
+                        else:
+                            operator = "=="
+                        min_version = str(spec)[2:]
+                        print(f"{requirement.name}{operator}{min_version}")
+                        break
                 else:
-                    for spec in requirement.specifier:
-                        if spec.operator == ">=":
-                            min_version = str(spec)[2:]
-                            print(f"{requirement.name}=={min_version}")
-                            break
-                    else:
-                        print(line.strip())
+                    print(line.strip())
 
 
 if __name__ == "__main__":
