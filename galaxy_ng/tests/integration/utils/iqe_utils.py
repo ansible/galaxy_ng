@@ -88,8 +88,8 @@ client_cache = {}
 
 
 class GalaxyKitClient:
-    def __init__(self, ansible_config):
-        self.config = ansible_config
+    def __init__(self, ansible_config, custom_config=None):
+        self.config = ansible_config if not custom_config else custom_config
 
     def gen_authorized_client(
         self,
@@ -99,9 +99,14 @@ class GalaxyKitClient:
         *,
         ignore_cache=False,
         token=None,
-        remote=False
+        remote=False,
+        basic_token=False
     ):
-        config = self.config()
+        # config = self.config()
+        try:
+            config = self.config()
+        except TypeError:
+            config = self.config
         # role can be either be the name of a user (like `ansible_insights`)
         # or a dict containing a username and password:
         # {"username": "autohubtest2", "password": "p@ssword!"}
@@ -150,14 +155,14 @@ class GalaxyKitClient:
                     }
                 else:
                     token = get_standalone_token(
-                        role, url, ignore_cache=ignore_cache, ssl_verify=ssl_verify
+                        role, url, ignore_cache=ignore_cache, ssl_verify=ssl_verify, basic_token=basic_token
                     )  # ignore_cache=True
                     role.update(token=token)
                     auth = role
 
             container_engine = config.get("container_engine")
             container_registry = config.get("container_registry")
-
+            token_type = None if not basic_token else "Basic"
             g_client = GalaxyClient(
                 url,
                 auth=auth,
@@ -165,6 +170,7 @@ class GalaxyKitClient:
                 container_registry=container_registry,
                 container_tls_verify=ssl_verify,
                 https_verify=ssl_verify,
+                token_type=token_type
             )
             if ignore_cache:
                 return g_client
@@ -176,7 +182,7 @@ class GalaxyKitClient:
 token_cache = {}
 
 
-def get_standalone_token(user, server, *, ignore_cache=False, ssl_verify=True):
+def get_standalone_token(user, server, *, ignore_cache=False, ssl_verify=True, basic_token=False):
     cache_key = f"{server}::{user['username']}"
 
     if cache_key not in token_cache or ignore_cache:
@@ -194,7 +200,7 @@ def get_standalone_token(user, server, *, ignore_cache=False, ssl_verify=True):
                 token_cache[cache_key] = GalaxyToken(token_value).config["token"]
         else:
             token = BasicAuthToken(username, password)
-            if is_ephemeral_env():
+            if is_ephemeral_env() or basic_token:
                 token_cache[cache_key] = token.get()
             else:
                 with patch("ansible.context.CLIARGS", {"ignore_certs": True}):
