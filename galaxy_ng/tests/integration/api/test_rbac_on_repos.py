@@ -8,7 +8,7 @@ from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_gro
 
 from galaxy_ng.tests.integration.utils.tools import generate_random_string
 from galaxykit.collections import sign_collection
-from galaxykit.remotes import create_remote
+from galaxykit.remotes import create_remote, view_remotes, update_remote, delete_remote
 from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository, \
     copy_content_between_repos, move_content_between_repos
 from galaxykit.utils import GalaxyClientError, wait_for_task
@@ -122,7 +122,7 @@ class TestRBACRepos:
         test_repo_name = f"repo-test-{generate_random_string()}"
         gc_admin = galaxy_client("iqe_admin")
         user, group = add_new_user_to_new_group(gc_admin)
-        permissions = ["ansible.change_ansiblerepository", "galaxy.upload_to_namespace"]
+        permissions = ["galaxy.upload_to_namespace", "ansible.modify_ansible_repo_content"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
         gc_admin.create_role(role_name, "any_description", permissions)
         gc_admin.add_role_to_group(role_name, group["id"])
@@ -133,7 +133,7 @@ class TestRBACRepos:
                                        "0.0.1")  # to staging (upload_to_namespace)
         collection_resp = gc_user.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
         content_units = [collection_resp["results"][0]["pulp_href"]]
-        add_content_units(gc_user, content_units, repo_pulp_href)  # (change_ansiblerepository)
+        add_content_units(gc_user, content_units, repo_pulp_href)  # (modify_ansible_repo_content)
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
@@ -366,7 +366,6 @@ class TestRBACRepos:
 
         copy_content_between_repos(gc_user, content_units, repo_pulp_href_1, [repo_pulp_href_2])
 
-    # @pytest.mark.this
     @pytest.mark.standalone_only
     def test_copy_missing_rbac_perm(self, galaxy_client):
         """
@@ -394,19 +393,151 @@ class TestRBACRepos:
             copy_content_between_repos(gc_user, content_units, repo_pulp_href_1, [repo_pulp_href_2])
         assert ctx.value.response.status_code == 403
 
-    @pytest.mark.this
     @pytest.mark.standalone_only
+    # @pytest.mark.this
     def test_remote(self, galaxy_client):
         """
         Verifies
         """
         gc_admin = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
-        respuesta = create_remote(gc_admin, test_remote_name, "https://www.pepe.com/")
-        remote_pulp_href = respuesta["pulp_href"]
+        r = create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
+        remote_pulp_href = r["pulp_href"]
         test_repo_name_1 = f"repo-test-{generate_random_string()}"
         ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
         repo_res = create_repository(gc_admin, test_repo_name_1, remote=remote_pulp_href)
         dist_data = {"base_path": test_repo_name_1, "name": test_repo_name_1, "repository": repo_res['pulp_href']}
         task_resp = gc_admin.post(ansible_distribution_path, dist_data)
         wait_for_task(gc_admin, task_resp)
+
+    @pytest.mark.standalone_only
+    # @pytest.mark.this
+    def test_add_remote_missing_role(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        gc_user = galaxy_client(user)
+
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        with pytest.raises(GalaxyClientError) as ctx:
+            create_remote(gc_user, test_remote_name, gc_admin.galaxy_root)
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    # @pytest.mark.this
+    def test_add_remote_role(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        gc_user = galaxy_client(user)
+
+        permissions = ["ansible.add_collectionremote"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        create_remote(gc_user, test_remote_name, gc_admin.galaxy_root)
+
+    @pytest.mark.standalone_only
+    def test_view_remote_role_missing_role(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            view_remotes(gc_user)
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    # @pytest.mark.this
+    def test_view_remote_role(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.view_collectionremote"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        gc_user = galaxy_client(user)
+        view_remotes(gc_user)
+
+    @pytest.mark.standalone_only
+    # @pytest.mark.this
+    def test_update_remote_missing_role(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.view_collectionremote"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            update_remote(gc_user, test_remote_name, "new_url", {})
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    # @pytest.mark.this
+    def test_update_remote(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.view_collectionremote", "ansible.change_collectionremote"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        gc_user = galaxy_client(user)
+        update_remote(gc_user, test_remote_name, "http://new_url/", {})
+
+    @pytest.mark.standalone_only
+    # @pytest.mark.this
+    def test_delete_remote(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.view_collectionremote", "ansible.delete_collectionremote"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        gc_user = galaxy_client(user)
+        delete_remote(gc_user, test_remote_name)
+
+    @pytest.mark.standalone_only
+    @pytest.mark.this
+    def test_delete_remote_missing_role(self, galaxy_client):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        test_remote_name = f"remote-test-{generate_random_string()}"
+        create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.view_collectionremote"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            delete_remote(gc_user, test_remote_name)
+        assert ctx.value.response.status_code == 403
