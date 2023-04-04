@@ -13,6 +13,36 @@ Changelog
 
 .. towncrier release notes start
 
+4.6.4 (2023-04-04)
+==================
+
+Features
+--------
+
+- Add version_range parameter to the _ui/v1/collection-versions/ endpoint.
+  `AAH-2018 <https://issues.redhat.com/browse/AAH-2018>`_
+- Add GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS which configures LDAP to only add users into groups that already exist in the system.
+  `AAH-2112 <https://issues.redhat.com/browse/AAH-2112>`_
+
+
+Bugfixes
+--------
+
+- Filtering deprecated EE from registry sync
+  `AAH-1958 <https://issues.redhat.com/browse/AAH-1958>`_
+- Allow ldap.OPT_REFERRALS to be set
+  `AAH-2150 <https://issues.redhat.com/browse/AAH-2150>`_
+
+
+Misc
+----
+
+- `AAH-2029 <https://issues.redhat.com/browse/AAH-2029>`_, `AAH-2137 <https://issues.redhat.com/browse/AAH-2137>`_
+
+
+----
+
+
 4.6.3 (2022-12-05)
 ==================
 
