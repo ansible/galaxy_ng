@@ -32,7 +32,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
-    data.update(configure_display_repositories(settings))
 
     # This should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
@@ -541,15 +540,6 @@ def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
     data = {}
     legacy_roles = settings.get("GALAXY_ENABLE_LEGACY_ROLES", False)
     data["GALAXY_FEATURE_FLAGS__legacy_roles"] = legacy_roles
-    return data
-
-
-def configure_display_repositories(settings: Dynaconf) -> Dict[str, Any]:
-    """Set the feature flag for showing or not showing repos in the UI"""
-    data = {}
-    display_repos = settings.get("GALAXY_DISPLAY_REPOSITORIES", True)
-    data["GALAXY_DISPLAY_REPOSITORIES"] = display_repos
-    data["GALAXY_FEATURE_FLAGS__display_repositories"] = display_repos
     return data
 
 
