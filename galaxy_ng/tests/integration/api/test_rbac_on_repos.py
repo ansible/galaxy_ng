@@ -10,7 +10,7 @@ from galaxy_ng.tests.integration.utils.tools import generate_random_string
 from galaxykit.collections import sign_collection
 from galaxykit.remotes import create_remote, view_remotes, update_remote, delete_remote, add_permissions_to_remote
 from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository, \
-    copy_content_between_repos, move_content_between_repos
+    copy_content_between_repos, move_content_between_repos, add_permissions_to_repository
 from galaxykit.utils import GalaxyClientError, wait_for_task
 
 logger = logging.getLogger(__name__)
@@ -113,7 +113,6 @@ class TestRBACRepos:
             add_content_units(gc_user, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
         assert ctx.value.response.status_code == 403
 
-    @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_role_upload_to_repo(self, galaxy_client):
         """
@@ -559,7 +558,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.standalone_only
-    @pytest.mark.this
+    # @pytest.mark.this
     def test_manage_roles_remotes(self, galaxy_client):
         """
         Verifies
@@ -576,3 +575,190 @@ class TestRBACRepos:
 
         gc_user = galaxy_client(user)
         add_permissions_to_remote(gc_user, test_remote_name, "galaxy.collection_remote_owner", [group["name"]])
+
+######################################
+    @pytest.mark.standalone_only
+    def test_role_local_upload_to_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.modify_ansible_repo_content"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
+        namespace_name = create_test_namespace(gc_admin)
+        add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name,
+                                       "0.0.1")
+        gc_user = galaxy_client(user)
+        collection_resp = gc_user.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc_user, content_units, repo_pulp_href)  # (modify_ansible_repo_content)
+
+    @pytest.mark.standalone_only
+    def test_role_missing_local_upload_to_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.delete_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
+        namespace_name = create_test_namespace(gc_admin)
+        add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name,
+                                       "0.0.1")
+        gc_user = galaxy_client(user)
+        collection_resp = gc_user.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        with pytest.raises(GalaxyClientError) as ctx:
+            add_content_units(gc_user, content_units, repo_pulp_href)  # (modify_ansible_repo_content)
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    def test_role_local_update_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.change_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
+        add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
+        gc_user = galaxy_client(user)
+        updated_body = {"name": test_repo_name, "description": "updated description"}
+        put_update_repository(gc_user, repo_pulp_href.split("/")[-2], updated_body)
+
+    @pytest.mark.standalone_only
+    def test_role_local_missing_update_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.delete_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
+        add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
+        gc_user = galaxy_client(user)
+        updated_body = {"name": test_repo_name, "description": "updated description"}
+        with pytest.raises(GalaxyClientError) as ctx:
+            put_update_repository(gc_user, repo_pulp_href.split("/")[-2], updated_body)
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    def test_role_local_delete_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.delete_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        create_repo_and_dist(gc_admin, test_repo_name)
+        add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
+        gc_user = galaxy_client(user)
+        # with pytest.raises(GalaxyClientError) as ctx:
+        delete_repository(gc_user, test_repo_name)
+        # assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    def test_role_local_missing_delete_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.change_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        create_repo_and_dist(gc_admin, test_repo_name)
+        add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            delete_repository(gc_user, test_repo_name)
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    def test_role_local_permissions_roles_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.manage_roles_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        create_repo_and_dist(gc_admin, test_repo_name)
+        add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
+        gc_user = galaxy_client(user)
+        add_permissions_to_repository(gc_user, test_repo_name, role_name, ["admin_staff"])
+
+    @pytest.mark.standalone_only
+    def test_role_local_missing_permissions_roles_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.delete_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        create_repo_and_dist(gc_admin, test_repo_name)
+        add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            add_permissions_to_repository(gc_user, test_repo_name, role_name, ["admin_staff"])
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    @pytest.mark.this
+    def test_role_global_permissions_roles_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.manage_roles_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        create_repo_and_dist(gc_admin, test_repo_name)
+        gc_user = galaxy_client(user)
+        add_permissions_to_repository(gc_user, test_repo_name, role_name, ["admin_staff"])
+
+    @pytest.mark.standalone_only
+    @pytest.mark.this
+    def test_role_global_missing_permissions_roles_repo(self, galaxy_client):
+        """
+        Verifies that a user with permissions can upload to repositories
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc_admin = galaxy_client("iqe_admin")
+        user, group = add_new_user_to_new_group(gc_admin)
+        permissions = ["ansible.delete_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc_admin.create_role(role_name, "any_description", permissions)
+        gc_admin.add_role_to_group(role_name, group["id"])
+        create_repo_and_dist(gc_admin, test_repo_name)
+        gc_user = galaxy_client(user)
+        with pytest.raises(GalaxyClientError) as ctx:
+            add_permissions_to_repository(gc_user, test_repo_name, role_name, ["admin_staff"])
+        assert ctx.value.response.status_code == 403

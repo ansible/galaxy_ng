@@ -2,7 +2,7 @@ import pytest
 import logging
 
 from galaxy_ng.tests.integration.utils import uuid4
-from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact
+from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact, add_new_user_to_new_group
 from orionutils.generator import build_collection
 
 from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version, generate_random_string
@@ -22,10 +22,11 @@ def repo_exists(name, repo_list):
     return False
 
 
-def create_repo_and_dist(client, repo_name):
+def create_repo_and_dist(client, repo_name, hide_from_search=False, private=False, pipeline=None):
     ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
     logger.debug(f"creating repo {repo_name}")
-    repo_res = create_repository(client, repo_name)
+    repo_res = create_repository(client, repo_name, hide_from_search=hide_from_search, private=private,
+                                 pipeline=pipeline)
     logger.debug(f"Repository creation response {repo_res}")
     dist_data = {"base_path": repo_name, "name": repo_name, "repository": repo_res['pulp_href']}
     logger.debug(f"creating dist with this data {dist_data}")
@@ -100,7 +101,7 @@ def verify_repo_data(expected_repos, actual_repos):
 @pytest.mark.min_hub_version("4.6dev")  # set correct min hub version
 class TestRM:
 
-    @pytest.mark.this
+    @pytest.mark.rm
     @pytest.mark.standalone_only
     def test_search_same_collection_diff_versions_same_repo(self, galaxy_client):
         """
@@ -330,7 +331,7 @@ class TestRM:
 
     @pytest.mark.rm
     @pytest.mark.standalone_only
-    def test_multiple_searchs(self, galaxy_client):
+    def test_multiple_searches(self, galaxy_client):
         """
         Verifies WIP
         """
@@ -735,7 +736,157 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 2
 
-    # hide from searching field ?
+    # hide from searching field ? only testable in UI
     # pipeline: approved no one can upload
     # pipeline: staging, those with rbac permissions can upload
     # both are hidden from search
+
+    @pytest.mark.standalone_only
+    def test_delete_this_pls(self, galaxy_client):
+        """
+        Verifies TO BE REMOVED
+        """
+        test_repo_name_1 = f"repo-test-1-{generate_random_string()}"
+        test_repo_name_2 = f"repo-test-2-{generate_random_string()}"
+        test_repo_name_3 = f"repo-test-3-{generate_random_string()}"
+
+        gc = galaxy_client("iqe_admin")
+        repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
+        repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
+        repo_pulp_href_3 = create_repo_and_dist(gc, test_repo_name_3)
+        namespace_name = create_test_namespace(gc)
+        key_1 = generate_random_string()
+        key_2 = generate_random_string()
+        key_3 = generate_random_string()
+
+        artifact_1v1 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.1", key_1)
+
+        collection_resp_1 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1v1.name}")
+
+        content_units_1 = [collection_resp_1["results"][0]["pulp_href"]]
+
+        add_content_units(gc, content_units_1, repo_pulp_href_1)
+        add_content_units(gc, content_units_1, repo_pulp_href_2)
+        add_content_units(gc, content_units_1, repo_pulp_href_3)
+
+    @pytest.mark.standalone_only
+    def test_private_repo(self, galaxy_client):
+        """
+        Verifies
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("iqe_admin")
+
+        repo_pulp_href = create_repo_and_dist(gc, test_repo_name, private=True)
+        namespace_name = create_test_namespace(gc)
+        key = generate_random_string()
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"], collection_resp["results"][1]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
+
+        user, group = add_new_user_to_new_group(gc)
+        gc_user = galaxy_client(user)
+        # ansible.view_ansiblerepository views private repos too
+        matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
+        assert matches == 0
+
+    @pytest.mark.standalone_only
+    @pytest.mark.this
+    def test_any_user_can_see_non_private_repos(self, galaxy_client):
+        """
+        Verifies
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("iqe_admin")
+
+        repo_pulp_href = create_repo_and_dist(gc, test_repo_name, private=False)
+        namespace_name = create_test_namespace(gc)
+        key = generate_random_string()
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"], collection_resp["results"][1]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
+
+        user, group = add_new_user_to_new_group(gc)
+        gc_user = galaxy_client(user)
+        # ansible.view_ansiblerepository views private repos too
+        matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
+        assert matches == 2
+
+    @pytest.mark.standalone_only
+    def test_private_repo_with_perm(self, galaxy_client):
+        """
+        Verifies
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("iqe_admin")
+
+        repo_pulp_href = create_repo_and_dist(gc, test_repo_name, private=True)
+        namespace_name = create_test_namespace(gc)
+        key = generate_random_string()
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"], collection_resp["results"][1]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
+
+        user, group = add_new_user_to_new_group(gc)
+        permissions = ["ansible.view_ansiblerepository"]
+        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        gc.create_role(role_name, "any_description", permissions)
+        gc.add_role_to_group(role_name, group["id"])
+
+        gc_user = galaxy_client(user)
+        # ansible.view_ansiblerepository views private repos too
+        matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
+        assert matches == 2
+
+    # @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_pipeline_staging(self, galaxy_client):
+        """
+        Verifies TODO
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("iqe_admin")
+
+        repo_pulp_href = create_repo_and_dist(gc, test_repo_name, pipeline="staging")
+        namespace_name = create_test_namespace(gc)
+        key = generate_random_string()
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"], collection_resp["results"][1]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
+
+        matches, result = search_collection_endpoint(gc, repository_name=test_repo_name, name=artifact.name)
+
+    # @pytest.mark.this
+    @pytest.mark.standalone_only
+    def test_pipeline_approved(self, galaxy_client):
+        """
+        Verifies TODO
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("iqe_admin")
+
+        repo_pulp_href = create_repo_and_dist(gc, test_repo_name, pipeline="approved")
+        namespace_name = create_test_namespace(gc)
+        key = generate_random_string()
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
+        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
+
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"], collection_resp["results"][1]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
+
+        user, group = add_new_user_to_new_group(gc)
+        gc_user = galaxy_client(user)
+        matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
