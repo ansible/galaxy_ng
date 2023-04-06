@@ -44,12 +44,12 @@ def test_community_settings(ansible_config):
 
     assert resp['GALAXY_AUTH_LDAP_ENABLED'] is None
     assert resp['GALAXY_AUTO_SIGN_COLLECTIONS'] is False
-    assert resp['GALAXY_DISPLAY_REPOSITORIES'] is False
     assert resp['GALAXY_REQUIRE_CONTENT_APPROVAL'] is False
     assert resp['GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL'] is False
     assert resp['GALAXY_SIGNATURE_UPLOAD_ENABLED'] is False
     assert resp['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'] is True
     assert resp['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is True
+    assert resp['GALAXY_FEATURE_FLAGS']['display_repositories'] is False
     assert resp['GALAXY_FEATURE_FLAGS']['execution_environments'] is False
     assert resp['GALAXY_FEATURE_FLAGS']['legacy_roles'] is True
     assert resp['GALAXY_FEATURE_FLAGS']['ai_deny_index'] is True

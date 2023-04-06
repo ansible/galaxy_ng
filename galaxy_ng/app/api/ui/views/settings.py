@@ -11,7 +11,6 @@ class SettingsView(api_base.APIView):
     def get(self, request, *args, **kwargs):
         data = {}
         keyset = [
-            "GALAXY_DISPLAY_REPOSITORIES",
             "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS",
             "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD",
             "GALAXY_FEATURE_FLAGS",
