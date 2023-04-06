@@ -58,3 +58,7 @@ The same pattern can be used for the following feature flags:
     - boolean
     - Enables AI Deny Index endpoints and tells UI to display the Wisdom opt-out buttons
     - default: False
+- `display_repositories`
+    - boolean
+    - Signals the UI to show or not to show repository information.
+    - default: True
