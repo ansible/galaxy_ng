@@ -11,6 +11,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 from pulpcore.plugin.models.role import GroupRole, UserRole
+from pulpcore.plugin import models as core_models
 
 from pulp_ansible.app import models as ansible_models
 
@@ -435,6 +436,32 @@ class AccessPolicyBase(AccessPolicyFromDB):
                     "Signatures are required in order to add collections into any 'approved'"
                     "repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
                 )})
+
+        return True
+
+    def is_not_protected_base_path(self, request, view, action):
+        """
+        Prevent deleting any of the default distributions or repositories.
+        """
+        PROTECTED_BASE_PATHS = (
+            "rh-certified",
+            "validated",
+            "community",
+            "published",
+            "staging",
+            "rejected",
+        )
+
+        obj = view.get_object()
+        if isinstance(obj, core_models.Repository):
+            if ansible_models.AnsibleDistribution.objects.filter(
+                repository=obj,
+                base_path__in=PROTECTED_BASE_PATHS,
+            ).exists():
+                return False
+        elif isinstance(obj, core_models.Distribution):
+            if obj.base_path in PROTECTED_BASE_PATHS:
+                return False
 
         return True
 
