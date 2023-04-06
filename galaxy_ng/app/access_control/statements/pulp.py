@@ -395,11 +395,8 @@ PULP_ANSIBLE_VIEWSETS = {
             },
         ],
         "queryset_scoping": {
-            "function": "scope_by_view_repository_permissions",
-            "parameters": {
-                "is_generic": True,
-                "field_name": "repository"
-            },
+            "function": "scope_synclist_distributions",
+            "parameters": {},
         },
     },
     "repositories/ansible/ansible/versions": {
