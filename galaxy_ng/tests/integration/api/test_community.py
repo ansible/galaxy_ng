@@ -49,10 +49,29 @@ def test_community_settings(ansible_config):
     assert resp['GALAXY_SIGNATURE_UPLOAD_ENABLED'] is False
     assert resp['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'] is True
     assert resp['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is True
+    assert resp['GALAXY_FEATURE_FLAGS']['display_repositories'] is False
     assert resp['GALAXY_FEATURE_FLAGS']['execution_environments'] is False
     assert resp['GALAXY_FEATURE_FLAGS']['legacy_roles'] is True
     assert resp['GALAXY_FEATURE_FLAGS']['ai_deny_index'] is True
     assert resp['GALAXY_CONTAINER_SIGNING_SERVICE'] is None
+
+
+@pytest.mark.community_only
+def test_community_feature_flags(ansible_config):
+    """Tests feature flags are correct"""
+
+    config = ansible_config("anonymous_user")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=False
+    )
+
+    resp = api_client('/api/_ui/v1/feature-flags/', method='GET')
+    assert resp['ai_deny_index'] is True
+    assert resp['display_repositories'] is False
+    assert resp['execution_environments'] is False
+    assert resp['legacy_roles'] is True
 
 
 @pytest.mark.community_only

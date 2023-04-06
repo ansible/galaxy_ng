@@ -73,6 +73,7 @@ GALAXY_DEPLOYMENT_MODE = 'standalone'
 
 # Dictionary with True|False values for the application to turn on/off features
 GALAXY_FEATURE_FLAGS = {
+    'display_repositories': True,
     'execution_environments': True,  # False will make execution_environments endpoints 404
     'legacy_roles': False,
     'ai_deny_index': False,  # False will make _ui/v1/ai_deny_index/ to 404

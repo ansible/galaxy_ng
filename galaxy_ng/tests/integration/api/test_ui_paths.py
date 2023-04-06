@@ -310,6 +310,11 @@ def test_api_ui_v1_feature_flags(ansible_config):
         ds = resp.json()
         validate_json(instance=ds, schema=schema_featureflags)
 
+        assert ds['ai_deny_index'] is False
+        assert ds['display_repositories'] is True
+        assert ds['execution_environments'] is True
+        assert ds['legacy_roles'] is False
+
 
 # /api/automation-hub/_ui/v1/groups/
 @pytest.mark.standalone_only
