@@ -320,7 +320,10 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": "destroy",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_ansible_repo_perms:ansible.delete_ansiblerepository",
+                "condition": [
+                    "has_ansible_repo_perms:ansible.delete_ansiblerepository",
+                    "is_not_protected_base_path"
+                ],
             },
             {
                 "action": ["list_roles", "add_role", "remove_role"],
@@ -376,13 +379,19 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": ["update", "partial_update"],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_ansible_repo_perms:ansible.change_ansiblerepository",
+                "condition": [
+                    "has_ansible_repo_perms:ansible.change_ansiblerepository",
+                    "is_not_protected_base_path",
+                ],
             },
             {
                 "action": "destroy",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_ansible_repo_perms:ansible.delete_ansiblerepository",
+                "condition": [
+                    "has_ansible_repo_perms:ansible.delete_ansiblerepository",
+                    "is_not_protected_base_path"
+                ],
             },
         ],
         "queryset_scoping": {
