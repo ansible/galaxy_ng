@@ -54,8 +54,7 @@ def distro_factory(admin_client):
     return _distro_factory
 
 
-@pytest.mark.standalone_only
-@pytest.mark.private_repos
+@pytest.mark.all
 @pytest.mark.min_hub_version("4.7dev")
 def test_private_repositories(admin_client, basic_user_client, repo_factory):
     api_prefix = admin_client.config.get("api_prefix").rstrip("/")
@@ -80,8 +79,8 @@ def test_private_repositories(admin_client, basic_user_client, repo_factory):
     admin_client(f'{public_repo_resp["pulp_href"]}', method="DELETE")
 
 
-@pytest.mark.standalone_only
-@pytest.mark.private_repos
+
+@pytest.mark.all
 @pytest.mark.min_hub_version("4.7dev")
 def test_distributions_with_private_repositories(
     admin_client, basic_user_client, distro_factory, repo_factory

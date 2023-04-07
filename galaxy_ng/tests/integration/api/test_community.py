@@ -29,7 +29,7 @@ from ..schemas import (
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_community_settings(ansible_config):
     """Tests settings are correct"""
 
@@ -56,7 +56,7 @@ def test_community_settings(ansible_config):
     assert resp['GALAXY_CONTAINER_SIGNING_SERVICE'] is None
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_community_feature_flags(ansible_config):
     """Tests feature flags are correct"""
 
@@ -74,7 +74,7 @@ def test_community_feature_flags(ansible_config):
     assert resp['legacy_roles'] is True
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_me_anonymous(ansible_config):
     """Tests anonymous user is detected correctly"""
 
@@ -93,7 +93,7 @@ def test_me_anonymous(ansible_config):
     assert resp['is_superuser'] is False
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_me_social(ansible_config):
     """ Tests a social authed user can see their user info """
 
@@ -106,7 +106,7 @@ def test_me_social(ansible_config):
         assert uinfo['username'] == cfg.get('username')
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_social_redirect(ansible_config):
     """ Tests a social auth is redirected to / so the UI doesn't load some incorrect repo path."""
 
@@ -122,7 +122,7 @@ def test_social_redirect(ansible_config):
         assert client.last_response.headers['Location'] == '/'
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_me_social_with_precreated_user(ansible_config):
     """ Make sure social auth associates to the correct username """
 
@@ -147,7 +147,7 @@ def test_me_social_with_precreated_user(ansible_config):
         assert uinfo['username'] == cfg.get('username')
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_me_social_with_v1_synced_user(ansible_config):
     """ Make sure social auth associates to the correct username """
 
@@ -177,7 +177,7 @@ def test_me_social_with_v1_synced_user(ansible_config):
         assert uinfo['username'] == cfg.get('username')
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_social_auth_creates_group(ansible_config):
 
     cleanup_social_user('gh01', ansible_config)
@@ -189,7 +189,7 @@ def test_social_auth_creates_group(ansible_config):
         assert uinfo['groups'][0]['name'] == 'namespace:gh01'
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_social_auth_creates_v3_namespace(ansible_config):
 
     cleanup_social_user('gh01', ansible_config)
@@ -219,7 +219,7 @@ def test_social_auth_creates_v3_namespace(ansible_config):
         )
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_social_auth_creates_legacynamespace(ansible_config):
 
     cleanup_social_user('gh01', ansible_config)
@@ -235,7 +235,7 @@ def test_social_auth_creates_legacynamespace(ansible_config):
         assert result['results'][0]['summary_fields']['owners'][0]['username'] == 'gh01'
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_update_legacynamespace_owners(ansible_config):
 
     cleanup_social_user('gh01', ansible_config)
@@ -271,7 +271,7 @@ def test_update_legacynamespace_owners(ansible_config):
         assert uinfo2['username'] in owners2_usernames
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_list_collections_anonymous(ansible_config):
     """Tests whether collections can be browsed anonymously"""
 
@@ -286,7 +286,7 @@ def test_list_collections_anonymous(ansible_config):
     validate_json(instance=resp, schema=schema_objectlist)
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_list_collections_social(ansible_config):
     """ Tests a social authed user can see collections """
 
@@ -296,7 +296,7 @@ def test_list_collections_social(ansible_config):
         validate_json(instance=resp.json(), schema=schema_objectlist)
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_v1_sync_with_user_and_limit(ansible_config):
     """" Tests if v1 sync accepts a user&limit arg """
 
@@ -341,7 +341,7 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     cleanup_social_user(github_user, ansible_config)
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_v1_autocomplete_search(ansible_config):
     """" Tests if v1 sync accepts a user&limit arg """
 
@@ -386,7 +386,7 @@ def test_v1_autocomplete_search(ansible_config):
     cleanup_social_user(github_user2, ansible_config)
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_v1_role_pagination(ansible_config):
     """" Tests if v1 roles are auto-sorted by created """
 
@@ -450,7 +450,7 @@ def test_v1_role_pagination(ansible_config):
     clean_all_roles(ansible_config)
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_v1_role_tag_filter(ansible_config):
     """" Tests if v1 roles are auto-sorted by created """
 

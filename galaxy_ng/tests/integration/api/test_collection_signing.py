@@ -88,9 +88,7 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
     return resp
 
 
-@pytest.mark.collection_signing
-@pytest.mark.collection_move
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 def test_collection_auto_sign_on_approval(api_client, config, settings, flags, upload_artifact):
     """Test whether a collection is uploaded and automatically signed on approval
     when GALAXY_AUTO_SIGN_COLLECTIONS is set to true.
@@ -161,8 +159,7 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags, u
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
-@pytest.mark.collection_signing
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 @pytest.mark.parametrize(
     "sign_url",
     [
@@ -261,9 +258,7 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
-@pytest.mark.collection_signing
-@pytest.mark.collection_move
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 def test_collection_move_with_signatures(api_client, config, settings, flags, upload_artifact):
     """Test whether a collection can be moved from repo to repo with its
     signatures.
@@ -353,9 +348,7 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
-@pytest.mark.collection_signing
-@pytest.mark.collection_move
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.7dev")
 def test_copy_collection_without_signatures(api_client, config, settings, flags, upload_artifact):
     """Test whether a collection can be added to a second repo without its signatures."""
@@ -424,9 +417,7 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
     assert collections["community"][ckey]["sign_state"] == "signed"
 
 
-@pytest.mark.collection_signing
-@pytest.mark.collection_move
-@pytest.mark.standalone_only  # This test can't run on cloud yet
+@pytest.mark.private_hub
 @pytest.mark.parametrize(
     "require_auth",
     [
@@ -530,7 +521,7 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] is None
 
-
+@pytest.mark.private_hub
 def test_move_with_no_signing_service_not_superuser_signature_required(
     ansible_config,
     upload_artifact,
@@ -602,7 +593,7 @@ def test_move_with_no_signing_service_not_superuser_signature_required(
     wait_for_task(partner_eng_client, resp.json())
     assert partner_eng_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
-
+@pytest.mark.private_hub
 def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
@@ -683,6 +674,7 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     assert api_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
+@pytest.mark.private_hub
 def test_move_with_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when

@@ -28,7 +28,7 @@ def flags(ansible_config):
         False,
     ],
 )
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_client):
     can_sign = flags.get("container_signing")
     if not can_sign:

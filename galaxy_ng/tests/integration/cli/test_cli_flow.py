@@ -14,7 +14,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.cli
+@pytest.mark.all
 def test_publish_newer_version_collection(ansible_config, cleanup_collections, uncertifiedv2):
     """Test whether a newer version of collection can be installed after being published.
 
@@ -41,7 +41,7 @@ def test_publish_newer_version_collection(ansible_config, cleanup_collections, u
     assert ci.version != v2.version
 
 
-@pytest.mark.cli
+@pytest.mark.all
 def test_publish_newer_certified_collection_version(
     ansible_config,
     cleanup_collections,
@@ -68,7 +68,7 @@ def test_publish_newer_certified_collection_version(
     assert ci.version == v2.version
 
 
-@pytest.mark.cli
+@pytest.mark.all
 def test_publish_same_collection_version(ansible_config):
     """Test you cannot publish same collection version already published."""
 
@@ -87,7 +87,7 @@ def test_publish_same_collection_version(ansible_config):
     assert "already exists" in str(p.stderr)
 
 
-@pytest.mark.cli
+@pytest.mark.all
 def test_publish_and_install_by_self(ansible_config, published, cleanup_collections):
     """A publishing user has the permission to install an uncertified version of their
     own collection.
@@ -99,8 +99,7 @@ def test_publish_and_install_by_self(ansible_config, published, cleanup_collecti
     )
 
 
-@pytest.mark.cli
-@pytest.mark.cloud_only
+@pytest.mark.insights
 def test_publish_and_expect_uncertified_hidden(
     ansible_config,
     published,

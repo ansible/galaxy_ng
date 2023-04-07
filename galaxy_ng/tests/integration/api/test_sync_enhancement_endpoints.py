@@ -6,6 +6,7 @@ from ansible.galaxy.api import GalaxyError
 from ..utils import get_client
 
 
+@pytest.mark.all
 def test_pulp_sync_enhancement_endpoints(ansible_config):
     """Tests whether the landing page returns the expected fields and numbers."""
 

@@ -20,7 +20,7 @@ class DependencySpec:
     xfail = attr.ib(default=False)
 
 
-@pytest.mark.cli
+@pytest.mark.all
 # @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.parametrize(
     "params",

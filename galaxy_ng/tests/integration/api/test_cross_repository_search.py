@@ -2,6 +2,7 @@ import pytest
 from ..utils import get_client, SocialGithubClient
 
 
+@pytest.mark.all
 @pytest.mark.min_hub_version("4.7dev")
 def test_x_repo_search_acl_basic_user(ansible_config, uncertifiedv2, settings):
     """Check if admin and basic user can perform x-repo searches"""
@@ -42,7 +43,7 @@ def test_x_repo_search_acl_basic_user(ansible_config, uncertifiedv2, settings):
     assert resp['meta']['count'] == 2
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 @pytest.mark.min_hub_version("4.7dev")
 def test_x_repo_search_acl_anonymous_user(ansible_config, auto_approved_artifacts):
     """Check if anonymous users can perform x-repo searches"""
@@ -81,7 +82,7 @@ def test_x_repo_search_acl_anonymous_user(ansible_config, auto_approved_artifact
     assert resp['meta']['count'] == 2
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 @pytest.mark.min_hub_version("4.7dev")
 def test_x_repo_search_acl_social_user(ansible_config, auto_approved_artifacts):
     """Check if a social user can perform x-repo searches"""

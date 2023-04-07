@@ -16,7 +16,7 @@ REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n    ve
 
 # /api/automation-hub/content/community/v3/sync/config/
 # /api/automation-hub/content/community/v3/sync/
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_remote_sync(ansible_config):
 

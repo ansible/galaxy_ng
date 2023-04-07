@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 # TODO Refactor get_client to provide access to bearer token
-@pytest.mark.standalone_only
+@pytest.mark.all
 def test_download_artifact(ansible_config, upload_artifact):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
@@ -84,6 +84,7 @@ def test_download_artifact(ansible_config, upload_artifact):
 
 
 # TODO: make download logic more DRY in these tests
+@pytest.mark.all
 @pytest.mark.min_hub_version("4.6dev")
 def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
     config = ansible_config("partner_engineer")

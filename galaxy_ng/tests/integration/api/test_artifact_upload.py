@@ -49,6 +49,7 @@ def gen_name_for_invalid():
     return f"{USERNAME_PUBLISHER}-invalid{key}-1.0.0.tar.gz"
 
 
+@pytest.mark.all
 @pytest.mark.stage_health
 @pytest.mark.parametrize("use_distribution", [True, False])
 def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution):
@@ -96,6 +97,7 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
             assert resp["state"] == "completed"
 
 
+@pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.6dev")
 def test_validated_publish(ansible_config, artifact, upload_artifact):
     """
@@ -147,6 +149,7 @@ def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
 
 
 @pytest.mark.stage_health
+@pytest.mark.all
 def test_api_publish_invalid_tarball(ansible_config, artifact, upload_artifact):
     """Test error responses when uploading a file that is not a tarball."""
     config = ansible_config("basic_user")
@@ -161,6 +164,7 @@ def test_api_publish_invalid_tarball(ansible_config, artifact, upload_artifact):
     assert resp["state"] == "failed"
 
 
+@pytest.mark.all
 def test_api_publish_missing_filename(ansible_config, artifact, upload_artifact):
     """Test handling of uploads missing the filename parameter."""
     config = ansible_config("basic_user")
@@ -181,6 +185,7 @@ def test_api_publish_missing_filename(ansible_config, artifact, upload_artifact)
 
 @pytest.mark.importer
 @pytest.mark.stage_health
+@pytest.mark.all
 def test_api_publish_broken_manifest(ansible_config, artifact, upload_artifact):
     """Test handling of uploads missing the collection name parameter."""
     config = ansible_config("basic_user")
@@ -209,6 +214,7 @@ INVALID_NAMES = {
 
 
 @pytest.mark.parametrize("wrong_name", INVALID_NAMES)
+@pytest.mark.all
 def test_api_publish_invalid_filename(ansible_config, artifact, upload_artifact, wrong_name):
     """Test handling of uploads with invalid filenames."""
     config = ansible_config("basic_user")
@@ -237,6 +243,7 @@ def test_api_publish_invalid_filename(ansible_config, artifact, upload_artifact,
     assert resp["errors"][0]["code"] == "invalid"
 
 
+@pytest.mark.all
 def test_api_publish_missing_file(ansible_config, artifact, upload_artifact):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
     config = ansible_config("basic_user")
@@ -281,6 +288,7 @@ MAX_LENGTH_VERSION = 128
 )
 @pytest.mark.stage_health
 @pytest.mark.importer
+@pytest.mark.all
 def test_long_field_values(ansible_config, upload_artifact, field):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
     config = ansible_config("basic_user")
@@ -328,6 +336,7 @@ def test_long_field_values(ansible_config, upload_artifact, field):
     ids=lambda _: _[0],
 )
 @pytest.mark.importer
+@pytest.mark.all
 @pytest.mark.min_hub_version("4.6dev")
 def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
     """
@@ -370,6 +379,7 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
 
 @pytest.mark.stage_health
 @pytest.mark.importer
+@pytest.mark.all
 def test_ansible_lint_exception(ansible_config, upload_artifact):
     """
     Ensure that:
@@ -408,6 +418,7 @@ def test_ansible_lint_exception(ansible_config, upload_artifact):
 
 
 @pytest.mark.importer
+@pytest.mark.all
 def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
     """
     Test that galaxy-importer logs when meta/execution-environment.yml
@@ -450,6 +461,7 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
 
 
 @pytest.mark.importer
+@pytest.mark.all
 def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
     """
     Test that galaxy-importer logs when ansible-test sanity ignore files are present.
@@ -487,6 +499,7 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
 
 @pytest.mark.cloud_only
 @pytest.mark.importer
+@pytest.mark.all
 def test_publish_fail_required_tag(ansible_config, upload_artifact):
     """
     Test cloud publish fails when collection metadata tags do not include

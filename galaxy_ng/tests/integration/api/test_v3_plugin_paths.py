@@ -19,7 +19,7 @@ def local_container():
 
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/history/
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.7dev")
 def test_api_v3_plugin_execution_environments_repositories_content_history(
     ansible_config,
@@ -44,7 +44,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_history(
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/images/
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/images/{manifest_ref}/
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.7dev")
 def test_api_v3_plugin_execution_environments_repositories_content_images(
     ansible_config,
@@ -68,7 +68,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_images(
 
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/readme/
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.7dev")
 def test_api_v3_plugin_execution_environments_repositories_content_readme(
     ansible_config,
@@ -114,7 +114,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_readme(
 
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/tags/
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.7dev")
 def test_api_v3_plugin_execution_environments_repositories_content_tags(
     ansible_config,
@@ -142,7 +142,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_tags(
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/
-@pytest.mark.standalone_only
+@pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.7dev")
 def test_api_v3_plugin_execution_environments_repositories(ansible_config, local_container):
     ns_name = local_container.get_namespace()['name']

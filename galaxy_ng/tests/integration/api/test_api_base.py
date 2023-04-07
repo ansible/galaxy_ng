@@ -1,8 +1,8 @@
 import pytest
-
 from ..utils import get_client
 
 
+@pytest.mark.all
 @pytest.mark.min_hub_version("4.6dev")
 def test_galaxy_api_root(ansible_config, artifact):
     """Test galaxy API root."""

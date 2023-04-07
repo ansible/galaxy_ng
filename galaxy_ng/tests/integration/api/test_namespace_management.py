@@ -14,7 +14,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.galaxyapi_smoke
-@pytest.mark.namespace
+@pytest.mark.all
 @pytest.mark.parametrize(
     "api_version",
     [

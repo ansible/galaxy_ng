@@ -74,7 +74,7 @@ def legacy_namespace(ansible_config):
     return 'gh01'
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespace, flags):
     """Test the whole workflow for AIindex.
 
@@ -136,7 +136,7 @@ def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespa
         )
 
 
-@pytest.mark.community_only
+@pytest.mark.community
 def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespace, flags):
     """Test the whole workflow for AIindex.
 

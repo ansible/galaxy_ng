@@ -7,8 +7,7 @@ from ..utils import get_client
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-@pytest.mark.standalone_only
-@pytest.mark.role
+@pytest.mark.all
 @pytest.mark.min_hub_version("4.6dev")
 def test_locked_roles_exist(ansible_config):
     config = ansible_config("admin")

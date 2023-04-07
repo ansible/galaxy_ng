@@ -18,8 +18,11 @@ def settings(ansible_config):
     return api_client(f"{api_prefix}/_ui/v1/settings/")
 
 
-@pytest.mark.ldap
-@pytest.mark.standalone_only
+
+
+
+# TODO: make add ldap credentials to conftest
+@pytest.mark.private_hub
 def test_push_container_as_ldap_user(ansible_config, settings):
 
     if not settings.get("GALAXY_AUTH_LDAP_ENABLED"):

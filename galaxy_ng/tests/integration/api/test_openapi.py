@@ -29,7 +29,7 @@ PULPY_VARIABLES = [
 ]
 
 
-@pytest.mark.openapi
+@pytest.mark.all
 def test_galaxy_openapi_no_pulp_variables(ansible_config):
     """Tests whether openapi.json has valid path names"""
 
@@ -49,11 +49,7 @@ def test_galaxy_openapi_no_pulp_variables(ansible_config):
         assert not path.startswith('{')
 
 
-@pytest.mark.openapi
-@pytest.mark.skip(
-    reason="uncomment after https://github.com/pulp/pulpcore/pull/3564 is merged"
-           " and pulpcore version is upgraded"
-)
+@pytest.mark.all
 def test_galaxy_openapi_validation(ansible_config):
     """Tests whether openapi.json passes openapi linter"""
 
@@ -69,7 +65,7 @@ def test_galaxy_openapi_validation(ansible_config):
     validate_spec(galaxy_spec)
 
 
-@pytest.mark.openapi
+@pytest.mark.all
 @pytest.mark.min_hub_version("4.6dev")
 def test_pulp_openapi_has_variables(ansible_config):
     """Tests whether openapi.json has valid path names for pulp"""
@@ -90,9 +86,13 @@ def test_pulp_openapi_has_variables(ansible_config):
         assert ev in paths_keys
 
 
-@pytest.mark.standalone_only
-@pytest.mark.openapi
-@pytest.mark.openapi_generate_bindings
+
+
+
+
+
+# TODO: see if this can work with podman
+@pytest.mark.all
 @pytest.mark.skipif(not is_docker_installed(), reason="docker is not installed on this machine")
 def test_openapi_bindings_generation(ansible_config):
     """Verify client bindings can be built from the pulp'ish api spec"""
