@@ -103,6 +103,10 @@ docker/test/integration/container:      ## Run integration tests.
 	docker build . -f dev/standalone/integration-test-dockerfile -t galaxy-integration-runner
 	docker run -it --rm --add-host=localhost:host-gateway galaxy-integration-runner $(FLAGS)
 
+.PHONY: oci-env/integration
+oci-env/integration:
+	oci-env exec bash /src/galaxy_ng/profiles/base/run_integration.sh $(FLAGS)
+
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from python script
 	#./compose run --rm api manage shell < app/dev/common/setup_test_data.py

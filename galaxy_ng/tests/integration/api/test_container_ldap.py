@@ -7,7 +7,11 @@ from urllib.parse import urlparse
 
 import pytest
 
-from galaxy_ng.tests.integration.utils import get_client
+from galaxy_ng.tests.integration.utils import (
+    get_client,
+    ensure_test_container_is_pulled,
+    tag_hub_with_registry
+)
 
 
 @pytest.fixture(scope="function")
@@ -38,24 +42,24 @@ def test_push_container_as_ldap_user(ansible_config, settings):
     this_user = client('_ui/v1/me/')
     assert this_user['username'] == username
 
-    # get the host:port from the config
-    url = config.get('url')
-    o = urlparse(url)
-    registry = o.netloc
-
     # Pull alpine image
-    subprocess.check_call(["docker", "pull", "alpine"])
-
+    ensure_test_container_is_pulled(container="alpine")
     # Tag the image
-    subprocess.check_call(["docker", "tag", "alpine", f"{registry}/alpine:latest"])
-
-    # Login to local registy with tls verify disabled
-    subprocess.check_call(["docker", "login", "-u", username, "-p", password, registry])
+    img = tag_hub_with_registry(config, "alpine", "alpine1:latest")
 
     # Push image to local registry
     pid = subprocess.run(
-        ["docker", "--debug", "push", f"{registry}/alpine:latest"],
+        [
+            "podman",
+            "--debug",
+            "push",
+            "--creds",
+            f"{username}:{password}",
+            img,
+            "--tls-verify=false"
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
     )
+
     assert pid.returncode == 0, pid.stdout

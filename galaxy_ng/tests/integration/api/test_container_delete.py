@@ -2,7 +2,12 @@ import subprocess
 from urllib.parse import urlparse
 
 import pytest
-from ..utils import get_client, wait_for_task
+from ..utils import (
+    get_client,
+    wait_for_task,
+    ensure_test_container_is_pulled,
+    tag_hub_with_registry
+)
 from ansible.galaxy.api import GalaxyError
 
 from ..utils.iqe_utils import pull_and_tag_test_image
@@ -23,20 +28,12 @@ def test_delete_ee_and_content(ansible_config):
     cont_reg = parsed_url.netloc
 
     # Pull alpine image
-    pull_and_tag_test_image(container_engine, cont_reg)
-
-    # Login to local registry with tls verify disabled
-    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(parsed_url.path)[0]}"]
-    if container_engine == 'podman':
-        cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    ensure_test_container_is_pulled(container="alpine")
+    # Tag the image
+    img = tag_hub_with_registry(config, "alpine", "alpine:latest")
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{cont_reg}/alpine:latest"]
-    if container_engine == 'podman':
-        cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    subprocess.check_call(["docker", "push", "localhost:5001/alpine:latest"])
 
     # Get an API client running with admin user credentials
     client = get_client(
@@ -96,37 +93,21 @@ def test_delete_ee_and_content(ansible_config):
 @pytest.mark.min_hub_version("4.7dev")
 def test_shared_content_is_not_deleted(ansible_config):
     config = ansible_config("admin")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    container_engine = config["container_engine"]
-    url = config['url']
-    parsed_url = urlparse(url)
-    cont_reg = parsed_url.netloc
     # Pull alpine image
-    image = pull_and_tag_test_image(container_engine, cont_reg, "alpine1:latest")
-    # Login to local registry with tls verify disabled
-    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
-    if container_engine == 'podman':
-        cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    ensure_test_container_is_pulled(container="alpine")
+    # Tag the image
+    img = tag_hub_with_registry(config, "alpine", "alpine1:latest")
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{cont_reg}/alpine1:latest"]
-
-    if container_engine == 'podman':
-        cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    subprocess.check_call(["docker", "push", "localhost:5001/alpine1:latest"])
 
     # Copy 'alpine1' and rename to 'alpine2'
-    subprocess.check_call([container_engine, "tag", image, f"{cont_reg}/alpine2:latest"])
-    cmd = [container_engine, "push", f"{cont_reg}/alpine2:latest"]
-    if container_engine == 'podman':
-        cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    subprocess.check_call(["docker", "tag", "alpine", "localhost:5001/alpine2:latest"])
+    subprocess.check_call(["docker", "push", "localhost:5001/alpine2:latest"])
 
     # Get an API client running with admin user credentials
     client = get_client(
-        config=ansible_config("admin"),
+        config=config,
         request_token=True,
     )
 

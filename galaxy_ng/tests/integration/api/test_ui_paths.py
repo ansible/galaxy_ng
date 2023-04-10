@@ -795,7 +795,7 @@ def test_api_ui_v1_users_by_id(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/users/
-@pytest.mark.all
+@pytest.mark.cloud
 def test_users_list_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
 
@@ -821,7 +821,7 @@ def test_users_list_insights_access(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/users/{id}/
-@pytest.mark.all
+@pytest.mark.cloud
 def test_users_detail_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
 

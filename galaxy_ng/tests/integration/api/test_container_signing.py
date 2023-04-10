@@ -8,9 +8,11 @@ from urllib.parse import urlparse
 
 import pytest
 
-from galaxy_ng.tests.integration.utils import get_client
-from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
-from galaxykit.container_images import get_container
+from galaxy_ng.tests.integration.utils import (
+    get_client,
+    ensure_test_container_is_pulled,
+    tag_hub_with_registry,
+)
 
 
 @pytest.fixture(scope="function")
@@ -35,31 +37,24 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
         pytest.skip("GALAXY_CONTAINER_SIGNING_SERVICE is not configured")
 
     config = ansible_config("admin")
-    url = config['url']
-    parsed_url = urlparse(url)
-    cont_reg = parsed_url.netloc
-
-    container_engine = config["container_engine"]
-
     # Pull alpine image
-    pull_and_tag_test_image(container_engine, cont_reg)
-
-    # Login to local registry with tls verify disabled
-    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(parsed_url.path)[0]}"]
-    if container_engine == 'podman':
-        cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    ensure_test_container_is_pulled(container="alpine")
+    # Tag the image
+    img = tag_hub_with_registry(config, "alpine", "alpine:latest")
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{cont_reg}/alpine:latest"]
-    if container_engine == 'podman':
-        cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    subprocess.check_call([
+        "podman",
+        "push",
+        "--creds",
+        "admin:admin",
+        img,
+        "--tls-verify=false"
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
     # Get an API client running with admin user credentials
     client = get_client(
-        config=ansible_config("admin"),
+        config=config,
         request_token=True,
         require_auth=require_auth
     )

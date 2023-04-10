@@ -1,13 +1,15 @@
 """Utility functions for AH tests."""
 
 import time
+import pytest
+
 from urllib.parse import urljoin, urlparse
 
 from ansible.galaxy.api import GalaxyError
 
 from .errors import CapturingGalaxyError, TaskWaitingTimeout
 
-
+@pytest.mark.all
 def test_url_safe_join():
     """Validate url_safe_join function."""
     testcases = [

@@ -10,7 +10,8 @@ from galaxy_ng.tests.integration.utils import (
     TaskWaitingTimeout,
     gen_string,
     wait_for_all_tasks as wait_for_all_tasks_fixtures,
-    AnsibleDistroAndRepo
+    AnsibleDistroAndRepo,
+    ensure_test_container_is_pulled
 )
 from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture, get_ansible_config, \
     get_galaxy_client
@@ -139,22 +140,8 @@ def wait_for_all_tasks():
     wait_for_all_tasks_fixtures(ADMIN_CLIENT)
 
 
-def ensure_test_container_is_pulled():
-    container_engine = CLIENT_CONFIG["container_engine"]
-    cmd = [container_engine, "image", "exists", TEST_CONTAINER]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    image = "alpine"
-    if avoid_docker_limit_rate():
-        image = "quay.io/libpod/alpine"
-    if proc.returncode == 1:
-        cmd = [container_engine, "image", "pull", image]
-        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-
 def podman_push(username, password, container, tag="latest"):
-    ensure_test_container_is_pulled()
-    container_engine = CLIENT_CONFIG["container_engine"]
-    container_registry = CLIENT_CONFIG["container_registry"]
+    ensure_test_container_is_pulled(container=TEST_CONTAINER)
 
     new_container = f"{container_registry}/{container}:{tag}"
     tag_cmd = [container_engine, "image", "tag", TEST_CONTAINER, new_container]

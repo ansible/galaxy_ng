@@ -497,9 +497,8 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
     assert len(ignorefile) == 1  # found ignorefile log message
 
 
-@pytest.mark.cloud_only
+@pytest.mark.cloud
 @pytest.mark.importer
-@pytest.mark.all
 def test_publish_fail_required_tag(ansible_config, upload_artifact):
     """
     Test cloud publish fails when collection metadata tags do not include
