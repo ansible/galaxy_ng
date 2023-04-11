@@ -151,6 +151,8 @@ objects:
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: ${{CONTENT_ORIGIN}}
+          - name: PULP_CONTENT_PATH_PREFIX
+            value: /api/automation-hub/pulp/content/
           - name: PULP_RH_ENTITLEMENT_REQUIRED
             value: 'insights'
           - name: PULP_X_PULP_CONTENT_HOST
@@ -221,7 +223,7 @@ objects:
             memory: ${{PULP_CONTENT_APP_MEMORY_REQUEST}}
         livenessProbe:
           httpGet:
-            path: /api/automation-hub/v3/artifacts/collections/
+            path: /api/automation-hub/pulp/content/
             port: 10000
             scheme: HTTP
           initialDelaySeconds: 30
@@ -231,7 +233,7 @@ objects:
           failureThreshold: 6
         readinessProbe:
           httpGet:
-            path: /api/automation-hub/v3/artifacts/collections/
+            path: /api/automation-hub/pulp/content/
             port: 10000
             scheme: HTTP
           initialDelaySeconds: 30
@@ -244,6 +246,8 @@ objects:
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: ${{CONTENT_ORIGIN}}
+          - name: PULP_CONTENT_PATH_PREFIX
+            value: /api/automation-hub/pulp/content/
           - name: GUNICORN_PORT
             value: '10000'
           - name: PULP_REDIS_SSL
@@ -300,6 +304,8 @@ objects:
             value: 'insights'
           - name: PULP_CONTENT_ORIGIN
             value: ${{CONTENT_ORIGIN}}
+          - name: PULP_CONTENT_PATH_PREFIX
+            value: /api/automation-hub/pulp/content/
           - name: IMPORTER_API_DOMAIN
             value: ${{API_DOMAIN}}
           - name: IMPORTER_JOB_NAMESPACE

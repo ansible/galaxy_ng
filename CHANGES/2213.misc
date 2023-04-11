@@ -1,0 +1,1 @@
+proxy /api/automation-hub/pulp/content/ to the content-app
