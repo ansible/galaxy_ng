@@ -9,3 +9,5 @@ RUN pip install .
 # set up venv for integration tests 
 RUN pip install virtualenv && virtualenv /tmp/gng_testing
 RUN bash profiles/base/setup_venv.sh
+
+WORKDIR /

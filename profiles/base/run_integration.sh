@@ -3,7 +3,6 @@ set -e
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
 source $VENVPATH/bin/activate
-echo "PYTHON: $(which python)"
 
 cd /src/galaxy_ng/
 
@@ -38,14 +37,19 @@ export HUB_USE_MOVE_ENDPOINT=true
 
 if [[ $COMPOSE_PROFILE =~ "galaxy_ng/ldap" ]]; then
     MARKS="all or private_hub or auth_ldap"
+    export HUB_TEST_AUTHENTICATION_BACKEND="ldap"
 elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/keycloak" ]]; then
     MARKS="all or private_hub or auth_keycloak"
+    export HUB_TEST_AUTHENTICATION_BACKEND="ldap"
 elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/community" ]]; then
     MARKS="all or community"
+    export HUB_TEST_AUTHENTICATION_BACKEND="community"
 elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/insights" ]]; then
     MARKS="all or insights"
+    export HUB_TEST_AUTHENTICATION_BACKEND="galaxy"
 else 
     MARKS="all or private_hub or auth_standalone"
+    export HUB_TEST_AUTHENTICATION_BACKEND="galaxy"
 fi
 
 echo $MARKS

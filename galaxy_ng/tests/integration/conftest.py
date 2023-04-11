@@ -3,6 +3,7 @@ import os
 import shutil
 from functools import lru_cache
 from urllib.parse import urlparse
+import requests
 
 import pytest
 from orionutils.utils import increment_version
@@ -10,7 +11,7 @@ from pkg_resources import parse_version, Requirement
 
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
-from .constants import USERNAME_PUBLISHER
+from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -81,6 +82,7 @@ insights: todo
 community: todo
 rbac: todo
 sync: todo
+cloud: todo 
 rbac_repos: tests verifying rbac roles on custom repositories
 rm_sync: tests verifying syncing custom repositories
 x_repo_search: tests verifying cross-repo search endpoint
@@ -115,73 +117,9 @@ def pytest_configure(config):
 class AnsibleConfigFixture(dict):
     # The class is instantiated with a "profile" that sets
     # which type of user will be used in the test
-    PROFILES = {
-        "anonymous_user": {
-            "username": None,
-            "password": None,
-            "token": None,
-        },
-        "basic_user": {
-            "username": "iqe_normal_user",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567891",
-        },
-        "partner_engineer": {
-            "username": "jdoe",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567892",
-        },
-        "org_admin": {  # user is org admin in keycloak
-            "username": "org-admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
-        },
-        "admin": {  # this is a superuser
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
-        "iqe_admin": {  # this is a superuser
-            "username": "iqe_admin",
-            "password": "redhat",
-            "token": None,
-        },
-        "ldap": {  # this is a superuser in ldap profile
-            "username": "professor",
-            "password": "professor",
-            "token": None,
-        },
-        "ldap_non_admin": {  # this is a regular user in ldap profile
-            "username": "fry",
-            "password": "fry",
-            "token": None,
-        },
-        "ee_admin": {
-            "username": "ee_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567895",
-        },
-        "github_user_1": {
-            "username": "gh01",
-            "password": "redhat",
-            "token": None,
-        },
-        "github_user_2": {
-            "username": "gh02",
-            "password": "redhat",
-            "token": None,
-        },
-        "geerlingguy": {
-            "username": "geerlingguy",
-            "password": "redhat",
-            "token": None,
-        },
-        "jctannerTEST": {
-            "username": "jctannerTEST",
-            "password": "redhat",
-            "token": None,
-        },
-    }
+
+    PROFILES = {}
+
     if is_stage_environment():
         PROFILES = {
             # ns owner to autohubtest2, not in partner engineer group, not an SSO org admin
@@ -221,6 +159,20 @@ class AnsibleConfigFixture(dict):
         }
 
     def __init__(self, profile=None, namespace=None, url=None, auth_url=None):
+        self._auth_backend = os.environ.get(
+            'HUB_TEST_AUTHENTICATION_BACKEND',
+            'galaxy'
+        )
+
+        for profile_name in PROFILES:
+            p = PROFILES[profile_name]
+            if username := p["username"].get(self._auth_backend):
+                self.PROFILES[profile_name] = {
+                    "username": username,
+                    "token": CREDENTIALS[username].get("token"),
+                    "password": CREDENTIALS[username].get("password")
+                }
+
         self.url = url
         self.auth_url = auth_url
         self.profile = profile
@@ -233,7 +185,6 @@ class AnsibleConfigFixture(dict):
         if not os.path.exists(galaxy_token_fn):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
-
         if self.profile:
             if isinstance(self.PROFILES[self.profile]["username"], dict):
                 # credentials from vault
@@ -242,6 +193,14 @@ class AnsibleConfigFixture(dict):
                 self._set_profile_from_vault(loader, self.profile, "password")
                 if self.PROFILES[self.profile]["token"]:
                     self._set_profile_from_vault(loader, self.profile, "token")
+
+            # LDAP backends don't create users until the user authenticates. To make
+            # ldap users with preset tokens function correctly, log them in by sending
+            # a request with basic auth to the server root.
+            if self._auth_backend == "ldap":
+                p = self.PROFILES[self.profile]
+                if "token" in p:
+                    requests.get(self["url"], auth=(p["username"], p["password"]))
 
     def _set_profile_from_vault(self, loader, profile, param):
         param_vault_path = self.PROFILES[profile][param]["vault_path"]
