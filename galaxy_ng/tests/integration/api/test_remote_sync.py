@@ -3,6 +3,8 @@ from datetime import datetime
 import pytest
 from jsonschema import validate as validate_json
 
+from ansible.galaxy.api import GalaxyError
+
 from ..schemas import (
     schema_objectlist,
     schema_task,
@@ -69,3 +71,33 @@ def test_api_ui_v1_remote_sync(ansible_config):
     assert len(ds) == 1
     assert ds[0]['namespace']['name'] == 'newswangerd'
     assert ds[0]['name'] == 'collection_demo'
+
+
+@pytest.mark.standalone_only
+def test_sync_community_with_no_requirements_file(ansible_config):
+    cfg = ansible_config("admin")
+    api_client = get_client(cfg, request_token=True, require_auth=True)
+
+    remote = api_client("pulp/api/v3/remotes/ansible/collection/?name=community")["results"][0]
+    resp = api_client(
+        remote["pulp_href"],
+        method="PATCH",
+        args={
+            "requirements_file": None,
+            "url": "https://galaxy.ansible.com",
+        }
+    )
+
+    wait_for_task(api_client, resp)
+
+    repo = api_client("pulp/api/v3/repositories/ansible/ansible/?name=community")["results"][0]
+
+    try:
+        api_client(f'{repo["pulp_href"]}sync/', method="POST")
+        # This API call should fail
+        assert False
+    except GalaxyError as ge:
+        assert ge.http_code == 400
+        # galaxy kit can't parse pulp error messages, so the contents of the error
+        # message can't be verified.
+        # assert "requirements_file" in ge.message
