@@ -19,8 +19,12 @@ from .utils import (
     get_client,
     set_certification,
     set_synclist,
-    iterate_all, wait_for_url
+    iterate_all,
+    wait_for_url,
 )
+
+from .utils.iqe_utils import get_standalone_token
+
 from .utils import upload_artifact as _upload_artifact
 from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
     is_sync_testing, is_dev_env_standalone, is_standalone, is_ephemeral_env, \
@@ -159,14 +163,18 @@ class AnsibleConfigFixture(dict):
         }
 
     def __init__(self, profile=None, namespace=None, url=None, auth_url=None):
-        self._auth_backend = os.environ.get(
-            'HUB_TEST_AUTHENTICATION_BACKEND',
-            'galaxy'
-        )
+        backend_map = {
+            "community": "community",
+            "galaxy": "galaxy",
+            "keycloak": "ldap",
+            "ldap": "ldap"
+        }
+        self._auth_backend = os.environ.get('HUB_TEST_AUTHENTICATION_BACKEND')
 
         for profile_name in PROFILES:
             p = PROFILES[profile_name]
-            if username := p["username"].get(self._auth_backend):
+            credential_set = backend_map.get(self._auth_backend, "galaxy")
+            if username := p["username"].get(credential_set):
                 self.PROFILES[profile_name] = {
                     "username": username,
                     "token": CREDENTIALS[username].get("token"),
@@ -193,14 +201,6 @@ class AnsibleConfigFixture(dict):
                 self._set_profile_from_vault(loader, self.profile, "password")
                 if self.PROFILES[self.profile]["token"]:
                     self._set_profile_from_vault(loader, self.profile, "token")
-
-            # LDAP backends don't create users until the user authenticates. To make
-            # ldap users with preset tokens function correctly, log them in by sending
-            # a request with basic auth to the server root.
-            if self._auth_backend == "ldap":
-                p = self.PROFILES[self.profile]
-                if "token" in p:
-                    requests.get(self["url"], auth=(p["username"], p["password"]))
 
     def _set_profile_from_vault(self, loader, profile, param):
         param_vault_path = self.PROFILES[profile][param]["vault_path"]
@@ -241,8 +241,15 @@ class AnsibleConfigFixture(dict):
                     'HUB_AUTH_URL',
                     None
                 )
+            
+        elif key == 'auth_backend':
+            return self._auth_backend
 
         elif key == "token":
+            # Generate tokens for LDAP and keycloak backed users
+            p = self.PROFILES[self.profile]
+            if CREDENTIALS[p["username"]].get("gen_token", False):
+                return get_standalone_token(p, self["url"])
             return self.PROFILES[self.profile]["token"]
 
         elif key == "username":

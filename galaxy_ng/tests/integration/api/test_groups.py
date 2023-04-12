@@ -29,7 +29,8 @@ API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
     ]
 )
 
-@pytest.mark.all
+@pytest.mark.auth_standalone
+@pytest.mark.auth_ldap
 @pytest.mark.min_hub_version("4.6dev")
 def test_group_role_listing(ansible_config, test_data):
     """Tests ability to list roles assigned to a namespace."""

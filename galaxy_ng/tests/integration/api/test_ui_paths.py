@@ -514,7 +514,11 @@ def test_api_ui_v1_me(ansible_config):
 
         assert not ds['is_anonymous']
         assert ds['username'] == cfg.get('username')
-        assert ds['auth_provider'] == ['django']
+
+        if uclient.auth_backend == "keycloak":
+            assert ds['auth_provider'] == ['keycloak']
+        else:
+            assert ds['auth_provider'] == ['django']
 
 
 # /api/automation-hub/_ui/v1/my-distributions/

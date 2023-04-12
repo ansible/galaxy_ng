@@ -23,7 +23,7 @@ CREDENTIALS = {
     "iqe_normal_user": {
         "password": "redhat",
         "token": "abcdefghijklmnopqrstuvwxyz1234567891",
-        "group": "ns_group_for_tests"
+        "group": "ns_group_for_tests",
     },
     "jdoe": {
         "password": "redhat",
@@ -45,16 +45,19 @@ CREDENTIALS = {
     },
     "professor": {
         "password": "professor",
-        "token": None
+        "token": None,
+        "gen_token": False,
     },
     "hermes": {
         "password": "hermes",
-        "token": "her_efghijklmnopqrstuvwxyz1234567894",
+        "token": None,
+        "gen_token": True,
     },
     "fry": {
         "password": "fry",
         "group": "ship_crew",
-        "token": "fry_efghijklmnopqrstuvwxyz1234567894"
+        "token": None,
+        "gen_token": True,
     },
     "ee_admin": {
         "password": "redhat",

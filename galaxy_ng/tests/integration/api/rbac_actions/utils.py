@@ -546,7 +546,10 @@ class ReusableLocalContainer:
         self._reset()
 
     def _reset(self):
-        podman_push(ADMIN_USER, ADMIN_PASSWORD, self._name)
+        p = podman_push(ADMIN_USER, ADMIN_PASSWORD, self._name)
+
+        # check if the podman push command succeeds
+        assert p == 0
 
         # reset pulp_container/namespace
         # 1. get namespace pulp_id from repositories

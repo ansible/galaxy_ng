@@ -10,7 +10,7 @@ from galaxy_ng.app.access_control import access_policy
 
 
 class TokenView(api_base.APIView):
-    authentication_classes = (BasicAuthentication, *api_base.GALAXY_AUTHENTICATION_CLASSES)
+    authentication_classes = api_base.GALAXY_AUTHENTICATION_CLASSES
     permission_classes = [access_policy.TokenAccessPolicy]
 
     @transaction.atomic
