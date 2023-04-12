@@ -9,9 +9,11 @@ from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, ValidationError
 
+from pulpcore.plugin.util import extract_pk
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 from pulpcore.plugin.models.role import GroupRole, UserRole
 from pulpcore.plugin import models as core_models
+from pulpcore.plugin.util import get_objects_for_user
 
 from pulp_ansible.app import models as ansible_models
 
@@ -21,6 +23,7 @@ from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
 from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
+from galaxy_ng.app.constants import COMMUNITY_DOMAINS
 
 from galaxy_ng.app.access_control.statements import PULP_VIEWSETS
 
@@ -199,6 +202,22 @@ class AccessPolicyBase(AccessPolicyFromDB):
             )
 
         return qs
+
+    def scope_synclist_distributions(self, view, qs):
+        if not view.request.user.has_perm("galaxy.view_synclist"):
+            my_synclists = get_objects_for_user(
+                view.request.user,
+                "galaxy.view_synclist",
+                qs=models.SyncList.objects.all(),
+            )
+            my_synclists = my_synclists.values_list("distribution", flat=True)
+            qs = qs.exclude(Q(base_path__endswith="-synclist") & ~Q(pk__in=my_synclists))
+        return self.scope_by_view_repository_permissions(
+            view,
+            qs,
+            field_name="repository",
+            is_generic=True
+        )
 
     # if not defined, defaults to parent qs of None breaking Group Detail
     def scope_queryset(self, view, qs):
@@ -463,6 +482,32 @@ class AccessPolicyBase(AccessPolicyFromDB):
             if obj.base_path in PROTECTED_BASE_PATHS:
                 return False
 
+        return True
+
+    def require_requirements_yaml(self, request, view, action):
+
+        if remote := request.data.get("remote"):
+            try:
+                remote = ansible_models.CollectionRemote.objects.get(pk=extract_pk(remote))
+
+            except ansible_models.CollectionRemote.DoesNotExist:
+                pass
+
+        if not remote:
+            obj = view.get_object()
+            remote = obj.remote.cast()
+            if remote is None:
+                return True
+
+        if not remote.requirements_file and any(
+            [domain in remote.url for domain in COMMUNITY_DOMAINS]
+        ):
+            raise ValidationError(
+                detail={
+                    'requirements_file':
+                        _('Syncing content from galaxy.ansible.com without specifying a '
+                          'requirements file is not allowed.')
+                })
         return True
 
 

@@ -288,12 +288,20 @@ PULP_ANSIBLE_VIEWSETS = {
                     "copy_collection_version",
                     "move_collection_version",
                     "modify",
-                    "sync",
                     "sign"
                 ],
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": "has_ansible_repo_perms:ansible.modify_ansible_repo_content"
+            },
+            {
+                "action": ["sync", ],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": [
+                    "has_ansible_repo_perms:ansible.modify_ansible_repo_content",
+                    "require_requirements_yaml",
+                ],
             },
             {
                 "action": [
@@ -395,11 +403,8 @@ PULP_ANSIBLE_VIEWSETS = {
             },
         ],
         "queryset_scoping": {
-            "function": "scope_by_view_repository_permissions",
-            "parameters": {
-                "is_generic": True,
-                "field_name": "repository"
-            },
+            "function": "scope_synclist_distributions",
+            "parameters": {},
         },
     },
     "repositories/ansible/ansible/versions": {
