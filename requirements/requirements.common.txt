@@ -293,7 +293,7 @@ pyyaml==6.0
     #   pulpcore
     #   tablib
     #   yamllint
-redis==4.5.1
+redis==4.5.4
     # via pulpcore
 requests-oauthlib==1.3.1
     # via social-auth-core
