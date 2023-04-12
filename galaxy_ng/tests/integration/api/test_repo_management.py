@@ -9,7 +9,7 @@ from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_ver
 from galaxykit.collections import delete_collection, deprecate_collection, sign_collection
 from galaxykit.namespaces import create_namespace
 from galaxykit.repositories import get_all_repositories, delete_repository, create_repository, search_collection, \
-    get_distribution_id
+    get_distribution_id, create_distribution
 from galaxykit.utils import wait_for_task, GalaxyClientError
 
 logger = logging.getLogger(__name__)
@@ -23,15 +23,16 @@ def repo_exists(name, repo_list):
 
 
 def create_repo_and_dist(client, repo_name, hide_from_search=False, private=False, pipeline=None):
-    ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
+    # ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
     logger.debug(f"creating repo {repo_name}")
     repo_res = create_repository(client, repo_name, hide_from_search=hide_from_search, private=private,
                                  pipeline=pipeline)
-    logger.debug(f"Repository creation response {repo_res}")
-    dist_data = {"base_path": repo_name, "name": repo_name, "repository": repo_res['pulp_href']}
-    logger.debug(f"creating dist with this data {dist_data}")
-    task_resp = client.post(ansible_distribution_path, dist_data)
-    wait_for_task(client, task_resp)
+    # logger.debug(f"Repository creation response {repo_res}")
+    # dist_data = {"base_path": repo_name, "name": repo_name, "repository": repo_res['pulp_href']}
+    # logger.debug(f"creating dist with this data {dist_data}")
+    # task_resp = client.post(ansible_distribution_path, dist_data)
+    # wait_for_task(client, task_resp)
+    create_distribution(client, repo_name, repo_res['pulp_href'])
     return repo_res['pulp_href']
 
 
@@ -98,7 +99,7 @@ def verify_repo_data(expected_repos, actual_repos):
     return True
 
 
-@pytest.mark.min_hub_version("4.6dev")  # set correct min hub version
+@pytest.mark.min_hub_version("4.7dev")  # set correct min hub version
 class TestRM:
 
     @pytest.mark.rm
@@ -251,7 +252,7 @@ class TestRM:
                     {"repo_name": test_repo_name_2, "cv_name": artifact_1.name, "is_highest": True}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.rm
+    @pytest.mark.this
     @pytest.mark.standalone_only
     def test_search_is_highest_changes_after_deletion(self, galaxy_client):
         """
@@ -794,7 +795,6 @@ class TestRM:
         assert matches == 0
 
     @pytest.mark.standalone_only
-    @pytest.mark.this
     def test_any_user_can_see_non_private_repos(self, galaxy_client):
         """
         Verifies

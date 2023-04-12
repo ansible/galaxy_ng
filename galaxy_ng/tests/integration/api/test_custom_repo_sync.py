@@ -31,11 +31,19 @@ def test_basic_sync_custom_repo(galaxy_client):
     pulp_href = create_repo_and_dist(source_client, test_repo_name_1)
 
     namespace_name = create_test_namespace(source_client)
+    namespace_name_no_sync = create_test_namespace(source_client)
     tags = ["application"]
     artifact = upload_new_artifact(source_client, namespace_name, test_repo_name_1, "1.0.1", tags=tags)
+    artifact_no_sync = upload_new_artifact(source_client, namespace_name_no_sync, test_repo_name_1, "1.0.1", tags=tags)
+
     collection_resp = source_client.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
     content_units = [collection_resp["results"][0]["pulp_href"]]
     add_content_units(source_client, content_units, pulp_href)
+
+    collection_resp_no_sync = source_client.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_no_sync.name}")
+    content_units_no_sync = [collection_resp_no_sync["results"][0]["pulp_href"]]
+    add_content_units(source_client, content_units_no_sync, pulp_href)
+
     matches, results = search_collection_endpoint(source_client, name=artifact.name)
     logger.debug(f"Results {results}!")
 
@@ -63,5 +71,8 @@ def test_basic_sync_custom_repo(galaxy_client):
     logger.debug(f"Results {results}!")
     expected = [{"repo_name": test_repo_name_1, "cv_version": "1.0.1", "is_highest": True, "cv_name": artifact.name}]
     assert verify_repo_data(expected, results)
+
+    matches, _ = search_collection_endpoint(gc, name=artifact_no_sync.name, limit=100)
+    assert matches == 0
 
 

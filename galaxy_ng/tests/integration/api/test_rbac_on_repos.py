@@ -10,7 +10,7 @@ from galaxy_ng.tests.integration.utils.tools import generate_random_string
 from galaxykit.collections import sign_collection
 from galaxykit.remotes import create_remote, view_remotes, update_remote, delete_remote, add_permissions_to_remote
 from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository, \
-    copy_content_between_repos, move_content_between_repos, add_permissions_to_repository
+    copy_content_between_repos, move_content_between_repos, add_permissions_to_repository, delete_distribution
 from galaxykit.utils import GalaxyClientError, wait_for_task
 
 logger = logging.getLogger(__name__)
@@ -728,7 +728,6 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.standalone_only
-    @pytest.mark.this
     def test_role_global_permissions_roles_repo(self, galaxy_client):
         """
         Verifies that a user with permissions can upload to repositories
@@ -745,7 +744,6 @@ class TestRBACRepos:
         add_permissions_to_repository(gc_user, test_repo_name, role_name, ["admin_staff"])
 
     @pytest.mark.standalone_only
-    @pytest.mark.this
     def test_role_global_missing_permissions_roles_repo(self, galaxy_client):
         """
         Verifies that a user with permissions can upload to repositories
@@ -761,4 +759,27 @@ class TestRBACRepos:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             add_permissions_to_repository(gc_user, test_repo_name, role_name, ["admin_staff"])
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.standalone_only
+    @pytest.mark.parametrize("protected_repo", ["validated", "rh-certified", "community", "published", "rejected", "staging"])
+    def test_admin_protected_repos(self, galaxy_client, protected_repo):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        with pytest.raises(GalaxyClientError) as ctx:
+            delete_repository(gc_admin, protected_repo)
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.this
+    @pytest.mark.standalone_only
+    @pytest.mark.parametrize("protected_dist", ["validated", "rh-certified", "community", "published", "rejected", "staging"])
+    def test_admin_protected_distributions(self, galaxy_client, protected_dist):
+        """
+        Verifies
+        """
+        gc_admin = galaxy_client("iqe_admin")
+        with pytest.raises(GalaxyClientError) as ctx:
+            delete_distribution(gc_admin, protected_dist)
         assert ctx.value.response.status_code == 403
