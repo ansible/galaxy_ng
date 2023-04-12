@@ -1,0 +1,1 @@
+Fix container registry auth bug in keycloak that was introduced in 4.7.0b1.
