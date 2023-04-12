@@ -9,6 +9,7 @@ from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, ValidationError
 
+from pulpcore.plugin.util import extract_pk
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 from pulpcore.plugin.models.role import GroupRole, UserRole
 from pulpcore.plugin import models as core_models
@@ -21,6 +22,7 @@ from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
 from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
+from galaxy_ng.app.constants import COMMUNITY_DOMAINS
 
 from galaxy_ng.app.access_control.statements import PULP_VIEWSETS
 
@@ -463,6 +465,32 @@ class AccessPolicyBase(AccessPolicyFromDB):
             if obj.base_path in PROTECTED_BASE_PATHS:
                 return False
 
+        return True
+
+    def require_requirements_yaml(self, request, view, action):
+
+        if remote := request.data.get("remote"):
+            try:
+                remote = ansible_models.CollectionRemote.objects.get(pk=extract_pk(remote))
+
+            except ansible_models.CollectionRemote.DoesNotExist:
+                pass
+
+        if not remote:
+            obj = view.get_object()
+            remote = obj.remote.cast()
+            if remote is None:
+                return True
+
+        if not remote.requirements_file and any(
+            [domain in remote.url for domain in COMMUNITY_DOMAINS]
+        ):
+            raise ValidationError(
+                detail={
+                    'requirements_file':
+                        _('Syncing content from galaxy.ansible.com without specifying a '
+                          'requirements file is not allowed.')
+                })
         return True
 
 

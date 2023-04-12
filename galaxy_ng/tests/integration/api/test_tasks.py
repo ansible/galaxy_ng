@@ -11,7 +11,7 @@ def test_logging_cid_value_in_task(ansible_config):
     api_client = get_client(config, request_token=True)
 
     ans_repo = api_client(
-        f"{api_prefix}/pulp/api/v3/repositories/ansible/ansible/?name=community",
+        f"{api_prefix}/pulp/api/v3/repositories/ansible/ansible/?name=rh-certified",
         method="GET"
     )['results'][0]
 
