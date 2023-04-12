@@ -26,7 +26,7 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
         # In a temp dir, publish a collection using ansible-galaxy CLI
         with tempfile.TemporaryDirectory() as tmp_dir:
-            content = http_get("https://galaxy.ansible.com/download/pulp-squeezer-0.0.9.tar.gz")
+            content = http_get("https://beta-galaxy.ansible.com/download/pulp-squeezer-0.0.9.tar.gz")
             collection_path = f"{tmp_dir}/pulp-squeezer-0.0.9.tar.gz"
             with open(collection_path, "wb") as f:
                 f.write(content)
@@ -65,7 +65,7 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
         # In a temp dir, publish a collection using ansible-galaxy CLI
         with tempfile.TemporaryDirectory() as tmp_dir:
-            content = http_get("https://galaxy.ansible.com/download/pulp-squeezer-0.0.9.tar.gz")
+            content = http_get("https://beta-galaxy.ansible.com/download/pulp-squeezer-0.0.9.tar.gz")
             collection_path = f"{tmp_dir}/pulp-squeezer-0.0.9.tar.gz"
             with open(collection_path, "wb") as f:
                 f.write(content)

@@ -30,7 +30,7 @@ def test_api_ui_v1_remote_sync(ansible_config):
     cfg = ansible_config('admin')
     api_prefix = cfg.get("api_prefix").rstrip("/")
     payload = {
-        'url': 'https://galaxy.ansible.com/api/',
+        'url': 'https://beta-galaxy.ansible.com/api/',
         'auth_url': None,
         'token': None,
         'policy': 'immediate',
@@ -84,7 +84,7 @@ def test_sync_community_with_no_requirements_file(ansible_config):
         method="PATCH",
         args={
             "requirements_file": None,
-            "url": "https://galaxy.ansible.com",
+            "url": "https://beta-galaxy.ansible.com",
         }
     )
 

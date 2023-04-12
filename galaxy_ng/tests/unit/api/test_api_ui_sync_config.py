@@ -101,7 +101,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
                 "name": "community",
                 "policy": "immediate",
                 "requirements_file": None,
-                "url": "https://galaxy.ansible.com/v3/collections",
+                "url": "https://beta-galaxy.ansible.com/v3/collections",
             },
             format='json'
         )
@@ -130,7 +130,7 @@ class TestUiSyncConfigViewSet(BaseTestCase):
                     "    server: https://foobar.content.com\n"
                     "    api_key: s3cr3tk3y\n"
                 ),
-                "url": "https://galaxy.ansible.com/v3/collections/",
+                "url": "https://beta-galaxy.ansible.com/v3/collections/",
             },
             format='json'
         )

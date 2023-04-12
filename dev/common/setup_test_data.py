@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from pulpcore.plugin.models.role import GroupRole, Role
 from pulpcore.plugin.util import assign_role
+from pulp_ansible.app.models import CollectionRemote
 from rest_framework.authtoken.models import Token
 
 from galaxy_ng.app.models import Namespace
@@ -114,3 +115,9 @@ GroupRole.objects.get_or_create(
 
 print("Add a group that exists in the testing LDAP container")
 ldap_group, _ = Group.objects.get_or_create(name="admin_staff")
+
+
+print("CollectionRemote community url points to beta-galaxy.ansible.com")
+remote = CollectionRemote.objects.get(name="community")
+remote.url = "https://beta-galaxy.ansible.com"
+remote.save()
