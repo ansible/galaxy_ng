@@ -147,3 +147,57 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
     assert failed
 
     assert failed
+
+
+@pytest.mark.delete
+def test_delete_default_repos(ansible_config, upload_artifact, uncertifiedv2):
+    """Verifies that default repos cannot be deleted"""
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+    )
+
+    PROTECTED_BASE_PATHS = (
+        "rh-certified",
+        "validated",
+        "community",
+        "published",
+        "staging",
+        "rejected",
+    )
+
+    # Attempt to modify default distros and delete distros and repos
+    for path in PROTECTED_BASE_PATHS:
+        results = api_client(f"pulp/api/v3/distributions/ansible/ansible?base_path={path}")
+        assert results["count"] == 1
+
+        distro = results["results"][0]
+        assert distro["repository"] is not None
+
+        try:
+            api_client(distro["pulp_href"], method="DELETE")
+            # This API call should fail
+            assert False
+        except GalaxyError as ge:
+            assert ge.http_code == 403
+
+        try:
+            api_client(distro["repository"], method="DELETE")
+            # This API call should fail
+            assert False
+        except GalaxyError as ge:
+            assert ge.http_code == 403
+
+        try:
+            api_client(
+                distro["pulp_href"],
+                method="PUT",
+                args={
+                    **distro,
+                    "repository": None
+                }
+            )
+            # This API call should fail
+            assert False
+        except GalaxyError as ge:
+            assert ge.http_code == 403
