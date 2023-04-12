@@ -116,7 +116,7 @@ requirements = [
     "pulp_ansible>=0.17.0,<0.18.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container>=2.14.3,<2.15.0",
+    "pulp-container>=2.14.5,<2.15.0",
     "django-automated-logging==6.1.3",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",
