@@ -50,9 +50,8 @@ def test_delete_ee_and_content(ansible_config):
     assert distro_response["results"][0]["base_path"] == 'alpine'
 
     # Grab the repository href from the json and make get request
-    repo_href = (distro_response["results"][0]["repository"]) \
-        .replace("/api/automation-hub", "")
-    repo_response = client(f"{repo_href}")
+    repo_href = (distro_response["results"][0]["repository"])
+    repo_response = client(repo_href)
 
     # Grab <latest_version_href> field from this Container Push Repo Instance
     latest_version = repo_response["latest_version_href"]
@@ -126,12 +125,10 @@ def test_shared_content_is_not_deleted(ansible_config):
     assert distro_response2["results"][0]["base_path"] == 'alpine2'
 
     # Grab the repository href from the json and make get request
-    repo_href_1 = (distro_response1["results"][0]["repository"]).replace(
-        "/api/automation-hub", "")
-    repo_href_2 = (distro_response2["results"][0]["repository"]).replace(
-        "/api/automation-hub", "")
-    repo_response_1 = client(f"{repo_href_1}")
-    repo_response_2 = client(f"{repo_href_2}")
+    repo_href_1 = (distro_response1["results"][0]["repository"])
+    repo_href_2 = (distro_response2["results"][0]["repository"])
+    repo_response_1 = client(repo_href_1)
+    repo_response_2 = client(repo_href_2)
 
     # Grab <latest_version_href> field from this Container Push Repo Instance
     latest_version_1 = repo_response_1["latest_version_href"]
