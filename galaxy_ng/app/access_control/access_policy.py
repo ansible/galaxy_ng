@@ -13,6 +13,7 @@ from pulpcore.plugin.util import extract_pk
 from pulpcore.plugin.access_policy import AccessPolicyFromDB
 from pulpcore.plugin.models.role import GroupRole, UserRole
 from pulpcore.plugin import models as core_models
+from pulpcore.plugin.util import get_objects_for_user
 
 from pulp_ansible.app import models as ansible_models
 
@@ -201,6 +202,22 @@ class AccessPolicyBase(AccessPolicyFromDB):
             )
 
         return qs
+
+    def scope_synclist_distributions(self, view, qs):
+        if not view.request.user.has_perm("galaxy.view_synclist"):
+            my_synclists = get_objects_for_user(
+                view.request.user,
+                "galaxy.view_synclist",
+                qs=models.SyncList.objects.all(),
+            )
+            my_synclists = my_synclists.values_list("distribution", flat=True)
+            qs = qs.exclude(Q(base_path__endswith="-synclist") & ~Q(pk__in=my_synclists))
+        return self.scope_by_view_repository_permissions(
+            view,
+            qs,
+            field_name="repository",
+            is_generic=True
+        )
 
     # if not defined, defaults to parent qs of None breaking Group Detail
     def scope_queryset(self, view, qs):

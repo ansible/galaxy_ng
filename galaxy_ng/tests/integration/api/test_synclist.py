@@ -155,3 +155,20 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
     resp = paginated_query(api_client, url, key="data")
     collections_after = [(c["namespace"], c["name"]) for c in resp["data"]]
     assert collections_before == collections_after
+
+
+@pytest.mark.synclist
+@pytest.mark.cloud_only
+@pytest.mark.slow_in_cloud
+def test_synclist_distributions(ansible_config, upload_artifact):
+    """
+    Test that only one synclist shows up for the user.
+    """
+
+    config = ansible_config("basic_user")
+    api_client = get_client(config, request_token=True, require_auth=True)
+
+    results = api_client(
+        "pulp/api/v3/distributions/ansible/ansible/?name__icontains=synclist")
+
+    assert results["count"] == 1
