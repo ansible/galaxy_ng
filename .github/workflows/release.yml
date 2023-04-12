@@ -34,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
 
@@ -83,7 +83,7 @@ jobs:
         with:
           name: galaxy_ng.tar
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
 
@@ -235,7 +235,7 @@ jobs:
         with:
           name: galaxy_ng.tar
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
 
