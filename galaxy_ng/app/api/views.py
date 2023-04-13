@@ -85,3 +85,26 @@ class ApiRedirectView(api_base.APIView):
 
         return HttpResponseRedirect(reverse(reverse_url_name,
                                             kwargs=reverse_kwargs), status=307)
+
+
+class DownloadRedirectView(api_base.APIView):
+    """Redirects /download/<path:filepath> to
+    /api/v3/plugin/ansible/content/published/collections/artifacts/{filepath}
+
+    This is required to keep compatibility with legacy galaxy /download/
+    endpoint used in legacy UI and some testing and automation.
+    """
+    permission_classes = [access_policy.CollectionAccessPolicy]
+    action = 'download'
+
+    def get(self, request, *args, **kwargs):
+        reverse_url_name = kwargs.get("reverse_url_name")
+
+        reverse_kwargs = {}
+        if "distro_base_path" in kwargs:
+            reverse_kwargs["distro_base_path"] = kwargs["distro_base_path"]
+
+        return HttpResponseRedirect(
+            reverse(reverse_url_name, kwargs=reverse_kwargs),
+            status=301  # Permanent Redirect
+        )
