@@ -300,26 +300,24 @@ class AccessPolicyBase(AccessPolicyFromDB):
         if request.user.has_perm(permission):
             return True
 
-        has_source_repo_perms = False
-        has_dest_repo_perms = False
-
+        # accumulate all the objects to check for permission    
+        repos_to_check = []
+        # add source repo to the list of repos to check
         obj = view.get_object()
         if isinstance(obj, ansible_models.AnsibleRepository):
-            source_repo = obj
+            repos_to_check.append(obj)
 
-            if request.user.has_perm(permission, source_repo):
-                has_source_repo_perms = True
-
+        # add destination repos to the list of repos to check
         serializer = CollectionVersionCopyMoveSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-        dest_repos = data["destination_repositories"]
+        repos_to_check.extend(list(serializer.validated_data["destination_repositories"]))
 
-        for repo in dest_repos:
-            if request.user.has_perm(permission, repo):
-                has_dest_repo_perms = True
-
-        return has_source_repo_perms and has_dest_repo_perms
+        # here the repos_to_check have all the objects and we want to ensure user has permission on all
+        # all returns a bool
+        # have to check `repos_to_check and all(...)` because `all([])` on an empty list would return True
+        return repos_to_check and all(
+            request.user.has_perm(permission, repo) for repo in repos_to_check
+        )
 
     def _get_rh_identity(self, request):
         if not isinstance(request.auth, dict):
