@@ -1,7 +1,6 @@
 import pytest
 import logging
 
-from galaxy_ng.tests.integration.utils import uuid4
 from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact, add_new_user_to_new_group
 from orionutils.generator import build_collection
 
@@ -327,7 +326,7 @@ class TestXRepoSearch:
         Verifies that search endpoint returns no results when a non-existing cv is searched
         """
         gc = galaxy_client("iqe_admin")
-        matches, _ = search_collection_endpoint(gc, name=f"does-not-exist-{uuid4()}")
+        matches, _ = search_collection_endpoint(gc, name=f"does-not-exist-{generate_random_string()}")
         assert matches == 0
 
     @pytest.mark.xreposearch
@@ -382,10 +381,10 @@ class TestXRepoSearch:
             {"repo_name": test_repo_name_3, "cv_name": artifact_3v1.name, "cv_version": "0.0.1", "is_highest": True}]
         assert verify_repo_data(expected, results)
 
-        matches, _ = search_collection_endpoint(gc, repository_name=f"does-not-exist-{uuid4()}")
+        matches, _ = search_collection_endpoint(gc, repository_name=f"does-not-exist-{generate_random_string()}")
         assert matches == 0
 
-        matches, _ = search_collection_endpoint(gc, repository_name=f"does-not-exist-{uuid4()}", name=artifact_1v1.name)
+        matches, _ = search_collection_endpoint(gc, repository_name=f"does-not-exist-{generate_random_string()}", name=artifact_1v1.name)
         assert matches == 0
 
         matches, _ = search_collection_endpoint(gc, repository_name=test_repo_name_2, name=artifact_1v1.name)
@@ -433,7 +432,7 @@ class TestXRepoSearch:
         assert matches == 1
 
         matches, results = search_collection_endpoint(gc, repository_name=[test_repo_name_1, test_repo_name_2,
-                                                                           f"does-not-exist-{uuid4()}"])
+                                                                           f"does-not-exist-{generate_random_string()}"])
         expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1.name, "is_highest": True},
                     {"repo_name": test_repo_name_2, "cv_name": artifact_2.name, "is_highest": True}]
         assert verify_repo_data(expected, results)
@@ -605,7 +604,7 @@ class TestXRepoSearch:
         expected = [{"cv_name": artifact_1.name}]
         assert verify_repo_data(expected, results)
         assert matches == 1
-        matches, results = search_collection_endpoint(gc, q=f"does-not-exist-{uuid4()}")
+        matches, results = search_collection_endpoint(gc, q=f"does-not-exist-{generate_random_string()}")
         assert matches == 0
 
     @pytest.mark.parametrize("is_signed", [True, False])
@@ -808,7 +807,7 @@ class TestXRepoSearch:
 
         user, group = add_new_user_to_new_group(gc)
         permissions = ["ansible.view_ansiblerepository"]
-        role_name = f"galaxy.rbac_test_role_{uuid4()}"
+        role_name = f"galaxy.rbac_test_role_{generate_random_string()}"
         gc.create_role(role_name, "any_description", permissions)
         gc.add_role_to_group(role_name, group["id"])
 
