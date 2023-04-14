@@ -10,7 +10,8 @@ from galaxy_ng.tests.integration.utils.tools import generate_random_string
 from galaxykit.collections import sign_collection
 from galaxykit.remotes import create_remote, view_remotes, update_remote, delete_remote, add_permissions_to_remote
 from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository, \
-    copy_content_between_repos, move_content_between_repos, add_permissions_to_repository, delete_distribution
+    copy_content_between_repos, move_content_between_repos, add_permissions_to_repository, delete_distribution, \
+    create_distribution
 from galaxykit.utils import GalaxyClientError, wait_for_task
 
 logger = logging.getLogger(__name__)
@@ -393,21 +394,17 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.standalone_only
-    # @pytest.mark.this
+    @pytest.mark.this
     def test_remote(self, galaxy_client):
         """
         Verifies
         """
         gc_admin = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
-        r = create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
-        remote_pulp_href = r["pulp_href"]
+        create_remote(gc_admin, test_remote_name, gc_admin.galaxy_root)
         test_repo_name_1 = f"repo-test-{generate_random_string()}"
-        ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
-        repo_res = create_repository(gc_admin, test_repo_name_1, remote=remote_pulp_href)
-        dist_data = {"base_path": test_repo_name_1, "name": test_repo_name_1, "repository": repo_res['pulp_href']}
-        task_resp = gc_admin.post(ansible_distribution_path, dist_data)
-        wait_for_task(gc_admin, task_resp)
+        repo_res = create_repository(gc_admin, test_repo_name_1, remote=test_remote_name)
+        create_distribution(gc_admin, test_repo_name_1, repo_res['pulp_href'])
 
     @pytest.mark.standalone_only
     # @pytest.mark.this
@@ -470,7 +467,7 @@ class TestRBACRepos:
         view_remotes(gc_user)
 
     @pytest.mark.standalone_only
-    # @pytest.mark.this
+    @pytest.mark.this
     def test_update_remote_missing_role(self, galaxy_client):
         """
         Verifies
