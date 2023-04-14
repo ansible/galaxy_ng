@@ -300,7 +300,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
         if request.user.has_perm(permission):
             return True
 
-        # accumulate all the objects to check for permission    
+        # accumulate all the objects to check for permission
         repos_to_check = []
         # add source repo to the list of repos to check
         obj = view.get_object()
@@ -312,9 +312,8 @@ class AccessPolicyBase(AccessPolicyFromDB):
         serializer.is_valid(raise_exception=True)
         repos_to_check.extend(list(serializer.validated_data["destination_repositories"]))
 
-        # here the repos_to_check have all the objects and we want to ensure user has permission on all
-        # all returns a bool
-        # have to check `repos_to_check and all(...)` because `all([])` on an empty list would return True
+        # have to check `repos_to_check and all(...)` because `all([])` on an empty
+        # list would return True
         return repos_to_check and all(
             request.user.has_perm(permission, repo) for repo in repos_to_check
         )
