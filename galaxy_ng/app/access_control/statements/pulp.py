@@ -281,7 +281,10 @@ PULP_ANSIBLE_VIEWSETS = {
                 ],
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "signatures_not_required_for_repo"
+                "condition": [
+                    "can_copy_or_move:ansible.modify_ansible_repo_content",
+                    "signatures_not_required_for_repo",
+                ],
             },
             {
                 "action": [

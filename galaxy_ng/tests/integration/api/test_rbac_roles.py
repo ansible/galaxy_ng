@@ -58,6 +58,8 @@ from .rbac_actions.collections import (
     deprecate_collections,
     undeprecate_collections,
     upload_collection_to_other_pipeline_repo,
+    copy_collection_version,
+    move_collection_version,
 
     # ansible repository
     view_ansible_repository,
@@ -166,6 +168,8 @@ GLOBAL_ACTIONS = {
     private_collection_version_list,
     view_private_repository_version,
     private_repo_v3,
+    copy_collection_version,
+    move_collection_version,
 
     # EEs
     # Remotes
@@ -292,6 +296,8 @@ OBJECT_ROLES_TO_TEST = {
         private_collection_version_list,
         view_private_repository_version,
         private_repo_v3,
+        copy_collection_version,
+        move_collection_version,
 
         # ansible repository version
         view_ansible_repository_version,
@@ -370,6 +376,8 @@ ROLES_TO_TEST = {
         private_collection_version_list,
         view_private_repository_version,
         private_repo_v3,
+        copy_collection_version,
+        move_collection_version,
 
         # ansible repository
         view_ansible_repository,
@@ -450,6 +458,8 @@ ROLES_TO_TEST = {
         private_collection_version_list,
         view_private_repository_version,
         private_repo_v3,
+        copy_collection_version,
+        move_collection_version,
 
         # ansible repository
         view_ansible_repository,
@@ -503,6 +513,8 @@ ROLES_TO_TEST = {
         private_collection_version_list,
         view_private_repository_version,
         private_repo_v3,
+        copy_collection_version,
+        move_collection_version,
 
         # ansible repository version
         view_ansible_repository_version,
