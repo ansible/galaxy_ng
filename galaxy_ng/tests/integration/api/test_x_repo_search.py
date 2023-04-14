@@ -100,9 +100,9 @@ def verify_repo_data(expected_repos, actual_repos):
 
 
 @pytest.mark.min_hub_version("4.7dev")
-class TestRM:
+class TestXRepoSearch:
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_same_collection_diff_versions_same_repo(self, galaxy_client):
         """
@@ -127,7 +127,7 @@ class TestRM:
                     {"is_highest": False, "cv_version": "0.0.1"}]
         assert verify_repo_data(expected, result)
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_same_collection_diff_versions_diff_repo(self, galaxy_client):
         """
@@ -158,7 +158,7 @@ class TestRM:
                     {"repo_name": test_repo_name_2, "cv_name": artifact_1.name, "cv_version": "0.0.2"}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_same_collection_diff_repo_same_versions(self, galaxy_client):
         """
@@ -180,7 +180,7 @@ class TestRM:
                     {"repo_name": test_repo_name_2, "cv_name": artifact.name, "cv_version": "0.0.1"}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_cant_upload_same_collection_same_repo(self, galaxy_client):
         """
@@ -195,7 +195,7 @@ class TestRM:
             upload_test_artifact(gc, namespace_name, test_repo_name, artifact)
         assert ctx.value.response.status_code == 400
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_upload_diff_collection_diff_namespaces(self, galaxy_client):
         """
@@ -222,7 +222,7 @@ class TestRM:
                     {"repo_name": test_repo_name, "cv_name": artifact_2.name, "cv_version": "0.0.2"}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_upload_same_collection_diff_repo_diff_versions_check_both_is_highest(self, galaxy_client):
         """
@@ -252,7 +252,7 @@ class TestRM:
                     {"repo_name": test_repo_name_2, "cv_name": artifact_1.name, "is_highest": True}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.this
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_is_highest_changes_after_deletion(self, galaxy_client):
         """
@@ -281,7 +281,7 @@ class TestRM:
         expected = [{"cv_version": "0.0.1", "is_highest": True}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_delete_repo_with_contents(self, galaxy_client):
         """
@@ -301,7 +301,7 @@ class TestRM:
         matches, results = search_collection_endpoint(gc, name=artifact.name, repository_name=test_repo_name)
         assert matches == 0
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_deprecated_collection(self, galaxy_client):
         """
@@ -320,7 +320,7 @@ class TestRM:
         expected = [{"repo_name": test_repo_name, "is_deprecated": True}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_cv_that_does_not_exist(self, galaxy_client):
         """
@@ -330,11 +330,11 @@ class TestRM:
         matches, _ = search_collection_endpoint(gc, name=f"does-not-exist-{uuid4()}")
         assert matches == 0
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_multiple_searches(self, galaxy_client):
         """
-        Verifies WIP
+        Verifies WIP break this down
         """
         test_repo_name_1 = f"repo-test-1-{generate_random_string()}"
         test_repo_name_2 = f"repo-test-2-{generate_random_string()}"
@@ -402,7 +402,7 @@ class TestRM:
         assert matches == 0
         # because the collection is gone from all repos. Is it correct?
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_repository_name_or_operator(self, galaxy_client):
         """
@@ -439,7 +439,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 2
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_repository_id(self, galaxy_client):
         """
@@ -459,7 +459,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_namespace(self, galaxy_client):
         """
@@ -478,7 +478,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 2  # staging
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_version(self, galaxy_client):
         """
@@ -498,7 +498,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
 
     @pytest.mark.parametrize("is_highest,cv_version", [(True, "4.0.2"), (False, "4.0.1")])
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_is_highest_true_false(self, galaxy_client, is_highest, cv_version):
         """
@@ -522,7 +522,7 @@ class TestRM:
         assert matches == 1
 
     @pytest.mark.parametrize("is_deprecated", [True, False])
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_is_deprecated_true_false(self, galaxy_client, is_deprecated):
         """
@@ -551,7 +551,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_tags(self, galaxy_client):
         """
@@ -581,7 +581,7 @@ class TestRM:
         matches, results = search_collection_endpoint(gc, tags="test_tag_1,test_tag_3", repository_name=test_repo_name)
         assert matches == 0
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_q(self, galaxy_client):
         """
@@ -609,7 +609,7 @@ class TestRM:
         assert matches == 0
 
     @pytest.mark.parametrize("is_signed", [True, False])
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_is_signed_true_false(self, galaxy_client, is_signed):
         """
@@ -635,7 +635,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_distribution_id(self, galaxy_client):
         """
@@ -655,7 +655,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_base_path(self, galaxy_client):
         """
@@ -674,7 +674,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_by_dependency(self, galaxy_client):
         """
@@ -694,7 +694,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 2  # staging (+1)
 
-    @pytest.mark.rm
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_search_version_range(self, galaxy_client):
         """
@@ -737,39 +737,7 @@ class TestRM:
         assert verify_repo_data(expected, results)
         assert matches == 2
 
-    # hide from searching field ? only testable in UI
-    # pipeline: approved no one can upload
-    # pipeline: staging, those with rbac permissions can upload
-    # both are hidden from search
-
-    @pytest.mark.standalone_only
-    def test_delete_this_pls(self, galaxy_client):
-        """
-        Verifies TO BE REMOVED
-        """
-        test_repo_name_1 = f"repo-test-1-{generate_random_string()}"
-        test_repo_name_2 = f"repo-test-2-{generate_random_string()}"
-        test_repo_name_3 = f"repo-test-3-{generate_random_string()}"
-
-        gc = galaxy_client("iqe_admin")
-        repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
-        repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
-        repo_pulp_href_3 = create_repo_and_dist(gc, test_repo_name_3)
-        namespace_name = create_test_namespace(gc)
-        key_1 = generate_random_string()
-        key_2 = generate_random_string()
-        key_3 = generate_random_string()
-
-        artifact_1v1 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.1", key_1)
-
-        collection_resp_1 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1v1.name}")
-
-        content_units_1 = [collection_resp_1["results"][0]["pulp_href"]]
-
-        add_content_units(gc, content_units_1, repo_pulp_href_1)
-        add_content_units(gc, content_units_1, repo_pulp_href_2)
-        add_content_units(gc, content_units_1, repo_pulp_href_3)
-
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_private_repo(self, galaxy_client):
         """
@@ -794,6 +762,7 @@ class TestRM:
         matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
         assert matches == 0
 
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_any_user_can_see_non_private_repos(self, galaxy_client):
         """
@@ -818,6 +787,7 @@ class TestRM:
         matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
         assert matches == 2
 
+    @pytest.mark.xreposearch
     @pytest.mark.standalone_only
     def test_private_repo_with_perm(self, galaxy_client):
         """
@@ -846,47 +816,3 @@ class TestRM:
         # ansible.view_ansiblerepository views private repos too
         matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
         assert matches == 2
-
-    # @pytest.mark.this
-    @pytest.mark.standalone_only
-    def test_pipeline_staging(self, galaxy_client):
-        """
-        Verifies TODO
-        """
-        test_repo_name = f"repo-test-{generate_random_string()}"
-        gc = galaxy_client("iqe_admin")
-
-        repo_pulp_href = create_repo_and_dist(gc, test_repo_name, pipeline="staging")
-        namespace_name = create_test_namespace(gc)
-        key = generate_random_string()
-        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
-        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
-
-        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-        content_units = [collection_resp["results"][0]["pulp_href"], collection_resp["results"][1]["pulp_href"]]
-        add_content_units(gc, content_units, repo_pulp_href)
-
-        matches, result = search_collection_endpoint(gc, repository_name=test_repo_name, name=artifact.name)
-
-    # @pytest.mark.this
-    @pytest.mark.standalone_only
-    def test_pipeline_approved(self, galaxy_client):
-        """
-        Verifies TODO
-        """
-        test_repo_name = f"repo-test-{generate_random_string()}"
-        gc = galaxy_client("iqe_admin")
-
-        repo_pulp_href = create_repo_and_dist(gc, test_repo_name, pipeline="approved")
-        namespace_name = create_test_namespace(gc)
-        key = generate_random_string()
-        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1", key)
-        upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.2", key)
-
-        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-        content_units = [collection_resp["results"][0]["pulp_href"], collection_resp["results"][1]["pulp_href"]]
-        add_content_units(gc, content_units, repo_pulp_href)
-
-        user, group = add_new_user_to_new_group(gc)
-        gc_user = galaxy_client(user)
-        matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)

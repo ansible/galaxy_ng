@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from galaxy_ng.tests.integration.api.test_repo_management import create_repo_and_dist, create_test_namespace, \
+from galaxy_ng.tests.integration.api.test_x_repo_search import create_repo_and_dist, create_test_namespace, \
     upload_new_artifact, add_content_units, search_collection_endpoint, verify_repo_data, remove_content_units
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 

@@ -6,7 +6,7 @@ import pytest
 from galaxykit.remotes import create_remote
 from galaxykit.repositories import create_repository
 from galaxykit.utils import wait_for_task
-from .test_repo_management import create_test_namespace, upload_new_artifact, search_collection_endpoint, \
+from .test_x_repo_search import create_test_namespace, upload_new_artifact, search_collection_endpoint, \
     add_content_units, create_repo_and_dist, verify_repo_data
 from .test_sync_stage import start_sync
 from ..conftest import AnsibleConfigFixture, get_galaxy_client, get_ansible_config
