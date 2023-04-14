@@ -23,15 +23,9 @@ def repo_exists(name, repo_list):
 
 
 def create_repo_and_dist(client, repo_name, hide_from_search=False, private=False, pipeline=None):
-    # ansible_distribution_path = "/api/automation-hub/pulp/api/v3/distributions/ansible/ansible/"
     logger.debug(f"creating repo {repo_name}")
-    repo_res = create_repository(client, repo_name, hide_from_search=hide_from_search, private=private,
-                                 pipeline=pipeline)
-    # logger.debug(f"Repository creation response {repo_res}")
-    # dist_data = {"base_path": repo_name, "name": repo_name, "repository": repo_res['pulp_href']}
-    # logger.debug(f"creating dist with this data {dist_data}")
-    # task_resp = client.post(ansible_distribution_path, dist_data)
-    # wait_for_task(client, task_resp)
+    repo_res = create_repository(client, repo_name, hide_from_search=hide_from_search,
+                                 private=private, pipeline=pipeline)
     create_distribution(client, repo_name, repo_res['pulp_href'])
     return repo_res['pulp_href']
 
@@ -80,6 +74,12 @@ def add_content_units(gc, content_units, repo_pulp_href):
     wait_for_task(gc, resp_task)
 
 
+def remove_content_units(gc, content_units, repo_pulp_href):
+    payload = {"remove_content_units": content_units}
+    resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload)
+    wait_for_task(gc, resp_task)
+
+
 def verify_repo_data(expected_repos, actual_repos):
     def is_dict_included(dict1, dict2):
         # Check if all key-value pairs in dict1 are present in dict2
@@ -99,7 +99,7 @@ def verify_repo_data(expected_repos, actual_repos):
     return True
 
 
-@pytest.mark.min_hub_version("4.7dev")  # set correct min hub version
+@pytest.mark.min_hub_version("4.7dev")
 class TestRM:
 
     @pytest.mark.rm
