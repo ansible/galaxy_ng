@@ -600,3 +600,112 @@ def private_repo_v3(user, password, expect_pass, extra):
     )
 
     assert_pass(expect_pass, response.status_code, 200, 403)
+
+
+# TODO move logic to ReusableCollection._reset_collection()
+def _reset_collection_repo(cv_pulp_href, repo, staging_repo):
+    requests.post(
+        f"{SERVER}{repo['pulp_href']}move_collection_version/",
+        json={
+            "collection_versions": [f"{cv_pulp_href}"],
+            "destination_repositories": [f"{staging_repo['pulp_href']}"]
+        },
+        auth=ADMIN_CREDENTIALS,
+    )
+
+
+def copy_collection_version(user, password, expect_pass, extra):
+    repo = extra["custom_repo"].get_repo()
+    collection = extra['collection'].get_collection()
+    collection_version_response = requests.get(
+        f"{PULP_API_ROOT}content/ansible/collection_versions/?name={collection['name']}",
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+    ds = collection_version_response["results"]
+    assert len(ds) == 1
+    cv_pulp_href = ds[0]['pulp_href']
+
+    staging_repo_resp = requests.get(
+        f"{PULP_API_ROOT}repositories/ansible/ansible/?name=staging",
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+    assert len(staging_repo_resp['results']) == 1
+    staging_repo = staging_repo_resp["results"][0]
+
+    response = requests.post(
+        f"{SERVER}{staging_repo['pulp_href']}copy_collection_version/",
+        json={
+            "collection_versions": [f"{cv_pulp_href}"],
+            "destination_repositories": [f"{repo['pulp_href']}"]
+        },
+        auth=(user['username'], password),
+    )
+
+    if response.status_code == 202:
+        _reset_collection_repo(cv_pulp_href, repo, staging_repo)
+
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def copy_multiple_collection_version(user, password, expect_pass, extra):
+    repo1 = extra["custom_repo"].get_repo()
+    repo2 = extra["custom_repo"].get_repo()
+    collection = extra['collection'].get_collection()
+    collection_version_response = requests.get(
+        f"{PULP_API_ROOT}content/ansible/collection_versions/?name={collection['name']}",
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+    ds = collection_version_response["results"]
+    assert len(ds) == 1
+    cv_pulp_href = ds[0]['pulp_href']
+
+    staging_repo_resp = requests.get(
+        f"{PULP_API_ROOT}repositories/ansible/ansible/?name=staging",
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+    assert len(staging_repo_resp['results']) == 1
+    staging_repo = staging_repo_resp["results"][0]
+
+    response = requests.post(
+        f"{SERVER}{staging_repo['pulp_href']}copy_collection_version/",
+        json={
+            "collection_versions": [f"{cv_pulp_href}"],
+            "destination_repositories": [f"{repo1['pulp_href']}", f"{repo2['pulp_href']}"]
+        },
+        auth=(user['username'], password),
+    )
+
+    assert_pass(expect_pass, response.status_code, 202, 403)
+
+
+def move_collection_version(user, password, expect_pass, extra):
+    repo = extra["custom_repo"].get_repo()
+    collection = extra['collection'].get_collection()
+    collection_version_response = requests.get(
+        f"{PULP_API_ROOT}content/ansible/collection_versions/?name={collection['name']}",
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+    ds = collection_version_response["results"]
+    assert len(ds) == 1
+    cv_pulp_href = ds[0]['pulp_href']
+
+    staging_repo_resp = requests.get(
+        f"{PULP_API_ROOT}repositories/ansible/ansible/?name=staging",
+        auth=ADMIN_CREDENTIALS,
+    ).json()
+    assert len(staging_repo_resp['results']) == 1
+    staging_repo = staging_repo_resp["results"][0]
+
+    response = requests.post(
+        f"{SERVER}{staging_repo['pulp_href']}move_collection_version/",
+        json={
+            "collection_versions": [f"{cv_pulp_href}"],
+            "destination_repositories": [f"{repo['pulp_href']}"]
+        },
+        auth=(user['username'], password),
+    )
+
+    if response.status_code == 202:
+        _reset_collection_repo(cv_pulp_href, repo, staging_repo)
+
+    assert_pass(expect_pass, response.status_code, 202, 403)
