@@ -292,6 +292,32 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
         return request.user.has_perm(permission, repo)
 
+    def can_copy_or_move(self, request, view, action, permission):
+        """
+        Check if the user has model or object-level permissions
+        on the source and destination repositories.
+        """
+        if request.user.has_perm(permission):
+            return True
+
+        # accumulate all the objects to check for permission
+        repos_to_check = []
+        # add source repo to the list of repos to check
+        obj = view.get_object()
+        if isinstance(obj, ansible_models.AnsibleRepository):
+            repos_to_check.append(obj)
+
+        # add destination repos to the list of repos to check
+        serializer = CollectionVersionCopyMoveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        repos_to_check.extend(list(serializer.validated_data["destination_repositories"]))
+
+        # have to check `repos_to_check and all(...)` because `all([])` on an empty
+        # list would return True
+        return repos_to_check and all(
+            request.user.has_perm(permission, repo) for repo in repos_to_check
+        )
+
     def _get_rh_identity(self, request):
         if not isinstance(request.auth, dict):
             log.debug("No request rh_identity request.auth found for request %s", request)
