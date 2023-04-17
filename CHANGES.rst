@@ -13,6 +13,78 @@ Changelog
 
 .. towncrier release notes start
 
+4.7.0 (2023-04-17)
+==================
+
+Features
+--------
+
+- Promote execution environment APIs into the supported v3/ api
+  `AAH-766 <https://issues.redhat.com/browse/AAH-766>`_
+- Get AAP version from /etc/ansible-automation-platform/VERSION file
+  `AAH-1315 <https://issues.redhat.com/browse/AAH-1315>`_
+- Refactor permissions UI and API.
+  `AAH-1714 <https://issues.redhat.com/browse/AAH-1714>`_
+- Removed inbound repository logic
+  `AAH-1777 <https://issues.redhat.com/browse/AAH-1777>`_
+- Add limited v1 support for legacy roles specific for use in galaxy.ansible.com
+  `AAH-1812 <https://issues.redhat.com/browse/AAH-1812>`_
+- Added custom querysets to include/exclude private repositories from api results.
+  `AAH-2000 <https://issues.redhat.com/browse/AAH-2000>`_
+- Add version_range parameter to the _ui/v1/collection-versions/ endpoint.
+  `AAH-2018 <https://issues.redhat.com/browse/AAH-2018>`_
+- Removed repository lock during collection import
+  `AAH-2104 <https://issues.redhat.com/browse/AAH-2104>`_
+- Add GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS which configures LDAP to only add users into groups that already exist in the system.
+  `AAH-2112 <https://issues.redhat.com/browse/AAH-2112>`_
+- Add AI Index Deny List for Project Wisdom
+  `AAH-2127 <https://issues.redhat.com/browse/AAH-2127>`_
+- Updated endpoint ``/v3/collections/{namespace}/{name}/versions/{version}/copy/{source_path}/{dest_path}/`` to copy collection version with associated content
+  `AAH-2149 <https://issues.redhat.com/browse/AAH-2149>`_
+- Allow users to create and publish to custom staging and approved repos.
+  `AAH-2170 <https://issues.redhat.com/browse/AAH-2170>`_
+- Add support for namespace and logo sync.
+  `AAH-2200 <https://issues.redhat.com/browse/AAH-2200>`_
+
+
+Bugfixes
+--------
+
+- Set no-cache headers of auth login endpoints
+  `AAH-1323 <https://issues.redhat.com/browse/AAH-1323>`_
+- Filter signatures scoped by distro.repository
+  `AAH-1941 <https://issues.redhat.com/browse/AAH-1941>`_
+- Add option to customize ldap group params
+  `AAH-1957 <https://issues.redhat.com/browse/AAH-1957>`_
+- Filtering deprecated EE from registry sync
+  `AAH-1958 <https://issues.redhat.com/browse/AAH-1958>`_
+- Fix AttributeError in index_registry task when handing serializer errors
+  `AAH-1966 <https://issues.redhat.com/browse/AAH-1966>`_
+- Update utility to avoid a JSONDecodeError
+  `AAH-1975 <https://issues.redhat.com/browse/AAH-1975>`_
+- Fix migration 0029 when upgrading from 4.2 to 4.6.
+  `AAH-1994 <https://issues.redhat.com/browse/AAH-1994>`_
+- Ensure that container deletion removes associated artifacts and content.
+  `AAH-2024 <https://issues.redhat.com/browse/AAH-2024>`_
+- Add content_guard to validated repo via migration
+  `AAH-2038 <https://issues.redhat.com/browse/AAH-2038>`_
+- Allow ldap.OPT_REFERRALS to be set
+  `AAH-2150 <https://issues.redhat.com/browse/AAH-2150>`_
+- Added access policy condition restricting access to the copy_collection_version endpoint
+  `AAH-2223 <https://issues.redhat.com/browse/AAH-2223>`_
+- Added access policy condition restricting access to the move_collection_version endpoint
+  `AAH-2224 <https://issues.redhat.com/browse/AAH-2224>`_
+
+
+Misc
+----
+
+- `AAH-805 <https://issues.redhat.com/browse/AAH-805>`_, `AAH-1270 <https://issues.redhat.com/browse/AAH-1270>`_, `AAH-1598 <https://issues.redhat.com/browse/AAH-1598>`_, `AAH-1612 <https://issues.redhat.com/browse/AAH-1612>`_, `AAH-1613 <https://issues.redhat.com/browse/AAH-1613>`_, `AAH-1672 <https://issues.redhat.com/browse/AAH-1672>`_, `AAH-1748 <https://issues.redhat.com/browse/AAH-1748>`_, `AAH-1797 <https://issues.redhat.com/browse/AAH-1797>`_, `AAH-1872 <https://issues.redhat.com/browse/AAH-1872>`_, `AAH-1911 <https://issues.redhat.com/browse/AAH-1911>`_, `AAH-1920 <https://issues.redhat.com/browse/AAH-1920>`_, `AAH-1950 <https://issues.redhat.com/browse/AAH-1950>`_, `AAH-1953 <https://issues.redhat.com/browse/AAH-1953>`_, `AAH-1956 <https://issues.redhat.com/browse/AAH-1956>`_, `AAH-1965 <https://issues.redhat.com/browse/AAH-1965>`_, `AAH-1985 <https://issues.redhat.com/browse/AAH-1985>`_, `AAH-1995 <https://issues.redhat.com/browse/AAH-1995>`_, `AAH-2001 <https://issues.redhat.com/browse/AAH-2001>`_, `AAH-2002 <https://issues.redhat.com/browse/AAH-2002>`_, `AAH-2003 <https://issues.redhat.com/browse/AAH-2003>`_, `AAH-2007 <https://issues.redhat.com/browse/AAH-2007>`_, `AAH-2029 <https://issues.redhat.com/browse/AAH-2029>`_, `AAH-2031 <https://issues.redhat.com/browse/AAH-2031>`_, `AAH-2033 <https://issues.redhat.com/browse/AAH-2033>`_, `AAH-2138 <https://issues.redhat.com/browse/AAH-2138>`_, `AAH-2279 <https://issues.redhat.com/browse/AAH-2279>`_, `AAH-2280 <https://issues.redhat.com/browse/AAH-2280>`_, `AAH-2281 <https://issues.redhat.com/browse/AAH-2281>`_, `AAH-2292 <https://issues.redhat.com/browse/AAH-2292>`_
+
+
+----
+
+
 4.6.0 (2022-10-13)
 Features
 --------
