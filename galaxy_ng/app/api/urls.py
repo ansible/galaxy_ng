@@ -82,16 +82,6 @@ urlpatterns = [
          views.ApiRedirectView.as_view(),
          name="api-redirect",
          kwargs={"reverse_url_name": "galaxy:api:root"}),
-
-    path(
-        "download/<str:filename>",  # used str instead of path because destination uses str
-        views.DownloadRedirectView.as_view(),
-        name="download-redirect",
-        kwargs={
-            "reverse_url_name": "galaxy:api:v3:collection-artifact-download",
-            "distro_base_path": DEFAULT_DISTRIBUTION_BASE_PATH,  # published
-        }
-    ),
 ]
 
 if settings.GALAXY_ENABLE_LEGACY_ROLES:
