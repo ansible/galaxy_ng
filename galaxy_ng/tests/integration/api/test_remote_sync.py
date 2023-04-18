@@ -84,7 +84,7 @@ def test_sync_community_with_no_requirements_file(ansible_config):
         method="PATCH",
         args={
             "requirements_file": None,
-            "url": "https://beta-galaxy.ansible.com",
+            "url": "https://beta-galaxy.ansible.com/api/",
         }
     )
 

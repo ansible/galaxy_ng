@@ -119,5 +119,5 @@ ldap_group, _ = Group.objects.get_or_create(name="admin_staff")
 
 print("CollectionRemote community url points to beta-galaxy.ansible.com")
 remote = CollectionRemote.objects.get(name="community")
-remote.url = "https://beta-galaxy.ansible.com"
+remote.url = "https://beta-galaxy.ansible.com/api/"
 remote.save()
