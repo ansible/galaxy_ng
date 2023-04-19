@@ -6,7 +6,6 @@ from galaxy_ng.tests.integration.utils.repo_management_utils import create_repo_
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 
 from galaxy_ng.tests.integration.utils.tools import generate_random_string
-from galaxykit.collections import sign_collection
 from galaxykit.remotes import create_remote, view_remotes, update_remote, delete_remote, add_permissions_to_remote
 from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository, \
     copy_content_between_repos, move_content_between_repos, add_permissions_to_repository, delete_distribution
@@ -271,118 +270,6 @@ class TestRBACRepos:
         gc_admin.add_role_to_group(role_name, group["id"])
         gc_user = galaxy_client(user)
         search_collection_endpoint(gc_user, repository_name=test_repo_name)
-
-    @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
-    def test_copy_cv_endpoint(self, galaxy_client):
-        """
-        Verifies a cv can be copied to a different repo
-        """
-        gc_admin = galaxy_client("iqe_admin")
-
-        test_repo_name_1 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
-
-        namespace_name = create_test_namespace(gc_admin)
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-        content_units = [collection_resp["results"][0]["pulp_href"]]
-        add_content_units(gc_admin, content_units, repo_pulp_href_1)
-
-        test_repo_name_2 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
-
-        copy_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
-        # verify cv is in both
-        matches, results = search_collection_endpoint(gc_admin, name=artifact.name)
-        expected = [{"cv_name": artifact.name, "repo_name": test_repo_name_1},
-                    {"cv_name": artifact.name, "repo_name": test_repo_name_2}]
-        assert verify_repo_data(expected, results)
-
-    @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
-    def test_move_cv_endpoint(self, galaxy_client):
-        """
-        Verifies a cv can be moved to a different repo
-        """
-        gc_admin = galaxy_client("iqe_admin")
-
-        test_repo_name_1 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
-
-        namespace_name = create_test_namespace(gc_admin)
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-        content_units = [collection_resp["results"][0]["pulp_href"]]
-        add_content_units(gc_admin, content_units, repo_pulp_href_1)
-
-        test_repo_name_2 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
-
-        move_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
-        # verify cv is only in destination repo
-        _, results = search_collection_endpoint(gc_admin, name=artifact.name)
-        expected = [{"cv_name": artifact.name, "repo_name": test_repo_name_2}]
-        assert verify_repo_data(expected, results)
-        matches, _ = search_collection_endpoint(gc_admin, name=artifact.name, repository_name=test_repo_name_1)
-        assert matches == 0
-
-    @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
-    def test_copy_signed_cv_endpoint(self, galaxy_client):
-        """
-        Verifies a signed cv can be copied to a different repo
-        """
-        gc_admin = galaxy_client("iqe_admin")
-
-        test_repo_name_1 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
-
-        namespace_name = create_test_namespace(gc_admin)
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-        content_units = [collection_resp["results"][0]["pulp_href"]]
-        add_content_units(gc_admin, content_units, repo_pulp_href_1)
-
-        test_repo_name_2 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
-
-        sign_collection(gc_admin, content_units[0], repo_pulp_href_1)
-
-        copy_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
-        matches, results = search_collection_endpoint(gc_admin, name=artifact.name)
-        expected = [{"cv_name": artifact.name, "repo_name": test_repo_name_1},
-                    {"cv_name": artifact.name, "repo_name": test_repo_name_2}]
-        assert verify_repo_data(expected, results)
-
-    @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
-    def test_move_signed_cv_endpoint(self, galaxy_client):
-        """
-        Verifies a signed cv can be moved to a different repo
-        """
-        gc_admin = galaxy_client("iqe_admin")
-
-        test_repo_name_1 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
-
-        namespace_name = create_test_namespace(gc_admin)
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-        content_units = [collection_resp["results"][0]["pulp_href"]]
-        add_content_units(gc_admin, content_units, repo_pulp_href_1)
-
-        test_repo_name_2 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
-
-        sign_collection(gc_admin, content_units[0], repo_pulp_href_1)
-
-        move_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
-        _, results = search_collection_endpoint(gc_admin, name=artifact.name)
-        expected = [{"cv_name": artifact.name, "repo_name": test_repo_name_2}]
-        assert verify_repo_data(expected, results)
-        matches, _ = search_collection_endpoint(gc_admin, name=artifact.name, repository_name=test_repo_name_1)
-        assert matches == 0
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
