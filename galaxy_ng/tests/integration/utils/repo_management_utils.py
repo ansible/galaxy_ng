@@ -18,10 +18,10 @@ def repo_exists(name, repo_list):
     return False
 
 
-def create_repo_and_dist(client, repo_name, hide_from_search=False, private=False, pipeline=None):
+def create_repo_and_dist(client, repo_name, hide_from_search=False, private=False, pipeline=None, remote=None):
     logger.debug(f"creating repo {repo_name}")
     repo_res = create_repository(client, repo_name, hide_from_search=hide_from_search,
-                                 private=private, pipeline=pipeline)
+                                 private=private, pipeline=pipeline, remote=remote)
     create_distribution(client, repo_name, repo_res['pulp_href'])
     return repo_res['pulp_href']
 
