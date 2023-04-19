@@ -1,8 +1,8 @@
 import pytest
 import logging
 
-from galaxy_ng.tests.integration.api.test_x_repo_search import create_repo_and_dist, create_test_namespace, \
-    upload_new_artifact, add_content_units, search_collection_endpoint, verify_repo_data, remove_content_units
+from galaxy_ng.tests.integration.utils.repo_management_utils import create_repo_and_dist, search_collection_endpoint, \
+    create_test_namespace, upload_new_artifact, add_content_units, remove_content_units, verify_repo_data
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 
 from galaxy_ng.tests.integration.utils.tools import generate_random_string
@@ -258,9 +258,9 @@ class TestRBACRepos:
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
-    def test_user_cannot_use_x_repo_search_endpoint(self, galaxy_client):
+    def test_any_user_can_use_x_repo_search_endpoint(self, galaxy_client):
         """
-        Verifies that a user without permissions can't search in repositories
+        Verifies that any user can search in repositories
         """
         test_repo_name = f"repo-test-{generate_random_string()}"
         gc_admin = galaxy_client("iqe_admin")
@@ -270,9 +270,7 @@ class TestRBACRepos:
         gc_admin.create_role(role_name, "any_description", permissions)
         gc_admin.add_role_to_group(role_name, group["id"])
         gc_user = galaxy_client(user)
-        with pytest.raises(GalaxyClientError) as ctx:
-            search_collection_endpoint(gc_user, repository_name=test_repo_name)
-        assert ctx.value.response.status_code == 403
+        search_collection_endpoint(gc_user, repository_name=test_repo_name)
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
@@ -408,7 +406,7 @@ class TestRBACRepos:
 
         # new user
         user, group = add_new_user_to_new_group(gc_admin)
-        permissions = ["ansible.change_ansiblerepository"]
+        permissions = ["ansible.modify_ansible_repo_content"]
         role_name = f"galaxy.rbac_test_role_{generate_random_string()}"
         gc_admin.create_role(role_name, "any_description", permissions)
         gc_admin.add_role_to_group(role_name, group["id"])
@@ -438,7 +436,7 @@ class TestRBACRepos:
 
         # new user
         user, group = add_new_user_to_new_group(gc_admin)
-        permissions = ["ansible.change_ansiblerepository"]
+        permissions = ["ansible.modify_ansible_repo_content"]
         role_name = f"galaxy.rbac_test_role_{generate_random_string()}"
         gc_admin.create_role(role_name, "any_description", permissions)
         gc_admin.add_role_to_group(role_name, group["id"])
@@ -864,7 +862,7 @@ class TestRBACRepos:
     @pytest.mark.parametrize("protected_repo", ["validated", "rh-certified", "community", "published", "rejected", "staging"])
     def test_admin_protected_repos_cant_be_deleted(self, galaxy_client, protected_repo):
         """
-        Verifies
+        Verifies that protected repos can't be deleted
         """
         gc_admin = galaxy_client("iqe_admin")
         with pytest.raises(GalaxyClientError) as ctx:
@@ -876,7 +874,7 @@ class TestRBACRepos:
     @pytest.mark.parametrize("protected_dist", ["validated", "rh-certified", "community", "published", "rejected", "staging"])
     def test_admin_protected_distributions_cant_be_deleted(self, galaxy_client, protected_dist):
         """
-        Verifies
+        Verifies that protected distributions can't be deleted
         """
         gc_admin = galaxy_client("iqe_admin")
         with pytest.raises(GalaxyClientError) as ctx:

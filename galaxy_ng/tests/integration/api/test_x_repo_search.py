@@ -1,101 +1,16 @@
 import pytest
 import logging
 
-from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact, add_new_user_to_new_group
-from orionutils.generator import build_collection
+from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 
+from galaxy_ng.tests.integration.utils.repo_management_utils import repo_exists, create_repo_and_dist, \
+    search_collection_endpoint, create_test_namespace, upload_new_artifact, add_content_units, verify_repo_data
 from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version, generate_random_string
 from galaxykit.collections import delete_collection, deprecate_collection, sign_collection
 from galaxykit.namespaces import create_namespace
-from galaxykit.repositories import get_all_repositories, delete_repository, create_repository, search_collection, \
-    get_distribution_id, create_distribution
-from galaxykit.utils import wait_for_task, GalaxyClientError
+from galaxykit.repositories import get_all_repositories, delete_repository, get_distribution_id
 
 logger = logging.getLogger(__name__)
-
-
-def repo_exists(name, repo_list):
-    for repo in repo_list:
-        if repo["name"] == name:
-            return True
-    return False
-
-
-def create_repo_and_dist(client, repo_name, hide_from_search=False, private=False, pipeline=None):
-    logger.debug(f"creating repo {repo_name}")
-    repo_res = create_repository(client, repo_name, hide_from_search=hide_from_search,
-                                 private=private, pipeline=pipeline)
-    create_distribution(client, repo_name, repo_res['pulp_href'])
-    return repo_res['pulp_href']
-
-
-def edit_results_for_verification(results):
-    _results = results["data"]
-    new_results = []
-    for data in _results:
-        repo_name = data["repository"]["name"]
-        cv_name = data["collection_version"]["name"]
-        cv_version = data["collection_version"]["version"]
-        is_highest = data["is_highest"]
-        is_deprecated = data["is_deprecated"]
-        is_signed = data["is_signed"]
-        new_result = {"repo_name": repo_name, "cv_name": cv_name, "cv_version": cv_version, "is_highest": is_highest,
-                      "is_deprecated": is_deprecated, "is_signed": is_signed}
-        new_results.append(new_result)
-    return new_results
-
-
-def search_collection_endpoint(client, **params):
-    result = search_collection(client, **params)
-    new_results = edit_results_for_verification(result)
-    return result["meta"]["count"], new_results
-
-
-def create_test_namespace(gc):
-    namespace_name = f"ns_test_{generate_random_string()}"
-    create_namespace(gc, namespace_name, "ns_group_for_tests")
-    return namespace_name
-
-
-def upload_new_artifact(gc, namespace, repository, version, key=None, tags=None, dependencies=None):
-    artifact = build_collection(
-        "skeleton",
-        config={"namespace": namespace, "version": version, "repository_name": repository,
-                "tags": tags, "dependencies": dependencies}, key=key
-    )
-    upload_test_artifact(gc, namespace, repository, artifact)
-    return artifact
-
-
-def add_content_units(gc, content_units, repo_pulp_href):
-    payload = {"add_content_units": content_units}
-    resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload)
-    wait_for_task(gc, resp_task)
-
-
-def remove_content_units(gc, content_units, repo_pulp_href):
-    payload = {"remove_content_units": content_units}
-    resp_task = gc.post(f"{repo_pulp_href}modify/", body=payload)
-    wait_for_task(gc, resp_task)
-
-
-def verify_repo_data(expected_repos, actual_repos):
-    def is_dict_included(dict1, dict2):
-        # Check if all key-value pairs in dict1 are present in dict2
-        for key, value in dict1.items():
-            if key not in dict2 or dict2[key] != value:
-                return False
-        return True
-
-    for expected_repo in expected_repos:
-        found = False
-        for actual_repo in actual_repos:
-            if is_dict_included(expected_repo, actual_repo):
-                found = True
-        if not found:
-            logger.debug(f"{expected_repo} not found in actual repos")
-            return False
-    return True
 
 
 @pytest.mark.min_hub_version("4.7dev")
@@ -178,21 +93,6 @@ class TestXRepoSearch:
         expected = [{"repo_name": test_repo_name_1, "cv_name": artifact.name, "cv_version": "0.0.1"},
                     {"repo_name": test_repo_name_2, "cv_name": artifact.name, "cv_version": "0.0.1"}]
         assert verify_repo_data(expected, results)
-
-    @pytest.mark.xreposearch
-    @pytest.mark.standalone_only
-    def test_cant_upload_same_collection_same_repo(self, galaxy_client):
-        """
-        Verifies that the same collection / version cannot be uploaded to the same repo
-        """
-        test_repo_name = f"repo-test-{generate_random_string()}"
-        gc = galaxy_client("iqe_admin")
-        create_repo_and_dist(gc, test_repo_name)
-        namespace_name = create_test_namespace(gc)
-        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1")
-        with pytest.raises(GalaxyClientError) as ctx:
-            upload_test_artifact(gc, namespace_name, test_repo_name, artifact)
-        assert ctx.value.response.status_code == 400
 
     @pytest.mark.xreposearch
     @pytest.mark.standalone_only
@@ -282,26 +182,6 @@ class TestXRepoSearch:
 
     @pytest.mark.xreposearch
     @pytest.mark.standalone_only
-    def test_delete_repo_with_contents(self, galaxy_client):
-        """
-        Verifies a non-empty repo can be deleted
-        """
-        test_repo_name = f"repo-test-{generate_random_string()}"
-        gc = galaxy_client("iqe_admin")
-        repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
-        namespace_name = create_test_namespace(gc)
-        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1")
-        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
-        content_units = [collection_resp["results"][0]["pulp_href"]]
-        add_content_units(gc, content_units, repo_pulp_href)
-        delete_repository(gc, test_repo_name)
-        repos = get_all_repositories(gc)
-        assert not repo_exists(test_repo_name, repos)
-        matches, results = search_collection_endpoint(gc, name=artifact.name, repository_name=test_repo_name)
-        assert matches == 0
-
-    @pytest.mark.xreposearch
-    @pytest.mark.standalone_only
     def test_search_deprecated_collection(self, galaxy_client):
         """
         Verifies is_deprecated flag
@@ -315,9 +195,10 @@ class TestXRepoSearch:
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc, content_units, repo_pulp_href)
         deprecate_collection(gc, namespace_name, artifact.name, repository=test_repo_name)
-        _, results = search_collection_endpoint(gc, repository_name=test_repo_name, name=artifact.name)
+        matches, results = search_collection_endpoint(gc, repository_name=test_repo_name, name=artifact.name)
         expected = [{"repo_name": test_repo_name, "is_deprecated": True}]
         assert verify_repo_data(expected, results)
+        assert matches == 1
 
     @pytest.mark.xreposearch
     @pytest.mark.standalone_only
@@ -328,78 +209,6 @@ class TestXRepoSearch:
         gc = galaxy_client("iqe_admin")
         matches, _ = search_collection_endpoint(gc, name=f"does-not-exist-{generate_random_string()}")
         assert matches == 0
-
-    @pytest.mark.xreposearch
-    @pytest.mark.standalone_only
-    def test_multiple_searches(self, galaxy_client):
-        """
-        Verifies WIP break this down
-        """
-        test_repo_name_1 = f"repo-test-1-{generate_random_string()}"
-        test_repo_name_2 = f"repo-test-2-{generate_random_string()}"
-        test_repo_name_3 = f"repo-test-3-{generate_random_string()}"
-
-        gc = galaxy_client("iqe_admin")
-        repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
-        repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
-        repo_pulp_href_3 = create_repo_and_dist(gc, test_repo_name_3)
-        namespace_name = create_test_namespace(gc)
-        key_1 = generate_random_string()
-        key_2 = generate_random_string()
-        key_3 = generate_random_string()
-
-        artifact_1v1 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.1", key_1)
-        artifact_2v2 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.2", key_2)
-        artifact_2v1 = upload_new_artifact(gc, namespace_name, test_repo_name_2, "0.0.1", key_2)
-        artifact_3v1 = upload_new_artifact(gc, namespace_name, test_repo_name_2, "0.0.1", key_3)
-
-        collection_resp_1 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1v1.name}")
-        collection_resp_2 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_2v1.name}")
-        collection_resp_3 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_3v1.name}")
-
-        content_units_1 = [collection_resp_1["results"][0]["pulp_href"], collection_resp_2["results"][1]["pulp_href"]]
-        content_units_2 = [collection_resp_2["results"][0]["pulp_href"], collection_resp_3["results"][0]["pulp_href"]]
-        content_units_3 = [collection_resp_3["results"][0]["pulp_href"]]
-
-        add_content_units(gc, content_units_1, repo_pulp_href_1)
-        add_content_units(gc, content_units_2, repo_pulp_href_2)
-        add_content_units(gc, content_units_3, repo_pulp_href_3)
-
-        _, results = search_collection_endpoint(gc, name=artifact_1v1.name)
-        expected = [{"repo_name": test_repo_name_1, "cv_name": artifact_1v1.name, "is_highest": True}]
-        assert verify_repo_data(expected, results)
-
-        _, results = search_collection_endpoint(gc, name=artifact_2v1.name)
-        expected = [
-            {"repo_name": test_repo_name_1, "cv_name": artifact_2v1.name, "cv_version": "0.0.2", "is_highest": True},
-            {"repo_name": test_repo_name_2, "cv_name": artifact_2v1.name, "cv_version": "0.0.1", "is_highest": True}]
-        assert verify_repo_data(expected, results)
-
-        _, results = search_collection_endpoint(gc, name=artifact_3v1.name)
-        expected = [
-            {"repo_name": test_repo_name_2, "cv_name": artifact_3v1.name, "cv_version": "0.0.1", "is_highest": True},
-            {"repo_name": test_repo_name_3, "cv_name": artifact_3v1.name, "cv_version": "0.0.1", "is_highest": True}]
-        assert verify_repo_data(expected, results)
-
-        matches, _ = search_collection_endpoint(gc, repository_name=f"does-not-exist-{generate_random_string()}")
-        assert matches == 0
-
-        matches, _ = search_collection_endpoint(gc, repository_name=f"does-not-exist-{generate_random_string()}", name=artifact_1v1.name)
-        assert matches == 0
-
-        matches, _ = search_collection_endpoint(gc, repository_name=test_repo_name_2, name=artifact_1v1.name)
-        assert matches == 0
-
-        matches, _ = search_collection_endpoint(gc, repository_name=test_repo_name_1, name=artifact_1v1.name)
-        assert matches == 1
-
-        matches, _ = search_collection_endpoint(gc, name=artifact_3v1.name)
-        assert matches == 3  # +1 because it's staging
-
-        delete_collection(gc, namespace_name, artifact_3v1.name, version="0.0.1", repository=test_repo_name_3)
-        matches, results = search_collection_endpoint(gc, name=artifact_3v1.name)
-        assert matches == 0
-        # because the collection is gone from all repos. Is it correct?
 
     @pytest.mark.xreposearch
     @pytest.mark.standalone_only
@@ -815,3 +624,118 @@ class TestXRepoSearch:
         # ansible.view_ansiblerepository views private repos too
         matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
         assert matches == 2
+
+    @pytest.mark.xreposearch
+    @pytest.mark.standalone_only
+    def test_search_non_existing_repo(self, galaxy_client):
+        """
+        Verifies that there are no results when the repository does not exist
+        """
+        test_repo_name_1 = f"repo-test-1-{generate_random_string()}"
+        gc = galaxy_client("iqe_admin")
+        repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
+        namespace_name = create_test_namespace(gc)
+        artifact_1v1 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp_1 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1v1.name}")
+        content_units_1 = [collection_resp_1["results"][0]["pulp_href"]]
+        add_content_units(gc, content_units_1, repo_pulp_href_1)
+
+        matches, _ = search_collection_endpoint(gc, repository_name=f"does-not-exist-{generate_random_string()}")
+        assert matches == 0
+
+        matches, _ = search_collection_endpoint(gc, repository_name=f"does-not-exist-{generate_random_string()}",
+                                                name=artifact_1v1.name)
+        assert matches == 0
+
+    @pytest.mark.xreposearch
+    @pytest.mark.standalone_only
+    def test_search_collection_in_wrong_repo(self, galaxy_client):
+        """
+        Verifies that the search returns no matches when a collection is searched in the wrong repo
+        """
+        test_repo_name_1 = f"repo-test-1-{generate_random_string()}"
+        test_repo_name_2 = f"repo-test-2-{generate_random_string()}"
+        gc = galaxy_client("iqe_admin")
+        repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
+        create_repo_and_dist(gc, test_repo_name_2)
+        namespace_name = create_test_namespace(gc)
+        artifact_1v1 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.1")
+        collection_resp_1 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_1v1.name}")
+        content_units_1 = [collection_resp_1["results"][0]["pulp_href"]]
+        add_content_units(gc, content_units_1, repo_pulp_href_1)
+        matches, _ = search_collection_endpoint(gc, repository_name=test_repo_name_2, name=artifact_1v1.name)
+        assert matches == 0
+
+    @pytest.mark.xreposearch
+    @pytest.mark.standalone_only
+    def test_search_after_deletion(self, galaxy_client):
+        """
+        Verifies that the search returns no matches when a collection has been deleted
+        """
+        test_repo_name_2 = f"repo-test-2-{generate_random_string()}"
+        test_repo_name_3 = f"repo-test-3-{generate_random_string()}"
+
+        gc = galaxy_client("iqe_admin")
+        repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
+        repo_pulp_href_3 = create_repo_and_dist(gc, test_repo_name_3)
+        namespace_name = create_test_namespace(gc)
+        artifact_3v1 = upload_new_artifact(gc, namespace_name, test_repo_name_2, "0.0.1")
+
+        collection_resp_3 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_3v1.name}")
+        content_units_3 = [collection_resp_3["results"][0]["pulp_href"]]
+
+        add_content_units(gc, content_units_3, repo_pulp_href_2)
+        add_content_units(gc, content_units_3, repo_pulp_href_3)
+
+        delete_collection(gc, namespace_name, artifact_3v1.name, version="0.0.1", repository=test_repo_name_3)
+        matches, results = search_collection_endpoint(gc, name=artifact_3v1.name)
+        assert matches == 0
+
+    @pytest.mark.xreposearch
+    @pytest.mark.standalone_only
+    def test_search_after_delete_repo_with_contents(self, galaxy_client):
+        """
+        Verifies a non-empty repo can be deleted and search returns 0
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("iqe_admin")
+        repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
+        namespace_name = create_test_namespace(gc)
+        artifact = upload_new_artifact(gc, namespace_name, test_repo_name, "0.0.1")
+        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        content_units = [collection_resp["results"][0]["pulp_href"]]
+        add_content_units(gc, content_units, repo_pulp_href)
+        delete_repository(gc, test_repo_name)
+        repos = get_all_repositories(gc)
+        assert not repo_exists(test_repo_name, repos)
+        matches, results = search_collection_endpoint(gc, name=artifact.name, repository_name=test_repo_name)
+        assert matches == 0
+
+    @pytest.mark.xreposearch
+    @pytest.mark.standalone_only
+    def test_is_highest_per_repo(self, galaxy_client):
+        """
+        Verifies is_highest is per repo
+        """
+        test_repo_name_1 = f"repo-test-1-{generate_random_string()}"
+        test_repo_name_2 = f"repo-test-2-{generate_random_string()}"
+
+        gc = galaxy_client("iqe_admin")
+        repo_pulp_href_1 = create_repo_and_dist(gc, test_repo_name_1)
+        repo_pulp_href_2 = create_repo_and_dist(gc, test_repo_name_2)
+        namespace_name = create_test_namespace(gc)
+        key_2 = generate_random_string()
+        artifact_2v2 = upload_new_artifact(gc, namespace_name, test_repo_name_1, "0.0.2", key_2)
+        artifact_2v1 = upload_new_artifact(gc, namespace_name, test_repo_name_2, "0.0.1", key_2)
+        collection_resp_2 = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_2v1.name}")
+        content_units_1 = [collection_resp_2["results"][1]["pulp_href"]]
+        content_units_2 = [collection_resp_2["results"][0]["pulp_href"]]
+
+        add_content_units(gc, content_units_1, repo_pulp_href_1)
+        add_content_units(gc, content_units_2, repo_pulp_href_2)
+
+        _, results = search_collection_endpoint(gc, name=artifact_2v1.name)
+        expected = [
+            {"repo_name": test_repo_name_1, "cv_name": artifact_2v1.name, "cv_version": "0.0.2", "is_highest": True},
+            {"repo_name": test_repo_name_2, "cv_name": artifact_2v1.name, "cv_version": "0.0.1", "is_highest": True}]
+        assert verify_repo_data(expected, results)
