@@ -1,5 +1,5 @@
 ---
-name: RBAC on Repositories tests
+name: Standalone RBAC on Repositories tests
 on: 
   pull_request:
     branches:
