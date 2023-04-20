@@ -25,7 +25,7 @@ $VENVPATH/bin/pip show epdb || pip install epdb
 # when running user can specify extra pytest arguments such as
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
-$VENVPATH/bin/pytest --capture=no -m "certified_sync and rm_sync" -v $@ galaxy_ng/tests/integration
+$VENVPATH/bin/pytest --capture=no -m "certified_sync or rm_sync" -v $@ galaxy_ng/tests/integration
 RC=$?
 
 if [[ $RC != 0 ]]; then
