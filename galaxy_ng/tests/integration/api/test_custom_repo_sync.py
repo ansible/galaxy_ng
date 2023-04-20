@@ -25,7 +25,8 @@ class TestCustomReposSync:
     @pytest.mark.rm_sync
     def test_basic_sync_custom_repo_with_req_file(self, galaxy_client):
         """
-        Test syncing directly from a custom repo. Only the collection specified in the requirements file is fetched
+        Test syncing directly from a custom repo.
+        Only the collection specified in the requirements file is fetched
         """
         # this is the insights mode instance (source hub)
         url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
@@ -65,7 +66,8 @@ class TestCustomReposSync:
         gc = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
         params = {
-            "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token",
+            "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid"
+                        "-connect/token",
             "token": "abcdefghijklmnopqrstuvwxyz1234567893",
             "requirements_file": f"---\ncollections:\n- {artifact.namespace}.{artifact.name}",
         }
@@ -98,7 +100,8 @@ class TestCustomReposSync:
     def test_basic_sync_custom_repo_mirror(self, galaxy_client):
         """
         Test syncing directly from a custom repo, without a requirements file and checking
-        that if the content is not present in the remote repository, it's removed from the local repo
+        that if the content is not present in the remote repository,
+        it's removed from the local repo
         """
         # this is the insights mode instance (source hub)
         url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
@@ -126,7 +129,8 @@ class TestCustomReposSync:
         gc = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
         params = {
-            "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token",
+            "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid"
+                        "-connect/token",
             "token": "abcdefghijklmnopqrstuvwxyz1234567893",
         }
         create_remote(
@@ -135,7 +139,8 @@ class TestCustomReposSync:
         pulp_href = create_repo_and_dist(gc, test_repo_name_1, remote=test_remote_name)
 
         create_namespace(gc, namespace_name, "ns_group_for_tests")
-        # this artifact is not in the remote repository, so it should be gone after syncing (mirror)
+        # this artifact is not in the remote repository,
+        # so it should be gone after syncing (mirror)
         artifact_will_be_gone = upload_new_artifact(
             gc, namespace_name, test_repo_name_1, "1.0.1", tags=tags
         )

@@ -782,7 +782,8 @@ class TestRBACRepos:
     @pytest.mark.standalone_only
     def test_role_add_permissions_to_repo_object_role(self, galaxy_client):
         """
-        Verifies that a user with permissions can add permissions to repositories (object permission)
+        Verifies that a user with permissions can
+        add permissions to repositories (object permission)
         """
         test_repo_name = f"repo-test-{generate_random_string()}"
         gc_admin = galaxy_client("iqe_admin")
@@ -801,7 +802,8 @@ class TestRBACRepos:
     @pytest.mark.standalone_only
     def test_missing_role_add_permissions_to_repo_object_role(self, galaxy_client):
         """
-        Verifies that a user without permissions can't add permissions to repositories (object permission)
+        Verifies that a user without permissions
+        can't add permissions to repositories (object permission)
         """
         test_repo_name = f"repo-test-{generate_random_string()}"
         gc_admin = galaxy_client("iqe_admin")
@@ -824,7 +826,8 @@ class TestRBACRepos:
     @pytest.mark.standalone_only
     def test_role_add_permissions_to_repo_object_role_global_role(self, galaxy_client):
         """
-        Verifies that a user with permissions can add permissions to repositories (global permission)
+        Verifies that a user with permissions
+        can add permissions to repositories (global permission)
         """
         test_repo_name = f"repo-test-{generate_random_string()}"
         gc_admin = galaxy_client("iqe_admin")
@@ -843,7 +846,8 @@ class TestRBACRepos:
             self, galaxy_client
     ):
         """
-        Verifies that a user without permissions can't add permissions to repositories (global permission)
+        Verifies that a user without permissions
+        can't add permissions to repositories (global permission)
         """
         test_repo_name = f"repo-test-{generate_random_string()}"
         gc_admin = galaxy_client("iqe_admin")
