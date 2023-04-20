@@ -1,5 +1,5 @@
 ---
-name: Standalone IQE RBAC tests
+name: Standalone Cross Repository Search tests
 on: 
   pull_request:
     branches:
@@ -54,8 +54,5 @@ jobs:
       - name: set keyring on staging repo for signature upload
         run: ./compose exec -T api ./entrypoint.sh manage set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y
 
-      #- name: install python 3.10
-      #  run: sudo apt install software-properties-common -y; sudo add-apt-repository --yes ppa:deadsnakes/ppa; sudo apt install python3.10
-
       - name: run the integration tests
-        run: ./dev/standalone-iqe-tests/RUN_RBAC_INTEGRATION.sh
+        run: ./dev/standalone-iqe-tests/RUN_XREPOSEARCH_INTEGRATION.sh

@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 @pytest.mark.min_hub_version("4.7dev")
 class TestCustomReposSync:
 
-    @pytest.mark.standalone_only
     @pytest.mark.rm_sync
     def test_basic_sync_custom_repo_with_req_file(self, galaxy_client):
         """
@@ -76,7 +75,6 @@ class TestCustomReposSync:
         matches, _ = search_collection_endpoint(gc, name=artifact_no_sync.name, limit=100)
         assert matches == 0
 
-    @pytest.mark.standalone_only
     @pytest.mark.rm_sync
     def test_basic_sync_custom_repo_mirror(self, galaxy_client):
         """
