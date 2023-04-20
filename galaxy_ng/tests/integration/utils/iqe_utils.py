@@ -107,7 +107,6 @@ class GalaxyKitClient:
         remote=False,
         basic_token=False,
     ):
-        # config = self.config()
         try:
             config = self.config()
         except TypeError:
