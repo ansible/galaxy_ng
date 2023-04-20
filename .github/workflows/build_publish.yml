@@ -31,6 +31,9 @@ jobs:
         echo "::error::Tag ${{ github.ref_name }} and galaxy_ng version ${{ env.galaxy_ng_version }} doesn't match."
         exit 1
 
+    - name: Update apt
+      run: sudo apt -y update
+
     - name: Install LDAP requirements
       run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
 
