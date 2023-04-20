@@ -1,14 +1,34 @@
 import pytest
 import logging
 
-from galaxy_ng.tests.integration.utils.repo_management_utils import create_repo_and_dist, search_collection_endpoint, \
-    create_test_namespace, upload_new_artifact, add_content_units, remove_content_units, verify_repo_data
+from galaxy_ng.tests.integration.utils.repo_management_utils import (
+    create_repo_and_dist,
+    search_collection_endpoint,
+    create_test_namespace,
+    upload_new_artifact,
+    add_content_units,
+    remove_content_units,
+)
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 
 from galaxy_ng.tests.integration.utils.tools import generate_random_string
-from galaxykit.remotes import create_remote, view_remotes, update_remote, delete_remote, add_permissions_to_remote
-from galaxykit.repositories import delete_repository, create_repository, patch_update_repository, put_update_repository, \
-    copy_content_between_repos, move_content_between_repos, add_permissions_to_repository, delete_distribution
+from galaxykit.remotes import (
+    create_remote,
+    view_remotes,
+    update_remote,
+    delete_remote,
+    add_permissions_to_remote,
+)
+from galaxykit.repositories import (
+    delete_repository,
+    create_repository,
+    patch_update_repository,
+    put_update_repository,
+    copy_content_between_repos,
+    move_content_between_repos,
+    add_permissions_to_repository,
+    delete_distribution,
+)
 from galaxykit.utils import GalaxyClientError
 
 logger = logging.getLogger(__name__)
@@ -16,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.min_hub_version("4.7dev")
 class TestRBACRepos:
-
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
     def test_missing_role_create_repo(self, galaxy_client):
@@ -25,7 +44,10 @@ class TestRBACRepos:
         """
         gc = galaxy_client("iqe_admin")
         user, group = add_new_user_to_new_group(gc)
-        permissions = ["galaxy.add_user", "galaxy.view_user"]  # nothing to do with creating repos :P
+        permissions = [
+            "galaxy.add_user",
+            "galaxy.view_user",
+        ]  # nothing to do with creating repos :P
         role_name = f"galaxy.rbac_test_role_{generate_random_string()}"
         gc.create_role(role_name, "any_description", permissions)
         gc.add_role_to_group(role_name, group["id"])
@@ -103,11 +125,17 @@ class TestRBACRepos:
         repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
         namespace_name = create_test_namespace(gc_admin)
         gc_user = galaxy_client(user)
-        artifact = upload_new_artifact(gc_user, namespace_name, test_repo_name, "0.0.1")  # (needs upload_to_namespace)
-        collection_resp = gc_user.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        artifact = upload_new_artifact(
+            gc_user, namespace_name, test_repo_name, "0.0.1"
+        )  # (needs upload_to_namespace)
+        collection_resp = gc_user.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         with pytest.raises(GalaxyClientError) as ctx:
-            add_content_units(gc_user, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
+            add_content_units(
+                gc_user, content_units, repo_pulp_href
+            )  # (needs change_ansiblerepository)
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
@@ -126,12 +154,20 @@ class TestRBACRepos:
         repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
         namespace_name = create_test_namespace(gc_admin)
         gc_user = galaxy_client(user)
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name, "0.0.1")  # (needs upload_to_namespace)
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        artifact = upload_new_artifact(
+            gc_admin, namespace_name, test_repo_name, "0.0.1"
+        )  # (needs upload_to_namespace)
+        collection_resp = gc_admin.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
-        add_content_units(gc_admin, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
+        add_content_units(
+            gc_admin, content_units, repo_pulp_href
+        )  # (needs change_ansiblerepository)
         with pytest.raises(GalaxyClientError) as ctx:
-            remove_content_units(gc_user, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
+            remove_content_units(
+                gc_user, content_units, repo_pulp_href
+            )  # (needs change_ansiblerepository)
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
@@ -150,9 +186,12 @@ class TestRBACRepos:
         repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
         namespace_name = create_test_namespace(gc_admin)
         gc_user = galaxy_client(user)
-        artifact = upload_new_artifact(gc_user, namespace_name, test_repo_name,
-                                       "0.0.1")  # to staging (upload_to_namespace)
-        collection_resp = gc_user.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        artifact = upload_new_artifact(
+            gc_user, namespace_name, test_repo_name, "0.0.1"
+        )  # to staging (upload_to_namespace)
+        collection_resp = gc_user.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_user, content_units, repo_pulp_href)  # (modify_ansible_repo_content)
 
@@ -172,12 +211,17 @@ class TestRBACRepos:
         repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
         namespace_name = create_test_namespace(gc_admin)
         gc_user = galaxy_client(user)
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name,
-                                       "0.0.1")  # to staging (upload_to_namespace)
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        artifact = upload_new_artifact(
+            gc_admin, namespace_name, test_repo_name, "0.0.1"
+        )  # to staging (upload_to_namespace)
+        collection_resp = gc_admin.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_admin, content_units, repo_pulp_href)  # (modify_ansible_repo_content)
-        remove_content_units(gc_user, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
+        remove_content_units(
+            gc_user, content_units, repo_pulp_href
+        )  # (needs change_ansiblerepository)
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
@@ -284,7 +328,9 @@ class TestRBACRepos:
 
         namespace_name = create_test_namespace(gc_admin)
         artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        collection_resp = gc_admin.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_admin, content_units, repo_pulp_href_1)
 
@@ -314,7 +360,9 @@ class TestRBACRepos:
 
         namespace_name = create_test_namespace(gc_admin)
         artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        collection_resp = gc_admin.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_admin, content_units, repo_pulp_href_1)
 
@@ -344,7 +392,9 @@ class TestRBACRepos:
 
         namespace_name = create_test_namespace(gc_admin)
         artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        collection_resp = gc_admin.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_admin, content_units, repo_pulp_href_1)
 
@@ -371,7 +421,9 @@ class TestRBACRepos:
 
         namespace_name = create_test_namespace(gc_admin)
         artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name_1, "0.0.1")
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        collection_resp = gc_admin.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_admin, content_units, repo_pulp_href_1)
 
@@ -551,7 +603,9 @@ class TestRBACRepos:
         gc_admin.add_role_to_group(role_name, group["id"])
 
         gc_user = galaxy_client(user)
-        add_permissions_to_remote(gc_user, test_remote_name, "galaxy.collection_remote_owner", [group["name"]])
+        add_permissions_to_remote(
+            gc_user, test_remote_name, "galaxy.collection_remote_owner", [group["name"]]
+        )
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
@@ -568,10 +622,11 @@ class TestRBACRepos:
         repo_pulp_href = create_repo_and_dist(gc_admin, test_repo_name)
         namespace_name = create_test_namespace(gc_admin)
         add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name,
-                                       "0.0.1")
+        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name, "0.0.1")
         gc_user = galaxy_client(user)
-        collection_resp = gc_user.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        collection_resp = gc_user.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_user, content_units, repo_pulp_href)  # (modify_ansible_repo_content)
 
@@ -592,10 +647,14 @@ class TestRBACRepos:
         add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
         artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name, "0.0.1")
         gc_user = galaxy_client(user)
-        collection_resp = gc_user.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        collection_resp = gc_user.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         with pytest.raises(GalaxyClientError) as ctx:
-            add_content_units(gc_user, content_units, repo_pulp_href)  # (modify_ansible_repo_content)
+            add_content_units(
+                gc_user, content_units, repo_pulp_href
+            )  # (modify_ansible_repo_content)
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
@@ -746,7 +805,10 @@ class TestRBACRepos:
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
-    @pytest.mark.parametrize("protected_repo", ["validated", "rh-certified", "community", "published", "rejected", "staging"])
+    @pytest.mark.parametrize(
+        "protected_repo",
+        ["validated", "rh-certified", "community", "published", "rejected", "staging"],
+    )
     def test_admin_protected_repos_cant_be_deleted(self, galaxy_client, protected_repo):
         """
         Verifies that protected repos can't be deleted
@@ -758,7 +820,10 @@ class TestRBACRepos:
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
-    @pytest.mark.parametrize("protected_dist", ["validated", "rh-certified", "community", "published", "rejected", "staging"])
+    @pytest.mark.parametrize(
+        "protected_dist",
+        ["validated", "rh-certified", "community", "published", "rejected", "staging"],
+    )
     def test_admin_protected_distributions_cant_be_deleted(self, galaxy_client, protected_dist):
         """
         Verifies that protected distributions can't be deleted
@@ -784,12 +849,17 @@ class TestRBACRepos:
         add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
         namespace_name = create_test_namespace(gc_admin)
         gc_user = galaxy_client(user)
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name,
-                                       "0.0.1")  # to staging (upload_to_namespace)
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        artifact = upload_new_artifact(
+            gc_admin, namespace_name, test_repo_name, "0.0.1"
+        )  # to staging (upload_to_namespace)
+        collection_resp = gc_admin.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_admin, content_units, repo_pulp_href)  # (modify_ansible_repo_content)
-        remove_content_units(gc_user, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
+        remove_content_units(
+            gc_user, content_units, repo_pulp_href
+        )  # (needs change_ansiblerepository)
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
@@ -807,10 +877,18 @@ class TestRBACRepos:
         add_permissions_to_repository(gc_admin, test_repo_name, role_name, [group["name"]])
         namespace_name = create_test_namespace(gc_admin)
         gc_user = galaxy_client(user)
-        artifact = upload_new_artifact(gc_admin, namespace_name, test_repo_name, "0.0.1")  # (needs upload_to_namespace)
-        collection_resp = gc_admin.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        artifact = upload_new_artifact(
+            gc_admin, namespace_name, test_repo_name, "0.0.1"
+        )  # (needs upload_to_namespace)
+        collection_resp = gc_admin.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
-        add_content_units(gc_admin, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
+        add_content_units(
+            gc_admin, content_units, repo_pulp_href
+        )  # (needs change_ansiblerepository)
         with pytest.raises(GalaxyClientError) as ctx:
-            remove_content_units(gc_user, content_units, repo_pulp_href)  # (needs change_ansiblerepository)
+            remove_content_units(
+                gc_user, content_units, repo_pulp_href
+            )  # (needs change_ansiblerepository)
         assert ctx.value.response.status_code == 403

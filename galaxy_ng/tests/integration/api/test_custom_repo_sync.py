@@ -6,8 +6,14 @@ import pytest
 from galaxykit.namespaces import create_namespace
 from galaxykit.remotes import create_remote
 from galaxykit.utils import wait_for_task
-from ..utils.repo_management_utils import create_repo_and_dist, search_collection_endpoint, create_test_namespace, \
-    upload_new_artifact, add_content_units, verify_repo_data
+from ..utils.repo_management_utils import (
+    create_repo_and_dist,
+    search_collection_endpoint,
+    create_test_namespace,
+    upload_new_artifact,
+    add_content_units,
+    verify_repo_data,
+)
 from ..utils.iqe_utils import GalaxyKitClient
 from ..utils.tools import generate_random_string
 
@@ -16,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.min_hub_version("4.7dev")
 class TestCustomReposSync:
-
     @pytest.mark.rm_sync
     def test_basic_sync_custom_repo_with_req_file(self, galaxy_client):
         """
@@ -27,8 +32,8 @@ class TestCustomReposSync:
         custom_config = {"url": url}
         galaxy_kit_client = GalaxyKitClient(custom_config)
         source_client = galaxy_kit_client.gen_authorized_client(
-            {"username": "notifications_admin", "password": "redhat"},
-            basic_token=True)
+            {"username": "notifications_admin", "password": "redhat"}, basic_token=True
+        )
 
         # create repo, distribution, namespace and add a collection
         test_repo_name_1 = f"repo-test-{generate_random_string()}"
@@ -36,16 +41,22 @@ class TestCustomReposSync:
         namespace_name = create_test_namespace(source_client)
         namespace_name_no_sync = create_test_namespace(source_client)
         tags = ["application"]
-        artifact = upload_new_artifact(source_client, namespace_name, test_repo_name_1, "1.0.1", tags=tags)
-        collection_resp = source_client.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        artifact = upload_new_artifact(
+            source_client, namespace_name, test_repo_name_1, "1.0.1", tags=tags
+        )
+        collection_resp = source_client.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(source_client, content_units, pulp_href)
 
         # this artifact is not going to be synced
-        artifact_no_sync = upload_new_artifact(source_client, namespace_name_no_sync, test_repo_name_1, "1.0.1",
-                                               tags=tags)
+        artifact_no_sync = upload_new_artifact(
+            source_client, namespace_name_no_sync, test_repo_name_1, "1.0.1", tags=tags
+        )
         collection_resp_no_sync = source_client.get(
-            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_no_sync.name}")
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_no_sync.name}"
+        )
         content_units_no_sync = [collection_resp_no_sync["results"][0]["pulp_href"]]
         add_content_units(source_client, content_units_no_sync, pulp_href)
 
@@ -53,11 +64,11 @@ class TestCustomReposSync:
         # create repository, distribution and remote in the local hub
         gc = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
-        params = {"auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token",
-                  "token": "abcdefghijklmnopqrstuvwxyz1234567893",
-                  "requirements_file":
-                      f"---\ncollections:\n- {artifact.namespace}.{artifact.name}"
-                  }
+        params = {
+            "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
+            "requirements_file": f"---\ncollections:\n- {artifact.namespace}.{artifact.name}",
+        }
         create_remote(gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params)
         create_repo_and_dist(gc, test_repo_name_1, remote=test_remote_name)
 
@@ -69,7 +80,13 @@ class TestCustomReposSync:
         # verify only the collection in the requirement file is synced
         matches, results = search_collection_endpoint(gc, name=artifact.name, limit=100)
         expected = [
-            {"repo_name": test_repo_name_1, "cv_version": "1.0.1", "is_highest": True, "cv_name": artifact.name}]
+            {
+                "repo_name": test_repo_name_1,
+                "cv_version": "1.0.1",
+                "is_highest": True,
+                "cv_name": artifact.name,
+            }
+        ]
         assert verify_repo_data(expected, results)
 
         matches, _ = search_collection_endpoint(gc, name=artifact_no_sync.name, limit=100)
@@ -86,15 +103,19 @@ class TestCustomReposSync:
         custom_config = {"url": url}
         galaxy_kit_client = GalaxyKitClient(custom_config)
         source_client = galaxy_kit_client.gen_authorized_client(
-            {"username": "notifications_admin", "password": "redhat"},
-            basic_token=True)
+            {"username": "notifications_admin", "password": "redhat"}, basic_token=True
+        )
         # create repo, distribution, namespace and add a collection
         test_repo_name_1 = f"repo-test-{generate_random_string()}"
         pulp_href = create_repo_and_dist(source_client, test_repo_name_1)
         namespace_name = create_test_namespace(source_client)
         tags = ["application"]
-        artifact = upload_new_artifact(source_client, namespace_name, test_repo_name_1, "1.0.1", tags=tags)
-        collection_resp = source_client.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}")
+        artifact = upload_new_artifact(
+            source_client, namespace_name, test_repo_name_1, "1.0.1", tags=tags
+        )
+        collection_resp = source_client.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(source_client, content_units, pulp_href)
 
@@ -102,16 +123,21 @@ class TestCustomReposSync:
         # create repository, distribution, namespace and remote in the local hub
         gc = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
-        params = {"auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token",
-                  "token": "abcdefghijklmnopqrstuvwxyz1234567893"
-                  }
+        params = {
+            "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token",
+            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
+        }
         create_remote(gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params)
         pulp_href = create_repo_and_dist(gc, test_repo_name_1, remote=test_remote_name)
 
         create_namespace(gc, namespace_name, "ns_group_for_tests")
         # this artifact is not in the remote repository, so it should be gone after syncing (mirror)
-        artifact_will_be_gone = upload_new_artifact(gc, namespace_name, test_repo_name_1, "1.0.1", tags=tags)
-        collection_resp = gc.get(f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_will_be_gone.name}")
+        artifact_will_be_gone = upload_new_artifact(
+            gc, namespace_name, test_repo_name_1, "1.0.1", tags=tags
+        )
+        collection_resp = gc.get(
+            f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_will_be_gone.name}"
+        )
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc, content_units, pulp_href)
 
@@ -126,11 +152,19 @@ class TestCustomReposSync:
         # artifact has been synced
         _, results = search_collection_endpoint(gc, name=artifact.name, limit=100)
         expected = [
-            {"repo_name": test_repo_name_1, "cv_version": "1.0.1", "is_highest": True, "cv_name": artifact.name}]
+            {
+                "repo_name": test_repo_name_1,
+                "cv_version": "1.0.1",
+                "is_highest": True,
+                "cv_name": artifact.name,
+            }
+        ]
         assert verify_repo_data(expected, results)
 
         # this artifact has been removed from the repo, now it's only in staging repo
-        matches, results = search_collection_endpoint(gc, name=artifact_will_be_gone.name, limit=100)
+        matches, results = search_collection_endpoint(
+            gc, name=artifact_will_be_gone.name, limit=100
+        )
         expected = [{"repo_name": "staging", "cv_name": artifact_will_be_gone.name}]
         assert matches == 1
         assert verify_repo_data(expected, results)
