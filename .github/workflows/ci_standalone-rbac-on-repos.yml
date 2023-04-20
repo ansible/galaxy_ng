@@ -1,5 +1,5 @@
 ---
-name: Standalone Cross Repository Search tests
+name: RBAC on Repositories tests
 on: 
   pull_request:
     branches:
@@ -55,4 +55,4 @@ jobs:
         run: ./compose exec -T api ./entrypoint.sh manage set-repo-keyring --repository staging --keyring /etc/pulp/certs/galaxy.kbx -y
 
       - name: run the integration tests
-        run: ./dev/standalone-iqe-tests/RUN_X_REPO_SEARCH_INTEGRATION.sh
+        run: ./dev/standalone-iqe-tests/RUN_RBAC_REPOS_INTEGRATION.sh
