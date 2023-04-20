@@ -5,7 +5,11 @@ from orionutils.generator import build_collection
 from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact
 from galaxy_ng.tests.integration.utils.tools import generate_random_string
 from galaxykit.namespaces import create_namespace
-from galaxykit.repositories import create_repository, create_distribution, search_collection
+from galaxykit.repositories import (
+    create_repository,
+    create_distribution,
+    search_collection,
+)
 from galaxykit.utils import wait_for_task
 
 logger = logging.getLogger(__name__)
@@ -18,12 +22,20 @@ def repo_exists(name, repo_list):
     return False
 
 
-def create_repo_and_dist(client, repo_name, hide_from_search=False, private=False, pipeline=None, remote=None):
+def create_repo_and_dist(
+    client, repo_name, hide_from_search=False, private=False, pipeline=None, remote=None
+):
     logger.debug(f"creating repo {repo_name}")
-    repo_res = create_repository(client, repo_name, hide_from_search=hide_from_search,
-                                 private=private, pipeline=pipeline, remote=remote)
-    create_distribution(client, repo_name, repo_res['pulp_href'])
-    return repo_res['pulp_href']
+    repo_res = create_repository(
+        client,
+        repo_name,
+        hide_from_search=hide_from_search,
+        private=private,
+        pipeline=pipeline,
+        remote=remote,
+    )
+    create_distribution(client, repo_name, repo_res["pulp_href"])
+    return repo_res["pulp_href"]
 
 
 def edit_results_for_verification(results):
@@ -36,8 +48,14 @@ def edit_results_for_verification(results):
         is_highest = data["is_highest"]
         is_deprecated = data["is_deprecated"]
         is_signed = data["is_signed"]
-        new_result = {"repo_name": repo_name, "cv_name": cv_name, "cv_version": cv_version, "is_highest": is_highest,
-                      "is_deprecated": is_deprecated, "is_signed": is_signed}
+        new_result = {
+            "repo_name": repo_name,
+            "cv_name": cv_name,
+            "cv_version": cv_version,
+            "is_highest": is_highest,
+            "is_deprecated": is_deprecated,
+            "is_signed": is_signed,
+        }
         new_results.append(new_result)
     return new_results
 
@@ -54,11 +72,19 @@ def create_test_namespace(gc):
     return namespace_name
 
 
-def upload_new_artifact(gc, namespace, repository, version, key=None, tags=None, dependencies=None):
+def upload_new_artifact(
+    gc, namespace, repository, version, key=None, tags=None, dependencies=None
+):
     artifact = build_collection(
         "skeleton",
-        config={"namespace": namespace, "version": version, "repository_name": repository,
-                "tags": tags, "dependencies": dependencies}, key=key
+        config={
+            "namespace": namespace,
+            "version": version,
+            "repository_name": repository,
+            "tags": tags,
+            "dependencies": dependencies,
+        },
+        key=key,
     )
     upload_test_artifact(gc, namespace, repository, artifact)
     return artifact

@@ -30,7 +30,12 @@ class KeycloakPassword(KeycloakToken):
     """
 
     def __init__(
-        self, access_token=None, auth_url=None, validate_certs=False, username=None, password=None
+        self,
+        access_token=None,
+        auth_url=None,
+        validate_certs=False,
+        username=None,
+        password=None,
     ):
         self.username = username
         self.password = password
@@ -100,7 +105,7 @@ class GalaxyKitClient:
         ignore_cache=False,
         token=None,
         remote=False,
-        basic_token=False
+        basic_token=False,
     ):
         # config = self.config()
         try:
@@ -118,8 +123,9 @@ class GalaxyKitClient:
         if cache_key not in client_cache or ignore_cache:
             if is_sync_testing():
                 url = config.get("remote_hub") if remote else config.get("local_hub")
-                profile_config = self.config("remote_admin") \
-                    if remote else self.config("local_admin")
+                profile_config = (
+                    self.config("remote_admin") if remote else self.config("local_admin")
+                )
                 user = profile_config.get_profile_data()
                 if profile_config.get("auth_url"):
                     token = profile_config.get("token")
@@ -132,7 +138,8 @@ class GalaxyKitClient:
                     "username": user["username"],
                     "password": user["password"],
                     "auth_url": profile_config.get("remote_auth_url")
-                    if remote else profile_config.get("local_auth_url"),
+                    if remote
+                    else profile_config.get("local_auth_url"),
                     "token": token,
                 }
             else:
@@ -155,7 +162,11 @@ class GalaxyKitClient:
                     }
                 else:
                     token = get_standalone_token(
-                        role, url, ignore_cache=ignore_cache, ssl_verify=ssl_verify, basic_token=basic_token
+                        role,
+                        url,
+                        ignore_cache=ignore_cache,
+                        ssl_verify=ssl_verify,
+                        basic_token=basic_token,
                     )  # ignore_cache=True
                     role.update(token=token)
                     auth = role
@@ -170,7 +181,7 @@ class GalaxyKitClient:
                 container_registry=container_registry,
                 container_tls_verify=ssl_verify,
                 https_verify=ssl_verify,
-                token_type=token_type
+                token_type=token_type,
             )
             if ignore_cache:
                 return g_client
@@ -182,7 +193,9 @@ class GalaxyKitClient:
 token_cache = {}
 
 
-def get_standalone_token(user, server, *, ignore_cache=False, ssl_verify=True, basic_token=False):
+def get_standalone_token(
+    user, server, *, ignore_cache=False, ssl_verify=True, basic_token=False
+):
     cache_key = f"{server}::{user['username']}"
 
     if cache_key not in token_cache or ignore_cache:
@@ -219,19 +232,21 @@ def get_standalone_token(user, server, *, ignore_cache=False, ssl_verify=True, b
 
 
 def is_standalone():
-    return os.getenv('HUB_LOCAL', False)
+    return os.getenv("HUB_LOCAL", False)
 
 
 def is_ephemeral_env():
-    return 'ephemeral' in os.getenv('HUB_API_ROOT', 'http://localhost:5001/api/automation-hub/')
+    return "ephemeral" in os.getenv(
+        "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
+    )
 
 
 def is_stage_environment():
-    return os.getenv('TESTS_AGAINST_STAGE', False)
+    return os.getenv("TESTS_AGAINST_STAGE", False)
 
 
 def is_sync_testing():
-    return os.getenv('SYNC_TESTS_STAGE', False)
+    return os.getenv("SYNC_TESTS_STAGE", False)
 
 
 def get_all_collections(api_client, repo):
@@ -241,7 +256,7 @@ def get_all_collections(api_client, repo):
     order of the collections is not guaranteed and the expected collection
     might not be returned within the 100 collections.
     """
-    url = f'content/{repo}/v3/collections/?limit=100&offset=0'
+    url = f"content/{repo}/v3/collections/?limit=100&offset=0"
     return api_client(url)
 
 
@@ -259,7 +274,9 @@ def retrieve_collection(artifact, collections):
     """
     local_collection_found = None
     for local_collection in collections["data"]:
-        if local_collection["name"] == artifact.name and \
-                local_collection["namespace"] == artifact.namespace:
+        if (
+            local_collection["name"] == artifact.name
+            and local_collection["namespace"] == artifact.namespace
+        ):
             local_collection_found = local_collection
     return local_collection_found

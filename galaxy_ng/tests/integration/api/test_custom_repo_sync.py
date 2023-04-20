@@ -69,7 +69,9 @@ class TestCustomReposSync:
             "token": "abcdefghijklmnopqrstuvwxyz1234567893",
             "requirements_file": f"---\ncollections:\n- {artifact.namespace}.{artifact.name}",
         }
-        create_remote(gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params)
+        create_remote(
+            gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params
+        )
         create_repo_and_dist(gc, test_repo_name_1, remote=test_remote_name)
 
         # start sync
@@ -127,7 +129,9 @@ class TestCustomReposSync:
             "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token",
             "token": "abcdefghijklmnopqrstuvwxyz1234567893",
         }
-        create_remote(gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params)
+        create_remote(
+            gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params
+        )
         pulp_href = create_repo_and_dist(gc, test_repo_name_1, remote=test_remote_name)
 
         create_namespace(gc, namespace_name, "ns_group_for_tests")
@@ -141,7 +145,9 @@ class TestCustomReposSync:
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc, content_units, pulp_href)
 
-        matches, _ = search_collection_endpoint(gc, name=artifact_will_be_gone.name, limit=100)
+        matches, _ = search_collection_endpoint(
+            gc, name=artifact_will_be_gone.name, limit=100
+        )
         assert matches == 2  # +1 because it's in staging repo
 
         # start sync
