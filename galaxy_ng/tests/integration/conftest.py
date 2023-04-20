@@ -64,6 +64,10 @@ sync: sync tests against stage
 certified_sync: sync tests container against container
 auto_approve: run tests that require AUTO_APPROVE to be set to true
 private_repos: run tests verifying private repositories
+rbac_repos: tests verifying rbac roles on custom repositories
+rm_sync: tests verifying syncing custom repositories
+x_repo_search: tests verifying cross-repo search endpoint
+repositories: tests verifying custom repositories
 """
 
 

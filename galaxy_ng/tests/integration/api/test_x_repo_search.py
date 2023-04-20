@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.min_hub_version("4.7dev")
 class TestXRepoSearch:
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_same_collection_diff_versions_same_repo(self, galaxy_client):
         """
         Verifies that one collection with diff versions in the same repo
@@ -40,7 +40,7 @@ class TestXRepoSearch:
                     {"is_highest": False, "cv_version": "1.0.1"}]
         assert verify_repo_data(expected, result)
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_same_collection_diff_versions_diff_repo(self, galaxy_client):
         """
         Verifies that one collection with diff versions in diff repos is found
@@ -70,7 +70,7 @@ class TestXRepoSearch:
                     {"repo_name": test_repo_name_2, "cv_name": artifact_1.name, "cv_version": "1.0.2"}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_same_collection_diff_repo_same_versions(self, galaxy_client):
         """
         Verifies that one collection with the same version in diff repos is found
@@ -91,7 +91,7 @@ class TestXRepoSearch:
                     {"repo_name": test_repo_name_2, "cv_name": artifact.name, "cv_version": "1.0.1"}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_upload_diff_collection_diff_namespaces(self, galaxy_client):
         """
         Verifies that two collections in different namespaces in the same repo are found
@@ -117,7 +117,7 @@ class TestXRepoSearch:
                     {"repo_name": test_repo_name, "cv_name": artifact_2.name, "cv_version": "1.0.2"}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_upload_same_collection_diff_repo_diff_versions_check_both_is_highest(self, galaxy_client):
         """
         Verifies that same collection name with two different versions
@@ -146,7 +146,7 @@ class TestXRepoSearch:
                     {"repo_name": test_repo_name_2, "cv_name": artifact_1.name, "is_highest": True}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_is_highest_changes_after_deletion(self, galaxy_client):
         """
         Verifies that lower version becomes is_highest True when higher version is deleted
@@ -174,7 +174,7 @@ class TestXRepoSearch:
         expected = [{"cv_version": "1.0.1", "is_highest": True}]
         assert verify_repo_data(expected, results)
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_deprecated_collection(self, galaxy_client):
         """
         Verifies is_deprecated flag
@@ -193,7 +193,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_cv_that_does_not_exist(self, galaxy_client):
         """
         Verifies that search endpoint returns no results when a non-existing cv is searched
@@ -202,7 +202,7 @@ class TestXRepoSearch:
         matches, _ = search_collection_endpoint(gc, name=f"does-not-exist-{generate_random_string()}")
         assert matches == 0
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_repository_name_or_operator(self, galaxy_client):
         """
         Verifies that search endpoint can take several repository_name params (OR)
@@ -238,7 +238,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 2
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_repository_id(self, galaxy_client):
         """
         Verifies that search endpoint accepts repository id as search param
@@ -257,7 +257,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_namespace(self, galaxy_client):
         """
         Verifies that search endpoint can search by namespace
@@ -275,7 +275,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 2  # staging
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_version(self, galaxy_client):
         """
         Verifies that search endpoint can search by version
@@ -294,7 +294,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
 
     @pytest.mark.parametrize("is_highest,cv_version", [(True, "4.0.2"), (False, "4.0.1")])
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_is_highest_true_false(self, galaxy_client, is_highest, cv_version):
         """
         Verifies that search endpoint can search by is_highest parameter
@@ -317,7 +317,7 @@ class TestXRepoSearch:
         assert matches == 1
 
     @pytest.mark.parametrize("is_deprecated", [True, False])
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_is_deprecated_true_false(self, galaxy_client, is_deprecated):
         """
         Verifies that search endpoint can search by is_deprecated parameter
@@ -345,7 +345,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_tags(self, galaxy_client):
         """
         Verifies that search endpoint can search by tags
@@ -374,7 +374,7 @@ class TestXRepoSearch:
         matches, results = search_collection_endpoint(gc, tags="application,test_tag_3", repository_name=test_repo_name)
         assert matches == 0
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_q(self, galaxy_client):
         """
         Verifies that search endpoint can search by q
@@ -401,7 +401,7 @@ class TestXRepoSearch:
         assert matches == 0
 
     @pytest.mark.parametrize("is_signed", [True, False])
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_is_signed_true_false(self, galaxy_client, is_signed):
         """
         Verifies that search endpoint can search by is_signed
@@ -426,7 +426,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_distribution_id(self, galaxy_client):
         """
         Verifies that search endpoint can search by distribution_id
@@ -445,7 +445,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_base_path(self, galaxy_client):
         """
         Verifies that search endpoint can search by base_path
@@ -463,7 +463,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 1
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_by_dependency(self, galaxy_client):
         """
         Verifies that search endpoint can search by dependency
@@ -483,7 +483,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 2  # staging (+1)
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_version_range(self, galaxy_client):
         """
         Verifies that search endpoint can search by version range
@@ -525,7 +525,7 @@ class TestXRepoSearch:
         assert verify_repo_data(expected, results)
         assert matches == 2
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_private_repo(self, galaxy_client):
         """
         Verifies that a basic user can't view private repos
@@ -549,7 +549,7 @@ class TestXRepoSearch:
         matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
         assert matches == 0
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_any_user_can_see_non_private_repos(self, galaxy_client):
         """
         Verifies that a user without permissions can view repos that are not private
@@ -573,7 +573,7 @@ class TestXRepoSearch:
         matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
         assert matches == 2
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_private_repo_with_perm(self, galaxy_client):
         """
         Verifies that a user with view permissions can view private repos
@@ -602,7 +602,7 @@ class TestXRepoSearch:
         matches, result = search_collection_endpoint(gc_user, repository_name=test_repo_name, name=artifact.name)
         assert matches == 2
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_non_existing_repo(self, galaxy_client):
         """
         Verifies that there are no results when the repository does not exist
@@ -623,7 +623,7 @@ class TestXRepoSearch:
                                                 name=artifact_1v1.name)
         assert matches == 0
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_collection_in_wrong_repo(self, galaxy_client):
         """
         Verifies that the search returns no matches when a collection is searched in the wrong repo
@@ -641,7 +641,7 @@ class TestXRepoSearch:
         matches, _ = search_collection_endpoint(gc, repository_name=test_repo_name_2, name=artifact_1v1.name)
         assert matches == 0
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_after_deletion(self, galaxy_client):
         """
         Verifies that the search returns no matches when a collection has been deleted
@@ -665,7 +665,7 @@ class TestXRepoSearch:
         matches, results = search_collection_endpoint(gc, name=artifact_3v1.name)
         assert matches == 0
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_search_after_delete_repo_with_contents(self, galaxy_client):
         """
         Verifies a non-empty repo can be deleted and search returns 0
@@ -684,7 +684,7 @@ class TestXRepoSearch:
         matches, results = search_collection_endpoint(gc, name=artifact.name, repository_name=test_repo_name)
         assert matches == 0
 
-    @pytest.mark.xreposearch
+    @pytest.mark.x_repo_search
     def test_is_highest_per_repo(self, galaxy_client):
         """
         Verifies is_highest is per repo

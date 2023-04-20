@@ -22,7 +22,7 @@ $VENVPATH/bin/pip show epdb || pip install epdb
 echo "Setting up test data"
 docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
-$VENVPATH/bin/pytest --capture=no -m "xreposearch" -v $@ galaxy_ng/tests/integration
+$VENVPATH/bin/pytest --capture=no -m "x_repo_search" -v $@ galaxy_ng/tests/integration
 RC=$?
 
 if [[ $RC != 0 ]]; then
