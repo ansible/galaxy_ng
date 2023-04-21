@@ -46,6 +46,9 @@ jobs:
           cd galaxy_ng
           django-admin makemessages --all
 
+      - name: Clear fuzzy entries
+        run: bash .github/workflows/scripts/clear_fuzzy_entries.sh
+
       - name: Compile strings
         run: |
           cd galaxy_ng
