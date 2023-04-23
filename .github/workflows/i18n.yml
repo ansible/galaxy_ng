@@ -1,0 +1,65 @@
+---
+name: Update translations
+
+on:
+  # allow running manually
+  workflow_dispatch:
+  # run weekly
+  schedule:
+  - cron: '30 5 * * 0'
+
+jobs:
+  i18n:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        branch:
+        - 'master'
+        - 'stable-4.4'
+        - 'stable-4.5'
+        - 'stable-4.6'
+        - 'stable-4.7'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+
+      - name: Update apt
+        run: sudo apt -y update
+
+      - name: Install LDAP requirements
+        run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
+
+      - name: Upgrade pip
+        run: pip install pip --upgrade
+
+      - name: Install galaxy_ng editable
+        run: pip install -e .
+
+      - name: Extract strings
+        run: |
+          cd galaxy_ng
+          django-admin makemessages --all
+
+      - name: Clear fuzzy entries
+        run: bash .github/workflows/scripts/clear_fuzzy_entries.sh
+
+      - name: Compile strings
+        run: |
+          cd galaxy_ng
+          django-admin compilemessages
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'GH Actions'
+          git config --global user.email 'gh_actions@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/ansible/galaxy_ng.git
+          git add galaxy_ng/locale/
+          if git commit -m "Automated updated of i18n strings on $(date +'%Y-%m-%d')"; then
+            git push --set-upstream origin
+          fi
