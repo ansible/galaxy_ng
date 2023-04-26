@@ -5,7 +5,7 @@ FE_ROUTE=$(oc get routes | awk '{print $1}' | grep front-end-aggregator)
 if [ -n "${FE_ROUTE}" ]; then
   CONTENT_ORIGIN=$(oc get route front-end-aggregator -o jsonpath='https://{.spec.host}{"\n"}')
 else
-  CONTENT_ORIGIN=$(bonfire namespace describe ${NAMESPACE} | grep Frontend | awk '{print $3}')
+  CONTENT_ORIGIN=$(bonfire namespace describe ${NAMESPACE} | grep "Frontend route" | awk '{print $3}')
 fi
 echo "CONTENT_ORIGIN = ${CONTENT_ORIGIN}"
 oc patch clowdapp automation-hub --type=json \
