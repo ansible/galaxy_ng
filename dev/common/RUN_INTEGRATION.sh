@@ -39,10 +39,10 @@ $VENVPATH/bin/pip show epdb || pip install epdb
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
 if [[ -z $HUB_LOCAL ]]; then
-    $VENVPATH/bin/pytest --capture=no -m "not standalone_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync" $@ -v galaxy_ng/tests/integration
+    $VENVPATH/bin/pytest --capture=no -m "not standalone_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync and not rm_sync and not x_repo_search and not rbac_repos" $@ -v galaxy_ng/tests/integration
     RC=$?
 else
-    $VENVPATH/bin/pytest --capture=no -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync" -v $@ galaxy_ng/tests/integration
+    $VENVPATH/bin/pytest --capture=no -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync and not rm_sync and not x_repo_search and not rbac_repos" -v $@ galaxy_ng/tests/integration
     RC=$?
 
     if [[ $RC != 0 ]]; then

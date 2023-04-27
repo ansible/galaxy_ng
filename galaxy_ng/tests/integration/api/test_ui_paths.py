@@ -163,7 +163,7 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
 def test_api_ui_v1_distributions(ansible_config):
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
-        resp = uclient.get('_ui/v1/distributions/')
+        resp = uclient.get('_ui/v1/distributions/?limit=100')
         assert resp.status_code == 200
 
         ds = resp.json()

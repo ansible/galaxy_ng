@@ -68,12 +68,13 @@ def create_local_image_container(config, client):
     return ee_name
 
 
-def upload_test_artifact(client, namespace):
+def upload_test_artifact(client, namespace, repo=None, artifact=None):
     test_version = generate_random_artifact_version()
-    artifact = build_collection(
-        "skeleton",
-        config={"namespace": namespace, "version": test_version},
-    )
+    if not artifact:
+        artifact = build_collection(
+            "skeleton",
+            config={"namespace": namespace, "version": test_version, "repository_name": repo},
+        )
     logger.debug(f"Uploading artifact {artifact}")
     resp = upload_artifact(None, client, artifact)
     logger.debug("Waiting for upload to be completed")

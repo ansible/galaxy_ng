@@ -26,5 +26,13 @@ def test_repository_labels(ansible_config):
             resp["name"] for resp in iterate_all(
                 client, url.format(label))
         }
+        # now we have test cases that create multiple repos, we don't want
+        # to take them into account in this test case
+        repos_to_remove = []
+        for repo in repos:
+            if repo.startswith("repo-test-"):
+                repos_to_remove.append(repo)
+        for repo in repos_to_remove:
+            repos.remove(repo)
 
         assert repos == labels[label]

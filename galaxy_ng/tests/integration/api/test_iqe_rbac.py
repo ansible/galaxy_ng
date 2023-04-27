@@ -469,7 +469,7 @@ class TestRBAC:
             gc_user.delete_collection(
                 namespace_name, artifact.name, artifact.version, repository="published"
             )
-        assert ctx.value.args[0] == 403
+        assert ctx.value.args[0]["status"] == "403"
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
 
     @pytest.mark.iqe_rbac_test
