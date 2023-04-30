@@ -104,6 +104,7 @@ services:
       - "./common/container_sign.sh:/var/lib/pulp/scripts/container_sign.sh:z"
       - "${COMPOSE_CONTEXT}/..:/src:z"
       - "pulp:/var/lib/pulp"
+      - "./docker/bin/start-content-app:/usr/local/bin/start-content-app:z"
     tmpfs:
       - "/tmp/ansible:uid=1000,gid=1000"
     depends_on:
