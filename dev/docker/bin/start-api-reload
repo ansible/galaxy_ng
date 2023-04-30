@@ -1,0 +1,37 @@
+#!/bin/bash
+# TODO(cutwater): Merge to `start-api` script. Add GUNICORN_RELOAD option.
+
+set -x
+set -o errexit
+set -o nounset
+
+readonly GUNICORN='/venv/bin/gunicorn'
+readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
+readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
+
+readonly BIND_HOST='0.0.0.0'
+readonly BIND_PORT=8000
+readonly APP_MODULE='pulpcore.app.wsgi:application'
+
+GUNICORN_OPTIONS=(
+  --bind "${BIND_HOST}:${BIND_PORT}"
+  --workers "${GUNICORN_WORKERS}"
+  --reload-extra-file /etc/pulp/settings.py 
+  --reload-extra-file /etc/pulp/dynaconf_hooks.py 
+  --reload-extra-file /src/galaxy_ng/.compose.env
+  --access-logfile -
+  --reload
+)
+
+if [[ -n "${GUNICORN_LOGGER_CLASS}" ]]; then
+    GUNICORN_OPTIONS+=(--logger-class "${GUNICORN_LOGGER_CLASS}")
+fi
+
+#exec "${GUNICORN}" "${GUNICORN_OPTIONS[@]}" "${APP_MODULE}"
+if ! hash coverage 2>/dev/null; then
+    pip install coverage
+fi
+exec coverage run \
+    --data-file=/src/coverage.datafile.api \
+    -m gunicorn \
+    "${GUNICORN_OPTIONS[@]}" "${APP_MODULE}"

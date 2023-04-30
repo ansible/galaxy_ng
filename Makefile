@@ -151,6 +151,13 @@ docker/all: 	                                ## Build, migrate, loaddata, transl
 	make docker/loaddata
 	make docker/translations
 
+.PHONY: docker/coverage
+docker/coverage:
+	docker exec -u root -it galaxy_ng_api_1 /bin/bash -c 'kill -HUP 1'
+	docker exec -u root -it galaxy_ng_worker_1 /bin/bash -c 'kill -HUP 1'
+	docker exec -it galaxy_ng_api_1 /bin/bash -c 'coverage combine -a --keep --data-file=/src/coverage.combined /src/coverage.datafile.api /src/coverage.datafile.worker'
+	docker exec -it galaxy_ng_api_1 /bin/bash -c 'coverage report --data-file=/src/coverage.combined'
+
 # Application management and debugging
 
 # e.g: make api/get URL=/content/community/v3/collections/
