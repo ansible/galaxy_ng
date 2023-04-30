@@ -159,10 +159,9 @@ docker/coverage:
 	sleep 5
 	docker exec -it galaxy_ng_api_1 /bin/bash -c 'coverage combine -a \
 		--keep --data-file=/src/coverage.combined \
-		/src/coverage.datafile.api \
-		/src/coverage.datafile.content \
-		/src/coverage.datafile.worker'
-	docker exec -it galaxy_ng_api_1 /bin/bash -c 'coverage report --data-file=/src/coverage.combined'
+		/src/coverage.datafile.*'
+	docker exec -it galaxy_ng_api_1 /bin/bash -c 'coverage report --data-file=/src/coverage.combined --show-missing'
+	docker exec -it galaxy_ng_api_1 /bin/bash -c 'coverage html --data-file=/src/coverage.combined -d /src/coverage_html'
 
 # Application management and debugging
 

@@ -9,6 +9,15 @@ set -o nounset
 if ! hash coverage 2>/dev/null; then
     pip install coverage
 fi
+#exec coverage run \
+#    --data-file=/src/coverage.datafile.worker \
+#    $(which pulpcore-worker)
+
+#exec coverage run \
+#    --data-file=/src/coverage.datafile.worker \
+#    -m pulpcore.tasking.entrypoint.worker
+
 exec coverage run \
     --data-file=/src/coverage.datafile.worker \
-    $(which pulpcore-worker)
+    /venv/bin/pulpcore-worker
+
