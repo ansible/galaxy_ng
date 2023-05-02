@@ -1,5 +1,9 @@
 # Community User Guide
 
+## API 
+
+If you are looking for v3 API reference please go to [API v3](api_v3.md)
+
 ## Servers
 
 We have multiple instances of the beta site running to cover the dev, staging and production lifecycle.
