@@ -14,6 +14,7 @@ COMMUNITY_DOMAINS = (
     'galaxy.ansible.com',
     'galaxy-dev.ansible.com',
     'galaxy-qa.ansible.com',
+    'beta-galaxy.ansible.com',
 )
 
 INBOUND_REPO_NAME_FORMAT = "inbound-{namespace_name}"

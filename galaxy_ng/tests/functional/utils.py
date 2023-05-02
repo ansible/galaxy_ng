@@ -239,7 +239,7 @@ class TestCaseUsingBindings(PulpTestCase):
     def sync_repo(self, requirements_file, **kwargs):
         """Sync a repository with a given requirements_file"""
         repo_name = kwargs.get("repo_name", "community")
-        url = kwargs.get("url", "https://galaxy.ansible.com/api/")
+        url = kwargs.get("url", "https://beta-galaxy.ansible.com/api/")
 
         self.sync_config_api.update(
             repo_name,
