@@ -49,7 +49,14 @@ token = <your-api-token>
 
 ## Finding Roles
 
-Standalone roles are not yet presented in the UI, so search is only available via the api or galaxy cli.
+Standalone roles are searchable via the UI, api or galaxy cli.
+
+### UI
+In the left nav menu, click on "Legacy" and then "Legacy Roles". Once the legacy roles page loads, a filter tool
+will be present at the top of the page. Search options are keywords or tags. Tags come from the role's metadata file
+and are defined the role author. Keywords are a full text search across the role's namespace, name and description.
+
+### API
 
 The v1 rest api has filter parameter support similar to the current code on https://galaxy.ansible.com.
 
@@ -60,6 +67,8 @@ curl 'https://beta-galaxy.ansible.com/api/v1/roles/?github_user=geerlingguy'
 # Find all roles containing a keyword in the namespace, name or description.
 curl 'https://beta-galaxy.ansible.com/api/v1/roles/?keyword=docker'
 ```
+
+### CLI
 
 The ansible-galaxy CLI also supports role search
 
@@ -72,16 +81,8 @@ ansible-galaxy role search --help
 Collections do have search support in the UI.
 
 1. In the left-nav click "Collections".
-2. Choose the appropriate repository in the dropdown.
-3. Choose keywords or tag.
-4. Type the term or select a tag to filter the list of results.
-
-!!! info
-
-    What repository?
-
-    We're currently synchronizing all collections from https://galaxy.ansible.com into the "community" repository,
-    but will soon attempt to change that to the "published" repository.
+2. Choose keywords or tag.
+3. Type the term or select a tag to filter the list of results.
 
 Future support for collection search in the ansible-galaxy CLI is [TBD](https://issues.redhat.com/browse/AAH-1968).
 
