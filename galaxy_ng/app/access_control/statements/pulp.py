@@ -181,6 +181,15 @@ PULP_CONTAINER_VIEWSETS = {
                     "has_namespace_or_obj_perms:container.modify_content_containerpushrepository",
                 ],
             },
+            {
+                "action": ["update", "partial_update"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition_expression": [
+                    "has_namespace_obj_perms:container.namespace_change_containerpushrepository or "
+                    "has_distribution_perms:container.change_containerdistribution",
+                ],
+            },
         ],
         # Remove permission assignment since it's trying to add permissions to groups
         # that don't exist
