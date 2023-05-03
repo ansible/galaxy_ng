@@ -4,7 +4,6 @@ Galaxy as a container registry can handle container manifest signatures, the ser
 image push with signatures attached and can also create signatures on-demand via UI and API
 using a Pulp Signing Service.
 
-
 !!! tip "Enabling signing on pulp installer"
     Pulp installer can also be configured to enable container signing https://github.com/pulp/pulp_installer/tree/main/roles/galaxy_post_install#variables-for-the-signing-service
     if you configures using pulp-installer you can skip the `Creating Container Signing Service` section of this page.
@@ -70,33 +69,26 @@ The named argument `--class`
 Pulp Container provides an example of a script that uses **skopeo** to produce signatures
 https://docs.pulpproject.org/pulp_container/workflows/sign-images.html#image-signature-configuration
 
-
-!!! info
-    On the running system it is important that the pulp worker has access to the `PULP_CONTAINER_SIGNING_KEY_FINGERPRINT` 
-    environment variable, ex: `export PULP_CONTAINER_SIGNING_KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint path/to/key.gpg | awk -F: '$1 == "fpr" {print $10;}' | head -n1)`
-
 ```bash title="/var/lib/pulp/scripts/container_sign.sh"
 #!/usr/bin/env bash
-
 # This GPG_TTY variable might be needed on a container image that is not running as root.
-#export GPG_TTY=$(tty)
+# export GPG_TTY=$(tty)
 
-# Create a file with passphrase only if the key is password protected.
-# echo "Galaxy2022" > /tmp/key_password.txt
-
-# pulp_container SigningService will pass the next 3 variables to the script.
+# pulp_container SigningService will pass the next 4 variables to the script.
 MANIFEST_PATH=$1
+FINGERPRINT="$PULP_SIGNING_KEY_FINGERPRINT"
 IMAGE_REFERENCE="$REFERENCE"
 SIGNATURE_PATH="$SIG_PATH"
 
 # Create container signature using skopeo
-# omit --passphrase-file option if the key is not password protected.
 skopeo standalone-sign \
-  # --passphrase-file /tmp/key_password.txt \
   $MANIFEST_PATH \
   $IMAGE_REFERENCE \
-  $PULP_CONTAINER_SIGNING_KEY_FINGERPRINT \
+  $FINGERPRINT \
   --output $SIGNATURE_PATH
+
+# Optionally pass the passphrase to the key if password protected.
+# --passphrase-file /path/to/key_password.txt
 
 # Check the exit status
 STATUS=$?
@@ -107,12 +99,12 @@ else
 fi
 ```
 
-#### Example
+#### Using the key and script to create the signing service
 
 ```bash title="Creating the signing service"
 django-admin add-signing-service container-default \
   /var/lib/pulp/scripts/container_sign.sh \
-  ${PULP_CONTAINER_SIGNING_KEY_FINGERPRINT} \
+  ${FINGERPRINT} \
   --class container:ManifestSigningService
 ```
 
