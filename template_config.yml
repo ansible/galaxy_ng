@@ -1,11 +1,11 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-208-g15b1f3d
+# generated with plugin_template@2021.08.26-212-g18b9346
 
 additional_repos:
 - bindings: true
-  branch: 0.17.0
+  branch: main
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -38,6 +38,7 @@ deploy_client_to_pypi: false
 deploy_client_to_rubygems: false
 deploy_to_pypi: false
 disabled_redis_runners: []
+doc_requirements_from_pulpcore: true
 docker_fixtures: false
 docs_test: false
 flake8: false
