@@ -27,7 +27,7 @@ class TestRepositories:
         Verifies that the same collection / version cannot be uploaded to the same repo
         """
         test_repo_name = f"repo-test-{generate_random_string()}"
-        gc = galaxy_client("admin")
+        gc = galaxy_client("partner_engineer")
         create_repo_and_dist(gc, test_repo_name)
         namespace_name = create_test_namespace(gc)
         artifact = upload_new_artifact(
@@ -42,7 +42,7 @@ class TestRepositories:
         """
         Verifies a cv can be copied to a different repo
         """
-        gc_admin = galaxy_client("admin")
+        gc_admin = galaxy_client("partner_engineer")
 
         test_repo_name_1 = f"repo-test-{generate_random_string()}"
         repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
@@ -74,7 +74,7 @@ class TestRepositories:
         """
         Verifies a cv can be moved to a different repo
         """
-        gc_admin = galaxy_client("admin")
+        gc_admin = galaxy_client("partner_engineer")
 
         test_repo_name_1 = f"repo-test-{generate_random_string()}"
         repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
