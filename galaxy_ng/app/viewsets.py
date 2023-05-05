@@ -48,18 +48,6 @@ class ContainerDistributionViewSet(
     endpoint_name = "galaxy_ng/container-distribution-proxy"
 
 
-# added so that object permissions are viewable for namespaces on the roles api endpoint.
-class NamespaceViewSet(
-    pulp_viewsets.NamedModelViewSet,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-):
-    queryset = models.Namespace.objects.all()
-    serializer_class = NamespaceSummarySerializer
-    permission_classes = [access_policy.NamespaceAccessPolicy]
-    endpoint_name = "pulp_ansible/namespaces"
-
-
 # This is here because when new objects are created, pulp tries to look up the viewset for
 # the model so that it can run creation hooks to assign permissions. This function fails
 # if the model isn't registered with a pulp viewset

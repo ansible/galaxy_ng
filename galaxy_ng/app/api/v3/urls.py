@@ -8,7 +8,11 @@ from pulp_ansible.app.urls import (
 from . import views, viewsets
 
 router = routers.SimpleRouter()
-router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
+
+
+
+# TODO: remove the namespace viewsets/serializers from galaxy_ng
+# router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
 
 namespace_urls = [
     path("", include(router.urls)),
