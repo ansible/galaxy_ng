@@ -25,12 +25,13 @@ echo "PYTHON: $(which python)"
 pip install -r integration_requirements.txt
 pip show epdb || pip install epdb
 
+CONTAINER=$(docker ps --filter="name=galaxy_ng" --format="table {{.Names}}" | grep -F api)
 echo "Setting up test data"
-docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
+docker exec -i "$CONTAINER" /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
 
 #export HUB_API_ROOT='http://localhost:5001/api/'
-pytest --capture=no --tb=short -m "rbac_roles" $@ -v galaxy_ng/tests/integration
+pytest --capture=no --tb=short -m "rbac_roles" "$@" -v galaxy_ng/tests/integration
 RC=$?
 
 exit $RC

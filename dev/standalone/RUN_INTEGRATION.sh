@@ -23,7 +23,9 @@ pip install -r integration_requirements.txt
 pip show epdb || pip install epdb
 
 echo "Setting up test data"
-docker exec -i galaxy_ng_api_1 /entrypoint.sh manage shell < dev/common/setup_test_data.py
+CONTAINER_API=$(docker ps --filter="name=galaxy_ng" --format="table {{.Names}}" | grep -F api)
+CONTAINER_WORKER=$(docker ps --filter="name=galaxy_ng" --format="table {{.Names}}" | grep -F worker)
+docker exec -i "${CONTAINER_API}" /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
 export HUB_USE_MOVE_ENDPOINT=true
 
@@ -33,15 +35,15 @@ export HUB_USE_MOVE_ENDPOINT=true
 pytest \
     --capture=no \
     -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync and not certified_sync and not x_repo_search and not rm_sync and not rbac_repos" \
-    -v $@ galaxy_ng/tests/integration
+    -v "$@" galaxy_ng/tests/integration
 RC=$?
 
-if [[ ! -z DUMP_LOGS ]] && [[ $RC != 0 ]]; then
+if [[ -n "$DUMP_LOGS" ]] && [[ $RC != 0 ]]; then
     # dump the api logs
-    docker logs galaxy_ng_api_1
+    docker logs "${CONTAINER_API}"
 
     # dump the worker logs
-    docker logs galaxy_ng_worker_1
+    docker logs "${CONTAINER_WORKER}"
 fi
 
 exit $RC

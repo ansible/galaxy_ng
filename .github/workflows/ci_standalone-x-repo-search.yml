@@ -30,8 +30,12 @@ jobs:
       - name: Install LDAP requirements
         run: sudo apt-get install -y libsasl2-dev python3 libldap2-dev libssl-dev build-essential
 
-      - name: Install docker-compose
-        run: pip3 install --upgrade docker-compose
+      - name: Install python requirements required to run integration tests
+        run: pip install requests pyyaml
+
+      - uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: '2.17.3'
 
       - name: create the .compose.env file
         run: rm -f .compose.env; cp .compose.env.example .compose.env
