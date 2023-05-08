@@ -23,13 +23,12 @@ pip install -r integration_requirements.txt
 pip show epdb || pip install epdb
 
 echo "Setting up test data"
-# If using a custom DEV_IMAGE_SUFFIX the container name will be different.
-CONTAINER_ID=${GALAXY_API_CONTAINER_NAME:-galaxy_ng_api_1}
-docker exec -i $CONTAINER_ID /entrypoint.sh manage shell < dev/common/setup_test_data.py
+CONTAINER=$(docker ps --filter="name=galaxy_ng" --format="table {{.Names}}" | grep -F api)
+docker exec -i "$CONTAINER" /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
 
 #export HUB_API_ROOT='http://localhost:5001/api/'
-pytest --capture=no --tb=short -m "standalone_only and ldap" $@ -v galaxy_ng/tests/integration
+pytest --capture=no --tb=short -m "standalone_only and ldap" "$@" -v galaxy_ng/tests/integration
 RC=$?
 
 exit $RC

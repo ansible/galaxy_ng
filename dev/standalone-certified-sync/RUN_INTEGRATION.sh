@@ -25,15 +25,17 @@ $VENVPATH/bin/pip show epdb || pip install epdb
 # when running user can specify extra pytest arguments such as
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
-$VENVPATH/bin/pytest --capture=no -m "certified_sync or rm_sync" -v $@ galaxy_ng/tests/integration
+$VENVPATH/bin/pytest --capture=no -m "certified_sync or rm_sync" -v "$@" galaxy_ng/tests/integration
 RC=$?
 
 if [[ $RC != 0 ]]; then
+    CONTAINER_API=$(docker ps --filter="name=galaxy_ng" --format="table {{.Names}}" | grep -F api)
+    CONTAINER_WORKER=$(docker ps --filter="name=galaxy_ng" --format="table {{.Names}}" | grep -F worker)
     # dump the api logs
-    docker logs galaxy_ng_api_1
+    docker logs "$CONTAINER_API"
 
     # dump the worker logs
-    docker logs galaxy_ng_worker_1
+    docker logs "$CONTAINER_WORKER"
 fi
 
 exit $RC
