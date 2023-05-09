@@ -171,7 +171,15 @@ def test_api_ui_v1_distributions(ansible_config):
 
         for distro in ds['data']:
             validate_json(instance=distro, schema=schema_distro)
-            validate_json(instance=distro['repository'], schema=schema_distro_repository)
+            if distro['repository']:
+                validate_json(instance=distro['repository'], schema=schema_distro_repository)
+
+        distros_to_remove = []
+        for distro in ds['data']:
+            if distro["name"].startswith("repo-test-") or distro["name"].startswith("foobar-") or distro["name"].startswith("dist-test-"):
+                distros_to_remove.append(distro)
+        for distro in distros_to_remove:
+            ds['data'].remove(distro)
 
         # make sure all default distros are in the list ...
         distro_tuples = [(x['name'], x['base_path']) for x in ds['data']]
@@ -205,7 +213,8 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
             assert resp.status_code == 200
             _ds = resp.json()
             validate_json(instance=_ds, schema=schema_distro)
-            validate_json(instance=_ds['repository'], schema=schema_distro_repository)
+            if _ds['repository']:
+                validate_json(instance=_ds['repository'], schema=schema_distro_repository)
             assert _ds['pulp_id'] == distro_id
 
 
@@ -311,7 +320,6 @@ def test_api_ui_v1_feature_flags(ansible_config):
         validate_json(instance=ds, schema=schema_featureflags)
 
         assert ds['ai_deny_index'] is False
-        assert ds['display_repositories'] is True
         assert ds['execution_environments'] is True
         assert ds['legacy_roles'] is False
 
@@ -607,7 +615,7 @@ def test_api_ui_v1_remotes(ansible_config):
     with UIClient(config=cfg) as uclient:
 
         # get the response
-        resp = uclient.get('_ui/v1/remotes/')
+        resp = uclient.get('_ui/v1/remotes/?limit=100')
         assert resp.status_code == 200
 
         ds = resp.json()

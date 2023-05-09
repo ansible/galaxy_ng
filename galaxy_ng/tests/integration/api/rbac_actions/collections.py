@@ -462,8 +462,8 @@ def change_ansible_distribution(user, password, expect_pass, extra):
     response = requests.put(
         f"{SERVER}{ansible_distro['pulp_href']}",
         {
-            "name": f"bazqux-{gen_string()}",
-            "base_path": f"bazqux-{gen_string()}"
+            "name": f"dist-test-{gen_string()}",
+            "base_path": f"dist-test-{gen_string()}"
         },
         # auth=ADMIN_CREDENTIALS,
         auth=(user['username'], password),
@@ -499,7 +499,7 @@ def change_ansible_remote(user, password, expect_pass, extra):
     response = requests.put(
         f"{SERVER}{ansible_remote['pulp_href']}",
         json={
-            "name": f"bazqux-{gen_string()}",
+            "name": f"dist-test-{gen_string()}",
             "url": "baz.qux/api/"
         },
         auth=(user['username'], password),

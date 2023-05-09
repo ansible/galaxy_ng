@@ -68,7 +68,7 @@ def create_local_image_container(config, client):
     return ee_name
 
 
-def upload_test_artifact(client, namespace, repo=None, artifact=None):
+def upload_test_artifact(client, namespace, repo=None, artifact=None, direct_upload=False):
     test_version = generate_random_artifact_version()
     if not artifact:
         artifact = build_collection(
@@ -76,7 +76,8 @@ def upload_test_artifact(client, namespace, repo=None, artifact=None):
             config={"namespace": namespace, "version": test_version, "repository_name": repo},
         )
     logger.debug(f"Uploading artifact {artifact}")
-    resp = upload_artifact(None, client, artifact)
+    path = repo if direct_upload else None
+    resp = upload_artifact(None, client, artifact, path=path)
     logger.debug("Waiting for upload to be completed")
     resp = wait_for_task(client, resp)
     assert resp["state"] == "completed"

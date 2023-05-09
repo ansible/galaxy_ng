@@ -126,6 +126,7 @@ from .rbac_actions.exec_env import (
     ee_namespace_add_role,
     ee_namespace_remove_role
 )
+from ..utils.tools import generate_random_string
 
 log = logging.getLogger(__name__)
 
@@ -637,11 +638,11 @@ def _get_reusable_extras():
             "remote_ee": ReusableRemoteContainer(gen_string(), _registry_pk),
             "local_ee": ReusableLocalContainer(gen_string()),
             "custom_staging_repo": ReusableAnsibleRepository(
-                gen_string(), is_staging=True),
+                f"repo-test-{generate_random_string()}", is_staging=True),
             "custom_repo": ReusableAnsibleRepository(
-                gen_string(), is_staging=False),
+                f"repo-test-{generate_random_string()}", is_staging=False),
             "private_repo": ReusableAnsibleRepository(
-                gen_string(), is_staging=False, is_private=True, add_collection=True),
+                f"repo-test-{generate_random_string()}", is_staging=False, is_private=True, add_collection=True),
         }
 
     return REUSABLE_EXTRA

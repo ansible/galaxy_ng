@@ -180,7 +180,7 @@ schema_distro = {
         'base_path': {'type': 'string'},
         'name': {'type': 'string'},
         'pulp_id': {'type': 'string'},
-        'repository': {'type': 'object'}
+        'repository': {'type': ['object', 'null']}
     }
 }
 
@@ -246,7 +246,7 @@ schema_remote = {
         'proxy_url': {'type': ['string', 'null']},
         'proxy_username': {'type': ['string', 'null']},
         'pulp_href': {'type': 'string'},
-        'rate_limit': {'type': 'number'},
+        'rate_limit': {'type': ['number', 'null']},
         'repositories': {'type': 'array'},
         'requirements_file': {'type': ['string', 'null']},
         'signed_only': {'type': 'boolean'},

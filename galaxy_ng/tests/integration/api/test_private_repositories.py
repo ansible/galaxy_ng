@@ -25,8 +25,8 @@ def repo_factory(admin_client):
         return admin_client(
             repo_url,
             args={
-                "name": uuid4(),
-                "description": uuid4(),
+                "name": f"repo-test-{uuid4()}",
+                "description": f"repo-test-{uuid4()}",
                 "private": private,
             },
             method="POST",
@@ -42,8 +42,8 @@ def distro_factory(admin_client):
         distro_task = admin_client(
             distro_url,
             args={
-                "base_path": uuid4(),
-                "name": uuid4(),
+                "base_path": f"dist-test-{uuid4()}",
+                "name": f"dist-test-{uuid4()}",
                 "repository": repo,
             },
             method="POST",
