@@ -26,7 +26,7 @@ from ansible.galaxy.token import KeycloakToken
 from orionutils.generator import build_collection as _build_collection
 from orionutils.generator import randstr
 
-from .constants import USERNAME_PUBLISHER
+from ..constants import USERNAME_PUBLISHER
 
 
 logger = logging.getLogger(__name__)

@@ -55,7 +55,7 @@ jobs:
         run: sleep 120
 
       - name: run the integration tests
-        continue-on-error: true
+        # continue-on-error: true
         run: HUB_LOCAL=1 ./dev/common/RUN_INTEGRATION.sh
 
       - name: dump the api logs
