@@ -176,7 +176,7 @@ def test_api_ui_v1_distributions(ansible_config):
 
         distros_to_remove = []
         for distro in ds['data']:
-            if distro["name"].startswith("repo-test-") or distro["name"].startswith("foobar-") or distro["name"].startswith("dist-test-"):
+            if distro["name"].startswith("repo-test-") or distro["name"].startswith("dist-test-"):
                 distros_to_remove.append(distro)
         for distro in distros_to_remove:
             ds['data'].remove(distro)

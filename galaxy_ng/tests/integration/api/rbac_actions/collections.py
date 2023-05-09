@@ -43,8 +43,8 @@ def _create_ansible_distro_common(user, password, expect_pass):
     task_response = requests.post(
         f"{PULP_API_ROOT}distributions/ansible/ansible/",
         {
-            "name": f"foobar-{gen_string()}",
-            "base_path": f"foobar-{gen_string()}"
+            "name": f"dist-test-{gen_string()}",
+            "base_path": f"dist-test-{gen_string()}"
         },
         auth=(user, password),
     )
@@ -448,8 +448,8 @@ def add_ansible_distribution(user, password, expect_pass, extra):
     response = requests.post(
         f"{PULP_API_ROOT}distributions/ansible/ansible/",
         {
-            "name": f"foobar-{gen_string()}",
-            "base_path": f"foobar-{gen_string()}"
+            "name": f"dist-test-{gen_string()}",
+            "base_path": f"dist-test{gen_string()}"
         },
         auth=(user['username'], password),
     )
