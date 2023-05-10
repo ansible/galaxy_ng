@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 14:21+0000\n"
+"POT-Creation-Date: 2023-05-01 10:21-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,23 +15,29 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app/access_control/access_policy.py:198
+#: app/access_control/access_policy.py:365
 msgid "Namespace in filename not found."
 msgstr "ファイル名の名前空間が見つかりません。"
 
-#: app/access_control/access_policy.py:231
+#: app/access_control/access_policy.py:398
 msgid "Distribution does not exist."
-msgstr ""
+msgstr "ディストリビューションは存在しません。"
 
-#: app/access_control/access_policy.py:245
+#: app/access_control/access_policy.py:412
 msgid "Namespace not found."
 msgstr "名前空間が見つかりません。"
 
-#: app/access_control/access_policy.py:333
+#: app/access_control/access_policy.py:481
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
-msgstr ""
+msgstr "GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL が有効になっている場合、任意の 'approved' リポジトリーにコレクションを追加するには、署名が必要です。"
+
+#: app/access_control/access_policy.py:534 app/api/v3/views/sync.py:49
+msgid ""
+"Syncing content from galaxy.ansible.com without specifying a requirements "
+"file is not allowed."
+msgstr "要件ファイルを指定せずに galaxy.ansible.com からコンテンツを同期することはできません。"
 
 #: app/access_control/fields.py:17
 msgid "object_roles field is required"
@@ -67,9 +73,7 @@ msgstr "無効なグループ名または ID"
 msgid ""
 "Role {role} does not exist or does not have any permissions related to this "
 "object."
-msgstr ""
-"ロール {role} が存在しないか、このオブジェクトに関連するパーミッションがあり"
-"ません。"
+msgstr "ロール {role} が存在しないか、このオブジェクトに関連するパーミッションがありません。"
 
 #: app/api/ui/serializers/execution_environment.py:64
 msgid "Selected registry does not exist."
@@ -79,9 +83,7 @@ msgstr "選択したレジストリーが存在しません。"
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr ""
-"コンテナー名には、英数字、「.」、「_」、「-」、および 1 つまでの「/」しか使用"
-"することができません。"
+msgstr "コンテナー名には、英数字、「.」、「_」、「-」、および 1 つまでの「/」しか使用することができません。"
 
 #: app/api/ui/serializers/execution_environment.py:91
 msgid "Name cannot be changed."
@@ -102,38 +104,28 @@ msgstr "同期リストはすでに存在します: %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr ""
-"同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つか"
-"りませんでした"
+msgstr "同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
 
 #: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr ""
-"同期リスト {synclist} の更新中にコレクション \"{namespace}.{name}\" が見つか"
-"りませんでした"
+msgstr "同期リスト {synclist} の更新中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
 
 #: app/api/ui/serializers/user.py:75
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr ""
-"要求するユーザーが所属しないユーザーグループを変更するには、「galaxy."
-"change_group」パーミッションが必要です。"
+msgstr "要求するユーザーが所属しないユーザーグループを変更するには、「galaxy.change_group」パーミッションが必要です。"
 
 #: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
 msgid "Must be a super user to grant super user permissions."
-msgstr ""
-"スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があ"
-"ります。"
+msgstr "スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があります。"
 
 #: app/api/ui/serializers/user.py:110
 msgid "Must be a super user to change another user's password."
-msgstr ""
-"別のユーザーのパスワードを変更するには、スーパーユーザーである必要がありま"
-"す。"
+msgstr "別のユーザーのパスワードを変更するには、スーパーユーザーである必要があります。"
 
 #: app/api/ui/serializers/user.py:126
 msgid "You do not have permissions to modify super users."
@@ -148,42 +140,31 @@ msgstr "グループ名=%(name)s、id=%(id)s は存在しません"
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr ""
-"警告:GALAXY_COLLECTION_SIGNING_SERVICE は '{}' に設定されていますが、それぞれ"
-"の SigningService がデータベースに存在しません。"
+msgstr "警告:GALAXY_COLLECTION_SIGNING_SERVICE は '{}' に設定されていますが、それぞれの SigningService がデータベースに存在しません。"
 
 #: app/api/ui/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
-msgstr ""
-"警告:GALAXY_AUTO_SIGN_COLLECTIONS は True に設定されていますが、システムには"
-"署名を作成する SigningService が設定されていません。"
+msgstr "警告:GALAXY_AUTO_SIGN_COLLECTIONS は True に設定されていますが、システムには署名を作成する SigningService が設定されていません。"
 
 #: app/api/ui/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
-msgstr ""
-"情報: システムは、(リモート同期からの) 署名を表示するように設定されています"
-"が、署名を作成したり、署名のアップロードを受け入れるように設定されていませ"
-"ん。"
+msgstr "情報: システムは、(リモート同期からの) 署名を表示するように設定されていますが、署名を作成したり、署名のアップロードを受け入れるように設定されていません。"
 
 #: app/api/ui/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr ""
-"警告:GALAXY_CONTAINER_SIGNING_SERVICE は '{}' に設定されていますが、それぞれ"
-"の SigningService はデータベースに存在しません。"
+msgstr "警告:GALAXY_CONTAINER_SIGNING_SERVICE は '{}' に設定されていますが、それぞれの SigningService はデータベースに存在しません。"
 
 #: app/api/ui/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
-msgstr ""
-"警告: container_signing は '{}' SigningService を介して有効になっていますが、"
-"実行環境はシステムで無効になっています。"
+msgstr "警告: container_signing は '{}' SigningService を介して有効になっていますが、実行環境はシステムで無効になっています。"
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
@@ -223,7 +204,7 @@ msgstr "ディストリビューションベースパスが必要です"
 #: app/api/ui/viewsets/collection.py:197
 #, python-format
 msgid "%s must be a valid semantic version range."
-msgstr ""
+msgstr "%s 有効なセマンティックバージョン範囲でなければなりません。"
 
 #: app/api/ui/viewsets/collection.py:233
 msgid "Retrieve collection version"
@@ -246,18 +227,14 @@ msgstr "%s という名前のグループはすでに存在します。"
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr ""
-"ファイル名 {filename} が無効です。想定される形式: namespace-name-version.tar."
-"gz"
+msgstr "ファイル名 {filename} が無効です。想定される形式: namespace-name-version.tar.gz"
 
 #: app/api/utils.py:60
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr ""
-"ファイル名 {filename} のバージョン文字列 {version} が無効です。セマンティック"
-"のバージョン形式が必要です。"
+msgstr "ファイル名 {filename} のバージョン文字列 {version} が無効です。セマンティックのバージョン形式が必要です。"
 
 #: app/api/utils.py:64
 #, python-format
@@ -281,7 +258,7 @@ msgstr "「%s」は有効な URL ではありません。"
 
 #: app/api/v3/serializers/namespace.py:106
 msgid "Attribute 'name' is required"
-msgstr "属性「名」が必要です。"
+msgstr "属性「名」が必要です"
 
 #: app/api/v3/serializers/namespace.py:109
 msgid "Name can only contain lower case letters, underscores and numbers"
@@ -315,22 +292,12 @@ msgstr "リモートユーザー。"
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr ""
-"要件ファイルを指定せずに、コミュニティードメインからのコンテンツを同期するこ"
-"とはできません。"
+msgstr "要件ファイルを指定せずに、コミュニティードメインからのコンテンツを同期することはできません。"
 
 #: app/api/v3/views/sync.py:38 app/api/v3/views/sync.py:83
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
 msgstr "%s ディストリビューションには、リモートが関連付けられていません。"
-
-#: app/api/v3/views/sync.py:49
-msgid ""
-"Syncing content from galaxy.ansible.com without specifying a requirements "
-"file is not allowed."
-msgstr ""
-"要件ファイルを指定せずに galaxy.ansible.com からコンテンツを同期することはで"
-"きません。"
 
 #: app/api/v3/views/sync.py:97
 #, python-format
@@ -345,7 +312,7 @@ msgstr "名前空間 \"{0}\" は存在しません。"
 #: app/api/v3/viewsets/collection.py:209
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
-msgstr "コンテンツアプリからの予期しない応答。コード: %s"
+msgstr "コンテンツアプリからの予期しない応答。コード: %s。"
 
 #: app/api/v3/viewsets/collection.py:237
 #, python-format
@@ -377,9 +344,7 @@ msgstr "署名 %s サービスが見つかりません"
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
 "at least a signature for approval."
-msgstr ""
-"承認するには少なくとも署名が必要なため、コレクション {namespace}.{name} を承"
-"認できませんでした。"
+msgstr "承認するには少なくとも署名が必要なため、コレクション {namespace}.{name} を承認できませんでした。"
 
 #: app/api/v3/viewsets/namespace.py:66
 #, python-format
@@ -391,9 +356,7 @@ msgstr "%s という名前の名前空間はすでに存在します。"
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr ""
-"名前空間 {name} には関連付けられているコレクションがあるため、削除できませ"
-"ん。"
+msgstr "名前空間 {name} には関連付けられているコレクションがあるため、削除できません。"
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -401,466 +364,504 @@ msgstr "認証に失敗しました。"
 
 #: app/constants.py:24
 msgid "Add namespace"
-msgstr ""
+msgstr "名前空間の追加"
 
 #: app/constants.py:28
 msgid "Create a new namespace."
-msgstr ""
+msgstr "新しい名前空間を作成します。"
 
 #: app/constants.py:30 app/constants.py:36 app/constants.py:42
 #: app/constants.py:48
 msgid "Collection Namespaces"
-msgstr ""
+msgstr "コレクション名前空間"
 
 #: app/constants.py:33
 msgid "Change namespace"
-msgstr ""
+msgstr "名前空間の変更"
 
 #: app/constants.py:34
 msgid "Edit this namespace."
-msgstr ""
+msgstr "この名前空間を編集します。"
 
 #: app/constants.py:35
 msgid "Edit any existing namespace."
-msgstr ""
+msgstr "任意の既存の名前空間を編集します。"
 
 #: app/constants.py:39
 msgid "Delete namespace"
-msgstr ""
+msgstr "名前空間の削除"
 
 #: app/constants.py:40
 msgid "Delete this namespace."
-msgstr ""
+msgstr "この名前空間を削除します。"
 
 #: app/constants.py:41
 msgid "Delete any existing namespace."
-msgstr ""
+msgstr "任意の既存の名前空間を削除します。"
 
 #: app/constants.py:45
 msgid "Upload to namespace"
-msgstr ""
+msgstr "名前空間へのアップロード"
 
 #: app/constants.py:46
 msgid "Upload collections to this namespace."
-msgstr ""
+msgstr "この名前空間にコレクションをアップロードします。"
 
 #: app/constants.py:47 app/constants.py:59
 msgid "Upload collections to any existing namespace."
-msgstr ""
+msgstr "コレクションを任意の既存の名前空間にアップロードします。"
 
 #: app/constants.py:51
 msgid "Delete collection"
-msgstr ""
+msgstr "コレクションの削除"
 
 #: app/constants.py:52
 msgid "Delete this collection."
-msgstr ""
+msgstr "このコレクションを削除します。"
 
 #: app/constants.py:53
 msgid "Delete any existing collection."
-msgstr ""
+msgstr "任意の既存のコレクションを削除します。"
 
 #: app/constants.py:54 app/constants.py:60 app/constants.py:66
 msgid "Collections"
-msgstr ""
+msgstr "コレクション"
 
 #: app/constants.py:57
 msgid "Modify Ansible repo content"
-msgstr ""
+msgstr "Ansible リポジトリーコンテンツの変更"
 
 #: app/constants.py:58
 msgid "Modify content of this Ansible repository."
-msgstr ""
+msgstr "この Ansible リポジトリーのコンテンツを変更します。"
 
 #: app/constants.py:63
 msgid "Sign collections"
-msgstr ""
+msgstr "コレクションへの署名"
 
 #: app/constants.py:64
 msgid "Sign collections in this repository."
-msgstr ""
+msgstr "このリポジトリーのコレクションに署名します。"
 
 #: app/constants.py:65
 msgid "Sign collections in any repository."
-msgstr ""
+msgstr "任意のリポジトリーのコレクションに署名します。"
 
 #: app/constants.py:69
 msgid "Add user"
-msgstr ""
+msgstr "ユーザーの追加"
 
 #: app/constants.py:71
 msgid "Add new users to the system."
-msgstr ""
+msgstr "システムに新しいユーザーを追加します。"
 
 #: app/constants.py:72 app/constants.py:78 app/constants.py:84
 #: app/constants.py:90
 msgid "Users"
-msgstr ""
+msgstr "ユーザー"
 
 #: app/constants.py:75
 msgid "Change user"
-msgstr ""
+msgstr "ユーザーの変更"
 
 #: app/constants.py:76
 msgid "Edit this user."
-msgstr ""
+msgstr "このユーザーを編集します。"
 
 #: app/constants.py:77
 msgid "Edit any existing user in the system."
-msgstr ""
+msgstr "システム内の任意の既存ユーザーを編集します。"
 
 #: app/constants.py:81
 msgid "Delete user"
-msgstr ""
+msgstr "ユーザーの削除"
 
 #: app/constants.py:82
 msgid "Delete this user."
-msgstr ""
+msgstr "このユーザーを削除します。"
 
 #: app/constants.py:83
 msgid "Delete any existing user in the system."
-msgstr ""
+msgstr "システム内の任意の既存ユーザーを削除します。"
 
 #: app/constants.py:87
 msgid "View user"
-msgstr ""
+msgstr "ユーザーの表示"
 
 #: app/constants.py:88
 msgid "View this user."
-msgstr ""
+msgstr "このユーザーを表示します。"
 
 #: app/constants.py:89
 msgid "View any user in the system."
-msgstr ""
+msgstr "システム内の任意のユーザーを表示します。"
 
 #: app/constants.py:93
 msgid "Add group"
-msgstr ""
+msgstr "グループの追加"
 
 #: app/constants.py:95
 msgid "Create new groups in the system."
-msgstr ""
+msgstr "システムに新しいグループを作成します。"
 
 #: app/constants.py:96 app/constants.py:102 app/constants.py:108
 #: app/constants.py:114
 msgid "Groups"
-msgstr ""
+msgstr "グループ"
 
 #: app/constants.py:99
 msgid "Change group"
-msgstr ""
+msgstr "グループの変更"
 
 #: app/constants.py:100
 msgid "Edit this group"
-msgstr ""
+msgstr "このグループを編集します"
 
 #: app/constants.py:101
 msgid "Edit any existing group in the system."
-msgstr ""
+msgstr "システム内の任意の既存グループを編集します。"
 
 #: app/constants.py:105
 msgid "Delete group"
-msgstr ""
+msgstr "グループの削除"
 
 #: app/constants.py:106
 msgid "Delete this group."
-msgstr ""
+msgstr "このグループを削除します。"
 
 #: app/constants.py:107
 msgid "Delete any group in the system."
-msgstr ""
+msgstr "システム内の任意のグループを削除します。"
 
 #: app/constants.py:111
 msgid "View group"
-msgstr ""
+msgstr "グループの表示"
 
 #: app/constants.py:112
 msgid "View this group."
-msgstr ""
+msgstr "このグループを表示します。"
 
 #: app/constants.py:113
 msgid "View any existing group in the system."
-msgstr ""
+msgstr "システム内の任意の既存グループを表示します。"
 
 #: app/constants.py:117
 msgid "View collection remote"
-msgstr ""
+msgstr "コレクションリモートの表示"
 
 #: app/constants.py:118
 msgid "View this collection remote."
-msgstr ""
+msgstr "このコレクションリモートを表示します。"
 
 #: app/constants.py:119
 msgid "View any collection remote existing in the system."
-msgstr ""
+msgstr "システムに存在する任意のコレクションリモートを表示します。"
 
 #: app/constants.py:120 app/constants.py:126 app/constants.py:132
-#: app/constants.py:138
+#: app/constants.py:138 app/constants.py:144
 msgid "Collection Remotes"
-msgstr ""
+msgstr "コレクションリモート"
 
 #: app/constants.py:123
 msgid "Add collection remote"
-msgstr ""
+msgstr "コレクションリモートの追加"
 
 #: app/constants.py:124
 msgid "Add this collection remote."
-msgstr ""
+msgstr "このコレクションリモートを追加します。"
 
 #: app/constants.py:125
 msgid "Add any collection remote existing in the system."
-msgstr ""
+msgstr "システムに存在する任意のコレクションリモートを追加します。"
 
 #: app/constants.py:129
 msgid "Change collection remote"
-msgstr ""
+msgstr "コレクションリモートの変更"
 
 #: app/constants.py:130
 msgid "Edit this collection remote."
-msgstr ""
+msgstr "このコレクションリモートを編集します。"
 
 #: app/constants.py:131
 msgid "Edit any collection remote existing in the system."
-msgstr ""
+msgstr "システムに存在する任意のコレクションリモートを編集します。"
 
 #: app/constants.py:135
 msgid "Delete collection remote"
-msgstr ""
+msgstr "コレクションリモートの削除"
 
 #: app/constants.py:136
 msgid "Delete this collection remote."
-msgstr ""
+msgstr "このコレクションリモートを削除します。"
 
 #: app/constants.py:137
 msgid "Delete any collection remote existing in the system."
-msgstr ""
+msgstr "システムに存在する任意のコレクションリモートを削除します。"
 
 #: app/constants.py:141
-msgid "View Ansible repository"
-msgstr ""
+msgid "Manage remote roles"
+msgstr "リモートロールの管理"
 
 #: app/constants.py:142
-msgid "View this Ansible repository."
-msgstr ""
+msgid "Configure who has permissions on this remote."
+msgstr "このリモートのパーミッション所有者を設定します。"
 
 #: app/constants.py:143
-msgid "View any Ansible repository existing in the system."
-msgstr ""
-
-#: app/constants.py:144 app/constants.py:150 app/constants.py:156
-#: app/constants.py:162
-msgid "Ansible Repository"
-msgstr ""
+msgid "Configure who has permissions on any remote."
+msgstr "任意のリモートのパーミッション所有者を設定します。"
 
 #: app/constants.py:147
-msgid "Add Ansible repository"
-msgstr ""
+msgid "View Ansible repository"
+msgstr "Ansible リポジトリーの表示"
 
 #: app/constants.py:148
-msgid "Add this Ansible repository."
-msgstr ""
+msgid "View this Ansible repository."
+msgstr "この Ansible リポジトリーを表示します。"
 
 #: app/constants.py:149
-msgid "Add any Ansible repository existing in the system."
-msgstr ""
+msgid "View any Ansible repository existing in the system."
+msgstr "システムに存在する任意の Ansible リポジトリーを表示します。"
+
+#: app/constants.py:150 app/constants.py:156 app/constants.py:162
+#: app/constants.py:168 app/constants.py:174 app/constants.py:182
+msgid "Ansible Repository"
+msgstr "Ansible リポジトリー"
 
 #: app/constants.py:153
-msgid "Change Ansible repository"
-msgstr ""
+msgid "Add Ansible repository"
+msgstr "Ansible リポジトリーの追加"
 
 #: app/constants.py:154
-msgid "Change this Ansible repository."
-msgstr ""
+msgid "Add this Ansible repository."
+msgstr "この Ansible リポジトリーを追加します。"
 
 #: app/constants.py:155
-msgid "Change any Ansible repository existing in the system."
-msgstr ""
+msgid "Add any Ansible repository existing in the system."
+msgstr "システムに存在する任意の Ansible リポジトリーを追加します。"
 
 #: app/constants.py:159
-msgid "Delete Ansible repository"
-msgstr ""
+msgid "Change Ansible repository"
+msgstr "Ansible リポジトリーの変更"
 
 #: app/constants.py:160
-msgid "Delete this Ansible repository."
-msgstr ""
+msgid "Change this Ansible repository."
+msgstr "この Ansible リポジトリーを変更します。"
 
 #: app/constants.py:161
-msgid "Delete any Ansible repository existing in the system."
-msgstr ""
+msgid "Change any Ansible repository existing in the system."
+msgstr "システムに存在する任意の Ansible リポジトリーを変更します。"
 
 #: app/constants.py:165
-msgid "Change container namespace permissions"
-msgstr ""
+msgid "Delete Ansible repository"
+msgstr "Ansible リポジトリーの削除"
 
 #: app/constants.py:166
-msgid "Edit permissions on this container namespace."
-msgstr ""
+msgid "Delete this Ansible repository."
+msgstr "この Ansible リポジトリーを削除します。"
 
 #: app/constants.py:167
-msgid "Edit permissions on any existing container namespace."
-msgstr ""
-
-#: app/constants.py:168 app/constants.py:174 app/constants.py:180
-#: app/constants.py:186 app/constants.py:192 app/constants.py:198
-#: app/constants.py:204 app/constants.py:210
-msgid "Execution Environments"
-msgstr ""
+msgid "Delete any Ansible repository existing in the system."
+msgstr "システムに存在する任意の Ansible リポジトリーを削除します。"
 
 #: app/constants.py:171
-msgid "Change containers"
-msgstr ""
+msgid "Manage repository roles"
+msgstr "リポジトリーロールの管理"
 
 #: app/constants.py:172
-msgid "Edit all objects in this container namespace."
-msgstr ""
+msgid "Configure who has permissions on this repository."
+msgstr "このリポジトリーのパーミッション所有者を設定します。"
 
 #: app/constants.py:173
-msgid "Edit all objects in any container namespace in the system."
-msgstr ""
+msgid "Configure who has permissions on any repository."
+msgstr "任意のリポジトリーのパーミッション所有者を設定します。"
 
 #: app/constants.py:177
-msgid "Change image tags"
-msgstr ""
+msgid "Repair Ansible repository"
+msgstr "Ansible リポジトリーの修復"
 
 #: app/constants.py:178
-msgid "Edit an image's tag in this container namespace"
-msgstr ""
+msgid "Repair artifacts associated with this Ansible repository."
+msgstr "この Ansible リポジトリーに関連付けられたアーティファクトを修復します。"
 
-#: app/constants.py:179
-msgid "Edit an image's tag in any container namespace the system."
-msgstr ""
-
-#: app/constants.py:183
-msgid "Create new containers"
-msgstr ""
+#: app/constants.py:180
+msgid ""
+"Repair artifacts associated with any Ansible repository existing in the "
+"system."
+msgstr "システムに存在する任意の Ansible リポジトリーに関連付けられたアーティファクトを修復します。"
 
 #: app/constants.py:185
-msgid "Add new containers to the system."
-msgstr ""
+msgid "Change container namespace permissions"
+msgstr "コンテナー名前空間パーミッションの変更"
 
-#: app/constants.py:189
-msgid "Delete container repository"
-msgstr ""
+#: app/constants.py:186
+msgid "Edit permissions on this container namespace."
+msgstr "このコンテナー名前空間に対するパーミッションを編集します。"
 
-#: app/constants.py:190
-msgid "Delete this container repository."
-msgstr ""
+#: app/constants.py:187
+msgid "Edit permissions on any existing container namespace."
+msgstr "任意の既存コンテナー名前空間に対するパーミッションを編集します。"
+
+#: app/constants.py:188 app/constants.py:194 app/constants.py:200
+#: app/constants.py:206 app/constants.py:212 app/constants.py:218
+#: app/constants.py:224 app/constants.py:230
+msgid "Execution Environments"
+msgstr "実行環境"
 
 #: app/constants.py:191
-msgid "Delete any existing container repository in the system."
-msgstr ""
+msgid "Change containers"
+msgstr "コンテナーの変更"
 
-#: app/constants.py:195
-msgid "Push to existing containers"
-msgstr ""
+#: app/constants.py:192
+msgid "Edit all objects in this container namespace."
+msgstr "このコンテナー名前空間内のすべてのオブジェクトを編集します。"
 
-#: app/constants.py:196
-msgid "Push to this namespace."
-msgstr ""
+#: app/constants.py:193
+msgid "Edit all objects in any container namespace in the system."
+msgstr "システム内の任意のコンテナー名前空間にあるすべてのオブジェクトを編集します。"
 
 #: app/constants.py:197
-msgid "Push to any existing namespace in the system."
-msgstr ""
+msgid "Change image tags"
+msgstr "イメージタグの変更"
 
-#: app/constants.py:201
-msgid "Push new containers"
-msgstr ""
+#: app/constants.py:198
+msgid "Edit an image's tag in this container namespace"
+msgstr "このコンテナー名前空間にあるイメージのタグを編集します"
 
-#: app/constants.py:202
-msgid "Push a new container to this namespace."
-msgstr ""
+#: app/constants.py:199
+msgid "Edit an image's tag in any container namespace the system."
+msgstr "システム内の任意のコンテナー名前空間にあるイメージのタグを編集します。"
 
 #: app/constants.py:203
-msgid "Push a new containers to any namespace in the system."
-msgstr ""
+msgid "Create new containers"
+msgstr "新規コンテナーの作成"
 
-#: app/constants.py:207
-msgid "Manage container namespace roles"
-msgstr ""
-
-#: app/constants.py:208
-msgid "Manage container namespace roles."
-msgstr ""
+#: app/constants.py:205
+msgid "Add new containers to the system."
+msgstr "システムに新しいコンテナーを追加します。"
 
 #: app/constants.py:209
-msgid "Manage container namespace roles existing in the system."
-msgstr ""
+msgid "Delete container repository"
+msgstr "コンテナーリポジトリーの削除"
 
-#: app/constants.py:213
-msgid "Add remote registry"
-msgstr ""
+#: app/constants.py:210
+msgid "Delete this container repository."
+msgstr "このコンテナーリポジトリーを削除します。"
+
+#: app/constants.py:211
+msgid "Delete any existing container repository in the system."
+msgstr "システム内の任意の既存コンテナーリポジトリーを削除します。"
 
 #: app/constants.py:215
-msgid "Add remote registry to the system."
-msgstr ""
+msgid "Push to existing containers"
+msgstr "既存コンテナーへのプッシュ"
 
-#: app/constants.py:216 app/constants.py:222
-msgid "Container Registry Remotes"
-msgstr ""
+#: app/constants.py:216
+msgid "Push to this namespace."
+msgstr "この名前空間にプッシュします。"
 
-#: app/constants.py:219
-msgid "Change remote registry"
-msgstr ""
-
-#: app/constants.py:220
-msgid "Edit this remote registry."
-msgstr ""
+#: app/constants.py:217
+msgid "Push to any existing namespace in the system."
+msgstr "システム内にある任意の既存の名前空間にプッシュします。"
 
 #: app/constants.py:221
-msgid "Change any remote registry existing in the system."
-msgstr ""
+msgid "Push new containers"
+msgstr "新規コンテナーのプッシュ"
 
-#: app/constants.py:225
-msgid "Delete remote registry"
-msgstr ""
+#: app/constants.py:222
+msgid "Push a new container to this namespace."
+msgstr "新しいコンテナーをこの名前空間にプッシュします。"
 
-#: app/constants.py:226
-msgid "Delete this remote registry."
-msgstr ""
+#: app/constants.py:223
+msgid "Push a new containers to any namespace in the system."
+msgstr "新しいコンテナーをシステム内の任意の名前空間にプッシュします。"
 
 #: app/constants.py:227
-msgid "Delete any remote registry existing in the system."
-msgstr ""
+msgid "Manage container namespace roles"
+msgstr "コンテナー名前空間のロールの管理"
 
-#: app/constants.py:231
-msgid "Change task"
-msgstr ""
+#: app/constants.py:228
+msgid "Manage container namespace roles."
+msgstr "コンテナー名前空間のロールを管理します。"
 
-#: app/constants.py:232
-msgid "Edit this task."
-msgstr ""
+#: app/constants.py:229
+msgid "Manage container namespace roles existing in the system."
+msgstr "システムに存在するコンテナー名前空間のロールを管理します。"
 
 #: app/constants.py:233
-msgid "Edit any task existing in the system."
-msgstr ""
+msgid "Add remote registry"
+msgstr "リモートレジストリーの追加"
 
-#: app/constants.py:234 app/constants.py:240 app/constants.py:246
-msgid "Task Management"
-msgstr ""
+#: app/constants.py:235
+msgid "Add remote registry to the system."
+msgstr "システムにリモートレジストリーを追加します。"
 
-#: app/constants.py:237
-msgid "Delete task"
-msgstr ""
-
-#: app/constants.py:238
-msgid "Delete this task."
-msgstr ""
+#: app/constants.py:236 app/constants.py:242
+msgid "Container Registry Remotes"
+msgstr "コンテナーレジストリーリモート"
 
 #: app/constants.py:239
-msgid "Delete any task existing in the system."
-msgstr ""
+msgid "Change remote registry"
+msgstr "リモートレジストリーの変更"
 
-#: app/constants.py:243
-msgid "View all tasks"
-msgstr ""
+#: app/constants.py:240
+msgid "Edit this remote registry."
+msgstr "このリモートレジストリーを編集します。"
 
-#: app/constants.py:244
-msgid "View this task."
-msgstr ""
+#: app/constants.py:241
+msgid "Change any remote registry existing in the system."
+msgstr "システム内に存在する任意のリモートレジストリーを変更します。"
 
 #: app/constants.py:245
+msgid "Delete remote registry"
+msgstr "リモートレジストリーの削除"
+
+#: app/constants.py:246
+msgid "Delete this remote registry."
+msgstr "このリモートレジストリーを削除します。"
+
+#: app/constants.py:247
+msgid "Delete any remote registry existing in the system."
+msgstr "システム内に存在する任意のリモートレジストリーを削除します。"
+
+#: app/constants.py:251
+msgid "Change task"
+msgstr "タスクの変更"
+
+#: app/constants.py:252
+msgid "Edit this task."
+msgstr "このタスクを編集します。"
+
+#: app/constants.py:253
+msgid "Edit any task existing in the system."
+msgstr "システム内に存在する任意のタスクを編集します。"
+
+#: app/constants.py:254 app/constants.py:260 app/constants.py:266
+msgid "Task Management"
+msgstr "タスク管理"
+
+#: app/constants.py:257
+msgid "Delete task"
+msgstr "タスクの削除"
+
+#: app/constants.py:258
+msgid "Delete this task."
+msgstr "このタスクを削除します。"
+
+#: app/constants.py:259
+msgid "Delete any task existing in the system."
+msgstr "システム内に存在する任意のタスクを削除します。"
+
+#: app/constants.py:263
+msgid "View all tasks"
+msgstr "すべてのタスクの表示"
+
+#: app/constants.py:264
+msgid "View this task."
+msgstr "このタスクを表示します。"
+
+#: app/constants.py:265
 msgid "View any task existing in the system."
-msgstr ""
+msgstr "システム内に存在する任意のタスクを表示します。"
 
 #: app/exceptions.py:8
 msgid "Data conflicts with existing entity."
@@ -875,9 +876,7 @@ msgstr "コンテナー {remote_name} の作成に失敗しました。{error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr ""
-"この名前が割り当てられたリモートコンテナーはすでに存在しますが、レジストリー"
-"には関連付けられていません。"
+msgstr "この名前が割り当てられたリモートコンテナーはすでに存在しますが、どのレジストリーにも関連付けられていません。"
 
 #: app/tasks/index_registry.py:99
 msgid "A local container with this name already exists."
@@ -888,5 +887,3 @@ msgstr "この名前が指定されたローカルコンテナーはすでに存
 msgid "Could not find staging repository: \"%s\""
 msgstr "ステージングリポジトリーが見つかりませんでした: \"%s\""
 
-#~ msgid "Path does not match: \"%s\""
-#~ msgstr "パスが一致しません: \"%s\""
