@@ -157,7 +157,7 @@ class TestRBAC:
         gc = galaxy_client("iqe_admin")
         gc.create_group(group_name)
         with pytest.raises(GalaxyClientError) as ctx:
-            gc.create_group(group_name)
+            gc.create_group(group_name, exists_ok=False)
         assert ctx.value.args[0]["status"] == "409"
 
     @pytest.mark.iqe_rbac_test

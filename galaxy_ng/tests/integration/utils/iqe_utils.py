@@ -5,16 +5,12 @@ from unittest.mock import patch
 from galaxykit import GalaxyClient
 
 import logging
-from functools import lru_cache
-from pkg_resources import Requirement
 from urllib.parse import urljoin
 
 from ansible.galaxy.api import GalaxyAPI
 from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
-
-from galaxy_ng.tests.integration.utils import get_client
 
 logger = logging.getLogger(__name__)
 
@@ -62,31 +58,6 @@ class CapturingGalaxyError(Exception):
 
 class CompletedProcessError(Exception):
     pass
-
-
-@lru_cache()
-def get_hub_version(ansible_config):
-    if is_standalone():
-        role = "iqe_admin"
-    elif is_ephemeral_env():
-        # TODO: this call should be done by galaxykit
-        config = ansible_config("org_admin")
-        api_client = get_client(config, request_token=True, require_auth=True)
-        return api_client("/", args={}, method="GET")["galaxy_ng_version"]
-    else:
-        role = "admin"
-    gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
-    return gc.get(gc.galaxy_root)["galaxy_ng_version"]
-
-
-def min_hub_version(ansible_config, spec):
-    version = get_hub_version(ansible_config)
-    return Requirement.parse(f"galaxy_ng<{spec}").specifier.contains(version)
-
-
-def max_hub_version(ansible_config, spec):
-    version = get_hub_version(ansible_config)
-    return Requirement.parse(f"galaxy_ng>{spec}").specifier.contains(version)
 
 
 client_cache = {}
@@ -246,6 +217,11 @@ def is_stage_environment():
 
 def is_sync_testing():
     return os.getenv("SYNC_TESTS_STAGE", False)
+
+
+def is_dev_env_standalone():
+    dev_env_standalone = os.getenv("DEV_ENV_STANDALONE", True)
+    return dev_env_standalone in ('true', 'True', 1, '1', True)
 
 
 def get_all_collections(api_client, repo):

@@ -6,8 +6,10 @@ from urllib.parse import urlparse
 
 import pytest
 from orionutils.utils import increment_version
-from pkg_resources import parse_version
+from pkg_resources import parse_version, Requirement
 
+from galaxykit.groups import get_group_id
+from galaxykit.utils import GalaxyClientError
 from .constants import USERNAME_PUBLISHER
 from .utils import (
     ansible_galaxy,
@@ -19,7 +21,8 @@ from .utils import (
     iterate_all
 )
 from .utils import upload_artifact as _upload_artifact
-from .utils.iqe_utils import GalaxyKitClient, get_hub_version, is_stage_environment, is_sync_testing
+from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
+    is_sync_testing, is_dev_env_standalone, is_standalone, is_ephemeral_env
 
 # from orionutils.generator import build_collection
 
@@ -666,3 +669,79 @@ def sync_instance_crc():
 def settings(ansible_config):
     api_client = get_client(ansible_config("admin"))
     return api_client("_ui/v1/settings/")
+
+
+def set_credentials_when_not_docker_pah():
+    # if we get here, we are running tests against PAH
+    # but not in a containerized development environment,
+    # so we need to get the URL and admin credentials (and create some test data)
+    admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
+    AnsibleConfigFixture.PROFILES["admin"]["username"] = "admin"
+    AnsibleConfigFixture.PROFILES["admin"]["password"] = admin_pass
+    AnsibleConfigFixture.PROFILES["admin"]["token"] = None
+    AnsibleConfigFixture.PROFILES["iqe_admin"]["username"] = "admin"
+    AnsibleConfigFixture.PROFILES["iqe_admin"]["password"] = admin_pass
+    AnsibleConfigFixture.PROFILES["iqe_admin"]["token"] = None
+    AnsibleConfigFixture.PROFILES["basic_user"]["token"] = None
+    AnsibleConfigFixture.PROFILES["basic_user"]["password"] = "Th1sP4ssd"
+    AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
+    AnsibleConfigFixture.PROFILES["partner_engineer"]["password"] = "Th1sP4ssd"
+    AnsibleConfigFixture.PROFILES["ee_admin"]["token"] = None
+    AnsibleConfigFixture.PROFILES["ee_admin"]["password"] = "Th1sP4ssd"
+
+@lru_cache()
+def get_hub_version(ansible_config):
+    if is_standalone():
+        role = "iqe_admin"
+    elif is_ephemeral_env():
+        # TODO: this call should be done by galaxykit
+        config = ansible_config("org_admin")
+        api_client = get_client(config, request_token=True, require_auth=True)
+        return api_client("/", args={}, method="GET")["galaxy_ng_version"]
+    elif not is_dev_env_standalone():
+        role = "admin"
+        set_credentials_when_not_docker_pah()
+        gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
+        gc.create_group("ns_group_for_tests")
+        gc.create_group("system:partner-engineers")
+        gc.create_group("ee_group_for_tests")
+        pe_roles = [
+            "galaxy.group_admin",
+            "galaxy.user_admin",
+            "galaxy.collection_admin",
+        ]
+
+        gc.get_or_create_user(username="iqe_normal_user", password="Th1sP4ssd", group=None)
+        gc.get_or_create_user(username="jdoe", password="Th1sP4ssd", group=None)
+        gc.get_or_create_user(username="ee_admin", password="Th1sP4ssd", group=None)
+        group_id = get_group_id(gc, group_name="ns_group_for_tests")
+        gc.add_user_to_group(username="iqe_normal_user", group_id=group_id)
+        group_id = get_group_id(gc, group_name="system:partner-engineers")
+        for rbac_role in pe_roles:
+            try:
+                gc.add_role_to_group(rbac_role, group_id)
+            except GalaxyClientError:
+                # role already assigned to group. It's ok.
+                pass
+
+        gc.add_user_to_group(username="jdoe", group_id=group_id)
+        gc.create_namespace(name="autohubtest2", group="ns_group_for_tests", object_roles=["galaxy.collection_namespace_owner"])
+
+        group_id = get_group_id(gc, group_name="ee_group_for_tests")
+        ee_role = 'galaxy.execution_environment_admin'
+        gc.add_role_to_group(ee_role, group_id)
+        gc.add_user_to_group(username="ee_admin", group_id=group_id)
+    else:
+        role = "admin"
+    gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
+    return gc.get(gc.galaxy_root)["galaxy_ng_version"]
+
+
+def min_hub_version(ansible_config, spec):
+    version = get_hub_version(ansible_config)
+    return Requirement.parse(f"galaxy_ng<{spec}").specifier.contains(version)
+
+
+def max_hub_version(ansible_config, spec):
+    version = get_hub_version(ansible_config)
+    return Requirement.parse(f"galaxy_ng>{spec}").specifier.contains(version)
