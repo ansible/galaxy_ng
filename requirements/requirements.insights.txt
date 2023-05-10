@@ -249,7 +249,7 @@ protobuf==4.22.1
     # via pulpcore
 psycopg2==2.9.5
     # via pulpcore
-pulp-ansible==0.17.0
+pulp-ansible==0.17.1
     # via galaxy-ng (setup.py)
 pulp-container==2.14.5
     # via galaxy-ng (setup.py)
