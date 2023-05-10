@@ -13,11 +13,21 @@ from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 logger = logging.getLogger(__name__)
 
 
+def print_args(func):
+    def wrapper(*args, **kwargs):
+        print("Args:", args)
+        print("Kwargs:", kwargs)
+        return func(*args, **kwargs)
+    return wrapper
+
+
+@print_args
 def ansible_galaxy(
     command,
     retries=3,
     check_retcode=0,
     server="automation_hub",
+    server_url=None,
     ansible_config=None,
     token=None,
     force_token=False,
@@ -42,7 +52,10 @@ def ansible_galaxy(
         f.write(f'server_list = {server}\n')
         f.write('\n')
         f.write(f'[galaxy_server.{server}]\n')
-        f.write(f"url={ansible_config.get('url')}\n")
+        if server_url is None:
+            f.write(f"url={ansible_config.get('url')}\n")
+        else:
+            f.write(f"url={server_url}\n")
         if ansible_config.get('auth_url'):
             f.write(f"auth_url={ansible_config.get('auth_url')}\n")
         f.write('validate_certs=False\n')
