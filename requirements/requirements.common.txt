@@ -76,7 +76,7 @@ diff-match-patch==20200713
     # via django-import-export
 distro==1.8.0
     # via bindep
-django==3.2.18
+django==3.2.19
     # via
     #   django-auth-ldap
     #   django-automated-logging
