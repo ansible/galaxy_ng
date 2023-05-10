@@ -5,7 +5,7 @@
 
 additional_repos:
 - bindings: true
-  branch: 0.17.0
+  branch: 0.17.1
   name: pulp_ansible
   org: pulp
 - bindings: true
@@ -13,7 +13,7 @@ additional_repos:
   name: pulp_container
   org: pulp
 - bindings: false
-  branch: v0.4.7
+  branch: v0.4.10
   name: galaxy-importer
   org: ansible
 api_root: /api/galaxy/pulp/
