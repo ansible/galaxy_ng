@@ -44,8 +44,24 @@ def _upload_collection(**kwargs):
     except AnsibleRepository.DoesNotExist:
         raise RuntimeError(_('Could not find staging repository: "%s"') % STAGING_NAME)
 
+    # The data key can also contain a repository field, which will
+    # trigger the creation functions to attempt to add the CV
+    # to a new repo version and therefore break upload concurrency
+    kwargs['data'].pop('repository')
+
     # kick off the upload and import task via the
     # pulp_ansible.app.serializers.CollectionVersionUploadSerializer serializer
+    # Example structure:
+    #   args: [ansible, CollectionVersionUploadSerializer]
+    #   kwargs:
+    #       repository_pk: <should be removed>
+    #       data:
+    #           sha256:
+    #           artifact:
+    #           repository: <should be removed>
+    #       context:
+    #           filename:
+    #           filename_ns:
     general_create(*general_args, **kwargs)
 
     return repo

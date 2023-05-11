@@ -14,7 +14,7 @@ from ..utils import (
 @pytest.mark.standalone_only
 def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
-    total = 3
+    total = 10
 
     config = ansible_config(profile="admin")
     client = get_client(

@@ -66,14 +66,14 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
                 import_to_staging,
                 kwargs=kwargs,
                 task_group=task_group,
-                exclusive_resources=[repository]
+                # exclusive_resources=[repository]
             )
 
         return dispatch(
             import_and_auto_approve,
             kwargs=kwargs,
             task_group=task_group,
-            exclusive_resources=[repository]
+            # exclusive_resources=[repository]
         )
 
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
