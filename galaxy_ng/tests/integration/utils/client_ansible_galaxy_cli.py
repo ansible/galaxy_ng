@@ -13,15 +13,6 @@ from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 logger = logging.getLogger(__name__)
 
 
-def print_args(func):
-    def wrapper(*args, **kwargs):
-        print("Args:", args)
-        print("Kwargs:", kwargs)
-        return func(*args, **kwargs)
-    return wrapper
-
-
-@print_args
 def ansible_galaxy(
     command,
     retries=3,
