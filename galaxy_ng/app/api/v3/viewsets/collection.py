@@ -62,19 +62,9 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         task_group = TaskGroup.objects.create(description=f"Import collection to {repository.name}")
 
         if settings.GALAXY_REQUIRE_CONTENT_APPROVAL:
-            return dispatch(
-                import_to_staging,
-                kwargs=kwargs,
-                task_group=task_group,
-                # exclusive_resources=[repository]
-            )
+            return dispatch(import_to_staging, kwargs=kwargs, task_group=task_group)
 
-        return dispatch(
-            import_and_auto_approve,
-            kwargs=kwargs,
-            task_group=task_group,
-            # exclusive_resources=[repository]
-        )
+        return dispatch(import_and_auto_approve, kwargs=kwargs, task_group=task_group)
 
     # Wrap super().create() so we can create a galaxy_ng.app.models.CollectionImport based on the
     # the import task and the collection artifact details
