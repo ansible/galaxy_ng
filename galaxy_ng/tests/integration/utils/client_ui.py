@@ -48,6 +48,7 @@ class UIClient:
 
     def login(self):
         self._rs = requests.Session()
+        self._rs.verify = False
 
         # GET the page to acquire the csrftoken
         self._rs.get(self.login_url)
@@ -58,7 +59,8 @@ class UIClient:
         # now POST the credentials
         pheaders = {
             'Cookie': f"csrftoken={cookies['csrftoken']}",
-            'X-CSRFToken': cookies['csrftoken']
+            'X-CSRFToken': cookies['csrftoken'],
+            'Referer': self.login_url,
         }
         self._rs.post(
             self.login_url,
