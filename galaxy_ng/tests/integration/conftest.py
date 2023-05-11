@@ -688,6 +688,8 @@ def set_credentials_when_not_docker_pah():
     AnsibleConfigFixture.PROFILES["partner_engineer"]["password"] = "Th1sP4ssd"
     AnsibleConfigFixture.PROFILES["ee_admin"]["token"] = None
     AnsibleConfigFixture.PROFILES["ee_admin"]["password"] = "Th1sP4ssd"
+    AnsibleConfigFixture.PROFILES["org_admin"]["token"] = None
+    AnsibleConfigFixture.PROFILES["org_admin"]["password"] = "Th1sP4ssd"
 
 @lru_cache()
 def get_hub_version(ansible_config):
@@ -712,10 +714,12 @@ def get_hub_version(ansible_config):
         ]
 
         gc.get_or_create_user(username="iqe_normal_user", password="Th1sP4ssd", group=None)
+        gc.get_or_create_user(username="org-admin", password="Th1sP4ssd", group=None)
         gc.get_or_create_user(username="jdoe", password="Th1sP4ssd", group=None)
         gc.get_or_create_user(username="ee_admin", password="Th1sP4ssd", group=None)
         group_id = get_group_id(gc, group_name="ns_group_for_tests")
         gc.add_user_to_group(username="iqe_normal_user", group_id=group_id)
+        gc.add_user_to_group(username="org-admin", group_id=group_id)
         group_id = get_group_id(gc, group_name="system:partner-engineers")
         for rbac_role in pe_roles:
             try:
@@ -729,7 +733,10 @@ def get_hub_version(ansible_config):
 
         group_id = get_group_id(gc, group_name="ee_group_for_tests")
         ee_role = 'galaxy.execution_environment_admin'
-        gc.add_role_to_group(ee_role, group_id)
+        try:
+            gc.add_role_to_group(ee_role, group_id)
+        except GalaxyClientError:
+            pass
         gc.add_user_to_group(username="ee_admin", group_id=group_id)
     else:
         role = "admin"

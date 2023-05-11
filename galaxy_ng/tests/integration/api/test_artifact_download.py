@@ -66,7 +66,8 @@ def test_download_artifact(ansible_config, upload_artifact):
             f"{config['username']}:{config['password']}",
             "-o",
             tarball_path,
-            url
+            url,
+            "--insecure"
         ]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         returncode = proc.wait()
@@ -108,7 +109,8 @@ def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
             f"{config['username']}:{config['password']}",
             "-o",
             tarball_path,
-            url
+            url,
+            "--insecure"
         ]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         returncode = proc.wait()

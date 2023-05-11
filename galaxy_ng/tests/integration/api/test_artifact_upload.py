@@ -50,7 +50,6 @@ def gen_name_for_invalid():
 
 @pytest.mark.stage_health
 @pytest.mark.parametrize("use_distribution", [True, False])
-@pytest.mark.everywhere
 def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution):
     """Test the most basic, valid artifact upload via the API.
 

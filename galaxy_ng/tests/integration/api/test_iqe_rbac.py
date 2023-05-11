@@ -9,6 +9,7 @@ from galaxykit.container_images import get_container_images
 from galaxykit.containers import add_owner_to_ee
 from galaxykit.containers import create_container
 from galaxykit.containers import delete_container
+from galaxykit.groups import create_group
 from galaxykit.namespaces import delete_namespace
 from galaxykit.registries import create_registry
 from galaxykit.registries import delete_registry
@@ -155,9 +156,9 @@ class TestRBAC:
         """
         group_name = f"rbac_test_group_{uuid4()}"
         gc = galaxy_client("iqe_admin")
-        gc.create_group(group_name)
+        create_group(gc, group_name)
         with pytest.raises(GalaxyClientError) as ctx:
-            gc.create_group(group_name, exists_ok=False)
+            create_group(gc, group_name, exists_ok=False)
         assert ctx.value.args[0]["status"] == "409"
 
     @pytest.mark.iqe_rbac_test
