@@ -82,6 +82,8 @@ services:
       - _base
       - postgres
       - redis
+    deploy:
+      replicas: 2
 
   content-app:
     image: "localhost/galaxy_ng/galaxy_ng:${COMPOSE_PROFILE}${DEV_IMAGE_SUFFIX:-}"
