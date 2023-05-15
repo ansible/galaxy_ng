@@ -22,7 +22,8 @@ from .utils import (
 )
 from .utils import upload_artifact as _upload_artifact
 from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
-    is_sync_testing, is_dev_env_standalone, is_standalone, is_ephemeral_env
+    is_sync_testing, is_dev_env_standalone, is_standalone, is_ephemeral_env, \
+    get_standalone_token
 
 # from orionutils.generator import build_collection
 
@@ -671,7 +672,7 @@ def settings(ansible_config):
     return api_client("_ui/v1/settings/")
 
 
-def set_credentials_when_not_docker_pah():
+def set_credentials_when_not_docker_pah(url):
     # if we get here, we are running tests against PAH
     # but not in a containerized development environment,
     # so we need to get the URL and admin credentials (and create some test data)
@@ -691,6 +692,9 @@ def set_credentials_when_not_docker_pah():
     AnsibleConfigFixture.PROFILES["org_admin"]["token"] = None
     AnsibleConfigFixture.PROFILES["org_admin"]["password"] = "Th1sP4ssd"
 
+    token = get_standalone_token(AnsibleConfigFixture.PROFILES["admin"], server=url, ssl_verify=False)
+    AnsibleConfigFixture.PROFILES["admin"]["token"] = token
+
 @lru_cache()
 def get_hub_version(ansible_config):
     if is_standalone():
@@ -702,7 +706,7 @@ def get_hub_version(ansible_config):
         return api_client("/", args={}, method="GET")["galaxy_ng_version"]
     elif not is_dev_env_standalone():
         role = "admin"
-        set_credentials_when_not_docker_pah()
+        set_credentials_when_not_docker_pah(ansible_config().get("url"))
         gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
         gc.create_group("ns_group_for_tests")
         gc.create_group("system:partner-engineers")
