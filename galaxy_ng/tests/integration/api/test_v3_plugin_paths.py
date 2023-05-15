@@ -104,6 +104,10 @@ def test_api_v3_plugin_execution_environments_repositories_content_readme(
     assert 'created_at' in resp
     assert 'updated_at' in resp
 
+    delete_response = api_client(f"{api_prefix}/v3/plugin/execution-environments/repositories/{name}/", method='DELETE')
+    resp = wait_for_task(api_client, delete_response, timeout=10000)
+    assert resp["state"] == "completed"
+
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/tags/
 @pytest.mark.standalone_only
@@ -184,7 +188,7 @@ def test_api_v3_plugin_execution_environments_repositories(ansible_config, local
     # assert pulp_labels dictionary is in response
     assert type(repository_resp['pulp']['repository']['pulp_labels']) == dict
 
-    # delete the respository
+    # delete the repository
     delete_repository_resp = api_client(
         f'{api_prefix}/v3/plugin/execution-environments/repositories/{name}/',
         method="DELETE"

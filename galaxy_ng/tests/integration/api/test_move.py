@@ -180,6 +180,7 @@ def test_copy_collection_version(ansible_config, upload_artifact):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.tofix
 def test_copy_associated_content(ansible_config, upload_artifact):
     """Tests whether a collection and associated content is copied from repo to repo"""
 

@@ -23,7 +23,8 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
         config["token"],
         "--server",
         config["url"] + f"content/{base_path}/",
-        artifact.filename
+        artifact.filename,
+        "--ignore-certs"
     ]
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -51,6 +52,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
 
         cmd = [
             "curl",
+            "-k",
             "--retry",
             "5",
             "-L",

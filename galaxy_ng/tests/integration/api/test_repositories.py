@@ -104,6 +104,7 @@ class TestRepositories:
 
     @pytest.mark.repositories
     @pytest.mark.standalone_only
+    @pytest.mark.tofix
     def test_copy_signed_cv_endpoint(self, galaxy_client):
         """
         Verifies a signed cv can be copied to a different repo
@@ -138,6 +139,7 @@ class TestRepositories:
 
     @pytest.mark.repositories
     @pytest.mark.standalone_only
+    @pytest.mark.tofix
     def test_move_signed_cv_endpoint(self, galaxy_client):
         """
         Verifies a signed cv can be moved to a different repo

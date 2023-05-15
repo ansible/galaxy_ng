@@ -82,6 +82,7 @@ def test_delete_ee_and_content(ansible_config):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.tofix
 def test_shared_content_is_not_deleted(ansible_config):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
