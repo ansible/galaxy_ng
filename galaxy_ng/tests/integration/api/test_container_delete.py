@@ -82,7 +82,6 @@ def test_delete_ee_and_content(ansible_config):
 
 
 @pytest.mark.standalone_only
-@pytest.mark.tofix
 def test_shared_content_is_not_deleted(ansible_config):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
@@ -118,6 +117,7 @@ def test_shared_content_is_not_deleted(ansible_config):
         config=ansible_config("admin"),
         request_token=True,
     )
+
     api_prefix = client.config.get("api_prefix").rstrip("/")
 
     # Select the distribution for alpine1 and alpine2.
@@ -176,3 +176,8 @@ def test_shared_content_is_not_deleted(ansible_config):
                 raise Exception(ge)
 
         assert success
+
+    delete_response = client(f"{api_prefix}/v3/"
+                             "plugin/execution-environments/repositories/alpine2/", method='DELETE')
+    resp = wait_for_task(client, delete_response, timeout=10000)
+    assert resp["state"] == "completed"

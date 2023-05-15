@@ -19,7 +19,6 @@ from galaxy_ng.tests.integration.utils import get_client
     ],
 )
 @pytest.mark.standalone_only
-@pytest.mark.tofix
 def test_can_update_container_push(ansible_config, require_auth):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
