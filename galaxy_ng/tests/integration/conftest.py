@@ -720,6 +720,7 @@ def get_hub_version(ansible_config):
         group_id = get_group_id(gc, group_name="ns_group_for_tests")
         gc.add_user_to_group(username="iqe_normal_user", group_id=group_id)
         gc.add_user_to_group(username="org-admin", group_id=group_id)
+        gc.add_user_to_group(username="jdoe", group_id=group_id)
         group_id = get_group_id(gc, group_name="system:partner-engineers")
         for rbac_role in pe_roles:
             try:
@@ -730,6 +731,8 @@ def get_hub_version(ansible_config):
 
         gc.add_user_to_group(username="jdoe", group_id=group_id)
         gc.create_namespace(name="autohubtest2", group="ns_group_for_tests", object_roles=["galaxy.collection_namespace_owner"])
+        gc.create_namespace(name="autohubtest3", group="ns_group_for_tests",
+                            object_roles=["galaxy.collection_namespace_owner"])
 
         group_id = get_group_id(gc, group_name="ee_group_for_tests")
         ee_role = 'galaxy.execution_environment_admin'

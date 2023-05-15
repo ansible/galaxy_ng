@@ -38,6 +38,9 @@ REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n"  # n
 
 TEST_CONTAINER = "alpine"
 
+session = requests.Session()
+session.verify = False
+
 
 class InvalidResponse(Exception):
     pass
@@ -58,7 +61,7 @@ def create_group_for_user(user, role=None):
 
     g = create_group(name)
 
-    requests.post(
+    session.post(
         f"{API_ROOT}_ui/v1/groups/{g['id']}/users/",
         json={"username": user["username"]},
         auth=ADMIN_CREDENTIALS
@@ -71,7 +74,7 @@ def create_group_for_user(user, role=None):
 
 
 def add_group_role(group_href, role, object_href=None):
-    requests.post(
+    session.post(
         SERVER + group_href + "roles/",
         json={"role": role, "content_object": object_href},
         auth=ADMIN_CREDENTIALS
@@ -79,7 +82,7 @@ def add_group_role(group_href, role, object_href=None):
 
 
 def create_user(username, password):
-    response = requests.post(
+    response = session.post(
         f"{API_ROOT}_ui/v1/users/",
         json={
             "username": username,
@@ -108,7 +111,7 @@ def wait_for_task(resp, path=None, timeout=300):
         if wait_until < time.time():
             raise TaskWaitingTimeout()
         try:
-            resp = requests.get(url, auth=ADMIN_CREDENTIALS)
+            resp = session.get(url, auth=ADMIN_CREDENTIALS)
         except GalaxyError as e:
             if "500" not in str(e):
                 raise
@@ -123,42 +126,48 @@ def wait_for_all_tasks():
 
 
 def ensure_test_container_is_pulled():
-    cmd = ["podman", "image", "exists", TEST_CONTAINER]
+    container_engine = CLIENT_CONFIG["container_engine"]
+    cmd = [container_engine, "image", "exists", TEST_CONTAINER]
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if proc.returncode == 1:
-        cmd = ["podman", "image", "pull", "alpine"]
+        cmd = [container_engine, "image", "pull", "alpine"]
+
         subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def podman_push(username, password, container, tag="latest"):
     ensure_test_container_is_pulled()
+    container_engine = CLIENT_CONFIG["container_engine"]
+    container_registry = CLIENT_CONFIG["container_registry"]
 
-    new_container = f"localhost:5001/{container}:{tag}"
+    new_container = f"{container_registry}/{container}:{tag}"
+    tag_cmd = [container_engine, "image", "tag", TEST_CONTAINER, new_container]
 
-    tag_cmd = ["podman", "image", "tag", TEST_CONTAINER, new_container]
     subprocess.run(tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     push_cmd = [
-        "podman",
+        container_engine,
         "push",
         "--creds",
         f"{username}:{password}",
         new_container,
-        "--remove-signatures",
-        "--tls-verify=false"]
+        "--remove-signatures"]
+
+    if container_engine == "podman":
+        push_cmd.append("--tls-verify=false")
 
     return subprocess.run(push_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode
 
 
 def del_user(pk):
-    requests.delete(
+    session.delete(
         f"{API_ROOT}_ui/v1/users/{pk}/",
         auth=(ADMIN_CREDENTIALS),
     )
 
 
 def create_group(name):
-    return requests.post(
+    return session.post(
         f"{API_ROOT}_ui/v1/groups/",
         json={"name": name},
         auth=ADMIN_CREDENTIALS
@@ -166,14 +175,14 @@ def create_group(name):
 
 
 def del_group(pk):
-    return requests.delete(
+    return session.delete(
         f"{API_ROOT}_ui/v1/groups/{pk}/",
         auth=ADMIN_CREDENTIALS
     )
 
 
 def create_role(name):
-    return requests.post(
+    return session.post(
         f"{PULP_API_ROOT}roles/",
         json={
             "name": name,
@@ -184,21 +193,21 @@ def create_role(name):
 
 
 def del_role(href):
-    requests.delete(
+    session.delete(
         f"{SERVER}{href}",
         auth=ADMIN_CREDENTIALS
     )
 
 
 def del_namespace(name):
-    return requests.delete(
+    return session.delete(
         f"{API_ROOT}_ui/v1/namespaces/{name}/",
         auth=ADMIN_CREDENTIALS,
     )
 
 
 def del_collection(name, namespace, repo="staging"):
-    requests.delete(
+    session.delete(
         f"{API_ROOT}v3/plugin/ansible/content/{repo}/collections/index/{namespace}/{name}/",
         auth=ADMIN_CREDENTIALS,
     )
@@ -207,7 +216,7 @@ def del_collection(name, namespace, repo="staging"):
 def gen_namespace(name, groups=None):
     groups = groups or []
 
-    resp = requests.post(
+    resp = session.post(
         f"{API_ROOT}v3/namespaces/",
         json={
             "name": name,
@@ -232,7 +241,7 @@ def gen_collection(name, namespace):
 
     wait_for_task_fixtures(client, upload_artifact(ansible_config, client, artifact))
 
-    resp = requests.get(
+    resp = session.get(
         f"{PULP_API_ROOT}content/ansible/collection_versions/?name={name}&namespace={namespace}",
         auth=ADMIN_CREDENTIALS
     )
@@ -241,7 +250,7 @@ def gen_collection(name, namespace):
 
 
 def reset_remote():
-    return requests.put(
+    return session.put(
         f"{API_ROOT}content/community/v3/sync/config/",
         json={
             "url": "https://example.com/",
@@ -283,7 +292,7 @@ class ReusableCollection:
 
     def _reset_collection_repo(self):
         wait_for_all_tasks()
-        requests.post(
+        session.post(
             (
                 f"{API_ROOT}v3/collections/{self._namespace_name}"
                 f"/{self._collection_name}/versions/{self._collection['version']}"
@@ -291,7 +300,7 @@ class ReusableCollection:
             ),
             auth=ADMIN_CREDENTIALS,
         )
-        requests.post(
+        session.post(
             (
                 f"{API_ROOT}v3/collections/{self._namespace_name}"
                 f"/{self._collection_name}/versions/{self._collection['version']}"
@@ -301,7 +310,7 @@ class ReusableCollection:
         )
 
     def _get_repo_href(self, name):
-        return requests.get(
+        return session.get(
             f"{PULP_API_ROOT}repositories/ansible/ansible/?name={name}",
             auth=ADMIN_CREDENTIALS
         ).json()["results"][0]["pulp_href"]
@@ -309,7 +318,7 @@ class ReusableCollection:
     def _reset_collection(self):
         wait_for_all_tasks()
 
-        resp = requests.get(
+        resp = session.get(
             (
                 f"{PULP_API_ROOT}content/ansible/collection_versions/"
                 f"?name={self._collection_name}&namespace="
@@ -333,7 +342,7 @@ class ReusableCollection:
             f'{self._namespace_name}/{self._collection_name}/'
         )
 
-        requests.patch(
+        session.patch(
             url,
             json={"deprecated": False},
             auth=ADMIN_CREDENTIALS,
@@ -366,14 +375,14 @@ def cleanup_test_obj(response, pk, del_func):
 
 
 def del_container(name):
-    requests.delete(
+    session.delete(
         f"{API_ROOT}v3/plugin/execution-environments/repositories/{name}/",
         auth=ADMIN_CREDENTIALS,
     )
 
 
 def gen_remote_container(name, registry_pk):
-    return requests.post(
+    return session.post(
         f"{API_ROOT}_ui/v1/execution-environments/remotes/",
         json={
             "name": name,
@@ -385,14 +394,14 @@ def gen_remote_container(name, registry_pk):
 
 
 def del_registry(pk):
-    requests.delete(
+    session.delete(
         f"{API_ROOT}_ui/v1/execution-environments/registries/{pk}/",
         auth=ADMIN_CREDENTIALS,
     )
 
 
 def gen_registry(name):
-    return requests.post(
+    return session.post(
         f"{API_ROOT}_ui/v1/execution-environments/registries/",
         json={
             "name": name,
@@ -465,7 +474,7 @@ class ReusableRemoteContainer:
     def _reset(self):
         self._remote = gen_remote_container(f"{self._ns_name}/{self._name}", self._registry_pk)
 
-        container = requests.get(
+        container = session.get(
             f"{API_ROOT}v3/plugin/execution-environments/"
             f"repositories/{self._ns_name}/{self._name}/",
             auth=ADMIN_CREDENTIALS
@@ -475,13 +484,13 @@ class ReusableRemoteContainer:
         pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
 
         # get roles first
-        roles = requests.get(
+        roles = session.get(
             f"{API_ROOT}{pulp_namespace_path}/list_roles",
             auth=ADMIN_CREDENTIALS
         ).json()
 
         for role in roles['roles']:
-            self.pulp_namespace = requests.post(
+            self.pulp_namespace = session.post(
                 f"{API_ROOT}{pulp_namespace_path}/remove_role",
                 json={
                     'role': role['role']
@@ -489,12 +498,12 @@ class ReusableRemoteContainer:
                 auth=ADMIN_CREDENTIALS
             )
 
-        self._namespace = requests.get(
+        self._namespace = session.get(
             f"{API_ROOT}{pulp_namespace_path}",
             auth=ADMIN_CREDENTIALS
         ).json()
 
-        self._container = requests.get(
+        self._container = session.get(
             f"{API_ROOT}v3/plugin/execution-environments/"
             f"repositories/{self._ns_name}/{self._name}/",
             auth=ADMIN_CREDENTIALS
@@ -532,7 +541,7 @@ class ReusableLocalContainer:
         # 2. get roles in namespace
         # 3. remove roles and groups (clean container namespace)
 
-        self._container = requests.get(
+        self._container = session.get(
             f"{API_ROOT}v3/plugin/execution-environments/repositories/{self._name}/",
             auth=ADMIN_CREDENTIALS
         ).json()
@@ -541,13 +550,13 @@ class ReusableLocalContainer:
         pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
 
         # get roles first
-        roles = requests.get(
+        roles = session.get(
             f"{API_ROOT}{pulp_namespace_path}/list_roles",
             auth=ADMIN_CREDENTIALS
         ).json()
 
         for role in roles['roles']:
-            requests.post(
+            session.post(
                 f"{API_ROOT}{pulp_namespace_path}/remove_role",
                 json={
                     'role': role['role']
@@ -555,12 +564,12 @@ class ReusableLocalContainer:
                 auth=ADMIN_CREDENTIALS
             )
 
-        self._namespace = requests.get(
+        self._namespace = session.get(
             f"{API_ROOT}{pulp_namespace_path}",
             auth=ADMIN_CREDENTIALS
         ).json()
 
-        self._manifest = requests.get(
+        self._manifest = session.get(
             (
                 f"{API_ROOT}v3/plugin/execution-environments/"
                 f"repositories/{self._name}/_content/images/latest/"
@@ -584,7 +593,7 @@ class ReusableLocalContainer:
 def add_role_common(user, password, expect_pass, pulp_href, role):
     group_name = create_group(gen_string())["name"]
 
-    response = requests.post(
+    response = session.post(
         f"{SERVER}{pulp_href}add_role/",
         json={
             "role": role,
@@ -597,7 +606,7 @@ def add_role_common(user, password, expect_pass, pulp_href, role):
 
 
 def remove_role_common(user, password, expect_pass, pulp_href, role):
-    response = requests.post(
+    response = session.post(
         f"{SERVER}{pulp_href}remove_role/",
         json={
             "role": role
@@ -609,7 +618,7 @@ def remove_role_common(user, password, expect_pass, pulp_href, role):
 
 
 def list_roles_common(user, password, expect_pass, pulp_href):
-    response = requests.get(
+    response = session.get(
         f"{SERVER}{pulp_href}list_roles/",
         auth=(user['username'], password)
     )

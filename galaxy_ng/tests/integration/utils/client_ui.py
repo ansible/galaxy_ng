@@ -78,7 +78,8 @@ class UIClient:
         pheaders = {
             'Content-Type': 'application/json',
             'Cookie': f"csrftoken={cookies['csrftoken']}; sessionid={cookies['sessionid']}",
-            'X-CSRFToken': cookies['csrftoken']
+            'X-CSRFToken': cookies['csrftoken'],
+            'Referer': self.login_url,
         }
         res = self._rs.post(self.logout_url, json={}, headers=pheaders)
 
@@ -142,7 +143,8 @@ class UIClient:
     def post(self, relative_url: str, payload: dict) -> requests.models.Response:
         pheaders = {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Referer': self.login_url
         }
 
         # send cookies whenever possible ...
@@ -182,6 +184,7 @@ class UIClient:
     def delete(self, relative_url: str) -> requests.models.Response:
         pheaders = {
             'Accept': 'application/json',
+            'Referer': self.login_url
         }
 
         # send cookies whenever possible ...
