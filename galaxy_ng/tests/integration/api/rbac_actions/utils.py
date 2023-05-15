@@ -145,16 +145,25 @@ def podman_push(username, password, container, tag="latest"):
 
     subprocess.run(tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    push_cmd = [
-        container_engine,
-        "push",
-        "--creds",
-        f"{username}:{password}",
-        new_container,
-        "--remove-signatures"]
+    if container_engine == "docker":
+        login_cmd = ["docker", "login", "-u", username, "-p", password, container_registry]
+        subprocess.run(login_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     if container_engine == "podman":
-        push_cmd.append("--tls-verify=false")
+        push_cmd = [
+            container_engine,
+            "push",
+            "--creds",
+            f"{username}:{password}",
+            new_container,
+            "--remove-signatures",
+            "--tls-verify=false"]
+
+    if container_engine == "docker":
+        push_cmd = [
+            container_engine,
+            "push",
+            new_container]
 
     return subprocess.run(push_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode
 
