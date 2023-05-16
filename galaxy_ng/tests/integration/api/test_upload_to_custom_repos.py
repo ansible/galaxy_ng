@@ -112,7 +112,7 @@ def test_publish_to_custom_repo(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
 
 
-@pytest.mark.standalone_only
+@pytest.mark.community_only
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
 def test_publish_and_auto_approve(ansible_config, artifact, settings):
@@ -139,7 +139,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
     assert len(cv["signatures"]) >= 1
 
 
-@pytest.mark.standalone_only
+@pytest.mark.community_only
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
 def test_auto_approve_muliple(ansible_config, artifact, settings):
