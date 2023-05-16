@@ -104,7 +104,8 @@ def test_api_v3_plugin_execution_environments_repositories_content_readme(
     assert 'created_at' in resp
     assert 'updated_at' in resp
 
-    delete_response = api_client(f"{api_prefix}/v3/plugin/execution-environments/repositories/{name}/", method='DELETE')
+    delete_response = api_client(f"{api_prefix}/v3/plugin/execution-environments/"
+                                 f"repositories/{name}/", method='DELETE')
     resp = wait_for_task(api_client, delete_response, timeout=10000)
     assert resp["state"] == "completed"
 

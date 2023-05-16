@@ -14,17 +14,20 @@ def test_delete_ee_and_content(ansible_config):
     # Pull alpine image
     subprocess.check_call([container_engine, "pull", "alpine"])
     # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine", f"{config['url'].strip(api_prefix).strip('https://')}/alpine:latest"])
+    subprocess.check_call([container_engine, "tag", "alpine",
+                           f"{config['url'].strip(api_prefix).strip('https://')}"
+                           f"/alpine:latest"])
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-                           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}/alpine:latest"]
+    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
+                                     f"/alpine:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
@@ -44,7 +47,8 @@ def test_delete_ee_and_content(ansible_config):
     assert distro_response["results"][0]["base_path"] == 'alpine'
 
     # Grab the repository href from the json and make get request
-    repo_href = (distro_response["results"][0]["repository"]).replace("/api/automation-hub", "")
+    repo_href = (distro_response["results"][0]["repository"]) \
+        .replace("/api/automation-hub", "")
     repo_response = client(f"{repo_href}")
 
     # Grab <latest_version_href> field from this Container Push Repo Instance
@@ -60,7 +64,8 @@ def test_delete_ee_and_content(ansible_config):
 
     # Delete repository, contents, and artifacts
     delete_response = client(f"{api_prefix}/v3/"
-                             "plugin/execution-environments/repositories/alpine/", method='DELETE')
+                             "plugin/execution-environments/repositories/alpine/",
+                             method='DELETE')
     resp = wait_for_task(client, delete_response, timeout=10000)
     assert resp["state"] == "completed"
 
@@ -90,24 +95,30 @@ def test_shared_content_is_not_deleted(ansible_config):
     # Pull alpine image
     subprocess.check_call([container_engine, "pull", "alpine"])
     # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine", f"{config['url'].strip(api_prefix).strip('https://')}/alpine1:latest"])
+    subprocess.check_call([container_engine, "tag", "alpine",
+                           f"{config['url'].strip(api_prefix).strip('https://')}"
+                           f"/alpine1:latest"])
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-                           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}/alpine1:latest"]
+    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
+                                     f"/alpine1:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Copy 'alpine1' and rename to 'alpine2'
-    subprocess.check_call([container_engine, "tag", "alpine", f"{config['url'].strip(api_prefix).strip('https://')}/alpine2:latest"])
-    cmd = [container_engine, "push",  f"{config['url'].strip(api_prefix).strip('https://')}/alpine2:latest"]
+    subprocess.check_call([container_engine, "tag", "alpine",
+                           f"{config['url'].strip(api_prefix).strip('https://')}"
+                           f"/alpine2:latest"])
+    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
+                                     f"/alpine2:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
@@ -133,8 +144,10 @@ def test_shared_content_is_not_deleted(ansible_config):
     assert distro_response2["results"][0]["base_path"] == 'alpine2'
 
     # Grab the repository href from the json and make get request
-    repo_href_1 = (distro_response1["results"][0]["repository"]).replace("/api/automation-hub", "")
-    repo_href_2 = (distro_response2["results"][0]["repository"]).replace("/api/automation-hub", "")
+    repo_href_1 = (distro_response1["results"][0]["repository"]).replace(
+        "/api/automation-hub", "")
+    repo_href_2 = (distro_response2["results"][0]["repository"]).replace(
+        "/api/automation-hub", "")
     repo_response_1 = client(f"{repo_href_1}")
     repo_response_2 = client(f"{repo_href_2}")
 
@@ -157,7 +170,8 @@ def test_shared_content_is_not_deleted(ansible_config):
 
     # Delete repository, contents, and artifacts for alpine1, NOT alpine2
     delete_response = client(f"{api_prefix}/v3/"
-                             "plugin/execution-environments/repositories/alpine1/", method='DELETE')
+                             "plugin/execution-environments/repositories/alpine1/",
+                             method='DELETE')
     resp = wait_for_task(client, delete_response, timeout=10000)
     assert resp["state"] == "completed"
 
@@ -178,6 +192,7 @@ def test_shared_content_is_not_deleted(ansible_config):
         assert success
 
     delete_response = client(f"{api_prefix}/v3/"
-                             "plugin/execution-environments/repositories/alpine2/", method='DELETE')
+                             "plugin/execution-environments/repositories/alpine2/",
+                             method='DELETE')
     resp = wait_for_task(client, delete_response, timeout=10000)
     assert resp["state"] == "completed"

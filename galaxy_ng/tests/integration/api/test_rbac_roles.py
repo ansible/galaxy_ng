@@ -642,7 +642,8 @@ def _get_reusable_extras():
             "custom_repo": ReusableAnsibleRepository(
                 f"repo-test-{generate_random_string()}", is_staging=False),
             "private_repo": ReusableAnsibleRepository(
-                f"repo-test-{generate_random_string()}", is_staging=False, is_private=True, add_collection=True),
+                f"repo-test-{generate_random_string()}", is_staging=False, is_private=True,
+                add_collection=True),
         }
 
     return REUSABLE_EXTRA
