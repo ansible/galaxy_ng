@@ -160,7 +160,6 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
 # /api/automation-hub/_ui/v1/distributions/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
-@pytest.mark.tofix
 def test_api_ui_v1_distributions(ansible_config):
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:

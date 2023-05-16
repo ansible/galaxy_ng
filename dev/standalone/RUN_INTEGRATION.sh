@@ -28,7 +28,7 @@ CONTAINER_WORKER=$(docker ps --filter="name=galaxy_ng" --format="table {{.Names}
 docker exec -i "${CONTAINER_API}" /entrypoint.sh manage shell < dev/common/setup_test_data.py
 
 export HUB_USE_MOVE_ENDPOINT=true
-
+export CONTAINER_ENGINE=docker
 # when running user can specify extra pytest arguments such as
 # export HUB_LOCAL=1
 # dev/common/RUN_INTEGRATION.sh --pdb -sv --log-cli-level=DEBUG "-m standalone_only" -k mytest
