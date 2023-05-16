@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.min_hub_version("4.7dev")
 class TestRepositories:
     @pytest.mark.repositories
+    @pytest.mark.skip_crc_infra  # FIXME: client does not work in CRC infra
     def test_cant_upload_same_collection_same_repo(self, galaxy_client):
         """
         Verifies that the same collection / version cannot be uploaded to the same repo
@@ -38,6 +39,7 @@ class TestRepositories:
         assert ctx.value.response.status_code == 400
 
     @pytest.mark.repositories
+    @pytest.mark.skip_crc_infra  # FIXME: client does not work in CRC infra
     def test_copy_cv_endpoint(self, galaxy_client):
         """
         Verifies a cv can be copied to a different repo
@@ -70,6 +72,7 @@ class TestRepositories:
         assert verify_repo_data(expected, results)
 
     @pytest.mark.repositories
+    @pytest.mark.skip_crc_infra  # FIXME: client does not work in CRC infra
     def test_move_cv_endpoint(self, galaxy_client):
         """
         Verifies a cv can be moved to a different repo

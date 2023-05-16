@@ -12,7 +12,7 @@ ${VENV_PATH}/bin/pip install -r integration_requirements.txt
 
 echo "Running pytest ..."
 ${VENV_PATH}/bin/pytest \
-    --capture=no -m "cloud_only or (not standalone_only and not community_only and not sync and not rm_sync and not x_repo_search and not rbac_repos)" \
+    --capture=no -m "cloud_only or (not standalone_only and not community_only and not sync and not rm_sync and not x_repo_search and not rbac_repos and not skip_crc_infra)" \
     -v \
     galaxy_ng/tests/integration $@
 RC=$?
