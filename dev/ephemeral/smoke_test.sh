@@ -52,7 +52,6 @@ else
         --env HUB_USE_MOVE_ENDPOINT="${HUB_USE_MOVE_ENDPOINT}" \
         --env HUB_API_ROOT="${HUB_API_ROOT}" \
         --env HUB_AUTH_URL="${HUB_AUTH_URL}" \
-        --env TESTS_AGAINST_STAGE=true \
         --rm \
         ${DOCKER_IMAGE} \
         /bin/bash -c "cd /app; bash dev/ephemeral/run_tests.sh"
