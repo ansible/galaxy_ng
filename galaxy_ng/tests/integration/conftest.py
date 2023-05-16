@@ -68,6 +68,7 @@ rbac_repos: tests verifying rbac roles on custom repositories
 rm_sync: tests verifying syncing custom repositories
 x_repo_search: tests verifying cross-repo search endpoint
 repositories: tests verifying custom repositories
+test_ci: testing
 """
 
 
