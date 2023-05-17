@@ -116,8 +116,7 @@ requirements = [
 
 
     # DON'T MERGE ME
-    # this wouldn't accept 0.17.0.dev until I included 0.16 for some reason
-    "pulp_ansible>=0.16.0,<0.18.0",
+    "pulp_ansible>=0.17.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.14.5,<2.15.0",
