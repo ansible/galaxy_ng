@@ -9,8 +9,11 @@ from ..utils import (
     create_unused_namespace,
     get_client, gen_string,
 )
+from ..utils.repo_management_utils import search_collection_endpoint
+from ..utils.tools import generate_random_string
 
 
+@pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.standalone_only
 def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
@@ -22,15 +25,15 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
     )
 
     # make a repo
+    repo_name = f"repo-test-{generate_random_string()}"
     repo = AnsibleDistroAndRepo(
         client,
-        gen_string(),
+        repo_name,
     )
     repo_data = repo.get_repo()
-    repo_name = repo_data['name']
 
     # make 10 namespaces
-    namespaces = [create_unused_namespace(client) for x in range(0, total + 1)]
+    namespaces = [create_unused_namespace(client) for x in range(0, total)]
 
     # make a collection for each namespace
     artifacts = []
@@ -60,11 +63,9 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
                 print(f"Function returned: {result}")
 
     gc = galaxy_client("admin")
-    cvs = gc.get(
-        (
-            "/api/automation-hub/v3/plugin/ansible/search/collection-versions/"
-            + f"?repository_name={repo_name}"
-        )
+
+    matches, _ = search_collection_endpoint(
+        gc, repository_name=repo_name
     )
 
-    assert cvs['meta']['count'] == len(artifacts)
+    assert matches == len(artifacts)
