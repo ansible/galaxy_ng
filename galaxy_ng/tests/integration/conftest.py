@@ -706,10 +706,13 @@ def get_hub_version(ansible_config):
 
         # I can't get a token from the ephemeral environment.
         # Changed to Basic token authentication until the issue is resolved
+        hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
         del os.environ["HUB_AUTH_URL"]
-        AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
+        pe_token_bck = AnsibleConfigFixture.PROFILES["partner_engineer"]["token"]
         role = "partner_engineer"
         gc = GalaxyKitClient(ansible_config).gen_authorized_client(role, basic_token=True)
+        os.environ["HUB_AUTH_URL"] = hub_auth_url_bck
+        AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = pe_token_bck
     elif not is_dev_env_standalone():
         # if we are here, we need to create some test data
         # (same as dev/common/setup_test_data.py)
