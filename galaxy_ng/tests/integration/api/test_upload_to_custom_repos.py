@@ -4,10 +4,11 @@ import tempfile
 
 from ..utils import (
     AnsibleDistroAndRepo,
-    get_client, gen_string,
+    get_client,
     CollectionInspector,
     wait_for_all_tasks
 )
+from ..utils.tools import generate_random_string
 
 
 def _upload_test_common(config, client, artifact, base_path, dest_base_path=None):
@@ -22,7 +23,8 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
         config["token"],
         "--server",
         config["url"] + f"content/{base_path}/",
-        artifact.filename
+        artifact.filename,
+        "--ignore-certs"
     ]
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -50,6 +52,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
 
         cmd = [
             "curl",
+            "-k",
             "--retry",
             "5",
             "-L",
@@ -83,7 +86,7 @@ def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
 
     repo = AnsibleDistroAndRepo(
         client,
-        gen_string(),
+        f"repo-test-{generate_random_string()}",
         repo_body={"pulp_labels": {"pipeline": "staging"}}
     )
 
@@ -101,7 +104,7 @@ def test_publish_to_custom_repo(ansible_config, artifact, settings):
 
     repo = AnsibleDistroAndRepo(
         client,
-        gen_string(),
+        f"repo-test-{generate_random_string()}",
     )
 
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
@@ -119,7 +122,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
 
     repo = AnsibleDistroAndRepo(
         client,
-        gen_string(),
+        f"repo-test-{generate_random_string()}",
     )
 
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"], "published")
@@ -144,7 +147,7 @@ def test_auto_approve_muliple(ansible_config, artifact, settings):
     )
     custom_published_repo = AnsibleDistroAndRepo(
         client,
-        gen_string(),
+        f"repo-test-{generate_random_string()}",
         repo_body={"pulp_labels": {"pipeline": "approved"}}
     )
 

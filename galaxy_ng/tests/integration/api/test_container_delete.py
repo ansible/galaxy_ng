@@ -9,16 +9,28 @@ def test_delete_ee_and_content(ansible_config):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
 
-    # Pull alpine image
-    subprocess.check_call(["docker", "pull", "alpine"])
-    # Tag the image
-    subprocess.check_call(["docker", "tag", "alpine", "localhost:5001/alpine:latest"])
+    container_engine = config["container_engine"]
 
-    # Login to local registy with tls verify disabled
-    subprocess.check_call(["docker", "login", "-u", "admin", "-p", "admin", "localhost:5001"])
+    # Pull alpine image
+    subprocess.check_call([container_engine, "pull", "alpine"])
+    # Tag the image
+    subprocess.check_call([container_engine, "tag", "alpine",
+                           f"{config['url'].strip(api_prefix).strip('https://')}"
+                           f"/alpine:latest"])
+
+    # Login to local registry with tls verify disabled
+    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
+           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+    if container_engine == 'podman':
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
 
     # Push image to local registry
-    subprocess.check_call(["docker", "push", "localhost:5001/alpine:latest"])
+    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
+                                     f"/alpine:latest"]
+    if container_engine == 'podman':
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
 
     # Get an API client running with admin user credentials
     client = get_client(
@@ -35,8 +47,9 @@ def test_delete_ee_and_content(ansible_config):
     assert distro_response["results"][0]["base_path"] == 'alpine'
 
     # Grab the repository href from the json and make get request
-    repo_href = (distro_response["results"][0]["repository"]).replace("/api/automation-hub", "")
-    repo_response = client(f"{api_prefix}{repo_href}")
+    repo_href = (distro_response["results"][0]["repository"]) \
+        .replace("/api/automation-hub", "")
+    repo_response = client(f"{repo_href}")
 
     # Grab <latest_version_href> field from this Container Push Repo Instance
     latest_version = repo_response["latest_version_href"]
@@ -51,7 +64,8 @@ def test_delete_ee_and_content(ansible_config):
 
     # Delete repository, contents, and artifacts
     delete_response = client(f"{api_prefix}/v3/"
-                             "plugin/execution-environments/repositories/alpine/", method='DELETE')
+                             "plugin/execution-environments/repositories/alpine/",
+                             method='DELETE')
     resp = wait_for_task(client, delete_response, timeout=10000)
     assert resp["state"] == "completed"
 
@@ -74,27 +88,47 @@ def test_delete_ee_and_content(ansible_config):
 
 @pytest.mark.standalone_only
 def test_shared_content_is_not_deleted(ansible_config):
+    config = ansible_config("admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
+    container_engine = config["container_engine"]
+
     # Pull alpine image
-    subprocess.check_call(["docker", "pull", "alpine"])
-
+    subprocess.check_call([container_engine, "pull", "alpine"])
     # Tag the image
-    subprocess.check_call(["docker", "tag", "alpine", "localhost:5001/alpine1:latest"])
+    subprocess.check_call([container_engine, "tag", "alpine",
+                           f"{config['url'].strip(api_prefix).strip('https://')}"
+                           f"/alpine1:latest"])
 
-    # Login to local registy with tls verify disabled
-    subprocess.check_call(["docker", "login", "-u", "admin", "-p", "admin", "localhost:5001"])
+    # Login to local registry with tls verify disabled
+    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
+           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+    if container_engine == 'podman':
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
 
     # Push image to local registry
-    subprocess.check_call(["docker", "push", "localhost:5001/alpine1:latest"])
+    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
+                                     f"/alpine1:latest"]
+    if container_engine == 'podman':
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
 
     # Copy 'alpine1' and rename to 'alpine2'
-    subprocess.check_call(["docker", "tag", "alpine", "localhost:5001/alpine2:latest"])
-    subprocess.check_call(["docker", "push", "localhost:5001/alpine2:latest"])
+    subprocess.check_call([container_engine, "tag", "alpine",
+                           f"{config['url'].strip(api_prefix).strip('https://')}"
+                           f"/alpine2:latest"])
+    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
+                                     f"/alpine2:latest"]
+    if container_engine == 'podman':
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
 
     # Get an API client running with admin user credentials
     client = get_client(
         config=ansible_config("admin"),
         request_token=True,
     )
+
     api_prefix = client.config.get("api_prefix").rstrip("/")
 
     # Select the distribution for alpine1 and alpine2.
@@ -110,10 +144,12 @@ def test_shared_content_is_not_deleted(ansible_config):
     assert distro_response2["results"][0]["base_path"] == 'alpine2'
 
     # Grab the repository href from the json and make get request
-    repo_href_1 = (distro_response1["results"][0]["repository"]).replace("/api/automation-hub", "")
-    repo_href_2 = (distro_response2["results"][0]["repository"]).replace("/api/automation-hub", "")
-    repo_response_1 = client(f"{api_prefix}{repo_href_1}")
-    repo_response_2 = client(f"{api_prefix}{repo_href_2}")
+    repo_href_1 = (distro_response1["results"][0]["repository"]).replace(
+        "/api/automation-hub", "")
+    repo_href_2 = (distro_response2["results"][0]["repository"]).replace(
+        "/api/automation-hub", "")
+    repo_response_1 = client(f"{repo_href_1}")
+    repo_response_2 = client(f"{repo_href_2}")
 
     # Grab <latest_version_href> field from this Container Push Repo Instance
     latest_version_1 = repo_response_1["latest_version_href"]
@@ -134,7 +170,8 @@ def test_shared_content_is_not_deleted(ansible_config):
 
     # Delete repository, contents, and artifacts for alpine1, NOT alpine2
     delete_response = client(f"{api_prefix}/v3/"
-                             "plugin/execution-environments/repositories/alpine1/", method='DELETE')
+                             "plugin/execution-environments/repositories/alpine1/",
+                             method='DELETE')
     resp = wait_for_task(client, delete_response, timeout=10000)
     assert resp["state"] == "completed"
 
@@ -153,3 +190,9 @@ def test_shared_content_is_not_deleted(ansible_config):
                 raise Exception(ge)
 
         assert success
+
+    delete_response = client(f"{api_prefix}/v3/"
+                             "plugin/execution-environments/repositories/alpine2/",
+                             method='DELETE')
+    resp = wait_for_task(client, delete_response, timeout=10000)
+    assert resp["state"] == "completed"

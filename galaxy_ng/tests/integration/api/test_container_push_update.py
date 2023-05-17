@@ -1,4 +1,3 @@
-
 """Tests related to container push update.
 
 See: https://issues.redhat.com/browse/AAH-2327
@@ -20,15 +19,29 @@ from galaxy_ng.tests.integration.utils import get_client
 )
 @pytest.mark.standalone_only
 def test_can_update_container_push(ansible_config, require_auth):
+    config = ansible_config("admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
+    container_engine = config["container_engine"]
     # Pull alpine image
-    subprocess.check_call(["docker", "pull", "alpine"])
+    subprocess.check_call([container_engine, "pull", "alpine"])
     # Tag the image
-    subprocess.check_call(["docker", "tag", "alpine", "localhost:5001/alpine:latest"])
+    subprocess.check_call([container_engine, "tag", "alpine",
+                           f"{config['url'].strip(api_prefix).strip('https://')}"
+                           f"/alpine:latest"])
 
-    # Login to local registy with tls verify disabled
-    subprocess.check_call(["docker", "login", "-u", "admin", "-p", "admin", "localhost:5001"])
+    # Login to local registry with tls verify disabled
+    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
+           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+    if container_engine == "podman":
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
+
     # Push image to local registry
-    subprocess.check_call(["docker", "push", "localhost:5001/alpine:latest"])
+    cmd = [container_engine, "push",
+           f"{config['url'].strip(api_prefix).strip('https://')}/alpine:latest"]
+    if container_engine == "podman":
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
 
     # Get an API client running with admin user credentials
     client = get_client(

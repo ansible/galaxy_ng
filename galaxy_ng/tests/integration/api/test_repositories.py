@@ -27,7 +27,7 @@ class TestRepositories:
         Verifies that the same collection / version cannot be uploaded to the same repo
         """
         test_repo_name = f"repo-test-{generate_random_string()}"
-        gc = galaxy_client("admin")
+        gc = galaxy_client("partner_engineer")
         create_repo_and_dist(gc, test_repo_name)
         namespace_name = create_test_namespace(gc)
         artifact = upload_new_artifact(
@@ -42,7 +42,7 @@ class TestRepositories:
         """
         Verifies a cv can be copied to a different repo
         """
-        gc_admin = galaxy_client("admin")
+        gc_admin = galaxy_client("partner_engineer")
 
         test_repo_name_1 = f"repo-test-{generate_random_string()}"
         repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
@@ -74,7 +74,7 @@ class TestRepositories:
         """
         Verifies a cv can be moved to a different repo
         """
-        gc_admin = galaxy_client("admin")
+        gc_admin = galaxy_client("partner_engineer")
 
         test_repo_name_1 = f"repo-test-{generate_random_string()}"
         repo_pulp_href_1 = create_repo_and_dist(gc_admin, test_repo_name_1)
@@ -170,3 +170,53 @@ class TestRepositories:
             gc_admin, name=artifact.name, repository_name=test_repo_name_1
         )
         assert matches == 0
+
+    @pytest.mark.repositories
+    def test_directly_to_repo(self, galaxy_client):
+        """
+        Verifies that a collection can be uploaded directly to a custom repo
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("partner_engineer")
+        create_repo_and_dist(gc, test_repo_name)
+        namespace_name = create_test_namespace(gc)
+        artifact = upload_new_artifact(
+            gc, namespace_name, test_repo_name, "1.0.1", tags=["application"],
+            direct_upload=True
+        )
+        matches, _ = search_collection_endpoint(gc, name=artifact.name)
+        assert matches == 1
+
+    @pytest.mark.repositories
+    def test_cannot_directly_to_repo_if_pipeline_approved(self, galaxy_client):
+        """
+        Verifies that a collection can't be uploaded directly to a custom repo
+        if pipeline is approved
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("partner_engineer")
+        create_repo_and_dist(gc, test_repo_name, pipeline="approved")
+        namespace_name = create_test_namespace(gc)
+        with pytest.raises(GalaxyClientError) as ctx:
+            upload_new_artifact(
+                gc, namespace_name, test_repo_name, "1.0.1", tags=["application"],
+                direct_upload=True
+            )
+        assert ctx.value.response.status_code == 403
+
+    @pytest.mark.repositories
+    def test_can_directly_to_repo_if_pipeline_staging(self, galaxy_client):
+        """
+        Verifies that a collection can be uploaded directly to a custom repo
+        if pipeline is staging
+        """
+        test_repo_name = f"repo-test-{generate_random_string()}"
+        gc = galaxy_client("partner_engineer")
+        create_repo_and_dist(gc, test_repo_name, pipeline="staging")
+        namespace_name = create_test_namespace(gc)
+        artifact = upload_new_artifact(
+            gc, namespace_name, test_repo_name, "1.0.1", tags=["application"],
+            direct_upload=True
+        )
+        matches, _ = search_collection_endpoint(gc, name=artifact.name)
+        assert matches == 1

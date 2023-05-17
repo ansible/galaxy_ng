@@ -796,7 +796,7 @@ class TestRBACRepos:
             gc_admin, test_repo_name, role_name, [group["name"]]
         )
         gc_user = galaxy_client(user)
-        add_permissions_to_repository(gc_user, test_repo_name, role_name, ["admin_staff"])
+        add_permissions_to_repository(gc_user, test_repo_name, role_name, ["ns_group_for_tests"])
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
@@ -818,7 +818,7 @@ class TestRBACRepos:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             add_permissions_to_repository(
-                gc_user, test_repo_name, role_name, ["admin_staff"]
+                gc_user, test_repo_name, role_name, ["ns_group_for_tests"]
             )
         assert ctx.value.response.status_code == 403
 
@@ -838,7 +838,7 @@ class TestRBACRepos:
         gc_admin.add_role_to_group(role_name, group["id"])
         create_repo_and_dist(gc_admin, test_repo_name)
         gc_user = galaxy_client(user)
-        add_permissions_to_repository(gc_user, test_repo_name, role_name, ["admin_staff"])
+        add_permissions_to_repository(gc_user, test_repo_name, role_name, ["ns_group_for_tests"])
 
     @pytest.mark.rbac_repos
     @pytest.mark.standalone_only
@@ -860,7 +860,7 @@ class TestRBACRepos:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             add_permissions_to_repository(
-                gc_user, test_repo_name, role_name, ["admin_staff"]
+                gc_user, test_repo_name, role_name, ["ns_group_for_tests"]
             )
         assert ctx.value.response.status_code == 403
 

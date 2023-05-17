@@ -68,12 +68,12 @@ def search_collection_endpoint(client, **params):
 
 def create_test_namespace(gc):
     namespace_name = f"ns_test_{generate_random_string()}"
-    create_namespace(gc, namespace_name, "ns_group_for_tests")
+    create_namespace(gc, namespace_name, "")
     return namespace_name
 
 
 def upload_new_artifact(
-    gc, namespace, repository, version, key=None, tags=None, dependencies=None
+    gc, namespace, repository, version, key=None, tags=None, dependencies=None, direct_upload=False
 ):
     artifact = build_collection(
         "skeleton",
@@ -86,7 +86,7 @@ def upload_new_artifact(
         },
         key=key,
     )
-    upload_test_artifact(gc, namespace, repository, artifact)
+    upload_test_artifact(gc, namespace, repository, artifact, direct_upload)
     return artifact
 
 

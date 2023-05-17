@@ -4,11 +4,11 @@ import pytest
 from galaxykit.collections import upload_artifact, delete_collection
 from pkg_resources import parse_version
 
-from ..conftest import get_galaxy_client, get_ansible_config_sync
+from ..conftest import get_galaxy_client, get_ansible_config_sync, get_hub_version
 from ..utils import wait_for_task, get_client, set_certification
 from orionutils.generator import build_collection
 from ..utils.iqe_utils import is_sync_testing, get_all_collections,\
-    retrieve_collection, get_hub_version
+    retrieve_collection
 from ..utils.tools import generate_random_artifact_version, uuid4
 
 pytestmark = pytest.mark.qa  # noqa: F821

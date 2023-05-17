@@ -89,6 +89,7 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
             raise
         else:
             resp = wait_for_task(api_client, resp)
+            logging.debug(resp)
             assert resp["state"] == "completed"
 
 
@@ -99,6 +100,8 @@ def test_validated_publish(ansible_config, artifact, upload_artifact):
 
     config = ansible_config("admin")
     api_client = get_client(config)
+    logging.debug(f"artifact name {artifact.name}")
+    logging.debug(f"artifact namespace {artifact.namespace}")
 
     with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
         try:
