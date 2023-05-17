@@ -709,10 +709,13 @@ def get_hub_version(ansible_config):
         hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
         del os.environ["HUB_AUTH_URL"]
         pe_token_bck = AnsibleConfigFixture.PROFILES["partner_engineer"]["token"]
+        AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
         role = "partner_engineer"
         gc = GalaxyKitClient(ansible_config).gen_authorized_client(role, basic_token=True)
+        galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
         os.environ["HUB_AUTH_URL"] = hub_auth_url_bck
         AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = pe_token_bck
+        return galaxy_ng_version
     elif not is_dev_env_standalone():
         # if we are here, we need to create some test data
         # (same as dev/common/setup_test_data.py)
