@@ -121,7 +121,8 @@ class GalaxyKitClient:
                         token = profile_config.get("token")
                     if token is None:
                         token = get_standalone_token(
-                            user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache
+                            user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
+                            basic_token=basic_token
                         )
 
                     auth = {

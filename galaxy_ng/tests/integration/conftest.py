@@ -700,10 +700,16 @@ def get_hub_version(ansible_config):
     if is_standalone():
         role = "iqe_admin"
     elif is_ephemeral_env():
-        # TODO: this call should be done by galaxykit
-        config = ansible_config("org_admin")
-        api_client = get_client(config, request_token=True, require_auth=True)
-        return api_client("/", args={}, method="GET")["galaxy_ng_version"]
+        # config = ansible_config("org_admin")
+        # api_client = get_client(config, request_token=True, require_auth=True)
+        # return api_client("/", args={}, method="GET")["galaxy_ng_version"]
+
+        # I can't get a token from the ephemeral environment.
+        # Changed to Basic token authentication until the issue is resolved
+        del os.environ["HUB_AUTH_URL"]
+        AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
+        role = "partner_engineer"
+        gc = GalaxyKitClient(ansible_config).gen_authorized_client(role, basic_token=True)
     elif not is_dev_env_standalone():
         # if we are here, we need to create some test data
         # (same as dev/common/setup_test_data.py)
