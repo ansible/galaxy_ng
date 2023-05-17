@@ -679,6 +679,7 @@ def set_credentials_when_not_docker_pah(url):
     admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
     AnsibleConfigFixture.PROFILES["admin"]["username"] = "admin"
     AnsibleConfigFixture.PROFILES["admin"]["password"] = admin_pass
+    AnsibleConfigFixture.PROFILES["admin"]["token"] = None
     AnsibleConfigFixture.PROFILES["iqe_admin"]["username"] = "admin"
     AnsibleConfigFixture.PROFILES["iqe_admin"]["password"] = admin_pass
     AnsibleConfigFixture.PROFILES["iqe_admin"]["token"] = None
