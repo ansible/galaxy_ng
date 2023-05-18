@@ -33,4 +33,4 @@ To install and run a local GalaxyNG server [view the End User Installation guide
 
 # License
 
-GNU General Public License v2. View [LICENSE](/LICENSE) for full text.
+GNU General Public License v2. View [LICENSE](/LICENSE) for full text...
