@@ -3,6 +3,7 @@ from rest_framework import serializers
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
+from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 
 
 class LegacyNamespacesSerializer(serializers.ModelSerializer):
@@ -145,6 +146,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
     summary_fields = serializers.SerializerMethodField()
     upstream_id = serializers.SerializerMethodField()
+    download_count = serializers.SerializerMethodField()
 
     class Meta:
         model = LegacyRole
@@ -160,7 +162,8 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
             'commit',
             'name',
             'description',
-            'summary_fields'
+            'summary_fields',
+            'download_count',
         ]
 
     def get_id(self, obj):
@@ -248,6 +251,12 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
             'tags': tags,
             'versions': versions
         }
+
+    def get_download_count(self, obj):
+        counter = LegacyRoleDownloadCount.objects.filter(legacyrole=obj).first()
+        if counter:
+            return counter.count
+        return 0
 
 
 class LegacyRoleContentSerializer(serializers.ModelSerializer):

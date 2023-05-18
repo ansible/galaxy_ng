@@ -147,3 +147,13 @@ class LegacyRole(models.Model):
         null=False,
         default=dict
     )
+
+
+class LegacyRoleDownloadCount(models.Model):
+    legacyrole = models.OneToOneField(
+        LegacyRole,
+        on_delete=models.CASCADE,
+        primary_key=True
+    )
+
+    count = models.IntegerField(default=0)

@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
@@ -16,7 +17,8 @@ from galaxy_ng.app.api.v1.tasks import (
     legacy_role_import,
 )
 from galaxy_ng.app.api.v1.models import (
-    LegacyRole
+    LegacyRole,
+    LegacyRoleDownloadCount,
 )
 from galaxy_ng.app.api.v1.serializers import (
     LegacyImportSerializer,
@@ -63,6 +65,31 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
         if order_by is not None:
             return self.queryset.order_by(order_by)
         return self.queryset
+
+    def list(self, request):
+
+        # this is the naive logic used in the original galaxy to assume a role
+        # was being downloaded by the CLI...
+        if request.query_params.get('owner__username') and request.query_params.get('name'):
+
+            role_namespace = request.query_params.get('owner__username')
+            role_name = request.query_params.get('name')
+            role = LegacyRole.objects.filter(namespace__name=role_namespace, name=role_name).first()
+            if role:
+
+                with transaction.atomic():
+
+                    # attempt to get or create the counter first
+                    counter, _ = LegacyRoleDownloadCount.objects.get_or_create(legacyrole=role)
+
+                    # now lock the row so that we avoid race conditions
+                    counter = LegacyRoleDownloadCount.objects.select_for_update().get(pk=counter.pk)
+
+                    # increment and save
+                    counter.count += 1
+                    counter.save()
+
+        return super().list(request)
 
     def destroy(self, request, pk=None):
         """Delete a single role."""
