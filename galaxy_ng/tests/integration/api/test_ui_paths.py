@@ -3,7 +3,6 @@ from ..utils import UIClient
 
 
 @pytest.mark.standalone_only
-@pytest.mark.api_ui
 def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertifiedv2):
     """Test the ?version_range query parameter."""
     c1, c2 = uncertifiedv2
