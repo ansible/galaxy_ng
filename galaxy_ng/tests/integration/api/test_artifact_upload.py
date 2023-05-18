@@ -254,17 +254,27 @@ def test_long_field_values(ansible_config, upload_artifact, field):
 @pytest.mark.parametrize(
     "spec",
     [
-        # ("2eq", "==2.10", "completed"),
+        # TODO: move most these to galaxy-importer unit tests
+        ("2eq", "==2.10", "completed"),
+        # ("gt", ">2.10.0", "completed"),
+        # ("gteq", ">=2.10", "completed"),
+        # ("beta", ">=2.12b1", "completed"),
+        ("beta2", ">=2.12.0b1", "completed"),
+        # ("lt", "<2.11", "completed"),
         # ("range1", ">=2.10,<2.11", "completed"),
-        ("range2", ">=2.10,<<2.11", "failed"),
-        ("2comma", ">=2.10,,", "failed"),
-        # ("star", "2.10.*", "completed"),
+        # ("it_strips_commas", ">=2.10,,", "completed"),
+        # ("gtstar", ">2.10.*", "completed"),
         # ("exc", ">=2.1,!=2.1.2", "completed"),
-        # Known limitations
-        # ("label", "2.10.post1", "completed"),
-        # ("pre", "2.11b4", "completed"),
+        ("norange", "2.10", "failed"),
+        # ("norange2", "2.10.0", "failed"),
+        # ("norange3", "2.10.0b1", "failed"),
+        # ("norange4", "2.10.*", "failed"),
         # ("1eq", "=2.10", "failed"),
-        # ("contradiction", ">2.0,<1.0", "failed"),
+        # Potentially unexpected
+        # ("gt_dup", ">>>>>2.11", "completed"),
+        # ("lt_dup", ">=2.10,<<2.11", "completed"),
+        # ("contradiction", ">2.0,<1.0", "completed"),
+        # ("text", ">nonumbers", "completed"),
     ],
     ids=lambda _: _[0],
 )
