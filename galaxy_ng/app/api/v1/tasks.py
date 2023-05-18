@@ -3,6 +3,8 @@ import datetime
 import logging
 import tempfile
 
+from django.db import transaction
+
 from galaxy_importer.utils import markup as markup_utils
 
 from galaxy_ng.app.models.auth import User
@@ -13,6 +15,7 @@ import galaxy_ng.app.utils.roles as roles_utils
 
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
+from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 
 from git import Repo
 
@@ -251,6 +254,7 @@ def legacy_sync_from_upstream(
         role_created = rdata.get('created', datetime.datetime.now().isoformat())
         role_modified = rdata.get('modified', datetime.datetime.now().isoformat())
         role_type = rdata.get('role_type', 'ANS')
+        role_download_count = rdata.get('download_count', 0)
 
         if ruser not in nsmap:
             logger.debug(f'SYNC NAMESPACE GET_OR_CREATE {ruser}')
@@ -301,7 +305,13 @@ def legacy_sync_from_upstream(
         }
 
         if dict(this_role.full_metadata) != new_full_metadata:
-            this_role.full_metadata = new_full_metadata
-            this_role.save()
+            with transaction.atomic():
+                this_role.full_metadata = new_full_metadata
+                this_role.save()
+
+        with transaction.atomic():
+            counter, _ = LegacyRoleDownloadCount.objects.get_or_create(legacyrole=this_role)
+            counter.count = role_download_count
+            counter.save()
 
     logger.debug('STOP LEGACY SYNC!')

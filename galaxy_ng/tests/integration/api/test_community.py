@@ -317,10 +317,14 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     assert resp.get('task') is not None
     wait_for_v1_task(resp=resp, api_client=api_client)
 
+    # verify filtering in the way that the CLI does it
     resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
     assert resp['count'] == 1
     assert resp['results'][0]['username'] == github_user
     roleid = resp['results'][0]['id']
+
+    # validate the download_count was synced
+    assert resp['results'][0]['download_count'] > 1
 
     # validate the versions endpoint
     versions_url = f'/api/v1/roles/{roleid}/versions/'
