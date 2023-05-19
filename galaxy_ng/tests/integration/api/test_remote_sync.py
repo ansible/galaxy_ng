@@ -74,6 +74,7 @@ def test_api_ui_v1_remote_sync(ansible_config):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_sync_community_with_no_requirements_file(ansible_config):
     cfg = ansible_config("admin")
     api_client = get_client(cfg, request_token=True, require_auth=True)
@@ -87,7 +88,6 @@ def test_sync_community_with_no_requirements_file(ansible_config):
             "url": "https://beta-galaxy.ansible.com/api/",
         }
     )
-
     wait_for_task(api_client, resp)
 
     repo = api_client("pulp/api/v3/repositories/ansible/ansible/?name=community")["results"][0]

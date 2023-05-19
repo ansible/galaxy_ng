@@ -5,6 +5,7 @@ from ..utils import get_client, UIClient
 
 @pytest.mark.pulp_api
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_logging_cid_value_in_task(ansible_config):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")

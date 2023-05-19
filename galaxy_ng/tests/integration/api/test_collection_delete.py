@@ -150,6 +150,7 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
 
 
 @pytest.mark.delete
+@pytest.mark.min_hub_version("4.7dev")
 def test_delete_default_repos(ansible_config, upload_artifact, uncertifiedv2):
     """Verifies that default repos cannot be deleted"""
     config = ansible_config("admin")

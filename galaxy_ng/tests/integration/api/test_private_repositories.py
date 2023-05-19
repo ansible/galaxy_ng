@@ -56,6 +56,7 @@ def distro_factory(admin_client):
 
 @pytest.mark.standalone_only
 @pytest.mark.private_repos
+@pytest.mark.min_hub_version("4.7dev")
 def test_private_repositories(admin_client, basic_user_client, repo_factory):
     api_prefix = admin_client.config.get("api_prefix").rstrip("/")
     url = f"{api_prefix}/pulp/api/v3/repositories/ansible/ansible/"
@@ -81,6 +82,7 @@ def test_private_repositories(admin_client, basic_user_client, repo_factory):
 
 @pytest.mark.standalone_only
 @pytest.mark.private_repos
+@pytest.mark.min_hub_version("4.7dev")
 def test_distributions_with_private_repositories(
     admin_client, basic_user_client, distro_factory, repo_factory
 ):

@@ -35,7 +35,7 @@ class TestRBAC:
         """
         Verifies that when a user has the role to create users, the user can create users
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.add_user", "galaxy.view_user"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -51,7 +51,7 @@ class TestRBAC:
         Verifies that when a user does not have the role to create users,
         the user can't create users
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.view_user"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -68,7 +68,7 @@ class TestRBAC:
         """
         Verifies that when a user has the role to update users, the user can modify users
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.change_user", "galaxy.view_user"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -87,7 +87,7 @@ class TestRBAC:
         Verifies that when a user does not have the role to update users,
         the user can't modify users
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.delete_user", "galaxy.view_user"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -107,7 +107,7 @@ class TestRBAC:
         """
         Verifies that when a user has the role to delete users, the user can delete users
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         user_to_delete = create_test_user(gc)
         permissions = ["galaxy.delete_user", "galaxy.view_user"]
@@ -125,7 +125,7 @@ class TestRBAC:
         Verifies that when a user does not have the role to delete users,
         the user can't delete users
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         user_to_delete = create_test_user(gc)
         permissions = ["galaxy.add_user", "galaxy.view_user"]
@@ -145,7 +145,7 @@ class TestRBAC:
         Verifies that it's possible to create a group
         """
         group_name = f"rbac_test_group_{uuid4()}"
-        group = galaxy_client("iqe_admin").create_group(group_name)
+        group = galaxy_client("admin").create_group(group_name)
         assert group
 
     @pytest.mark.iqe_rbac_test
@@ -155,7 +155,7 @@ class TestRBAC:
         Verifies that it's not possible to create a group that already exists
         """
         group_name = f"rbac_test_group_{uuid4()}"
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         create_group(gc, group_name)
         with pytest.raises(GalaxyClientError) as ctx:
             create_group(gc, group_name, exists_ok=False)
@@ -168,7 +168,7 @@ class TestRBAC:
         Verifies that an admin user can create a role
         """
         permissions = ["core.manage_roles_group"]
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
         resp = gc.create_role(role_name, "any_description", permissions)
         assert resp
@@ -180,7 +180,7 @@ class TestRBAC:
         Verifies that two roles cannot have the same name
         """
         permissions = ["core.manage_roles_group"]
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
         assert gc.create_role(role_name, "any_description", permissions)
         with pytest.raises(GalaxyClientError) as ctx:
@@ -194,7 +194,7 @@ class TestRBAC:
         Verifies that it's possible to delete a role
         """
         permissions = ["core.manage_roles_group"]
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_name, "any_description", permissions)
         gc.get_role(role_name)
@@ -210,7 +210,7 @@ class TestRBAC:
         Verifies that it's possible to patch update a role
         """
         permissions = ["core.manage_roles_group"]
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_name, "any_description", permissions)
         updated_body = {"description": "updated description"}
@@ -225,7 +225,7 @@ class TestRBAC:
         Verifies that it's possible to put update a role
         """
         permissions = ["core.manage_roles_group"]
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_name, "any_description", permissions)
         updated_body = {
@@ -243,7 +243,7 @@ class TestRBAC:
         """
         Verifies that when a user has the role to add groups, the user can create a group
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.add_group"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -259,7 +259,7 @@ class TestRBAC:
         """
         Verifies that a non admin user can't create roles
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         gc.add_user_to_group(user["username"], group["id"])
         permissions = [
@@ -285,7 +285,7 @@ class TestRBAC:
         Verifies that when a user doesn't have the role to add groups,
         the user can't create a group
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         # incorrect permission to create a group (correct is galaxy.add_group)
         permissions = ["galaxy.view_group"]
@@ -305,7 +305,7 @@ class TestRBAC:
         Verifies that when a user doesn't have the role to create a ns,
         the user can't create a ns
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = [
             "galaxy.change_namespace",
@@ -325,7 +325,7 @@ class TestRBAC:
         """
         Verifies that when a user has the role to create a ns, the user can create a ns
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         _, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.add_namespace"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -339,7 +339,7 @@ class TestRBAC:
         """
         Verifies that when a user has the role to delete a ns, the user can delete a ns
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         _, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.delete_namespace"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -355,7 +355,7 @@ class TestRBAC:
         Verifies that when a user doesn't have the role to delete a ns,
         the user can't delete a ns
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.view_namespace"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -376,7 +376,7 @@ class TestRBAC:
         upload a collection even though the user does not have the (global)
         galaxy.upload_to_namespace permission
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.upload_to_namespace"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -394,7 +394,7 @@ class TestRBAC:
         the user can't upload a collection even though the user has the
         galaxy.upload_to_namespace permission
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, _ = add_new_user_to_new_group(gc)
         permissions = ["galaxy.upload_to_namespace"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -416,7 +416,7 @@ class TestRBAC:
         a namespace but has the upload_to_namespace permission assigned as a global role,
         the user can upload a collection
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.upload_to_namespace"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -433,7 +433,7 @@ class TestRBAC:
         Verifies that when a user has the role to delete collections,
         the user can delete collections
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["ansible.delete_collection"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -456,7 +456,7 @@ class TestRBAC:
         Verifies that when a user doesn't have the permission to delete collections,
         the user cannot delete a collection
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.upload_to_namespace"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -480,7 +480,7 @@ class TestRBAC:
         Verifies that when a user does not have the role to reject collections,
         the user cannot reject a collection
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["galaxy.upload_to_namespace"]
         role_name = f"galaxy.rbac_test_role_{uuid4()}"
@@ -509,7 +509,7 @@ class TestRBAC:
         Verifies that when a user has role to reject collections,
         the user can reject a collection
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["ansible.modify_ansible_repo_content"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -539,7 +539,7 @@ class TestRBAC:
         Verifies that when a user has role to approve collections,
         the user can approve a collection
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["ansible.modify_ansible_repo_content"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -563,7 +563,7 @@ class TestRBAC:
         Verifies that when a user does not have a role to approve collections,
         the user cannot approve a collection
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = []
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -588,7 +588,7 @@ class TestRBAC:
         Verifies that when a user does not have the role to add a remote registry,
         the user cannot add a remote registry
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["galaxy.add_group"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -606,7 +606,7 @@ class TestRBAC:
         Verifies that when a user does not have the role to add a remote registry,
         the user cannot add a remote registry
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["galaxy.add_containerregistryremote"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -622,7 +622,7 @@ class TestRBAC:
         Verifies that when a user has the role to delete a remote registry,
         the user can delete a remote registry
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["galaxy.delete_containerregistryremote"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -640,7 +640,7 @@ class TestRBAC:
         Verifies that when a user does not have the role to delete a remote registry,
         the user cannot delete a remote registry
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["galaxy.add_group"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -659,7 +659,7 @@ class TestRBAC:
         """
         Verifies that when a user has the role to create an ee, the user can create an ee
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["container.add_containernamespace"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -678,7 +678,7 @@ class TestRBAC:
         """
         Verifies that when a user does not have the role to create ee, the user cannot create an ee
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["galaxy.add_group"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -698,7 +698,7 @@ class TestRBAC:
         """
         Verifies that when a user has the role to remove an ee, the user can remove an ee
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["container.delete_containerrepository"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -718,7 +718,7 @@ class TestRBAC:
         Verifies that when a user does not have the role to remove an ee,
         the user cannot remove an ee
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["galaxy.add_group"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -739,7 +739,7 @@ class TestRBAC:
         """
         Verifies that a user with change collection remote permissions can config remotes
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["ansible.change_collectionremote"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -754,7 +754,7 @@ class TestRBAC:
         """
         Verifies that a user without change collection remote permissions can't config remotes
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = []
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -771,7 +771,7 @@ class TestRBAC:
         """
         Verifies that a user with view remotes roles can view remote config
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions = ["ansible.view_collectionremote"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -787,7 +787,7 @@ class TestRBAC:
         Verifies that when a user does not have
         object permissions to push an image, the user can't push an image
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         ee_name = create_local_image_container(ansible_config(), gc)
         user, _ = add_new_user_to_new_group(gc)
         gc_user = galaxy_client(user)
@@ -806,7 +806,7 @@ class TestRBAC:
         Verifies that when a user has object permissions to push an image,
         the user can push an image
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         ee_name = create_local_image_container(ansible_config(), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["container.namespace_push_containerdistribution"]
@@ -823,7 +823,7 @@ class TestRBAC:
         Verifies that when a user has global permissions
         to push an image, the user can push an image
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.add_containernamespace",
@@ -843,7 +843,7 @@ class TestRBAC:
         Verifies that when a user does not have
         global permissions to push an image, the user can't push an image
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
         permissions_user = []
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -866,7 +866,7 @@ class TestRBAC:
         Verifies that when a user does not have
         object permissions to delete an image, the user can't delete an image
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         ee_name = create_local_image_container(ansible_config(), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
@@ -890,7 +890,7 @@ class TestRBAC:
         Verifies that when a user has
         global permissions to delete an image, the user can delete an image
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         ee_name = create_local_image_container(ansible_config(), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
@@ -912,7 +912,7 @@ class TestRBAC:
         Verifies that when a user does not have
         global permissions to delete an image, the user can't delete an image
         """
-        gc = galaxy_client("iqe_admin")
+        gc = galaxy_client("admin")
         ee_name = create_local_image_container(ansible_config(), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [

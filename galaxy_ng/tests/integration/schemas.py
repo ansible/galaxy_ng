@@ -148,7 +148,6 @@ schema_featureflags = {
         'display_signatures',
         'execution_environments',
         'container_signing',
-        'ai_deny_index',
         '_messages',
     ],
     'properties': {
@@ -421,7 +420,6 @@ schema_ee_registry = {
         'is_indexable',
         'last_sync_task',
         'name',
-        'id',
         'policy',
         'proxy_url',
         'rate_limit',

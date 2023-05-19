@@ -12,12 +12,19 @@ from galaxy_ng.tests.integration.utils import (
     wait_for_all_tasks as wait_for_all_tasks_fixtures,
     AnsibleDistroAndRepo
 )
-from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture
+from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture, get_ansible_config, \
+    get_galaxy_client
 
 from ansible.galaxy.api import GalaxyError
 
+from galaxykit.container_images import get_container, get_container_images_latest
+
 CLIENT_CONFIG = AnsibleConfigFixture("admin")
 ADMIN_CLIENT = get_client(CLIENT_CONFIG)
+
+ansible_config = get_ansible_config()
+galaxy_client = get_galaxy_client(ansible_config)
+gc_admin = galaxy_client("admin")
 
 API_ROOT = CLIENT_CONFIG["url"]
 PULP_API_ROOT = f"{API_ROOT}pulp/api/v3/"
@@ -549,42 +556,19 @@ class ReusableLocalContainer:
         # 1. get namespace pulp_id from repositories
         # 2. get roles in namespace
         # 3. remove roles and groups (clean container namespace)
-
-        self._container = session.get(
-            f"{API_ROOT}v3/plugin/execution-environments/repositories/{self._name}/",
-            auth=ADMIN_CREDENTIALS
-        ).json()
-
-        namespace_id = self._container['namespace']['id']
-        pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
-
+        self._container = get_container(gc_admin, self._name)
+        ns_r = gc_admin.get(f"pulp/api/v3/pulp_container/namespaces/?name={self._ns_name}")
+        pulp_namespace_path = ns_r["results"][0]["pulp_href"]
         # get roles first
-        roles = session.get(
-            f"{API_ROOT}{pulp_namespace_path}/list_roles",
-            auth=ADMIN_CREDENTIALS
-        ).json()
+        roles = gc_admin.get(f"{pulp_namespace_path}list_roles")
+        for role in roles["roles"]:
+            body = {
+                'role': role["role"]
+            }
+            gc_admin.post(path=f"{pulp_namespace_path}remove_role/", body=body)
 
-        for role in roles['roles']:
-            session.post(
-                f"{API_ROOT}{pulp_namespace_path}/remove_role",
-                json={
-                    'role': role['role']
-                },
-                auth=ADMIN_CREDENTIALS
-            )
-
-        self._namespace = session.get(
-            f"{API_ROOT}{pulp_namespace_path}",
-            auth=ADMIN_CREDENTIALS
-        ).json()
-
-        self._manifest = session.get(
-            (
-                f"{API_ROOT}v3/plugin/execution-environments/"
-                f"repositories/{self._name}/_content/images/latest/"
-            ),
-            auth=ADMIN_CREDENTIALS
-        ).json()
+        self._namespace = gc_admin.get(pulp_namespace_path)
+        self._manifest = get_container_images_latest(gc_admin, self._name)
 
     def get_container(self):
         return self._container
