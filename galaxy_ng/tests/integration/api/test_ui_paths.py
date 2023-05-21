@@ -374,7 +374,7 @@ def test_api_ui_v1_groups_users(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
-        resp = uclient.get('_ui/v1/groups/')
+        resp = uclient.get('_ui/v1/groups/?limit=1000')
         assert resp.status_code == 200
         groups_ds = resp.json()
         validate_json(instance=groups_ds, schema=schema_objectlist)
