@@ -61,12 +61,19 @@ def test_api_ui_v1_remote_sync(ansible_config):
     validate_json(instance=task, schema=schema_task)
     resp = wait_for_task(api_client, task)
 
+    try:
+        if "Internal Server Error" in resp["error"]["description"]:
+            pytest.skip("Server error on https://beta-galaxy.ansible.com/. Skipping test.")
+    except KeyError:
+        pass
+
     # search collections for synced collection
     resp = api_client(
         f"{api_prefix}/_ui/v1/repo/community/?namespace=newswangerd&name=collection_demo",
         args={},
         method="GET"
     )
+
     ds = resp['data']
     assert len(ds) == 1
     assert ds[0]['namespace']['name'] == 'newswangerd'

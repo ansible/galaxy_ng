@@ -97,6 +97,10 @@ def test_openapi_bindings_generation(ansible_config):
     """Verify client bindings can be built from the pulp'ish api spec"""
 
     config = ansible_config("basic_user")
+
+    if config["container_engine"] != "docker":
+        pytest.skip("Container engine is not Docker")
+
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
