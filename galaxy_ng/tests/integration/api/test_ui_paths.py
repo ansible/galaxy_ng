@@ -128,7 +128,7 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
         assert ds['data'][0]["version"] == c1.version
 
         # test range
-        resp = uclient.get(f'{v_path}&version_range=>={c1.version}')
+        resp = uclient.get(f'{v_path}&version_range>={c1.version}')
         ds = resp.json()
 
         assert len(ds['data']) == 2
