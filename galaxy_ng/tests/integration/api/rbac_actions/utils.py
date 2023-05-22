@@ -25,8 +25,10 @@ ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 
 ansible_config = get_ansible_config()
 galaxy_client = get_galaxy_client(ansible_config)
-basic_token = True if is_ephemeral_env() else False
-gc_admin = galaxy_client("admin", basic_token=basic_token)
+if is_ephemeral_env():
+    gc_admin = galaxy_client("partner_engineer", basic_token=True)
+else:
+    gc_admin = galaxy_client("admin", basic_token=False)
 
 API_ROOT = CLIENT_CONFIG["url"]
 PULP_API_ROOT = f"{API_ROOT}pulp/api/v3/"
