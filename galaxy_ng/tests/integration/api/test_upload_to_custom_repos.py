@@ -12,8 +12,6 @@ from ..utils.tools import generate_random_string
 
 
 def _upload_test_common(config, client, artifact, base_path, dest_base_path=None):
-    if dest_base_path is None:
-        dest_base_path = base_path
 
     cmd = [
         "ansible-galaxy",
