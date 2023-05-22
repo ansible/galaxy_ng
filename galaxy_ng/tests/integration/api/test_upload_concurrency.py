@@ -13,7 +13,7 @@ from ..utils.repo_management_utils import search_collection_endpoint
 from ..utils.tools import generate_random_string
 
 
-@pytest.mark.min_hub_version("4.7dev")
+@pytest.mark.min_hub_version("4.8dev")
 # if this is backported, remove the min_hub_version marker
 @pytest.mark.standalone_only
 def test_upload_concurrency(ansible_config, settings, galaxy_client):
