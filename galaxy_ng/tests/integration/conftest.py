@@ -712,7 +712,11 @@ def get_hub_version(ansible_config):
         pe_token_bck = AnsibleConfigFixture.PROFILES["partner_engineer"]["token"]
         AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
         role = "partner_engineer"
-        gc = GalaxyKitClient(ansible_config).gen_authorized_client(role, basic_token=True)
+
+        galaxy_client = get_galaxy_client(ansible_config)
+        gc = galaxy_client(role, basic_token=True)
+
+    #    gc = GalaxyKitClient(ansible_config).gen_authorized_client(role, basic_token=True)
         galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
         os.environ["HUB_AUTH_URL"] = hub_auth_url_bck
         AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = pe_token_bck

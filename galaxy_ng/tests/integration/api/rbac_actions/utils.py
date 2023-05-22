@@ -17,6 +17,7 @@ from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture, get_ansib
 
 from ansible.galaxy.api import GalaxyError
 
+from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env
 from galaxykit.container_images import get_container, get_container_images_latest
 
 CLIENT_CONFIG = AnsibleConfigFixture("admin")
@@ -24,7 +25,8 @@ ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 
 ansible_config = get_ansible_config()
 galaxy_client = get_galaxy_client(ansible_config)
-gc_admin = galaxy_client("admin")
+basic_token = True if is_ephemeral_env() else False
+gc_admin = galaxy_client("admin", basic_token=basic_token)
 
 API_ROOT = CLIENT_CONFIG["url"]
 PULP_API_ROOT = f"{API_ROOT}pulp/api/v3/"
