@@ -701,10 +701,6 @@ def get_hub_version(ansible_config):
     if is_standalone():
         role = "iqe_admin"
     elif is_ephemeral_env():
-        # config = ansible_config("org_admin")
-        # api_client = get_client(config, request_token=True, require_auth=True)
-        # return api_client("/", args={}, method="GET")["galaxy_ng_version"]
-
         # I can't get a token from the ephemeral environment.
         # Changed to Basic token authentication until the issue is resolved
         hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
