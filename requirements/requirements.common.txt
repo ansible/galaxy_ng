@@ -310,7 +310,7 @@ pyyaml==6.0
     #   yamllint
 redis==4.5.1
     # via pulpcore
-requests==2.30.0
+requests==2.31.0
     # via
     #   galaxy-importer
     #   insights-analytics-collector
