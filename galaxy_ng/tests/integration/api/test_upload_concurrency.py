@@ -12,6 +12,7 @@ from ..utils import (
 
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
     total = 10
