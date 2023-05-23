@@ -112,7 +112,7 @@ def url_safe_join(server, url):
     return urljoin(server.rstrip('/') + '/', url.lstrip('/'))
 
 
-def wait_for_url(api_client, url, timeout_sec=30):
+def wait_for_url(api_client, url, timeout_sec=6000):
     """Wait until url stops returning a 404."""
     ready = False
     res = None

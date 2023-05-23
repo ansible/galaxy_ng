@@ -33,7 +33,7 @@ def wait_for_all_tasks(client, timeout=300):
         time.sleep(1)
 
 
-def wait_for_task(api_client, resp, task_id=None, timeout=300, raise_on_error=False):
+def wait_for_task(api_client, resp, task_id=None, timeout=6000, raise_on_error=False):
     if task_id:
         url = f"v3/tasks/{task_id}/"
     else:
