@@ -64,7 +64,7 @@ def test_api_ui_v1_remote_sync(ansible_config):
     try:
         if "Internal Server Error" in resp["error"]["description"]:
             pytest.skip("Server error on https://beta-galaxy.ansible.com/. Skipping test.")
-    except KeyError:
+    except TypeError:
         pass
 
     # search collections for synced collection
