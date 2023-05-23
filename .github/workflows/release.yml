@@ -32,8 +32,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # by default, it uses a depth of 1
-          # this fetches all history so that we can read each commit
           fetch-depth: 0
 
       - uses: actions/setup-python@v3
@@ -43,7 +41,7 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install bandersnatch bump2version gitpython python-redmine towncrier==19.9.0 wheel
+          pip install packaging~=21.3 bandersnatch bump2version gitpython towncrier==19.9.0 wheel
           echo ::endgroup::
 
       - name: Configure Git with ansible name and email
@@ -52,19 +50,15 @@ jobs:
           git config --global user.email 'ansible-infra@redhat.com'
 
       - name: Setting secrets
-        
         run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
-
-      - name: Verify upper bound requirements
-        run: python .ci/scripts/upper_bound.py
 
       - name: Create the release commit, tag it, create a post-release commit, and build plugin package
         run: python .github/workflows/scripts/release.py ${{ github.event.inputs.release }}
 
       - name: 'Tar files'
-        run: tar -cvf galaxy_ng.tar $GITHUB_WORKSPACE
+        run: tar -cvf galaxy_ng.tar .
 
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v3
@@ -83,6 +77,7 @@ jobs:
           - TEST: pulp
           - TEST: azure
           - TEST: s3
+          - TEST: lowerbounds
 
     steps:
       - uses: actions/download-artifact@v3
@@ -95,9 +90,7 @@ jobs:
 
       - name: Untar repository
         run: |
-          shopt -s dotglob
           tar -xf galaxy_ng.tar
-          mv home/runner/work/galaxy_ng/galaxy_ng/* ./
 
       # update to the branch's latest ci files rather than the ones from the release tag. this is
       # helpful when there was a problem with the ci files during the release which needs to be
@@ -119,7 +112,6 @@ jobs:
           echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
 
       - name: Before Install
-        
         run: .github/workflows/scripts/before_install.sh
         shell: bash
         env:
@@ -150,7 +142,6 @@ jobs:
         shell: bash
 
       - name: Before Script
-        
         run: .github/workflows/scripts/before_script.sh
         shell: bash
         env:
@@ -166,13 +157,11 @@ jobs:
           REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
 
       - name: Setting secrets
-        
         run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
 
       - name: Install Python client
-        
         run: .github/workflows/scripts/install_python_client.sh
         shell: bash
 
@@ -252,7 +241,6 @@ jobs:
           python-version: "3.8"
 
       - uses: ruby/setup-ruby@v1
-        
         with:
           ruby-version: "2.6"
 
@@ -263,9 +251,7 @@ jobs:
 
       - name: Untar repository
         run: |
-          shopt -s dotglob
           tar -xf galaxy_ng.tar
-          mv home/runner/work/galaxy_ng/galaxy_ng/* ./
 
       # update to the branch's latest ci files rather than the ones from the release tag. this is
       # helpful when there was a problem with the ci files during the release which needs to be
@@ -276,7 +262,6 @@ jobs:
           git checkout "origin/${GITHUB_REF##*/}" -- .github
 
       - name: Setting secrets
-        
         run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
@@ -284,13 +269,11 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install gitpython python-redmine requests packaging tweepy
+          pip install gitpython requests packaging~=21.3 tweepy
           echo ::endgroup::
 
       - name: Push branch and tag to GitHub
         run: bash .github/workflows/scripts/push_branch_and_tag_to_github.sh ${{ github.event.inputs.release }}
-
-      
 
       
 
