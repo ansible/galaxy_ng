@@ -3,6 +3,7 @@ from ..utils import get_client, iterate_all
 
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_repository_labels(ansible_config):
     # Get an API client running with admin user credentials
     client = get_client(

@@ -104,8 +104,9 @@ def test_move_collection_version(ansible_config, upload_artifact):
 @pytest.mark.collection_move
 @pytest.mark.move
 @pytest.mark.slow_in_cloud
+@pytest.mark.min_hub_version("4.7dev")
 def test_copy_collection_version(ansible_config, upload_artifact):
-    """Tests whether a colleciton can be copied from repo to repo"""
+    """Tests whether a collection can be copied from repo to repo"""
 
     config = ansible_config("partner_engineer")
     api_prefix = config.get("api_prefix").rstrip("/")
@@ -180,6 +181,7 @@ def test_copy_collection_version(ansible_config, upload_artifact):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_copy_associated_content(ansible_config, upload_artifact):
     """Tests whether a collection and associated content is copied from repo to repo"""
 

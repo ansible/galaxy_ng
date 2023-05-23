@@ -151,6 +151,7 @@ def local_container():
 )
 @pytest.mark.pulp_api
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
     name = local_container.get_container()['name']
     config = ansible_config("ee_admin")

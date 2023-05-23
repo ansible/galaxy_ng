@@ -71,7 +71,8 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
 
         pid = ansible_galaxy(
             f"collection install -vvv --ignore-cert \
-                {artifact2.namespace}.{artifact2.name}:{artifact2.version} --server=automation_hub",
+                {artifact2.namespace}.{artifact2.name}:{artifact2.version} --server"
+            f"=automation_hub",
             check_retcode=False,
             ansible_config=ansible_config("basic_user"),
             # cleanup=False

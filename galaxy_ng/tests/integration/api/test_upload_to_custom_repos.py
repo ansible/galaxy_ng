@@ -76,6 +76,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
 
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be true")
@@ -94,6 +95,7 @@ def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_publish_to_custom_repo(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be true")
@@ -112,6 +114,7 @@ def test_publish_to_custom_repo(ansible_config, artifact, settings):
 
 @pytest.mark.standalone_only
 @pytest.mark.auto_approve
+@pytest.mark.min_hub_version("4.7dev")
 def test_publish_and_auto_approve(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")
@@ -138,6 +141,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
 
 @pytest.mark.standalone_only
 @pytest.mark.auto_approve
+@pytest.mark.min_hub_version("4.7dev")
 def test_auto_approve_muliple(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")

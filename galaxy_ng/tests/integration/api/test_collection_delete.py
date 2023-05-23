@@ -83,7 +83,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
 @pytest.mark.collection_version_delete
 @pytest.mark.slow_in_cloud
 def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv2):
-    """Tests whether a colleciton version can be deleted"""
+    """Tests whether a collection version can be deleted"""
     config = ansible_config("partner_engineer")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
@@ -150,6 +150,7 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
 
 
 @pytest.mark.delete
+@pytest.mark.min_hub_version("4.7dev")
 def test_delete_default_repos(ansible_config, upload_artifact, uncertifiedv2):
     """Verifies that default repos cannot be deleted"""
     config = ansible_config("admin")

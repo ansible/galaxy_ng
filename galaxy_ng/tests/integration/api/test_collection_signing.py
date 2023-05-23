@@ -345,6 +345,7 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_copy_collection_without_signatures(api_client, config, settings, flags, upload_artifact):
     """Test whether a collection can be added to a second repo without its signatures."""
     can_sign = flags.get("can_create_signatures")

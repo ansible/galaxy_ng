@@ -8,11 +8,13 @@ import time
 import pytest
 
 from galaxy_ng.tests.integration.utils import get_client
+from galaxykit.container_images import get_container
 
 
 @pytest.fixture(scope="function")
 def flags(ansible_config):
-    api_client = get_client(config=ansible_config("admin"), request_token=True, require_auth=True)
+    api_client = get_client(config=ansible_config("admin"), request_token=True,
+                            require_auth=True)
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
     return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
 
@@ -25,20 +27,36 @@ def flags(ansible_config):
     ],
 )
 @pytest.mark.standalone_only
-def test_push_and_sign_a_container(ansible_config, flags, require_auth):
+def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_client):
     can_sign = flags.get("container_signing")
     if not can_sign:
         pytest.skip("GALAXY_CONTAINER_SIGNING_SERVICE is not configured")
 
-    # Pull alpine image
-    subprocess.check_call(["docker", "pull", "alpine"])
-    # Tag the image
-    subprocess.check_call(["docker", "tag", "alpine", "localhost:5001/alpine:latest"])
+    config = ansible_config("admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
 
-    # Login to local registy with tls verify disabled
-    subprocess.check_call(["docker", "login", "-u", "admin", "-p", "admin", "localhost:5001"])
+    container_engine = config["container_engine"]
+
+    # Pull alpine image
+    subprocess.check_call([container_engine, "pull", "alpine"])
+    # Tag the image
+    subprocess.check_call(
+        [container_engine, "tag", "alpine",
+         f"{config['url'].strip(api_prefix).strip('https://')}/alpine:latest"])
+
+    # Login to local registry with tls verify disabled
+    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
+           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+    if container_engine == 'podman':
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
+
     # Push image to local registry
-    subprocess.check_call(["docker", "push", "localhost:5001/alpine:latest"])
+    cmd = [container_engine, "push",
+           f"{config['url'].strip(api_prefix).strip('https://')}/alpine:latest"]
+    if container_engine == 'podman':
+        cmd.append("--tls-verify=false")
+    subprocess.check_call(cmd)
 
     # Get an API client running with admin user credentials
     client = get_client(
@@ -61,7 +79,8 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth):
     ss_href = signing_service["results"][0]["pulp_href"]
 
     # Sign the image
-    client(f"{container_href}/sign/", method="POST", args={"manifest_signing_service": ss_href})
+    client(f"{container_href}/sign/", method="POST",
+           args={"manifest_signing_service": ss_href})
 
     # sleep 2 second2
     time.sleep(2)
@@ -73,6 +92,7 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth):
     latest_version = client(latest_version_href)
     assert latest_version["content_summary"]["added"]["container.signature"]["count"] > 0
 
+    gc = galaxy_client("admin")
+    ee = get_container(gc, "alpine")
     # Check the sign state is set on the UI API
-    ee = client(f"{api_prefix}/v3/plugin/execution-environments/repositories/?name=alpine")
-    assert ee["data"][0]["pulp"]["repository"]["sign_state"] == "signed"
+    assert ee["pulp"]["repository"]["sign_state"] == "signed"

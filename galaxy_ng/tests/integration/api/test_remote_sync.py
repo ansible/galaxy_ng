@@ -61,12 +61,19 @@ def test_api_ui_v1_remote_sync(ansible_config):
     validate_json(instance=task, schema=schema_task)
     resp = wait_for_task(api_client, task)
 
+    try:
+        if "Internal Server Error" in resp["error"]["description"]:
+            pytest.skip("Server error on https://beta-galaxy.ansible.com/. Skipping test.")
+    except TypeError:
+        pass
+
     # search collections for synced collection
     resp = api_client(
         f"{api_prefix}/_ui/v1/repo/community/?namespace=newswangerd&name=collection_demo",
         args={},
         method="GET"
     )
+
     ds = resp['data']
     assert len(ds) == 1
     assert ds[0]['namespace']['name'] == 'newswangerd'
@@ -74,6 +81,7 @@ def test_api_ui_v1_remote_sync(ansible_config):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_sync_community_with_no_requirements_file(ansible_config):
     cfg = ansible_config("admin")
     api_client = get_client(cfg, request_token=True, require_auth=True)
@@ -87,7 +95,6 @@ def test_sync_community_with_no_requirements_file(ansible_config):
             "url": "https://beta-galaxy.ansible.com/api/",
         }
     )
-
     wait_for_task(api_client, resp)
 
     repo = api_client("pulp/api/v3/repositories/ansible/ansible/?name=community")["results"][0]

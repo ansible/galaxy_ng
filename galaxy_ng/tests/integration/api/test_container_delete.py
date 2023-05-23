@@ -3,8 +3,12 @@ import pytest
 from ..utils import get_client, wait_for_task
 from ansible.galaxy.api import GalaxyError
 
+# this is to be enabled when https://github.com/ansible/galaxy_ng/pull/1627
+# is merged
+
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_delete_ee_and_content(ansible_config):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
@@ -87,6 +91,7 @@ def test_delete_ee_and_content(ansible_config):
 
 
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.7dev")
 def test_shared_content_is_not_deleted(ansible_config):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
