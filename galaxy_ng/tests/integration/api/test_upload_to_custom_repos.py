@@ -12,6 +12,10 @@ from ..utils.tools import generate_random_string
 
 
 def _upload_test_common(config, client, artifact, base_path, dest_base_path=None):
+    url = config["url"]
+    if dest_base_path is None:
+        url = f"{config['url']}content/{base_path}/"
+        dest_base_path = base_path
 
     cmd = [
         "ansible-galaxy",
@@ -20,7 +24,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
         "--api-key",
         config["token"],
         "--server",
-        config["url"] + f"content/{base_path}/",
+        url,
         artifact.filename,
         "--ignore-certs"
     ]
@@ -92,11 +96,9 @@ def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
 
 
-@pytest.mark.standalone_only
+@pytest.mark.community_only
 @pytest.mark.min_hub_version("4.7dev")
 def test_publish_to_custom_repo(ansible_config, artifact, settings):
-    if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
-        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be true")
     config = ansible_config(profile="admin")
     client = get_client(
         config=config
