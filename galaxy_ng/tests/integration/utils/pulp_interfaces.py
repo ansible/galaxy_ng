@@ -50,13 +50,13 @@ class AnsibleDistroAndRepo(PulpObjectBase):
 
     def create(self):
         self._repo = self.client(
-            "pulp/api/v3/repositories/ansible/ansible/",
+            f"{self.api_prefix}pulp/api/v3/repositories/ansible/ansible/",
             args=self._repo_body,
             method="POST"
         )
 
         resp = self.client(
-            "pulp/api/v3/distributions/ansible/ansible/",
+            f"{self.api_prefix}pulp/api/v3/distributions/ansible/ansible/",
             args={
                 "repository": self._repo["pulp_href"],
                 **self._distro_body
@@ -67,7 +67,8 @@ class AnsibleDistroAndRepo(PulpObjectBase):
         wait_for_task(self.client, resp)
 
         self._distro = self.client(
-            f"pulp/api/v3/distributions/ansible/ansible/?name={self._repo_body['name']}",
+            f"{self.api_prefix}pulp/api/v3/distributions/ansible/ansible/"
+            f"?name={self._repo_body['name']}",
         )["results"][0]
 
         self.cleanup_hrefs = [self._distro["pulp_href"], self._repo["pulp_href"]]

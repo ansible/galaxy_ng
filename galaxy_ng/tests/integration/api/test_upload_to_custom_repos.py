@@ -12,7 +12,9 @@ from ..utils.tools import generate_random_string
 
 
 def _upload_test_common(config, client, artifact, base_path, dest_base_path=None):
+    api_prefix = config.get("api_prefix")
     url = config["url"]
+
     if dest_base_path is None:
         url = f"{config['url']}content/{base_path}/"
         dest_base_path = base_path
@@ -35,7 +37,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
     wait_for_all_tasks(client)
 
     collection_url = (
-        f"/content/{dest_base_path}/v3/collections/"
+        f"{api_prefix}content/{dest_base_path}/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
     )
 
@@ -119,6 +121,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")
     config = ansible_config(profile="admin")
+    api_prefix = config.get("api_prefix")
     client = get_client(
         config=config
     )
@@ -131,7 +134,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"], "published")
 
     cv = client(
-        "/content/published/v3/collections/"
+        f"{api_prefix}content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
 
     )
@@ -146,6 +149,7 @@ def test_auto_approve_muliple(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")
     config = ansible_config(profile="admin")
+    api_prefix = config.get("api_prefix")
     client = get_client(
         config=config
     )
@@ -160,7 +164,7 @@ def test_auto_approve_muliple(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, "staging", published)
 
     cv = client(
-        f"/content/{published}/v3/collections/"
+        f"{api_prefix}content/{published}/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
 
     )
@@ -168,7 +172,7 @@ def test_auto_approve_muliple(ansible_config, artifact, settings):
     assert len(cv["signatures"]) >= 1
 
     cv = client(
-        f"/content/published/v3/collections/"
+        f"{api_prefix}content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
 
     )
