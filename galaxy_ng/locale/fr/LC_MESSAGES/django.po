@@ -845,7 +845,7 @@ msgstr "Supprimer la tâche"
 
 #: app/constants.py:258
 msgid "Delete this task."
-msgstr "Supprimer ce nœud."
+msgstr "Supprimer cette tâche."
 
 #: app/constants.py:259
 msgid "Delete any task existing in the system."

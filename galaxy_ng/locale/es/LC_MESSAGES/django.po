@@ -393,7 +393,7 @@ msgstr "Eliminar el espacio de nombres"
 
 #: app/constants.py:40
 msgid "Delete this namespace."
-msgstr "Eliminar este nodo"
+msgstr "Eliminar este espacio de nombres"
 
 #: app/constants.py:41
 msgid "Delete any existing namespace."
@@ -466,7 +466,7 @@ msgstr "Cambiar usuario"
 
 #: app/constants.py:76
 msgid "Edit this user."
-msgstr "Modificar este nodo"
+msgstr "Modificar este usuario"
 
 #: app/constants.py:77
 msgid "Edit any existing user in the system."
@@ -478,7 +478,7 @@ msgstr "Eliminar usuario"
 
 #: app/constants.py:82
 msgid "Delete this user."
-msgstr "Eliminar este nodo"
+msgstr "Eliminar este usuario"
 
 #: app/constants.py:83
 msgid "Delete any existing user in the system."
@@ -515,7 +515,7 @@ msgstr "Cambiar de grupo"
 
 #: app/constants.py:100
 msgid "Edit this group"
-msgstr "Modificar este nodo"
+msgstr "Modificar este grupo"
 
 #: app/constants.py:101
 msgid "Edit any existing group in the system."
@@ -527,7 +527,7 @@ msgstr "Eliminar grupo"
 
 #: app/constants.py:106
 msgid "Delete this group."
-msgstr "Eliminar este nodo"
+msgstr "Eliminar este grupo"
 
 #: app/constants.py:107
 msgid "Delete any group in the system."
@@ -560,7 +560,7 @@ msgstr "Ver cualquier colección remota existente en el sistema."
 #: app/constants.py:120 app/constants.py:126 app/constants.py:132
 #: app/constants.py:138 app/constants.py:144
 msgid "Collection Remotes"
-msgstr "Mandos a distancia de la colección"
+msgstr "La colección a distancia"
 
 #: app/constants.py:123
 msgid "Add collection remote"
@@ -797,7 +797,7 @@ msgstr "Añadir registro remoto al sistema."
 
 #: app/constants.py:236 app/constants.py:242
 msgid "Container Registry Remotes"
-msgstr "Tipo de registro de contenedores"
+msgstr "Registro de contenedores remoto"
 
 #: app/constants.py:239
 msgid "Change remote registry"
@@ -829,7 +829,7 @@ msgstr "Cambiar tarea"
 
 #: app/constants.py:252
 msgid "Edit this task."
-msgstr "Modificar este nodo"
+msgstr "Editar esta tarea"
 
 #: app/constants.py:253
 msgid "Edit any task existing in the system."
@@ -845,7 +845,7 @@ msgstr "Eliminar tarea"
 
 #: app/constants.py:258
 msgid "Delete this task."
-msgstr "Eliminar este nodo"
+msgstr "Eliminar este tarea"
 
 #: app/constants.py:259
 msgid "Delete any task existing in the system."
