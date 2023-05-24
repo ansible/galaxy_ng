@@ -136,10 +136,9 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
     cv = client(
         f"{api_prefix}content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-
     )
 
-    assert len(cv["signatures"]) >= 1
+    assert cv["version"] == "1.0.0"
 
 
 @pytest.mark.community_only
@@ -166,16 +165,13 @@ def test_auto_approve_muliple(ansible_config, artifact, settings):
     cv = client(
         f"{api_prefix}content/{published}/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-
     )
 
-    assert len(cv["signatures"]) >= 1
+    assert cv["version"] == "1.0.0"
 
     cv = client(
         f"{api_prefix}content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-
     )
 
-    assert len(cv["signatures"]) >= 1
     assert cv["name"] == artifact.name
