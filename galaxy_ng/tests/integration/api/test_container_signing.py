@@ -4,6 +4,7 @@ See: https://issues.redhat.com/browse/AAH-1358
 """
 import subprocess
 import time
+from urllib.parse import urlparse
 
 import pytest
 
@@ -33,27 +34,27 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
         pytest.skip("GALAXY_CONTAINER_SIGNING_SERVICE is not configured")
 
     config = ansible_config("admin")
-    api_prefix = config.get("api_prefix").rstrip("/")
+    url = config['url']
+    parsed_url = urlparse(url)
+    cont_reg = parsed_url.netloc
 
     container_engine = config["container_engine"]
 
     # Pull alpine image
     subprocess.check_call([container_engine, "pull", "alpine"])
     # Tag the image
-    subprocess.check_call(
-        [container_engine, "tag", "alpine",
-         f"{config['url'].strip(api_prefix).strip('https://')}/alpine:latest"])
+    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine:latest"])
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+           f"{config['password']}", f"{config['url'].split(parsed_url.path)[0]}"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push",
-           f"{config['url'].strip(api_prefix).strip('https://')}/alpine:latest"]
+    cmd = [container_engine, "push", f"{cont_reg}/alpine:latest"]
+
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)

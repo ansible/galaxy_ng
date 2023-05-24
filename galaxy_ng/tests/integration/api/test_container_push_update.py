@@ -4,6 +4,7 @@ See: https://issues.redhat.com/browse/AAH-2327
 """
 import subprocess
 import time
+from urllib.parse import urlparse
 
 import pytest
 
@@ -18,27 +19,29 @@ from galaxy_ng.tests.integration.utils import get_client
     ],
 )
 @pytest.mark.standalone_only
+@pytest.mark.this
+@pytest.mark.min_hub_version("4.7.1")
+@pytest.mark.min_hub_version("4.6.6")
 def test_can_update_container_push(ansible_config, require_auth):
     config = ansible_config("admin")
-    api_prefix = config.get("api_prefix").rstrip("/")
     container_engine = config["container_engine"]
     # Pull alpine image
     subprocess.check_call([container_engine, "pull", "alpine"])
+    url = config['url']
+    parsed_url = urlparse(url)
+    cont_reg = parsed_url.netloc
     # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine",
-                           f"{config['url'].strip(api_prefix).strip('https://')}"
-                           f"/alpine:latest"])
+    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine:latest"])
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+           f"{config['password']}", f"{config['url'].split(parsed_url.path)[0]}"]
     if container_engine == "podman":
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push",
-           f"{config['url'].strip(api_prefix).strip('https://')}/alpine:latest"]
+    cmd = [container_engine, "push", f"{cont_reg}/alpine:latest"]
     if container_engine == "podman":
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
