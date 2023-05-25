@@ -41,7 +41,8 @@ jobs:
 
       - name: setup oci-env
         run: |
-          git clone https://github.com/pulp/oci_env.git $OCI_ENV_PATH
+          #git clone https://github.com/pulp/oci_env.git $OCI_ENV_PATH
+          git clone https://github.com/jctanner/oci_env.git --branch DEBUG_POLLING  $OCI_ENV_PATH
           pip install -e $OCI_ENV_PATH/client/
           mkdir $OCI_ENV_PATH/db_backup/
           cp dev/data/insights-fixture.tar.gz $OCI_ENV_PATH/db_backup/insights-fixture.tar.gz
@@ -56,9 +57,6 @@ jobs:
         run: |
           oci-env -e dev/oci_env_configs/standalone.compose.env poll --wait 10 --attempts 30
           oci-env -e dev/oci_env_configs/sync-test.compose.env poll
-
-      - name: wait more ...
-        run: sleep 60
 
       - name: finish insights instance setup
         run: |
