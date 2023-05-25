@@ -1,4 +1,6 @@
 import subprocess
+from urllib.parse import urlparse
+
 import pytest
 from ..utils import get_client, wait_for_task
 from ansible.galaxy.api import GalaxyError
@@ -14,24 +16,24 @@ def test_delete_ee_and_content(ansible_config):
     api_prefix = config.get("api_prefix").rstrip("/")
 
     container_engine = config["container_engine"]
+    url = config['url']
+    parsed_url = urlparse(url)
+    cont_reg = parsed_url.netloc
 
     # Pull alpine image
     subprocess.check_call([container_engine, "pull", "alpine"])
     # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine",
-                           f"{config['url'].strip(api_prefix).strip('https://')}"
-                           f"/alpine:latest"])
+    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine:latest"])
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
+           f"{config['password']}", f"{config['url'].split(parsed_url.path)[0]}"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
-                                     f"/alpine:latest"]
+    cmd = [container_engine, "push", f"{cont_reg}/alpine:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
@@ -96,14 +98,14 @@ def test_shared_content_is_not_deleted(ansible_config):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     container_engine = config["container_engine"]
+    url = config['url']
+    parsed_url = urlparse(url)
+    cont_reg = parsed_url.netloc
 
     # Pull alpine image
     subprocess.check_call([container_engine, "pull", "alpine"])
     # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine",
-                           f"{config['url'].strip(api_prefix).strip('https://')}"
-                           f"/alpine1:latest"])
-
+    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine1:latest"])
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
            f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
@@ -112,18 +114,15 @@ def test_shared_content_is_not_deleted(ansible_config):
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
-                                     f"/alpine1:latest"]
+    cmd = [container_engine, "push", f"{cont_reg}/alpine1:latest"]
+
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Copy 'alpine1' and rename to 'alpine2'
-    subprocess.check_call([container_engine, "tag", "alpine",
-                           f"{config['url'].strip(api_prefix).strip('https://')}"
-                           f"/alpine2:latest"])
-    cmd = [container_engine, "push", f"{config['url'].strip(api_prefix).strip('https://')}"
-                                     f"/alpine2:latest"]
+    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine2:latest"])
+    cmd = [container_engine, "push", f"{cont_reg}/alpine2:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
