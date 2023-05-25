@@ -5,6 +5,9 @@ import pytest
 from ..utils import get_client, wait_for_task
 from ansible.galaxy.api import GalaxyError
 
+from ..utils.iqe_utils import pull_and_tag_test_image
+
+
 # this is to be enabled when https://github.com/ansible/galaxy_ng/pull/1627
 # is merged
 
@@ -21,9 +24,7 @@ def test_delete_ee_and_content(ansible_config):
     cont_reg = parsed_url.netloc
 
     # Pull alpine image
-    subprocess.check_call([container_engine, "pull", "alpine"])
-    # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine:latest"])
+    pull_and_tag_test_image(container_engine, cont_reg)
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
@@ -103,7 +104,8 @@ def test_shared_content_is_not_deleted(ansible_config):
     cont_reg = parsed_url.netloc
 
     # Pull alpine image
-    subprocess.check_call([container_engine, "pull", "alpine"])
+    # subprocess.check_call([container_engine, "pull", "alpine"])
+    image = pull_and_tag_test_image(container_engine, cont_reg, "alpine1:latest")
     # Tag the image
     subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine1:latest"])
     # Login to local registry with tls verify disabled

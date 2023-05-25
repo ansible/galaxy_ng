@@ -1,5 +1,6 @@
 """Utility functions for AH tests."""
 import os
+import subprocess
 from unittest.mock import patch
 
 from galaxykit import GalaxyClient
@@ -223,6 +224,23 @@ def is_sync_testing():
 def is_dev_env_standalone():
     dev_env_standalone = os.getenv("DEV_ENV_STANDALONE", True)
     return dev_env_standalone in ('true', 'True', 1, '1', True)
+
+
+def avoid_docker_limit_rate():
+    avoid_limit_rate = os.getenv("AVOID_DOCKER_LIMIT_RATE", False)
+    return avoid_limit_rate in ('true', 'True', 1, '1', True)
+
+
+def pull_and_tag_test_image(container_engine, registry, tag=None):
+    image = "alpine"
+    tag = "alpine:latest" if tag is None else tag
+    if avoid_docker_limit_rate():
+        image = "quay.io/libpod/alpine"
+    subprocess.check_call([container_engine, "pull", image])
+    subprocess.check_call(
+        [container_engine, "tag", image,
+         f"{registry}/{tag}"])
+    return image
 
 
 def get_all_collections(api_client, repo):
