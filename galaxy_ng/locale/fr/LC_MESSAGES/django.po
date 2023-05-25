@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 14:21+0000\n"
+"POT-Creation-Date: 2023-05-01 10:21-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,23 +15,29 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app/access_control/access_policy.py:198
+#: app/access_control/access_policy.py:365
 msgid "Namespace in filename not found."
 msgstr "L'espace de nommage n'a pas été trouvé dans le nom de fichier."
 
-#: app/access_control/access_policy.py:231
+#: app/access_control/access_policy.py:398
 msgid "Distribution does not exist."
-msgstr ""
+msgstr "Distribution non existante."
 
-#: app/access_control/access_policy.py:245
+#: app/access_control/access_policy.py:412
 msgid "Namespace not found."
 msgstr "Espace de nommage non trouvé."
 
-#: app/access_control/access_policy.py:333
+#: app/access_control/access_policy.py:481
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
-msgstr ""
+msgstr "Les signatures sont nécessaires pour ajouter des collections à un référentiel \"approuvé\" lorsque l'option GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL est activée."
+
+#: app/access_control/access_policy.py:534 app/api/v3/views/sync.py:49
+msgid ""
+"Syncing content from galaxy.ansible.com without specifying a requirements "
+"file is not allowed."
+msgstr "La synchronisation du contenu de galaxy.ansible.com sans spécifier un fichier de conditions requises n'est pas autorisée."
 
 #: app/access_control/fields.py:17
 msgid "object_roles field is required"
@@ -39,7 +45,7 @@ msgstr "Le champ object_roles est obligatoire"
 
 #: app/access_control/fields.py:21
 msgid "id or name field is required"
-msgstr "Le champ nom ou id est obligatoire."
+msgstr "Le champ nom ou id est obligatoire"
 
 #: app/access_control/fields.py:27
 msgid "object_roles must be a list of strings"
@@ -47,7 +53,7 @@ msgstr "object_roles doit être une liste de chaînes de caractères"
 
 #: app/access_control/fields.py:35
 msgid "Role {} does not exist"
-msgstr "Le rôle {} n'existe pas."
+msgstr "Le rôle {} n'existe pas"
 
 #: app/access_control/fields.py:50
 msgid "Groups must be a list of group objects"
@@ -67,8 +73,7 @@ msgstr "Nom de groupe ou ID invalide"
 msgid ""
 "Role {role} does not exist or does not have any permissions related to this "
 "object."
-msgstr ""
-"Le rôle {role} n'existe pas ou n'a pas de permissions liées à cet objet."
+msgstr "Le rôle {role} n'existe pas ou n'a pas de permissions liées à cet objet."
 
 #: app/api/ui/serializers/execution_environment.py:64
 msgid "Selected registry does not exist."
@@ -78,9 +83,7 @@ msgstr "Le registre sélectionné n'existe pas."
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr ""
-"Les noms de conteneurs ne peuvent contenir que des chiffres alphanumériques, "
-"\".\", \"_\", \"-\" et un maximum d'un \"/\"."
+msgstr "Les noms de conteneurs ne peuvent contenir que des chiffres alphanumériques, \".\", \"_\", \"-\" et un maximum d'un \"/\"."
 
 #: app/api/ui/serializers/execution_environment.py:91
 msgid "Name cannot be changed."
@@ -89,9 +92,7 @@ msgstr "Le nom ne peut pas être modifié."
 #: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr ""
-"Le référentiel \"{pulp_id}\" n'a pas été trouvé lors de la création de la "
-"synclist"
+msgstr "Le référentiel \"{pulp_id}\" n'a pas été trouvé lors de la création de la synclist"
 
 #: app/api/ui/serializers/synclist.py:65
 #, python-format
@@ -103,38 +104,28 @@ msgstr "Synclist existe déjà : %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr ""
-"La collection \"{namespace}.{name}\" n'a pas été trouvée lors de la création "
-"de la synclist {synclist}"
+msgstr "La collection \"{namespace}.{name}\" n'a pas été trouvée lors de la création de la synclist {synclist}"
 
 #: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr ""
-"La collection \"{namespace}.{name}\" n'a pas été trouvé lors de la mise à "
-"jour de la synclist {synclist}"
+msgstr "La collection \"{namespace}.{name}\" n'a pas été trouvé lors de la mise à jour de la synclist {synclist}"
 
 #: app/api/ui/serializers/user.py:75
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr ""
-"L'autorisation 'galaxy.change_group' est nécessaire pour modifier un groupe "
-"d'utilisateurs dont l'utilisateur demandeur ne fait pas partie."
+msgstr "L'autorisation 'galaxy.change_group' est nécessaire pour modifier un groupe d'utilisateurs dont l'utilisateur demandeur ne fait pas partie."
 
 #: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
 msgid "Must be a super user to grant super user permissions."
-msgstr ""
-"Il faut être un super utilisateur pour accorder des autorisations de super "
-"utilisateur."
+msgstr "Il faut être un super utilisateur pour accorder des autorisations de super utilisateur."
 
 #: app/api/ui/serializers/user.py:110
 msgid "Must be a super user to change another user's password."
-msgstr ""
-"Il faut être un super utilisateur pour changer le mot de passe d'un autre "
-"utilisateur."
+msgstr "Il faut être un super utilisateur pour changer le mot de passe d'un autre utilisateur."
 
 #: app/api/ui/serializers/user.py:126
 msgid "You do not have permissions to modify super users."
@@ -149,48 +140,35 @@ msgstr "Le groupe nom=%(name)s, id=%(id)s n'existe pas"
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr ""
-"WARNING:GALAXY_COLLECTION_SIGNING_SERVICE a la valeur '{}', mais le service "
-"de signature correspondant n'existe pas dans la base de données."
+msgstr "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE a la valeur '{}', mais le service de signature correspondant n'existe pas dans la base de données."
 
 #: app/api/ui/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
-msgstr ""
-"WARNING:GALAXY_AUTO_SIGN_COLLECTIONS est défini sur True, mais le système "
-"n'est pas configuré avec un SigningService pour créer des signatures."
+msgstr "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS est défini sur True, mais le système n'est pas configuré avec un SigningService pour créer des signatures."
 
 #: app/api/ui/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
-msgstr ""
-"INFO:Le système est configuré pour afficher les signatures (provenant de "
-"synchronisations à distance) mais n'est pas configuré pour créer ou accepter "
-"le téléchargement de signatures."
+msgstr "INFO:Le système est configuré pour afficher les signatures (provenant de synchronisations à distance) mais n'est pas configuré pour créer ou accepter le téléchargement de signatures."
 
 #: app/api/ui/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr ""
-"WARNING:GALAXY_CONTAINER_SIGNING_SERVICE a pour valeur '{}', mais le "
-"SigningService correspondant n'existe pas dans la base de données."
+msgstr "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE a pour valeur '{}', mais le SigningService correspondant n'existe pas dans la base de données."
 
 #: app/api/ui/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
-msgstr ""
-"WARNING : container_signing est activé via '{}' SigningService, mais les "
-"environnements d'exécution sont désactivés sur le système."
+msgstr "WARNING : container_signing est activé via '{}' SigningService, mais les environnements d'exécution sont désactivés sur le système."
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
-msgstr ""
-"L'indexation des environnements d'exécution n'est pas prise en charge par ce "
-"registre."
+msgstr "L'indexation des environnements d'exécution n'est pas prise en charge par ce registre."
 
 #: app/api/ui/views/signing.py:71
 msgid "Missing required field: namespace"
@@ -208,16 +186,16 @@ msgstr "Le champ distro_base_path est obligatoire."
 #: app/api/ui/views/signing.py:108
 #, python-format
 msgid "Distribution %s does not exist."
-msgstr "Distribution %s non existante"
+msgstr "Distribution %s non existante."
 
 #: app/api/ui/views/signing.py:114
 msgid "signing_service field is required."
-msgstr "Le champ signing_service est obligatoire"
+msgstr "Le champ signing_service est obligatoire."
 
 #: app/api/ui/views/signing.py:117
 #, python-format
 msgid "Signing service \"%s\" does not exist."
-msgstr "Le service de signature \"%s\" n’existe pas"
+msgstr "Le service de signature \"%s\" n’existe pas."
 
 #: app/api/ui/viewsets/collection.py:77
 msgid "Distribution base path is required"
@@ -226,7 +204,7 @@ msgstr "Le chemin de la base de distribution est requis"
 #: app/api/ui/viewsets/collection.py:197
 #, python-format
 msgid "%s must be a valid semantic version range."
-msgstr ""
+msgstr "%s doit être un intervalle de versions sémantiques valide."
 
 #: app/api/ui/viewsets/collection.py:233
 msgid "Retrieve collection version"
@@ -249,18 +227,14 @@ msgstr "Un groupe nommé %s existe déjà."
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr ""
-"Nom de fichier {filename} non valide. Format attendu : namespace-name-"
-"version.tar.gz"
+msgstr "Nom de fichier {filename} non valide. Format attendu : namespace-name-version.tar.gz"
 
 #: app/api/utils.py:60
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr ""
-"Chaîne de version {version} non valide  à partir du nom de fichier "
-"{filename}. Format de version sémantique attendu."
+msgstr "Chaîne de version {version} non valide à partir du nom de fichier {filename}. Format de version sémantique attendu."
 
 #: app/api/utils.py:64
 #, python-format
@@ -288,9 +262,7 @@ msgstr "L'attribut \"nom\" est obligatoire"
 
 #: app/api/v3/serializers/namespace.py:109
 msgid "Name can only contain lower case letters, underscores and numbers"
-msgstr ""
-"Le nom ne peut contenir que des lettres minuscules, des caractères de "
-"soulignement et des chiffres"
+msgstr "Le nom ne peut contenir que des lettres minuscules, des caractères de soulignement et des chiffres"
 
 #: app/api/v3/serializers/namespace.py:112
 msgid "Name must be longer than 2 characters"
@@ -320,22 +292,12 @@ msgstr "Utilisateur distant."
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr ""
-"La synchronisation du contenu des domaines communautaires sans spécifier un "
-"fichier d'exigences n'est pas autorisée."
+msgstr "La synchronisation du contenu des domaines communautaires sans spécifier un fichier d'exigences n'est pas autorisée."
 
 #: app/api/v3/views/sync.py:38 app/api/v3/views/sync.py:83
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
 msgstr "La distribution %s n'a pas d’utilisateurs distants associés."
-
-#: app/api/v3/views/sync.py:49
-msgid ""
-"Syncing content from galaxy.ansible.com without specifying a requirements "
-"file is not allowed."
-msgstr ""
-"La synchronisation du contenu de galaxy.ansible.com sans spécifier un "
-"fichier d'exigences n'est pas autorisée."
 
 #: app/api/v3/views/sync.py:97
 #, python-format
@@ -382,9 +344,7 @@ msgstr "Le service de signature %s n’a pas été trouvé"
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
 "at least a signature for approval."
-msgstr ""
-"La collection {namespace}.{name} n'a pas pu être approuvée car le système "
-"exige au moins une signature pour l'approbation."
+msgstr "La collection {namespace}.{name} n'a pas pu être approuvée car le système exige au moins une signature pour l'approbation."
 
 #: app/api/v3/viewsets/namespace.py:66
 #, python-format
@@ -396,9 +356,7 @@ msgstr "Un espace de nom nommé %s existe déjà."
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr ""
-"L'espace de nommage {name} ne peut pas être supprimé car des collections lui "
-"sont encore associées."
+msgstr "L'espace de nommage {name} ne peut pas être supprimé car des collections lui sont encore associées."
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -406,466 +364,504 @@ msgstr "Échec de notification."
 
 #: app/constants.py:24
 msgid "Add namespace"
-msgstr ""
+msgstr "Ajouter un espace de nom"
 
 #: app/constants.py:28
 msgid "Create a new namespace."
-msgstr ""
+msgstr "Créer un nouvel espace de nom."
 
 #: app/constants.py:30 app/constants.py:36 app/constants.py:42
 #: app/constants.py:48
 msgid "Collection Namespaces"
-msgstr ""
+msgstr "Espaces de nom de la collection"
 
 #: app/constants.py:33
 msgid "Change namespace"
-msgstr ""
+msgstr "Changer l'espace de nom"
 
 #: app/constants.py:34
 msgid "Edit this namespace."
-msgstr ""
+msgstr "Modifier cet espace de nom."
 
 #: app/constants.py:35
 msgid "Edit any existing namespace."
-msgstr ""
+msgstr "Modifier tout espace de nom existant."
 
 #: app/constants.py:39
 msgid "Delete namespace"
-msgstr ""
+msgstr "Supprimer l'espace nom"
 
 #: app/constants.py:40
 msgid "Delete this namespace."
-msgstr ""
+msgstr "Supprimer cet espace de nom."
 
 #: app/constants.py:41
 msgid "Delete any existing namespace."
-msgstr ""
+msgstr "Supprimer tout espace de nom existant."
 
 #: app/constants.py:45
 msgid "Upload to namespace"
-msgstr ""
+msgstr "Télécharger vers l'espace de nom"
 
 #: app/constants.py:46
 msgid "Upload collections to this namespace."
-msgstr ""
+msgstr "Télécharger des collections dans cet espace de nom."
 
 #: app/constants.py:47 app/constants.py:59
 msgid "Upload collections to any existing namespace."
-msgstr ""
+msgstr "Téléchargez des collections dans n'importe quel espace de nom existant."
 
 #: app/constants.py:51
 msgid "Delete collection"
-msgstr ""
+msgstr "Supprimer la collection"
 
 #: app/constants.py:52
 msgid "Delete this collection."
-msgstr ""
+msgstr "Supprimer cette collection."
 
 #: app/constants.py:53
 msgid "Delete any existing collection."
-msgstr ""
+msgstr "Supprimez toute collection existante."
 
 #: app/constants.py:54 app/constants.py:60 app/constants.py:66
 msgid "Collections"
-msgstr ""
+msgstr "Collections"
 
 #: app/constants.py:57
 msgid "Modify Ansible repo content"
-msgstr ""
+msgstr "Modifier le contenu du référentiel Ansible"
 
 #: app/constants.py:58
 msgid "Modify content of this Ansible repository."
-msgstr ""
+msgstr "Modifier le contenu de ce référentiel Ansible."
 
 #: app/constants.py:63
 msgid "Sign collections"
-msgstr ""
+msgstr "Voir les collections"
 
 #: app/constants.py:64
 msgid "Sign collections in this repository."
-msgstr ""
+msgstr "Signer des collections dans ce référentiel."
 
 #: app/constants.py:65
 msgid "Sign collections in any repository."
-msgstr ""
+msgstr "Signer des collections dans n'importe quel référentiel."
 
 #: app/constants.py:69
 msgid "Add user"
-msgstr ""
+msgstr "Ajouter un utilisateur"
 
 #: app/constants.py:71
 msgid "Add new users to the system."
-msgstr ""
+msgstr "Ajouter de nouveaux utilisateurs au système."
 
 #: app/constants.py:72 app/constants.py:78 app/constants.py:84
 #: app/constants.py:90
 msgid "Users"
-msgstr ""
+msgstr "Utilisateurs"
 
 #: app/constants.py:75
 msgid "Change user"
-msgstr ""
+msgstr "Changer d'utilisateur"
 
 #: app/constants.py:76
 msgid "Edit this user."
-msgstr ""
+msgstr "Modifier cet utilisateur."
 
 #: app/constants.py:77
 msgid "Edit any existing user in the system."
-msgstr ""
+msgstr "Modifier tout utilisateur existant dans le système."
 
 #: app/constants.py:81
 msgid "Delete user"
-msgstr ""
+msgstr "Supprimer l’utilisateur"
 
 #: app/constants.py:82
 msgid "Delete this user."
-msgstr ""
+msgstr "Supprimer cet utilisateur."
 
 #: app/constants.py:83
 msgid "Delete any existing user in the system."
-msgstr ""
+msgstr "Supprimer tout utilisateur existant dans le système."
 
 #: app/constants.py:87
 msgid "View user"
-msgstr ""
+msgstr "Afficher l’utilisateur"
 
 #: app/constants.py:88
 msgid "View this user."
-msgstr ""
+msgstr "Voir cet utilisateur."
 
 #: app/constants.py:89
 msgid "View any user in the system."
-msgstr ""
+msgstr "Visualiser n'importe quel utilisateur du système."
 
 #: app/constants.py:93
 msgid "Add group"
-msgstr ""
+msgstr "Ajouter un groupe"
 
 #: app/constants.py:95
 msgid "Create new groups in the system."
-msgstr ""
+msgstr "Créer de nouveaux groupes dans le système."
 
 #: app/constants.py:96 app/constants.py:102 app/constants.py:108
 #: app/constants.py:114
 msgid "Groups"
-msgstr ""
+msgstr "Groupes"
 
 #: app/constants.py:99
 msgid "Change group"
-msgstr ""
+msgstr "Changer le groupe"
 
 #: app/constants.py:100
 msgid "Edit this group"
-msgstr ""
+msgstr "Modifier ce groupe"
 
 #: app/constants.py:101
 msgid "Edit any existing group in the system."
-msgstr ""
+msgstr "Modifier tout groupe existant dans le système."
 
 #: app/constants.py:105
 msgid "Delete group"
-msgstr ""
+msgstr "Supprimer le groupe"
 
 #: app/constants.py:106
 msgid "Delete this group."
-msgstr ""
+msgstr "Supprimer ce groupe."
 
 #: app/constants.py:107
 msgid "Delete any group in the system."
-msgstr ""
+msgstr "Supprimer tout groupe dans le système."
 
 #: app/constants.py:111
 msgid "View group"
-msgstr ""
+msgstr "Afficher le groupe"
 
 #: app/constants.py:112
 msgid "View this group."
-msgstr ""
+msgstr "Voir ce groupe."
 
 #: app/constants.py:113
 msgid "View any existing group in the system."
-msgstr ""
+msgstr "Visualiser tout groupe existant dans le système."
 
 #: app/constants.py:117
 msgid "View collection remote"
-msgstr ""
+msgstr "Voir la collection d’utilisateurs à distance"
 
 #: app/constants.py:118
 msgid "View this collection remote."
-msgstr ""
+msgstr "Voir cette collection à distance."
 
 #: app/constants.py:119
 msgid "View any collection remote existing in the system."
-msgstr ""
+msgstr "Visualiser toute collection à distance existant dans le système."
 
 #: app/constants.py:120 app/constants.py:126 app/constants.py:132
-#: app/constants.py:138
+#: app/constants.py:138 app/constants.py:144
 msgid "Collection Remotes"
-msgstr ""
+msgstr "Collection d’utilisateurs à distance"
 
 #: app/constants.py:123
 msgid "Add collection remote"
-msgstr ""
+msgstr "Voir la collection d’utilisateurs à distance"
 
 #: app/constants.py:124
 msgid "Add this collection remote."
-msgstr ""
+msgstr "Voir cette collection à distance."
 
 #: app/constants.py:125
 msgid "Add any collection remote existing in the system."
-msgstr ""
+msgstr "Visualiser toute collection à distance existant dans le système."
 
 #: app/constants.py:129
 msgid "Change collection remote"
-msgstr ""
+msgstr "Changer la collection d’utilisateurs à distance"
 
 #: app/constants.py:130
 msgid "Edit this collection remote."
-msgstr ""
+msgstr "Modifier cette collection à distance."
 
 #: app/constants.py:131
 msgid "Edit any collection remote existing in the system."
-msgstr ""
+msgstr "Modifier toute collection à distance existant dans le système."
 
 #: app/constants.py:135
 msgid "Delete collection remote"
-msgstr ""
+msgstr "Supprimer la collection à distance"
 
 #: app/constants.py:136
 msgid "Delete this collection remote."
-msgstr ""
+msgstr "Voir cette collection à distance."
 
 #: app/constants.py:137
 msgid "Delete any collection remote existing in the system."
-msgstr ""
+msgstr "Visualiser toute collection à distance existant dans le système."
 
 #: app/constants.py:141
-msgid "View Ansible repository"
-msgstr ""
+msgid "Manage remote roles"
+msgstr "Gérer les rôles à distance"
 
 #: app/constants.py:142
-msgid "View this Ansible repository."
-msgstr ""
+msgid "Configure who has permissions on this remote."
+msgstr "Configurer qui a les permissions sur cette télécommande."
 
 #: app/constants.py:143
-msgid "View any Ansible repository existing in the system."
-msgstr ""
-
-#: app/constants.py:144 app/constants.py:150 app/constants.py:156
-#: app/constants.py:162
-msgid "Ansible Repository"
-msgstr ""
+msgid "Configure who has permissions on any remote."
+msgstr "Configurer qui a les permissions sur n'importe quel ordinateur distant."
 
 #: app/constants.py:147
-msgid "Add Ansible repository"
-msgstr ""
+msgid "View Ansible repository"
+msgstr "Voir le référentiel Ansible"
 
 #: app/constants.py:148
-msgid "Add this Ansible repository."
-msgstr ""
+msgid "View this Ansible repository."
+msgstr "Voir ce référentiel Ansible."
 
 #: app/constants.py:149
-msgid "Add any Ansible repository existing in the system."
-msgstr ""
+msgid "View any Ansible repository existing in the system."
+msgstr "Visualiser n'importe quel référentiel Ansible existant dans le système."
+
+#: app/constants.py:150 app/constants.py:156 app/constants.py:162
+#: app/constants.py:168 app/constants.py:174 app/constants.py:182
+msgid "Ansible Repository"
+msgstr "Référentiel Ansible"
 
 #: app/constants.py:153
-msgid "Change Ansible repository"
-msgstr ""
+msgid "Add Ansible repository"
+msgstr "Ajouter un référentiel Ansible"
 
 #: app/constants.py:154
-msgid "Change this Ansible repository."
-msgstr ""
+msgid "Add this Ansible repository."
+msgstr "Ajouter ce référentiel Ansible."
 
 #: app/constants.py:155
-msgid "Change any Ansible repository existing in the system."
-msgstr ""
+msgid "Add any Ansible repository existing in the system."
+msgstr "Ajouter n'importe quel référentiel Ansible existant dans le système."
 
 #: app/constants.py:159
-msgid "Delete Ansible repository"
-msgstr ""
+msgid "Change Ansible repository"
+msgstr "Modifier le référentiel Ansible"
 
 #: app/constants.py:160
-msgid "Delete this Ansible repository."
-msgstr ""
+msgid "Change this Ansible repository."
+msgstr "Modifier ce référentiel Ansible."
 
 #: app/constants.py:161
-msgid "Delete any Ansible repository existing in the system."
-msgstr ""
+msgid "Change any Ansible repository existing in the system."
+msgstr "Modifier tout référentiel Ansible existant dans le système."
 
 #: app/constants.py:165
-msgid "Change container namespace permissions"
-msgstr ""
+msgid "Delete Ansible repository"
+msgstr "Supprimer un référentiel Ansible"
 
 #: app/constants.py:166
-msgid "Edit permissions on this container namespace."
-msgstr ""
+msgid "Delete this Ansible repository."
+msgstr "Supprimer ce référentiel Ansible."
 
 #: app/constants.py:167
-msgid "Edit permissions on any existing container namespace."
-msgstr ""
-
-#: app/constants.py:168 app/constants.py:174 app/constants.py:180
-#: app/constants.py:186 app/constants.py:192 app/constants.py:198
-#: app/constants.py:204 app/constants.py:210
-msgid "Execution Environments"
-msgstr ""
+msgid "Delete any Ansible repository existing in the system."
+msgstr "Supprimer tout référentiel Ansible existant dans le système."
 
 #: app/constants.py:171
-msgid "Change containers"
-msgstr ""
+msgid "Manage repository roles"
+msgstr "Gérer les rôles du référentiel"
 
 #: app/constants.py:172
-msgid "Edit all objects in this container namespace."
-msgstr ""
+msgid "Configure who has permissions on this repository."
+msgstr "Configurer qui a les permissions sur ce référentiel."
 
 #: app/constants.py:173
-msgid "Edit all objects in any container namespace in the system."
-msgstr ""
+msgid "Configure who has permissions on any repository."
+msgstr "Configurer qui a les permissions sur un référentiel."
 
 #: app/constants.py:177
-msgid "Change image tags"
-msgstr ""
+msgid "Repair Ansible repository"
+msgstr "Réparer le référentiel Ansible"
 
 #: app/constants.py:178
-msgid "Edit an image's tag in this container namespace"
-msgstr ""
+msgid "Repair artifacts associated with this Ansible repository."
+msgstr "Réparer les artefacts associés à ce référentiel Ansible."
 
-#: app/constants.py:179
-msgid "Edit an image's tag in any container namespace the system."
-msgstr ""
-
-#: app/constants.py:183
-msgid "Create new containers"
-msgstr ""
+#: app/constants.py:180
+msgid ""
+"Repair artifacts associated with any Ansible repository existing in the "
+"system."
+msgstr "Réparer les artefacts associés à n'importe quel référentiel Ansible existant dans le système."
 
 #: app/constants.py:185
-msgid "Add new containers to the system."
-msgstr ""
+msgid "Change container namespace permissions"
+msgstr "Changer les permissions de l'espace de nom du conteneur"
 
-#: app/constants.py:189
-msgid "Delete container repository"
-msgstr ""
+#: app/constants.py:186
+msgid "Edit permissions on this container namespace."
+msgstr "Modifier les permissions sur cet espace de nom de conteneur."
 
-#: app/constants.py:190
-msgid "Delete this container repository."
-msgstr ""
+#: app/constants.py:187
+msgid "Edit permissions on any existing container namespace."
+msgstr "Modifier les permissions sur tout espace de nom de conteneur existant."
+
+#: app/constants.py:188 app/constants.py:194 app/constants.py:200
+#: app/constants.py:206 app/constants.py:212 app/constants.py:218
+#: app/constants.py:224 app/constants.py:230
+msgid "Execution Environments"
+msgstr "Environnements d'exécution"
 
 #: app/constants.py:191
-msgid "Delete any existing container repository in the system."
-msgstr ""
+msgid "Change containers"
+msgstr "Changer les conteneurs"
 
-#: app/constants.py:195
-msgid "Push to existing containers"
-msgstr ""
+#: app/constants.py:192
+msgid "Edit all objects in this container namespace."
+msgstr "Modifier tous les objets de cet espace de nom de conteneur."
 
-#: app/constants.py:196
-msgid "Push to this namespace."
-msgstr ""
+#: app/constants.py:193
+msgid "Edit all objects in any container namespace in the system."
+msgstr "Modifier tous les objets de n'importe quel espace de nom de conteneur dans le système."
 
 #: app/constants.py:197
-msgid "Push to any existing namespace in the system."
-msgstr ""
+msgid "Change image tags"
+msgstr "Changer les tags d'image"
 
-#: app/constants.py:201
-msgid "Push new containers"
-msgstr ""
+#: app/constants.py:198
+msgid "Edit an image's tag in this container namespace"
+msgstr "Modifier la balise d'une image dans l'espace de nom de ce conteneur"
 
-#: app/constants.py:202
-msgid "Push a new container to this namespace."
-msgstr ""
+#: app/constants.py:199
+msgid "Edit an image's tag in any container namespace the system."
+msgstr "Modifier la balise d'une image dans n'importe quel espace de nom de conteneur du système."
 
 #: app/constants.py:203
-msgid "Push a new containers to any namespace in the system."
-msgstr ""
+msgid "Create new containers"
+msgstr "Créer de nouveaux conteneurs"
 
-#: app/constants.py:207
-msgid "Manage container namespace roles"
-msgstr ""
-
-#: app/constants.py:208
-msgid "Manage container namespace roles."
-msgstr ""
+#: app/constants.py:205
+msgid "Add new containers to the system."
+msgstr "Ajouter de nouveaux conteneurs au système."
 
 #: app/constants.py:209
-msgid "Manage container namespace roles existing in the system."
-msgstr ""
+msgid "Delete container repository"
+msgstr "Supprimer le référentiel du conteneur"
 
-#: app/constants.py:213
-msgid "Add remote registry"
-msgstr ""
+#: app/constants.py:210
+msgid "Delete this container repository."
+msgstr "Supprimer ce référentiel de conteneur."
+
+#: app/constants.py:211
+msgid "Delete any existing container repository in the system."
+msgstr "Supprimez tout référentiel de conteneurs existant dans le système."
 
 #: app/constants.py:215
-msgid "Add remote registry to the system."
-msgstr ""
+msgid "Push to existing containers"
+msgstr "Ajouter dans les conteneurs existants"
 
-#: app/constants.py:216 app/constants.py:222
-msgid "Container Registry Remotes"
-msgstr ""
+#: app/constants.py:216
+msgid "Push to this namespace."
+msgstr "Ajouter dans cet espace de nom."
 
-#: app/constants.py:219
-msgid "Change remote registry"
-msgstr ""
-
-#: app/constants.py:220
-msgid "Edit this remote registry."
-msgstr ""
+#: app/constants.py:217
+msgid "Push to any existing namespace in the system."
+msgstr "Ajouter dans tout espace de nom existant dans le système."
 
 #: app/constants.py:221
-msgid "Change any remote registry existing in the system."
-msgstr ""
+msgid "Push new containers"
+msgstr "Ajouter de nouveaux conteneurs"
 
-#: app/constants.py:225
-msgid "Delete remote registry"
-msgstr ""
+#: app/constants.py:222
+msgid "Push a new container to this namespace."
+msgstr "Ajouter un nouveau conteneur dans cet espace de nom."
 
-#: app/constants.py:226
-msgid "Delete this remote registry."
-msgstr ""
+#: app/constants.py:223
+msgid "Push a new containers to any namespace in the system."
+msgstr "Ajouter un nouveau conteneur dans n'importe quel espace de nom du système."
 
 #: app/constants.py:227
-msgid "Delete any remote registry existing in the system."
-msgstr ""
+msgid "Manage container namespace roles"
+msgstr "Supprimer l'espace de nom du conteneur"
 
-#: app/constants.py:231
-msgid "Change task"
-msgstr ""
+#: app/constants.py:228
+msgid "Manage container namespace roles."
+msgstr "Supprimer l'espace de nom du conteneur."
 
-#: app/constants.py:232
-msgid "Edit this task."
-msgstr ""
+#: app/constants.py:229
+msgid "Manage container namespace roles existing in the system."
+msgstr "Gérer les rôles de l'espace de noms des conteneurs existant dans le système."
 
 #: app/constants.py:233
-msgid "Edit any task existing in the system."
-msgstr ""
+msgid "Add remote registry"
+msgstr "Ajouter un registre à distance"
 
-#: app/constants.py:234 app/constants.py:240 app/constants.py:246
-msgid "Task Management"
-msgstr ""
+#: app/constants.py:235
+msgid "Add remote registry to the system."
+msgstr "Ajouter un registre à distance au système."
 
-#: app/constants.py:237
-msgid "Delete task"
-msgstr ""
-
-#: app/constants.py:238
-msgid "Delete this task."
-msgstr ""
+#: app/constants.py:236 app/constants.py:242
+msgid "Container Registry Remotes"
+msgstr "Type de registre des conteneurs"
 
 #: app/constants.py:239
-msgid "Delete any task existing in the system."
-msgstr ""
+msgid "Change remote registry"
+msgstr "Changer le registre distant"
 
-#: app/constants.py:243
-msgid "View all tasks"
-msgstr ""
+#: app/constants.py:240
+msgid "Edit this remote registry."
+msgstr "Modifiez ce registre à distance."
 
-#: app/constants.py:244
-msgid "View this task."
-msgstr ""
+#: app/constants.py:241
+msgid "Change any remote registry existing in the system."
+msgstr "Modifier tout registre distant existant dans le système."
 
 #: app/constants.py:245
+msgid "Delete remote registry"
+msgstr "Supprimer le registre distant"
+
+#: app/constants.py:246
+msgid "Delete this remote registry."
+msgstr "Supprimez ce registre distant."
+
+#: app/constants.py:247
+msgid "Delete any remote registry existing in the system."
+msgstr "Supprimez tout registre distant existant dans le système."
+
+#: app/constants.py:251
+msgid "Change task"
+msgstr "Changer la tâche"
+
+#: app/constants.py:252
+msgid "Edit this task."
+msgstr "Modifier cette tâche."
+
+#: app/constants.py:253
+msgid "Edit any task existing in the system."
+msgstr "Modifier toute tâche existante dans le système."
+
+#: app/constants.py:254 app/constants.py:260 app/constants.py:266
+msgid "Task Management"
+msgstr "Jobs de gestion"
+
+#: app/constants.py:257
+msgid "Delete task"
+msgstr "Supprimer la tâche"
+
+#: app/constants.py:258
+msgid "Delete this task."
+msgstr "Supprimer cette tâche."
+
+#: app/constants.py:259
+msgid "Delete any task existing in the system."
+msgstr "Supprimer toute tâche existante dans le système."
+
+#: app/constants.py:263
+msgid "View all tasks"
+msgstr "Voir toutes les tâches"
+
+#: app/constants.py:264
+msgid "View this task."
+msgstr "Voir cette tâche."
+
+#: app/constants.py:265
 msgid "View any task existing in the system."
-msgstr ""
+msgstr "Visualiser toute tâche existante dans le système."
 
 #: app/exceptions.py:8
 msgid "Data conflicts with existing entity."
@@ -880,9 +876,7 @@ msgstr "Créer un groupe de conteneurs {remote_name}. {error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr ""
-"Un conteneur distant portant ce nom existe déjà, mais n'est associé à aucun "
-"registre."
+msgstr "Un conteneur distant portant ce nom existe déjà, mais n'est associé à aucun registre."
 
 #: app/tasks/index_registry.py:99
 msgid "A local container with this name already exists."
@@ -893,5 +887,3 @@ msgstr "Un conteneur local portant ce nom existe déjà."
 msgid "Could not find staging repository: \"%s\""
 msgstr "Impossible de trouver le référentiel «staging» : \"%s\""
 
-#~ msgid "Path does not match: \"%s\""
-#~ msgstr "Le chemin ne correspond pas : \"%s\""
