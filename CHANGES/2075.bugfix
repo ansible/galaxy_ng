@@ -1,0 +1,1 @@
+Fix container registry auth when running with keycloak.
