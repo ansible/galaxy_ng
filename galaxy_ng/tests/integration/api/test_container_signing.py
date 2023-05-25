@@ -42,7 +42,8 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
     container_engine = config["container_engine"]
 
     # Pull alpine image
-    pull_and_tag_test_image(container_engine)
+    pull_and_tag_test_image(container_engine,
+                            config['url'].strip(api_prefix).strip('https://'))
     # subprocess.check_call([container_engine, "pull", "alpine"])
     # Tag the image
     subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine:latest"])
