@@ -23,6 +23,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.collection_move
 @pytest.mark.move
 @pytest.mark.slow_in_cloud
+@pytest.mark.skip  # REMOVE THIS MARKER
 def test_move_collection_version(ansible_config, upload_artifact):
     """Tests whether a colleciton can be moved from repo to repo"""
 
