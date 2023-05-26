@@ -3,7 +3,7 @@
 Imported from https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugin/
 """
 import pytest
-from galaxykit.collections import move_collection
+from galaxykit.collections import move_or_copy_collection
 from galaxykit.container_images import delete_container as delete_image_container
 from galaxykit.container_images import get_container_images
 from galaxykit.containers import add_owner_to_ee
@@ -441,7 +441,7 @@ class TestRBAC:
         gc.add_role_to_group(role_name, group["id"])
         namespace_name = create_namespace(gc, None)
         artifact = upload_test_artifact(gc, namespace_name)
-        move_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
+        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
         gc_user = galaxy_client(user)
         gc_user.delete_collection(
@@ -463,7 +463,7 @@ class TestRBAC:
         gc.create_role(role_name, "any_description", permissions)
         namespace_name = create_namespace(gc, group, object_roles=[role_name])
         artifact = upload_test_artifact(gc, namespace_name)
-        move_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
+        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
@@ -487,12 +487,12 @@ class TestRBAC:
         gc.create_role(role_name, "any_description", permissions)
         namespace_name = create_namespace(gc, group, object_roles=[role_name])
         artifact = upload_test_artifact(gc, namespace_name)
-        move_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
+        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             # reject collection
-            move_collection(
+            move_or_copy_collection(
                 gc_user,
                 namespace_name,
                 artifact.name,
@@ -520,10 +520,10 @@ class TestRBAC:
         gc.create_role(role_name, "any_description", permissions)
         namespace_name = create_namespace(gc, group, object_roles=[role_name])
         artifact = upload_test_artifact(gc, namespace_name)
-        move_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
+        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
         gc_user = galaxy_client(user)
-        move_collection(
+        move_or_copy_collection(
             gc_user,
             namespace_name,
             artifact.name,
@@ -551,7 +551,7 @@ class TestRBAC:
         namespace_name = create_namespace(gc, group, object_roles=[role_name])
         artifact = upload_test_artifact(gc, namespace_name)
         gc_user = galaxy_client(user)
-        move_collection(
+        move_or_copy_collection(
             gc_user, namespace_name, artifact.name, artifact.version
         )  # approve collection
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
@@ -576,7 +576,7 @@ class TestRBAC:
         artifact = upload_test_artifact(gc, namespace_name)
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
-            move_collection(
+            move_or_copy_collection(
                 gc_user, namespace_name, artifact.name, artifact.version
             )  # approve collection
         assert ctx.value.args[0]["status"] == "403"
