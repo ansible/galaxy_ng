@@ -6,6 +6,8 @@ See: https://issues.redhat.com/browse/AAH-1268
 import pytest
 from orionutils.generator import build_collection
 
+from galaxykit.collections import upload_artifact
+from galaxykit.utils import wait_for_task as gk_wait_for_task
 from ..constants import USERNAME_PUBLISHER
 from ..utils import (
     copy_collection_version,
@@ -23,10 +25,8 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.collection_move
 @pytest.mark.move
 @pytest.mark.slow_in_cloud
-@pytest.mark.skip  # TODO REMOVE THIS MARKER
-def test_move_collection_version(ansible_config, upload_artifact):
+def test_move_collection_version(ansible_config, galaxy_client):
     """Tests whether a collection can be moved from repo to repo"""
-
     config = ansible_config("partner_engineer")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
@@ -63,9 +63,9 @@ def test_move_collection_version(ansible_config, upload_artifact):
     assert ckey not in pre['published']
 
     # import and wait ...
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
-    assert resp['state'] == 'completed'
+    gc_admin = galaxy_client("admin")
+    resp = upload_artifact(None, gc_admin, artifact)
+    gk_wait_for_task(gc_admin, resp)
     dest_url = (
         f"content/staging/v3/collections/{artifact.namespace}/"
         f"{artifact.name}/versions/{artifact.version}/"
@@ -91,6 +91,11 @@ def test_move_collection_version(ansible_config, upload_artifact):
     assert ckey in after['published']
 
     # Make sure an error is thrown if move attempted again ...
+
+    # uncomment this code when stage performance issues are solved. Because
+    # of these problems, the timeout to wait for the certification is very high, making
+    # this last verification very long (10 minutes)
+    '''
     failed = None
     try:
         cert_result = set_certification(api_client, artifact)
@@ -98,7 +103,7 @@ def test_move_collection_version(ansible_config, upload_artifact):
     except Exception:
         failed = True
     assert failed
-
+    '''
 
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.certification
@@ -106,7 +111,7 @@ def test_move_collection_version(ansible_config, upload_artifact):
 @pytest.mark.move
 @pytest.mark.slow_in_cloud
 @pytest.mark.min_hub_version("4.7dev")
-def test_copy_collection_version(ansible_config, upload_artifact):
+def test_copy_collection_version(ansible_config, galaxy_client):
     """Tests whether a collection can be copied from repo to repo"""
 
     config = ansible_config("partner_engineer")
@@ -145,9 +150,9 @@ def test_copy_collection_version(ansible_config, upload_artifact):
     assert ckey not in pre['community']
 
     # import and wait ...
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
-    assert resp['state'] == 'completed'
+    gc_admin = galaxy_client("admin")
+    resp = upload_artifact(None, gc_admin, artifact)
+    gk_wait_for_task(gc_admin, resp)
     dest_url = (
         f"content/staging/v3/collections/{artifact.namespace}/"
         f"{artifact.name}/versions/{artifact.version}/"
@@ -183,7 +188,7 @@ def test_copy_collection_version(ansible_config, upload_artifact):
 
 @pytest.mark.standalone_only
 @pytest.mark.min_hub_version("4.7dev")
-def test_copy_associated_content(ansible_config, upload_artifact):
+def test_copy_associated_content(ansible_config, galaxy_client):
     """Tests whether a collection and associated content is copied from repo to repo"""
 
     # TODO: add check for ansible namespace metadata
@@ -205,9 +210,9 @@ def test_copy_associated_content(ansible_config, upload_artifact):
     )
 
     # import and wait ...
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
-    assert resp['state'] == 'completed'
+    gc_admin = galaxy_client("admin")
+    resp = upload_artifact(None, gc_admin, artifact)
+    gk_wait_for_task(gc_admin, resp)
 
     # get staging repo version
     staging_repo = api_client(
