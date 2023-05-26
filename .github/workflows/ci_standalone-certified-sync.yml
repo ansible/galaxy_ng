@@ -61,11 +61,17 @@ jobs:
           oci-env -e dev/oci_env_configs/standalone.compose.env poll --wait 10 --attempts 30
           oci-env -e dev/oci_env_configs/sync-test.compose.env poll
 
+      - name: give the stack extra time to start
+        run: sleep 30
+
       - name: finish insights instance setup
         run: |
           oci-env -e dev/oci_env_configs/sync-test.compose.env db restore -f insights-fixture --migrate
           oci-env -e dev/oci_env_configs/sync-test.compose.env pulpcore-manager migrate
           oci-env -e dev/oci_env_configs/sync-test.compose.env poll
+
+      - name: give the stack extra time to re-start
+        run: sleep 30
 
       - name: run the integration tests
         run: ./dev/standalone-certified-sync/RUN_INTEGRATION.sh
