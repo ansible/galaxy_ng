@@ -1,6 +1,7 @@
 import os
 import shutil
 import time
+from urllib.parse import urlparse
 
 import pytest
 from orionutils.utils import increment_version
@@ -141,7 +142,14 @@ class AnsibleConfigFixture(dict):
                 'HUB_API_ROOT',
                 'http://localhost:5001/api/automation-hub/'
             )
-
+        elif key == 'api_prefix':
+            # strip the proto+host+port from the api root
+            api_root = os.environ.get(
+                'HUB_API_ROOT',
+                'http://localhost:5001/api/automation-hub/'
+            )
+            parsed = urlparse(api_root)
+            return parsed.path
         elif key == 'auth_url':
             # The auth_url value should be None for a standalone stack.
             return os.environ.get(
