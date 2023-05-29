@@ -47,7 +47,7 @@ When submitting a PR to either the UI or backend:
     - `No-Issue` should be used infrequently and the reviewers may ask you to create a Jira ticket and attach it to your PR.
     - `Issue: AAH-XXXX` should must include a Jira ticket number (such as AAH-123). This also requires a changelog entry in `CHANGES/`. Changelog entries follow the `<issue_number>.type` format. For example if I submit a fix for AAH-123, it must also come with a `CHANGES/123.bugfix` entry. Changelog file extensions include:
 
-        - `.feature`: use this for new features. New features must include documentation. See our [docs documentation](dev/writing_docs.md) for mor information.
+        - `.feature`: use this for new features. New features must include documentation. See our [docs documentation](dev/writing_docs.md) for more information.
         - `.bugfix`: use this for bugfixes.
         - `.misc`: use this for small maintenance changes that don't need to be communicated such as fixing typos, refactoring code etc.
 
