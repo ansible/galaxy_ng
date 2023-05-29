@@ -441,7 +441,7 @@ class TestRBAC:
         gc.add_role_to_group(role_name, group["id"])
         namespace_name = create_namespace(gc, None)
         artifact = upload_test_artifact(gc, namespace_name)
-        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
+        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
         gc_user = galaxy_client(user)
         gc_user.delete_collection(
@@ -463,7 +463,7 @@ class TestRBAC:
         gc.create_role(role_name, "any_description", permissions)
         namespace_name = create_namespace(gc, group, object_roles=[role_name])
         artifact = upload_test_artifact(gc, namespace_name)
-        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
+        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
@@ -487,7 +487,7 @@ class TestRBAC:
         gc.create_role(role_name, "any_description", permissions)
         namespace_name = create_namespace(gc, group, object_roles=[role_name])
         artifact = upload_test_artifact(gc, namespace_name)
-        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
+        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
@@ -520,7 +520,7 @@ class TestRBAC:
         gc.create_role(role_name, "any_description", permissions)
         namespace_name = create_namespace(gc, group, object_roles=[role_name])
         artifact = upload_test_artifact(gc, namespace_name)
-        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)  # approve collection
+        move_or_copy_collection(gc, namespace_name, artifact.name, artifact.version)
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
         gc_user = galaxy_client(user)
         move_or_copy_collection(

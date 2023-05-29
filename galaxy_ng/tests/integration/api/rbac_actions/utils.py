@@ -50,7 +50,7 @@ REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n"  # n
 
 TEST_CONTAINER = "alpine"
 if avoid_docker_limit_rate():
-        TEST_CONTAINER = "quay.io/libpod/alpine"
+    TEST_CONTAINER = "quay.io/libpod/alpine"
 
 session = requests.Session()
 session.verify = False

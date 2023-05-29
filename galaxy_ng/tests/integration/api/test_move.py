@@ -105,6 +105,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
     assert failed
     '''
 
+
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.certification
 @pytest.mark.collection_move
