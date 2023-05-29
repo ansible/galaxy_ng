@@ -1,6 +1,7 @@
 import logging
 
-from galaxy_ng.tests.integration.utils.iqe_utils import avoid_docker_limit_rate
+from galaxy_ng.tests.integration.utils.iqe_utils import avoid_docker_limit_rate, \
+    push_image_with_retry
 from galaxykit.container_images import get_container_images
 from galaxykit.containerutils import ContainerClient
 from galaxykit.users import get_user
@@ -68,7 +69,7 @@ def create_local_image_container(config, client):
     unauth_ctn.pull_image("alpine")
     ee_name = f"ee_{uuid4()}"
     client.tag_image(image, ee_name + ":latest")
-    client.push_image(ee_name + ":latest")
+    push_image_with_retry(client, ee_name + ":latest")
     info = get_container_images(client, ee_name)
     delete_image_container(client, ee_name, info["data"][0]["digest"])
     return ee_name
