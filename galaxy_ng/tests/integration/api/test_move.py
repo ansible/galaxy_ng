@@ -63,7 +63,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
     assert ckey not in pre['published']
 
     # import and wait ...
-    gc_admin = galaxy_client("admin")
+    gc_admin = galaxy_client("partner_engineer")
     resp = upload_artifact(None, gc_admin, artifact)
     gk_wait_for_task(gc_admin, resp)
     dest_url = (
@@ -151,7 +151,7 @@ def test_copy_collection_version(ansible_config, galaxy_client):
     assert ckey not in pre['community']
 
     # import and wait ...
-    gc_admin = galaxy_client("admin")
+    gc_admin = galaxy_client("partner_engineer")
     resp = upload_artifact(None, gc_admin, artifact)
     gk_wait_for_task(gc_admin, resp)
     dest_url = (

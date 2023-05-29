@@ -67,8 +67,9 @@ client_cache = {}
 
 
 class GalaxyKitClient:
-    def __init__(self, ansible_config, custom_config=None):
+    def __init__(self, ansible_config, custom_config=None, basic_token=None):
         self.config = ansible_config if not custom_config else custom_config
+        self._basic_token = basic_token
 
     def gen_authorized_client(
         self,
@@ -118,6 +119,7 @@ class GalaxyKitClient:
             else:
                 url = config.get("url")
                 if isinstance(role, str):
+                    self._basic_token = True if is_ephemeral_env() else basic_token
                     profile_config = self.config(role)
                     user = profile_config.get_profile_data()
                     if profile_config.get("auth_url"):
@@ -125,7 +127,7 @@ class GalaxyKitClient:
                     if token is None:
                         token = get_standalone_token(
                             user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
-                            basic_token=basic_token
+                            basic_token=self._basic_token
                         )
 
                     auth = {
