@@ -9,7 +9,7 @@ from orionutils.generator import build_collection, randstr
 from pkg_resources import parse_version
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
-from ..conftest import get_hub_version
+from ..conftest import get_hub_version, is_hub_4_5
 
 from ..utils import (
     CapturingGalaxyError,
@@ -65,9 +65,8 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
     # inbound repos aren't created anymore. This will create one to verify that they still
     # work on legacy clients
     if use_distribution:
-        hub_version = get_hub_version(ansible_config)
-        if parse_version(hub_version) < parse_version('4.6'):
-            pytest.skip(f"Hub version is {hub_version}")
+        if is_hub_4_5(ansible_config):
+            pytest.skip("Hub version is 4.5")
         admin_client = get_client(ansible_config(profile="admin"))
         distros = admin_client("pulp/api/v3/distributions/ansible/"
                                f"ansible/?name=inbound-{artifact.namespace}")
