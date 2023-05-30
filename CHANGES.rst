@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.7.1 (2023-05-29)
+==================
+
+Bugfixes
+--------
+
+- Fix container push update permission
+  `AAH-2327 <https://issues.redhat.com/browse/AAH-2327>`_
+
+
+----
+
+
 4.7.0 (2023-04-17)
 ==================
 
