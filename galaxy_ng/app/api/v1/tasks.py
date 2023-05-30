@@ -1,17 +1,18 @@
 import copy
 import datetime
 import logging
+import os
 import tempfile
 
 from django.db import transaction
 
-from galaxy_importer.utils import markup as markup_utils
+from galaxy_importer.config import Config
+from galaxy_importer.legacy_role import import_legacy_role
 
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.utils.galaxy import upstream_role_iterator
 from galaxy_ng.app.utils.git import get_tag_commit_hash
 from galaxy_ng.app.utils.git import get_tag_commit_date
-import galaxy_ng.app.utils.roles as roles_utils
 
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
@@ -59,7 +60,6 @@ def legacy_role_import(
     if not github_reference:
         github_reference = None
 
-    role_name = alternate_role_name or github_repo.replace('ansible-role-', '')
     if LegacyNamespace.objects.filter(name=github_user).count() == 0:
         logger.debug(f'CREATE NEW NAMESPACE {github_user}')
         namespace, _ = LegacyNamespace.objects.get_or_create(name=github_user)
@@ -72,7 +72,12 @@ def legacy_role_import(
         logger.debug(f'USE EXISTING NAMESPACE {github_user}')
         namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
-    with tempfile.TemporaryDirectory() as checkout_path:
+    with tempfile.TemporaryDirectory() as tmp_path:
+        # galaxy-importer requires importing legacy roles from the role's parent directory.
+        os.chdir(tmp_path)
+
+        # galaxy-importer wants the role's directory to be the name of the role.
+        checkout_path = os.path.join(tmp_path, github_repo)
 
         clone_url = f'https://github.com/{github_user}/{github_repo}'
         gitrepo = Repo.clone_from(clone_url, checkout_path, multi_options=["--recurse-submodules"])
@@ -103,6 +108,15 @@ def legacy_role_import(
         logger.debug(f'GITHUB_REFERENCE: {github_reference}')
         logger.debug(f'GITHUB_COMMIT: {github_commit}')
 
+        # Parse legacy role with galaxy-importer.
+        importer_config = Config()
+        result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
+        galaxy_info = result["metadata"]["galaxy_info"]
+        logger.debug(f"TAGS: {galaxy_info['galaxy_tags']}")
+
+        role_name = result["name"] or alternate_role_name or \
+            github_repo.replace("ansible-role-", "")
+
         # check if this namespace/name/version has already been imported
         old = LegacyRole.objects.filter(namespace=namespace, name=role_name).first()
         if old is not None:
@@ -116,33 +130,23 @@ def legacy_role_import(
                 )
                 raise Exception(msg)
 
-        role_meta = roles_utils.get_path_role_meta(checkout_path)
-        role_tags = role_meta.get('galaxy_info', {}).get('galaxy_tags', [])
-        if role_tags is None:
-            role_tags = []
-        logger.debug(f'TAGS: {role_tags}')
-
-        # use the importer to grok the readme
-        readme = markup_utils.get_readme_doc_file(checkout_path)
-        if not readme:
-            raise Exception("No role readme found.")
-        readme_html = markup_utils.get_html(readme)
-
-        galaxy_info = role_meta.get('galaxy_info', {})
         new_full_metadata = {
             'imported': datetime.datetime.now().isoformat(),
             'clone_url': clone_url,
-            'tags': role_tags,
+            'tags': galaxy_info["galaxy_tags"],
             'commit': github_commit,
             'github_repo': github_repo,
             'github_reference': github_reference,
-            'issue_tracker_url': clone_url + '/issues',
-            'dependencies': [],
+            'issue_tracker_url': galaxy_info["issue_tracker_url"] or clone_url + "/issues",
+            'dependencies': result["metadata"]["dependencies"],
             'versions': [],
-            'description': galaxy_info.get('description', ''),
-            'license': galaxy_info.get('galaxy_info', {}).get('license', ''),
-            'readme': readme,
-            'readme_html': readme_html
+            'description': galaxy_info["description"] or "",
+            'license': galaxy_info["license"] or "",
+            'min_ansible_version': galaxy_info["min_ansible_version"] or "",
+            'min_ansible_container_version': galaxy_info["min_ansible_container_version"] or "",
+            'platforms': galaxy_info["platforms"],
+            'readme': result["readme_file"],
+            'readme_html': result["readme_html"]
         }
 
         # Make the object
