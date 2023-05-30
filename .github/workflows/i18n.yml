@@ -1,12 +1,12 @@
 ---
-name: Update translations
+name: "[i18n] Update translations"
 
 on:
   # allow running manually
   workflow_dispatch:
   # run weekly
   schedule:
-  - cron: '30 5 * * 0'
+  - cron: '30 5 1 * *'
 
 jobs:
   i18n:
@@ -54,12 +54,16 @@ jobs:
           cd galaxy_ng
           django-admin compilemessages
 
-      - name: Commit changes
-        run: |
-          git config --global user.name 'GH Actions'
-          git config --global user.email 'gh_actions@users.noreply.github.com'
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/ansible/galaxy_ng.git
-          git add galaxy_ng/locale/
-          if git commit -m "Automated updated of i18n strings on $(date +'%Y-%m-%d')"; then
-            git push --set-upstream origin
-          fi
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Automated updated of i18n strings on ${{ env.NOW }}
+          body: |
+            No-Issue
+          title: "[i18n] Update translations ${{ env.NOW }}"
+          branch: i18n-update-translations-${{ env.NOW }}
+          base: master
