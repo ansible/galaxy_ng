@@ -6,10 +6,9 @@ from unittest.mock import patch
 
 import pytest
 from orionutils.generator import build_collection, randstr
-from pkg_resources import parse_version
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
-from ..conftest import get_hub_version, is_hub_4_5
+from ..conftest import is_hub_4_5
 
 from ..utils import (
     CapturingGalaxyError,
