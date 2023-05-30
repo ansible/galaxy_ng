@@ -5,11 +5,10 @@ See: https://issues.redhat.com/browse/AAH-1268
 """
 import pytest
 from orionutils.generator import build_collection
-from pkg_resources import parse_version
 
 from galaxykit.collections import upload_artifact
 from galaxykit.utils import wait_for_task as gk_wait_for_task
-from ..conftest import get_hub_version
+from ..conftest import is_hub_4_5
 from ..constants import USERNAME_PUBLISHER
 from ..utils import (
     copy_collection_version,
@@ -80,11 +79,8 @@ def test_move_collection_version(ansible_config, galaxy_client):
     assert ckey not in before['published']
 
     # Certify and check the response...
-    hub_version = get_hub_version(ansible_config)
-    very_old = False
-    if parse_version(hub_version) < parse_version('4.6'):
-        very_old = True
-    cert_result = set_certification(api_client, artifact, very_old=very_old)
+    hub_4_5 = is_hub_4_5(ansible_config)
+    cert_result = set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     assert cert_result['namespace']['name'] == artifact.namespace
     assert cert_result['name'] == artifact.name

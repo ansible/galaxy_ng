@@ -3,9 +3,8 @@ import logging
 
 import attr
 import pytest
-from pkg_resources import parse_version
 
-from ..conftest import get_hub_version
+from ..conftest import is_hub_4_5
 from ..utils import ansible_galaxy, build_collection, get_client, set_certification
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -70,11 +69,8 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
     if retcode == 0:
         config = ansible_config("partner_engineer")
         client = get_client(config)
-        hub_version = get_hub_version(ansible_config)
-        very_old = False
-        if parse_version(hub_version) < parse_version('4.6'):
-            very_old = True
-        set_certification(client, artifact2, very_old=very_old)
+        hub_4_5 = is_hub_4_5(ansible_config)
+        set_certification(client, artifact2, hub_4_5=hub_4_5)
 
         pid = ansible_galaxy(
             f"collection install -vvv --ignore-cert \

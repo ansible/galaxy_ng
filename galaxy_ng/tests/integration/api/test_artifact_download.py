@@ -5,9 +5,8 @@ from unittest.mock import patch
 
 import pytest
 from orionutils.generator import build_collection, randstr
-from pkg_resources import parse_version
 
-from ..conftest import get_hub_version
+from ..conftest import is_hub_4_5
 from ..constants import USERNAME_PUBLISHER
 from ..utils import (
     CapturingGalaxyError,
@@ -47,11 +46,8 @@ def test_download_artifact(ansible_config, upload_artifact):
             resp = wait_for_task(api_client, resp)
             assert resp["state"] == "completed"
 
-    hub_version = get_hub_version(ansible_config)
-    very_old = False
-    if parse_version(hub_version) < parse_version('4.6'):
-        very_old = True
-    set_certification(api_client, artifact, very_old=very_old)
+    hub_4_5 = is_hub_4_5(ansible_config)
+    set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     # download collection
     config = ansible_config("basic_user")

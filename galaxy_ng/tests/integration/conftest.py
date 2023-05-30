@@ -370,12 +370,8 @@ def published(ansible_config, artifact):
     )
 
     # certify
-    hub_version = get_hub_version(ansible_config)
-    very_old = False
-    if parse_version(hub_version) < parse_version('4.6'):
-        very_old = True
-
-    set_certification(api_client, artifact, very_old=very_old)
+    hub_4_5 = is_hub_4_5(ansible_config)
+    set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     return artifact
 
@@ -401,11 +397,8 @@ def certifiedv2(ansible_config, artifact):
     )
 
     # certify v1
-    hub_version = get_hub_version(ansible_config)
-    very_old = False
-    if parse_version(hub_version) < parse_version('4.6'):
-        very_old = True
-    set_certification(api_client, artifact, very_old=very_old)
+    hub_4_5 = is_hub_4_5(ansible_config)
+    set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -423,11 +416,7 @@ def certifiedv2(ansible_config, artifact):
     )
 
     # certify newer version
-    hub_version = get_hub_version(ansible_config)
-    very_old = False
-    if parse_version(hub_version) < parse_version('4.6'):
-        very_old = True
-    set_certification(api_client, artifact2, very_old=very_old)
+    set_certification(api_client, artifact2, hub_4_5=hub_4_5)
 
     return (artifact, artifact2)
 
@@ -453,11 +442,8 @@ def uncertifiedv2(ansible_config, artifact):
     )
 
     # certify v1
-    hub_version = get_hub_version(ansible_config)
-    very_old = False
-    if parse_version(hub_version) < parse_version('4.6'):
-        very_old = True
-    set_certification(api_client, artifact, very_old=very_old)
+    hub_4_5 = is_hub_4_5(ansible_config)
+    set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -822,3 +808,8 @@ def min_hub_version(ansible_config, spec):
 def max_hub_version(ansible_config, spec):
     version = get_hub_version(ansible_config)
     return Requirement.parse(f"galaxy_ng>{spec}").specifier.contains(version)
+
+
+def is_hub_4_5(ansible_config):
+    hub_version = get_hub_version(ansible_config)
+    return parse_version(hub_version) < parse_version('4.6')
