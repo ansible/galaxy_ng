@@ -13,6 +13,23 @@ Changelog
 
 .. towncrier release notes start
 
+4.6.6 (2023-05-29)
+==================
+
+Bugfixes
+--------
+
+- Ensure that container deletion removes associated artifacts and content.
+  `AAH-2024 <https://issues.redhat.com/browse/AAH-2024>`_
+- Fix container registry auth when running with keycloak.
+  `AAH-2075 <https://issues.redhat.com/browse/AAH-2075>`_
+- Fix container push update permission
+  `AAH-2327 <https://issues.redhat.com/browse/AAH-2327>`_
+
+
+----
+
+
 4.6.5 (2023-04-20)
 ==================
 
