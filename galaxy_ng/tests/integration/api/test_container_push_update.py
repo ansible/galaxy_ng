@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import pytest
 
 from galaxy_ng.tests.integration.utils import get_client
+from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
 
 
 @pytest.mark.parametrize(
@@ -19,19 +20,16 @@ from galaxy_ng.tests.integration.utils import get_client
     ],
 )
 @pytest.mark.standalone_only
-@pytest.mark.this
 @pytest.mark.min_hub_version("4.7.1")
 @pytest.mark.min_hub_version("4.6.6")
 def test_can_update_container_push(ansible_config, require_auth):
     config = ansible_config("admin")
     container_engine = config["container_engine"]
-    # Pull alpine image
-    subprocess.check_call([container_engine, "pull", "alpine"])
     url = config['url']
     parsed_url = urlparse(url)
     cont_reg = parsed_url.netloc
-    # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine:latest"])
+    # Pull alpine image
+    pull_and_tag_test_image(container_engine, cont_reg)
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",

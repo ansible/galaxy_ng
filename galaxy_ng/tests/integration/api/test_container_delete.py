@@ -5,6 +5,9 @@ import pytest
 from ..utils import get_client, wait_for_task
 from ansible.galaxy.api import GalaxyError
 
+from ..utils.iqe_utils import pull_and_tag_test_image
+
+
 # this is to be enabled when https://github.com/ansible/galaxy_ng/pull/1627
 # is merged
 
@@ -13,7 +16,6 @@ from ansible.galaxy.api import GalaxyError
 @pytest.mark.min_hub_version("4.7dev")
 def test_delete_ee_and_content(ansible_config):
     config = ansible_config("admin")
-    api_prefix = config.get("api_prefix").rstrip("/")
 
     container_engine = config["container_engine"]
     url = config['url']
@@ -21,9 +23,7 @@ def test_delete_ee_and_content(ansible_config):
     cont_reg = parsed_url.netloc
 
     # Pull alpine image
-    subprocess.check_call([container_engine, "pull", "alpine"])
-    # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine:latest"])
+    pull_and_tag_test_image(container_engine, cont_reg)
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
@@ -101,11 +101,8 @@ def test_shared_content_is_not_deleted(ansible_config):
     url = config['url']
     parsed_url = urlparse(url)
     cont_reg = parsed_url.netloc
-
     # Pull alpine image
-    subprocess.check_call([container_engine, "pull", "alpine"])
-    # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine1:latest"])
+    image = pull_and_tag_test_image(container_engine, cont_reg, "alpine1:latest")
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
            f"{config['password']}", f"{config['url'].split(api_prefix)[0]}"]
@@ -121,7 +118,7 @@ def test_shared_content_is_not_deleted(ansible_config):
     subprocess.check_call(cmd)
 
     # Copy 'alpine1' and rename to 'alpine2'
-    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine2:latest"])
+    subprocess.check_call([container_engine, "tag", image, f"{cont_reg}/alpine2:latest"])
     cmd = [container_engine, "push", f"{cont_reg}/alpine2:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")

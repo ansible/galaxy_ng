@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import pytest
 
 from galaxy_ng.tests.integration.utils import get_client
+from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
 from galaxykit.container_images import get_container
 
 
@@ -41,9 +42,7 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
     container_engine = config["container_engine"]
 
     # Pull alpine image
-    subprocess.check_call([container_engine, "pull", "alpine"])
-    # Tag the image
-    subprocess.check_call([container_engine, "tag", "alpine", f"{cont_reg}/alpine:latest"])
+    pull_and_tag_test_image(container_engine, cont_reg)
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
@@ -54,7 +53,6 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
 
     # Push image to local registry
     cmd = [container_engine, "push", f"{cont_reg}/alpine:latest"]
-
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)

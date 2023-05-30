@@ -1,5 +1,6 @@
 """Utility functions for AH tests."""
 import os
+import subprocess
 from unittest.mock import patch
 
 from galaxykit import GalaxyClient
@@ -11,6 +12,8 @@ from ansible.galaxy.api import GalaxyAPI
 from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
+
+from galaxykit.utils import GalaxyClientError
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +67,9 @@ client_cache = {}
 
 
 class GalaxyKitClient:
-    def __init__(self, ansible_config, custom_config=None):
+    def __init__(self, ansible_config, custom_config=None, basic_token=None):
         self.config = ansible_config if not custom_config else custom_config
+        self._basic_token = basic_token
 
     def gen_authorized_client(
         self,
@@ -115,6 +119,7 @@ class GalaxyKitClient:
             else:
                 url = config.get("url")
                 if isinstance(role, str):
+                    self._basic_token = True if is_ephemeral_env() else basic_token
                     profile_config = self.config(role)
                     user = profile_config.get_profile_data()
                     if profile_config.get("auth_url"):
@@ -122,7 +127,7 @@ class GalaxyKitClient:
                     if token is None:
                         token = get_standalone_token(
                             user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
-                            basic_token=basic_token
+                            basic_token=self._basic_token
                         )
 
                     auth = {
@@ -223,6 +228,36 @@ def is_sync_testing():
 def is_dev_env_standalone():
     dev_env_standalone = os.getenv("DEV_ENV_STANDALONE", True)
     return dev_env_standalone in ('true', 'True', 1, '1', True)
+
+
+def avoid_docker_limit_rate():
+    avoid_limit_rate = os.getenv("AVOID_DOCKER_LIMIT_RATE", False)
+    return avoid_limit_rate in ('true', 'True', 1, '1', True)
+
+
+def pull_and_tag_test_image(container_engine, registry, tag=None):
+    image = "alpine"
+    tag = "alpine:latest" if tag is None else tag
+    if avoid_docker_limit_rate():
+        image = "quay.io/libpod/alpine"
+    subprocess.check_call([container_engine, "pull", image])
+    subprocess.check_call(
+        [container_engine, "tag", image,
+         f"{registry}/{tag}"])
+    return image
+
+
+def push_image_with_retry(client, image):
+    try:
+        client.push_image(image)
+    except GalaxyClientError as e:
+        if "retcode 1" in e.response:
+            logger.debug("Image push failed. Clearing cache and retrying.")
+            subprocess.check_call([client.container_client.engine,
+                                   "system", "prune", "-a", "--volumes", "-f"])
+            client.push_image(image)
+        else:
+            raise e
 
 
 def get_all_collections(api_client, repo):
