@@ -6,8 +6,10 @@ from unittest.mock import patch
 
 import pytest
 from orionutils.generator import build_collection, randstr
+from pkg_resources import parse_version
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
+from ..conftest import get_hub_version
 
 from ..utils import (
     CapturingGalaxyError,
@@ -63,6 +65,9 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
     # inbound repos aren't created anymore. This will create one to verify that they still
     # work on legacy clients
     if use_distribution:
+        hub_version = get_hub_version(ansible_config)
+        if parse_version(hub_version) < parse_version('4.6'):
+            pytest.skip(f"Hub version is {hub_version}")
         admin_client = get_client(ansible_config(profile="admin"))
         distros = admin_client("pulp/api/v3/distributions/ansible/"
                                f"ansible/?name=inbound-{artifact.namespace}")
@@ -93,6 +98,7 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
             assert resp["state"] == "completed"
 
 
+@pytest.mark.min_hub_version("4.6dev")
 def test_validated_publish(ansible_config, artifact, upload_artifact):
     """
     Publish a collection to the validated repo.
@@ -324,6 +330,7 @@ def test_long_field_values(ansible_config, upload_artifact, field):
     ids=lambda _: _[0],
 )
 @pytest.mark.importer
+@pytest.mark.min_hub_version("4.6dev")
 def test_ansible_requires(ansible_config, upload_artifact, spec):
     """
     Test handling of POSTs to the artifact endpoint neglecting to submit a file.

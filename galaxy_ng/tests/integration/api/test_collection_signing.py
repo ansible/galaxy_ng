@@ -445,9 +445,12 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     staging_has_gpgkey = False
     for distribution in distributions["data"]:
         if distribution["name"] == "staging":
-            if distribution["repository"]["gpgkey"]:
-                staging_has_gpgkey = True
-                break
+            try:
+                if distribution["repository"]["gpgkey"]:
+                    staging_has_gpgkey = True
+                    break
+            except KeyError:
+                pass
 
     if not staging_has_gpgkey:
         pytest.skip("Staging repository doesn't have a gpgkey")

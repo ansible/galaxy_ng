@@ -161,6 +161,7 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
 # /api/automation-hub/_ui/v1/distributions/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
+@pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_distributions(ansible_config):
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -192,6 +193,7 @@ def test_api_ui_v1_distributions(ansible_config):
 # /api/automation-hub/_ui/v1/distributions/{pulp_id}/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
+@pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_distributions_by_id(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -222,6 +224,7 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/execution-environments/registries/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
+@pytest.mark.this
 def test_api_ui_v1_execution_environments_registries(ansible_config):
 
     cfg = ansible_config('ee_admin')
@@ -316,6 +319,7 @@ def local_container():
 # /api/automation-hub/_ui/v1/feature-flags/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
+@pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_feature_flags(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -536,6 +540,7 @@ def test_api_ui_v1_me(ansible_config):
 # /api/automation-hub/_ui/v1/my-namespaces/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
+@pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_my_namespaces(ansible_config):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
@@ -593,6 +598,7 @@ def test_api_ui_v1_my_namespaces(ansible_config):
 # /api/automation-hub/_ui/v1/my-namespaces/{name}/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
+@pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_my_namespaces_name(ansible_config):
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
@@ -706,6 +712,7 @@ def test_api_ui_v1_collection_detail_view(ansible_config, published):
 # /api/automation-hub/_ui/v1/settings/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
+@pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_settings(ansible_config):
 
     cfg = ansible_config('basic_user')

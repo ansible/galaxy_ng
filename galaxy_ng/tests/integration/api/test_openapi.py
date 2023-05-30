@@ -70,6 +70,7 @@ def test_galaxy_openapi_validation(ansible_config):
 
 
 @pytest.mark.openapi
+@pytest.mark.min_hub_version("4.6dev")
 def test_pulp_openapi_has_variables(ansible_config):
     """Tests whether openapi.json has valid path names for pulp"""
 
