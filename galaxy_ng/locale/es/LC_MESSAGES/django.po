@@ -134,7 +134,7 @@ msgstr "No tiene permisos para modificar súper usuarios."
 #: app/api/ui/serializers/user.py:153
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
-msgstr "El nombre del grupo=%s, id=%s no existe"
+msgstr "El nombre del grupo=%(name)s, id=%(id)s no existe"
 
 #: app/api/ui/views/feature_flags.py:50
 msgid ""
