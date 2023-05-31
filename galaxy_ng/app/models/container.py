@@ -1,25 +1,10 @@
 from django.db import models
 from pulpcore.plugin import models as pulp_models
-# from pulp_container.app import models as container_models
+from pulp_container.app import models as container_models
 from django_lifecycle import LifecycleModelMixin
 
 from galaxy_ng.app.access_control import mixins
 
-
-'''
-try:
-    from pulp_container.app import models as container_models
-except Exception as e:
-    class ContainerModelsFake:
-        @property
-        def ContainerDistribution(self):
-            pass
-        @property
-        def ContainerNamespace(self):
-            pass
-    container_models = ContainerModelsFake()
-'''
-from pulp_container.app import models as container_models
 
 
 class ContainerDistribution(
