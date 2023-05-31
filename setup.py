@@ -125,7 +125,8 @@ requirements = [
     "django-auth-ldap==4.0.0",
     "insights_analytics_collector>=0.3.0",
     "boto3",
-    "distro"
+    "distro",
+    #"django-currentuser"
 ]
 
 

@@ -4,11 +4,11 @@ from django.utils.translation import gettext_lazy as _
 
 from rest_framework.exceptions import ValidationError
 
-from pulpcore.plugin.util import (
-    assign_role,
-    remove_role,
-    get_groups_with_perms_attached_roles,
-)
+#from pulpcore.plugin.util import (
+#    assign_role,
+#    remove_role,
+#    get_groups_with_perms_attached_roles,
+#)
 
 from django_lifecycle import hook
 
@@ -18,6 +18,8 @@ class GroupModelPermissionsMixin:
 
     @property
     def groups(self):
+        from pulpcore.plugin.util import get_groups_with_perms_attached_roles
+
         return get_groups_with_perms_attached_roles(
             self, include_model_permissions=False, for_concrete_model=True)
 
@@ -30,6 +32,10 @@ class GroupModelPermissionsMixin:
         # Can't add permissions to objects that haven't been
         # saved. When creating new objects, save group data to _groups where it
         # can be picked up by the post save hook.
+
+        from pulpcore.plugin.util import assign_role
+        from pulpcore.plugin.util import remove_role
+
         if self._state.adding:
             self._groups = groups
         else:

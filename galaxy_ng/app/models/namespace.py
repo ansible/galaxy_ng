@@ -6,7 +6,7 @@ from django.db import transaction
 from django_lifecycle import LifecycleModel
 from django.conf import settings
 
-from pulpcore.plugin.util import get_url
+# from pulpcore.plugin.util import get_url
 
 from pulp_ansible.app.models import AnsibleNamespaceMetadata
 
@@ -56,6 +56,9 @@ class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin):
     def avatar_url(self):
         # TODO: remove this once we can fix the content app on CRC
         # the content app in crc doesn't work
+
+        from pulpcore.plugin.util import get_url
+
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:
             data = self.last_created_pulp_metadata
             if data and data.avatar_sha256:
