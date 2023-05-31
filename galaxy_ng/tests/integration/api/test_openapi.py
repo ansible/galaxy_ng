@@ -171,4 +171,6 @@ def test_openapi_bindings_generation(ansible_config):
             if "toomanyrequests" in str(e):
                 pytest.skip("Docker error: toomanyrequests: You have reached your pull rate "
                             "limit.")
+            else:
+                raise e
         assert os.path.exists(os.path.join(generator_checkout, 'galaxy_ng-client'))
