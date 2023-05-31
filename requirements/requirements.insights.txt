@@ -94,6 +94,7 @@ django==4.2.1
     # via
     #   django-auth-ldap
     #   django-automated-logging
+    #   django-currentuser
     #   django-filter
     #   django-guid
     #   django-import-export
@@ -108,6 +109,8 @@ django==4.2.1
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
 django-automated-logging @ git+https://github.com/jctanner/django-automated-logging@DJANGO_4x
+    # via galaxy-ng (setup.py)
+django-currentuser @ git+https://github.com/zsoldosp/django-currentuser@master
     # via galaxy-ng (setup.py)
 django-filter==23.2
     # via pulpcore
