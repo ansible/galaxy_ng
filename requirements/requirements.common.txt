@@ -36,10 +36,7 @@ attrs==22.2.0
     #   galaxy-importer
     #   jsonschema
 backoff==2.2.1
-    # via
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-    #   pulpcore
+    # via pulpcore
 bindep==2.11.0
     # via ansible-builder
 black==23.3.0
@@ -81,11 +78,6 @@ defusedxml==0.7.1
     #   odfpy
     #   python3-openid
     #   social-auth-core
-deprecated==1.2.14
-    # via
-    #   opentelemetry-api
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
 diff-match-patch==20230430
     # via django-import-export
 distro==1.8.0
@@ -166,20 +158,12 @@ gitdb==4.0.10
     # via gitpython
 gitpython==3.1.31
     # via pulp-ansible
-googleapis-common-protos==1.59.0
-    # via
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-grpcio==1.54.2
-    # via opentelemetry-exporter-otlp-proto-grpc
 gunicorn==20.1.0
     # via pulpcore
 idna==3.4
     # via
     #   requests
     #   yarl
-importlib-metadata==6.0.1
-    # via opentelemetry-api
 inflection==0.5.1
     # via drf-spectacular
 insights-analytics-collector==0.3.2
@@ -228,59 +212,6 @@ odfpy==1.4.1
     # via tablib
 openpyxl==3.1.2
     # via tablib
-opentelemetry-api==1.18.0
-    # via
-    #   opentelemetry-distro
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-    #   opentelemetry-instrumentation
-    #   opentelemetry-instrumentation-django
-    #   opentelemetry-instrumentation-wsgi
-    #   opentelemetry-sdk
-opentelemetry-distro[otlp]==0.39b0
-    # via pulpcore
-opentelemetry-exporter-otlp==1.18.0
-    # via opentelemetry-distro
-opentelemetry-exporter-otlp-proto-common==1.18.0
-    # via
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-exporter-otlp-proto-grpc==1.18.0
-    # via opentelemetry-exporter-otlp
-opentelemetry-exporter-otlp-proto-http==1.18.0
-    # via
-    #   opentelemetry-exporter-otlp
-    #   pulpcore
-opentelemetry-instrumentation==0.39b0
-    # via
-    #   opentelemetry-distro
-    #   opentelemetry-instrumentation-django
-    #   opentelemetry-instrumentation-wsgi
-opentelemetry-instrumentation-django==0.39b0
-    # via pulpcore
-opentelemetry-instrumentation-wsgi==0.39b0
-    # via
-    #   opentelemetry-instrumentation-django
-    #   pulpcore
-opentelemetry-proto==1.18.0
-    # via
-    #   opentelemetry-exporter-otlp-proto-common
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-sdk==1.18.0
-    # via
-    #   opentelemetry-distro
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-semantic-conventions==0.39b0
-    # via
-    #   opentelemetry-instrumentation-django
-    #   opentelemetry-instrumentation-wsgi
-    #   opentelemetry-sdk
-opentelemetry-util-http==0.39b0
-    # via
-    #   opentelemetry-instrumentation-django
-    #   opentelemetry-instrumentation-wsgi
 packaging==23.1
     # via
     #   ansible-core
@@ -307,10 +238,7 @@ platformdirs==3.5.0
 prometheus-client==0.16.0
     # via django-prometheus
 protobuf==4.22.1
-    # via
-    #   googleapis-common-protos
-    #   opentelemetry-proto
-    #   pulpcore
+    # via pulpcore
 psycopg[binary]==3.1.9
     # via pulpcore
 psycopg-binary==3.1.9
@@ -321,7 +249,7 @@ pulp-container==2.15.0
     # via galaxy-ng (setup.py)
 pulp-glue==0.19.1
     # via pulpcore
-pulpcore==3.27.0
+pulpcore==3.25.1
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -383,7 +311,6 @@ requests==2.30.0
     # via
     #   galaxy-importer
     #   insights-analytics-collector
-    #   opentelemetry-exporter-otlp-proto-http
     #   pulp-glue
     #   pyjwkest
     #   requests-oauthlib
@@ -436,7 +363,6 @@ types-setuptools==67.7.0.2
 typing-extensions==4.5.0
     # via
     #   async-lru
-    #   opentelemetry-sdk
     #   psycopg
 uritemplate==4.1.1
     # via drf-spectacular
@@ -456,10 +382,6 @@ webencodings==0.5.1
     # via bleach
 whitenoise==6.4.0
     # via pulpcore
-wrapt==1.15.0
-    # via
-    #   deprecated
-    #   opentelemetry-instrumentation
 xlrd==2.0.1
     # via tablib
 xlwt==1.3.0
@@ -470,8 +392,6 @@ yarl==1.8.2
     # via
     #   aiohttp
     #   pulpcore
-zipp==3.15.0
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
