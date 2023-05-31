@@ -21,17 +21,17 @@ msgstr "No se ha encontrado el espacio de nombres en el nombre del archivo."
 
 #: app/access_control/access_policy.py:398
 msgid "Distribution does not exist."
-msgstr "La distribución  no existe."
+msgstr "La distribución no existe."
 
 #: app/access_control/access_policy.py:412
 msgid "Namespace not found."
-msgstr "No se encontró el nombre del espacio."
+msgstr "No se encontró el espacio de nombres."
 
 #: app/access_control/access_policy.py:481
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
-msgstr "Las firmas son necesarias para añadir colecciones a cualquier repositorio \"aprobado\" cuando GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL está activado."
+msgstr "Se requieren firmas para agregar colecciones a cualquier repositorio 'aprobado' cuando GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL esté habilitado."
 
 #: app/access_control/access_policy.py:534 app/api/v3/views/sync.py:49
 msgid ""
@@ -41,7 +41,7 @@ msgstr "No se permite sincronizar el contenido de galaxy.ansible.com sin especif
 
 #: app/access_control/fields.py:17
 msgid "object_roles field is required"
-msgstr "El campo object_roles es obligatorio"
+msgstr "el campo object_roles es obligatorio"
 
 #: app/access_control/fields.py:21
 msgid "id or name field is required"
@@ -62,7 +62,7 @@ msgstr "Los grupos deben ser una lista de objetos de grupo"
 #: app/access_control/fields.py:68
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
-msgstr "El grupo name=%s, id=%s no existe"
+msgstr "El nombre del grupo=%s, id=%s no existe"
 
 #: app/access_control/fields.py:72 app/api/ui/serializers/user.py:157
 msgid "Invalid group name or ID"
@@ -83,7 +83,7 @@ msgstr "El registro seleccionado no existe."
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "Los nombres de los contenedores sólo pueden contener números alfanuméricos, \".\", \"_\", \"-\" y un máximo de un \"/\"."
+msgstr "Los nombres de los contenedores sólo pueden contener números alfanuméricos, \".\", \"_\", \"-\" y hasta una barra diagonal \"/\"."
 
 #: app/api/ui/serializers/execution_environment.py:91
 msgid "Name cannot be changed."
@@ -121,20 +121,20 @@ msgstr "El permiso 'galaxy.change_group' es necesario para cambiar un grupo de u
 
 #: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
 msgid "Must be a super user to grant super user permissions."
-msgstr "Debe ser un superusuario para conceder permisos de superusuario."
+msgstr "Debe ser un súper usuario para conceder permisos de súper usuario."
 
 #: app/api/ui/serializers/user.py:110
 msgid "Must be a super user to change another user's password."
-msgstr "Debe ser un superusuario para cambiar la contraseña de otro usuario."
+msgstr "Debe ser un súper usuario para cambiar la contraseña de otro usuario."
 
 #: app/api/ui/serializers/user.py:126
 msgid "You do not have permissions to modify super users."
-msgstr "No tiene permisos para modificar los superusuarios."
+msgstr "No tiene permisos para modificar súper usuarios."
 
 #: app/api/ui/serializers/user.py:153
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
-msgstr "El grupo name=%(name)s, id=%(id)s no existe"
+msgstr "El nombre del grupo=%s, id=%s no existe"
 
 #: app/api/ui/views/feature_flags.py:50
 msgid ""
@@ -270,7 +270,7 @@ msgstr "El nombre debe tener más de 2 caracteres"
 
 #: app/api/v3/serializers/namespace.py:115
 msgid "Name cannot begin with '_'"
-msgstr "El nombre no puede empezar por \"_\""
+msgstr "El nombre no puede empezar por '_'"
 
 #: app/api/v3/serializers/sync.py:67
 msgid "Password for proxy authentication."
@@ -368,7 +368,7 @@ msgstr "Añadir espacio de nombres"
 
 #: app/constants.py:28
 msgid "Create a new namespace."
-msgstr "Crear un nuevo espacio de nombres"
+msgstr "Crear un nuevo espacio de nombres."
 
 #: app/constants.py:30 app/constants.py:36 app/constants.py:42
 #: app/constants.py:48
@@ -381,11 +381,11 @@ msgstr "Cambiar el espacio de nombres"
 
 #: app/constants.py:34
 msgid "Edit this namespace."
-msgstr "Edita este espacio de nombres."
+msgstr "Editar este espacio de nombres."
 
 #: app/constants.py:35
 msgid "Edit any existing namespace."
-msgstr "Edite cualquier espacio de nombres existente."
+msgstr "Editar cualquier espacio de nombres existente."
 
 #: app/constants.py:39
 msgid "Delete namespace"
@@ -393,11 +393,11 @@ msgstr "Eliminar el espacio de nombres"
 
 #: app/constants.py:40
 msgid "Delete this namespace."
-msgstr "Eliminar este espacio de nombres"
+msgstr "Eliminar este espacio de nombres."
 
 #: app/constants.py:41
 msgid "Delete any existing namespace."
-msgstr "Elimina cualquier espacio de nombres existente."
+msgstr "Eliminar cualquier espacio de nombres existente."
 
 #: app/constants.py:45
 msgid "Upload to namespace"
@@ -405,11 +405,11 @@ msgstr "Subir al espacio de nombres"
 
 #: app/constants.py:46
 msgid "Upload collections to this namespace."
-msgstr "Cambiar y cargar las colecciones a los espacios de nombres."
+msgstr "Subir colecciones a este espacio de nombres."
 
 #: app/constants.py:47 app/constants.py:59
 msgid "Upload collections to any existing namespace."
-msgstr "Cargar colecciones en cualquier espacio de nombres existente."
+msgstr "Subir colecciones a cualquier espacio de nombres existente."
 
 #: app/constants.py:51
 msgid "Delete collection"
@@ -417,7 +417,7 @@ msgstr "Eliminar la colección"
 
 #: app/constants.py:52
 msgid "Delete this collection."
-msgstr "Borra esta colección."
+msgstr "Borrar esta colección."
 
 #: app/constants.py:53
 msgid "Delete any existing collection."
@@ -429,7 +429,7 @@ msgstr "Colecciones"
 
 #: app/constants.py:57
 msgid "Modify Ansible repo content"
-msgstr "Modificar el contenido del repo de Ansible"
+msgstr "Modificar el contenido del repositorio de Ansible"
 
 #: app/constants.py:58
 msgid "Modify content of this Ansible repository."
@@ -437,7 +437,7 @@ msgstr "Modificar el contenido de este repositorio Ansible."
 
 #: app/constants.py:63
 msgid "Sign collections"
-msgstr "Ver colecciones"
+msgstr "Firmar colecciones"
 
 #: app/constants.py:64
 msgid "Sign collections in this repository."
@@ -466,7 +466,7 @@ msgstr "Cambiar usuario"
 
 #: app/constants.py:76
 msgid "Edit this user."
-msgstr "Modificar este usuario"
+msgstr "Editar este usuario."
 
 #: app/constants.py:77
 msgid "Edit any existing user in the system."
@@ -478,7 +478,7 @@ msgstr "Eliminar usuario"
 
 #: app/constants.py:82
 msgid "Delete this user."
-msgstr "Eliminar este usuario"
+msgstr "Eliminar este usuario."
 
 #: app/constants.py:83
 msgid "Delete any existing user in the system."
@@ -515,7 +515,7 @@ msgstr "Cambiar de grupo"
 
 #: app/constants.py:100
 msgid "Edit this group"
-msgstr "Modificar este grupo"
+msgstr "Editar este grupo"
 
 #: app/constants.py:101
 msgid "Edit any existing group in the system."
@@ -527,7 +527,7 @@ msgstr "Eliminar grupo"
 
 #: app/constants.py:106
 msgid "Delete this group."
-msgstr "Eliminar este grupo"
+msgstr "Eliminar este grupo."
 
 #: app/constants.py:107
 msgid "Delete any group in the system."
@@ -547,11 +547,11 @@ msgstr "Ver cualquier grupo existente en el sistema."
 
 #: app/constants.py:117
 msgid "View collection remote"
-msgstr "Ver la colección a distancia"
+msgstr "Ver colección remota"
 
 #: app/constants.py:118
 msgid "View this collection remote."
-msgstr "Ver la colección a distancia"
+msgstr "Ver esta colección remota."
 
 #: app/constants.py:119
 msgid "View any collection remote existing in the system."
@@ -560,19 +560,19 @@ msgstr "Ver cualquier colección remota existente en el sistema."
 #: app/constants.py:120 app/constants.py:126 app/constants.py:132
 #: app/constants.py:138 app/constants.py:144
 msgid "Collection Remotes"
-msgstr "La colección a distancia"
+msgstr "Colecciones remotas"
 
 #: app/constants.py:123
 msgid "Add collection remote"
-msgstr "Agregar la colección a distancia"
+msgstr "Agregar colección remota"
 
 #: app/constants.py:124
 msgid "Add this collection remote."
-msgstr "Agregar la colección a distancia"
+msgstr "Agregar esta colección remota."
 
 #: app/constants.py:125
 msgid "Add any collection remote existing in the system."
-msgstr "Añade cualquier colección remota existente en el sistema."
+msgstr "Añadir cualquier colección remota existente en el sistema."
 
 #: app/constants.py:129
 msgid "Change collection remote"
@@ -580,7 +580,7 @@ msgstr "Cambiar la recogida a distancia"
 
 #: app/constants.py:130
 msgid "Edit this collection remote."
-msgstr "Eliminar el mando a distancia de la colección"
+msgstr "Editar esta colección remota."
 
 #: app/constants.py:131
 msgid "Edit any collection remote existing in the system."
@@ -588,11 +588,11 @@ msgstr "Editar cualquier colección remota existente en el sistema."
 
 #: app/constants.py:135
 msgid "Delete collection remote"
-msgstr "Eliminar el mando a distancia de la colección"
+msgstr "Eliminar colección remota"
 
 #: app/constants.py:136
 msgid "Delete this collection remote."
-msgstr "Eliminar el mando a distancia de la colección"
+msgstr "Eliminar esta colección remota."
 
 #: app/constants.py:137
 msgid "Delete any collection remote existing in the system."
@@ -604,11 +604,11 @@ msgstr "Gestionar funciones remotas"
 
 #: app/constants.py:142
 msgid "Configure who has permissions on this remote."
-msgstr "Configure quién tiene permisos en esta remota."
+msgstr "Configurar quién tiene permisos en este repositorio remoto."
 
 #: app/constants.py:143
 msgid "Configure who has permissions on any remote."
-msgstr "Configura quién tiene permisos en cualquier remoto."
+msgstr "Configurar quién tiene permisos en cualquier repositorio remoto."
 
 #: app/constants.py:147
 msgid "View Ansible repository"
@@ -620,24 +620,24 @@ msgstr "Ver este repositorio de Ansible."
 
 #: app/constants.py:149
 msgid "View any Ansible repository existing in the system."
-msgstr "Ver cualquier repositorio Ansible existente en el sistema."
+msgstr "Ver cualquier repositorio de Ansible existente en el sistema."
 
 #: app/constants.py:150 app/constants.py:156 app/constants.py:162
 #: app/constants.py:168 app/constants.py:174 app/constants.py:182
 msgid "Ansible Repository"
-msgstr "Repositorio Ansible"
+msgstr "Repositorio de Ansible"
 
 #: app/constants.py:153
 msgid "Add Ansible repository"
-msgstr "Añadir repositorio Ansible"
+msgstr "Añadir repositorio de Ansible"
 
 #: app/constants.py:154
 msgid "Add this Ansible repository."
-msgstr "Añade este repositorio Ansible."
+msgstr "Añadir este repositorio de Ansible."
 
 #: app/constants.py:155
 msgid "Add any Ansible repository existing in the system."
-msgstr "Añade cualquier repositorio Ansible existente en el sistema."
+msgstr "Añadir cualquier repositorio de Ansible existente en el sistema."
 
 #: app/constants.py:159
 msgid "Change Ansible repository"
@@ -645,23 +645,23 @@ msgstr "Cambiar el repositorio de Ansible"
 
 #: app/constants.py:160
 msgid "Change this Ansible repository."
-msgstr "Cambia este repositorio de Ansible."
+msgstr "Cambiar este repositorio de Ansible."
 
 #: app/constants.py:161
 msgid "Change any Ansible repository existing in the system."
-msgstr "Modificar cualquier repositorio Ansible existente en el sistema."
+msgstr "Cambiar cualquier repositorio de Ansible existente en el sistema."
 
 #: app/constants.py:165
 msgid "Delete Ansible repository"
-msgstr "Borrar repositorio Ansible"
+msgstr "Eliminar repositorio de Ansible"
 
 #: app/constants.py:166
 msgid "Delete this Ansible repository."
-msgstr "Eliminar este repositorio Ansible."
+msgstr "Eliminar este repositorio de Ansible."
 
 #: app/constants.py:167
 msgid "Delete any Ansible repository existing in the system."
-msgstr "Eliminar cualquier repositorio Ansible existente en el sistema."
+msgstr "Eliminar cualquier repositorio de Ansible existente en el sistema."
 
 #: app/constants.py:171
 msgid "Manage repository roles"
@@ -669,25 +669,25 @@ msgstr "Gestionar los roles del repositorio"
 
 #: app/constants.py:172
 msgid "Configure who has permissions on this repository."
-msgstr "Configure quién tiene permisos sobre este repositorio."
+msgstr "Configurar quién tiene permisos sobre este repositorio."
 
 #: app/constants.py:173
 msgid "Configure who has permissions on any repository."
-msgstr "Configure quién tiene permisos sobre cualquier repositorio."
+msgstr "Configurar quién tiene permisos sobre cualquier repositorio."
 
 #: app/constants.py:177
 msgid "Repair Ansible repository"
-msgstr "Reparar repositorio Ansible"
+msgstr "Reparar repositorio de Ansible"
 
 #: app/constants.py:178
 msgid "Repair artifacts associated with this Ansible repository."
-msgstr "Reparar artefactos asociados a este repositorio Ansible."
+msgstr "Reparar artefactos asociados a este repositorio de Ansible."
 
 #: app/constants.py:180
 msgid ""
 "Repair artifacts associated with any Ansible repository existing in the "
 "system."
-msgstr "Reparar artefactos asociados a cualquier repositorio Ansible existente en el sistema."
+msgstr "Reparar artefactos asociados a cualquier repositorio de Ansible existente en el sistema."
 
 #: app/constants.py:185
 msgid "Change container namespace permissions"
@@ -695,11 +695,11 @@ msgstr "Cambiar los permisos del espacio de nombres del contenedor"
 
 #: app/constants.py:186
 msgid "Edit permissions on this container namespace."
-msgstr "Permisos de edición en este espacio de nombres de contenedor."
+msgstr "Editar permisos en este espacio de nombres del contenedor."
 
 #: app/constants.py:187
 msgid "Edit permissions on any existing container namespace."
-msgstr "Permisos de edición en cualquier espacio de nombres de contenedor existente."
+msgstr "Editar permisos en cualquier espacio de nombres del contenedor existente."
 
 #: app/constants.py:188 app/constants.py:194 app/constants.py:200
 #: app/constants.py:206 app/constants.py:212 app/constants.py:218
@@ -713,11 +713,11 @@ msgstr "Cambiar los contenedores"
 
 #: app/constants.py:192
 msgid "Edit all objects in this container namespace."
-msgstr "Edita todos los objetos de este espacio de nombres contenedor."
+msgstr "Editar todos los objetos en este espacio de nombres del contenedor."
 
 #: app/constants.py:193
 msgid "Edit all objects in any container namespace in the system."
-msgstr "Edita todos los objetos de cualquier espacio de nombres contenedor del sistema."
+msgstr "Editar todos los objetos en cualquier espacio de nombres de contenedor en el sistema."
 
 #: app/constants.py:197
 msgid "Change image tags"
@@ -725,11 +725,11 @@ msgstr "Cambiar las etiquetas de las imágenes"
 
 #: app/constants.py:198
 msgid "Edit an image's tag in this container namespace"
-msgstr "Editar la etiqueta de una imagen en este espacio de nombres contenedor"
+msgstr "Editar la etiqueta de una imagen en este espacio de nombres del contenedor"
 
 #: app/constants.py:199
 msgid "Edit an image's tag in any container namespace the system."
-msgstr "Edita la etiqueta de una imagen en cualquier espacio de nombres de contenedor del sistema."
+msgstr "Editar la etiqueta de una imagen en cualquier espacio de nombres del contenedor."
 
 #: app/constants.py:203
 msgid "Create new containers"
@@ -737,7 +737,7 @@ msgstr "Crear nuevo grupo de contenedores"
 
 #: app/constants.py:205
 msgid "Add new containers to the system."
-msgstr "Añade nuevos contenedores al sistema."
+msgstr "Añadir nuevos contenedores al sistema."
 
 #: app/constants.py:209
 msgid "Delete container repository"
@@ -745,7 +745,7 @@ msgstr "Eliminar el repositorio de contenedores"
 
 #: app/constants.py:210
 msgid "Delete this container repository."
-msgstr "Eliminar el repositorio de contenedores"
+msgstr "Eliminar este repositorio de contenedores."
 
 #: app/constants.py:211
 msgid "Delete any existing container repository in the system."
@@ -757,11 +757,11 @@ msgstr "Enviar a los contenedores existentes"
 
 #: app/constants.py:216
 msgid "Push to this namespace."
-msgstr "Empujar a este espacio de nombres."
+msgstr "Enviar a este espacio de nombres."
 
 #: app/constants.py:217
 msgid "Push to any existing namespace in the system."
-msgstr "Empujar a cualquier espacio de nombres existente en el sistema."
+msgstr "Enviar a cualquier espacio de nombres existente en el sistema."
 
 #: app/constants.py:221
 msgid "Push new containers"
@@ -769,23 +769,23 @@ msgstr "Enviar nuevos contenedores"
 
 #: app/constants.py:222
 msgid "Push a new container to this namespace."
-msgstr "Añade un nuevo contenedor a este espacio de nombres."
+msgstr "Enviar un nuevo contenedor a este espacio de nombres."
 
 #: app/constants.py:223
 msgid "Push a new containers to any namespace in the system."
-msgstr "Introduce un nuevo contenedor en cualquier espacio de nombres del sistema."
+msgstr "Enviar un nuevo contenedor a cualquier espacio de nombres del sistema."
 
 #: app/constants.py:227
 msgid "Manage container namespace roles"
-msgstr "Eliminar el espacio de nombres del contenedor"
+msgstr "Administrar roles de espacio de nombres de contenedor"
 
 #: app/constants.py:228
 msgid "Manage container namespace roles."
-msgstr "Eliminar el espacio de nombres del contenedor"
+msgstr "Administrar roles de espacio de nombres de contenedor."
 
 #: app/constants.py:229
 msgid "Manage container namespace roles existing in the system."
-msgstr "Gestionar los roles de espacio de nombres de contenedor existentes en el sistema."
+msgstr "Administrar roles de espacio de nombres de contenedor existentes en el sistema."
 
 #: app/constants.py:233
 msgid "Add remote registry"
@@ -797,7 +797,7 @@ msgstr "Añadir registro remoto al sistema."
 
 #: app/constants.py:236 app/constants.py:242
 msgid "Container Registry Remotes"
-msgstr "Registro de contenedores remoto"
+msgstr "Remotos del registro de contenedores"
 
 #: app/constants.py:239
 msgid "Change remote registry"
@@ -805,7 +805,7 @@ msgstr "Cambiar el registro remoto"
 
 #: app/constants.py:240
 msgid "Edit this remote registry."
-msgstr "Editar el registro remoto"
+msgstr "Editar este registro remoto."
 
 #: app/constants.py:241
 msgid "Change any remote registry existing in the system."
@@ -817,7 +817,7 @@ msgstr "Eliminar el registro remoto"
 
 #: app/constants.py:246
 msgid "Delete this remote registry."
-msgstr "Eliminar el registro remoto"
+msgstr "Eliminar este registro remoto."
 
 #: app/constants.py:247
 msgid "Delete any remote registry existing in the system."
@@ -829,7 +829,7 @@ msgstr "Cambiar tarea"
 
 #: app/constants.py:252
 msgid "Edit this task."
-msgstr "Editar esta tarea"
+msgstr "Editar esta tarea."
 
 #: app/constants.py:253
 msgid "Edit any task existing in the system."
@@ -845,7 +845,7 @@ msgstr "Eliminar tarea"
 
 #: app/constants.py:258
 msgid "Delete this task."
-msgstr "Eliminar este tarea"
+msgstr "Eliminar esta tarea."
 
 #: app/constants.py:259
 msgid "Delete any task existing in the system."
