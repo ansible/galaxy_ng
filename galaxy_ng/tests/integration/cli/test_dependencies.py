@@ -4,6 +4,7 @@ import logging
 import attr
 import pytest
 
+from ..conftest import is_hub_4_5
 from ..utils import ansible_galaxy, build_collection, get_client, set_certification
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -20,6 +21,7 @@ class DependencySpec:
 
 
 @pytest.mark.cli
+# @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.parametrize(
     "params",
     (
@@ -67,7 +69,8 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
     if retcode == 0:
         config = ansible_config("partner_engineer")
         client = get_client(config)
-        set_certification(client, artifact2)
+        hub_4_5 = is_hub_4_5(ansible_config)
+        set_certification(client, artifact2, hub_4_5=hub_4_5)
 
         pid = ansible_galaxy(
             f"collection install -vvv --ignore-cert \

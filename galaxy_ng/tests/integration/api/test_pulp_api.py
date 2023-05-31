@@ -14,6 +14,7 @@ REGEX_40X = r"HTTP Code: 40\d"
 
 @pytest.mark.standalone_only
 @pytest.mark.pulp_api
+@pytest.mark.min_hub_version("4.6dev")
 def test_pulp_api_redirect(ansible_config, artifact):
     """Test that /pulp/ is redirecting to /api/galaxy/pulp/"""
 
@@ -48,6 +49,7 @@ def test_pulp_api_redirect(ansible_config, artifact):
     ],
 )
 @pytest.mark.pulp_api
+@pytest.mark.min_hub_version("4.6dev")
 def test_pulp_endpoint_readonly(ansible_config, artifact, url):
     """Ensure authenticated user has readonly access to view"""
 
@@ -82,6 +84,7 @@ TEST_ROLE_NAME = "test_role_".join(random.choices(string.ascii_lowercase, k=10))
 )
 @pytest.mark.pulp_api
 @pytest.mark.standalone_only
+@pytest.mark.min_hub_version("4.6dev")
 def test_pulp_roles_endpoint(ansible_config, require_auth):
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")

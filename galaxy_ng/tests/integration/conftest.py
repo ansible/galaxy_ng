@@ -74,7 +74,6 @@ x_repo_search: tests verifying cross-repo search endpoint
 repositories: tests verifying custom repositories
 """
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -219,7 +218,8 @@ class AnsibleConfigFixture(dict):
     def _set_profile_from_vault(self, loader, profile, param):
         param_vault_path = self.PROFILES[profile][param]["vault_path"]
         param_vault_key = self.PROFILES[profile][param]["vault_key"]
-        param_from_vault = loader.get_value_from_vault(path=param_vault_path, key=param_vault_key)
+        param_from_vault = loader.get_value_from_vault(path=param_vault_path,
+                                                       key=param_vault_key)
         self.PROFILES[profile][param] = param_from_vault
 
     def __repr__(self):
@@ -353,7 +353,6 @@ def get_ansible_config_sync():
 
 @pytest.fixture(scope="function")
 def published(ansible_config, artifact):
-
     # make sure the expected namespace exists ...
     config = ansible_config("partner_engineer")
     api_prefix = config.get("api_prefix")
@@ -371,7 +370,8 @@ def published(ansible_config, artifact):
     )
 
     # certify
-    set_certification(api_client, artifact)
+    hub_4_5 = is_hub_4_5(ansible_config)
+    set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     return artifact
 
@@ -397,7 +397,8 @@ def certifiedv2(ansible_config, artifact):
     )
 
     # certify v1
-    set_certification(api_client, artifact)
+    hub_4_5 = is_hub_4_5(ansible_config)
+    set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -415,7 +416,7 @@ def certifiedv2(ansible_config, artifact):
     )
 
     # certify newer version
-    set_certification(api_client, artifact2)
+    set_certification(api_client, artifact2, hub_4_5=hub_4_5)
 
     return (artifact, artifact2)
 
@@ -441,7 +442,8 @@ def uncertifiedv2(ansible_config, artifact):
     )
 
     # certify v1
-    set_certification(api_client, artifact)
+    hub_4_5 = is_hub_4_5(ansible_config)
+    set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -573,7 +575,10 @@ def get_galaxy_client(ansible_config):
 
 
 def pytest_sessionstart(session):
-    hub_version = get_hub_version(get_ansible_config())
+    ansible_config = get_ansible_config()
+    hub_version = get_hub_version(ansible_config)
+    if not is_standalone() and not is_ephemeral_env() and not is_dev_env_standalone():
+        set_test_data(ansible_config, hub_version)
     logger.debug(f"Running tests against hub version {hub_version}")
 
 
@@ -696,6 +701,78 @@ def set_credentials_when_not_docker_pah(url):
     AnsibleConfigFixture.PROFILES["admin"]["token"] = token
 
 
+def set_test_data(ansible_config, hub_version):
+    role = "admin"
+    gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
+    gc.create_group("ns_group_for_tests")
+    gc.create_group("system:partner-engineers")
+    gc.create_group("ee_group_for_tests")
+    pe_roles = [
+        "galaxy.group_admin",
+        "galaxy.user_admin",
+        "galaxy.collection_admin",
+    ]
+    gc.get_or_create_user(username="iqe_normal_user", password="Th1sP4ssd", group=None)
+    gc.get_or_create_user(username="org-admin", password="Th1sP4ssd", group=None)
+    gc.get_or_create_user(username="jdoe", password="Th1sP4ssd", group=None)
+    gc.get_or_create_user(username="ee_admin", password="Th1sP4ssd", group=None)
+    ns_group_id = get_group_id(gc, group_name="ns_group_for_tests")
+    gc.add_user_to_group(username="iqe_normal_user", group_id=ns_group_id)
+    gc.add_user_to_group(username="org-admin", group_id=ns_group_id)
+    gc.add_user_to_group(username="jdoe", group_id=ns_group_id)
+    pe_group_id = get_group_id(gc, group_name="system:partner-engineers")
+    if parse_version(hub_version) < parse_version('4.6'):
+        pe_permissions = ["galaxy.view_group",
+                          "galaxy.delete_group",
+                          "galaxy.add_group",
+                          "galaxy.change_group",
+                          "galaxy.view_user",
+                          "galaxy.delete_user",
+                          "galaxy.add_user",
+                          "galaxy.change_user",
+                          "ansible.delete_collection",
+                          "galaxy.delete_namespace",
+                          "galaxy.add_namespace",
+                          "ansible.modify_ansible_repo_content",
+                          "ansible.view_ansiblerepository",
+                          "ansible.add_ansiblerepository",
+                          "ansible.change_ansiblerepository",
+                          "ansible.delete_ansiblerepository",
+                          "galaxy.change_namespace",
+                          "galaxy.upload_to_namespace",
+                          ]
+        gc.set_permissions("system:partner-engineers", pe_permissions)
+    else:
+        for rbac_role in pe_roles:
+            try:
+                gc.add_role_to_group(rbac_role, pe_group_id)
+            except GalaxyClientError:
+                # role already assigned to group. It's ok.
+                pass
+
+    gc.add_user_to_group(username="jdoe", group_id=pe_group_id)
+    gc.create_namespace(name="autohubtest2", group="ns_group_for_tests",
+                        object_roles=["galaxy.collection_namespace_owner"])
+    gc.create_namespace(name="autohubtest3", group="ns_group_for_tests",
+                        object_roles=["galaxy.collection_namespace_owner"])
+
+    ee_group_id = get_group_id(gc, group_name="ee_group_for_tests")
+    ee_role = 'galaxy.execution_environment_admin'
+    if parse_version(hub_version) < parse_version('4.6'):
+        ee_permissions = ["container.delete_containerrepository",
+                          "galaxy.add_containerregistryremote",
+                          "galaxy.change_containerregistryremote",
+                          "galaxy.delete_containerregistryremote"]
+        gc.set_permissions("ee_group_for_tests", ee_permissions)
+    else:
+        try:
+            gc.add_role_to_group(ee_role, ee_group_id)
+        except GalaxyClientError:
+            # role already assigned to group. It's ok.
+            pass
+    gc.add_user_to_group(username="ee_admin", group_id=ee_group_id)
+
+
 @lru_cache()
 def get_hub_version(ansible_config):
     if is_standalone():
@@ -715,49 +792,8 @@ def get_hub_version(ansible_config):
         AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = pe_token_bck
         return galaxy_ng_version
     elif not is_dev_env_standalone():
-        # if we are here, we need to create some test data
-        # (same as dev/common/setup_test_data.py)
         role = "admin"
         set_credentials_when_not_docker_pah(ansible_config().get("url"))
-        gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
-        gc.create_group("ns_group_for_tests")
-        gc.create_group("system:partner-engineers")
-        gc.create_group("ee_group_for_tests")
-        pe_roles = [
-            "galaxy.group_admin",
-            "galaxy.user_admin",
-            "galaxy.collection_admin",
-        ]
-        gc.get_or_create_user(username="iqe_normal_user", password="Th1sP4ssd", group=None)
-        gc.get_or_create_user(username="org-admin", password="Th1sP4ssd", group=None)
-        gc.get_or_create_user(username="jdoe", password="Th1sP4ssd", group=None)
-        gc.get_or_create_user(username="ee_admin", password="Th1sP4ssd", group=None)
-        ns_group_id = get_group_id(gc, group_name="ns_group_for_tests")
-        gc.add_user_to_group(username="iqe_normal_user", group_id=ns_group_id)
-        gc.add_user_to_group(username="org-admin", group_id=ns_group_id)
-        gc.add_user_to_group(username="jdoe", group_id=ns_group_id)
-        pe_group_id = get_group_id(gc, group_name="system:partner-engineers")
-        for rbac_role in pe_roles:
-            try:
-                gc.add_role_to_group(rbac_role, pe_group_id)
-            except GalaxyClientError:
-                # role already assigned to group. It's ok.
-                pass
-
-        gc.add_user_to_group(username="jdoe", group_id=pe_group_id)
-        gc.create_namespace(name="autohubtest2", group="ns_group_for_tests",
-                            object_roles=["galaxy.collection_namespace_owner"])
-        gc.create_namespace(name="autohubtest3", group="ns_group_for_tests",
-                            object_roles=["galaxy.collection_namespace_owner"])
-
-        ee_group_id = get_group_id(gc, group_name="ee_group_for_tests")
-        ee_role = 'galaxy.execution_environment_admin'
-        try:
-            gc.add_role_to_group(ee_role, ee_group_id)
-        except GalaxyClientError:
-            # role already assigned to group. It's ok.
-            pass
-        gc.add_user_to_group(username="ee_admin", group_id=ee_group_id)
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
@@ -772,3 +808,8 @@ def min_hub_version(ansible_config, spec):
 def max_hub_version(ansible_config, spec):
     version = get_hub_version(ansible_config)
     return Requirement.parse(f"galaxy_ng>{spec}").specifier.contains(version)
+
+
+def is_hub_4_5(ansible_config):
+    hub_version = get_hub_version(ansible_config)
+    return parse_version(hub_version) < parse_version('4.6')

@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 from orionutils.generator import build_collection, randstr
 
+from ..conftest import is_hub_4_5
 from ..constants import USERNAME_PUBLISHER
 from ..utils import (
     CapturingGalaxyError,
@@ -44,7 +45,9 @@ def test_download_artifact(ansible_config, upload_artifact):
         else:
             resp = wait_for_task(api_client, resp)
             assert resp["state"] == "completed"
-    set_certification(api_client, artifact)
+
+    hub_4_5 = is_hub_4_5(ansible_config)
+    set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     # download collection
     config = ansible_config("basic_user")
@@ -81,12 +84,14 @@ def test_download_artifact(ansible_config, upload_artifact):
 
 
 # TODO: make download logic more DRY in these tests
+@pytest.mark.min_hub_version("4.6dev")
 def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = upload_artifact(config, api_client, artifact)
     resp = wait_for_task(api_client, resp)
+
     set_certification(api_client, artifact, level="validated")
 
     # download collection

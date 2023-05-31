@@ -343,12 +343,25 @@ def get_collection_full_path(namespace, collection_name):
     return os.path.join(get_collections_namespace_path(namespace), collection_name)
 
 
-def set_certification(client, collection, level="published"):
+def set_certification(client, collection, level="published", hub_4_5=False):
     """Moves a collection from the `staging` to the `published` repository.
 
     For use in instances that use repository-based certification and that
     do not have auto-certification enabled.
     """
+
+    if hub_4_5:
+        if client.config["use_move_endpoint"]:
+            url = (
+                f"v3/collections/{collection.namespace}/{collection.name}/versions/"
+                f"{collection.version}/move/staging/published/"
+            )
+            client(url, method="POST", args=b"{}")
+            dest_url = (
+                f"v3/collections/{collection.namespace}/"
+                f"{collection.name}/versions/{collection.version}/"
+            )
+            return wait_for_url(client, dest_url)
 
     # exit early if config is set to auto approve
     if not client.config["use_move_endpoint"]:
