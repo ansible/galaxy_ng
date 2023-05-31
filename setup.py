@@ -112,12 +112,13 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
 
 requirements = [
     "galaxy-importer>=0.4.10,<0.5.0",
-    "pulpcore>=3.23.0,<3.24.0",
-    "pulp_ansible>=0.17.2,<0.18.0",
+    "pulpcore>=3.25.0,<3.28.0",
+    "pulp_ansible>=0.18.0,<0.19.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
-    "pulp-container>=2.14.5,<2.15.0",
-    "django-automated-logging==6.1.3",
+    "pulp-container>=2.15.0,<2.16.0",
+    #"django-automated-logging==6.1.3",
+    "django-automated-logging@git+https://github.com/jctanner/django-automated-logging@DJANGO_4x",
     "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-app-django>=3.1.0,<4.0.0",
     "dynaconf>=3.1.12",
