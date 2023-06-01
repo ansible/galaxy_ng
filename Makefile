@@ -105,8 +105,7 @@ docker/test/integration/container:      ## Run integration tests.
 
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from python script
-	#./compose run --rm api manage shell < app/dev/common/setup_test_data.py
-	$(call exec_or_run, api, bash, -c "django-admin shell < app/dev/common/setup_test_data.py")
+	$(call exec_or_run, api, "/bin/bash", "-c", "/entrypoint.sh manage shell < app/dev/common/setup_test_data.py")
 
 .PHONY: docker/makemigrations
 docker/makemigrations:   ## Run django migrations
