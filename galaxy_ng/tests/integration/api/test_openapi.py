@@ -165,5 +165,12 @@ def test_openapi_bindings_generation(ansible_config):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        assert docker_pid.returncode == 0, docker_pid.stderr.decode('utf-8')
+        try:
+            assert docker_pid.returncode == 0, docker_pid.stderr.decode('utf-8')
+        except AssertionError as e:
+            if "toomanyrequests" in str(e):
+                pytest.skip("Docker error: toomanyrequests: You have reached your pull rate "
+                            "limit.")
+            else:
+                raise e
         assert os.path.exists(os.path.join(generator_checkout, 'galaxy_ng-client'))
