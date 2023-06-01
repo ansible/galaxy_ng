@@ -18,7 +18,7 @@ from .utils import (
     get_client,
     set_certification,
     set_synclist,
-    iterate_all
+    iterate_all, wait_for_url
 )
 from .utils import upload_artifact as _upload_artifact
 from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
@@ -459,7 +459,11 @@ def uncertifiedv2(ansible_config, artifact):
         f"collection publish {artifact2.filename}",
         ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
     )
-
+    dest_url = (
+        f"v3/plugin/ansible/content/staging/collections/index/"
+        f"{artifact2.namespace}/{artifact2.name}/versions/{artifact2.version}/"
+    )
+    wait_for_url(api_client, dest_url)
     return artifact, artifact2
 
 

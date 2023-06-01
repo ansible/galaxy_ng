@@ -14,6 +14,7 @@ from ..utils import (
     get_client,
     wait_for_task,
 )
+from ..utils.iqe_utils import is_stage_environment
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -166,6 +167,11 @@ def test_delete_default_repos(ansible_config, upload_artifact, uncertifiedv2):
         "staging",
         "rejected",
     )
+
+    if is_stage_environment():
+        protected_base_paths_list = list(PROTECTED_BASE_PATHS)
+        protected_base_paths_list.remove("rh-certified")
+        PROTECTED_BASE_PATHS = tuple(protected_base_paths_list)
 
     # Attempt to modify default distros and delete distros and repos
     for path in PROTECTED_BASE_PATHS:

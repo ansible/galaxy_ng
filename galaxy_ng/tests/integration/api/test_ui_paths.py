@@ -224,7 +224,6 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/execution-environments/registries/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
-@pytest.mark.this
 def test_api_ui_v1_execution_environments_registries(ansible_config):
 
     cfg = ansible_config('ee_admin')
