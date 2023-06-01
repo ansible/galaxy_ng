@@ -21,7 +21,7 @@ msgstr "Namespace in bestandsnaam niet gevonden."
 
 #: app/access_control/access_policy.py:398
 msgid "Distribution does not exist."
-msgstr "Machtiging  bestaat niet."
+msgstr "Machtiging bestaat niet."
 
 #: app/access_control/access_policy.py:412
 msgid "Namespace not found."
@@ -254,7 +254,7 @@ msgstr "Verwachte versie met max. lengte van %s"
 #: app/api/v3/serializers/namespace.py:69
 #, python-format
 msgid "'%s' is not a valid url."
-msgstr "\"%s\" is geen geldige url."
+msgstr "\"%s\" is geen geldige URL."
 
 #: app/api/v3/serializers/namespace.py:106
 msgid "Attribute 'name' is required"
@@ -364,11 +364,11 @@ msgstr "Authenticatie mislukt."
 
 #: app/constants.py:24
 msgid "Add namespace"
-msgstr "Naamruimte toevoegen"
+msgstr "Namespace toevoegen"
 
 #: app/constants.py:28
 msgid "Create a new namespace."
-msgstr "Een nieuwe namespace maken"
+msgstr "Maak een nieuwe namespace."
 
 #: app/constants.py:30 app/constants.py:36 app/constants.py:42
 #: app/constants.py:48
@@ -381,11 +381,11 @@ msgstr "Namespace wijzigen"
 
 #: app/constants.py:34
 msgid "Edit this namespace."
-msgstr "Bewerk deze naamruimte."
+msgstr "Bewerk deze namespace."
 
 #: app/constants.py:35
 msgid "Edit any existing namespace."
-msgstr "Bewerk een bestaande naamruimte."
+msgstr "Bewerk een bestaande namespace."
 
 #: app/constants.py:39
 msgid "Delete namespace"
@@ -393,7 +393,7 @@ msgstr "Namespace verwijderen"
 
 #: app/constants.py:40
 msgid "Delete this namespace."
-msgstr "Dit knooppunt verwijderen"
+msgstr "Verwijder deze namespace."
 
 #: app/constants.py:41
 msgid "Delete any existing namespace."
@@ -405,11 +405,11 @@ msgstr "Uploaden naar namespace"
 
 #: app/constants.py:46
 msgid "Upload collections to this namespace."
-msgstr "Collecties wijzigen en uploaden naar namespaces."
+msgstr "Upload collecties naar deze namespace."
 
 #: app/constants.py:47 app/constants.py:59
 msgid "Upload collections to any existing namespace."
-msgstr "Upload collecties naar een bestaande naamruimte."
+msgstr "Upload collecties naar een bestaande namespace."
 
 #: app/constants.py:51
 msgid "Delete collection"
@@ -433,19 +433,19 @@ msgstr "Ansible repo-inhoud aanpassen"
 
 #: app/constants.py:58
 msgid "Modify content of this Ansible repository."
-msgstr "Wijzig de inhoud van deze Ansible-repository."
+msgstr "Pas inhoud aan van deze Ansible-repository."
 
 #: app/constants.py:63
 msgid "Sign collections"
-msgstr "Collecties weergeven"
+msgstr "Collecties ondertekenen"
 
 #: app/constants.py:64
 msgid "Sign collections in this repository."
-msgstr "Onderteken collecties in dit archief."
+msgstr "Onderteken collecties in deze repository."
 
 #: app/constants.py:65
 msgid "Sign collections in any repository."
-msgstr "Onderteken collecties in elk archief."
+msgstr "Onderteken collecties in een repository."
 
 #: app/constants.py:69
 msgid "Add user"
@@ -453,7 +453,7 @@ msgstr "Gebruiker toevoegen"
 
 #: app/constants.py:71
 msgid "Add new users to the system."
-msgstr "Nieuwe gebruikers aan het systeem toevoegen."
+msgstr "Voeg nieuwe gebruikers toe aan het systeem."
 
 #: app/constants.py:72 app/constants.py:78 app/constants.py:84
 #: app/constants.py:90
@@ -466,11 +466,11 @@ msgstr "Gebruiker wijzigen"
 
 #: app/constants.py:76
 msgid "Edit this user."
-msgstr "Dit knooppunt bewerken"
+msgstr "Bewerk dit knooppunt."
 
 #: app/constants.py:77
 msgid "Edit any existing user in the system."
-msgstr "Elke bestaande gebruiker in het systeem bewerken."
+msgstr "Bewerk een bestaande gebruiker in het systeem."
 
 #: app/constants.py:81
 msgid "Delete user"
@@ -478,11 +478,11 @@ msgstr "Gebruiker verwijderen"
 
 #: app/constants.py:82
 msgid "Delete this user."
-msgstr "Dit knooppunt verwijderen"
+msgstr "Verwijder deze gebruiker."
 
 #: app/constants.py:83
 msgid "Delete any existing user in the system."
-msgstr "Verwijder elke bestaande gebruiker in het systeem."
+msgstr "Verwijder een bestaande gebruiker in het systeem."
 
 #: app/constants.py:87
 msgid "View user"
@@ -494,7 +494,7 @@ msgstr "Bekijk deze gebruiker."
 
 #: app/constants.py:89
 msgid "View any user in the system."
-msgstr "Bekijk elke gebruiker in het systeem."
+msgstr "Bekijk een gebruiker in het systeem."
 
 #: app/constants.py:93
 msgid "Add group"
@@ -515,7 +515,7 @@ msgstr "Groep wijzigen"
 
 #: app/constants.py:100
 msgid "Edit this group"
-msgstr "Dit knooppunt bewerken"
+msgstr "Deze groep bewerken"
 
 #: app/constants.py:101
 msgid "Edit any existing group in the system."
@@ -527,11 +527,11 @@ msgstr "Groep verwijderen"
 
 #: app/constants.py:106
 msgid "Delete this group."
-msgstr "Dit knooppunt verwijderen"
+msgstr "Deze groep verwijderen."
 
 #: app/constants.py:107
 msgid "Delete any group in the system."
-msgstr "Elke groep in het systeem verwijderen."
+msgstr "Verwijder een groep in het systeem."
 
 #: app/constants.py:111
 msgid "View group"
@@ -539,11 +539,11 @@ msgstr "Groep weergeven"
 
 #: app/constants.py:112
 msgid "View this group."
-msgstr "Bekijk deze groep."
+msgstr "Geef deze groep weer."
 
 #: app/constants.py:113
 msgid "View any existing group in the system."
-msgstr "Bekijk elke bestaande groep in het systeem."
+msgstr "Geef een bestaande groep weer in het systeem."
 
 #: app/constants.py:117
 msgid "View collection remote"
@@ -551,11 +551,11 @@ msgstr "Collectie op afstand weergeven"
 
 #: app/constants.py:118
 msgid "View this collection remote."
-msgstr "Collectie op afstand weergeven"
+msgstr "Deze collectie op afstand weergeven."
 
 #: app/constants.py:119
 msgid "View any collection remote existing in the system."
-msgstr "Bekijk elke collectie op afstand in het systeem."
+msgstr "Bekijk een collectie op afstand in het systeem."
 
 #: app/constants.py:120 app/constants.py:126 app/constants.py:132
 #: app/constants.py:138 app/constants.py:144
@@ -568,11 +568,11 @@ msgstr "Collectie op afstand toevoegen"
 
 #: app/constants.py:124
 msgid "Add this collection remote."
-msgstr "Collectie op afstand toevoegen"
+msgstr "Deze collectie op afstand toevoegen."
 
 #: app/constants.py:125
 msgid "Add any collection remote existing in the system."
-msgstr "Voeg elke in het systeem bestaande collectie op afstand toe."
+msgstr "Voeg een in het systeem bestaande collectie op afstand toe."
 
 #: app/constants.py:129
 msgid "Change collection remote"
@@ -580,11 +580,11 @@ msgstr "Collectie op afstand wijzigen"
 
 #: app/constants.py:130
 msgid "Edit this collection remote."
-msgstr "Collectie op afstand verwijderen"
+msgstr "Deze collectie op afstand bewerken."
 
 #: app/constants.py:131
 msgid "Edit any collection remote existing in the system."
-msgstr "Bewerk elke collectie op afstand in het systeem."
+msgstr "Bewerk een collectie op afstand in het systeem."
 
 #: app/constants.py:135
 msgid "Delete collection remote"
@@ -592,11 +592,11 @@ msgstr "Collectie op afstand verwijderen"
 
 #: app/constants.py:136
 msgid "Delete this collection remote."
-msgstr "Collectie op afstand verwijderen"
+msgstr "Deze collectie op afstand verwijderen."
 
 #: app/constants.py:137
 msgid "Delete any collection remote existing in the system."
-msgstr "Verwijder elke collectie op afstand in het systeem."
+msgstr "Verwijder een collectie op afstand in het systeem."
 
 #: app/constants.py:141
 msgid "Manage remote roles"
@@ -604,28 +604,28 @@ msgstr "Rollen op afstand beheren"
 
 #: app/constants.py:142
 msgid "Configure who has permissions on this remote."
-msgstr "Configureer wie rechten heeft op deze afstandsbediening."
+msgstr "Configureer wie rechten heeft voor dit item op afstand."
 
 #: app/constants.py:143
 msgid "Configure who has permissions on any remote."
-msgstr "Configureer wie machtigingen heeft op elke remote."
+msgstr "Configureer wie machtigingen heeft voor een item op afstand."
 
 #: app/constants.py:147
 msgid "View Ansible repository"
-msgstr "Bekijk de Ansible repository"
+msgstr "Ansible-repository weergeven"
 
 #: app/constants.py:148
 msgid "View this Ansible repository."
-msgstr "Bekijk deze Ansible repository."
+msgstr "Geef deze Ansible-repository weer."
 
 #: app/constants.py:149
 msgid "View any Ansible repository existing in the system."
-msgstr "Bekijk elke bestaande Ansible repository in het systeem."
+msgstr "Geef een bestaande Ansible-repository in het systeem weer."
 
 #: app/constants.py:150 app/constants.py:156 app/constants.py:162
 #: app/constants.py:168 app/constants.py:174 app/constants.py:182
 msgid "Ansible Repository"
-msgstr "Ansible archief"
+msgstr "Ansible-repository"
 
 #: app/constants.py:153
 msgid "Add Ansible repository"
@@ -633,11 +633,11 @@ msgstr "Ansible-repository toevoegen"
 
 #: app/constants.py:154
 msgid "Add this Ansible repository."
-msgstr "Voeg deze Ansible repository toe."
+msgstr "Voeg deze Ansible-repository toe."
 
 #: app/constants.py:155
 msgid "Add any Ansible repository existing in the system."
-msgstr "Voeg elke bestaande Ansible-repository in het systeem toe."
+msgstr "Voeg een bestaande Ansible-repository in het systeem toe."
 
 #: app/constants.py:159
 msgid "Change Ansible repository"
@@ -645,49 +645,49 @@ msgstr "Ansible-repository wijzigen"
 
 #: app/constants.py:160
 msgid "Change this Ansible repository."
-msgstr "Wijzig deze Ansible repository."
+msgstr "Wijzig deze Ansible-repository."
 
 #: app/constants.py:161
 msgid "Change any Ansible repository existing in the system."
-msgstr "Wijzig elke bestaande Ansible-repository in het systeem."
+msgstr "Wijzig een bestaande Ansible-repository in het systeem."
 
 #: app/constants.py:165
 msgid "Delete Ansible repository"
-msgstr "Ansible archief verwijderen"
+msgstr "Ansible-repository verwijderen"
 
 #: app/constants.py:166
 msgid "Delete this Ansible repository."
-msgstr "Verwijder deze Ansible repository."
+msgstr "Verwijder deze Ansible-repository."
 
 #: app/constants.py:167
 msgid "Delete any Ansible repository existing in the system."
-msgstr "Verwijder elke bestaande Ansible-repository in het systeem."
+msgstr "Verwijder een bestaande Ansible-repository in het systeem."
 
 #: app/constants.py:171
 msgid "Manage repository roles"
-msgstr "Beheer van archiefrollen"
+msgstr "Repository-rollen beheren"
 
 #: app/constants.py:172
 msgid "Configure who has permissions on this repository."
-msgstr "Configureer wie rechten heeft op dit archief."
+msgstr "Configureer wie gemachtigd is voor deze repository."
 
 #: app/constants.py:173
 msgid "Configure who has permissions on any repository."
-msgstr "Configureer wie rechten heeft op een archief."
+msgstr "Configureer wie gemachtigd is voor ene repository."
 
 #: app/constants.py:177
 msgid "Repair Ansible repository"
-msgstr "Reparatie Ansible archief"
+msgstr "Ansible-repository herstellen"
 
 #: app/constants.py:178
 msgid "Repair artifacts associated with this Ansible repository."
-msgstr "Repareer artefacten die aan deze Ansible-repository zijn gekoppeld."
+msgstr "Herstel artefacten die aan deze Ansible-repository zijn gekoppeld."
 
 #: app/constants.py:180
 msgid ""
 "Repair artifacts associated with any Ansible repository existing in the "
 "system."
-msgstr "Repareert artefacten die verband houden met elke bestaande Ansible-repository in het systeem."
+msgstr "Herstel artefacten die aan een Ansible-repository in het systeem zijn gekoppeld."
 
 #: app/constants.py:185
 msgid "Change container namespace permissions"
@@ -695,11 +695,11 @@ msgstr "Machtigingen container-namespace wijzigen"
 
 #: app/constants.py:186
 msgid "Edit permissions on this container namespace."
-msgstr "Bewerkingsrechten op deze containernaamruimte."
+msgstr "Wijzig machtigingen voor deze container-namespace."
 
 #: app/constants.py:187
 msgid "Edit permissions on any existing container namespace."
-msgstr "Bewerkingsrechten op een bestaande containernaamruimte."
+msgstr "Wijzig machtigingen voor een bestaande container-namespace."
 
 #: app/constants.py:188 app/constants.py:194 app/constants.py:200
 #: app/constants.py:206 app/constants.py:212 app/constants.py:218
@@ -713,11 +713,11 @@ msgstr "Containers wijzigen"
 
 #: app/constants.py:192
 msgid "Edit all objects in this container namespace."
-msgstr "Bewerk alle objecten in deze containernaamruimte."
+msgstr "Bewerk alle objecten in deze container-namespace."
 
 #: app/constants.py:193
 msgid "Edit all objects in any container namespace in the system."
-msgstr "Bewerk alle objecten in elke containernaamruimte in het systeem."
+msgstr "Bewerk alle objecten in een container-namespace in het systeem."
 
 #: app/constants.py:197
 msgid "Change image tags"
@@ -725,11 +725,11 @@ msgstr "Afbeeldingstags wijzigen"
 
 #: app/constants.py:198
 msgid "Edit an image's tag in this container namespace"
-msgstr "Bewerk de tag van een afbeelding in deze containernaamruimte"
+msgstr "Bewerk de tag van een afbeelding in deze container-namespace"
 
 #: app/constants.py:199
 msgid "Edit an image's tag in any container namespace the system."
-msgstr "Bewerk de tag van een afbeelding in elke containernaamruimte van het systeem."
+msgstr "Bewerk de tag van een afbeelding in een container-namespace van het systeem."
 
 #: app/constants.py:203
 msgid "Create new containers"
@@ -737,7 +737,7 @@ msgstr "Nieuwe containers maken"
 
 #: app/constants.py:205
 msgid "Add new containers to the system."
-msgstr "Nieuwe containers aan het systeem toevoegen."
+msgstr "Voeg nieuwe containers toe aan het systeem."
 
 #: app/constants.py:209
 msgid "Delete container repository"
@@ -745,11 +745,11 @@ msgstr "Container-repository verwijderen"
 
 #: app/constants.py:210
 msgid "Delete this container repository."
-msgstr "Container-repository verwijderen"
+msgstr "Verwijder deze container-repository"
 
 #: app/constants.py:211
 msgid "Delete any existing container repository in the system."
-msgstr "Verwijder alle bestaande containeropslagplaatsen in het systeem."
+msgstr "Verwijder een bestaande container-repository in het systeem."
 
 #: app/constants.py:215
 msgid "Push to existing containers"
@@ -757,35 +757,35 @@ msgstr "Push naar bestaande containers"
 
 #: app/constants.py:216
 msgid "Push to this namespace."
-msgstr "Duw naar deze naamruimte."
+msgstr "Push naar deze namespace."
 
 #: app/constants.py:217
 msgid "Push to any existing namespace in the system."
-msgstr "Push naar elke bestaande naamruimte in het systeem."
+msgstr "Push naar een bestaande namespace in het systeem."
 
 #: app/constants.py:221
 msgid "Push new containers"
-msgstr "Push nieuwe containers"
+msgstr "Nieuwe containers pushen"
 
 #: app/constants.py:222
 msgid "Push a new container to this namespace."
-msgstr "Duwt een nieuwe container naar deze naamruimte."
+msgstr "Pusht een nieuwe container naar deze namespace."
 
 #: app/constants.py:223
 msgid "Push a new containers to any namespace in the system."
-msgstr "Duwt een nieuwe container naar eender welke naamruimte in het systeem."
+msgstr "Pust een nieuwe container naar een namespace in het systeem."
 
 #: app/constants.py:227
 msgid "Manage container namespace roles"
-msgstr "Namespace van de container verwijderen"
+msgstr "Rollen container-namespace beheren"
 
 #: app/constants.py:228
 msgid "Manage container namespace roles."
-msgstr "Namespace van de container verwijderen"
+msgstr "Rollen container-namespace beheren."
 
 #: app/constants.py:229
 msgid "Manage container namespace roles existing in the system."
-msgstr "Beheren van in het systeem bestaande rollen van de containernaamruimte."
+msgstr "Beheren rollen van de container-namespace in het systeem."
 
 #: app/constants.py:233
 msgid "Add remote registry"
@@ -793,11 +793,11 @@ msgstr "Extern register toevoegen"
 
 #: app/constants.py:235
 msgid "Add remote registry to the system."
-msgstr "Voeg het register op afstand toe aan het systeem."
+msgstr "Voeg een extern register toe aan het systeem."
 
 #: app/constants.py:236 app/constants.py:242
 msgid "Container Registry Remotes"
-msgstr "Type containerregister"
+msgstr "Items op afstand container-register"
 
 #: app/constants.py:239
 msgid "Change remote registry"
@@ -805,11 +805,11 @@ msgstr "Extern register wijzigen"
 
 #: app/constants.py:240
 msgid "Edit this remote registry."
-msgstr "Extern register bewerken"
+msgstr "Bewerk dit externe register."
 
 #: app/constants.py:241
 msgid "Change any remote registry existing in the system."
-msgstr "Verander alle externe registers in het systeem."
+msgstr "Verander een extern register in het systeem."
 
 #: app/constants.py:245
 msgid "Delete remote registry"
@@ -817,11 +817,11 @@ msgstr "Extern register verwijderen"
 
 #: app/constants.py:246
 msgid "Delete this remote registry."
-msgstr "Extern register verwijderen"
+msgstr "Verwijder dit externe register."
 
 #: app/constants.py:247
 msgid "Delete any remote registry existing in the system."
-msgstr "Verwijder alle externe registers in het systeem."
+msgstr "Verwijder een extern register in het systeem."
 
 #: app/constants.py:251
 msgid "Change task"
@@ -829,11 +829,11 @@ msgstr "Taak wijzigen"
 
 #: app/constants.py:252
 msgid "Edit this task."
-msgstr "Dit knooppunt bewerken"
+msgstr "Wijzig deze taak."
 
 #: app/constants.py:253
 msgid "Edit any task existing in the system."
-msgstr "Elke bestaande taak in het systeem bewerken."
+msgstr "Wijzig een bestaande taak in het systeem."
 
 #: app/constants.py:254 app/constants.py:260 app/constants.py:266
 msgid "Task Management"
@@ -845,11 +845,11 @@ msgstr "Taak verwijderen"
 
 #: app/constants.py:258
 msgid "Delete this task."
-msgstr "Dit knooppunt verwijderen"
+msgstr "Verwijder deze taak."
 
 #: app/constants.py:259
 msgid "Delete any task existing in the system."
-msgstr "Een bestaande taak in het systeem verwijderen."
+msgstr "Verwijder een taak in het systeem."
 
 #: app/constants.py:263
 msgid "View all tasks"
@@ -857,11 +857,11 @@ msgstr "Geef alle taken weer."
 
 #: app/constants.py:264
 msgid "View this task."
-msgstr "Bekijk deze taak."
+msgstr "Geef deze taak weer."
 
 #: app/constants.py:265
 msgid "View any task existing in the system."
-msgstr "Elke bestaande taak in het systeem bekijken."
+msgstr "Geef een taak weer in het systeem."
 
 #: app/exceptions.py:8
 msgid "Data conflicts with existing entity."
