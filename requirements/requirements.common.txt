@@ -248,7 +248,7 @@ psycopg-binary==3.1.9
     # via psycopg
 pulp-ansible==0.18.0
     # via galaxy-ng (setup.py)
-pulp-container==2.15.0
+pulp-container @ git+https://github.com/jctanner/pulp_container@CIRCULAR_IMPORT_2023_06_01
     # via galaxy-ng (setup.py)
 pulp-glue==0.19.1
     # via pulpcore
