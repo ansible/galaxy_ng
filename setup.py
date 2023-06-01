@@ -112,7 +112,8 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
 
 requirements = [
     "galaxy-importer>=0.4.10,<0.5.0",
-    "pulpcore>=3.25.0,<3.26.0",
+    #"pulpcore>=3.25.0,<3.26.0",
+    "pulpcore>=3.27.0,<3.40.0",
     "pulp_ansible>=0.18.0,<0.19.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
