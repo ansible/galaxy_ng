@@ -35,6 +35,7 @@ class GroupModelPermissionsMixin:
 
         from pulpcore.plugin.util import assign_role
         from pulpcore.plugin.util import remove_role
+        from pulpcore.plugin.util import get_groups_with_perms_attached_roles
 
         if self._state.adding:
             self._groups = groups
