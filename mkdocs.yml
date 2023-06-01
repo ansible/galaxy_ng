@@ -38,6 +38,7 @@ nav:
         - OCI Env Environment: dev/oci_env.md
         - Vagrant environment: dev/vagrant.md
         - Writing documentation: dev/writing_docs.md
+        - Keyword searches: dev/keyword_searching_explanation.md
     - Tags: tags.md
     - Community:
         - Overview: community/overview.md
