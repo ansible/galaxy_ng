@@ -141,7 +141,7 @@ docker/db_restore:   ## Restore database from a snapshot with optional NAME para
 
 .PHONY: docker/translations
 docker/translations:   ## Generate the translation messages
-	./compose run --rm api bash -c "cd /app/galaxy_ng && django-admin makemessages --all"
+	$(call exec_or_run, api, "/bin/bash", "-c", "cd /app/galaxy_ng && /entrypoint.sh manage makemessages --all")
 
 .PHONY: docker/all
 docker/all: 	                                ## Build, migrate, loaddata, translate and add test collections.
