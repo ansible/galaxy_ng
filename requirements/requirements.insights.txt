@@ -114,6 +114,7 @@ django==4.2.1
     #   drf-spectacular
     #   insights-analytics-collector
     #   pulpcore
+    #   social-auth-app-django
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
 django-automated-logging @ git+https://github.com/jctanner/django-automated-logging@DJANGO_4x
@@ -426,14 +427,12 @@ six==1.16.0
     #   ecdsa
     #   pyjwkest
     #   python-dateutil
-    #   social-auth-app-django
-    #   social-auth-core
     #   url-normalize
 smmap==5.0.0
     # via gitdb
-social-auth-app-django==3.4.0
+social-auth-app-django==5.2.0
     # via galaxy-ng (setup.py)
-social-auth-core==3.4.0
+social-auth-core==4.4.2
     # via
     #   galaxy-ng (setup.py)
     #   social-auth-app-django
