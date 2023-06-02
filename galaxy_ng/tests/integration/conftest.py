@@ -468,6 +468,54 @@ def uncertifiedv2(ansible_config, artifact):
 
 
 @pytest.fixture(scope="function")
+def auto_approved_artifacts(ansible_config, artifact):
+    """ Create and publish collection version N and N+1"""
+
+    # make sure the expected namespace exists ...
+    config = ansible_config("partner_engineer")
+    api_prefix = config.get("api_prefix")
+    api_prefix = api_prefix.rstrip("/")
+    api_client = get_client(config)
+    existing = dict((x['name'], x) for x in get_all_namespaces(api_client=api_client))
+    if artifact.namespace not in existing:
+        payload = {'name': artifact.namespace, 'groups': []}
+        api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
+
+    # publish
+    ansible_galaxy(
+        f"collection publish {artifact.filename}",
+        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+    )
+
+    dest_url = (
+        f"v3/plugin/ansible/content/published/collections/index/"
+        f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
+    )
+    wait_for_url(api_client, dest_url)
+
+    # Increase collection version
+    new_version = increment_version(artifact.version)
+    artifact2 = build_collection(
+        key=artifact.key,
+        namespace=artifact.namespace,
+        name=artifact.name,
+        version=new_version
+    )
+
+    # Publish but do -NOT- certify newer version ...
+    ansible_galaxy(
+        f"collection publish {artifact2.filename}",
+        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+    )
+    dest_url = (
+        f"v3/plugin/ansible/content/published/collections/index/"
+        f"{artifact2.namespace}/{artifact2.name}/versions/{artifact2.version}/"
+    )
+    wait_for_url(api_client, dest_url)
+    return artifact, artifact2
+
+
+@pytest.fixture(scope="function")
 def artifact():
     """Generate a randomized collection for testing."""
 

@@ -42,7 +42,7 @@ def test_x_repo_search_acl_basic_user(ansible_config, uncertifiedv2):
 
 @pytest.mark.community_only
 @pytest.mark.min_hub_version("4.7dev")
-def test_x_repo_search_acl_anonymous_user(ansible_config, uncertifiedv2):
+def test_x_repo_search_acl_anonymous_user(ansible_config, auto_approved_artifacts):
     """Check if anonymous users can perform x-repo searches"""
 
     config = ansible_config("admin")
@@ -55,7 +55,7 @@ def test_x_repo_search_acl_anonymous_user(ansible_config, uncertifiedv2):
 
     # Enumerate published collection info ...
     ckeys = []
-    for cv in uncertifiedv2:
+    for cv in auto_approved_artifacts:
         ckeys.append((cv.namespace, cv.name, cv.version))
 
     # /api/automation-hub/v3/plugin/ansible/search/collection-versions/
@@ -81,7 +81,7 @@ def test_x_repo_search_acl_anonymous_user(ansible_config, uncertifiedv2):
 
 @pytest.mark.community_only
 @pytest.mark.min_hub_version("4.7dev")
-def test_x_repo_search_acl_social_user(ansible_config, uncertifiedv2):
+def test_x_repo_search_acl_social_user(ansible_config, auto_approved_artifacts):
     """Check if a social user can perform x-repo searches"""
 
     config = ansible_config("admin")
@@ -94,7 +94,7 @@ def test_x_repo_search_acl_social_user(ansible_config, uncertifiedv2):
 
     # Enumerate published collection info ...
     ckeys = []
-    for cv in uncertifiedv2:
+    for cv in auto_approved_artifacts:
         ckeys.append((cv.namespace, cv.name, cv.version))
 
     # /api/automation-hub/v3/plugin/ansible/search/collection-versions/
