@@ -604,7 +604,7 @@ def test_move_with_signing_service(ansible_config, artifact, upload_artifact, se
     config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
-    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
 
     resp = upload_artifact(config, api_client, artifact)
     resp = wait_for_task(api_client, resp)
