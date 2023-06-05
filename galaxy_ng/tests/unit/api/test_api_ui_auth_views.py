@@ -38,7 +38,8 @@ class TestLoginViewsStandalone(APITestCase):
 
         self._test_login_permission_denied(
             data={"username": "test1", "password": "test1-secret"},
-            expected_detail="CSRF Failed: CSRF token missing or incorrect.",
+            # expected_detail="CSRF Failed: CSRF token missing or incorrect.",
+            expected_detail="CSRF Failed: CSRF token missing.",
             client=client
         )
 
