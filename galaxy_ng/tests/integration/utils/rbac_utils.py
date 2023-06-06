@@ -12,7 +12,8 @@ from orionutils.generator import build_collection
 from galaxykit.collections import get_collection, upload_artifact
 
 from galaxy_ng.tests.integration.utils import uuid4
-from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version
+from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version, \
+    generate_random_string
 
 logger = logging.getLogger(__name__)
 
@@ -67,15 +68,17 @@ def create_local_image_container(config, client):
         image = f"{registry}alpine"
     unauth_ctn = ContainerClient(auth=None, engine=container_engine, registry=registry)
     unauth_ctn.pull_image("alpine")
-    ee_name = f"ee_{uuid4()}"
-    client.tag_image(image, ee_name + ":latest")
+    ee_name = f"ee_{generate_random_string()}"
+    tag = generate_random_string()
+    client.tag_image(image, ee_name + f":{tag}")
     retry_pull_cmd = [container_engine, "pull", registry + "alpine"]
     if container_engine == 'podman':
         retry_pull_cmd.append("--tls-verify=False")
     logging.debug(f"Retry command in case it fails: {retry_pull_cmd}")
-    push_image_with_retry(client, ee_name + ":latest", retry_pull_cmd)
+    push_image_with_retry(client, ee_name + f":{tag}", retry_pull_cmd)
     info = get_container_images(client, ee_name)
     delete_image_container(client, ee_name, info["data"][0]["digest"])
+    client.tag_image(image, ee_name + ":latest")
     return ee_name
 
 

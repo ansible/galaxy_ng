@@ -908,7 +908,6 @@ class TestRBAC:
 
     @pytest.mark.iqe_rbac_test
     @pytest.mark.standalone_only
-    @pytest.mark.this
     def test_missing_global_role_delete_image_from_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
