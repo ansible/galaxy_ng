@@ -662,10 +662,18 @@ class TestRBAC:
         """
         gc = galaxy_client("admin")
         user, group = add_new_user_to_new_group(gc)
+
         permissions_user = ["container.add_containernamespace"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
+
+        # this block added for pulp 3.27 upgrade ...
+        permissions_user = ["container.manage_roles_containernamespace"]
+        role_user = f"galaxy.rbac_test_role_{uuid4()}"
+        gc.create_role(role_user, "any_description2", permissions_user)
+        gc.add_role_to_group(role_user, group["id"])
+
         remote_registry = f"remote_registry_{uuid4()}"
         create_registry(gc, remote_registry, "url")
         gc_user = galaxy_client(user)
