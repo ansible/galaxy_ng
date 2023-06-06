@@ -77,7 +77,7 @@ class LegacyRoleFilter(filterset.FilterSet):
         return queryset.filter(namespace__name=value)
 
     def owner__username_filter(self, queryset, name, value):
-        return queryset.filter(namespace__owners__username=value)
+        return queryset.filter(namespace__name=value)
 
     def tags_filter(self, queryset, name, value):
 
