@@ -4,7 +4,6 @@ Imported from https://gitlab.cee.redhat.com/insights-qe/iqe-automation-hub-plugi
 """
 import pytest
 
-from galaxy_ng.tests.integration.utils.iqe_utils import push_image_with_retry
 from galaxykit.collections import move_or_copy_collection
 from galaxykit.container_images import delete_container as delete_image_container
 from galaxykit.container_images import get_container_images
@@ -816,7 +815,7 @@ class TestRBAC:
         gc.create_role(role_user, "any_description", permissions_user)
         add_owner_to_ee(gc, ee_name, group["name"], [role_user])
         gc_user = galaxy_client(user)
-        push_image_with_retry(gc_user, ee_name + ":latest")
+        gc_user.push_image(ee_name + ":latest")
 
     @pytest.mark.iqe_rbac_test
     @pytest.mark.standalone_only
@@ -836,7 +835,7 @@ class TestRBAC:
         gc.add_role_to_group(role_user, group["id"])
         ee_name = create_local_image_container(ansible_config(), gc)
         gc_user = galaxy_client(user)
-        push_image_with_retry(gc_user, ee_name + ":latest")
+        gc_user.push_image(ee_name + ":latest")
 
     @pytest.mark.iqe_rbac_test
     @pytest.mark.standalone_only
@@ -879,7 +878,7 @@ class TestRBAC:
         gc.create_role(role_user, "any_description", permissions_user)
         add_owner_to_ee(gc, ee_name, group["name"], [role_user])
         gc_user = galaxy_client(user)
-        push_image_with_retry(gc_user, ee_name + ":latest")
+        gc_user.push_image(ee_name + ":latest")
         all_images = get_container_images(gc_user, ee_name)
         with pytest.raises(GalaxyClientError) as ctx:
             delete_image_container(gc_user, ee_name, all_images["data"][0]["digest"])
@@ -903,12 +902,13 @@ class TestRBAC:
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
         gc_user = galaxy_client(user)
-        push_image_with_retry(gc_user, ee_name + ":latest")
+        gc_user.push_image(ee_name + ":latest")
         all_images = get_container_images(gc_user, ee_name)
         delete_image_container(gc_user, ee_name, all_images["data"][0]["digest"])
 
     @pytest.mark.iqe_rbac_test
     @pytest.mark.standalone_only
+    @pytest.mark.this
     def test_missing_global_role_delete_image_from_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
@@ -925,7 +925,7 @@ class TestRBAC:
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
         gc_user = galaxy_client(user)
-        push_image_with_retry(gc_user, ee_name + ":latest")
+        gc_user.push_image(ee_name + ":latest")
         all_images = get_container_images(gc_user, ee_name)
         with pytest.raises(GalaxyClientError) as ctx:
             delete_image_container(gc_user, ee_name, all_images["data"][0]["digest"])

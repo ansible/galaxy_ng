@@ -247,13 +247,15 @@ def pull_and_tag_test_image(container_engine, registry, tag=None):
     return image
 
 
-def push_image_with_retry(client, image):
+def push_image_with_retry(client, image, retry_pull_cmd):
     try:
         client.push_image(image)
     except GalaxyClientError:
         logger.debug("Image push failed. Clearing cache and retrying.")
         subprocess.check_call([client.container_client.engine,
                                "system", "prune", "-a", "--volumes", "-f"])
+        # here we need to pull again
+        subprocess.check_call(retry_pull_cmd)
         client.push_image(image)
 
 
