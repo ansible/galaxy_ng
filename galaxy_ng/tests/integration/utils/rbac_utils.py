@@ -80,16 +80,16 @@ def create_local_image_container(config, client):
     delete_image_container(client, ee_name, info["data"][0]["digest"])
     subprocess.check_call([client.container_client.engine,
                            "system", "prune", "-a", "--volumes", "-f"])
-    pull_and_tag_image(client, container_engine, registry, image, ee_name)
+    pull_and_tag_image(client, container_engine, registry, image, ee_name, tag="latest")
     return ee_name
 
 
-def pull_and_tag_image(client, container_engine, registry, image, ee_name):
+def pull_and_tag_image(client, container_engine, registry, image, ee_name, tag=None):
     unauth_ctn = ContainerClient(auth=None, engine=container_engine, registry=registry)
     unauth_ctn.pull_image("alpine")
-    tag = generate_random_string()
-    client.tag_image(image, ee_name + f":{tag}")
-    return ee_name + f":{tag}"
+    final_tag = tag or generate_random_string()
+    client.tag_image(image, ee_name + f":{final_tag}")
+    return ee_name + f":{final_tag}"
     # client.push_image(ee_name + f":{tag}")
 
 
