@@ -68,18 +68,19 @@ def create_local_image_container(config, client):
         image = f"{registry}alpine"
     ee_name = f"ee_{generate_random_string()}"
     try:
-        pull_and_tag_image(client, container_engine, registry, image, ee_name)
+        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name)
+        client.push_image(full_name)
     except GalaxyClientError:
         logger.debug("Image push failed. Clearing cache and retrying.")
         subprocess.check_call([client.container_client.engine,
                                "system", "prune", "-a", "--volumes", "-f"])
-        pull_and_tag_image(client, container_engine, registry, image, ee_name)
+        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name)
+        client.push_image(full_name)
     info = get_container_images(client, ee_name)
     delete_image_container(client, ee_name, info["data"][0]["digest"])
     subprocess.check_call([client.container_client.engine,
                            "system", "prune", "-a", "--volumes", "-f"])
-    full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name)
-    client.push_image(full_name)
+    pull_and_tag_image(client, container_engine, registry, image, ee_name)
     return ee_name
 
 
