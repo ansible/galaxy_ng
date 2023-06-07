@@ -66,7 +66,7 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
     gc = galaxy_client("admin")
 
-    for x in range(0, 10);
+    for x in range(0, 10):
         matches, _ = search_collection_endpoint(
             gc, repository_name=repo_name
         )
