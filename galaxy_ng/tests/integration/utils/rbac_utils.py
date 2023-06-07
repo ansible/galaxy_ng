@@ -1,7 +1,7 @@
 import logging
+import subprocess
 
-from galaxy_ng.tests.integration.utils.iqe_utils import avoid_docker_limit_rate, \
-    push_image_with_retry
+from galaxy_ng.tests.integration.utils.iqe_utils import avoid_docker_limit_rate
 from galaxykit.container_images import get_container_images
 from galaxykit.containerutils import ContainerClient
 from galaxykit.users import get_user
@@ -12,7 +12,8 @@ from orionutils.generator import build_collection
 from galaxykit.collections import get_collection, upload_artifact
 
 from galaxy_ng.tests.integration.utils import uuid4
-from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version
+from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_version, \
+    generate_random_string
 
 logger = logging.getLogger(__name__)
 
@@ -65,14 +66,31 @@ def create_local_image_container(config, client):
     if avoid_docker_limit_rate():
         registry = "quay.io/libpod/"
         image = f"{registry}alpine"
-    unauth_ctn = ContainerClient(auth=None, engine=container_engine, registry=registry)
-    unauth_ctn.pull_image("alpine")
-    ee_name = f"ee_{uuid4()}"
-    client.tag_image(image, ee_name + ":latest")
-    push_image_with_retry(client, ee_name + ":latest")
+    ee_name = f"ee_{generate_random_string()}"
+    try:
+        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name)
+        client.push_image(full_name)
+    except GalaxyClientError:
+        logger.debug("Image push failed. Clearing cache and retrying.")
+        subprocess.check_call([client.container_client.engine,
+                               "system", "prune", "-a", "--volumes", "-f"])
+        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name)
+        client.push_image(full_name)
     info = get_container_images(client, ee_name)
     delete_image_container(client, ee_name, info["data"][0]["digest"])
+    # we need this to avoid push errors (blob unknown to registry, invalid manifest)
+    subprocess.check_call([client.container_client.engine,
+                           "system", "prune", "-a", "--volumes", "-f"])
+    pull_and_tag_image(client, container_engine, registry, image, ee_name, tag="latest")
     return ee_name
+
+
+def pull_and_tag_image(client, container_engine, registry, image, ee_name, tag=None):
+    unauth_ctn = ContainerClient(auth=None, engine=container_engine, registry=registry)
+    unauth_ctn.pull_image("alpine")
+    final_tag = tag or generate_random_string()
+    client.tag_image(image, ee_name + f":{final_tag}")
+    return ee_name + f":{final_tag}"
 
 
 def upload_test_artifact(client, namespace, repo=None, artifact=None, direct_upload=False):

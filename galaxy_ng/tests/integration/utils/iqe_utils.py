@@ -13,8 +13,6 @@ from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
 
-from galaxykit.utils import GalaxyClientError
-
 logger = logging.getLogger(__name__)
 
 # FILENAME_INCLUDED
@@ -245,16 +243,6 @@ def pull_and_tag_test_image(container_engine, registry, tag=None):
         [container_engine, "tag", image,
          f"{registry}/{tag}"])
     return image
-
-
-def push_image_with_retry(client, image):
-    try:
-        client.push_image(image)
-    except GalaxyClientError:
-        logger.debug("Image push failed. Clearing cache and retrying.")
-        subprocess.check_call([client.container_client.engine,
-                               "system", "prune", "-a", "--volumes", "-f"])
-        client.push_image(image)
 
 
 def get_all_collections(api_client, repo):
