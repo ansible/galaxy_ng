@@ -35,11 +35,10 @@ def test_can_update_container_push(ansible_config, require_auth):
         request_token=True,
         require_auth=require_auth
     )
-    api_prefix = "/api/automation-hub"
 
     # Get the pulp_href for the pushed repo
     image = client(
-        f"{api_prefix}/pulp/api/v3/repositories/container/container-push/?name=alpine"
+        "/pulp/api/v3/repositories/container/container-push/?name=alpine"
     )
     container_href = image["results"][0]["pulp_href"]
 

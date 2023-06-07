@@ -1,8 +1,11 @@
 """test_dependencies.py - Tests of collection dependency handling."""
 import logging
+import time
 
 import attr
 import pytest
+
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 
 from ..utils import ansible_galaxy
 from ..utils import get_client
@@ -53,7 +56,6 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
 
     spec = params.spec
     retcode = params.retcode
-    ansible_config("ansible_partner", namespace=published.namespace)
     artifact2 = build_collection(dependencies={f"{published.namespace}.{published.name}": spec})
 
     try:
@@ -68,10 +70,16 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
         else:
             raise
 
+    # wait for move task from `inbound-<namespace>` repo to `staging` repo
+    time.sleep(SLEEP_SECONDS_ONETIME)
+
     if retcode == 0:
         config = ansible_config("ansible_insights")
         client = get_client(config)
         set_certification(client, artifact2)
+
+        # wait for move task from `staging` repo to `published` repo
+        time.sleep(SLEEP_SECONDS_ONETIME)
 
         pid = ansible_galaxy(
             f"collection install -vvv --ignore-cert \
