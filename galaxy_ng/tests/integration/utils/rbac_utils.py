@@ -1,4 +1,5 @@
 import logging
+import subprocess
 
 from galaxy_ng.tests.integration.utils.iqe_utils import avoid_docker_limit_rate, \
     push_image_with_retry
@@ -66,20 +67,30 @@ def create_local_image_container(config, client):
     if avoid_docker_limit_rate():
         registry = "quay.io/libpod/"
         image = f"{registry}alpine"
-    unauth_ctn = ContainerClient(auth=None, engine=container_engine, registry=registry)
-    unauth_ctn.pull_image("alpine")
     ee_name = f"ee_{generate_random_string()}"
-    tag = generate_random_string()
-    client.tag_image(image, ee_name + f":{tag}")
-    retry_pull_cmd = [container_engine, "pull", registry + "alpine"]
-    if container_engine == 'podman':
-        retry_pull_cmd.append("--tls-verify=False")
-    logging.debug(f"Retry command in case it fails: {retry_pull_cmd}")
-    push_image_with_retry(client, ee_name + f":{tag}", retry_pull_cmd)
+    try:
+        docker_things(client, container_engine, registry, image, ee_name)
+    except GalaxyClientError:
+        logger.debug("Image push failed. Clearing cache and retrying.")
+        subprocess.check_call([client.container_client.engine,
+                               "system", "prune", "-a", "--volumes", "-f"])
+        docker_things(client, container_engine, registry, image, ee_name)
     info = get_container_images(client, ee_name)
     delete_image_container(client, ee_name, info["data"][0]["digest"])
+    subprocess.check_call([client.container_client.engine,
+                           "system", "prune", "-a", "--volumes", "-f"])
+    unauth_ctn = ContainerClient(auth=None, engine=container_engine, registry=registry)
+    unauth_ctn.pull_image("alpine")
     client.tag_image(image, ee_name + ":latest")
     return ee_name
+
+
+def docker_things(client, container_engine, registry, image, ee_name):
+    unauth_ctn = ContainerClient(auth=None, engine=container_engine, registry=registry)
+    unauth_ctn.pull_image("alpine")
+    tag = generate_random_string()
+    client.tag_image(image, ee_name + f":{tag}")
+    client.push_image(ee_name + f":{tag}")
 
 
 def upload_test_artifact(client, namespace, repo=None, artifact=None, direct_upload=False):
