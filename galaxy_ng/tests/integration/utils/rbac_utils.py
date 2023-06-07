@@ -78,6 +78,7 @@ def create_local_image_container(config, client):
         client.push_image(full_name)
     info = get_container_images(client, ee_name)
     delete_image_container(client, ee_name, info["data"][0]["digest"])
+    # we need this to avoid push errors (blob unknown to registry, invalid manifest)
     subprocess.check_call([client.container_client.engine,
                            "system", "prune", "-a", "--volumes", "-f"])
     pull_and_tag_image(client, container_engine, registry, image, ee_name, tag="latest")
@@ -90,7 +91,6 @@ def pull_and_tag_image(client, container_engine, registry, image, ee_name, tag=N
     final_tag = tag or generate_random_string()
     client.tag_image(image, ee_name + f":{final_tag}")
     return ee_name + f":{final_tag}"
-    # client.push_image(ee_name + f":{tag}")
 
 
 def upload_test_artifact(client, namespace, repo=None, artifact=None, direct_upload=False):
