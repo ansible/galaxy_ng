@@ -405,15 +405,14 @@ def view_ansible_repository_version(user, password, expect_pass, extra):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-# FIXME: pulp_1   | TypeError: rebuild_metadata() got an unexpected keyword argument 'repository_pk'
 def rebuild_metadata_ansible_repository_version(user, password, expect_pass, extra):
     repo_href = extra["custom_repo"].get_repo()["pulp_href"]
 
     response = requests.post(
-        f"{SERVER}{repo_href}0/rebuild_metadata/",
+        f"{SERVER}{repo_href}versions/0/rebuild_metadata/",
         auth=(user['username'], password),
     )
-    assert_pass(expect_pass, response.status_code, 200, 403)
+    assert_pass(expect_pass, response.status_code, 202, 403)
 
 
 def repair_ansible_repository_version(user, password, expect_pass, extra):
