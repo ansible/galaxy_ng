@@ -1,4 +1,5 @@
 import pytest
+import time
 
 import concurrent.futures
 
@@ -65,8 +66,12 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
     gc = galaxy_client("admin")
 
-    matches, _ = search_collection_endpoint(
-        gc, repository_name=repo_name
-    )
+    for x in range(0, 10):
+        matches, _ = search_collection_endpoint(
+            gc, repository_name=repo_name
+        )
+        if matches == len(artifacts):
+            break
+        time.sleep(10)
 
     assert matches == len(artifacts)
