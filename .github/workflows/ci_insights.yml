@@ -48,8 +48,8 @@ jobs:
       - name: require approval
         run: sed -i.bak 's/# PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=false/PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true/' .compose.env
 
-      - name: disable signing
-        run: sed -i.bak 's/ENABLE_SIGNING=1/ENABLE_SIGNING=0/' .compose.env
+      - name: enable signing but do not setup a signing service
+        run: sed -i.bak 's/ENABLE_SIGNING=1/ENABLE_SIGNING=2/' .compose.env
 
       - name: build stack
         run: make docker/all
