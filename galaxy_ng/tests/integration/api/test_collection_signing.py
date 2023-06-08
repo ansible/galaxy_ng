@@ -613,10 +613,14 @@ def test_move_with_signing_service(ansible_config, artifact, upload_artifact, se
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
+    if settings.get("GALAXY_COLLECTION_SIGNING_SERVICE") is None:
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is NoneType")
+
     config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
-    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
+    # this should never be None ...
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE") or "ansible-default"
 
     resp = upload_artifact(config, api_client, artifact)
     resp = wait_for_task(api_client, resp)
@@ -627,6 +631,7 @@ def test_move_with_signing_service(ansible_config, artifact, upload_artifact, se
     collection_href = api_client(
         f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
     )["results"][0]["pulp_href"]
+    #import epdb; epdb.st()
     signing_href = api_client(
         f"pulp/api/v3/signing-services/?name={signing_service}"
     )["results"][0]["pulp_href"]
