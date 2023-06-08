@@ -520,6 +520,23 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     assert collection["signatures"][0]["signing_service"] is None
 
 
+@pytest.mark.fixme
+def test_move_with_no_signing_service_new(ansible_config, artifact, upload_artifact, settings):
+    """
+    Test signature validation on the pulp {repo_href}/move_collection_version/ api when
+    signatures are required.
+    """
+
+    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
+
+    if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
+
+    # import epdb; epdb.st()
+    pass
+
+
 def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when

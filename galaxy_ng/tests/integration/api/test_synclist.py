@@ -84,11 +84,13 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 @pytest.mark.synclist
 @pytest.mark.cloud_only
 @pytest.mark.slow_in_cloud
-def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact):
+def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings):
     """Edit SyncList object to exclude a collection,
     confirm see in content/{SyncList.name}/v3/excludes/
     confirm no change to content/{SyncList.name}/v3/collections/
     """
+    if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
+        pytest.skip("This test needs refactoring to work with signatures required on move.")
 
     # NOTE: on stage env, a toggle action does:
     # PUT https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/
