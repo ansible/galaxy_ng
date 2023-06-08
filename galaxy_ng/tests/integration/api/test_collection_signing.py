@@ -11,11 +11,13 @@ from tempfile import TemporaryDirectory
 
 import pytest
 import requests
-from orionutils.generator import build_collection
+# from orionutils.generator import build_collection
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
+    build_collection,
     copy_collection_version,
+    create_unused_namespace,
     get_all_collections_by_repo,
     get_all_namespaces,
     get_client,
@@ -521,6 +523,78 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     assert collection["signatures"][0]["signing_service"] is None
 
 
+def test_move_with_no_signing_service_not_superuser_signature_required(
+    ansible_config,
+    upload_artifact,
+    settings
+):
+    """
+    Test signature validation on the pulp {repo_href}/move_collection_version/ api when
+    signatures are required.
+    """
+    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
+
+    if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
+
+    # need the admin client
+    admin_config = ansible_config("admin")
+    admin_client = get_client(admin_config, request_token=True, require_auth=True)
+
+    # need a new regular user
+    partner_eng_config = ansible_config("partner_engineer")
+    partner_eng_client = get_client(partner_eng_config, request_token=True, require_auth=True)
+
+    # need a new namespace
+    namespace = create_unused_namespace(api_client=admin_client)
+
+    # make the collection
+    artifact = build_collection(namespace=namespace)
+
+    # use admin to upload the collection
+    upload_task = upload_artifact(admin_config, admin_client, artifact)
+    resp = wait_for_task(admin_client, upload_task)
+
+    # create a signature
+    signature = create_local_signature_for_tarball(artifact.filename)
+
+    # upload the signature
+    baseurl = admin_config.get('url').rstrip('/') + '/' + 'pulp/api/v3/'
+    staging_href = admin_client(
+        "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]["pulp_href"]
+    collection_href = admin_client(
+        f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+    )["results"][0]["pulp_href"]
+    signature_upload_response = requests.post(
+        baseurl + "content/ansible/collection_signatures/",
+        files={"file": signature},
+        data={
+            "repository": staging_href,
+            "signed_collection": collection_href,
+        },
+        auth=(admin_config.get('username'), admin_config.get('password')),
+    )
+    wait_for_task(admin_client, signature_upload_response.json())
+
+    # use the PE user to approve the collection
+    published_href = partner_eng_client(
+        "pulp/api/v3/repositories/ansible/ansible/?name=published")["results"][0]["pulp_href"]
+    resp = requests.post(
+        partner_eng_config["server"] + staging_href + "move_collection_version/",
+        json={
+            "collection_versions": [collection_href],
+            "destination_repositories": [published_href]
+        },
+        auth=(partner_eng_config["username"], partner_eng_config["password"])
+    )
+
+    assert resp.status_code == 202
+    assert "task" in resp.json()
+    wait_for_task(partner_eng_client, resp.json())
+    assert partner_eng_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
+
+
 def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
@@ -631,7 +705,6 @@ def test_move_with_signing_service(ansible_config, artifact, upload_artifact, se
     collection_href = api_client(
         f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
     )["results"][0]["pulp_href"]
-    #import epdb; epdb.st()
     signing_href = api_client(
         f"pulp/api/v3/signing-services/?name={signing_service}"
     )["results"][0]["pulp_href"]
