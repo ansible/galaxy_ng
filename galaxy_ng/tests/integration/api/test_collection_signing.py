@@ -21,6 +21,7 @@ from galaxy_ng.tests.integration.utils import (
     get_client,
     set_certification,
     wait_for_task,
+    create_local_signature_for_tarball,
 )
 
 log = logging.getLogger(__name__)
@@ -520,29 +521,11 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     assert collection["signatures"][0]["signing_service"] is None
 
 
-@pytest.mark.fixme
-def test_move_with_no_signing_service_new(ansible_config, artifact, upload_artifact, settings):
-    """
-    Test signature validation on the pulp {repo_href}/move_collection_version/ api when
-    signatures are required.
-    """
-
-    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-
-    if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
-        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
-
-    # import epdb; epdb.st()
-    pass
-
-
 def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
     """
-
     if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
 
@@ -562,7 +545,10 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
         f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
     )["results"][0]["pulp_href"]
 
-    # test moving collection without signature
+    ####################################################
+    # Test moving collection without signature
+    ####################################################
+
     resp = requests.post(
         config["server"] + staging_href + "move_collection_version/",
         json={
@@ -575,20 +561,29 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     assert resp.status_code == 400
     err = resp.json().get("collection_versions", None)
     assert err is not None
-
     assert "Signatures are required" in err
 
-    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
-
+    ####################################################
     # Test signing the collection before moving
-    sign_payload = {
-        "distro_base_path": "staging",
-        "namespace": artifact.namespace,
-        "collection": artifact.name,
-        "version": artifact.version,
-    }
-    sign_on_demand(api_client, signing_service, **sign_payload)
+    ####################################################
 
+    # make signature
+    signature = create_local_signature_for_tarball(artifact.filename)
+
+    # upload signature
+    baseurl = config.get('url').rstrip('/') + '/' + 'pulp/api/v3/'
+    signature_upload_response = requests.post(
+        baseurl + "content/ansible/collection_signatures/",
+        files={"file": signature},
+        data={
+            "repository": staging_href,
+            "signed_collection": collection_href,
+        },
+        auth=(config.get('username'), config.get('password')),
+    )
+    wait_for_task(api_client, signature_upload_response.json())
+
+    # move the collection
     resp = requests.post(
         config["server"] + staging_href + "move_collection_version/",
         json={

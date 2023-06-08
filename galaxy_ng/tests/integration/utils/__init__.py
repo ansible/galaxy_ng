@@ -45,12 +45,14 @@ from .sync import (
     perform_sync,
 )
 from .pulp_interfaces import AnsibleDistroAndRepo
+from .signatures import create_local_signature_for_tarball
 
 
 __all__ = (
     get_client,
     ansible_galaxy,
     copy_collection_version,
+    create_local_signature_for_tarball,
     SocialGithubClient,
     UIClient,
     CollectionInspector,
