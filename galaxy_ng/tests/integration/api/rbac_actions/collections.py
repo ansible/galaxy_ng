@@ -410,15 +410,10 @@ def view_ansible_repository_version(user, password, expect_pass, extra):
 
 
 def rebuild_metadata_ansible_repository_version(user, password, expect_pass, extra):
-    versions_href = extra["custom_repo"].get_repo()["latest_version_href"]
-
-    logger.warning(f'{extra["custom_repo"].get_repo()}')
-    logger.warning(f'{versions_href}')
-    logger.warning(f'{SERVER}')
-    logger.warning(f'{extra["custom_repo"]}')
+    ansible_repo = _create_ansible_repo_common(ADMIN_USER, ADMIN_PASSWORD, True).json()
 
     response = requests.post(
-        f"{SERVER}{versions_href}rebuild_metadata/",
+        f"{SERVER}{ansible_repo['latest_version_href']}rebuild_metadata/",
         auth=(user['username'], password),
     )
     assert_pass(expect_pass, response.status_code, 202, 403)
