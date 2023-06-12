@@ -102,8 +102,8 @@ def build_collection(
 
     # use order of precedence to set the config ...
     for ckey in ['namespace', 'name', 'version', 'dependencies', 'tags']:
-        if ckey in globals() and globals()[ckey] is not None:
-            config[ckey] = globals()[ckey]
+        if ckey in locals() and locals()[ckey] is not None:
+            config[ckey] = locals()[ckey]
         elif config.get(ckey):
             pass
         else:
@@ -184,6 +184,10 @@ def build_collection(
             runtime_file = os.path.join(meta_dir, 'runtime.yml')
             with open(runtime_file, 'w') as f:
                 f.write(yaml.dump({'requires_ansible': requires_ansible}))
+
+        # need a CHANGELOG file ...
+        with open(os.path.join(basedir, 'CHANGELOG.md'), 'w') as f:
+            f.write('')
 
         if extra_files:
             raise Exception('extra_files not yet implemented')
