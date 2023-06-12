@@ -14,3 +14,4 @@ exclude mkdocs.yml
 exclude netlify.toml
 exclude docs
 exclude docs_requirements.txt
+exclude .readthedocs.yaml
