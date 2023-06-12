@@ -12,9 +12,10 @@ from tempfile import TemporaryDirectory
 import pytest
 import requests
 
+from orionutils.generator import build_collection
+
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
-    build_collection,
     copy_collection_version,
     create_unused_namespace,
     get_all_collections_by_repo,
