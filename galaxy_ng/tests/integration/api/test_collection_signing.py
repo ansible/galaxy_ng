@@ -16,6 +16,7 @@ from orionutils.generator import build_collection
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
+    build_collection as galaxy_build_collection,
     copy_collection_version,
     create_unused_namespace,
     get_all_collections_by_repo,
@@ -557,7 +558,7 @@ def test_move_with_no_signing_service_not_superuser_signature_required(
     namespace = create_unused_namespace(api_client=admin_client)
 
     # make the collection
-    artifact = build_collection(namespace=namespace)
+    artifact = galaxy_build_collection(namespace=namespace)
 
     # use admin to upload the collection
     upload_task = upload_artifact(admin_config, admin_client, artifact)
