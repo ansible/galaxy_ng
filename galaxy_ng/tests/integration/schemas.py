@@ -158,7 +158,12 @@ schema_featureflags = {
         'can_upload_signatures': {'type': 'boolean'},
         'collection_auto_sign': {'type': 'boolean'},
         'display_signatures': {'type': 'boolean'},
-        'execution_environments': {'type': 'boolean'},
+        'execution_environments': {
+            'anyOf': [
+                {'type': 'string'},
+                {'type': 'boolean'}
+            ]
+        },
         'container_signing': {'type': 'boolean'},
         'ai_deny_index': {'type': 'boolean'},
         '_messages': {'type': 'array'},
