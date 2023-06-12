@@ -8,6 +8,7 @@ from .collection_inspector import CollectionInspector
 from .collections import (
     build_collection,
     copy_collection_version,
+    delete_all_collections,
     upload_artifact,
     modify_artifact,
     get_collections_namespace_path,
@@ -87,4 +88,5 @@ __all__ = (
     wait_for_all_tasks,
     gen_string,
     AnsibleDistroAndRepo,
+    delete_all_collections
 )

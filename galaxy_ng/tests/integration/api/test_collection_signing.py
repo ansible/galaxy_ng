@@ -11,7 +11,6 @@ from tempfile import TemporaryDirectory
 
 import pytest
 import requests
-# from orionutils.generator import build_collection
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
@@ -73,6 +72,13 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
     sign_url = sign_url or f"{api_prefix}/_ui/v1/collection_signing/"
     sign_payload = {"signing_service": signing_service, **payload}
+
+    '''
+    # need to get the x-repo list now ...
+    cvs = get_all_repository_collection_versions(api_client=api_client)
+    import epdb; epdb.st()
+    '''
+
     resp = api_client(sign_url, method="POST", args=sign_payload)
     log.info("Sign Task: %s", resp)
     # FIXME - pulp tasks do not seem to accept token auth, so no way to check task progress

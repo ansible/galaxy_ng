@@ -96,29 +96,23 @@ def build_collection(
         config = {
             "namespace": None,
             "name": None,
+            "version": None,
             "tags": []
         }
 
-    if namespace is not None:
-        config['namespace'] = namespace
-    else:
-        config['namespace'] = USERNAME_PUBLISHER
-
-    if name is not None:
-        config['name'] = name
-    else:
-        config['name'] = randstr()
-
-    if version is not None:
-        config['version'] = version
-    else:
-        config['version'] = '1.0.0'
-
-    if dependencies is not None:
-        config['dependencies'] = dependencies
-
-    if tags is not None:
-        config['tags'] = tags
+    # use order of precedence to set the config ...
+    for ckey in ['namespace', 'name', 'version', 'dependencies', 'tags']:
+        if ckey in globals() and globals()[ckey] is not None:
+            config[ckey] = globals()[ckey]
+        elif config.get(ckey):
+            pass
+        else:
+            if ckey == 'namespace':
+                config[ckey] = USERNAME_PUBLISHER
+            elif ckey == 'name':
+                config[ckey] = randstr()
+            elif ckey == 'version':
+                config[ckey] = '1.0.0'
 
     # workaround for cloud importer config
     if 'tools' not in config['tags']:
@@ -135,7 +129,7 @@ def build_collection(
             extra_files=extra_files
         )
 
-    # orionutils uses the key to "randomize" the name
+    # orionutils uses the key to prefix the name
     if key is not None:
         name = config['name'] + "_" + key
         config['name'] = name
@@ -588,6 +582,43 @@ def get_all_repository_collection_versions(api_client):
     return rcv
 
 
+def delete_all_collections(api_client):
+    """Deletes all collections regardless of dependency chains."""
+
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
+    # iterate until none are left
+    while True:
+        cvs = get_all_repository_collection_versions(api_client)
+        cvs = list(cvs.keys())
+        if len(cvs) == 0:
+            break
+
+        # make repo+collection keys
+        delkeys = [(x[0], x[1], x[2]) for x in cvs]
+        delkeys = sorted(set(delkeys))
+
+        # try to delete each one
+        for delkey in delkeys:
+            crepo = delkey[0]
+            namespace_name = delkey[1]
+            cname = delkey[2]
+
+            # if other collections require this one, the delete will fail
+            resp = None
+            try:
+                resp = api_client(
+                    (f'{api_prefix}/v3/plugin/ansible/content'
+                        f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
+                    method='DELETE'
+                )
+            except GalaxyError:
+                pass
+
+            if resp is not None:
+                wait_for_task(api_client, resp, timeout=10000)
+
+
 def delete_all_collections_in_namespace(api_client, namespace_name):
 
     assert api_client is not None, "api_client is a required param"
@@ -605,10 +636,14 @@ def delete_all_collections_in_namespace(api_client, namespace_name):
         crepo = ctuple[0]
         cname = ctuple[2]
 
-        recursvive_delete(api_client, namespace_name, cname, crepo)
+        recursive_delete(api_client, namespace_name, cname, crepo)
 
 
 def recursvive_delete(api_client, namespace_name, cname, crepo):
+    return recursive_delete(api_client, namespace_name, cname, crepo)
+
+
+def recursive_delete(api_client, namespace_name, cname, crepo):
     """Recursively delete a collection along with every other collection that depends on it."""
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
 
