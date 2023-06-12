@@ -332,7 +332,7 @@ def test_api_ui_v1_feature_flags(ansible_config):
         validate_json(instance=ds, schema=schema_featureflags)
 
         # assert ds['ai_deny_index'] is False
-        assert ds['execution_environments'] in [True or 'True']
+        assert ds['execution_environments'] in [True, 'True']
         assert ds['legacy_roles'] is False
 
 
