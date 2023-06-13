@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0106_alter_artifactdistribution_distribution_ptr_and_more"),
-        ("galaxy", "0039_legacyroledownloadcount"),
+        ("galaxy", "0040_fix_collection_remote_pulp_type"),
     ]
 
     operations = [
