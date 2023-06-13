@@ -11,16 +11,20 @@ from tempfile import TemporaryDirectory
 
 import pytest
 import requests
+
 from orionutils.generator import build_collection
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
+    build_collection as galaxy_build_collection,
     copy_collection_version,
+    create_unused_namespace,
     get_all_collections_by_repo,
     get_all_namespaces,
     get_client,
     set_certification,
     wait_for_task,
+    create_local_signature_for_tarball,
 )
 
 log = logging.getLogger(__name__)
@@ -70,6 +74,13 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
     sign_url = sign_url or f"{api_prefix}/_ui/v1/collection_signing/"
     sign_payload = {"signing_service": signing_service, **payload}
+
+    '''
+    # need to get the x-repo list now ...
+    cvs = get_all_repository_collection_versions(api_client=api_client)
+    import epdb; epdb.st()
+    '''
+
     resp = api_client(sign_url, method="POST", args=sign_payload)
     log.info("Sign Task: %s", resp)
     # FIXME - pulp tasks do not seem to accept token auth, so no way to check task progress
@@ -520,12 +531,83 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     assert collection["signatures"][0]["signing_service"] is None
 
 
+def test_move_with_no_signing_service_not_superuser_signature_required(
+    ansible_config,
+    upload_artifact,
+    settings
+):
+    """
+    Test signature validation on the pulp {repo_href}/move_collection_version/ api when
+    signatures are required.
+    """
+    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
+
+    if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
+        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
+
+    # need the admin client
+    admin_config = ansible_config("admin")
+    admin_client = get_client(admin_config, request_token=True, require_auth=True)
+
+    # need a new regular user
+    partner_eng_config = ansible_config("partner_engineer")
+    partner_eng_client = get_client(partner_eng_config, request_token=True, require_auth=True)
+
+    # need a new namespace
+    namespace = create_unused_namespace(api_client=admin_client)
+
+    # make the collection
+    artifact = galaxy_build_collection(namespace=namespace)
+
+    # use admin to upload the collection
+    upload_task = upload_artifact(admin_config, admin_client, artifact)
+    resp = wait_for_task(admin_client, upload_task)
+
+    # create a signature
+    signature = create_local_signature_for_tarball(artifact.filename)
+
+    # upload the signature
+    baseurl = admin_config.get('url').rstrip('/') + '/' + 'pulp/api/v3/'
+    staging_href = admin_client(
+        "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]["pulp_href"]
+    collection_href = admin_client(
+        f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+    )["results"][0]["pulp_href"]
+    signature_upload_response = requests.post(
+        baseurl + "content/ansible/collection_signatures/",
+        files={"file": signature},
+        data={
+            "repository": staging_href,
+            "signed_collection": collection_href,
+        },
+        auth=(admin_config.get('username'), admin_config.get('password')),
+    )
+    wait_for_task(admin_client, signature_upload_response.json())
+
+    # use the PE user to approve the collection
+    published_href = partner_eng_client(
+        "pulp/api/v3/repositories/ansible/ansible/?name=published")["results"][0]["pulp_href"]
+    resp = requests.post(
+        partner_eng_config["server"] + staging_href + "move_collection_version/",
+        json={
+            "collection_versions": [collection_href],
+            "destination_repositories": [published_href]
+        },
+        auth=(partner_eng_config["username"], partner_eng_config["password"])
+    )
+
+    assert resp.status_code == 202
+    assert "task" in resp.json()
+    wait_for_task(partner_eng_client, resp.json())
+    assert partner_eng_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
+
+
 def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
     """
-
     if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
 
@@ -545,7 +627,10 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
         f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
     )["results"][0]["pulp_href"]
 
-    # test moving collection without signature
+    ####################################################
+    # Test moving collection without signature
+    ####################################################
+
     resp = requests.post(
         config["server"] + staging_href + "move_collection_version/",
         json={
@@ -558,20 +643,29 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     assert resp.status_code == 400
     err = resp.json().get("collection_versions", None)
     assert err is not None
-
     assert "Signatures are required" in err
 
-    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
-
+    ####################################################
     # Test signing the collection before moving
-    sign_payload = {
-        "distro_base_path": "staging",
-        "namespace": artifact.namespace,
-        "collection": artifact.name,
-        "version": artifact.version,
-    }
-    sign_on_demand(api_client, signing_service, **sign_payload)
+    ####################################################
 
+    # make signature
+    signature = create_local_signature_for_tarball(artifact.filename)
+
+    # upload signature
+    baseurl = config.get('url').rstrip('/') + '/' + 'pulp/api/v3/'
+    signature_upload_response = requests.post(
+        baseurl + "content/ansible/collection_signatures/",
+        files={"file": signature},
+        data={
+            "repository": staging_href,
+            "signed_collection": collection_href,
+        },
+        auth=(config.get('username'), config.get('password')),
+    )
+    wait_for_task(api_client, signature_upload_response.json())
+
+    # move the collection
     resp = requests.post(
         config["server"] + staging_href + "move_collection_version/",
         json={
@@ -601,10 +695,14 @@ def test_move_with_signing_service(ansible_config, artifact, upload_artifact, se
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
+    if settings.get("GALAXY_COLLECTION_SIGNING_SERVICE") is None:
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is NoneType")
+
     config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
-    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
+    # this should never be None ...
+    signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE") or "ansible-default"
 
     resp = upload_artifact(config, api_client, artifact)
     resp = wait_for_task(api_client, resp)

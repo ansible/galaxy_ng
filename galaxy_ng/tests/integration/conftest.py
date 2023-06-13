@@ -422,7 +422,7 @@ def certifiedv2(ansible_config, artifact):
 
 
 @pytest.fixture(scope="function")
-def uncertifiedv2(ansible_config, artifact):
+def uncertifiedv2(ansible_config, artifact, settings):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...

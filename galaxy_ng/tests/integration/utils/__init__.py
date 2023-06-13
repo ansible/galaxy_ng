@@ -8,6 +8,7 @@ from .collection_inspector import CollectionInspector
 from .collections import (
     build_collection,
     copy_collection_version,
+    delete_all_collections,
     upload_artifact,
     modify_artifact,
     get_collections_namespace_path,
@@ -45,12 +46,14 @@ from .sync import (
     perform_sync,
 )
 from .pulp_interfaces import AnsibleDistroAndRepo
+from .signatures import create_local_signature_for_tarball
 
 
 __all__ = (
     get_client,
     ansible_galaxy,
     copy_collection_version,
+    create_local_signature_for_tarball,
     SocialGithubClient,
     UIClient,
     CollectionInspector,
@@ -85,4 +88,5 @@ __all__ = (
     wait_for_all_tasks,
     gen_string,
     AnsibleDistroAndRepo,
+    delete_all_collections
 )

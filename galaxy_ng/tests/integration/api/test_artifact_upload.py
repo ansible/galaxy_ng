@@ -329,13 +329,16 @@ def test_long_field_values(ansible_config, upload_artifact, field):
 )
 @pytest.mark.importer
 @pytest.mark.min_hub_version("4.6dev")
-def test_ansible_requires(ansible_config, upload_artifact, spec):
+def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
     """
     Test handling of POSTs to the artifact endpoint neglecting to submit a file.
 
     Also verifies that the collections endpoint properly returns a `requires_ansible` field,
     and that the returned field matches the collection metadata.
     """
+    if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
+        pytest.skip("This test needs refactoring to work with signatures required on move.")
+
     config = ansible_config("basic_user")
     api_client = get_client(config)
     _, requires_ansible, result = spec
