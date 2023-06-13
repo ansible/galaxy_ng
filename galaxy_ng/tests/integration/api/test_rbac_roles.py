@@ -81,7 +81,7 @@ from .rbac_actions.collections import (
 
     # ansible repository version
     view_ansible_repository_version,
-    # rebuild_metadata_ansible_repository_version,
+    rebuild_metadata_ansible_repository_version,
     repair_ansible_repository_version,
     delete_ansible_repository_version,
 
@@ -215,8 +215,7 @@ GLOBAL_ACTIONS = {
 
     # ansible repository version
     view_ansible_repository_version,
-    # FIXME: https://github.com/pulp/pulp_ansible/pull/1311
-    # rebuild_metadata_ansible_repository_version,
+    rebuild_metadata_ansible_repository_version,
     repair_ansible_repository_version,
     delete_ansible_repository_version,
 
@@ -305,7 +304,7 @@ OBJECT_ROLES_TO_TEST = {
 
         # ansible repository version
         view_ansible_repository_version,
-        # rebuild_metadata_ansible_repository_version,
+        rebuild_metadata_ansible_repository_version,
         repair_ansible_repository_version,
         delete_ansible_repository_version,
         collection_repo_list_roles,
@@ -398,7 +397,7 @@ ROLES_TO_TEST = {
 
         # ansible repository version
         view_ansible_repository_version,
-        # rebuild_metadata_ansible_repository_version,
+        rebuild_metadata_ansible_repository_version,
         repair_ansible_repository_version,
         delete_ansible_repository_version,
 
@@ -481,7 +480,7 @@ ROLES_TO_TEST = {
 
         # ansible repository version
         view_ansible_repository_version,
-        # rebuild_metadata_ansible_repository_version,
+        rebuild_metadata_ansible_repository_version,
         repair_ansible_repository_version,
         delete_ansible_repository_version,
 
@@ -525,7 +524,7 @@ ROLES_TO_TEST = {
 
         # ansible repository version
         view_ansible_repository_version,
-        # rebuild_metadata_ansible_repository_version,
+        rebuild_metadata_ansible_repository_version,
         repair_ansible_repository_version,
         delete_ansible_repository_version,
         collection_repo_list_roles,
