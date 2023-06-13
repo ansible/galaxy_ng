@@ -131,7 +131,7 @@ requirements = [
     "boto3",
     "distro",
     # "django-currentuser==0.5.3"
-    "django-currentuser@git+https://github.com/zsoldosp/django-currentuser@master",
+    # "django-currentuser@git+https://github.com/zsoldosp/django-currentuser@master",
 ]
 
 
