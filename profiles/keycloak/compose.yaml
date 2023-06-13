@@ -3,13 +3,13 @@
 version: "3.7"
 
 services:
-  ui:
-    environment:
-      - "API_PROXY_HOST=pulp"
-      - "API_PROXY_PORT={API_PORT}"
-      - "DEPLOYMENT_MODE=standalone"
-      - "API_BASE_PATH=/api/galaxy/"
-      - "UI_EXTERNAL_LOGIN_URI={API_PROTOCOL}://{API_HOST}:{API_PORT}/login"
+  # ui:
+  #   environment:
+  #     - "API_PROXY_HOST=pulp"
+  #     - "API_PROXY_PORT={API_PORT}"
+  #     - "DEPLOYMENT_MODE=standalone"
+  #     - "API_BASE_PATH=/api/galaxy/"
+  #     - "UI_EXTERNAL_LOGIN_URI={API_PROTOCOL}://{API_HOST}:{API_PORT}/login"
 
   keycloak:
     image: quay.io/keycloak/keycloak:legacy
