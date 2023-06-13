@@ -1,6 +1,4 @@
 import subprocess
-from urllib.parse import urlparse
-
 import pytest
 from ..utils import (
     get_client,
@@ -10,22 +8,12 @@ from ..utils import (
 )
 from ansible.galaxy.api import GalaxyError
 
-from ..utils.iqe_utils import pull_and_tag_test_image
-
-
-# this is to be enabled when https://github.com/ansible/galaxy_ng/pull/1627
-# is merged
-
 
 @pytest.mark.private_hub
 @pytest.mark.min_hub_version("4.7dev")
 def test_delete_ee_and_content(ansible_config):
     config = ansible_config("admin")
-
-    container_engine = config["container_engine"]
-    url = config['url']
-    parsed_url = urlparse(url)
-    cont_reg = parsed_url.netloc
+    api_prefix = config.get("api_prefix").rstrip("/")
 
     # Pull alpine image
     ensure_test_container_is_pulled(container="alpine")
@@ -33,7 +21,14 @@ def test_delete_ee_and_content(ansible_config):
     img = tag_hub_with_registry(config, "alpine", "alpine:latest")
 
     # Push image to local registry
-    subprocess.check_call(["docker", "push", "localhost:5001/alpine:latest"])
+    subprocess.check_call([
+        "podman",
+        "push",
+        "--creds",
+        "admin:admin",
+        img,
+        "--tls-verify=false"
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
     # Get an API client running with admin user credentials
     client = get_client(
@@ -66,8 +61,7 @@ def test_delete_ee_and_content(ansible_config):
 
     # Delete repository, contents, and artifacts
     delete_response = client(f"{api_prefix}/v3/"
-                             "plugin/execution-environments/repositories/alpine/",
-                             method='DELETE')
+                             "plugin/execution-environments/repositories/alpine/", method='DELETE')
     resp = wait_for_task(client, delete_response, timeout=10000)
     assert resp["state"] == "completed"
 
@@ -98,18 +92,33 @@ def test_shared_content_is_not_deleted(ansible_config):
     img = tag_hub_with_registry(config, "alpine", "alpine1:latest")
 
     # Push image to local registry
-    subprocess.check_call(["docker", "push", "localhost:5001/alpine1:latest"])
+    subprocess.check_call([
+        "podman",
+        "push",
+        "--creds",
+        "admin:admin",
+        img,
+        "--tls-verify=false"
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
     # Copy 'alpine1' and rename to 'alpine2'
-    subprocess.check_call(["docker", "tag", "alpine", "localhost:5001/alpine2:latest"])
-    subprocess.check_call(["docker", "push", "localhost:5001/alpine2:latest"])
+    img = tag_hub_with_registry(config, "alpine", "alpine2:latest")
+
+    # Push image to local registry
+    subprocess.check_call([
+        "podman",
+        "push",
+        "--creds",
+        "admin:admin",
+        img,
+        "--tls-verify=false"
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
     # Get an API client running with admin user credentials
     client = get_client(
         config=config,
         request_token=True,
     )
-
     api_prefix = client.config.get("api_prefix").rstrip("/")
 
     # Select the distribution for alpine1 and alpine2.
@@ -149,8 +158,7 @@ def test_shared_content_is_not_deleted(ansible_config):
 
     # Delete repository, contents, and artifacts for alpine1, NOT alpine2
     delete_response = client(f"{api_prefix}/v3/"
-                             "plugin/execution-environments/repositories/alpine1/",
-                             method='DELETE')
+                             "plugin/execution-environments/repositories/alpine1/", method='DELETE')
     resp = wait_for_task(client, delete_response, timeout=10000)
     assert resp["state"] == "completed"
 
@@ -169,9 +177,3 @@ def test_shared_content_is_not_deleted(ansible_config):
                 raise Exception(ge)
 
         assert success
-
-    delete_response = client(f"{api_prefix}/v3/"
-                             "plugin/execution-environments/repositories/alpine2/",
-                             method='DELETE')
-    resp = wait_for_task(client, delete_response, timeout=10000)
-    assert resp["state"] == "completed"
