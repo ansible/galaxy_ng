@@ -14,7 +14,7 @@ To learn more about Pulp, [view the Pulp project page](https://pulpproject.org/)
 
 ## Documentation
 
-Project documentation is hosted on [netlify](https://galaxyng.netlify.app/).
+Project documentation is hosted on [Read The Docs](http://galaxy-ng.readthedocs.io/).
 
 ## OpenAPI Spec
 
