@@ -17,7 +17,7 @@ MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',
     # END: Pulp standard middleware
     'django_prometheus.middleware.PrometheusAfterMiddleware',
-    #'django_currentuser.middleware.ThreadLocalUserMiddleware',
+    # 'django_currentuser.middleware.ThreadLocalUserMiddleware',
     'galaxy_ng.middleware.ThreadLocalUserMiddleware',
 ]
 

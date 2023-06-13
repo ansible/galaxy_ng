@@ -45,7 +45,10 @@ class RepositoryFilter(filterset.FilterSet):
         }
 
     def has_permissions(self, queryset, name, value):
-        print(f'GALAXY_NG repositoryfilter has_permissions queryset:{queryset} name:{name} value:{value}')
+        log.debug(
+            'GALAXY_NG repositoryfilter has_permissions queryset:'
+            + f'{queryset} name:{name} value:{value}'
+        )
         perms = self.request.query_params.getlist(name)
         namespaces = get_objects_for_user(
             self.request.user, perms, qs=container_models.ContainerNamespace.objects.all())
