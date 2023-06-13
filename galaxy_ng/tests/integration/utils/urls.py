@@ -99,10 +99,7 @@ def url_safe_join(server, url):
     # url contains the base url
     if url.startswith(new_url) and server_path in url_path:
         return (
-            new_url
-            + server_path.rstrip('/')
-            + '/'
-            + url_path.replace(server_path, '').lstrip('/')
+            new_url + url_path
         )
 
     # url path is a pulp root

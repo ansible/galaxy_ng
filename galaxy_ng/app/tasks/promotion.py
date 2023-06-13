@@ -15,7 +15,11 @@ AUTO_SIGN = settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False)
 def auto_approve(src_repo_pk, cv_pk, ns_pk=None):
     published_repos = AnsibleRepository.objects.filter(pulp_labels__pipeline="approved")
     published_pks = list(published_repos.values_list("pk", flat=True))
-    staging_repo = AnsibleRepository.objects.get(pk=src_repo_pk)
+
+    staging_repos = AnsibleRepository.objects.filter(pulp_labels__pipeline="staging")
+    staging_pks = list(staging_repos.values_list("pk", flat=True))
+
+    source_repo = AnsibleRepository.objects.get(pk=src_repo_pk)
 
     add = [cv_pk]
     if ns_pk:
@@ -35,23 +39,25 @@ def auto_approve(src_repo_pk, cv_pk, ns_pk=None):
     # Sign the collection if auto sign is enabled
     if AUTO_SIGN:
         sign(
-            repository_href=staging_repo,
+            repository_href=source_repo,
             content_hrefs=[cv_pk],
             signing_service_href=signing_service.pk
         )
 
-    # move the new collection (along with all it's associated objects) into
-    # all of the approved repos.
-    dispatch(
-        move_collection,
-        exclusive_resources=published_repos,
-        shared_resources=[staging_repo],
-        kwargs={
-            "cv_pk_list": [cv_pk],
-            "src_repo_pk": staging_repo.pk,
-            "dest_repo_list": published_pks,
-        }
-    )
+    # if source repo isn't staging, don't move it to published repos
+    if source_repo.pk in staging_pks:
+        # move the new collection (along with all it's associated objects) into
+        # all of the approved repos.
+        dispatch(
+            move_collection,
+            exclusive_resources=published_repos,
+            shared_resources=[source_repo],
+            kwargs={
+                "cv_pk_list": [cv_pk],
+                "src_repo_pk": source_repo.pk,
+                "dest_repo_list": published_pks,
+            }
+        )
 
 
 def call_auto_approve_task(collection_version, repo, ns_pk):

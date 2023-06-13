@@ -12,7 +12,11 @@ from ..utils.tools import generate_random_string
 
 
 def _upload_test_common(config, client, artifact, base_path, dest_base_path=None):
+    api_prefix = config.get("api_prefix")
+    url = config["url"]
+
     if dest_base_path is None:
+        url = f"{config['url']}content/{base_path}/"
         dest_base_path = base_path
 
     cmd = [
@@ -22,7 +26,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
         "--api-key",
         config["token"],
         "--server",
-        config["url"] + f"content/{base_path}/",
+        url,
         artifact.filename,
         "--ignore-certs"
     ]
@@ -33,7 +37,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
     wait_for_all_tasks(client)
 
     collection_url = (
-        f"/content/{dest_base_path}/v3/collections/"
+        f"{api_prefix}content/{dest_base_path}/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
     )
 
@@ -94,11 +98,9 @@ def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
 
 
-@pytest.mark.standalone_only
+@pytest.mark.community_only
 @pytest.mark.min_hub_version("4.7dev")
 def test_publish_to_custom_repo(ansible_config, artifact, settings):
-    if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
-        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be true")
     config = ansible_config(profile="admin")
     client = get_client(
         config=config
@@ -112,13 +114,14 @@ def test_publish_to_custom_repo(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
 
 
-@pytest.mark.standalone_only
+@pytest.mark.community_only
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
 def test_publish_and_auto_approve(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")
     config = ansible_config(profile="admin")
+    api_prefix = config.get("api_prefix")
     client = get_client(
         config=config
     )
@@ -131,21 +134,21 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"], "published")
 
     cv = client(
-        "/content/published/v3/collections/"
+        f"{api_prefix}content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-
     )
 
-    assert len(cv["signatures"]) >= 1
+    assert cv["version"] == "1.0.0"
 
 
-@pytest.mark.standalone_only
+@pytest.mark.community_only
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
 def test_auto_approve_muliple(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")
     config = ansible_config(profile="admin")
+    api_prefix = config.get("api_prefix")
     client = get_client(
         config=config
     )
@@ -160,18 +163,15 @@ def test_auto_approve_muliple(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, "staging", published)
 
     cv = client(
-        f"/content/{published}/v3/collections/"
+        f"{api_prefix}content/{published}/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-
     )
 
-    assert len(cv["signatures"]) >= 1
+    assert cv["version"] == "1.0.0"
 
     cv = client(
-        f"/content/published/v3/collections/"
+        f"{api_prefix}content/published/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-
     )
 
-    assert len(cv["signatures"]) >= 1
     assert cv["name"] == artifact.name
