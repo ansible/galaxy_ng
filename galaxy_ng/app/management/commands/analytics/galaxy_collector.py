@@ -222,28 +222,9 @@ def _simple_csv(full_path, file_name, query, max_data_size=209715200):
     file_path = _get_file_path(full_path, file_name)
     tfile = _get_csv_splitter(file_path, max_data_size)
 
-    # copy_expert nor copy_to nor COPY are supported by psycopg
-    query = query.replace('\n', ' ')
-    query = query.replace('    ', '')
-    query = query.replace('COPY (', '')
-    query = query.replace(') TO STDOUT WITH CSV HEADER', '')
-    query = query.strip()
-
-    # use a normal .execute to get the data as rows ...
     with Collector.db_connection().cursor() as cursor:
-        cursor.execute(query)
-        column_names = [col[0] for col in cursor.description]
-        rows = cursor.fetchall()
+        cursor.copy_expert(query, tfile)
 
-    # csv'ify the data ...
-    csv_data = ','.join(column_names) + '\n'
-    for row in rows:
-        csv_data += ','.join([str(x) for x in row]) + '\n'
-
-    # do what copy_expert would have done ...
-    tfile.write(csv_data)
-
-    # return the tmp file path as identified by the splitter
     return tfile.file_list()
 
 

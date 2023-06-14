@@ -1,8 +1,7 @@
 from django.db import connection
 
 from insights_analytics_collector import Collector as BaseCollector
-from galaxy_ng.app.management.commands.analytics.package import S3Package
-from galaxy_ng.app.management.commands.analytics.package import LocalPackage
+from galaxy_ng.app.management.commands.analytics.package import Package
 
 
 class Collector(BaseCollector):
@@ -17,7 +16,7 @@ class Collector(BaseCollector):
 
     @staticmethod
     def _package_class():
-        return S3Package
+        return Package
 
     def get_last_gathering(self):
         return self._last_gathering()
@@ -45,10 +44,3 @@ class Collector(BaseCollector):
     def _save_last_gather(self):
         # doing a full scan database dump
         pass
-
-
-class LocalCollector(Collector):
-
-    @staticmethod
-    def _package_class():
-        return LocalPackage
