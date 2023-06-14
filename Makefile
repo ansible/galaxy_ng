@@ -103,6 +103,34 @@ docker/test/integration/container:      ## Run integration tests.
 	docker build . -f dev/standalone/integration-test-dockerfile -t galaxy-integration-runner
 	docker run -it --rm --add-host=localhost:host-gateway galaxy-integration-runner $(FLAGS)
 
+.PHONY: oci-env/integration
+oci-env/integration:
+	oci-env exec bash /src/galaxy_ng/profiles/base/run_integration.sh $(FLAGS)
+
+.PHONY: gh-action/ldap
+gh-action/ldap:
+	python3 dev/oci_env_integration/actions/ldap.py
+
+.PHONY: gh-action/keycloak
+gh-action/keycloak:
+	python3 dev/oci_env_integration/actions/keycloak.py
+
+.PHONY: gh-action/rbac
+gh-action/rbac:
+	python3 dev/oci_env_integration/actions/rbac.py
+
+.PHONY: gh-action/insights
+gh-action/insights:
+	python3 dev/oci_env_integration/actions/insights.py
+
+.PHONY: gh-action/standalone
+gh-action/standalone:
+	python3 dev/oci_env_integration/actions/standalone.py
+
+.PHONY: gh-action/certified-sync
+gh-action/certified-sync:
+	python3 dev/oci_env_integration/actions/certified-sync.py
+
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from python script
 	$(call exec_or_run, api, "/bin/bash", "-c", "/entrypoint.sh manage shell < app/dev/common/setup_test_data.py")

@@ -366,6 +366,22 @@
         auth_password: admin
       register: hub_admin_create
 
+    - name: Add the hubadmin role to the admin_staff group
+      community.general.keycloak_client_rolemapping:
+        roles: 
+          - name: hubadmin
+        group_name: "admin_staff"
+        # uid: "8b21aa1f-d7be-4711-9ad7-4c24e326edc2"
+        realm: aap
+        client_id: automation-hub
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: http://keycloak:8080/auth
+        auth_realm: master
+        auth_username: admin
+        auth_password: admin
+      # loop: "{{ user_list.json}}"
+
     - name: Get realm public key
       uri:
         url: "http://keycloak:8080/auth/realms/aap"

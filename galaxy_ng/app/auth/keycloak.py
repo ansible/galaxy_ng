@@ -35,22 +35,27 @@ class KeycloakBasicAuth(BasicAuthentication):
         )
 
         if response.status_code == http_code.HTTP_200_OK:
+            # requests to the content app don't have all the attributes for
+            # this to work, so catch any attribute errors and continue to the
+            # next authentication step
+            try:
+                # load social auth django strategy
+                strategy = load_strategy(request)
+                backend = KeycloakOAuth2(strategy)
 
-            # load social auth django strategy
-            strategy = load_strategy(request)
-            backend = KeycloakOAuth2(strategy)
+                token_data = backend.user_data(response.json()['access_token'])
 
-            token_data = backend.user_data(response.json()['access_token'])
+                # The django social auth strategy uses data from the JWT token in the KeycloackOAuth2
+                # backend to create a new user and update it with the data from the token. This
+                # should return a django user instance.
+                user = strategy.authenticate(backend, response=token_data)
 
-            # The django social auth strategy uses data from the JWT token in the KeycloackOAuth2
-            # backend to create a new user and update it with the data from the token. This
-            # should return a django user instance.
-            user = strategy.authenticate(backend, response=token_data)
+                if user is None:
+                    raise exceptions.AuthenticationFailed(_("Authentication failed."))
 
-            if user is None:
-                raise exceptions.AuthenticationFailed(_("Authentication failed."))
-
-            return (user, None)
+                return (user, None)
+            except AttributeError:
+                pass
 
         else:
             # If keycloak basic auth fails, try regular basic auth.
