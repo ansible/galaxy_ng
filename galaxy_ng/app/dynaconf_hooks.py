@@ -252,7 +252,7 @@ def configure_logging(settings: Dynaconf) -> Dict[str, Any]:
     if data["GALAXY_ENABLE_API_ACCESS_LOG"]:
         data["INSTALLED_APPS"] = ["automated_logging", "dynaconf_merge"]
         data["MIDDLEWARE"] = [
-            "automated_logging.middleware.AutomatedLoggingMiddleware",
+            # "automated_logging.middleware.AutomatedLoggingMiddleware",
             "dynaconf_merge",
         ]
         data["LOGGING"] = {

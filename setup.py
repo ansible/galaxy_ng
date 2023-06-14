@@ -120,7 +120,7 @@ requirements = [
     # "pulp-container>=2.15.0,<2.16.0",
     "pulp-container@git+https://github.com/jctanner/pulp_container@CIRCULAR_IMPORT_2023_06_01",
     # "django-automated-logging==6.1.3",
-    "django-automated-logging@git+https://github.com/jctanner/django-automated-logging@DJANGO_4x",
+    # "django-automated-logging@git+https://github.com/jctanner/django-automated-logging@DJANGO_4x",
     # "social-auth-core>=3.3.1,<4.0.0",
     "social-auth-core>=4.4.2",
     # "social-auth-app-django>=3.1.0,<4.0.0",
