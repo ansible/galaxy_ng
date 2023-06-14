@@ -13,7 +13,12 @@ from galaxy_ng.tests.integration.utils.repo_management_utils import (
 )
 from galaxy_ng.tests.integration.utils.tools import generate_random_string
 from galaxykit.collections import sign_collection
-from galaxykit.repositories import copy_content_between_repos, move_content_between_repos
+from galaxykit.repositories import (
+    copy_content_between_repos,
+    delete_distribution,
+    delete_repository,
+    move_content_between_repos,
+)
 from galaxykit.utils import GalaxyClientError
 
 logger = logging.getLogger(__name__)
@@ -36,6 +41,10 @@ class TestRepositories:
         with pytest.raises(GalaxyClientError) as ctx:
             upload_test_artifact(gc, namespace_name, test_repo_name, artifact)
         assert ctx.value.response.status_code == 400
+
+        # Cleanup
+        delete_repository(gc, test_repo_name)
+        delete_distribution(gc, test_repo_name)
 
     @pytest.mark.repositories
     def test_copy_cv_endpoint(self, galaxy_client):
@@ -68,6 +77,12 @@ class TestRepositories:
             {"cv_name": artifact.name, "repo_name": test_repo_name_2, "is_signed": False},
         ]
         assert verify_repo_data(expected, results)
+
+        # Cleanup
+        delete_repository(gc_admin, test_repo_name_1)
+        delete_repository(gc_admin, test_repo_name_2)
+        delete_distribution(gc_admin, test_repo_name_1)
+        delete_distribution(gc_admin, test_repo_name_2)
 
     @pytest.mark.repositories
     def test_move_cv_endpoint(self, galaxy_client):
@@ -102,6 +117,12 @@ class TestRepositories:
         )
         assert matches == 0
 
+        # Cleanup
+        delete_repository(gc_admin, test_repo_name_1)
+        delete_repository(gc_admin, test_repo_name_2)
+        delete_distribution(gc_admin, test_repo_name_1)
+        delete_distribution(gc_admin, test_repo_name_2)
+
     @pytest.mark.repositories
     @pytest.mark.standalone_only
     def test_copy_signed_cv_endpoint(self, galaxy_client):
@@ -135,6 +156,12 @@ class TestRepositories:
             {"cv_name": artifact.name, "repo_name": test_repo_name_2, "is_signed": True},
         ]
         assert verify_repo_data(expected, results)
+
+        # Cleanup
+        delete_repository(gc_admin, test_repo_name_1)
+        delete_repository(gc_admin, test_repo_name_2)
+        delete_distribution(gc_admin, test_repo_name_1)
+        delete_distribution(gc_admin, test_repo_name_2)
 
     @pytest.mark.repositories
     @pytest.mark.standalone_only
@@ -171,6 +198,12 @@ class TestRepositories:
         )
         assert matches == 0
 
+        # Cleanup
+        delete_repository(gc_admin, test_repo_name_1)
+        delete_repository(gc_admin, test_repo_name_2)
+        delete_distribution(gc_admin, test_repo_name_1)
+        delete_distribution(gc_admin, test_repo_name_2)
+
     @pytest.mark.repositories
     def test_directly_to_repo(self, galaxy_client):
         """
@@ -181,11 +214,14 @@ class TestRepositories:
         create_repo_and_dist(gc, test_repo_name)
         namespace_name = create_test_namespace(gc)
         artifact = upload_new_artifact(
-            gc, namespace_name, test_repo_name, "1.0.1", tags=["application"],
-            direct_upload=True
+            gc, namespace_name, test_repo_name, "1.0.1", tags=["application"], direct_upload=True
         )
         matches, _ = search_collection_endpoint(gc, name=artifact.name)
         assert matches == 1
+
+        # Cleanup
+        delete_repository(gc, test_repo_name)
+        delete_distribution(gc, test_repo_name)
 
     @pytest.mark.repositories
     def test_cannot_directly_to_repo_if_pipeline_approved(self, galaxy_client):
@@ -199,10 +235,18 @@ class TestRepositories:
         namespace_name = create_test_namespace(gc)
         with pytest.raises(GalaxyClientError) as ctx:
             upload_new_artifact(
-                gc, namespace_name, test_repo_name, "1.0.1", tags=["application"],
-                direct_upload=True
+                gc,
+                namespace_name,
+                test_repo_name,
+                "1.0.1",
+                tags=["application"],
+                direct_upload=True,
             )
         assert ctx.value.response.status_code == 403
+
+        # Cleanup
+        delete_repository(gc, test_repo_name)
+        delete_distribution(gc, test_repo_name)
 
     @pytest.mark.repositories
     def test_can_directly_to_repo_if_pipeline_staging(self, galaxy_client):
@@ -215,8 +259,11 @@ class TestRepositories:
         create_repo_and_dist(gc, test_repo_name, pipeline="staging")
         namespace_name = create_test_namespace(gc)
         artifact = upload_new_artifact(
-            gc, namespace_name, test_repo_name, "1.0.1", tags=["application"],
-            direct_upload=True
+            gc, namespace_name, test_repo_name, "1.0.1", tags=["application"], direct_upload=True
         )
         matches, _ = search_collection_endpoint(gc, name=artifact.name)
         assert matches == 1
+
+        # Cleanup
+        delete_repository(gc, test_repo_name)
+        delete_distribution(gc, test_repo_name)
