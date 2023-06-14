@@ -47,7 +47,7 @@ def test_ldap_login(ansible_config, settings):
     if not settings.get("GALAXY_AUTH_LDAP_ENABLED"):
         pytest.skip("GALAXY_AUTH_LDAP_ENABLED is not enabled")
 
-    config = ansible_config("ldap")
+    config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=False, require_auth=True)
 

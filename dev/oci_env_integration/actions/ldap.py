@@ -7,7 +7,6 @@ env = action_lib.OCIEnvIntegrationTest(
             "run_tests": True,
             "db_restore": None,
             "pytest_flags": None,
-            "wait_before_tests": 20
         }
     ]
 )
