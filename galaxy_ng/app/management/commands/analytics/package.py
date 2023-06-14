@@ -1,10 +1,12 @@
 import boto3
+import datetime
 import os
+import shutil
 
 from insights_analytics_collector import Package as InsightsAnalyticsPackage
 
 
-class Package(InsightsAnalyticsPackage):
+class S3Package(InsightsAnalyticsPackage):
     PAYLOAD_CONTENT_TYPE = "application/vnd.redhat.wisdom.filename+tgz"
 
     def _tarname_base(self):
@@ -52,3 +54,18 @@ class Package(InsightsAnalyticsPackage):
             return s3_client.upload_file(
                 self.tar_path, self._get_rh_bucket(), os.path.basename(self.tar_path).split("/")[-1]
             )
+
+
+class LocalPackage(S3Package):
+    """Package to disk instead of S3."""
+
+    def ship(self):
+        """The tarfile is cleaned up on exit, so we need to copy it elsewhere."""
+
+        # this is a simple/easy place to save these. (please don't bikeshed it)
+        dstdir = os.path.join("/tmp", "analytics_" + datetime.datetime.now().strftime("%Y_%m_%d"))
+        if not os.path.exists(dstdir):
+            os.makedirs(dstdir)
+        dst = os.path.join(dstdir, os.path.basename(self.tar_path))
+        shutil.copy(self.tar_path, dst)
+        print(f'The exported data has been saved to: {dst}')
