@@ -73,7 +73,7 @@ class OCIEnvIntegrationTest:
             print(e)
             failed = True
         finally:
-            self.dump_logs()
+            # self.dump_logs()
             self.teardown()
 
         if failed:
@@ -109,7 +109,9 @@ class OCIEnvIntegrationTest:
         exec_cmd = ["oci-env", "-e", path] + cmd.split(" ")
         print(" ".join(exec_cmd))
 
-        return subprocess.call(exec_cmd)
+        rc = subprocess.call(exec_cmd)
+
+        assert rc == 0
 
     def run_test(self):
         for env in self.envs:

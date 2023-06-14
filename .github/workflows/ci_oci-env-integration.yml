@@ -1,5 +1,5 @@
 ---
-name: Local Standalone Sync Against Local Insights
+name: OCI Env Integration
 on: 
   pull_request:
     branches:
@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
+        env:
           - TEST_PROFILE: ldap
           - TEST_PROFILE: keycloak
           - TEST_PROFILE: standalone
@@ -55,4 +55,4 @@ jobs:
           mkdir $OCI_ENV_PATH/db_backup/
 
       - name: run integration tests
-        run: make gh-action/$TEST_PROFILE
+        run: make gh-action/${{ matrix.env.TEST_PROFILE }}

@@ -4,6 +4,8 @@ version: "3.7"
 services:
   # pre installs all of the python dependencies, including for integration tests
   _galaxy_base:
+    depends_on:
+      - _base
     build:
       context: "{SRC_DIR}/galaxy_ng/"
       dockerfile: "profiles/base/Dockerfile"
