@@ -3,6 +3,7 @@ import os
 import shutil
 from functools import lru_cache
 from urllib.parse import urlparse
+import requests
 
 import pytest
 from orionutils.utils import increment_version
@@ -10,7 +11,7 @@ from pkg_resources import parse_version, Requirement
 
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
-from .constants import USERNAME_PUBLISHER
+from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -18,8 +19,12 @@ from .utils import (
     get_client,
     set_certification,
     set_synclist,
-    iterate_all, wait_for_url
+    iterate_all,
+    wait_for_url,
 )
+
+from .utils.iqe_utils import get_standalone_token
+
 from .utils import upload_artifact as _upload_artifact
 from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
     is_sync_testing, is_dev_env_standalone, is_standalone, is_ephemeral_env, \
@@ -87,73 +92,9 @@ def pytest_configure(config):
 class AnsibleConfigFixture(dict):
     # The class is instantiated with a "profile" that sets
     # which type of user will be used in the test
-    PROFILES = {
-        "anonymous_user": {
-            "username": None,
-            "password": None,
-            "token": None,
-        },
-        "basic_user": {
-            "username": "iqe_normal_user",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567891",
-        },
-        "partner_engineer": {
-            "username": "jdoe",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567892",
-        },
-        "org_admin": {  # user is org admin in keycloak
-            "username": "org-admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
-        },
-        "admin": {  # this is a superuser
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
-        "iqe_admin": {  # this is a superuser
-            "username": "iqe_admin",
-            "password": "redhat",
-            "token": None,
-        },
-        "ldap": {  # this is a superuser in ldap profile
-            "username": "professor",
-            "password": "professor",
-            "token": None,
-        },
-        "ldap_non_admin": {  # this is a regular user in ldap profile
-            "username": "fry",
-            "password": "fry",
-            "token": None,
-        },
-        "ee_admin": {
-            "username": "ee_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567895",
-        },
-        "github_user_1": {
-            "username": "gh01",
-            "password": "redhat",
-            "token": None,
-        },
-        "github_user_2": {
-            "username": "gh02",
-            "password": "redhat",
-            "token": None,
-        },
-        "geerlingguy": {
-            "username": "geerlingguy",
-            "password": "redhat",
-            "token": None,
-        },
-        "jctannerTEST": {
-            "username": "jctannerTEST",
-            "password": "redhat",
-            "token": None,
-        },
-    }
+
+    PROFILES = {}
+
     if is_stage_environment():
         PROFILES = {
             # ns owner to autohubtest2, not in partner engineer group, not an SSO org admin
@@ -193,6 +134,24 @@ class AnsibleConfigFixture(dict):
         }
 
     def __init__(self, profile=None, namespace=None, url=None, auth_url=None):
+        backend_map = {
+            "community": "community",
+            "galaxy": "galaxy",
+            "keycloak": "ldap",
+            "ldap": "ldap"
+        }
+        self._auth_backend = os.environ.get('HUB_TEST_AUTHENTICATION_BACKEND')
+
+        for profile_name in PROFILES:
+            p = PROFILES[profile_name]
+            credential_set = backend_map.get(self._auth_backend, "galaxy")
+            if username := p["username"].get(credential_set):
+                self.PROFILES[profile_name] = {
+                    "username": username,
+                    "token": CREDENTIALS[username].get("token"),
+                    "password": CREDENTIALS[username].get("password")
+                }
+
         self.url = url
         self.auth_url = auth_url
         self.profile = profile
@@ -205,7 +164,6 @@ class AnsibleConfigFixture(dict):
         if not os.path.exists(galaxy_token_fn):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
-
         if self.profile:
             if isinstance(self.PROFILES[self.profile]["username"], dict):
                 # credentials from vault
@@ -254,8 +212,15 @@ class AnsibleConfigFixture(dict):
                     'HUB_AUTH_URL',
                     None
                 )
+            
+        elif key == 'auth_backend':
+            return self._auth_backend
 
         elif key == "token":
+            # Generate tokens for LDAP and keycloak backed users
+            p = self.PROFILES[self.profile]
+            if CREDENTIALS[p["username"]].get("gen_token", False):
+                return get_standalone_token(p, self["url"])
             return self.PROFILES[self.profile]["token"]
 
         elif key == "username":
@@ -399,6 +364,9 @@ def certifiedv2(ansible_config, artifact):
     # certify v1
     hub_4_5 = is_hub_4_5(ansible_config)
     set_certification(api_client, artifact, hub_4_5=hub_4_5)
+
+
+
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -673,10 +641,10 @@ def sync_instance_crc():
     dev/data/insights-fixture.tar.gz
     """
 
-    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
+    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:38080/api/automation-hub/")
     auth_url = os.getenv(
         "TEST_CRC_AUTH_URL",
-        "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
+        "http://localhost:38080/auth/realms/redhat-external/protocol/openid-connect/token"
     )
 
     config = AnsibleConfigFixture(url=url, auth_url=auth_url, profile="org_admin")
