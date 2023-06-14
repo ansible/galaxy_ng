@@ -1,6 +1,9 @@
 import os
 import platform
 import distro
+
+from pathlib import PosixPath
+from typing import List
 from django.conf import settings
 
 from insights_analytics_collector import CsvFileSplitter, register
@@ -55,15 +58,12 @@ def instance_info(since, **kwargs):
 @register("ansible_collection_table", "1.0", format="csv", description="Data on ansible_collection")
 def ansible_collection_table(since, full_path, until, **kwargs):
     source_query = """
-        COPY (
-            SELECT "ansible_collection"."pulp_id",
-                   "ansible_collection"."pulp_created",
-                   "ansible_collection"."pulp_last_updated",
-                   "ansible_collection"."namespace",
-                   "ansible_collection"."name"
-            FROM "ansible_collection"
-        )
-        TO STDOUT WITH CSV HEADER
+        SELECT "ansible_collection"."pulp_id",
+               "ansible_collection"."pulp_created",
+               "ansible_collection"."pulp_last_updated",
+               "ansible_collection"."namespace",
+               "ansible_collection"."name"
+        FROM "ansible_collection"
     """
 
     return _simple_csv(full_path, "ansible_collection", source_query)
@@ -76,28 +76,27 @@ def ansible_collection_table(since, full_path, until, **kwargs):
     description="Data on ansible_collectionversion",
 )
 def ansible_collectionversion_table(since, full_path, until, **kwargs):
-    source_query = """COPY (
-            SELECT "ansible_collectionversion"."content_ptr_id",
-                   "core_content"."pulp_created",
-                   "core_content"."pulp_last_updated",
-                   "ansible_collectionversion"."collection_id",
-                   "ansible_collectionversion"."contents",
-                   "ansible_collectionversion"."dependencies",
-                   "ansible_collectionversion"."description",
-                   "ansible_collectionversion"."license",
-                   "ansible_collectionversion"."version",
-                   "ansible_collectionversion"."requires_ansible",
-                   "ansible_collectionversion"."is_highest",
-                   "ansible_collectionversion_tags"."tag_id"
-            FROM "ansible_collectionversion"
-            INNER JOIN "core_content" ON (
-                "ansible_collectionversion"."content_ptr_id" = "core_content"."pulp_id"
-                )
-            LEFT OUTER JOIN "ansible_collectionversion_tags" ON (
-                "ansible_collectionversion"."content_ptr_id" =
-                "ansible_collectionversion_tags"."collectionversion_id"
-                )
-        ) TO STDOUT WITH CSV HEADER
+    source_query = """
+        SELECT "ansible_collectionversion"."content_ptr_id",
+               "core_content"."pulp_created",
+               "core_content"."pulp_last_updated",
+               "ansible_collectionversion"."collection_id",
+               "ansible_collectionversion"."contents",
+               "ansible_collectionversion"."dependencies",
+               "ansible_collectionversion"."description",
+               "ansible_collectionversion"."license",
+               "ansible_collectionversion"."version",
+               "ansible_collectionversion"."requires_ansible",
+               "ansible_collectionversion"."is_highest",
+               "ansible_collectionversion_tags"."tag_id"
+        FROM "ansible_collectionversion"
+        INNER JOIN "core_content" ON (
+            "ansible_collectionversion"."content_ptr_id" = "core_content"."pulp_id"
+            )
+        LEFT OUTER JOIN "ansible_collectionversion_tags" ON (
+            "ansible_collectionversion"."content_ptr_id" =
+            "ansible_collectionversion_tags"."collectionversion_id"
+            )
     """
     return _simple_csv(full_path, "ansible_collectionversion", source_query)
 
@@ -110,9 +109,8 @@ def ansible_collectionversion_table(since, full_path, until, **kwargs):
 )
 def ansible_collectionversionsignature_table(since, full_path, until, **kwargs):
     # currently no rows in the table, so no objects to base a query off
-    source_query = """COPY (
-            SELECT * FROM ansible_collectionversionsignature
-        ) TO STDOUT WITH CSV HEADER
+    source_query = """
+        SELECT * FROM ansible_collectionversionsignature
     """
     return _simple_csv(full_path, "ansible_collectionversionsignature", source_query)
 
@@ -125,9 +123,8 @@ def ansible_collectionversionsignature_table(since, full_path, until, **kwargs):
 )
 def ansible_collectionimport_table(since, full_path, until, **kwargs):
     # currently no rows in the table, so no objects to base a query off
-    source_query = """COPY (
-            SELECT * FROM ansible_collectionimport
-        ) TO STDOUT WITH CSV HEADER
+    source_query = """
+        SELECT * FROM ansible_collectionimport
     """
     return _simple_csv(full_path, "ansible_collectionimport", source_query)
 
@@ -153,9 +150,8 @@ def ansible_collectionimport_table(since, full_path, until, **kwargs):
 )
 def container_containerrepository_table(since, full_path, until, **kwargs):
     # currently no rows in the table, so no objects to base a query off
-    source_query = """COPY (
-            SELECT * FROM container_containerrepository
-        ) TO STDOUT WITH CSV HEADER
+    source_query = """
+        SELECT * FROM container_containerrepository
     """
     return _simple_csv(full_path, "container_containerrepository", source_query)
 
@@ -168,9 +164,8 @@ def container_containerrepository_table(since, full_path, until, **kwargs):
 )
 def container_containerremote_table(since, full_path, until, **kwargs):
     # currently no rows in the table, so no objects to base a query off
-    source_query = """COPY (
-            SELECT * FROM container_containerremote
-        ) TO STDOUT WITH CSV HEADER
+    source_query = """
+        SELECT * FROM container_containerremote
     """
     return _simple_csv(full_path, "container_containerremote", source_query)
 
@@ -178,9 +173,8 @@ def container_containerremote_table(since, full_path, until, **kwargs):
 @register("container_tag_table", "1.0", format="csv", description="Data on container_tag")
 def container_tag_table(since, full_path, until, **kwargs):
     # currently no rows in the table, so no objects to base a query off
-    source_query = """COPY (
-            SELECT * FROM container_tag
-        ) TO STDOUT WITH CSV HEADER
+    source_query = """
+        SELECT * FROM container_tag
     """
     return _simple_csv(full_path, "container_tag", source_query)
 
@@ -189,19 +183,21 @@ def container_tag_table(since, full_path, until, **kwargs):
     "galaxy_legacynamespace", "1.0", format="csv", description="Data on galaxy_legacynamespace"
 )
 def galaxy_legacynamespace_table(since, full_path, until, **kwargs):
-    source_query = """COPY (SELECT
+    source_query = """
+        SELECT
             id, created, modified, name, company, avatar_url, description, namespace_id
-            FROM galaxy_legacynamespace
-        ) TO STDOUT WITH CSV HEADER"""
+        FROM galaxy_legacynamespace
+    """
     return _simple_csv(full_path, "galaxy_legacynamespace", source_query)
 
 
 @register("galaxy_legacyrole", "1.0", format="csv", description="Data on galaxy_legacyrole")
 def galaxy_legacyrole_table(since, full_path, until, **kwargs):
-    source_query = """COPY (SELECT
+    source_query = """
+        SELECT
             id, created, modified, name, full_metadata, namespace_id
-            FROM galaxy_legacyrole
-        ) TO STDOUT WITH CSV HEADER"""
+        FROM galaxy_legacyrole
+    """
     return _simple_csv(full_path, "galaxy_legacyrole", source_query)
 
 
@@ -209,8 +205,9 @@ def galaxy_legacyrole_table(since, full_path, until, **kwargs):
     "galaxy_aiindexdenylist", "1.0", format="csv", description="Data on galaxy_aiindexdenylist"
 )
 def galaxy_aiindexdenylist_table(since, full_path, until, **kwargs):
-    source_query = """COPY (SELECT * FROM galaxy_aiindexdenylist
-        ) TO STDOUT WITH CSV HEADER"""
+    source_query = """
+        SELECT * FROM galaxy_aiindexdenylist
+    """
     return _simple_csv(full_path, "galaxy_aiindexdenylist", source_query)
 
 
@@ -218,16 +215,32 @@ def _get_csv_splitter(file_path, max_data_size=209715200):
     return CsvFileSplitter(filespec=file_path, max_file_size=max_data_size)
 
 
-def _simple_csv(full_path, file_name, query, max_data_size=209715200):
+def _simple_csv(
+    full_path: PosixPath,
+    file_name: str,
+    query: str,
+    max_data_size: int = 209715200
+) -> List[str]:
+    """
+    Execute a psql query and write to a splitted temp file.
+
+    This function previously used cursor.copy_expert() previously
+    to emit a csv structure directly to stdout but that function
+    no longer exists in django 4.x + psycopg which will come from
+    upgrading to pulp >= 3.25.
+
+    Args:
+        full_path: A PosixPath temp directory were the files are written.
+        file_name: A string file basename where the output is written.
+        query: The psql query to run and save the output of.
+        max_data_size: An integer that controls the csv splitter.
+
+    Returns:
+        A list of strings that are filepaths where the data
+        was written to. It is usually just one filepath.
+    """
     file_path = _get_file_path(full_path, file_name)
     tfile = _get_csv_splitter(file_path, max_data_size)
-
-    # copy_expert nor copy_to nor COPY are supported by psycopg
-    query = query.replace('\n', ' ')
-    query = query.replace('    ', '')
-    query = query.replace('COPY (', '')
-    query = query.replace(') TO STDOUT WITH CSV HEADER', '')
-    query = query.strip()
 
     # use a normal .execute to get the data as rows ...
     with Collector.db_connection().cursor() as cursor:
