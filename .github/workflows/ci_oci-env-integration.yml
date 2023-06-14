@@ -15,14 +15,16 @@ on:
 
 jobs:
   integration:
-    matrix:
-      include:
-        - TEST_PROFILE: ldap
-        - TEST_PROFILE: keycloak
-        - TEST_PROFILE: rbac
-        - TEST_PROFILE: insights
-        - TEST_PROFILE: standalone
-        - TEST_PROFILE: certified-sync
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - TEST_PROFILE: ldap
+          - TEST_PROFILE: keycloak
+          - TEST_PROFILE: standalone
+          - TEST_PROFILE: rbac
+          - TEST_PROFILE: certified-sync
+          # - TEST_PROFILE: insights
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

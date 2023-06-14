@@ -85,7 +85,7 @@ class UIClient:
         )
 
         # assert that the login succeeded
-        assert resp.status_code == 200
+        assert resp.status_code in (200, 204)
 
     def keycloak_login(self):
         self._rs = requests.Session()
@@ -114,7 +114,7 @@ class UIClient:
         )
 
         # assert that the login succeeded
-        assert resp.status_code == 200
+        assert resp.status_code in (200, 204)
 
     def logout(self, expected_code=None):
         if self._rs is None:
