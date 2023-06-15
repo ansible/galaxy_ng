@@ -685,6 +685,7 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     assert api_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
+@pytest.mark.standalone_only  # This test can't run on crc yet
 def test_move_with_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
