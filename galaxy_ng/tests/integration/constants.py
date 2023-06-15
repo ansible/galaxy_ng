@@ -34,6 +34,7 @@ CREDENTIALS = {
         "username": "org-admin",
         "password": "redhat",
         "group": "ns_group_for_tests",
+        "token": "abcdefghijklmnopqrstuvwxyz1234567893",
     },
     "notifications_admin": {
         "password": "redhat",

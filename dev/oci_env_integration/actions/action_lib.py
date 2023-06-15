@@ -3,6 +3,7 @@ import sys
 import getopt
 import subprocess
 import shutil
+import shlex
 
 
 class OCIEnvIntegrationTest:
@@ -99,16 +100,14 @@ class OCIEnvIntegrationTest:
             if db_dump := self.envs[env].get("db_restore", None):
                 dump_path = f"dev/oci_env_integration/test_fixtures/{db_dump}.tar.gz"
 
-                shutil.copyfile(dump_path, "../oci_env/db_backup/{db_dump}.tar.gz")
+                shutil.copyfile(dump_path, f"../oci_env/db_backup/{db_dump}.tar.gz")
                 self.exec_cmd(env, f"db restore -f {db_dump} --migrate")
                 time.sleep(10)
                 self.exec_cmd(env, "poll --wait 2 --attempts 30")
 
     def exec_cmd(self, env, cmd):
         path = f"dev/oci_env_integration/oci_env_configs/{env}"
-        exec_cmd = ["oci-env", "-e", path] + cmd.split(" ")
-        print(" ".join(exec_cmd))
-
+        exec_cmd = ["oci-env", "-e", path] + shlex.split(cmd)
         rc = subprocess.call(exec_cmd)
 
         assert rc == 0

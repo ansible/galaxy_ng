@@ -1,4 +1,5 @@
 set -e
+set -x
 
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
@@ -6,9 +7,11 @@ source $VENVPATH/bin/activate
 
 cd /src/galaxy_ng/
 
+PORT="${INSIGHTS_PROXY_PORT:-$API_PORT}"
+
 export HUB_LOCAL=1
-export HUB_API_ROOT="$API_PROTOCOL://$API_HOST:$API_PORT$PULP_GALAXY_API_PATH_PREFIX"
-export CONTAINER_REGISTRY="$API_HOST:$API_PORT"
+export HUB_API_ROOT="$API_PROTOCOL://$API_HOST:$PORT$PULP_GALAXY_API_PATH_PREFIX"
+export CONTAINER_REGISTRY="$API_HOST:$PORT"
 
 export HUB_USE_MOVE_ENDPOINT=true
 
@@ -60,7 +63,7 @@ fi
 
 # TODO: fix marks
 
-$VENVPATH/bin/pytest -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync and not certified_sync and not x_repo_search and not rm_sync and not rbac_repos" $@ galaxy_ng/tests/integration
+$VENVPATH/bin/pytest -v -r sx --color=yes -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync and not certified_sync and not x_repo_search and not rm_sync and not rbac_repos" "$@" galaxy_ng/tests/integration
 RC=$?
 
 exit $RC

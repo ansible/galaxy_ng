@@ -6,9 +6,9 @@ services:
     build:
       context: "{SRC_DIR}/galaxy_ng/profiles/insights/proxy"
     ports:
-      - "38080:38080"
+      - "{INSIGHTS_PROXY_PORT}:{INSIGHTS_PROXY_PORT}"
     environment:
       UPSTREAM_URL: "http://pulp:{API_PORT}"
-      PROXY_PORT: "38080"
+      PROXY_PORT: "{INSIGHTS_PROXY_PORT}"
     volumes:
       - "{SRC_DIR}/galaxy_ng/profiles/insights/proxy:/app:ro"

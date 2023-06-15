@@ -96,7 +96,7 @@ class UIClient:
             allow_redirects=True,
         )
 
-        # assert that the login succeeded
+        # assert that the keycloak login page loaded correctly
         assert resp.status_code == 200
 
         # Parse the login url out of the keycloak html form

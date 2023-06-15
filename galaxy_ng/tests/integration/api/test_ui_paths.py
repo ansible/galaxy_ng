@@ -515,7 +515,7 @@ def test_api_ui_v1_imports_collections(ansible_config):
 # /api/automation-hub/_ui/v1/me/
 @pytest.mark.standalone_only
 @pytest.mark.api_ui
-def test_api_ui_v1_me(ansible_config):
+def test_api_ui_v1_me(ansible_config, settings):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -529,7 +529,11 @@ def test_api_ui_v1_me(ansible_config):
 
         assert not ds['is_anonymous']
         assert ds['username'] == cfg.get('username')
-        assert ds['auth_provider'] == ['django']
+
+        if settings.get("KEYCLOAK_URL") is not None:
+            assert ds['auth_provider'] == ['keycloak']
+        else:
+            assert ds['auth_provider'] == ['django']
 
 
 # /api/automation-hub/_ui/v1/my-distributions/
