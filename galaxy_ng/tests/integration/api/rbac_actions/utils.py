@@ -21,6 +21,7 @@ from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env, \
     avoid_docker_limit_rate
 from galaxykit.container_images import get_container, get_container_images_latest
 
+
 CLIENT_CONFIG = AnsibleConfigFixture("admin")
 ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 
@@ -48,9 +49,7 @@ CONTAINER_IMAGE = ["foo/ubi9-minimal", "foo/ubi8-minimal"]
 
 REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n"  # noqa: 501
 
-TEST_CONTAINER = "alpine"
-if avoid_docker_limit_rate():
-    TEST_CONTAINER = "quay.io/libpod/alpine"
+TEST_CONTAINER = "quay.io/libpod/alpine"
 
 session = requests.Session()
 session.verify = False
@@ -143,12 +142,10 @@ def ensure_test_container_is_pulled():
     container_engine = CLIENT_CONFIG["container_engine"]
     cmd = [container_engine, "image", "exists", TEST_CONTAINER]
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    image = "alpine"
-    if avoid_docker_limit_rate():
-        image = "quay.io/libpod/alpine"
     if proc.returncode == 1:
-        cmd = [container_engine, "image", "pull", image]
-        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cmd = [container_engine, "image", "pull", TEST_CONTAINER]
+        rc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        assert rc.returncode == 0
 
 
 def podman_push(username, password, container, tag="latest"):
@@ -181,7 +178,8 @@ def podman_push(username, password, container, tag="latest"):
             "push",
             new_container]
 
-    return subprocess.run(push_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode
+    rc = subprocess.run(push_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return rc.returncode
 
 
 def del_user(pk):

@@ -119,7 +119,7 @@ class OCIEnvIntegrationTest:
             if pytest_flags is None:
                 pytest_flags = ""
 
-            if wait_time := self.envs[env].get("wait_before_tests"):
+            if wait_time := self.envs[env].get("wait_before_tests", 20):
                 print(f"waiting {wait_time} seconds")
                 time.sleep(wait_time)
 
