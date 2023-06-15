@@ -223,7 +223,9 @@ def _simple_csv(full_path, file_name, query, max_data_size=209715200):
     tfile = _get_csv_splitter(file_path, max_data_size)
 
     with Collector.db_connection().cursor() as cursor:
-        cursor.copy_expert(query, tfile)
+        with cursor.copy(query) as copy:
+            while data := copy.read():
+                tfile.write(str(data,'utf8'))
 
     return tfile.file_list()
 
