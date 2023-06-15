@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 14:21+0000\n"
+"POT-Creation-Date: 2023-06-15 09:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgstr "그룹은 그룹 오브젝트 목록이어야 합니다."
 msgid "Group name=%s, id=%s does not exist"
 msgstr "그룹 이름=%s, id=%s이/가 존재하지 않습니다."
 
-#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "잘못된 그룹 이름 또는 ID"
 
@@ -122,19 +122,20 @@ msgstr ""
 "변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 "
 "않습니다."
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr "슈퍼유저 권한을 부여하려면 슈퍼유저여야 합니다."
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
 msgid "Must be a super user to change another user's password."
-msgstr "다른 사용자의 암호를 변경하려면 슈퍼유저여야 합니다."
+msgstr ""
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:125
 msgid "You do not have permissions to modify super users."
-msgstr "슈퍼 유저를 수정할 수 있는 권한이 없습니다."
+msgstr ""
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "그룹 이름=%(name)s, id=%(id)s이/가 존재하지 않습니다."
@@ -214,20 +215,20 @@ msgstr "서명 서비스 \"%s\"이/가 존재하지 않습니다."
 msgid "Distribution base path is required"
 msgstr "배포 기본 경로가 필요합니다."
 
-#: app/api/ui/viewsets/collection.py:197
+#: app/api/ui/viewsets/collection.py:231
 #, python-format
 msgid "%s must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/viewsets/collection.py:233
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "컬렉션 버전 검색"
 
-#: app/api/ui/viewsets/collection.py:244
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "컬렉션 버전을 찾을 수 없음: {}"
 
-#: app/api/ui/viewsets/collection.py:300
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "컬렉션 가져오기 검색"
 
@@ -878,5 +879,34 @@ msgstr "이 이름을 가진 로컬 컨테이너가 이미 존재합니다."
 msgid "Could not find staging repository: \"%s\""
 msgstr "스테이징 리포지토리를 찾을 수 없음: \"%s\""
 
-#~ msgid "Path does not match: \"%s\""
-#~ msgstr "경로가 일치하지 않습니다. \"%s\""
+#: app/tasks/synclist.py:45
+#, python-format
+msgid "Curating all synclists repos that curate from %s"
+msgstr "%s에서 큐레이트된 모든 동기화 목록 리포지토리 선별"
+
+#: app/tasks/synclist.py:56
+msgid "Synclists curating upstream repo"
+msgstr "큐레이트된 업스트림 리포지토리 동기화 목록"
+
+#: app/tasks/synclist.py:63
+msgid "Synclists curating upstream repo task"
+msgstr "큐레이트된 업스트림 리포지토리 작업 동기화 목록"
+
+#: app/tasks/synclist.py:92
+#, python-format
+msgid "Finishing curating %s synclist repos based on %s update"
+msgstr ""
+"%s 업데이트를 기반으로 큐레이트된 %s 동기화 목록 리포지토리 사용을 완료"
+
+#: app/tasks/synclist.py:121
+#, python-format
+msgid ""
+"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
+"repo \"%s\""
+msgstr ""
+"policy=%s와 동기화 목록 \"%s\"을 적용하여 업스트림 리포지토리 \"%s\"에서 리포"
+"지토리 \"%s\"을 처리"
+
+#: app/tasks/synclist.py:163
+msgid "Unexpected synclist policy {}"
+msgstr "예기치 않은 동기화 목록 정책 {}"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 14:21+0000\n"
+"POT-Creation-Date: 2023-06-15 09:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgstr "Los grupos deben ser una lista de objetos de grupo"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "El grupo name=%s, id=%s no existe"
 
-#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "Nombre o ID de grupo no válido"
 
@@ -125,19 +125,20 @@ msgstr ""
 "El permiso 'galaxy.change_group' es necesario para cambiar un grupo de "
 "usuarios en el que el usuario solicitante no está."
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr "Debe ser un superusuario para conceder permisos de superusuario."
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
 msgid "Must be a super user to change another user's password."
-msgstr "Debe ser un superusuario para cambiar la contraseña de otro usuario."
+msgstr ""
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:125
 msgid "You do not have permissions to modify super users."
-msgstr "No tienes permisos para modificar los superusuarios."
+msgstr ""
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "El grupo name=%(name)s, id=%(id)s no existe"
@@ -220,20 +221,20 @@ msgstr "El servicio de firmas \"%s\" no existe."
 msgid "Distribution base path is required"
 msgstr "Se requiere una ruta base de distribución"
 
-#: app/api/ui/viewsets/collection.py:197
+#: app/api/ui/viewsets/collection.py:231
 #, python-format
 msgid "%s must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/viewsets/collection.py:233
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "Recuperar la versión de la colección"
 
-#: app/api/ui/viewsets/collection.py:244
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "No se ha encontrado la versión de la colección para: {}"
 
-#: app/api/ui/viewsets/collection.py:300
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "Recuperación de la colección de importación"
 
@@ -889,5 +890,36 @@ msgstr "Ya existe un contenedor local con este nombre."
 msgid "Could not find staging repository: \"%s\""
 msgstr "No se pudo encontrar el repositorio de puesta en escena: \"%s\""
 
-#~ msgid "Path does not match: \"%s\""
-#~ msgstr "La ruta no coincide: \"%s\""
+#: app/tasks/synclist.py:45
+#, python-format
+msgid "Curating all synclists repos that curate from %s"
+msgstr ""
+"Curando todos los repositorios de listas de sincronización que curan de %s"
+
+#: app/tasks/synclist.py:56
+msgid "Synclists curating upstream repo"
+msgstr "Listas de sincronización curando el repo del upstream"
+
+#: app/tasks/synclist.py:63
+msgid "Synclists curating upstream repo task"
+msgstr "Tarea de curado de repo de listas de sincronización"
+
+#: app/tasks/synclist.py:92
+#, python-format
+msgid "Finishing curating %s synclist repos based on %s update"
+msgstr ""
+"Terminando de curar los repos de listas de sincronización %s basados en la "
+"actualización de %s"
+
+#: app/tasks/synclist.py:121
+#, python-format
+msgid ""
+"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
+"repo \"%s\""
+msgstr ""
+"Aplicando lista de sincronización \"%s\" con policy=%s para curar el "
+"repositorio \"%s\" desde el repositorio \"%s\""
+
+#: app/tasks/synclist.py:163
+msgid "Unexpected synclist policy {}"
+msgstr "Política de lista de sincronización inesperada {}"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 14:21+0000\n"
+"POT-Creation-Date: 2023-06-15 09:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgstr "组必须是一个组对象的列表"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "组名=%s, id=%s 不存在"
 
-#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "无效的组名称或 ID"
 
@@ -113,19 +113,20 @@ msgid ""
 "the requesting user is not in."
 msgstr "更改请求用户不在的用户组需要具有 'galaxy.change_group' 权限。"
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr "必须是超级用户才能授予超级用户权限。"
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
 msgid "Must be a super user to change another user's password."
-msgstr "必须是超级用户才能更改其他用户的密码。"
+msgstr ""
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:125
 msgid "You do not have permissions to modify super users."
-msgstr "您没有修改超级用户的权限。"
+msgstr ""
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "组名=%(name)s, id=%(id)s 不存在"
@@ -204,20 +205,20 @@ msgstr "签名服务 \"%s\" 不存在。"
 msgid "Distribution base path is required"
 msgstr "发布基础路径是必需的"
 
-#: app/api/ui/viewsets/collection.py:197
+#: app/api/ui/viewsets/collection.py:231
 #, python-format
 msgid "%s must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/viewsets/collection.py:233
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "检索集合版本"
 
-#: app/api/ui/viewsets/collection.py:244
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "未找到集合版本：{}"
 
-#: app/api/ui/viewsets/collection.py:300
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "检索集合导入"
 
@@ -858,5 +859,32 @@ msgstr "具有此名称的本地容器已经存在。"
 msgid "Could not find staging repository: \"%s\""
 msgstr "无法找到 staging 存储库：\"%s\""
 
-#~ msgid "Path does not match: \"%s\""
-#~ msgstr "路径不匹配：\"%s\""
+#: app/tasks/synclist.py:45
+#, python-format
+msgid "Curating all synclists repos that curate from %s"
+msgstr "策展从 %s 中策展的所有同步列表"
+
+#: app/tasks/synclist.py:56
+msgid "Synclists curating upstream repo"
+msgstr "Synclists 策展上游存储库"
+
+#: app/tasks/synclist.py:63
+msgid "Synclists curating upstream repo task"
+msgstr "Synclists 策展上游存储库任务"
+
+#: app/tasks/synclist.py:92
+#, python-format
+msgid "Finishing curating %s synclist repos based on %s update"
+msgstr "根据 %s 更新完成策展 %s 同步列表存储库"
+
+#: app/tasks/synclist.py:121
+#, python-format
+msgid ""
+"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
+"repo \"%s\""
+msgstr ""
+"使用 policy=%s 应用同步列表 \"%s\" 以从上游仓库 \"%s\" 中策展存储库 \"%s\""
+
+#: app/tasks/synclist.py:163
+msgid "Unexpected synclist policy {}"
+msgstr "意外同步列表策略 {}"

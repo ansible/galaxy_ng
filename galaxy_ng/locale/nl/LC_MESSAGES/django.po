@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 14:21+0000\n"
+"POT-Creation-Date: 2023-06-15 09:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgstr "Groepen moet een lijst van groepsobjecten zijn"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "Groepsnaam=%s, id=%s bestaat niet"
 
-#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "Ongeldige groepsnaam of id"
 
@@ -122,23 +122,22 @@ msgstr ""
 "De machtiging 'galaxy.change_group' is nodig om een gebruikersgroep te "
 "veranderen waar de aanvragende gebruiker geen deel van uitmaakt."
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr ""
 "Moet een supergebruiker zijn om machtigingen voor een supergebruiker te "
 "verlenen."
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
 msgid "Must be a super user to change another user's password."
 msgstr ""
-"Moet een supergebruiker zijn om het wachtwoord van een andere gebruiker te "
-"wijzigen."
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:125
 msgid "You do not have permissions to modify super users."
-msgstr "Je hebt geen rechten om supergebruikers te wijzigen."
+msgstr ""
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "Groepsnaam=%(name)s, id=%(id)s bestaat niet"
@@ -216,26 +215,37 @@ msgstr "Het veld signing_service is verplicht."
 #: app/api/ui/views/signing.py:117
 #, python-format
 msgid "Signing service \"%s\" does not exist."
-msgstr "Ondertekendienst \"%s\" bestaat niet."
+msgstr ""
+
+#: app/api/ui/views/sync.py:37 app/api/v3/views/sync.py:34
+#, python-format
+msgid "The %s distribution does not have any remotes associated with it."
+msgstr ""
+"De %s-distributie heeft geen items op afstand die ermee zijn geassocieerd."
+
+#: app/api/ui/views/sync.py:51
+#, python-format
+msgid "The %s remote does not have any registries associated with it."
+msgstr "De %s op afstand heeft geen registers die ermee zijn geassocieerd."
 
 #: app/api/ui/viewsets/collection.py:77
 msgid "Distribution base path is required"
 msgstr "Basispad distributie is vereist"
 
-#: app/api/ui/viewsets/collection.py:197
+#: app/api/ui/viewsets/collection.py:231
 #, python-format
 msgid "%s must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/viewsets/collection.py:233
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "Collectieversie ophalen"
 
-#: app/api/ui/viewsets/collection.py:244
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "Collectieversie niet gevonden voor: {}"
 
-#: app/api/ui/viewsets/collection.py:300
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "Collectie import ophalen"
 
@@ -320,12 +330,6 @@ msgid ""
 msgstr ""
 "Het is niet toegestaan inhoud van gemeenschapsdomeinen te synchroniseren "
 "zonder een bestand met vereisten op te geven."
-
-#: app/api/v3/views/sync.py:38 app/api/v3/views/sync.py:83
-#, python-format
-msgid "The %s distribution does not have any remotes associated with it."
-msgstr ""
-"De %s-distributie heeft geen items op afstand die ermee zijn geassocieerd."
 
 #: app/api/v3/views/sync.py:49
 msgid ""
@@ -891,5 +895,33 @@ msgstr "Een lokale container met deze naam bestaat al."
 msgid "Could not find staging repository: \"%s\""
 msgstr "Kon de staging repository niet vinden: \"%s\""
 
-#~ msgid "Path does not match: \"%s\""
-#~ msgstr "Pad komt niet overeen: \"%s\""
+#: app/tasks/synclist.py:45
+#, python-format
+msgid "Curating all synclists repos that curate from %s"
+msgstr "Cureren van alle synclists-repo's die cureren vanuit %s"
+
+#: app/tasks/synclist.py:56
+msgid "Synclists curating upstream repo"
+msgstr "Synclisten cureren upstream repo"
+
+#: app/tasks/synclist.py:63
+msgid "Synclists curating upstream repo task"
+msgstr "Synclisten cureren taak upstream repo"
+
+#: app/tasks/synclist.py:92
+#, python-format
+msgid "Finishing curating %s synclist repos based on %s update"
+msgstr "Afwerking van %s synclist-repo's gebaseerd op %s-update"
+
+#: app/tasks/synclist.py:121
+#, python-format
+msgid ""
+"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
+"repo \"%s\""
+msgstr ""
+"Synclist \"%s\" toepassen met policy=%s om repo \"%s\" te cureren vanuit "
+"upstream repo \"%s\""
+
+#: app/tasks/synclist.py:163
+msgid "Unexpected synclist policy {}"
+msgstr "Onverwachte policy synclist {}"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 14:21+0000\n"
+"POT-Creation-Date: 2023-06-15 09:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgstr "Les groupes doivent correspondre à une liste d'objets de groupe"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "Le groupe nom=%s, id=%s n'existe pas"
 
-#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "Nom de groupe ou ID invalide"
 
@@ -124,23 +124,22 @@ msgstr ""
 "L'autorisation 'galaxy.change_group' est nécessaire pour modifier un groupe "
 "d'utilisateurs dont l'utilisateur demandeur ne fait pas partie."
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr ""
 "Il faut être un super utilisateur pour accorder des autorisations de super "
 "utilisateur."
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
 msgid "Must be a super user to change another user's password."
 msgstr ""
-"Il faut être un super utilisateur pour changer le mot de passe d'un autre "
-"utilisateur."
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:125
 msgid "You do not have permissions to modify super users."
-msgstr "Vous n'avez pas le droit de modifier les super utilisateurs."
+msgstr ""
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "Le groupe nom=%(name)s, id=%(id)s n'existe pas"
@@ -223,20 +222,20 @@ msgstr "Le service de signature \"%s\" n’existe pas"
 msgid "Distribution base path is required"
 msgstr "Le chemin de la base de distribution est requis"
 
-#: app/api/ui/viewsets/collection.py:197
+#: app/api/ui/viewsets/collection.py:231
 #, python-format
 msgid "%s must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/viewsets/collection.py:233
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "Récupérer la version de la collection"
 
-#: app/api/ui/viewsets/collection.py:244
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "Version de la collection non trouvée pour : {}"
 
-#: app/api/ui/viewsets/collection.py:300
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "Récupérer l'importation de la collection"
 
@@ -893,5 +892,33 @@ msgstr "Un conteneur local portant ce nom existe déjà."
 msgid "Could not find staging repository: \"%s\""
 msgstr "Impossible de trouver le référentiel «staging» : \"%s\""
 
-#~ msgid "Path does not match: \"%s\""
-#~ msgstr "Le chemin ne correspond pas : \"%s\""
+#: app/tasks/synclist.py:45
+#, python-format
+msgid "Curating all synclists repos that curate from %s"
+msgstr "Curation de tous les dépôts synclistes à partir de %s"
+
+#: app/tasks/synclist.py:56
+msgid "Synclists curating upstream repo"
+msgstr "Synclistes conservant le repo amont"
+
+#: app/tasks/synclist.py:63
+msgid "Synclists curating upstream repo task"
+msgstr "Tâche de curation de repo amont par Synclists"
+
+#: app/tasks/synclist.py:92
+#, python-format
+msgid "Finishing curating %s synclist repos based on %s update"
+msgstr "Fin de la préparation %s repos synclistes basés sur la mise à jour %s"
+
+#: app/tasks/synclist.py:121
+#, python-format
+msgid ""
+"Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
+"repo \"%s\""
+msgstr ""
+"Application de synclist \"%s\" avec policy=%s au repo curate \"%s\" à partir "
+"du repo amont \"%s\""
+
+#: app/tasks/synclist.py:163
+msgid "Unexpected synclist policy {}"
+msgstr "Politique syncliste inattendue {}"
