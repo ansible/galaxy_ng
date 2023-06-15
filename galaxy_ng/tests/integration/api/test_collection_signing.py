@@ -695,8 +695,8 @@ def test_move_with_signing_service(ansible_config, artifact, upload_artifact, se
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
-    if settings.get("GALAXY_COLLECTION_SIGNING_SERVICE") is None:
-        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is NoneType")
+    if not settings.get("GALAXY_COLLECTION_SIGNING_SERVICE"):
+        pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is required to be set")
 
     config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
