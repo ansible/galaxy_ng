@@ -206,7 +206,10 @@ def get_standalone_token(
 
 
 def is_standalone():
-    return os.getenv("HUB_LOCAL", False)
+    local = os.getenv("HUB_LOCAL", False)
+    if local:
+        return local not in ("0", "false")
+    return local
 
 
 def is_ephemeral_env():

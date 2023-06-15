@@ -1,19 +1,10 @@
 set -e
-set -x
 
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
 source $VENVPATH/bin/activate
 
 cd /src/galaxy_ng/
-
-PORT="${INSIGHTS_PROXY_PORT:-$API_PORT}"
-
-export HUB_LOCAL=1
-export HUB_API_ROOT="$API_PROTOCOL://$API_HOST:$PORT$PULP_GALAXY_API_PATH_PREFIX"
-export CONTAINER_REGISTRY="$API_HOST:$PORT"
-
-export HUB_USE_MOVE_ENDPOINT=true
 
 django-admin shell < ./dev/common/setup_test_data.py
 cd galaxy_ng
@@ -40,28 +31,24 @@ cd /src/galaxy_ng/
 # check the environment to see if the test fixtures are set up. If they aren't,
 # initialize them
 
-if [[ $COMPOSE_PROFILE =~ "galaxy_ng/ldap" ]]; then
-    # MARKS="all or private_hub or auth_ldap"
-    export HUB_TEST_AUTHENTICATION_BACKEND="ldap"
-elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/keycloak" ]]; then
-    # MARKS="all or private_hub or auth_keycloak"
-    export HUB_TEST_AUTHENTICATION_BACKEND="keycloak"
-elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/community" ]]; then
-    # MARKS="all or community"
-    export HUB_TEST_AUTHENTICATION_BACKEND="community"
-elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/insights" ]]; then
-    # MARKS="all or insights"
-    export HUB_TEST_AUTHENTICATION_BACKEND="galaxy"
-else 
-    # MARKS="all or private_hub or auth_standalone"
-    export HUB_TEST_AUTHENTICATION_BACKEND="galaxy"
-fi
+# if [[ $COMPOSE_PROFILE =~ "galaxy_ng/ldap" ]]; then
+#     MARKS="all or private_hub or auth_ldap"
+# elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/keycloak" ]]; then
+#     MARKS="all or private_hub or auth_keycloak"
+# elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/community" ]]; then
+#     MARKS="all or community"
+# elif [[ $COMPOSE_PROFILE =~ "galaxy_ng/insights" ]]; then
+#     MARKS="all or insights"
+# else 
+#     MARKS="all or private_hub or auth_standalone"
+# fi
 
 # echo $MARKS
 
 
 
 # TODO: fix marks
+set -x
 
 $VENVPATH/bin/pytest -v -r sx --color=yes -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync and not certified_sync and not x_repo_search and not rm_sync and not rbac_repos" "$@" galaxy_ng/tests/integration
 RC=$?

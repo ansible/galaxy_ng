@@ -43,11 +43,12 @@ CREDENTIALS = {
     "iqe_admin": {
         "password": "redhat",
         "token": None,
+        "gen_token": False
     },
     "professor": {
         "password": "professor",
         "token": None,
-        "gen_token": False,
+        "gen_token": True,
     },
     "hermes": {
         "password": "hermes",

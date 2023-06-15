@@ -10,6 +10,10 @@
       debug:
         msg: "Preparing Keycloak setup ..."
 
+    - name: Setting hub URL
+      set_fact:
+        hub_url: "{{ lookup('ansible.builtin.env', 'KEYCLOAK_REDIRECT_URL', default='http://localhost:5001/') }}"
+
     - name: Create or update AAP Keycloak realm
       community.general.keycloak_realm:
         auth_client_id: admin-cli
@@ -37,16 +41,15 @@
         id: d8b127a3-31f6-44c8-a7e4-4ab9a3e78d95
         name: Automation Hub
         description: Client ID for Ansible Automation Hub
-        root_url: http://localhost:5001/
+        root_url: "{{ hub_url }}"
         enabled: yes
         client_authenticator_type: client-secret
         secret: REALLYWELLKEPTSECRET
         redirect_uris:
-          - http://localhost:8002/
+          - "{{ hub_url }}*"
           - http://localhost:8002/*
-          - http://localhost:5001/*
         web_origins:
-          - http://localhost:5001/*
+          - "{{ hub_url }}*"
           - http://localhost:8002/*
         bearer_only: no
         consent_required: no

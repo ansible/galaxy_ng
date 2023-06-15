@@ -84,7 +84,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
 def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be true")
-    config = ansible_config(profile="iqe_admin")
+    config = ansible_config(profile="admin")
     client = get_client(
         config=config
     )
