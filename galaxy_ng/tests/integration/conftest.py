@@ -36,9 +36,9 @@ from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
 MARKER_CONFIG = """
 qa: Mark tests to run in the vortex job.
 galaxyapi_smoke: Smoke tests for galaxy-api backend.
-standalone_only: Tests that should not run against the Insights version of Hub.
-cloud_only: Tests that should not run against the standalone version of Hub.
-community_only: Tests relevant to the community deployment profile.
+deployment_standalone: Tests that should not run against the Insights version of Hub.
+deployment_cloud: Tests that should not run against the standalone version of Hub.
+deployment_community: Tests relevant to the community deployment profile.
 cli: Tests that shell out to the real ansible-galaxy cli.
 ui: Tests that navigate the UI via selenium.
 ui_standalone: UI tests that only work in standalone mode.
@@ -74,9 +74,9 @@ certified_sync: sync tests container against container
 auto_approve: run tests that require AUTO_APPROVE to be set to true
 private_repos: run tests verifying private repositories
 rbac_repos: tests verifying rbac roles on custom repositories
-rm_sync: tests verifying syncing custom repositories
 x_repo_search: tests verifying cross-repo search endpoint
 repositories: tests verifying custom repositories
+all: tests that are unmarked and should pass in all deployment modes
 """
 
 logger = logging.getLogger(__name__)
@@ -838,3 +838,11 @@ def max_hub_version(ansible_config, spec):
 def is_hub_4_5(ansible_config):
     hub_version = get_hub_version(ansible_config)
     return parse_version(hub_version) < parse_version('4.6')
+
+
+# add the "all" label to any unmarked tests
+def pytest_collection_modifyitems(items, config):
+    for item in items:
+        if not any(item.iter_markers()):
+            print(item)
+            item.add_marker("all")

@@ -111,6 +111,14 @@ oci-env/integration:
 gh-action/ldap:
 	python3 dev/oci_env_integration/actions/ldap.py
 
+.PHONY: gh-action/x_repo_search
+gh-action/x_repo_search:
+	python3 dev/oci_env_integration/actions/x_repo_search.py
+
+.PHONY: gh-action/iqe_rbac
+gh-action/iqe_rbac:
+	python3 dev/oci_env_integration/actions/iqe_rbac.py
+
 .PHONY: gh-action/keycloak
 gh-action/keycloak:
 	python3 dev/oci_env_integration/actions/keycloak.py

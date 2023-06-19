@@ -100,7 +100,7 @@ def test_publish_and_install_by_self(ansible_config, published, cleanup_collecti
 
 
 @pytest.mark.cli
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 @pytest.mark.skip(
     reason="Marked for insights mode which always has GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL true"
 )

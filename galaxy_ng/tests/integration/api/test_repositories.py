@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.min_hub_version("4.7dev")
+@pytest.mark.deployment_standalone
 class TestRepositories:
     @pytest.mark.repositories
     def test_cant_upload_same_collection_same_repo(self, galaxy_client):
@@ -125,7 +126,7 @@ class TestRepositories:
         delete_distribution(gc_admin, test_repo_name_2)
 
     @pytest.mark.repositories
-    @pytest.mark.standalone_only
+    @pytest.mark.deployment_standalone
     @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
     def test_copy_signed_cv_endpoint(self, galaxy_client):
         """
@@ -166,7 +167,7 @@ class TestRepositories:
         delete_distribution(gc_admin, test_repo_name_2)
 
     @pytest.mark.repositories
-    @pytest.mark.standalone_only
+    @pytest.mark.deployment_standalone
     @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
     def test_move_signed_cv_endpoint(self, galaxy_client):
         """

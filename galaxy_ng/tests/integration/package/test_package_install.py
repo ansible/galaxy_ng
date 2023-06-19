@@ -12,7 +12,7 @@ import tempfile
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.package
 @pytest.mark.parametrize(
     "env_vars",

@@ -25,6 +25,8 @@ jobs:
           - TEST_PROFILE: rbac
           - TEST_PROFILE: certified-sync
           - TEST_PROFILE: insights
+          - TEST_PROFILE: iqe_rbac
+          - TEST_PROFILE: x_repo_search
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

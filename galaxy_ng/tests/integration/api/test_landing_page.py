@@ -5,7 +5,7 @@ import pytest
 from ..utils import get_client
 
 
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 def test_landing_page(ansible_config):
     """Tests whether the landing page returns the expected fields and numbers."""
 

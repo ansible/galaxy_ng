@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.min_hub_version("4.7dev")
 class TestCustomReposSync:
-    @pytest.mark.rm_sync
+    @pytest.mark.sync
     def test_basic_sync_custom_repo_with_req_file(self, sync_instance_crc, galaxy_client):
         """
         Test syncing directly from a custom repo.
@@ -95,7 +95,7 @@ class TestCustomReposSync:
         matches, _ = search_collection_endpoint(gc, name=artifact_no_sync.name, limit=100)
         assert matches == 0
 
-    @pytest.mark.rm_sync
+    @pytest.mark.sync
     def test_basic_sync_custom_repo_mirror(self, sync_instance_crc, galaxy_client):
         """
         Test syncing directly from a custom repo, without a requirements file and checking

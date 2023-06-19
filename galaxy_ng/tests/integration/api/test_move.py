@@ -27,6 +27,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.collection_move
 @pytest.mark.move
 @pytest.mark.slow_in_cloud
+@pytest.mark.all
 def test_move_collection_version(ansible_config, galaxy_client):
     """Tests whether a collection can be moved from repo to repo"""
     config = ansible_config("partner_engineer")
@@ -116,6 +117,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
 @pytest.mark.move
 @pytest.mark.slow_in_cloud
 @pytest.mark.min_hub_version("4.7dev")
+@pytest.mark.all
 def test_copy_collection_version(ansible_config, galaxy_client):
     """Tests whether a collection can be copied from repo to repo"""
 
@@ -191,7 +193,7 @@ def test_copy_collection_version(ansible_config, galaxy_client):
     assert ckey in after['community']
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
 def test_copy_associated_content(ansible_config, galaxy_client):

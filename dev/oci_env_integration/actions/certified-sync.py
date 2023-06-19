@@ -6,7 +6,7 @@ env = action_lib.OCIEnvIntegrationTest(
             "env_file": "standalone.compose.env",
             "run_tests": True,
             "db_restore": None,
-            "pytest_flags": '-m "certified_sync or rm_sync"'
+            "pytest_flags": '-m sync'
         },
         {
             "env_file": "sync-test.compose.env",

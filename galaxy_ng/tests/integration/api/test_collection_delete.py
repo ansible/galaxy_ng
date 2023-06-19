@@ -23,6 +23,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.delete
 @pytest.mark.collection_delete
 @pytest.mark.slow_in_cloud
+@pytest.mark.all
 def test_delete_collection(ansible_config, uncertifiedv2):
     """Tests whether a collection can be deleted"""
     config = ansible_config("partner_engineer")
@@ -82,6 +83,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
 @pytest.mark.delete
 @pytest.mark.collection_version_delete
 @pytest.mark.slow_in_cloud
+@pytest.mark.all
 def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv2):
     """Tests whether a collection version can be deleted"""
     config = ansible_config("partner_engineer")
@@ -149,6 +151,7 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
 
 @pytest.mark.delete
 @pytest.mark.min_hub_version("4.7dev")
+@pytest.mark.all
 def test_delete_default_repos(ansible_config, upload_artifact, uncertifiedv2):
     """Verifies that default repos cannot be deleted"""
     config = ansible_config("admin")

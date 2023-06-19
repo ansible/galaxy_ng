@@ -26,7 +26,6 @@ def settings(ansible_config):
     return api_client(f"{api_prefix}/_ui/v1/settings/")
 
 
-@pytest.mark.standalone_only
 @pytest.mark.ldap
 def test_ldap_is_enabled(ansible_config, settings):
     """test whether ldap user can login"""
@@ -39,7 +38,6 @@ def test_ldap_is_enabled(ansible_config, settings):
     assert api_client(f"{api_prefix}/_ui/v1/settings/")["GALAXY_AUTH_LDAP_ENABLED"] is True
 
 
-@pytest.mark.standalone_only
 @pytest.mark.ldap
 def test_ldap_login(ansible_config, settings):
     """test whether ldap user can login"""
@@ -62,7 +60,6 @@ def test_ldap_login(ansible_config, settings):
     assert data["groups"][0]["name"] == "admin_staff"
 
 
-@pytest.mark.standalone_only
 @pytest.mark.ldap
 def test_ldap_mirror_only_existing_groups(ansible_config, settings):
     """Ensure that GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS works as expected."""

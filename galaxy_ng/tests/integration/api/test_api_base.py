@@ -4,6 +4,7 @@ from ..utils import get_client
 
 
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.all
 def test_galaxy_api_root(ansible_config, artifact):
     """Test galaxy API root."""
 
@@ -31,6 +32,7 @@ def test_galaxy_api_root(ansible_config, artifact):
 
 
 @pytest.mark.max_hub_version("4.5.5")
+@pytest.mark.all
 def test_galaxy_api_root_v_4_5(ansible_config, artifact):
     """Test galaxy API root."""
 

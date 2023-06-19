@@ -31,7 +31,6 @@ from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_gro
 class TestRBAC:
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_create_user(self, galaxy_client):
         """
         Verifies that when a user has the role to create users, the user can create users
@@ -46,7 +45,6 @@ class TestRBAC:
         create_test_user(gc)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_create_user(self, galaxy_client):
         """
         Verifies that when a user does not have the role to create users,
@@ -64,7 +62,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_update_user(self, galaxy_client):
         """
         Verifies that when a user has the role to update users, the user can modify users
@@ -82,7 +79,6 @@ class TestRBAC:
         update_user(gc_user, resp)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_update_user(self, galaxy_client):
         """
         Verifies that when a user does not have the role to update users,
@@ -103,7 +99,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_delete_user(self, galaxy_client):
         """
         Verifies that when a user has the role to delete users, the user can delete users
@@ -120,7 +115,6 @@ class TestRBAC:
         assert not user_exists(user_to_delete["username"], gc)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_delete_user(self, galaxy_client):
         """
         Verifies that when a user does not have the role to delete users,
@@ -140,7 +134,6 @@ class TestRBAC:
         assert user_exists(user_to_delete["username"], gc)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_can_create_group(self, galaxy_client):
         """
         Verifies that it's possible to create a group
@@ -150,7 +143,6 @@ class TestRBAC:
         assert group
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_cannot_create_group_that_already_exists(self, galaxy_client):
         """
         Verifies that it's not possible to create a group that already exists
@@ -163,7 +155,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "409"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_admin_can_create_role(self, galaxy_client):
         """
         Verifies that an admin user can create a role
@@ -175,7 +166,6 @@ class TestRBAC:
         assert resp
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_admin_cannot_create_duplicate_roles(self, galaxy_client):
         """
         Verifies that two roles cannot have the same name
@@ -189,7 +179,6 @@ class TestRBAC:
         assert ctx.value.args[0] == 400
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_can_delete_role(self, galaxy_client):
         """
         Verifies that it's possible to delete a role
@@ -205,7 +194,6 @@ class TestRBAC:
             gc.get_role(role_name)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_can_patch_update_role(self, galaxy_client):
         """
         Verifies that it's possible to patch update a role
@@ -220,7 +208,6 @@ class TestRBAC:
         assert resp["description"] == "updated description"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_can_put_update_role(self, galaxy_client):
         """
         Verifies that it's possible to put update a role
@@ -239,7 +226,6 @@ class TestRBAC:
         assert resp["description"] == "updated description"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_add_group(self, galaxy_client):
         """
         Verifies that when a user has the role to add groups, the user can create a group
@@ -255,7 +241,6 @@ class TestRBAC:
         gc.create_group(new_group_name)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_non_admin_cannot_create_roles(self, galaxy_client):
         """
         Verifies that a non admin user can't create roles
@@ -280,7 +265,6 @@ class TestRBAC:
         assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_permission_in_role_to_add_group(self, galaxy_client):
         """
         Verifies that when a user doesn't have the role to add groups,
@@ -300,7 +284,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_permission_add_namespace(self, galaxy_client):
         """
         Verifies that when a user doesn't have the role to create a ns,
@@ -321,7 +304,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_add_namespace(self, galaxy_client):
         """
         Verifies that when a user has the role to create a ns, the user can create a ns
@@ -335,7 +317,6 @@ class TestRBAC:
         create_namespace(gc, group)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_delete_namespace(self, galaxy_client):
         """
         Verifies that when a user has the role to delete a ns, the user can delete a ns
@@ -350,7 +331,6 @@ class TestRBAC:
         delete_namespace(gc, namespace_name)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_delete_namespace(self, galaxy_client):
         """
         Verifies that when a user doesn't have the role to delete a ns,
@@ -369,7 +349,6 @@ class TestRBAC:
         assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_object_role_upload_to_namespace(self, galaxy_client):
         """
         Verifies that when a user belongs to the same group as the one defined in a namespace
@@ -387,7 +366,6 @@ class TestRBAC:
         upload_test_artifact(gc_user, namespace_name)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_upload_to_namespace(self, galaxy_client):
         """
         Verifies that when a user does not belong to the same group as the one defined in
@@ -410,7 +388,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_global_role_upload_to_namespace(self, galaxy_client):
         """
         Verifies that when a user does not belong to the same group as the one defined in
@@ -428,7 +405,6 @@ class TestRBAC:
         upload_test_artifact(gc_user, ns_name)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_global_role_delete_collection(self, galaxy_client):
         """
         Verifies that when a user has the role to delete collections,
@@ -451,7 +427,6 @@ class TestRBAC:
         assert not collection_exists(gc, namespace_name, artifact.name, artifact.version)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_delete_collection(self, galaxy_client):
         """
         Verifies that when a user doesn't have the permission to delete collections,
@@ -475,7 +450,6 @@ class TestRBAC:
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_reject_collection(self, galaxy_client):
         """
         Verifies that when a user does not have the role to reject collections,
@@ -504,7 +478,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_reject_collection(self, galaxy_client):
         """
         Verifies that when a user has role to reject collections,
@@ -534,7 +507,6 @@ class TestRBAC:
         )
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_approve_collection(self, galaxy_client):
         """
         Verifies that when a user has role to approve collections,
@@ -558,7 +530,6 @@ class TestRBAC:
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_approve_collection(self, galaxy_client):
         """
         Verifies that when a user does not have a role to approve collections,
@@ -583,7 +554,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_add_remote_registry(self, galaxy_client):
         """
         Verifies that when a user does not have the role to add a remote registry,
@@ -601,7 +571,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_add_remote_registry(self, galaxy_client):
         """
         Verifies that when a user does not have the role to add a remote registry,
@@ -617,7 +586,6 @@ class TestRBAC:
         create_registry(gc_user, f"remote_registry_{uuid4()}", "url")
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_delete_remote_registry(self, galaxy_client):
         """
         Verifies that when a user has the role to delete a remote registry,
@@ -635,7 +603,6 @@ class TestRBAC:
         delete_registry(gc_user, remote_registry)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_delete_remote_registry(self, galaxy_client):
         """
         Verifies that when a user does not have the role to delete a remote registry,
@@ -655,7 +622,6 @@ class TestRBAC:
         assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_add_ee(self, galaxy_client):
         """
         Verifies that when a user has the role to create an ee, the user can create an ee
@@ -682,7 +648,6 @@ class TestRBAC:
         add_owner_to_ee(gc_user, ee_name, group["name"], [role_user])
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_add_ee(self, galaxy_client):
         """
         Verifies that when a user does not have the role to create ee, the user cannot create an ee
@@ -702,7 +667,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_role_delete_ee(self, galaxy_client):
         """
         Verifies that when a user has the role to remove an ee, the user can remove an ee
@@ -721,7 +685,6 @@ class TestRBAC:
         delete_container(gc_user, ee_name)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_role_delete_ee(self, galaxy_client):
         """
         Verifies that when a user does not have the role to remove an ee,
@@ -743,7 +706,6 @@ class TestRBAC:
         assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_user_role_remotes(self, galaxy_client):
         """
         Verifies that a user with change collection remote permissions can config remotes
@@ -758,7 +720,6 @@ class TestRBAC:
         community_remote_config(gc_user, "http://google.com/", "username", "password")
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_user_missing_role_remotes(self, galaxy_client):
         """
         Verifies that a user without change collection remote permissions can't config remotes
@@ -775,7 +736,6 @@ class TestRBAC:
         assert ctx.value.args[0]["status"] == "403"
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_user_role_get_remotes(self, galaxy_client):
         """
         Verifies that a user with view remotes roles can view remote config
@@ -790,7 +750,6 @@ class TestRBAC:
         get_community_remote(gc_user)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_object_role_push_image_to_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
@@ -809,7 +768,6 @@ class TestRBAC:
             assert "retcode" in str(e)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_object_role_push_image_to_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user has object permissions to push an image,
@@ -826,7 +784,6 @@ class TestRBAC:
         gc_user.push_image(ee_name + ":latest")
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_global_role_push_image_to_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user has global permissions
@@ -846,7 +803,6 @@ class TestRBAC:
         gc_user.push_image(ee_name + ":latest")
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_global_role_push_image_to_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
@@ -869,7 +825,6 @@ class TestRBAC:
             assert "retcode" in str(e)
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_object_role_delete_image_from_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have
@@ -893,7 +848,6 @@ class TestRBAC:
         assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_global_role_delete_image_from_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user has
@@ -915,7 +869,6 @@ class TestRBAC:
         delete_image_container(gc_user, ee_name, all_images["data"][0]["digest"])
 
     @pytest.mark.iqe_rbac_test
-    @pytest.mark.standalone_only
     def test_missing_global_role_delete_image_from_ee(self, galaxy_client, ansible_config):
         """
         Verifies that when a user does not have

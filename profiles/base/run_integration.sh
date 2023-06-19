@@ -50,7 +50,7 @@ cd /src/galaxy_ng/
 # TODO: fix marks
 set -x
 
-$VENVPATH/bin/pytest -v -r sx --color=yes -m "not cloud_only and not community_only and not rbac_roles and not iqe_rbac_test and not sync and not certified_sync and not x_repo_search and not rm_sync and not rbac_repos" "$@" galaxy_ng/tests/integration
+$VENVPATH/bin/pytest -v -r sx --color=yes -m "$HUB_TEST_MARKS" "$@" galaxy_ng/tests/integration
 RC=$?
 
 exit $RC

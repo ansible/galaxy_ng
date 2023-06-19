@@ -11,7 +11,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.synclist
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 def test_synclist_object_get(ansible_config):
     """Validate user can read the endpoints with synclist objects."""
 
@@ -28,7 +28,7 @@ def test_synclist_object_get(ansible_config):
 
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.synclist
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 def test_synclist_object_edit(ansible_config, upload_artifact):
     """Edit the synclist json object and confirm data is saved.
 
@@ -82,7 +82,7 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.synclist
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 @pytest.mark.slow_in_cloud
 def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings):
     """Edit SyncList object to exclude a collection,
@@ -160,7 +160,7 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings
 
 
 @pytest.mark.synclist
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 @pytest.mark.slow_in_cloud
 def test_synclist_distributions(ansible_config, upload_artifact):
     """

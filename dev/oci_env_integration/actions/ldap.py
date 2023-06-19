@@ -6,7 +6,6 @@ env = action_lib.OCIEnvIntegrationTest(
             "env_file": "ldap.compose.env",
             "run_tests": True,
             "db_restore": None,
-            "pytest_flags": None,
         }
     ]
 )
