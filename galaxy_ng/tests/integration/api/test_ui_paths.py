@@ -858,8 +858,14 @@ def test_users_detail_insights_access(ansible_config):
 
     config = ansible_config("basic_user")
     api_prefix = config.get("api_prefix").rstrip("/")
-    url = f"{api_prefix}/_ui/v1/users/1/"
     api_client = get_client(config, request_token=True, require_auth=True)
+
+    admin_config = ansible_config("partner_engineer")
+    admin_client = get_client(admin_config, request_token=True, require_auth=True)
+
+    user_id = admin_client(
+        f"{api_prefix}/_ui/v1/users/?username={config['username']}")["data"][0]["id"]
+    url = f"{api_prefix}/_ui/v1/users/{user_id}/"
 
     with pytest.raises(GalaxyError, match=REGEX_403):
         api_client(url, method="GET")
@@ -870,11 +876,12 @@ def test_users_detail_insights_access(ansible_config):
     with pytest.raises(GalaxyError, match=REGEX_403):
         api_client(url, method="DELETE")
 
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config, request_token=True, require_auth=True)
+    api_client = admin_client
 
     user = api_client(url, method="GET")
-    assert user["id"] == 1
+    assert user["id"] == user_id
+
+    print(user)
 
     put_resp = api_client(url, method="PUT", args=user)
     assert put_resp == user
