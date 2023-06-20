@@ -85,7 +85,9 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
                         counter, _ = LegacyRoleDownloadCount.objects.get_or_create(legacyrole=role)
 
                         # now lock the row so that we avoid race conditions
-                        counter = LegacyRoleDownloadCount.objects.select_for_update().get(pk=counter.pk)
+                        counter = LegacyRoleDownloadCount.objects.select_for_update().get(
+                            pk=counter.pk
+                        )
 
                         # increment and save
                         counter.count += 1
