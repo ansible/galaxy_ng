@@ -6,7 +6,6 @@ env = action_lib.OCIEnvIntegrationTest(
             "env_file": "keycloak.compose.env",
             "run_tests": True,
             "db_restore": None,
-            "pytest_flags": None,
 
             # the keycloak profile performs some setup after the service
             # comes online

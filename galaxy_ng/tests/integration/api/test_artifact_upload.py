@@ -131,6 +131,7 @@ def test_validated_publish(ansible_config, artifact, upload_artifact):
 
 
 @pytest.mark.skip
+@pytest.mark.all
 def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
     """Test error responses when posting to the collections endpoint."""
     config = ansible_config("basic_user")

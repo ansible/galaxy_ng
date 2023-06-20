@@ -50,6 +50,7 @@ def test_pulp_api_redirect(ansible_config, artifact):
 )
 @pytest.mark.pulp_api
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.all
 def test_pulp_endpoint_readonly(ansible_config, artifact, url):
     """Ensure authenticated user has readonly access to view"""
 
