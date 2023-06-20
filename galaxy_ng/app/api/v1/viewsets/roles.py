@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from django.db import transaction
+from django.db.utils import InternalError as DatabaseInternalError
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
@@ -79,15 +80,24 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
 
                 with transaction.atomic():
 
-                    # attempt to get or create the counter first
-                    counter, _ = LegacyRoleDownloadCount.objects.get_or_create(legacyrole=role)
+                    try:
+                        # attempt to get or create the counter first
+                        counter, _ = LegacyRoleDownloadCount.objects.get_or_create(legacyrole=role)
 
-                    # now lock the row so that we avoid race conditions
-                    counter = LegacyRoleDownloadCount.objects.select_for_update().get(pk=counter.pk)
+                        # now lock the row so that we avoid race conditions
+                        counter = LegacyRoleDownloadCount.objects.select_for_update().get(
+                            pk=counter.pk
+                        )
 
-                    # increment and save
-                    counter.count += 1
-                    counter.save()
+                        # increment and save
+                        counter.count += 1
+                        counter.save()
+                    except DatabaseInternalError as e:
+                        # Fail gracefully if the database is in read-only mode.
+                        if "read-only" in str(e):
+                            pass
+                        else:
+                            raise e
 
         return super().list(request)
 
