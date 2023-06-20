@@ -1,6 +1,4 @@
 import time
-import sys
-import getopt
 import subprocess
 import shutil
 import shlex
@@ -121,7 +119,8 @@ class OCIEnvIntegrationTest:
             if self.envs[env]["run_tests"]:
                 self.exec_cmd(
                     env,
-                    f"exec bash /src/galaxy_ng/profiles/base/run_integration.sh {pytest_flags} {self.flags}"
+                    "exec bash /src/galaxy_ng/profiles/base/run_integration.sh"
+                    f" {pytest_flags} {self.flags}"
                 )
 
     def dump_logs(self):

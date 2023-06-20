@@ -17,8 +17,7 @@ from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture, get_ansib
 
 from ansible.galaxy.api import GalaxyError
 
-from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env, \
-    avoid_docker_limit_rate
+from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env
 from galaxykit.container_images import get_container, get_container_images_latest
 
 

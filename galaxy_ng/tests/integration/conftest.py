@@ -3,7 +3,6 @@ import os
 import shutil
 from functools import lru_cache
 from urllib.parse import urlparse
-import requests
 
 import pytest
 from orionutils.utils import increment_version
@@ -23,12 +22,17 @@ from .utils import (
     wait_for_url,
 )
 
-from .utils.iqe_utils import get_standalone_token
 
 from .utils import upload_artifact as _upload_artifact
-from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
-    is_sync_testing, is_dev_env_standalone, is_standalone, is_ephemeral_env, \
+from .utils.iqe_utils import (
+    GalaxyKitClient,
+    is_stage_environment,
+    is_sync_testing,
+    is_dev_env_standalone,
+    is_standalone,
+    is_ephemeral_env,
     get_standalone_token
+)
 
 # from orionutils.generator import build_collection
 
@@ -212,7 +216,7 @@ class AnsibleConfigFixture(dict):
                     'HUB_AUTH_URL',
                     None
                 )
-            
+
         elif key == 'auth_backend':
             return self._auth_backend
 
@@ -364,9 +368,6 @@ def certifiedv2(ansible_config, artifact):
     # certify v1
     hub_4_5 = is_hub_4_5(ansible_config)
     set_certification(api_client, artifact, hub_4_5=hub_4_5)
-
-
-
 
     # Increase collection version
     new_version = increment_version(artifact.version)

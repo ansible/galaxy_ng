@@ -45,7 +45,8 @@ class KeycloakBasicAuth(BasicAuthentication):
 
                 token_data = backend.user_data(response.json()['access_token'])
 
-                # The django social auth strategy uses data from the JWT token in the KeycloackOAuth2
+                # The django social auth strategy uses data from the JWT token in the
+                # KeycloackOAuth2
                 # backend to create a new user and update it with the data from the token. This
                 # should return a django user instance.
                 user = strategy.authenticate(backend, response=token_data)
