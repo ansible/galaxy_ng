@@ -4,6 +4,7 @@ import getopt
 import subprocess
 import shutil
 import shlex
+import os
 
 
 class OCIEnvIntegrationTest:
@@ -45,8 +46,8 @@ class OCIEnvIntegrationTest:
             number of seconds before running integration tests after the stack has spun up.
 
     """
-    dump_logs = False
-    teadown = False
+    do_dump_logs = False
+    do_teardown = True
     flags = ""
     envs = {}
 
@@ -56,15 +57,9 @@ class OCIEnvIntegrationTest:
             self.envs[env_file] = env
             self.envs[env_file]["env_path"] = f"dev/oci_env_integration/oci_env_configs/{env_file}"
 
-        opts, _ = getopt.getopt(sys.argv[1:], "", ["flags", "dump-logs", "teardown"])
-
-        for flag, val in opts:
-            if flag == "--teardown":
-                self.teardown = True
-            elif flag == "--dump-logs":
-                self.dump_logs = True
-            elif flag == "--flags":
-                self.flags = val
+        self.do_dump_logs = os.environ.get("GH_DUMP_LOGS", "0") == "1"
+        self.do_teardown = os.environ.get("GH_TEARDOWN", "1") == "1"
+        self.flags = os.environ.get("GH_FLAGS", "")
 
         failed = False
         try:
@@ -74,7 +69,7 @@ class OCIEnvIntegrationTest:
             print(e)
             failed = True
         finally:
-            # self.dump_logs()
+            self.dump_logs()
             self.teardown()
 
         if failed:
@@ -130,9 +125,13 @@ class OCIEnvIntegrationTest:
                 )
 
     def dump_logs(self):
+        if not self.do_dump_logs:
+            return
         for env in self.envs:
             self.exec_cmd(env, "compose logs")
 
     def teardown(self):
+        if not self.do_teardown:
+            return
         for env in self.envs:
             self.exec_cmd(env, "compose down -v")
