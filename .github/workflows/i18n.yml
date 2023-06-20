@@ -60,9 +60,13 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Automated updated of i18n strings on ${{ env.NOW }}
+          committer: ansible <ansible-infra@redhat.com>
+          author: ansible <ansible-infra@redhat.com>
+          commit-message: |
+            Automated updated of i18n strings on ${{ env.NOW }}
+            No-Issue
           body: |
             No-Issue
           title: "[i18n] Update translations ${{ env.NOW }}"
-          branch: i18n-update-translations-${{ env.NOW }}
-          base: master
+          branch: i18n/${{ matrix.branch }}/update-translations-${{ env.NOW }}
+          base: ${{ matrix.branch }}
