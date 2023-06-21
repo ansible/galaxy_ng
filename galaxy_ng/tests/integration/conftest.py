@@ -10,7 +10,7 @@ from pkg_resources import parse_version, Requirement
 
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
-from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS
+from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -99,44 +99,6 @@ class AnsibleConfigFixture(dict):
 
     PROFILES = {}
 
-    if is_stage_environment():
-        PROFILES = {
-            # ns owner to autohubtest2, not in partner engineer group, not an SSO org admin
-            "basic_user": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
-                             "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
-                             "vault_key": "password"},
-                "token": None,
-            },
-            # in partner engineer group, not an SSO org admin username: ansible-hub-qe-pe2
-            "partner_engineer": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                             "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                             "vault_key": "password"},
-                "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                          "vault_key": "token"},
-            },
-            # an SSO org admin, not in partner engineer group
-            "org_admin": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-rbac",
-                             "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-rbac",
-                             "vault_key": "password"},
-                "token": None,
-            },
-            # for stage env, this can be same user as partner_engineer profile
-            "admin": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                             "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                             "vault_key": "password"},
-                "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                          "vault_key": "token"},
-            }
-        }
-
     def __init__(self, profile=None, namespace=None, url=None, auth_url=None):
         backend_map = {
             "community": "community",
@@ -146,15 +108,18 @@ class AnsibleConfigFixture(dict):
         }
         self._auth_backend = os.environ.get('HUB_TEST_AUTHENTICATION_BACKEND')
 
-        for profile_name in PROFILES:
-            p = PROFILES[profile_name]
-            credential_set = backend_map.get(self._auth_backend, "galaxy")
-            if username := p["username"].get(credential_set):
-                self.PROFILES[profile_name] = {
-                    "username": username,
-                    "token": CREDENTIALS[username].get("token"),
-                    "password": CREDENTIALS[username].get("password")
-                }
+        if is_stage_environment():
+            self.PROFILES = EPHEMERAL_PROFILES
+        else:
+            for profile_name in PROFILES:
+                p = PROFILES[profile_name]
+                credential_set = backend_map.get(self._auth_backend, "galaxy")
+                if username := p["username"].get(credential_set):
+                    self.PROFILES[profile_name] = {
+                        "username": username,
+                        "token": CREDENTIALS[username].get("token"),
+                        "password": CREDENTIALS[username].get("password")
+                    }
 
         self.url = url
         self.auth_url = auth_url
@@ -801,16 +766,22 @@ def get_hub_version(ansible_config):
     elif is_ephemeral_env():
         # I can't get a token from the ephemeral environment.
         # Changed to Basic token authentication until the issue is resolved
-        hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
-        del os.environ["HUB_AUTH_URL"]
-        pe_token_bck = AnsibleConfigFixture.PROFILES["partner_engineer"]["token"]
-        AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
         role = "partner_engineer"
         galaxy_client = get_galaxy_client(ansible_config)
+
+
+        print("________--------------------------__________________--------------")
+        hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
+        print(hub_auth_url_bck)
+        del os.environ["HUB_AUTH_URL"]
+        pe_token_bck = galaxy_client.config.PROFILES["partner_engineer"]["token"]
+        print(pe_token_bck)
+        galaxy_client.config.PROFILES["partner_engineer"]["token"] = None
+
+        print(galaxy_client.config.PROFILES)
         gc = galaxy_client(role, basic_token=True)
         galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
         os.environ["HUB_AUTH_URL"] = hub_auth_url_bck
-        AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = pe_token_bck
         return galaxy_ng_version
     elif not is_dev_env_standalone():
         role = "admin"
