@@ -33,7 +33,7 @@ class PulpOpenAPIJsonRedirectView(api_base.APIView):
     permission_classes = []
 
     def get(self, request, *args, **kwargs):
-        url = f"/{PULP_PREFIX}/api/v3/docs/api.json"
+        url = f"/{PULP_PREFIX}/api/v3/docs/api.json?pk_path=1"
         return HttpResponsePermanentRedirect(url)
 
 
@@ -41,7 +41,7 @@ class PulpOpenAPIYamlRedirectView(api_base.APIView):
     permission_classes = []
 
     def get(self, request, *args, **kwargs):
-        url = f"/{PULP_PREFIX}/api/v3/docs/api.yaml"
+        url = f"/{PULP_PREFIX}/api/v3/docs/api.yaml?pk_path=1"
         return HttpResponsePermanentRedirect(url)
 
 
