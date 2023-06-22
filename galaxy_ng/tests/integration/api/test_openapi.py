@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 
 from openapi_spec_validator import validate_spec
+import requests
 
 from ..utils import get_client, is_docker_installed
 
@@ -88,6 +89,39 @@ def test_pulp_openapi_has_variables(ansible_config):
     paths_keys = list(pulp_spec['paths'].keys())
     for ev in PULPY_VARIABLES:
         assert ev in paths_keys
+
+
+@pytest.mark.openapi
+def test_openapi_pulp_redirects(ansible_config):
+    """Tests that openapi calls redirect to the openapi spec provided by pulp."""
+
+    config = ansible_config("basic_user")
+    api_url = config.get("url").rstrip("/")
+    api_prefix = config.get("api_prefix").rstrip("/")
+
+    # Test JSON redirect.
+    response = requests.get(f"{api_url}/v3/openapi.json", allow_redirects=False)
+    assert response.status_code == 301
+    assert "Location" in response.headers
+    assert response.headers["Location"] == f"{api_prefix}/pulp/api/v3/docs/api.json?pk_path=1"
+
+    # Test YAML redirect.
+    response = requests.get(f"{api_url}/v3/openapi.yaml", allow_redirects=False)
+    assert response.status_code == 301
+    assert "Location" in response.headers
+    assert response.headers["Location"] == f"{api_prefix}/pulp/api/v3/docs/api.yaml?pk_path=1"
+
+    # Test redoc redirect.
+    response = requests.get(f"{api_url}/v3/redoc/", allow_redirects=False)
+    assert response.status_code == 301
+    assert "Location" in response.headers
+    assert response.headers["Location"] == f"{api_prefix}/pulp/api/v3/docs/"
+
+    # Test swagger redirect.
+    response = requests.get(f"{api_url}/v3/swagger-ui/", allow_redirects=False)
+    assert response.status_code == 301
+    assert "Location" in response.headers
+    assert response.headers["Location"] == f"{api_prefix}/pulp/api/v3/swagger/"
 
 
 @pytest.mark.standalone_only
