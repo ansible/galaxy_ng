@@ -17,6 +17,7 @@ from ..utils import (
     wait_for_task,
     wait_for_url,
 )
+from ..utils.iqe_utils import is_ocp_env
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -192,6 +193,7 @@ def test_copy_collection_version(ansible_config, galaxy_client):
 
 @pytest.mark.standalone_only
 @pytest.mark.min_hub_version("4.7dev")
+@pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
 def test_copy_associated_content(ansible_config, galaxy_client):
     """Tests whether a collection and associated content is copied from repo to repo"""
 
