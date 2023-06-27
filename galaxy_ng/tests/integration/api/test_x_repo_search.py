@@ -1,6 +1,7 @@
 import pytest
 import logging
 
+from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 
 from galaxy_ng.tests.integration.utils.repo_management_utils import (
@@ -554,6 +555,7 @@ class TestXRepoSearch:
 
     @pytest.mark.parametrize("is_signed", [True, False])
     @pytest.mark.x_repo_search
+    @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
     def test_search_by_is_signed_true_false(self, galaxy_client, is_signed):
         """
         Verifies that search endpoint can search by is_signed

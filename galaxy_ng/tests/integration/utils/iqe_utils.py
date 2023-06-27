@@ -215,6 +215,13 @@ def is_ephemeral_env():
     )
 
 
+def is_ocp_env():
+    # this check will not be necessary when content signing is enabled in operator
+    return "ocp4.testing.ansible.com" in os.getenv(
+        "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
+    )
+
+
 def is_stage_environment():
     return os.getenv("TESTS_AGAINST_STAGE", False)
 

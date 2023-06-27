@@ -1,6 +1,7 @@
 import pytest
 import logging
 
+from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env
 from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact
 
 from galaxy_ng.tests.integration.utils.repo_management_utils import (
@@ -125,6 +126,7 @@ class TestRepositories:
 
     @pytest.mark.repositories
     @pytest.mark.standalone_only
+    @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
     def test_copy_signed_cv_endpoint(self, galaxy_client):
         """
         Verifies a signed cv can be copied to a different repo
@@ -165,6 +167,7 @@ class TestRepositories:
 
     @pytest.mark.repositories
     @pytest.mark.standalone_only
+    @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
     def test_move_signed_cv_endpoint(self, galaxy_client):
         """
         Verifies a signed cv can be moved to a different repo
