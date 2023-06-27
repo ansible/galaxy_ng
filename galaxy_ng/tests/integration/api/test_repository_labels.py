@@ -7,7 +7,7 @@ from ..utils import get_client, iterate_all
 def test_repository_labels(ansible_config):
     # Get an API client running with admin user credentials
     client = get_client(
-        config=ansible_config("admin"),
+        config=ansible_config.set_profile("admin"),
         request_token=True,
     )
     api_prefix = client.config.get("api_prefix").rstrip("/")

@@ -19,9 +19,8 @@ from ansible.galaxy.api import GalaxyError
 
 from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env
 from galaxykit.container_images import get_container, get_container_images_latest
-
-
-CLIENT_CONFIG = AnsibleConfigFixture("admin")
+ansible_config = get_ansible_config()
+CLIENT_CONFIG = ansible_config.set_profile("admin")
 ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 
 ansible_config = get_ansible_config()

@@ -13,7 +13,6 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.package
 @pytest.mark.parametrize(
     "env_vars",
     [

@@ -23,7 +23,7 @@ from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
 @pytest.mark.min_hub_version("4.7.1")
 @pytest.mark.min_hub_version("4.6.6")
 def test_can_update_container_push(ansible_config, require_auth):
-    config = ansible_config("admin")
+    config = ansible_config.set_profile("admin")
     container_engine = config["container_engine"]
     url = config['url']
     parsed_url = urlparse(url)
@@ -46,7 +46,7 @@ def test_can_update_container_push(ansible_config, require_auth):
 
     # Get an API client running with admin user credentials
     client = get_client(
-        config=ansible_config("admin"),
+        config=ansible_config.set_profile("admin"),
         request_token=True,
         require_auth=require_auth
     )

@@ -30,7 +30,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.all
 def test_move_collection_version(ansible_config, galaxy_client):
     """Tests whether a collection can be moved from repo to repo"""
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
@@ -121,7 +121,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
 def test_copy_collection_version(ansible_config, galaxy_client):
     """Tests whether a collection can be copied from repo to repo"""
 
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
@@ -201,7 +201,7 @@ def test_copy_associated_content(ansible_config, galaxy_client):
 
     # TODO: add check for ansible namespace metadata
 
-    config = ansible_config("admin")
+    config = ansible_config.set_profile("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,

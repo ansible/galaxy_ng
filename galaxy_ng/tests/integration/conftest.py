@@ -10,7 +10,8 @@ from pkg_resources import parse_version, Requirement
 
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
-from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES
+from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES,\
+    SYNC_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -93,7 +94,16 @@ def pytest_configure(config):
         config.addinivalue_line('markers', line)
 
 
-class AnsibleConfigFixture(dict):
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class AnsibleConfigFixture(dict, metaclass=Singleton):
     # The class is instantiated with a "profile" that sets
     # which type of user will be used in the test
 
@@ -110,6 +120,8 @@ class AnsibleConfigFixture(dict):
 
         if is_stage_environment():
             self.PROFILES = EPHEMERAL_PROFILES
+        if is_sync_testing():
+            self.PROFILES = SYNC_PROFILES
         else:
             for profile_name in PROFILES:
                 p = PROFILES[profile_name]
@@ -133,14 +145,10 @@ class AnsibleConfigFixture(dict):
         if not os.path.exists(galaxy_token_fn):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
-        if self.profile:
-            if isinstance(self.PROFILES[self.profile]["username"], dict):
-                # credentials from vault
-                loader = get_vault_loader()
-                self._set_profile_from_vault(loader, self.profile, "username")
-                self._set_profile_from_vault(loader, self.profile, "password")
-                if self.PROFILES[self.profile]["token"]:
-                    self._set_profile_from_vault(loader, self.profile, "token")
+
+    def __hash__(self):
+        # To avoid TypeError: unhashable type: 'AnsibleConfigFixture'
+        return hash((self.url, self.auth_url, self.profile, self.namespace))
 
     def _set_profile_from_vault(self, loader, profile, param):
         param_vault_path = self.PROFILES[profile][param]["vault_path"]
@@ -187,10 +195,17 @@ class AnsibleConfigFixture(dict):
 
         elif key == "token":
             # Generate tokens for LDAP and keycloak backed users
-            p = self.PROFILES[self.profile]
-            if CREDENTIALS[p["username"]].get("gen_token", False):
-                return get_standalone_token(p, self["url"])
-            return self.PROFILES[self.profile]["token"]
+            if self.profile:
+                p = self.PROFILES[self.profile]
+                try:
+                    if CREDENTIALS[p["username"]].get("gen_token", False):
+                        return get_standalone_token(p, self["url"])
+                except KeyError:
+                    pass
+                finally:
+                    return self.PROFILES[self.profile]["token"]
+            else:
+                return None
 
         elif key == "username":
             return self.PROFILES[self.profile]["username"]
@@ -255,6 +270,32 @@ class AnsibleConfigFixture(dict):
         elif key == 'server':
             return self["url"].split("/api/")[0]
 
+        elif key == 'remote_hub':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'REMOTE_HUB',
+                'https://console.stage.redhat.com/api/automation-hub/'
+            )
+        elif key == 'remote_auth_url':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'REMOTE_AUTH_URL',
+                'https://sso.stage.redhat.com/auth/realms/'
+                'redhat-external/protocol/openid-connect/token/'
+            )
+        elif key == 'local_hub':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'LOCAL_HUB',
+                'http://localhost:5001/api/automation-hub/'
+            )
+        elif key == 'local_auth_url':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'LOCAL_AUTH_URL',
+                None
+            )
+
         else:
             raise Exception(f'Unknown config key: {self.namespace}.{key}')
 
@@ -268,6 +309,17 @@ class AnsibleConfigFixture(dict):
             return self.PROFILES[self.profile]
         raise Exception("No profile has been set")
 
+    def set_profile(self, profile):
+        self.profile = profile
+        if isinstance(self.PROFILES[self.profile]["username"], dict):
+            # credentials from vault
+            loader = get_vault_loader()
+            self._set_profile_from_vault(loader, self.profile, "username")
+            self._set_profile_from_vault(loader, self.profile, "password")
+            if self.PROFILES[self.profile]["token"]:
+                self._set_profile_from_vault(loader, self.profile, "token")
+        return self
+
 
 @pytest.fixture(scope="session")
 def ansible_config():
@@ -275,20 +327,13 @@ def ansible_config():
 
 
 def get_ansible_config():
-    if is_sync_testing():
-        return AnsibleConfigSync
-    else:
-        return AnsibleConfigFixture
-
-
-def get_ansible_config_sync():
-    return AnsibleConfigSync
+    return AnsibleConfigFixture()
 
 
 @pytest.fixture(scope="function")
 def published(ansible_config, artifact):
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
     api_client = get_client(config)
@@ -298,9 +343,10 @@ def published(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
+    config = ansible_config.set_profile("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
-        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     # certify
@@ -315,7 +361,7 @@ def certifiedv2(ansible_config, artifact):
     """ Create and publish+certify collection version N and N+1 """
 
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
     api_client = get_client(config)
@@ -325,9 +371,10 @@ def certifiedv2(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish v1
+    config = ansible_config.set_profile("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     # certify v1
@@ -344,9 +391,10 @@ def certifiedv2(ansible_config, artifact):
     )
 
     # publish newer version
+    config = ansible_config.set_profile("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     # certify newer version
@@ -360,7 +408,7 @@ def uncertifiedv2(ansible_config, artifact, settings):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
     api_client = get_client(config)
@@ -370,9 +418,10 @@ def uncertifiedv2(ansible_config, artifact, settings):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
+    config = ansible_config.set_profile("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     # certify v1
@@ -389,9 +438,10 @@ def uncertifiedv2(ansible_config, artifact, settings):
     )
 
     # Publish but do -NOT- certify newer version ...
+    config = ansible_config.set_profile("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+        ansible_config=config
     )
     dest_url = (
         f"v3/plugin/ansible/content/staging/collections/index/"
@@ -406,7 +456,7 @@ def auto_approved_artifacts(ansible_config, artifact):
     """ Create and publish collection version N and N+1"""
 
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
     api_client = get_client(config)
@@ -416,9 +466,10 @@ def auto_approved_artifacts(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
+    config = ansible_config.set_profile("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     dest_url = (
@@ -437,9 +488,10 @@ def auto_approved_artifacts(ansible_config, artifact):
     )
 
     # Publish but do -NOT- certify newer version ...
+    config = ansible_config.set_profile("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+        ansible_config=config
     )
     dest_url = (
         f"v3/plugin/ansible/content/published/collections/index/"
@@ -500,55 +552,6 @@ def get_vault_loader():
 @pytest.fixture(scope="session")
 def galaxy_client(ansible_config):
     return get_galaxy_client(ansible_config)
-
-
-class AnsibleConfigSync(AnsibleConfigFixture):
-    PROFILES = {
-        "remote_admin": {
-            "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
-                         "vault_key": "username"},
-            "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
-                         "vault_key": "password"},
-            "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
-                      "vault_key": "token"},
-        },
-        "local_admin": {  # this is a superuser
-            "username": "admin",
-            "password": "admin",
-            "token": None,
-        }
-    }
-
-    def __init__(self, profile=None, namespace=None):
-        super().__init__(profile, namespace)
-
-    def __getitem__(self, key):
-        if key == 'remote_hub':
-            # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'REMOTE_HUB',
-                'https://console.stage.redhat.com/api/automation-hub/'
-            )
-        if key == 'remote_auth_url':
-            # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'REMOTE_AUTH_URL',
-                'https://sso.stage.redhat.com/auth/realms/'
-                'redhat-external/protocol/openid-connect/token/'
-            )
-        if key == 'local_hub':
-            # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'LOCAL_HUB',
-                'http://localhost:5001/api/automation-hub/'
-            )
-        if key == 'local_auth_url':
-            # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'LOCAL_AUTH_URL',
-                None
-            )
-        return super().__getitem__(key)
 
 
 def get_galaxy_client(ansible_config):
@@ -659,7 +662,8 @@ def sync_instance_crc():
 
 @pytest.fixture(scope="function")
 def settings(ansible_config):
-    api_client = get_client(ansible_config("admin"))
+    config = ansible_config.set_profile("admin")
+    api_client = get_client(config)
     return api_client("_ui/v1/settings/")
 
 
@@ -769,7 +773,6 @@ def get_hub_version(ansible_config):
         role = "partner_engineer"
         galaxy_client = get_galaxy_client(ansible_config)
 
-
         print("________--------------------------__________________--------------")
         hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
         print(hub_auth_url_bck)
@@ -785,7 +788,7 @@ def get_hub_version(ansible_config):
         return galaxy_ng_version
     elif not is_dev_env_standalone():
         role = "admin"
-        set_credentials_when_not_docker_pah(ansible_config().get("url"))
+        set_credentials_when_not_docker_pah(ansible_config.get("url"))
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)

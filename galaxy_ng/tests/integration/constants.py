@@ -18,7 +18,6 @@ DEFAULT_DISTROS = {
     'staging': {'basepath': 'staging'}
 }
 
-
 CREDENTIALS = {
     "iqe_normal_user": {
         "password": "redhat",
@@ -166,35 +165,51 @@ EPHEMERAL_PROFILES = {
     # ns owner to autohubtest2, not in partner engineer group, not an SSO org admin
     "basic_user": {
         "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
-                        "vault_key": "username"},
+                     "vault_key": "username"},
         "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
-                        "vault_key": "password"},
+                     "vault_key": "password"},
         "token": None,
     },
     # in partner engineer group, not an SSO org admin username: ansible-hub-qe-pe2
     "partner_engineer": {
         "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                        "vault_key": "username"},
+                     "vault_key": "username"},
         "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                        "vault_key": "password"},
+                     "vault_key": "password"},
         "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                    "vault_key": "token"},
+                  "vault_key": "token"},
     },
     # an SSO org admin, not in partner engineer group
     "org_admin": {
         "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-rbac",
-                        "vault_key": "username"},
+                     "vault_key": "username"},
         "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-rbac",
-                        "vault_key": "password"},
+                     "vault_key": "password"},
         "token": None,
     },
     # for stage env, this can be same user as partner_engineer profile
     "admin": {
         "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                        "vault_key": "username"},
+                     "vault_key": "username"},
         "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                        "vault_key": "password"},
+                     "vault_key": "password"},
         "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                    "vault_key": "token"},
+                  "vault_key": "token"},
+    }
+}
+
+SYNC_PROFILES = {
+    "remote_admin": {
+        "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                     "vault_key": "password"},
+        "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
+                  "vault_key": "token"},
+    },
+    "local_admin": {  # this is a superuser
+        "username": "admin",
+        "password": "admin",
+        "token": None,
     }
 }

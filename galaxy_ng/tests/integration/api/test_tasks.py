@@ -7,7 +7,7 @@ from ..utils import get_client, UIClient
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_logging_cid_value_in_task(ansible_config):
-    config = ansible_config("admin")
+    config = ansible_config.set_profile("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True)
 

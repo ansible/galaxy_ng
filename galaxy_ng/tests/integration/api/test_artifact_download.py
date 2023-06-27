@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # TODO Refactor get_client to provide access to bearer token
 @pytest.mark.deployment_standalone
 def test_download_artifact(ansible_config, upload_artifact):
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     # create, upload and certify a collection
@@ -50,7 +50,7 @@ def test_download_artifact(ansible_config, upload_artifact):
     set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     # download collection
-    config = ansible_config("basic_user")
+    config = ansible_config.set_profile("basic_user")
 
     with tempfile.TemporaryDirectory() as dir:
         api_root = config["url"]
@@ -87,7 +87,7 @@ def test_download_artifact(ansible_config, upload_artifact):
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
 def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = upload_artifact(config, api_client, artifact)
@@ -96,7 +96,7 @@ def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
     set_certification(api_client, artifact, level="validated")
 
     # download collection
-    config = ansible_config("basic_user")
+    config = ansible_config.set_profile("basic_user")
 
     with tempfile.TemporaryDirectory() as dir:
         api_root = config["url"]

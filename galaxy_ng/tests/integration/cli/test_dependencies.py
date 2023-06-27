@@ -59,7 +59,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
         ansible_galaxy(
             f"collection publish {artifact2.filename} --server=automation_hub",
             check_retcode=retcode,
-            ansible_config=ansible_config("basic_user", namespace=published.namespace)
+            ansible_config=ansible_config.set_profile("basic_user")
         )
     except AssertionError:
         if params.xfail:
@@ -68,7 +68,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
             raise
 
     if retcode == 0:
-        config = ansible_config("partner_engineer")
+        config = ansible_config.set_profile("partner_engineer")
         client = get_client(config)
         hub_4_5 = is_hub_4_5(ansible_config)
         set_certification(client, artifact2, hub_4_5=hub_4_5)
@@ -78,7 +78,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
                 {artifact2.namespace}.{artifact2.name}:{artifact2.version} --server"
             f"=automation_hub",
             check_retcode=False,
-            ansible_config=ansible_config("basic_user"),
+            ansible_config=ansible_config.set_profile("basic_user"),
             # cleanup=False
         )
 

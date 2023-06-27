@@ -15,7 +15,7 @@ from galaxykit.container_images import get_container
 
 @pytest.fixture(scope="function")
 def flags(ansible_config):
-    api_client = get_client(config=ansible_config("admin"), request_token=True,
+    api_client = get_client(config=ansible_config.set_profile("admin"), request_token=True,
                             require_auth=True)
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
     return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
@@ -34,7 +34,7 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
     if not can_sign:
         pytest.skip("GALAXY_CONTAINER_SIGNING_SERVICE is not configured")
 
-    config = ansible_config("admin")
+    config = ansible_config.set_profile("admin")
     url = config['url']
     parsed_url = urlparse(url)
     cont_reg = parsed_url.netloc
@@ -59,7 +59,7 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
 
     # Get an API client running with admin user credentials
     client = get_client(
-        config=ansible_config("admin"),
+        config=ansible_config.set_profile("admin"),
         request_token=True,
         require_auth=require_auth
     )

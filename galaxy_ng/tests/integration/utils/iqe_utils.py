@@ -80,10 +80,7 @@ class GalaxyKitClient:
         remote=False,
         basic_token=False,
     ):
-        try:
-            config = self.config()
-        except TypeError:
-            config = self.config
+        config = self.config
         # role can be either be the name of a user (like `ansible_insights`)
         # or a dict containing a username and password:
         # {"username": "autohubtest2", "password": "p@ssword!"}
@@ -96,7 +93,8 @@ class GalaxyKitClient:
             if is_sync_testing():
                 url = config.get("remote_hub") if remote else config.get("local_hub")
                 profile_config = (
-                    self.config("remote_admin") if remote else self.config("local_admin")
+                    self.config.set_profile("remote_admin")
+                    if remote else self.config.set_profile("local_admin")
                 )
                 user = profile_config.get_profile_data()
                 if profile_config.get("auth_url"):
@@ -118,10 +116,11 @@ class GalaxyKitClient:
                 url = config.get("url")
                 if isinstance(role, str):
                     self._basic_token = True if is_ephemeral_env() else basic_token
-                    profile_config = self.config(role)
-                    user = profile_config.get_profile_data()
-                    if profile_config.get("auth_url"):
-                        token = profile_config.get("token")
+                    self.config.set_profile(role)
+                    profile_config = self.config.PROFILES.get(role)
+                    user = profile_config
+                    if self.config.get("auth_url"):
+                        token = self.config.get("token")
                     if token is None:
                         token = get_standalone_token(
                             user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
@@ -131,7 +130,7 @@ class GalaxyKitClient:
                     auth = {
                         "username": user["username"],
                         "password": user["password"],
-                        "auth_url": profile_config.get("auth_url"),
+                        "auth_url": self.config.get("auth_url"),
                         "token": token,
                     }
                 else:

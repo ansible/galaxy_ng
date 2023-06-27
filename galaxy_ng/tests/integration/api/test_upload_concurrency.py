@@ -21,7 +21,7 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
     total = 10
 
-    config = ansible_config(profile="admin")
+    config = ansible_config.set_profile(profile="admin")
     client = get_client(
         config=config
     )

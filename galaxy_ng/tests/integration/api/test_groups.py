@@ -36,7 +36,7 @@ API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
 def test_group_role_listing(ansible_config, test_data):
     """Tests ability to list roles assigned to a namespace."""
 
-    config = ansible_config("admin")
+    config = ansible_config.set_profile("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True, require_auth=test_data["require_auth"])
 

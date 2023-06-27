@@ -30,7 +30,7 @@ def test_namespace_create_and_delete(ansible_config, api_version):
     # http://192.168.1.119:8002/api/automation-hub/v3/namespaces/
     # {name: "testnamespace1", groups: []}
 
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
     api_prefix = config.get("api_prefix").rstrip("/")
 

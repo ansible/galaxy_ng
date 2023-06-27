@@ -26,7 +26,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.all
 def test_delete_collection(ansible_config, uncertifiedv2):
     """Tests whether a collection can be deleted"""
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
@@ -86,7 +86,7 @@ def test_delete_collection(ansible_config, uncertifiedv2):
 @pytest.mark.all
 def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv2):
     """Tests whether a collection version can be deleted"""
-    config = ansible_config("partner_engineer")
+    config = ansible_config.set_profile("partner_engineer")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
@@ -154,7 +154,7 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
 @pytest.mark.all
 def test_delete_default_repos(ansible_config, upload_artifact, uncertifiedv2):
     """Verifies that default repos cannot be deleted"""
-    config = ansible_config("admin")
+    config = ansible_config.set_profile("admin")
     api_client = get_client(
         config=config,
     )

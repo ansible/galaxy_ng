@@ -20,7 +20,7 @@ REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n    ve
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_remote_sync(ansible_config):
 
-    cfg = ansible_config("admin")
+    cfg = ansible_config.set_profile("admin")
     api_client = get_client(cfg, request_token=True, require_auth=True)
 
     # get the remotes
@@ -28,7 +28,7 @@ def test_api_ui_v1_remote_sync(ansible_config):
     validate_json(instance=resp, schema=schema_objectlist)
 
     # update the community remote
-    cfg = ansible_config('admin')
+    cfg = ansible_config.set_profile('admin')
     api_prefix = cfg.get("api_prefix").rstrip("/")
     payload = {
         'url': 'https://beta-galaxy.ansible.com/api/',
@@ -84,7 +84,7 @@ def test_api_ui_v1_remote_sync(ansible_config):
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_sync_community_with_no_requirements_file(ansible_config):
-    cfg = ansible_config("admin")
+    cfg = ansible_config.set_profile("admin")
     api_client = get_client(cfg, request_token=True, require_auth=True)
 
     remote = api_client("pulp/api/v3/remotes/ansible/collection/?name=community")["results"][0]

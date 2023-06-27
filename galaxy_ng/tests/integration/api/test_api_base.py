@@ -9,12 +9,12 @@ def test_galaxy_api_root(ansible_config, artifact):
     """Test galaxy API root."""
 
     # TODO: change to `basic_user` profile when can access pulp-v3 api root
-    config = ansible_config("admin")
-    api_prefix = config.get("api_prefix")
+    ansible_config.set_profile("admin")
+    api_prefix = ansible_config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
 
     api_client = get_client(
-        config=config,
+        config=ansible_config,
         request_token=True,
         require_auth=True
     )
@@ -37,7 +37,7 @@ def test_galaxy_api_root_v_4_5(ansible_config, artifact):
     """Test galaxy API root."""
 
     # TODO: change to `basic_user` profile when can access pulp-v3 api root
-    config = ansible_config("admin")
+    config = ansible_config.set_profile("admin")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
 

@@ -10,7 +10,7 @@ def test_landing_page(ansible_config):
     """Tests whether the landing page returns the expected fields and numbers."""
 
     api_client = get_client(
-        config=ansible_config("basic_user"), request_token=True, require_auth=True
+        config=ansible_config.set_profile("basic_user"), request_token=True, require_auth=True
     )
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
 
