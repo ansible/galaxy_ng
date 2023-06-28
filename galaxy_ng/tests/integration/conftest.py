@@ -116,7 +116,7 @@ class AnsibleConfigFixture(dict):
             self.PROFILES = SYNC_PROFILES
         elif is_stage_environment():
             self.PROFILES = EPHEMERAL_PROFILES
-        elif not is_dev_env_standalone():
+        elif not is_dev_env_standalone() or is_ephemeral_env():
             self.PROFILES = DEPLOYED_PAH_PROFILES
             self._set_credentials_when_not_docker_pah()
         else:
@@ -763,18 +763,10 @@ def get_hub_version(ansible_config):
     elif is_ephemeral_env():
         # I can't get a token from the ephemeral environment.
         # Changed to Basic token authentication until the issue is resolved
+        hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
+        del os.environ["HUB_AUTH_URL"]
         role = "partner_engineer"
         galaxy_client = get_galaxy_client(ansible_config)
-
-        print("________--------------------------__________________--------------")
-        hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
-        print(hub_auth_url_bck)
-        del os.environ["HUB_AUTH_URL"]
-        pe_token_bck = galaxy_client.config.PROFILES["partner_engineer"]["token"]
-        print(pe_token_bck)
-        galaxy_client.config.PROFILES["partner_engineer"]["token"] = None
-
-        print(galaxy_client.config.PROFILES)
         gc = galaxy_client(role, basic_token=True)
         galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
         os.environ["HUB_AUTH_URL"] = hub_auth_url_bck
