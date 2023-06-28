@@ -117,13 +117,15 @@ class GalaxyKitClient:
             else:
                 url = config.get("url")
                 if isinstance(role, str):
-                    self._basic_token = True if is_ephemeral_env() else basic_token
                     profile_config = self.config(role)
-                    # profile_config = self.config.PROFILES.get(role)
+                    if is_ephemeral_env():
+                        self._basic_token = True
+                        profile_config.PROFILES[role]["token"] = None
+                        profile_config.PROFILES[role]["auth_url"] = None
                     user = profile_config
                     if profile_config.get("auth_url"):
                         token = profile_config.get("token")
-                    if token is None:
+                    if token is None or self._basic_token:
                         token = get_standalone_token(
                             user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
                             basic_token=self._basic_token

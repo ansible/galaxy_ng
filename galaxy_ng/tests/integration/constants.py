@@ -251,3 +251,26 @@ DEPLOYED_PAH_PROFILES = {
         "token": "abcdefghijklmnopqrstuvwxyz1234567895",
     },
 }
+
+EPH_PROFILES = {
+    "basic_user": {
+        "username": "iqe_normal_user",
+        "password": "redhat",
+        "token": None,
+    },
+    "partner_engineer": {
+        "username": "jdoe",
+        "password": "redhat",
+        "token": None,
+    },
+    "org_admin": {  # user is org admin in keycloak
+        "username": "org-admin",
+        "password": "redhat",
+        "token": None,
+    },
+    "admin": {  # this is a superuser
+        "username": "notifications_admin",
+        "password": "redhat",
+        "token": None,
+    }
+}
