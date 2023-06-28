@@ -5,7 +5,7 @@ from ..utils import get_client, uuid4, wait_for_task
 @pytest.fixture
 def admin_client(ansible_config):
     return get_client(
-        config=ansible_config.set_profile("admin"),
+        config=ansible_config("admin"),
         request_token=True,
     )
 
@@ -13,7 +13,7 @@ def admin_client(ansible_config):
 @pytest.fixture
 def basic_user_client(ansible_config):
     return get_client(
-        config=ansible_config.set_profile("basic_user"),
+        config=ansible_config("basic_user"),
         request_token=True,
     )
 

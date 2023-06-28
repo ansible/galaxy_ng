@@ -18,7 +18,7 @@ REGEX_40X = r"HTTP Code: 40\d"
 def test_pulp_api_redirect(ansible_config, artifact):
     """Test that /pulp/ is redirecting to /api/galaxy/pulp/"""
 
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
 
     api_client = get_client(config=config, request_token=True, require_auth=True)
 
@@ -54,7 +54,7 @@ def test_pulp_api_redirect(ansible_config, artifact):
 def test_pulp_endpoint_readonly(ansible_config, artifact, url):
     """Ensure authenticated user has readonly access to view"""
 
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True, require_auth=True)
 
@@ -87,7 +87,7 @@ TEST_ROLE_NAME = "test_role_".join(random.choices(string.ascii_lowercase, k=10))
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.6dev")
 def test_pulp_roles_endpoint(ansible_config, require_auth):
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True, require_auth=require_auth)
 
@@ -158,7 +158,7 @@ def local_container():
 @pytest.mark.min_hub_version("4.7dev")
 def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
     name = local_container.get_container()['name']
-    config = ansible_config.set_profile("ee_admin")
+    config = ansible_config("ee_admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True, require_auth=require_auth)
 

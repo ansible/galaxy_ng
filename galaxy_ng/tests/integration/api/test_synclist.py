@@ -15,7 +15,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 def test_synclist_object_get(ansible_config):
     """Validate user can read the endpoints with synclist objects."""
 
-    config = ansible_config.set_profile("org_admin")
+    config = ansible_config("org_admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
@@ -56,7 +56,7 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
     #     ]
     # }
 
-    config = ansible_config.set_profile("org_admin")
+    config = ansible_config("org_admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     # determine synclist repo associated to user
@@ -95,7 +95,7 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings
     # NOTE: on stage env, a toggle action does:
     # PUT https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/
 
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     def paginated_query(client, next_url, key="data"):

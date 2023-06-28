@@ -35,7 +35,7 @@ NAMESPACE = "signing"
 @pytest.fixture(scope="function")
 def config(ansible_config):
     # FIXME: have this run partner_engineer profile
-    return ansible_config.set_profile("admin")
+    return ansible_config("admin")
 
 
 @pytest.fixture(scope="function")
@@ -547,11 +547,11 @@ def test_move_with_no_signing_service_not_superuser_signature_required(
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
     # need the admin client
-    admin_config = ansible_config.set_profile("admin")
+    admin_config = ansible_config("admin")
     admin_client = get_client(admin_config, request_token=True, require_auth=True)
 
     # need a new regular user
-    partner_eng_config = ansible_config.set_profile("partner_engineer")
+    partner_eng_config = ansible_config("partner_engineer")
     partner_eng_client = get_client(partner_eng_config, request_token=True, require_auth=True)
 
     # need a new namespace
@@ -614,7 +614,7 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = upload_artifact(config, api_client, artifact)
@@ -698,7 +698,7 @@ def test_move_with_signing_service(ansible_config, artifact, upload_artifact, se
     if not settings.get("GALAXY_COLLECTION_SIGNING_SERVICE"):
         pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is required to be set")
 
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     # this should never be None ...

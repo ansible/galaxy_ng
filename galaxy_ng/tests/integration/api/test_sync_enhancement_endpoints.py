@@ -9,7 +9,7 @@ from ..utils import get_client
 def test_pulp_sync_enhancement_endpoints(ansible_config):
     """Tests whether the landing page returns the expected fields and numbers."""
 
-    client = get_client(config=ansible_config.set_profile("admin"),
+    client = get_client(config=ansible_config("admin"),
                         request_token=True, require_auth=True)
     api_prefix = client.config.get("api_prefix").rstrip("/")
 

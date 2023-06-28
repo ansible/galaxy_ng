@@ -211,5 +211,43 @@ SYNC_PROFILES = {
         "username": "admin",
         "password": "admin",
         "token": None,
+    },
+    "admin": {  # this is a superuser
+        "username": "admin",
+        "password": "admin",
+        "token": None,
     }
+}
+
+DEPLOYED_PAH_PROFILES = {
+    "basic_user": {
+        "username": "iqe_normal_user",
+        "password": "redhat",
+        "token": "abcdefghijklmnopqrstuvwxyz1234567891",
+    },
+    "partner_engineer": {
+        "username": "jdoe",
+        "password": "redhat",
+        "token": "abcdefghijklmnopqrstuvwxyz1234567892",
+    },
+    "org_admin": {  # user is org admin in keycloak
+        "username": "org-admin",
+        "password": "redhat",
+        "token": "abcdefghijklmnopqrstuvwxyz1234567893",
+    },
+    "admin": {  # this is a superuser
+        "username": "notifications_admin",
+        "password": "redhat",
+        "token": "abcdefghijklmnopqrstuvwxyz1234567894",
+    },
+    "iqe_admin": {  # this is a superuser
+        "username": "iqe_admin",
+        "password": "redhat",
+        "token": None,
+    },
+    "ee_admin": {
+        "username": "ee_admin",
+        "password": "redhat",
+        "token": "abcdefghijklmnopqrstuvwxyz1234567895",
+    },
 }

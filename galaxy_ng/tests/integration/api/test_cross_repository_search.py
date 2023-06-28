@@ -9,7 +9,7 @@ def test_x_repo_search_acl_basic_user(ansible_config, uncertifiedv2, settings):
     if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
         pytest.skip("This test needs refactoring to work with signatures required on move.")
 
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
         config=config,
@@ -33,7 +33,7 @@ def test_x_repo_search_acl_basic_user(ansible_config, uncertifiedv2, settings):
     resp = api_client.request(search_url)
     assert resp['meta']['count'] == 2
 
-    config = ansible_config.set_profile("basic_user")
+    config = ansible_config("basic_user")
     basic_client = get_client(
         config=config,
         request_token=True,

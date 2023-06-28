@@ -26,7 +26,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_history(
     local_container
 ):
     name = local_container.get_container()['name']
-    cfg = ansible_config.set_profile('ee_admin')
+    cfg = ansible_config('ee_admin')
     api_prefix = cfg.get("api_prefix").rstrip("/")
     api_client = get_client(cfg)
 
@@ -52,7 +52,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_images(
 ):
     name = local_container.get_container()['name']
     manifest = local_container.get_manifest()
-    cfg = ansible_config.set_profile('ee_admin')
+    cfg = ansible_config('ee_admin')
     api_prefix = cfg.get("api_prefix").rstrip("/")
     api_client = get_client(cfg)
     # get the view
@@ -75,7 +75,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_readme(
     local_container
 ):
     name = local_container.get_container()['name']
-    cfg = ansible_config.set_profile('ee_admin')
+    cfg = ansible_config('ee_admin')
     api_prefix = cfg.get("api_prefix").rstrip("/")
     url = f'{api_prefix}/v3/plugin/execution-environments/repositories/{name}/_content/readme/'
     api_client = get_client(cfg)
@@ -122,7 +122,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_tags(
 ):
     manifest = local_container.get_manifest()
     name = local_container.get_container()['name']
-    cfg = ansible_config.set_profile('ee_admin')
+    cfg = ansible_config('ee_admin')
     api_prefix = cfg.get("api_prefix").rstrip("/")
     api_client = get_client(cfg)
 
@@ -147,7 +147,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_tags(
 def test_api_v3_plugin_execution_environments_repositories(ansible_config, local_container):
     ns_name = local_container.get_namespace()['name']
     name = local_container.get_container()['name']
-    cfg = ansible_config.set_profile('admin')
+    cfg = ansible_config('admin')
     api_prefix = cfg.get("api_prefix").rstrip("/")
     api_client = get_client(cfg)
 

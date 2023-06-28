@@ -37,7 +37,7 @@ REGEX_403 = r"HTTP Code: 403"
 @pytest.mark.api_ui
 def test_api_ui_v1_login(ansible_config):
 
-    cfg = ansible_config.set_profile("basic_user")
+    cfg = ansible_config("basic_user")
 
     # an authenticated session has a csrftoken and a sessionid
     with UIClient(config=cfg) as uclient:
@@ -51,7 +51,7 @@ def test_api_ui_v1_login(ansible_config):
 @pytest.mark.min_hub_version("4.7dev")
 def test_api_ui_v1_login_cache_header(ansible_config):
 
-    cfg = ansible_config.set_profile("basic_user")
+    cfg = ansible_config("basic_user")
 
     # an authenticated session has a csrftoken and a sessionid
     with UIClient(config=cfg) as uclient:
@@ -68,7 +68,7 @@ def test_api_ui_v1_login_cache_header(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_logout(ansible_config):
 
-    cfg = ansible_config.set_profile("basic_user")
+    cfg = ansible_config("basic_user")
     uclient = UIClient(config=cfg)
 
     # check the auth first
@@ -87,7 +87,7 @@ def test_api_ui_v1_logout(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
         resp = uclient.get('_ui/v1/collection-versions/')
         assert resp.status_code == 200
@@ -116,7 +116,7 @@ def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertifiedv2):
     """Test the ?version_range query parameter."""
     c1, c2 = uncertifiedv2
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     v_path = f"_ui/v1/collection-versions/?name={c1.name}&namespace={c1.namespace}"
 
     with UIClient(config=cfg) as uclient:
@@ -163,7 +163,7 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_distributions(ansible_config):
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
         resp = uclient.get('_ui/v1/distributions/?limit=1000')
         assert resp.status_code == 200
@@ -196,7 +196,7 @@ def test_api_ui_v1_distributions(ansible_config):
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_distributions_by_id(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -226,7 +226,7 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_execution_environments_registries(ansible_config):
 
-    cfg = ansible_config.set_profile('ee_admin')
+    cfg = ansible_config('ee_admin')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -321,7 +321,7 @@ def local_container():
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_feature_flags(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -341,7 +341,7 @@ def test_api_ui_v1_feature_flags(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups(ansible_config):
 
-    cfg = ansible_config.set_profile('partner_engineer')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -375,7 +375,7 @@ def test_api_ui_v1_groups(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_users(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
         resp = uclient.get('_ui/v1/groups/?limit=1000')
         assert resp.status_code == 200
@@ -403,7 +403,7 @@ def test_api_ui_v1_groups_users(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_users_add_delete(ansible_config):
 
-    cfg = ansible_config.set_profile('partner_engineer')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
         suffix = random.choice(range(0, 1000))
@@ -460,7 +460,7 @@ def test_api_ui_v1_groups_users_add_delete(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_by_id(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -484,7 +484,7 @@ def test_api_ui_v1_groups_by_id(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_imports_collections(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -517,7 +517,7 @@ def test_api_ui_v1_imports_collections(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_me(ansible_config, settings):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -545,11 +545,11 @@ def test_api_ui_v1_me(ansible_config, settings):
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_my_namespaces(ansible_config):
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
     new_namespace = generate_unused_namespace(api_client=api_client, api_version='_ui/v1')
 
-    cfg = ansible_config.set_profile('partner_engineer')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
         # get user
         resp = uclient.get('_ui/v1/me/')
@@ -603,7 +603,7 @@ def test_api_ui_v1_my_namespaces(ansible_config):
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_my_namespaces_name(ansible_config):
-    cfg = ansible_config.set_profile('partner_engineer')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
         # get the response
         resp = uclient.get('_ui/v1/my-namespaces/autohubtest2/')
@@ -629,7 +629,7 @@ def test_api_ui_v1_my_namespaces_name(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_remotes(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -652,7 +652,7 @@ def test_api_ui_v1_remotes(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_remotes_by_id(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -677,7 +677,7 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get each repo by basepath? or is it get a distro by basepath?
@@ -697,7 +697,7 @@ def test_api_ui_v1_collection_detail_view(ansible_config, published):
     name = published.name
     version = published.version
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
         resp = uclient.get(f'_ui/v1/repo/published/{namespace}/{name}/')
         assert resp.status_code == 200
@@ -718,7 +718,7 @@ def test_api_ui_v1_collection_detail_view(ansible_config, published):
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_settings(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -743,7 +743,7 @@ def test_api_ui_v1_settings(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_tags(ansible_config):
 
-    cfg = ansible_config.set_profile('basic_user')
+    cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -761,7 +761,7 @@ def test_api_ui_v1_tags(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_users(ansible_config):
 
-    cfg = ansible_config.set_profile('partner_engineer')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
         # get the response
@@ -801,7 +801,7 @@ def test_api_ui_v1_users(ansible_config):
 @pytest.mark.api_ui
 def test_api_ui_v1_users_by_id(ansible_config):
 
-    cfg = ansible_config.set_profile('partner_engineer')
+    cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
         resp = uclient.get('_ui/v1/users/?username=jdoe')
@@ -829,7 +829,7 @@ def test_api_ui_v1_users_by_id(ansible_config):
 def test_users_list_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
 
-    config = ansible_config.set_profile("basic_user")
+    config = ansible_config("basic_user")
     api_prefix = config.get("api_prefix").rstrip("/")
     url = f"{api_prefix}/_ui/v1/users/"
     api_client = get_client(config, request_token=True, require_auth=True)
@@ -840,7 +840,7 @@ def test_users_list_insights_access(ansible_config):
     with pytest.raises(GalaxyError, match=REGEX_403):
         api_client(url, method="POST", args=b"{}")
 
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = api_client(url, method="GET")
@@ -856,11 +856,11 @@ def test_users_list_insights_access(ansible_config):
 def test_users_detail_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
 
-    config = ansible_config.set_profile("basic_user")
+    config = ansible_config("basic_user")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True, require_auth=True)
 
-    admin_config = ansible_config.set_profile("partner_engineer")
+    admin_config = ansible_config("partner_engineer")
     admin_client = get_client(admin_config, request_token=True, require_auth=True)
 
     user_id = admin_client(

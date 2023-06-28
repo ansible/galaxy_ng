@@ -10,8 +10,8 @@ from pkg_resources import parse_version, Requirement
 
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
-from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES,\
-    SYNC_PROFILES
+from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES, \
+    SYNC_PROFILES, DEPLOYED_PAH_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -22,7 +22,6 @@ from .utils import (
     iterate_all,
     wait_for_url,
 )
-
 
 from .utils import upload_artifact as _upload_artifact
 from .utils.iqe_utils import (
@@ -94,16 +93,7 @@ def pytest_configure(config):
         config.addinivalue_line('markers', line)
 
 
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super().__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class AnsibleConfigFixture(dict, metaclass=Singleton):
+class AnsibleConfigFixture(dict):
     # The class is instantiated with a "profile" that sets
     # which type of user will be used in the test
 
@@ -117,11 +107,18 @@ class AnsibleConfigFixture(dict, metaclass=Singleton):
             "ldap": "ldap"
         }
         self._auth_backend = os.environ.get('HUB_TEST_AUTHENTICATION_BACKEND')
+        self.url = url
+        self.auth_url = auth_url
+        self.profile = profile
+        self.namespace = namespace
 
-        if is_stage_environment():
-            self.PROFILES = EPHEMERAL_PROFILES
         if is_sync_testing():
             self.PROFILES = SYNC_PROFILES
+        elif is_stage_environment():
+            self.PROFILES = EPHEMERAL_PROFILES
+        elif not is_dev_env_standalone():
+            self.PROFILES = DEPLOYED_PAH_PROFILES
+            self._set_credentials_when_not_docker_pah()
         else:
             for profile_name in PROFILES:
                 p = PROFILES[profile_name]
@@ -133,11 +130,6 @@ class AnsibleConfigFixture(dict, metaclass=Singleton):
                         "password": CREDENTIALS[username].get("password")
                     }
 
-        self.url = url
-        self.auth_url = auth_url
-        self.profile = profile
-        self.namespace = namespace
-
         # workaround for a weird error with the galaxy cli lib ...
         galaxy_token_fn = os.path.expanduser('~/.ansible/galaxy_token')
         if not os.path.exists(os.path.dirname(galaxy_token_fn)):
@@ -145,6 +137,9 @@ class AnsibleConfigFixture(dict, metaclass=Singleton):
         if not os.path.exists(galaxy_token_fn):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
+
+        if profile:
+            self.set_profile(profile)
 
     def __hash__(self):
         # To avoid TypeError: unhashable type: 'AnsibleConfigFixture'
@@ -156,6 +151,29 @@ class AnsibleConfigFixture(dict, metaclass=Singleton):
         param_from_vault = loader.get_value_from_vault(path=param_vault_path,
                                                        key=param_vault_key)
         self.PROFILES[profile][param] = param_from_vault
+
+    def _set_credentials_when_not_docker_pah(self):
+        # if we get here, we are running tests against PAH
+        # but not in a containerized development environment (probably from AAP installation),
+        # so we need to get the URL and admin credentials (and create some test data)
+        admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
+        self.PROFILES["admin"]["username"] = "admin"
+        self.PROFILES["admin"]["password"] = admin_pass
+        self.PROFILES["admin"]["token"] = None
+        self.PROFILES["iqe_admin"]["username"] = "admin"
+        self.PROFILES["iqe_admin"]["password"] = admin_pass
+        self.PROFILES["iqe_admin"]["token"] = None
+        self.PROFILES["basic_user"]["token"] = None
+        self.PROFILES["basic_user"]["password"] = "Th1sP4ssd"
+        self.PROFILES["partner_engineer"]["token"] = None
+        self.PROFILES["partner_engineer"]["password"] = "Th1sP4ssd"
+        self.PROFILES["ee_admin"]["token"] = None
+        self.PROFILES["ee_admin"]["password"] = "Th1sP4ssd"
+        self.PROFILES["org_admin"]["token"] = None
+        self.PROFILES["org_admin"]["password"] = "Th1sP4ssd"
+        token = get_standalone_token(self.PROFILES["admin"], server=self.get("url"),
+                                     ssl_verify=False)
+        self.PROFILES["admin"]["token"] = token
 
     def __repr__(self):
         return f'<AnsibleConfigFixture: {self.namespace}>'
@@ -318,7 +336,6 @@ class AnsibleConfigFixture(dict, metaclass=Singleton):
             self._set_profile_from_vault(loader, self.profile, "password")
             if self.PROFILES[self.profile]["token"]:
                 self._set_profile_from_vault(loader, self.profile, "token")
-        return self
 
 
 @pytest.fixture(scope="session")
@@ -327,13 +344,13 @@ def ansible_config():
 
 
 def get_ansible_config():
-    return AnsibleConfigFixture()
+    return AnsibleConfigFixture
 
 
 @pytest.fixture(scope="function")
 def published(ansible_config, artifact):
     # make sure the expected namespace exists ...
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
     api_client = get_client(config)
@@ -343,7 +360,7 @@ def published(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
         ansible_config=config
@@ -361,7 +378,7 @@ def certifiedv2(ansible_config, artifact):
     """ Create and publish+certify collection version N and N+1 """
 
     # make sure the expected namespace exists ...
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
     api_client = get_client(config)
@@ -371,7 +388,7 @@ def certifiedv2(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish v1
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
         ansible_config=config
@@ -391,7 +408,7 @@ def certifiedv2(ansible_config, artifact):
     )
 
     # publish newer version
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
         ansible_config=config
@@ -408,7 +425,7 @@ def uncertifiedv2(ansible_config, artifact, settings):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
     api_client = get_client(config)
@@ -418,7 +435,7 @@ def uncertifiedv2(ansible_config, artifact, settings):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
-    config = ansible_config.set_profile("basic_user")
+    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
         ansible_config=config
@@ -438,7 +455,7 @@ def uncertifiedv2(ansible_config, artifact, settings):
     )
 
     # Publish but do -NOT- certify newer version ...
-    config = ansible_config.set_profile("basic_user")
+    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
         ansible_config=config
@@ -456,7 +473,7 @@ def auto_approved_artifacts(ansible_config, artifact):
     """ Create and publish collection version N and N+1"""
 
     # make sure the expected namespace exists ...
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
     api_client = get_client(config)
@@ -466,7 +483,7 @@ def auto_approved_artifacts(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
-    config = ansible_config.set_profile("basic_user")
+    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
         ansible_config=config
@@ -488,7 +505,7 @@ def auto_approved_artifacts(ansible_config, artifact):
     )
 
     # Publish but do -NOT- certify newer version ...
-    config = ansible_config.set_profile("basic_user")
+    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
         ansible_config=config
@@ -662,33 +679,9 @@ def sync_instance_crc():
 
 @pytest.fixture(scope="function")
 def settings(ansible_config):
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_client = get_client(config)
     return api_client("_ui/v1/settings/")
-
-
-def set_credentials_when_not_docker_pah(url):
-    # if we get here, we are running tests against PAH
-    # but not in a containerized development environment (probably from AAP installation),
-    # so we need to get the URL and admin credentials (and create some test data)
-    admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
-    AnsibleConfigFixture.PROFILES["admin"]["username"] = "admin"
-    AnsibleConfigFixture.PROFILES["admin"]["password"] = admin_pass
-    AnsibleConfigFixture.PROFILES["admin"]["token"] = None
-    AnsibleConfigFixture.PROFILES["iqe_admin"]["username"] = "admin"
-    AnsibleConfigFixture.PROFILES["iqe_admin"]["password"] = admin_pass
-    AnsibleConfigFixture.PROFILES["iqe_admin"]["token"] = None
-    AnsibleConfigFixture.PROFILES["basic_user"]["token"] = None
-    AnsibleConfigFixture.PROFILES["basic_user"]["password"] = "Th1sP4ssd"
-    AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
-    AnsibleConfigFixture.PROFILES["partner_engineer"]["password"] = "Th1sP4ssd"
-    AnsibleConfigFixture.PROFILES["ee_admin"]["token"] = None
-    AnsibleConfigFixture.PROFILES["ee_admin"]["password"] = "Th1sP4ssd"
-    AnsibleConfigFixture.PROFILES["org_admin"]["token"] = None
-    AnsibleConfigFixture.PROFILES["org_admin"]["password"] = "Th1sP4ssd"
-    token = get_standalone_token(AnsibleConfigFixture.PROFILES["admin"], server=url,
-                                 ssl_verify=False)
-    AnsibleConfigFixture.PROFILES["admin"]["token"] = token
 
 
 def set_test_data(ansible_config, hub_version):
@@ -786,9 +779,6 @@ def get_hub_version(ansible_config):
         galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
         os.environ["HUB_AUTH_URL"] = hub_auth_url_bck
         return galaxy_ng_version
-    elif not is_dev_env_standalone():
-        role = "admin"
-        set_credentials_when_not_docker_pah(ansible_config.get("url"))
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)

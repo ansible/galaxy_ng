@@ -29,7 +29,7 @@ def test_publish_newer_version_collection(ansible_config, cleanup_collections, u
     # Install collection without version ...
     install_pid = ansible_galaxy(
         f"collection install {v1.namespace}.{v1.name}",
-        ansible_config=ansible_config.set_profile("basic_user"),
+        ansible_config=ansible_config("basic_user"),
         cleanup=False,
         check_retcode=False
     )
@@ -63,7 +63,7 @@ def test_publish_newer_certified_collection_version(
     # Ensure v2 gets installed by default ...
     ansible_galaxy(
         f"collection install {v1.namespace}.{v1.name}",
-        ansible_config=ansible_config.set_profile("basic_user")
+        ansible_config=ansible_config("basic_user")
     )
     collection_path = get_collection_full_path(v1.namespace, v1.name)
     ci = CollectionInspector(directory=collection_path)
@@ -76,17 +76,17 @@ def test_publish_newer_certified_collection_version(
 def test_publish_same_collection_version(ansible_config):
     """Test you cannot publish same collection version already published."""
 
-    api_client = get_client(ansible_config.set_profile("admin"))
+    api_client = get_client(ansible_config("admin"))
     cnamespace = create_unused_namespace(api_client=api_client)
     collection = build_collection(namespace=cnamespace)
     ansible_galaxy(
         f"collection publish {collection.filename}",
-        ansible_config=ansible_config.set_profile("admin")
+        ansible_config=ansible_config("admin")
     )
     p = ansible_galaxy(
         f"collection publish {collection.filename}",
         check_retcode=1,
-        ansible_config=ansible_config.set_profile("admin")
+        ansible_config=ansible_config("admin")
     )
     assert "already exists" in str(p.stderr)
 
@@ -100,7 +100,7 @@ def test_publish_and_install_by_self(ansible_config, published, cleanup_collecti
 
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}:{published.version}",
-        ansible_config=ansible_config.set_profile("basic_user"),
+        ansible_config=ansible_config("basic_user"),
     )
 
 
@@ -128,9 +128,9 @@ def test_publish_and_expect_uncertified_hidden(
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}",
         check_retcode=0,
-        ansible_config=ansible_config.set_profile("basic_user"),
+        ansible_config=ansible_config("basic_user"),
     )
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}:1.0.0",
-        ansible_config=ansible_config.set_profile("basic_user"),
+        ansible_config=ansible_config("basic_user"),
     )

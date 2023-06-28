@@ -15,7 +15,7 @@ from .test_community import cleanup_social_user
 
 @pytest.fixture(scope="function")
 def flags(ansible_config):
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
     return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
@@ -24,7 +24,7 @@ def flags(ansible_config):
 @pytest.fixture(scope="function")
 def namespace(ansible_config) -> str:
     """create a new namespace."""
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
     return create_unused_namespace(api_client)
 
@@ -32,7 +32,7 @@ def namespace(ansible_config) -> str:
 @pytest.fixture(scope="function")
 def pe_namespace(ansible_config) -> str:
     """create a new namespace owned by PE user."""
-    config = ansible_config.set_profile("partner_engineer")
+    config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
     new_namespace = generate_unused_namespace(api_client=api_client, api_version="_ui/v1")
     with UIClient(config=config) as uclient:
@@ -61,7 +61,7 @@ def legacy_namespace(ansible_config):
 
     cleanup_social_user('gh01', ansible_config)
 
-    cfg = ansible_config.set_profile("github_user_1")
+    cfg = ansible_config("github_user_1")
     with SocialGithubClient(config=cfg) as client:
         resp = client.get('v1/namespaces/?name=gh01')
         result = resp.json()
@@ -90,7 +90,7 @@ def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespa
     if not flags.get("ai_deny_index"):
         pytest.skip("ai_deny_index flag is not enabled")
 
-    cfg = ansible_config.set_profile("github_user_1")
+    cfg = ansible_config("github_user_1")
     with SocialGithubClient(config=cfg) as client:
         assert (
             client.post(
@@ -125,7 +125,7 @@ def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespa
         expected = {"scope": "legacy_namespace", "reference": legacy_namespace}
         assert expected not in response.json()["results"]
 
-    cfg = ansible_config.set_profile("github_user_2")
+    cfg = ansible_config("github_user_2")
     with SocialGithubClient(config=cfg) as client:
         # 7. Repeat step 2 with github_user_2
         assert (
@@ -152,7 +152,7 @@ def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespa
     if not flags.get("ai_deny_index"):
         pytest.skip("ai_deny_index flag is not enabled")
 
-    with UIClient(config=ansible_config.set_profile("admin")) as client:
+    with UIClient(config=ansible_config("admin")) as client:
         # 2. Add namespace to AIIndex
         assert (
             client.post(
@@ -194,7 +194,7 @@ def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespa
         assert expected not in response.json()["results"]
 
     # 7. Repeat step 2 with a basic user
-    with UIClient(config=ansible_config.set_profile("basic_user")) as uclient:
+    with UIClient(config=ansible_config("basic_user")) as uclient:
         # 8. Assert permission error raises
         assert (
             uclient.post(
@@ -203,7 +203,7 @@ def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespa
             ).status_code == 403
         )
 
-    with UIClient(config=ansible_config.set_profile("partner_engineer")) as uclient:
+    with UIClient(config=ansible_config("partner_engineer")) as uclient:
         # 9. add to the AI Index, a namespace owned by PE
         assert (
             uclient.post(

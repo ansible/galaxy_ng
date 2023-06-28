@@ -15,7 +15,7 @@ from ..utils.iqe_utils import pull_and_tag_test_image
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_delete_ee_and_content(ansible_config):
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
 
     container_engine = config["container_engine"]
     url = config['url']
@@ -40,7 +40,7 @@ def test_delete_ee_and_content(ansible_config):
 
     # Get an API client running with admin user credentials
     client = get_client(
-        config=ansible_config.set_profile("admin"),
+        config=ansible_config("admin"),
         request_token=True,
     )
     api_prefix = client.config.get("api_prefix").rstrip("/")
@@ -95,7 +95,7 @@ def test_delete_ee_and_content(ansible_config):
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_shared_content_is_not_deleted(ansible_config):
-    config = ansible_config.set_profile("admin")
+    config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     container_engine = config["container_engine"]
     url = config['url']
@@ -126,7 +126,7 @@ def test_shared_content_is_not_deleted(ansible_config):
 
     # Get an API client running with admin user credentials
     client = get_client(
-        config=ansible_config.set_profile("admin"),
+        config=ansible_config("admin"),
         request_token=True,
     )
 
