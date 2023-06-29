@@ -5,6 +5,9 @@ RUNNING = $(shell docker ps -q -f name=api)
 # if running is empty, then DJ_MANAGER = manage, else DJ_MANAGER = django-admin
 DJ_MANAGER = $(shell if [ "$(RUNNING)" = "" ]; then echo manage; else echo django-admin; fi)
 
+# set the OCI_ENV_PATH to be ../oci_env/ if this isn't set in the user's environment
+export OCI_ENV_PATH = $(shell if [ -n "$$OCI_ENV_PATH" ]; then echo "$$OCI_ENV_PATH"; else echo ${PWD}/../oci_env/; fi)
+
 define exec_or_run
 	# Tries to run on existing container if it exists, otherwise starts a new one.
 	@echo $(1)$(2)$(3)$(4)$(5)$(6)

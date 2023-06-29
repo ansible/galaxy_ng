@@ -1,0 +1,22 @@
+---
+version: "3.7"
+
+services:
+  # pre installs all of the python dependencies, including for integration tests
+  _galaxy_base:
+    depends_on:
+      - _base
+    build:
+      context: "/Users/dnewswan/code/hub/galaxy_ng/"
+      dockerfile: "profiles/base/Dockerfile"
+    image: "localhost/oci_env/galaxy_ng:base"
+    entrypoint: "/bin/true"
+
+  pulp:
+    image: "localhost/oci_env/galaxy_ng:base"
+    # this is required in order to run podman inside the container
+    privileged: true
+    extra_hosts:
+      localhost: "host-gateway"
+    depends_on:
+      - _galaxy_base
