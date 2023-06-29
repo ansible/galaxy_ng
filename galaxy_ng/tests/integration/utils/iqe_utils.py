@@ -80,6 +80,7 @@ class GalaxyKitClient:
         remote=False,
         basic_token=False,
     ):
+        self._basic_token = basic_token
         try:
             config = self.config()
         except TypeError:
@@ -118,14 +119,10 @@ class GalaxyKitClient:
                 url = config.get("url")
                 if isinstance(role, str):
                     profile_config = self.config(role)
-                    if is_ephemeral_env():
-                        self._basic_token = True
-                        profile_config.PROFILES[role]["token"] = None
-                        profile_config.PROFILES[role]["auth_url"] = None
                     user = profile_config
                     if profile_config.get("auth_url"):
                         token = profile_config.get("token")
-                    if token is None or self._basic_token:
+                    if token is None:
                         token = get_standalone_token(
                             user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
                             basic_token=self._basic_token
@@ -187,10 +184,10 @@ def get_standalone_token(
                 token_cache[cache_key] = token.get()
             else:
                 token = GalaxyToken(token_value)
-                token_cache[cache_key] = GalaxyToken(token_value).config["token"]
+                token_cache[cache_key] = token.config["token"]
         else:
             token = BasicAuthToken(username, password)
-            if is_ephemeral_env() or basic_token:
+            if basic_token:
                 token_cache[cache_key] = token.get()
             else:
                 with patch("ansible.context.CLIARGS", {"ignore_certs": True}):

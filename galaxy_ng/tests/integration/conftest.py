@@ -11,7 +11,7 @@ from pkg_resources import parse_version, Requirement
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
 from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES, \
-    SYNC_PROFILES, DEPLOYED_PAH_PROFILES, EPH_PROFILES
+    SYNC_PROFILES, DEPLOYED_PAH_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -120,7 +120,11 @@ class AnsibleConfigFixture(dict):
             self.PROFILES = DEPLOYED_PAH_PROFILES
             self._set_credentials_when_not_docker_pah()
         elif is_ephemeral_env():
-            self.PROFILES = EPH_PROFILES
+            self.PROFILES = DEPLOYED_PAH_PROFILES
+            self.PROFILES["admin"]["token"] = None
+            self.PROFILES["org_admin"]["token"] = None
+            self.PROFILES["partner_engineer"]["token"] = None
+            self.PROFILES["basic_user"]["token"] = None
         else:
             for profile_name in PROFILES:
                 p = PROFILES[profile_name]

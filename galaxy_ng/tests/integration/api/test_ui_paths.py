@@ -826,6 +826,7 @@ def test_api_ui_v1_users_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/users/
 @pytest.mark.deployment_cloud
 @pytest.mark.api_ui
+@pytest.mark.this
 def test_users_list_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
 
