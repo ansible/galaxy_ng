@@ -398,13 +398,16 @@ def test_ansible_lint_exception(ansible_config, upload_artifact):
 
     log_messages = [item["message"] for item in resp["messages"]]
 
-    linting_re = re.compile("Linting role .* via ansible-lint")
-    critical_re = re.compile("CRITICAL Couldn't parse task at")
+    linting_re = re.compile("Linting collection via ansible-lint")
     linting = [item for item in log_messages if linting_re.match(item)]
-    critical = [item for item in log_messages if critical_re.match(item)]
-
     assert len(linting) == 1  # linting occurred
-    assert len(critical) == 0  # no critical errors
+
+    # ansible-lint stderr has a variety of unstructured output, most of which
+    # is not expected to be logged by galaxy-importer.
+    # Only stderr lines starting with CRITICAL or ERROR are logged
+    stderr_msg_re = re.compile("errors were encountered during the plugin load")
+    stderr_msg = [item for item in log_messages if stderr_msg_re.match(item)]
+    assert len(stderr_msg) == 0  # this stderr message not in log
 
 
 @pytest.mark.importer
