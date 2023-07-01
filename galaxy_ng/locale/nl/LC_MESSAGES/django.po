@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-01 10:21-0400\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,13 +31,18 @@ msgstr "Namespace niet gevonden."
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
-msgstr "Handtekeningen zijn vereist om collecties toe te voegen aan een \"goedgekeurd\" archief wanneer GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is ingeschakeld."
+msgstr ""
+"Handtekeningen zijn vereist om collecties toe te voegen aan een "
+"\"goedgekeurd\" archief wanneer GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is "
+"ingeschakeld."
 
 #: app/access_control/access_policy.py:534 app/api/v3/views/sync.py:49
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "Het is niet toegestaan inhoud van galaxy.ansible.com te synchroniseren zonder een bestand met vereisten op te geven."
+msgstr ""
+"Het is niet toegestaan inhoud van galaxy.ansible.com te synchroniseren "
+"zonder een bestand met vereisten op te geven."
 
 #: app/access_control/fields.py:17
 msgid "object_roles field is required"
@@ -83,7 +88,9 @@ msgstr "Geselecteerd register bestaat niet."
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "Containernamen kunnen alleen alfanumerieke getallen, \".\", \"_\", \"-\" en maximaal één \"/\" bevatten."
+msgstr ""
+"Containernamen kunnen alleen alfanumerieke getallen, \".\", \"_\", \"-\" en "
+"maximaal één \"/\" bevatten."
 
 #: app/api/ui/serializers/execution_environment.py:91
 msgid "Name cannot be changed."
@@ -104,28 +111,38 @@ msgstr "Synclist bestaat al: %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "Collectie \"{namespace}.{name}\" niet gevonden tijdens het aanmaken van synclist {synclist}"
+msgstr ""
+"Collectie \"{namespace}.{name}\" niet gevonden tijdens het aanmaken van "
+"synclist {synclist}"
 
 #: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "Collectie \"{namespace}.{name}\" niet gevonden tijdens het bijwerken van synclist {synclist}"
+msgstr ""
+"Collectie \"{namespace}.{name}\" niet gevonden tijdens het bijwerken van "
+"synclist {synclist}"
 
 #: app/api/ui/serializers/user.py:75
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "De machtiging 'galaxy.change_group' is nodig om een gebruikersgroep te veranderen waar de aanvragende gebruiker geen deel van uitmaakt."
+msgstr ""
+"De machtiging 'galaxy.change_group' is nodig om een gebruikersgroep te "
+"veranderen waar de aanvragende gebruiker geen deel van uitmaakt."
 
 #: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
 msgid "Must be a super user to grant super user permissions."
-msgstr "Moet een supergebruiker zijn om machtigingen voor een supergebruiker te verlenen."
+msgstr ""
+"Moet een supergebruiker zijn om machtigingen voor een supergebruiker te "
+"verlenen."
 
 #: app/api/ui/serializers/user.py:110
 msgid "Must be a super user to change another user's password."
-msgstr "Moet een supergebruiker zijn om het wachtwoord van een andere gebruiker te wijzigen."
+msgstr ""
+"Moet een supergebruiker zijn om het wachtwoord van een andere gebruiker te "
+"wijzigen."
 
 #: app/api/ui/serializers/user.py:126
 msgid "You do not have permissions to modify super users."
@@ -140,35 +157,49 @@ msgstr "Groepsnaam=%(name)s, id=%(id)s bestaat niet"
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "WAARSCHUWING: GALAXY_COLLECTION_SIGNING_SERVICE is ingesteld op '{}', maar de betreffende SigningService bestaat niet in de database."
+msgstr ""
+"WAARSCHUWING: GALAXY_COLLECTION_SIGNING_SERVICE is ingesteld op '{}', maar "
+"de betreffende SigningService bestaat niet in de database."
 
 #: app/api/ui/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
-msgstr "WAARSCHUWING: GALAXY_AUTO_SIGN_COLLECTIONS is ingesteld op True, maar het systeem is niet geconfigureerd met een SigningService voor het aanmaken van handtekeningen."
+msgstr ""
+"WAARSCHUWING: GALAXY_AUTO_SIGN_COLLECTIONS is ingesteld op True, maar het "
+"systeem is niet geconfigureerd met een SigningService voor het aanmaken van "
+"handtekeningen."
 
 #: app/api/ui/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
-msgstr "INFO:het systeem is geconfigureerd om handtekeningen weer te geven (afkomstig van externe synchronisaties) maar is niet geconfigureerd om handtekeningen aan te maken of het uploaden ervan te accepteren."
+msgstr ""
+"INFO:het systeem is geconfigureerd om handtekeningen weer te geven "
+"(afkomstig van externe synchronisaties) maar is niet geconfigureerd om "
+"handtekeningen aan te maken of het uploaden ervan te accepteren."
 
 #: app/api/ui/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "WAARSCHUWING: GALAXY_CONTAINER_SIGNING_SERVICE is ingesteld op '{}', maar de betreffende SigningService bestaat niet in de database."
+msgstr ""
+"WAARSCHUWING: GALAXY_CONTAINER_SIGNING_SERVICE is ingesteld op '{}', maar de "
+"betreffende SigningService bestaat niet in de database."
 
 #: app/api/ui/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
-msgstr "WAARSCHUWING: container_signing is ingeschakeld via '{}' SigningService, maar uitvoeringsomgevingen zijn uitgeschakeld op het systeem."
+msgstr ""
+"WAARSCHUWING: container_signing is ingeschakeld via '{}' SigningService, "
+"maar uitvoeringsomgevingen zijn uitgeschakeld op het systeem."
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
-msgstr "Het indexeren van uitvoeringsomgevingen wordt in dit register niet ondersteund."
+msgstr ""
+"Het indexeren van uitvoeringsomgevingen wordt in dit register niet "
+"ondersteund."
 
 #: app/api/ui/views/signing.py:71
 msgid "Missing required field: namespace"
@@ -227,14 +258,18 @@ msgstr "Een groep met de naam %s bestaat al."
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr "Ongeldige bestandsnaam {filename}. Verwachte indeling: namespace-naam-versie.tar.gz"
+msgstr ""
+"Ongeldige bestandsnaam {filename}. Verwachte indeling: namespace-naam-versie."
+"tar.gz"
 
 #: app/api/utils.py:60
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "Ongeldige versie string {version} van bestandsnaam {filename}. Verwachte semantische versie indeling."
+msgstr ""
+"Ongeldige versie string {version} van bestandsnaam {filename}. Verwachte "
+"semantische versie indeling."
 
 #: app/api/utils.py:64
 #, python-format
@@ -292,12 +327,15 @@ msgstr "Gebruiker op afstand."
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "Het is niet toegestaan inhoud van gemeenschapsdomeinen te synchroniseren zonder een bestand met vereisten op te geven."
+msgstr ""
+"Het is niet toegestaan inhoud van gemeenschapsdomeinen te synchroniseren "
+"zonder een bestand met vereisten op te geven."
 
 #: app/api/v3/views/sync.py:38 app/api/v3/views/sync.py:83
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
-msgstr "De %s-distributie heeft geen items op afstand die ermee zijn geassocieerd."
+msgstr ""
+"De %s-distributie heeft geen items op afstand die ermee zijn geassocieerd."
 
 #: app/api/v3/views/sync.py:97
 #, python-format
@@ -344,7 +382,9 @@ msgstr "Ondertekeningdienst %s niet gevonden"
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
 "at least a signature for approval."
-msgstr "Collectie {namespace}.{name} kan niet worden goedgekeurd omdat het systeem ten minste een handtekening vereist voor goedkeuring."
+msgstr ""
+"Collectie {namespace}.{name} kan niet worden goedgekeurd omdat het systeem "
+"ten minste een handtekening vereist voor goedkeuring."
 
 #: app/api/v3/viewsets/namespace.py:66
 #, python-format
@@ -356,7 +396,9 @@ msgstr "Een namespace met de naam %s bestaat al."
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr "Namespace {name} kan niet worden verwijderd omdat er nog collecties aan zijn gekoppeld."
+msgstr ""
+"Namespace {name} kan niet worden verwijderd omdat er nog collecties aan zijn "
+"gekoppeld."
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -687,7 +729,9 @@ msgstr "Herstel artefacten die aan deze Ansible-repository zijn gekoppeld."
 msgid ""
 "Repair artifacts associated with any Ansible repository existing in the "
 "system."
-msgstr "Herstel artefacten die aan een Ansible-repository in het systeem zijn gekoppeld."
+msgstr ""
+"Herstel artefacten die aan een Ansible-repository in het systeem zijn "
+"gekoppeld."
 
 #: app/constants.py:185
 msgid "Change container namespace permissions"
@@ -729,7 +773,8 @@ msgstr "Bewerk de tag van een afbeelding in deze container-namespace"
 
 #: app/constants.py:199
 msgid "Edit an image's tag in any container namespace the system."
-msgstr "Bewerk de tag van een afbeelding in een container-namespace van het systeem."
+msgstr ""
+"Bewerk de tag van een afbeelding in een container-namespace van het systeem."
 
 #: app/constants.py:203
 msgid "Create new containers"
@@ -876,7 +921,9 @@ msgstr "Kan container {remote_name}. {error} niet aanmaken"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "Een container op afstand met deze naam bestaat al, maar is niet geassocieerd met een register."
+msgstr ""
+"Een container op afstand met deze naam bestaat al, maar is niet geassocieerd "
+"met een register."
 
 #: app/tasks/index_registry.py:99
 msgid "A local container with this name already exists."
@@ -886,4 +933,3 @@ msgstr "Een lokale container met deze naam bestaat al."
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "Kon de staging repository niet vinden: \"%s\""
-

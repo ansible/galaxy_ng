@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-01 10:21-0400\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,7 +31,9 @@ msgstr "未找到命名空间。"
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
-msgstr "当启用了 GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL 时，需要签名才能将集合添加到任何 'approved'repository 中。"
+msgstr ""
+"当启用了 GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL 时，需要签名才能将集合添加到任"
+"何 'approved'repository 中。"
 
 #: app/access_control/access_policy.py:534 app/api/v3/views/sync.py:49
 msgid ""
@@ -140,31 +142,40 @@ msgstr "组名=%(name)s, id=%(id)s 不存在"
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE 设置为 '{}'，但对应的 SigningService 不数据库中不存在。"
+msgstr ""
+"WARNING:GALAXY_COLLECTION_SIGNING_SERVICE 设置为 '{}'，但对应的 "
+"SigningService 不数据库中不存在。"
 
 #: app/api/ui/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
-msgstr "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS 设置为 True，但系统没有配置为使用 SigningService 来创建签名。"
+msgstr ""
+"WARNING:GALAXY_AUTO_SIGN_COLLECTIONS 设置为 True，但系统没有配置为使用 "
+"SigningService 来创建签名。"
 
 #: app/api/ui/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
-msgstr "INFO:System 配置为显示签名（来自远程同步），但没有配置为创建或接受签名上传。"
+msgstr ""
+"INFO:System 配置为显示签名（来自远程同步），但没有配置为创建或接受签名上传。"
 
 #: app/api/ui/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE 设置为 '{}'，但对应的 SigningService 不数据库中不存在。"
+msgstr ""
+"WARNING:GALAXY_CONTAINER_SIGNING_SERVICE 设置为 '{}'，但对应的 "
+"SigningService 不数据库中不存在。"
 
 #: app/api/ui/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
-msgstr "WARNING: container_signing 通过 '{}' SigningService 启用，但执行环境在系统中被禁用。"
+msgstr ""
+"WARNING: container_signing 通过 '{}' SigningService 启用，但执行环境在系统中"
+"被禁用。"
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
@@ -886,4 +897,3 @@ msgstr "具有此名称的本地容器已经存在。"
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "无法找到 staging 存储库：\"%s\""
-
