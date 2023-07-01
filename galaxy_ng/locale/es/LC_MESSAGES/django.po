@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-28 11:07-0400\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,7 +57,9 @@ msgstr "Nombre o ID de grupo no válido"
 msgid ""
 "Role {role} does not exist or does not have any permissions related to this "
 "object."
-msgstr "El rol {role} no existe o no tiene ningún permiso relacionado con este objeto."
+msgstr ""
+"El rol {role} no existe o no tiene ningún permiso relacionado con este "
+"objeto."
 
 #: app/api/ui/serializers/execution_environment.py:379
 msgid "Selected registry does not exist."
@@ -67,7 +69,9 @@ msgstr "El registro seleccionado no existe."
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "Los nombres de los contenedores sólo pueden contener números alfanuméricos, \".\", \"_\", \"-\" y un máximo de un \"/\"."
+msgstr ""
+"Los nombres de los contenedores sólo pueden contener números alfanuméricos, "
+"\".\", \"_\", \"-\" y un máximo de un \"/\"."
 
 #: app/api/ui/serializers/execution_environment.py:406
 msgid "Name cannot be changed."
@@ -76,7 +80,9 @@ msgstr "El nombre no se puede cambiar."
 #: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr "No se encontró el repositorio \"{pulp_id}\" al crear la lista de sincronización"
+msgstr ""
+"No se encontró el repositorio \"{pulp_id}\" al crear la lista de "
+"sincronización"
 
 #: app/api/ui/serializers/synclist.py:65
 #, python-format
@@ -88,20 +94,26 @@ msgstr "La lista de sincronización ya existe: %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "No se encontró la colección \"{namespace}.{name}\" al crear la lista de sincronización {synclist}"
+msgstr ""
+"No se encontró la colección \"{namespace}.{name}\" al crear la lista de "
+"sincronización {synclist}"
 
 #: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "No se encontró la colección \"{namespace}.{name}\" al actualizar la lista de sincronización {synclist}"
+msgstr ""
+"No se encontró la colección \"{namespace}.{name}\" al actualizar la lista de "
+"sincronización {synclist}"
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "El permiso 'galaxy.change_group' es necesario para cambiar un grupo de usuarios en el que el usuario solicitante no está."
+msgstr ""
+"El permiso 'galaxy.change_group' es necesario para cambiar un grupo de "
+"usuarios en el que el usuario solicitante no está."
 
 #: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
@@ -124,35 +136,48 @@ msgstr "El grupo name=%(name)s, id=%(id)s no existe"
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "ADVERTENCIA: GALAXY_COLLECTION_SIGNING_SERVICE está establecido en '{}', pero el SigningService correspondiente no existe en la base de datos."
+msgstr ""
+"ADVERTENCIA: GALAXY_COLLECTION_SIGNING_SERVICE está establecido en '{}', "
+"pero el SigningService correspondiente no existe en la base de datos."
 
 #: app/api/ui/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
-msgstr "ADVERTENCIA:GALAXY_AUTO_SIGN_COLLECTIONS está establecido en True, pero el sistema no está configurado con un SigningService para crear firmas."
+msgstr ""
+"ADVERTENCIA:GALAXY_AUTO_SIGN_COLLECTIONS está establecido en True, pero el "
+"sistema no está configurado con un SigningService para crear firmas."
 
 #: app/api/ui/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
-msgstr "INFO:El sistema está configurado para mostrar firmas (procedentes de sincronizaciones remotas) pero no está configurado para crear o aceptar la carga de firmas."
+msgstr ""
+"INFO:El sistema está configurado para mostrar firmas (procedentes de "
+"sincronizaciones remotas) pero no está configurado para crear o aceptar la "
+"carga de firmas."
 
 #: app/api/ui/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "ADVERTENCIA: GALAXY_CONTAINER_SIGNING_SERVICE está establecido en '{}', pero el SigningService correspondiente no existe en la base de datos."
+msgstr ""
+"ADVERTENCIA: GALAXY_CONTAINER_SIGNING_SERVICE está establecido en '{}', pero "
+"el SigningService correspondiente no existe en la base de datos."
 
 #: app/api/ui/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
-msgstr "ADVERTENCIA: container_signing está habilitado a través de '{}' SigningService, sin embargo los entornos de ejecución están deshabilitados en el sistema."
+msgstr ""
+"ADVERTENCIA: container_signing está habilitado a través de '{}' "
+"SigningService, sin embargo los entornos de ejecución están deshabilitados "
+"en el sistema."
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
-msgstr "La indexación de entornos de ejecución no es compatible con este registro."
+msgstr ""
+"La indexación de entornos de ejecución no es compatible con este registro."
 
 #: app/api/ui/views/signing.py:71
 msgid "Missing required field: namespace"
@@ -195,15 +220,20 @@ msgstr "El mando a distancia %s no tiene ningún registro asociado."
 msgid "Distribution base path is required"
 msgstr "Se requiere una ruta base de distribución"
 
-#: app/api/ui/viewsets/collection.py:221
+#: app/api/ui/viewsets/collection.py:197
+#, python-format
+msgid "%s must be a valid semantic version range."
+msgstr ""
+
+#: app/api/ui/viewsets/collection.py:233
 msgid "Retrieve collection version"
 msgstr "Recuperar la versión de la colección"
 
-#: app/api/ui/viewsets/collection.py:232
+#: app/api/ui/viewsets/collection.py:244
 msgid "Collection version not found for: {}"
 msgstr "No se ha encontrado la versión de la colección para: {}"
 
-#: app/api/ui/viewsets/collection.py:288
+#: app/api/ui/viewsets/collection.py:300
 msgid "Retrieve collection import"
 msgstr "Recuperación de la colección de importación"
 
@@ -216,14 +246,18 @@ msgstr "Ya existe un grupo llamado %s."
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr "Nombre de archivo no válido {filename}. Formato esperado: espacio de nombres-nombre-versión.tar.gz"
+msgstr ""
+"Nombre de archivo no válido {filename}. Formato esperado: espacio de nombres-"
+"nombre-versión.tar.gz"
 
 #: app/api/utils.py:56
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "Cadena de versión no válida {version} de nombre de archivo {filename}. Se espera un formato de versión semántico."
+msgstr ""
+"Cadena de versión no válida {version} de nombre de archivo {filename}. Se "
+"espera un formato de versión semántico."
 
 #: app/api/utils.py:60
 #, python-format
@@ -251,7 +285,8 @@ msgstr "El atributo \"nombre\" es obligatorio"
 
 #: app/api/v3/serializers/namespace.py:103
 msgid "Name can only contain lower case letters, underscores and numbers"
-msgstr "El nombre sólo puede contener letras minúsculas, guiones bajos y números"
+msgstr ""
+"El nombre sólo puede contener letras minúsculas, guiones bajos y números"
 
 #: app/api/v3/serializers/namespace.py:106
 msgid "Name must be longer than 2 characters"
@@ -281,13 +316,17 @@ msgstr "Usuario remoto."
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "No está permitido sincronizar contenidos de dominios comunitarios sin especificar un archivo de requisitos."
+msgstr ""
+"No está permitido sincronizar contenidos de dominios comunitarios sin "
+"especificar un archivo de requisitos."
 
 #: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "No se permite sincronizar el contenido de galaxy.ansible.com sin especificar un archivo de requisitos."
+msgstr ""
+"No se permite sincronizar el contenido de galaxy.ansible.com sin especificar "
+"un archivo de requisitos."
 
 #: app/api/v3/viewsets/collection.py:109
 #, python-format
@@ -334,7 +373,9 @@ msgstr "No se encontró el servicio de firmas %s"
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
 "at least a signature for approval."
-msgstr "Collección {namespace}.{name} no ha podido ser aprobada porque el sistema requiere al menos una firma para su aprobación."
+msgstr ""
+"Collección {namespace}.{name} no ha podido ser aprobada porque el sistema "
+"requiere al menos una firma para su aprobación."
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
@@ -346,7 +387,9 @@ msgstr "Ya existe un espacio de nombres llamado %s."
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr "No se puede eliminar el espacio de nombres {name} porque todavía hay colecciones asociadas a él."
+msgstr ""
+"No se puede eliminar el espacio de nombres {name} porque todavía hay "
+"colecciones asociadas a él."
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -365,7 +408,9 @@ msgstr "Error al crear el contenedor {remote_name}. {error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "Ya existe un contenedor remoto con este nombre, pero no está asociado a ningún registro."
+msgstr ""
+"Ya existe un contenedor remoto con este nombre, pero no está asociado a "
+"ningún registro."
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
@@ -375,4 +420,3 @@ msgstr "Ya existe un contenedor local con este nombre."
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "No se pudo encontrar el repositorio de puesta en escena: \"%s\""
-
