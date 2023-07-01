@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,7 +48,7 @@ msgstr "Los grupos deben ser una lista de objetos de grupo"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "El grupo name=%s, id=%s no existe"
 
-#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "Nombre o ID de grupo no válido"
 
@@ -60,7 +60,9 @@ msgstr "El registro seleccionado no existe."
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "Los nombres de los contenedores sólo pueden contener números alfanuméricos, \".\", \"_\", \"-\" y un máximo de un \"/\"."
+msgstr ""
+"Los nombres de los contenedores sólo pueden contener números alfanuméricos, "
+"\".\", \"_\", \"-\" y un máximo de un \"/\"."
 
 #: app/api/ui/serializers/execution_environment.py:402
 msgid "Name cannot be changed."
@@ -69,7 +71,9 @@ msgstr "El nombre no se puede cambiar."
 #: app/api/ui/serializers/synclist.py:41
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr "No se encontró el repositorio \"{pulp_id}\" al crear la lista de sincronización"
+msgstr ""
+"No se encontró el repositorio \"{pulp_id}\" al crear la lista de "
+"sincronización"
 
 #: app/api/ui/serializers/synclist.py:96
 #, python-format
@@ -81,33 +85,49 @@ msgstr "La lista de sincronización ya existe: %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "No se encontró la colección \"{namespace}.{name}\" al crear la lista de sincronización {synclist}"
+msgstr ""
+"No se encontró la colección \"{namespace}.{name}\" al crear la lista de "
+"sincronización {synclist}"
 
 #: app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "No se encontró la colección \"{namespace}.{name}\" al actualizar la lista de sincronización {synclist}"
+msgstr ""
+"No se encontró la colección \"{namespace}.{name}\" al actualizar la lista de "
+"sincronización {synclist}"
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "El permiso 'galaxy.change_group' es necesario para cambiar un grupo de usuarios en el que el usuario solicitante no está."
+msgstr ""
+"El permiso 'galaxy.change_group' es necesario para cambiar un grupo de "
+"usuarios en el que el usuario solicitante no está."
 
-#: app/api/ui/serializers/user.py:85
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr "Debe ser un superusuario para conceder permisos de superusuario."
 
-#: app/api/ui/serializers/user.py:128
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
+msgid "Must be a super user to change another user's password."
+msgstr ""
+
+#: app/api/ui/serializers/user.py:125
+msgid "You do not have permissions to modify super users."
+msgstr ""
+
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "El grupo name=%(name)s, id=%(id)s no existe"
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
-msgstr "La indexación de entornos de ejecución no es compatible con este registro."
+msgstr ""
+"La indexación de entornos de ejecución no es compatible con este registro."
 
 #: app/api/ui/views/signing.py:71
 msgid "Missing required field: namespace"
@@ -150,15 +170,20 @@ msgstr "El mando a distancia %s no tiene ningún registro asociado."
 msgid "Distribution base path is required"
 msgstr "Se requiere una ruta base de distribución"
 
-#: app/api/ui/viewsets/collection.py:255
+#: app/api/ui/viewsets/collection.py:231
+#, python-format
+msgid "%s must be a valid semantic version range."
+msgstr ""
+
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "Recuperar la versión de la colección"
 
-#: app/api/ui/viewsets/collection.py:266
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "No se ha encontrado la versión de la colección para: {}"
 
-#: app/api/ui/viewsets/collection.py:322
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "Recuperación de la colección de importación"
 
@@ -171,14 +196,18 @@ msgstr "Ya existe un grupo llamado %s."
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr "Nombre de archivo no válido {filename}. Formato esperado: espacio de nombres-nombre-versión.tar.gz"
+msgstr ""
+"Nombre de archivo no válido {filename}. Formato esperado: espacio de nombres-"
+"nombre-versión.tar.gz"
 
 #: app/api/utils.py:56
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "Cadena de versión no válida {version} de nombre de archivo {filename}. Se espera un formato de versión semántico."
+msgstr ""
+"Cadena de versión no válida {version} de nombre de archivo {filename}. Se "
+"espera un formato de versión semántico."
 
 #: app/api/utils.py:60
 #, python-format
@@ -206,7 +235,8 @@ msgstr "El atributo \"nombre\" es obligatorio"
 
 #: app/api/v3/serializers/namespace.py:97
 msgid "Name can only contain lower case letters, underscores and numbers"
-msgstr "El nombre sólo puede contener letras minúsculas, guiones bajos y números"
+msgstr ""
+"El nombre sólo puede contener letras minúsculas, guiones bajos y números"
 
 #: app/api/v3/serializers/namespace.py:100
 msgid "Name must be longer than 2 characters"
@@ -236,13 +266,17 @@ msgstr "Usuario remoto."
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "No está permitido sincronizar contenidos de dominios comunitarios sin especificar un archivo de requisitos."
+msgstr ""
+"No está permitido sincronizar contenidos de dominios comunitarios sin "
+"especificar un archivo de requisitos."
 
 #: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "No se permite sincronizar el contenido de galaxy.ansible.com sin especificar un archivo de requisitos."
+msgstr ""
+"No se permite sincronizar el contenido de galaxy.ansible.com sin especificar "
+"un archivo de requisitos."
 
 #: app/api/v3/viewsets/collection.py:109
 #, python-format
@@ -294,7 +328,9 @@ msgstr "Ya existe un espacio de nombres llamado %s."
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr "No se puede eliminar el espacio de nombres {name} porque todavía hay colecciones asociadas a él."
+msgstr ""
+"No se puede eliminar el espacio de nombres {name} porque todavía hay "
+"colecciones asociadas a él."
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -313,7 +349,9 @@ msgstr "Error al crear el contenedor {remote_name}. {error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "Ya existe un contenedor remoto con este nombre, pero no está asociado a ningún registro."
+msgstr ""
+"Ya existe un contenedor remoto con este nombre, pero no está asociado a "
+"ningún registro."
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
@@ -327,7 +365,8 @@ msgstr "No se pudo encontrar el repositorio de puesta en escena: \"%s\""
 #: app/tasks/synclist.py:45
 #, python-format
 msgid "Curating all synclists repos that curate from %s"
-msgstr "Curando todos los repositorios de listas de sincronización que curan de %s"
+msgstr ""
+"Curando todos los repositorios de listas de sincronización que curan de %s"
 
 #: app/tasks/synclist.py:56
 msgid "Synclists curating upstream repo"
@@ -340,14 +379,18 @@ msgstr "Tarea de curado de repo de listas de sincronización"
 #: app/tasks/synclist.py:92
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
-msgstr "Terminando de curar los repos de listas de sincronización %s basados en la actualización de %s"
+msgstr ""
+"Terminando de curar los repos de listas de sincronización %s basados en la "
+"actualización de %s"
 
 #: app/tasks/synclist.py:121
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr "Aplicando lista de sincronización \"%s\" con policy=%s para curar el repositorio \"%s\" desde el repositorio \"%s\""
+msgstr ""
+"Aplicando lista de sincronización \"%s\" con policy=%s para curar el "
+"repositorio \"%s\" desde el repositorio \"%s\""
 
 #: app/tasks/synclist.py:163
 msgid "Unexpected synclist policy {}"

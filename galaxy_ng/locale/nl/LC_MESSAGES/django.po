@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,7 +48,7 @@ msgstr "Groepen moet een lijst van groepsobjecten zijn"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "Groepsnaam=%s, id=%s bestaat niet"
 
-#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "Ongeldige groepsnaam of id."
 
@@ -60,7 +60,9 @@ msgstr "Geselecteerd register bestaat niet."
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "Containernamen kunnen alleen alfanumerieke getallen, \".\", \"_\", \"-\" en maximaal één \"/\" bevatten."
+msgstr ""
+"Containernamen kunnen alleen alfanumerieke getallen, \".\", \"_\", \"-\" en "
+"maximaal één \"/\" bevatten."
 
 #: app/api/ui/serializers/execution_environment.py:402
 msgid "Name cannot be changed."
@@ -81,33 +83,52 @@ msgstr "Synclist bestaat al: %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "Collectie \"{namespace}.{name}\" niet gevonden tijdens het aanmaken van synclist {synclist}"
+msgstr ""
+"Collectie \"{namespace}.{name}\" niet gevonden tijdens het aanmaken van "
+"synclist {synclist}"
 
 #: app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "Collectie \"{namespace}.{name}\" niet gevonden tijdens het bijwerken van synclist {synclist}"
+msgstr ""
+"Collectie \"{namespace}.{name}\" niet gevonden tijdens het bijwerken van "
+"synclist {synclist}"
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "De machtiging 'galaxy.change_group' is nodig om een gebruikersgroep te veranderen waar de aanvragende gebruiker geen deel van uitmaakt."
+msgstr ""
+"De machtiging 'galaxy.change_group' is nodig om een gebruikersgroep te "
+"veranderen waar de aanvragende gebruiker geen deel van uitmaakt."
 
-#: app/api/ui/serializers/user.py:85
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
-msgstr "Moet een supergebruiker zijn om machtigingen voor een supergebruiker te verlenen."
+msgstr ""
+"Moet een supergebruiker zijn om machtigingen voor een supergebruiker te "
+"verlenen."
 
-#: app/api/ui/serializers/user.py:128
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
+msgid "Must be a super user to change another user's password."
+msgstr ""
+
+#: app/api/ui/serializers/user.py:125
+msgid "You do not have permissions to modify super users."
+msgstr ""
+
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "Groepsnaam=%(name)s, id=%(id)s bestaat niet"
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
-msgstr "Het indexeren van uitvoeringsomgevingen wordt in dit register niet ondersteund."
+msgstr ""
+"Het indexeren van uitvoeringsomgevingen wordt in dit register niet "
+"ondersteund."
 
 #: app/api/ui/views/signing.py:71
 msgid "Missing required field: namespace"
@@ -139,7 +160,8 @@ msgstr ""
 #: app/api/ui/views/sync.py:37 app/api/v3/views/sync.py:34
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
-msgstr "De %s-distributie heeft geen items op afstand die ermee zijn geassocieerd."
+msgstr ""
+"De %s-distributie heeft geen items op afstand die ermee zijn geassocieerd."
 
 #: app/api/ui/views/sync.py:51
 #, python-format
@@ -150,15 +172,20 @@ msgstr "De %s op afstand heeft geen registers die ermee zijn geassocieerd."
 msgid "Distribution base path is required"
 msgstr "Basispad distributie is vereist"
 
-#: app/api/ui/viewsets/collection.py:255
+#: app/api/ui/viewsets/collection.py:231
+#, python-format
+msgid "%s must be a valid semantic version range."
+msgstr ""
+
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "Collectieversie ophalen"
 
-#: app/api/ui/viewsets/collection.py:266
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "Collectieversie niet gevonden voor: {}"
 
-#: app/api/ui/viewsets/collection.py:322
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "Collectie import ophalen"
 
@@ -171,14 +198,18 @@ msgstr "Een groep met de naam %s bestaat al."
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr "Ongeldige bestandsnaam {filename}. Verwachte indeling: namespace-naam-versie.tar.gz"
+msgstr ""
+"Ongeldige bestandsnaam {filename}. Verwachte indeling: namespace-naam-versie."
+"tar.gz"
 
 #: app/api/utils.py:56
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "Ongeldige versie string {version} van bestandsnaam {filename}. Verwachte semantische versie indeling."
+msgstr ""
+"Ongeldige versie string {version} van bestandsnaam {filename}. Verwachte "
+"semantische versie indeling."
 
 #: app/api/utils.py:60
 #, python-format
@@ -236,13 +267,17 @@ msgstr "Gebruiker op afstand."
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "Het is niet toegestaan inhoud van gemeenschapsdomeinen te synchroniseren zonder een bestand met vereisten op te geven."
+msgstr ""
+"Het is niet toegestaan inhoud van gemeenschapsdomeinen te synchroniseren "
+"zonder een bestand met vereisten op te geven."
 
 #: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "Het is niet toegestaan inhoud van galaxy.ansible.com te synchroniseren zonder een bestand met vereisten op te geven."
+msgstr ""
+"Het is niet toegestaan inhoud van galaxy.ansible.com te synchroniseren "
+"zonder een bestand met vereisten op te geven."
 
 #: app/api/v3/viewsets/collection.py:109
 #, python-format
@@ -294,7 +329,9 @@ msgstr "Een namespace met de naam %s bestaat al."
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr "Namespace {name} kan niet worden verwijderd omdat er nog collecties aan zijn gekoppeld."
+msgstr ""
+"Namespace {name} kan niet worden verwijderd omdat er nog collecties aan zijn "
+"gekoppeld."
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -313,7 +350,9 @@ msgstr "Kan container {remote_name}. {error} niet aanmaken"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "Een container op afstand met deze naam bestaat al, maar is niet geassocieerd met een register."
+msgstr ""
+"Een container op afstand met deze naam bestaat al, maar is niet geassocieerd "
+"met een register."
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
@@ -347,7 +386,9 @@ msgstr "Afwerking van %s synclist-repo's gebaseerd op %s-update"
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr "Synclist \"%s\" toepassen met policy=%s om repo \"%s\" te cureren vanuit upstream repo \"%s\""
+msgstr ""
+"Synclist \"%s\" toepassen met policy=%s om repo \"%s\" te cureren vanuit "
+"upstream repo \"%s\""
 
 #: app/tasks/synclist.py:163
 msgid "Unexpected synclist policy {}"
