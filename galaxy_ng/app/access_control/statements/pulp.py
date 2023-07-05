@@ -577,6 +577,20 @@ PULP_CORE_VIEWSETS = {
             {"action": "*", "principal": "admin", "effect": "allow"},
         ]
     },
+    "tasks": {
+        "statements": [
+            {
+                "action": ["list"],
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+            {
+                "action": ["retrieve", "my_permissions"],
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+        ]
+    }
 }
 
 
