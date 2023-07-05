@@ -224,10 +224,9 @@ class AnsibleConfigFixture(dict):
                 try:
                     if CREDENTIALS[p["username"]].get("gen_token", False):
                         return get_standalone_token(p, self["url"])
+                    return p.get("token", None)
                 except KeyError:
-                    pass
-                finally:
-                    return self.PROFILES[self.profile]["token"]
+                    return p.get("token", None)
             else:
                 return None
 
