@@ -7,13 +7,6 @@ from . import views
 from galaxy_ng.app.api import urls as api_urls
 from galaxy_ng.ui import urls as ui_urls
 
-from drf_spectacular.views import (
-    SpectacularJSONAPIView,
-    SpectacularYAMLAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
-
 API_PATH_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
 
 galaxy_urls = [
@@ -26,23 +19,23 @@ urlpatterns = [
     path("", include("django_prometheus.urls")),
     path(
         f"{API_PATH_PREFIX}/v3/openapi.json",
-        SpectacularJSONAPIView.as_view(),
-        name="schema",
+        views.PulpOpenAPIJsonRedirectView.as_view(),
+        name="schema-json-redirect",
     ),
     path(
         f"{API_PATH_PREFIX}/v3/openapi.yaml",
-        SpectacularYAMLAPIView.as_view(),
-        name="schema-yaml",
+        views.PulpOpenAPIYamlRedirectView.as_view(),
+        name="schema-yaml-redirect",
     ),
     path(
         f"{API_PATH_PREFIX}/v3/redoc/",
-        SpectacularRedocView.as_view(),
-        name="schema-redoc",
+        views.PulpRedocRedirectView.as_view(),
+        name="schema-redoc-redirect",
     ),
     path(
         f"{API_PATH_PREFIX}/v3/swagger-ui/",
-        SpectacularSwaggerView.as_view(url_name="schema"),
-        name="swagger-ui",
+        views.PulpSwaggerRedirectView.as_view(),
+        name="swagger-ui-redirect",
     ),
     path("healthz", views.health_view),
 ]
