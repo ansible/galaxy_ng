@@ -852,6 +852,11 @@ def get_hub_version(ansible_config):
     return gc.get(gc.galaxy_root)["galaxy_ng_version"]
 
 
+@pytest.fixture(scope="session")
+def hub_version(ansible_config):
+    return get_hub_version(ansible_config)
+
+
 def min_hub_version(ansible_config, spec):
     version = get_hub_version(ansible_config)
     return Requirement.parse(f"galaxy_ng<{spec}").specifier.contains(version)
