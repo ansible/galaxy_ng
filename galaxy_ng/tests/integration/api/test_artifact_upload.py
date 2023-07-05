@@ -370,7 +370,6 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
 
 @pytest.mark.stage_health
 @pytest.mark.importer
-@pytest.mark.this
 def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
     """
     Ensure that:
