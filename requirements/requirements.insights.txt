@@ -38,7 +38,10 @@ attrs==22.2.0
     #   galaxy-importer
     #   jsonschema
 backoff==2.2.1
-    # via pulpcore
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   pulpcore
 bindep==2.11.0
     # via ansible-builder
 black==23.3.0
@@ -84,46 +87,41 @@ defusedxml==0.7.1
     #   odfpy
     #   python3-openid
     #   social-auth-core
+deprecated==1.2.14
+    # via
+    #   opentelemetry-api
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
 diff-match-patch==20230430
     # via django-import-export
 distro==1.8.0
     # via
     #   bindep
     #   galaxy-ng (setup.py)
-django==3.2.19
+django==4.2.1
     # via
     #   django-auth-ldap
-    #   django-automated-logging
-    #   django-currentuser
     #   django-filter
     #   django-guid
     #   django-import-export
     #   django-lifecycle
-    #   django-picklefield
     #   django-storages
     #   djangorestframework
     #   drf-nested-routers
     #   drf-spectacular
     #   insights-analytics-collector
     #   pulpcore
+    #   social-auth-app-django
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
-django-automated-logging==6.1.3
-    # via galaxy-ng (setup.py)
-django-currentuser==0.5.3
-    # via pulpcore
-django-filter==22.1
+django-filter==23.2
     # via pulpcore
 django-guid==3.3.0
     # via pulpcore
 django-import-export==3.1.0
     # via pulpcore
-django-ipware==3.0.7
-    # via django-automated-logging
 django-lifecycle==1.0.0
     # via pulpcore
-django-picklefield==3.1
-    # via django-automated-logging
 django-prometheus==2.3.1
     # via galaxy-ng (setup.py)
 django-storages[boto3]==1.13.2
@@ -140,7 +138,7 @@ drf-access-policy==1.5.0
     # via pulpcore
 drf-nested-routers==0.93.4
     # via pulpcore
-drf-spectacular==0.25.1
+drf-spectacular==0.26.2
     # via
     #   galaxy-ng (setup.py)
     #   pulpcore
@@ -170,12 +168,20 @@ gitdb==4.0.10
     # via gitpython
 gitpython==3.1.31
     # via pulp-ansible
+googleapis-common-protos==1.59.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+grpcio==1.54.2
+    # via opentelemetry-exporter-otlp-proto-grpc
 gunicorn==20.1.0
     # via pulpcore
 idna==3.4
     # via
     #   requests
     #   yarl
+importlib-metadata==6.0.1
+    # via opentelemetry-api
 inflection==0.5.1
     # via drf-spectacular
 insights-analytics-collector==0.3.2
@@ -204,8 +210,6 @@ markuppy==1.14
     # via tablib
 markupsafe==2.1.2
     # via jinja2
-marshmallow==3.19.0
-    # via django-automated-logging
 mccabe==0.7.0
     # via flake8
 mdurl==0.1.2
@@ -226,6 +230,59 @@ odfpy==1.4.1
     # via tablib
 openpyxl==3.1.2
     # via tablib
+opentelemetry-api==1.18.0
+    # via
+    #   opentelemetry-distro
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-wsgi
+    #   opentelemetry-sdk
+opentelemetry-distro[otlp]==0.39b0
+    # via pulpcore
+opentelemetry-exporter-otlp==1.18.0
+    # via opentelemetry-distro
+opentelemetry-exporter-otlp-proto-common==1.18.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-grpc==1.18.0
+    # via opentelemetry-exporter-otlp
+opentelemetry-exporter-otlp-proto-http==1.18.0
+    # via
+    #   opentelemetry-exporter-otlp
+    #   pulpcore
+opentelemetry-instrumentation==0.39b0
+    # via
+    #   opentelemetry-distro
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-wsgi
+opentelemetry-instrumentation-django==0.39b0
+    # via pulpcore
+opentelemetry-instrumentation-wsgi==0.39b0
+    # via
+    #   opentelemetry-instrumentation-django
+    #   pulpcore
+opentelemetry-proto==1.18.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-common
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-sdk==1.18.0
+    # via
+    #   opentelemetry-distro
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-semantic-conventions==0.39b0
+    # via
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-wsgi
+    #   opentelemetry-sdk
+opentelemetry-util-http==0.39b0
+    # via
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-wsgi
 packaging==23.1
     # via
     #   ansible-core
@@ -234,7 +291,6 @@ packaging==23.1
     #   black
     #   bleach
     #   django-lifecycle
-    #   marshmallow
     #   pulp-glue
 parsley==1.3
     # via bindep
@@ -252,16 +308,21 @@ platformdirs==3.5.0
 prometheus-client==0.16.0
     # via django-prometheus
 protobuf==4.22.1
+    # via
+    #   googleapis-common-protos
+    #   opentelemetry-proto
+    #   pulpcore
+psycopg[binary]==3.1.9
     # via pulpcore
-psycopg2==2.9.5
-    # via pulpcore
-pulp-ansible==0.17.2
+psycopg-binary==3.1.9
+    # via psycopg
+pulp-ansible==0.18.0
     # via galaxy-ng (setup.py)
-pulp-container==2.14.5
+pulp-container==2.15.1
     # via galaxy-ng (setup.py)
 pulp-glue==0.19.1
     # via pulpcore
-pulpcore==3.23.4
+pulpcore==3.28.1
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -305,9 +366,7 @@ python-ldap==3.4.3
 python3-openid==3.2.0
     # via social-auth-core
 pytz==2023.3
-    # via
-    #   django
-    #   djangorestframework
+    # via djangorestframework
 pyyaml==6.0
     # via
     #   ansible-builder
@@ -325,6 +384,7 @@ requests==2.30.0
     # via
     #   galaxy-importer
     #   insights-analytics-collector
+    #   opentelemetry-exporter-otlp-proto-http
     #   pulp-glue
     #   pyjwkest
     #   requests-oauthlib
@@ -353,14 +413,12 @@ six==1.16.0
     #   ecdsa
     #   pyjwkest
     #   python-dateutil
-    #   social-auth-app-django
-    #   social-auth-core
     #   url-normalize
 smmap==5.0.0
     # via gitdb
-social-auth-app-django==3.4.0
+social-auth-app-django==5.2.0
     # via galaxy-ng (setup.py)
-social-auth-core==3.4.0
+social-auth-core==4.4.2
     # via
     #   galaxy-ng (setup.py)
     #   social-auth-app-django
@@ -377,7 +435,10 @@ types-cryptography==3.3.23.2
 types-setuptools==67.7.0.2
     # via requirements-parser
 typing-extensions==4.5.0
-    # via async-lru
+    # via
+    #   async-lru
+    #   opentelemetry-sdk
+    #   psycopg
 uritemplate==4.1.1
     # via drf-spectacular
 url-normalize==1.4.3
@@ -388,6 +449,8 @@ urllib3==1.26.15
     #   requests
 urlman==2.0.1
     # via django-lifecycle
+uuid6==2023.5.2
+    # via pulpcore
 watchtower==3.0.1
     # via -r requirements/requirements.insights.in
 wcmatch==8.4.1
@@ -396,6 +459,10 @@ webencodings==0.5.1
     # via bleach
 whitenoise==6.4.0
     # via pulpcore
+wrapt==1.15.0
+    # via
+    #   deprecated
+    #   opentelemetry-instrumentation
 xlrd==2.0.1
     # via tablib
 xlwt==1.3.0
@@ -406,6 +473,8 @@ yarl==1.8.2
     # via
     #   aiohttp
     #   pulpcore
+zipp==3.15.0
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

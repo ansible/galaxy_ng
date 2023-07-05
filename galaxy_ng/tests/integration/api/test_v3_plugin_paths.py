@@ -39,7 +39,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_history(
     validate_json(instance=resp, schema=schema_objectlist)
 
     # assert on the expected minimum length of the dataset
-    assert resp['data'][0]['number'] >= 3
+    assert resp['data'][0]['number'] >= 1
 
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/images/

@@ -105,8 +105,7 @@ docker/test/integration/container:      ## Run integration tests.
 
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from python script
-	#./compose run --rm api manage shell < app/dev/common/setup_test_data.py
-	$(call exec_or_run, api, bash, -c "django-admin shell < app/dev/common/setup_test_data.py")
+	$(call exec_or_run, api, "/bin/bash", "-c", "/entrypoint.sh manage shell < app/dev/common/setup_test_data.py")
 
 .PHONY: docker/makemigrations
 docker/makemigrations:   ## Run django migrations
@@ -142,7 +141,7 @@ docker/db_restore:   ## Restore database from a snapshot with optional NAME para
 
 .PHONY: docker/translations
 docker/translations:   ## Generate the translation messages
-	./compose run --rm api bash -c "cd /app/galaxy_ng && django-admin makemessages --all"
+	$(call exec_or_run, api, "/bin/bash", "-c", "cd /app/galaxy_ng && /entrypoint.sh manage makemessages --all")
 
 .PHONY: docker/all
 docker/all: 	                                ## Build, migrate, loaddata, translate and add test collections.

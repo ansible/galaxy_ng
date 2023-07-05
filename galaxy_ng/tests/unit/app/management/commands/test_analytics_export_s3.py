@@ -3,6 +3,7 @@ from django.core.management import call_command
 from django.test import TestCase
 import os
 
+
 s3_details = {
     "aws_access_key_id": "blah",
     "aws_secret_access_key": "blah",

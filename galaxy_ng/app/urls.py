@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import url
+from django.urls import re_path as url
 from django.shortcuts import redirect
 from django.urls import include, path
 
