@@ -10,6 +10,7 @@ set -e
 export HUB_API_ROOT="http://localhost:8080/api/automation-hub/"
 export HUB_AUTH_URL="http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
 export HUB_USE_MOVE_ENDPOINT="true"
+export HUB_UPLOAD_SIGNATURES="true"
 unset HUB_TOKEN
 
 which virtualenv || pip install --user virtualenv
