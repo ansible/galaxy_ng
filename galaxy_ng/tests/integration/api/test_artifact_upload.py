@@ -9,7 +9,6 @@ from orionutils.generator import build_collection, randstr
 from pkg_resources import parse_version
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
-from ..conftest import is_hub_4_5, get_hub_version
 
 from ..utils import (
     CapturingGalaxyError,
@@ -52,7 +51,7 @@ def gen_name_for_invalid():
 
 @pytest.mark.stage_health
 @pytest.mark.parametrize("use_distribution", [True, False])
-def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution):
+def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution, hub_version):
     """Test the most basic, valid artifact upload via the API.
 
     Should successfully return a task URL to get updates of the progress,
@@ -65,7 +64,7 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
     # inbound repos aren't created anymore. This will create one to verify that they still
     # work on legacy clients
     if use_distribution:
-        if is_hub_4_5(ansible_config):
+        if parse_version(hub_version) < parse_version('4.6'):
             pytest.skip("Hub version is 4.5")
         admin_client = get_client(ansible_config(profile="admin"))
         distros = admin_client("pulp/api/v3/distributions/ansible/"
@@ -371,7 +370,8 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
 
 @pytest.mark.stage_health
 @pytest.mark.importer
-def test_ansible_lint_exception(ansible_config, upload_artifact):
+@pytest.mark.this
+def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
     """
     Ensure that:
         * ansible-lint runs against our uploaded collection
@@ -400,7 +400,6 @@ def test_ansible_lint_exception(ansible_config, upload_artifact):
     log_messages = [item["message"] for item in resp["messages"]]
 
     pattern = "Linting collection via ansible-lint"  # hub 4.8, galaxy-importer 0.4.11
-    hub_version = get_hub_version(ansible_config)
     if parse_version(hub_version) < parse_version('4.8.0dev'):
         pattern = "Linting role .* via ansible-lint"  # 4.7, galaxy-importer 0.4.7
 
