@@ -13,7 +13,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.parametrize("profile", ("basic_user", "partner_engineer", "org_admin", "admin"))
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 def test_token_auth(profile, ansible_config):
     """Test whether normal auth is required and works to access APIs.
@@ -33,7 +33,7 @@ def test_token_auth(profile, ansible_config):
     assert "available_versions" in resp
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 def test_auth_admin(ansible_config):
     """Test whether admin can not access API root using invalid token."""
@@ -50,7 +50,7 @@ def test_auth_admin(ansible_config):
     assert ctx.value.http_code == 403
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 def test_auth_exception(ansible_config, published):
     """Test whether an HTTP exception when using an invalid token."""

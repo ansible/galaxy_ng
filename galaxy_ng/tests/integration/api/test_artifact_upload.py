@@ -51,6 +51,7 @@ def gen_name_for_invalid():
 
 @pytest.mark.stage_health
 @pytest.mark.parametrize("use_distribution", [True, False])
+@pytest.mark.all
 def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution, hub_version):
     """Test the most basic, valid artifact upload via the API.
 
@@ -66,7 +67,7 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
     if use_distribution:
         if parse_version(hub_version) < parse_version('4.6'):
             pytest.skip("Hub version is 4.5")
-        admin_client = get_client(ansible_config(profile="admin"))
+        admin_client = get_client(ansible_config("admin"))
         distros = admin_client("pulp/api/v3/distributions/ansible/"
                                f"ansible/?name=inbound-{artifact.namespace}")
 
@@ -85,7 +86,8 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
 
     with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
         try:
-            resp = upload_artifact(config, api_client, artifact, use_distribution=use_distribution)
+            resp = upload_artifact(config, api_client, artifact,
+                                   use_distribution=use_distribution)
         except CapturingGalaxyError as capture:
             error_body = capture.http_error.read()
             logger.error("Upload failed with error response: %s", error_body)
@@ -97,6 +99,7 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
 
 
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.all
 def test_validated_publish(ansible_config, artifact, upload_artifact):
     """
     Publish a collection to the validated repo.
@@ -129,6 +132,7 @@ def test_validated_publish(ansible_config, artifact, upload_artifact):
 
 
 @pytest.mark.skip
+@pytest.mark.all
 def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
     """Test error responses when posting to the collections endpoint."""
     config = ansible_config("basic_user")
@@ -147,6 +151,7 @@ def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
 
 
 @pytest.mark.stage_health
+@pytest.mark.all
 def test_api_publish_invalid_tarball(ansible_config, artifact, upload_artifact):
     """Test error responses when uploading a file that is not a tarball."""
     config = ansible_config("basic_user")
@@ -181,6 +186,7 @@ def test_api_publish_missing_filename(ansible_config, artifact, upload_artifact)
 
 @pytest.mark.importer
 @pytest.mark.stage_health
+@pytest.mark.all
 def test_api_publish_broken_manifest(ansible_config, artifact, upload_artifact):
     """Test handling of uploads missing the collection name parameter."""
     config = ansible_config("basic_user")
@@ -209,6 +215,7 @@ INVALID_NAMES = {
 
 
 @pytest.mark.parametrize("wrong_name", INVALID_NAMES)
+@pytest.mark.all
 def test_api_publish_invalid_filename(ansible_config, artifact, upload_artifact, wrong_name):
     """Test handling of uploads with invalid filenames."""
     config = ansible_config("basic_user")
@@ -281,6 +288,7 @@ MAX_LENGTH_VERSION = 128
 )
 @pytest.mark.stage_health
 @pytest.mark.importer
+@pytest.mark.all
 def test_long_field_values(ansible_config, upload_artifact, field):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
     config = ansible_config("basic_user")
@@ -329,6 +337,7 @@ def test_long_field_values(ansible_config, upload_artifact, field):
 )
 @pytest.mark.importer
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.all
 def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
     """
     Test handling of POSTs to the artifact endpoint neglecting to submit a file.
@@ -354,7 +363,8 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
     assert resp["state"] == result
 
     if result == "completed":
-        partner_engineer_client = get_client(ansible_config("partner_engineer"))
+        config = ansible_config("partner_engineer")
+        partner_engineer_client = get_client(config)
         set_certification(partner_engineer_client, artifact)
 
         collection_url = f"v3/collections/{artifact.namespace}/{artifact.name}/versions/1.0.0/"
@@ -370,6 +380,7 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
 
 @pytest.mark.stage_health
 @pytest.mark.importer
+@pytest.mark.all
 def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
     """
     Ensure that:
@@ -415,6 +426,7 @@ def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
 
 
 @pytest.mark.importer
+@pytest.mark.all
 def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
     """
     Test that galaxy-importer logs when meta/execution-environment.yml
@@ -457,6 +469,7 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
 
 
 @pytest.mark.importer
+@pytest.mark.all
 def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
     """
     Test that galaxy-importer logs when ansible-test sanity ignore files are present.
@@ -492,7 +505,7 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
     assert len(ignorefile) == 1  # found ignorefile log message
 
 
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 @pytest.mark.importer
 def test_publish_fail_required_tag(ansible_config, upload_artifact):
     """

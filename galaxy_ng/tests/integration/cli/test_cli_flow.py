@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.cli
+@pytest.mark.all
 def test_publish_newer_version_collection(ansible_config, cleanup_collections, uncertifiedv2):
     """Test whether a newer version of collection can be installed after being published.
 
@@ -41,6 +42,7 @@ def test_publish_newer_version_collection(ansible_config, cleanup_collections, u
     assert ci.version != v2.version
 
 
+@pytest.mark.all
 @pytest.mark.cli
 def test_publish_newer_certified_collection_version(
     ansible_config,
@@ -60,7 +62,8 @@ def test_publish_newer_certified_collection_version(
 
     # Ensure v2 gets installed by default ...
     ansible_galaxy(
-        f"collection install {v1.namespace}.{v1.name}", ansible_config=ansible_config("basic_user")
+        f"collection install {v1.namespace}.{v1.name}",
+        ansible_config=ansible_config("basic_user")
     )
     collection_path = get_collection_full_path(v1.namespace, v1.name)
     ci = CollectionInspector(directory=collection_path)
@@ -68,6 +71,7 @@ def test_publish_newer_certified_collection_version(
     assert ci.version == v2.version
 
 
+@pytest.mark.all
 @pytest.mark.cli
 def test_publish_same_collection_version(ansible_config):
     """Test you cannot publish same collection version already published."""
@@ -77,16 +81,17 @@ def test_publish_same_collection_version(ansible_config):
     collection = build_collection(namespace=cnamespace)
     ansible_galaxy(
         f"collection publish {collection.filename}",
-        ansible_config=ansible_config("admin", namespace=collection.namespace)
+        ansible_config=ansible_config("admin")
     )
     p = ansible_galaxy(
         f"collection publish {collection.filename}",
         check_retcode=1,
-        ansible_config=ansible_config("admin", namespace=collection.namespace)
+        ansible_config=ansible_config("admin")
     )
     assert "already exists" in str(p.stderr)
 
 
+@pytest.mark.all
 @pytest.mark.cli
 def test_publish_and_install_by_self(ansible_config, published, cleanup_collections):
     """A publishing user has the permission to install an uncertified version of their
@@ -99,8 +104,9 @@ def test_publish_and_install_by_self(ansible_config, published, cleanup_collecti
     )
 
 
+@pytest.mark.all
 @pytest.mark.cli
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 @pytest.mark.skip(
     reason="Marked for insights mode which always has GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL true"
 )

@@ -126,8 +126,7 @@ def _assert_namespace_sync(pah_client, crc_client, namespace):
     assert pah_sha == pah_ns["avatar_sha256"]
 
 
-@pytest.mark.standalone_only
-@pytest.mark.certified_sync
+@pytest.mark.sync
 def test_basic_sync(sync_instance_crc, ansible_config):
     """Test syncing directly from the published repo."""
 
@@ -144,8 +143,7 @@ def test_basic_sync(sync_instance_crc, ansible_config):
     _assert_sync(manifest, pah_client)
 
 
-@pytest.mark.standalone_only
-@pytest.mark.certified_sync
+@pytest.mark.sync
 def test_synclist_sync(sync_instance_crc, ansible_config):
     """Test syncing from a customer's synclist repo."""
 
@@ -186,8 +184,7 @@ def test_synclist_sync(sync_instance_crc, ansible_config):
     _assert_sync(manifest, pah_client)
 
 
-@pytest.mark.standalone_only
-@pytest.mark.certified_sync
+@pytest.mark.sync
 def test_signed_only_sync(sync_instance_crc, ansible_config):
     """Test syncing only signed collections."""
 
@@ -206,8 +203,7 @@ def test_signed_only_sync(sync_instance_crc, ansible_config):
     _assert_sync(expected_manifest, pah_client)
 
 
-@pytest.mark.standalone_only
-@pytest.mark.certified_sync
+@pytest.mark.sync
 def test_namespace_sync(sync_instance_crc, ansible_config):
     pah_config = ansible_config(profile="admin")
     manifest, crc_config = sync_instance_crc

@@ -107,15 +107,15 @@ download_ui() {
     echo "yes" | django-admin collectstatic
 }
 
-set_up_test_data() {
-    cd /src/galaxy_ng
-    # make docker/loaddata
-    django-admin shell < ./dev/common/setup_test_data.py
+# set_up_test_data() {
+#     cd /src/galaxy_ng
+#     # make docker/loaddata
+#     django-admin shell < ./dev/common/setup_test_data.py
 
-    # make docker/translations
-    cd galaxy_ng
-    django-admin makemessages --all
-}
+#     # make docker/translations
+#     cd galaxy_ng
+#     django-admin makemessages --all
+# }
 
 setup_webserver_snippets
 
@@ -135,6 +135,6 @@ if [[ "$UPDATE_UI" -eq "1" ]]; then
     download_ui
 fi
 
-if [[ "$SETUP_TEST_DATA" -eq "1" ]]; then
-    set_up_test_data
-fi
+# if [[ "$SETUP_TEST_DATA" -eq "1" ]]; then
+#     set_up_test_data
+# fi

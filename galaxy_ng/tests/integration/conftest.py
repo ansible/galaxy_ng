@@ -10,7 +10,8 @@ from pkg_resources import parse_version, Requirement
 
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
-from .constants import USERNAME_PUBLISHER
+from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES, \
+    SYNC_PROFILES, DEPLOYED_PAH_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -18,12 +19,20 @@ from .utils import (
     get_client,
     set_certification,
     set_synclist,
-    iterate_all, wait_for_url
+    iterate_all,
+    wait_for_url,
 )
+
 from .utils import upload_artifact as _upload_artifact
-from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
-    is_sync_testing, is_dev_env_standalone, is_standalone, is_ephemeral_env, \
+from .utils.iqe_utils import (
+    GalaxyKitClient,
+    is_stage_environment,
+    is_sync_testing,
+    is_dev_env_standalone,
+    is_standalone,
+    is_ephemeral_env,
     get_standalone_token
+)
 
 # from orionutils.generator import build_collection
 
@@ -31,9 +40,9 @@ from .utils.iqe_utils import GalaxyKitClient, is_stage_environment, \
 MARKER_CONFIG = """
 qa: Mark tests to run in the vortex job.
 galaxyapi_smoke: Smoke tests for galaxy-api backend.
-standalone_only: Tests that should not run against the Insights version of Hub.
-cloud_only: Tests that should not run against the standalone version of Hub.
-community_only: Tests relevant to the community deployment profile.
+deployment_standalone: Tests that should not run against the Insights version of Hub.
+deployment_cloud: Tests that should not run against the standalone version of Hub.
+deployment_community: Tests relevant to the community deployment profile.
 cli: Tests that shell out to the real ansible-galaxy cli.
 ui: Tests that navigate the UI via selenium.
 ui_standalone: UI tests that only work in standalone mode.
@@ -69,9 +78,9 @@ certified_sync: sync tests container against container
 auto_approve: run tests that require AUTO_APPROVE to be set to true
 private_repos: run tests verifying private repositories
 rbac_repos: tests verifying rbac roles on custom repositories
-rm_sync: tests verifying syncing custom repositories
 x_repo_search: tests verifying cross-repo search endpoint
 repositories: tests verifying custom repositories
+all: tests that are unmarked and should pass in all deployment modes
 """
 
 logger = logging.getLogger(__name__)
@@ -87,116 +96,45 @@ def pytest_configure(config):
 class AnsibleConfigFixture(dict):
     # The class is instantiated with a "profile" that sets
     # which type of user will be used in the test
-    PROFILES = {
-        "anonymous_user": {
-            "username": None,
-            "password": None,
-            "token": None,
-        },
-        "basic_user": {
-            "username": "iqe_normal_user",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567891",
-        },
-        "partner_engineer": {
-            "username": "jdoe",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567892",
-        },
-        "org_admin": {  # user is org admin in keycloak
-            "username": "org-admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
-        },
-        "admin": {  # this is a superuser
-            "username": "notifications_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567894",
-        },
-        "iqe_admin": {  # this is a superuser
-            "username": "iqe_admin",
-            "password": "redhat",
-            "token": None,
-        },
-        "ldap": {  # this is a superuser in ldap profile
-            "username": "professor",
-            "password": "professor",
-            "token": None,
-        },
-        "ldap_non_admin": {  # this is a regular user in ldap profile
-            "username": "fry",
-            "password": "fry",
-            "token": None,
-        },
-        "ee_admin": {
-            "username": "ee_admin",
-            "password": "redhat",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567895",
-        },
-        "github_user_1": {
-            "username": "gh01",
-            "password": "redhat",
-            "token": None,
-        },
-        "github_user_2": {
-            "username": "gh02",
-            "password": "redhat",
-            "token": None,
-        },
-        "geerlingguy": {
-            "username": "geerlingguy",
-            "password": "redhat",
-            "token": None,
-        },
-        "jctannerTEST": {
-            "username": "jctannerTEST",
-            "password": "redhat",
-            "token": None,
-        },
-    }
-    if is_stage_environment():
-        PROFILES = {
-            # ns owner to autohubtest2, not in partner engineer group, not an SSO org admin
-            "basic_user": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
-                             "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
-                             "vault_key": "password"},
-                "token": None,
-            },
-            # in partner engineer group, not an SSO org admin username: ansible-hub-qe-pe2
-            "partner_engineer": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                             "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                             "vault_key": "password"},
-                "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                          "vault_key": "token"},
-            },
-            # an SSO org admin, not in partner engineer group
-            "org_admin": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-rbac",
-                             "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-rbac",
-                             "vault_key": "password"},
-                "token": None,
-            },
-            # for stage env, this can be same user as partner_engineer profile
-            "admin": {
-                "username": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                             "vault_key": "username"},
-                "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                             "vault_key": "password"},
-                "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-pe",
-                          "vault_key": "token"},
-            }
-        }
+
+    PROFILES = {}
 
     def __init__(self, profile=None, namespace=None, url=None, auth_url=None):
+        backend_map = {
+            "community": "community",
+            "galaxy": "galaxy",
+            "keycloak": "ldap",
+            "ldap": "ldap"
+        }
+        self._auth_backend = os.environ.get('HUB_TEST_AUTHENTICATION_BACKEND')
         self.url = url
         self.auth_url = auth_url
         self.profile = profile
         self.namespace = namespace
+
+        if is_sync_testing():
+            self.PROFILES = SYNC_PROFILES
+        elif is_stage_environment():
+            self.PROFILES = EPHEMERAL_PROFILES
+        elif not is_dev_env_standalone():
+            self.PROFILES = DEPLOYED_PAH_PROFILES
+            self._set_credentials_when_not_docker_pah()
+        elif is_ephemeral_env():
+            self.PROFILES = DEPLOYED_PAH_PROFILES
+            self.PROFILES["admin"]["token"] = None
+            self.PROFILES["org_admin"]["token"] = None
+            self.PROFILES["partner_engineer"]["token"] = None
+            self.PROFILES["basic_user"]["token"] = None
+        else:
+            for profile_name in PROFILES:
+                p = PROFILES[profile_name]
+                credential_set = backend_map.get(self._auth_backend, "galaxy")
+                if username := p["username"].get(credential_set):
+                    self.PROFILES[profile_name] = {
+                        "username": username,
+                        "token": CREDENTIALS[username].get("token"),
+                        "password": CREDENTIALS[username].get("password")
+                    }
 
         # workaround for a weird error with the galaxy cli lib ...
         galaxy_token_fn = os.path.expanduser('~/.ansible/galaxy_token')
@@ -206,14 +144,12 @@ class AnsibleConfigFixture(dict):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
 
-        if self.profile:
-            if isinstance(self.PROFILES[self.profile]["username"], dict):
-                # credentials from vault
-                loader = get_vault_loader()
-                self._set_profile_from_vault(loader, self.profile, "username")
-                self._set_profile_from_vault(loader, self.profile, "password")
-                if self.PROFILES[self.profile]["token"]:
-                    self._set_profile_from_vault(loader, self.profile, "token")
+        if profile:
+            self.set_profile(profile)
+
+    def __hash__(self):
+        # To avoid TypeError: unhashable type: 'AnsibleConfigFixture'
+        return hash((self.url, self.auth_url, self.profile, self.namespace))
 
     def _set_profile_from_vault(self, loader, profile, param):
         param_vault_path = self.PROFILES[profile][param]["vault_path"]
@@ -221,6 +157,29 @@ class AnsibleConfigFixture(dict):
         param_from_vault = loader.get_value_from_vault(path=param_vault_path,
                                                        key=param_vault_key)
         self.PROFILES[profile][param] = param_from_vault
+
+    def _set_credentials_when_not_docker_pah(self):
+        # if we get here, we are running tests against PAH
+        # but not in a containerized development environment (probably from AAP installation),
+        # so we need to get the URL and admin credentials (and create some test data)
+        admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
+        self.PROFILES["admin"]["username"] = "admin"
+        self.PROFILES["admin"]["password"] = admin_pass
+        self.PROFILES["admin"]["token"] = None
+        self.PROFILES["iqe_admin"]["username"] = "admin"
+        self.PROFILES["iqe_admin"]["password"] = admin_pass
+        self.PROFILES["iqe_admin"]["token"] = None
+        self.PROFILES["basic_user"]["token"] = None
+        self.PROFILES["basic_user"]["password"] = "Th1sP4ssd"
+        self.PROFILES["partner_engineer"]["token"] = None
+        self.PROFILES["partner_engineer"]["password"] = "Th1sP4ssd"
+        self.PROFILES["ee_admin"]["token"] = None
+        self.PROFILES["ee_admin"]["password"] = "Th1sP4ssd"
+        self.PROFILES["org_admin"]["token"] = None
+        self.PROFILES["org_admin"]["password"] = "Th1sP4ssd"
+        token = get_standalone_token(self.PROFILES["admin"], server=self.get("url"),
+                                     ssl_verify=False)
+        self.PROFILES["admin"]["token"] = token
 
     def __repr__(self):
         return f'<AnsibleConfigFixture: {self.namespace}>'
@@ -255,8 +214,21 @@ class AnsibleConfigFixture(dict):
                     None
                 )
 
+        elif key == 'auth_backend':
+            return self._auth_backend
+
         elif key == "token":
-            return self.PROFILES[self.profile]["token"]
+            # Generate tokens for LDAP and keycloak backed users
+            if self.profile:
+                p = self.PROFILES[self.profile]
+                try:
+                    if CREDENTIALS[p["username"]].get("gen_token", False):
+                        return get_standalone_token(p, self["url"])
+                    return p.get("token", None)
+                except KeyError:
+                    return p.get("token", None)
+            else:
+                return None
 
         elif key == "username":
             return self.PROFILES[self.profile]["username"]
@@ -321,6 +293,32 @@ class AnsibleConfigFixture(dict):
         elif key == 'server':
             return self["url"].split("/api/")[0]
 
+        elif key == 'remote_hub':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'REMOTE_HUB',
+                'https://console.stage.redhat.com/api/automation-hub/'
+            )
+        elif key == 'remote_auth_url':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'REMOTE_AUTH_URL',
+                'https://sso.stage.redhat.com/auth/realms/'
+                'redhat-external/protocol/openid-connect/token/'
+            )
+        elif key == 'local_hub':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'LOCAL_HUB',
+                'http://localhost:5001/api/automation-hub/'
+            )
+        elif key == 'local_auth_url':
+            # The "url" key is actually the full url to the api root.
+            return os.environ.get(
+                'LOCAL_AUTH_URL',
+                None
+            )
+
         else:
             raise Exception(f'Unknown config key: {self.namespace}.{key}')
 
@@ -334,6 +332,16 @@ class AnsibleConfigFixture(dict):
             return self.PROFILES[self.profile]
         raise Exception("No profile has been set")
 
+    def set_profile(self, profile):
+        self.profile = profile
+        if isinstance(self.PROFILES[self.profile]["username"], dict):
+            # credentials from vault
+            loader = get_vault_loader()
+            self._set_profile_from_vault(loader, self.profile, "username")
+            self._set_profile_from_vault(loader, self.profile, "password")
+            if self.PROFILES[self.profile]["token"]:
+                self._set_profile_from_vault(loader, self.profile, "token")
+
 
 @pytest.fixture(scope="session")
 def ansible_config():
@@ -341,14 +349,7 @@ def ansible_config():
 
 
 def get_ansible_config():
-    if is_sync_testing():
-        return AnsibleConfigSync
-    else:
-        return AnsibleConfigFixture
-
-
-def get_ansible_config_sync():
-    return AnsibleConfigSync
+    return AnsibleConfigFixture
 
 
 @pytest.fixture(scope="function")
@@ -364,9 +365,10 @@ def published(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
+    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
-        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     # certify
@@ -391,9 +393,10 @@ def certifiedv2(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish v1
+    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     # certify v1
@@ -410,9 +413,10 @@ def certifiedv2(ansible_config, artifact):
     )
 
     # publish newer version
+    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("partner_engineer", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     # certify newer version
@@ -436,9 +440,10 @@ def uncertifiedv2(ansible_config, artifact, settings):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
+    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     # certify v1
@@ -455,9 +460,10 @@ def uncertifiedv2(ansible_config, artifact, settings):
     )
 
     # Publish but do -NOT- certify newer version ...
+    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+        ansible_config=config
     )
     dest_url = (
         f"v3/plugin/ansible/content/staging/collections/index/"
@@ -482,9 +488,10 @@ def auto_approved_artifacts(ansible_config, artifact):
         api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
 
     # publish
+    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+        ansible_config=config
     )
 
     dest_url = (
@@ -503,9 +510,10 @@ def auto_approved_artifacts(ansible_config, artifact):
     )
 
     # Publish but do -NOT- certify newer version ...
+    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=ansible_config("basic_user", namespace=artifact.namespace)
+        ansible_config=config
     )
     dest_url = (
         f"v3/plugin/ansible/content/published/collections/index/"
@@ -568,55 +576,6 @@ def galaxy_client(ansible_config):
     return get_galaxy_client(ansible_config)
 
 
-class AnsibleConfigSync(AnsibleConfigFixture):
-    PROFILES = {
-        "remote_admin": {
-            "username": {"vault_path": "secrets/qe/stage/users/ansible_insights",
-                         "vault_key": "username"},
-            "password": {"vault_path": "secrets/qe/stage/users/ansible_insights",
-                         "vault_key": "password"},
-            "token": {"vault_path": "secrets/qe/stage/users/ansible_insights",
-                      "vault_key": "token"},
-        },
-        "local_admin": {  # this is a superuser
-            "username": "admin",
-            "password": "admin",
-            "token": None,
-        }
-    }
-
-    def __init__(self, profile=None, namespace=None):
-        super().__init__(profile, namespace)
-
-    def __getitem__(self, key):
-        if key == 'remote_hub':
-            # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'REMOTE_HUB',
-                'https://console.stage.redhat.com/api/automation-hub/'
-            )
-        if key == 'remote_auth_url':
-            # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'REMOTE_AUTH_URL',
-                'https://sso.stage.redhat.com/auth/realms/'
-                'redhat-external/protocol/openid-connect/token/'
-            )
-        if key == 'local_hub':
-            # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'LOCAL_HUB',
-                'http://localhost:5001/api/automation-hub/'
-            )
-        if key == 'local_auth_url':
-            # The "url" key is actually the full url to the api root.
-            return os.environ.get(
-                'LOCAL_AUTH_URL',
-                None
-            )
-        return super().__getitem__(key)
-
-
 def get_galaxy_client(ansible_config):
     """
     Returns a function that, when called with one of the users listed in the settings.local.yaml
@@ -673,10 +632,10 @@ def sync_instance_crc():
     dev/data/insights-fixture.tar.gz
     """
 
-    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
+    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:38080/api/automation-hub/")
     auth_url = os.getenv(
         "TEST_CRC_AUTH_URL",
-        "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
+        "http://localhost:38080/auth/realms/redhat-external/protocol/openid-connect/token"
     )
 
     config = AnsibleConfigFixture(url=url, auth_url=auth_url, profile="org_admin")
@@ -725,32 +684,9 @@ def sync_instance_crc():
 
 @pytest.fixture(scope="function")
 def settings(ansible_config):
-    api_client = get_client(ansible_config("admin"))
+    config = ansible_config("admin")
+    api_client = get_client(config)
     return api_client("_ui/v1/settings/")
-
-
-def set_credentials_when_not_docker_pah(url):
-    # if we get here, we are running tests against PAH
-    # but not in a containerized development environment (probably from AAP installation),
-    # so we need to get the URL and admin credentials (and create some test data)
-    admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
-    AnsibleConfigFixture.PROFILES["admin"]["username"] = "admin"
-    AnsibleConfigFixture.PROFILES["admin"]["password"] = admin_pass
-    AnsibleConfigFixture.PROFILES["admin"]["token"] = None
-    AnsibleConfigFixture.PROFILES["iqe_admin"]["username"] = "admin"
-    AnsibleConfigFixture.PROFILES["iqe_admin"]["password"] = admin_pass
-    AnsibleConfigFixture.PROFILES["iqe_admin"]["token"] = None
-    AnsibleConfigFixture.PROFILES["basic_user"]["token"] = None
-    AnsibleConfigFixture.PROFILES["basic_user"]["password"] = "Th1sP4ssd"
-    AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
-    AnsibleConfigFixture.PROFILES["partner_engineer"]["password"] = "Th1sP4ssd"
-    AnsibleConfigFixture.PROFILES["ee_admin"]["token"] = None
-    AnsibleConfigFixture.PROFILES["ee_admin"]["password"] = "Th1sP4ssd"
-    AnsibleConfigFixture.PROFILES["org_admin"]["token"] = None
-    AnsibleConfigFixture.PROFILES["org_admin"]["password"] = "Th1sP4ssd"
-    token = get_standalone_token(AnsibleConfigFixture.PROFILES["admin"], server=url,
-                                 ssl_verify=False)
-    AnsibleConfigFixture.PROFILES["admin"]["token"] = token
 
 
 def set_test_data(ansible_config, hub_version):
@@ -832,20 +768,12 @@ def get_hub_version(ansible_config):
     elif is_ephemeral_env():
         # I can't get a token from the ephemeral environment.
         # Changed to Basic token authentication until the issue is resolved
-        hub_auth_url_bck = os.environ["HUB_AUTH_URL"]
         del os.environ["HUB_AUTH_URL"]
-        pe_token_bck = AnsibleConfigFixture.PROFILES["partner_engineer"]["token"]
-        AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = None
         role = "partner_engineer"
         galaxy_client = get_galaxy_client(ansible_config)
-        gc = galaxy_client(role, basic_token=True)
+        gc = galaxy_client(role, basic_token=True, ignore_cache=True)
         galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
-        os.environ["HUB_AUTH_URL"] = hub_auth_url_bck
-        AnsibleConfigFixture.PROFILES["partner_engineer"]["token"] = pe_token_bck
         return galaxy_ng_version
-    elif not is_dev_env_standalone():
-        role = "admin"
-        set_credentials_when_not_docker_pah(ansible_config().get("url"))
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
@@ -870,3 +798,10 @@ def max_hub_version(ansible_config, spec):
 def is_hub_4_5(ansible_config):
     hub_version = get_hub_version(ansible_config)
     return parse_version(hub_version) < parse_version('4.6')
+
+
+# add the "all" label to any unmarked tests
+def pytest_collection_modifyitems(items, config):
+    for item in items:
+        if not any(item.iter_markers()):
+            item.add_marker("all")

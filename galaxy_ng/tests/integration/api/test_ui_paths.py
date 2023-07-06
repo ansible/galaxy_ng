@@ -33,7 +33,7 @@ REGEX_403 = r"HTTP Code: 403"
 
 
 # /api/automation-hub/_ui/v1/auth/login/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_login(ansible_config):
 
@@ -46,7 +46,7 @@ def test_api_ui_v1_login(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/auth/login/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.7dev")
 def test_api_ui_v1_login_cache_header(ansible_config):
@@ -64,7 +64,7 @@ def test_api_ui_v1_login_cache_header(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/auth/logout/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_logout(ansible_config):
 
@@ -83,7 +83,7 @@ def test_api_ui_v1_logout(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/collection-versions/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 
@@ -111,7 +111,7 @@ def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
             validate_json(instance=ds['metadata'], schema=schema_collectionversion_metadata)
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertifiedv2):
     """Test the ?version_range query parameter."""
@@ -159,7 +159,7 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
 
 
 # /api/automation-hub/_ui/v1/distributions/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_distributions(ansible_config):
@@ -191,7 +191,7 @@ def test_api_ui_v1_distributions(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/distributions/{pulp_id}/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_distributions_by_id(ansible_config):
@@ -222,7 +222,7 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/execution-environments/registries/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_execution_environments_registries(ansible_config):
 
@@ -316,7 +316,7 @@ def local_container():
 
 
 # /api/automation-hub/_ui/v1/feature-flags/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_feature_flags(ansible_config):
@@ -337,7 +337,7 @@ def test_api_ui_v1_feature_flags(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/groups/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_groups(ansible_config):
 
@@ -371,7 +371,7 @@ def test_api_ui_v1_groups(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_users(ansible_config):
 
@@ -399,7 +399,7 @@ def test_api_ui_v1_groups_users(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/{id}/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_users_add_delete(ansible_config):
 
@@ -456,7 +456,7 @@ def test_api_ui_v1_groups_users_add_delete(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/groups/{id}/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_groups_by_id(ansible_config):
 
@@ -480,7 +480,7 @@ def test_api_ui_v1_groups_by_id(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/imports/collections/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_imports_collections(ansible_config):
 
@@ -513,9 +513,9 @@ def test_api_ui_v1_imports_collections(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/me/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-def test_api_ui_v1_me(ansible_config):
+def test_api_ui_v1_me(ansible_config, settings):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -529,7 +529,11 @@ def test_api_ui_v1_me(ansible_config):
 
         assert not ds['is_anonymous']
         assert ds['username'] == cfg.get('username')
-        assert ds['auth_provider'] == ['django']
+
+        if settings.get("KEYCLOAK_URL") is not None:
+            assert ds['auth_provider'] == ['keycloak']
+        else:
+            assert ds['auth_provider'] == ['django']
 
 
 # /api/automation-hub/_ui/v1/my-distributions/
@@ -537,7 +541,7 @@ def test_api_ui_v1_me(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/my-namespaces/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_my_namespaces(ansible_config):
@@ -595,7 +599,7 @@ def test_api_ui_v1_my_namespaces(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/my-namespaces/{name}/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_my_namespaces_name(ansible_config):
@@ -621,7 +625,7 @@ def test_api_ui_v1_my_namespaces_name(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/remotes/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_remotes(ansible_config):
 
@@ -644,7 +648,7 @@ def test_api_ui_v1_remotes(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/remotes/{pulp_id}/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_remotes_by_id(ansible_config):
 
@@ -669,7 +673,7 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
@@ -685,7 +689,7 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_collection_detail_view(ansible_config, published):
 
@@ -709,7 +713,7 @@ def test_api_ui_v1_collection_detail_view(ansible_config, published):
 
 
 # /api/automation-hub/_ui/v1/settings/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_settings(ansible_config):
@@ -735,7 +739,7 @@ def test_api_ui_v1_settings(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/tags/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_tags(ansible_config):
 
@@ -753,7 +757,7 @@ def test_api_ui_v1_tags(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/users/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_users(ansible_config):
 
@@ -793,7 +797,7 @@ def test_api_ui_v1_users(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/users/{id}/
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_users_by_id(ansible_config):
 
@@ -820,8 +824,9 @@ def test_api_ui_v1_users_by_id(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/users/
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 @pytest.mark.api_ui
+@pytest.mark.this
 def test_users_list_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
 
@@ -847,15 +852,21 @@ def test_users_list_insights_access(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/users/{id}/
-@pytest.mark.cloud_only
+@pytest.mark.deployment_cloud
 @pytest.mark.api_ui
 def test_users_detail_insights_access(ansible_config):
     """Check insights mode access to users endpoint"""
 
     config = ansible_config("basic_user")
     api_prefix = config.get("api_prefix").rstrip("/")
-    url = f"{api_prefix}/_ui/v1/users/1/"
     api_client = get_client(config, request_token=True, require_auth=True)
+
+    admin_config = ansible_config("partner_engineer")
+    admin_client = get_client(admin_config, request_token=True, require_auth=True)
+
+    user_id = admin_client(
+        f"{api_prefix}/_ui/v1/users/?username={config['username']}")["data"][0]["id"]
+    url = f"{api_prefix}/_ui/v1/users/{user_id}/"
 
     with pytest.raises(GalaxyError, match=REGEX_403):
         api_client(url, method="GET")
@@ -866,11 +877,12 @@ def test_users_detail_insights_access(ansible_config):
     with pytest.raises(GalaxyError, match=REGEX_403):
         api_client(url, method="DELETE")
 
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config, request_token=True, require_auth=True)
+    api_client = admin_client
 
     user = api_client(url, method="GET")
-    assert user["id"] == 1
+    assert user["id"] == user_id
+
+    print(user)
 
     put_resp = api_client(url, method="PUT", args=user)
     assert put_resp == user

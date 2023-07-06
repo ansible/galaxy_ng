@@ -19,7 +19,7 @@ from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
         False,
     ],
 )
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7.1")
 @pytest.mark.min_hub_version("4.6.6")
 def test_can_update_container_push(ansible_config, require_auth):

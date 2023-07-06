@@ -61,7 +61,7 @@ def legacy_namespace(ansible_config):
 
     cleanup_social_user('gh01', ansible_config)
 
-    cfg = ansible_config('github_user_1')
+    cfg = ansible_config("github_user_1")
     with SocialGithubClient(config=cfg) as client:
         resp = client.get('v1/namespaces/?name=gh01')
         result = resp.json()
@@ -74,7 +74,7 @@ def legacy_namespace(ansible_config):
     return 'gh01'
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespace, flags):
     """Test the whole workflow for AIindex.
 
@@ -90,7 +90,7 @@ def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespa
     if not flags.get("ai_deny_index"):
         pytest.skip("ai_deny_index flag is not enabled")
 
-    cfg = ansible_config('github_user_1')
+    cfg = ansible_config("github_user_1")
     with SocialGithubClient(config=cfg) as client:
         assert (
             client.post(
@@ -125,7 +125,7 @@ def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespa
         expected = {"scope": "legacy_namespace", "reference": legacy_namespace}
         assert expected not in response.json()["results"]
 
-    cfg = ansible_config('github_user_2')
+    cfg = ansible_config("github_user_2")
     with SocialGithubClient(config=cfg) as client:
         # 7. Repeat step 2 with github_user_2
         assert (
@@ -136,7 +136,7 @@ def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespa
         )
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespace, flags):
     """Test the whole workflow for AIindex.
 

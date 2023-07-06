@@ -79,7 +79,7 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
         assert ci.version == artifact.version
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
@@ -98,7 +98,7 @@ def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 @pytest.mark.min_hub_version("4.7dev")
 def test_publish_to_custom_repo(ansible_config, artifact, settings):
     config = ansible_config(profile="admin")
@@ -114,7 +114,7 @@ def test_publish_to_custom_repo(ansible_config, artifact, settings):
     _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
 def test_publish_and_auto_approve(ansible_config, artifact, settings):
@@ -141,7 +141,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
     assert cv["version"] == "1.0.0"
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
 def test_auto_approve_muliple(ansible_config, artifact, settings):

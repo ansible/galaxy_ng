@@ -1,4 +1,5 @@
 import logging
+import json
 
 from django.conf import settings
 from django.contrib import auth as django_auth
@@ -87,8 +88,11 @@ class LogoutView(api_base.APIView):
             msg = "User does not have Social Auth object no openid-connect logout attemtped."
             log.warning(msg)
             return
-        access_token = social.extra_data['access_token']
-        refresh_token = social.extra_data['refresh_token']
+
+        extra_data = json.loads(social.extra_data)
+
+        access_token = extra_data['access_token']
+        refresh_token = extra_data['refresh_token']
         payload = {'client_id': settings.SOCIAL_AUTH_KEYCLOAK_KEY, 'refresh_token': refresh_token,
                    'client_secret': settings.SOCIAL_AUTH_KEYCLOAK_SECRET}
         headers = {"Authorization": "Bearer {access_token}".format(access_token=access_token)}

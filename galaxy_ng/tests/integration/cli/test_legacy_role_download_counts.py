@@ -44,7 +44,7 @@ def import_role(client, cfg, token, github_user, github_repo):
     assert import_pid.returncode == 0
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_legacy_role_download_counter_via_cli(ansible_config):
     """ Tests role import workflow with a social auth user and anonymous install """
 
@@ -103,7 +103,7 @@ def test_legacy_role_download_counter_via_cli(ansible_config):
     assert role['download_count'] == 5
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_legacy_role_download_counter_concurrency(ansible_config):
     """ Tests role import workflow with a social auth user and anonymous install """
 

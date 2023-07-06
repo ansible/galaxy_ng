@@ -12,7 +12,7 @@ from ..utils.iqe_utils import pull_and_tag_test_image
 # is merged
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_delete_ee_and_content(ansible_config):
     config = ansible_config("admin")
@@ -92,7 +92,7 @@ def test_delete_ee_and_content(ansible_config):
         assert failed
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_shared_content_is_not_deleted(ansible_config):
     config = ansible_config("admin")
