@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,7 +48,7 @@ msgstr "グループは、グループオブジェクトの一覧でなければ
 msgid "Group name=%s, id=%s does not exist"
 msgstr "グループ名=%s、id=%s は存在しません"
 
-#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "無効なグループ名または ID"
 
@@ -60,7 +60,9 @@ msgstr "選択したレジストリーが存在しません。"
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "コンテナー名には、英数字、「.」、「_」、「-」、および 1 つまでの「/」しか使用することができません。"
+msgstr ""
+"コンテナー名には、英数字、「.」、「_」、「-」、および 1 つまでの「/」しか使用"
+"することができません。"
 
 #: app/api/ui/serializers/execution_environment.py:402
 msgid "Name cannot be changed."
@@ -81,26 +83,43 @@ msgstr "同期リストはすでに存在します: %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
+msgstr ""
+"同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つか"
+"りませんでした"
 
 #: app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "同期リスト {synclist} の更新中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
+msgstr ""
+"同期リスト {synclist} の更新中にコレクション \"{namespace}.{name}\" が見つか"
+"りませんでした"
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "要求するユーザーが所属しないユーザーグループを変更するには、「galaxy.change_group」パーミッションが必要です。"
+msgstr ""
+"要求するユーザーが所属しないユーザーグループを変更するには、「galaxy."
+"change_group」パーミッションが必要です。"
 
-#: app/api/ui/serializers/user.py:85
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
-msgstr "スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があります。"
+msgstr ""
+"スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があ"
+"ります。"
 
-#: app/api/ui/serializers/user.py:128
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
+msgid "Must be a super user to change another user's password."
+msgstr ""
+
+#: app/api/ui/serializers/user.py:125
+msgid "You do not have permissions to modify super users."
+msgstr ""
+
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "グループ名=%(name)s、id=%(id)s は存在しません"
@@ -150,15 +169,20 @@ msgstr "%s リモートには、レジストリーが関連付けられていま
 msgid "Distribution base path is required"
 msgstr "ディストリビューションベースパスが必要です"
 
-#: app/api/ui/viewsets/collection.py:255
+#: app/api/ui/viewsets/collection.py:231
+#, python-format
+msgid "%s must be a valid semantic version range."
+msgstr ""
+
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "コレクションバージョンの取得"
 
-#: app/api/ui/viewsets/collection.py:266
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "コレクションバージョンが見つかりません: {}"
 
-#: app/api/ui/viewsets/collection.py:322
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "コレクションインポートの取得"
 
@@ -171,14 +195,18 @@ msgstr "%s という名前のグループはすでに存在します。"
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr "ファイル名 {filename} が無効です。想定される形式: namespace-name-version.tar.gz"
+msgstr ""
+"ファイル名 {filename} が無効です。想定される形式: namespace-name-version.tar."
+"gz"
 
 #: app/api/utils.py:56
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "ファイル名 {filename} のバージョン文字列 {version} が無効です。セマンティックのバージョン形式が必要です。"
+msgstr ""
+"ファイル名 {filename} のバージョン文字列 {version} が無効です。セマンティック"
+"のバージョン形式が必要です。"
 
 #: app/api/utils.py:60
 #, python-format
@@ -236,13 +264,17 @@ msgstr "リモートユーザー。"
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "要件ファイルを指定せずに、コミュニティードメインからのコンテンツを同期することはできません。"
+msgstr ""
+"要件ファイルを指定せずに、コミュニティードメインからのコンテンツを同期するこ"
+"とはできません。"
 
 #: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "要件ファイルを指定せずに galaxy.ansible.com からコンテンツを同期することはできません。"
+msgstr ""
+"要件ファイルを指定せずに galaxy.ansible.com からコンテンツを同期することはで"
+"きません。"
 
 #: app/api/v3/viewsets/collection.py:109
 #, python-format
@@ -294,7 +326,9 @@ msgstr "%s という名前の名前空間はすでに存在します。"
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr "名前空間 {name} には関連付けられているコレクションがあるため、削除できません。"
+msgstr ""
+"名前空間 {name} には関連付けられているコレクションがあるため、削除できませ"
+"ん。"
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -313,7 +347,9 @@ msgstr "コンテナー {remote_name} の作成に失敗しました。{error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "この名前が割り当てられたリモートコンテナーはすでに存在しますが、レジストリーには関連付けられていません。"
+msgstr ""
+"この名前が割り当てられたリモートコンテナーはすでに存在しますが、レジストリー"
+"には関連付けられていません。"
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
@@ -347,7 +383,9 @@ msgstr "%s 更新に基づく %s 同期リストリポジトリーのキュレ�
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr "アップストリームリポジトリー \"%s\" からリポジトリー \"%s\" をキュレートするために policy=%s で同期リスト \"%s\" を適用中"
+msgstr ""
+"アップストリームリポジトリー \"%s\" からリポジトリー \"%s\" をキュレートする"
+"ために policy=%s で同期リスト \"%s\" を適用中"
 
 #: app/tasks/synclist.py:163
 msgid "Unexpected synclist policy {}"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-25 02:43+0000\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,7 +48,7 @@ msgstr "그룹은 그룹 오브젝트 목록이어야 합니다."
 msgid "Group name=%s, id=%s does not exist"
 msgstr "그룹 이름=%s, id=%s이/가 존재하지 않습니다."
 
-#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:132
+#: app/access_control/fields.py:75 app/api/ui/serializers/user.py:156
 msgid "Invalid group name or ID"
 msgstr "잘못된 그룹 이름 또는 ID입니다."
 
@@ -60,7 +60,9 @@ msgstr "선택한 레지스트리가 존재하지 않습니다."
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "컨테이너 이름에는 영숫자 \".\", \"_\", \"-\" 및 최대 하나의 \"/\"만 포함할 수 있습니다."
+msgstr ""
+"컨테이너 이름에는 영숫자 \".\", \"_\", \"-\" 및 최대 하나의 \"/\"만 포함할 "
+"수 있습니다."
 
 #: app/api/ui/serializers/execution_environment.py:402
 msgid "Name cannot be changed."
@@ -69,7 +71,8 @@ msgstr "이름은 변경할 수 없습니다."
 #: app/api/ui/serializers/synclist.py:41
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr "동기화 목록을 생성하는 동안 리포지토리 \"{pulp_id}\"을/를 찾을 수 없습니다"
+msgstr ""
+"동기화 목록을 생성하는 동안 리포지토리 \"{pulp_id}\"을/를 찾을 수 없습니다"
 
 #: app/api/ui/serializers/synclist.py:96
 #, python-format
@@ -81,26 +84,41 @@ msgstr "동기화 목록이 이미 존재합니다. %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "{synclist}동기화 목록을 생성하는 동안 \"{namespace}.{name}\" 컬렉션을 찾을 수 없습니다."
+msgstr ""
+"{synclist}동기화 목록을 생성하는 동안 \"{namespace}.{name}\" 컬렉션을 찾을 "
+"수 없습니다."
 
 #: app/api/ui/serializers/synclist.py:143
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "{synclist} 동기화 목록을 업데이트하는 동안 컬렉션 \"{namespace}.{name}\"을 찾을 수 없습니다."
+msgstr ""
+"{synclist} 동기화 목록을 업데이트하는 동안 컬렉션 \"{namespace}.{name}\"을 찾"
+"을 수 없습니다."
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 않습니다."
+msgstr ""
+"변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 "
+"않습니다."
 
-#: app/api/ui/serializers/user.py:85
+#: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
 msgstr "슈퍼유저 권한을 부여하려면 슈퍼유저여야 합니다."
 
-#: app/api/ui/serializers/user.py:128
+#: app/api/ui/serializers/user.py:109
+#| msgid "Must be a super user to grant super user permissions."
+msgid "Must be a super user to change another user's password."
+msgstr ""
+
+#: app/api/ui/serializers/user.py:125
+msgid "You do not have permissions to modify super users."
+msgstr ""
+
+#: app/api/ui/serializers/user.py:152
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "그룹 이름=%(name)s, id=%(id)s이/가 존재하지 않습니다."
@@ -150,15 +168,20 @@ msgstr "%s 원격 장치에 연결된 레지스트리가 없습니다."
 msgid "Distribution base path is required"
 msgstr "배포 기본 경로가 필요합니다."
 
-#: app/api/ui/viewsets/collection.py:255
+#: app/api/ui/viewsets/collection.py:231
+#, python-format
+msgid "%s must be a valid semantic version range."
+msgstr ""
+
+#: app/api/ui/viewsets/collection.py:267
 msgid "Retrieve collection version"
 msgstr "컬렉션 버전 검색"
 
-#: app/api/ui/viewsets/collection.py:266
+#: app/api/ui/viewsets/collection.py:278
 msgid "Collection version not found for: {}"
 msgstr "컬렉션 버전을 찾을 수 없음: {}"
 
-#: app/api/ui/viewsets/collection.py:322
+#: app/api/ui/viewsets/collection.py:334
 msgid "Retrieve collection import"
 msgstr "컬렉션 가져오기 검색"
 
@@ -178,7 +201,9 @@ msgstr "잘못된 파일 이름 {filename} 예상 형식: namespace-name-version
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "파일 이름 {filename}의 잘못된 버전 문자열 {version}. 시맨틱 버전 형식이 예상됩니다."
+msgstr ""
+"파일 이름 {filename}의 잘못된 버전 문자열 {version}. 시맨틱 버전 형식이 예상"
+"됩니다."
 
 #: app/api/utils.py:60
 #, python-format
@@ -236,13 +261,17 @@ msgstr "원격 사용자."
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "요구 사항 파일을 지정하지 않고 커뮤니티 도메인에서 콘텐츠를 동기화하는 것은 허용되지 않습니다."
+msgstr ""
+"요구 사항 파일을 지정하지 않고 커뮤니티 도메인에서 콘텐츠를 동기화하는 것은 "
+"허용되지 않습니다."
 
 #: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "요구 사항 파일을 지정하지 않고 dockerfile.ansible.com의 콘텐츠를 동기화할 수 없습니다."
+msgstr ""
+"요구 사항 파일을 지정하지 않고 dockerfile.ansible.com의 콘텐츠를 동기화할 수 "
+"없습니다."
 
 #: app/api/v3/viewsets/collection.py:109
 #, python-format
@@ -313,7 +342,9 @@ msgstr "컨테이너 {remote_name}을/를 생성하지 못했습니다. {error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "이 이름의 원격 컨테이너는 이미 존재하지만 어떤 레지스트리에도 연결되어 있지 않습니다."
+msgstr ""
+"이 이름의 원격 컨테이너는 이미 존재하지만 어떤 레지스트리에도 연결되어 있지 "
+"않습니다."
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
@@ -340,14 +371,17 @@ msgstr "큐레이트된 업스트림 리포지토리 작업 동기화 목록"
 #: app/tasks/synclist.py:92
 #, python-format
 msgid "Finishing curating %s synclist repos based on %s update"
-msgstr "%s 업데이트를 기반으로 큐레이트된 %s 동기화 목록 리포지토리 사용을 완료"
+msgstr ""
+"%s 업데이트를 기반으로 큐레이트된 %s 동기화 목록 리포지토리 사용을 완료"
 
 #: app/tasks/synclist.py:121
 #, python-format
 msgid ""
 "Applying synclist \"%s\" with policy=%s to curate repo \"%s\" from upstream "
 "repo \"%s\""
-msgstr "policy=%s와 동기화 목록 \"%s\"을 적용하여 업스트림 리포지토리 \"%s\"에서 리포지토리 \"%s\"을 처리"
+msgstr ""
+"policy=%s와 동기화 목록 \"%s\"을 적용하여 업스트림 리포지토리 \"%s\"에서 리포"
+"지토리 \"%s\"을 처리"
 
 #: app/tasks/synclist.py:163
 msgid "Unexpected synclist policy {}"
