@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-28 11:07-0400\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,7 +57,9 @@ msgstr "無効なグループ名または ID"
 msgid ""
 "Role {role} does not exist or does not have any permissions related to this "
 "object."
-msgstr "ロール {role} が存在しないか、このオブジェクトに関連するパーミッションがありません。"
+msgstr ""
+"ロール {role} が存在しないか、このオブジェクトに関連するパーミッションがあり"
+"ません。"
 
 #: app/api/ui/serializers/execution_environment.py:379
 msgid "Selected registry does not exist."
@@ -67,7 +69,9 @@ msgstr "選択したレジストリーが存在しません。"
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "コンテナー名には、英数字、「.」、「_」、「-」、および 1 つまでの「/」しか使用することができません。"
+msgstr ""
+"コンテナー名には、英数字、「.」、「_」、「-」、および 1 つまでの「/」しか使用"
+"することができません。"
 
 #: app/api/ui/serializers/execution_environment.py:406
 msgid "Name cannot be changed."
@@ -88,28 +92,38 @@ msgstr "同期リストはすでに存在します: %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
+msgstr ""
+"同期リスト {synclist} の作成中にコレクション \"{namespace}.{name}\" が見つか"
+"りませんでした"
 
 #: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "同期リスト {synclist} の更新中にコレクション \"{namespace}.{name}\" が見つかりませんでした"
+msgstr ""
+"同期リスト {synclist} の更新中にコレクション \"{namespace}.{name}\" が見つか"
+"りませんでした"
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "要求するユーザーが所属しないユーザーグループを変更するには、「galaxy.change_group」パーミッションが必要です。"
+msgstr ""
+"要求するユーザーが所属しないユーザーグループを変更するには、「galaxy."
+"change_group」パーミッションが必要です。"
 
 #: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
-msgstr "スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があります。"
+msgstr ""
+"スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があ"
+"ります。"
 
 #: app/api/ui/serializers/user.py:109
 msgid "Must be a super user to change another user's password."
-msgstr "別のユーザーのパスワードを変更するには、スーパーユーザーである必要があります。"
+msgstr ""
+"別のユーザーのパスワードを変更するには、スーパーユーザーである必要がありま"
+"す。"
 
 #: app/api/ui/serializers/user.py:125
 msgid "You do not have permissions to modify super users."
@@ -124,31 +138,42 @@ msgstr "グループ名=%(name)s、id=%(id)s は存在しません"
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "警告:GALAXY_COLLECTION_SIGNING_SERVICE は '{}' に設定されていますが、それぞれの SigningService がデータベースに存在しません。"
+msgstr ""
+"警告:GALAXY_COLLECTION_SIGNING_SERVICE は '{}' に設定されていますが、それぞれ"
+"の SigningService がデータベースに存在しません。"
 
 #: app/api/ui/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
-msgstr "警告:GALAXY_AUTO_SIGN_COLLECTIONS は True に設定されていますが、システムには署名を作成する SigningService が設定されていません。"
+msgstr ""
+"警告:GALAXY_AUTO_SIGN_COLLECTIONS は True に設定されていますが、システムには"
+"署名を作成する SigningService が設定されていません。"
 
 #: app/api/ui/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
-msgstr "情報: システムは、(リモート同期からの) 署名を表示するように設定されていますが、署名を作成したり、署名のアップロードを受け入れるように設定されていません。"
+msgstr ""
+"情報: システムは、(リモート同期からの) 署名を表示するように設定されています"
+"が、署名を作成したり、署名のアップロードを受け入れるように設定されていませ"
+"ん。"
 
 #: app/api/ui/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "警告:GALAXY_CONTAINER_SIGNING_SERVICE は '{}' に設定されていますが、それぞれの SigningService はデータベースに存在しません。"
+msgstr ""
+"警告:GALAXY_CONTAINER_SIGNING_SERVICE は '{}' に設定されていますが、それぞれ"
+"の SigningService はデータベースに存在しません。"
 
 #: app/api/ui/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
-msgstr "警告: container_signing は '{}' SigningService を介して有効になっていますが、実行環境はシステムで無効になっています。"
+msgstr ""
+"警告: container_signing は '{}' SigningService を介して有効になっていますが、"
+"実行環境はシステムで無効になっています。"
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
@@ -195,15 +220,20 @@ msgstr "%s リモートには、レジストリーが関連付けられていま
 msgid "Distribution base path is required"
 msgstr "ディストリビューションベースパスが必要です"
 
-#: app/api/ui/viewsets/collection.py:221
+#: app/api/ui/viewsets/collection.py:197
+#, python-format
+msgid "%s must be a valid semantic version range."
+msgstr ""
+
+#: app/api/ui/viewsets/collection.py:233
 msgid "Retrieve collection version"
 msgstr "コレクションバージョンの取得"
 
-#: app/api/ui/viewsets/collection.py:232
+#: app/api/ui/viewsets/collection.py:244
 msgid "Collection version not found for: {}"
 msgstr "コレクションバージョンが見つかりません: {}"
 
-#: app/api/ui/viewsets/collection.py:288
+#: app/api/ui/viewsets/collection.py:300
 msgid "Retrieve collection import"
 msgstr "コレクションインポートの取得"
 
@@ -216,14 +246,18 @@ msgstr "%s という名前のグループはすでに存在します。"
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
-msgstr "ファイル名 {filename} が無効です。想定される形式: namespace-name-version.tar.gz"
+msgstr ""
+"ファイル名 {filename} が無効です。想定される形式: namespace-name-version.tar."
+"gz"
 
 #: app/api/utils.py:56
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "ファイル名 {filename} のバージョン文字列 {version} が無効です。セマンティックのバージョン形式が必要です。"
+msgstr ""
+"ファイル名 {filename} のバージョン文字列 {version} が無効です。セマンティック"
+"のバージョン形式が必要です。"
 
 #: app/api/utils.py:60
 #, python-format
@@ -281,13 +315,17 @@ msgstr "リモートユーザー。"
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "要件ファイルを指定せずに、コミュニティードメインからのコンテンツを同期することはできません。"
+msgstr ""
+"要件ファイルを指定せずに、コミュニティードメインからのコンテンツを同期するこ"
+"とはできません。"
 
 #: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "要件ファイルを指定せずに galaxy.ansible.com からコンテンツを同期することはできません。"
+msgstr ""
+"要件ファイルを指定せずに galaxy.ansible.com からコンテンツを同期することはで"
+"きません。"
 
 #: app/api/v3/viewsets/collection.py:109
 #, python-format
@@ -334,7 +372,9 @@ msgstr "署名 %s サービスが見つかりません"
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
 "at least a signature for approval."
-msgstr "承認するには少なくとも署名が必要なため、コレクション {namespace}.{name} を承認できませんでした。"
+msgstr ""
+"承認するには少なくとも署名が必要なため、コレクション {namespace}.{name} を承"
+"認できませんでした。"
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
@@ -346,7 +386,9 @@ msgstr "%s という名前の名前空間はすでに存在します。"
 msgid ""
 "Namespace {name} cannot be deleted because there are still collections "
 "associated with it."
-msgstr "名前空間 {name} には関連付けられているコレクションがあるため、削除できません。"
+msgstr ""
+"名前空間 {name} には関連付けられているコレクションがあるため、削除できませ"
+"ん。"
 
 #: app/auth/keycloak.py:51
 msgid "Authentication failed."
@@ -365,7 +407,9 @@ msgstr "コンテナー {remote_name} の作成に失敗しました。{error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "この名前が割り当てられたリモートコンテナーはすでに存在しますが、レジストリーには関連付けられていません。"
+msgstr ""
+"この名前が割り当てられたリモートコンテナーはすでに存在しますが、レジストリー"
+"には関連付けられていません。"
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
@@ -375,4 +419,3 @@ msgstr "この名前が指定されたローカルコンテナーはすでに存
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "ステージングリポジトリーが見つかりませんでした: \"%s\""
-

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-28 11:07-0400\n"
+"POT-Creation-Date: 2023-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -67,7 +67,9 @@ msgstr "선택한 레지스트리가 존재하지 않습니다."
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
-msgstr "컨테이너 이름에는 영숫자 \".\", \"_\", \"-\" 및 최대 하나의 \"/\"만 포함할 수 있습니다."
+msgstr ""
+"컨테이너 이름에는 영숫자 \".\", \"_\", \"-\" 및 최대 하나의 \"/\"만 포함할 "
+"수 있습니다."
 
 #: app/api/ui/serializers/execution_environment.py:406
 msgid "Name cannot be changed."
@@ -76,7 +78,8 @@ msgstr "이름은 변경할 수 없습니다."
 #: app/api/ui/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
-msgstr "동기화 목록을 생성하는 동안 리포지토리 \"{pulp_id}\"을/를 찾을 수 없습니다"
+msgstr ""
+"동기화 목록을 생성하는 동안 리포지토리 \"{pulp_id}\"을/를 찾을 수 없습니다"
 
 #: app/api/ui/serializers/synclist.py:65
 #, python-format
@@ -88,20 +91,26 @@ msgstr "동기화 목록이 이미 존재합니다. %s"
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
-msgstr "{synclist}동기화 목록을 생성하는 동안 \"{namespace}.{name}\" 컬렉션을 찾을 수 없습니다."
+msgstr ""
+"{synclist}동기화 목록을 생성하는 동안 \"{namespace}.{name}\" 컬렉션을 찾을 "
+"수 없습니다."
 
 #: app/api/ui/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
-msgstr "{synclist} 동기화 목록을 업데이트하는 동안 컬렉션 \"{namespace}.{name}\"을 찾을 수 없습니다."
+msgstr ""
+"{synclist} 동기화 목록을 업데이트하는 동안 컬렉션 \"{namespace}.{name}\"을 찾"
+"을 수 없습니다."
 
 #: app/api/ui/serializers/user.py:74
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
-msgstr "변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 않습니다."
+msgstr ""
+"변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 "
+"않습니다."
 
 #: app/api/ui/serializers/user.py:89 app/api/ui/serializers/user.py:95
 msgid "Must be a super user to grant super user permissions."
@@ -124,31 +133,41 @@ msgstr "그룹 이름=%(name)s, id=%(id)s이/가 존재하지 않습니다."
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE는 '{}'로 설정되어 있지만 해당 서명 서비스는 데이터베이스에 존재하지 않습니다."
+msgstr ""
+"WARNING:GALAXY_COLLECTION_SIGNING_SERVICE는 '{}'로 설정되어 있지만 해당 서명 "
+"서비스는 데이터베이스에 존재하지 않습니다."
 
 #: app/api/ui/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
-msgstr "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS가 True로 설정되어 있지만 시스템은 서명을 생성하기 위해 SigningService로 구성되지 않습니다."
+msgstr ""
+"WARNING:GALAXY_AUTO_SIGN_COLLECTIONS가 True로 설정되어 있지만 시스템은 서명"
+"을 생성하기 위해 SigningService로 구성되지 않습니다."
 
 #: app/api/ui/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
-msgstr "INFO:System은 서명을 표시하도록 구성되었지만(원격 동기화에서 수신됨) 서명 업로드를을 생성하거나 수락하도록 구성되지 않았습니다."
+msgstr ""
+"INFO:System은 서명을 표시하도록 구성되었지만(원격 동기화에서 수신됨) 서명 업"
+"로드를을 생성하거나 수락하도록 구성되지 않았습니다."
 
 #: app/api/ui/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
-msgstr "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE는 '{}'로 설정되어 있지만 해당 서명 서비스는 데이터베이스에 존재하지 않습니다."
+msgstr ""
+"WARNING:GALAXY_CONTAINER_SIGNING_SERVICE는 '{}'로 설정되어 있지만 해당 서명 "
+"서비스는 데이터베이스에 존재하지 않습니다."
 
 #: app/api/ui/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
-msgstr "WARNING: container_signing은 '{}' SigningService를 통해 활성화되지만 실행 환경은 시스템에서 비활성화되어 있습니다."
+msgstr ""
+"WARNING: container_signing은 '{}' SigningService를 통해 활성화되지만 실행 환"
+"경은 시스템에서 비활성화되어 있습니다."
 
 #: app/api/ui/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
@@ -195,15 +214,20 @@ msgstr "%s 원격 장치에 연결된 레지스트리가 없습니다."
 msgid "Distribution base path is required"
 msgstr "배포 기본 경로가 필요합니다."
 
-#: app/api/ui/viewsets/collection.py:221
+#: app/api/ui/viewsets/collection.py:197
+#, python-format
+msgid "%s must be a valid semantic version range."
+msgstr ""
+
+#: app/api/ui/viewsets/collection.py:233
 msgid "Retrieve collection version"
 msgstr "컬렉션 버전 검색"
 
-#: app/api/ui/viewsets/collection.py:232
+#: app/api/ui/viewsets/collection.py:244
 msgid "Collection version not found for: {}"
 msgstr "컬렉션 버전을 찾을 수 없음: {}"
 
-#: app/api/ui/viewsets/collection.py:288
+#: app/api/ui/viewsets/collection.py:300
 msgid "Retrieve collection import"
 msgstr "컬렉션 가져오기 검색"
 
@@ -223,7 +247,9 @@ msgstr "잘못된 파일 이름 {filename} 예상 형식: namespace-name-version
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
-msgstr "파일 이름 {filename}의 잘못된 버전 문자열 {version}. 시맨틱 버전 형식이 예상됩니다."
+msgstr ""
+"파일 이름 {filename}의 잘못된 버전 문자열 {version}. 시맨틱 버전 형식이 예상"
+"됩니다."
 
 #: app/api/utils.py:60
 #, python-format
@@ -281,13 +307,17 @@ msgstr "원격 사용자."
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
-msgstr "요구 사항 파일을 지정하지 않고 커뮤니티 도메인에서 콘텐츠를 동기화하는 것은 허용되지 않습니다."
+msgstr ""
+"요구 사항 파일을 지정하지 않고 커뮤니티 도메인에서 콘텐츠를 동기화하는 것은 "
+"허용되지 않습니다."
 
 #: app/api/v3/views/sync.py:45
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
-msgstr "요구 사항 파일을 지정하지 않고 dockerfile.ansible.com의 콘텐츠를 동기화할 수 없습니다."
+msgstr ""
+"요구 사항 파일을 지정하지 않고 dockerfile.ansible.com의 콘텐츠를 동기화할 수 "
+"없습니다."
 
 #: app/api/v3/viewsets/collection.py:109
 #, python-format
@@ -334,7 +364,9 @@ msgstr "서명 %s 서비스를 찾을 수 없음"
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
 "at least a signature for approval."
-msgstr "컬렉션 {namespace}.{name} 시스템에는 승인을 위해 최소한 서명이 필요하기 때문에 승인할 수 없습니다."
+msgstr ""
+"컬렉션 {namespace}.{name} 시스템에는 승인을 위해 최소한 서명이 필요하기 때문"
+"에 승인할 수 없습니다."
 
 #: app/api/v3/viewsets/namespace.py:67
 #, python-format
@@ -365,7 +397,9 @@ msgstr "컨테이너 {remote_name}을/를 생성하지 못했습니다. {error}"
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
-msgstr "이 이름의 원격 컨테이너는 이미 존재하지만 어떤 레지스트리에도 연결되어 있지 않습니다."
+msgstr ""
+"이 이름의 원격 컨테이너는 이미 존재하지만 어떤 레지스트리에도 연결되어 있지 "
+"않습니다."
 
 #: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
@@ -375,4 +409,3 @@ msgstr "이 이름을 가진 로컬 컨테이너가 이미 존재합니다."
 #, python-format
 msgid "Could not find staging repository: \"%s\""
 msgstr "스테이징 리포지토리를 찾을 수 없음: \"%s\""
-
