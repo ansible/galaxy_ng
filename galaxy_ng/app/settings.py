@@ -17,7 +17,6 @@ MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',
     # END: Pulp standard middleware
     'django_prometheus.middleware.PrometheusAfterMiddleware',
-    'django_currentuser.middleware.ThreadLocalUserMiddleware',
 ]
 
 INSTALLED_APPS = [

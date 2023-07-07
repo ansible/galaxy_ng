@@ -29,7 +29,7 @@ export SOCIAL_AUTH_GITHUB_BASE_URL='http://localhost:8082'
 export SOCIAL_AUTH_GITHUB_API_URL='http://localhost:8082'
 
 export HUB_API_ROOT='http://localhost:5001/api/'
-pytest --capture=no -m "community_only" "$@" -v galaxy_ng/tests/integration
+pytest --capture=no -m "deployment_community or all" "$@" -v galaxy_ng/tests/integration
 RC=$?
 
 if [[ $RC != 0 && -n "$DUMP_LOGS" ]]; then

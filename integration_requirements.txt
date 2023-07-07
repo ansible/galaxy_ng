@@ -1,6 +1,7 @@
 epdb
 requests
-ansible-core==2.14.0
+# pulp requires compatibility with python 3.8
+ansible-core<2.13.0
 pytest
 orionutils
 openapi-spec-validator

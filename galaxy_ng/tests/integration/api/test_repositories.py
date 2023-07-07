@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.min_hub_version("4.7dev")
 class TestRepositories:
+    @pytest.mark.all
     @pytest.mark.repositories
     def test_cant_upload_same_collection_same_repo(self, galaxy_client):
         """
@@ -47,6 +48,7 @@ class TestRepositories:
         delete_repository(gc, test_repo_name)
         delete_distribution(gc, test_repo_name)
 
+    @pytest.mark.all
     @pytest.mark.repositories
     def test_copy_cv_endpoint(self, galaxy_client):
         """
@@ -85,6 +87,7 @@ class TestRepositories:
         delete_distribution(gc_admin, test_repo_name_1)
         delete_distribution(gc_admin, test_repo_name_2)
 
+    @pytest.mark.all
     @pytest.mark.repositories
     def test_move_cv_endpoint(self, galaxy_client):
         """
@@ -125,7 +128,7 @@ class TestRepositories:
         delete_distribution(gc_admin, test_repo_name_2)
 
     @pytest.mark.repositories
-    @pytest.mark.standalone_only
+    @pytest.mark.deployment_standalone
     @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
     def test_copy_signed_cv_endpoint(self, galaxy_client):
         """
@@ -166,7 +169,7 @@ class TestRepositories:
         delete_distribution(gc_admin, test_repo_name_2)
 
     @pytest.mark.repositories
-    @pytest.mark.standalone_only
+    @pytest.mark.deployment_standalone
     @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
     def test_move_signed_cv_endpoint(self, galaxy_client):
         """
@@ -200,13 +203,13 @@ class TestRepositories:
             gc_admin, name=artifact.name, repository_name=test_repo_name_1
         )
         assert matches == 0
-
         # Cleanup
         delete_repository(gc_admin, test_repo_name_1)
         delete_repository(gc_admin, test_repo_name_2)
         delete_distribution(gc_admin, test_repo_name_1)
         delete_distribution(gc_admin, test_repo_name_2)
 
+    @pytest.mark.all
     @pytest.mark.repositories
     def test_directly_to_repo(self, galaxy_client):
         """
@@ -221,11 +224,11 @@ class TestRepositories:
         )
         matches, _ = search_collection_endpoint(gc, name=artifact.name)
         assert matches == 1
-
         # Cleanup
         delete_repository(gc, test_repo_name)
         delete_distribution(gc, test_repo_name)
 
+    @pytest.mark.all
     @pytest.mark.repositories
     def test_cannot_directly_to_repo_if_pipeline_approved(self, galaxy_client):
         """
@@ -246,11 +249,11 @@ class TestRepositories:
                 direct_upload=True,
             )
         assert ctx.value.response.status_code == 403
-
         # Cleanup
         delete_repository(gc, test_repo_name)
         delete_distribution(gc, test_repo_name)
 
+    @pytest.mark.all
     @pytest.mark.repositories
     def test_can_directly_to_repo_if_pipeline_staging(self, galaxy_client):
         """

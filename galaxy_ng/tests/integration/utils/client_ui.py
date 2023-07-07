@@ -2,9 +2,10 @@
 
 import logging
 import requests
+import re
+import html
 
-from urllib.parse import urlparse
-
+from urllib.parse import urlparse, unquote
 
 logger = logging.getLogger(__name__)
 
@@ -15,12 +16,19 @@ class UIClient:
 
     _rs = None
 
-    def __init__(self, username=None, password=None, baseurl=None, authurl=None, config=None):
+    def __init__(self,
+                 username=None,
+                 password=None,
+                 baseurl=None,
+                 authurl=None,
+                 config=None,
+                 auth_backend=None):
         self.username = username
         self.password = password
         self.baseurl = baseurl
         self.authurl = authurl
         self.config = config
+        self.auth_backend = auth_backend
 
         # default to config settings ...
         if self.config is not None and not self.username:
@@ -31,6 +39,8 @@ class UIClient:
             self.baseurl = self.config.get('url')
         if self.config is not None and not self.authurl:
             self.authurl = self.config.get('auth_url')
+        if self.config is not None and not self.auth_backend:
+            self.auth_backend = self.config.get('auth_backend')
 
         self.login_url = self.baseurl + '_ui/v1/auth/login/'
         self.logout_url = self.baseurl + '_ui/v1/auth/logout/'
@@ -47,6 +57,12 @@ class UIClient:
         self.logout()
 
     def login(self):
+        if self.auth_backend == "keycloak":
+            return self.keycloak_login()
+        else:
+            return self.galaxy_login()
+
+    def galaxy_login(self):
         self._rs = requests.Session()
         self._rs.verify = False
 
@@ -62,14 +78,45 @@ class UIClient:
             'X-CSRFToken': cookies['csrftoken'],
             'Referer': self.login_url,
         }
-        self._rs.post(
+        resp = self._rs.post(
             self.login_url,
             headers=pheaders,
             json={'username': self.username, 'password': self.password}
         )
 
-    def logout(self, expected_code=None):
+        # assert that the login succeeded
+        assert resp.status_code in (200, 204)
 
+    def keycloak_login(self):
+        self._rs = requests.Session()
+
+        # Get the keycloak login page
+        resp = self._rs.get(
+            self.baseurl.split("/api/")[0] + "/login/",
+            allow_redirects=True,
+        )
+
+        # assert that the keycloak login page loaded correctly
+        assert resp.status_code == 200
+
+        # Parse the login url out of the keycloak html form
+        url = re.search(b'action="([^"]*)"', resp.content)
+
+        # Log the user in
+        resp = self._rs.post(
+            html.unescape(unquote(url.group(1).decode("utf-8"))),
+            data={
+                'username': self.username,
+                'password': self.password,
+                'credentialId': ''
+            },
+            allow_redirects=True,
+        )
+
+        # assert that the login succeeded
+        assert resp.status_code in (200, 204)
+
+    def logout(self, expected_code=None):
         if self._rs is None:
             raise Exception('client is not authenticated')
 

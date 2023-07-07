@@ -74,6 +74,7 @@ _LOCKED_ROLES = {
             "galaxy.add_containerregistryremote",
             "galaxy.change_containerregistryremote",
             "galaxy.delete_containerregistryremote",
+            "container.manage_roles_containernamespace"
         },
         "inherit_from": ["galaxy.execution_environment_publisher"],
     },

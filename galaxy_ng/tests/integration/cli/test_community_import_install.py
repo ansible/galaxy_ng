@@ -7,7 +7,7 @@ from ..utils import ansible_galaxy, get_client, SocialGithubClient
 from ..utils.legacy import clean_all_roles, cleanup_social_user
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_import_install_role_as_admin(ansible_config):
     """Tests installing a role that was imported by an owner that is
     not the same as the role's github_user."""
@@ -60,7 +60,7 @@ def test_import_install_role_as_admin(ansible_config):
         assert os.path.exists(meta_yaml)
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_import_install_role_as_not_admin(ansible_config):
     """Tests installing a role that was imported by an owner that is
     not the same as the role's github_user."""
@@ -142,7 +142,7 @@ def test_import_install_role_as_not_admin(ansible_config):
         assert os.path.exists(meta_yaml)
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_import_owner_not_github_user(ansible_config):
     """Tests importing a role as an owner that is different from the GitHub user."""
 

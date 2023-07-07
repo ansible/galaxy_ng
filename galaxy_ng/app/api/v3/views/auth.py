@@ -1,5 +1,4 @@
 from django.db import transaction
-from rest_framework.authentication import BasicAuthentication
 from rest_framework.request import Request
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -10,7 +9,7 @@ from galaxy_ng.app.access_control import access_policy
 
 
 class TokenView(api_base.APIView):
-    authentication_classes = (BasicAuthentication, *api_base.GALAXY_AUTHENTICATION_CLASSES)
+    authentication_classes = api_base.GALAXY_AUTHENTICATION_CLASSES
     permission_classes = [access_policy.TokenAccessPolicy]
 
     @transaction.atomic

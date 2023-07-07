@@ -16,7 +16,7 @@ from ..utils.tools import generate_random_string
 
 @pytest.mark.min_hub_version("4.8dev")
 # if this is backported, remove the min_hub_version marker
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
     total = 10

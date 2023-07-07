@@ -5,6 +5,9 @@ RUNNING = $(shell docker ps -q -f name=api)
 # if running is empty, then DJ_MANAGER = manage, else DJ_MANAGER = django-admin
 DJ_MANAGER = $(shell if [ "$(RUNNING)" = "" ]; then echo manage; else echo django-admin; fi)
 
+# set the OCI_ENV_PATH to be ../oci_env/ if this isn't set in the user's environment
+export OCI_ENV_PATH = $(shell if [ -n "$$OCI_ENV_PATH" ]; then echo "$$OCI_ENV_PATH"; else echo ${PWD}/../oci_env/; fi)
+
 define exec_or_run
 	# Tries to run on existing container if it exists, otherwise starts a new one.
 	@echo $(1)$(2)$(3)$(4)$(5)$(6)
@@ -103,10 +106,45 @@ docker/test/integration/container:      ## Run integration tests.
 	docker build . -f dev/standalone/integration-test-dockerfile -t galaxy-integration-runner
 	docker run -it --rm --add-host=localhost:host-gateway galaxy-integration-runner $(FLAGS)
 
+.PHONY: oci-env/integration
+oci-env/integration:
+	oci-env exec bash /src/galaxy_ng/profiles/base/run_integration.sh $(FLAGS)
+
+.PHONY: gh-action/ldap
+gh-action/ldap:
+	python3 dev/oci_env_integration/actions/ldap.py
+
+.PHONY: gh-action/x_repo_search
+gh-action/x_repo_search:
+	python3 dev/oci_env_integration/actions/x_repo_search.py
+
+.PHONY: gh-action/iqe_rbac
+gh-action/iqe_rbac:
+	python3 dev/oci_env_integration/actions/iqe_rbac.py
+
+.PHONY: gh-action/keycloak
+gh-action/keycloak:
+	python3 dev/oci_env_integration/actions/keycloak.py
+
+.PHONY: gh-action/rbac
+gh-action/rbac:
+	python3 dev/oci_env_integration/actions/rbac.py
+
+.PHONY: gh-action/insights
+gh-action/insights:
+	python3 dev/oci_env_integration/actions/insights.py
+
+.PHONY: gh-action/standalone
+gh-action/standalone:
+	python3 dev/oci_env_integration/actions/standalone.py
+
+.PHONY: gh-action/certified-sync
+gh-action/certified-sync:
+	python3 dev/oci_env_integration/actions/certified-sync.py
+
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from python script
-	#./compose run --rm api manage shell < app/dev/common/setup_test_data.py
-	$(call exec_or_run, api, bash, -c "django-admin shell < app/dev/common/setup_test_data.py")
+	$(call exec_or_run, api, "/bin/bash", "-c", "/entrypoint.sh manage shell < app/dev/common/setup_test_data.py")
 
 .PHONY: docker/makemigrations
 docker/makemigrations:   ## Run django migrations
@@ -142,7 +180,7 @@ docker/db_restore:   ## Restore database from a snapshot with optional NAME para
 
 .PHONY: docker/translations
 docker/translations:   ## Generate the translation messages
-	./compose run --rm api bash -c "cd /app/galaxy_ng && django-admin makemessages --all"
+	$(call exec_or_run, api, "/bin/bash", "-c", "cd /app/galaxy_ng && /entrypoint.sh manage makemessages --all")
 
 .PHONY: docker/all
 docker/all: 	                                ## Build, migrate, loaddata, translate and add test collections.

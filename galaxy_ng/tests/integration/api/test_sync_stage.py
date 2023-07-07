@@ -4,7 +4,7 @@ import pytest
 from galaxykit.collections import upload_artifact, delete_collection
 from pkg_resources import parse_version
 
-from ..conftest import get_galaxy_client, get_ansible_config_sync, get_hub_version
+from ..conftest import get_galaxy_client, get_ansible_config, get_hub_version
 from ..utils import wait_for_task, get_client, set_certification
 from orionutils.generator import build_collection
 from ..utils.iqe_utils import is_sync_testing, get_all_collections,\
@@ -27,7 +27,7 @@ def start_sync(api_client, repo):
 @pytest.mark.sync
 @pytest.mark.skipif(not is_sync_testing(), reason="This test can only be run on sync-tests mode")
 def test_sync():
-    config_sync = get_ansible_config_sync()
+    config_sync = get_ansible_config()
     galaxy_client = get_galaxy_client(config_sync)
     gc_remote = galaxy_client("remote_admin", remote=True)
     user_stage = gc_remote.username

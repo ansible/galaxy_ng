@@ -1,5 +1,4 @@
 import logging
-import os
 
 import pytest
 
@@ -22,15 +21,15 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.min_hub_version("4.7dev")
 class TestCustomReposSync:
-    @pytest.mark.rm_sync
-    def test_basic_sync_custom_repo_with_req_file(self, galaxy_client):
+    @pytest.mark.sync
+    def test_basic_sync_custom_repo_with_req_file(self, sync_instance_crc, galaxy_client):
         """
         Test syncing directly from a custom repo.
         Only the collection specified in the requirements file is fetched
         """
         # this is the insights mode instance (source hub)
-        url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
-        custom_config = {"url": url}
+        _, custom_config = sync_instance_crc
+        url = custom_config["url"]
         galaxy_kit_client = GalaxyKitClient(custom_config)
         source_client = galaxy_kit_client.gen_authorized_client(
             {"username": "notifications_admin", "password": "redhat"}, basic_token=True
@@ -66,9 +65,8 @@ class TestCustomReposSync:
         gc = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
         params = {
-            "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid"
-                        "-connect/token",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
+            "auth_url": custom_config["auth_url"],
+            "token": custom_config["token"],
             "requirements_file": f"---\ncollections:\n- {artifact.namespace}.{artifact.name}",
         }
         create_remote(
@@ -96,16 +94,15 @@ class TestCustomReposSync:
         matches, _ = search_collection_endpoint(gc, name=artifact_no_sync.name, limit=100)
         assert matches == 0
 
-    @pytest.mark.rm_sync
-    def test_basic_sync_custom_repo_mirror(self, galaxy_client):
+    @pytest.mark.sync
+    def test_basic_sync_custom_repo_mirror(self, sync_instance_crc, galaxy_client):
         """
         Test syncing directly from a custom repo, without a requirements file and checking
         that if the content is not present in the remote repository,
         it's removed from the local repo
         """
-        # this is the insights mode instance (source hub)
-        url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
-        custom_config = {"url": url}
+        _, custom_config = sync_instance_crc
+        url = custom_config["url"]
         galaxy_kit_client = GalaxyKitClient(custom_config)
         source_client = galaxy_kit_client.gen_authorized_client(
             {"username": "notifications_admin", "password": "redhat"}, basic_token=True
@@ -129,9 +126,8 @@ class TestCustomReposSync:
         gc = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
         params = {
-            "auth_url": "http://localhost:8080/auth/realms/redhat-external/protocol/openid"
-                        "-connect/token",
-            "token": "abcdefghijklmnopqrstuvwxyz1234567893",
+            "auth_url": custom_config["auth_url"],
+            "token": custom_config["token"],
         }
         create_remote(
             gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params

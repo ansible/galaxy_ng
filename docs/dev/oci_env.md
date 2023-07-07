@@ -54,10 +54,18 @@ More documentation for each of these profiles can be found in their respective R
 
 ### Integration
 
-You can find environment configurations for running integration tests in each deployment mode under dev/oci_env_configs/. Some extra settings to accommodate the testing are provided there.
+To run the tests against your currently environment cd to your galaxy_ng folder and run `make oci-env/integration`. This will run the integration tests that are expected to pass for the profile that you have configured. The tests should be smart enough to determine if you have a customized url or port for galaxy ng. This accepts a FLAGS arg, which allows you to send custom pystest flags such as `make oci-env/integration FLAGS="-m rbac_roles -k test_admin_permissions"`. The `-k` flag is especially useful as it lets you pick specific tests by name or by filename.
 
-Once the environment is running, run the tests as you would for the [docker environment](/galaxy_ng/dev/docker_environment/#integration-tests).
+To run the same tests that run in github actions, run `make gh-action/<action>` (ex `make gh-action/standalone`). See the Makefile for all the supported targets. This will spin up the stack in the same way that GitHub actions does and run the same set of tests that the CI pipeline does. This command will take care of provisioning the whole environment, running tests and tearing down the environment.
 
-### Functional and Functional
+`make gh-action/*` accepts the following environment variables:
+
+- `GH_DUMP_LOGS=1` -> print the server logs after the tests are finished running
+- `GH_TEARDOWN=0` -> don't teardown the environment after the tests exit. This allows you to rerun the action without having to wait for the environment to be re provisioned every time.
+- `GH_FLAGS="pytest flags"` -> allows you to pass custom pytest flags to the integration tests.
+
+Example: `GH_FLAGS="-k test_delete_collection" GH_DUMP_LOGS=1 GH_TEARDOWN=0 make gh-action/standalone`
+
+### Functional and Unit
 
 See the [oci-env README](https://github.com/pulp/oci_env#running-tests) for information on running unit and functional tests.

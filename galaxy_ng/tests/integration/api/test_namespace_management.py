@@ -22,6 +22,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
         '_ui/v1'
     ]
 )
+@pytest.mark.all
 def test_namespace_create_and_delete(ansible_config, api_version):
     """Tests whether a namespace can be created and deleted"""
 

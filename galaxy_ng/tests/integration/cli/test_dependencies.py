@@ -20,6 +20,7 @@ class DependencySpec:
     xfail = attr.ib(default=False)
 
 
+@pytest.mark.all
 @pytest.mark.cli
 # @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.parametrize(
@@ -58,7 +59,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
         ansible_galaxy(
             f"collection publish {artifact2.filename} --server=automation_hub",
             check_retcode=retcode,
-            ansible_config=ansible_config("basic_user", namespace=published.namespace)
+            ansible_config=ansible_config("basic_user")
         )
     except AssertionError:
         if params.xfail:

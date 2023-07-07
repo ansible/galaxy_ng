@@ -17,7 +17,7 @@ from ..utils.legacy import cleanup_social_user
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_import_role_as_owner(ansible_config):
     """ Tests role import workflow with a social auth user and anonymous install """
 
@@ -121,7 +121,7 @@ def test_import_role_as_owner(ansible_config):
         assert os.path.exists(meta_yaml)
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_import_role_as_not_owner(ansible_config):
     """ Tests role import workflow with non-owner """
 
@@ -171,7 +171,7 @@ def test_import_role_as_not_owner(ansible_config):
     assert ds.get('count') == 0
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_delete_role_as_not_owner(ansible_config):
     """ Tests role delete with non-owner """
 
@@ -231,7 +231,7 @@ def test_delete_role_as_not_owner(ansible_config):
         assert resp.status_code == 403
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_delete_namespace_deletes_roles(ansible_config):
     """ Tests deleting namespace also deletes roles """
 
@@ -287,7 +287,7 @@ def test_delete_namespace_deletes_roles(ansible_config):
     assert ds['count'] == 0
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_delete_role_with_cli(ansible_config):
     """ Tests role delete with CLI """
 
@@ -335,7 +335,7 @@ def test_delete_role_with_cli(ansible_config):
     assert delete_pid.returncode == 0, delete_pid.stderr.decode('utf-8')
 
 
-@pytest.mark.community_only
+@pytest.mark.deployment_community
 def test_delete_missing_role_with_cli(ansible_config):
     """ Tests missing role delete with CLI """
 

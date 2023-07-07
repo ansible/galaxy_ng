@@ -17,8 +17,6 @@ from urllib.parse import urljoin
 from urllib.parse import urlparse
 from contextlib import contextmanager
 
-import pytest
-
 from ansible.galaxy.api import GalaxyError
 from orionutils.generator import build_collection as _build_collection
 from orionutils.generator import randstr
@@ -349,14 +347,6 @@ def set_certification(client, collection, level="published", hub_4_5=False):
     For use in instances that use repository-based certification and that
     do not have auto-certification enabled.
     """
-
-    # are signatures required?
-    settings = client("_ui/v1/settings/")
-    if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip(
-            "FIXME: set_certification function incompatible with"
-            + " GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL."
-        )
 
     if hub_4_5:
         if client.config["use_move_endpoint"]:

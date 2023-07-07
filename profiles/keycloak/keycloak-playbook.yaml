@@ -10,6 +10,10 @@
       debug:
         msg: "Preparing Keycloak setup ..."
 
+    - name: Setting hub URL
+      set_fact:
+        hub_url: "{{ lookup('ansible.builtin.env', 'KEYCLOAK_REDIRECT_URL', default='http://localhost:5001/') }}"
+
     - name: Create or update AAP Keycloak realm
       community.general.keycloak_realm:
         auth_client_id: admin-cli
@@ -37,16 +41,15 @@
         id: d8b127a3-31f6-44c8-a7e4-4ab9a3e78d95
         name: Automation Hub
         description: Client ID for Ansible Automation Hub
-        root_url: http://localhost:5001/
+        root_url: "{{ hub_url }}"
         enabled: yes
         client_authenticator_type: client-secret
         secret: REALLYWELLKEPTSECRET
         redirect_uris:
-          - http://localhost:8002/
+          - "{{ hub_url }}*"
           - http://localhost:8002/*
-          - http://localhost:5001/*
         web_origins:
-          - http://localhost:5001/*
+          - "{{ hub_url }}*"
           - http://localhost:8002/*
         bearer_only: no
         consent_required: no
@@ -365,6 +368,22 @@
         auth_username: admin
         auth_password: admin
       register: hub_admin_create
+
+    - name: Add the hubadmin role to the admin_staff group
+      community.general.keycloak_client_rolemapping:
+        roles: 
+          - name: hubadmin
+        group_name: "admin_staff"
+        # uid: "8b21aa1f-d7be-4711-9ad7-4c24e326edc2"
+        realm: aap
+        client_id: automation-hub
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: http://keycloak:8080/auth
+        auth_realm: master
+        auth_username: admin
+        auth_password: admin
+      # loop: "{{ user_list.json}}"
 
     - name: Get realm public key
       uri:

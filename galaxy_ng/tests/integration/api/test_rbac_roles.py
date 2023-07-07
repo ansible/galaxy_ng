@@ -649,7 +649,6 @@ def _get_reusable_extras():
 
 
 @pytest.mark.rbac_roles
-@pytest.mark.standalone_only
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
 def test_global_role_actions(role):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
@@ -679,7 +678,6 @@ def test_global_role_actions(role):
 
 
 @pytest.mark.rbac_roles
-@pytest.mark.standalone_only
 @pytest.mark.parametrize("role", OBJECT_ROLES_TO_TEST)
 def test_object_role_actions(role):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
@@ -742,7 +740,6 @@ def test_object_role_actions(role):
 
 
 @pytest.mark.rbac_roles
-@pytest.mark.standalone_only
 def test_role_actions_for_admin():
     extra = _get_reusable_extras()
     failures = []
@@ -759,7 +756,6 @@ def test_role_actions_for_admin():
 
 
 @pytest.mark.rbac_roles
-@pytest.mark.standalone_only
 def test_all_actions_are_tested():
     """
     Ensures that all of the actions defined in ROLES_TO_TEST and OBJECT_ROLES_TO_TEST

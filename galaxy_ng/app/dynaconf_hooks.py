@@ -100,8 +100,8 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         data["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = settings.get(
             "SOCIAL_AUTH_LOGIN_REDIRECT_URL", default="/ui/"
         )
-        data["SOCIAL_AUTH_POSTGRES_JSONFIELD"] = True
-        data["SOCIAL_AUTH_JSONFIELD_CUSTOM"] = "django.contrib.postgres.fields.JSONField"
+        data["SOCIAL_AUTH_JSONFIELD_ENABLED"] = True
+        data["SOCIAL_AUTH_JSONFIELD_CUSTOM"] = "django.db.models.JSONField"
         data["SOCIAL_AUTH_URL_NAMESPACE"] = "social"
         data["SOCIAL_AUTH_KEYCLOAK_EXTRA_DATA"] = [
             ("refresh_token", "refresh_token"),
@@ -250,9 +250,11 @@ def configure_logging(settings: Dynaconf) -> Dict[str, Any]:
         )
     }
     if data["GALAXY_ENABLE_API_ACCESS_LOG"]:
-        data["INSTALLED_APPS"] = ["automated_logging", "dynaconf_merge"]
+        data["INSTALLED_APPS"] = ["dynaconf_merge"]
         data["MIDDLEWARE"] = [
-            "automated_logging.middleware.AutomatedLoggingMiddleware",
+            # We want to re-add this separately with a vendored copy
+            # since the upstream is no longer maintained.
+            # "automated_logging.middleware.AutomatedLoggingMiddleware",
             "dynaconf_merge",
         ]
         data["LOGGING"] = {

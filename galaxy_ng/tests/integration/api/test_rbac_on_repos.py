@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.min_hub_version("4.7dev")
 class TestRBACRepos:
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_create_repo(self, galaxy_client):
         """
         Verifies that a user without permissions can't create repositories
@@ -58,7 +58,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_create_repo(self, galaxy_client):
         """
         Verifies that a user with permission can create repositories
@@ -74,7 +74,7 @@ class TestRBACRepos:
         create_repo_and_dist(gc, test_repo_name)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_delete_repo(self, galaxy_client):
         """
         Verifies that a user without permissions can't delete repositories
@@ -95,7 +95,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_delete_repo(self, galaxy_client):
         """
         Verifies that a user with permissions can delete repositories
@@ -112,7 +112,7 @@ class TestRBACRepos:
         delete_repository(gc_user, test_repo_name)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_upload_to_repo(self, galaxy_client):
         """
         Verifies that a user without permissions can't upload to repositories
@@ -141,7 +141,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_remove_from_repo(self, galaxy_client):
         """
         Verifies that a user without permissions can't remove cv from repositories
@@ -173,7 +173,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_upload_to_repo(self, galaxy_client):
         """
         Verifies that a user with permissions can upload to repositories
@@ -203,7 +203,7 @@ class TestRBACRepos:
         )  # (modify_ansible_repo_content)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_remove_from_repo(self, galaxy_client):
         """
         Verifies that a user with permissions can remove from repositories
@@ -236,7 +236,7 @@ class TestRBACRepos:
         )  # (needs change_ansiblerepository)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_patch_update_repo(self, galaxy_client):
         """
         Verifies that a user with permissions can update repositories (patch)
@@ -254,7 +254,7 @@ class TestRBACRepos:
         patch_update_repository(gc_user, resp["pulp_href"].split("/")[-2], updated_body)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_patch_update_repo(self, galaxy_client):
         """
         Verifies that a user without permissions can't update repositories (patch)
@@ -276,7 +276,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_put_update_repo(self, galaxy_client):
         """
         Verifies that a user with permissions can update repositories (put)
@@ -294,7 +294,7 @@ class TestRBACRepos:
         put_update_repository(gc_user, resp["pulp_href"].split("/")[-2], updated_body)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_put_update_repo(self, galaxy_client):
         """
         Verifies that a user without permissions can't update repositories (put)
@@ -314,7 +314,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_any_user_can_use_x_repo_search_endpoint(self, galaxy_client):
         """
         Verifies that any user can search in repositories
@@ -330,7 +330,7 @@ class TestRBACRepos:
         search_collection_endpoint(gc_user, repository_name=test_repo_name)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_copy_cv_endpoint(self, galaxy_client):
         """
         Verifies a user with permissions can use the copy cv endpoint
@@ -366,7 +366,7 @@ class TestRBACRepos:
         )
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_move_cv_endpoint(self, galaxy_client):
         """
         Verifies a user with permissions can use the move cv endpoint
@@ -402,7 +402,7 @@ class TestRBACRepos:
         )
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_copy_cv_endpoint(self, galaxy_client):
         """
         Verifies a user without permissions can't use the copy cv endpoint
@@ -435,7 +435,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_move_cv_endpoint(self, galaxy_client):
         """
         Verifies a user without permissions can't use the move cv endpoint
@@ -468,7 +468,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_add_remote_missing_role(self, galaxy_client):
         """
         Verifies a user without permissions can't create remotes
@@ -483,7 +483,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_add_remote(self, galaxy_client):
         """
         Verifies a user with permissions can create remotes
@@ -501,7 +501,7 @@ class TestRBACRepos:
         create_remote(gc_user, test_remote_name, gc_admin.galaxy_root)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_view_remotes_missing_role(self, galaxy_client):
         """
         Verifies a user without permissions can't view remotes
@@ -514,7 +514,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_view_remote_role(self, galaxy_client):
         """
         Verifies a user with permissions can view remotes
@@ -529,7 +529,7 @@ class TestRBACRepos:
         view_remotes(gc_user)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_update_remote_missing_role(self, galaxy_client):
         """
         Verifies a user without permissions can't update remotes
@@ -548,7 +548,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_update_remote(self, galaxy_client):
         """
         Verifies a user with permissions can update remotes
@@ -565,7 +565,7 @@ class TestRBACRepos:
         update_remote(gc_user, test_remote_name, "http://new_url/", {})
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_delete_remote(self, galaxy_client):
         """
         Verifies a user with permissions can delete remotes
@@ -582,7 +582,7 @@ class TestRBACRepos:
         delete_remote(gc_user, test_remote_name)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_delete_remote(self, galaxy_client):
         """
         Verifies a user without permissions can't delete remotes
@@ -601,7 +601,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_manage_roles_remotes(self, galaxy_client):
         """
         Verifies a user without permissions can't add permissions to remotes
@@ -617,7 +617,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_manage_roles_remotes(self, galaxy_client):
         """
         Verifies a user with permissions can add permissions to remotes
@@ -641,7 +641,7 @@ class TestRBACRepos:
         )
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_upload_to_repo_object_role(self, galaxy_client):
         """
         Verifies that a user with permissions can upload to repositories (object permission)
@@ -668,7 +668,7 @@ class TestRBACRepos:
         )  # (modify_ansible_repo_content)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_upload_to_repo_object_role(self, galaxy_client):
         """
         Verifies that a user without permissions can't upload to repositories (object permission)
@@ -697,7 +697,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_update_repo_object_role(self, galaxy_client):
         """
         Verifies that a user with permissions can update a repository (object permission)
@@ -717,7 +717,7 @@ class TestRBACRepos:
         put_update_repository(gc_user, repo_pulp_href.split("/")[-2], updated_body)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_update_repo_object_role(self, galaxy_client):
         """
         Verifies that a user without permissions can't update a repository (object permission)
@@ -739,7 +739,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_delete_repo_object_role(self, galaxy_client):
         """
         Verifies that a user with permissions can delete a repositories (object permission)
@@ -758,7 +758,7 @@ class TestRBACRepos:
         delete_repository(gc_user, test_repo_name)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_delete_repo_object_role(self, galaxy_client):
         """
         Verifies that a user without permissions can't delete a repositories (object permission)
@@ -779,7 +779,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_add_permissions_to_repo_object_role(self, galaxy_client):
         """
         Verifies that a user with permissions can
@@ -799,7 +799,7 @@ class TestRBACRepos:
         add_permissions_to_repository(gc_user, test_repo_name, role_name, ["ns_group_for_tests"])
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_add_permissions_to_repo_object_role(self, galaxy_client):
         """
         Verifies that a user without permissions
@@ -823,7 +823,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_add_permissions_to_repo_object_role_global_role(self, galaxy_client):
         """
         Verifies that a user with permissions
@@ -841,7 +841,7 @@ class TestRBACRepos:
         add_permissions_to_repository(gc_user, test_repo_name, role_name, ["ns_group_for_tests"])
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_add_permissions_to_repo_object_role_global_role(
             self, galaxy_client
     ):
@@ -865,7 +865,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     @pytest.mark.parametrize(
         "protected_repo",
         ["validated", "rh-certified", "community", "published", "rejected", "staging"],
@@ -880,7 +880,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     @pytest.mark.parametrize(
         "protected_dist",
         ["validated", "rh-certified", "community", "published", "rejected", "staging"],
@@ -897,7 +897,7 @@ class TestRBACRepos:
         assert ctx.value.response.status_code == 403
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_role_remove_from_repo_object_role(self, galaxy_client):
         """
         Verifies that a user with permissions can remove from repositories (object permission)
@@ -932,7 +932,7 @@ class TestRBACRepos:
         )  # (needs change_ansiblerepository)
 
     @pytest.mark.rbac_repos
-    @pytest.mark.standalone_only
+    @pytest.mark.iqe_rbac_test
     def test_missing_role_remove_from_repo_object_role(self, galaxy_client):
         """
         Verifies that a user without permissions can't remove cv from repositories (object role)

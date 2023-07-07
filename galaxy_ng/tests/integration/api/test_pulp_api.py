@@ -12,7 +12,7 @@ from ..utils import get_client, wait_for_task
 REGEX_40X = r"HTTP Code: 40\d"
 
 
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.pulp_api
 @pytest.mark.min_hub_version("4.6dev")
 def test_pulp_api_redirect(ansible_config, artifact):
@@ -50,6 +50,7 @@ def test_pulp_api_redirect(ansible_config, artifact):
 )
 @pytest.mark.pulp_api
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.all
 def test_pulp_endpoint_readonly(ansible_config, artifact, url):
     """Ensure authenticated user has readonly access to view"""
 
@@ -83,7 +84,7 @@ TEST_ROLE_NAME = "test_role_".join(random.choices(string.ascii_lowercase, k=10))
     ],
 )
 @pytest.mark.pulp_api
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.6dev")
 def test_pulp_roles_endpoint(ansible_config, require_auth):
     config = ansible_config("admin")
@@ -153,7 +154,7 @@ def local_container():
     ],
 )
 @pytest.mark.pulp_api
-@pytest.mark.standalone_only
+@pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
     name = local_container.get_container()['name']
