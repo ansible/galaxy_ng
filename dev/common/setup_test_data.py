@@ -40,7 +40,7 @@ def _init_group(credentials, profile):
 
         if roles := profile.get("roles"):
             for role in roles:
-                GroupRole.objects.get_or_create(
+                GroupRole.objects.create(
                     role=Role.objects.get(name=role),
                     group=group,
                 )
@@ -55,6 +55,7 @@ def _init_token(user, credentials):
 
 for profile_name in PROFILES:
     profile = PROFILES[profile_name]
+
     try:
         if ldap_user := profile["username"].get("ldap"):
             print(f"Initializing ldap user for test profile: {profile_name}")

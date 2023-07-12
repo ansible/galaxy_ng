@@ -89,16 +89,14 @@ CREDENTIALS = {
 
 PROFILES = {
     "anonymous_user": {
-        "username": {
-            "ldap": None,
-            "galaxy": None,
-        }
+        "username": None,
     },
     "basic_user": {
         "namespaces": ["autohubtest2", "autohubtest3"],
         "username": {
             "ldap": "fry",
             "galaxy": "iqe_normal_user",
+            "community": "iqe_normal_user",
         }
     },
     "partner_engineer": {
@@ -107,6 +105,7 @@ PROFILES = {
         "username": {
             "ldap": "professor",
             "galaxy": "jdoe",
+            "community": "jdoe",
         }
     },
     "org_admin": {  # user is org admin in keycloak
@@ -121,7 +120,7 @@ PROFILES = {
         "username": {
             "ldap": "professor",
             "galaxy": "notifications_admin",
-            "github": "notifications_admin",
+            "community": "notifications_admin",
         }
     },
     "iqe_admin": {
@@ -129,6 +128,7 @@ PROFILES = {
         "username": {
             "ldap": "hermes",
             "galaxy": "iqe_admin",
+            "community": "iqe_admin",
         }
     },
     "ee_admin": {
@@ -141,22 +141,22 @@ PROFILES = {
 
     "github_user_1": {
         "username": {
-            "github": "gh01",
+            "community": "gh01",
         }
     },
     "github_user_2": {
         "username": {
-            "github": "gh02",
+            "community": "gh02",
         }
     },
     "geerlingguy": {
         "username": {
-            "github": "geerlingguy",
+            "community": "geerlingguy",
         }
     },
     "jctannerTEST": {
         "username": {
-            "github": "jctannerTEST",
+            "community": "jctannerTEST",
         }
     },
 }
