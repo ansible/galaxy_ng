@@ -107,9 +107,6 @@ def test_publish_and_install_by_self(ansible_config, published, cleanup_collecti
 @pytest.mark.all
 @pytest.mark.cli
 @pytest.mark.deployment_cloud
-@pytest.mark.skip(
-    reason="Marked for insights mode which always has GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL true"
-)
 def test_publish_and_expect_uncertified_hidden(
     ansible_config,
     published,
@@ -120,8 +117,6 @@ def test_publish_and_expect_uncertified_hidden(
     uncertified collection, but not an unspecified version range.
     """
 
-    # FIXME: AAH-2442 this is not skipping here in CRC stage integration tests
-    # where GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL=true
     if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
         pytest.skip("This test needs refactoring to work with signatures required on move.")
 
