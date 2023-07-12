@@ -1,0 +1,89 @@
+---
+- name: Galaxy + AH Collection Tests for Content Automation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - ansible.automation_hub
+
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars.yml
+  
+  tasks:
+    - name: Authenticate and retrieve API token
+      ansible.automation_hub.ah_token:
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Create the automate namespace
+      ansible.automation_hub.ah_namespace:
+        name: automate
+        company: Automator Inc.
+        email: automator@redhat.com
+        description: The namespace for all things automation
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Rename automate namespace to automator
+      ansible.automation_hub.ah_namespace:
+        name: automate
+        new_name: automator
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the automator namespace
+      ansible.automation_hub.ah_namespace:
+        state: absent
+        name: automator
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Ensure there is an ansible namespace
+      ansible.automation_hub.ah_namespace:
+        name: ansible
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Upload the automation hub collection to the ansible namespace
+      ansible.automation_hub.ah_collection:
+        namespace: ansible
+        name: automation_hub
+        path: "{{ ah_artifact_runner_absolute_path }}"
+        version: "1.0.0"
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Approve the automation hub collection
+      ansible.automation_hub.ah_approval:
+        namespace: ansible
+        name: automation_hub
+        version: "1.0.0"
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the automation hub collection
+      ansible.automation_hub.ah_collection:
+        state: absent
+        namespace: ansible
+        name: automation_hub
+        version: "1.0.0"
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Deauthenticate
+      ansible.automation_hub.ah_token:
+        state: absent
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
