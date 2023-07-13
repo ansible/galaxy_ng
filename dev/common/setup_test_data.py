@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.contenttypes.models import ContentType
 from pulpcore.plugin.models.role import GroupRole, Role
 from pulp_ansible.app.models import CollectionRemote
@@ -14,6 +16,8 @@ Setup test data used in integration tests.
 """
 
 TEST_NAMESPACES = {}
+
+auth_backend = os.environ.get('HUB_TEST_AUTHENTICATION_BACKEND')
 
 print("Create test namespaces")
 for nsname in ["autohubtest2", "autohubtest3", "signing"]:
@@ -55,14 +59,17 @@ def _init_token(user, credentials):
 
 for profile_name in PROFILES:
     profile = PROFILES[profile_name]
-
     try:
+        if profile['username'] is None:
+            continue
+
         if ldap_user := profile["username"].get("ldap"):
             print(f"Initializing ldap user for test profile: {profile_name}")
             credentials = CREDENTIALS[ldap_user]
             _init_group(credentials, profile)
 
-        if galaxy_user := profile["username"].get("galaxy"):
+        username = profile["username"]
+        if galaxy_user := username.get("galaxy") or username.get("community"):
             print(f"Initializing galaxy user for test profile: {profile_name}")
             u, _ = User.objects.get_or_create(username=galaxy_user)
             credentials = CREDENTIALS[galaxy_user]
@@ -77,7 +84,6 @@ for profile_name in PROFILES:
             _init_token(u, credentials)
     except Exception as e:
         print(e)
-
 
 print("CollectionRemote community url points to beta-galaxy.ansible.com")
 remote = CollectionRemote.objects.get(name="community")
