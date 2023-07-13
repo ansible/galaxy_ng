@@ -108,3 +108,5 @@ venv.bak/
 
 # Galaxy NG
 db_snapshots/
+
+.compiled/
