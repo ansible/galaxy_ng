@@ -31,6 +31,14 @@ This will launch galax_ng from source (see `DEV_SOURCE_PATH`) using the galaxy_n
 
 Other profiles are available under the `profiles/` directory.
 
+### M1 Macs
+
+If you are using ARM, you'll need to use the `galaxy_ng:m1` profile along with the base profile.
+
+```
+COMPOSE_PROFILE=galaxy_ng/base:galaxy_ng/m1
+```
+
 ## Develop using keycloak, insights mode and ldap
 
 Profiles for all of these modes are available from galaxy_ng. Simply add them to your `COMPOSE_PROFILE`:

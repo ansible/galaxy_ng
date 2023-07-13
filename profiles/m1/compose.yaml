@@ -1,0 +1,16 @@
+version: "3.7"
+
+services:
+  _galaxy_base:
+    build:
+      context: "{SRC_DIR}/galaxy_ng/"
+      dockerfile: "profiles/base/Dockerfile"
+
+      # This is necesary for M1 Macs. The localhost/oci_env/pulp:base gets built
+      # as amd64 for some reason. This service builds off of that image and
+      # attempts to build it as arm64. By doing so, it tries to find a local
+      # localhost/oci_env/pulp:base arm64 image, fails and then tries to pull
+      # the image from the localhost registry.
+      platforms:
+        - "linux/amd64"
+
