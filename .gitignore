@@ -109,4 +109,5 @@ venv.bak/
 # Galaxy NG
 db_snapshots/
 
+# oci-env profile files
 .compiled/
