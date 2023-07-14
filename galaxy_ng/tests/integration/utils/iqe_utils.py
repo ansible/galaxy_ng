@@ -72,7 +72,7 @@ class GalaxyKitClient:
 
     def gen_authorized_client(
             self,
-            role,
+            role=None,
             container_engine="podman",
             container_registry=None,
             *,
@@ -82,11 +82,14 @@ class GalaxyKitClient:
             basic_token=False,
             github_social_auth=False
     ):
+
         self._basic_token = basic_token
         try:
             config = self.config()
         except TypeError:
             config = self.config
+        if not role:
+            return GalaxyClient(galaxy_root=config.get("url"), auth=None)
         # role can be either be the name of a user (like `ansible_insights`)
         # or a dict containing a username and password:
         # {"username": "autohubtest2", "password": "p@ssword!"}

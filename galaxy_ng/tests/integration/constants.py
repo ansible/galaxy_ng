@@ -253,7 +253,7 @@ DEPLOYED_PAH_PROFILES = {
 }
 
 BETA_GALAXY_PROFILES = {
-    "admin": {  # it's a regular user
+    "regular_user": {  # it's a regular django user
         "username": "galaxy_qe",
         "password": "pVGcbC2hmaCDzf67bbam",
         "token": "a1b989a642e8f527221889c28928ea2b06df955d",
@@ -267,5 +267,10 @@ BETA_GALAXY_PROFILES = {
     "github_user": {
         "username": "github-qe-test-user",
         "password": "iWvFM@9Jj5Eckuy",
-    }
+    },
+    "admin": {  # it's an admin django user
+        "username": "galaxy_qe_admin",
+        "password": "qKFnT26wfusVX49kUsQb",
+        "token": "21685581f65b1cd46a65b12cb6288a6e936e16d0",
+    },
 }

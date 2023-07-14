@@ -776,8 +776,6 @@ def get_hub_version(ansible_config):
         gc = galaxy_client(role, basic_token=True, ignore_cache=True)
         galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
         return galaxy_ng_version
-    elif is_beta_galaxy():
-        role = "admin"
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
