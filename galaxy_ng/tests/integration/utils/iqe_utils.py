@@ -15,6 +15,7 @@ from ansible.galaxy.token import KeycloakToken
 
 logger = logging.getLogger(__name__)
 
+
 # FILENAME_INCLUDED
 # FILENAME_EXCLUDED
 # FILENAME_MISSING
@@ -27,12 +28,12 @@ class KeycloakPassword(KeycloakToken):
     """
 
     def __init__(
-        self,
-        access_token=None,
-        auth_url=None,
-        validate_certs=False,
-        username=None,
-        password=None,
+            self,
+            access_token=None,
+            auth_url=None,
+            validate_certs=False,
+            username=None,
+            password=None,
     ):
         self.username = username
         self.password = password
@@ -70,15 +71,16 @@ class GalaxyKitClient:
         self._basic_token = basic_token
 
     def gen_authorized_client(
-        self,
-        role,
-        container_engine="podman",
-        container_registry=None,
-        *,
-        ignore_cache=False,
-        token=None,
-        remote=False,
-        basic_token=False,
+            self,
+            role,
+            container_engine="podman",
+            container_registry=None,
+            *,
+            ignore_cache=False,
+            token=None,
+            remote=False,
+            basic_token=False,
+            github_social_auth=False
     ):
         self._basic_token = basic_token
         try:
@@ -120,21 +122,21 @@ class GalaxyKitClient:
                 if isinstance(role, str):
                     profile_config = self.config(role)
                     user = profile_config
-                    if profile_config.get("auth_url"):
-                        token = profile_config.get("token")
-                    if token is None:
-                        token = get_standalone_token(
-                            user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
-                            basic_token=self._basic_token
-                        )
-
+                    if not github_social_auth:
+                        if profile_config.get("auth_url"):
+                            token = profile_config.get("token")
+                        if token is None:
+                            token = get_standalone_token(
+                                user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
+                                basic_token=self._basic_token
+                            )
                     auth = {
                         "username": user["username"],
                         "password": user["password"],
                         "auth_url": profile_config.get("auth_url"),
                         "token": token,
                     }
-                else:
+                elif not github_social_auth:
                     token = get_standalone_token(
                         role,
                         url,
@@ -144,7 +146,8 @@ class GalaxyKitClient:
                     )  # ignore_cache=True
                     role.update(token=token)
                     auth = role
-
+                else:
+                    auth = role
             container_engine = config.get("container_engine")
             container_registry = config.get("container_registry")
             token_type = None if not basic_token else "Basic"
@@ -156,6 +159,7 @@ class GalaxyKitClient:
                 container_tls_verify=ssl_verify,
                 https_verify=ssl_verify,
                 token_type=token_type,
+                github_social_auth=github_social_auth
             )
             if ignore_cache:
                 return g_client
@@ -168,7 +172,7 @@ token_cache = {}
 
 
 def get_standalone_token(
-    user, server, *, ignore_cache=False, ssl_verify=True, basic_token=False
+        user, server, *, ignore_cache=False, ssl_verify=True, basic_token=False
 ):
     cache_key = f"{server}::{user['username']}"
 
@@ -214,6 +218,12 @@ def is_standalone():
 
 def is_ephemeral_env():
     return "ephemeral" in os.getenv(
+        "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
+    )
+
+
+def is_beta_galaxy():
+    return "beta-galaxy-stage.ansible" in os.getenv(
         "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
     )
 
@@ -281,8 +291,8 @@ def retrieve_collection(artifact, collections):
     local_collection_found = None
     for local_collection in collections["data"]:
         if (
-            local_collection["name"] == artifact.name
-            and local_collection["namespace"] == artifact.namespace
+                local_collection["name"] == artifact.name
+                and local_collection["namespace"] == artifact.namespace
         ):
             local_collection_found = local_collection
     return local_collection_found

@@ -251,3 +251,21 @@ DEPLOYED_PAH_PROFILES = {
         "token": "abcdefghijklmnopqrstuvwxyz1234567895",
     },
 }
+
+BETA_GALAXY_PROFILES = {
+    "admin": {  # it's a regular user
+        "username": "galaxy_qe",
+        "password": "pVGcbC2hmaCDzf67bbam",
+        "token": "a1b989a642e8f527221889c28928ea2b06df955d",
+    },
+    "anonymous_user": {
+        "username": None
+    },
+    "github_user_1": {
+        "username": "gh01",
+    },
+    "github_user": {
+        "username": "github-qe-test-user",
+        "password": "iWvFM@9Jj5Eckuy",
+    }
+}

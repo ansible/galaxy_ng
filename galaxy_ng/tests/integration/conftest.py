@@ -11,7 +11,7 @@ from pkg_resources import parse_version, Requirement
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
 from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES, \
-    SYNC_PROFILES, DEPLOYED_PAH_PROFILES
+    SYNC_PROFILES, DEPLOYED_PAH_PROFILES, BETA_GALAXY_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -31,7 +31,7 @@ from .utils.iqe_utils import (
     is_dev_env_standalone,
     is_standalone,
     is_ephemeral_env,
-    get_standalone_token
+    get_standalone_token, is_beta_galaxy
 )
 
 # from orionutils.generator import build_collection
@@ -125,6 +125,8 @@ class AnsibleConfigFixture(dict):
             self.PROFILES["org_admin"]["token"] = None
             self.PROFILES["partner_engineer"]["token"] = None
             self.PROFILES["basic_user"]["token"] = None
+        elif is_beta_galaxy():
+            self.PROFILES = BETA_GALAXY_PROFILES
         else:
             for profile_name in PROFILES:
                 p = PROFILES[profile_name]
@@ -774,6 +776,8 @@ def get_hub_version(ansible_config):
         gc = galaxy_client(role, basic_token=True, ignore_cache=True)
         galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
         return galaxy_ng_version
+    elif is_beta_galaxy():
+        role = "admin"
     else:
         role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
