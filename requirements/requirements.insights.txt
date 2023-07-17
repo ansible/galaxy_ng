@@ -181,7 +181,9 @@ idna==3.4
     #   requests
     #   yarl
 importlib-metadata==6.0.1
-    # via opentelemetry-api
+    # via
+    #   opentelemetry-api
+    #   pulpcore
 inflection==0.5.1
     # via drf-spectacular
 insights-analytics-collector==0.3.2
@@ -322,7 +324,7 @@ pulp-container==2.15.1
     # via galaxy-ng (setup.py)
 pulp-glue==0.19.1
     # via pulpcore
-pulpcore==3.28.1
+pulpcore==3.28.3
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
