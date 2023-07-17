@@ -15,3 +15,5 @@ exclude netlify.toml
 exclude docs
 exclude docs_requirements.txt
 exclude .readthedocs.yaml
+include django-automated-logging-LICENSE.txt
+include galaxy_ng/automated_logging/templates/dal/admin/view.html
