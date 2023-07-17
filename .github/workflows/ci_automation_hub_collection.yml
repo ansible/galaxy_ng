@@ -25,9 +25,6 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install docker-compose
-        run: pip3 install --upgrade docker-compose
-
       - name: Checkout the automation hub collection
         uses: actions/checkout@v3
         with:
@@ -47,6 +44,7 @@ jobs:
           echo "DEV_SOURCE_PATH=galaxy_ng" >> .compose.env
           make docker/all
           ./compose up -d
+          pip3 install --upgrade requests pyyaml
           python3 dev/common/poll.py
 
       - name: Test the user playbook
