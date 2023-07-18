@@ -18,8 +18,8 @@ from galaxy_ng.tests.integration.utils.tools import generate_random_artifact_ver
 logger = logging.getLogger(__name__)
 
 
-def create_test_user(client):
-    username = f"rbac-user-test_{uuid4()}"
+def create_test_user(client, username=None):
+    username = username or f"rbac-user-test_{uuid4()}"
     password = "p@ssword!"
     client.get_or_create_user(username, password, group=None)
     return {

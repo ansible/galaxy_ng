@@ -268,6 +268,10 @@ BETA_GALAXY_PROFILES = {
         "username": "github-qe-test-user",
         "password": "iWvFM@9Jj5Eckuy",
     },
+    "github_user_alt": {
+        "username": "github-qe-test-user-alt",
+        "password": "qg7SQqeuH8hp@xL",
+    },
     "admin": {  # it's an admin django user
         "username": "galaxy_qe_admin",
         "password": "qKFnT26wfusVX49kUsQb",

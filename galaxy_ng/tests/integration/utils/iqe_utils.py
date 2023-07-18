@@ -98,7 +98,7 @@ class GalaxyKitClient:
         else:
             cache_key = (role, container_engine, container_registry, token)
         ssl_verify = config.get("ssl_verify")
-        if cache_key not in client_cache or ignore_cache:
+        if cache_key not in client_cache or ignore_cache or github_social_auth:
             if is_sync_testing():
                 url = config.get("remote_hub") if remote else config.get("local_hub")
                 profile_config = (
@@ -164,7 +164,7 @@ class GalaxyKitClient:
                 token_type=token_type,
                 github_social_auth=github_social_auth
             )
-            if ignore_cache:
+            if ignore_cache or github_social_auth:
                 return g_client
             else:
                 client_cache[cache_key] = g_client
