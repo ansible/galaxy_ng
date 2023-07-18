@@ -93,7 +93,10 @@ class OCIEnvIntegrationTest:
             if db_dump := self.envs[env].get("db_restore", None):
                 dump_path = f"dev/oci_env_integration/test_fixtures/{db_dump}.tar.gz"
 
-                shutil.copyfile(dump_path, f"../oci_env/db_backup/{db_dump}.tar.gz")
+                db_backup_path = "../oci_env/db_backup/"
+                if not os.path.isdir(db_backup_path):
+                    os.makedirs(db_backup_path)
+                shutil.copyfile(dump_path, f"{db_backup_path}{db_dump}.tar.gz")
                 self.exec_cmd(env, f"db restore -f {db_dump} --migrate")
                 time.sleep(10)
                 self.exec_cmd(env, "poll --wait 2 --attempts 30")
