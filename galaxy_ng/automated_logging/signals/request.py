@@ -24,7 +24,7 @@ except ImportError:
     get_client_ip = None
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("automated_logging")
 
 
 @receiver(request_finished, weak=False)

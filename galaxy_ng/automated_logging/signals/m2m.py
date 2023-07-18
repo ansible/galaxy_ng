@@ -31,7 +31,7 @@ from automated_logging.models import (
 from automated_logging.settings import settings
 from automated_logging.signals import lazy_model_exclusion
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("automated_logging")
 
 
 def find_m2m_rel(sender, model) -> Optional[ManyToManyField]:

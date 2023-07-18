@@ -33,7 +33,7 @@ from automated_logging.helpers import (
 from automated_logging.helpers.enums import PastOperationMap
 
 ChangeSet = namedtuple('ChangeSet', ('deleted', 'added', 'changed'))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("automated_logging")
 
 
 def normalize_save_value(value: Any):
