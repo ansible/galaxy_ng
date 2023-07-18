@@ -21,27 +21,6 @@ from ..utils.rbac_utils import create_test_user, upload_test_artifact
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.skip
-def test_github(galaxy_client):
-    gc = galaxy_client("github_user", github_social_auth=True)
-    r = gc.get("_ui/v1/me/")
-
-
-@pytest.mark.skip
-def test_anon():
-    url = "https://beta-galaxy-stage.ansible.com/api/"
-    g_client = GalaxyClient(galaxy_root=url, auth=None)
-    r = g_client.get("_ui/v1/me/")
-    print(r)
-
-
-def test_anon_fixure(galaxy_client):
-    g_client = galaxy_client(None)
-    r = g_client.get("_ui/v1/me/")
-    print(r)
-    # cleanup(galaxy_client)
-
-
 def test_community_settings(galaxy_client):
     """Tests settings are correct"""
     g_client = galaxy_client(None)
