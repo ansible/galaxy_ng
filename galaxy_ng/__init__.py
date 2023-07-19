@@ -1,5 +1,5 @@
 import sys
-from . import automated_logging
+from ._vendor import automated_logging
 
 sys.modules.setdefault("automated_logging", automated_logging)
 
