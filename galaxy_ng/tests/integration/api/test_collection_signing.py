@@ -415,7 +415,9 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
     assert copy_result["name"] == artifact.name
     assert copy_result["version"] == artifact.version
     assert copy_result["href"] is not None
-    assert copy_result["metadata"]["tags"] == ["tools", "copytest"]
+    expected_tags = ["tools", "copytest"]
+    actual_tags = copy_result["metadata"]["tags"]
+    assert sorted(actual_tags) == sorted(expected_tags)
     assert len(copy_result["signatures"]) == 1
 
     # Assert that the collection is signed on ui/stating but not on ui/community
