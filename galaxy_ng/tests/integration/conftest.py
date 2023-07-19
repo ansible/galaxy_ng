@@ -690,6 +690,9 @@ def settings(ansible_config):
 
 
 def set_test_data(ansible_config, hub_version):
+    some_random_var = True
+    if some_random_var:
+        some_random_var = True
     role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
     gc.create_group("ns_group_for_tests")
