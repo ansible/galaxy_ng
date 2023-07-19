@@ -36,13 +36,15 @@ RUN set -ex; \
         git \
         gcc \
         glibc-langpack-en \
-        python39-devel \
         libpq \
         libpq-devel \
         pinentry \
         make \
         openldap-devel \
         skopeo \
+        python3.11 \
+        python3.11-devel \
+        python3.11-pip \
     && dnf clean all \
     && rm -rf /var/cache/dnf/ \
     && rm -f /var/lib/rpm/__db.* \
@@ -63,7 +65,7 @@ RUN git clone https://github.com/eradman/entr && \
 
 USER ${USER_NAME}:${USER_GROUP}
 RUN set -ex; \
-    python3 -m venv /venv
+    python3.11 -m venv /venv
 
 ENV PATH="/venv/bin:${PATH}" \
     VIRTUAL_ENV="/venv"
@@ -72,9 +74,9 @@ COPY ./requirements/requirements.common.txt /tmp/requirements.txt
 COPY ./dev/common/ansible-sign.key /tmp/ansible-sign.key
 
 RUN set -ex; \
-    pip install --no-cache-dir --upgrade pip \
+    pip3.11 install --no-cache-dir --upgrade pip \
     && if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then \
-    pip install --no-cache-dir --requirement /tmp/requirements.txt; fi
+    pip3.11 install --no-cache-dir --requirement /tmp/requirements.txt; fi
 
 # Install application
 COPY --chown=${USER_NAME}:${USER_GROUP} . /app
@@ -82,8 +84,8 @@ COPY --chown=${USER_NAME}:${USER_GROUP} . /app
 # When LOCK_REQUIREMENTS is disabled avoid running collectstatic here
 # on that case developer should run collectstatic manually
 RUN set -ex; \
-    pip install --no-cache-dir --editable /app \
-    && pip install -r /app/requirements/requirements.dev.txt
+    pip3.11 install --no-cache-dir --editable /app \
+    && pip3.11 install -r /app/requirements/requirements.dev.txt
 
 USER root:root
 RUN set -ex; \

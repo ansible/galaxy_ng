@@ -22,10 +22,10 @@ COPY requirements/requirements.insights.txt /tmp/requirements.txt
 # NOTE: en_US.UTF-8 locale is provided by glibc-langpack-en
 RUN set -ex; \
     DNF="dnf -y --disableplugin=subscription-manager" && \
-    INSTALL_PKGS="glibc-langpack-en git-core libpq python39" && \
-    INSTALL_PKGS_BUILD="gcc libpq-devel python39-devel openldap-devel" && \
+    INSTALL_PKGS="glibc-langpack-en git-core libpq python3.11 python3.11-pip" && \
+    INSTALL_PKGS_BUILD="gcc libpq-devel python3.11-devel openldap-devel" && \
     LANG=C ${DNF} install ${INSTALL_PKGS} ${INSTALL_PKGS_BUILD} && \
-    python3 -m venv "${VIRTUAL_ENV}" && \
+    python3.11 -m venv "${VIRTUAL_ENV}" && \
     PYTHON="${VIRTUAL_ENV}/bin/python3" && \
     ${PYTHON} -m pip install -U pip wheel && \
     ${PYTHON} -m pip install -r /tmp/requirements.txt && \
@@ -39,7 +39,7 @@ RUN set -ex; \
                                /var/lib/pulp/tmp \
                                /etc/pulp/certs \
                                /tmp/ansible && \
-    pip install --no-deps --editable /app && \
+    pip3.11 install --no-deps --editable /app && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
     install -Dm 0644 /app/ansible.cfg /etc/ansible/ansible.cfg && \
     install -Dm 0644 /app/docker/etc/settings.py /etc/pulp/settings.py && \
