@@ -75,4 +75,5 @@ ignore = [
     "pr_check.sh",
     "lint_requirements.txt",
     "profiles/**",
+    "galaxy_ng/_vendor/**",
 ]

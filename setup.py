@@ -117,9 +117,6 @@ requirements = [
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.15.0,<2.17.0",
-    # We want to re-add this later with a vendored copy since
-    # upstream is no longer maintained.
-    # "django-automated-logging@git+https://github.com/jctanner/django-automated-logging@DJANGO_4x",
     "social-auth-core>=4.4.2",
     "social-auth-app-django>=5.2.0",
     "dynaconf>=3.1.12",
@@ -127,6 +124,10 @@ requirements = [
     "insights_analytics_collector>=0.3.0",
     "boto3",
     "distro",
+    # From vendored automated_logging
+    "marshmallow<4.0.0,>=3.6.1",
+    "django-picklefield<4.0.0,>=3.0.1",
+    "django-ipware<4.0.0,>=3.0.0",
 ]
 
 
