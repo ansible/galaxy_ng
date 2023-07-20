@@ -6,6 +6,7 @@ from .ui import urls as ui_urls
 from .v1 import urls as v1_urls
 from .v3 import urls as v3_urls
 
+
 DEFAULT_DISTRIBUTION_BASE_PATH = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH.strip('/')
 
 app_name = "api"
