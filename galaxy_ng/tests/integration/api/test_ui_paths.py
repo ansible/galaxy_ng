@@ -207,7 +207,6 @@ def test_api_ui_v1_distributions(ansible_config):
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 def test_api_ui_v1_distributions_by_id(ansible_config):
-
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
