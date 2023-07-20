@@ -1,7 +1,10 @@
 """Utility functions for AH tests."""
 import os
 import subprocess
+from functools import lru_cache
 from unittest.mock import patch
+
+from galaxy_ng.tests.integration.constants import BETA_GALAXY_PROFILES
 
 from galaxykit import GalaxyClient
 
@@ -12,6 +15,11 @@ from ansible.galaxy.api import GalaxyAPI
 from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
+
+from galaxykit.groups import delete_group
+from galaxykit.namespaces import delete_namespace, delete_v1_namespace
+from galaxykit.users import delete_user
+from galaxykit.utils import GalaxyClientError
 
 logger = logging.getLogger(__name__)
 
@@ -299,3 +307,25 @@ def retrieve_collection(artifact, collections):
         ):
             local_collection_found = local_collection
     return local_collection_found
+
+
+def beta_galaxy_cleanup(gc, u):
+    gc_admin = gc("admin")
+    github_user_username = BETA_GALAXY_PROFILES[u]["username"]
+    group = f"namespace:{github_user_username}".replace("-", "_")
+    try:
+        delete_user(gc_admin, github_user_username)
+    except ValueError:
+        logger.debug("DELETE USER FAILED")
+    try:
+        delete_group(gc_admin, group)
+    except ValueError:
+        logger.debug("DELETE GROUP FAILED")
+    try:
+        delete_namespace(gc_admin, github_user_username.replace("-", "_"))
+    except GalaxyClientError:
+        logger.debug("DELETE NAMESPACE FAILED")
+    try:
+        delete_v1_namespace(gc_admin, github_user_username)
+    except ValueError:
+        logger.debug("DELETE v1 NAMESPACE FAILED")

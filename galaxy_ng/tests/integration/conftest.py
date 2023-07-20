@@ -31,7 +31,7 @@ from .utils.iqe_utils import (
     is_dev_env_standalone,
     is_standalone,
     is_ephemeral_env,
-    get_standalone_token, is_beta_galaxy
+    get_standalone_token, is_beta_galaxy, beta_galaxy_cleanup
 )
 
 # from orionutils.generator import build_collection
@@ -785,6 +785,26 @@ def get_hub_version(ansible_config):
 @pytest.fixture(scope="session")
 def hub_version(ansible_config):
     return get_hub_version(ansible_config)
+
+
+@pytest.fixture(scope="function")
+def github_user_1(ansible_config):
+    """
+    Beta Galaxy Stage Galaxy Client
+    """
+    gc = get_galaxy_client(ansible_config)
+    yield gc("github_user", github_social_auth=True)
+    beta_galaxy_cleanup(gc, "github_user")
+
+
+@pytest.fixture(scope="function")
+def github_user_2(ansible_config):
+    """
+    Beta Galaxy Stage Galaxy Client
+    """
+    gc = get_galaxy_client(ansible_config)
+    yield gc("github_user_alt", github_social_auth=True)
+    beta_galaxy_cleanup(gc, "github_user_alt")
 
 
 def min_hub_version(ansible_config, spec):
