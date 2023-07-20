@@ -138,6 +138,10 @@ gh-action/insights:
 gh-action/standalone:
 	python3 dev/oci_env_integration/actions/standalone.py
 
+.PHONY: gh-action/community
+gh-action/community:
+	python3 dev/oci_env_integration/actions/community.py
+
 .PHONY: gh-action/certified-sync
 gh-action/certified-sync:
 	python3 dev/oci_env_integration/actions/certified-sync.py
