@@ -1,6 +1,7 @@
 import os
 
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 from pulpcore.plugin.models.role import GroupRole, Role
 from pulp_ansible.app.models import CollectionRemote
 from rest_framework.authtoken.models import Token
@@ -17,7 +18,7 @@ Setup test data used in integration tests.
 
 TEST_NAMESPACES = {}
 
-auth_backend = os.environ.get('HUB_TEST_AUTHENTICATION_BACKEND')
+auth_backend = settings.get("HUB_TEST_AUTHENTICATION_BACKEND", None)
 
 print("Create test namespaces")
 for nsname in ["autohubtest2", "autohubtest3", "signing"]:
