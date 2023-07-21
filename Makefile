@@ -273,3 +273,7 @@ docs/build:
 
 docs/serve:
 	@mkdocs serve
+
+.PHONY: oci/standalone
+oci/standalone:
+	dev/oci_start standalone
