@@ -35,12 +35,12 @@ class KeycloakPassword(KeycloakToken):
     """
 
     def __init__(
-            self,
-            access_token=None,
-            auth_url=None,
-            validate_certs=False,
-            username=None,
-            password=None,
+        self,
+        access_token=None,
+        auth_url=None,
+        validate_certs=False,
+        username=None,
+        password=None,
     ):
         self.username = username
         self.password = password
@@ -85,16 +85,16 @@ class GalaxyKitClient:
         self._basic_token = basic_token
 
     def gen_authorized_client(
-            self,
-            role=None,
-            container_engine="podman",
-            container_registry=None,
-            *,
-            ignore_cache=False,
-            token=None,
-            remote=False,
-            basic_token=False,
-            github_social_auth=False
+        self,
+        role=None,
+        container_engine="podman",
+        container_registry=None,
+        *,
+        ignore_cache=False,
+        token=None,
+        remote=False,
+        basic_token=False,
+        github_social_auth=False
     ):
 
         self._basic_token = basic_token
@@ -112,7 +112,6 @@ class GalaxyKitClient:
         else:
             cache_key = (role, container_engine, container_registry, token)
         ssl_verify = config.get("ssl_verify")
-        # if cache_key not in client_cache or ignore_cache or github_social_auth:
         if cache_key not in client_cache or ignore_cache:
             if is_sync_testing():
                 url = config.get("remote_hub") if remote else config.get("local_hub")
@@ -179,7 +178,6 @@ class GalaxyKitClient:
                 token_type=token_type,
                 github_social_auth=github_social_auth
             )
-            # if ignore_cache or github_social_auth:
             client_cache[cache_key] = g_client
             if ignore_cache:
                 return g_client
@@ -190,7 +188,7 @@ token_cache = {}
 
 
 def get_standalone_token(
-        user, server, *, ignore_cache=False, ssl_verify=True, basic_token=False
+    user, server, *, ignore_cache=False, ssl_verify=True, basic_token=False
 ):
     cache_key = f"{server}::{user['username']}"
 
@@ -309,8 +307,8 @@ def retrieve_collection(artifact, collections):
     local_collection_found = None
     for local_collection in collections["data"]:
         if (
-                local_collection["name"] == artifact.name
-                and local_collection["namespace"] == artifact.namespace
+            local_collection["name"] == artifact.name
+            and local_collection["namespace"] == artifact.namespace
         ):
             local_collection_found = local_collection
     return local_collection_found
