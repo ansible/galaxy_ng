@@ -254,27 +254,33 @@ DEPLOYED_PAH_PROFILES = {
 
 BETA_GALAXY_PROFILES = {
     "regular_user": {  # it's a regular django user
-        "username": "galaxy_qe",
-        "password": "pVGcbC2hmaCDzf67bbam",
-        "token": "a1b989a642e8f527221889c28928ea2b06df955d",
-    },
-    "anonymous_user": {
-        "username": None
-    },
-    "github_user_1": {
-        "username": "gh01",
+        "username": {"vault_path": "secrets/qe/stage/users/beta_galaxy_reg_user",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/beta_galaxy_reg_user",
+                     "vault_key": "password"},
+        "token": {"vault_path": "secrets/qe/stage/users/beta_galaxy_reg_user",
+                  "vault_key": "token"},
     },
     "github_user": {
-        "username": "github-qe-test-user",
-        "password": "iWvFM@9Jj5Eckuy",
+        "username": {"vault_path": "secrets/qe/stage/users/github_user",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/github_user",
+                     "vault_key": "password"},
+        "token": None
     },
     "github_user_alt": {
-        "username": "github-qe-test-user-alt",
-        "password": "qg7SQqeuH8hp@xL",
+        "username": {"vault_path": "secrets/qe/stage/users/github_user_alt",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/github_user_alt",
+                     "vault_key": "password"},
+        "token": None
     },
     "admin": {  # it's an admin django user
-        "username": "galaxy_qe_admin",
-        "password": "qKFnT26wfusVX49kUsQb",
-        "token": "21685581f65b1cd46a65b12cb6288a6e936e16d0",
-    },
+        "username": {"vault_path": "secrets/qe/stage/users/beta_galaxy_admin",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/beta_galaxy_admin",
+                     "vault_key": "password"},
+        "token": {"vault_path": "secrets/qe/stage/users/beta_galaxy_admin",
+                  "vault_key": "token"},
+    }
 }

@@ -83,6 +83,7 @@ rbac_repos: tests verifying rbac roles on custom repositories
 x_repo_search: tests verifying cross-repo search endpoint
 repositories: tests verifying custom repositories
 all: tests that are unmarked and should pass in all deployment modes
+beta_galaxy: tests tha run against beta-galaxy-stage.ansible.com
 """
 
 logger = logging.getLogger(__name__)

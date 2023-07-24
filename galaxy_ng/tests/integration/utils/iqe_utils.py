@@ -1,7 +1,6 @@
 """Utility functions for AH tests."""
 import os
 import subprocess
-from functools import lru_cache
 from unittest.mock import patch
 
 from galaxy_ng.tests.integration.constants import BETA_GALAXY_PROFILES
