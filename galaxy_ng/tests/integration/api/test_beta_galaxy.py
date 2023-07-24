@@ -16,7 +16,7 @@ from jsonschema import validate as validate_json
 from ..schemas import (
     schema_objectlist,
 )
-from ..utils.iqe_utils import beta_galaxy_cleanup
+from ..utils.iqe_utils import beta_galaxy_user_cleanup
 from ..utils.rbac_utils import create_test_user
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ def test_me_social_with_precreated_user(galaxy_client):
     """ Make sure social auth associates to the correct username """
     # delete user to make sure user does not exist
     gc_admin = galaxy_client("admin")
-    beta_galaxy_cleanup(galaxy_client, "github_user")
+    beta_galaxy_user_cleanup(galaxy_client, "github_user")
     github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
     create_test_user(gc_admin, github_user_username)
     gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
@@ -134,17 +134,17 @@ def test_social_auth_creates_legacynamespace(gh_user_1_pre):
 
 
 @pytest.mark.beta_galaxy
-def test_update_legacynamespace_owners(github_user_1, gh_user_2):
+def test_update_legacynamespace_owners(gh_user_1_post, gh_user_2):
     uinfo2 = gh_user_2.get("_ui/v1/me/")
-    ns_resp = github_user_1.get(f"v1/namespaces/?name={github_user_1.username}")
+    ns_resp = gh_user_1_post.get(f"v1/namespaces/?name={gh_user_1_post.username}")
     ns_id = ns_resp['results'][0]['id']
     ns_url = f'v1/namespaces/{ns_id}/'
     owners_url = ns_url + 'owners/'
     new_owners = {'owners': [{'id': uinfo2['id']}]}
     # put the payload
-    github_user_1.put(owners_url, body=new_owners)
+    gh_user_1_post.put(owners_url, body=new_owners)
     # get the new data
-    owners2 = github_user_1.get(owners_url)
+    owners2 = gh_user_1_post.get(owners_url)
     owners2_usernames = [x['username'] for x in owners2]
     assert 'gh01' not in owners2_usernames
     assert uinfo2['username'] in owners2_usernames

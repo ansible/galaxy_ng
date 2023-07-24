@@ -32,7 +32,7 @@ from .utils.iqe_utils import (
     is_dev_env_standalone,
     is_standalone,
     is_ephemeral_env,
-    get_standalone_token, is_beta_galaxy, beta_galaxy_cleanup, remove_from_cache
+    get_standalone_token, is_beta_galaxy, beta_galaxy_user_cleanup, remove_from_cache
 )
 from .utils.tools import generate_random_artifact_version
 
@@ -791,20 +791,22 @@ def hub_version(ansible_config):
 
 
 @pytest.fixture(scope="function")
-def github_user_1(ansible_config):
+def gh_user_1_post(ansible_config):
     """
-    Beta Galaxy Stage Galaxy Client
+    Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
+    The user and everything related to it will be removed from beta galaxy stage
+    after the test
     """
     gc = get_galaxy_client(ansible_config)
     yield gc("github_user", github_social_auth=True)
-    beta_galaxy_cleanup(gc, "github_user")
+    beta_galaxy_user_cleanup(gc, "github_user")
     remove_from_cache("github_user")
 
 
 @pytest.fixture(scope="function")
 def gh_user_1(ansible_config):
     """
-    Beta Galaxy Stage Galaxy Client
+    Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
     """
     gc = get_galaxy_client(ansible_config)
     return gc("github_user", github_social_auth=True)
@@ -813,7 +815,7 @@ def gh_user_1(ansible_config):
 @pytest.fixture(scope="function")
 def gh_user_2(ansible_config):
     """
-    Beta Galaxy Stage Galaxy Client
+    Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
     """
     gc = get_galaxy_client(ansible_config)
     return gc("github_user_alt", github_social_auth=True)
@@ -822,17 +824,18 @@ def gh_user_2(ansible_config):
 @pytest.fixture(scope="function")
 def gh_user_1_pre(ansible_config):
     """
-    Cleans everything and logins again
+    Removes everything related to the GitHub user and the user itself and
+    returns a galaxy kit client with the same GitHub user logged into beta galaxy stage
     """
     gc = get_galaxy_client(ansible_config)
-    beta_galaxy_cleanup(gc, "github_user")
+    beta_galaxy_user_cleanup(gc, "github_user")
     return gc("github_user", github_social_auth=True, ignore_cache=True)
 
 
 @pytest.fixture(scope="function")
 def generate_test_artifact(ansible_config):
     """
-    Beta Galaxy Stage Galaxy Client
+    Generates a test artifact and deletes it after the test
     """
     github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
     expected_ns = f"{github_user_username}".replace("-", "_")

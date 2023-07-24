@@ -314,23 +314,23 @@ def retrieve_collection(artifact, collections):
     return local_collection_found
 
 
-def beta_galaxy_cleanup(gc, u):
+def beta_galaxy_user_cleanup(gc, u):
     gc_admin = gc("admin")
     github_user_username = BETA_GALAXY_PROFILES[u]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
     try:
         delete_user(gc_admin, github_user_username)
     except ValueError:
-        logger.debug("DELETE USER FAILED")
+        pass
     try:
         delete_group(gc_admin, group)
     except ValueError:
-        logger.debug("DELETE GROUP FAILED")
+        pass
     try:
         delete_namespace(gc_admin, github_user_username.replace("-", "_"))
     except GalaxyClientError:
-        logger.debug("DELETE NAMESPACE FAILED")
+        pass
     try:
         delete_v1_namespace(gc_admin, github_user_username)
     except ValueError:
-        logger.debug("DELETE v1 NAMESPACE FAILED")
+        pass
