@@ -7,6 +7,7 @@ import pytest
 
 from galaxykit.collections import get_all_collections, upload_artifact
 from galaxykit.namespaces import get_namespace
+from galaxykit.users import get_me
 from galaxykit.utils import wait_for_task
 from ..utils import ansible_galaxy, wait_for_url, CollectionInspector
 from ..constants import BETA_GALAXY_PROFILES
@@ -59,7 +60,7 @@ def test_me_anonymous(galaxy_client):
     """Tests anonymous user is detected correctly"""
 
     g_client = galaxy_client(None)
-    resp = g_client.get('/api/_ui/v1/me/')
+    resp = get_me(g_client)
 
     assert resp['username'] == ""
     assert resp['id'] is None
@@ -70,7 +71,7 @@ def test_me_anonymous(galaxy_client):
 @pytest.mark.beta_galaxy
 def test_me_social(gh_user_1):
     """ Tests a social authed user can see their user info """
-    r = gh_user_1.get("_ui/v1/me/")
+    r = get_me(gh_user_1)
     assert r['username'] == gh_user_1.username
 
 
@@ -83,7 +84,7 @@ def test_me_social_with_precreated_user(galaxy_client):
     github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
     create_test_user(gc_admin, github_user_username)
     gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
-    uinfo = gc.get('_ui/v1/me/')
+    uinfo = get_me(gc)
     assert uinfo['username'] == gc.username
 
 
@@ -91,7 +92,7 @@ def test_me_social_with_precreated_user(galaxy_client):
 def test_social_auth_creates_group(gh_user_1_pre):
     github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
-    uinfo = gh_user_1_pre.get('_ui/v1/me/')
+    uinfo = get_me(gh_user_1_pre)
     assert uinfo['username'] == gh_user_1_pre.username
     assert uinfo['groups'][0]['name'] == group
 
@@ -135,7 +136,7 @@ def test_social_auth_creates_legacynamespace(gh_user_1_pre):
 
 @pytest.mark.beta_galaxy
 def test_update_legacynamespace_owners(gh_user_1_post, gh_user_2):
-    uinfo2 = gh_user_2.get("_ui/v1/me/")
+    uinfo2 = get_me(gh_user_2)
     ns_resp = gh_user_1_post.get(f"v1/namespaces/?name={gh_user_1_post.username}")
     ns_id = ns_resp['results'][0]['id']
     ns_url = f'v1/namespaces/{ns_id}/'
