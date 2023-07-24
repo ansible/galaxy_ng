@@ -73,6 +73,13 @@ class CompletedProcessError(Exception):
 client_cache = {}
 
 
+def remove_from_cache(role):
+    for e in list(client_cache.keys()):
+        if role in e:
+            client_cache.pop(e)
+            logger.debug(f"key {e} removed from GalaxyKitClient cache")
+
+
 class GalaxyKitClient:
     def __init__(self, ansible_config, custom_config=None, basic_token=None):
         self.config = ansible_config if not custom_config else custom_config
@@ -106,7 +113,8 @@ class GalaxyKitClient:
         else:
             cache_key = (role, container_engine, container_registry, token)
         ssl_verify = config.get("ssl_verify")
-        if cache_key not in client_cache or ignore_cache or github_social_auth:
+        # if cache_key not in client_cache or ignore_cache or github_social_auth:
+        if cache_key not in client_cache or ignore_cache:
             if is_sync_testing():
                 url = config.get("remote_hub") if remote else config.get("local_hub")
                 profile_config = (
@@ -172,10 +180,10 @@ class GalaxyKitClient:
                 token_type=token_type,
                 github_social_auth=github_social_auth
             )
-            if ignore_cache or github_social_auth:
+            # if ignore_cache or github_social_auth:
+            client_cache[cache_key] = g_client
+            if ignore_cache:
                 return g_client
-            else:
-                client_cache[cache_key] = g_client
         return client_cache[cache_key]
 
 

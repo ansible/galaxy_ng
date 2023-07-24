@@ -1,14 +1,13 @@
 import logging
-from time import sleep
+import subprocess
+import tempfile
 
 import pytest
 
-from galaxykit.collections import get_all_collections, delete_collection
-from galaxykit.groups import delete_group
-from galaxykit.namespaces import get_namespace, delete_namespace
-from galaxykit.users import delete_user
-from ..utils import build_collection, ansible_galaxy, wait_for_url
-from ..utils.iqe_utils import beta_galaxy_cleanup
+from galaxykit.collections import get_all_collections, upload_artifact
+from galaxykit.namespaces import get_namespace
+from galaxykit.utils import wait_for_task
+from ..utils import ansible_galaxy, wait_for_url, CollectionInspector
 from ..constants import BETA_GALAXY_PROFILES
 
 from jsonschema import validate as validate_json
@@ -16,8 +15,8 @@ from jsonschema import validate as validate_json
 from ..schemas import (
     schema_objectlist,
 )
-from ..utils.rbac_utils import create_test_user, upload_test_artifact
-from ..utils.tools import generate_random_artifact_version
+from ..utils.iqe_utils import beta_galaxy_cleanup
+from ..utils.rbac_utils import create_test_user
 
 logger = logging.getLogger(__name__)
 
@@ -64,89 +63,69 @@ def test_me_anonymous(galaxy_client):
     assert resp['is_superuser'] is False
 
 
-def test_me_social(github_user_1):
+def test_me_social(gh_user_1):
     """ Tests a social authed user can see their user info """
-    r = github_user_1.get("_ui/v1/me/")
-    assert r['username'] == github_user_1.username
+    r = gh_user_1.get("_ui/v1/me/")
+    assert r['username'] == gh_user_1.username
 
 
 def test_me_social_with_precreated_user(galaxy_client):
     """ Make sure social auth associates to the correct username """
+    # delete user to make sure user does not exist
     gc_admin = galaxy_client("admin")
+    beta_galaxy_cleanup(galaxy_client, "github_user")
     github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
-    try:
-        delete_user(gc_admin, github_user_username)
-        delete_namespace(gc_admin, github_user_username.replace("-", "_"))
-    except ValueError:
-        pass
     create_test_user(gc_admin, github_user_username)
-    gc = galaxy_client("github_user", github_social_auth=True)
+    gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
     uinfo = gc.get('_ui/v1/me/')
     assert uinfo['username'] == gc.username
-    beta_galaxy_cleanup(galaxy_client, "github_user")
 
 
-def test_social_auth_creates_group(galaxy_client):
-    gc_admin = galaxy_client("admin")
+def test_social_auth_creates_group(gh_user_1_pre):
     github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
-    try:
-        delete_user(gc_admin, github_user_username)
-        delete_group(gc_admin, group)
-        delete_namespace(gc_admin, github_user_username.replace("-", "_"))
-    except ValueError:
-        pass
-    gc = galaxy_client("github_user", github_social_auth=True)
-    uinfo = gc.get('_ui/v1/me/')
-    assert uinfo['username'] == gc.username
+    uinfo = gh_user_1_pre.get('_ui/v1/me/')
+    assert uinfo['username'] == gh_user_1_pre.username
     assert uinfo['groups'][0]['name'] == group
 
 
-def test_social_auth_creates_v3_namespace(github_user_1, galaxy_client):
-    expected_ns = f"{github_user_1.username}".replace("-", "_")
-    ns = get_namespace(github_user_1, expected_ns)
+def test_social_auth_creates_v3_namespace(gh_user_1_pre, generate_test_artifact):
+    expected_ns = f"{gh_user_1_pre.username}".replace("-", "_")
+    ns = get_namespace(gh_user_1_pre, expected_ns)
     assert ns["name"] == expected_ns
-    collection = upload_test_artifact(github_user_1, expected_ns)
-
-    gc_admin = galaxy_client("admin")
-    delete_collection(gc_admin, namespace=collection.namespace, collection=collection.name)
-    # test with collection publish ?
-    # make a collection
+    resp = upload_artifact(None, gh_user_1_pre, generate_test_artifact)
+    logger.debug("Waiting for upload to be completed")
+    resp = wait_for_task(gh_user_1_pre, resp)
+    assert resp["state"] == "completed"
 
 
-def test_social_auth_creates_v3_namespace_upload_cli(github_user_1, galaxy_client):
-    expected_ns = f"{github_user_1.username}".replace("-", "_")
-    ns = get_namespace(github_user_1, expected_ns)
+def test_social_auth_creates_v3_namespace_upload_cli(gh_user_1, galaxy_client,
+                                                     generate_test_artifact):
+    expected_ns = f"{gh_user_1.username}".replace("-", "_")
+    ns = get_namespace(gh_user_1, expected_ns)
     assert ns["name"] == expected_ns
-
-    test_version = generate_random_artifact_version()
-    artifact = build_collection(
-        "skeleton",
-        config={"namespace": expected_ns, "version": test_version, "tags": ["tools"]},
-    )
-
     ansible_galaxy(
-        f"collection publish {artifact.filename}",
-        server_url=github_user_1.galaxy_root,
+        f"collection publish {generate_test_artifact.filename}",
+        server_url=gh_user_1.galaxy_root,
         force_token=True,
-        token=github_user_1.get_token()
+        token=gh_user_1.get_token()
     )
     gc_admin = galaxy_client("admin")
     url = f"v3/plugin/ansible/content/" \
-          f"published/collections/index/{expected_ns}/{artifact.name}/"
+          f"published/collections/index/{expected_ns}/{generate_test_artifact.name}/"
     wait_for_url(gc_admin, url)
-    delete_collection(gc_admin, namespace=artifact.namespace, collection=artifact.name)
 
 
-def test_social_auth_creates_legacynamespace(github_user_1):
-    r = github_user_1.get(f"v1/namespaces/?name={github_user_1.username}")
+def test_social_auth_creates_legacynamespace(gh_user_1_pre):
+    r = gh_user_1_pre.get(f"v1/namespaces/?name={gh_user_1_pre.username}")
     assert r['count'] == 1
-    assert r['results'][0]['name'] == github_user_1.username
-    assert r['results'][0]['summary_fields']['owners'][0]['username'] == github_user_1.username
+    assert r['results'][0]['name'] == gh_user_1_pre.username
+    assert r['results'][0]['summary_fields']['owners'][0]['username'] == gh_user_1_pre.username
 
 
-def test_update_legacynamespace_owners(github_user_1, github_user_2):
-    uinfo2 = github_user_2.get(f"_ui/v1/me/")
+@pytest.mark.this
+def test_update_legacynamespace_owners(github_user_1, gh_user_2):
+    uinfo2 = gh_user_2.get(f"_ui/v1/me/")
     ns_resp = github_user_1.get(f"v1/namespaces/?name={github_user_1.username}")
     ns_id = ns_resp['results'][0]['id']
     ns_url = f'v1/namespaces/{ns_id}/'
@@ -169,7 +148,45 @@ def test_list_collections_anonymous(galaxy_client):
     validate_json(instance=resp, schema=schema_objectlist)
 
 
-def test_list_collections_social(github_user_1):
+def test_list_collections_social(gh_user_1):
     """ Tests a social authed user can see collections """
-    resp = get_all_collections(github_user_1)
+    resp = get_all_collections(gh_user_1)
     validate_json(instance=resp, schema=schema_objectlist)
+
+
+def test_social_download_artifact(gh_user_1, generate_test_artifact):
+    expected_ns = f"{gh_user_1.username}".replace("-", "_")
+    resp = upload_artifact(None, gh_user_1, generate_test_artifact)
+    logger.debug("Waiting for upload to be completed")
+    resp = wait_for_task(gh_user_1, resp)
+    assert resp["state"] == "completed"
+
+    with tempfile.TemporaryDirectory() as dir:
+        filename = f"{expected_ns}-{generate_test_artifact.name}-{generate_test_artifact.version}.tar.gz"
+        tarball_path = f"{dir}/{filename}"
+        url = f"{gh_user_1.galaxy_root}v3/plugin/" \
+              f"ansible/content/published/collections/artifacts/{filename}"
+
+        cmd = [
+            "curl",
+            "--retry",
+            "5",
+            "-L",
+            "-H",
+            "'Content-Type: application/json'",
+            "-H",
+            f"Authorization: Bearer {gh_user_1.get_token()}",
+            "-o",
+            tarball_path,
+            url,
+            "--insecure"
+        ]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        returncode = proc.wait()
+        assert returncode == 0
+
+        # Extract tarball, verify information in manifest
+        ci = CollectionInspector(tarball=tarball_path)
+        assert ci.namespace == expected_ns
+        assert ci.name == generate_test_artifact.name
+        assert ci.version == generate_test_artifact.version

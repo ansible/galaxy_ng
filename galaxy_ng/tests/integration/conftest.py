@@ -8,6 +8,7 @@ import pytest
 from orionutils.utils import increment_version
 from pkg_resources import parse_version, Requirement
 
+from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
 from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES, \
@@ -31,8 +32,9 @@ from .utils.iqe_utils import (
     is_dev_env_standalone,
     is_standalone,
     is_ephemeral_env,
-    get_standalone_token, is_beta_galaxy, beta_galaxy_cleanup
+    get_standalone_token, is_beta_galaxy, beta_galaxy_cleanup, remove_from_cache
 )
+from .utils.tools import generate_random_artifact_version
 
 # from orionutils.generator import build_collection
 
@@ -795,16 +797,53 @@ def github_user_1(ansible_config):
     gc = get_galaxy_client(ansible_config)
     yield gc("github_user", github_social_auth=True)
     beta_galaxy_cleanup(gc, "github_user")
+    remove_from_cache("github_user")
 
 
 @pytest.fixture(scope="function")
-def github_user_2(ansible_config):
+def gh_user_1(ansible_config):
     """
     Beta Galaxy Stage Galaxy Client
     """
     gc = get_galaxy_client(ansible_config)
-    yield gc("github_user_alt", github_social_auth=True)
-    beta_galaxy_cleanup(gc, "github_user_alt")
+    return gc("github_user", github_social_auth=True)
+
+
+@pytest.fixture(scope="function")
+def gh_user_2(ansible_config):
+    """
+    Beta Galaxy Stage Galaxy Client
+    """
+    gc = get_galaxy_client(ansible_config)
+    return gc("github_user_alt", github_social_auth=True)
+
+
+@pytest.fixture(scope="function")
+def gh_user_1_pre(ansible_config):
+    """
+    Cleans everything and logins again
+    """
+    gc = get_galaxy_client(ansible_config)
+    beta_galaxy_cleanup(gc, "github_user")
+    return gc("github_user", github_social_auth=True, ignore_cache=True)
+
+
+@pytest.fixture(scope="function")
+def generate_test_artifact(ansible_config):
+    """
+    Beta Galaxy Stage Galaxy Client
+    """
+    github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
+    expected_ns = f"{github_user_username}".replace("-", "_")
+    test_version = generate_random_artifact_version()
+    artifact = build_collection(
+        "skeleton",
+        config={"namespace": expected_ns, "version": test_version, "tags": ["tools"]},
+    )
+    yield artifact
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc_admin = galaxy_client("admin")
+    delete_collection(gc_admin, namespace=artifact.namespace, collection=artifact.name)
 
 
 def min_hub_version(ansible_config, spec):
