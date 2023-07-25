@@ -56,7 +56,7 @@ botocore==1.29.132
     #   s3transfer
 bracex==2.3.post1
     # via wcmatch
-certifi==2023.5.7
+certifi==2023.7.22
     # via requests
 cffi==1.15.1
     # via
