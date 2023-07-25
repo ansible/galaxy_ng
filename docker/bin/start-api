@@ -18,6 +18,7 @@ GUNICORN_OPTIONS=(
   --bind "${BIND_HOST}:${BIND_PORT}"
   --workers "${GUNICORN_WORKERS}"
   --access-logfile -
+  --limit-request-field_size 32768
 )
 
 if [[ -n "${GUNICORN_FORWARDED_ALLOW_IPS}" ]]; then
