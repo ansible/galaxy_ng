@@ -27,8 +27,7 @@ logger = logging.getLogger(__name__)
 def test_community_settings(galaxy_client):
     """Tests settings are correct"""
     g_client = galaxy_client(None)
-
-    resp = g_client.get('/api/_ui/v1/settings/')
+    resp = g_client.get_settings()
 
     assert resp['GALAXY_AUTH_LDAP_ENABLED'] is None
     assert resp['GALAXY_AUTO_SIGN_COLLECTIONS'] is False
@@ -48,7 +47,7 @@ def test_community_settings(galaxy_client):
 def test_community_feature_flags(galaxy_client):
     """Tests feature flags are correct"""
     g_client = galaxy_client(None)
-    resp = g_client.get('/api/_ui/v1/feature-flags/')
+    resp = g_client.get_feature_flags()
     assert resp['ai_deny_index'] is True
     assert resp['display_repositories'] is False
     assert resp['execution_environments'] is False
