@@ -5,6 +5,9 @@ from insights_analytics_collector import Package as InsightsAnalyticsPackage
 
 
 class Package(InsightsAnalyticsPackage):
+    """Package is the class responsible to creating and sending of one tar.gz archive"""
+    # Ansible Lightspeed was originally named as wisdom,
+    # that's the reason for the content-type's name
     PAYLOAD_CONTENT_TYPE = "application/vnd.redhat.wisdom.filename+tgz"
 
     def _tarname_base(self):
@@ -26,7 +29,7 @@ class Package(InsightsAnalyticsPackage):
     def _get_rh_bucket(self):
         return os.environ["aws_bucket"]
 
-    def get_s3_configured():
+    def get_s3_configured(self):
         return True
 
     def shipping_auth_mode(self):

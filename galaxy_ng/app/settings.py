@@ -249,3 +249,20 @@ SOCIAL_AUTH_GITHUB_SECRET = os.environ.get('SOCIAL_AUTH_GITHUB_SECRET')
 # groups foo and bar login and only group foo exists in the system,
 # the user will be added to foo and bar will be ignored.
 GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS = False
+
+# Enables Metrics collection for Lightspeed/Wisdom
+# - django command metrics-collection-lightspeed
+GALAXY_METRICS_COLLECTION_LIGHTSPEED_ENABLED = True
+# Enables Metrics collection for Automation Analytics
+# - django command metrics-collection-automation-analytics
+GALAXY_METRICS_COLLECTION_AUTOMATION_ANALYTICS_ENABLED = False
+# List of values has the insights_analytics_collector/package.py:SHIPPING_AUTH_*
+GALAXY_METRICS_COLLECTION_AUTOMATION_ANALYTICS_AUTH_TYPE = "user-pass"
+# URL of Ingress upload API in console.redhat.com
+GALAXY_METRICS_COLLECTION_C_RH_C_UPLOAD_URL = None
+# RH account's user
+GALAXY_METRICS_COLLECTION_REDHAT_USERNAME = None
+# RH account's password
+GALAXY_METRICS_COLLECTION_REDHAT_PASSWORD = None
+# RH account's org id (required for x-rh-identity auth type)
+GALAXY_METRICS_COLLECTION_ORG_ID = None
