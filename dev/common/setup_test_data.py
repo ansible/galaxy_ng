@@ -55,24 +55,27 @@ def _init_token(user, credentials):
 
 for profile_name in PROFILES:
     profile = PROFILES[profile_name]
-    if ldap_user := profile["username"].get("ldap"):
-        print(f"Initializing ldap user for test profile: {profile_name}")
-        credentials = CREDENTIALS[ldap_user]
-        _init_group(credentials, profile)
+    try:
+        if ldap_user := profile["username"].get("ldap"):
+            print(f"Initializing ldap user for test profile: {profile_name}")
+            credentials = CREDENTIALS[ldap_user]
+            _init_group(credentials, profile)
 
-    if galaxy_user := profile["username"].get("galaxy"):
-        print(f"Initializing galaxy user for test profile: {profile_name}")
-        u, _ = User.objects.get_or_create(username=galaxy_user)
-        credentials = CREDENTIALS[galaxy_user]
+        if galaxy_user := profile["username"].get("galaxy"):
+            print(f"Initializing galaxy user for test profile: {profile_name}")
+            u, _ = User.objects.get_or_create(username=galaxy_user)
+            credentials = CREDENTIALS[galaxy_user]
 
-        u.set_password(credentials["password"])
-        u.is_superuser = profile.get("is_superuser", False)
+            u.set_password(credentials["password"])
+            u.is_superuser = profile.get("is_superuser", False)
 
-        if group := _init_group(credentials, profile):
-            u.groups.add(group)
-        u.save()
+            if group := _init_group(credentials, profile):
+                u.groups.add(group)
+            u.save()
 
-        _init_token(u, credentials)
+            _init_token(u, credentials)
+    except Exception as e:
+        print(e)
 
 
 print("CollectionRemote community url points to beta-galaxy.ansible.com")
