@@ -1,6 +1,5 @@
 import logging
 import os
-from functools import lru_cache
 
 from django.conf import settings
 from django.contrib.auth.models import Permission
@@ -122,7 +121,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
     NAME = None
 
     @classmethod
-    @lru_cache
     def get_access_policy(cls, view):
         statements = GALAXY_STATEMENTS
 
