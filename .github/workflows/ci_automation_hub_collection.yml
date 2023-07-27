@@ -34,6 +34,8 @@ jobs:
       - name: Build and install the collection
         working-directory: automation_hub_collection
         run: |
+          # The ansible.cfg defined in the collection repository might break the test. We want the same variables for installation and running.
+          rm -f ansible.cfg
           ansible all -i localhost, -c local -m template -a "src=galaxy.yml.j2 dest=galaxy.yml" -e collection_namespace=ansible -e collection_name=automation_hub -e collection_version=1.0.0 -e collection_repo=https://github.com/ansible/automation_hub_collection
           ansible-galaxy collection build -vvv
           ansible-galaxy collection install ansible-automation_hub-1.0.0.tar.gz -vvv
