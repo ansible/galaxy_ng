@@ -203,7 +203,7 @@ def test_signed_only_sync(sync_instance_crc, ansible_config):
     _assert_sync(expected_manifest, pah_client)
 
 
-@pytest.mark.skip("broken by python 3.11 ... ?")
+#@pytest.mark.skip("broken by python 3.11 ... ?")
 @pytest.mark.sync
 def test_namespace_sync(sync_instance_crc, ansible_config):
     pah_config = ansible_config(profile="admin")
