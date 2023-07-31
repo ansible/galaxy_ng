@@ -129,12 +129,18 @@ class AnsibleConfigFixture(dict):
             for profile_name in PROFILES:
                 p = PROFILES[profile_name]
                 credential_set = backend_map.get(self._auth_backend, "galaxy")
+                if p['username'] is None:
+                    continue
+
                 if username := p["username"].get(credential_set):
                     self.PROFILES[profile_name] = {
                         "username": username,
                         "token": CREDENTIALS[username].get("token"),
                         "password": CREDENTIALS[username].get("password")
                     }
+
+            if self._auth_backend == "community":
+                self.PROFILES["anonymous_user"] = PROFILES.get('anonymous_user')
 
         # workaround for a weird error with the galaxy cli lib ...
         galaxy_token_fn = os.path.expanduser('~/.ansible/galaxy_token')
