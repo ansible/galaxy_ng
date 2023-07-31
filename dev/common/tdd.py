@@ -55,7 +55,8 @@ def verify_test_files_changed(changed_files):
 
     # places where test code goes
     test_paths = [
-        'galaxy_ng/tests'
+        'galaxy_ng/tests',
+        'dev/oci_env_integration',
     ]
 
     def is_app_path(fn):
