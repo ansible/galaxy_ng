@@ -192,7 +192,7 @@ def test_api_v3_plugin_execution_environments_repositories(ansible_config, local
     assert ns_name == ns_detail_resp['name']
 
     # assert pulp_labels dictionary is in response
-    assert type(repository_resp['pulp']['repository']['pulp_labels']) == dict
+    assert type(repository_resp['pulp']['repository']['pulp_labels']) is dict
 
     # delete the repository
     delete_repository_resp = api_client(

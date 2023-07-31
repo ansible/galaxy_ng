@@ -39,7 +39,7 @@ class IndexRegistryEEView(api_base.APIView):
         serializable_meta = {}
         for key in self.request.META:
             val = self.request.META[key]
-            if type(val) == str:
+            if type(val) is str:
                 serializable_meta[key] = val
 
         request_data = {
