@@ -297,3 +297,7 @@ oci/keycloak:
 .PHONY: oci/ldap
 oci/ldap:
 	dev/oci_start ldap
+
+.PHONY: oci/community
+oci/community:
+	dev/oci_start community
