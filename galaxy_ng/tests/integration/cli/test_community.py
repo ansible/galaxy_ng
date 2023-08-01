@@ -11,7 +11,7 @@ from ..utils import (
     SocialGithubClient
 )
 
-from ..utils.legacy import cleanup_social_user
+from ..utils.legacy import clean_all_roles, cleanup_social_user
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -169,6 +169,60 @@ def test_import_role_as_not_owner(ansible_config):
     assert resp.status_code == 200
     ds = resp.json()
     assert ds.get('count') == 0
+
+
+@pytest.mark.deployment_community
+def test_import_role_fields(ansible_config):
+    """Test role serializer fields after import with galaxy-importer>=0.4.11."""
+
+    github_user = "jctannerTEST"
+    github_repo = "role1"
+    role_name = "role1"
+    role_url = f"v1/roles/?github_user={github_user}&name={role_name}"
+
+    # Cleanup all roles.
+    clean_all_roles(ansible_config)
+
+    config = ansible_config(github_user)
+    client = SocialGithubClient(config=config)
+    client.login()
+    token = client.get_hub_token()
+    assert token is not None
+
+    import_pid = ansible_galaxy(
+        f"role import {github_user} {github_repo}",
+        ansible_config=config,
+        token=token,
+        force_token=True,
+        cleanup=False,
+        check_retcode=False
+    )
+    assert import_pid.returncode == 0
+
+    result = client.get(role_url).json()["results"][0]
+
+    for field in [
+        "commit", "created", "description", "download_count", "github_branch", "github_repo",
+        "github_user", "id", "modified", "name", "summary_fields", "upstream_id", "username"
+    ]:
+        assert field in result
+
+    summary_fields = result["summary_fields"]
+    assert summary_fields["dependencies"] == list()
+    assert summary_fields["namespace"]["name"] == "jctannerTEST"
+    assert summary_fields["provider_namespace"]["name"] == "jctannerTEST"
+    assert summary_fields["repository"]["name"] == "role1"
+    assert summary_fields["tags"] == list()
+
+    assert len(summary_fields["versions"]) == 1
+    for field in [
+        "active", "commit_date", "commit_sha", "created", "download_url",
+        "modified", "name", "release_date", "url", "version"
+    ]:
+        assert field in summary_fields["versions"][0]
+
+    # Cleanup all roles.
+    clean_all_roles(ansible_config)
 
 
 @pytest.mark.deployment_community
