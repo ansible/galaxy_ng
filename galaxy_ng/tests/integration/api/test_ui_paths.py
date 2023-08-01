@@ -233,7 +233,6 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 
 
 # /api/automation-hub/_ui/v1/execution-environments/registries/
-@pytest.mark.skip("waiting for https://github.com/pulp/pulpcore/issues/4107")
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_api_ui_v1_execution_environments_registries(ansible_config):
