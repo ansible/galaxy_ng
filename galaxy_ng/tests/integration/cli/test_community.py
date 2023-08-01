@@ -172,7 +172,7 @@ def test_import_role_as_not_owner(ansible_config):
 
 
 @pytest.mark.deployment_community
-def test_import_role_metadata(ansible_config):
+def test_import_role_fields(ansible_config):
     """Test role serializer fields after import with galaxy-importer>=0.4.11."""
 
     github_user = "jctannerTEST"
@@ -193,6 +193,7 @@ def test_import_role_metadata(ansible_config):
         f"role import {github_user} {github_repo}",
         ansible_config=config,
         token=token,
+        force_token=True,
         cleanup=False,
         check_retcode=False
     )
@@ -219,6 +220,9 @@ def test_import_role_metadata(ansible_config):
         "modified", "name", "release_date", "url", "version"
     ]:
         assert field in summary_fields["versions"][0]
+
+    # Cleanup all roles.
+    clean_all_roles(ansible_config)
 
 
 @pytest.mark.deployment_community
