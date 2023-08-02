@@ -159,6 +159,11 @@ LOGGING = {
             "class": "pulp_ansible.app.logutils.CollectionImportHandler",
             "formatter": "simple",
         },
+        "legacy_role_import": {
+            "level": "DEBUG",
+            "class": "galaxy_ng.app.api.v1.log.LegacyRoleImportHandler",
+            "formatter": "simple"
+        }
 
     },
     'root': {
@@ -191,6 +196,11 @@ LOGGING = {
             "handlers": ["collection_import"],
             "propagate": False,
         },
+        "galaxy_ng.app.api.v1.tasks.legacy_role_import": {
+            "level": "DEBUG",
+            "handlers": ["legacy_role_import"],
+            "propagate": False
+        }
     }
 }
 LOGGING["handlers"].update(_extra_handlers)

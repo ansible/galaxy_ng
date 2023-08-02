@@ -1,4 +1,5 @@
 from django.db import models
+from pulpcore.plugin.models import Task
 
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.models.auth import User
@@ -157,3 +158,22 @@ class LegacyRoleDownloadCount(models.Model):
     )
 
     count = models.IntegerField(default=0)
+
+
+class LegacyRoleImport(models.Model):
+    """The legacy role import task with galaxy-importer/ansible-lint messages."""
+
+    task = models.OneToOneField(
+        Task,
+        on_delete=models.CASCADE,
+        editable=False,
+        related_name="+",
+        primary_key=True
+    )
+
+    logs = models.JSONField(default=list, editable=False)
+
+    def add_log_record(self, log_record):
+        self.logs.append(
+            {"message": log_record.msg, "level": log_record.levelname, "time": log_record.created}
+        )

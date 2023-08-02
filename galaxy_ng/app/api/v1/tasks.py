@@ -5,6 +5,7 @@ import os
 import tempfile
 
 from django.db import transaction
+from pulpcore.plugin.models import Task
 
 from galaxy_importer.config import Config
 from galaxy_importer.legacy_role import import_legacy_role
@@ -17,6 +18,7 @@ from galaxy_ng.app.utils.git import get_tag_commit_date
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
+from galaxy_ng.app.api.v1.models import LegacyRoleImport
 
 from git import Repo
 
@@ -108,9 +110,13 @@ def legacy_role_import(
         logger.debug(f'GITHUB_REFERENCE: {github_reference}')
         logger.debug(f'GITHUB_COMMIT: {github_commit}')
 
+        # This LegacyRoleImport object will contain the logs for this import task.
+        LegacyRoleImport.objects.get_or_create(task_id=Task.current().pulp_id)
+        import_logger = logging.getLogger("galaxy_ng.app.api.v1.tasks.legacy_role_import")
+
         # Parse legacy role with galaxy-importer.
         importer_config = Config()
-        result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
+        result = import_legacy_role(checkout_path, namespace.name, importer_config, import_logger)
         galaxy_info = result["metadata"]["galaxy_info"]
         logger.debug(f"TAGS: {galaxy_info['galaxy_tags']}")
 
