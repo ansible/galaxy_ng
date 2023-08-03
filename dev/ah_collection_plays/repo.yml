@@ -13,14 +13,14 @@
   
   tasks:
     - name: Authenticate and retrieve API token
-      ansible.automation_hub.ah_token:
+      ah_token:
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Configure community repository
-      ansible.automation_hub.ah_repository:
+      ah_repository:
         name: community
         url: https://galaxy.ansible.com/api/
         requirements:
@@ -31,14 +31,14 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Sync community repository
-      ansible.automation_hub.ah_repository_sync:
+      ah_repository_sync:
         name: community
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Deauthenticate
-      ansible.automation_hub.ah_token:
+      ah_token:
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"
         ah_path_prefix: "{{ ah_path_prefix }}"

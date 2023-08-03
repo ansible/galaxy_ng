@@ -13,7 +13,7 @@
   
   tasks:
     - name: Create a developers group
-      ansible.automation_hub.ah_group:
+      ah_group:
         name: developers
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
@@ -21,7 +21,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Add 3 new users who are developers
-      ansible.automation_hub.ah_user:
+      ah_user:
         username: "dev_{{ item }}"
         password: password!@3w6$%
         first_name: Developer
@@ -38,7 +38,7 @@
         - blue
 
     - name: Create an executives group
-      ansible.automation_hub.ah_group:
+      ah_group:
         name: executives
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
@@ -46,7 +46,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Create an omnipotent role with all permissions
-      ansible.automation_hub.ah_role:
+      ah_role:
         name: galaxy.omnipotent
         description: Manage anything and everything
         perms: all
@@ -59,7 +59,7 @@
 # https://github.com/ansible/automation_hub_collection/issues/179 is resolved.
 
     - name: Create new executive users
-      ansible.automation_hub.ah_user:
+      ah_user:
         username: "{{ item }}"
         password: executive!@3w6$%
         is_superuser: true
@@ -77,7 +77,7 @@
         - cto
 
     - name: Delete the red developer
-      ansible.automation_hub.ah_user:
+      ah_user:
         state: absent
         username: dev_red
         ah_host: "{{ ah_host }}"
@@ -86,7 +86,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Delete the developers and executives groups
-      ansible.automation_hub.ah_group:
+      ah_group:
         state: absent
         name: "{{ item }}"
         ah_host: "{{ ah_host }}"
@@ -98,7 +98,7 @@
         - executives
 
     - name: Delete the omnipotent role
-      ansible.automation_hub.ah_role:
+      ah_role:
         state: absent
         name: galaxy.omnipotent
         ah_host: "{{ ah_host }}"

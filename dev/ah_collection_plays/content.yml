@@ -13,14 +13,14 @@
   
   tasks:
     - name: Authenticate and retrieve API token
-      ansible.automation_hub.ah_token:
+      ah_token:
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Create the automate namespace
-      ansible.automation_hub.ah_namespace:
+      ah_namespace:
         name: automate
         company: Automator Inc.
         email: automator@redhat.com
@@ -30,7 +30,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Rename automate namespace to automator
-      ansible.automation_hub.ah_namespace:
+      ah_namespace:
         name: automate
         new_name: automator
         ah_host: "{{ ah_host }}"
@@ -38,7 +38,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Delete the automator namespace
-      ansible.automation_hub.ah_namespace:
+      ah_namespace:
         state: absent
         name: automator
         ah_host: "{{ ah_host }}"
@@ -46,14 +46,14 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Ensure there is an ansible namespace
-      ansible.automation_hub.ah_namespace:
+      ah_namespace:
         name: ansible
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Upload the automation hub collection to the ansible namespace
-      ansible.automation_hub.ah_collection:
+      ah_collection:
         namespace: ansible
         name: automation_hub
         path: "{{ ah_artifact_runner_absolute_path }}"
@@ -63,7 +63,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Approve the automation hub collection
-      ansible.automation_hub.ah_approval:
+      ah_approval:
         namespace: ansible
         name: automation_hub
         version: "1.0.0"
@@ -72,7 +72,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Delete the automation hub collection
-      ansible.automation_hub.ah_collection:
+      ah_collection:
         state: absent
         namespace: ansible
         name: automation_hub
@@ -82,7 +82,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Deauthenticate
-      ansible.automation_hub.ah_token:
+      ah_token:
         state: absent
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"

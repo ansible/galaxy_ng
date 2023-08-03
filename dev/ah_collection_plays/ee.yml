@@ -13,7 +13,7 @@
   
   tasks:
     - name: Add redhat.io registry
-      ansible.automation_hub.ah_ee_registry:
+      ah_ee_registry:
         name: redhat
         url: registry.redhat.io
         ah_host: "{{ ah_host }}"
@@ -24,7 +24,7 @@
         # Can be uncommented after AAH-2607 is resolved.
         #
         #    - name: Index redhat.io registry
-        #      ansible.automation_hub.ah_ee_registry_index:
+        #      ah_ee_registry_index:
         #        name: redhat
         #        ah_host: "{{ ah_host }}"
         #        ah_username: "{{ ah_username }}"
@@ -32,7 +32,7 @@
         #        ah_path_prefix: "{{ ah_path_prefix }}"
         #
         #    - name: Update aap22ee29rhel8 ee repository
-        #      ansible.automation_hub.ah_ee_repository:
+        #      ah_ee_repository:
         #        name: ansible-automation-platform-22/ee-29-rhel8
         #        description: AAP RHEL execution environment
         #        readme: |
@@ -44,7 +44,7 @@
         #        ah_path_prefix: "{{ ah_path_prefix }}"
         #
         #    - name: Delete the aap22ee29rhel8 repository
-        #      ansible.automation_hub.ah_ee_repository:
+        #      ah_ee_repository:
         #        name: ansible-automation-platform-22/ee-29-rhel8
         #        state: absent
         #        ah_host: "{{ ah_host }}"
@@ -53,7 +53,7 @@
         #        ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Delete the redhat.io registry
-      ansible.automation_hub.ah_ee_registry:
+      ah_ee_registry:
         name: redhat
         state: absent
         ah_host: "{{ ah_host }}"
