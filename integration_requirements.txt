@@ -8,4 +8,4 @@ openapi-spec-validator
 jsonschema
 hvac
 importlib_resources
-galaxykit @ git+https://github.com/ansible/galaxykit@beta_galaxy
+galaxykit @ git+https://github.com/ansible/galaxykit

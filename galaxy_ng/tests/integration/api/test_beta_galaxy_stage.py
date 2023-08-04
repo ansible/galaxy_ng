@@ -10,7 +10,7 @@ from galaxykit.namespaces import get_namespace
 from galaxykit.users import get_me
 from galaxykit.utils import wait_for_task
 from ..utils import ansible_galaxy, wait_for_url, CollectionInspector
-from ..constants import BETA_GALAXY_PROFILES
+from ..constants import BETA_GALAXY_STAGE_PROFILES
 
 from jsonschema import validate as validate_json
 
@@ -80,7 +80,7 @@ def test_me_social_with_precreated_user(galaxy_client):
     # delete user to make sure user does not exist
     gc_admin = galaxy_client("admin")
     beta_galaxy_user_cleanup(galaxy_client, "github_user")
-    github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
+    github_user_username = BETA_GALAXY_STAGE_PROFILES["github_user"]["username"]
     create_test_user(gc_admin, github_user_username)
     gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
     uinfo = get_me(gc)
@@ -89,7 +89,7 @@ def test_me_social_with_precreated_user(galaxy_client):
 
 @pytest.mark.beta_galaxy
 def test_social_auth_creates_group(gh_user_1_pre):
-    github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
+    github_user_username = BETA_GALAXY_STAGE_PROFILES["github_user"]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
     uinfo = get_me(gh_user_1_pre)
     assert uinfo['username'] == gh_user_1_pre.username

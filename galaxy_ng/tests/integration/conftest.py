@@ -12,7 +12,7 @@ from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
 from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES, \
-    SYNC_PROFILES, DEPLOYED_PAH_PROFILES, BETA_GALAXY_PROFILES
+    SYNC_PROFILES, DEPLOYED_PAH_PROFILES, BETA_GALAXY_STAGE_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -32,7 +32,7 @@ from .utils.iqe_utils import (
     is_dev_env_standalone,
     is_standalone,
     is_ephemeral_env,
-    get_standalone_token, is_beta_galaxy, beta_galaxy_user_cleanup, remove_from_cache
+    get_standalone_token, is_beta_galaxy_stage, beta_galaxy_user_cleanup, remove_from_cache
 )
 from .utils.tools import generate_random_artifact_version
 
@@ -128,8 +128,8 @@ class AnsibleConfigFixture(dict):
             self.PROFILES["org_admin"]["token"] = None
             self.PROFILES["partner_engineer"]["token"] = None
             self.PROFILES["basic_user"]["token"] = None
-        elif is_beta_galaxy():
-            self.PROFILES = BETA_GALAXY_PROFILES
+        elif is_beta_galaxy_stage():
+            self.PROFILES = BETA_GALAXY_STAGE_PROFILES
         else:
             for profile_name in PROFILES:
                 p = PROFILES[profile_name]
@@ -837,7 +837,7 @@ def generate_test_artifact(ansible_config):
     """
     Generates a test artifact and deletes it after the test
     """
-    github_user_username = BETA_GALAXY_PROFILES["github_user"]["username"]
+    github_user_username = BETA_GALAXY_STAGE_PROFILES["github_user"]["username"]
     expected_ns = f"{github_user_username}".replace("-", "_")
     test_version = generate_random_artifact_version()
     artifact = build_collection(

@@ -3,7 +3,7 @@ import os
 import subprocess
 from unittest.mock import patch
 
-from galaxy_ng.tests.integration.constants import BETA_GALAXY_PROFILES
+from galaxy_ng.tests.integration.constants import BETA_GALAXY_STAGE_PROFILES
 
 from galaxykit import GalaxyClient
 
@@ -238,7 +238,7 @@ def is_ephemeral_env():
     )
 
 
-def is_beta_galaxy():
+def is_beta_galaxy_stage():
     return "beta-galaxy-stage.ansible" in os.getenv(
         "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
     )
@@ -316,7 +316,7 @@ def retrieve_collection(artifact, collections):
 
 def beta_galaxy_user_cleanup(gc, u):
     gc_admin = gc("admin")
-    github_user_username = BETA_GALAXY_PROFILES[u]["username"]
+    github_user_username = BETA_GALAXY_STAGE_PROFILES[u]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
     try:
         delete_user(gc_admin, github_user_username)
