@@ -8,10 +8,11 @@ import pytest
 from orionutils.utils import increment_version
 from pkg_resources import parse_version, Requirement
 
+from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id
 from galaxykit.utils import GalaxyClientError
 from .constants import USERNAME_PUBLISHER, PROFILES, CREDENTIALS, EPHEMERAL_PROFILES, \
-    SYNC_PROFILES, DEPLOYED_PAH_PROFILES
+    SYNC_PROFILES, DEPLOYED_PAH_PROFILES, BETA_GALAXY_STAGE_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -31,8 +32,9 @@ from .utils.iqe_utils import (
     is_dev_env_standalone,
     is_standalone,
     is_ephemeral_env,
-    get_standalone_token
+    get_standalone_token, is_beta_galaxy_stage, beta_galaxy_user_cleanup, remove_from_cache
 )
+from .utils.tools import generate_random_artifact_version
 
 # from orionutils.generator import build_collection
 
@@ -81,6 +83,7 @@ rbac_repos: tests verifying rbac roles on custom repositories
 x_repo_search: tests verifying cross-repo search endpoint
 repositories: tests verifying custom repositories
 all: tests that are unmarked and should pass in all deployment modes
+beta_galaxy: tests tha run against beta-galaxy-stage.ansible.com
 """
 
 logger = logging.getLogger(__name__)
@@ -125,6 +128,8 @@ class AnsibleConfigFixture(dict):
             self.PROFILES["org_admin"]["token"] = None
             self.PROFILES["partner_engineer"]["token"] = None
             self.PROFILES["basic_user"]["token"] = None
+        elif is_beta_galaxy_stage():
+            self.PROFILES = BETA_GALAXY_STAGE_PROFILES
         else:
             for profile_name in PROFILES:
                 p = PROFILES[profile_name]
@@ -789,6 +794,66 @@ def get_hub_version(ansible_config):
 @pytest.fixture(scope="session")
 def hub_version(ansible_config):
     return get_hub_version(ansible_config)
+
+
+@pytest.fixture(scope="function")
+def gh_user_1_post(ansible_config):
+    """
+    Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
+    The user and everything related to it will be removed from beta galaxy stage
+    after the test
+    """
+    gc = get_galaxy_client(ansible_config)
+    yield gc("github_user", github_social_auth=True)
+    beta_galaxy_user_cleanup(gc, "github_user")
+    remove_from_cache("github_user")
+
+
+@pytest.fixture(scope="function")
+def gh_user_1(ansible_config):
+    """
+    Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
+    """
+    gc = get_galaxy_client(ansible_config)
+    return gc("github_user", github_social_auth=True)
+
+
+@pytest.fixture(scope="function")
+def gh_user_2(ansible_config):
+    """
+    Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
+    """
+    gc = get_galaxy_client(ansible_config)
+    return gc("github_user_alt", github_social_auth=True)
+
+
+@pytest.fixture(scope="function")
+def gh_user_1_pre(ansible_config):
+    """
+    Removes everything related to the GitHub user and the user itself and
+    returns a galaxy kit client with the same GitHub user logged into beta galaxy stage
+    """
+    gc = get_galaxy_client(ansible_config)
+    beta_galaxy_user_cleanup(gc, "github_user")
+    return gc("github_user", github_social_auth=True, ignore_cache=True)
+
+
+@pytest.fixture(scope="function")
+def generate_test_artifact(ansible_config):
+    """
+    Generates a test artifact and deletes it after the test
+    """
+    github_user_username = BETA_GALAXY_STAGE_PROFILES["github_user"]["username"]
+    expected_ns = f"{github_user_username}".replace("-", "_")
+    test_version = generate_random_artifact_version()
+    artifact = build_collection(
+        "skeleton",
+        config={"namespace": expected_ns, "version": test_version, "tags": ["tools"]},
+    )
+    yield artifact
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc_admin = galaxy_client("admin")
+    delete_collection(gc_admin, namespace=artifact.namespace, collection=artifact.name)
 
 
 def min_hub_version(ansible_config, spec):

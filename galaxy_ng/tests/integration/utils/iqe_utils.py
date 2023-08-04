@@ -3,6 +3,8 @@ import os
 import subprocess
 from unittest.mock import patch
 
+from galaxy_ng.tests.integration.constants import BETA_GALAXY_STAGE_PROFILES
+
 from galaxykit import GalaxyClient
 
 import logging
@@ -13,7 +15,13 @@ from ansible.galaxy.token import BasicAuthToken
 from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
 
+from galaxykit.groups import delete_group
+from galaxykit.namespaces import delete_namespace, delete_v1_namespace
+from galaxykit.users import delete_user
+from galaxykit.utils import GalaxyClientError
+
 logger = logging.getLogger(__name__)
+
 
 # FILENAME_INCLUDED
 # FILENAME_EXCLUDED
@@ -64,6 +72,13 @@ class CompletedProcessError(Exception):
 client_cache = {}
 
 
+def remove_from_cache(role):
+    for e in list(client_cache.keys()):
+        if role in e:
+            client_cache.pop(e)
+            logger.debug(f"key {e} removed from GalaxyKitClient cache")
+
+
 class GalaxyKitClient:
     def __init__(self, ansible_config, custom_config=None, basic_token=None):
         self.config = ansible_config if not custom_config else custom_config
@@ -71,7 +86,7 @@ class GalaxyKitClient:
 
     def gen_authorized_client(
         self,
-        role,
+        role=None,
         container_engine="podman",
         container_registry=None,
         *,
@@ -79,12 +94,16 @@ class GalaxyKitClient:
         token=None,
         remote=False,
         basic_token=False,
+        github_social_auth=False
     ):
+
         self._basic_token = basic_token
         try:
             config = self.config()
         except TypeError:
             config = self.config
+        if not role:
+            return GalaxyClient(galaxy_root=config.get("url"), auth=None)
         # role can be either be the name of a user (like `ansible_insights`)
         # or a dict containing a username and password:
         # {"username": "autohubtest2", "password": "p@ssword!"}
@@ -120,21 +139,21 @@ class GalaxyKitClient:
                 if isinstance(role, str):
                     profile_config = self.config(role)
                     user = profile_config
-                    if profile_config.get("auth_url"):
-                        token = profile_config.get("token")
-                    if token is None:
-                        token = get_standalone_token(
-                            user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
-                            basic_token=self._basic_token
-                        )
-
+                    if not github_social_auth:
+                        if profile_config.get("auth_url"):
+                            token = profile_config.get("token")
+                        if token is None:
+                            token = get_standalone_token(
+                                user, url, ssl_verify=ssl_verify, ignore_cache=ignore_cache,
+                                basic_token=self._basic_token
+                            )
                     auth = {
                         "username": user["username"],
                         "password": user["password"],
                         "auth_url": profile_config.get("auth_url"),
                         "token": token,
                     }
-                else:
+                elif not github_social_auth:
                     token = get_standalone_token(
                         role,
                         url,
@@ -144,7 +163,8 @@ class GalaxyKitClient:
                     )  # ignore_cache=True
                     role.update(token=token)
                     auth = role
-
+                else:
+                    auth = role
             container_engine = config.get("container_engine")
             container_registry = config.get("container_registry")
             token_type = None if not basic_token else "Basic"
@@ -156,11 +176,11 @@ class GalaxyKitClient:
                 container_tls_verify=ssl_verify,
                 https_verify=ssl_verify,
                 token_type=token_type,
+                github_social_auth=github_social_auth
             )
+            client_cache[cache_key] = g_client
             if ignore_cache:
                 return g_client
-            else:
-                client_cache[cache_key] = g_client
         return client_cache[cache_key]
 
 
@@ -214,6 +234,12 @@ def is_standalone():
 
 def is_ephemeral_env():
     return "ephemeral" in os.getenv(
+        "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
+    )
+
+
+def is_beta_galaxy_stage():
+    return "beta-galaxy-stage.ansible" in os.getenv(
         "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
     )
 
@@ -286,3 +312,25 @@ def retrieve_collection(artifact, collections):
         ):
             local_collection_found = local_collection
     return local_collection_found
+
+
+def beta_galaxy_user_cleanup(gc, u):
+    gc_admin = gc("admin")
+    github_user_username = BETA_GALAXY_STAGE_PROFILES[u]["username"]
+    group = f"namespace:{github_user_username}".replace("-", "_")
+    try:
+        delete_user(gc_admin, github_user_username)
+    except ValueError:
+        pass
+    try:
+        delete_group(gc_admin, group)
+    except ValueError:
+        pass
+    try:
+        delete_namespace(gc_admin, github_user_username.replace("-", "_"))
+    except GalaxyClientError:
+        pass
+    try:
+        delete_v1_namespace(gc_admin, github_user_username)
+    except ValueError:
+        pass

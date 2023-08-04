@@ -251,3 +251,36 @@ DEPLOYED_PAH_PROFILES = {
         "token": "abcdefghijklmnopqrstuvwxyz1234567895",
     },
 }
+
+BETA_GALAXY_STAGE_PROFILES = {
+    "regular_user": {  # it's a regular django user
+        "username": {"vault_path": "secrets/qe/stage/users/beta_galaxy_reg_user",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/beta_galaxy_reg_user",
+                     "vault_key": "password"},
+        "token": {"vault_path": "secrets/qe/stage/users/beta_galaxy_reg_user",
+                  "vault_key": "token"},
+    },
+    "github_user": {
+        "username": {"vault_path": "secrets/qe/stage/users/github_user",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/github_user",
+                     "vault_key": "password"},
+        "token": None
+    },
+    "github_user_alt": {
+        "username": {"vault_path": "secrets/qe/stage/users/github_user_alt",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/github_user_alt",
+                     "vault_key": "password"},
+        "token": None
+    },
+    "admin": {  # it's an admin django user
+        "username": {"vault_path": "secrets/qe/stage/users/beta_galaxy_admin",
+                     "vault_key": "username"},
+        "password": {"vault_path": "secrets/qe/stage/users/beta_galaxy_admin",
+                     "vault_key": "password"},
+        "token": {"vault_path": "secrets/qe/stage/users/beta_galaxy_admin",
+                  "vault_key": "token"},
+    }
+}

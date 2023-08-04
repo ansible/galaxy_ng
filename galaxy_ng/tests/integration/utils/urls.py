@@ -5,6 +5,7 @@ from urllib.parse import urljoin, urlparse
 
 from ansible.galaxy.api import GalaxyError
 
+from galaxykit.utils import GalaxyClientError
 from .errors import CapturingGalaxyError, TaskWaitingTimeout
 
 
@@ -118,8 +119,11 @@ def wait_for_url(api_client, url, timeout_sec=6000):
         if wait_until < time.time():
             raise TaskWaitingTimeout()
         try:
-            res = api_client(url, method="GET")
-        except (GalaxyError, CapturingGalaxyError) as e:
+            try:
+                res = api_client(url, method="GET")
+            except TypeError:
+                res = api_client.get(url)
+        except (GalaxyError, CapturingGalaxyError, GalaxyClientError) as e:
             if "404" not in str(e):
                 raise
             time.sleep(0.5)
