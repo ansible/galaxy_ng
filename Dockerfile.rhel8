@@ -34,6 +34,15 @@ RUN set -ex; \
 
 COPY . /app
 
+# We need to force a consistent homedir for openshift, or it will
+# default to the unwritable root directory.
+ENV HOME="/app"
+
+# https://developers.redhat.com/blog/2020/10/26/adapting-docker-and-kubernetes-containers-to-run-on-red-hat-openshift-container-platform#group_ownership_and_file_permission
+# We have to make /app group writable because openshift always runs with an random UUID
+RUN chgrp -R 0 $HOME && \
+    chmod -R g=u $HOME
+
 RUN set -ex; \
     install -dm 0775 -o galaxy /var/lib/pulp/artifact \
                                /var/lib/pulp/tmp \
