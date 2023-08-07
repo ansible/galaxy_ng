@@ -112,6 +112,14 @@ class TestRepositories:
         test_repo_name_2 = f"repo-test-{generate_random_string()}"
         repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
 
+        # FIXME - the POST call will often result in an error with the oci+insights profile ...
+        # root:client.py:216 Cannot parse expected JSON response
+        # (http://localhost:38080/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/
+        #   <uuid>/move_collection_version/):
+        # Post "http://pulp:55001/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/
+        #   <uuid>/move_collection_version/":
+        # readfrom tcp 172.18.0.3:37490->172.18.0.2:55001:
+        #   write tcp 172.18.0.3:37490->172.18.0.2:55001: use of closed network connection
         retries = 10
         for x in range(0, retries):
             try:
