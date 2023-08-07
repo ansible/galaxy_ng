@@ -110,7 +110,24 @@ class TestRepositories:
         add_content_units(gc_admin, content_units, repo_pulp_href_1)
 
         test_repo_name_2 = f"repo-test-{generate_random_string()}"
-        repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
+
+        # FIXME - the POST call will often result in an error with the oci+insights profile ...
+        # root:client.py:216 Cannot parse expected JSON response
+        # (http://localhost:38080/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/):
+        # Post "http://pulp:55001/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/":
+        # read tcp 172.18.0.2:47338->172.18.0.3:55001: read: connection reset by peer
+        repo_pulp_href_2 = None
+        retries = 10
+        for x in range(0, retries):
+            try:
+                repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(5)
+
+        if repo_pulp_href_2 is None:
+            raise Exception("failed to create repo and dist")
 
         # FIXME - the POST call will often result in an error with the oci+insights profile ...
         # root:client.py:216 Cannot parse expected JSON response
