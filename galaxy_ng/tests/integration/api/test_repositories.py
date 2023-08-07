@@ -1,5 +1,6 @@
 import pytest
 import logging
+import time
 
 from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env
 from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact
@@ -111,7 +112,17 @@ class TestRepositories:
         test_repo_name_2 = f"repo-test-{generate_random_string()}"
         repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
 
-        move_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
+        retries = 10
+        for x in range(0, retries):
+            try:
+                move_content_between_repos(
+                    gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2]
+                )
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(5)
+
         # verify cv is only in destination repo
         _, results = search_collection_endpoint(gc_admin, name=artifact.name)
         expected = [{"cv_name": artifact.name, "repo_name": test_repo_name_2, "is_signed": False}]
