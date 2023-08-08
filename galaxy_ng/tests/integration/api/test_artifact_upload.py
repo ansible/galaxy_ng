@@ -18,6 +18,9 @@ from ..utils import (
     wait_for_task,
 )
 
+from ..utils import build_collection as bc
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -423,6 +426,56 @@ def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
     stderr_msg_re = re.compile("errors were encountered during the plugin load")
     stderr_msg = [item for item in log_messages if stderr_msg_re.match(item)]
     assert len(stderr_msg) == 0  # this stderr message not in log
+
+
+@pytest.mark.stage_health
+@pytest.mark.importer
+@pytest.mark.all
+def test_ansible_lint_exception_AAH_2606(ansible_config, upload_artifact, hub_version):
+    """
+    https://issues.redhat.com/browse/AAH-2609
+        - ansible-lint output is missing.
+    """
+    config = ansible_config("basic_user")
+    api_client = get_client(config)
+
+    IGNORE_CONTENT = \
+        "plugins/modules/lm_otel_collector.py validate-modules:use-run-command-not-popen\n"
+
+    expected = [
+        (
+            "meta/runtime.yml:1: meta-runtime[unsupported-version]:"
+            + " requires_ansible key must be set to a supported version."
+        ),
+        (
+            "meta/runtime.yml:1: yaml[new-line-at-end-of-file]:"
+            + " No new line character at the end of file"
+        ),
+        (
+            "tests/sanity/ignore-2.10.txt:1: sanity[cannot-ignore]:"
+            + " Ignore file contains validate-modules:use-run-command-not-popen at line 1,"
+            + " which is not a permitted ignore."
+        )
+    ]
+
+    artifact = bc(
+        "skeleton",
+        config={
+            "namespace": USERNAME_PUBLISHER,
+            "tags": ["database"],
+        },
+        extra_files={
+            "meta/runtime.yml": "requires_ansible: \">=2.10\"",
+            "tests/sanity/ignore-2.10.txt": IGNORE_CONTENT,
+        },
+    )
+
+    resp = upload_artifact(config, api_client, artifact)
+    resp = wait_for_task(api_client, resp)
+    log_messages = [item["message"] for item in resp["messages"]]
+    log_messages = "\n".join(log_messages)
+    for line in expected:
+        assert line in log_messages, log_messages
 
 
 @pytest.mark.importer
