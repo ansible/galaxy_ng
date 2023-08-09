@@ -29,8 +29,10 @@ class Command(BaseCommand):
             default=DEFAULT_UPSTREAM,
             help=f"remote host to retrieve data from [{DEFAULT_UPSTREAM}]"
         )
-
         parser.add_argument('--limit', type=int, help="stop syncing after N collections")
+        parser.add_argument(
+            '--force', action='store_true', help='sync all counts and ignore last update'
+        )
 
     def handle(self, *args, **options):
         log.info(f"Processing upstream download counts from {options['upstream']}")
@@ -55,14 +57,17 @@ class Command(BaseCommand):
             if namespace in SKIPLIST:
                 continue
 
+            # optimization: don't try to resync something that changed less than a day ago
             counter = CollectionDownloadCount.objects.filter(namespace=namespace, name=name).first()
-            if counter is not None:
+            if counter is not None and not args.force:
                 delta = (now - counter.pulp_last_updated.replace(tzinfo=None)).total_seconds()
-                if (delta / 60) < ( 24 * 60 * 60 ):
+                if (delta / 60) < (24 * 60 * 60):
                     continue
-                #import epdb; epdb.st()
 
-            detail_url = upstream + f'/api/internal/ui/repo-or-collection-detail/?namespace={namespace}&name={name}'
+            detail_url = (
+                upstream
+                + f'/api/internal/ui/repo-or-collection-detail/?namespace={namespace}&name={name}'
+            )
             log.info('\t' + detail_url)
             drr = requests.get(detail_url)
             ds = drr.json()
@@ -80,12 +85,19 @@ class Command(BaseCommand):
             if counter is None:
                 log.info(f'\tcreate downloadcount for {namespace}.{name} with value of {dcount}')
                 with transaction.atomic():
-                    counter = CollectionDownloadCount(namespace=namespace, name=name, download_count=dcount)
+                    counter = CollectionDownloadCount(
+                        namespace=namespace,
+                        name=name,
+                        download_count=dcount
+                    )
                     counter.save()
                 continue
 
             if counter.download_count < dcount:
-                log.info(f'\tupdate downloadcount for {namespace}.{name} from {counter.download_count} to  {dcount}')
+                log.info(
+                    f'\tupdate downloadcount for {namespace}.{name}'
+                    + f' from {counter.download_count} to {dcount}'
+                )
                 with transaction.atomic():
                     counter.download_count = dcount
                     continue
