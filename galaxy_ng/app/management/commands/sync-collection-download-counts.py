@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
             # optimization: don't try to resync something that changed less than a day ago
             counter = CollectionDownloadCount.objects.filter(namespace=namespace, name=name).first()
-            if counter is not None and not args.force:
+            if counter is not None and not options['force']:
                 delta = (now - counter.pulp_last_updated.replace(tzinfo=None)).total_seconds()
                 if (delta / 60) < (24 * 60 * 60):
                     continue
