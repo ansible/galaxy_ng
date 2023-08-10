@@ -20,5 +20,7 @@ services:
     privileged: true
     extra_hosts:
       localhost: "host-gateway"
+    environment:
+      - PULP_WORKERS=1
     depends_on:
       - _galaxy_base
