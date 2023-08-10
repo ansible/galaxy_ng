@@ -47,6 +47,7 @@ def test_download_artifact(ansible_config, upload_artifact):
             assert resp["state"] == "completed"
 
     hub_4_5 = is_hub_4_5(ansible_config)
+
     set_certification(api_client, artifact, hub_4_5=hub_4_5)
 
     # download collection
