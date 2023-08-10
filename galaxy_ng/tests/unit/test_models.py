@@ -65,7 +65,7 @@ class TestSignalCreateNamespace(TestCase):
 
 class TestSetting(TestCase):
     def test_create_setting_directly(self):
-        Setting.objects.delete()
+        Setting.objects.all().delete()
         Setting.objects.create(key='test', value='value')
 
         # Lowercase read
@@ -87,46 +87,46 @@ class TestSetting(TestCase):
         assert setting.version > first_version
 
     def test_only_latest_10_old_versions_are_kept(self):
-        Setting.objects.delete()
+        Setting.objects.all().delete()
         for i in range(20):
             Setting.objects.create(key='test', value=f'value{i}')
 
         assert Setting.objects.filter(key='test').count() == 11
 
     def test_get_settings_as_dict(self):
-        Setting.objects.delete()
+        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "BAR")
         Setting.set_value_in_db("TEST", 1)
         assert Setting.as_dict() == {"FOO": "BAR", "TEST": 1}
 
     def test_get_settings_all(self):
-        Setting.objects.delete()
+        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "BAR")
         Setting.set_value_in_db("FOO", "BAR2")
         Setting.set_value_in_db("TEST", 1)
         assert len(Setting.get_all()) == 3
 
     def test_get_setting_icase(self):
-        Setting.objects.delete()
+        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "BAR")
         assert Setting.get_value_from_db("foo") == "BAR"
         assert Setting.get_value_from_db("FOO") == "BAR"
 
     def test_setting_bool_casing_fix(self):
-        Setting.objects.delete()
+        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "True")
         assert Setting.get_value_from_db("foo") == "true"
         Setting.set_value_in_db("FOO", "False")
         assert Setting.get_value_from_db("FOO") == "false"
 
     def test_display_secret(self):
-        Setting.objects.delete()
+        Setting.objects.all().delete()
         Setting.set_secret_in_db("FOO", "SECRETDATA123")
         assert Setting.get_value_from_db("FOO") == "SECRETDATA123"
         assert Setting.get_setting_from_db("FOO").display_value == "SEC***"
 
     def test_delete_all_setting_versions(self):
-        Setting.objects.delete()
+        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "BAR")
         Setting.set_value_in_db("FOO", "BAR2")
         Setting.delete_latest_version("FOO")

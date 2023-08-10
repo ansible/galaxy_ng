@@ -612,7 +612,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
         from dynaconf import DynaconfFormatError, DynaconfParseError
         from dynaconf.loaders.base import SourceMetadata
         from dynaconf.hooking import Hook, Action, HookValue
-        from dynaconf.base import RESERVED_ATTRS, UPPER_DEFAULT_SETTINGS, Settings
+        from dynaconf.base import Settings
     except ImportError as exc:
         # Graceful degradation for dynaconf < 3.3 where  method hooking is not available
         logger.error(
@@ -622,31 +622,33 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
         return {}
 
     logger.info("Enabling Dynamic Settings Feature")
-    def read_settings_from_cache_or_db(settings_dict:Dict, value: HookValue, key: str, *args, **kwargs) -> Any:
+
+    def read_settings_from_cache_or_db(
+        temp_settings: Settings,
+        value: HookValue,
+        key: str,
+        *args,
+        **kwargs
+    ) -> Any:
         """A function to be attached on Dynaconf Afterget hook.
-        Load everything from settings cache or db, process parsing and mergings, returns the desired key value
+        Load everything from settings cache or db, process parsing and mergings,
+        returns the desired key value
         """
         if not apps.ready or key.upper() not in DYNAMIC_SETTINGS_SCHEMA:
-            # If app is starting up or key is not on allowed list bypass and just return the unwrapped value
+            # If app is starting up or key is not on allowed list bypass and just return the value
             return value.value
-
-        # It is required to build a new Settings object to trigger parsing and mergings
-        temp_settings = Settings()
-        metadata = SourceMetadata(loader="hooking", identifier="settings_dict", env="main", merged=True)
-        reserved_keys = set(RESERVED_ATTRS + UPPER_DEFAULT_SETTINGS)
-        allowed_keys = settings_dict.keys() - reserved_keys
-        temp_data = {k: v for k, v in settings_dict.items() if k in allowed_keys}
-        temp_settings.update(temp_data, tomlfy=True, loader_identifier=metadata)
 
         # lazy import because it can't happen before apps are ready
         from galaxy_ng.app.tasks.settings_cache import get_settings_from_cache, get_settings_from_db
-        if (data := get_settings_from_cache()):
-            metadata = SourceMetadata(loader="hooking", identifier="cache", env="main", merged=True)
+        if data := get_settings_from_cache():
+            metadata = SourceMetadata(loader="hooking", identifier="cache")
         else:
             data = get_settings_from_db()
             if data:
-                metadata = SourceMetadata(loader="hooking", identifier="db", env="main", merged=True)
+                metadata = SourceMetadata(loader="hooking", identifier="db")
 
+        # This is the main part, it will update temp_settigns with data coming from settings db
+        # and by calling update it will process dynaconf parsing and merging.
         try:
             if data:
                 temp_settings.update(data, loader_identifier=metadata, tomlfy=True)
@@ -658,7 +660,10 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
         elif key in [_k.split("__")[0] for _k in data]:
             logger.debug("Dynamic setting for key: %s loaded from %s", key, metadata.identifier)
         else:
-            logger.debug("Key %s not on db/cache, %s other keys loaded from %s", key, len(data), metadata.identifier)
+            logger.debug(
+                "Key %s not on db/cache, %s other keys loaded from %s",
+                key, len(data), metadata.identifier
+            )
 
         return temp_settings.get(key, value.value)
 
