@@ -22,5 +22,6 @@ services:
       localhost: "host-gateway"
     environment:
       - PULP_WORKERS=1
+      #- LOCK_REQUIREMENTS=0
     depends_on:
       - _galaxy_base
