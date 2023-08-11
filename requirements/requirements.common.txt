@@ -162,7 +162,7 @@ galaxy-importer==0.4.11
     #   pulp-ansible
 gitdb==4.0.10
     # via gitpython
-gitpython==3.1.31
+gitpython==3.1.32
     # via pulp-ansible
 googleapis-common-protos==1.59.0
     # via
