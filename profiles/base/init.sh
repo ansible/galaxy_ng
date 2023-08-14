@@ -8,6 +8,8 @@ readonly ENABLE_SIGNING="${ENABLE_SIGNING:-0}"
 readonly UPDATE_UI="${UPDATE_UI:-1}"
 readonly SETUP_TEST_DATA="${SETUP_TEST_DATA:-0}"
 
+PIP="python3.11 -m pip"
+
 log_message() {
     echo "$@" >&2
 }
@@ -16,7 +18,7 @@ log_message() {
 # so this is a workaround to install the pulp container snippets
 setup_webserver_snippets() {
     log_message "setting up pulp container webserver snippets"
-    LOCATION=$(pip show pulp-container | grep  Location: | awk '{print$2}')
+    LOCATION=$(${PIP} show pulp-container | grep  Location: | awk '{print$2}')
     cp $LOCATION/pulp_container/app/webserver_snippets/nginx.conf /etc/nginx/pulp/pulp_container.conf || true
 }
 

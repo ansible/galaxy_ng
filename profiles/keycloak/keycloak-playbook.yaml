@@ -401,8 +401,9 @@
       set_fact:
         keycloak_realm_public_key: "{{ keycloak_realm['json']['public_key']  }}"
 
-    - debug:
-        var: keycloak_realm_public_key
+    - name: Ensure variable is not empty or null
+      assert:
+        that: 'keycloak_realm_public_key is defined and keycloak_realm_public_key is not none and keycloak_realm_public_key != ""'
 
     - name: Ensure SELinux is set to enforcing mode
       ansible.builtin.lineinfile:

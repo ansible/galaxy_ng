@@ -51,8 +51,9 @@ def wait_for_task(api_client, resp, task_id=None, timeout=6000, raise_on_error=F
                 if raise_on_error:
                     raise TaskFailed(resp["error"])
         except GalaxyError as e:
-            if "500" not in str(e):
-                raise
+            raise e
+            # if "500" not in str(e):
+            #    raise
         else:
             ready = resp["state"] not in ("running", "waiting")
         time.sleep(SLEEP_SECONDS_POLLING)
