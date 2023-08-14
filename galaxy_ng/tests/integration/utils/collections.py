@@ -188,7 +188,18 @@ def build_collection(
             f.write('')
 
         if extra_files:
-            raise Exception('extra_files not yet implemented')
+            for ename, econtent in extra_files.items():
+                fpath = os.path.join(basedir, ename)
+                fdir = os.path.dirname(fpath)
+                if not os.path.exists(fdir):
+                    os.makedirs(fdir)
+                with open(fpath, 'w') as f:
+                    if isinstance(econtent, dict) and econtent.get('mimetype') == 'yaml':
+                        yaml.dump(econtent['content'], f)
+                    elif isinstance(econtent, dict):
+                        f.write(econtent['content'])
+                    else:
+                        f.write(econtent)
 
         if pre_build:
             raise Exception('pre_build not yet implemented')
