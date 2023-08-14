@@ -4,13 +4,13 @@
   connection: local
   gather_facts: false
   collections:
-    - ansible.automation_hub
+    - galaxy.galaxy
 
   pre_tasks:
     - name: Include variables
       ansible.builtin.include_vars:
         file: vars.yml
-  
+
   tasks:
     - name: Authenticate and retrieve API token
       ah_token:
@@ -45,37 +45,37 @@
         ah_token: "{{ ah_token }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
 
-    - name: Ensure there is an ansible namespace
+    - name: Ensure there is a galaxy namespace
       ah_namespace:
-        name: ansible
+        name: galaxy
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
 
-    - name: Upload the automation hub collection to the ansible namespace
+    - name: Upload the galaxy collection to the galaxy namespace
       ah_collection:
-        namespace: ansible
-        name: automation_hub
+        namespace: galaxy
+        name: galaxy
         path: "{{ ah_artifact_runner_absolute_path }}"
         version: "1.0.0"
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
 
-    - name: Approve the automation hub collection
+    - name: Approve the galaxy collection
       ah_approval:
-        namespace: ansible
-        name: automation_hub
+        namespace: galaxy
+        name: galaxy
         version: "1.0.0"
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
 
-    - name: Delete the automation hub collection
+    - name: Delete the galaxy collection
       ah_collection:
         state: absent
-        namespace: ansible
-        name: automation_hub
+        namespace: galaxy
+        name: galaxy
         version: "1.0.0"
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"

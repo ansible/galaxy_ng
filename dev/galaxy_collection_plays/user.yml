@@ -4,13 +4,13 @@
   connection: local
   gather_facts: false
   collections:
-    - ansible.automation_hub
+    - galaxy.galaxy
 
   pre_tasks:
     - name: Include variables
       ansible.builtin.include_vars:
         file: vars.yml
-  
+
   tasks:
     - name: Create a developers group
       ah_group:
@@ -56,7 +56,7 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
 
 # TODO: Add a test that permissions/roles can be added to a group after
-# https://github.com/ansible/automation_hub_collection/issues/179 is resolved.
+# https://github.com/ansible/galaxy_collection/issues/179 is resolved.
 
     - name: Create new executive users
       ah_user:

@@ -4,13 +4,13 @@
   connection: local
   gather_facts: false
   collections:
-    - ansible.automation_hub
+    - galaxy.galaxy
 
   pre_tasks:
     - name: Include variables
       ansible.builtin.include_vars:
         file: vars.yml
-  
+
   tasks:
     - name: Add redhat.io registry
       ah_ee_registry:
