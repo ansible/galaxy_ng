@@ -72,7 +72,6 @@ plugins:
         tags_file: tags.md
   - search:
       lang: en
-      prebuild_index: true
 markdown_extensions:
   - tables
   - attr_list

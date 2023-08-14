@@ -15,7 +15,7 @@ for any reason an installation from scratch is needed, all the details can be fo
 
 !!! info
     This is the recommended installation process for a production ready system. If you are looking
-    for information on how to install on a development environment see [development setup page](/dev/setup/)
+    for information on how to install on a development environment see [development setup page](../dev/getting_started.md)
 
 The following provides instructions for installing GalaxyNG on a virtual machine, with an example playbook that installs Pulp and Galaxy NG from PyPi packages.
 

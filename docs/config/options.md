@@ -9,7 +9,7 @@ You can find more information about pulp configuration on [Pulp Docs](https://do
 
 
 !!! tip
-    If you are looking for how to set configuration options on the pulp-installer take a look on [installation page](/installation)
+    If you are looking for how to set configuration options on the pulp-installer take a look on [pulp options](#pulp-django-and-other-plugins)
 
 ## Configuring your galaxy server
 
@@ -157,7 +157,7 @@ Here is a [diagram explaining](https://www.xmind.net/m/VPSF59/#) the loading ord
 | `GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH`      | Distribution where collections go when waiting for approval, Default: `"staging"` |
 | `GALAXY_API_REJECTED_DISTRIBUTION_BASE_PATH`     | Distribution where collections go after rejection, Default: `"rejected"` |
 | `GALAXY_REQUIRE_CONTENT_APPROVAL`                | Sets if system requires uploaded collections to be manually approved, Default: `True` (if set to false all uploaded collections are automatically approved)  |
-| `GALAXY_FEATURE_FLAGS`                           | A dictionary that toggles specific flags [see feature flags page](/config/featureflags) |
+| `GALAXY_FEATURE_FLAGS`                           | A dictionary that toggles specific flags [see feature flags page](featureflags.md) |
 | `GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS`      | Enabled anonymous browsing, Default: `False` |
 | `GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD`      | Enabled anonymous download, Default: `False` |
 | `GALAXY_ENABLE_API_ACCESS_LOG`      | Enable gathering of logs, Default: `False` |
@@ -173,7 +173,7 @@ Here is a [diagram explaining](https://www.xmind.net/m/VPSF59/#) the loading ord
 | `GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL`  | Approval dashboard and move endpoint must require signature?, Default: `False` |
 | `GALAXY_MINIMUM_PASSWORD_LENGTH` |  Minimum password lenght for validation, Default: 9 |
 
-For SSO Keycloak configuration see [keycloak](keycloak)
+For SSO Keycloak configuration see [keycloak](../dev/docker_environment.md#keycloak)
 
 ### Pulp, Django and other plugins
 

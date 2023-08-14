@@ -220,7 +220,7 @@ If you want to login as a superuser, you can do one of two things:
 
 Unit and integration tests can be easily run using docker compose. At the moment, there is no easy way to run pulp functional tests with docker.
 
-For more information on tests, refer to [writing tests](dev/writing_tests.md).
+For more information on tests, refer to [writing tests](integration_tests.md).
 
 ### Unit tests
 

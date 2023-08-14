@@ -13,13 +13,13 @@ This is recommended for beginners. It's less error prone and easier to setup, ho
 - are developing using a Mac
 - writing documentation
 
-[Docker environment developer setup guide](/galaxy_ng/dev/docker_environment).
+[Docker environment developer setup guide](docker_environment.md).
 
 ### OCI Env
 
 This is the new preferred way to develop with pulp. It provides a flexible, containerized environment that's easy to set up. It supports running integration and functional tests as well as developing the UI. It supports all the features from the docker and vagrant environments, but isn't as heavily tested as the docker environment.
 
-[OCI Env developer setup guide](/galaxy_ng/dev/oci_env)
+[OCI Env developer setup guide](oci_env.md)
 
 ### Vagrant Environment
 
@@ -30,7 +30,7 @@ This uses the [Pulp developer environment](https://docs.pulpproject.org/pulpcore
 - need to run pulpcore and pulp_ansible without the galaxy_ng plugin installed
 - need to debug an issue on an operating system other than RHEL/Centos
 
-[Vagrant environment developer setup guide](/galaxy_ng/dev/vagrant)
+[Vagrant environment developer setup guide](vagrant.md)
 
 ## Issue Tracker
 
@@ -47,7 +47,7 @@ When submitting a PR to either the UI or backend:
     - `No-Issue` should be used infrequently and the reviewers may ask you to create a Jira ticket and attach it to your PR.
     - `Issue: AAH-XXXX` should must include a Jira ticket number (such as AAH-123). This also requires a changelog entry in `CHANGES/`. Changelog entries follow the `<issue_number>.type` format. For example if I submit a fix for AAH-123, it must also come with a `CHANGES/123.bugfix` entry. Changelog file extensions include:
 
-        - `.feature`: use this for new features. New features must include documentation. See our [docs documentation](dev/writing_docs.md) for more information.
+        - `.feature`: use this for new features. New features must include documentation. See our [docs documentation](writing_docs.md) for more information.
         - `.bugfix`: use this for bugfixes.
         - `.misc`: use this for small maintenance changes that don't need to be communicated such as fixing typos, refactoring code etc.
 
