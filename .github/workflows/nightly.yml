@@ -6,13 +6,17 @@
 # For more info visit https://github.com/pulp/plugin_template
 
 ---
-name: Galaxy Nightly CI/CD
+name: Galaxy Nightly CI
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     # runs at 3:00 UTC daily
     - cron: '00 3 * * *'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -161,16 +165,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - uses: actions/setup-python@v3
         with:
-          python-version: "3.8"
+          python-version: "3.11"
 
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install gitpython requests packaging
+          pip install gitpython toml
           echo ::endgroup::
 
       - name: Configure Git with ansible name and email
@@ -178,23 +182,16 @@ jobs:
           git config --global user.name 'ansible'
           git config --global user.email 'ansible-infra@redhat.com'
 
-      - name: Changelog history
-        run: python .ci/scripts/changelog.py
+      - name: Collect changes from all branches
+        run: python .ci/scripts/collect_changes.py
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
-          committer: ansible <ansible-infra@redhat.com>
-          author: ansible <ansible-infra@redhat.com>
           title: 'Update Changelog'
-          body: 'No-Issue'
+          body: ''
           branch: 'changelog/update'
-          base: master
-          commit-message: |
-            Update Changelog
-
-            No-Issue
           delete-branch: true
 
   publish:

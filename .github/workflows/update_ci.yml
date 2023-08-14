@@ -7,14 +7,9 @@
 
 
 ---
-name: CI Update
+name: Galaxy CI Update
 on:
   workflow_dispatch:
-    inputs:
-      all_branches:
-        description: "Run on all branches"
-        default: 'no'
-        required: false
 
 jobs:
   update:
@@ -26,7 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          repository: pulp/plugin_template
+          path: plugin_template
+          fetch-depth: 0
 
       - uses: actions/setup-python@v3
         with:
@@ -42,24 +39,28 @@ jobs:
         run: |
           git config --global user.name 'ansible'
           git config --global user.email 'ansible-infra@redhat.com'
-
-      - name: Set short_ref
-        id: vars
-        run: echo short_ref=${GITHUB_REF#refs/*/} >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v3
+        with:
+          path: galaxy_ng
+          ref: 'master'
+          fetch-depth: 0
 
       - name: Run update
+        working-directory: galaxy_ng
         run: |
-          .github/workflows/scripts/update_ci.sh
+          ../plugin_template/scripts/update_ci.sh
 
       - name: Create Pull Request for CI files
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
+          path: galaxy_ng
           committer: ansible <ansible-infra@redhat.com>
           author: ansible <ansible-infra@redhat.com>
-          title: 'Update CI files from ${{ steps.vars.outputs.short_ref }} branch'
+          title: 'Update CI files for branch master'
           body: 'No-Issue'
-          branch: 'create-pull-request/${{ steps.vars.outputs.short_ref }}/patch'
+          branch: 'update-ci/master'
+          base: 'master'
           commit-message: |
             Update CI files
 

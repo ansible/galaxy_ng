@@ -8,6 +8,11 @@
 ---
 name: Galaxy CI
 on: {pull_request: {branches: ['**']}, push: {branches: ['**']}}
+
+concurrency:
+  group: ${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   check_commit:
 
