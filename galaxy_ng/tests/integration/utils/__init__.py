@@ -45,7 +45,7 @@ from .sync import (
     clear_certified,
     perform_sync,
 )
-from .pulp_interfaces import AnsibleDistroAndRepo
+from .pulp_interfaces import AnsibleDistroAndRepo, PulpObjectBase
 from .signatures import create_local_signature_for_tarball
 
 
@@ -88,5 +88,6 @@ __all__ = (
     wait_for_all_tasks,
     gen_string,
     AnsibleDistroAndRepo,
-    delete_all_collections
+    delete_all_collections,
+    PulpObjectBase
 )
