@@ -1,7 +1,7 @@
 # This config represents the latest values used when running the plugin-template. Any settings that
 # were not present before running plugin-template have been added with their default values.
 
-# generated with plugin_template@2021.08.26-208-g15b1f3d
+# generated with plugin_template@2021.08.26-241-g9cfc63e
 
 additional_repos:
 - bindings: true
@@ -26,6 +26,8 @@ ci_env:
   GITHUB_USER: ${{ github.event.pull_request.user.login }}
 ci_trigger: '{pull_request: {branches: [''**'']}, push: {branches: [''**'']}}'
 ci_update_branches: []
+ci_update_docs: false
+ci_update_release_behavior: null
 cli_package: pulp-cli
 cli_repo: https://github.com/pulp/pulp-cli.git
 core_import_allowed:
@@ -38,8 +40,10 @@ deploy_client_to_pypi: false
 deploy_client_to_rubygems: false
 deploy_to_pypi: false
 disabled_redis_runners: []
+doc_requirements_from_pulpcore: false
 docker_fixtures: false
 docs_test: false
+extra_docs_requirements: []
 flake8: false
 flake8_ignore: []
 github_org: ansible
@@ -98,7 +102,6 @@ test_lowerbounds: false
 test_performance: false
 test_reroute: false
 test_s3: true
-test_stream: false
 update_github: false
 use_issue_template: false
 
