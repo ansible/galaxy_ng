@@ -580,14 +580,26 @@ PULP_CORE_VIEWSETS = {
     "tasks": {
         "statements": [
             {
-                "action": ["list"],
+                "action": ["list", "retrieve"],
                 "principal": "authenticated",
                 "effect": "allow",
             },
             {
-                "action": ["retrieve", "my_permissions"],
+                "action": ["my_permissions"],
                 "principal": "authenticated",
                 "effect": "allow",
+            },
+            {
+                "action": ["destroy", "purge"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_domain_or_obj_perms:core.delete_task",
+            },
+            {
+                "action": ["update", "partial_update"],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "has_model_or_domain_or_obj_perms:core.change_task",
             },
         ]
     }
