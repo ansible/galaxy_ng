@@ -135,7 +135,15 @@ class Setting(LifecycleModelMixin, models.Model):
             raise Exception(f"Setting {self.key} not allowed by schema")
 
         logger.debug("validate %s via settings validators", self.key)
-        # TODO: Create a settings copy, build a Validation from schema, validate it.
+        validator = DYNAMIC_SETTINGS_SCHEMA[self.base_key].get("validator")
+        if validator:
+            validator.names = [self.base_key]
+            temp_settings = settings.dynaconf_clone()
+            temp_settings.validators.register(validator)
+            temp_settings.update(self.as_dict(), tomlfy=True)
+            temp_settings.set(self.base_key, self.value, tomlfy=True)
+            temp_settings.validators.validate()
+
 
     @property
     def base_key(self):
