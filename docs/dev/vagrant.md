@@ -320,7 +320,7 @@ workon pulp
 
 ## Running tests
 
-Functional and unit tests can be run from vagrant. Integration tests can only be run in [the docker environment](dev/docker_environment.md).
+Functional and unit tests can be run from vagrant. Integration tests can only be run in [the docker environment](docker_environment.md).
 
 ### Integration Tests
 

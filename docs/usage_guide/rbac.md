@@ -30,5 +30,5 @@ Object roles are assigned to a specific instance of an object, and only grant th
 
 Currently there are two places where object roles are used:
 
-- [Collection namespaces](/galaxy_ng/usage_guide/collections#permissions)
-- [Execution Environment namespaces](/galaxy_ng/usage_guide/execution_environments#permissions)
+- [Collection namespaces](collections.md#permissions)
+- [Execution Environment namespaces](execution_environments.md#permissions)

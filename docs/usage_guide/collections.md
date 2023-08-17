@@ -56,7 +56,7 @@ Collection has been successfully published and imported to the Galaxy server dev
 
 ### Approval
 
-Once a collection is uploaded, it will either end up in the Published repository, where it will be available for download, or the staging repository where it needs to be approved first depending on what you have configured for [GALAXY_REQUIRE_CONTENT_APPROVAL](/galaxy_ng/config/options#galaxy).
+Once a collection is uploaded, it will either end up in the Published repository, where it will be available for download, or the staging repository where it needs to be approved first depending on what you have configured for [GALAXY_REQUIRE_CONTENT_APPROVAL](../config/options.md#galaxy).
 
 If approval is required, click the "Collections > Approval" link in the navigation menu. This will give you a list of newly uploaded collections to review. If signing is enabled, you will also be promted to sign the collection.
 
