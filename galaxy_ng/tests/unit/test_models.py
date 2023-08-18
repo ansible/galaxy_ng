@@ -3,6 +3,7 @@ from pulp_ansible.app.models import AnsibleRepository, Collection
 
 from galaxy_ng.app.models import Namespace, Setting
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
+from galaxy_ng.app.models.config import MAX_VERSIONS_TO_KEEP
 
 DYNAMIC_SETTINGS_SCHEMA["TEST"] = {}
 DYNAMIC_SETTINGS_SCHEMA["FOO"] = {}
@@ -64,13 +65,16 @@ class TestSignalCreateNamespace(TestCase):
 
 
 class TestSetting(TestCase):
-    def test_create_setting_directly(self):
+    def setUp(self):
+        """Ensure Table is clean before each case"""
         Setting.objects.all().delete()
+
+    def test_create_setting_directly(self):
         Setting.objects.create(key='test', value='value')
 
         # Lowercase read
         setting = Setting.get_setting_from_db('test')
-        self.assertEqual(setting.key, 'test')
+        self.assertEqual(setting.key, 'TEST')
         self.assertEqual(setting.value, 'value')
 
         # Uppercase read
@@ -82,54 +86,65 @@ class TestSetting(TestCase):
         first_version = setting.version
         Setting.objects.create(key='test', value='value2')
         setting = Setting.objects.get_setting_from_db('test')
-        self.assertEqual(setting.key, 'test')
+        self.assertEqual(setting.key, 'TEST')
         self.assertEqual(setting.value, 'value2')
         assert setting.version > first_version
 
-    def test_only_latest_10_old_versions_are_kept(self):
-        Setting.objects.all().delete()
-        for i in range(20):
+    def test_only_latest_x_old_versions_are_kept(self):
+        for i in range(MAX_VERSIONS_TO_KEEP * 2):
             Setting.objects.create(key='test', value=f'value{i}')
 
-        assert Setting.objects.filter(key='test').count() == 11
+        assert Setting.objects.filter(key='test').count() == MAX_VERSIONS_TO_KEEP + 1
 
     def test_get_settings_as_dict(self):
-        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "BAR")
         Setting.set_value_in_db("TEST", 1)
         assert Setting.as_dict() == {"FOO": "BAR", "TEST": 1}
 
     def test_get_settings_all(self):
-        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "BAR")
         Setting.set_value_in_db("FOO", "BAR2")
         Setting.set_value_in_db("TEST", 1)
         assert len(Setting.get_all()) == 3
 
     def test_get_setting_icase(self):
-        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "BAR")
         assert Setting.get_value_from_db("foo") == "BAR"
         assert Setting.get_value_from_db("FOO") == "BAR"
 
     def test_setting_bool_casing_fix(self):
-        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "True")
         assert Setting.get_value_from_db("foo") == "true"
         Setting.set_value_in_db("FOO", "False")
         assert Setting.get_value_from_db("FOO") == "false"
 
     def test_display_secret(self):
-        Setting.objects.all().delete()
         Setting.set_secret_in_db("FOO", "SECRETDATA123")
         assert Setting.get_value_from_db("FOO") == "SECRETDATA123"
         assert Setting.get_setting_from_db("FOO").display_value == "SEC***"
 
     def test_delete_all_setting_versions(self):
-        Setting.objects.all().delete()
         Setting.set_value_in_db("FOO", "BAR")
         Setting.set_value_in_db("FOO", "BAR2")
         Setting.delete_latest_version("FOO")
         assert Setting.get_value_from_db("FOO") == "BAR"
         Setting.delete_all_versions("FOO")
         assert Setting.objects.filter(key="FOO").count() == 0
+
+    def test_dynaconf_parsing(self):
+        Setting.set_value_in_db("FOO", "BAR")
+        Setting.set_value_in_db("TEST", "@format {this.FOO}/TEST")
+        assert Setting.get("TEST") == "BAR/TEST"
+
+        Setting.set_value_in_db("FOO", "@bool 0")
+        Setting.set_value_in_db("TEST", "@int 42")
+        assert Setting.get("TEST") == 42
+        assert Setting.get("FOO") is False
+
+        Setting.set_value_in_db("FOO__key1", "BAR")
+        Setting.set_value_in_db("FOO__key2", "BAR2")
+        assert Setting.get("FOO") == {"key1": "BAR", "key2": "BAR2"}
+
+        Setting.set_value_in_db("FOO", '@json {"colors": ["red"]}')
+        Setting.set_value_in_db("FOO__colors", "@merge green,blue")
+        assert Setting.get("FOO") == {"colors": ["red", "green", "blue"]}

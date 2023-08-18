@@ -1,6 +1,58 @@
+"""Django Models for Dynamic Settings Managed by Dynaconf.
+
+Functionality:
+    - Create a new Setting entry, keeping the latest 10 versions in DB
+    - A Setting model stores key:value for Dynaconf
+    - Validators are set on dynamic_settings.py:DYNAMIC_SETTINGS_SCHEMA
+    - Only keys defined in DYNAMIC_SETTINGS_SCHEMA can be set in DB
+    - Before saving there is a validation that checks if key:value is valid
+    - Values are strings parsed by Dynaconf (all dynaconf merging/markers are supported)
+    - The value must be accessed through Dynaconf or Setting.get method
+    - Creating or deleting will update the Redis Cache when redis is available
+
+Setting a new value in the database:
+    # Only keys defined in DYNAMIC_SETTINGS_SCHEMA can be set in DB
+
+    Setting.set_value_in_db("FOO", "bar")  # accepts optional `user`
+    Setting.set_value_in_db("MY_PATH", "@format {this.BASE_PATH}/foo/bar")
+    Setting.set_value_in_db("MY_LIST", "@merge [1, 2, 3]")
+    Setting.set_value_in_db("DATA__key__nested", "thing")
+    Setting.set_secret_in_db("TOKEN", "123456")
+    # Setting a secret only mark it as a secret, making it read only on the API.
+
+Reading a RAW value directly from database: (not recommended)
+    # This will not be parsed by Dynaconf
+
+    Setting.get_setting_from_db("FOO") -> <Setting: FOO='bar' [v-1]>
+    Setting.get_value_from_db("MY_PATH") -> "@format {this.BASE_PATH}/foo/bar"
+    Setting.get_all() -> [<Setting: FOO='bar' [v-1]>, <Setting: MY_PATH='...' [v-1]>]
+    Setting.as_dict() -> {"FOO": "bar", "MY_PATH": "@format {this.BASE_PATH}/foo/bar"}
+
+Reading a value parsed by Dynaconf:
+
+    Setting.get("PATH") -> "/base_path/to/foo/bar")
+
+    # The above is the equivalent of reading the value directly from dynaconf
+    # via dango.conf.settings, however this works only when the system has
+    # GALAXY_DYNAMIC_SETTINGS enabled.
+    from django.conf import settings
+    settings.PATH -> "/base_path/to/foo/bar"  # this triggers the lookup on database/cache
+
+Updating Cache:
+
+    # When Redis connection is available the cache will be created/updated
+    # on every call to methods that writes to database.
+    # However if you want to force a cache update you can call:
+
+    Setting.update_cache()
+
+"""
+
 import logging
 import time
 
+from dynaconf import Validator
+from dynaconf.utils import upperfy
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models, transaction
@@ -22,16 +74,20 @@ setting_key_validator = RegexValidator(
     "alphanumeric, no spaces, no hyphen, only underscore cant start with a number.",
 )
 
+MAX_VERSIONS_TO_KEEP = 10
+empty = object()
 __all__ = ["Setting"]
 
 
 class SettingsManager(models.Manager):
     def create(self, key, value, *args, **kwargs):
-        """Creates a new Setting entry, keeping the latest 10 versions in DB
+        """Creates a new Setting entry, keeping the latest versions in DB
         uses a lock to ensure no version bump collisions.
 
         If Redis is not available, skip locking and just create the new entry.
         """
+        key = upperfy(key)  # Key first level must be uppercase
+
         from galaxy_ng.app.tasks.settings_cache import acquire_lock, release_lock  # noqa
 
         for __ in range(10):  # try 10 times
@@ -52,7 +108,10 @@ class SettingsManager(models.Manager):
         release_lock(key, lock)
 
         # Delete old versions
-        self.get_queryset().filter(key=key, version__lt=new.version - 10).delete()
+        self.get_queryset().filter(
+            key=key,
+            version__lt=new.version - MAX_VERSIONS_TO_KEEP
+        ).delete()
 
         return new
 
@@ -64,7 +123,8 @@ class SettingsManager(models.Manager):
 
 
 class Setting(LifecycleModelMixin, models.Model):
-    """Setting model stores key:value for Dynaconf
+    """Setting model stores key:value for Dynaconf.
+
     The recommended usage is via custom methods.
 
     Setting.set_value_in_db('FOO__BAR', 'baz')
@@ -135,15 +195,27 @@ class Setting(LifecycleModelMixin, models.Model):
             raise Exception(f"Setting {self.key} not allowed by schema")
 
         logger.debug("validate %s via settings validators", self.key)
-        validator = DYNAMIC_SETTINGS_SCHEMA[self.base_key].get("validator")
-        if validator:
-            validator.names = [self.base_key]
-            temp_settings = settings.dynaconf_clone()
-            temp_settings.validators.register(validator)
-            temp_settings.update(self.as_dict(), tomlfy=True)
-            temp_settings.set(self.base_key, self.value, tomlfy=True)
-            temp_settings.validators.validate()
+        current_db_data = self.as_dict()
+        validator = DYNAMIC_SETTINGS_SCHEMA[self.base_key].get("validator", Validator())
+        validator.names = [self.base_key]
+        temp_settings = settings.dynaconf_clone()
+        temp_settings.validators.register(validator)
+        temp_settings.update(current_db_data, tomlfy=True)
+        temp_settings.set(self.base_key, self.value, tomlfy=True)
+        temp_settings.validators.validate()
 
+    @classmethod
+    def get(cls, key, default=empty):
+        """Get a setting value directly from database.
+        but parsing though Dynaconf before returning.
+        """
+        current_db_data = cls.as_dict()
+        temp_settings = settings.dynaconf_clone()
+        temp_settings.update(current_db_data, tomlfy=True)
+        value = temp_settings.get(key, default)
+        if value is empty:
+            raise KeyError(f"Setting {key} not found in database")
+        return value
 
     @property
     def base_key(self):
@@ -186,12 +258,16 @@ class Setting(LifecycleModelMixin, models.Model):
     @classmethod
     @transaction.atomic
     def delete_latest_version(cls, key):
-        return cls.objects.filter(key=key).latest("version").delete()
+        result = cls.objects.filter(key=key).latest("version").delete()
+        cls.update_cache()
+        return result
 
     @classmethod
     @transaction.atomic
     def delete_all_versions(cls, key):
-        return cls.objects.filter(key=key).delete()
+        result = cls.objects.filter(key=key).delete()
+        cls.update_cache()
+        return result
 
     def __str__(self):
         return f"{self.key}={self.display_value!r} [v-{self.version}]"
