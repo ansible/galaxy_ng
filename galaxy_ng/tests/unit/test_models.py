@@ -1,6 +1,7 @@
 from django.test import TestCase
 from pulp_ansible.app.models import AnsibleRepository, Collection
 
+from django.conf import settings
 from galaxy_ng.app.models import Namespace, Setting
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 from galaxy_ng.app.models.config import MAX_VERSIONS_TO_KEEP
@@ -85,7 +86,7 @@ class TestSetting(TestCase):
         # Bump the version
         first_version = setting.version
         Setting.objects.create(key='test', value='value2')
-        setting = Setting.objects.get_setting_from_db('test')
+        setting = Setting.get_setting_from_db('test')
         self.assertEqual(setting.key, 'TEST')
         self.assertEqual(setting.value, 'value2')
         assert setting.version > first_version
@@ -99,13 +100,14 @@ class TestSetting(TestCase):
     def test_get_settings_as_dict(self):
         Setting.set_value_in_db("FOO", "BAR")
         Setting.set_value_in_db("TEST", 1)
-        assert Setting.as_dict() == {"FOO": "BAR", "TEST": 1}
+        assert Setting.as_dict() == {"FOO": "BAR", "TEST": "1"}
 
     def test_get_settings_all(self):
         Setting.set_value_in_db("FOO", "BAR")
         Setting.set_value_in_db("FOO", "BAR2")
         Setting.set_value_in_db("TEST", 1)
-        assert len(Setting.get_all()) == 3
+        assert len(Setting.get_all()) == 2
+        assert Setting.objects.all().count() == 3
 
     def test_get_setting_icase(self):
         Setting.set_value_in_db("FOO", "BAR")
@@ -133,6 +135,7 @@ class TestSetting(TestCase):
 
     def test_dynaconf_parsing(self):
         Setting.set_value_in_db("FOO", "BAR")
+        settings.set("FOO", "BAR")
         Setting.set_value_in_db("TEST", "@format {this.FOO}/TEST")
         assert Setting.get("TEST") == "BAR/TEST"
 
