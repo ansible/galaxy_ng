@@ -150,4 +150,8 @@ class TestSetting(TestCase):
 
         Setting.set_value_in_db("FOO", '@json {"colors": ["red"]}')
         Setting.set_value_in_db("FOO__colors", "@merge green,blue")
-        assert Setting.get("FOO") == {"colors": ["red", "green", "blue"]}
+        assert Setting.get("FOO") == {
+            "colors": ["red", "green", "blue"],
+            "key1": "BAR",
+            "key2": "BAR2",
+        }

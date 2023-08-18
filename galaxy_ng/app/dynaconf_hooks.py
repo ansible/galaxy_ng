@@ -594,7 +594,7 @@ def validate(settings: Dynaconf) -> None:
 
 
 def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
-    """Dynaconf 3.3 allows registration of hooks on methods `get` and `as_dict`
+    """Dynaconf 3.2.2 allows registration of hooks on methods `get` and `as_dict`
 
     For galaxy this enables the Dynamic Settings feature, which triggers a
     specified function after every key is accessed.
@@ -614,9 +614,9 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
         from dynaconf.hooking import Hook, Action, HookValue
         from dynaconf.base import Settings
     except ImportError as exc:
-        # Graceful degradation for dynaconf < 3.3 where  method hooking is not available
+        # Graceful degradation for dynaconf < 3.2.2 where  method hooking is not available
         logger.error(
-            "Dynaconf method hooking requires Dynaconf >=3.3: %s",
+            "Dynaconf method hooking requires Dynaconf >=3.2.2: %s",
             str(exc)
         )
         return {}
