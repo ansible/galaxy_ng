@@ -28,4 +28,4 @@ pip3 install --upgrade pip wheel
 
 pip3 install -r integration_requirements.txt
 
-pytest --log-cli-level=DEBUG -m "deployment_cloud or all" --junitxml=galaxy_ng-results.xml -v galaxy_ng/tests/integration
+pytest --log-cli-level=DEBUG -m "(deployment_cloud or all) and not slow_in_cloud" --junitxml=galaxy_ng-results.xml -v galaxy_ng/tests/integration
