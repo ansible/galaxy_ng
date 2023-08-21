@@ -246,9 +246,10 @@ def is_beta_galaxy_stage():
 
 def is_ocp_env():
     # this check will not be necessary when content signing is enabled in operator
-    return "ocp4.testing.ansible.com" in os.getenv(
-        "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
-    )
+    # we also have containerized aap, in that case check proper env var as well
+    return ("ocp4.testing.ansible.com" in os.getenv(
+        "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/")
+        or os.getenv("HUB_CONTENT_SIGNING_ENABLED", 'true') not in ['1', 'True', 'true'])
 
 
 def is_stage_environment():
