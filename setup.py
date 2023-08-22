@@ -111,7 +111,8 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
 
 
 requirements = [
-    "galaxy-importer>=0.4.11,<0.5.0",
+    # "galaxy-importer>=0.4.11,<0.5.0",
+    "galaxy-importer @ git+https://github.com/ansible/galaxy-importer@master#egg=galaxy-importer",
     "pulpcore>=3.28.10,<3.29.0",
     "pulp_ansible>=0.19.0,<0.20.0",
     "django-prometheus>=2.0.0",
