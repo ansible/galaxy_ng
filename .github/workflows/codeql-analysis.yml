@@ -4,12 +4,16 @@
 # './plugin-template --github galaxy_ng' to update this file.
 #
 # For more info visit https://github.com/pulp/plugin_template
-name: "CodeQL"
+name: "Galaxy CodeQL"
 
 on:
   workflow_dispatch:
   schedule:
     - cron: '37 1 * * 6'
+
+concurrency:
+  group: ${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   analyze:

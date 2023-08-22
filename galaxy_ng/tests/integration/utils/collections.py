@@ -189,6 +189,10 @@ def build_collection(
             with open(runtime_file, 'w') as f:
                 f.write(yaml.dump({'requires_ansible': requires_ansible}))
 
+        # need a CHANGELOG file ...
+        with open(os.path.join(basedir, 'CHANGELOG.md'), 'w') as f:
+            f.write('')
+
         if extra_files:
             raise Exception('extra_files not yet implemented')
 

@@ -60,9 +60,6 @@ cd ..
 
 git clone --depth=1 https://github.com/pulp/pulp-openapi-generator.git
 
-pip install pulp-cli
-
-
 # Intall requirements for ansible playbooks
 pip install docker netaddr boto3 ansible
 

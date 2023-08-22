@@ -43,7 +43,11 @@ for filename, check_upperbound, check_prereleases, check_r in CHECK_MATRIX:
                         errors.append(f"{filename}:{nr}: Unreadable requirement {line}")
                 else:
                     if check_prereleases and req.specifier.prereleases:
-                        if req.name != "galaxy-ng-client":
+                        # Do not even think about begging for more exceptions!
+                        if (
+                            not req.name.startswith("opentelemetry")
+                            and req.name != "galaxy-ng-client"
+                        ):
                             errors.append(f"{filename}:{nr}: Prerelease versions found in {line}.")
                     ops = [op for op, ver in req.specs]
                     spec = str(req.specs)

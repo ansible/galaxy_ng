@@ -6,7 +6,7 @@
 # For more info visit https://github.com/pulp/plugin_template
 
 ---
-name: Release Pipeline
+name: Galaxy Release Pipeline
 on:
   workflow_dispatch:
     inputs:
@@ -15,7 +15,7 @@ on:
         required: true
       before_script:
         description: |
-          Bash code to run before script.sh is executed. This should only be used when re-running
+          Bash code to run before bindings and docs are built. This should only be used when re-running
           a workflow to correct some aspect of the docs. e.g.: git checkout origin/3.14 CHANGES.rst
         required: false
 
@@ -41,7 +41,7 @@ jobs:
       - name: Install python dependencies
         run: |
           echo ::group::PYDEPS
-          pip install packaging~=21.3 bandersnatch bump2version gitpython towncrier==19.9.0 wheel
+          pip install packaging~=21.3 bump2version gitpython towncrier==19.9.0 wheel requests
           echo ::endgroup::
 
       - name: Configure Git with ansible name and email
@@ -65,18 +65,14 @@ jobs:
         with:
           name: galaxy_ng.tar
           path: galaxy_ng.tar
-  test:
+
+
+  build-bindings-docs:
     needs: build-artifacts
-
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        env:
-          - TEST: pulp
-          - TEST: azure
-          - TEST: s3
+    # Install scripts expect TEST to be set, 'docs' is most appropriate even though we don't run tests
+    env:
+      TEST: docs
 
     steps:
       - uses: actions/download-artifact@v3
@@ -106,10 +102,8 @@ jobs:
           echo ::endgroup::
           echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
 
-      - name: Set environment variables
-        run: |
-          echo "TEST=${{ matrix.env.TEST }}" >> $GITHUB_ENV
-
+      # Building the bindings and docs requires accessing the OpenAPI specs endpoint, so we need to
+      # setup the Pulp instance.
       - name: Before Install
         run: .github/workflows/scripts/before_install.sh
         shell: bash
@@ -140,74 +134,25 @@ jobs:
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
         shell: bash
 
-      - name: Before Script
-        run: .github/workflows/scripts/before_script.sh
+      - name: Additional before_script
+        run: ${{ github.event.inputs.before_script }}
         shell: bash
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          GITHUB_PULL_REQUEST: ${{ github.event.number }}
-          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
-          GITHUB_BRANCH: ${{ github.head_ref }}
-          GITHUB_REPO_SLUG: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
-          GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          REDIS_DISABLED: ${{ contains('', matrix.env.TEST) }}
-
-      - name: Setting secrets
-        run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
-        env:
-          SECRETS_CONTEXT: ${{ toJson(secrets) }}
 
       - name: Install Python client
         run: .github/workflows/scripts/install_python_client.sh
         shell: bash
 
-      - name: Install Ruby client
-        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
-        run: .github/workflows/scripts/install_ruby_client.sh
-        shell: bash
-
-      - name: Additional before_script
-        run: ${{ github.event.inputs.before_script }}
-        shell: bash
-
-      - name: Script
-        if: ${{ env.TEST != 'generate-bindings' }}
-        run: .github/workflows/scripts/script.sh
-        shell: bash
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          GITHUB_PULL_REQUEST: ${{ github.event.number }}
-          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
-          GITHUB_BRANCH: ${{ github.head_ref }}
-          GITHUB_REPO_SLUG: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
-          GITHUB_USER: ${{ github.event.pull_request.user.login }}
-
       - name: Upload python client packages
-        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
         uses: actions/upload-artifact@v3
         with:
           name: python-client.tar
           path: python-client.tar
 
       - name: Upload python client docs
-        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
         uses: actions/upload-artifact@v3
         with:
           name: python-client-docs.tar
           path: python-client-docs.tar
-
-      - name: Upload ruby client packages
-        if: ${{ env.TEST == 'bindings' || env.TEST == 'generate-bindings' }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: ruby-client.tar
-          path: ruby-client.tar
 
       - name: Logs
         if: always()
@@ -224,7 +169,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    needs: test
+    needs: build-bindings-docs
 
     env:
       TEST: publish
@@ -282,25 +227,3 @@ jobs:
 
       - name: Create release on GitHub
         run: bash .github/workflows/scripts/create_release_from_tag.sh ${{ github.event.inputs.release }}
-
-      - name: Cleanup repository before making changelog PR
-        run: rm -rf .lock generation galaxy_ng_client* *-client.tar galaxy_ng.tar todo web *docs.tar
-
-      - name: Stage changelog for master branch
-        run: python .github/workflows/scripts/stage-changelog-for-default-branch.py ${{ github.event.inputs.release }}
-
-      - name: Create Pull Request for Changelog
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.RELEASE_TOKEN }}
-          committer: ansible <ansible-infra@redhat.com>
-          author: ansible <ansible-infra@redhat.com>
-          branch: changelog/${{ github.event.inputs.release }}
-          base: master
-          title: 'Cherry pick ${{ github.event.inputs.release }} changelog'
-          body: '[noissue]'
-          commit-message: |
-            ${{ github.event.inputs.release }} changelog
-
-            [noissue]
-          delete-branch: true
