@@ -179,7 +179,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
                 request, filename, distro_base_path
             )
 
-        if settings.ANSIBLE_COLLECT_DOWNLOAD_COUNT:
+        if settings.get("ANSIBLE_COLLECT_DOWNLOAD_COUNT", False):
             pulp_ansible_views.CollectionArtifactDownloadView.count_download(filename)
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
