@@ -431,6 +431,7 @@ def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
 @pytest.mark.stage_health
 @pytest.mark.importer
 @pytest.mark.all
+@pytest.mark.min_hub_version("4.8dev")
 def test_ansible_lint_exception_AAH_2606(ansible_config, upload_artifact, hub_version):
     """
     https://issues.redhat.com/browse/AAH-2609
