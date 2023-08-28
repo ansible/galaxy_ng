@@ -179,6 +179,9 @@ class CollectionArtifactDownloadView(api_base.APIView):
                 request, filename, distro_base_path
             )
 
+        if settings.get("ANSIBLE_COLLECT_DOWNLOAD_COUNT", False):
+            pulp_ansible_views.CollectionArtifactDownloadView.count_download(filename)
+
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
                 host=settings.X_PULP_CONTENT_HOST,
