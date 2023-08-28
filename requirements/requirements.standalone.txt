@@ -320,7 +320,7 @@ pulp-container==2.15.2
     # via galaxy-ng (setup.py)
 pulp-glue==0.19.5
     # via pulpcore
-pulpcore==3.28.10
+pulpcore==3.28.12
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
