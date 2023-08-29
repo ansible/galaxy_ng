@@ -21,8 +21,6 @@ if one want to enable signing, then set the following variables
 on the per environment basis. e.g: export PULP_GALAXY_....
 """
 
-ANSIBLE_COLLECT_DOWNLOAD_LOG = True
-
 X_PULP_CONTENT_HOST = "pulp-content-app"
 X_PULP_CONTENT_PORT = 24816
 

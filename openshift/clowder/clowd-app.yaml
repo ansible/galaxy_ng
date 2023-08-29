@@ -179,6 +179,10 @@ objects:
             value: ${GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES}
           - name: PULP_GALAXY_FEATURE_FLAGS__execution_environments
             value: 'false'
+          - name: PULP_ANSIBLE_COLLECT_DOWNLOAD_LOG
+            value: ${ANSIBLE_COLLECT_DOWNLOAD_LOG}
+          - name: PULP_ANSIBLE_COLLECT_DOWNLOAD_COUNT
+            value: ${ANSIBLE_COLLECT_DOWNLOAD_COUNT}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs/database_fields.symmetric.key
@@ -397,6 +401,10 @@ parameters:
   value: "false"
 - name: PROMETHEUS_DIR
   value: "/tmp"
+- name: ANSIBLE_COLLECT_DOWNLOAD_LOG
+  value: "true"
+- name: ANSIBLE_COLLECT_DOWNLOAD_COUNT
+  value: "true"
 
 # signing requirements
 - name: ENABLE_SIGNING
