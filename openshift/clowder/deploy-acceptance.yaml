@@ -17,8 +17,9 @@ objects:
       trigger_job () {
         # trigger build
         URL=$1
+        TOKEN=$2
         BUILD_NUM=$(curl --silent ${URL}/api/json | jq '.nextBuildNumber')
-        curl --silent -X POST -H "Authorization: Bearer ${JENKINS_TOKEN}" ${URL}/buildWithParameters
+        curl --silent -X POST -H "Authorization: Bearer ${TOKEN}" ${URL}/buildWithParameters
 
         # verify build started
         sleep 10
@@ -42,12 +43,12 @@ objects:
       }
 
       # trigger build 1
-      trigger_job "${JENKINS_JOB_URL}"
+      trigger_job "${JENKINS_JOB_URL}" "${JENKINS_TOKEN}"
       BUILD_1_NUM=${BUILD_NUM}
       BUILD_1_STATUS=${BUILD_STATUS}
 
       # trigger build 2
-      trigger_job "${JENKINS_JOB_URL_2}"
+      trigger_job "${JENKINS_JOB_URL_2}" "${JENKINS_TOKEN_2}"
       BUILD_2_NUM=${BUILD_NUM}
       BUILD_2_STATUS=${BUILD_STATUS}
 
@@ -140,6 +141,11 @@ objects:
                   secretKeyRef:
                     name: iqe-jenkins
                     key: token
+              - name: JENKINS_TOKEN_2
+                valueFrom:
+                  secretKeyRef:
+                    name: iqe-jenkins
+                    key: token-2
               - name: SLACK_URL
                 valueFrom:
                   secretKeyRef:
