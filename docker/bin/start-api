@@ -8,6 +8,7 @@ readonly GUNICORN='/venv/bin/gunicorn'
 readonly GUNICORN_FORWARDED_ALLOW_IPS="${GUNICORN_FORWARDED_ALLOW_IPS:-}"
 readonly GUNICORN_WORKERS="${GUNICORN_WORKERS:-4}"
 readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
+readonly GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-60}"
 
 readonly BIND_HOST='0.0.0.0'
 readonly BIND_PORT=${GUNICORN_PORT:-8000}
@@ -19,6 +20,7 @@ GUNICORN_OPTIONS=(
   --workers "${GUNICORN_WORKERS}"
   --access-logfile -
   --limit-request-field_size 32768
+  --timeout "${GUNICORN_TIMEOUT}"
 )
 
 if [[ -n "${GUNICORN_FORWARDED_ALLOW_IPS}" ]]; then
