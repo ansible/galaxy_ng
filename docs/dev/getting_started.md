@@ -38,7 +38,7 @@ Issues for Galaxy NG are tracked in Jira at https://issues.redhat.com/browse/AAH
 
 ## Submitting a Pull Request
 
-UI PRs should be submitted at (github.com/ansible/ansible-hub-ui)[https://github.com/ansible/ansible-hub-ui].
+UI PRs should be submitted at [github.com/ansible/ansible-hub-ui](https://github.com/ansible/ansible-hub-ui).
 
 When submitting a PR to either the UI or backend:
 
