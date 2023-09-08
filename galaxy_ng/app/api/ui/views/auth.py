@@ -89,7 +89,11 @@ class LogoutView(api_base.APIView):
             log.warning(msg)
             return
 
-        extra_data = json.loads(social.extra_data)
+        # FIXME - workaround for custom json type from dynaconf
+        if isinstance(social.extra_data, dict):
+            extra_data = social.extra_data
+        else:
+            extra_data = json.loads(social.extra_data)
 
         access_token = extra_data['access_token']
         refresh_token = extra_data['refresh_token']
