@@ -112,7 +112,7 @@ func getAccessToken(rw http.ResponseWriter, req *http.Request) {
 	refresh_token := req.FormValue("refresh_token")
 
 	if accountID, ok := refreshTokens[refresh_token]; ok {
-		fmt.Printf("Creating refresh token for: %s", accountID)
+		fmt.Printf("xxx Creating refresh token for: %s", accountID)
 
 		acces_token := randomString(32)
 		accessTokens[acces_token] = accountID
@@ -186,6 +186,22 @@ func getEnv(key string, fallback string) string {
 	return fallback
 }
 
+func createHTTPClient(url string) *http.Client {
+
+    if strings.Contains(url, ".tar.gz") {
+        return &http.Client{
+            CheckRedirect: func(req *http.Request, via []*http.Request) error {
+                return http.ErrUseLastResponse
+            },
+        }
+
+    }
+
+    //return &http.Client{}
+    //return &http.DefaultClient
+    return &http.Client{}
+}
+
 func main() {
 	fmt.Println("Staring insights proxy.")
 
@@ -217,6 +233,13 @@ func main() {
 		// Set X-RH-IDENTITY header
 		setRHIdentityHeader(req)
 
+        fmt.Printf("req.Host: %s\n", req.Host)
+        fmt.Printf("req.URL.Host: %s\n", req.URL.Host)
+        fmt.Printf("req.URL.Scheme: %s\n", req.URL.Scheme)
+        fmt.Printf("req.URL.Path: %s\n", req.URL.Path)
+        fmt.Printf("urlToProxyTo.Host: %s\n", urlToProxyTo.Host)
+        fmt.Printf("urlToProxyTo.Scheme: %s\n", urlToProxyTo.Scheme)
+
 		// Rewrite the url on the incoming request and resend it
 		req.Host = urlToProxyTo.Host
 		req.URL.Host = urlToProxyTo.Host
@@ -224,17 +247,46 @@ func main() {
 		req.RequestURI = ""
 		req.URL.Path = strings.ReplaceAll(req.URL.Path, "//", "/")
 
-		fmt.Printf("Proxying request to: %s\n", req.URL.RequestURI())
+        // fixme ...
+        // change http://localhost:11651 to http://pminio:8000
 
-		// save the response from the origin server
-		upstreamServerResponse, err := http.DefaultClient.Do(req)
+        fmt.Printf("Proxying request to: %s\n", req.URL.RequestURI())
+
+        /*
+        client := &http.Client{
+            CheckRedirect: func(req *http.Request, via []*http.Request) error {
+                return http.ErrUseLastResponse
+            },
+        }
+        */
+
+        client := createHTTPClient(req.URL.Path)
+
+		//upstreamServerResponse, err := http.DefaultClient.Do(req)
+		upstreamServerResponse, err := client.Do(req)
+
 		if err != nil {
+            fmt.Println("error ...")
+            fmt.Println(err)
 			rw.WriteHeader(http.StatusInternalServerError)
 			_, _ = fmt.Fprint(rw, err)
 			fmt.Println("")
 
 			return
 		}
+
+        // if it's a 302 redirect, write the new url into the response headers ...
+        headers := upstreamServerResponse.Header
+        for key, values := range headers {
+            for _, value := range values {
+                fmt.Printf("HEADER %s: %s\n", key, value)
+            }
+        }
+
+        location := upstreamServerResponse.Header.Get("Location")
+        if location != "" {
+            rw.Header().Set("Location", location)
+        }
 
 		// replace any download urls that are found on the response so that they
 		// get redirected through the proxy
@@ -245,6 +297,7 @@ func main() {
 		rw.WriteHeader(upstreamServerResponse.StatusCode)
 		rw.Write(modified)
 
+        fmt.Println("request complete")
 		fmt.Println()
 	})
 
