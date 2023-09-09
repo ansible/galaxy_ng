@@ -47,6 +47,7 @@ from .sync import (
 )
 from .pulp_interfaces import AnsibleDistroAndRepo, PulpObjectBase
 from .signatures import create_local_signature_for_tarball
+from .github import GithubAdminClient
 
 
 __all__ = (
@@ -89,5 +90,6 @@ __all__ = (
     gen_string,
     AnsibleDistroAndRepo,
     delete_all_collections,
-    PulpObjectBase
+    PulpObjectBase,
+    GithubAdminClient
 )
