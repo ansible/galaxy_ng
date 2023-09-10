@@ -214,12 +214,29 @@ func isBrokenPipeError(err error) bool {
 }
 
 
+func isConnectionResetByPeer(err error) bool {
+	if netErr, ok := err.(*net.OpError); ok {
+		if sysErr, ok := netErr.Err.(*os.SyscallError); ok {
+			if sysErr.Err == syscall.ECONNRESET {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+
 func retryHTTPRequest(client *http.Client, req *http.Request, maxRetries int) (*http.Response, error) {
     for retry := 0; retry < maxRetries; retry++ {
         resp, err := client.Do(req)
         if err != nil {
             if isBrokenPipeError(err) {
                 fmt.Printf("Retry attempt %d: Broken Pipe Error\n", retry+1)
+                time.Sleep(1 * time.Second) // Wait before retrying
+                continue
+            }
+            if isConnectionResetByPeer(err) {
+                fmt.Printf("Retry attempt %d: Connection Reest by Peer Error\n", retry+1)
                 time.Sleep(1 * time.Second) // Wait before retrying
                 continue
             }
