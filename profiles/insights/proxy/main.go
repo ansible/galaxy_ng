@@ -13,6 +13,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+    "net"
+    "syscall"
 )
 
 var refreshTokens = map[string]string{
@@ -202,6 +204,38 @@ func createHTTPClient(url string) *http.Client {
     return &http.Client{}
 }
 
+
+func isBrokenPipeError(err error) bool {
+	if netErr, ok := err.(*net.OpError); ok {
+		if sysErr, ok := netErr.Err.(*os.SyscallError); ok {
+			if sysErr.Err == syscall.EPIPE {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+
+func retryHTTPRequest(client *http.Client, req *http.Request, maxRetries int) (*http.Response, error) {
+	for retry := 0; retry < maxRetries; retry++ {
+		resp, err := client.Do(req)
+		if err != nil {
+			if isBrokenPipeError(err) {
+				fmt.Printf("Retry attempt %d: Broken Pipe Error\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			return nil, err
+		}
+
+		return resp, nil
+	}
+
+	return nil, fmt.Errorf("Exhausted all retry attempts")
+}
+
+
 func main() {
 	fmt.Println("Staring insights proxy.")
 
@@ -247,23 +281,11 @@ func main() {
 		req.RequestURI = ""
 		req.URL.Path = strings.ReplaceAll(req.URL.Path, "//", "/")
 
-        // fixme ...
-        // change http://localhost:11651 to http://pminio:8000
-
         fmt.Printf("Proxying request to: %s\n", req.URL.RequestURI())
 
-        /*
-        client := &http.Client{
-            CheckRedirect: func(req *http.Request, via []*http.Request) error {
-                return http.ErrUseLastResponse
-            },
-        }
-        */
-
         client := createHTTPClient(req.URL.Path)
-
-		//upstreamServerResponse, err := http.DefaultClient.Do(req)
-		upstreamServerResponse, err := client.Do(req)
+		maxRetries := 3
+		upstreamServerResponse, err := retryHTTPRequest(client, req, maxRetries)
 
 		if err != nil {
             fmt.Println("error ...")
@@ -282,6 +304,7 @@ func main() {
                 fmt.Printf("HEADER %s: %s\n", key, value)
             }
         }
+        fmt.Printf("STATUS CODE: %d\n", upstreamServerResponse.StatusCode)
 
         location := upstreamServerResponse.Header.Get("Location")
         if location != "" {
