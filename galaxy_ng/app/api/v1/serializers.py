@@ -9,12 +9,10 @@ from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 class LegacyNamespacesSerializer(serializers.ModelSerializer):
 
     summary_fields = serializers.SerializerMethodField()
-    # date_joined = serializers.SerializerMethodField()
-    # active = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
-    # full_name = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
     avatar_url = serializers.SerializerMethodField()
+    related = serializers.SerializerMethodField()
 
     class Meta:
         model = LegacyNamespace
@@ -25,11 +23,16 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
             'created',
             'modified',
             'name',
-            # 'full_name',
-            # 'date_joined',
             'avatar_url',
-            # 'active'
+            'related',
         ]
+
+    def get_related(self, obj):
+        return {
+            'provider_namespaces': None,
+            'content': None,
+            'owners': f'/api/v1/namespaces/{obj.id}/owners/',
+        }
 
     def get_name(self, obj):
         if hasattr(obj, 'name'):
@@ -40,20 +43,24 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
     def get_url(self, obj):
         return ''
 
-    # def get_full_name(self, obj):
-    #    return ''
-
     def get_date_joined(self, obj):
         return obj.created
 
     def get_summary_fields(self, obj):
         owners = obj.owners.all()
         owners = [{'id': x.id, 'username': x.username} for x in owners]
-        return {'owners': owners}
 
-    # TODO: What does this actually mean?
-    # def get_active(self, obj):
-    #    return True
+        # link the v1 namespace to the v3 namespace so that users
+        # don't need to query the database to figure it out.
+        providers = []
+        if obj.namespace:
+            providers.append({
+                'id': obj.namespace.id,
+                'name': obj.namespace.name,
+                'pulp_href': f"/api/pulp/api/v3/pulp_ansible/namespaces/{obj.namespace.id}/",
+            })
+
+        return {'owners': owners, 'provider_namespaces': providers}
 
     def get_avatar_url(self, obj):
         url = f'https://github.com/{obj.name}.png'
@@ -233,6 +240,18 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         versions = obj.full_metadata.get('versions', [])
         dependencies = obj.full_metadata.get('dependencies', [])
         tags = obj.full_metadata.get('tags', [])
+
+        provider_ns = None
+        if obj.namespace and obj.namespace.namespace:
+            provider_ns = {
+                'id': obj.namespace.namespace.id,
+                'name': obj.namespace.namespace.name,
+                'pulp_href': (
+                    "/api/pulp/api/v3/pulp_ansible/namespaces/"
+                    + f"{obj.namespace.namespace.id}/"
+                )
+            }
+
         return {
             'dependencies': dependencies,
             'namespace': {
@@ -240,10 +259,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
                 'name': obj.namespace.name,
                 'avatar_url': f'https://github.com/{obj.namespace.name}.png'
             },
-            'provider_namespace': {
-                'id': obj.namespace.id,
-                'name': obj.namespace.name
-            },
+            'provider_namespace': provider_ns,
             'repository': {
                 'name': obj.name,
                 'original_name': obj.full_metadata.get('github_repo')
