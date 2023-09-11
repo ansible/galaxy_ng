@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from pulpcore.plugin.util import get_url
+
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
@@ -54,10 +56,11 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
         # don't need to query the database to figure it out.
         providers = []
         if obj.namespace:
+            pulp_href = get_url(obj.namespace)
             providers.append({
                 'id': obj.namespace.id,
                 'name': obj.namespace.name,
-                'pulp_href': f"/api/pulp/api/v3/pulp_ansible/namespaces/{obj.namespace.id}/",
+                'pulp_href': pulp_href,
             })
 
         return {'owners': owners, 'provider_namespaces': providers}
@@ -243,13 +246,11 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
 
         provider_ns = None
         if obj.namespace and obj.namespace.namespace:
+            pulp_href = get_url(obj.namespace.namespace)
             provider_ns = {
                 'id': obj.namespace.namespace.id,
                 'name': obj.namespace.namespace.name,
-                'pulp_href': (
-                    "/api/pulp/api/v3/pulp_ansible/namespaces/"
-                    + f"{obj.namespace.namespace.id}/"
-                )
+                'pulp_href': pulp_href
             }
 
         return {
