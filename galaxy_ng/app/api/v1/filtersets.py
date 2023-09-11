@@ -77,7 +77,12 @@ class LegacyRoleFilter(filterset.FilterSet):
         return queryset.filter(namespace__name=value)
 
     def owner__username_filter(self, queryset, name, value):
-        return queryset.filter(namespace__name=value)
+        """
+        The cli uses this filter to find a role by the namespace.
+        It should be case insenstive such that Foo and foo find
+        the same content... hence the __iexact
+        """
+        return queryset.filter(namespace__name__iexact=value)
 
     def tags_filter(self, queryset, name, value):
 
