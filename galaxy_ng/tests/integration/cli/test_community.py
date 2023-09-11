@@ -237,12 +237,17 @@ def test_delete_role_as_not_owner(ansible_config):
     role_name = "role1"
     qs = f'v1/roles/?github_user={github_user}&name={role_name}'
 
+    cleanup_social_user(deleter)
+    cleanup_social_user(github_user)
+    cleanup_social_user(github_user.lower())
+
     cfg = ansible_config(github_user)
     client = SocialGithubClient(config=cfg)
     client.login()
     token = client.get_hub_token()
     assert token is not None
 
+    '''
     # cleanup the role if it exists
     resp = client.get(qs)
     ds = resp.json()
@@ -252,6 +257,7 @@ def test_delete_role_as_not_owner(ansible_config):
         role_url = f'v1/roles/{role_id}/'
         resp = client.delete(role_url)
         assert resp.status_code == 200
+    '''
 
     # Run the import as the owner
     cfg = ansible_config(github_user)
