@@ -237,9 +237,9 @@ def test_delete_role_as_not_owner(ansible_config):
     role_name = "role1"
     qs = f'v1/roles/?github_user={github_user}&name={role_name}'
 
-    cleanup_social_user(deleter)
-    cleanup_social_user(github_user)
-    cleanup_social_user(github_user.lower())
+    cleanup_social_user(deleter, ansible_config)
+    cleanup_social_user(github_user, ansible_config)
+    cleanup_social_user(github_user.lower(), ansible_config)
 
     cfg = ansible_config(github_user)
     client = SocialGithubClient(config=cfg)
