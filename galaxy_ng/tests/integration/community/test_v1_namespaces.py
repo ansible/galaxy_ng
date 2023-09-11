@@ -1,36 +1,21 @@
 """test_community.py - Tests related to the community featureset.
 """
 
-import json
 import pytest
-
-from urllib.parse import urlparse
 
 from ..utils import (
     ansible_galaxy,
-    build_collection,
-    get_client,
     SocialGithubClient,
-    create_user,
 )
 from ..utils.legacy import (
-    clean_all_roles,
     cleanup_social_user,
-    wait_for_v1_task,
 )
-
-from jsonschema import validate as validate_json
-
-from ..schemas import (
-    schema_objectlist,
-)
-
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.deployment_community
-def test_social_auth_creates_v3_namespace_new(ansible_config):
+def test_social_auth_creates_v3_namespace_as_v1_provider(ansible_config):
 
     github_user = 'jctannerTEST'
     github_repo = 'role1'
@@ -64,6 +49,3 @@ def test_social_auth_creates_v3_namespace_new(ansible_config):
         role = res['results'][0]
         provider_namespace = role['summary_fields']['provider_namespace']
         assert provider_namespace['name'] == github_user.lower()
-
-        import epdb; epdb.st()
-        print('done')
