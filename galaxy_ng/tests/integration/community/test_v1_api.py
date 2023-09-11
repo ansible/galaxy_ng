@@ -1,28 +1,14 @@
 """test_community.py - Tests related to the community featureset.
 """
 
-import json
 import pytest
-
-from urllib.parse import urlparse
 
 from ..utils import (
     ansible_galaxy,
-    build_collection,
     get_client,
-    SocialGithubClient,
-    create_user,
 )
 from ..utils.legacy import (
-    clean_all_roles,
     cleanup_social_user,
-    wait_for_v1_task,
-)
-
-from jsonschema import validate as validate_json
-
-from ..schemas import (
-    schema_objectlist,
 )
 
 
