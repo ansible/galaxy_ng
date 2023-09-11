@@ -43,53 +43,74 @@ The v3 api is 100% focused on collections and collection namespaces. As time pro
 
 Access control over collections is controlled by the v3 collection namespaces and pulp object level RBAC. Users are added to a group and the group is bound to the namespace with a permission. For the community instances, the group and permission bindings are handled automatically by the social auth handler.
 
-## Docker compose
+### OCI Env
 
-**For development work on the galaxy_ng project or when integration testing a pulp_ansible+galaxy_ng feature, docker-compose is the preferred pathway. With all the moving parts in the stack, docker-compose is the simplest way to spin up a functional dev environment.**
+The community profile is only supported via the [oci-env](https://github.com/pulp/oci_env) project. The "old" dev stack that utilizes the "compose" script in the project root is no longer supported and will be removed in the near future.
 
-!!! warning
-    docker-compose 2.x (the golang rewrite) has compatibility issues with our current stack, so please use the 1.x version that was written in python.
+To get started, it's recommended to a create a new top level directory to store your various checkouts.
 
-### Profiles & Configuration
+```bash
+/src
+`- oci_env
+`- galaxy_ng
+`- ansible-hub-ui
+```
 
-The galaxy_ng project is a highly configurable application, but only at startup time. Almost all of the behavior of the application is influenced by environment variables and static settings.py files that are read in by [django](https://www.djangoproject.com/) and [dynaconf](https://www.dynaconf.com/). None of these settings live in the database currently, so they can only be declared before the application starts.
+Clone the three projects into the src dir.
+```bash
+cd src
+git clone https://github.com/pulp/oci_env
+git clone https://github.com/ansible/galaxy_ng
+git clone https://github.com/ansible/ansible-hub-ui
+```
 
-The "community" profile of galaxy_ng is a combination of settings driven by the docker-compose files found in [the standalone-community directory](https://github.com/ansible/galaxy_ng/tree/master/dev/standalone-community). To get his profile to run, you must do a few things:
+Create a virtual env in the src dir
+```bash
+cd src
+python -m venv venv
+```
 
-1. Copy the ".compose.env.example" file at the root of the repository to a new file named ".compose.env".
-2. Change the `COMPOSE_PROFILE` value in ".compose.env" from "standalone" to "standalone-community".
-3. Add `SOCIAL_AUTH_GITHUB_KEY=<value>` to the bottom of ".compose.env".
-4. Add `SOCIAL_AUTH_GITHUB_SECRET=<value>` to the bottom of ".compose.env".
-5. Add `SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/"` to the bottom of galaxy_ng/app/settings.py
-6. Add `SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to the bottom of galaxy_ng/app/settings.py if your stack will be behind an http server with SSL enabled.
+Install the oci-env client
+```bash
+cd src
+source venv/bin/activate
+cd oci_env
+pip install -e client
+```
 
-The github key and secret are provided by configuring an oauth account on github.com under your user's developer settings. The oauth application config needs to have a valid and resolvable homepage url and the callback url should be the same host with "/complete/github/" as the path. For local testing, you can use http://localhost:8002 as base url.
-
-Afterwards, the stack can be created and spun up via:
-
-1. `make docker/all`
-2. `./compose up`
-
+Start the stack build and spinup
+```bash
+cd src/galaxy_ng
+make oci/community
+```
 
 You can now reach the api at http://localhost:5001. The makefile targets created a couple test users, namely admin:admin for the primary superuser. This is purely an API stack with no UI. That makes it difficult to test and use github users, so see the next section about adding the UI.
-
 
 ### React.js UI
 
 To connect to the UI, the default address is http://localhost:8002. If social auth is enabled, you'll be forced to auth via Github if clicking on the "login" link at the top right of the page. The presence of `SOCIAL_AUTH_GITHUB_KEY` & `SOCIAL_AUTH_GITHUB_SECRET` in the backend configuration triggers dynaconf to set a feature flag for external auth that the UI reads and alters the login link accordingly. If you want to bypass github and use a local django user, go directly to the http://localhost:8002/ui/login url and login that way.
 
-#### docker-compose
-Inside .compose.env, you'll find a commented out line referencing `ANSIBLE_HUB_UI_PATH`. If you want to add a UI to the compose stack, this needs to be uncommented and set to a valid absolute path for a checkout of [ansible-hub-ui](https://github.com/ansible/ansible-hub-ui). The compose spin up should properly allocate an alpine container with the appropriate node.js version and install+build+launch the UI.
-
 #### starting directly
 
-For development work on the UI, it's easier to launch the webpack dev server outside the compose stack. The npm start scripts and configuration will have it redirect api calls to http://localhost:5001 by default, so no hacking is necessary to make it work locally.
+For development work on the UI, it's easiest to launch the webpack dev server outside the compose stack. The npm start scripts and configuration will have it redirect api calls to http://localhost:5001 by default, so no hacking is necessary to make it work locally.
 
 1. Install [NVM](https://github.com/nvm-sh/nvm) to easily manage node.js versions.
 2. Use NVM to install and set the version to 16: `nvm install 16`,
 3. Clone the [ansible-hub-ui](https://github.com/ansible/ansible-hub-ui) repo to the desired location.
 4. From the checkout, run `npm install`.
 5. From the checkout, run `npm run start-community`.
+
+### Configuration
+
+The galaxy_ng project is a highly configurable application, but only at startup time. Almost all of the behavior of the application is influenced by environment variables and static settings.py files that are read in by [django](https://www.djangoproject.com/) and [dynaconf](https://www.dynaconf.com/). None of these settings live in the database currently, so they can only be declared before the application starts. If you change anything after starting the stack, it is recommeneded to completely destroy the stack, wipe all your docker images and spin up from scatch.
+
+The community specific settings are found in `galaxy_ng/profiles/community/pulp_config.env`
+
+1. Comment out the `SOCIAL_AUTH_GITHUB_BASE_URL` line
+2. Add `PULP_SOCIAL_AUTH_GITHUB_KEY=<value>`
+3. Add `PULP_SOCIAL_AUTH_GITHUB_SECRET=<value>`
+
+The github key and secret are provided by configuring an oauth account on github.com under your user's developer settings. The oauth application config needs to have a valid and resolvable homepage url and the callback url should be the same host with "/complete/github/" as the path. For local testing, you can use http://localhost:8002 as base url.
 
 ## Testing
 
@@ -100,7 +121,6 @@ The GalaxyNG project is a "test driven development" (TDD) project. Our interpret
 More focus has been spent on the integration tests, but there are a few unit tests in the project. The compose stack must be running to launch unit tests, as they are using django and postgres with a temporary database to do real SQL calls that are incompatible with sqlite.
 
 To launch units, execute `make docker/test/unit`. Specific tests can be selected by running `TEST=xyz make docker/test/unit`.
-
 
 ### Functional
 
