@@ -210,7 +210,7 @@ def test_import_role_fields(ansible_config):
     summary_fields = result["summary_fields"]
     assert summary_fields["dependencies"] == list()
     assert summary_fields["namespace"]["name"] == "jctannerTEST"
-    assert summary_fields["provider_namespace"]["name"] == "jctannerTEST"
+    assert summary_fields["provider_namespace"]["name"] == "jctannertest"
     assert summary_fields["repository"]["name"] == "role1"
     assert summary_fields["tags"] == list()
 
