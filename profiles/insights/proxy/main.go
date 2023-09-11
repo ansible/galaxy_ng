@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -223,6 +224,25 @@ func isConnectionResetByPeer(err error) bool {
 	return false
 }
 
+func isUseOfClosedNetworkConnection(err error) bool {
+	return strings.Contains(err.Error(), "use of closed network connection")
+}
+
+func isWriteBrokenPipe(err error) bool {
+	return strings.Contains(err.Error(), "write: broken pipe")
+}
+
+func isInvalidReadOnClosedBody(err error) bool {
+	return strings.Contains(err.Error(), "invalid Read on closed Body")
+}
+
+func isEOFerror(err error) bool {
+	if err == io.EOF {
+		return true
+	}
+	return false
+}
+
 func retryHTTPRequest(client *http.Client, req *http.Request, maxRetries int) (*http.Response, error) {
 	for retry := 0; retry < maxRetries; retry++ {
 		resp, err := client.Do(req)
@@ -237,6 +257,26 @@ func retryHTTPRequest(client *http.Client, req *http.Request, maxRetries int) (*
 				time.Sleep(1 * time.Second) // Wait before retrying
 				continue
 			}
+			if isUseOfClosedNetworkConnection(err) {
+				fmt.Printf("Retry attempt %d: use of closed network connection\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			if isWriteBrokenPipe(err) {
+				fmt.Printf("Retry attempt %d: write broken pipe\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			if isInvalidReadOnClosedBody(err) {
+				fmt.Printf("Retry attempt %d: invalid read on closed body\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			if isEOFerror(err) {
+				fmt.Printf("Retry attempt %d: EOF error\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
 			return nil, err
 		}
 
@@ -247,7 +287,7 @@ func retryHTTPRequest(client *http.Client, req *http.Request, maxRetries int) (*
 }
 
 func main() {
-	fmt.Println("Staring insights proxy.")
+	fmt.Println("Starting insights proxy.")
 
 	// define origin server URL
 	urlToProxyTo, err := url.Parse(getEnv("UPSTREAM_URL", "http://localhost:5001"))
@@ -325,6 +365,8 @@ func main() {
 		// get redirected through the proxy
 		data, _ := ioutil.ReadAll(upstreamServerResponse.Body)
 		modified := downloadUrlReg.ReplaceAll(data, replacementURL)
+
+		fmt.Printf("MODIFIED DATA: %s\n", modified)
 
 		// Write the response
 		rw.WriteHeader(upstreamServerResponse.StatusCode)
