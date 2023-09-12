@@ -55,7 +55,12 @@ def _download_avatar(url):
             print("file is not an image")
             return
 
-    return Artifact.init_and_validate(tf)
+        # the artifact has to be saved before the file is closed, or s3transfer
+        # will throw an error.
+        artifact = Artifact.init_and_validate(tf)
+        artifact.save()
+
+        return artifact
 
 
 def _create_pulp_namespace(galaxy_ns_pk, download_logo):
@@ -99,8 +104,6 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
     else:
         with transaction.atomic():
             metadata.save()
-            if avatar_artifact:
-                avatar_artifact.save()
             ContentArtifact.objects.create(
                 artifact=avatar_artifact,
                 content=metadata,

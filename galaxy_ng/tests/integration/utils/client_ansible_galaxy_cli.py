@@ -61,7 +61,7 @@ def ansible_galaxy(
         if token:
             f.write(f"token={token}\n")
 
-    command_string = f"ansible-galaxy -vvv {command} --server={server} --ignore-certs"
+    command_string = f"ansible-galaxy {command} -vvv --server={server} --ignore-certs"
 
     for x in range(0, retries + 1):
         try:

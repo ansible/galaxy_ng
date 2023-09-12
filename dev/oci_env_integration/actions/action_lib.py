@@ -48,6 +48,7 @@ class OCIEnvIntegrationTest:
     do_teardown = True
     flags = ""
     envs = {}
+    failed = None
 
     def __init__(self, envs):
         for env in envs:
@@ -59,18 +60,18 @@ class OCIEnvIntegrationTest:
         self.do_teardown = os.environ.get("GH_TEARDOWN", "1") == "1"
         self.flags = os.environ.get("GH_FLAGS", "")
 
-        failed = False
+        self.failed = False
         try:
             self.set_up_env()
             self.run_test()
         except Exception as e:
             print(e)
-            failed = True
+            self.failed = True
         finally:
             self.dump_logs()
             self.teardown()
 
-        if failed:
+        if self.failed:
             exit(1)
 
     def set_up_env(self):
@@ -129,8 +130,9 @@ class OCIEnvIntegrationTest:
     def dump_logs(self):
         if not self.do_dump_logs:
             return
-        for env in self.envs:
-            self.exec_cmd(env, "compose logs")
+        if self.failed:
+            for env in self.envs:
+                self.exec_cmd(env, "compose logs")
 
     def teardown(self):
         if not self.do_teardown:

@@ -4,14 +4,17 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -112,7 +115,7 @@ func getAccessToken(rw http.ResponseWriter, req *http.Request) {
 	refresh_token := req.FormValue("refresh_token")
 
 	if accountID, ok := refreshTokens[refresh_token]; ok {
-		fmt.Printf("Creating refresh token for: %s", accountID)
+		fmt.Printf("xxx Creating refresh token for: %s", accountID)
 
 		acces_token := randomString(32)
 		accessTokens[acces_token] = accountID
@@ -186,8 +189,105 @@ func getEnv(key string, fallback string) string {
 	return fallback
 }
 
+func createHTTPClient(url string) *http.Client {
+	// if fetching a tarball, do not follow redirects
+	if strings.Contains(url, ".tar.gz") {
+		return &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
+
+	}
+	return &http.Client{}
+}
+
+func isBrokenPipeError(err error) bool {
+	if netErr, ok := err.(*net.OpError); ok {
+		if sysErr, ok := netErr.Err.(*os.SyscallError); ok {
+			if sysErr.Err == syscall.EPIPE {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isConnectionResetByPeer(err error) bool {
+	if netErr, ok := err.(*net.OpError); ok {
+		if sysErr, ok := netErr.Err.(*os.SyscallError); ok {
+			if sysErr.Err == syscall.ECONNRESET {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isUseOfClosedNetworkConnection(err error) bool {
+	return strings.Contains(err.Error(), "use of closed network connection")
+}
+
+func isWriteBrokenPipe(err error) bool {
+	return strings.Contains(err.Error(), "write: broken pipe")
+}
+
+func isInvalidReadOnClosedBody(err error) bool {
+	return strings.Contains(err.Error(), "invalid Read on closed Body")
+}
+
+func isEOFerror(err error) bool {
+	if err == io.EOF {
+		return true
+	}
+	return false
+}
+
+func retryHTTPRequest(client *http.Client, req *http.Request, maxRetries int) (*http.Response, error) {
+	for retry := 0; retry < maxRetries; retry++ {
+		resp, err := client.Do(req)
+		if err != nil {
+			if isBrokenPipeError(err) {
+				fmt.Printf("Retry attempt %d: Broken Pipe Error\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			if isConnectionResetByPeer(err) {
+				fmt.Printf("Retry attempt %d: Connection Reest by Peer Error\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			if isUseOfClosedNetworkConnection(err) {
+				fmt.Printf("Retry attempt %d: use of closed network connection\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			if isWriteBrokenPipe(err) {
+				fmt.Printf("Retry attempt %d: write broken pipe\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			if isInvalidReadOnClosedBody(err) {
+				fmt.Printf("Retry attempt %d: invalid read on closed body\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			if isEOFerror(err) {
+				fmt.Printf("Retry attempt %d: EOF error\n", retry+1)
+				time.Sleep(1 * time.Second) // Wait before retrying
+				continue
+			}
+			return nil, err
+		}
+
+		return resp, nil
+	}
+
+	return nil, fmt.Errorf("Exhausted all retry attempts")
+}
+
 func main() {
-	fmt.Println("Staring insights proxy.")
+	fmt.Println("Starting insights proxy.")
 
 	// define origin server URL
 	urlToProxyTo, err := url.Parse(getEnv("UPSTREAM_URL", "http://localhost:5001"))
@@ -217,6 +317,13 @@ func main() {
 		// Set X-RH-IDENTITY header
 		setRHIdentityHeader(req)
 
+		fmt.Printf("req.Host: %s\n", req.Host)
+		fmt.Printf("req.URL.Host: %s\n", req.URL.Host)
+		fmt.Printf("req.URL.Scheme: %s\n", req.URL.Scheme)
+		fmt.Printf("req.URL.Path: %s\n", req.URL.Path)
+		fmt.Printf("urlToProxyTo.Host: %s\n", urlToProxyTo.Host)
+		fmt.Printf("urlToProxyTo.Scheme: %s\n", urlToProxyTo.Scheme)
+
 		// Rewrite the url on the incoming request and resend it
 		req.Host = urlToProxyTo.Host
 		req.URL.Host = urlToProxyTo.Host
@@ -226,9 +333,13 @@ func main() {
 
 		fmt.Printf("Proxying request to: %s\n", req.URL.RequestURI())
 
-		// save the response from the origin server
-		upstreamServerResponse, err := http.DefaultClient.Do(req)
+		client := createHTTPClient(req.URL.Path)
+		maxRetries := 3
+		upstreamServerResponse, err := retryHTTPRequest(client, req, maxRetries)
+
 		if err != nil {
+			fmt.Println("error ...")
+			fmt.Println(err)
 			rw.WriteHeader(http.StatusInternalServerError)
 			_, _ = fmt.Fprint(rw, err)
 			fmt.Println("")
@@ -236,15 +347,32 @@ func main() {
 			return
 		}
 
+		// if it's a 302 redirect, write the new url into the response headers ...
+		headers := upstreamServerResponse.Header
+		for key, values := range headers {
+			for _, value := range values {
+				fmt.Printf("HEADER %s: %s\n", key, value)
+			}
+		}
+		fmt.Printf("STATUS CODE: %d\n", upstreamServerResponse.StatusCode)
+
+		location := upstreamServerResponse.Header.Get("Location")
+		if location != "" {
+			rw.Header().Set("Location", location)
+		}
+
 		// replace any download urls that are found on the response so that they
 		// get redirected through the proxy
 		data, _ := ioutil.ReadAll(upstreamServerResponse.Body)
 		modified := downloadUrlReg.ReplaceAll(data, replacementURL)
 
+		fmt.Printf("MODIFIED DATA: %s\n", modified)
+
 		// Write the response
 		rw.WriteHeader(upstreamServerResponse.StatusCode)
 		rw.Write(modified)
 
+		fmt.Println("request complete")
 		fmt.Println()
 	})
 

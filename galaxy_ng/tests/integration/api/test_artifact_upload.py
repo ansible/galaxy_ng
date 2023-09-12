@@ -428,6 +428,7 @@ def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
     assert len(stderr_msg) == 0  # this stderr message not in log
 
 
+@pytest.mark.min_hub_version("4.8dev")
 @pytest.mark.stage_health
 @pytest.mark.importer
 @pytest.mark.all
