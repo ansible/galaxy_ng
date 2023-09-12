@@ -61,10 +61,11 @@ class GalaxyNGOAuth2(GithubOAuth2):
         auth_response = self.strategy.authenticate(*args, **kwargs)
 
         # create a legacynamespace?
-        legacy_namespace, _ = self._ensure_legacynamespace(login)
+        legacy_namespace, legacy_created = self._ensure_legacynamespace(login)
 
         # define namespace, validate and create ...
         namespace_name = self.transform_namespace_name(login)
+        print(f'NAMESPACE NAME: {namespace_name}')
         if self.validate_namespace_name(namespace_name):
 
             # Need user for group and rbac binding
@@ -74,7 +75,12 @@ class GalaxyNGOAuth2(GithubOAuth2):
             group, _ = self._ensure_group(namespace_name, user)
 
             # create a v3 namespace?
-            namespace, _ = self._ensure_namespace(namespace_name, user, group)
+            v3_namespace, v3_created = self._ensure_namespace(namespace_name, user, group)
+
+            # bind the v3 namespace to the v1 namespace
+            if legacy_created and v3_created:
+                legacy_namespace.namespace = v3_namespace
+                legacy_namespace.save()
 
         return auth_response
 
@@ -111,6 +117,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
         with transaction.atomic():
             namespace, created = Namespace.objects.get_or_create(name=name)
+            print(f'NAMESPACE:{namespace} CREATED:{created}')
             owners = rbac.get_v3_namespace_owners(namespace)
             if created or not owners:
                 # Binding by user breaks the UI workflow ...
