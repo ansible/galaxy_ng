@@ -1,1 +1,0 @@
-Gracefully fail the legacy role download count increment if the database is in read-only mode.
