@@ -19,6 +19,7 @@ jobs:
         - 'stable-4.5'
         - 'stable-4.6'
         - 'stable-4.7'
+        - 'stable-4.8'
 
     steps:
       - uses: actions/checkout@v3
@@ -45,6 +46,17 @@ jobs:
           cd galaxy_ng
           django-admin makemessages --all
 
+      - name: Check if files were updated
+        run: |
+          filesChanged=$(git diff --ignore-matching-lines=POT-Creation-Date)
+          if [ -z "$filesChanged" ]
+          then
+              echo "openPR=false" >> $GITHUB_ENV
+          else
+              echo "openPR=true" >> $GITHUB_ENV
+          fi
+        shell: bash
+
       - name: Clear fuzzy entries
         run: bash .github/workflows/scripts/clear_fuzzy_entries.sh
 
@@ -56,7 +68,8 @@ jobs:
       - name: Set current date as env variable
         run: echo "NOW=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
-      - name: Create Pull Request
+      - name: Create a Pull Request (only if files were updated)
+        if: env.openPR == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
