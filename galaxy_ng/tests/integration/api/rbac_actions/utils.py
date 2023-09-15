@@ -12,12 +12,11 @@ from galaxy_ng.tests.integration.utils import (
     wait_for_all_tasks as wait_for_all_tasks_fixtures,
     AnsibleDistroAndRepo
 )
-from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture, get_ansible_config, \
-    get_galaxy_client
 
 from ansible.galaxy.api import GalaxyError
 
-from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env
+from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env, get_ansible_config, \
+    get_galaxy_client, AnsibleConfigFixture
 from galaxykit.container_images import get_container, get_container_images_latest
 ansible_config = get_ansible_config()
 CLIENT_CONFIG = ansible_config("admin")

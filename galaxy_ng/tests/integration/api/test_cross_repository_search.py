@@ -1,14 +1,16 @@
 import pytest
+
+from ..utils.iqe_utils import require_signature_for_approval
 from ..utils import get_client, SocialGithubClient
 
 
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.all
+@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
+                                                             "work with signatures required "
+                                                             "on move.")
 def test_x_repo_search_acl_basic_user(ansible_config, uncertifiedv2, settings):
     """Check if admin and basic user can perform x-repo searches"""
-    if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip("This test needs refactoring to work with signatures required on move.")
-
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(
