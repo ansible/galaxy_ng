@@ -13,6 +13,15 @@ Changelog
 
 .. towncrier release notes start
 
+4.7.2 (2023-09-14)
+==================
+
+No significant changes.
+
+
+----
+
+
 4.7.1 (2023-05-29)
 ==================
 
