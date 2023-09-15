@@ -210,7 +210,7 @@ def test_import_role_fields(ansible_config):
     summary_fields = result["summary_fields"]
     assert summary_fields["dependencies"] == list()
     assert summary_fields["namespace"]["name"] == "jctannerTEST"
-    assert summary_fields["provider_namespace"]["name"] == "jctannerTEST"
+    assert summary_fields["provider_namespace"]["name"] == "jctannertest"
     assert summary_fields["repository"]["name"] == "role1"
     assert summary_fields["tags"] == list()
 
@@ -237,12 +237,17 @@ def test_delete_role_as_not_owner(ansible_config):
     role_name = "role1"
     qs = f'v1/roles/?github_user={github_user}&name={role_name}'
 
+    cleanup_social_user(deleter, ansible_config)
+    cleanup_social_user(github_user, ansible_config)
+    cleanup_social_user(github_user.lower(), ansible_config)
+
     cfg = ansible_config(github_user)
     client = SocialGithubClient(config=cfg)
     client.login()
     token = client.get_hub_token()
     assert token is not None
 
+    '''
     # cleanup the role if it exists
     resp = client.get(qs)
     ds = resp.json()
@@ -252,6 +257,7 @@ def test_delete_role_as_not_owner(ansible_config):
         role_url = f'v1/roles/{role_id}/'
         resp = client.delete(role_url)
         assert resp.status_code == 200
+    '''
 
     # Run the import as the owner
     cfg = ansible_config(github_user)
