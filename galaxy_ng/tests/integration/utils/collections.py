@@ -22,6 +22,7 @@ from orionutils.generator import randstr
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
+from . import wait_for_task as gng_wait_for_task
 from galaxykit.utils import wait_for_url, wait_for_task
 
 from .tools import iterate_all
@@ -667,7 +668,7 @@ def recursive_delete(api_client, namespace_name, cname, crepo):
             return
     # wait for the orphan_cleanup job to finish ...
     try:
-        wait_for_task(api_client, resp, timeout=10000)
+        gng_wait_for_task(api_client, resp, timeout=10000)
     except GalaxyError as ge:
         # FIXME - pulp tasks do not seem to accept token auth
         if ge.http_code in [403, 404]:
