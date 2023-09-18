@@ -60,7 +60,7 @@ def test_sync():
 
     # sync and check
     api_client = get_client({"url": "http://localhost:5001/api/automation-hub/",
-                             "username": "admin", "password": "admin"},
+                             "username": "iqe_admin", "password": "redhat"},
                             request_token=True, require_auth=True)
 
     body = {
