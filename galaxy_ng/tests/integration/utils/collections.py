@@ -22,7 +22,7 @@ from orionutils.generator import randstr
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
-from . import wait_for_task as gng_wait_for_task
+from .tasks import wait_for_task as gng_wait_for_task
 from galaxykit.utils import wait_for_url, wait_for_task
 
 from .tools import iterate_all
