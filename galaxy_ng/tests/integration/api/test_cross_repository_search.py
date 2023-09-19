@@ -69,7 +69,7 @@ def test_x_repo_search_acl_anonymous_user(ansible_config, auto_approved_artifact
     search_url = (
         api_prefix
         + '/v3/plugin/ansible/search/collection-versions/'
-        + f'?namespace={namespace}&name={name}'
+        + f'?namespace={namespace}&name={name}&repository_name=published'
     )
     resp = api_client.request(search_url)
     assert resp['meta']['count'] == 2
@@ -108,14 +108,14 @@ def test_x_repo_search_acl_social_user(ansible_config, auto_approved_artifacts):
     search_url = (
         api_prefix
         + '/v3/plugin/ansible/search/collection-versions/'
-        + f'?namespace={namespace}&name={name}'
+        + f'?namespace={namespace}&name={name}&repository_name=published'
     )
     resp = api_client.request(search_url)
     assert resp['meta']['count'] == 2
 
     search_url = (
         'v3/plugin/ansible/search/collection-versions/'
-        + f'?namespace={namespace}&name={name}'
+        + f'?namespace={namespace}&name={name}&repository_name=published'
     )
     cfg = ansible_config('github_user_1')
     with SocialGithubClient(config=cfg) as client:
