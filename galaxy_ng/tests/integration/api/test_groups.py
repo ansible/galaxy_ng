@@ -11,8 +11,7 @@ import pytest
 
 from ..utils import UIClient, get_client
 
-from galaxy_ng.tests.integration.conftest import AnsibleConfigFixture
-
+from ..utils.iqe_utils import AnsibleConfigFixture
 
 pytestmark = pytest.mark.qa  # noqa: F821
 CLIENT_CONFIG = AnsibleConfigFixture("admin")

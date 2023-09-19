@@ -208,13 +208,13 @@ SYNC_PROFILES = {
                   "vault_key": "token"},
     },
     "local_admin": {  # this is a superuser
-        "username": "admin",
-        "password": "admin",
+        "username": "iqe_admin",
+        "password": "redhat",
         "token": None,
     },
     "admin": {  # this is a superuser
-        "username": "admin",
-        "password": "admin",
+        "username": "iqe_admin",
+        "password": "redhat",
         "token": None,
     }
 }

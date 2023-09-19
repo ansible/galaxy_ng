@@ -13,7 +13,6 @@ from typing import List, Union
 from ansible.galaxy.api import _urljoin
 
 import yaml
-from urllib.parse import urljoin
 from urllib.parse import urlparse
 from contextlib import contextmanager
 
@@ -23,10 +22,11 @@ from orionutils.generator import randstr
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
+from .tasks import wait_for_task as gng_wait_for_task
+from galaxykit.utils import wait_for_url, wait_for_task
 
-from .tasks import wait_for_task
-from .urls import wait_for_url
 from .tools import iterate_all
+from .iqe_utils import get_ansible_config, get_galaxy_client
 
 try:
     import importlib.resources as pkg_resources
@@ -298,7 +298,7 @@ def upload_artifact(
     data = b"\r\n".join(form)
 
     headers = {
-        "Content-type": "multipart/form-data; boundary=%s" % boundary,
+        "Content-Type": "multipart/form-data; boundary=%s" % boundary,
         "Content-length": len(data),
     }
 
@@ -358,6 +358,9 @@ def set_certification(client, collection, level="published", hub_4_5=False):
     For use in instances that use repository-based certification and that
     do not have auto-certification enabled.
     """
+    ansible_config = get_ansible_config()
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc = galaxy_client("partner_engineer")
 
     if hub_4_5:
         if client.config["use_move_endpoint"]:
@@ -365,12 +368,13 @@ def set_certification(client, collection, level="published", hub_4_5=False):
                 f"v3/collections/{collection.namespace}/{collection.name}/versions/"
                 f"{collection.version}/move/staging/published/"
             )
-            client(url, method="POST", args=b"{}")
+
+            gc.post(url, b"{}")
             dest_url = (
                 f"v3/collections/{collection.namespace}/"
                 f"{collection.name}/versions/{collection.version}/"
             )
-            return wait_for_url(client, dest_url)
+            return wait_for_url(gc, dest_url)
 
     # exit early if config is set to auto approve
     if not client.config["use_move_endpoint"]:
@@ -381,7 +385,7 @@ def set_certification(client, collection, level="published", hub_4_5=False):
         f"v3/plugin/ansible/content/staging/collections/index/"
         f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
     )
-    wait_for_url(client, staging_artifact_url)
+    wait_for_url(gc, staging_artifact_url)
 
     if client.config["upload_signatures"]:
         # Write manifest to temp file
@@ -421,56 +425,44 @@ def set_certification(client, collection, level="published", hub_4_5=False):
             signature_filename = json.loads(result)["signature"]
 
         # Prepare API endpoint URLs needed to POST signature
-        sig_url = urljoin(
-            client.config["url"],
-            "pulp/api/v3/content/ansible/collection_signatures/",
-        )
-        rep_obj_url = urljoin(
-            client.config["url"],
-            "pulp/api/v3/repositories/ansible/ansible/?name=staging",
-        )
-        repository_pulp_href = client(rep_obj_url)["results"][0]["pulp_href"]
-
+        rep_obj_url = "pulp/api/v3/repositories/ansible/ansible/?name=staging"
+        repository_pulp_href = gc.get(rep_obj_url)["results"][0]["pulp_href"]
         artifact_obj_url = f"_ui/v1/repo/staging/{collection.namespace}/" f"{collection.name}/"
-        all_versions = client(artifact_obj_url)["all_versions"]
+        all_versions = gc.get(artifact_obj_url)["all_versions"]
         one_version = [v for v in all_versions if v["version"] == collection.version][0]
         artifact_pulp_id = one_version["id"]
-        # FIXME: used unified uirl join utility below
         artifact_pulp_href = (
             "/"
             + _urljoin(
-                urlparse(client.config["url"]).path,
+                urlparse(gc.galaxy_root).path,
                 "pulp/api/v3/content/ansible/collection_versions/",
                 artifact_pulp_id,
             )
             + "/"
         )
-
         data = {
             "repository": repository_pulp_href,
             "signed_collection": artifact_pulp_href,
         }
         kwargs = setup_multipart(signature_filename, data)
-        resp = client(sig_url, method="POST", auth_required=True, **kwargs)
-        wait_for_task(client, resp)
+        sig_url = "pulp/api/v3/content/ansible/collection_signatures/"
+        resp = gc.post(sig_url, kwargs.pop('args'), **kwargs)
+        wait_for_task(gc, resp, timeout=6000)
 
     # move the artifact from staging to destination repo
     url = (
         f"v3/collections/{collection.namespace}/{collection.name}/versions/"
         f"{collection.version}/move/staging/{level}/"
     )
-    job_tasks = client(url, method="POST", args=b"{}")
+    job_tasks = gc.post(url, b"{}")
     assert "copy_task_id" in job_tasks
     assert "remove_task_id" in job_tasks
 
     # wait for each unique task to finish ...
     for key in ["copy_task_id", "remove_task_id"]:
         task_id = job_tasks.get(key)
-
-        # The task_id is not a url, so it has to be assembled from known data ...
-        # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
-        ds = {"task": f"{client.config['url']}/pulp/api/v3/tasks/{task_id}"}
-        task_result = wait_for_task(client, ds)
+        ds = {"task": f"{gc.galaxy_root}pulp/api/v3/tasks/{task_id}/"}
+        task_result = wait_for_task(gc, ds, timeout=6000)
         assert task_result["state"] == "completed", task_result
 
     # callers expect response as part of this method, ensure artifact is there
@@ -478,7 +470,7 @@ def set_certification(client, collection, level="published", hub_4_5=False):
         f"v3/plugin/ansible/content/{level}/collections/index/"
         f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
     )
-    return wait_for_url(client, dest_url)
+    return wait_for_url(gc, dest_url)
 
 
 def copy_collection_version(client, collection, src_repo_name, dest_repo_name):
@@ -496,10 +488,11 @@ def copy_collection_version(client, collection, src_repo_name, dest_repo_name):
 
     # The task_id is not a url, so it has to be assembled from known data ...
     # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
-    ds = {
-        'task': f"{client.config['url']}/pulp/api/v3/tasks/{task_id}"
-    }
-    task_result = wait_for_task(client, ds)
+    ansible_config = get_ansible_config()
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc = galaxy_client("partner_engineer")
+    ds = {"task": f"{gc.galaxy_root}pulp/api/v3/tasks/{task_id}/"}
+    task_result = wait_for_task(gc, ds, timeout=6000)
     assert task_result['state'] == 'completed', task_result
 
     # callers expect response as part of this method, ensure artifact is there
@@ -507,7 +500,7 @@ def copy_collection_version(client, collection, src_repo_name, dest_repo_name):
         f"v3/plugin/ansible/content/{dest_repo_name}/collections/index/"
         f"{collection.namespace}/{collection.name}/versions/{collection.version}/"
     )
-    return wait_for_url(client, dest_url)
+    return wait_for_url(gc, dest_url)
 
 
 def get_all_collections_by_repo(api_client=None):
@@ -675,7 +668,7 @@ def recursive_delete(api_client, namespace_name, cname, crepo):
             return
     # wait for the orphan_cleanup job to finish ...
     try:
-        wait_for_task(api_client, resp, timeout=10000)
+        gng_wait_for_task(api_client, resp, timeout=10000)
     except GalaxyError as ge:
         # FIXME - pulp tasks do not seem to accept token auth
         if ge.http_code in [403, 404]:
@@ -709,7 +702,7 @@ def setup_multipart(path: str, data: dict) -> dict:
 
     data = b"\r\n".join(buffer)
     headers = {
-        "Content-type": "multipart/form-data; boundary=%s"
+        "Content-Type": "multipart/form-data; boundary=%s"
         % boundary[2:].decode("ascii"),  # strip --
         "Content-length": len(data),
     }

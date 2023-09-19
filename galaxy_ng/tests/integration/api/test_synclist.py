@@ -3,6 +3,7 @@
 import pytest
 from orionutils.generator import build_collection
 
+from ..utils.iqe_utils import require_signature_for_approval
 from ..constants import USERNAME_PUBLISHER
 from ..utils import get_client, set_certification, wait_for_task
 
@@ -84,13 +85,14 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 @pytest.mark.synclist
 @pytest.mark.deployment_cloud
 @pytest.mark.slow_in_cloud
+@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
+                                                             "work with signatures required "
+                                                             "on move.")
 def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings):
     """Edit SyncList object to exclude a collection,
     confirm see in content/{SyncList.name}/v3/excludes/
     confirm no change to content/{SyncList.name}/v3/collections/
     """
-    if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip("This test needs refactoring to work with signatures required on move.")
 
     # NOTE: on stage env, a toggle action does:
     # PUT https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/
@@ -144,7 +146,7 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings
     synclist_data_after["collections"] = [
         {"namespace": collection.namespace, "name": collection.name}
     ]
-    resp = api_client(my_synclist_url, args=synclist_data_after, method="PUT")
+    api_client(my_synclist_url, args=synclist_data_after, method="PUT")
 
     # check collection in viewset {synclist_name}/v3/excludes/
     url = f"content/{synclist_name}/v3/excludes/"
