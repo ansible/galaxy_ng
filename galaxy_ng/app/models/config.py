@@ -201,7 +201,7 @@ class Setting(LifecycleModelMixin, models.Model):
         temp_settings = settings.dynaconf_clone()
         temp_settings.validators.register(validator)
         temp_settings.update(current_db_data, tomlfy=True)
-        temp_settings.set(self.base_key, self.value, tomlfy=True)
+        temp_settings.set(self.key, self.value, tomlfy=True)
         temp_settings.validators.validate()
 
     @classmethod

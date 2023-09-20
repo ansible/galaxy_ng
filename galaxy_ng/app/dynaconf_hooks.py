@@ -609,14 +609,15 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     # Perform lazy imports here to avoid breaking when system runs with older
     # dynaconf versions
     try:
+        from dynaconf.hooking import Hook, Action, HookValue
         from dynaconf import DynaconfFormatError, DynaconfParseError
         from dynaconf.loaders.base import SourceMetadata
-        from dynaconf.hooking import Hook, Action, HookValue
         from dynaconf.base import Settings
     except ImportError as exc:
-        # Graceful degradation for dynaconf < 3.2.2 where  method hooking is not available
+        # Graceful degradation for dynaconf < 3.2.3 where  method hooking is not available
         logger.error(
-            "Dynaconf method hooking requires Dynaconf >=3.2.2: %s",
+            "Galaxy Dynamic Settings requires Dynaconf >=3.2.3, "
+            "system will work normally but dynamic settings from database will be ignored: %s",
             str(exc)
         )
         return {}
@@ -647,7 +648,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
             if data:
                 metadata = SourceMetadata(loader="hooking", identifier="db")
 
-        # This is the main part, it will update temp_settigns with data coming from settings db
+        # This is the main part, it will update temp_settings with data coming from settings db
         # and by calling update it will process dynaconf parsing and merging.
         try:
             if data:

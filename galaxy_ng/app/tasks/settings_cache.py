@@ -17,13 +17,15 @@ _conn = None
 
 def get_redis_connection():
     global _conn
+    redis_host = settings.get("REDIS_HOST")
+    redis_url = settings.get("REDIS_URL")
     if _conn is None:
-        if redis_url := settings.get("REDIS_URL"):
+        if redis_url is not None:
             _conn = Redis.from_url(redis_url, decode_responses=True)
-        else:
+        elif redis_host is not None:
             _conn = Redis(
-                host=settings.get("REDIS_HOST", "localhost"),
-                port=settings.get("REDIS_PORT", 6379),
+                host=redis_host,
+                port=settings.get("REDIS_PORT") or 6379,
                 db=settings.get("REDIS_DB", 0),
                 password=settings.get("REDIS_PASSWORD"),
                 ssl=settings.get("REDIS_SSL", False),
@@ -47,7 +49,7 @@ def connection_error_wrapper(
     def dispatch(func, *args, **kwargs):
         """Handle connection errors, specific to the sync context, raised by the Redis client."""
         if conn is None:
-            logger.debug(f"{func.__name__} skipped, no Redis connection available")
+            logger.warning(f"{func.__name__} skipped, no Redis connection available")
             return default()
         try:
             return func(*args, **kwargs)
@@ -82,7 +84,7 @@ def acquire_lock(lock_name: str, lock_timeout: int = 20):
     """Acquire a lock using Redis connection"""
     LOCK_KEY = f"GALAXY_SETTINGS_LOCK_{lock_name}"
     if conn is None:
-        logger.debug("Lock acquisition skipped, no Redis connection available")
+        logger.warning("Lock acquisition skipped, no Redis connection available")
         return "no-lock"  # no Redis connection, assume lock is acquired
 
     token = str(uuid4())
@@ -95,7 +97,7 @@ def release_lock(lock_name: str, token: str):
     """Release a lock using Redis connection"""
     LOCK_KEY = f"GALAXY_SETTINGS_LOCK_{lock_name}"
     if conn is None:
-        logger.debug("Lock release skipped, no Redis connection available")
+        logger.warning("Lock release skipped, no Redis connection available")
         return
     lock = conn.get(LOCK_KEY)
     if lock == token:
@@ -107,7 +109,7 @@ def update_setting_cache(data: Dict[str, Any]) -> int:
     """Takes a python dictionary and write to Redis
     as a hashmap using Redis connection"""
     if conn is None:
-        logger.debug("Settings cache update skipped, no Redis connection available")
+        logger.warning("Settings cache update skipped, no Redis connection available")
         return 0
 
     conn.delete(CACHE_KEY)
@@ -122,7 +124,7 @@ def update_setting_cache(data: Dict[str, Any]) -> int:
 def get_settings_from_cache() -> Dict[str, Any]:
     """Reads settings from Redis cache and returns a python dictionary"""
     if conn is None:
-        logger.debug("Settings cache read skipped, no Redis connection available")
+        logger.warning("Settings cache read skipped, no Redis connection available")
         return {}
 
     return conn.hgetall(CACHE_KEY)

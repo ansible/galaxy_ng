@@ -14,13 +14,13 @@ class Command(BaseCommand):
     django-admin galaxy-settings set --key=foo --value=bar --is-secret
 
     django-admin galaxy-settings get --key=foo
-    django-admin galaxy-settings get --key=foo --parsed
+    django-admin galaxy-settings get --key=foo --raw
 
     django-admin galaxy-settings delete --key=foo --all-versions
     django-admin galaxy-settings delete --all
 
     django-admin galaxy-settings list
-    django-admin galaxy-settings list --parsed
+    django-admin galaxy-settings list --raw
 
     django-admin galaxy-settings inspect --key=foo
 
@@ -42,7 +42,7 @@ class Command(BaseCommand):
         # Subcommand: get
         get_parser = subparsers.add_parser('get', help='Get a Galaxy setting')
         get_parser.add_argument('--key', required=True, help='Setting key')
-        get_parser.add_argument('--parsed', action='store_true', help='Parse value using Dynaconf')
+        get_parser.add_argument('--raw', action='store_true', help='Raw value from DB')
         get_parser.add_argument('--default', help='Default value')
 
         # Subcommand: delete
@@ -55,7 +55,7 @@ class Command(BaseCommand):
 
         # Subcommand: list
         list_parser = subparsers.add_parser('list', help='List Galaxy settings')
-        list_parser.add_argument('--parsed', action='store_true', help='Parse values with Dynaconf')
+        list_parser.add_argument('--raw', action='store_true', help='Raw value from DB')
 
         # Subcommand: inspect
         inspect_parser = subparsers.add_parser('inspect', help='Inspect a Galaxy setting')
@@ -86,14 +86,14 @@ class Command(BaseCommand):
 
     def handle_get(self, *args, **options):
         key = options['key']
-        parsed = options['parsed']
+        raw = options['raw']
         default = options['default']
-        if parsed:
-            return Setting.get(upperfy(key), default=default)
-        try:
-            return Setting.get_value_from_db(upperfy(key))
-        except Setting.DoesNotExist:
-            return default
+        if raw:
+            try:
+                return Setting.get_value_from_db(upperfy(key))
+            except Setting.DoesNotExist:
+                return default
+        return Setting.get(upperfy(key), default=default)
 
     def handle_delete(self, *args, **options):
         key = options['key']
@@ -113,11 +113,11 @@ class Command(BaseCommand):
         return "Nothing to delete"
 
     def handle_list(self, *args, **options):
-        parsed = options['parsed']
+        raw = options['raw']
         data = Setting.as_dict()
-        if parsed:
-            return {k: Setting.get(k) for k in data}
-        return data
+        if raw:
+            return data
+        return {k: Setting.get(k) for k in data}
 
     def handle_inspect(self, *args, **options):
         key = options['key']
