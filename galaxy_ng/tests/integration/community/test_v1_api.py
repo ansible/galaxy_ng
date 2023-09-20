@@ -6,6 +6,7 @@ import pytest
 from ..utils import (
     ansible_galaxy,
     get_client,
+    SocialGithubClient,
 )
 from ..utils.legacy import (
     cleanup_social_user,
@@ -13,6 +14,17 @@ from ..utils.legacy import (
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
+
+
+def extract_default_config(ansible_config):
+    base_cfg = ansible_config('github_user_1')
+    cfg = {}
+    cfg['token'] = None
+    cfg['url'] = base_cfg.get('url')
+    cfg['auth_url'] = base_cfg.get('auth_url')
+    cfg['github_url'] = base_cfg.get('github_url')
+    cfg['github_api_url'] = base_cfg.get('github_api_url')
+    return cfg
 
 
 @pytest.mark.deployment_community
@@ -29,6 +41,15 @@ def test_v1_owner_username_filter_is_case_insensitive(ansible_config):
     github_user = 'jctannerTEST'
     github_repo = 'role1'
     cleanup_social_user(github_user, ansible_config)
+
+    user_cfg = extract_default_config(ansible_config)
+    user_cfg['username'] = github_user
+    user_cfg['password'] = 'redhat'
+
+    # Login with the user first to create the v1+v3 namespaces
+    with SocialGithubClient(config=user_cfg) as client:
+        me = client.get('_ui/v1/me/')
+        assert me.json()['username'] == github_user
 
     # Run the import
     import_pid = ansible_galaxy(

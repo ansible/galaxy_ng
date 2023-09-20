@@ -62,6 +62,11 @@ def add_user_to_v3_namespace(user: User, namespace: Namespace) -> None:
     assign_role(role_name, user, namespace)
 
 
+def remove_user_from_v3_namespace(user: User, namespace: Namespace) -> None:
+    role_name = 'galaxy.collection_namespace_owner'
+    remove_role(role_name, user, namespace)
+
+
 def get_v3_namespace_owners(namespace: Namespace) -> list:
     """
     Return a list of users that own a v3 namespace.
@@ -78,5 +83,19 @@ def get_v3_namespace_owners(namespace: Namespace) -> list:
         include_model_permissions=False
     )
     owners.extend(list(current_users))
-    owners = sorted(set(owners))
-    return owners
+    unique_owners = []
+    for owner in owners:
+        if owner not in unique_owners:
+            unique_owners.append(owner)
+    return unique_owners
+
+
+def get_owned_v3_namespaces(user: User):
+
+    owned = []
+    for namespace in Namespace.objects.all():
+        owners = get_v3_namespace_owners(namespace)
+        if user in owners:
+            owned.append(namespace)
+
+    return owned

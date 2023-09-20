@@ -5,11 +5,13 @@ from django_filters.rest_framework import filterset
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
+from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 
 
 class LegacyNamespaceFilter(filterset.FilterSet):
 
     keywords = filters.CharFilter(method='keywords_filter')
+    owner = filters.CharFilter(method='owner_filter')
 
     sort = filters.OrderingFilter(
         fields=(
@@ -28,6 +30,23 @@ class LegacyNamespaceFilter(filterset.FilterSet):
 
         for keyword in keywords:
             queryset = queryset.filter(Q(name__icontains=keyword))
+
+        return queryset
+
+    def owner_filter(self, queryset, name, value):
+        # find the owner on the linked v3 namespace
+
+        # FIXME - this is terribly slow
+        pks = []
+        for ns1 in LegacyNamespace.objects.all():
+            if not ns1.namespace:
+                continue
+            ns3 = ns1.namespace
+            owners = get_v3_namespace_owners(ns3)
+            if value in [x.username for x in owners]:
+                pks.append(ns1.id)
+
+        queryset = queryset.filter(id__in=pks)
 
         return queryset
 
@@ -61,6 +80,7 @@ class LegacyRoleFilter(filterset.FilterSet):
     tag = filters.CharFilter(method='tags_filter')
     autocomplete = filters.CharFilter(method='autocomplete_filter')
     owner__username = filters.CharFilter(method='owner__username_filter')
+    namespace = filters.CharFilter(method='namespace_filter')
 
     sort = filters.OrderingFilter(
         fields=(
@@ -75,6 +95,9 @@ class LegacyRoleFilter(filterset.FilterSet):
 
     def github_user_filter(self, queryset, name, value):
         return queryset.filter(namespace__name=value)
+
+    def namespace_filter(self, queryset, name, value):
+        return queryset.filter(namespace__name__iexact=value)
 
     def owner__username_filter(self, queryset, name, value):
         """
