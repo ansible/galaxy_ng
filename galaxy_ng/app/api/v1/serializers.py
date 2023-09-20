@@ -3,6 +3,8 @@ from rest_framework import serializers
 from pulpcore.plugin.util import get_url
 
 from galaxy_ng.app.models.auth import User
+from galaxy_ng.app.models.namespace import Namespace
+from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
@@ -49,8 +51,11 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
         return obj.created
 
     def get_summary_fields(self, obj):
-        owners = obj.owners.all()
-        owners = [{'id': x.id, 'username': x.username} for x in owners]
+
+        owners = []
+        if obj.namespace:
+            owner_objects = get_v3_namespace_owners(obj.namespace)
+            owners = [{'id': x.id, 'username': x.username} for x in owner_objects]
 
         # link the v1 namespace to the v3 namespace so that users
         # don't need to query the database to figure it out.
@@ -80,6 +85,22 @@ class LegacyNamespaceOwnerSerializer(serializers.Serializer):
 
     def get_id(self, obj):
         return obj.id
+
+
+class LegacyNamespaceProviderSerializer(serializers.ModelSerializer):
+
+    pulp_href = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Namespace
+        fields = [
+            'id',
+            'name',
+            'pulp_href'
+        ]
+
+    def get_pulp_href(self, obj):
+        return get_url(obj)
 
 
 class LegacyUserSerializer(serializers.ModelSerializer):

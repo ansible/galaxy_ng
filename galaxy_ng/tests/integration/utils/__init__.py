@@ -91,5 +91,5 @@ __all__ = (
     AnsibleDistroAndRepo,
     delete_all_collections,
     PulpObjectBase,
-    GithubAdminClient
+    GithubAdminClient,
 )

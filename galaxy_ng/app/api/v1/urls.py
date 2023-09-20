@@ -10,6 +10,7 @@ from galaxy_ng.app.api.v1.viewsets import (
     LegacyRolesSyncViewSet,
     LegacyNamespacesViewSet,
     LegacyNamespaceOwnersViewSet,
+    LegacyNamespaceProvidersViewSet,
     LegacyUsersViewSet
 )
 
@@ -86,7 +87,7 @@ urlpatterns = [
     ),
     path(
         'namespaces/',
-        LegacyNamespacesViewSet.as_view({"get": "list"}),
+        LegacyNamespacesViewSet.as_view({"get": "list", "post": "create"}),
         name='legacy_namespace-list'
     ),
     path(
@@ -98,6 +99,11 @@ urlpatterns = [
         'namespaces/<int:pk>/owners/',
         LegacyNamespaceOwnersViewSet.as_view({"get": "list", "put": "update"}),
         name='legacy_namespace_owners-list'
+    ),
+    path(
+        'namespaces/<int:pk>/providers/',
+        LegacyNamespaceProvidersViewSet.as_view({"get": "list", "put": "update", "post": "update"}),
+        name='legacy_namespace_providers-list'
     ),
 
     path('', LegacyRootView.as_view(), name='legacy-root')

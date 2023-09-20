@@ -5,10 +5,11 @@ from django.conf import settings
 from django.db import transaction
 from social_core.backends.github import GithubOAuth2
 
-from galaxy_ng.app.models.auth import Group, User
+# from galaxy_ng.app.models.auth import Group, User
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.utils import rbac
+# from galaxy_ng.app.utils import namespaces as ns_utils
 
 from galaxy_importer.constants import NAME_REGEXP
 
@@ -43,13 +44,11 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
         # userdata = id, login, access_token
         data = self.get_github_user(access_token)
-        # print('-' * 100)
-        # from pprint import pprint
-        # pprint(data)
-        # print('-' * 100)
 
         # extract the login now to prevent mutation
+        gid = data['id']
         login = data['login']
+        email = data['email']
 
         # ensure access_token is passed in as a kwarg
         if data is not None and 'access_token' not in data:
@@ -57,32 +56,82 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
         kwargs.update({'response': data, 'backend': self})
 
-        # use upstream auth method
+        # use upstream auth method to get or create the new user ...
         auth_response = self.strategy.authenticate(*args, **kwargs)
 
-        # create a legacynamespace?
-        legacy_namespace, legacy_created = self._ensure_legacynamespace(login)
+        # make a v3 namespace for the user ...
+        v3_namespace, v3_namespace_created = \
+            self.handle_v3_namespace(auth_response, email, login, gid)
 
-        # define namespace, validate and create ...
-        namespace_name = self.transform_namespace_name(login)
-        print(f'NAMESPACE NAME: {namespace_name}')
-        if self.validate_namespace_name(namespace_name):
-
-            # Need user for group and rbac binding
-            user = User.objects.filter(username=login).first()
-
-            # Create a group to bind rbac perms.
-            group, _ = self._ensure_group(namespace_name, user)
-
-            # create a v3 namespace?
-            v3_namespace, v3_created = self._ensure_namespace(namespace_name, user, group)
-
-            # bind the v3 namespace to the v1 namespace
-            if legacy_created and v3_created:
-                legacy_namespace.namespace = v3_namespace
-                legacy_namespace.save()
+        # create a legacynamespace and bind to the v3 namespace?
+        legacy_namespace, legacy_namespace_created = \
+            self._ensure_legacynamespace(login, v3_namespace)
 
         return auth_response
+
+    def handle_v3_namespace(self, session_user, session_email, session_login, github_id):
+
+        logger.debug(
+            f'HANDLING V3 NAMESPACE session_user:{session_user}'
+            + f' session_email:{session_email} session_login:{session_login}'
+        )
+
+        namespace_created = False
+
+        # first make the namespace name ...
+        namespace_name = self.transform_namespace_name(session_login)
+
+        logger.debug(f'TRANSFORMED NAME: {namespace_name}')
+
+        if not self.validate_namespace_name(namespace_name):
+            logger.debug(f'DID NOT VALIDATE NAMESPACE NAME: {namespace_name}')
+            return False, False
+
+        # does the namespace already exist?
+        found_namespace = Namespace.objects.filter(name=namespace_name).first()
+
+        logger.debug(f'FOUND NAMESPACE: {found_namespace}')
+
+        # is it owned by this userid?
+        if found_namespace:
+            logger.debug(f'FOUND EXISTING NAMESPACE: {found_namespace}')
+            owners = rbac.get_v3_namespace_owners(found_namespace)
+            logger.debug(f'FOUND EXISTING OWNERS: {owners}')
+
+            if session_user in owners:
+                return found_namespace, False
+
+        # should always have a namespace ...
+        if found_namespace:
+            logger.debug(
+                f'GENERATING A NEW NAMESPACE NAME SINCE USER DOES NOT OWN {found_namespace}'
+            )
+            namespace_name = self.generate_available_namespace_name(session_login, github_id)
+            logger.debug(f'FINAL NAMESPACE NAME {namespace_name}')
+
+        # create a v3 namespace?
+        namespace, namespace_created = self._ensure_namespace(namespace_name, session_user)
+
+        owned = rbac.get_owned_v3_namespaces(session_user)
+        logger.debug(f'NS OWNED BY {session_user}: {owned}')
+
+        return namespace, namespace_created
+
+    def generate_available_namespace_name(self, session_login, github_id):
+        # we're only here because session_login is already taken as a
+        # namespace name and we need a new one for the user
+
+        # this makes the weird gh_{BLAH} name ...
+        # namespace_name = ns_utils.map_v3_namespace(session_login)
+
+        # we should iterate and append 0,1,2,3,4,5,etc on the login name
+        # until we find one that is free
+        counter = -1
+        while True:
+            counter += 1
+            namespace_name = self.transform_namespace_name(session_login) + str(counter)
+            if Namespace.objects.filter(name=namespace_name).count() == 0:
+                return namespace_name
 
     def validate_namespace_name(self, name):
         """Similar validation to the v3 namespace serializer."""
@@ -103,6 +152,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
         """Convert namespace name to valid v3 name."""
         return name.replace('-', '_').lower()
 
+    '''
     def _ensure_group(self, namespace_name, user):
         """Create a group in the form of <namespace>:<namespace_name>"""
         with transaction.atomic():
@@ -111,26 +161,27 @@ class GalaxyNGOAuth2(GithubOAuth2):
             if created:
                 rbac.add_user_to_group(user, group)
         return group, created
+    '''
 
-    def _ensure_namespace(self, name, user, group):
+    def _ensure_namespace(self, namespace_name, user):
         """Create an auto v3 namespace for the account"""
 
         with transaction.atomic():
-            namespace, created = Namespace.objects.get_or_create(name=name)
-            print(f'NAMESPACE:{namespace} CREATED:{created}')
+            namespace, created = Namespace.objects.get_or_create(name=namespace_name)
             owners = rbac.get_v3_namespace_owners(namespace)
             if created or not owners:
                 # Binding by user breaks the UI workflow ...
-                # rbac.add_user_to_v3_namespace(user, namespace)
-                rbac.add_group_to_v3_namespace(group, namespace)
+                rbac.add_user_to_v3_namespace(user, namespace)
 
         return namespace, created
 
-    def _ensure_legacynamespace(self, login):
+    def _ensure_legacynamespace(self, login, v3_namespace):
         """Create an auto legacynamespace for the account"""
 
+        '''
         # userdata = id, login, access_token
         user = User.objects.filter(username=login).first()
+        '''
 
         # make the namespace
         with transaction.atomic():
@@ -139,9 +190,10 @@ class GalaxyNGOAuth2(GithubOAuth2):
                     name=login
                 )
 
-            # add the user to the owners
-            if created:
-                legacy_namespace.owners.add(user)
+            # bind the v3 namespace
+            if created or not legacy_namespace.namespace:
+                legacy_namespace.namespace = v3_namespace
+                legacy_namespace.save()
 
         return legacy_namespace, created
 

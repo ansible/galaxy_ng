@@ -68,10 +68,10 @@ USERS = {
         'email': 'jctannerTEST@gmail.com',
     },
     'geerlingguy': {
-        'id': 1004,
+        'id': 481677,
         'login': 'geerlingguy',
         'password': 'redhat',
-        'email': 'geerlingguy@gmail.com',
+        'email': 'geerlingguy@nohaxx.me',
     }
 }
 

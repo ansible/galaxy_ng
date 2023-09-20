@@ -8,7 +8,7 @@ from .users import (
 )
 
 
-def wait_for_v1_task(task_id=None, resp=None, api_client=None):
+def wait_for_v1_task(task_id=None, resp=None, api_client=None, check=True):
 
     if task_id is None:
         task_id = resp['task']
@@ -26,7 +26,10 @@ def wait_for_v1_task(task_id=None, resp=None, api_client=None):
             break
         time.sleep(.5)
 
-    assert state == 'SUCCESS'
+    if check:
+        assert state == 'SUCCESS'
+
+    return task_resp
 
 
 def clean_all_roles(ansible_config):

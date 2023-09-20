@@ -91,6 +91,7 @@ def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespa
 
     cfg = ansible_config("github_user_1")
     with SocialGithubClient(config=cfg) as client:
+
         assert (
             client.post(
                 "_ui/v1/ai_deny_index/legacy_namespace/",
