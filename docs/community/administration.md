@@ -12,7 +12,7 @@ The legacy namespaces should have a foreign key relationship with a v3 namespace
 
 A user on galaxy should be able to import roles into their legacy namespace, and also upload collections to their provider namespace (or any v3 namespace they've been added to). As the user logs into galaxy, the backend should validate and create their legacy namespace and the provider/v3 namespace automatically.
 
-To validate a user via django shell, do the following:
+#### Validating and fixing a user via the django shell
 
 ```
 pulpcore-manager shell
@@ -36,9 +36,10 @@ assert provider_namespace is not None
 
 # get a list of owners for the provider namespace ...
 owners = rbac.get_v3_namespace_owners(provider_namespace)
+assert sean in owners
 ```
 
-To fix sean's RBAC on the sean-m-sullivan/sean_m_ullivan namespaces ...
+To fix sean's RBAC on the sean-m-sullivan/sean_m_sullivan namespaces ...
 ```
 provider_namespace = Namespace.objects.filter(name='sean_m_sullivan').first()
 rbac.add_user_to_v3_namespace(sean, provider_namespace)
@@ -56,4 +57,57 @@ legacy_namespace = LegacyNamespace.objects.filter(name='Wilk42').first()
 rbac.add_user_to_v3_namespace(sean, legacy_namespace.namespace)
 owners = rbac.get_v3_namespace_owners(legacy_namespace.namespace)
 assert sean in owners
+```
+
+#### Validating and fixing a user via the API
+
+Find the legacy namespace ...
+```
+curl https://galaxy-dev.ansible.com/api/v1/namespaces/?name=Wilk42 | jq .
+```
+
+Check the provider namespace ...
+```
+$ curl -s https://galaxy-dev.ansible.com/api/v1/namespaces/?name=Wilk42 | jq .results[0].summary_fields.provider_namespaces
+[
+  {
+    "id": 19193,
+    "name": "wilk42",
+    "pulp_href": "/api/pulp/api/v3/pulp_ansible/namespaces/19193/"
+  }
+]
+```
+
+Binding a provider namespace to the legacy namespace ...
+```
+$ curl -X POST \
+    -H 'Authorization: token <TOKEN>' \
+    -H 'Content-Type: appliction/json' \
+    -d '{"id": 19192}' \
+    https://galaxy-dev.ansible.com/api/v1/namespaces/7532/providers/
+```
+
+Check the owners ...
+```
+$ curl -s https://galaxy-dev.ansible.com/api/v1/namespaces/?name=Wilk42 | jq .results[0].summary_fields.
+owners
+[
+  {
+    "id": 7184,
+    "username": "Wilk42"
+  },
+  {
+    "id": 17656,
+    "username": "sean-m-sullivan"
+  }
+]
+```
+
+Setting the list of owners for a provider namespace ...
+```
+$ curl -X POST \
+    -H 'Authorization: token <TOKEN>' \
+    -H 'Content-Type: appliction/json' \
+    -d '{"owners": [{"id": 7184}, {"id": 17656}]}' \
+    https://galaxy-dev.ansible.com/api/v1/namespaces/7532/owners/
 ```
