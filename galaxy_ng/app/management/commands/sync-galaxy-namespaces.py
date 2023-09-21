@@ -22,9 +22,10 @@ class Command(BaseCommand):
     help = 'Sync upstream namespaces+owners from [old-]galaxy.ansible.com'
 
     def add_arguments(self, parser):
-        parser.add_argument("--baseurl", default="https://galaxy.ansible.com")
+        parser.add_argument("--baseurl", default="https://old-galaxy.ansible.com")
         parser.add_argument("--name", help="find and sync only this namespace name")
         parser.add_argument("--id", help="find and sync only this namespace id")
+        parser.add_argument("--force", action="store_true")
         parser.add_argument("--limit", type=int)
         parser.add_argument("--start_page", type=int)
 
@@ -37,12 +38,12 @@ class Command(BaseCommand):
         if options.get('name'):
             ns_name, ns_info = find_namespace(baseurl=options['baseurl'], name=options['name'])
             self.echo(f'PROCESSING {ns_info["id"]}:{ns_name}')
-            process_namespace(ns_name, ns_info)
+            process_namespace(ns_name, ns_info, force=options['force'])
 
         elif options.get('id'):
             ns_name, ns_info = find_namespace(baseurl=options['baseurl'], id=options['id'])
             self.echo(f'PROCESSING {ns_info["id"]}:{ns_name}')
-            process_namespace(ns_name, ns_info)
+            process_namespace(ns_name, ns_info, force=options['force'])
 
         else:
 
@@ -60,4 +61,4 @@ class Command(BaseCommand):
                     f'({total}|{count})'
                     + f' PROCESSING {namespace_info["id"]}:{namespace_name}'
                 )
-                process_namespace(namespace_name, namespace_info)
+                process_namespace(namespace_name, namespace_info, force=options['force'])

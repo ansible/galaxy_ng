@@ -1,33 +1,16 @@
-# import trio
-
-# import datetime
+import logging
 import re
-# import sys
-# import time
-# import django_guid
 from django.contrib.auth import get_user_model
-
-# from django.core.management.base import BaseCommand
-# from pulp_ansible.app.models import AnsibleRepository
-# from pulpcore.plugin.constants import TASK_FINAL_STATES, TASK_STATES
-# from pulpcore.plugin.tasking import dispatch
 
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.models import Namespace
-# from galaxy_ng.app.tasks.namespaces import _create_pulp_namespace
-# from galaxy_ng.app.utils.galaxy import upstream_collection_iterator
-# from galaxy_ng.app.utils.galaxy import upstream_namespace_iterator
-# from galaxy_ng.app.utils.galaxy import upstream_role_iterator
-# from galaxy_ng.app.utils.galaxy import find_namespace
 from galaxy_ng.app.utils.galaxy import generate_unverified_email
 from galaxy_ng.app.utils.namespaces import generate_v3_namespace_from_attributes
 from galaxy_ng.app.utils.rbac import add_user_to_v3_namespace
+from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 
-# from pulpcore.plugin.files import PulpTemporaryUploadedFile
-# from pulpcore.plugin.download import HttpDownloader
-# from pulp_ansible.app.models import AnsibleNamespaceMetadata, AnsibleNamespace
-# from pulpcore.plugin.tasking import add_and_remove, dispatch
-# from pulpcore.plugin.models import RepositoryContent, Artifact, ContentArtifact
+
+logger = logging.getLogger(__name__)
 
 
 User = get_user_model()
@@ -48,18 +31,26 @@ def sanitize_avatar_url(url):
     return None
 
 
-def process_namespace(namespace_name, namespace_info):
+def process_namespace(namespace_name, namespace_info, force=False):
     '''Do all the work to sync a legacy namespace and build it's v3 counterpart'''
+
+    logger.info(f'process legacy namespace ({namespace_info["id"]}) {namespace_name}')
 
     # get or create a legacy namespace with an identical name first ...
     legacy_namespace, legacy_namespace_created = \
         LegacyNamespace.objects.get_or_create(name=namespace_name)
 
+    logger.info(f'found: {legacy_namespace} created:{legacy_namespace_created}')
+
     if legacy_namespace.namespace:
+        logger.info(f'{legacy_namespace} has provider namespace {legacy_namespace.namespace}')
         namespace = legacy_namespace.namespace
         namespace_created = False
 
     else:
+        logger.info(f'{legacy_namespace} does not have a provider namespace yet')
+
+        namespace = legacy_namespace.namespace
         _owners = namespace_info['summary_fields']['owners']
         _owners = [(x['github_id'], x['username']) for x in _owners]
         _matched_owners = [x for x in _owners if x[1].lower() == namespace_name.lower()]
@@ -71,32 +62,35 @@ def process_namespace(namespace_name, namespace_info):
         else:
             v3_namespace_name = generate_v3_namespace_from_attributes(username=namespace_name)
 
+        logger.info(f'{legacy_namespace} creating provider namespace {v3_namespace_name}')
         namespace, namespace_created = Namespace.objects.get_or_create(name=v3_namespace_name)
 
     # bind legacy and v3
-    legacy_namespace.namespace = namespace
-    legacy_namespace.save()
+    if legacy_namespace.namespace != namespace:
+        logger.info(f'set {legacy_namespace} provider to {namespace}')
+        legacy_namespace.namespace = namespace
+        legacy_namespace.save()
 
     changed = False
 
-    if namespace_info['avatar_url'] and not namespace.avatar_url:
+    if namespace_info['avatar_url'] and (not namespace.avatar_url or force):
         avatar_url = sanitize_avatar_url(namespace_info['avatar_url'])
         if avatar_url:
             namespace.avatar_url = avatar_url
             changed = True
 
-    if namespace_info['company'] and not namespace.company:
+    if namespace_info['company'] and (not namespace.company or force):
         if len(namespace_info['company']) >= 60:
             namespace.company = namespace_info['company'][:60]
         else:
             namespace.company = namespace_info['company']
         changed = True
 
-    if namespace_info['email'] and not namespace.email:
+    if namespace_info['email'] and (not namespace.email or force):
         namespace.email = namespace_info['email']
         changed = True
 
-    if namespace_info['description'] and not namespace.description:
+    if namespace_info['description'] and (not namespace.description or force):
         if len(namespace_info['description']) >= 60:
             namespace.description = namespace_info['description'][:60]
         else:
@@ -106,7 +100,11 @@ def process_namespace(namespace_name, namespace_info):
     if changed:
         namespace.save()
 
+    logger.info(f'iterating upstream owners of {legacy_namespace}')
+    current_owners = get_v3_namespace_owners(namespace)
     for owner_info in namespace_info['summary_fields']['owners']:
+
+        logger.info(f'check {legacy_namespace} owner {owner_info["username"]}')
 
         unverified_email = generate_unverified_email(owner_info['github_id'])
 
@@ -114,6 +112,8 @@ def process_namespace(namespace_name, namespace_info):
         owner = User.objects.filter(username=unverified_email).first()
         if not owner:
             owner = User.objects.filter(email=unverified_email).first()
+
+        logger.info(f'found matching owner for {owner_info["username"]} = {owner}')
 
         # should always have an email set with default of the unverified email
         if owner and not owner.email:
@@ -129,6 +129,8 @@ def process_namespace(namespace_name, namespace_info):
                 owner.email = unverified_email
                 owner.save()
 
-        add_user_to_v3_namespace(owner, namespace)
+        if owner not in current_owners:
+            logger.info(f'adding {owner} to {namespace}')
+            add_user_to_v3_namespace(owner, namespace)
 
     return legacy_namespace, namespace
