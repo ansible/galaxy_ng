@@ -71,7 +71,7 @@ class Command(BaseCommand):
         subparsers.add_parser('allowed_keys', help='List allowed settings keys')
 
     def echo(self, message):
-        self.stdout.write(self.style.SUCCESS(message))
+        self.stdout.write(self.style.SUCCESS(str(message)))
 
     def handle(self, *args, **options):
         subcommand = options['subcommand']

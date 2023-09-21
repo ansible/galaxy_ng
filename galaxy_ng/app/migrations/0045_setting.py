@@ -9,7 +9,7 @@ import django_lifecycle.mixins
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("galaxy", "0041_alter_containerregistryremote_remote_ptr"),
+        ("galaxy", "0044_legacyroleimport"),
     ]
 
     operations = [

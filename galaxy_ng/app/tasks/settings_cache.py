@@ -12,7 +12,9 @@ from redis import ConnectionError, Redis
 from galaxy_ng.app.models.config import Setting
 from django.db.utils import OperationalError
 
+logger = logging.getLogger(__name__)
 _conn = None
+CACHE_KEY = "GALAXY_SETTINGS_DATA"
 
 
 def get_redis_connection():
@@ -32,13 +34,14 @@ def get_redis_connection():
                 ssl_ca_certs=settings.get("REDIS_SSL_CA_CERTS"),
                 decode_responses=True,
             )
+        else:
+            logger.warning(
+                "REDIS connection undefined, not caching dynamic settings"
+            )
     return _conn
 
 
 conn: Optional[Redis] = get_redis_connection()
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-CACHE_KEY = "GALAXY_SETTINGS_DATA"
 
 
 def connection_error_wrapper(
@@ -48,8 +51,7 @@ def connection_error_wrapper(
 
     def dispatch(func, *args, **kwargs):
         """Handle connection errors, specific to the sync context, raised by the Redis client."""
-        if conn is None:
-            logger.warning(f"{func.__name__} skipped, no Redis connection available")
+        if conn is None:  # No redis connection defined
             return default()
         try:
             return func(*args, **kwargs)
@@ -84,7 +86,6 @@ def acquire_lock(lock_name: str, lock_timeout: int = 20):
     """Acquire a lock using Redis connection"""
     LOCK_KEY = f"GALAXY_SETTINGS_LOCK_{lock_name}"
     if conn is None:
-        logger.warning("Lock acquisition skipped, no Redis connection available")
         return "no-lock"  # no Redis connection, assume lock is acquired
 
     token = str(uuid4())
@@ -97,7 +98,6 @@ def release_lock(lock_name: str, token: str):
     """Release a lock using Redis connection"""
     LOCK_KEY = f"GALAXY_SETTINGS_LOCK_{lock_name}"
     if conn is None:
-        logger.warning("Lock release skipped, no Redis connection available")
         return
     lock = conn.get(LOCK_KEY)
     if lock == token:
@@ -109,7 +109,6 @@ def update_setting_cache(data: Dict[str, Any]) -> int:
     """Takes a python dictionary and write to Redis
     as a hashmap using Redis connection"""
     if conn is None:
-        logger.warning("Settings cache update skipped, no Redis connection available")
         return 0
 
     conn.delete(CACHE_KEY)
@@ -124,7 +123,6 @@ def update_setting_cache(data: Dict[str, Any]) -> int:
 def get_settings_from_cache() -> Dict[str, Any]:
     """Reads settings from Redis cache and returns a python dictionary"""
     if conn is None:
-        logger.warning("Settings cache read skipped, no Redis connection available")
         return {}
 
     return conn.hgetall(CACHE_KEY)
