@@ -39,7 +39,7 @@ def safe_fetch(url):
         if rr.status_code < 500:
             return rr
 
-        logger.info(f'waiting 60s to refetch {url}')
+        logger.info(f'ERROR:{rr.status_code} waiting 60s to refetch {url}')
         time.sleep(60)
 
     return rr
@@ -53,6 +53,9 @@ def paginated_results(next_url):
     while next_url:
         logger.info(f'fetch {next_url}')
         rr = safe_fetch(next_url)
+        if rr.status_code == 404:
+            break
+
         ds = rr.json()
 
         results.extend(ds['results'])
@@ -217,6 +220,7 @@ def upstream_collection_iterator(
     collection_namespace=None,
     collection_name=None,
     get_versions=True,
+    start_page=None,
 ):
     """Abstracts the pagination of v2 collections into a generator with error handling."""
     logger.info(f'baseurl1: {baseurl}')
@@ -242,6 +246,69 @@ def upstream_collection_iterator(
     '''
 
     namespace_cache = {}
+
+    if collection_namespace or collection_name:
+        if collection_namespace and not collection_name:
+            # get the namespace ID first ...
+            ns_name, ns_data = find_namespace(baseurl=baseurl, name=collection_namespace)
+            ns_id = ns_data['id']
+            next_url = (
+                baseurl
+                + f'/api/internal/ui/search/?keywords={collection_namespace}'
+                + '&order_by=-relevance&type=collection'
+            )
+
+            collection_count = -1
+            while next_url:
+                page = safe_fetch(next_url)
+                ds = page.json()
+                collections = ds['collection']['results']
+                for cdata in collections:
+
+                    if cdata['namespace']['name'] != collection_namespace:
+                        continue
+
+                    collection_count += 1
+                    if limit and collection_count >= limit:
+                        return
+
+                    # Get the namespace+owners
+                    ns_id = cdata['namespace']['id']
+                    if ns_id not in namespace_cache:
+                        logger.info(_baseurl + f'/api/v1/namespaces/{ns_id}/')
+                        ns_url = _baseurl + f'/api/v1/namespaces/{ns_id}/'
+                        namespace_data = safe_fetch(ns_url).json()
+                        # logger.info(namespace_data)
+                        namespace_cache[ns_id] = namespace_data
+
+                        # get the owners too
+                        namespace_cache[ns_id]['summary_fields']['owners'] = \
+                            get_namespace_owners_details(_baseurl, ns_id)
+
+                    else:
+                        namespace_data = namespace_cache[ns_id]
+
+                    # get the versions
+                    if get_versions:
+                        versions_url = (
+                            baseurl
+                            + '/api/v2/collections/'
+                            + cdata["namespace"]["name"]
+                            + '/'
+                            + cdata["name"]
+                            + '/versions/'
+                        )
+                        collection_versions = paginated_results(versions_url)
+                    else:
+                        collection_versions = []
+
+                    yield namespace_data, cdata, collection_versions
+
+                # no pagination in search results?
+                return
+
+        raise Exception('namespace + name not yet supported')
+        return
 
     pagenum = 0
     collection_count = 0
