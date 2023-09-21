@@ -1,5 +1,35 @@
 # Community Galaxy Administration
 
+
+## Creating a new v3 namespace
+
+V3 Namespaces can be created in one of two methods: API or WebUI.
+
+### WebUI
+
+1) Login as a superuser
+2) Expand "Collections" in the left nav
+3) Click on "Namespaces" in the left nav
+4) Click the "Create" button in the middle of the top header.
+5) Fill in an appropriate name.
+6) Click "Create" to save.
+7) In the summary page for the new namespace, click on the 3 dot hamburger icon on the top right.
+8) Choose "Edit Namespace" from the menu.
+9) Fill in the various details such as the company name, logo url, and description.
+10) Click "Save"
+
+### API
+
+```
+$ curl -X POST \
+    -H 'Authorization: token <TOKEN>' \
+    -H 'Content-Type: appliction/json' \
+    -d '{"name": "foobar", "groups": []}' \
+    https://galaxy-dev.ansible.com/api/_ui/v1/namespaces/
+```
+
+TBD: Setting namespace details via the API.
+
 ## Setting namespace owners
 
 Social auth in galaxy_ng has been heavily customized per https://github.com/ansible/galaxy_ng/pull/1881
@@ -11,6 +41,8 @@ A "v3" namespace is the api/v3 and pulp related namespace which is restricted to
 The legacy namespaces should have a foreign key relationship with a v3 namespace (which we'll call the "provider" namespace). The provider namespace is where owner management should occur.
 
 A user on galaxy should be able to import roles into their legacy namespace, and also upload collections to their provider namespace (or any v3 namespace they've been added to). As the user logs into galaxy, the backend should validate and create their legacy namespace and the provider/v3 namespace automatically.
+
+
 
 #### Validating and fixing a user via the django shell
 
