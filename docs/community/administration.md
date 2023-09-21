@@ -143,3 +143,18 @@ $ curl -X POST \
     -d '{"owners": [{"id": 7184}, {"id": 17656}]}' \
     https://galaxy-dev.ansible.com/api/v1/namespaces/7532/owners/
 ```
+
+## Deleting legacy roles
+
+Legacy role RBAC should allow superusers and legacy namespace owners to delete their owned roles ...
+
+```
+$ curl -X DELETE \
+    -H 'Authorization: token <TOKEN>' \
+    https://galaxy-dev.ansible.com/api/v1/roles/<roleid>/
+```
+
+The API does not currently support deleting a specific legacy role version.
+
+
+## Deleting collections
