@@ -352,15 +352,12 @@ def get_collection_full_path(namespace, collection_name):
     return os.path.join(get_collections_namespace_path(namespace), collection_name)
 
 
-def set_certification(client, collection, level="published", hub_4_5=False):
+def set_certification(client, gc, collection, level="published", hub_4_5=False):
     """Moves a collection from the `staging` to the `published` repository.
 
     For use in instances that use repository-based certification and that
     do not have auto-certification enabled.
     """
-    ansible_config = get_ansible_config()
-    galaxy_client = get_galaxy_client(ansible_config)
-    gc = galaxy_client("partner_engineer")
 
     if hub_4_5:
         if client.config["use_move_endpoint"]:

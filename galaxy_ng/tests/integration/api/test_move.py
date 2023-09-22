@@ -82,7 +82,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
 
     # Certify and check the response...
     hub_4_5 = is_hub_4_5(ansible_config)
-    cert_result = set_certification(api_client, artifact, hub_4_5=hub_4_5)
+    cert_result = set_certification(api_client, gc_admin, artifact, hub_4_5=hub_4_5)
 
     assert cert_result['namespace']['name'] == artifact.namespace
     assert cert_result['name'] == artifact.name

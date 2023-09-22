@@ -104,13 +104,14 @@ def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution
 
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
-def test_validated_publish(ansible_config, artifact, upload_artifact):
+def test_validated_publish(ansible_config, artifact, upload_artifact, galaxy_client):
     """
     Publish a collection to the validated repo.
     """
 
     config = ansible_config("admin")
     api_client = get_client(config)
+    gc = galaxy_client("partner_engineer")
     logging.debug(f"artifact name {artifact.name}")
     logging.debug(f"artifact namespace {artifact.namespace}")
 
@@ -125,7 +126,7 @@ def test_validated_publish(ansible_config, artifact, upload_artifact):
             resp = wait_for_task(api_client, resp)
             assert resp["state"] == "completed"
 
-        set_certification(api_client, artifact, level="validated")
+        set_certification(api_client, gc, artifact, level="validated")
 
         collection_url = (
             "/content/validated/v3/collections/"
@@ -345,7 +346,7 @@ def test_long_field_values(ansible_config, upload_artifact, field):
 @pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
                                                              "work with signatures required "
                                                              "on move.")
-def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
+def test_ansible_requires(ansible_config, upload_artifact, spec, settings, galaxy_client):
     """
     Test handling of POSTs to the artifact endpoint neglecting to submit a file.
 
@@ -355,6 +356,7 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
 
     config = ansible_config("basic_user")
     api_client = get_client(config)
+    gc = galaxy_client("partner_engineer")
     _, requires_ansible, result = spec
     artifact = build_collection(
         "skeleton",
@@ -370,7 +372,7 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings):
     if result == "completed":
         config = ansible_config("partner_engineer")
         partner_engineer_client = get_client(config)
-        set_certification(partner_engineer_client, artifact)
+        set_certification(partner_engineer_client, gc, artifact)
 
         collection_url = f"v3/collections/{artifact.namespace}/{artifact.name}/versions/1.0.0/"
         collection_resp = api_client(collection_url)

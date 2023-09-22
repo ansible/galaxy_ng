@@ -4,6 +4,7 @@ import pytest
 from galaxykit.collections import upload_artifact, delete_collection
 from pkg_resources import parse_version
 
+from galaxykit.utils import wait_for_task as gk_wait_for_task
 from ..conftest import get_hub_version
 from ..utils import wait_for_task, get_client, set_certification
 from orionutils.generator import build_collection
@@ -22,8 +23,8 @@ logger = logging.getLogger(__name__)
 def start_sync(api_client, repo):
     logger.debug(f"Syncing {repo} repo")
     url = f'content/{repo}/v3/sync/'
-    resp = api_client(url, method="POST")
-    resp = wait_for_task(api_client, resp=None, task_id=resp["task"], raise_on_error=True)
+    resp = api_client.post(url, b"{}")
+    resp = gk_wait_for_task(api_client, resp=None, task_id=resp["task"], raise_on_error=True)
     logger.debug(f"Response from wait_for_task_id {resp}!")
 
 
@@ -56,13 +57,9 @@ def test_sync():
     resp = wait_for_task(api_client_remote, resp=resp, raise_on_error=True)
     assert resp["state"] == "completed"
 
-    set_certification(api_client_remote, artifact)
+    set_certification(api_client_remote, gc_remote, artifact)
 
     # sync and check
-    api_client = get_client({"url": "http://localhost:5001/api/automation-hub/",
-                             "username": "iqe_admin", "password": "redhat"},
-                            request_token=True, require_auth=True)
-
     body = {
         "url": "https://console.stage.redhat.com/api/"
                "automation-hub/content/1237261-synclist/",
@@ -79,11 +76,13 @@ def test_sync():
     if parse_version(hub_version) < parse_version('4.5'):
         del body["signed_only"]
 
+    gc_local = galaxy_client("local_admin")
     url = "content/community/v3/sync/config/"
-    api_client(url, method="PUT", args=body)
+    gc_local.put(url, body)
+    gc_local = galaxy_client("local_admin")
+    start_sync(gc_local, 'community')
 
-    start_sync(api_client, 'community')
-    local_collections = get_all_collections(api_client, 'community')
+    local_collections = get_all_collections(gc_local, 'community')
     assert retrieve_collection(artifact, local_collections)
 
     delete_collection(gc_remote, artifact.namespace, artifact.name)

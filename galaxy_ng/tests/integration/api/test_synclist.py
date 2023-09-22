@@ -88,7 +88,7 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 @pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
                                                              "work with signatures required "
                                                              "on move.")
-def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings):
+def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings, galaxy_client):
     """Edit SyncList object to exclude a collection,
     confirm see in content/{SyncList.name}/v3/excludes/
     confirm no change to content/{SyncList.name}/v3/collections/
@@ -116,7 +116,8 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings
     collection = build_collection("skeleton", config={"namespace": USERNAME_PUBLISHER})
     resp = upload_artifact(config, api_client, collection)
     resp = wait_for_task(api_client, resp)
-    set_certification(api_client, collection)
+    gc = galaxy_client("partner_engineer")
+    set_certification(api_client, gc, collection)
     collection_key = (collection.namespace, collection.name)
 
     config = ansible_config("org_admin")
