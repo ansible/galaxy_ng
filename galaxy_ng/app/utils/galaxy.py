@@ -310,7 +310,31 @@ def upstream_collection_iterator(
                 # no pagination in search results?
                 return
 
-        raise Exception('namespace + name not yet supported')
+        if collection_name and not collection_namespace:
+            raise Exception('name without namespace not supported yet')
+
+        # https://galaxy.ansible.com/api/v2/collections/geerlingguy/mac/
+        url = _baseurl + f'/api/v2/collections/{collection_namespace}/{collection_name}/'
+        cdata = safe_fetch(url).json()
+        collection_versions = paginated_results(cdata['versions_url'])
+
+        # Get the namespace+owners
+        ns_id = cdata['namespace']['id']
+        if ns_id not in namespace_cache:
+            logger.info(_baseurl + f'/api/v1/namespaces/{ns_id}/')
+            ns_url = _baseurl + f'/api/v1/namespaces/{ns_id}/'
+            namespace_data = safe_fetch(ns_url).json()
+            # logger.info(namespace_data)
+            namespace_cache[ns_id] = namespace_data
+
+            # get the owners too
+            namespace_cache[ns_id]['summary_fields']['owners'] = \
+                get_namespace_owners_details(_baseurl, ns_id)
+
+        else:
+            namespace_data = namespace_cache[ns_id]
+
+        yield namespace_data, cdata, collection_versions
         return
 
     pagenum = 0

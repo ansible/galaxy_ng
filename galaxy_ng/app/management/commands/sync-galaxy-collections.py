@@ -14,6 +14,7 @@ from pulp_ansible.app.models import CollectionVersion
 from pulp_ansible.app.models import CollectionRemote
 from pulp_ansible.app.models import AnsibleRepository
 from pulp_ansible.app.tasks.collections import sync
+from pulp_ansible.app.tasks.collections import rebuild_repository_collection_versions_metadata
 
 from pulpcore.plugin.tasking import dispatch
 from pulpcore.plugin.constants import TASK_FINAL_STATES, TASK_STATES
@@ -40,14 +41,17 @@ class Command(BaseCommand):
         parser.add_argument("--baseurl", default="https://old-galaxy.ansible.com")
         parser.add_argument("--namespace", help="find and sync only this namespace name")
         parser.add_argument("--name", help="find and sync only this name")
+        parser.add_argument("--rebuild_only", action="store_true", help="only rebuild metadata")
         parser.add_argument("--limit", type=int)
 
     def echo(self, message, style=None):
         style = style or self.style.SUCCESS
-        # self.stdout.write(style(message))
         logger.info(style(message))
 
     def handle(self, *args, **options):
+
+        remote = CollectionRemote.objects.filter(name='community').first()
+        repo = AnsibleRepository.objects.filter(name='published').first()
 
         counter = 0
         processed_namespaces = set()
@@ -69,44 +73,60 @@ class Command(BaseCommand):
 
             # pulp_ansible sync isn't smart enough to do this ...
             should_sync = False
+            should_rebuild = False
             for cvdata in collection_versions:
-                if not CollectionVersion.objects.filter(
+                cv = CollectionVersion.objects.filter(
                     namespace=collection_info['namespace']['name'],
                     name=collection_info['name'],
                     version=cvdata['version']
-                ).exists():
+                ).first()
+
+                if not cv:
                     should_sync = True
-                    break
-            if not should_sync:
-                continue
+                    should_rebuild = True
+                elif not cv.contents or not cv.requires_ansible:
+                    should_rebuild = True
 
-            remote = CollectionRemote.objects.filter(name='community').first()
-            repo = AnsibleRepository.objects.filter(name='published').first()
+            self.echo(f'sync: {should_sync}')
+            self.echo(f'rebuild: {should_rebuild}')
 
-            # build a single collection requirements
-            requirements = {
-                'collections': [
-                    collection_info['namespace']['name'] + '.' + collection_info['name']
-                ]
-            }
-            requirements_yaml = yaml.dump(requirements)
+            if should_sync and not args['rebuild_only']:
 
-            # set the remote's requirements
-            remote.requirements_file = requirements_yaml
-            remote.save()
+                # build a single collection requirements
+                requirements = {
+                    'collections': [
+                        collection_info['namespace']['name'] + '.' + collection_info['name']
+                    ]
+                }
+                requirements_yaml = yaml.dump(requirements)
 
-            self.echo(
-                f"dispatching sync for {collection_info['namespace']['name']}"
-                + f".{collection_info['name']}"
-            )
-            self.do_dispatch(
-                remote,
-                repo,
-                collection_info['namespace']['name'],
-                collection_info['name']
-            )
+                # set the remote's requirements
+                remote.requirements_file = requirements_yaml
+                remote.save()
 
-    def do_dispatch(self, remote, repository, namespace, name):
+                self.echo(
+                    f"dispatching sync for {collection_info['namespace']['name']}"
+                    + f".{collection_info['name']}"
+                )
+                self.do_sync_dispatch(
+                    remote,
+                    repo,
+                    collection_info['namespace']['name'],
+                    collection_info['name']
+                )
+
+            if should_rebuild:
+                self.echo(
+                    f"dispatching rebuild for {collection_info['namespace']['name']}"
+                    + f".{collection_info['name']}"
+                )
+                self.do_rebuild_dispatch(
+                    repo,
+                    collection_info['namespace']['name'],
+                    collection_info['name']
+                )
+
+    def do_sync_dispatch(self, remote, repository, namespace, name):
 
         # dispatch the real pulp_ansible sync code
         task = dispatch(
@@ -126,6 +146,33 @@ class Command(BaseCommand):
             task.refresh_from_db()
 
         self.echo(f"Syncing {namespace}.{name} {task.state}")
+
+        if task.state == TASK_STATES.FAILED:
+            self.echo(
+                f"Task failed with error ({namespace}.{name}): {task.error}", self.style.ERROR
+            )
+            sys.exit(1)
+
+    def do_rebuild_dispatch(self, repository, namespace, name):
+
+        repository_version = repository.latest_version()
+
+        task = dispatch(
+            rebuild_repository_collection_versions_metadata,
+            kwargs={
+                'repository_version_pk': str(repository_version.pk),
+                'namespace': namespace,
+                'name': name
+            },
+            exclusive_resources=[repository],
+        )
+
+        while task.state not in TASK_FINAL_STATES:
+            time.sleep(2)
+            self.echo(f"Rebuild {namespace}.{name} {task.state}")
+            task.refresh_from_db()
+
+        self.echo(f"Rebuild {namespace}.{name} {task.state}")
 
         if task.state == TASK_STATES.FAILED:
             self.echo(
