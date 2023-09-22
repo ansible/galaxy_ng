@@ -2,13 +2,12 @@
 import logging
 import pytest
 
+from ..utils.iqe_utils import require_signature_for_approval
 from ..utils import ansible_galaxy
-from ..utils import get_client
 from ..utils import get_collection_full_path
-from ..utils import create_unused_namespace
 from ..utils import CollectionInspector
 from ..utils import build_collection
-
+from ..utils.repo_management_utils import create_test_namespace
 
 pytestmark = pytest.mark.qa  # noqa: F821
 logger = logging.getLogger(__name__)
@@ -44,6 +43,9 @@ def test_publish_newer_version_collection(ansible_config, cleanup_collections, u
 
 @pytest.mark.all
 @pytest.mark.cli
+@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
+                                                             "work with signatures required "
+                                                             "on move.")
 def test_publish_newer_certified_collection_version(
     ansible_config,
     cleanup_collections,
@@ -54,8 +56,6 @@ def test_publish_newer_certified_collection_version(
 
     If the collection version was certified the latest version will be installed.
     """
-    if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip("This test needs refactoring to work with signatures required on move.")
 
     v1 = certifiedv2[0]
     v2 = certifiedv2[1]
@@ -73,11 +73,11 @@ def test_publish_newer_certified_collection_version(
 
 @pytest.mark.all
 @pytest.mark.cli
-def test_publish_same_collection_version(ansible_config):
+def test_publish_same_collection_version(ansible_config, galaxy_client):
     """Test you cannot publish same collection version already published."""
 
-    api_client = get_client(ansible_config("admin"))
-    cnamespace = create_unused_namespace(api_client=api_client)
+    gc = galaxy_client("partner_engineer")
+    cnamespace = create_test_namespace(gc)
     collection = build_collection(namespace=cnamespace)
     ansible_galaxy(
         f"collection publish {collection.filename}",
@@ -107,6 +107,9 @@ def test_publish_and_install_by_self(ansible_config, published, cleanup_collecti
 @pytest.mark.all
 @pytest.mark.cli
 @pytest.mark.deployment_cloud
+@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
+                                                             "work with signatures required "
+                                                             "on move.")
 def test_publish_and_expect_uncertified_hidden(
     ansible_config,
     published,
@@ -116,10 +119,6 @@ def test_publish_and_expect_uncertified_hidden(
     """A discovering/consumer user has the permission to download a specific version of an
     uncertified collection, but not an unspecified version range.
     """
-
-    if settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip("This test needs refactoring to work with signatures required on move.")
-
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}",
         check_retcode=0,

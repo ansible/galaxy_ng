@@ -152,7 +152,10 @@ def test_me_social_with_v1_synced_user(ansible_config):
     """ Make sure social auth associates to the correct username """
 
     username = 'geerlingguy'
+    real_email = 'geerlingguy@nohaxx.me'
+    unverified_email = '481677@GALAXY.GITHUB.UNVERIFIED.COM'
     cleanup_social_user(username, ansible_config)
+    cleanup_social_user(unverified_email, ansible_config)
 
     admin_config = ansible_config("admin")
     admin_client = get_client(
@@ -166,6 +169,10 @@ def test_me_social_with_v1_synced_user(ansible_config):
     resp = admin_client('/api/v1/sync/', method='POST', args=pargs)
     wait_for_v1_task(resp=resp, api_client=admin_client)
 
+    # should have an unverified user ...
+    unverified_user = admin_client(f'/api/_ui/v1/users/?username={username}')['data'][0]
+    assert unverified_user['email'] == unverified_email
+
     # set the social config ...
     cfg = ansible_config(username)
 
@@ -176,7 +183,18 @@ def test_me_social_with_v1_synced_user(ansible_config):
         uinfo = resp.json()
         assert uinfo['username'] == cfg.get('username')
 
+        # should have the same ID ...
+        assert uinfo['id'] == unverified_user['id']
 
+        # should have the right email
+        assert uinfo['email'] == real_email
+
+    # the unverified email should not be a user ...
+    bad_users = admin_client(f'/api/_ui/v1/users/?username={unverified_email}')
+    assert bad_users['meta']['count'] == 0, bad_users
+
+
+@pytest.mark.skip(reason='no longer creating groups for social users')
 @pytest.mark.deployment_community
 def test_social_auth_creates_group(ansible_config):
 

@@ -5,7 +5,7 @@ ansible-core<2.13.0
 pytest
 orionutils
 openapi-spec-validator
-jsonschema
+jsonschema<=4.19.0
 hvac
 importlib_resources
 galaxykit @ git+https://github.com/ansible/galaxykit

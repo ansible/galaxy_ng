@@ -92,7 +92,7 @@ def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    wait_for_task(api_client, resp)
 
     set_certification(api_client, artifact, level="validated")
 

@@ -23,6 +23,7 @@ from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.constants import COMMUNITY_DOMAINS
+from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 
 from galaxy_ng.app.access_control.statements import PULP_VIEWSETS
 
@@ -770,8 +771,14 @@ class LegacyAccessPolicy(AccessPolicyBase):
         if namespace is None and github_user and user.username == github_user:
             return True
 
-        # allow owners to do things in the namespace
-        if namespace and user.username in [x.username for x in namespace.owners.all()]:
+        # v1 namespace rbac is controlled via their v3 namespace
+        v3_namespace = namespace.namespace
+        if not v3_namespace:
+            return False
+
+        # use the helper to get the list of owners
+        owners = get_v3_namespace_owners(v3_namespace)
+        if owners and user in owners:
             return True
 
         return False

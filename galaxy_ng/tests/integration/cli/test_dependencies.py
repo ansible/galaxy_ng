@@ -22,7 +22,7 @@ class DependencySpec:
 
 @pytest.mark.all
 @pytest.mark.cli
-# @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.slow_in_cloud
 @pytest.mark.parametrize(
     "params",
     (

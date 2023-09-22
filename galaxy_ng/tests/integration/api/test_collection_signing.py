@@ -14,11 +14,11 @@ import requests
 
 from orionutils.generator import build_collection
 
+from galaxy_ng.tests.integration.utils.iqe_utils import require_signature_for_approval
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
     build_collection as galaxy_build_collection,
     copy_collection_version,
-    create_unused_namespace,
     get_all_collections_by_repo,
     get_all_namespaces,
     get_client,
@@ -26,6 +26,7 @@ from galaxy_ng.tests.integration.utils import (
     wait_for_task,
     create_local_signature_for_tarball,
 )
+from galaxy_ng.tests.integration.utils.repo_management_utils import create_test_namespace
 
 log = logging.getLogger(__name__)
 
@@ -533,18 +534,18 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     assert collection["signatures"][0]["signing_service"] is None
 
 
+@pytest.mark.skipif(not require_signature_for_approval(),
+                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
 def test_move_with_no_signing_service_not_superuser_signature_required(
     ansible_config,
     upload_artifact,
-    settings
+    settings,
+    galaxy_client
 ):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
     """
-    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
@@ -557,7 +558,8 @@ def test_move_with_no_signing_service_not_superuser_signature_required(
     partner_eng_client = get_client(partner_eng_config, request_token=True, require_auth=True)
 
     # need a new namespace
-    namespace = create_unused_namespace(api_client=admin_client)
+    gc = galaxy_client("partner_engineer")
+    namespace = create_test_namespace(gc)
 
     # make the collection
     artifact = galaxy_build_collection(namespace=namespace)
@@ -605,14 +607,13 @@ def test_move_with_no_signing_service_not_superuser_signature_required(
     assert partner_eng_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
+@pytest.mark.skipif(not require_signature_for_approval(),
+                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
 def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
     """
-    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
@@ -620,7 +621,7 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    wait_for_task(api_client, resp)
     staging_href = api_client(
         "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]["pulp_href"]
     published_href = api_client(
@@ -685,17 +686,13 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     assert api_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
+@pytest.mark.skipif(not require_signature_for_approval(),
+                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
 def test_move_with_signing_service(ansible_config, artifact, upload_artifact, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
     """
-
-    if not settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"):
-        pytest.skip("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-
-    if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
-        pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
     if not settings.get("GALAXY_COLLECTION_SIGNING_SERVICE"):
         pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is required to be set")

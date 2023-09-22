@@ -2,6 +2,7 @@ import copy
 import datetime
 import logging
 import os
+import subprocess
 import tempfile
 
 from django.db import transaction
@@ -13,6 +14,7 @@ from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.utils.galaxy import upstream_role_iterator
 from galaxy_ng.app.utils.git import get_tag_commit_hash
 from galaxy_ng.app.utils.git import get_tag_commit_date
+from galaxy_ng.app.utils.legacy import process_namespace
 
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
@@ -60,17 +62,19 @@ def legacy_role_import(
     if not github_reference:
         github_reference = None
 
-    if LegacyNamespace.objects.filter(name=github_user).count() == 0:
-        logger.debug(f'CREATE NEW NAMESPACE {github_user}')
-        namespace, _ = LegacyNamespace.objects.get_or_create(name=github_user)
+    # this shouldn't happen but just in case ...
+    if request_username and not User.objects.filter(username=request_username).exists():
+        raise Exception(f'Username {request_username} does not exist in galaxy')
 
-        # set the owner to this request user ...
-        user = User.objects.filter(username=request_username).first()
-        namespace.owners.add(user)
+    # the user should have a legacy and v3 namespace if they logged in ...
+    namespace = LegacyNamespace.objects.filter(name=github_user).first()
+    if not namespace:
+        raise Exception(f'No legacy namespace exists for {github_user}')
 
-    else:
-        logger.debug(f'USE EXISTING NAMESPACE {github_user}')
-        namespace = LegacyNamespace.objects.filter(name=github_user).first()
+    # we have to have a v3 namespace because of the rbac based ownership ...
+    v3_namespace = namespace.namespace
+    if not v3_namespace:
+        raise Exception(f'No v3 namespace exists for {github_user}')
 
     with tempfile.TemporaryDirectory() as tmp_path:
         # galaxy-importer requires importing legacy roles from the role's parent directory.
@@ -78,9 +82,19 @@ def legacy_role_import(
 
         # galaxy-importer wants the role's directory to be the name of the role.
         checkout_path = os.path.join(tmp_path, github_repo)
-
         clone_url = f'https://github.com/{github_user}/{github_repo}'
-        gitrepo = Repo.clone_from(clone_url, checkout_path, multi_options=["--recurse-submodules"])
+
+        # pygit didn't have an obvious way to prevent interactive clones ...
+        pid = subprocess.run(
+            f'GIT_TERMINAL_PROMPT=0 git clone --recurse-submodules {clone_url} {checkout_path}',
+            shell=True,
+        )
+        if pid.returncode != 0:
+            raise Exception(f'git clone for {clone_url} failed')
+
+        # bind the checkout to a pygit object
+        gitrepo = Repo(checkout_path)
+
         github_commit = None
         github_commit_date = None
 
@@ -126,7 +140,7 @@ def legacy_role_import(
             if github_reference in old_versions:
                 msg = (
                     f'{namespace.name}.{role_name} {github_reference}'
-                    + 'has already been imported'
+                    + ' has already been imported'
                 )
                 raise Exception(msg)
 
@@ -186,7 +200,8 @@ def legacy_sync_from_upstream(
     github_user=None,
     role_name=None,
     role_version=None,
-    limit=None
+    limit=None,
+    start_page=None,
 ):
     """
     Sync legacy roles from a remote v1 api.
@@ -214,8 +229,6 @@ def legacy_sync_from_upstream(
 
     logger.debug('SYNC INDEX EXISTING NAMESPACES')
     nsmap = {}
-    for ns in LegacyNamespace.objects.all():
-        nsmap[ns.name] = ns
 
     # allow the user to specify how many roles to sync
     if limit is not None:
@@ -228,12 +241,23 @@ def legacy_sync_from_upstream(
         'baseurl': baseurl,
         'github_user': github_user,
         'role_name': role_name,
-        'limit': limit
+        'limit': limit,
+        'start_page': start_page,
     }
     for ns_data, rdata, rversions in upstream_role_iterator(**iterator_kwargs):
 
+        # processing a namespace should make owners and set rbac as needed ...
+        if ns_data['name'] not in nsmap:
+            namespace, v3_namespace = process_namespace(ns_data['name'], ns_data)
+            nsmap[ns_data['name']] = (namespace, v3_namespace)
+        else:
+            namespace, v3_namespace = nsmap[ns_data['name']]
+
         ruser = rdata.get('github_user')
         rname = rdata.get('name')
+
+        logger.info(f'POPULATE {ruser}.{rname}')
+
         rkey = (ruser, rname)
         remote_id = rdata['id']
         role_versions = rversions[:]
@@ -259,19 +283,6 @@ def legacy_sync_from_upstream(
         role_modified = rdata.get('modified', datetime.datetime.now().isoformat())
         role_type = rdata.get('role_type', 'ANS')
         role_download_count = rdata.get('download_count', 0)
-
-        if ruser not in nsmap:
-            logger.debug(f'SYNC NAMESPACE GET_OR_CREATE {ruser}')
-            namespace, _ = LegacyNamespace.objects.get_or_create(name=ruser)
-
-            # if the ns has owners, create them and set them
-            for owner_info in ns_data['summary_fields']['owners']:
-                user, _ = User.objects.get_or_create(username=owner_info['username'])
-                namespace.owners.add(user)
-
-            nsmap[ruser] = namespace
-        else:
-            namespace = nsmap[ruser]
 
         if rkey not in rmap:
             logger.debug(f'SYNC create initial role for {rkey}')

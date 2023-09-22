@@ -3,7 +3,6 @@ import pytest
 from ..utils import (
     UIClient,
     SocialGithubClient,
-    create_unused_namespace,
     generate_unused_namespace,
     get_client
 )
@@ -11,6 +10,7 @@ from ..utils import (
 # should we import this like this
 # or move that function to utils?
 from .test_community import cleanup_social_user
+from ..utils.repo_management_utils import create_test_namespace
 
 
 @pytest.fixture(scope="function")
@@ -22,11 +22,10 @@ def flags(ansible_config):
 
 
 @pytest.fixture(scope="function")
-def namespace(ansible_config) -> str:
+def namespace(ansible_config, galaxy_client) -> str:
     """create a new namespace."""
-    config = ansible_config("admin")
-    api_client = get_client(config, request_token=True, require_auth=True)
-    return create_unused_namespace(api_client)
+    gc = galaxy_client("partner_engineer")
+    return create_test_namespace(gc)
 
 
 @pytest.fixture(scope="function")
@@ -92,6 +91,7 @@ def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespa
 
     cfg = ansible_config("github_user_1")
     with SocialGithubClient(config=cfg) as client:
+
         assert (
             client.post(
                 "_ui/v1/ai_deny_index/legacy_namespace/",
