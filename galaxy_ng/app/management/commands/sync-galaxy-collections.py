@@ -90,7 +90,7 @@ class Command(BaseCommand):
             self.echo(f'sync: {should_sync}')
             self.echo(f'rebuild: {should_rebuild}')
 
-            if should_sync and not args['rebuild_only']:
+            if should_sync and not options['rebuild_only']:
 
                 # build a single collection requirements
                 requirements = {
