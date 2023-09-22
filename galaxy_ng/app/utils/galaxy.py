@@ -39,6 +39,9 @@ def safe_fetch(url):
         if rr.status_code < 500:
             return rr
 
+        if counter >= 5:
+            return rr
+
         logger.info(f'ERROR:{rr.status_code} waiting 60s to refetch {url}')
         time.sleep(60)
 
