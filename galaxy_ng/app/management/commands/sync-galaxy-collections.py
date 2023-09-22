@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 from galaxy_ng.app.utils.galaxy import upstream_collection_iterator
 from galaxy_ng.app.utils.legacy import process_namespace
 
+from pulp_ansible.app.models import CollectionVersion
 from pulp_ansible.app.models import CollectionRemote
 from pulp_ansible.app.models import AnsibleRepository
 from pulp_ansible.app.tasks.collections import sync
@@ -40,15 +41,16 @@ class Command(BaseCommand):
         parser.add_argument("--namespace", help="find and sync only this namespace name")
         parser.add_argument("--name", help="find and sync only this name")
         parser.add_argument("--limit", type=int)
-        # parser.add_argument("--start_page", type=int)
 
     def echo(self, message, style=None):
         style = style or self.style.SUCCESS
-        self.stdout.write(style(message))
+        # self.stdout.write(style(message))
+        logger.info(style(message))
 
     def handle(self, *args, **options):
 
         counter = 0
+        processed_namespaces = set()
         for namespace_info, collection_info, collection_versions in upstream_collection_iterator(
             baseurl=options['baseurl'],
             collection_namespace=options['namespace'],
@@ -61,20 +63,42 @@ class Command(BaseCommand):
                 + f" versions:{len(collection_versions)}"
             )
 
-            process_namespace(namespace_info['name'], namespace_info)
+            if namespace_info['name'] not in processed_namespaces:
+                process_namespace(namespace_info['name'], namespace_info)
+                processed_namespaces.add(namespace_info['name'])
+
+            # pulp_ansible sync isn't smart enough to do this ...
+            should_sync = False
+            for cvdata in collection_versions:
+                if not CollectionVersion.objects.filter(
+                    namespace=collection_info['namespace']['name'],
+                    name=collection_info['name'],
+                    version=cvdata['version']
+                ).exists():
+                    should_sync = True
+                    break
+            if not should_sync:
+                continue
 
             remote = CollectionRemote.objects.filter(name='community').first()
             repo = AnsibleRepository.objects.filter(name='published').first()
 
+            # build a single collection requirements
             requirements = {
                 'collections': [
                     collection_info['namespace']['name'] + '.' + collection_info['name']
                 ]
             }
             requirements_yaml = yaml.dump(requirements)
+
+            # set the remote's requirements
             remote.requirements_file = requirements_yaml
             remote.save()
 
+            self.echo(
+                f"dispatching sync for {collection_info['namespace']['name']}"
+                + f".{collection_info['name']}"
+            )
             self.do_dispatch(
                 remote,
                 repo,
@@ -84,7 +108,7 @@ class Command(BaseCommand):
 
     def do_dispatch(self, remote, repository, namespace, name):
 
-        # def sync(remote_pk, repository_pk, mirror, optimize)
+        # dispatch the real pulp_ansible sync code
         task = dispatch(
             sync,
             kwargs={
@@ -97,7 +121,8 @@ class Command(BaseCommand):
         )
 
         while task.state not in TASK_FINAL_STATES:
-            time.sleep(1)
+            time.sleep(2)
+            self.echo(f"Syncing {namespace}.{name} {task.state}")
             task.refresh_from_db()
 
         self.echo(f"Syncing {namespace}.{name} {task.state}")

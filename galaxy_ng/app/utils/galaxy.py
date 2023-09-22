@@ -312,6 +312,7 @@ def upstream_collection_iterator(
 
     pagenum = 0
     collection_count = 0
+    next_url = _baseurl + '/api/v2/collections/'
     while next_url:
         logger.info(f'fetch {pagenum} {next_url}')
 
