@@ -46,6 +46,7 @@ nav:
         - User Guide: community/userguide.md
         - Development: community/devstack.md
         - API V3: community/api_v3.md
+        - Administration: community/administration.md
 theme:
   features:
       - search.suggest
