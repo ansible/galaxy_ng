@@ -115,7 +115,7 @@ def published(ansible_config, artifact, galaxy_client):
 
     # certify
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, artifact, hub_4_5=hub_4_5)
+    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
 
     return artifact
 
@@ -139,7 +139,7 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
 
     # certify v1
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, artifact, hub_4_5=hub_4_5)
+    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -158,7 +158,7 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     )
 
     # certify newer version
-    set_certification(api_client, artifact2, hub_4_5=hub_4_5)
+    set_certification(api_client, gc, artifact2, hub_4_5=hub_4_5)
 
     return (artifact, artifact2)
 
@@ -182,7 +182,7 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
 
     # certify v1
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, artifact, hub_4_5=hub_4_5)
+    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)

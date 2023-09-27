@@ -92,7 +92,8 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.deployment_standalone
-def test_collection_auto_sign_on_approval(api_client, config, settings, flags, upload_artifact):
+def test_collection_auto_sign_on_approval(api_client, config, settings, flags,
+                                          upload_artifact, galaxy_client):
     """Test whether a collection is uploaded and automatically signed on approval
     when GALAXY_AUTO_SIGN_COLLECTIONS is set to true.
     """
@@ -120,7 +121,8 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags, u
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         # perform manual approval
         # Certify and check the response...
-        cert_result = set_certification(api_client, artifact)
+        gc = galaxy_client("partner_engineer")
+        cert_result = set_certification(api_client, gc, artifact)
         assert cert_result["namespace"]["name"] == artifact.namespace
         assert cert_result["name"] == artifact.name
         assert cert_result["version"] == artifact.version
@@ -265,7 +267,8 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.deployment_standalone
-def test_collection_move_with_signatures(api_client, config, settings, flags, upload_artifact):
+def test_collection_move_with_signatures(api_client, config, settings, flags,
+                                         upload_artifact, galaxy_client):
     """Test whether a collection can be moved from repo to repo with its
     signatures.
     """
@@ -316,7 +319,8 @@ def test_collection_move_with_signatures(api_client, config, settings, flags, up
         assert collections["staging"][ckey]["sign_state"] == "signed"
 
         # Move the collection to /published/
-        cert_result = set_certification(api_client, artifact)
+        gc = galaxy_client("partner_engineer")
+        cert_result = set_certification(api_client, gc, artifact)
         assert cert_result["namespace"]["name"] == artifact.namespace
         assert cert_result["name"] == artifact.name
         assert cert_result["version"] == artifact.version

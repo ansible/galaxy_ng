@@ -21,9 +21,10 @@ logger = logging.getLogger(__name__)
 
 # TODO Refactor get_client to provide access to bearer token
 @pytest.mark.deployment_standalone
-def test_download_artifact(ansible_config, upload_artifact):
+def test_download_artifact(ansible_config, upload_artifact, galaxy_client):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
+    gc = galaxy_client("partner_engineer")
 
     # create, upload and certify a collection
     namespace = USERNAME_PUBLISHER
@@ -48,7 +49,7 @@ def test_download_artifact(ansible_config, upload_artifact):
 
     hub_4_5 = is_hub_4_5(ansible_config)
 
-    set_certification(api_client, artifact, hub_4_5=hub_4_5)
+    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
 
     # download collection
     config = ansible_config("basic_user")
@@ -87,14 +88,15 @@ def test_download_artifact(ansible_config, upload_artifact):
 # TODO: make download logic more DRY in these tests
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
-def test_download_artifact_validated(ansible_config, artifact, upload_artifact):
+def test_download_artifact_validated(ansible_config, artifact, upload_artifact, galaxy_client):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
+    gc = galaxy_client("partner_engineer")
 
     resp = upload_artifact(config, api_client, artifact)
     wait_for_task(api_client, resp)
 
-    set_certification(api_client, artifact, level="validated")
+    set_certification(api_client, gc, artifact, level="validated")
 
     # download collection
     config = ansible_config("basic_user")

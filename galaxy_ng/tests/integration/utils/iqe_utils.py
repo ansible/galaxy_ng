@@ -293,7 +293,7 @@ def get_all_collections(api_client, repo):
     might not be returned within the 100 collections.
     """
     url = f"content/{repo}/v3/collections/?limit=100&offset=0"
-    return api_client(url)
+    return api_client.get(url)
 
 
 def retrieve_collection(artifact, collections):
