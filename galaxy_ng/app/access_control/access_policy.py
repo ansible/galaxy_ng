@@ -260,6 +260,27 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
         return True
 
+    def v3_can_destroy_collections(self, request, view, action):
+        SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
+        SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
+        is_social_auth = all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET])
+
+        user = request.user
+        perm = "ansible.delete_collection"
+        social_perm = "galaxy.change_namespace"
+        collection = view.get_object()
+        namespace = models.Namespace.objects.get(name=collection.namespace)
+
+        if not is_social_auth and user.has_perm(perm) and self.v3_can_view_repo_content(
+            request,
+            view,
+            action,
+        ):
+            return True
+        elif is_social_auth and user.has_perm(social_perm, namespace):
+            return True
+        return False
+
     def has_ansible_repo_perms(self, request, view, action, permission):
         """
         Check if the user has model or object-level permissions
