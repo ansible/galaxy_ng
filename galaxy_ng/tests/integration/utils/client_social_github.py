@@ -201,6 +201,30 @@ class SocialGithubClient:
         resp = self._rs.put(this_url, headers=pheaders, json=data)
         return resp
 
+    def patch(
+        self,
+        relative_url: str = None,
+        absolute_url: str = None,
+        data=None
+    ) -> requests.models.Response:
+
+        pheaders = {
+            'Accept': 'application/json',
+            'X-CSRFToken': self.csrftoken,
+            'Cookie': f'csrftoken={self.csrftoken}; sessionid={self.sessionid}'
+        }
+
+        this_url = None
+        if absolute_url:
+            uri = urlparse(self.baseurl)
+            this_url = f"{uri.scheme}://{uri.netloc}{absolute_url}"
+        else:
+            this_url = self.baseurl + relative_url
+
+        # call patch
+        resp = self._rs.patch(this_url, headers=pheaders, json=data)
+        return resp
+
     def post(
         self,
         relative_url: str = None,

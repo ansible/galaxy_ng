@@ -12,6 +12,7 @@ from ..utils import (
     get_client,
     SocialGithubClient,
     create_user,
+    wait_for_task,
 )
 from ..utils.legacy import (
     clean_all_roles,
@@ -217,6 +218,121 @@ def test_social_auth_creates_v3_namespace(ansible_config):
             force_token=True,
             token=client.get_hub_token()
         )
+
+
+@pytest.mark.deployment_community
+def test_social_auth_delete_collection(ansible_config):
+
+    cleanup_social_user('gh01', ansible_config)
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+
+        resp = client.get('v3/namespaces/?name=gh01')
+        result = resp.json()
+        assert result['meta']['count'] == 1
+        assert result['data'][0]['name'] == 'gh01'
+
+        # make a collection
+        namespace = 'gh01'
+        name = 'mystuff'
+        collection = build_collection(
+            use_orionutils=False,
+            namespace=namespace,
+            name=name,
+            version='1.0.0'
+        )
+
+        # verify the user can publish to the namespace ...
+        ansible_galaxy(
+            f"collection publish {collection.filename}",
+            ansible_config=ansible_config("github_user_1"),
+            force_token=True,
+            token=client.get_hub_token(),
+        )
+
+        exists_resp = client.get(
+            f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
+        )
+        assert exists_resp.status_code == 200
+
+        del_resp = client.delete(
+            f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
+        )
+        assert del_resp.status_code == 202
+        del_results = del_resp.json()
+        assert isinstance(del_results, dict)
+        assert del_results.get('task') is not None
+
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+    wait_for_task(resp=del_results, api_client=admin_client)
+
+
+@pytest.mark.deployment_community
+def test_social_auth_deprecate_collection(ansible_config):
+
+    cleanup_social_user('gh01', ansible_config)
+
+    cfg = ansible_config('github_user_1')
+    with SocialGithubClient(config=cfg) as client:
+
+        resp = client.get('v3/namespaces/?name=gh01')
+        result = resp.json()
+        assert result['meta']['count'] == 1
+        assert result['data'][0]['name'] == 'gh01'
+
+        # make a collection
+        namespace = 'gh01'
+        name = 'mystuff'
+        collection = build_collection(
+            use_orionutils=False,
+            namespace=namespace,
+            name=name,
+            version='1.0.0'
+        )
+
+        # verify the user can publish to the namespace ...
+        ansible_galaxy(
+            f"collection publish {collection.filename}",
+            ansible_config=ansible_config("github_user_1"),
+            force_token=True,
+            token=client.get_hub_token(),
+        )
+
+        exists_resp = client.get(
+            f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
+        )
+        assert exists_resp.status_code == 200
+
+        dep_resp = client.patch(
+            f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/",
+            data={"deprecated": True},
+        )
+        assert dep_resp.status_code == 202
+        dep_results = dep_resp.json()
+        assert isinstance(dep_results, dict)
+        assert dep_results.get('task') is not None
+
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+    wait_for_task(resp=dep_results, api_client=admin_client)
+
+    with SocialGithubClient(config=cfg) as client:
+        verify_resp = client.get(
+            f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
+        )
+        assert verify_resp.status_code == 200
+        verify_results = verify_resp.json()
+        assert verify_results["deprecated"] is True
 
 
 @pytest.mark.deployment_community

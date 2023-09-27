@@ -35,7 +35,7 @@ _collection_statements = [
         "action": "destroy",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": ["has_model_perms:ansible.delete_collection", "v3_can_view_repo_content"],
+        "condition": ["v3_can_destroy_collections"],
     },
     {
         "action": ["download"],
