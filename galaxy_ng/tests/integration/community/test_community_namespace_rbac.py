@@ -468,3 +468,9 @@ def test_social_user_sync_with_changed_login(ansible_config):
             assert role_data['results'][0]['github_user'] == 'Wilk42'
             assert role_data['results'][0]['github_repo'] == role['github_repo']
             assert role_data['results'][0]['name'] == role['name']
+
+
+@pytest.mark.skip(reason='this should be unit tested')
+@pytest.mark.deployment_community
+def test_rbac_utils_get_owned_v3_namespaces(ansible_config):
+    pass
