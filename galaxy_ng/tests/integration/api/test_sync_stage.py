@@ -1,17 +1,19 @@
 import logging
 
 import pytest
+
+from galaxykit import GalaxyClient
 from galaxykit.collections import upload_artifact, delete_collection
 from pkg_resources import parse_version
 
 from galaxykit.utils import wait_for_task as gk_wait_for_task
-from ..conftest import get_hub_version
 from ..utils import wait_for_task, get_client, set_certification
 from orionutils.generator import build_collection
 from ..utils.iqe_utils import (
     is_sync_testing,
     get_all_collections,
-    retrieve_collection, get_ansible_config, get_galaxy_client,
+    retrieve_collection, get_ansible_config, get_galaxy_client, get_hub_version,
+    has_old_credentials,
 )
 from ..utils.tools import generate_random_artifact_version, uuid4
 
@@ -29,7 +31,8 @@ def start_sync(api_client, repo):
 
 
 @pytest.mark.sync
-@pytest.mark.skipif(not is_sync_testing(), reason="This test can only be run on sync-tests mode")
+@pytest.mark.skipif(not is_sync_testing(),
+                    reason="This test can only be run on sync-tests mode")
 def test_sync():
     config_sync = get_ansible_config()
     galaxy_client = get_galaxy_client(config_sync)
@@ -78,8 +81,10 @@ def test_sync():
 
     gc_local = galaxy_client("local_admin")
     url = "content/community/v3/sync/config/"
+    if has_old_credentials():
+        gc_local = GalaxyClient(galaxy_root="http://localhost:5001/api/automation-hub/",
+                                auth={"username": "admin", "password": "admin"})
     gc_local.put(url, body)
-    gc_local = galaxy_client("local_admin")
     start_sync(gc_local, 'community')
 
     local_collections = get_all_collections(gc_local, 'community')
