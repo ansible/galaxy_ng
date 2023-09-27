@@ -79,11 +79,13 @@ def test_sync():
     if parse_version(hub_version) < parse_version('4.5'):
         del body["signed_only"]
 
-    gc_local = galaxy_client("local_admin")
     url = "content/community/v3/sync/config/"
     if has_old_credentials():
         gc_local = GalaxyClient(galaxy_root="http://localhost:5001/api/automation-hub/",
                                 auth={"username": "admin", "password": "admin"})
+    else:
+        gc_local = galaxy_client("local_admin")
+
     gc_local.put(url, body)
     start_sync(gc_local, 'community')
 
