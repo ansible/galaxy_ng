@@ -1,7 +1,10 @@
+from pulpcore.plugin.models.role import Role
+
 from pulpcore.plugin.util import (
     assign_role,
     get_groups_with_perms_attached_roles,
     get_users_with_perms_attached_roles,
+    get_objects_for_user,
     remove_role
 )
 
@@ -92,10 +95,12 @@ def get_v3_namespace_owners(namespace: Namespace) -> list:
 
 def get_owned_v3_namespaces(user: User):
 
-    owned = []
-    for namespace in Namespace.objects.all():
-        owners = get_v3_namespace_owners(namespace)
-        if user in owners:
-            owned.append(namespace)
+    role_name = 'galaxy.collection_namespace_owner'
+    role = Role.objects.filter(name=role_name).first()
+    permission_codenames = role.permissions.values_list("codename", flat=True)
 
-    return owned
+    return get_objects_for_user(
+        user,
+        permission_codenames,
+        Namespace.objects.all()
+    )
