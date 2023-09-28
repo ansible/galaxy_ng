@@ -111,6 +111,9 @@ class LegacyNamespace(models.Model):
     def __repr__(self):
         return f'<LegacyNamespace: {self.name}>'
 
+    def __str__(self):
+        return self.name
+
 
 class LegacyRole(models.Model):
     """
@@ -153,6 +156,9 @@ class LegacyRole(models.Model):
 
     def __repr__(self):
         return f'<LegacyRole: {self.namespace.name}.{self.name}>'
+
+    def __str__(self):
+        return f'{self.namespace.name}.{self.name}'
 
 
 class LegacyRoleDownloadCount(models.Model):
