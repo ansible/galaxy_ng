@@ -10,7 +10,7 @@ from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id
 from galaxykit.namespaces import create_namespace
 from galaxykit.utils import GalaxyClientError
-from .constants import USERNAME_PUBLISHER, BETA_GALAXY_STAGE_PROFILES
+from .constants import USERNAME_PUBLISHER, GALAXY_STAGE_ANSIBLE_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
@@ -27,7 +27,7 @@ from .utils.iqe_utils import (
     is_dev_env_standalone,
     is_standalone,
     is_ephemeral_env,
-    beta_galaxy_user_cleanup, remove_from_cache,
+    galaxy_stage_ansible_user_cleanup, remove_from_cache,
     get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version
 )
 from .utils.tools import generate_random_artifact_version
@@ -79,7 +79,7 @@ rbac_repos: tests verifying rbac roles on custom repositories
 x_repo_search: tests verifying cross-repo search endpoint
 repositories: tests verifying custom repositories
 all: tests that are unmarked and should pass in all deployment modes
-beta_galaxy: tests tha run against beta-galaxy-stage.ansible.com
+galaxy_stage_ansible: tests that run against galaxy-stage.ansible.com
 """
 
 logger = logging.getLogger(__name__)
@@ -480,7 +480,7 @@ def gh_user_1_post(ansible_config):
     """
     gc = get_galaxy_client(ansible_config)
     yield gc("github_user", github_social_auth=True)
-    beta_galaxy_user_cleanup(gc, "github_user")
+    galaxy_stage_ansible_user_cleanup(gc, "github_user")
     remove_from_cache("github_user")
 
 
@@ -509,7 +509,7 @@ def gh_user_1_pre(ansible_config):
     returns a galaxy kit client with the same GitHub user logged into beta galaxy stage
     """
     gc = get_galaxy_client(ansible_config)
-    beta_galaxy_user_cleanup(gc, "github_user")
+    galaxy_stage_ansible_user_cleanup(gc, "github_user")
     return gc("github_user", github_social_auth=True, ignore_cache=True)
 
 
@@ -518,7 +518,7 @@ def generate_test_artifact(ansible_config):
     """
     Generates a test artifact and deletes it after the test
     """
-    github_user_username = BETA_GALAXY_STAGE_PROFILES["github_user"]["username"]
+    github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES["github_user"]["username"]
     expected_ns = f"{github_user_username}".replace("-", "_")
     test_version = generate_random_artifact_version()
     artifact = build_collection(

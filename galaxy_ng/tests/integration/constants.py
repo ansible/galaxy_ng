@@ -252,7 +252,7 @@ DEPLOYED_PAH_PROFILES = {
     },
 }
 
-BETA_GALAXY_STAGE_PROFILES = {
+GALAXY_STAGE_ANSIBLE_PROFILES = {
     "regular_user": {  # it's a regular django user
         "username": {"vault_path": "secrets/qe/stage/users/beta_galaxy_reg_user",
                      "vault_key": "username"},
