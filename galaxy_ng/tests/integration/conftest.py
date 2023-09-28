@@ -1,7 +1,6 @@
 import logging
 import os
 import shutil
-from functools import lru_cache
 
 import pytest
 from orionutils.utils import increment_version
@@ -29,7 +28,7 @@ from .utils.iqe_utils import (
     is_standalone,
     is_ephemeral_env,
     beta_galaxy_user_cleanup, remove_from_cache,
-    get_ansible_config, get_galaxy_client, AnsibleConfigFixture
+    get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version
 )
 from .utils.tools import generate_random_artifact_version
 
@@ -465,25 +464,6 @@ def set_test_data(ansible_config, hub_version):
             # role already assigned to group. It's ok.
             pass
     gc.add_user_to_group(username="ee_admin", group_id=ee_group_id)
-
-
-@lru_cache()
-def get_hub_version(ansible_config):
-    if is_standalone():
-        role = "iqe_admin"
-    elif is_ephemeral_env():
-        # I can't get a token from the ephemeral environment.
-        # Changed to Basic token authentication until the issue is resolved
-        del os.environ["HUB_AUTH_URL"]
-        role = "partner_engineer"
-        galaxy_client = get_galaxy_client(ansible_config)
-        gc = galaxy_client(role, basic_token=True, ignore_cache=True)
-        galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
-        return galaxy_ng_version
-    else:
-        role = "admin"
-    gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
-    return gc.get(gc.galaxy_root)["galaxy_ng_version"]
 
 
 @pytest.fixture(scope="session")
