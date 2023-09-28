@@ -1,4 +1,4 @@
-"""test_beta_galaxy.py - Tests that run against https://beta-galaxy-stage.ansible.com/
+"""test_galaxy_stage_ansible.py - Tests that run against https://galaxy-stage.ansible.com/
 """
 import logging
 import subprocess
@@ -10,20 +10,20 @@ from galaxykit.namespaces import get_namespace
 from galaxykit.users import get_me
 from galaxykit.utils import wait_for_task
 from ..utils import ansible_galaxy, wait_for_url, CollectionInspector
-from ..constants import BETA_GALAXY_STAGE_PROFILES
+from ..constants import GALAXY_STAGE_ANSIBLE_PROFILES
 
 from jsonschema import validate as validate_json
 
 from ..schemas import (
     schema_objectlist,
 )
-from ..utils.iqe_utils import beta_galaxy_user_cleanup
+from ..utils.iqe_utils import galaxy_stage_ansible_user_cleanup
 from ..utils.rbac_utils import create_test_user
 
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_community_settings(galaxy_client):
     """Tests settings are correct"""
     g_client = galaxy_client(None)
@@ -43,7 +43,7 @@ def test_community_settings(galaxy_client):
     assert resp['GALAXY_CONTAINER_SIGNING_SERVICE'] is None
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_community_feature_flags(galaxy_client):
     """Tests feature flags are correct"""
     g_client = galaxy_client(None)
@@ -54,7 +54,7 @@ def test_community_feature_flags(galaxy_client):
     assert resp['legacy_roles'] is True
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_me_anonymous(galaxy_client):
     """Tests anonymous user is detected correctly"""
 
@@ -67,36 +67,36 @@ def test_me_anonymous(galaxy_client):
     assert resp['is_superuser'] is False
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_me_social(gh_user_1):
     """ Tests a social authed user can see their user info """
     r = get_me(gh_user_1)
     assert r['username'] == gh_user_1.username
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_me_social_with_precreated_user(galaxy_client):
     """ Make sure social auth associates to the correct username """
     # delete user to make sure user does not exist
     gc_admin = galaxy_client("admin")
-    beta_galaxy_user_cleanup(galaxy_client, "github_user")
-    github_user_username = BETA_GALAXY_STAGE_PROFILES["github_user"]["username"]
+    galaxy_stage_ansible_user_cleanup(galaxy_client, "github_user")
+    github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES["github_user"]["username"]
     create_test_user(gc_admin, github_user_username)
     gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
     uinfo = get_me(gc)
     assert uinfo['username'] == gc.username
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_social_auth_creates_group(gh_user_1_pre):
-    github_user_username = BETA_GALAXY_STAGE_PROFILES["github_user"]["username"]
+    github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES["github_user"]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
     uinfo = get_me(gh_user_1_pre)
     assert uinfo['username'] == gh_user_1_pre.username
     assert uinfo['groups'][0]['name'] == group
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_social_auth_creates_v3_namespace(gh_user_1_pre, generate_test_artifact):
     expected_ns = f"{gh_user_1_pre.username}".replace("-", "_")
     ns = get_namespace(gh_user_1_pre, expected_ns)
@@ -107,7 +107,7 @@ def test_social_auth_creates_v3_namespace(gh_user_1_pre, generate_test_artifact)
     assert resp["state"] == "completed"
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_social_auth_creates_v3_namespace_upload_cli(gh_user_1, galaxy_client,
                                                      generate_test_artifact):
     expected_ns = f"{gh_user_1.username}".replace("-", "_")
@@ -125,7 +125,7 @@ def test_social_auth_creates_v3_namespace_upload_cli(gh_user_1, galaxy_client,
     wait_for_url(gc_admin, url)
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_social_auth_creates_legacynamespace(gh_user_1_pre):
     r = gh_user_1_pre.get(f"v1/namespaces/?name={gh_user_1_pre.username}")
     assert r['count'] == 1
@@ -133,7 +133,7 @@ def test_social_auth_creates_legacynamespace(gh_user_1_pre):
     assert r['results'][0]['summary_fields']['owners'][0]['username'] == gh_user_1_pre.username
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_update_legacynamespace_owners(gh_user_1_post, gh_user_2):
     uinfo2 = get_me(gh_user_2)
     ns_resp = gh_user_1_post.get(f"v1/namespaces/?name={gh_user_1_post.username}")
@@ -150,7 +150,7 @@ def test_update_legacynamespace_owners(gh_user_1_post, gh_user_2):
     assert uinfo2['username'] in owners2_usernames
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_list_collections_anonymous(galaxy_client):
     """Tests whether collections can be browsed anonymously"""
 
@@ -159,14 +159,14 @@ def test_list_collections_anonymous(galaxy_client):
     validate_json(instance=resp, schema=schema_objectlist)
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_list_collections_social(gh_user_1):
     """ Tests a social authed user can see collections """
     resp = get_all_collections(gh_user_1)
     validate_json(instance=resp, schema=schema_objectlist)
 
 
-@pytest.mark.beta_galaxy
+@pytest.mark.galaxy_stage_ansible
 def test_social_download_artifact(gh_user_1, generate_test_artifact):
     expected_ns = f"{gh_user_1.username}".replace("-", "_")
     resp = upload_artifact(None, gh_user_1, generate_test_artifact)

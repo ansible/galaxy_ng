@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from pkg_resources import parse_version
 
-from galaxy_ng.tests.integration.constants import BETA_GALAXY_STAGE_PROFILES, \
+from galaxy_ng.tests.integration.constants import GALAXY_STAGE_ANSIBLE_PROFILES, \
     EPHEMERAL_PROFILES, PROFILES, CREDENTIALS, SYNC_PROFILES, DEPLOYED_PAH_PROFILES
 from galaxy_ng.tests.integration.utils import get_client
 
@@ -243,8 +243,8 @@ def is_ephemeral_env():
     )
 
 
-def is_beta_galaxy_stage():
-    return "beta-galaxy-stage.ansible" in os.getenv(
+def is_galaxy_stage():
+    return "galaxy-stage.ansible" in os.getenv(
         "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
     )
 
@@ -320,9 +320,9 @@ def retrieve_collection(artifact, collections):
     return local_collection_found
 
 
-def beta_galaxy_user_cleanup(gc, u):
+def galaxy_stage_ansible_user_cleanup(gc, u):
     gc_admin = gc("admin")
-    github_user_username = BETA_GALAXY_STAGE_PROFILES[u]["username"]
+    github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES[u]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
     try:
         delete_user(gc_admin, github_user_username)
@@ -387,8 +387,8 @@ class AnsibleConfigFixture(dict):
             self.PROFILES["org_admin"]["token"] = None
             self.PROFILES["partner_engineer"]["token"] = None
             self.PROFILES["basic_user"]["token"] = None
-        elif is_beta_galaxy_stage():
-            self.PROFILES = BETA_GALAXY_STAGE_PROFILES
+        elif is_galaxy_stage():
+            self.PROFILES = GALAXY_STAGE_ANSIBLE_PROFILES
         else:
             for profile_name in PROFILES:
                 p = PROFILES[profile_name]
