@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.mark.skip(reason='TBD')
-def test_sync_galaxy_namespaces():
+def test_copy_owner_permissions():
     pass
 
 
