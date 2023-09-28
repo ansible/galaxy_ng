@@ -324,7 +324,6 @@ def upstream_collection_iterator(
             logger.info(_baseurl + f'/api/v1/namespaces/{ns_id}/')
             ns_url = _baseurl + f'/api/v1/namespaces/{ns_id}/'
             namespace_data = safe_fetch(ns_url).json()
-            # logger.info(namespace_data)
             namespace_cache[ns_id] = namespace_data
 
             # get the owners too
