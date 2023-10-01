@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-13 11:35+0000\n"
+"POT-Creation-Date: 2023-10-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,25 +19,25 @@ msgstr ""
 msgid "Back to list"
 msgstr ""
 
-#: app/access_control/access_policy.py:363
+#: app/access_control/access_policy.py:385
 msgid "Namespace in filename not found."
 msgstr "ファイル名の名前空間が見つかりません。"
 
-#: app/access_control/access_policy.py:396
+#: app/access_control/access_policy.py:418
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:410
+#: app/access_control/access_policy.py:432
 msgid "Namespace not found."
 msgstr "名前空間が見つかりません。"
 
-#: app/access_control/access_policy.py:479
+#: app/access_control/access_policy.py:501
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:532 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:554 app/api/v3/views/sync.py:49
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
