@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: pulp/plugin_template
           path: plugin_template
@@ -39,7 +39,7 @@ jobs:
         run: |
           git config --global user.name 'ansible'
           git config --global user.email 'ansible-infra@redhat.com'
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: galaxy_ng
           ref: 'master'

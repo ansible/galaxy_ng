@@ -16,7 +16,7 @@ jobs:
         LABEL="backported-${VERSION}"
         echo "LABEL=${LABEL}" >> $GITHUB_ENV
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: 'Set $PR to PR number'
       run: |
