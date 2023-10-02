@@ -82,7 +82,7 @@ def find_namespace(baseurl=None, name=None, id=None):
 
     logger.info(f'baseurl1: {baseurl}')
     if baseurl is None or not baseurl:
-        baseurl = 'https://galaxy.ansible.com'
+        baseurl = 'https://old-galaxy.ansible.com'
     baseurl += '/api/v1/namespaces'
     logger.info(f'baseurl2: {baseurl}')
 
@@ -151,7 +151,7 @@ def upstream_namespace_iterator(
     """Abstracts the pagination of v2 collections into a generator with error handling."""
     logger.info(f'baseurl1: {baseurl}')
     if baseurl is None or not baseurl:
-        baseurl = 'https://galaxy.ansible.com/api/v1/namespaces'
+        baseurl = 'https://old-galaxy.ansible.com/api/v1/namespaces'
     if not baseurl.rstrip().endswith('/api/v1/namespaces'):
         baseurl = baseurl.rstrip() + '/api/v1/namespaces'
     logger.info(f'baseurl2: {baseurl}')
@@ -228,7 +228,7 @@ def upstream_collection_iterator(
     """Abstracts the pagination of v2 collections into a generator with error handling."""
     logger.info(f'baseurl1: {baseurl}')
     if baseurl is None or not baseurl:
-        baseurl = 'https://galaxy.ansible.com/api/v2/collections'
+        baseurl = 'https://old-galaxy.ansible.com/api/v2/collections'
     logger.info(f'baseurl2: {baseurl}')
 
     # normalize the upstream url
@@ -411,7 +411,7 @@ def upstream_role_iterator(
     """Abstracts the pagination of v1 roles into a generator with error handling."""
     logger.info(f'baseurl1: {baseurl}')
     if baseurl is None or not baseurl:
-        baseurl = 'https://galaxy.ansible.com/api/v1/roles'
+        baseurl = 'https://old-galaxy.ansible.com/api/v1/roles'
     logger.info(f'baseurl2: {baseurl}')
 
     # normalize the upstream url

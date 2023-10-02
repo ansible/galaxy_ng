@@ -25,7 +25,7 @@ def test_community_collection_download_count_sync(ansible_config):
 
     # pick an upstream collection at random that does not exist locally ...
     sync_collection = None
-    base_url = 'https://galaxy.ansible.com'
+    base_url = 'https://old-galaxy.ansible.com'
     next_url = base_url + '/api/v2/collections/'
     while next_url:
         rr = requests.get(next_url)
