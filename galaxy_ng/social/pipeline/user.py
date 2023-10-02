@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 
+import logging
 
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.utils.galaxy import generate_unverified_email
+
+
+logger = logging.getLogger(__name__)
 
 
 USER_FIELDS = ['username', 'email']
@@ -14,10 +18,13 @@ def get_username(strategy, details, backend, user=None, *args, **kwargs):
 
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
 
+    logger.info(f'create_user(1): user-kwarg:{user}')
+
     if user:
         if user.username != details.get('username'):
             user.username = details.get('username')
             user.save()
+        logger.info(f'create_user(2): returning user-kwarg {user}')
         return {'is_new': False}
 
     fields = dict(
@@ -26,6 +33,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     )
 
     if not fields:
+        logger.info(f'create_user(3): no fields for {user}')
         return
 
     # bypass the strange logic that can't find the user ... ?
@@ -34,25 +42,35 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     github_id = details.get('id')
     if not github_id:
         github_id = kwargs['response']['id']
+    logger.info(f'create_user(4): enumerate username:{username} email:{email} github_id:{github_id}')
 
     # check for all possible emails ...
     possible_emails = [generate_unverified_email(github_id), email]
     for possible_email in possible_emails:
+
+        # if the email is null maybe that causes the user hijacking?
+        if not email:
+            continue
+
         found_email = User.objects.filter(email=possible_email).first()
         if found_email is not None:
+            logger.info(f'create_user(5): found user {found_email} via email {possible_email}')
             break
 
     if found_email is not None:
 
         # fix the username if they've changed their login since last time
         if found_email.username != username:
+            logger.info(f'create_user(6): set found user {found_email} username to {username}')
             found_email.username = username
             found_email.save()
 
         if found_email.email != email:
+            logger.info(f'create_user(7): set found user {found_email} email to {email}')
             found_email.email = email
             found_email.save()
 
+        logger.info(f'create_user(8): returning found user {found_email} via email {possible_email}')
         return {
             'is_new': False,
             'user': found_email
@@ -67,12 +85,14 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
 
     found_username = User.objects.filter(username=username).first()
     if found_username is not None:
+        print(f'create_user(9): {found_username}')
         return {
             'is_new': False,
             'user': found_username
         }
 
     new_user = strategy.create_user(**fields)
+    print(f'create_user(10): {new_user}')
     return {
         'is_new': True,
         'user': new_user

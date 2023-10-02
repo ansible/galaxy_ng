@@ -135,6 +135,11 @@ class SocialGithubClient:
         if self._rs is None:
             raise Exception('client is not authenticated')
 
+        # POST {} -> https://galaxy-dev.ansible.com/api/_ui/v1/auth/logout/
+        #rr = self._rs.post(self.baseurl + '_u1/v1/auth/logout/', data={})
+        rr = self.post(absolute_url='/api/_ui/v1/auth/logout/', data={})
+        assert rr.status_code == 204, rr.text
+
     def get(self, relative_url: str = None, absolute_url: str = None) -> requests.models.Response:
 
         pheaders = {
