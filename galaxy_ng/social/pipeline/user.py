@@ -85,19 +85,20 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if found_username is not None and found_username.email:
         # we have an old user who's got the username but it's not the same person logging in ...
         # so change that username? The email should be unique right?
+        logger.info(f'create_user(9): set {found_username} username to {found_username.email}')
         found_username.username = found_username.email
         found_username.save()
 
     found_username = User.objects.filter(username=username).first()
     if found_username is not None:
-        print(f'create_user(9): {found_username}')
+        logger.info(f'create_user(10): {found_username}')
         return {
             'is_new': False,
             'user': found_username
         }
 
     new_user = strategy.create_user(**fields)
-    logger.info(f'create_user(10): {new_user}')
+    logger.info(f'create_user(11): {new_user}')
     return {
         'is_new': True,
         'user': new_user
