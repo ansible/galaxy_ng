@@ -49,8 +49,8 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     for possible_email in possible_emails:
 
         # if the email is null maybe that causes the user hijacking?
-        if not email:
-            continue
+        #if not email:
+        #    continue
 
         found_email = User.objects.filter(email=possible_email).first()
         if found_email is not None:
