@@ -93,7 +93,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         }
 
     new_user = strategy.create_user(**fields)
-    print(f'create_user(10): {new_user}')
+    logger.info(f'create_user(10): {new_user}')
     return {
         'is_new': True,
         'user': new_user
