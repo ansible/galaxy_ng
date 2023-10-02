@@ -18,7 +18,7 @@ Project documentation is hosted on [Read The Docs](http://galaxy-ng.readthedocs.
 
 ## OpenAPI Spec
 
-View the latest version of the spec by [clicking here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/ansible/galaxy_ng/master/openapi/openapi.yaml).
+View the latest version of the spec at https://galaxy.ansible.com/api/v3/swagger-ui/. *(Directlink to [JSON](https://galaxy.ansible.com/api/v3/openapi.json) or [YAML](https://galaxy.ansible.com/api/v3/openapi.yaml))*
 
 ## Contributing
 
