@@ -250,7 +250,7 @@ opentelemetry-exporter-otlp-proto-http==1.18.0
     # via
     #   opentelemetry-exporter-otlp
     #   pulpcore
-opentelemetry-instrumentation==0.39b0
+opentelemetry-instrumentation==0.41b0
     # via
     #   opentelemetry-distro
     #   opentelemetry-instrumentation-django
