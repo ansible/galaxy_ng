@@ -474,3 +474,9 @@ def test_social_user_sync_with_changed_login(ansible_config):
 @pytest.mark.deployment_community
 def test_rbac_utils_get_owned_v3_namespaces(ansible_config):
     pass
+
+
+@pytest.mark.skip(reason='this should be unit tested')
+@pytest.mark.deployment_community
+def test_community_tools_urls(ansible_config):
+    pass
