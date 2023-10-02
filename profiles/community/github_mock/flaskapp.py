@@ -421,7 +421,7 @@ def admin_add_user():
     if password is None:
         password = get_new_password()
     email = ds.get('email', login + '@github.com')
-    #if email is None or not email:
+    # if email is None or not email:
     #    email = login + '@github.com'
 
     conn = sqlite3.connect(db_name)

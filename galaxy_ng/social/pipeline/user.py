@@ -42,7 +42,9 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     github_id = details.get('id')
     if not github_id:
         github_id = kwargs['response']['id']
-    logger.info(f'create_user(4): enumerate username:{username} email:{email} github_id:{github_id}')
+    logger.info(
+        f'create_user(4): enumerate username:{username} email:{email} github_id:{github_id}'
+    )
 
     # check for all possible emails ...
     possible_emails = [generate_unverified_email(github_id), email]
@@ -71,7 +73,9 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
             found_email.email = email
             found_email.save()
 
-        logger.info(f'create_user(8): returning found user {found_email} via email {possible_email}')
+        logger.info(
+            f'create_user(8): returning found user {found_email} via email {possible_email}'
+        )
         return {
             'is_new': False,
             'user': found_email

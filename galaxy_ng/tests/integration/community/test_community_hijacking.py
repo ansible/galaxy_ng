@@ -1,10 +1,7 @@
 """test_community.py - Tests related to the community featureset.
 """
 
-import json
 import pytest
-import random
-import string
 
 from ..utils import (
     get_client,
@@ -14,7 +11,6 @@ from ..utils import (
 )
 from ..utils.legacy import (
     cleanup_social_user,
-    wait_for_v1_task,
 )
 
 
@@ -48,13 +44,13 @@ def test_community_hijacking(ansible_config):
         'jctannerTESTME': {
             'uid': 1000,
             'login': 'jctannerTESTME',
-            #'email': 'jctannerTESTME@haxx.net',
+            # 'email': 'jctannerTESTME@haxx.net',
             'email': '',
         },
         'drod0258X': {
             'uid': 1001,
             'login': 'drod0258X',
-            #'email': 'drod0258X@haxx.net',
+            # 'email': 'drod0258X@haxx.net',
             'email': ''
         }
     }
