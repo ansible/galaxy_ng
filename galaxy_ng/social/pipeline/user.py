@@ -46,11 +46,12 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
 
     # check for all possible emails ...
     possible_emails = [generate_unverified_email(github_id), email]
+    found_email = None
     for possible_email in possible_emails:
 
         # if the email is null maybe that causes the user hijacking?
-        #if not email:
-        #    continue
+        if not email:
+            continue
 
         found_email = User.objects.filter(email=possible_email).first()
         if found_email is not None:
