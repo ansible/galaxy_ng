@@ -1,0 +1,1 @@
+Fixed ``username`` filter in ``/api/v1/users`` endpoint.
