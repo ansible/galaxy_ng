@@ -106,7 +106,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             login TEXT NOT NULL UNIQUE,
-            email TEXT NOT NULL UNIQUE,
+            email TEXT NOT NULL,
             password TEXT NOT NULL
         )
     ''')
@@ -421,8 +421,8 @@ def admin_add_user():
     if password is None:
         password = get_new_password()
     email = ds.get('email', login + '@github.com')
-    if email is None or not email:
-        email = login + '@github.com'
+    # if email is None or not email:
+    #    email = login + '@github.com'
 
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
