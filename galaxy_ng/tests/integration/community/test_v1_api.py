@@ -79,3 +79,42 @@ def test_v1_owner_username_filter_is_case_insensitive(ansible_config):
 
     # cleanup
     cleanup_social_user(github_user, ansible_config)
+
+
+@pytest.mark.deployment_community
+def test_v1_users_filter(ansible_config):
+    """" Tests v1 users filter works as expected """
+
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True
+    )
+
+    github_user = 'jctannerTEST'
+    # github_repo = 'role1'
+    cleanup_social_user(github_user, ansible_config)
+
+    user_cfg = extract_default_config(ansible_config)
+    user_cfg['username'] = github_user
+    user_cfg['password'] = 'redhat'
+
+    # Login with the user first to create the v1+v3 namespaces
+    with SocialGithubClient(config=user_cfg) as client:
+        me = client.get('_ui/v1/me/')
+        assert me.json()['username'] == github_user
+
+    resp = api_client('/api/v1/users/')
+
+    assert len(resp["results"]) > 0
+
+    resp = api_client(f'/api/v1/users/?username={github_user}')
+
+    assert resp["count"] == 1
+    assert resp["results"][0]["username"] == github_user
+
+    resp = api_client('/api/v1/users/?username=user_should_not_exist')
+    assert resp["count"] == 0
+
+    cleanup_social_user(github_user, ansible_config)
