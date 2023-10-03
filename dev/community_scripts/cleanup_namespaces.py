@@ -51,22 +51,28 @@ def do_cleanup():
         if len(ns_map[ns_key]) <= 1:
             continue
 
-        counter += 1
-
-        print('-' * 100)
-        print(f'{counter}. {ns_key}')
-        # is there a user for this namespace ...?
-        found_user = User.objects.filter(username=ns_key).first()
-
         ns = Namespace.objects.filter(name=ns_key).first()
+        if not ns:
+            continue
+
         if ns:
-            collection_count = CollectionVersion.objects.filter(namespace=dupe_name).count()
+            collection_count = CollectionVersion.objects.filter(namespace=ns).count()
             owners = rbac.get_v3_namespace_owners(ns)
             legacy_count = LegacyNamespace.objects.filter(namespace=ns).count()
         else:
             collection_count = None
             owners = None
             legacy_count = None
+
+        counter += 1
+
+        print('-' * 100)
+        print(f'{counter}. {ns_key}')
+
+        # is there a matching user for this namespace ...?
+        found_user = User.objects.filter(username=ns_key).first()
+        print('')
+        print(f'\tuser: {found_user}')
 
         print('')
         print(f'\tnamespace:{ns} legacy-ns:{legacy_count} collections:{collection_count} owners:{owners}')
