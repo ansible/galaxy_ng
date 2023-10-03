@@ -43,8 +43,11 @@ def do_cleanup():
     # check each ns for content ...
     ns_keys = sorted(list(ns_map.keys()))
     for ns_key in ns_keys:
-        print(ns_key)
 
+        if len(ns_map[ns_key]) <= 1:
+            continue
+
+        print(ns_key)
         # is there a user for this namespace ...?
         found_user = User.objects.filter(username=ns_key).first()
 
