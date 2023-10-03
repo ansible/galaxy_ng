@@ -63,9 +63,14 @@ class GalaxyNGOAuth2(GithubOAuth2):
         v3_namespace, v3_namespace_created = \
             self.handle_v3_namespace(auth_response, email, login, gid)
 
+        print('-' * 100)
+        print(f'{login} v3 namespace: {v3_namespace}')
+        print('-' * 100)
+
         # create a legacynamespace and bind to the v3 namespace?
-        legacy_namespace, legacy_namespace_created = \
-            self._ensure_legacynamespace(login, v3_namespace)
+        if v3_namespace:
+            legacy_namespace, legacy_namespace_created = \
+                self._ensure_legacynamespace(login, v3_namespace)
 
         return auth_response
 
@@ -82,15 +87,18 @@ class GalaxyNGOAuth2(GithubOAuth2):
         namespace_name = self.transform_namespace_name(session_login)
 
         logger.debug(f'TRANSFORMED NAME: {namespace_name}')
+        print(f'TRANSFORMED NAME: {namespace_name}')
 
         if not self.validate_namespace_name(namespace_name):
             logger.debug(f'DID NOT VALIDATE NAMESPACE NAME: {namespace_name}')
+            print(f'DID NOT VALIDATE NAMESPACE NAME: {namespace_name}')
             return False, False
 
         # does the namespace already exist?
         found_namespace = Namespace.objects.filter(name=namespace_name).first()
 
         logger.debug(f'FOUND NAMESPACE: {found_namespace}')
+        print(f'FOUND NAMESPACE: {found_namespace}')
 
         # is it owned by this userid?
         if found_namespace:
@@ -100,6 +108,24 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
             if session_user in owners:
                 return found_namespace, False
+
+        # FIXME - make one from the transformed name?
+        if not found_namespace:
+            namespace, namespace_created = self._ensure_namespace(namespace_name, session_user)
+            return namespace, namespace_created
+
+        # short circuit if the user does own at least one namespace ...
+        owned_namespaces = rbac.get_owned_v3_namespaces(session_user)
+        logger.debug(f'FOUND USER OWNED NAMESPACES: {owned_namespaces}')
+        print(f'FOUND USER OWNED NAMESPACES: {owned_namespaces}')
+        if owned_namespaces:
+            # does one resemble the desired namespace name?
+            owned_namespaces = sorted(owned_namespaces)
+            for ns in owned_namespaces:
+                if ns.name.startswith(namespace_name):
+                    logger.debug(f'MATCHED NS OWNED BY {session_user}: {ns} {ns.name}')
+                    return ns, False
+            return None, False
 
         # should always have a namespace ...
         if found_namespace:

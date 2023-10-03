@@ -58,7 +58,7 @@ def test_community_collection_download_count_sync(ansible_config):
     remotes = dict((x['name'], x) for x in resp['results'])
     community_remote_config = {
         'name': 'community',
-        'url': 'https://galaxy.ansible.com/',
+        'url': 'https://old-galaxy.ansible.com/',
         'sync_dependencies': False,
         'requirements_file': json.dumps({'collections': ['.'.join(list(sync_collection))]}),
     }

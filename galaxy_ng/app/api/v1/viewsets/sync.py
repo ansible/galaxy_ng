@@ -46,5 +46,6 @@ class LegacyRolesSyncViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, L
         serializer.is_valid(raise_exception=True)
         kwargs = dict(serializer.validated_data)
         logger.debug(f'REQUEST kwargs: {kwargs}')
+        print(f'REQUEST kwargs: {kwargs}')
         task_id = self.legacy_dispatch(legacy_sync_from_upstream, kwargs=kwargs)
         return Response({'task': task_id})

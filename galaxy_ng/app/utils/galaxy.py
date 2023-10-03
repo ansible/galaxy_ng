@@ -130,6 +130,7 @@ def get_namespace_owners_details(baseurl, ns_id):
     owners = []
     next_owners_url = baseurl + f'/api/v1/namespaces/{ns_id}/owners/'
     while next_owners_url:
+        print(next_owners_url)
         o_data = safe_fetch(next_owners_url).json()
         for owner in o_data['results']:
             owners.append(owner)
@@ -155,6 +156,7 @@ def upstream_namespace_iterator(
     if not baseurl.rstrip().endswith('/api/v1/namespaces'):
         baseurl = baseurl.rstrip() + '/api/v1/namespaces'
     logger.info(f'baseurl2: {baseurl}')
+    print(f'NS ITERATOR BASEURL {baseurl}')
 
     # normalize the upstream url
     parsed = urlparse(baseurl)
@@ -413,6 +415,7 @@ def upstream_role_iterator(
     if baseurl is None or not baseurl:
         baseurl = 'https://old-galaxy.ansible.com/api/v1/roles'
     logger.info(f'baseurl2: {baseurl}')
+    print('ROLE ITERATOR BASEURL {baseurl}')
 
     # normalize the upstream url
     parsed = urlparse(baseurl)
