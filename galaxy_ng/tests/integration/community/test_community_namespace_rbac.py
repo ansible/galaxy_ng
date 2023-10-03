@@ -562,3 +562,11 @@ def test_social_auth_no_duplicated_namespaces(ansible_config):
         next_url = resp['links']['next']
     sean_namespaces = sorted([x for x in nsmap.keys() if x.startswith('sean_m')])
     assert sean_namespaces == ['sean_m_sullivan', 'sean_m_sullivan0']
+
+
+@pytest.mark.skip(reason='this should be unit tested')
+@pytest.mark.deployment_community
+def test_community_social_v3_namespace_sorting(ansible_config):
+    # https://issues.redhat.com/browse/AAH-2729
+    # social auth code was trying to sort namespaces ...
+    pass
