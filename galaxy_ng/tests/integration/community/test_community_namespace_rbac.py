@@ -570,4 +570,3 @@ def test_community_social_v3_namespace_sorting(ansible_config):
     # https://issues.redhat.com/browse/AAH-2729
     # social auth code was trying to sort namespaces ...
     pass
-
