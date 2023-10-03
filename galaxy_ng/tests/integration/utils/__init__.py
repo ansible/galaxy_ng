@@ -26,6 +26,7 @@ from .namespaces import (
     get_all_namespaces,
     generate_unused_namespace,
     create_unused_namespace,
+    cleanup_namespaces,
     cleanup_namespace
 )
 from .tasks import wait_for_task, wait_for_task_ui_client, wait_for_all_tasks
@@ -73,6 +74,7 @@ __all__ = (
     generate_unused_namespace,
     create_unused_namespace,
     cleanup_namespace,
+    cleanup_namespaces,
     wait_for_task,
     wait_for_task_ui_client,
     is_docker_installed,

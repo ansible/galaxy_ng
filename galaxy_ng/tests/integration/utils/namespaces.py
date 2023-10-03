@@ -100,3 +100,15 @@ def cleanup_namespace(name, api_client=None):
 
         resp = api_client(f'{api_prefix}/v3/namespaces/?name={name}', method='GET')
         assert resp['meta']['count'] == 0
+
+
+def cleanup_namespaces(names, api_client=None):
+
+    assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+
+    namespaces = get_all_namespaces(api_client=api_client)
+    nsmap = dict((x['name'], x) for x in namespaces)
+    names = [x for x in names if x in nsmap]
+    for name in names:
+        cleanup_namespace(name, api_client=api_client)
