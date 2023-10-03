@@ -567,5 +567,7 @@ def test_social_auth_no_duplicated_namespaces(ansible_config):
 @pytest.mark.skip(reason='this should be unit tested')
 @pytest.mark.deployment_community
 def test_community_social_v3_namespace_sorting(ansible_config):
+    # https://issues.redhat.com/browse/AAH-2729
+    # social auth code was trying to sort namespaces ...
     pass
 
