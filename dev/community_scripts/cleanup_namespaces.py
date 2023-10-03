@@ -70,9 +70,13 @@ def do_cleanup():
             dupe_ns = Namespace.objects.filter(name=dupe_name).first()
             collection_count = CollectionVersion.objects.filter(namespace=dupe_name).count()
             dupe_owners = rbac.get_v3_namespace_owners(dupe_ns)
-            dupe_legacy_count = LegacyNamespace.objects.filter(namespace=ns).count()
+            dupe_legacy_count = LegacyNamespace.objects.filter(namespace=dupe_ns).count()
 
             print(f'\t\t{dupe_name} legacy-ns:{dupe_legacy_count} collections:{collection_count} owners:{dupe_owners}')
+
+            if dupe_legacy_count > 0:
+                for lns in LegacyNamespace.objects.filter(namespace=dupe_ns):
+                    print('\t\t\tlegacy:{lns.name} v3:{lns.namespace}')
 
     # import epdb; epdb.st()
 
