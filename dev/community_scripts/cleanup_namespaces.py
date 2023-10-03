@@ -47,17 +47,34 @@ def do_cleanup():
         if len(ns_map[ns_key]) <= 1:
             continue
 
+        print('-' * 100)
         print(ns_key)
         # is there a user for this namespace ...?
         found_user = User.objects.filter(username=ns_key).first()
 
-        for dupe_name in ns_map[ns_key]:
-            ns = Namespace.objects.filter(name=dupe_name).first()
+        ns = Namespace.objects.filter(name=ns_key).first()
+        if ns:
             collection_count = CollectionVersion.objects.filter(namespace=dupe_name).count()
-            dupe_owners = rbac.get_v3_namespace_owners(ns)
-            print(f'\t{dupe_name} collections:{collection_count} owners:{dupe_owners}')
+            owners = rbac.get_v3_namespace_owners(ns)
+            legacy_count = LegacyNamespace.objects.filter(namespace=ns).count()
+        else:
+            collection_count = None
+            owners = None
+            legacy_count = None
 
-    #import epdb; epdb.st()
+        print('')
+        print(f'\tnamespace:{ns} legacy-ns:{legacy_count} collections:{collection_count} owners:{owners}')
+        print('')
+
+        for dupe_name in ns_map[ns_key]:
+            dupe_ns = Namespace.objects.filter(name=dupe_name).first()
+            collection_count = CollectionVersion.objects.filter(namespace=dupe_name).count()
+            dupe_owners = rbac.get_v3_namespace_owners(dupe_ns)
+            dupe_legacy_count = LegacyNamespace.objects.filter(namespace=ns).count()
+
+            print(f'\t\t{dupe_name} legacy-ns:{dupe_legacy_count} collections:{collection_count} owners:{dupe_owners}')
+
+    # import epdb; epdb.st()
 
 
 do_cleanup()
