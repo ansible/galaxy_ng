@@ -76,7 +76,7 @@ def do_cleanup():
 
             if dupe_legacy_count > 0:
                 for lns in LegacyNamespace.objects.filter(namespace=dupe_ns):
-                    print('\t\t\tlegacy:{lns.name} v3:{lns.namespace}')
+                    print(f'\t\t\tlegacy:{lns.name} v3:{lns.namespace}')
 
     # import epdb; epdb.st()
 
