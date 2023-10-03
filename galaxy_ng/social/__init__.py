@@ -63,21 +63,26 @@ class GalaxyNGOAuth2(GithubOAuth2):
         v3_namespace, v3_namespace_created = \
             self.handle_v3_namespace(auth_response, email, login, gid)
 
-        print('-' * 100)
-        print(f'{login} v3 namespace: {v3_namespace}')
-        print('-' * 100)
+        logger.info(
+            f'v3 namespace {v3_namespace} created:{v3_namespace_created}'
+            + f' for github login {login}'
+        )
 
         # create a legacynamespace and bind to the v3 namespace?
         if v3_namespace:
             legacy_namespace, legacy_namespace_created = \
                 self._ensure_legacynamespace(login, v3_namespace)
+            logger.info(
+                f'legacy namespace {legacy_namespace} created:{legacy_namespace_created}'
+                + f' for github login {login}'
+            )
 
         return auth_response
 
     def handle_v3_namespace(self, session_user, session_email, session_login, github_id):
 
-        logger.debug(
-            f'HANDLING V3 NAMESPACE session_user:{session_user}'
+        logger.info(
+            f'handle_v3_namespace(1): session_user:{session_user}'
             + f' session_email:{session_email} session_login:{session_login}'
         )
 
@@ -86,19 +91,23 @@ class GalaxyNGOAuth2(GithubOAuth2):
         # first make the namespace name ...
         namespace_name = self.transform_namespace_name(session_login)
 
-        logger.debug(f'TRANSFORMED NAME: {namespace_name}')
-        print(f'TRANSFORMED NAME: {namespace_name}')
+        logger.info(
+            f'handle_v3_namespace(2): session_login:{session_login}'
+            + f' transformed_name:{namespace_name}'
+        )
 
         if not self.validate_namespace_name(namespace_name):
-            logger.debug(f'DID NOT VALIDATE NAMESPACE NAME: {namespace_name}')
-            print(f'DID NOT VALIDATE NAMESPACE NAME: {namespace_name}')
+            logger.info(
+                f'handle_v3_namespace(3): session_login:{session_login}'
+                + f' transformed_name:{namespace_name} validated:False')
             return False, False
 
         # does the namespace already exist?
         found_namespace = Namespace.objects.filter(name=namespace_name).first()
-
-        logger.debug(f'FOUND NAMESPACE: {found_namespace}')
-        print(f'FOUND NAMESPACE: {found_namespace}')
+        logger.info(
+            f'handle_v3_namespace(4): session_login:{session_login}'
+            + f' transformed_name:{namespace_name} found:{found_namespace}'
+        )
 
         # is it owned by this userid?
         if found_namespace:
@@ -107,39 +116,65 @@ class GalaxyNGOAuth2(GithubOAuth2):
             logger.debug(f'FOUND EXISTING OWNERS: {owners}')
 
             if session_user in owners:
+                logger.info(
+                    f'handle_v3_namespace(5): session_login:{session_login}'
+                    f' is owner of {found_namespace}'
+                )
                 return found_namespace, False
+            else:
+                logger.info(
+                    f'handle_v3_namespace(6): session_login:{session_login}'
+                    + f' is NOT owner of {found_namespace}'
+                )
 
         # FIXME - make one from the transformed name?
         if not found_namespace:
             namespace, namespace_created = self._ensure_namespace(namespace_name, session_user)
+            logger.info(
+                f'handle_v3_namespace(7): session_login:{session_login}'
+                + f' created:{namespace_created} namespace:{namespace}'
+            )
             return namespace, namespace_created
 
         # short circuit if the user does own at least one namespace ...
         owned_namespaces = rbac.get_owned_v3_namespaces(session_user)
-        logger.debug(f'FOUND USER OWNED NAMESPACES: {owned_namespaces}')
-        print(f'FOUND USER OWNED NAMESPACES: {owned_namespaces}')
+        logger.info(
+            f'handle_v3_namespace(8): session_login:{session_login} owns {owned_namespaces}'
+        )
+
         if owned_namespaces:
             # does one resemble the desired namespace name?
             owned_namespaces = sorted(owned_namespaces)
             for ns in owned_namespaces:
                 if ns.name.startswith(namespace_name):
-                    logger.debug(f'MATCHED NS OWNED BY {session_user}: {ns} {ns.name}')
+                    logger.info(
+                        f'handle_v3_namespace(9): session_login:{session_login} returning {ns}'
+                    )
                     return ns, False
+
+            logger.info(
+                f'handle_v3_namespace(10): session_login:{session_login}'
+                + f' no candidates among {owned_namespaces}'
+            )
             return None, False
 
         # should always have a namespace ...
         if found_namespace:
-            logger.debug(
-                f'GENERATING A NEW NAMESPACE NAME SINCE USER DOES NOT OWN {found_namespace}'
-            )
             namespace_name = self.generate_available_namespace_name(session_login, github_id)
-            logger.debug(f'FINAL NAMESPACE NAME {namespace_name}')
+            logger.info(
+                f'handle_v3_namespace(11): session_login:{session_login}'
+                + f' new namespace name {namespace_name}'
+            )
 
         # create a v3 namespace?
         namespace, namespace_created = self._ensure_namespace(namespace_name, session_user)
+        logger.info(
+            f'handle_v3_namespace(12): session_login:{session_login}'
+            + f' namespace:{namespace} created:{namespace_created}'
+        )
 
         owned = rbac.get_owned_v3_namespaces(session_user)
-        logger.debug(f'NS OWNED BY {session_user}: {owned}')
+        logger.info(f'handle_v3_namespace(13): session_login:{session_login} owns {owned}')
 
         return namespace, namespace_created
 

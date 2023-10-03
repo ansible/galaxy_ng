@@ -500,6 +500,7 @@ def test_rbac_utils_get_owned_v3_namespaces(ansible_config):
 def test_community_tools_urls(ansible_config):
     pass
 
+
 @pytest.mark.deployment_community
 def test_social_auth_no_duplicated_namespaces(ansible_config):
 

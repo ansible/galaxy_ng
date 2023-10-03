@@ -166,7 +166,11 @@ def test_me_social_with_v1_synced_user(ansible_config):
     )
 
     # v1 sync the user's roles and namespace ...
-    pargs = json.dumps({"github_user": username, "limit": 1, "baseurl": "https://old-galaxy.ansible.com"}).encode('utf-8')
+    pargs = json.dumps({
+        "github_user": username,
+        "limit": 1,
+        "baseurl": "https://old-galaxy.ansible.com"
+    }).encode('utf-8')
     resp = admin_client('/api/v1/sync/', method='POST', args=pargs)
     wait_for_v1_task(resp=resp, api_client=admin_client)
 

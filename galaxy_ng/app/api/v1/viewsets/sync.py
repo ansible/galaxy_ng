@@ -23,7 +23,6 @@ GALAXY_AUTHENTICATION_CLASSES = perform_import(
 )
 
 
-
 class LegacyRolesSyncViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, LegacyTasksMixin):
     """Load roles from an upstream v1 source."""
 
