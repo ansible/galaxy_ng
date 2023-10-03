@@ -144,7 +144,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
         if owned_namespaces:
             # does one resemble the desired namespace name?
-            owned_namespaces = sorted(owned_namespaces)
+            owned_namespaces = sorted(owned_namespaces, key=lambda x: x.name)
             for ns in owned_namespaces:
                 if ns.name.startswith(namespace_name):
                     logger.info(
