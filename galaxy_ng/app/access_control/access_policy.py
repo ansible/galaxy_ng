@@ -778,6 +778,13 @@ class LegacyAccessPolicy(AccessPolicyBase):
         if user.is_superuser:
             return True
 
+        # for some reason
+        # "is_namespace_owner" is called on GET endpoint if browsable api is enabled
+        # on visiting endpoint "request.method" is "POST", "action" is "create"
+        # even though request.META["REQUEST_METHOD"] is GET
+        if request.META["REQUEST_METHOD"] == "GET" and request.accepted_renderer.format == "api":
+            return True
+
         namespace = None
         github_user = None
         kwargs = request.parser_context['kwargs']
