@@ -54,7 +54,7 @@ def paginated_results(next_url):
     _baseurl = parsed.scheme + '://' + parsed.netloc
     results = []
     while next_url:
-        logger.info(f'fetch {next_url}')
+        logger.info(f'pagination fetch {next_url}')
         rr = safe_fetch(next_url)
         if rr.status_code == 404:
             break
@@ -79,12 +79,10 @@ def paginated_results(next_url):
 
 
 def find_namespace(baseurl=None, name=None, id=None):
-
-    logger.info(f'baseurl1: {baseurl}')
     if baseurl is None or not baseurl:
         baseurl = 'https://old-galaxy.ansible.com'
     baseurl += '/api/v1/namespaces'
-    logger.info(f'baseurl2: {baseurl}')
+    logger.info(f'find_namespace baseurl:{baseurl} name:{name} id:{id}')
 
     parsed = urlparse(baseurl)
     _baseurl = parsed.scheme + '://' + parsed.netloc
@@ -130,6 +128,7 @@ def get_namespace_owners_details(baseurl, ns_id):
     owners = []
     next_owners_url = baseurl + f'/api/v1/namespaces/{ns_id}/owners/'
     while next_owners_url:
+        logger.info(f'fetch {next_owners_url}')
         o_data = safe_fetch(next_owners_url).json()
         for owner in o_data['results']:
             owners.append(owner)
@@ -147,14 +146,12 @@ def upstream_namespace_iterator(
     start_page=None,
     require_content=True,
 ):
-
     """Abstracts the pagination of v2 collections into a generator with error handling."""
-    logger.info(f'baseurl1: {baseurl}')
     if baseurl is None or not baseurl:
         baseurl = 'https://old-galaxy.ansible.com/api/v1/namespaces'
     if not baseurl.rstrip().endswith('/api/v1/namespaces'):
         baseurl = baseurl.rstrip() + '/api/v1/namespaces'
-    logger.info(f'baseurl2: {baseurl}')
+    logger.info(f'upstream_namespace_iterator baseurl:{baseurl}')
 
     # normalize the upstream url
     parsed = urlparse(baseurl)
@@ -226,10 +223,9 @@ def upstream_collection_iterator(
     start_page=None,
 ):
     """Abstracts the pagination of v2 collections into a generator with error handling."""
-    logger.info(f'baseurl1: {baseurl}')
     if baseurl is None or not baseurl:
         baseurl = 'https://old-galaxy.ansible.com/api/v2/collections'
-    logger.info(f'baseurl2: {baseurl}')
+    logger.info(f'upstream_collection_iterator baseurl:{baseurl}')
 
     # normalize the upstream url
     parsed = urlparse(baseurl)
@@ -409,10 +405,9 @@ def upstream_role_iterator(
     start_page=None,
 ):
     """Abstracts the pagination of v1 roles into a generator with error handling."""
-    logger.info(f'baseurl1: {baseurl}')
     if baseurl is None or not baseurl:
         baseurl = 'https://old-galaxy.ansible.com/api/v1/roles'
-    logger.info(f'baseurl2: {baseurl}')
+    logger.info(f'upstream_role_iterator baseurl:{baseurl}')
 
     # normalize the upstream url
     parsed = urlparse(baseurl)

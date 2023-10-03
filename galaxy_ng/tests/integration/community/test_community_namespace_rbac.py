@@ -241,14 +241,34 @@ def test_social_user_with_reclaimed_login(ansible_config):
     #   the "bar" namespace will not belong to them
     #   do they own -any- namespaces?
 
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+
     ga = GithubAdminClient()
     ga.delete_user(login='Wilk42')
     ga.delete_user(login='sean-m-sullivan')
     cleanup_social_user('Wilk42', ansible_config)
     cleanup_social_user('sean-m-sullivan', ansible_config)
+    cleanup_social_user('sean_m_sullivan', ansible_config)
     cleanup_social_user('sean-m-sullivan@redhat.com', ansible_config)
 
     default_cfg = extract_default_config(ansible_config)
+
+    nsmap = {}
+    next_url = '/api/v3/namespaces/'
+    while next_url:
+        resp = admin_client(next_url)
+        nsmap.update(dict((x['name'], x) for x in resp['data']))
+        next_url = resp['links']['next']
+    for nsname, nsdata in nsmap.items():
+        if not nsname.lower().startswith('sean_m') and not nsname.lower().startswith('wilk42'):
+            continue
+        cleanup_social_user(nsname, ansible_config)
+        cleanup_namespace(nsname, api_client=admin_client)
 
     old_login = 'Wilk42'
     email = 'sean-m-sullivan@redhat.com'
@@ -258,7 +278,6 @@ def test_social_user_with_reclaimed_login(ansible_config):
 
     # login once to make user
     with SocialGithubClient(config=user_a) as client:
-
         a_resp = client.get('_ui/v1/me/')
         ns_resp = client.get('_ui/v1/my-namespaces/')
         ns_ds = ns_resp.json()
@@ -480,3 +499,66 @@ def test_rbac_utils_get_owned_v3_namespaces(ansible_config):
 @pytest.mark.deployment_community
 def test_community_tools_urls(ansible_config):
     pass
+
+
+@pytest.mark.deployment_community
+def test_social_auth_no_duplicated_namespaces(ansible_config):
+
+    # https://issues.redhat.com/browse/AAH-2729
+
+    ga = GithubAdminClient()
+    ga.delete_user(login='Wilk42')
+    ga.delete_user(login='sean-m-sullivan')
+    cleanup_social_user('sean-m-sullivan', ansible_config)
+    cleanup_social_user('Wilk42', ansible_config)
+    cleanup_social_user('wilk42', ansible_config)
+    cleanup_social_user('sean-m-sullivan@findme.net', ansible_config)
+    cleanup_social_user('30054029@GALAXY.GITHUB.UNVERIFIED.COM', ansible_config)
+
+    default_cfg = extract_default_config(ansible_config)
+
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+
+    # find all the sean_m* namespaces and clean them up ...
+    nsmap = {}
+    next_url = '/api/v3/namespaces/'
+    while next_url:
+        resp = admin_client(next_url)
+        nsmap.update(dict((x['name'], x) for x in resp['data']))
+        next_url = resp['links']['next']
+    for nsname, nsdata in nsmap.items():
+        if not nsname.startswith('sean_m') and not nsname.startswith('wilk42'):
+            continue
+        cleanup_social_user(nsname, ansible_config)
+        cleanup_namespace(nsname, api_client=admin_client)
+
+    # make sean_m_sullivan namespace with no owners?
+    api_prefix = admin_client.config.get("api_prefix").rstrip("/")
+    payload = {'name': 'sean_m_sullivan', 'groups': []}
+    resp = admin_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
+
+    # make sean-m-sullivan on github
+    ga.delete_user(login='sean-m-sullivan')
+    sean = ga.create_user(login='sean-m-sullivan', email='sean@findme.net', uid=30054029)
+    sean['username'] = sean['login']
+    sean.update(default_cfg)
+
+    # login 10 times ...
+    for x in range(0, 10):
+        with SocialGithubClient(config=sean) as client:
+            client.get('_ui/v1/me/')
+
+    # check to make sure only the one ns was created ...
+    nsmap = {}
+    next_url = '/api/v3/namespaces/'
+    while next_url:
+        resp = admin_client(next_url)
+        nsmap.update(dict((x['name'], x) for x in resp['data']))
+        next_url = resp['links']['next']
+    sean_namespaces = sorted([x for x in nsmap.keys() if x.startswith('sean_m')])
+    assert sean_namespaces == ['sean_m_sullivan', 'sean_m_sullivan0']
