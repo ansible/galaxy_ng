@@ -1,5 +1,3 @@
-import logging
-
 from django.conf import settings
 
 from drf_spectacular.utils import extend_schema
@@ -25,8 +23,6 @@ GALAXY_AUTHENTICATION_CLASSES = perform_import(
 )
 
 
-logger = logging.getLogger(__name__)
-
 
 class LegacyRolesSyncViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, LegacyTasksMixin):
     """Load roles from an upstream v1 source."""
@@ -45,7 +41,5 @@ class LegacyRolesSyncViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, L
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         kwargs = dict(serializer.validated_data)
-        logger.debug(f'REQUEST kwargs: {kwargs}')
-        print(f'REQUEST kwargs: {kwargs}')
         task_id = self.legacy_dispatch(legacy_sync_from_upstream, kwargs=kwargs)
         return Response({'task': task_id})
