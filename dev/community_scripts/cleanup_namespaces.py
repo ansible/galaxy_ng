@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api.v1.models import LegacyNamespace
+from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.utils import rbac
 
 from pulp_ansible.app.models import CollectionVersion
@@ -77,6 +78,9 @@ def do_cleanup():
             if dupe_legacy_count > 0:
                 for lns in LegacyNamespace.objects.filter(namespace=dupe_ns):
                     print(f'\t\t\tlegacy:{lns.name} v3:{lns.namespace}')
+
+                    for role in LegacyRole.objects.filter(namespace=lns):
+                        print(f'\t\t\t\t{role.namespace}.{role.name}')
 
     # import epdb; epdb.st()
 
