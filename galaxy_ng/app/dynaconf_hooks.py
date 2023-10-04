@@ -29,6 +29,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_cors(settings))
     data.update(configure_pulp_ansible(settings))
     data.update(configure_authentication_backends(settings))
+    data.update(configure_renderers())
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
@@ -531,6 +532,16 @@ def configure_authentication_backends(settings: Dynaconf) -> Dict[str, Any]:
         data["AUTHENTICATION_BACKENDS"] = presets[choosen_preset]
 
     return data
+
+
+def configure_renderers() -> Dict[str, Any]:
+    "Set default renderer classes."
+    return {
+        "DEFAULT_RENDERER_CLASSES": [
+            'rest_framework.renderers.JSONRenderer',
+            'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
+        ]
+    }
 
 
 def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
