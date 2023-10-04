@@ -7,5 +7,5 @@ class CustomBrowsableAPIRenderer(BrowsableAPIRenderer):
     def show_form_for_method(self, view, method, request, obj):
         """Display forms only for superuser."""
         if request.user.is_superuser:
-            return True
+            return super().show_form_for_method(view, method, request, obj)
         return False

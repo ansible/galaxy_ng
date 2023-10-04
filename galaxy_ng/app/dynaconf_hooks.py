@@ -537,7 +537,7 @@ def configure_authentication_backends(settings: Dynaconf) -> Dict[str, Any]:
 def configure_renderers() -> Dict[str, Any]:
     "Set default renderer classes."
     return {
-        "DEFAULT_RENDERER_CLASSES": [
+        "REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES": [
             'rest_framework.renderers.JSONRenderer',
             'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
         ]
