@@ -41,6 +41,8 @@ class Command(BaseCommand):
         parser.add_argument("--baseurl", default="https://old-galaxy.ansible.com")
         parser.add_argument("--namespace", help="find and sync only this namespace name")
         parser.add_argument("--name", help="find and sync only this name")
+        parser.add_argument("--remote", help="name for the remote", default="published")
+        parser.add_argument("--repository", help="name for the repository", default="published")
         parser.add_argument("--rebuild_only", action="store_true", help="only rebuild metadata")
         parser.add_argument("--limit", type=int)
 
@@ -50,8 +52,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        remote = CollectionRemote.objects.filter(name='community').first()
-        repo = AnsibleRepository.objects.filter(name='published').first()
+        remote = CollectionRemote.objects.filter(name=options['remote']).first()
+        if not remote:
+            raise Exception('could not find remote')
+        repo = AnsibleRepository.objects.filter(name=options['repository']).first()
+        if not repo:
+            raise Exception('could not find repo')
 
         counter = 0
         processed_namespaces = set()
