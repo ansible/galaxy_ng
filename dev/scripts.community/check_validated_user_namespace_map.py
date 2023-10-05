@@ -19,11 +19,22 @@ def do_check():
     if os.environ.get('CHECK_MODE') == "0":
         checkmode = False
 
+    known_usernames = list(User.objects.values_list('username', flat=True))
+    known_usernames = dict((x, None) for x in known_usernames)
+
+    known_v1_names = list(LegacyNamespace.objects.values_list('name', flat=True))
+    known_v1_names = dict((x, None) for x in known_v1_names)
+
+    known_v3_names = list(Namespace.objects.values_list('name', flat=True))
+    known_v3_names = dict((x, None) for x in known_v3_names)
+
+    # compressed for size ...
     fn = 'user_namespace_map_validated.json.gz'
     with gzip.open(fn, 'rb') as gz_file:
         raw = gz_file.read()
     umap = json.loads(raw)
 
+    # check each upstream user one by one ...
     uids = list(umap.keys())
     uids = sorted(uids, key=lambda x: int(x))
     for uid in uids:
@@ -37,6 +48,12 @@ def do_check():
         # worry about these later ...
         if old_data['galaxy_username'] != old_data['github_login'] or \
             (old_data.get('gitub_login_new') and old_data.get('gitub_login_new') != old_data['galaxy_username']):
+            continue
+
+        # skip any users that have no current namespaces on this system ...
+        # this should theoretically skip making namespaces with no content
+        found_namespaces = [x for x in old_data.get('owned_namespaces', []) if x in known_v1_names or x in known_v3_names]
+        if not found_namespaces:
             continue
 
         galaxy_username = old_data['galaxy_username']
