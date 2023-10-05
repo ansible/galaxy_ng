@@ -417,8 +417,8 @@ def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
     log_messages = [item["message"] for item in resp["messages"]]
 
     pattern = "Linting collection via ansible-lint"  # hub 4.8, galaxy-importer 0.4.11
-    if parse_version(hub_version) < parse_version('4.8.0dev'):
-        pattern = "Linting role .* via ansible-lint"  # 4.7, galaxy-importer 0.4.7
+    if parse_version(hub_version) < parse_version('4.7.0dev'):
+        pattern = "Linting role .* via ansible-lint"  # 4.6, galaxy-importer 0.4.7
 
     linting_re = re.compile(pattern)
     linting = [item for item in log_messages if linting_re.match(item)]
