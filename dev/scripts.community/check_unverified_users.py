@@ -157,6 +157,9 @@ def do_check():
 
         print(f'{unverified_user} found related {found_users}')
 
+        if 'IPvSean' in github_logins:
+            print(gdata)
+            break
 
 
 do_check()
