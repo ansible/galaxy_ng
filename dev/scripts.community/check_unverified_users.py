@@ -168,6 +168,7 @@ def do_check():
         print(f'FIX - verify {unverified_user}')
         if not checkmode:
             unverified_user.email = ''
+            unverified_user.save()
 
 
 do_check()
