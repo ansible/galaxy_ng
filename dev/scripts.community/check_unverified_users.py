@@ -134,11 +134,21 @@ def do_check():
         if not github_logins:
             continue
 
+        '''
         # find the new user that social auth created
         social_user = UserSocialAuth.objects.filter(uid=int(old_guid)).first()
         if not social_user:
             print(f'ERROR - could not find social user for guid:{old_guid} logins:{github_logins}')
             continue
+        '''
+
+        found_users = []
+        for login in github_logins:
+            this_user = User.objects.filter(username=login).first()
+            if this_user and this_user != unverified_user:
+                found_users.append(found_users)
+
+        print(f'{unverified_user} found related {found_users}')
 
 
 
