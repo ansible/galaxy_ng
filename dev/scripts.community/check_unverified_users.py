@@ -134,6 +134,9 @@ def do_check():
         if not github_logins:
             continue
 
+        if 'IPvSean' in github_logins:
+            print(gdata)
+
         '''
         # find the new user that social auth created
         social_user = UserSocialAuth.objects.filter(uid=int(old_guid)).first()
