@@ -71,6 +71,7 @@ def do_check():
             unverified_user.email = ''
             unverified_user.save()
 
+    '''
     # fix the flipped users ...
     count = User.objects.filter(username__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').count()
     print(f'# {count} users with unverified username')
@@ -106,6 +107,7 @@ def do_check():
         print(f'FIX - delete user {unverified_user}')
 
         #import epdb; epdb.st()
+    '''
 
     # handle changed usernames ...
     count = User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').count()
@@ -135,7 +137,7 @@ def do_check():
         # find the new user that social auth created
         social_user = UserSocialAuth.objects.filter(uid=int(old_guid)).first()
         if not social_user:
-            print('ERROR - could not find social user for guid:{old_guid} logins:{github_logins}')
+            print(f'ERROR - could not find social user for guid:{old_guid} logins:{github_logins}')
             continue
 
 
