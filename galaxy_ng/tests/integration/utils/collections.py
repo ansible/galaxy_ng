@@ -487,7 +487,7 @@ def copy_collection_version(client, collection, src_repo_name, dest_repo_name):
     # http://.../api/automation-hub/pulp/api/v3/tasks/8be0b9b6-71d6-4214-8427-2ecf81818ed4/
     ansible_config = get_ansible_config()
     galaxy_client = get_galaxy_client(ansible_config)
-    gc = galaxy_client("partner_engineer")
+    gc = galaxy_client("admin")
     ds = {"task": f"{gc.galaxy_root}pulp/api/v3/tasks/{task_id}/"}
     task_result = wait_for_task(gc, ds, timeout=6000)
     assert task_result['state'] == 'completed', task_result
