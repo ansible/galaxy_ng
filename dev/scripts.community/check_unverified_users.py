@@ -176,8 +176,12 @@ def do_check():
 
         print(f'{unverified_user} found related {found_users}')
         if found_users:
+            owned_namespaces = rbac.get_owned_v3_namespaces(unverified_user)
             for found_user in found_users:
-                print(f'FIX - copy perms from {unverified_user} to {found_user}')
+                found_namespaces = rbac.get_owned_v3_namespaces(found_user)
+                for owned_namespace in owned_namespaces:
+                    if owned_namespace not in found_namespaces:
+                        print(f'FIX - copy perms from {unverified_user} to {found_user} for ns:{owned_namespace}')
 
         #if 'IPvSean' in github_logins:
         #    # print(gdata)
