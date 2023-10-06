@@ -21,6 +21,8 @@ def do_check():
     if os.environ.get('CHECK_MODE') == "0":
         checkmode = False
 
+    print(f'CHECK_MODE:{checkmode}')
+
     known_usernames = list(User.objects.values_list('username', flat=True))
     known_usernames = dict((x, None) for x in known_usernames)
 
