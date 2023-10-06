@@ -148,7 +148,7 @@ def do_check():
             if this_user and this_user != unverified_user:
                 found_users.append(found_users)
             if login != login.lower():
-                this_user = User.objects.filter(username=login.lower().first()
+                this_user = User.objects.filter(username=login.lower()).first()
                 if this_user and this_user != unverified_user:
                     found_users.append(found_users)
 
