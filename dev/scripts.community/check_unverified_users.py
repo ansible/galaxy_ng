@@ -127,9 +127,14 @@ def do_check():
         gdata = umap_by_github_id[old_guid]
 
         github_logins = []
-        for lkey in ['github_login', 'github_login_new']:
-            if gdata.get(lkey):
-                github_logins.append(gdata[lkey])
+        #for lkey in ['github_login', 'github_login_new']:
+        #    if gdata.get(lkey):
+        #        github_logins.append(gdata[lkey])
+        github_logins = []
+        if gdata.get('github_login_new'):
+            github_logins.append(gdata['github_login_new'])
+        elif gdata.get('github_login'):
+            github_logins.append(gdata['github_login'])
 
         if not github_logins:
             continue
@@ -165,6 +170,7 @@ def do_check():
                 continue
             elif this_user:
                 pass
+                found_users.append(this_user)
             else:
                 print(f'FIX - create {login} user to match {unverified_user}')
 
