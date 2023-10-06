@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.db.models import fields as Case, When, Value
 from django_filters import filters
 from django_filters.rest_framework import filterset
 
@@ -72,6 +73,21 @@ class LegacyUserFilter(filterset.FilterSet):
         return queryset.filter(username=username)
 
 
+class LegacyRoleFilterOrdering(filters.OrderingFilter):
+    def filter(self, qs, value):
+        if value is not None and any(v in ["download_count", "-download_count"] for v in value):
+            order = "-" if "-download_count" in value else ""
+
+            return qs.annotate(
+                download_count=Case(
+                    When(legacyroledownloadcount=None, then=Value(0)),
+                    default="legacyroledownloadcount__count",
+                )
+            ).order_by(f"{order}download_count")
+
+        return super().filter(qs, value)
+
+
 class LegacyRoleFilter(filterset.FilterSet):
 
     github_user = filters.CharFilter(method='github_user_filter')
@@ -82,10 +98,11 @@ class LegacyRoleFilter(filterset.FilterSet):
     owner__username = filters.CharFilter(method='owner__username_filter')
     namespace = filters.CharFilter(method='namespace_filter')
 
-    sort = filters.OrderingFilter(
+    order_by = LegacyRoleFilterOrdering(
         fields=(
-            ('created', 'full_metadata__created'),
-            # ('name', 'name')
+            ('name', 'name'),
+            ('created', 'created'),
+            ('download_count', 'download_count')
         )
     )
 

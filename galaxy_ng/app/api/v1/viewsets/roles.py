@@ -50,7 +50,6 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
     """A list of legacy roles."""
 
     queryset = LegacyRole.objects.all().order_by('created')
-    ordering_fields = ('created')
     ordering = ('created')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LegacyRoleFilter
@@ -60,12 +59,6 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
 
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
-
-    def get_queryset(self, *args, **kwargs):
-        order_by = self.request.query_params.get('order_by')
-        if order_by is not None:
-            return self.queryset.order_by(order_by)
-        return self.queryset
 
     def list(self, request):
 
