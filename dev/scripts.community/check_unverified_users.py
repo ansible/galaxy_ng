@@ -75,6 +75,7 @@ def do_check():
 
         # do we know about this github id? ...
         if old_guid not in umap_by_github_id:
+            print(f'ERROR - could not find {old_guid} in verified data')
             continue
 
         gdata = umap_by_github_id[old_guid]
