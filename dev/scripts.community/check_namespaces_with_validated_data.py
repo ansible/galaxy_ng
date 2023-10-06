@@ -1,3 +1,4 @@
+import datetime
 import gzip
 import json
 import os
@@ -49,9 +50,9 @@ class Fixer:
                     self.old_ns_owners[ns_name] = []
                 self.old_ns_owners[ns_name].append(k)
 
-    def write_log_change(self, msg):
+    def changelog(self, msg):
         with open('changelog.txt', 'a') as f:
-            f.write(msg + '\n')
+            f.write(datetime.datetime.now().isoformat() + " " + msg + '\n')
 
     def match_old_user_to_local_user(self, udata):
 
@@ -77,7 +78,7 @@ class Fixer:
             github_login = udata['galaxy_username']
 
         print(f'FIX - create user {github_login}')
-        self.write_log_change(f'FIX - create user {github_login}')
+        self.changelog(f'FIX - create user {github_login}')
         if not CHECKMODE:
             user,_ = User.objects.get_or_create(username=github_login)
             return user
@@ -117,14 +118,16 @@ class Fixer:
             ]
             missing_owners = [x for x in old_owners if x and x not in current_owners]
 
+            '''
             # looks good?
             if not missing_owners:
                 continue
+            '''
 
             #print(ns_name)
             for missing_owner in missing_owners:
                 print(f'FIX - add {missing_owner} to v3:{v3_namespace} owners')
-                self.write_log_change(f'FIX - add {missing_owner} to v3:{v3_namespace} owners')
+                self.changelog(f'FIX - add {missing_owner} to v3:{v3_namespace} owners')
                 if not CHECKMODE:
                     rbac.add_user_to_v3_namespace(missing_owner, v3_namespace)
 
