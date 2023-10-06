@@ -166,7 +166,7 @@ def do_check():
             elif this_user:
                 pass
             else:
-                print(f'FIX - create {login} user')
+                print(f'FIX - create {login} user to match {unverified_user}')
 
         print(f'{unverified_user} found related {found_users}')
 
