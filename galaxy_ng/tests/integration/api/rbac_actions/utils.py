@@ -25,7 +25,7 @@ ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 ansible_config = get_ansible_config()
 galaxy_client = get_galaxy_client(ansible_config)
 if is_ephemeral_env():
-    gc_admin = galaxy_client("partner_engineer", basic_token=True)
+    gc_admin = galaxy_client("admin", basic_token=True)
 else:
     gc_admin = galaxy_client("admin", basic_token=False)
 
