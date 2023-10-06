@@ -39,7 +39,7 @@ def do_check():
     # verify unverified users via the email ...
     count = User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').count()
     print(f'# {count} users with unverified email')
-    for unverified_user in User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM'),order_by('username'):
+    for unverified_user in User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').order_by('username'):
         old_guid = unverified_user.email.replace('@GALAXY.GITHUB.UNVERIFIED.COM', '')
         current_username = unverified_user.username
 
@@ -112,7 +112,7 @@ def do_check():
     # handle changed usernames ...
     count = User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').count()
     print(f'# {count} users with unverified email')
-    for unverified_user in User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM'):
+    for unverified_user in User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').order_by('username'):
         old_guid = unverified_user.email.replace('@GALAXY.GITHUB.UNVERIFIED.COM', '')
         current_username = unverified_user.username
 
@@ -126,10 +126,7 @@ def do_check():
 
         gdata = umap_by_github_id[old_guid]
 
-        github_logins = []
-        #for lkey in ['github_login', 'github_login_new']:
-        #    if gdata.get(lkey):
-        #        github_logins.append(gdata[lkey])
+        # prefer new logins ...
         github_logins = []
         if gdata.get('github_login_new'):
             github_logins.append(gdata['github_login_new'])
@@ -138,30 +135,6 @@ def do_check():
 
         if not github_logins:
             continue
-
-        #if 'IPvSean' in github_logins:
-        #    print(gdata)
-        #    print(github_logins)
-
-        '''
-        # find the new user that social auth created
-        social_user = UserSocialAuth.objects.filter(uid=int(old_guid)).first()
-        if not social_user:
-            print(f'ERROR - could not find social user for guid:{old_guid} logins:{github_logins}')
-            continue
-        '''
-
-        '''
-        found_users = []
-        for login in github_logins:
-            this_user = User.objects.filter(username=login).first()
-            if this_user and this_user != unverified_user:
-                found_users.append(found_users)
-            if login != login.lower():
-                this_user = User.objects.filter(username=login.lower()).first()
-                if this_user and this_user != unverified_user:
-                    found_users.append(found_users)
-        '''
 
         found_users = []
         for login in github_logins:
@@ -173,6 +146,9 @@ def do_check():
                 found_users.append(this_user)
             else:
                 print(f'FIX - create {login} user to match {unverified_user}')
+                if not checkmode:
+                    this_user,_ = User.objects.get_or_create(username=login)
+                    found_users.append(this_user)
 
         print(f'{unverified_user} found related {found_users}')
         if found_users:
@@ -182,12 +158,16 @@ def do_check():
                 for owned_namespace in owned_namespaces:
                     if owned_namespace not in found_namespaces:
                         print(f'FIX - copy perms from {unverified_user} to {found_user} for ns:{owned_namespace}')
+                        if not checkmode:
+                            rbac.add_user_to_v3_namespace(found_user, owned_namespace)
 
         #if 'IPvSean' in github_logins:
         #    # print(gdata)
         #    break
 
         print(f'FIX - verify {unverified_user}')
+        if not checkmode:
+            unverified_user.email = ''
 
 
 do_check()
