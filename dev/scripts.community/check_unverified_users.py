@@ -37,6 +37,8 @@ def do_check():
         umap_by_github_id[v['github_id']] = v
 
     # verify unverified users via the email ...
+    count = User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').count()
+    print(f'# {count} users with unverified email')
     for unverified_user in User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM'):
         old_guid = unverified_user.email.replace('@GALAXY.GITHUB.UNVERIFIED.COM', '')
         current_username = unverified_user.username
@@ -70,6 +72,8 @@ def do_check():
             unverified_user.save()
 
     # fix the flipped users ...
+    count = User.objects.filter(username__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').count()
+    print(f'# {count} users with unverified username')
     for unverified_user in User.objects.filter(username__icontains='@GALAXY.GITHUB.UNVERIFIED.COM'):
         old_guid = unverified_user.username.replace('@GALAXY.GITHUB.UNVERIFIED.COM', '')
 
