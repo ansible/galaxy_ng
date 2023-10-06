@@ -1,5 +1,5 @@
 from django.db.models import Q
-from django.db.models import fields as Case, When, Value
+from django.db.models import Case, Value, When
 from django_filters import filters
 from django_filters.rest_framework import filterset
 
