@@ -175,10 +175,15 @@ def do_check():
                 print(f'FIX - create {login} user to match {unverified_user}')
 
         print(f'{unverified_user} found related {found_users}')
+        if found_users:
+            for found_user in found_users:
+                print(f'FIX - copy perms from {unverified_user} to {found_user}')
 
         #if 'IPvSean' in github_logins:
         #    # print(gdata)
         #    break
+
+        print(f'FIX - verify {unverified_user}')
 
 
 do_check()
