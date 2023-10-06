@@ -107,6 +107,37 @@ def do_check():
 
         #import epdb; epdb.st()
 
+    # handle changed usernames ...
+    count = User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').count()
+    print(f'# {count} users with unverified email')
+    for unverified_user in User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM'):
+        old_guid = unverified_user.email.replace('@GALAXY.GITHUB.UNVERIFIED.COM', '')
+        current_username = unverified_user.username
+
+        # don't try to fix the unverified usernames yet ..
+        if current_username.endswith('@GALAXY.GITHUB.UNVERIFIED.COM'):
+            continue
+
+        # do we know about this github id? ...
+        if old_guid not in umap_by_github_id:
+            continue
+
+        gdata = umap_by_github_id[old_guid]
+
+        github_logins = []
+        for lkey in ['github_login', 'github_login_new']:
+            if gdata.get(lkey):
+                github_logins.append(gdata[lkey])
+
+        if not github_logins:
+            continue
+
+        # find the new user that social auth created
+        social_user = UserSocialAuth.objects.filter(uid=int(old_guid)).first()
+        if not social_user:
+            print('ERROR - could not find social user for guid:{old_guid} logins:{github_logins}')
+            continue
+
 
 
 do_check()
