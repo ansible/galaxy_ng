@@ -69,7 +69,7 @@ class LegacyUserFilter(filterset.FilterSet):
 
     def username_filter(self, queryset, name, value):
         username = self.request.query_params.get('username')
-        return queryset.filter(name=username)
+        return queryset.filter(username=username)
 
 
 class LegacyRoleFilter(filterset.FilterSet):
