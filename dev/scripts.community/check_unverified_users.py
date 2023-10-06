@@ -70,6 +70,7 @@ def do_check():
         # verify the user ...
         print(f'FIX - verifying {unverified_user}')
         if not checkmode:
+            print(f'\tmaking change {checkmode}')
             unverified_user.email = ''
             unverified_user.save()
 
@@ -161,6 +162,7 @@ def do_check():
                     if owned_namespace not in found_namespaces:
                         print(f'FIX - copy perms from {unverified_user} to {found_user} for ns:{owned_namespace}')
                         if not checkmode:
+                            print(f'\tmaking change {checkmode}')
                             rbac.add_user_to_v3_namespace(found_user, owned_namespace)
 
         #if 'IPvSean' in github_logins:
@@ -169,6 +171,7 @@ def do_check():
 
         print(f'FIX - verify {unverified_user}')
         if not checkmode:
+            print(f'\tmaking change {checkmode}')
             unverified_user.email = ''
             unverified_user.save()
 
