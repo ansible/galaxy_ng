@@ -118,12 +118,6 @@ class Fixer:
             ]
             missing_owners = [x for x in old_owners if x and x not in current_owners]
 
-            '''
-            # looks good?
-            if not missing_owners:
-                continue
-            '''
-
             #print(ns_name)
             for missing_owner in missing_owners:
                 print(f'FIX - add {missing_owner} to v3:{v3_namespace} owners')
