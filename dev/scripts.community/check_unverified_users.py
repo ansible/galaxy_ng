@@ -150,7 +150,7 @@ def do_check():
                     this_user,_ = User.objects.get_or_create(username=login)
                     found_users.append(this_user)
 
-        print(f'{unverified_user} found related {found_users}')
+        # print(f'{unverified_user} found related {found_users}')
         if found_users:
             owned_namespaces = rbac.get_owned_v3_namespaces(unverified_user)
             for found_user in found_users:
