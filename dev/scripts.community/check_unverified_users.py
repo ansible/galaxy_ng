@@ -39,7 +39,7 @@ def do_check():
     # verify unverified users via the email ...
     count = User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM').count()
     print(f'# {count} users with unverified email')
-    for unverified_user in User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM'):
+    for unverified_user in User.objects.filter(email__icontains='@GALAXY.GITHUB.UNVERIFIED.COM'),order_by('username'):
         old_guid = unverified_user.email.replace('@GALAXY.GITHUB.UNVERIFIED.COM', '')
         current_username = unverified_user.username
 
