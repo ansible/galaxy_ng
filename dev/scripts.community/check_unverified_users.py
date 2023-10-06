@@ -136,6 +136,7 @@ def do_check():
 
         if 'IPvSean' in github_logins:
             print(gdata)
+            print(github_logins)
 
         '''
         # find the new user that social auth created
@@ -158,7 +159,7 @@ def do_check():
         print(f'{unverified_user} found related {found_users}')
 
         if 'IPvSean' in github_logins:
-            print(gdata)
+            # print(gdata)
             break
 
 
