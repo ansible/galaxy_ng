@@ -146,6 +146,7 @@ def do_check():
             continue
         '''
 
+        '''
         found_users = []
         for login in github_logins:
             this_user = User.objects.filter(username=login).first()
@@ -155,6 +156,17 @@ def do_check():
                 this_user = User.objects.filter(username=login.lower()).first()
                 if this_user and this_user != unverified_user:
                     found_users.append(found_users)
+        '''
+
+        found_users = []
+        for login in github_logins:
+            this_user = User.objects.filter(username=login).first()
+            if this_user and this_user == unverified_user:
+                continue
+            elif this_user:
+                pass
+            else:
+                print(f'FIX - create {login} user')
 
         print(f'{unverified_user} found related {found_users}')
 
