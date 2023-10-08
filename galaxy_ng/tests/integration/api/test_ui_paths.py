@@ -3,10 +3,13 @@
 import random
 
 import pytest
+
+from orionutils.generator import build_collection
+
 from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
 
-from ..constants import DEFAULT_DISTROS
+from ..constants import DEFAULT_DISTROS, USERNAME_PUBLISHER
 from ..schemas import (
     schema_collection_import,
     schema_collection_import_detail,
@@ -26,7 +29,14 @@ from ..schemas import (
     schema_ui_collection_summary,
     schema_user,
 )
-from ..utils import UIClient, generate_unused_namespace, get_client, wait_for_task_ui_client
+from ..utils import (
+    UIClient,
+    generate_unused_namespace,
+    get_client,
+    wait_for_task_ui_client,
+    wait_for_task,
+)
+
 from .rbac_actions.utils import ReusableLocalContainer
 
 REGEX_403 = r"HTTP Code: 403"
@@ -765,6 +775,63 @@ def test_api_ui_v1_tags(ansible_config):
         validate_json(instance=ds, schema=schema_objectlist)
 
         # FIXME - ui tags api does not support POST?
+
+
+# /api/automation-hub/_ui/v1/tags/collections/
+@pytest.mark.deployment_community
+def test_api_ui_v1_tags_collections(ansible_config, upload_artifact):
+
+    config = ansible_config("basic_user")
+    api_client = get_client(config)
+
+    def build_upload_wait(tags):
+        artifact = build_collection(
+            "skeleton",
+            config={
+                "namespace": USERNAME_PUBLISHER,
+                "tags": tags,
+            }
+        )
+        resp = upload_artifact(config, api_client, artifact)
+        resp = wait_for_task(api_client, resp)
+
+    build_upload_wait(["tools", "database", "postgresql"])
+    build_upload_wait(["tools", "database", "mysql"])
+    build_upload_wait(["tools", "database"])
+    build_upload_wait(["tools"])
+
+    with UIClient(config=config) as uclient:
+
+        # get the response
+        resp = uclient.get('_ui/v1/tags/collections')
+        assert resp.status_code == 200
+
+        ds = resp.json()
+        validate_json(instance=ds, schema=schema_objectlist)
+
+        resp = uclient.get('_ui/v1/tags/collections?name=tools')
+        ds = resp.json()
+        assert len(ds["data"]) == 1
+
+        # result count should be 2 (mysql, postgresql)
+        resp = uclient.get('_ui/v1/tags/collections?name__icontains=sql')
+        ds = resp.json()
+        assert len(ds["data"]) == 2
+
+        resp = uclient.get('_ui/v1/tags/collections?name=test123')
+        ds = resp.json()
+        assert len(ds["data"]) == 0
+
+        # verify sort by name is correct
+        resp = uclient.get('_ui/v1/tags/collections?sort=name')
+        tags = [tag["name"] for tag in resp.json()["data"]]
+        assert tags == sorted(tags)
+
+        # verify sort by -count is correct
+        resp = uclient.get('_ui/v1/tags/collections/?sort=-count')
+        data = resp.json()["data"]
+        assert data[0]["name"] == "tools"
+        assert data[1]["name"] == "database"
 
 
 # /api/automation-hub/_ui/v1/users/
