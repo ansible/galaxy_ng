@@ -149,6 +149,7 @@ def legacy_role_import(
             'clone_url': clone_url,
             'tags': galaxy_info["galaxy_tags"],
             'commit': github_commit,
+            'github_user': github_user,
             'github_repo': github_repo,
             'github_reference': github_reference,
             'issue_tracker_url': galaxy_info["issue_tracker_url"] or clone_url + "/issues",
@@ -253,17 +254,18 @@ def legacy_sync_from_upstream(
         else:
             namespace, v3_namespace = nsmap[ns_data['name']]
 
-        ruser = rdata.get('github_user')
-        rname = rdata.get('name')
+        github_user = rdata.get('github_user')
+        role_name = rdata.get('name')
 
-        logger.info(f'POPULATE {ruser}.{rname}')
+        logger.info(f'POPULATE {github_user}.{role_name}')
 
-        rkey = (ruser, rname)
+        rkey = (github_user, role_name)
         remote_id = rdata['id']
         role_versions = rversions[:]
+        # github_user = rdata['github_user']
         github_repo = rdata['github_repo']
         github_branch = rdata['github_branch']
-        clone_url = f'https://github.com/{ruser}/{github_repo}'
+        clone_url = f'https://github.com/{github_user}/{github_repo}'
         sfields = rdata.get('summary_fields', {})
         role_tags = sfields.get('tags', [])
         commit_hash = rdata.get('commit')
@@ -288,7 +290,7 @@ def legacy_sync_from_upstream(
             logger.debug(f'SYNC create initial role for {rkey}')
             this_role, _ = LegacyRole.objects.get_or_create(
                 namespace=namespace,
-                name=rname
+                name=role_name
             )
             rmap[rkey] = this_role
         else:
@@ -305,6 +307,7 @@ def legacy_sync_from_upstream(
             'commit': commit_hash,
             'commit_message': commit_msg,
             'commit_url': commit_url,
+            'github_user': github_user,
             'github_repo': github_repo,
             'github_branch': github_branch,
             # 'github_reference': github_reference,

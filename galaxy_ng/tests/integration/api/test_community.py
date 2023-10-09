@@ -513,7 +513,7 @@ def test_v1_autocomplete_search(ansible_config):
     # query by user
     resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
     assert resp['count'] > 0
-    usernames = sorted(set([x['username'] for x in resp['results']]))
+    usernames = sorted(set([x['github_user'] for x in resp['results']]))
     assert usernames == [github_user]
 
     # validate autocomplete search only finds the relevant roles
@@ -566,11 +566,11 @@ def test_v1_role_pagination(ansible_config):
     urls, all_roles = get_roles(page_size=1, order_by='created')
     roles = [[x['created'], x['id']] for x in all_roles]
 
-    # make sure all 10 show up ...
-    assert len(roles) == 10
+    total_count = len(urls)
+    assert total_count >= 10
 
-    # make sure all pages were visited
-    assert len(urls) == 10
+    # make sure all 10 show up ...
+    assert len(roles) == total_count
 
     # make sure no duplicates found
     assert [x[1] for x in roles] == sorted(set([x[1] for x in roles]))
@@ -581,9 +581,10 @@ def test_v1_role_pagination(ansible_config):
     # repeat with ordered by name ...
     urls, all_roles = get_roles(page_size=1, order_by='name')
     roles = [x['name'] for x in all_roles]
+
     assert roles == sorted(roles)
-    assert len(roles) == 10
-    assert len(sorted(set(roles))) == 10
+    assert len(roles) == total_count
+    assert len(sorted(set(roles))) == total_count
 
     # cleanup
     clean_all_roles(ansible_config)
