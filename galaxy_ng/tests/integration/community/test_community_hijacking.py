@@ -42,13 +42,13 @@ def test_community_hijacking(ansible_config):
 
     usermap = {
         'jctannerTESTME': {
-            'uid': 1000,
+            'uid': 2000,
             'login': 'jctannerTESTME',
             # 'email': 'jctannerTESTME@haxx.net',
             'email': '',
         },
         'drod0258X': {
-            'uid': 1001,
+            'uid': 2001,
             'login': 'drod0258X',
             # 'email': 'drod0258X@haxx.net',
             'email': ''

@@ -169,11 +169,27 @@ class LegacyUserSerializer(serializers.ModelSerializer):
 
 class LegacyRoleSerializer(serializers.ModelSerializer):
 
+    # core cli uses this field to emit the list of
+    # results from a role search so it must exit
     username = serializers.SerializerMethodField()
+
+    # this has to be the real github org/user so that
+    # role installs will work
     github_user = serializers.SerializerMethodField()
+
+    # this has to be the real github repository name
+    # so that role installs will work
     github_repo = serializers.SerializerMethodField()
+
+    # this is the default or non-default branch
+    # the cli will use will installing the role.
+    # in old galaxy this was internall renamed to
+    # import_branch.
     github_branch = serializers.SerializerMethodField()
+
     commit = serializers.SerializerMethodField()
+    commit_message = serializers.SerializerMethodField()
+
     description = serializers.SerializerMethodField()
     summary_fields = serializers.SerializerMethodField()
     upstream_id = serializers.SerializerMethodField()
@@ -191,6 +207,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
             'github_repo',
             'github_branch',
             'commit',
+            'commit_message',
             'name',
             'description',
             'summary_fields',
@@ -229,6 +246,8 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         of the role in the form of:
             https://github.com/<github_user>/<github_repo>/...
         """
+        if obj.full_metadata.get('github_user'):
+            return obj.full_metadata['github_user']
         return obj.namespace.name
 
     def get_username(self, obj):
@@ -252,10 +271,15 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         at install time. If not branch is given, the cli will default to
         the "master" branch.
         """
-        return obj.full_metadata.get('github_reference')
+        if obj.full_metadata.get('github_reference'):
+            return obj.full_metadata.get('github_reference')
+        return obj.full_metadata.get('github_branch')
 
     def get_commit(self, obj):
         return obj.full_metadata.get('commit')
+
+    def get_commit_message(self, obj):
+        return obj.full_metadata.get('commit_message')
 
     def get_description(self, obj):
         return obj.full_metadata.get('description')

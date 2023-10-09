@@ -50,7 +50,7 @@ def clean_all_roles(ansible_config):
             break
         next_url = resp['next']
 
-    usernames = [x['username'] for x in pre_existing]
+    usernames = [x['github_user'] for x in pre_existing]
     usernames = sorted(set(usernames))
     for username in usernames:
         cleanup_social_user(username, ansible_config)
