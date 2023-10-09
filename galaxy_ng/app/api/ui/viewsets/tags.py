@@ -1,4 +1,8 @@
+from itertools import chain
+from gettext import gettext as _
+
 from django.db.models import Count
+from rest_framework import serializers
 from rest_framework import mixins
 from django_filters import filters
 from django_filters.rest_framework import DjangoFilterBackend, filterset
@@ -9,6 +13,7 @@ from pulp_ansible.app.serializers import TagSerializer
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.ui import versioning
 from galaxy_ng.app.access_control import access_policy
+from galaxy_ng.app.api.v1.models import LegacyRole
 
 
 class TagsViewSet(api_base.GenericViewSet):
@@ -68,3 +73,76 @@ class CollectionsTagsViewSet(
     filterset_class = TagFilter
 
     queryset = Tag.objects.all()
+
+
+class RolesTagFilter(filterset.FilterSet):
+    sort = filters.OrderingFilter(
+        fields=(
+            ("name", "name"),
+            ('count', 'count')
+        ),
+    )
+
+    class Meta:
+        model = LegacyRole
+        fields = {
+            "name": ["exact", "icontains", "contains", "startswith"],
+        }
+
+
+class RolesTagsViewSet(api_base.GenericViewSet):
+    """
+    ViewSet for roles' tags within the system.
+    """
+    queryset = LegacyRole.objects.all()
+    permission_classes = [access_policy.TagsAccessPolicy]
+    versioning_class = versioning.UIVersioning
+    serializer_class = TagSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RolesTagFilter
+
+    ordering_fields = ["name", "count"]
+    ordering = ["name"]
+    filter_fields = ["exact", "icontains", "contains", "startswith"]
+
+    def _filter_queryset(self, queryset, request):
+        """Custom sorting and filtering."""
+
+        query_params = request.query_params.copy()
+        sort = query_params.get("sort")
+        if sort:
+            query_params.pop("sort")
+
+        # filtering
+        if value := query_params.get("name"):
+            queryset = list(filter(lambda x: x["name"] == value, queryset))
+        elif value := query_params.get("name__contains"):
+            queryset = list(filter(lambda x: value in x["name"], queryset))
+        elif value := query_params.get("name__icontains"):
+            queryset = list(filter(lambda x: value.lower() in x["name"].lower(), queryset))
+        elif value := query_params.get("name__startswith"):
+            queryset = list(filter(lambda x: x["name"].startswith(value), queryset))
+
+        # sorting
+        if sort is not None and sort in ["name", "-name", "count", "-count"]:
+            reverse = True if "-" in sort else False
+            sort_field = sort.replace("-", "")
+            queryset = sorted(queryset, key=lambda x: x[sort_field], reverse=reverse)
+        elif sort is not None:
+            raise serializers.ValidationError(_(f"Invalid Sort: '{sort}'"))
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+
+        metadata_tags = LegacyRole.objects.all().values_list("full_metadata__tags", flat=True)
+        tag_list = list(chain(*metadata_tags))
+
+        tags = [dict(name=tag, count=tag_list.count(tag)) for tag in set(tag_list)]
+
+        tags = self._filter_queryset(tags, request)
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(tags, request, view=self)
+
+        return paginator.get_paginated_response(page)

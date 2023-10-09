@@ -26,6 +26,8 @@ router.register('distributions', viewsets.DistributionViewSet, basename='distrib
 router.register('my-distributions', viewsets.MyDistributionViewSet, basename='my-distributions')
 
 router.register('tags/collections', viewsets.CollectionsTagsViewSet, basename='collections-tags')
+router.register('tags/roles', viewsets.RolesTagsViewSet, basename='roles-tags')
+
 
 auth_views = [
     path("login/", views.LoginView.as_view(), name="auth-login"),
