@@ -102,13 +102,14 @@ class LegacyRoleFilter(filterset.FilterSet):
         fields=(
             ('name', 'name'),
             ('created', 'created'),
+            ('modified', 'modified'),
             ('download_count', 'download_count')
         )
     )
 
     class Meta:
         model = LegacyRole
-        fields = ['created', 'name']
+        fields = ['created', 'name', "modified"]
 
     def github_user_filter(self, queryset, name, value):
         return queryset.filter(namespace__name=value)
