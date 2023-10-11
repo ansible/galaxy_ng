@@ -2,6 +2,7 @@
 #                  main galaxy_ng/app/settings.py file.
 #                  Split the configuration if necessary.
 import os
+import re
 
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
@@ -40,6 +41,12 @@ REDIS_HOST = os.environ.get('PULP_REDIS_HOST')
 REDIS_PORT = os.environ.get('PULP_REDIS_PORT')
 
 REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = ['rest_framework.renderers.JSONRenderer']
+
+# add CustomBrowsableAPI only for community (galaxy.ansible.com, galaxy-stage, galaxy-dev)"
+if re.search(r'galaxy(-dev|-stage)*.ansible.com', os.environ.get('PULP_CONTENT_ORIGIN', "")):
+    REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES.append(
+        'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
+    )
 
 _enabled_handlers = ['console']
 _extra_handlers = {}
