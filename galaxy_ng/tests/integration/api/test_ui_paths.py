@@ -871,11 +871,6 @@ def test_api_ui_v1_tags_roles(ansible_config):
         assert resp.get('task') is not None
         wait_for_v1_task(resp=resp, api_client=api_admin_client)
 
-        # test wrong filter param
-        resp = uclient.get('_ui/v1/tags/roles?wrong=filter')
-        resp.status_code == 200
-        # assert resp.json()["errors"][0]["detail"] == "Invalid Filter: 'wrong'"
-
         resp = uclient.get('_ui/v1/tags/roles?name=docker')
         resp.status_code == 200
         assert resp.json()["data"][0]["name"] == "docker"
