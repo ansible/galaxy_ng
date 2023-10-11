@@ -75,21 +75,6 @@ class CollectionsTagsViewSet(
     queryset = Tag.objects.all()
 
 
-class RolesTagFilter(filterset.FilterSet):
-    sort = filters.OrderingFilter(
-        fields=(
-            ("name", "name"),
-            ('count', 'count')
-        ),
-    )
-
-    class Meta:
-        model = LegacyRole
-        fields = {
-            "name": ["exact", "icontains", "contains", "startswith"],
-        }
-
-
 class RolesTagsViewSet(api_base.GenericViewSet):
     """
     ViewSet for roles' tags within the system.
@@ -97,16 +82,18 @@ class RolesTagsViewSet(api_base.GenericViewSet):
     queryset = LegacyRole.objects.all()
     permission_classes = [access_policy.TagsAccessPolicy]
     versioning_class = versioning.UIVersioning
-    serializer_class = TagSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = RolesTagFilter
 
     ordering_fields = ["name", "count"]
     ordering = ["name"]
     filter_fields = ["exact", "icontains", "contains", "startswith"]
 
     def _filter_queryset(self, queryset, request):
-        """Custom sorting and filtering."""
+        """
+            Custom sorting and filtering,
+            must be performed manually since
+            we are overwriting the queryset with a list of tags.
+        """
 
         query_params = request.query_params.copy()
         sort = query_params.get("sort")
