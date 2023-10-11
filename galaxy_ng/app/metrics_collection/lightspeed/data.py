@@ -1,55 +1,32 @@
 import os
-import platform
-import distro
-from django.conf import settings
+from django.db import connection
 
 from insights_analytics_collector import CsvFileSplitter, register
-
-from galaxy_ng.app.management.commands.analytics.collector import Collector
+import galaxy_ng.app.metrics_collection.common_data as data
 
 
 @register("config", "1.0", description="General platform configuration.", config=True)
 def config(since, **kwargs):
-    # TODO: license_info = get_license()
-    license_info = {}
+    cfg = data.config()
 
-    return {
-        "platform": {
-            "system": platform.system(),
-            "dist": distro.linux_distribution(),
-            "release": platform.release(),
-            "type": "traditional",
-        },
-        "external_logger_enabled": "todo",
-        "external_logger_type": "todo",
-        "install_uuid": "todo",
-        "instance_uuid": "todo",
-        "tower_url_base": "todo",
-        "tower_version": "todo",
-        "logging_aggregators": ["todo"],
-        "pendo_tracking": "todo",
-        "hub_url_base": "todo",
-        "hub_version": "todo",
+    # just for compatibility, remove when Wisdom team is aware of that
+    license_info = {}
+    compatibility_csv = {
         "license_type": license_info.get("license_type", "UNLICENSED"),
         "free_instances": license_info.get("free_instances", 0),
         "total_licensed_instances": license_info.get("instance_count", 0),
         "license_expiry": license_info.get("time_remaining", 0),
-        "authentication_backends": settings.AUTHENTICATION_BACKENDS,
+        "external_logger_enabled": "todo",
+        "external_logger_type": "todo",
+        "logging_aggregators": ["todo"],
+        "pendo_tracking": "todo"
     }
+    return cfg | compatibility_csv
 
 
 @register("instance_info", "1.0", description="Node information", config=True)
 def instance_info(since, **kwargs):
-    # TODO:
-
-    return {
-        "versions": {"system": "todo"},
-        "online_workers": "todo",
-        "online_content_apps": "todo",
-        "database_connection": "todo",
-        "redis_connection": "todo",
-        "storage": "todo",
-    }
+    return data.instance_info()
 
 
 @register("ansible_collection_table", "1.0", format="csv", description="Data on ansible_collection")
@@ -222,7 +199,7 @@ def _simple_csv(full_path, file_name, query, max_data_size=209715200):
     file_path = _get_file_path(full_path, file_name)
     tfile = _get_csv_splitter(file_path, max_data_size)
 
-    with Collector.db_connection().cursor() as cursor:
+    with connection.cursor() as cursor:
         with cursor.copy(query) as copy:
             while data := copy.read():
                 tfile.write(str(data, 'utf8'))

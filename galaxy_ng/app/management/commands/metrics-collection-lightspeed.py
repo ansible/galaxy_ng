@@ -1,11 +1,11 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from galaxy_ng.app.management.commands.analytics.collector import Collector
-from galaxy_ng.app.management.commands.analytics import galaxy_collector
+from galaxy_ng.app.metrics_collection.lightspeed.collector import Collector
+from galaxy_ng.app.metrics_collection.lightspeed import data as lightspeed_data
 from django.utils.timezone import now, timedelta
 
-logger = logging.getLogger("analytics")
+logger = logging.getLogger("metrics_collection.export_lightspeed")
 
 
 class Command(BaseCommand):
@@ -15,14 +15,14 @@ class Command(BaseCommand):
         """Handle command"""
 
         collector = Collector(
-            collector_module=galaxy_collector,
-            collection_type="manual",
+            collector_module=lightspeed_data,
+            collection_type=Collector.MANUAL_COLLECTION,
             logger=logger,
         )
 
         collector.gather(since=now() - timedelta(days=8), until=now() - timedelta(days=1))
 
-        print("Completed ")
+        self.stdout.write("Gather Analytics => S3(Lightspeed): Completed ")
 
 
 if __name__ == "__main__":

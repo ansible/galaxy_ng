@@ -1,7 +1,6 @@
-from django.db import connection
-
-from insights_analytics_collector import Collector as BaseCollector
-from galaxy_ng.app.management.commands.analytics.package import Package
+from django.conf import settings
+from galaxy_ng.app.metrics_collection.collector import Collector as BaseCollector
+from galaxy_ng.app.metrics_collection.lightspeed.package import Package
 
 
 class Collector(BaseCollector):
@@ -11,22 +10,20 @@ class Collector(BaseCollector):
         )
 
     @staticmethod
-    def db_connection():
-        return connection
-
-    @staticmethod
     def _package_class():
         return Package
+
+    def is_enabled(self):
+        if not settings.GALAXY_METRICS_COLLECTION_LIGHTSPEED_ENABLED:
+            self.logger.log(self.log_level,
+                            "Metrics Collection for Ansible Lightspeed not enabled.")
+            return False
+        return super().is_enabled()
 
     def get_last_gathering(self):
         return self._last_gathering()
 
     def _is_shipping_configured(self):
-        # TODO: need shipping configuration
-        return True
-
-    def _is_valid_license(self):
-        # TODO: need license information and validation logics
         return True
 
     def _last_gathering(self):
