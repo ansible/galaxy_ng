@@ -96,7 +96,7 @@ distro==1.8.0
     # via
     #   bindep
     #   galaxy-ng (setup.py)
-django==4.2.4
+django==4.2.6
     # via
     #   django-auth-ldap
     #   django-filter
