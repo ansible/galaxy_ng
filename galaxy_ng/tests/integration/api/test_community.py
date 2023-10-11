@@ -647,3 +647,55 @@ def test_v1_role_tag_filter(ansible_config):
 
     # cleanup
     clean_all_roles(ansible_config)
+
+
+@pytest.mark.deployment_community
+def test_legacy_roles_ordering(ansible_config):
+    """ Tests if sorting is working correctly on v1 roles """
+
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True
+    )
+
+    # clean all roles
+    clean_all_roles(ansible_config)
+
+    # start the sync
+    pargs = json.dumps({"limit": 5}).encode('utf-8')
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+    wait_for_v1_task(resp=resp, api_client=api_client)
+
+    resp = api_client('/api/v1/roles/')
+    assert resp['count'] == 5
+
+    roles = resp["results"]
+
+    # default sorting should be "created"
+    created = [r["created"] for r in roles]
+    assert created == sorted(created)
+
+    names = [r["name"] for r in roles]
+    download_count = [r["download_count"] for r in roles]
+
+    # verify download_count sorting is correct
+    resp = api_client('/api/v1/roles/?order_by=download_count')
+    sorted_dc = [r["download_count"] for r in resp["results"]]
+    assert sorted_dc == sorted(download_count)
+
+    resp = api_client('/api/v1/roles/?order_by=-download_count')
+    sorted_dc = [r["download_count"] for r in resp["results"]]
+    assert sorted_dc == sorted(download_count, reverse=True)
+
+    # verify name sorting is correct
+    resp = api_client('/api/v1/roles/?order_by=name')
+    sorted_names = [r["name"] for r in resp["results"]]
+    assert sorted_names == sorted(names)
+
+    resp = api_client('/api/v1/roles/?order_by=-name')
+    sorted_names = [r["name"] for r in resp["results"]]
+    assert sorted_names == sorted(names, reverse=True)
