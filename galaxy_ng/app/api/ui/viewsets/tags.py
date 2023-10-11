@@ -116,7 +116,7 @@ class RolesTagsViewSet(api_base.GenericViewSet):
             sort_field = sort.replace("-", "")
             queryset = sorted(queryset, key=lambda x: x[sort_field], reverse=reverse)
         elif sort is not None:
-            raise serializers.ValidationError(_(f"Invalid Sort: '{sort}'"))
+            raise serializers.ValidationError(_("Invalid Sort: '{}'").format(sort))
 
         return queryset
 
