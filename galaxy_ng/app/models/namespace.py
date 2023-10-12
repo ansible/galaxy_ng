@@ -16,7 +16,11 @@ from galaxy_ng.app.constants import DeploymentMode
 __all__ = ("Namespace", "NamespaceLink")
 
 
-class Namespace(LifecycleModel, mixins.GroupModelPermissionsMixin):
+class Namespace(
+    LifecycleModel,
+    mixins.GroupModelPermissionsMixin,
+    mixins.UserModelPermissionsMixin
+):
     """
     A model representing Ansible content namespace.
 

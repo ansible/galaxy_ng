@@ -1,4 +1,5 @@
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -8,6 +9,9 @@ from pulpcore.plugin.models.role import Role
 from pulpcore.plugin.util import get_perms_for_model
 
 from galaxy_ng.app.models import auth as auth_models
+
+
+User = get_user_model()
 
 
 class GroupPermissionField(serializers.Field):
@@ -70,6 +74,48 @@ class GroupPermissionField(serializers.Field):
                 })
             except ValueError:
                 raise ValidationError(detail={'group': _('Invalid group name or ID')})
+
+        return internal
+
+
+class UserPermissionField(serializers.Field):
+
+    def _validate_user(self, user_data):
+        # FIXME - fill this in ...
+        pass
+
+    def to_representation(self, value):
+        rep = []
+        for user in value:
+            rep.append({
+                'id': user.id,
+                'name': user.username,
+                'object_roles': value[user]
+            })
+        return rep
+
+    def to_internal_value(self, data):
+        if not isinstance(data, list):
+            raise ValidationError(detail={
+                'users': _('Users must be a list of user objects')
+            })
+
+        internal = {}
+        for user_data in data:
+            self._validate_user(user_data)
+            user_filter = {}
+            for field in user_data:
+                if field in ('id', 'username'):
+                    user_filter[field] = user_data[field]
+
+            user = User.objects.filter(**user_filter).first()
+            if not user:
+                raise ValidationError(detail={'user': _('Invalid user username or ID')})
+
+            if 'object_permissions' in user_data:
+                internal[user] = user_data['object_permissions']
+            if 'object_roles' in user_data:
+                internal[user] = user_data['object_roles']
 
         return internal
 

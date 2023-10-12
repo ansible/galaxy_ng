@@ -13,7 +13,11 @@ from pulpcore.plugin.serializers import IdentityField
 
 from galaxy_ng.app import models
 from galaxy_ng.app.tasks import dispatch_create_pulp_namespace_metadata
-from galaxy_ng.app.access_control.fields import GroupPermissionField, MyPermissionsField
+from galaxy_ng.app.access_control.fields import (
+    GroupPermissionField,
+    UserPermissionField,
+    MyPermissionsField
+)
 from galaxy_ng.app.api.base import RelatedFieldsBaseSerializer
 
 log = logging.getLogger(__name__)
@@ -73,7 +77,8 @@ class NamespaceLinkSerializer(serializers.ModelSerializer):
 
 class NamespaceSerializer(serializers.ModelSerializer):
     links = NamespaceLinkSerializer(many=True, required=False)
-    groups = GroupPermissionField()
+    groups = GroupPermissionField(required=False)
+    users = UserPermissionField(required=False)
     related_fields = NamespaceRelatedFieldSerializer(source="*")
     avatar_url = fields.URLField(required=False, allow_blank=True)
     avatar_sha256 = serializers.SerializerMethodField()
@@ -93,6 +98,7 @@ class NamespaceSerializer(serializers.ModelSerializer):
             'description',
             'links',
             'groups',
+            'users',
             'resources',
             'related_fields',
             'metadata_sha256',
@@ -178,6 +184,7 @@ class NamespaceSummarySerializer(NamespaceSerializer):
             'avatar_url',
             'description',
             'groups',
+            'users',
             'related_fields',
             'metadata_sha256',
             'avatar_sha256'
