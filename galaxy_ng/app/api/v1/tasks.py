@@ -12,8 +12,6 @@ from galaxy_importer.legacy_role import import_legacy_role
 
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.utils.galaxy import upstream_role_iterator
-from galaxy_ng.app.utils.git import get_tag_commit_hash
-from galaxy_ng.app.utils.git import get_tag_commit_date
 from galaxy_ng.app.utils.legacy import process_namespace
 
 from galaxy_ng.app.api.v1.models import LegacyNamespace
@@ -56,24 +54,67 @@ def legacy_role_import(
     there will not be any duplicate key errors. However,
     the "commit" field should always reflect the latest import.
     """
-    logger.debug('START LEGACY ROLE IMPORT')
+    logger.info('START LEGACY ROLE IMPORT')
+    logger.info(f'REQUEST_USERNAME:{request_username}')
+    logger.info(f'GITHUB_USER:{github_user}')
+    logger.info(f'GITHUB_REPO:{github_repo}')
+    logger.info(f'GITHUB_REFERENCE:{github_reference}')
+    logger.info(f'ALTERNATE_ROLE_NAME:{alternate_role_name}')
+
+    clone_url = None
+    real_role = None
+    real_namespace_name = github_user
+    real_github_user = github_user
+    real_github_repo = github_repo
+    github_reference_is_tag = False
 
     # prevent empty strings?
     if not github_reference:
         github_reference = None
 
+    # some roles have their github_user set differently from their namespace name ...
+    candidates = LegacyRole.objects.filter(
+        full_metadata__github_user=github_user,
+        full_metadata__github_repo=github_repo
+    )
+    if candidates.count() > 0:
+        real_role = candidates.first()
+        logger.info(f'Using {real_role} as basis for import task')
+        rr_github_user = real_role.full_metadata.get('github_user')
+        rr_github_repo = real_role.full_metadata.get('github_repo')
+        real_namespace_name = real_role.namespace.name
+        if rr_github_user and rr_github_repo:
+            real_github_user = rr_github_user
+            real_github_repo = rr_github_repo
+            logger.info(
+                f'using github_user:{real_github_user}'
+                + f' and github_repo:{real_github_repo} from {real_role}'
+            )
+            clone_url = f'https://github.com/{rr_github_user}/{rr_github_repo}'
+        elif rr_github_user:
+            real_github_user = rr_github_user
+            logger.info(f'using github_user:{real_github_user} from {real_role}')
+            clone_url = f'https://github.com/{rr_github_user}/{github_repo}'
+        elif rr_github_repo:
+            real_github_repo = rr_github_repo
+            logger.info(f'using github_repo:{real_github_repo} from {real_role}')
+            clone_url = f'https://github.com/{github_user}/{github_repo}'
+
     # this shouldn't happen but just in case ...
     if request_username and not User.objects.filter(username=request_username).exists():
+        logger.error(f'Username {request_username} does not exist in galaxy')
         raise Exception(f'Username {request_username} does not exist in galaxy')
 
     # the user should have a legacy and v3 namespace if they logged in ...
-    namespace = LegacyNamespace.objects.filter(name=github_user).first()
+    namespace = LegacyNamespace.objects.filter(name=real_namespace_name).first()
     if not namespace:
+        logger.error(f'No legacy namespace exists for {github_user}')
         raise Exception(f'No legacy namespace exists for {github_user}')
 
     # we have to have a v3 namespace because of the rbac based ownership ...
     v3_namespace = namespace.namespace
     if not v3_namespace:
+        logger.error(f'No v3 namespace exists for {github_user}')
         raise Exception(f'No v3 namespace exists for {github_user}')
 
     with tempfile.TemporaryDirectory() as tmp_path:
@@ -82,55 +123,87 @@ def legacy_role_import(
 
         # galaxy-importer wants the role's directory to be the name of the role.
         checkout_path = os.path.join(tmp_path, github_repo)
-        clone_url = f'https://github.com/{github_user}/{github_repo}'
+        if clone_url is None:
+            clone_url = f'https://github.com/{github_user}/{github_repo}'
+
+        logger.info(f'CLONING {clone_url}')
 
         # pygit didn't have an obvious way to prevent interactive clones ...
         pid = subprocess.run(
             f'GIT_TERMINAL_PROMPT=0 git clone --recurse-submodules {clone_url} {checkout_path}',
             shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
         )
         if pid.returncode != 0:
+            error = pid.stdout.decode('utf-8')
+            logger.error(f'cloning failed: {error}')
             raise Exception(f'git clone for {clone_url} failed')
 
         # bind the checkout to a pygit object
         gitrepo = Repo(checkout_path)
 
-        github_commit = None
-        github_commit_date = None
-
+        # the github_reference could be a branch OR a tag name ...
         if github_reference is not None:
-            gitrepo.checkout(github_reference)
-            github_commit = get_tag_commit_hash(
-                clone_url,
-                github_reference,
-                checkout_path=checkout_path
-            )
-            github_commit_date = get_tag_commit_date(
-                clone_url,
-                github_reference,
-                checkout_path=checkout_path
-            )
-        else:
-            # FIXME - figure out the old logic.
-            if gitrepo.tags:
-                tag = gitrepo.tags[-1]
-                github_reference = tag.name
-                github_commit = tag.commit.hexsha
-                github_commit_date = datetime.datetime.fromtimestamp(tag.commit.committed_date)
-                github_commit_date = github_commit_date.isoformat()
 
-        logger.debug(f'GITHUB_REFERENCE: {github_reference}')
-        logger.debug(f'GITHUB_COMMIT: {github_commit}')
+            branch_names = [x.name for x in gitrepo.branches]
+            tag_names = [x.name for x in gitrepo.tags]
+
+            cmd = None
+            if github_reference in branch_names:
+                current_branch = gitrepo.active_branch.name
+                if github_reference != current_branch:
+                    cmd = f'git checkout origin/{github_reference}'
+            elif github_reference in tag_names:
+                github_reference_is_tag = True
+                cmd = f'git checkout tags/{github_reference} -b local_${github_reference}'
+            else:
+                raise Exception(f'{github_reference} is not a valid branch or tag name')
+
+            if cmd:
+                logger.info(f'switching to {github_reference} in checkout via {cmd}')
+                pid = subprocess.run(
+                    cmd,
+                    cwd=checkout_path,
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                )
+                if pid.returncode != 0:
+                    error = pid.stdout.decode('utf-8')
+                    logger.error('{cmd} failed: {error}')
+                    raise Exception(f'{cmd} failed')
+
+            last_commit = [x for x in gitrepo.iter_commits()][0]
+
+        else:
+            # use the default branch ...
+            github_reference = gitrepo.active_branch.name
+
+            # use latest commit on HEAD
+            last_commit = gitrepo.head.commit
+
+        # relevant data for this new role version ...
+        github_commit = last_commit.hexsha
+        github_commit_message = last_commit.message
+        github_commit_date = last_commit.committed_datetime.isoformat()
+
+        logger.info(f'GITHUB_REFERENCE: {github_reference}')
+        logger.info(f'GITHUB_COMMIT: {github_commit}')
+        logger.info(f'GITHUB_COMMIT_MESSAGE: {github_commit_message}')
+        logger.info(f'GITHUB_COMMIT_DATE: {github_commit_date}')
 
         # Parse legacy role with galaxy-importer.
         importer_config = Config()
         result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
         galaxy_info = result["metadata"]["galaxy_info"]
-        logger.debug(f"TAGS: {galaxy_info['galaxy_tags']}")
+        logger.debug(f"FOUND TAGS: {galaxy_info['galaxy_tags']}")
 
+        # munge the role name via an order of precedence
         role_name = result["name"] or alternate_role_name or \
             github_repo.replace("ansible-role-", "")
 
+        '''
         # check if this namespace/name/version has already been imported
         old = LegacyRole.objects.filter(namespace=namespace, name=role_name).first()
         if old is not None:
@@ -143,15 +216,18 @@ def legacy_role_import(
                     + ' has already been imported'
                 )
                 raise Exception(msg)
+        '''
 
         new_full_metadata = {
             'imported': datetime.datetime.now().isoformat(),
             'clone_url': clone_url,
             'tags': galaxy_info["galaxy_tags"],
             'commit': github_commit,
-            'github_user': github_user,
-            'github_repo': github_repo,
+            'github_user': real_github_user,
+            'github_repo': real_github_repo,
             'github_reference': github_reference,
+            'commit': github_commit,
+            'commit_message': github_commit_message,
             'issue_tracker_url': galaxy_info["issue_tracker_url"] or clone_url + "/issues",
             'dependencies': result["metadata"]["dependencies"],
             'versions': [],
@@ -165,28 +241,49 @@ def legacy_role_import(
         }
 
         # Make the object
-        this_role, _ = LegacyRole.objects.get_or_create(
-            namespace=namespace,
-            name=role_name
-        )
+        if real_role:
+            this_role = real_role
+        else:
+            this_role, _ = LegacyRole.objects.get_or_create(
+                namespace=namespace,
+                name=role_name
+            )
 
         # Combine old versions with new ...
         old_metadata = copy.deepcopy(this_role.full_metadata)
 
         new_full_metadata['versions'] = old_metadata.get('versions', [])
         ts = datetime.datetime.now().isoformat()
-        new_full_metadata['versions'].append({
+
+        # only make a download url for tags?
+        download_url = None
+        if github_reference_is_tag:
+            download_url = (
+                f'https://github.com/{real_github_user}/{real_github_repo}'
+                + f'/archive/{github_reference}.tar.gz'
+            )
+
+        new_version = {
             'name': github_reference,
             'version': github_reference,
             'release_date': ts,
             'created': ts,
             'modified': ts,
             'active': None,
-            'download_url': None,
+            'download_url': download_url,
             'url': None,
             'commit_date': github_commit_date,
             'commit_sha': github_commit
-        })
+        }
+        versions_by_sha = dict((x['commit_sha'], x) for x in new_full_metadata.get('versions', []))
+        if github_commit not in versions_by_sha:
+            new_full_metadata['versions'].append(new_version)
+        else:
+            msg = (
+                f'{namespace.name}.{role_name} {github_reference} commit:{github_commit}'
+                + ' has already been imported'
+            )
+            raise Exception(msg)
 
         # Save the new metadata
         this_role.full_metadata = new_full_metadata
