@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings as django_settings
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
