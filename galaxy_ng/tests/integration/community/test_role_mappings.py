@@ -105,7 +105,7 @@ def test_role_import_with_changed_github_username(ansible_config):
     with tempfile.TemporaryDirectory() as roles_path:
         install_pid = ansible_galaxy(
             f"role install -p {roles_path} {github_user}.{role_name}",
-            # ansible_config=gh1_config,
+            ansible_config=admin_config,
             # token=gh1_token,
             force_token=True,
             cleanup=False,
