@@ -130,13 +130,15 @@ class TestUiUserViewSet(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_user_list(self):
-        def _test_user_list():
+        def _test_user_list(expected=None):
+            # Check test user can[not] view other users
             self.client.force_authenticate(user=self.user)
             log.debug("self.client: %s", self.client)
             log.debug("self.client.__dict__: %s", self.client.__dict__)
             response = self.client.get(self.user_url)
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, expected)
 
+            # Check admin user can -always- view others
             self.client.force_authenticate(user=self.admin_user)
             response = self.client.get(self.user_url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -144,29 +146,29 @@ class TestUiUserViewSet(BaseTestCase):
             self.assertEqual(len(data), auth_models.User.objects.all().count())
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            _test_user_list()
+            _test_user_list(expected=status.HTTP_200_OK)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            _test_user_list()
+            _test_user_list(expected=status.HTTP_403_FORBIDDEN)
 
     def test_user_get(self):
-        def _test_user_get():
-            # Check test user can* view themselves on the users/ api
+        def _test_user_get(expected=None):
+            # Check test user can[not] view themselves on the users/ api
             self.client.force_authenticate(user=self.user)
             url = "{}{}/".format(self.user_url, self.user.id)
             response = self.client.get(url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, expected)
 
-            # Check test user can* view other users
+            # Check test user can[not] view other users
             url = "{}{}/".format(self.user_url, self.admin_user.id)
             response = self.client.get(url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, expected)
 
-            # Check admin user can view others
+            # Check admin user can -always- view others
             self.client.force_authenticate(user=self.admin_user)
             url = "{}{}/".format(self.user_url, self.user.id)
             response = self.client.get(url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, expected)
             data = response.data
             self.assertEqual(data["email"], self.user.email)
             self.assertEqual(data["first_name"], self.user.first_name)
@@ -175,10 +177,10 @@ class TestUiUserViewSet(BaseTestCase):
                 self.assertTrue(self.user.groups.exists(id=group["id"]))
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            _test_user_get()
+            _test_user_get(expected=status.HTTP_200_OK)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            _test_user_get()
+            _test_user_get(expected=status.HTTP_403_FORBIDDEN)
 
     def _test_create_or_update(self, method_call, url, new_user_data, crud_status, auth_user):
         self.client.force_authenticate(user=auth_user)
