@@ -1,5 +1,8 @@
 import pytest
 
+from unittest.mock import patch
+
+from galaxy_importer.config import Config
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
@@ -29,11 +32,17 @@ def test_legacy_role_import_simple():
     LegacyRole.objects.filter(namespace=legacy_ns, name=alternate_role_name).delete()
 
     # import it
-    legacy_role_import(
-        github_user=github_user,
-        github_repo=github_repo,
-        alternate_role_name=alternate_role_name
-    )
+
+    with patch('galaxy_ng.app.api.v1.tasks.Config', spec=Config) as MockConfig:
+
+        MockConfig.return_value = Config()
+        MockConfig.return_value.run_ansible_lint = False
+
+        legacy_role_import(
+            github_user=github_user,
+            github_repo=github_repo,
+            alternate_role_name=alternate_role_name
+        )
 
     # find the role
     found = LegacyRole.objects.filter(namespace=legacy_ns, name=alternate_role_name)
@@ -84,12 +93,17 @@ def test_legacy_role_import_altered_github_org_name():
     this_role.save()
 
     # import it
-    legacy_role_import(
-        github_user=github_user,
-        github_repo=github_repo,
-        github_reference=github_reference,
-        alternate_role_name=alternate_role_name,
-    )
+    with patch('galaxy_ng.app.api.v1.tasks.Config', spec=Config) as MockConfig:
+
+        MockConfig.return_value = Config()
+        MockConfig.return_value.run_ansible_lint = False
+
+        legacy_role_import(
+            github_user=github_user,
+            github_repo=github_repo,
+            github_reference=github_reference,
+            alternate_role_name=alternate_role_name,
+        )
 
     # find the role
     found = LegacyRole.objects.filter(
@@ -138,12 +152,17 @@ def test_legacy_role_import_with_tag_name():
     ).delete()
 
     # import it
-    legacy_role_import(
-        github_user=github_user,
-        github_repo=github_repo,
-        github_reference=github_reference,
-        alternate_role_name=alternate_role_name,
-    )
+    with patch('galaxy_ng.app.api.v1.tasks.Config', spec=Config) as MockConfig:
+
+        MockConfig.return_value = Config()
+        MockConfig.return_value.run_ansible_lint = False
+
+        legacy_role_import(
+            github_user=github_user,
+            github_repo=github_repo,
+            github_reference=github_reference,
+            alternate_role_name=alternate_role_name,
+        )
 
     # find the role
     found = LegacyRole.objects.filter(
@@ -160,12 +179,17 @@ def test_legacy_role_import_with_tag_name():
 
     # import again with new ref
     github_reference_2 = '1.24.3'
-    legacy_role_import(
-        github_user=github_user,
-        github_repo=github_repo,
-        github_reference=github_reference_2,
-        alternate_role_name=alternate_role_name,
-    )
+    with patch('galaxy_ng.app.api.v1.tasks.Config', spec=Config) as MockConfig:
+
+        MockConfig.return_value = Config()
+        MockConfig.return_value.run_ansible_lint = False
+
+        legacy_role_import(
+            github_user=github_user,
+            github_repo=github_repo,
+            github_reference=github_reference_2,
+            alternate_role_name=alternate_role_name,
+        )
 
     # find the role
     found = LegacyRole.objects.filter(
