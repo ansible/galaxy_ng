@@ -570,3 +570,28 @@ def test_community_social_v3_namespace_sorting(ansible_config):
     # https://issues.redhat.com/browse/AAH-2729
     # social auth code was trying to sort namespaces ...
     pass
+
+
+@pytest.mark.deployment_community
+def test_social_auth_access_api_ui_v1_users(ansible_config):
+    # https://issues.redhat.com/browse/AAH-2781
+
+    username = "foo1234"
+    default_cfg = extract_default_config(ansible_config)
+
+    ga = GithubAdminClient()
+    ga.delete_user(login=username)
+
+    user_c = ga.create_user(login=username, email="foo1234@gmail.com")
+    user_c.update(default_cfg)
+    user_c['username'] = username
+
+    with SocialGithubClient(config=user_c) as client:
+        users_resp = client.get('_ui/v1/users/')
+        assert users_resp.status_code == 200
+
+        # try to fetch each user ..
+        for udata in users_resp.json()['data']:
+            uid = udata['id']
+            user_resp = client.get(f'_ui/v1/users/{uid}/')
+            assert user_resp.status_code == 200
