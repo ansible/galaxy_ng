@@ -151,16 +151,16 @@ class TestUiUserViewSet(BaseTestCase):
 
     def test_user_get(self):
         def _test_user_get():
-            # Check test user cannot view themselves on the users/ api
+            # Check test user can* view themselves on the users/ api
             self.client.force_authenticate(user=self.user)
             url = "{}{}/".format(self.user_url, self.user.id)
             response = self.client.get(url)
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-            # Check test user cannot view other users
+            # Check test user can* view other users
             url = "{}{}/".format(self.user_url, self.admin_user.id)
             response = self.client.get(url)
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             # Check admin user can view others
             self.client.force_authenticate(user=self.admin_user)
