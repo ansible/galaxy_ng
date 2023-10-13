@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings as django_settings
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -168,7 +169,7 @@ class TestUiUserViewSet(BaseTestCase):
             self.client.force_authenticate(user=self.admin_user)
             url = "{}{}/".format(self.user_url, self.user.id)
             response = self.client.get(url)
-            self.assertEqual(response.status_code, expected)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
             data = response.data
             self.assertEqual(data["email"], self.user.email)
             self.assertEqual(data["first_name"], self.user.first_name)
