@@ -613,6 +613,7 @@ ACTIONS_FOR_ALL_USERS = {
     view_tasks,
     view_role,
     view_pulp_groups,
+    view_users,
 }
 
 DENIED_FOR_ALL_USERS = {
