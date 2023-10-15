@@ -24,6 +24,58 @@ from git import Repo
 logger = logging.getLogger(__name__)
 
 
+def find_real_role(github_user, github_repo):
+    """
+    Given the github_user and github_repo attributes, find a matching
+    role with those matching values and then return the necessary
+    properties from the role needed to to do an import.
+
+    :param github_user:
+        The github_user as passed in to the CLI for imports.
+    :param github_repo:
+        The github_repo as passed in to the CLI for imports.
+    """
+
+    # if we find a role, this will point at it
+    real_role = None
+
+    # figure out the actual namespace name
+    real_namespace_name = github_user
+
+    # figure out the actual github user
+    real_github_user = github_user
+
+    # figure out the actual github repo
+    real_github_repo = github_repo
+
+    # the role role can influence the clone url
+    clone_url = None
+
+    # some roles have their github_user set differently from their namespace name ...
+    candidates = LegacyRole.objects.filter(
+        full_metadata__github_user=github_user,
+        full_metadata__github_repo=github_repo
+    )
+    if candidates.count() > 0:
+        real_role = candidates.first()
+        logger.info(f'Using {real_role} as basis for import task')
+        rr_github_user = real_role.full_metadata.get('github_user')
+        rr_github_repo = real_role.full_metadata.get('github_repo')
+        real_namespace_name = real_role.namespace.name
+        if rr_github_user and rr_github_repo:
+            real_github_user = rr_github_user
+            real_github_repo = rr_github_repo
+            clone_url = f'https://github.com/{rr_github_user}/{rr_github_repo}'
+        elif rr_github_user:
+            real_github_user = rr_github_user
+            clone_url = f'https://github.com/{rr_github_user}/{github_repo}'
+        elif rr_github_repo:
+            real_github_repo = rr_github_repo
+            clone_url = f'https://github.com/{github_user}/{github_repo}'
+
+    return real_role, real_namespace_name, real_github_user, real_github_repo, clone_url
+
+
 def legacy_role_import(
     request_username=None,
     github_user=None,
@@ -62,10 +114,6 @@ def legacy_role_import(
     logger.info(f'ALTERNATE_ROLE_NAME:{alternate_role_name}')
 
     clone_url = None
-    real_role = None
-    real_namespace_name = github_user
-    real_github_user = github_user
-    real_github_repo = github_repo
     github_reference_is_tag = False
 
     # prevent empty strings?
@@ -73,32 +121,10 @@ def legacy_role_import(
         github_reference = None
 
     # some roles have their github_user set differently from their namespace name ...
-    candidates = LegacyRole.objects.filter(
-        full_metadata__github_user=github_user,
-        full_metadata__github_repo=github_repo
-    )
-    if candidates.count() > 0:
-        real_role = candidates.first()
+    real_role, real_namespace_name, real_github_user, real_github_repo, clone_url = \
+        find_real_role(github_user, github_repo)
+    if real_role:
         logger.info(f'Using {real_role} as basis for import task')
-        rr_github_user = real_role.full_metadata.get('github_user')
-        rr_github_repo = real_role.full_metadata.get('github_repo')
-        real_namespace_name = real_role.namespace.name
-        if rr_github_user and rr_github_repo:
-            real_github_user = rr_github_user
-            real_github_repo = rr_github_repo
-            logger.info(
-                f'using github_user:{real_github_user}'
-                + f' and github_repo:{real_github_repo} from {real_role}'
-            )
-            clone_url = f'https://github.com/{rr_github_user}/{rr_github_repo}'
-        elif rr_github_user:
-            real_github_user = rr_github_user
-            logger.info(f'using github_user:{real_github_user} from {real_role}')
-            clone_url = f'https://github.com/{rr_github_user}/{github_repo}'
-        elif rr_github_repo:
-            real_github_repo = rr_github_repo
-            logger.info(f'using github_repo:{real_github_repo} from {real_role}')
-            clone_url = f'https://github.com/{github_user}/{github_repo}'
 
     # this shouldn't happen but just in case ...
     if request_username and not User.objects.filter(username=request_username).exists():
