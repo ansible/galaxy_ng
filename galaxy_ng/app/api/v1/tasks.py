@@ -229,21 +229,6 @@ def legacy_role_import(
         role_name = result["name"] or alternate_role_name or \
             github_repo.replace("ansible-role-", "")
 
-        '''
-        # check if this namespace/name/version has already been imported
-        old = LegacyRole.objects.filter(namespace=namespace, name=role_name).first()
-        if old is not None:
-            old_versions = old.full_metadata.get('versions', [])
-            old_versions = [x['name'] for x in old_versions]
-            logger.debug(f'OLD VERSIONS: {old_versions}')
-            if github_reference in old_versions:
-                msg = (
-                    f'{namespace.name}.{role_name} {github_reference}'
-                    + ' has already been imported'
-                )
-                raise Exception(msg)
-        '''
-
         new_full_metadata = {
             'imported': datetime.datetime.now().isoformat(),
             'clone_url': clone_url,
