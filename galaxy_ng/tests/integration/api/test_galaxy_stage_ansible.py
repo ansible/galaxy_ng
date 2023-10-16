@@ -87,6 +87,7 @@ def test_me_social_with_precreated_user(galaxy_client):
     assert uinfo['username'] == gc.username
 
 
+@pytest.mark.skip(reason='no longer creating groups for social users')
 @pytest.mark.galaxy_stage_ansible
 def test_social_auth_creates_group(gh_user_1_pre):
     github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES["github_user"]["username"]
