@@ -95,6 +95,7 @@ class LegacyRoleFilter(filterset.FilterSet):
     tags = filters.CharFilter(method='tags_filter')
     tag = filters.CharFilter(method='tags_filter')
     autocomplete = filters.CharFilter(method='autocomplete_filter')
+    username_autocomplete = filters.CharFilter(method='username_autocomplete_filter')
     owner__username = filters.CharFilter(method='owner__username_filter')
     namespace = filters.CharFilter(method='namespace_filter')
 
@@ -147,6 +148,19 @@ class LegacyRoleFilter(filterset.FilterSet):
     def autocomplete_filter(self, queryset, name, value):
 
         keywords = self.request.query_params.getlist('autocomplete')
+
+        for keyword in keywords:
+            queryset = queryset.filter(
+                Q(namespace__name__contains=keyword)
+                | Q(name__contains=keyword)
+                | Q(full_metadata__description__contains=keyword)
+            )
+
+        return queryset
+
+    def username_autocomplete_filter(self, queryset, name, value):
+
+        keywords = self.request.query_params.getlist('username_autocomplete')
 
         for keyword in keywords:
             queryset = queryset.filter(
