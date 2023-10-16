@@ -1,0 +1,1 @@
+Allow all authenticated users to list and retrieve other users when using github social auth.

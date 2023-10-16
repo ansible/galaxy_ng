@@ -281,6 +281,23 @@ class AccessPolicyBase(AccessPolicyFromDB):
             return True
         return False
 
+    def v3_can_view_users(self, request, view, action):
+        """
+        Community galaxy users need to be able to see one-another,
+        so that they can grant eachother access to their namespaces.
+        """
+        SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
+        SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
+        is_github_social_auth = all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET])
+
+        if is_github_social_auth:
+            return True
+
+        if request.user.has_perm('galaxy.view_user'):
+            return True
+
+        return False
+
     def has_ansible_repo_perms(self, request, view, action, permission):
         """
         Check if the user has model or object-level permissions

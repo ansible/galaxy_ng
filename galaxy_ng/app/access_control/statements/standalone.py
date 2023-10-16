@@ -198,13 +198,13 @@ STANDALONE_STATEMENTS = {
             "action": ["list"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.view_user"
+            "condition": ["v3_can_view_users"],
         },
         {
             "action": ["retrieve"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.view_user"
+            "condition": ["v3_can_view_users"],
         },
         {
             "action": "destroy",
