@@ -81,9 +81,6 @@ class GalaxyStatements:
         return self._STATEMENTS
 
     def _get_statements(self):
-        print(f'_GET_STATEMENTS settings.GALAXY_DEPLOYMENT_MODE:{settings.GALAXY_DEPLOYMENT_MODE}')
-        res = self.galaxy_statements[settings.GALAXY_DEPLOYMENT_MODE]
-        print(res)
         return self.galaxy_statements[settings.GALAXY_DEPLOYMENT_MODE]
 
     def get_pulp_access_policy(self, name, default=None):

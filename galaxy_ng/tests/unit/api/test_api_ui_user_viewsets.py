@@ -146,10 +146,19 @@ class TestUiUserViewSet(BaseTestCase):
             self.assertEqual(len(data), auth_models.User.objects.all().count())
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            _test_user_list(expected=status.HTTP_200_OK)
+            _test_user_list(expected=status.HTTP_403_FORBIDDEN)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             _test_user_list(expected=status.HTTP_403_FORBIDDEN)
+
+        # community
+        kwargs = {
+            'GALAXY_DEPLOYMENT_MODE': DeploymentMode.STANDALONE.value,
+            'SOCIAL_AUTH_GITHUB_KEY': '1234',
+            'SOCIAL_AUTH_GITHUB_SECRET': '1234'
+        }
+        with self.settings(**kwargs):
+            _test_user_list(expected=status.HTTP_200_OK)
 
     def test_user_get(self):
         def _test_user_get(expected=None):
@@ -177,10 +186,20 @@ class TestUiUserViewSet(BaseTestCase):
                 self.assertTrue(self.user.groups.exists(id=group["id"]))
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            _test_user_get(expected=status.HTTP_200_OK)
+            _test_user_get(expected=status.HTTP_403_FORBIDDEN)
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             _test_user_get(expected=status.HTTP_403_FORBIDDEN)
+
+        # community
+        kwargs = {
+            'GALAXY_DEPLOYMENT_MODE': DeploymentMode.STANDALONE.value,
+            'SOCIAL_AUTH_GITHUB_KEY': '1234',
+            'SOCIAL_AUTH_GITHUB_SECRET': '1234'
+        }
+        with self.settings(**kwargs):
+            _test_user_get(expected=status.HTTP_200_OK)
+
 
     def _test_create_or_update(self, method_call, url, new_user_data, crud_status, auth_user):
         self.client.force_authenticate(user=auth_user)
