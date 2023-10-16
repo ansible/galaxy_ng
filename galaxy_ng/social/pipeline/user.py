@@ -64,24 +64,34 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
 
         found_email = User.objects.filter(email=possible_email).first()
         if found_email is not None:
-            logger.info(f'create_user(5): found user {found_email}:{found_email.id} via email {possible_email}')
+            logger.info(
+                f'create_user(5): found user {found_email}:{found_email.id}'
+                + f' via email {possible_email}'
+            )
             break
 
     if found_email is not None:
 
         # fix the username if they've changed their login since last time
         if found_email.username != username:
-            logger.info(f'create_user(6): set found user {found_email}:{found_email.id} username to {username}')
+            logger.info(
+                f'create_user(6): set found user {found_email}:{found_email.id}'
+                + f' username to {username}'
+            )
             found_email.username = username
             found_email.save()
 
         if found_email.email != email:
-            logger.info(f'create_user(7): set found user {found_email}:{found_email.id} email to {email}')
+            logger.info(
+                f'create_user(7): set found user {found_email}:{found_email.id}'
+                + f' email to {email}'
+            )
             found_email.email = email
             found_email.save()
 
         logger.info(
-            f'create_user(8): returning found user {found_email}:{found_email.id} via email {possible_email}'
+            f'create_user(8): returning found user {found_email}:{found_email.id}'
+            + f' via email {possible_email}'
         )
         return {
             'is_new': False,
@@ -92,12 +102,19 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
 
     found_username = User.objects.filter(username=username).first()
     if found_username:
-        logger.info(f'create_user(10): found user:{found_username}:{found_username.id}:{found_username.email} by username:{username}')
+        logger.info(
+            f'create_user(10): found user:{found_username}:{found_username.id}:'
+            + f'{found_username.email}'
+            + f' by username:{username}'
+        )
 
     if found_username is not None and found_username.email:
         # we have an old user who's got the username but it's not the same person logging in ...
         # so change that username? The email should be unique right?
-        logger.info(f'create_user(11): set {found_username}:{found_username.id}:{found_username.email} username to {found_username.email}')
+        logger.info(
+            f'create_user(11): set {found_username}:{found_username.id}:{found_username.email}'
+            + f' username to {found_username.email}'
+        )
         found_username.username = found_username.email
         found_username.save()
 
