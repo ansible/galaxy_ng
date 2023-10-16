@@ -13,7 +13,7 @@ from pulp_ansible.app.models import Collection, CollectionDownloadCount
 log = logging.getLogger(__name__)
 
 
-DEFAULT_UPSTREAM = 'https://galaxy.ansible.com'
+DEFAULT_UPSTREAM = 'https://old-galaxy.ansible.com'
 
 SKIPLIST = [
     'larrymou9',
