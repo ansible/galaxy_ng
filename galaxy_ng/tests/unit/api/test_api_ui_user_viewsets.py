@@ -200,7 +200,6 @@ class TestUiUserViewSet(BaseTestCase):
         with self.settings(**kwargs):
             _test_user_get(expected=status.HTTP_200_OK)
 
-
     def _test_create_or_update(self, method_call, url, new_user_data, crud_status, auth_user):
         self.client.force_authenticate(user=auth_user)
         # set user with invalid password
