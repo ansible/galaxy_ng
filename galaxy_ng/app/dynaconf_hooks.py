@@ -2,6 +2,7 @@ import json
 import ldap
 import pkg_resources
 import os
+import re
 from typing import Any, Dict, List
 from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
@@ -29,7 +30,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_cors(settings))
     data.update(configure_pulp_ansible(settings))
     data.update(configure_authentication_backends(settings))
-    data.update(configure_renderers())
+    data.update(configure_renderers(settings))
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
@@ -534,14 +535,18 @@ def configure_authentication_backends(settings: Dynaconf) -> Dict[str, Any]:
     return data
 
 
-def configure_renderers() -> Dict[str, Any]:
-    "Set default renderer classes."
-    return {
-        "REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES": [
-            'rest_framework.renderers.JSONRenderer',
-            'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
-        ]
-    }
+def configure_renderers(settings) -> Dict[str, Any]:
+    """
+        Add CustomBrowsableAPI only for community (galaxy.ansible.com, galaxy-stage, galaxy-dev)"
+    """
+    if re.search(
+        r'galaxy(-dev|-stage)*.ansible.com', settings.get('CONTENT_ORIGIN', "")
+    ):
+        value = settings.get("REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES", [])
+        value.append('galaxy_ng.app.renderers.CustomBrowsableAPIRenderer')
+        return {"REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES": value}
+
+    return {}
 
 
 def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
