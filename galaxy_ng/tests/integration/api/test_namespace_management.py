@@ -68,6 +68,7 @@ def test_namespace_create_and_delete(ansible_config, api_version):
         'username'
     ]
 )
+@pytest.mark.min_hub_version("4.9")
 def test_namespace_create_with_user(ansible_config, user_property):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
@@ -113,6 +114,7 @@ def test_namespace_create_with_user(ansible_config, user_property):
         'username'
     ]
 )
+@pytest.mark.min_hub_version("4.9")
 def test_namespace_edit_with_user(ansible_config, user_property):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
