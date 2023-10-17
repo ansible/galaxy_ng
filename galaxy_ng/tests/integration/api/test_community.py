@@ -3,6 +3,7 @@
 
 import json
 import pytest
+import subprocess
 
 from urllib.parse import urlparse
 
@@ -523,6 +524,74 @@ def test_v1_autocomplete_search(ansible_config):
     # cleanup
     cleanup_social_user(github_user, ansible_config)
     cleanup_social_user(github_user2, ansible_config)
+
+
+@pytest.mark.deployment_community
+def test_v1_username_autocomplete_search(ansible_config):
+    """"
+        Tests v1 roles filtering by 'username_autocomplete' and
+        ansible-galaxy role search --author works as expected.
+    """
+
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True
+    )
+
+    github_user = 'geerlingguy'
+    cleanup_social_user(github_user, ansible_config)
+
+    # sync geerlingguy roles
+    pargs = json.dumps({"github_user": github_user, "limit": 5}).encode('utf-8')
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+    wait_for_v1_task(resp=resp, api_client=api_client)
+
+    # sync more roles
+    pargs = json.dumps({"limit": 5}).encode('utf-8')
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+    wait_for_v1_task(resp=resp, api_client=api_client)
+
+    # verify filtering works
+    resp = api_client(f'/api/v1/roles/?username_autocomplete={github_user}')
+    assert resp['count'] == 5
+    for role in resp['results']:
+        assert role["username"] == github_user
+
+    server = config.get("url")
+
+    # test correct results with ansible-galaxy role search
+    cmd = [
+        "ansible-galaxy"
+        + " role search"
+        + " --author "
+        + github_user
+        + " --server "
+        + server
+    ]
+    proc = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert b"Found 5 roles matching your search" in proc.stdout
+
+    cmd = [
+        "ansible-galaxy"
+        + " role search"
+        + " --author "
+        + github_user
+        + " adminer "
+        + " --server "
+        + server
+    ]
+    proc = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert b"Found 1 roles matching your search" in proc.stdout
+    assert b"geerlingguy.adminer" in proc.stdout
+
+    # cleanup
+    cleanup_social_user(github_user, ansible_config)
 
 
 @pytest.mark.deployment_community
