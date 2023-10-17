@@ -163,10 +163,6 @@ class LegacyRoleFilter(filterset.FilterSet):
         keywords = self.request.query_params.getlist('username_autocomplete')
 
         for keyword in keywords:
-            queryset = queryset.filter(
-                Q(namespace__name__contains=keyword)
-                | Q(name__contains=keyword)
-                | Q(full_metadata__description__contains=keyword)
-            )
+            queryset = queryset.filter(namespace__name__icontains=keyword)
 
         return queryset
