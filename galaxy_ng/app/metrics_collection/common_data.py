@@ -21,10 +21,10 @@ def api_status():
         else:
             logger.error(f"export metrics_collection: failed API call {status_path}: "
                          f"HTTP status {response.status_code}")
-            return f"Wrong status: {response.status_code}"
+            return {}
     except Exception as e:
         logger.error(f"export metrics_collection: failed API call {status_path}: {e}")
-        return f"Error happened: {str(e)}"
+        return {}
 
 
 def hub_version():

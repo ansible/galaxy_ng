@@ -2,7 +2,6 @@ from unittest.mock import patch, mock_open, MagicMock
 from django.core.management import call_command
 from django.test import TestCase
 import os
-import galaxy_ng.app.metrics_collection.common_data
 
 s3_details = {
     "aws_access_key_id": "blah",
@@ -15,9 +14,12 @@ s3_details = {
 class TestMetricsCollectionLightspeedCommand(TestCase):
     def setUp(self):
         super().setUp()
-        self.api_status = MagicMock()
+        self.api_status_patch = patch('galaxy_ng.app.metrics_collection.common_data.api_status')
+        self.api_status = self.api_status_patch.start()
         self.api_status.return_value = {}
-        galaxy_ng.app.metrics_collection.common_data.api_status = self.api_status
+
+    def tearDown(self):
+        self.api_status_patch.stop()
 
     def test_command_output(self):
         call_command("metrics-collection-lightspeed")
