@@ -190,6 +190,7 @@ class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
                 'id': task_id,
                 'github_user': kwargs['github_user'],
                 'github_repo': kwargs['github_repo'],
+                'github_reference': kwargs.get('github_reference'),
                 'summary_fields': {
                     'role': {
                         'name': role_name

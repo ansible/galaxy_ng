@@ -21,11 +21,32 @@ def test_import_install_role_as_admin(ansible_config):
     # Cleanup all roles.
     clean_all_roles(ansible_config)
 
+    # cleanup the namespaces
+    cleanup_social_user('jctannerTEST', ansible_config)
+    cleanup_social_user('jctannertest', ansible_config)
+
     # Login as admin.
     admin_config = ansible_config("admin")
     admin_client = get_client(admin_config)
     token = admin_client.token
     assert token is not None
+
+    # make the jctannerTEST legacynamespace first ...
+    legacy_ns = admin_client(
+        '/api/v1/namespaces/', method='POST', args={'name': 'jctannerTEST'}
+    )
+
+    # make the v3 namespace ...
+    namespace = admin_client(
+        '/api/_ui/v1/namespaces/', method='POST', args={'name': 'jctannertest', 'groups': []}
+    )
+
+    # bind v1+v3 ...
+    # 'namespaces/<int:pk>/providers/'
+    lnid = legacy_ns['id']
+    admin_client(
+        f'/api/v1/namespaces/{lnid}/providers/', method='PUT', args={'id': namespace['id']}
+    )
 
     # Import jctannerTEST role1 as admin.
     import_pid = ansible_galaxy(

@@ -187,6 +187,8 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
     # import_branch.
     github_branch = serializers.SerializerMethodField()
 
+    imported = serializers.SerializerMethodField()
+
     commit = serializers.SerializerMethodField()
     commit_message = serializers.SerializerMethodField()
 
@@ -202,6 +204,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
             'upstream_id',
             'created',
             'modified',
+            'imported',
             'github_user',
             'username',
             'github_repo',
@@ -237,6 +240,9 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
 
     def get_modified(self, obj):
         return obj.pulp_created
+
+    def get_imported(self, obj):
+        return obj.full_metadata.get('imported')
 
     def get_github_user(self, obj):
         """
@@ -446,13 +452,15 @@ class LegacyImportSerializer(serializers.Serializer):
     github_user = serializers.CharField()
     github_repo = serializers.CharField()
     alternate_role_name = serializers.CharField(required=False)
+    github_reference = serializers.CharField(required=False)
 
     class Meta:
         model = None
         fields = [
             'github_user',
             'github_repo',
-            'alternate_role_name'
+            'alternate_role_name',
+            'github_reference',
         ]
 
 

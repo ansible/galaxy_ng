@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -x
+set -e
+
+if [ -z "$1" ]; then
+    echo "Error: Argument 1 must be set and a valid oci profile name (such as 'community')."
+    exit 1
+fi
+
+profile=$1
+shift
+echo "USING PROFILE ${profile}"
+
+# find the oci-env checkout
+OCI_ENV_PATH=$(dirname $(pip show oci-env | egrep ^Location | awk '{print $2}'))
+echo "FOUND OCI_ENV_PATH: ${OCI_ENV_PATH}"
+
+export COMPOSE_INTERACTIVE_NO_CLI=1
+env_path=dev/oci_env_integration/oci_env_configs/$profile.compose.env
+
+oci-env -e ${env_path} compose exec pulp /bin/bash \
+    -c "python3.11 -m pip install git+https://github.com/pulp/pulp-smash.git"
+
+oci-env -e ${env_path} compose exec pulp /bin/bash \
+    -c "python3.11 -m pip install -r /src/galaxy_ng/unittest_requirements.txt"
+
+oci-env -e ${env_path} compose exec pulp /bin/bash \
+    -c "sudo -u postgres psql -c 'ALTER USER pulp CREATEDB;'"
+
+oci-env -e ${env_path} compose exec pulp /bin/bash -c \
+    "
+    source /opt/oci_env/base/container_scripts/configure_pulp_smash.sh
+    cd /src/galaxy_ng
+    sudo -u pulp -E PULP_DATABASES__default__USER=postgres pytest --capture=no -v -r sx --color=yes --pyargs galaxy_ng.tests.unit.app.api.v1.test_tasks::test_legacy_role_import_with_tag_name
+    "
