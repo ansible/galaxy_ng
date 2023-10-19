@@ -146,8 +146,8 @@ def test_custom_browsable_format(ansible_config):
     assert not isinstance(html.value, dict)
     assert "results" in str(html.value)
 
-    # test as a github user
-    config = ansible_config("github_user_1")
+    # test as a basic user
+    config = ansible_config("basic_user")
     api_client = get_client(
         config=config,
         request_token=False,
