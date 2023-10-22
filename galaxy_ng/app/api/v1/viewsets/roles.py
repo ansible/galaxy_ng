@@ -145,9 +145,6 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
 class LegacyRoleContentViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     """Documentation for a single legacy role."""
 
-    # FIXME - we shouldn't need this
-    queryset = LegacyRole.objects.all().order_by('created')
-
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
     serializer_class = LegacyRoleContentSerializer
@@ -159,7 +156,7 @@ class LegacyRoleContentViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixi
 class LegacyRoleVersionsViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     """A list of versions for a single legacy role."""
 
-    # FIXME - we shouldn't need this
+    # the html api viewer requires this
     queryset = LegacyRole.objects.all().order_by('created')
 
     permission_classes = [LegacyAccessPolicy]
