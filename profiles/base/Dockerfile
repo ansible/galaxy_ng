@@ -1,4 +1,5 @@
 FROM localhost/oci_env/pulp:base
+RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
 
 COPY . /opt/galaxy_ng/
 WORKDIR /opt/galaxy_ng/
