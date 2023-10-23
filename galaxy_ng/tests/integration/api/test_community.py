@@ -5,6 +5,8 @@ import json
 import pytest
 import subprocess
 
+from ansible.errors import AnsibleError
+
 from urllib.parse import urlparse
 
 from ..utils import (
@@ -768,3 +770,42 @@ def test_legacy_roles_ordering(ansible_config):
     resp = api_client('/api/v1/roles/?order_by=-name')
     sorted_names = [r["name"] for r in resp["results"]]
     assert sorted_names == sorted(names, reverse=True)
+
+
+@pytest.mark.deployment_community
+def test_v1_role_versions(ansible_config):
+    """
+        Test that role versions endpoint doesn't fail on missing queryset
+        with enabled browsable api format.
+    """
+
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True
+    )
+
+    # clean all roles
+    clean_all_roles(ansible_config)
+
+    # start the sync
+    pargs = json.dumps({"github_user": "geerlingguy", "role_name": "ansible"}).encode('utf-8')
+    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
+    assert isinstance(resp, dict)
+    assert resp.get('task') is not None
+    wait_for_v1_task(resp=resp, api_client=api_client)
+
+    resp = api_client('/api/v1/roles/?username=geerlingguy&name=ansible')
+    assert resp['count'] == 1
+
+    id = resp["results"][0]["id"]
+    versions = resp["results"][0]["summary_fields"]["versions"]
+
+    resp = api_client(f'/api/v1/roles/{id}/versions')
+    assert len(versions) == resp["count"]
+
+    with pytest.raises(AnsibleError) as html:
+        api_client(f"v1/roles/{id}/versions", headers={"Accept": "text/html"})
+    assert not isinstance(html.value, dict)
+    assert "results" in str(html.value)

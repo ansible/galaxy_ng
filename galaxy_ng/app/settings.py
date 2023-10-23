@@ -64,6 +64,11 @@ REST_FRAMEWORK__DEFAULT_PERMISSION_CLASSES = (
     "galaxy_ng.app.access_control.access_policy.AccessPolicyBase",
 )
 
+REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = [
+    'rest_framework.renderers.JSONRenderer',
+    'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
+]
+
 # Settings for insights mode
 # GALAXY_AUTHENTICATION_CLASSES = ["galaxy_ng.app.auth.auth.RHIdentityAuthentication"]
 

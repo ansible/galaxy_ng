@@ -159,6 +159,7 @@ class LegacyRoleVersionsViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMix
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
     serializer_class = LegacyRoleVersionsSerializer
+    queryset = LegacyRole.objects.all()
 
     def get_object(self):
         return get_object_or_404(LegacyRole, id=self.kwargs["pk"])

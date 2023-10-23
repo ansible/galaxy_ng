@@ -3,6 +3,8 @@
 
 import pytest
 
+from ansible.errors import AnsibleError
+
 from ..utils import (
     ansible_galaxy,
     get_client,
@@ -11,7 +13,6 @@ from ..utils import (
 from ..utils.legacy import (
     cleanup_social_user,
 )
-
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -118,3 +119,50 @@ def test_v1_users_filter(ansible_config):
     assert resp["count"] == 0
 
     cleanup_social_user(github_user, ansible_config)
+
+
+@pytest.mark.deployment_community
+def test_custom_browsable_format(ansible_config):
+    """" Test endpoints works with enabled browsable api """
+
+    # test as a admin
+    config = ansible_config("admin")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True,
+    )
+
+    resp = api_client("v1/namespaces")
+    assert isinstance(resp, dict)
+    assert "results" in resp
+
+    resp = api_client("v1/namespaces?format=json")
+    assert isinstance(resp, dict)
+    assert "results" in resp
+
+    with pytest.raises(AnsibleError) as html:
+        api_client("v1/namespaces", headers={"Accept": "text/html"})
+    assert not isinstance(html.value, dict)
+    assert "results" in str(html.value)
+
+    # test as a basic user
+    config = ansible_config("basic_user")
+    api_client = get_client(
+        config=config,
+        request_token=False,
+        require_auth=True,
+    )
+
+    resp = api_client("v1/namespaces")
+    assert isinstance(resp, dict)
+    assert "results" in resp
+
+    resp = api_client("v1/namespaces?format=json")
+    assert isinstance(resp, dict)
+    assert "results" in resp
+
+    with pytest.raises(AnsibleError) as html:
+        api_client("v1/namespaces", headers={"Accept": "text/html"})
+    assert not isinstance(html.value, dict)
+    assert "results" in str(html.value)
