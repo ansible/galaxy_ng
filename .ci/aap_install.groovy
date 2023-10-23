@@ -1,8 +1,8 @@
-@Library(['aap-jenkins-shared-library@galaxy_ng_yolo']) _
+@Library(['aap-jenkins-shared-library']) _
 import steps.StepsFactory
 import validation.AapqaProvisionerParameters
 
-StepsFactory stepsFactory = new StepsFactory(this, [:], 'aap_galaxy_ng')
+StepsFactory stepsFactory = new StepsFactory(this, [:], 'galaxy_ng_aap_install')
 Map provisionInfo = [:]
 Map installInfo = [:]
 Map validateInfo = [:]
@@ -26,7 +26,7 @@ pipeline {
         }
 
         stages {
-            stage('Validate') {
+            stage('Set variables') {
                 steps {
                     script {
 
