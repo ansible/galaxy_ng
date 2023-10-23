@@ -1,3 +1,4 @@
+import os
 import requests
 import logging
 from urllib.parse import urljoin
@@ -10,9 +11,10 @@ logger = logging.getLogger("metrics_collection.export_data")
 
 
 def api_status():
-    status_path = '/pulp/api/v3/status/'
+    status_path = 'pulp/api/v3/status/'
     try:
-        url = urljoin(settings.ANSIBLE_API_HOSTNAME, status_path)
+        path = os.path.join(settings.GALAXY_API_PATH_PREFIX or '', status_path)
+        url = urljoin(settings.ANSIBLE_API_HOSTNAME, path)
         response = requests.request("GET", url)
         if response.status_code == 200:
             return response.json()

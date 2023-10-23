@@ -6,7 +6,6 @@ import tarfile
 from unittest.mock import MagicMock, patch, ANY
 from insights_analytics_collector import register
 import insights_analytics_collector.package
-import galaxy_ng.app.metrics_collection.common_data
 from galaxy_ng.app.metrics_collection.automation_analytics.collector import Collector
 from galaxy_ng.app.metrics_collection.automation_analytics.package import Package
 from django.test import TestCase, override_settings
@@ -56,14 +55,18 @@ def csv_exception(since, **kwargs):
 class TestAutomationAnalyticsCollector(TestCase):
     def setUp(self):
         super().setUp()
-        self.api_status = MagicMock()
+
+        self.api_status_patch = patch('galaxy_ng.app.metrics_collection.common_data.api_status')
+        self.api_status = self.api_status_patch.start()
         self.api_status.return_value = {}
-        galaxy_ng.app.metrics_collection.common_data.api_status = self.api_status
 
         self.logger = MagicMock()
         self.log = MagicMock("log")
         self.logger.log = self.log
         self.logger.exception = MagicMock("exception")
+
+    def tearDown(self):
+        self.api_status_patch.stop()
 
     def test_no_config_gather(self):
         """Config is missing, no data are collected"""
