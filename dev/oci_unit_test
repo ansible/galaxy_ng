@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# Runs unit tests using oci-env
+#
+# 1) Run galaxy with oci-env, i.e. using script `oci_start standalone`
+# 2) There is 1 required and 1 optional argument
+# - 1st argument: oci profile name
+# - 2nd argument: unit test path. Defaults to: `galaxy_ng.tests.unit`
+#
 
 set -x
 set -e
@@ -11,6 +19,10 @@ fi
 profile=$1
 shift
 echo "USING PROFILE ${profile}"
+
+unit_tests=${1:-"galaxy_ng.tests.unit"}
+echo "Running tests: ${unit_tests}"
+
 
 # find the oci-env checkout
 OCI_ENV_PATH=$(dirname $(pip show oci-env | egrep ^Location | awk '{print $2}'))
@@ -32,5 +44,5 @@ oci-env -e ${env_path} compose exec pulp /bin/bash -c \
     "
     source /opt/oci_env/base/container_scripts/configure_pulp_smash.sh
     cd /src/galaxy_ng
-    sudo -u pulp -E PULP_DATABASES__default__USER=postgres pytest --capture=no -v -r sx --color=yes --pyargs galaxy_ng.tests.unit.app.api.v1.test_tasks::test_legacy_role_import_with_tag_name
+    sudo -u pulp -E PULP_DATABASES__default__USER=postgres pytest --capture=no -v -r sx --color=yes --pyargs ${unit_tests}
     "
