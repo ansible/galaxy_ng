@@ -169,6 +169,65 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
     return gitrepo, github_reference, last_commit
 
 
+def compute_all_versions(this_role, gitrepo):
+    """
+    Build a reconciled list of old versions and new versions.
+    """
+
+    # Combine old versions with new ...
+    old_metadata = copy.deepcopy(this_role.full_metadata)
+    versions = old_metadata.get('versions', [])
+
+    # Clean out non-semver versions due to bad import code
+    for version in versions:
+        try:
+            parse_version_tag(version['version'])
+        except ValueError:
+            versions.remove(version)
+
+    # ALL semver tags should become versions
+    current_tags = []
+    for cversion in versions:
+        # we want tag but the sync'ed roles don't have it
+        # because the serializer returns "name" instead.
+        tag = cversion.get('tag')
+        if not tag:
+            tag = cversion.get('name')
+        current_tags.append(tag)
+    for tag in gitrepo.tags:
+
+        # must be a semver compliant value ...
+        try:
+            version = parse_version_tag(tag.name)
+        except ValueError:
+            continue
+
+        if str(version) in current_tags:
+            continue
+
+        ts = datetime.datetime.now().isoformat()
+        vdata = {
+            'id': str(uuid.uuid4()),
+            'tag': tag.name,
+            'version': str(version),
+            'commit_date': tag.commit.committed_datetime.isoformat(),
+            'commit_sha': tag.commit.hexsha,
+            'created': ts,
+            'modified': ts,
+        }
+        logger.info(f'adding new version from tag: {vdata}')
+        versions.append(vdata)
+
+    # remove old tag versions if they no longer exist in the repo
+    git_tags = [x.name for x in gitrepo.tags]
+    for version in versions[:]:
+        if version.get('version') not in git_tags:
+            logger.info(f"removing {version['version']} because it no longer has a tag")
+            versions.remove(version)
+
+    return versions
+
+
 def legacy_role_import(
     request_username=None,
     github_user=None,
@@ -322,52 +381,8 @@ def legacy_role_import(
                 name=role_name
             )
 
-        # Combine old versions with new ...
-        old_metadata = copy.deepcopy(this_role.full_metadata)
-        versions = old_metadata.get('versions', [])
-
-        # Clean out non-semver versions due to bad import code
-        for version in versions:
-            try:
-                parse_version_tag(version['version'])
-            except ValueError:
-                versions.remove(version)
-
-        # ALL semver tags should become versions
-        current_tags = []
-        for cversion in versions:
-            # we want tag but the sync'ed roles don't have it
-            # because the serializer returns "name" instead.
-            tag = cversion.get('tag')
-            if not tag:
-                tag = cversion.get('name')
-            current_tags.append(tag)
-        for tag in gitrepo.tags:
-
-            # must be a semver compliant value ...
-            try:
-                version = parse_version_tag(tag.name)
-            except ValueError:
-                continue
-
-            if str(version) in current_tags:
-                continue
-
-            ts = datetime.datetime.now().isoformat()
-            vdata = {
-                'id': str(uuid.uuid4()),
-                'tag': tag.name,
-                'version': str(version),
-                'commit_date': tag.commit.committed_datetime.isoformat(),
-                'commit_sha': tag.commit.hexsha,
-                'created': ts,
-                'modified': ts,
-            }
-            logger.info(f'adding new version from tag: {vdata}')
-            versions.append(vdata)
-
         # set the enumerated versions ...
-        new_full_metadata['versions'] = versions
+        new_full_metadata['versions'] = compute_all_versions(this_role, gitrepo)
 
         # Save the new metadata
         this_role.full_metadata = new_full_metadata
