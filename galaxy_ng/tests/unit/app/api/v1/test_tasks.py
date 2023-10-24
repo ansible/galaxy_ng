@@ -117,15 +117,19 @@ def test_legacy_role_import_altered_github_org_name():
     # make sure it's the right id
     assert role.id == this_role.id
 
+    # make sure the name is correct ...
+    assert role.name == alternate_role_name
+
     # make sure the github_user is correct ...
     assert role.full_metadata.get('github_user') == github_user
     assert role.full_metadata.get('github_repo') == github_repo
 
     # should have used the default branch ..
     assert role.full_metadata.get('github_reference') == github_reference
+    assert role.full_metadata.get('github_branch') == github_reference
 
-    # should have only the old version ...
-    assert role.full_metadata['versions'] == [{'version': '0.0.1', 'name': 'v0.0.1'}]
+    # the old version isn't a tag so it should have been removed.
+    assert role.full_metadata['versions'] == []
 
 
 @pytest.mark.django_db
