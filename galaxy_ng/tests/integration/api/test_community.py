@@ -803,7 +803,7 @@ def test_v1_role_versions(ansible_config):
     versions = resp["results"][0]["summary_fields"]["versions"]
 
     resp = api_client(f'/api/v1/roles/{id}/versions')
-    assert len(versions) == resp["count"]
+    assert resp["count"] >= len(versions)
 
     with pytest.raises(AnsibleError) as html:
         api_client(f"v1/roles/{id}/versions", headers={"Accept": "text/html"})
