@@ -18,7 +18,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.deployment_community
-def test_import_role_as_owner(ansible_config):
+def test_import_role_as_owner_no_tags(ansible_config):
     """ Tests role import workflow with a social auth user and anonymous install """
 
     # https://github.com/jctannerTEST/role1
@@ -70,15 +70,14 @@ def test_import_role_as_owner(ansible_config):
     assert role['github_repo'] == github_repo
     assert role['github_branch'] is not None
     assert role['commit'] is not None
-    assert len(role['summary_fields']['versions']) == 1
+    assert len(role['summary_fields']['versions']) == 0
 
     # validate the versions url
     versions_url = f'v1/roles/{role_id}/versions/'
     versions_resp = client.get(versions_url)
     assert versions_resp.status_code == 200
     versions = versions_resp.json()
-    assert versions['results'][0]['version'] == \
-        role['summary_fields']['versions'][0]['version']
+    assert versions['count'] == 0
 
     # validate the content url
     content_url = f'v1/roles/{role_id}/content/'
@@ -122,7 +121,7 @@ def test_import_role_as_owner(ansible_config):
 
 
 @pytest.mark.deployment_community
-def test_import_role_as_not_owner(ansible_config):
+def test_import_role_as_not_owner_no_tags(ansible_config):
     """ Tests role import workflow with non-owner """
 
     # https://github.com/jctannerTEST/role1
@@ -172,7 +171,7 @@ def test_import_role_as_not_owner(ansible_config):
 
 
 @pytest.mark.deployment_community
-def test_import_role_fields(ansible_config):
+def test_import_role_fields_no_tags(ansible_config):
     """Test role serializer fields after import with galaxy-importer>=0.4.11."""
 
     github_user = "jctannerTEST"
@@ -214,12 +213,7 @@ def test_import_role_fields(ansible_config):
     assert summary_fields["repository"]["name"] == "role1"
     assert summary_fields["tags"] == list()
 
-    assert len(summary_fields["versions"]) == 1
-    for field in [
-        "active", "commit_date", "commit_sha", "created", "download_url",
-        "modified", "name", "release_date", "url", "version"
-    ]:
-        assert field in summary_fields["versions"][0]
+    assert len(summary_fields["versions"]) == 0
 
     # Cleanup all roles.
     clean_all_roles(ansible_config)

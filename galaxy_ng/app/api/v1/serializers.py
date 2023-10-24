@@ -291,9 +291,16 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         return obj.full_metadata.get('description')
 
     def get_summary_fields(self, obj):
-        versions = obj.full_metadata.get('versions', [])
         dependencies = obj.full_metadata.get('dependencies', [])
         tags = obj.full_metadata.get('tags', [])
+
+        versions = obj.full_metadata.get('versions', [])
+        if versions:
+            versions = sorted(versions, key=lambda x: x['commit_date'])
+            versions = versions[::-1]
+            if len(versions) > 10:
+                versions = versions[:11]
+            versions = [LegacyRoleVersionSummary(obj, x).to_json() for x in versions]
 
         provider_ns = None
         if obj.namespace and obj.namespace.namespace:
@@ -346,6 +353,64 @@ class LegacyRoleContentSerializer(serializers.ModelSerializer):
         return obj.full_metadata.get('readme_html', '')
 
 
+class LegacyRoleVersionSummary:
+    """
+    Shim serializer to be replaced once role versions
+    become first class objects.
+    """
+    def __init__(self, role, version):
+        self.role = role
+        self.version = version
+
+    def to_json(self):
+
+        # old galaxy has a field for the real tag value
+        # and that is what gets returned for the name
+        name = self.version.get('tag')
+        if not name:
+            name = self.version.get('name')
+
+        return {
+            'id': self.version.get('id'),
+            'name': name,
+            'release_date': self.version.get('commit_date'),
+        }
+
+
+class LegacyRoleVersionDetail:
+    """
+    Shim serializer to be replaced once role versions
+    become first class objects.
+    """
+    def __init__(self, role, version):
+        self.role = role
+        self.version = version
+
+    def to_json(self):
+
+        # old galaxy has a field for the real tag value
+        # and that is what gets returned for the name
+        name = self.version.get('tag')
+        if not name:
+            name = self.version.get('name')
+
+        # "https://github.com/andrewrothstein/ansible-miniconda/archive/v2.0.0.tar.gz"
+        github_user = self.role.full_metadata.get('github_user')
+        github_repo = self.role.full_metadata.get('github_repo')
+        download_url = f'https://github.com/{github_user}/{github_repo}/archive/{name}.tar.gz'
+
+        return {
+            'id': self.version.get('id'),
+            'name': name,
+            'version': self.version.get('version'),
+            'created': self.version.get('created'),
+            'modified': self.version.get('modified'),
+            'commit_date': self.version.get('commit_date'),
+            'commit_sha': self.version.get('commit_sha'),
+            'download_url': download_url,
+        }
+
+
 class LegacyRoleVersionsSerializer(serializers.ModelSerializer):
 
     count = serializers.SerializerMethodField()
@@ -385,35 +450,10 @@ class LegacyRoleVersionsSerializer(serializers.ModelSerializer):
 
         versions = obj.full_metadata.get('versions', [])
 
-        fields = [
-            'id',
-            'url',
-            'related',
-            'summary_fields',
-            'created',
-            'modified',
-            'name',
-            'version',
-            'commit_date',
-            'commit_sha',
-            'download_url',
-            'active'
-        ]
-
         results = []
 
         for idv, version in enumerate(versions):
-            ds = {}
-            for field in fields:
-                if field in ['created', 'modified'] and field not in version:
-                    ds[field] = version.get('release_date')
-                    continue
-                if field == 'version':
-                    ds[field] = version['name']
-                    continue
-                ds[field] = version.get(field)
-            ds['id'] = idv
-            results.append(ds)
+            results.append(LegacyRoleVersionDetail(obj, version).to_json())
 
         return results
 
