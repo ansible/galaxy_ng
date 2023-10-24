@@ -202,7 +202,7 @@ def compute_all_versions(this_role, gitrepo):
         except ValueError:
             continue
 
-        if str(version) in current_tags:
+        if str(tag.name) in current_tags:
             continue
 
         ts = datetime.datetime.now().isoformat()
@@ -221,8 +221,11 @@ def compute_all_versions(this_role, gitrepo):
     # remove old tag versions if they no longer exist in the repo
     git_tags = [x.name for x in gitrepo.tags]
     for version in versions[:]:
-        if version.get('version') not in git_tags:
-            logger.info(f"removing {version['version']} because it no longer has a tag")
+        vname = version.get('tag')
+        if not vname:
+            vname = version.get('name')
+        if vname not in git_tags:
+            logger.info(f"removing {vname} because it no longer has a tag")
             versions.remove(version)
 
     return versions
