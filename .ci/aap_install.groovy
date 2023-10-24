@@ -40,6 +40,7 @@ pipeline {
                         installerFlags.add('input/install/flags/automationhub_content_signing.yml')
                         installerFlags.add('input/install/flags/automationhub_routable_hostname.yml')
                         installerFlags.add('input/install/flags/automationhub_from_git.yml')
+                        installerFlags.add('input/install/ee/unreleased.yml')
 
                         provisionFlags.add('input/provisioner/flags/domain.yml')
                         provisionFlags.add("input/provisioner/architecture/x86_64.yml")
