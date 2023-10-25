@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 # TODO Refactor get_client to provide access to bearer token
 @pytest.mark.deployment_standalone
+@pytest.mark.installer_smoke_test
 def test_download_artifact(ansible_config, upload_artifact, galaxy_client):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
