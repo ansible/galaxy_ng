@@ -2,11 +2,12 @@
 import steps.StepsFactory
 import validation.AapqaProvisionerParameters
 
-StepsFactory stepsFactory = new StepsFactory(this, [:], 'galaxy_ng_aap_install')
+StepsFactory stepsFactory = new StepsFactory(this, [:], 'galaxy_ng_aap_upgrade')
 Map provisionInfo = [:]
 Map installInfo = [:]
 Map validateInfo = [:]
 List installerFlags = []
+List upgradeFlags = []
 Map installerVars = [:]
 String pulpcore_version = ''
 String automationhub_pulp_ansible_version = ''
@@ -35,12 +36,16 @@ pipeline {
                         echo "${fork}"
                         echo "Branch Name: ${env.CHANGE_BRANCH}"
 
+                        upgradeFlags.add('aapqa_private/input/install/ee_registry.yml')
+                        upgradeFlags.add('input/install/flags/automationhub_content_signing.yml')
+                        upgradeFlags.add('input/install/flags/automationhub_from_git.yml')
+                        upgradeFlags.add('input/install/flags/automationhub_routable_hostname.yml')
+
                         List provisionFlags = []
 
                         installerFlags.add('input/install/flags/automationhub_content_signing.yml')
                         installerFlags.add('input/install/flags/automationhub_routable_hostname.yml')
-                        installerFlags.add('input/install/flags/automationhub_from_git.yml')
-                        installerFlags.add('input/install/ee/unreleased.yml')
+                        // installerFlags.add('input/install/flags/automationhub_from_git.yml')
 
                         provisionFlags.add('input/provisioner/flags/domain.yml')
                         provisionFlags.add("input/provisioner/architecture/x86_64.yml")
@@ -48,6 +53,7 @@ pipeline {
 
                         validateInfo.put("provisionFlags", provisionFlags)
                         validateInfo.put("installerFlags", installerFlags)
+                        validateInfo.put("upgradeFlags", upgradeFlags)
                     }
                 }
             }
@@ -133,13 +139,50 @@ pipeline {
                 }
             }
 
-            stage('Install') {
+            stage('Fresh Install AAP 2.3') {
                 steps {
                     container('aapqa-ansible') {
                         script {
                             installerFlags = validateInfo.get("installerFlags")
+                            stepsFactory.aapqaAapInstallerSteps.updateBuildInformation(provisionInfo)
+                            installInfo = stepsFactory.aapqaAapInstallerSteps.install(provisionInfo + [
+                                aapVersionVarFile: "input/install/2.3_released.yml",
+                                installerVarFiles: installerFlags + [
+                                    "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                    "input/platform/rhel88.yml"
+                                ]
+                            ])
+                        }
+                    }
+                }
 
-                            installerVars = [:]
+                post {
+                    always {
+                        script {
+                            container('aapqa-ansible') {
+                                stepsFactory.aapqaAapInstallerSteps.collectAapInstallerArtifacts(provisionInfo + [
+                                        archiveArtifactsSubdir: 'install'
+                                ])
+
+                                if (fileExists('artifacts/install/setup.log')) {
+                                    sh """
+                                        echo "Install setup log:"
+                                        echo "-------------------------------------------------"
+                                        cat artifacts/install/setup.log
+                                        echo "-------------------------------------------------"
+                                    """
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            stage('Upgrade AAP 2.4') {
+                steps {
+                    container('aapqa-ansible') {
+                        script {
 
                             Map ahubPipParams = [
                                     automationhub_git_url: "https://github.com/${fork}/galaxy_ng",
@@ -169,34 +212,71 @@ pipeline {
                                     file: 'input/install/ahub_pip.yml',
                                     data: ahubPipParams
                             )
-                            installerFlags.add('input/install/ahub_pip.yml')
+
+                            upgradeFlags.add('input/install/ahub_pip.yml')
+
                             archiveArtifacts(artifacts: 'input/install/ahub_pip.yml')
 
-                            installInfo = stepsFactory.aapqaAapInstallerSteps.install(provisionInfo + [
-                                aapVersionVarFile: "input/install/devel.yml",
-                                installerVarFiles: installerFlags + [
-                                    "input/aap_scenarios/1inst_1hybr_1ahub.yml",
-                                    "input/platform/rhel88.yml"
-                                ],
-                                installerVars: installerVars
+                            upgradeInfo = stepsFactory.aapqaAapInstallerSteps.upgrade(provisionInfo + [
+                                    aapVersionVarFile: "input/install/2.4_released.yml",
+                                    upgradeVarFiles: upgradeFlags + [
+                                        "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                        "input/platform/rhel88.yml"
+                                    ]
                             ])
                         }
                     }
                 }
-
                 post {
                     always {
                         script {
                             container('aapqa-ansible') {
                                 stepsFactory.aapqaAapInstallerSteps.collectAapInstallerArtifacts(provisionInfo + [
-                                        archiveArtifactsSubdir: 'install'
+                                        archiveArtifactsSubdir: 'upgrade'
                                 ])
 
-                                if (fileExists('artifacts/install/setup.log')) {
+                                if (fileExists('artifacts/upgrade/setup.log')) {
                                     sh """
-                                        echo "Install setup log:"
+                                        echo "Upgrade setup log:"
                                         echo "-------------------------------------------------"
-                                        cat artifacts/install/setup.log
+                                        cat artifacts/upgrade/setup.log
+                                        echo "-------------------------------------------------"
+                                    """
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            stage('Upgrade AAP devel') {
+                steps {
+                    container('aapqa-ansible') {
+                        script {
+                            upgradeFlags.add('input/install/ee/unreleased.yml')
+                            upgradeInfo = stepsFactory.aapqaAapInstallerSteps.upgrade(provisionInfo + [
+                                    aapVersionVarFile: "input/install/devel.yml",
+                                    upgradeVarFiles: upgradeFlags + [
+                                        "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                        "input/platform/rhel88.yml"
+                                    ]
+                            ])
+                        }
+                    }
+                }
+                post {
+                    always {
+                        script {
+                            container('aapqa-ansible') {
+                                stepsFactory.aapqaAapInstallerSteps.collectAapInstallerArtifacts(provisionInfo + [
+                                        archiveArtifactsSubdir: 'upgrade'
+                                ])
+
+                                if (fileExists('artifacts/upgrade/setup.log')) {
+                                    sh """
+                                        echo "Upgrade setup log:"
+                                        echo "-------------------------------------------------"
+                                        cat artifacts/upgrade/setup.log
                                         echo "-------------------------------------------------"
                                     """
                                 }
