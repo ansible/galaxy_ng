@@ -111,9 +111,11 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
     logger.info(f'CLONING {clone_url}')
 
     # pygit didn't have an obvious way to prevent interactive clones ...
+    cmd_args = ['git', 'clone', '--recurse-submodules', clone_url, checkout_path]
     pid = subprocess.run(
-        f'GIT_TERMINAL_PROMPT=0 git clone --recurse-submodules {clone_url} {checkout_path}',
-        shell=True,
+        cmd_args,
+        shell=False,
+        env={'GIT_TERMINAL_PROMPT': '0'},
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
