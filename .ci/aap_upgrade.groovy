@@ -7,6 +7,7 @@ Map provisionInfo = [:]
 Map installInfo = [:]
 Map validateInfo = [:]
 List installerFlags = []
+List upgradeFlags = []
 Map installerVars = [:]
 String pulpcore_version = ''
 String automationhub_pulp_ansible_version = ''
