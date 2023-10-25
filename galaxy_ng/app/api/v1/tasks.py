@@ -10,6 +10,8 @@ import semantic_version
 
 from django.db import transaction
 
+from ansible.module_utils.compat.version import LooseVersion
+
 from galaxy_importer.config import Config
 from galaxy_importer.legacy_role import import_legacy_role
 
@@ -171,6 +173,41 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
     return gitrepo, github_reference, last_commit
 
 
+def sort_versions(versions):
+    """
+    Use ansible-core's LooseVersion util to sort the versions.
+    """
+    sorted_versions = sorted(versions, key=lambda x: LooseVersion(x['tag'].lower()))
+    return sorted_versions
+
+
+def normalize_versions(versions):
+    # convert old integer based IDs to uuid
+    for vix, version in enumerate(versions):
+        if isinstance(version.get('id', ''), int):
+            versions[vix]['upstream_id'] = version['id']
+            versions[vix]['id'] = str(uuid.uuid4())
+
+    # Normalize keys
+    for vix, version in enumerate(versions):
+        if not version.get('tag'):
+            if version.get('name'):
+                versions[vix]['tag'] = version['name']
+            else:
+                versions[vix]['tag'] = version['version']
+
+    # if looseversion can't make a numeric version from this tag
+    # it's not going to work later. This also should cover the case
+    # where previous galaxy_ng import code mistakenly thought
+    # the branch+commit should be a version instead of only tags.
+    for version in versions[:]:
+        lver = LooseVersion(version['tag'].lower())
+        if not all(isinstance(x, int) for x in lver.version):
+            versions.remove(version)
+
+    return versions
+
+
 def compute_all_versions(this_role, gitrepo):
     """
     Build a reconciled list of old versions and new versions.
@@ -180,12 +217,8 @@ def compute_all_versions(this_role, gitrepo):
     old_metadata = copy.deepcopy(this_role.full_metadata)
     versions = old_metadata.get('versions', [])
 
-    # Clean out non-semver versions due to bad import code
-    for version in versions:
-        try:
-            parse_version_tag(version['version'])
-        except ValueError:
-            versions.remove(version)
+    # fix keys from synced versions ...
+    versions = normalize_versions(versions)
 
     # ALL semver tags should become versions
     current_tags = []
@@ -229,6 +262,8 @@ def compute_all_versions(this_role, gitrepo):
         if vname not in git_tags:
             logger.info(f"removing {vname} because it no longer has a tag")
             versions.remove(version)
+
+    versions = sort_versions(versions)
 
     return versions
 
@@ -387,7 +422,8 @@ def legacy_role_import(
             )
 
         # set the enumerated versions ...
-        new_full_metadata['versions'] = compute_all_versions(this_role, gitrepo)
+        new_versions = compute_all_versions(this_role, gitrepo)
+        new_full_metadata['versions'] = new_versions
 
         # Save the new metadata
         this_role.full_metadata = new_full_metadata
@@ -527,6 +563,9 @@ def legacy_sync_from_upstream(
             'min_ansible_version': role_min_ansible,
             'company': role_company,
         }
+
+        new_full_metadata['versions'] = normalize_versions(new_full_metadata['versions'])
+        new_full_metadata['versions'] = sort_versions(new_full_metadata['versions'])
 
         if dict(this_role.full_metadata) != new_full_metadata:
             with transaction.atomic():

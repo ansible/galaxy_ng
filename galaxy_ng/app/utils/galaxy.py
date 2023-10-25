@@ -130,13 +130,20 @@ def get_namespace_owners_details(baseurl, ns_id):
     while next_owners_url:
         logger.info(f'fetch {next_owners_url}')
         o_data = safe_fetch(next_owners_url).json()
-        for owner in o_data['results']:
-            owners.append(owner)
-        if not o_data.get('next'):
+        if isinstance(o_data, dict):
+            # old galaxy
+            for owner in o_data['results']:
+                owners.append(owner)
+            if not o_data.get('next'):
+                break
+            if 'next_link' in o_data and not o_data.get('next_link'):
+                break
+            next_owners_url = baseurl + o_data['next_link']
+        else:
+            # new galaxy
+            for owner in o_data:
+                owners.append(owner)
             break
-        if 'next_link' in o_data and not o_data.get('next_link'):
-            break
-        next_owners_url = baseurl + o_data['next_link']
     return owners
 
 

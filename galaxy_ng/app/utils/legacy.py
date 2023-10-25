@@ -79,18 +79,18 @@ def process_namespace(namespace_name, namespace_info, force=False):
             namespace.avatar_url = avatar_url
             changed = True
 
-    if namespace_info['company'] and (not namespace.company or force):
+    if namespace_info.get('company') and (not namespace.company or force):
         if len(namespace_info['company']) >= 60:
             namespace.company = namespace_info['company'][:60]
         else:
             namespace.company = namespace_info['company']
         changed = True
 
-    if namespace_info['email'] and (not namespace.email or force):
+    if namespace_info.get('email') and (not namespace.email or force):
         namespace.email = namespace_info['email']
         changed = True
 
-    if namespace_info['description'] and (not namespace.description or force):
+    if namespace_info.get('description') and (not namespace.description or force):
         if len(namespace_info['description']) >= 60:
             namespace.description = namespace_info['description'][:60]
         else:
@@ -106,7 +106,10 @@ def process_namespace(namespace_name, namespace_info, force=False):
 
         logger.info(f'check {legacy_namespace} owner {owner_info["username"]}')
 
-        unverified_email = generate_unverified_email(owner_info['github_id'])
+        if owner_info.get('github_id'):
+            unverified_email = generate_unverified_email(owner_info['github_id'])
+        else:
+            unverified_email = owner_info['username'] + '@localhost'
 
         owner_created = False
         owner = User.objects.filter(username=unverified_email).first()
