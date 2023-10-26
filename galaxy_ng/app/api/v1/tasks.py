@@ -4,15 +4,22 @@ import logging
 import os
 import subprocess
 import tempfile
+import uuid
+
+import semantic_version
 
 from django.db import transaction
+
+from ansible.module_utils.compat.version import LooseVersion
 
 from galaxy_importer.config import Config
 from galaxy_importer.legacy_role import import_legacy_role
 
 from galaxy_ng.app.models.auth import User
+from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.utils.galaxy import upstream_role_iterator
 from galaxy_ng.app.utils.legacy import process_namespace
+from galaxy_ng.app.utils.namespaces import generate_v3_namespace_from_attributes
 
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
@@ -22,6 +29,15 @@ from git import Repo
 
 
 logger = logging.getLogger(__name__)
+
+
+def parse_version_tag(value):
+    value = str(value)
+    if not value:
+        raise ValueError('Empty version value')
+    if value[0].lower() == 'v':
+        value = value[1:]
+    return semantic_version.Version(value)
 
 
 def find_real_role(github_user, github_repo):
@@ -76,12 +92,193 @@ def find_real_role(github_user, github_repo):
     return real_role, real_namespace_name, real_github_user, real_github_repo, clone_url
 
 
+def do_git_checkout(clone_url, checkout_path, github_reference):
+    """
+    Handle making a clone, setting a branch/tag and
+    enumerating the last commit for a role.
+
+    :param clone_url:
+        A valid anonymous/public github clone url.
+    :param checkout_path:
+        Where to make the clone.
+    :param github_reference:
+        A valid branch or a tag name.
+
+    :return: A tuple with the following members:
+        - the git.Repo object
+        - the enumerated github_reference (aka branch or tag)
+        - the last commit object from the github_reference or $HEAD
+    :rtype: tuple(git.Repo, string, git.Commit)
+    """
+    logger.info(f'CLONING {clone_url}')
+
+    # pygit didn't have an obvious way to prevent interactive clones ...
+    cmd_args = ['git', 'clone', '--recurse-submodules', clone_url, checkout_path]
+    pid = subprocess.run(
+        cmd_args,
+        shell=False,
+        env={'GIT_TERMINAL_PROMPT': '0'},
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    if pid.returncode != 0:
+        error = pid.stdout.decode('utf-8')
+        logger.error(f'cloning failed: {error}')
+        raise Exception(f'git clone for {clone_url} failed')
+
+    # bind the checkout to a pygit object
+    gitrepo = Repo(checkout_path)
+
+    # the github_reference could be a branch OR a tag name ...
+    if github_reference is not None:
+
+        branch_names = [x.name for x in gitrepo.branches]
+        tag_names = [x.name for x in gitrepo.tags]
+
+        cmd = None
+        if github_reference in branch_names:
+            current_branch = gitrepo.active_branch.name
+            if github_reference != current_branch:
+                cmd = f'git checkout origin/{github_reference}'
+
+        elif github_reference in tag_names:
+            cmd = f'git checkout tags/{github_reference} -b local_${github_reference}'
+
+        else:
+            raise Exception(f'{github_reference} is not a valid branch or tag name')
+
+        if cmd:
+            logger.info(f'switching to {github_reference} in checkout via {cmd}')
+            pid = subprocess.run(
+                cmd,
+                cwd=checkout_path,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            if pid.returncode != 0:
+                error = pid.stdout.decode('utf-8')
+                logger.error('{cmd} failed: {error}')
+                raise Exception(f'{cmd} failed')
+
+        last_commit = [x for x in gitrepo.iter_commits()][0]
+
+    else:
+        # use the default branch ...
+        github_reference = gitrepo.active_branch.name
+
+        # use latest commit on HEAD
+        last_commit = gitrepo.head.commit
+
+    return gitrepo, github_reference, last_commit
+
+
+def sort_versions(versions):
+    """
+    Use ansible-core's LooseVersion util to sort the versions.
+    """
+    sorted_versions = sorted(versions, key=lambda x: LooseVersion(x['tag'].lower()))
+    return sorted_versions
+
+
+def normalize_versions(versions):
+
+    # convert old integer based IDs to uuid
+    for vix, version in enumerate(versions):
+        if isinstance(version.get('id', ''), int):
+            versions[vix]['upstream_id'] = version['id']
+            versions[vix]['id'] = str(uuid.uuid4())
+
+    # Normalize keys
+    for vix, version in enumerate(versions):
+        if not version.get('tag'):
+            if version.get('name'):
+                versions[vix]['tag'] = version['name']
+            else:
+                versions[vix]['tag'] = version['version']
+
+    # if looseversion can't make a numeric version from this tag
+    # it's not going to work later. This also should cover the case
+    # where previous galaxy_ng import code mistakenly thought
+    # the branch+commit should be a version instead of only tags.
+    for version in versions[:]:
+        if not version.get('tag'):
+            versions.remove(version)
+            continue
+        lver = LooseVersion(version['tag'].lower())
+        if not all(isinstance(x, int) for x in lver.version):
+            versions.remove(version)
+
+    return versions
+
+
+def compute_all_versions(this_role, gitrepo):
+    """
+    Build a reconciled list of old versions and new versions.
+    """
+
+    # Combine old versions with new ...
+    old_metadata = copy.deepcopy(this_role.full_metadata)
+    versions = old_metadata.get('versions', [])
+
+    # fix keys from synced versions ...
+    versions = normalize_versions(versions)
+
+    # ALL semver tags should become versions
+    current_tags = []
+    for cversion in versions:
+        # we want tag but the sync'ed roles don't have it
+        # because the serializer returns "name" instead.
+        tag = cversion.get('tag')
+        if not tag:
+            tag = cversion.get('name')
+        current_tags.append(tag)
+    for tag in gitrepo.tags:
+
+        # must be a semver compliant value ...
+        try:
+            version = parse_version_tag(tag.name)
+        except ValueError:
+            continue
+
+        if str(tag.name) in current_tags:
+            continue
+
+        ts = datetime.datetime.now().isoformat()
+        vdata = {
+            'id': str(uuid.uuid4()),
+            'tag': tag.name,
+            'version': str(version),
+            'commit_date': tag.commit.committed_datetime.isoformat(),
+            'commit_sha': tag.commit.hexsha,
+            'created': ts,
+            'modified': ts,
+        }
+        logger.info(f'adding new version from tag: {vdata}')
+        versions.append(vdata)
+
+    # remove old tag versions if they no longer exist in the repo
+    git_tags = [x.name for x in gitrepo.tags]
+    for version in versions[:]:
+        vname = version.get('tag')
+        if not vname:
+            vname = version.get('name')
+        if vname not in git_tags:
+            logger.info(f"removing {vname} because it no longer has a tag")
+            versions.remove(version)
+
+    versions = sort_versions(versions)
+
+    return versions
+
+
 def legacy_role_import(
     request_username=None,
     github_user=None,
     github_repo=None,
     github_reference=None,
-    alternate_role_name=None
+    alternate_role_name=None,
+    superuser_can_create_namespaces=False
 ):
     """
     Import a legacy role by user, repo and or reference.
@@ -112,9 +309,12 @@ def legacy_role_import(
     logger.info(f'GITHUB_REPO:{github_repo}')
     logger.info(f'GITHUB_REFERENCE:{github_reference}')
     logger.info(f'ALTERNATE_ROLE_NAME:{alternate_role_name}')
+    logger.info(f'superuser_can_create_namespaces: {superuser_can_create_namespaces}')
 
     clone_url = None
-    github_reference_is_tag = False
+
+    request_user = User.objects.filter(username=request_username).first()
+    logger.info(f'REQUEST_USER: {request_user}')
 
     # prevent empty strings?
     if not github_reference:
@@ -134,14 +334,30 @@ def legacy_role_import(
     # the user should have a legacy and v3 namespace if they logged in ...
     namespace = LegacyNamespace.objects.filter(name=real_namespace_name).first()
     if not namespace:
-        logger.error(f'No legacy namespace exists for {github_user}')
-        raise Exception(f'No legacy namespace exists for {github_user}')
+
+        if not request_user.is_superuser or \
+                (request_user.is_superuser and not superuser_can_create_namespaces):
+            logger.error(f'No legacy namespace exists for {github_user}')
+            raise Exception(f'No legacy namespace exists for {github_user}')
+
+        logger.info(f'create legacynamespace {real_namespace_name}')
+        namespace, _ = LegacyNamespace.objects.get_or_create(name=real_namespace_name)
 
     # we have to have a v3 namespace because of the rbac based ownership ...
     v3_namespace = namespace.namespace
     if not v3_namespace:
-        logger.error(f'No v3 namespace exists for {github_user}')
-        raise Exception(f'No v3 namespace exists for {github_user}')
+
+        if not request_user.is_superuser or \
+                (request_user.is_superuser and not superuser_can_create_namespaces):
+            logger.error(f'No v3 namespace exists for {github_user}')
+            raise Exception(f'No v3 namespace exists for {github_user}')
+
+        # transformed name ... ?
+        v3_name = generate_v3_namespace_from_attributes(username=real_namespace_name)
+        logger.info(f'creating namespace {v3_name}')
+        v3_namespace, _ = Namespace.objects.get_or_create(name=v3_name)
+        namespace.namespace = v3_namespace
+        namespace.save()
 
     with tempfile.TemporaryDirectory() as tmp_path:
         # galaxy-importer requires importing legacy roles from the role's parent directory.
@@ -152,62 +368,9 @@ def legacy_role_import(
         if clone_url is None:
             clone_url = f'https://github.com/{github_user}/{github_repo}'
 
-        logger.info(f'CLONING {clone_url}')
-
-        # pygit didn't have an obvious way to prevent interactive clones ...
-        pid = subprocess.run(
-            f'GIT_TERMINAL_PROMPT=0 git clone --recurse-submodules {clone_url} {checkout_path}',
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-        if pid.returncode != 0:
-            error = pid.stdout.decode('utf-8')
-            logger.error(f'cloning failed: {error}')
-            raise Exception(f'git clone for {clone_url} failed')
-
-        # bind the checkout to a pygit object
-        gitrepo = Repo(checkout_path)
-
-        # the github_reference could be a branch OR a tag name ...
-        if github_reference is not None:
-
-            branch_names = [x.name for x in gitrepo.branches]
-            tag_names = [x.name for x in gitrepo.tags]
-
-            cmd = None
-            if github_reference in branch_names:
-                current_branch = gitrepo.active_branch.name
-                if github_reference != current_branch:
-                    cmd = f'git checkout origin/{github_reference}'
-            elif github_reference in tag_names:
-                github_reference_is_tag = True
-                cmd = f'git checkout tags/{github_reference} -b local_${github_reference}'
-            else:
-                raise Exception(f'{github_reference} is not a valid branch or tag name')
-
-            if cmd:
-                logger.info(f'switching to {github_reference} in checkout via {cmd}')
-                pid = subprocess.run(
-                    cmd,
-                    cwd=checkout_path,
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                )
-                if pid.returncode != 0:
-                    error = pid.stdout.decode('utf-8')
-                    logger.error('{cmd} failed: {error}')
-                    raise Exception(f'{cmd} failed')
-
-            last_commit = [x for x in gitrepo.iter_commits()][0]
-
-        else:
-            # use the default branch ...
-            github_reference = gitrepo.active_branch.name
-
-            # use latest commit on HEAD
-            last_commit = gitrepo.head.commit
+        # process the checkout ...
+        gitrepo, github_reference, last_commit = \
+            do_git_checkout(clone_url, checkout_path, github_reference)
 
         # relevant data for this new role version ...
         github_commit = last_commit.hexsha
@@ -236,7 +399,9 @@ def legacy_role_import(
             'commit': github_commit,
             'github_user': real_github_user,
             'github_repo': real_github_repo,
+            'github_branch': github_reference,
             'github_reference': github_reference,
+            'import_branch': github_reference,
             'commit': github_commit,
             'commit_message': github_commit_message,
             'issue_tracker_url': galaxy_info["issue_tracker_url"] or clone_url + "/issues",
@@ -251,7 +416,7 @@ def legacy_role_import(
             'readme_html': result["readme_html"]
         }
 
-        # Make the object
+        # Make or get the object
         if real_role:
             this_role = real_role
         else:
@@ -260,44 +425,17 @@ def legacy_role_import(
                 name=role_name
             )
 
-        # Combine old versions with new ...
-        old_metadata = copy.deepcopy(this_role.full_metadata)
-
-        new_full_metadata['versions'] = old_metadata.get('versions', [])
-        ts = datetime.datetime.now().isoformat()
-
-        # only make a download url for tags?
-        download_url = None
-        if github_reference_is_tag:
-            download_url = (
-                f'https://github.com/{real_github_user}/{real_github_repo}'
-                + f'/archive/{github_reference}.tar.gz'
-            )
-
-        new_version = {
-            'name': github_reference,
-            'version': github_reference,
-            'release_date': ts,
-            'created': ts,
-            'modified': ts,
-            'active': None,
-            'download_url': download_url,
-            'url': None,
-            'commit_date': github_commit_date,
-            'commit_sha': github_commit
-        }
-        versions_by_sha = dict((x['commit_sha'], x) for x in new_full_metadata.get('versions', []))
-        if github_commit not in versions_by_sha:
-            new_full_metadata['versions'].append(new_version)
-        else:
-            msg = (
-                f'{namespace.name}.{role_name} {github_reference} commit:{github_commit}'
-                + ' has already been imported'
-            )
-            raise Exception(msg)
+        # set the enumerated versions ...
+        new_versions = compute_all_versions(this_role, gitrepo)
+        new_full_metadata['versions'] = new_versions
 
         # Save the new metadata
         this_role.full_metadata = new_full_metadata
+
+        # Set the correct name ...
+        if this_role.name != role_name:
+            this_role.name = role_name
+
         this_role.save()
 
     logger.debug('STOP LEGACY ROLE IMPORT')
@@ -429,6 +567,9 @@ def legacy_sync_from_upstream(
             'min_ansible_version': role_min_ansible,
             'company': role_company,
         }
+
+        new_full_metadata['versions'] = normalize_versions(new_full_metadata['versions'])
+        new_full_metadata['versions'] = sort_versions(new_full_metadata['versions'])
 
         if dict(this_role.full_metadata) != new_full_metadata:
             with transaction.atomic():

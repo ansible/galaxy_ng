@@ -51,13 +51,15 @@ def test_legacy_role_import_simple():
 
     # make sure the github_user is correct ...
     assert role.full_metadata.get('github_user') == github_user
+
+    # make sure the github_repo is correct ...
     assert role.full_metadata.get('github_repo') == github_repo
 
     # should have used the default branch ..
     assert role.full_metadata.get('github_reference') == 'master'
 
-    # should have one version
-    assert len(role.full_metadata['versions']) == 1
+    # should have many versions
+    assert len(role.full_metadata['versions']) >= 1
 
 
 @pytest.mark.django_db
@@ -89,7 +91,7 @@ def test_legacy_role_import_altered_github_org_name():
     this_role, _ = LegacyRole.objects.get_or_create(namespace=legacy_ns, name=alternate_role_name)
     this_role.full_metadata['github_user'] = github_user
     this_role.full_metadata['github_repo'] = github_repo
-    this_role.full_metadata['versions'] = [{'commit_sha': '1111', 'name': '1111'}]
+    this_role.full_metadata['versions'] = [{'version': '0.0.1', 'name': 'v0.0.1'}]
     this_role.save()
 
     # import it
@@ -115,15 +117,19 @@ def test_legacy_role_import_altered_github_org_name():
     # make sure it's the right id
     assert role.id == this_role.id
 
+    # make sure the name is correct ...
+    assert role.name == alternate_role_name
+
     # make sure the github_user is correct ...
     assert role.full_metadata.get('github_user') == github_user
     assert role.full_metadata.get('github_repo') == github_repo
 
     # should have used the default branch ..
     assert role.full_metadata.get('github_reference') == github_reference
+    assert role.full_metadata.get('github_branch') == github_reference
 
-    # should have two versions
-    assert len(role.full_metadata['versions']) == 2
+    # the old version isn't a tag so it should have been removed.
+    assert role.full_metadata['versions'] == []
 
 
 @pytest.mark.django_db
@@ -171,35 +177,13 @@ def test_legacy_role_import_with_tag_name():
     assert found.count() == 1
     role = found.first()
 
-    # should have the one version ..
-    assert len(role.full_metadata['versions']) == 1
-    v1 = role.full_metadata['versions'][0]
-    assert v1['name'] == github_reference
-    assert v1['version'] == github_reference
+    # the branch and the reference should be the tag name ...
+    assert role.full_metadata['github_reference'] == github_reference
+    assert role.full_metadata['github_branch'] == github_reference
 
-    # import again with new ref
-    github_reference_2 = '1.24.3'
-    with patch('galaxy_ng.app.api.v1.tasks.Config', spec=Config) as MockConfig:
+    # should have ALL the tag versions ...
+    assert len(role.full_metadata['versions']) >= 1
 
-        MockConfig.return_value = Config()
-        MockConfig.return_value.run_ansible_lint = False
-
-        legacy_role_import(
-            github_user=github_user,
-            github_repo=github_repo,
-            github_reference=github_reference_2,
-            alternate_role_name=alternate_role_name,
-        )
-
-    # find the role
-    found = LegacyRole.objects.filter(
-        full_metadata__github_user=github_user, name=alternate_role_name
-    )
-    assert found.count() == 1
-    role = found.first()
-
-    # should have the second version ..
-    assert len(role.full_metadata['versions']) == 2
-    v2 = role.full_metadata['versions'][1]
-    assert v2['name'] == github_reference_2
-    assert v2['version'] == github_reference_2
+    # the tag should be in the versions ...
+    vmap = dict((x['version'], x) for x in role.full_metadata['versions'])
+    assert github_reference in vmap
