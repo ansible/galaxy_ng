@@ -115,6 +115,16 @@ class LegacyNamespace(models.Model):
         return self.name
 
 
+class LegacyRoleTag(models.Model):
+    name = models.CharField(max_length=64, unique=True, editable=False)
+
+    def __repr__(self):
+        return f'<LegacyRoleTag: {self.name}>'
+
+    def __str__(self):
+        return self.name
+
+
 class LegacyRole(models.Model):
     """
     A legacy v1 role, which is just an index for github.
@@ -153,6 +163,8 @@ class LegacyRole(models.Model):
         null=False,
         default=dict
     )
+
+    tags = models.ManyToManyField(LegacyRoleTag, editable=False, related_name="legacyrole")
 
     def __repr__(self):
         return f'<LegacyRole: {self.namespace.name}.{self.name}>'
