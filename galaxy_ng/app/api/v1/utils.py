@@ -20,12 +20,26 @@ def sort_versions(versions):
         """
         Necessary until we normalize all versions.
         """
-        if version.get('tag'):
+        if version.get('version'):
+            return version['version']
+        elif version.get('tag'):
             return version['tag']
         elif version.get('name'):
             return version['name']
-        return version.get('version')
+        return ''
 
-    sorted_versions = sorted(versions, key=lambda x: LooseVersion(x['tag'].lower()))
+    try:
+        sorted_versions = sorted(
+            versions,
+            key=lambda x: LooseVersion(
+                get_version_tag(x).lower()
+            )
+        )
+    except TypeError:
+        # we did our best, it'll have to be unsorted.
+        return versions
+    except AttributeError:
+        # we did our best, it'll have to be unsorted.
+        return versions
 
     return sorted_versions
