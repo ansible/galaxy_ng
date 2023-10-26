@@ -183,8 +183,6 @@ def sort_versions(versions):
 
 def normalize_versions(versions):
 
-    original = [copy.deepcopy(x) for x in versions]
-
     # convert old integer based IDs to uuid
     for vix, version in enumerate(versions):
         if isinstance(version.get('id', ''), int):
