@@ -6,8 +6,6 @@ import subprocess
 import tempfile
 import uuid
 
-import semantic_version
-
 from django.db import transaction
 
 from ansible.module_utils.compat.version import LooseVersion
@@ -24,20 +22,13 @@ from galaxy_ng.app.utils.namespaces import generate_v3_namespace_from_attributes
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
+from galaxy_ng.app.api.v1.utils import sort_versions
+from galaxy_ng.app.api.v1.utils import parse_version_tag
 
 from git import Repo
 
 
 logger = logging.getLogger(__name__)
-
-
-def parse_version_tag(value):
-    value = str(value)
-    if not value:
-        raise ValueError('Empty version value')
-    if value[0].lower() == 'v':
-        value = value[1:]
-    return semantic_version.Version(value)
 
 
 def find_real_role(github_user, github_repo):
@@ -171,14 +162,6 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
         last_commit = gitrepo.head.commit
 
     return gitrepo, github_reference, last_commit
-
-
-def sort_versions(versions):
-    """
-    Use ansible-core's LooseVersion util to sort the versions.
-    """
-    sorted_versions = sorted(versions, key=lambda x: LooseVersion(x['tag'].lower()))
-    return sorted_versions
 
 
 def normalize_versions(versions):

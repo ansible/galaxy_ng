@@ -8,6 +8,7 @@ from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
+from galaxy_ng.app.api.v1.utils import sort_versions
 
 
 class LegacyNamespacesSerializer(serializers.ModelSerializer):
@@ -296,7 +297,8 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
 
         versions = obj.full_metadata.get('versions', [])
         if versions:
-            # the versions data should have been sorted at sync or import time
+            # FIXME - we can't assume they're all sorted yet
+            versions = sort_versions(versions)
             versions = versions[::-1]
             if len(versions) > 10:
                 versions = versions[:11]
@@ -449,6 +451,7 @@ class LegacyRoleVersionsSerializer(serializers.ModelSerializer):
     def get_results(self, obj):
 
         versions = obj.full_metadata.get('versions', [])
+        versions = sort_versions(versions)
 
         results = []
 
