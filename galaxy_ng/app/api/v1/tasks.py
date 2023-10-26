@@ -206,7 +206,7 @@ def normalize_versions(versions):
             versions.remove(version)
             continue
         lver = LooseVersion(version['tag'].lower())
-        if not all(isinstance(x, int) for x in lver.version):
+        if not any(isinstance(x, int) for x in lver.version):
             versions.remove(version)
 
     return versions
