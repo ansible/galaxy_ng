@@ -52,7 +52,7 @@ def process_namespace(namespace_name, namespace_info, force=False):
 
         namespace = legacy_namespace.namespace
         _owners = namespace_info['summary_fields']['owners']
-        _owners = [(x['github_id'], x['username']) for x in _owners]
+        _owners = [(x.get('github_id', -1), x['username']) for x in _owners]
         _matched_owners = [x for x in _owners if x[1].lower() == namespace_name.lower()]
 
         if _matched_owners:

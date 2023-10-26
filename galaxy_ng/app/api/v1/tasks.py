@@ -182,6 +182,9 @@ def sort_versions(versions):
 
 
 def normalize_versions(versions):
+
+    original = [copy.deepcopy(x) for x in versions]
+
     # convert old integer based IDs to uuid
     for vix, version in enumerate(versions):
         if isinstance(version.get('id', ''), int):
@@ -201,6 +204,9 @@ def normalize_versions(versions):
     # where previous galaxy_ng import code mistakenly thought
     # the branch+commit should be a version instead of only tags.
     for version in versions[:]:
+        if not version.get('tag'):
+            versions.remove(version)
+            continue
         lver = LooseVersion(version['tag'].lower())
         if not all(isinstance(x, int) for x in lver.version):
             versions.remove(version)

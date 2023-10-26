@@ -296,7 +296,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
 
         versions = obj.full_metadata.get('versions', [])
         if versions:
-            versions = sorted(versions, key=lambda x: x['commit_date'])
+            # the versions data should have been sorted at sync or import time
             versions = versions[::-1]
             if len(versions) > 10:
                 versions = versions[:11]

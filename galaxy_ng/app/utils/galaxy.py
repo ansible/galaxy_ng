@@ -517,9 +517,12 @@ def upstream_role_iterator(
         if limit is not None and role_count >= limit:
             break
 
-        # break if no next page
-        if not ds.get('next_link'):
+        if ds.get('next'):
+            next_url = ds['next']
+        elif ds.get('next_link'):
+            next_url = _baseurl + ds['next_link']
+        else:
+            # break if no next page
             break
 
         pagenum += 1
-        next_url = _baseurl + ds['next_link']
