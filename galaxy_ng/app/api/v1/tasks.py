@@ -9,6 +9,7 @@ import uuid
 import semantic_version
 
 from django.db import transaction
+from pulpcore.plugin.models import Task
 
 from ansible.module_utils.compat.version import LooseVersion
 
@@ -24,6 +25,7 @@ from galaxy_ng.app.utils.namespaces import generate_v3_namespace_from_attributes
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
+from galaxy_ng.app.api.v1.models import LegacyRoleImport
 
 from git import Repo
 
@@ -382,9 +384,13 @@ def legacy_role_import(
         logger.info(f'GITHUB_COMMIT_MESSAGE: {github_commit_message}')
         logger.info(f'GITHUB_COMMIT_DATE: {github_commit_date}')
 
+        # This LegacyRoleImport object will contain the logs for this import task.
+        LegacyRoleImport.objects.get_or_create(task_id=Task.current().pulp_id)
+        import_logger = logging.getLogger("galaxy_ng.app.api.v1.tasks.legacy_role_import")
+
         # Parse legacy role with galaxy-importer.
         importer_config = Config()
-        result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
+        result = import_legacy_role(checkout_path, namespace.name, importer_config, import_logger)
         galaxy_info = result["metadata"]["galaxy_info"]
         logger.debug(f"FOUND TAGS: {galaxy_info['galaxy_tags']}")
 
