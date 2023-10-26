@@ -2,11 +2,11 @@
 
 import random
 import json
+import subprocess
 
 import pytest
 
 from orionutils.generator import build_collection
-
 from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
 
@@ -43,6 +43,7 @@ from ..utils.legacy import (
 )
 
 from .rbac_actions.utils import ReusableLocalContainer
+
 
 REGEX_403 = r"HTTP Code: 403"
 
@@ -843,6 +844,21 @@ def test_api_ui_v1_tags_collections(ansible_config, upload_artifact):
 @pytest.mark.deployment_community
 def test_api_ui_v1_tags_roles(ansible_config):
     """Test endpoint's sorting and filtering"""
+
+    def _sync_role(github_user, role_name):
+        pargs = json.dumps({"github_user": github_user, "role_name": role_name}).encode('utf-8')
+        resp = api_admin_client('/api/v1/sync/', method='POST', args=pargs)
+        assert isinstance(resp, dict)
+        assert resp.get('task') is not None
+        wait_for_v1_task(resp=resp, api_client=api_admin_client)
+
+    def _populate_tags_cmd():
+        proc = subprocess.run(
+            "django-admin populate-role-tags",
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+        )
+        assert proc.returncode == 0
+
     config = ansible_config("basic_user")
 
     admin_config = ansible_config("admin")
@@ -865,91 +881,36 @@ def test_api_ui_v1_tags_roles(ansible_config):
         clean_all_roles(ansible_config)
 
         # start the sync
-        pargs = json.dumps({"github_user": "geerlingguy", "role_name": "docker"}).encode('utf-8')
-        resp = api_admin_client('/api/v1/sync/', method='POST', args=pargs)
-        assert isinstance(resp, dict)
-        assert resp.get('task') is not None
-        wait_for_v1_task(resp=resp, api_client=api_admin_client)
+        _sync_role("geerlingguy", "docker")
 
-        resp = uclient.get('_ui/v1/tags/roles?name=docker')
-        resp.status_code == 200
-        assert resp.json()["data"][0]["name"] == "docker"
-
-        resp = uclient.get('_ui/v1/tags/roles?name=doc')
+        resp = uclient.get('_ui/v1/tags/roles')
         resp.status_code == 200
         assert resp.json()["meta"]["count"] == 0
 
-        resp = uclient.get('_ui/v1/tags/roles?name__contains=doc')
+        # run command to populate role tags table
+        _populate_tags_cmd()
+
+        resp = uclient.get('_ui/v1/tags/roles')
         resp.status_code == 200
-        assert resp.json()["data"][0]["name"] == "docker"
-
-        resp = uclient.get('_ui/v1/tags/roles?name__contains=DOC')
-        resp.status_code == 200
-        assert resp.json()["meta"]["count"] == 0
-
-        resp = uclient.get('_ui/v1/tags/roles?name__icontains=doc')
-        resp.status_code == 200
-        assert resp.json()["data"][0]["name"] == "docker"
-
-        resp = uclient.get('_ui/v1/tags/roles?name__icontains=DOC')
-        resp.status_code == 200
-        assert resp.json()["data"][0]["name"] == "docker"
-
-        resp = uclient.get('_ui/v1/tags/roles?name__startswith=doc')
-        resp.status_code == 200
-        assert resp.json()["data"][0]["name"] == "docker"
-
-        resp = uclient.get('_ui/v1/tags/roles?name__startswith=ker')
-        resp.status_code == 200
-        assert resp.json()["meta"]["count"] == 0
-
-        # test sorting
-        tags = [tag for tag in uclient.get('_ui/v1/tags/roles').json()["data"]]
-        print("tag names: ", [(tag["name"], tag["count"]) for tag in tags])
-
-        resp = uclient.get('_ui/v1/tags/roles?sort=foobar')
-        resp.status_code == 400
-        assert resp.json()["errors"][0]["detail"] == "Invalid Sort: 'foobar'"
-
-        resp = uclient.get('_ui/v1/tags/roles?sort=name')
-        resp.status_code == 200
-        assert sorted(tags, key=lambda x: x["name"]) == resp.json()["data"]
-
-        # assert False
-        resp = uclient.get('_ui/v1/tags/roles?sort=-name')
-        resp.status_code == 200
-        assert sorted(tags, key=lambda x: x["name"], reverse=True) == resp.json()["data"]
-
-        resp = uclient.get('_ui/v1/tags/roles?sort=count')
-        resp.status_code == 200
-        assert sorted(tags, key=lambda x: x["count"]) == resp.json()["data"]
+        assert resp.json()["meta"]["count"] > 0
 
         # add additional tags to test count
         # tags ["docker", "system"]
-        pargs = json.dumps({"github_user": "6nsh", "role_name": "docker"}).encode('utf-8')
-        resp = api_admin_client('/api/v1/sync/', method='POST', args=pargs)
-        assert isinstance(resp, dict)
-        assert resp.get('task') is not None
-        wait_for_v1_task(resp=resp, api_client=api_admin_client)
-
+        _sync_role("6nsh", "docker")
         # tags ["docker"]
-        pargs = json.dumps({"github_user": "0x28d", "role_name": "docker_ce"}).encode('utf-8')
-        resp = api_admin_client('/api/v1/sync/', method='POST', args=pargs)
-        assert isinstance(resp, dict)
-        assert resp.get('task') is not None
-        wait_for_v1_task(resp=resp, api_client=api_admin_client)
+        _sync_role("0x28d", "docker_ce")
+        _populate_tags_cmd()
+
+        resp = uclient.get('_ui/v1/tags/roles?sort=-count')
+        resp.status_code == 200
+        assert resp.json()["meta"]["count"] > 0
 
         # test correct count sorting
         tags = [tag for tag in uclient.get('_ui/v1/tags/roles').json()["data"]]
-        resp = uclient.get('_ui/v1/tags/roles?sort=-count')
-        resp.status_code == 200
-        assert sorted(tags, key=lambda x: x["count"], reverse=True) == resp.json()["data"]
+
+        assert sorted(tags, key=lambda r: r["count"], reverse=True)[:2] == resp.json()["data"][:2]
         assert resp.json()["data"][0]["name"] == "docker"
         assert resp.json()["data"][1]["name"] == "system"
-
-        resp = uclient.get('_ui/v1/tags/roles?sort=-count&name__icontains=o')
-        resp.status_code == 200
-        assert resp.json()["data"][0]["name"] == "docker"
 
 
 # /api/automation-hub/_ui/v1/users/

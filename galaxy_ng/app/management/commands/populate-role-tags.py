@@ -1,3 +1,5 @@
+from gettext import gettext as _
+
 import django_guid
 from django.core.management.base import BaseCommand
 
@@ -15,7 +17,7 @@ class Command(BaseCommand):
     This command is run nightly on galaxy.ansible.com.
     """
 
-    help = "Populate the 'LegacyRoleTag' model with tags from LegacyRole 'full_metadata__tags'."
+    help = _("Populate the 'LegacyRoleTag' model with tags from LegacyRole 'full_metadata__tags'.")
 
     def handle(self, *args, **options):
         for role in LegacyRole.objects.all():
