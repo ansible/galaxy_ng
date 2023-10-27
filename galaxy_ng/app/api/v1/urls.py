@@ -36,7 +36,7 @@ urlpatterns = [
 
     path(
         'roles/<int:pk>/',
-        LegacyRolesViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
+        LegacyRolesViewSet.as_view({"get": "retrieve", "delete": "destroy", "put": "update"}),
         name='legacy_role-detail'
     ),
 

@@ -313,6 +313,15 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
                 'pulp_href': pulp_href
             }
 
+        # FIXME - repository is a bit hacky atm
+        repository = {}
+        if obj.full_metadata.get('repository'):
+            repository = obj.full_metadata.get('repository')
+        if not repository.get('name'):
+            repository['name'] = obj.full_metadata.get('github_repo')
+        if not repository.get('original_name'):
+            repository['original_name'] = obj.full_metadata.get('github_repo')
+
         return {
             'dependencies': dependencies,
             'namespace': {
@@ -321,10 +330,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
                 'avatar_url': f'https://github.com/{obj.namespace.name}.png'
             },
             'provider_namespace': provider_ns,
-            'repository': {
-                'name': obj.name,
-                'original_name': obj.full_metadata.get('github_repo')
-            },
+            'repository': repository,
             'tags': tags,
             'versions': versions
         }
@@ -334,6 +340,40 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         if counter:
             return counter.count
         return 0
+
+
+class LegacyRoleRepositoryUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False, allow_blank=False, max_length=50)
+    original_name = serializers.CharField(required=False, allow_blank=False, max_length=50)
+
+    def is_valid(self, raise_exception=False):
+        # Check for any unexpected fields
+        extra_fields = set(self.initial_data.keys()) - set(self.fields.keys())
+        if extra_fields:
+            self._errors = {field: ["Unexpected field."] for field in extra_fields}
+        else:
+            # Continue with the original validation logic
+            super(serializers.Serializer, self).is_valid(raise_exception=raise_exception)
+
+        return not bool(self._errors)
+
+
+class LegacyRoleUpdateSerializer(serializers.Serializer):
+    github_user = serializers.CharField(required=False, allow_blank=False, max_length=50)
+    github_repo = serializers.CharField(required=False, allow_blank=False, max_length=50)
+    github_branch = serializers.CharField(required=False, allow_blank=False, max_length=50)
+    repository = LegacyRoleRepositoryUpdateSerializer(required=False)
+
+    def is_valid(self, raise_exception=False):
+        # Check for any unexpected fields
+        extra_fields = set(self.initial_data.keys()) - set(self.fields.keys())
+        if extra_fields:
+            self._errors = {field: ["Unexpected field."] for field in extra_fields}
+        else:
+            # Continue with the original validation logic
+            super(serializers.Serializer, self).is_valid(raise_exception=raise_exception)
+
+        return not bool(self._errors)
 
 
 class LegacyRoleContentSerializer(serializers.ModelSerializer):

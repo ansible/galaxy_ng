@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import mixins
 from rest_framework import viewsets
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.settings import perform_import
 from rest_framework.pagination import PageNumberPagination
@@ -24,6 +25,7 @@ from galaxy_ng.app.api.v1.models import (
 from galaxy_ng.app.api.v1.serializers import (
     LegacyImportSerializer,
     LegacyRoleSerializer,
+    LegacyRoleUpdateSerializer,
     LegacyRoleContentSerializer,
     LegacyRoleVersionsSerializer,
 )
@@ -93,6 +95,48 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
                             raise e
 
         return super().list(request)
+
+    def update(self, request, pk=None):
+        role = self.get_object()
+        serializer = LegacyRoleUpdateSerializer(role, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        changed = {}
+        for key, newval in serializer.validated_data.items():
+
+            # repositories are special ...
+            if key == 'repository':
+                if not role.full_metadata.get('repository'):
+                    changed['repository'] = {}
+                    role.full_metadata['repository'] = {}
+                for subkey, subval in newval.items():
+                    print(f'{key}.{subkey} {role.full_metadata[key].get(subkey)} --> {subval}')
+                    if role.full_metadata.get(key, {}).get(subkey) != subval:
+                        if key not in changed:
+                            changed[key] = {}
+                        role.full_metadata[key][subkey] = subval
+                        changed[key][subkey] = subval
+                continue
+
+            print(f'{key} {role.full_metadata.get(key)} --> {newval}')
+            if role.full_metadata.get(key) != newval:
+                role.full_metadata[key] = newval
+                changed[key] = newval
+
+            # TODO - get rid of github_reference?
+            if key == 'github_branch':
+                key = 'github_reference'
+                if role.full_metadata.get(key) != newval:
+                    role.full_metadata[key] = newval
+                    changed[key] = newval
+
+        # only save if changes made
+        if changed:
+            role.save()
+            return Response(changed, status=200)
+
+        return Response(changed, status=204)
 
     def destroy(self, request, pk=None):
         """Delete a single role."""
