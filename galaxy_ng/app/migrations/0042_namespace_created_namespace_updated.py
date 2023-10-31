@@ -11,8 +11,8 @@ def set_default_timestamps(apps, schema_editor):
         if not obj.created:
             obj.created = django.utils.timezone.now()
             changed = True
-        if not obj.udated:
-            obj.updated_at = django.utils.timezone.now()
+        if not obj.updated:
+            obj.updated = django.utils.timezone.now()
             changed = True
         if changed:
             obj.save()
