@@ -111,13 +111,21 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
                     changed['repository'] = {}
                     role.full_metadata['repository'] = {}
                 for subkey, subval in newval.items():
-                    print(f'{key}.{subkey} {role.full_metadata[key].get(subkey)} --> {subval}')
                     if role.full_metadata.get(key, {}).get(subkey) != subval:
                         if key not in changed:
                             changed[key] = {}
                         role.full_metadata[key][subkey] = subval
                         changed[key][subkey] = subval
                 continue
+
+            # github_repo should set repository.name?
+            if key == 'github_repo':
+                if not role.full_metadata.get('repository'):
+                    changed['repository'] = {}
+                    role.full_metadata['repository'] = {}
+                old_name = role.full_metadata['repository'].get('name')
+                role.full_metadata['repository']['name'] = newval
+                role.full_metadata['repository']['original_name'] = old_name
 
             if role.full_metadata.get(key) != newval:
                 role.full_metadata[key] = newval
