@@ -56,6 +56,11 @@ class Namespace(
         related_name="galaxy_namespace"
     )
 
+    # We use these to keep track of newly created and updated namespaces
+    # from social auth pipelines.
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
     @property
     def avatar_url(self):
         # TODO: remove this once we can fix the content app on CRC
