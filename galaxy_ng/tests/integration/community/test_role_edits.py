@@ -1,7 +1,3 @@
-import os
-# import subprocess
-import tempfile
-
 import pytest
 
 # from ..utils import ansible_galaxy, get_client, SocialGithubClient
@@ -54,7 +50,7 @@ def test_community_legacy_role_edit(ansible_config):
     }
     admin_client(f"/api/v1/namespaces/{v1_ns['id']}/providers/", method='POST', args=v3_bind)
 
-    # import jctanerTEST role1 
+    # import jctanerTEST role1
     pid = ansible_galaxy(
         f"role import {github_user} {github_repo} --branch={branch}",
         ansible_config=admin_config,
@@ -133,5 +129,5 @@ def test_community_legacy_role_edit(ansible_config):
     # cleanup the role ...
     try:
         admin_client(f'/api/v1/roles/{role_id}/', method='DELETE')
-    except Exception as e:
+    except Exception:
         pass
