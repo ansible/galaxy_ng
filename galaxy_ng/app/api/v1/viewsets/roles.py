@@ -119,7 +119,6 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
                         changed[key][subkey] = subval
                 continue
 
-            print(f'{key} {role.full_metadata.get(key)} --> {newval}')
             if role.full_metadata.get(key) != newval:
                 role.full_metadata[key] = newval
                 changed[key] = newval
