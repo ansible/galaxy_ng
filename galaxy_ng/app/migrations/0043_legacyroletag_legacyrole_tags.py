@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("galaxy", "0041_alter_containerregistryremote_remote_ptr"),
+        ("galaxy", "0042_namespace_created_namespace_updated"),
     ]
 
     operations = [

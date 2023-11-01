@@ -20,7 +20,17 @@ class Command(BaseCommand):
     help = _("Populate the 'LegacyRoleTag' model with tags from LegacyRole 'full_metadata__tags'.")
 
     def handle(self, *args, **options):
-        for role in LegacyRole.objects.all():
+        created_tags = []
+        roles = LegacyRole.objects.all()
+        for role in roles:
             for name in role.full_metadata["tags"]:
-                tag = LegacyRoleTag.objects.get_or_create(name=name)
-                tag[0].legacyrole.add(role)
+                tag, created = LegacyRoleTag.objects.get_or_create(name=name)
+                tag.legacyrole.add(role)
+
+                if created:
+                    created_tags.append(tag)
+
+        self.stdout.write(
+            "Successfully populated {} tags "
+            "from {} roles.".format(len(created_tags), len(roles))
+        )
