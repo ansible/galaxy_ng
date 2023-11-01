@@ -10,7 +10,11 @@ from .collection import (
 )
 from .my_namespace import MyNamespaceViewSet
 from .my_synclist import MySyncListViewSet
-from .tags import TagsViewSet
+from .tags import (
+    TagsViewSet,
+    CollectionsTagsViewSet,
+    RolesTagsViewSet
+)
 from .user import UserViewSet, CurrentUserViewSet
 from .synclist import SyncListViewSet
 from .root import APIRootView
@@ -30,6 +34,8 @@ __all__ = (
     'CollectionImportViewSet',
     'CollectionRemoteViewSet',
     'TagsViewSet',
+    'CollectionsTagsViewSet',
+    'RolesTagsViewSet',
     'CurrentUserViewSet',
     'UserViewSet',
     'SyncListViewSet',

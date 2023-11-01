@@ -25,6 +25,10 @@ router.register('remotes', viewsets.CollectionRemoteViewSet, basename='remotes')
 router.register('distributions', viewsets.DistributionViewSet, basename='distributions')
 router.register('my-distributions', viewsets.MyDistributionViewSet, basename='my-distributions')
 
+router.register('tags/collections', viewsets.CollectionsTagsViewSet, basename='collections-tags')
+router.register('tags/roles', viewsets.RolesTagsViewSet, basename='roles-tags')
+
+
 auth_views = [
     path("login/", views.LoginView.as_view(), name="auth-login"),
     path("logout/", views.LogoutView.as_view(), name="auth-logout"),

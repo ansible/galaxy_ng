@@ -6,7 +6,7 @@ from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.namespace import Namespace
 from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 from galaxy_ng.app.api.v1.models import LegacyNamespace
-from galaxy_ng.app.api.v1.models import LegacyRole
+from galaxy_ng.app.api.v1.models import LegacyRole, LegacyRoleTag
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 from galaxy_ng.app.api.v1.utils import sort_versions
 
@@ -602,3 +602,12 @@ class LegacyTaskDetailSerializer(serializers.Serializer):
     class Meta:
         model = None
         fields = ['results']
+
+
+class LegacyRoleTagSerializer(serializers.ModelSerializer):
+
+    count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = LegacyRoleTag
+        fields = ['name', 'count']
