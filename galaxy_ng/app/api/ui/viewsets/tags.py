@@ -107,6 +107,7 @@ class RolesTagsViewSet(
 ):
     """
     ViewSet for roles' tags within the system.
+    Tags can be populated manually by running `django-admin populate-role-tags`.
     """
     queryset = LegacyRoleTag.objects.all()
     serializer_class = LegacyRoleTagSerializer
