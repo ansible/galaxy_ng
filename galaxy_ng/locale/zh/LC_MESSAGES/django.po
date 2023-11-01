@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-01 05:35+0000\n"
+"POT-Creation-Date: 2023-11-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,6 @@ msgid "Must be a super user to grant super user permissions."
 msgstr "必须是超级用户才能授予超级用户权限。"
 
 #: app/api/ui/serializers/user.py:109
-#| msgid "Must be a super user to grant super user permissions."
 msgid "Must be a super user to change another user's password."
 msgstr ""
 
