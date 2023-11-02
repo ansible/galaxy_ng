@@ -109,6 +109,82 @@ Collection installs should work as they did before with https://galaxy.ansible.c
 
 Role imports are only supported through the ansible galaxy cli. Once a valid ansible.cfg is setup, run the `ansible-galaxy role import` command to import one of your roles hosted on https://github.com
 
+`ansible-galaxy role import <github_user> <github_repo>`
+
+#### Role Versions
+
+Role versions are derived from semantic version compliant git tags. During the import process, the backend looks for any git tag that is semver compatible (with the preceding v or V removed) and adds those as role versions.
+
+## Updating Roles
+
+Roles are "updated" by re-importing them.
+
+`ansible-galaxy role import <github_user> <github_repo>`
+
+## Deleting Roles
+
+Roles can be deleted either via the ansible-galaxy CLI or with any http client (curl for example).
+
+### ansible-galaxy CLI
+
+`ansible-galaxy role delete <github_user> <github_repo>`
+
+### http client
+
+First, find the exact role id you'd like to delete.
+
+`curl https://galaxy.ansible.com/api/v1/roles/?owner__username=<NAMESPACE_NAME>&name=<ROLE_NAME>`
+
+Now issue a DELETE call to the role via it's full url.
+
+`curl -X DELETE -H 'Authorization: token <TOKEN>' https://galaxy.ansible.com/api/v1/roles/<ROLE_ID>/`
+
+
+## Changing Roles
+
+Every role has a unique identifier which we call the "fully qualified name", FQN for short. If the role's name or namespace name are changed, installations of the previous FQN will fail.
+
+In many cases the FQN matches the `github_user` and `github_repo`, but there are many exceptions. For example, many roles are hosted in github repositories named `ansible-role-<ROLENAME>`. At import time, the backend server will auto-trim the `ansible-role-` prefix to create the role's true name. There are also cases where an admin created a custom namespace in the old galaxy for a user and then through the UI a role was imported into that specific namespace, because the CLI wouldn't have been able to handle it. There are also cases where the github_user or github_repo were renamed on github which lead to an FQN that no longer matched those attributes.
+
+Having a role FQN that does not closely resemble the github_user and github_repo the role comes from can lead to various problems:
+
+* Naming collisions.
+  * If a user changes their github login without changing the role namespace&github_user, the old login can be reclaimed by anyone and the integrity of galaxy's ownership for the roles is compromised.
+  * If someone else besides the role auther currently has a matching github login, that person will be forced to use a different namespace in galaxy should they ever use the system.
+* Confusion.
+  * If a user's github login got created as a custom namespace by someone else before they ever log into galaxy, users aren't going to know which namespace is the true person.
+  * A role user knows to install by the FQN as that is what is referenced on blog posts or other social media and what goes into requirements.yml. If the role namespace or name change, all of those internet references are no longer valid. The users will have to come to galaxy and try to find what the role has been renamed to via the search.
+  * Curators and admins of galaxy spend a lot of time trying to sort out why github user "foo" doesn't own namespace "bar" or why "Foo" doesn't own "foo" or why "jimbob" can't import roles into "jimB0B".
+
+### Changing the namespace name or the github_user
+
+Should you decide that your roles would be better under a different namespace or github_user, here is the suggested path ... 
+
+1. Delete the roles by ID as they currently exist on galaxy.
+2. Create a new username on github.
+3. Move the roles's github repositories to the new github username.
+4. Login to galaxy with the new github username. (Namespaces will auto-create at login time)
+5. Create a galaxy API token for the new username.
+6. Re-import the roles from their new location. `ansible-galaxy role import <new_github_user> <reponame>`
+
+We suggest picking a github username that is all lowercase, starts with a letter and does not contain hyphens. That ensures that no name conversion will be necessary for the corresponding collection namespace where ownership will be controlled.
+
+### Changing the github_repository
+
+1. Delete the role by it's current ID with an HTTP client..
+2. Rename the roles's github repository to a new name.
+3. Re-import the role from the new location. `ansible-galaxy role import <github_user> <new_repository_name>`
+
+### Changing the role name
+
+There are two ways to accomplish this and both involve re-importing the role.
+
+A. `ansible-galaxy role import --role-name=<NEW_NAME> <github_user> <github_repo>`
+B. Alter the `name` field in the role's `meta/main.yml` file and then import `ansible-galaxy role import <github_user> <github_repo>`
+
+The second option is much more predictable and reliable.
+
+
 ## Uploading Collections
 
 Collections can be uploaded either by the ansible galaxy CLI or in the GalaxyNG web interface.
