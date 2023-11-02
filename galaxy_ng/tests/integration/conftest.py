@@ -531,6 +531,20 @@ def generate_test_artifact(ansible_config):
     delete_collection(gc_admin, namespace=artifact.namespace, collection=artifact.name)
 
 
+@pytest.fixture(scope="function")
+def keep_generated_test_artifact(ansible_config):
+    """
+    Generates a test artifact
+    """
+    github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES["github_user"]["username"]
+    expected_ns = f"{github_user_username}".replace("-", "_")
+    test_version = generate_random_artifact_version()
+    return build_collection(
+        "skeleton",
+        config={"namespace": expected_ns, "version": test_version, "tags": ["tools"]},
+    )
+
+
 def min_hub_version(ansible_config, spec):
     version = get_hub_version(ansible_config)
     return Requirement.parse(f"galaxy_ng<{spec}").specifier.contains(version)

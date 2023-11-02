@@ -22,10 +22,11 @@ from orionutils.generator import randstr
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
+from galaxykit.collections import delete_collection
 from .tasks import wait_for_task as gng_wait_for_task
-from galaxykit.utils import wait_for_url, wait_for_task
+from galaxykit.utils import wait_for_url, wait_for_task, GalaxyClientError
 
-from .tools import iterate_all
+from .tools import iterate_all, iterate_all_gk
 from .iqe_utils import get_ansible_config, get_galaxy_client
 
 try:
@@ -60,7 +61,6 @@ def build_collection(
     dependencies=None,
     requires_ansible='>=2.13.0',
     roles=['docker_role'],
-    # use_orionutils=True
     use_orionutils=False
 ) -> ArtifactFile:
 
@@ -724,3 +724,52 @@ def add_multipart_field(
         b"",
         value,
     ]
+
+
+def get_all_collections_in_ns(gc_admin, namespace):
+    """ Return a dict of each repo and their collections """
+    collections = []
+    next_page = f"_ui/v1/repo/published/?namespace={namespace}"
+    while next_page:
+        collection_list = gc_admin.get(next_page)
+        for _collection in collection_list["data"]:
+            name = _collection['name']
+            collections.append(name)
+        next_page = collection_list["links"]["next"]
+    return collections
+
+
+def delete_all_collections_in_namespace_gk(gc_admin, namespace_name):
+    collections = get_all_collections_in_ns(gc_admin, namespace_name)
+    for collection in collections:
+        recursive_delete_gk(gc_admin, namespace_name=namespace_name, cname=collection)
+
+
+def recursive_delete_gk(gc_admin, namespace_name, cname, crepo="published"):
+    """Recursively delete a collection along with every other collection that depends on it."""
+    dependants = set([
+        (cv["namespace"], cv["name"]) for cv in iterate_all_gk(
+            gc_admin,
+            f"_ui/v1/collection-versions/?dependency={namespace_name}.{cname}"
+        )
+    ])
+
+    if dependants:
+        for ns, name in dependants:
+            recursive_delete_gk(gc_admin, ns, name, crepo)
+
+    # Try deleting the whole collection ...
+    try:
+        resp = delete_collection(gc_admin, namespace=namespace_name, collection=cname)
+    except GalaxyClientError as ge:
+        print(ge)
+        pass
+    # wait for the orphan_cleanup job to finish ...
+    try:
+        wait_for_task(gc_admin, resp, timeout=10000)
+    except GalaxyError as ge:
+        # FIXME - pulp tasks do not seem to accept token auth
+        if ge.http_code in [403, 404]:
+            time.sleep(SLEEP_SECONDS_ONETIME)
+        else:
+            raise Exception(ge)
