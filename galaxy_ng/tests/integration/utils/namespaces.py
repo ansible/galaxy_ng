@@ -4,8 +4,8 @@ import logging
 import random
 import string
 
-from .collections import delete_all_collections_in_namespace
-
+from .collections import delete_all_collections_in_namespace, \
+    delete_all_collections_in_namespace_gk
 
 logger = logging.getLogger(__name__)
 
@@ -99,4 +99,24 @@ def cleanup_namespace(name, api_client=None):
                 pass
 
         resp = api_client(f'{api_prefix}/v3/namespaces/?name={name}', method='GET')
+        assert resp['meta']['count'] == 0
+
+
+def cleanup_namespace_gk(name, gc_admin):
+
+    resp = gc_admin.get(f'v3/namespaces/?name={name}')
+    if resp['meta']['count'] > 0:
+        delete_all_collections_in_namespace_gk(gc_admin, name)
+
+        for result in resp['data']:
+            ns_name = result['name']
+            ns_url = f"v3/namespaces/{ns_name}/"
+
+            # exception on json parsing expected ...
+            try:
+                gc_admin.delete(ns_url)
+            except Exception:
+                pass
+
+        resp = gc_admin.get(f'v3/namespaces/?name={name}')
         assert resp['meta']['count'] == 0

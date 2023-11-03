@@ -89,3 +89,19 @@ def delete_user(username, api_client=None):
     except Exception as e:
         error = str(e)
         assert 'as JSON' in error, e
+
+
+def delete_group_gk(groupname, gc_admin):
+    resp = gc_admin.get(f'_ui/v1/groups/?name={groupname}')
+
+    if resp['meta']['count'] == 0:
+        return
+
+    ginfo = resp['data'][0]
+    gid = ginfo['id']
+
+    try:
+        resp = gc_admin.delete(f'_ui/v1/groups/{gid}/')
+    except Exception as e:
+        error = str(e)
+        assert 'as JSON' in error, e

@@ -205,3 +205,130 @@ def test_social_download_artifact(gh_user_1, generate_test_artifact):
         assert ci.namespace == expected_ns
         assert ci.name == generate_test_artifact.name
         assert ci.version == generate_test_artifact.version
+
+
+@pytest.mark.galaxy_stage_ansible
+def test_social_auth_delete_collection(gh_user_1, keep_generated_test_artifact, galaxy_client):
+    expected_ns = f"{gh_user_1.username}".replace("-", "_")
+    resp = upload_artifact(None, gh_user_1, keep_generated_test_artifact)
+    logger.debug("Waiting for upload to be completed")
+    resp = wait_for_task(gh_user_1, resp)
+    assert resp["state"] == "completed"
+
+    gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
+    gc.delete_collection(namespace=expected_ns, collection=keep_generated_test_artifact.name,
+                         version=keep_generated_test_artifact.version, repository="published")
+
+
+@pytest.mark.galaxy_stage_ansible
+def test_social_auth_deprecate_collection(gh_user_1, generate_test_artifact, galaxy_client):
+    expected_ns = f"{gh_user_1.username}".replace("-", "_")
+    resp = upload_artifact(None, gh_user_1, generate_test_artifact)
+    logger.debug("Waiting for upload to be completed")
+    resp = wait_for_task(gh_user_1, resp)
+    assert resp["state"] == "completed"
+    gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
+    gc.deprecate_collection(namespace=expected_ns, collection=generate_test_artifact.name,
+                            repository="published")
+    r = gc.get(f"v3/plugin/ansible/content/published/collections/index/"
+               f"{expected_ns}/{generate_test_artifact.name}/")
+    assert r["deprecated"] is True
+
+
+@pytest.mark.galaxy_stage_ansible
+def test_social_auth_creates_v3_namespace_as_v1_provider(gh_user_1):
+
+    resp = gh_user_1.get(f'v1/namespaces/?name={gh_user_1.username}')
+    v1_namespace = resp['results'][0]
+    provider_namespace = v1_namespace['summary_fields']['provider_namespaces'][0]
+    assert provider_namespace['name'] == gh_user_1.username.lower().replace("-", "_")
+    github_repo = 'role1'
+    import_pid = ansible_galaxy(
+        f"role import {gh_user_1.username} {github_repo}",
+        server_url=gh_user_1.galaxy_root,
+        force_token=True,
+        token=gh_user_1.get_token(),
+        check_retcode=False
+    )
+    assert import_pid.returncode == 0
+    res = gh_user_1.get(f'v1/roles/?owner__username={gh_user_1.username}&name={github_repo}')
+    role = res['results'][0]
+    provider_namespace = role['summary_fields']['provider_namespace']
+    assert provider_namespace['name'] == gh_user_1.username.lower().replace("-", "_")
+
+
+@pytest.mark.galaxy_stage_ansible
+def test_v1_owner_username_filter_is_case_insensitive(galaxy_client, gh_user_1):
+    """" Tests if v1 sync accepts a user&limit arg """
+    gc_admin = galaxy_client("admin")
+    github_repo = 'role1'
+    r = get_me(gh_user_1)
+    assert r['username'] == gh_user_1.username
+
+    # Run the import
+    import_pid = ansible_galaxy(
+        f"role import {gh_user_1.username} {github_repo}",
+        server_url=gh_user_1.galaxy_root,
+        force_token=True,
+        token=gh_user_1.get_token(),
+        check_retcode=False,
+        cleanup=False
+    )
+    assert import_pid.returncode == 0
+
+    # verify filtering in the way that the CLI does it
+    resp = gc_admin.get(f'/api/v1/roles/?owner__username={gh_user_1.username}')
+    assert resp['count'] == 1
+    assert resp['results'][0]['username'] == gh_user_1.username
+    roleid = resp['results'][0]['id']
+
+    # verify filtering with the username as lowercase ...
+    resp2 = gc_admin.get(f'/api/v1/roles/?owner__username={gh_user_1.username.lower()}')
+    assert resp2['count'] == 1
+    assert resp2['results'][0]['username'] == gh_user_1.username
+    roleid2 = resp2['results'][0]['id']
+
+    # roleids should match
+    assert roleid == roleid2
+
+
+@pytest.mark.galaxy_stage_ansible
+def test_v1_users_filter(galaxy_client, gh_user_1):
+    """" Tests v1 users filter works as expected """
+    gc_admin = galaxy_client("admin")
+    resp = gc_admin.get('/api/v1/users/')
+    assert len(resp["results"]) > 0
+    resp = gc_admin.get(f'/api/v1/users/?username={gh_user_1.username}')
+    assert resp["count"] == 1
+    assert resp["results"][0]["username"] == gh_user_1.username
+    resp = gc_admin.get('/api/v1/users/?username=user_should_not_exist')
+    assert resp["count"] == 0
+
+
+@pytest.mark.galaxy_stage_ansible
+def test_custom_browsable_format(galaxy_client, gh_user_1):
+    """" Test endpoints works with enabled browsable api """
+
+    # test as a admin
+    gc_admin = galaxy_client("admin")
+    resp = gc_admin.get("v1/namespaces/")
+    assert "results" in resp
+
+    resp = gc_admin.get("v1/namespaces/?format=json")
+    assert isinstance(resp, dict)
+    assert "results" in resp
+
+    resp = gc_admin.get("v1/namespaces/", headers={"Accept": "text/html"}, parse_json=False)
+    assert "results" in str(resp.content)
+
+    # test as a basic user
+    resp = gh_user_1.get("v1/namespaces/")
+    assert isinstance(resp, dict)
+    assert "results" in resp
+
+    resp = gh_user_1.get("v1/namespaces/?format=json")
+    assert isinstance(resp, dict)
+    assert "results" in resp
+
+    resp = gh_user_1.get("v1/namespaces/", headers={"Accept": "text/html"}, parse_json=False)
+    assert "results" in str(resp.content)
