@@ -94,8 +94,10 @@ class LegacyTasksMixin:
             for message in roleimport.messages:
                 msg_type = msg_type_map.get(message['level'], message['level'])
                 ts = datetime.datetime.utcfromtimestamp(message['time']).isoformat()
+                msg_state = state_map.get(message['state'].upper(), message['state'].upper())
                 msg = {
                     'id': ts,
+                    'state': msg_state,
                     'message_type': msg_type,
                     'message_text': message['message']
                 }

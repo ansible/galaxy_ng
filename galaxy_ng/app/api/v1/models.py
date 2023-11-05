@@ -194,7 +194,7 @@ class LegacyRoleImport(models.Model):
     class Meta:
         ordering = ["task__pulp_created"]
 
-    def add_log_record(self, log_record):
+    def add_log_record(self, log_record, state=None):
         """
         Records a single log message but does not save the LegacyRoleImport object.
 
@@ -202,6 +202,9 @@ class LegacyRoleImport(models.Model):
             log_record(logging.LogRecord): The logging record to record on messages.
 
         """
-        self.messages.append(
-            {"message": log_record.msg, "level": log_record.levelname, "time": log_record.created}
-        )
+        self.messages.append({
+                "state": state,
+                "message": log_record.msg,
+                "level": log_record.levelname,
+                "time": log_record.created
+        })

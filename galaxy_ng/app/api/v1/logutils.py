@@ -27,6 +27,9 @@ class LegacyRoleImportHandler(logging.Handler):
         if not LegacyRoleImport.objects.filter(task=Task.current().pulp_id).exists():
             return
 
-        legacyrole_import = LegacyRoleImport.objects.get(task=Task.current().pulp_id)
-        legacyrole_import.add_log_record(record)
+        # fetch the task
+        task = Task.current()
+
+        legacyrole_import = LegacyRoleImport.objects.get(task=task.pulp_id)
+        legacyrole_import.add_log_record(record, state=task.state)
         legacyrole_import.save()

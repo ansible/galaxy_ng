@@ -57,7 +57,7 @@ def test_admin_can_import_legacy_roles(ansible_config):
     res = wait_for_v1_task(task_id=task_id, api_client=admin_client, check=False)
 
     # it should have failed because of the missing v1+v3 namespaces ...
-    assert res['results'][0]['summary_fields']['task_messages'][0]['state'] == 'FAILED', res
+    assert res['results'][0]['state'] == 'FAILED', res
 
     # make the legacy namespace
     ns_payload = {
@@ -92,7 +92,7 @@ def test_admin_can_import_legacy_roles(ansible_config):
     resp = admin_client('/api/v1/imports/', method='POST', args=payload)
     task_id = resp['results'][0]['id']
     res = wait_for_v1_task(task_id=task_id, api_client=admin_client, check=False)
-    assert res['results'][0]['summary_fields']['task_messages'][0]['state'] == 'SUCCESS', res
+    assert res['results'][0]['state'] == 'SUCCESS', res
 
 
 @pytest.mark.skip(reason="not ready yet")
