@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0107_distribution_hidden"),
-        ("galaxy", "0042_namespace_created_namespace_updated"),
+        ("galaxy", "0043_legacyroletag_legacyrole_tags"),
     ]
 
     operations = [
