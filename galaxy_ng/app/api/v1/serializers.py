@@ -72,6 +72,11 @@ class LegacyNamespacesSerializer(serializers.ModelSerializer):
         return {'owners': owners, 'provider_namespaces': providers}
 
     def get_avatar_url(self, obj):
+
+        # prefer the provider avatar url
+        if obj.namespace and obj.namespace.avatar_url:
+            return obj.namespace.avatar_url
+
         url = f'https://github.com/{obj.name}.png'
         return url
 
@@ -322,12 +327,18 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         if not repository.get('original_name'):
             repository['original_name'] = obj.full_metadata.get('github_repo')
 
+        # prefer the provider avatar url
+        avatar_url = f'https://github.com/{obj.namespace.name}.png'
+        if obj.namespace and obj.namespace.namespace:
+            if obj.namespace.namespace.avatar_url:
+                avatar_url = obj.namespace.namespace.avatar_url
+
         return {
             'dependencies': dependencies,
             'namespace': {
                 'id': obj.namespace.id,
                 'name': obj.namespace.name,
-                'avatar_url': f'https://github.com/{obj.namespace.name}.png'
+                'avatar_url': avatar_url
             },
             'provider_namespace': provider_ns,
             'repository': repository,
