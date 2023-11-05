@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("galaxy", "0042_namespace_created_namespace_updated"),
+        ("galaxy", "0043_legacyroleimport"),
     ]
 
     operations = [
