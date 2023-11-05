@@ -203,8 +203,8 @@ class LegacyRoleImport(models.Model):
 
         """
         self.messages.append({
-                "state": state,
-                "message": log_record.msg,
-                "level": log_record.levelname,
-                "time": log_record.created
+            "state": state,
+            "message": log_record.msg,
+            "level": log_record.levelname,
+            "time": log_record.created
         })
