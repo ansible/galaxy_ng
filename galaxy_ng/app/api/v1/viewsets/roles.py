@@ -21,9 +21,11 @@ from galaxy_ng.app.api.v1.tasks import (
 from galaxy_ng.app.api.v1.models import (
     LegacyRole,
     LegacyRoleDownloadCount,
+    LegacyRoleImport,
 )
 from galaxy_ng.app.api.v1.serializers import (
     LegacyImportSerializer,
+    LegacyImportListSerializer,
     LegacyRoleSerializer,
     LegacyRoleUpdateSerializer,
     LegacyRoleContentSerializer,
@@ -216,15 +218,43 @@ class LegacyRoleVersionsViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMix
         return get_object_or_404(LegacyRole, id=self.kwargs["pk"])
 
 
-class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
+#class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
+class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
     """Legacy role imports."""
 
-    serializer_class = LegacyImportSerializer
+    serializer_class = LegacyImportListSerializer
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
+    queryset = LegacyRoleImport.objects.order_by('task__pulp_created')
+
+    def list(self, request, *args, **kwargs):
+        """
+        List view for import tasks.
+
+        v1's list view shows summaries, however if the "id"
+        parameter is given it returns a detail view that includes
+        log messages.
+        """
+        if request.query_params.get('id'):
+            return self.get_task(request, id=int(request.query_params['id']))
+        return super(LegacyRoleImportsViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Detail view for an import task.
+        """
+        return self.get_task(request, id=int(kwargs['pk']))
 
     def create(self, request):
-        serializer = self.get_serializer(data=request.data)
+        """
+        Create view for imports.
+
+        Starts a new import task by dispatching it
+        to the pulp tasking system and translating the
+        task UUID to an integer to retain v1 compatibility.
+        """
+        serializer_class = LegacyImportSerializer
+        serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         kwargs = dict(serializer.validated_data)
 

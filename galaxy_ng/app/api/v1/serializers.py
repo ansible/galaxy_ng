@@ -10,6 +10,11 @@ from galaxy_ng.app.api.v1.models import LegacyRole, LegacyRoleTag
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 from galaxy_ng.app.api.v1.utils import sort_versions
 
+from galaxy_ng.app.utils.galaxy import (
+    uuid_to_int,
+    int_to_uuid
+)
+
 
 class LegacyNamespacesSerializer(serializers.ModelSerializer):
 
@@ -545,6 +550,56 @@ class LegacyImportSerializer(serializers.Serializer):
             'alternate_role_name',
             'github_reference',
         ]
+
+
+class LegacyImportListSerializer(serializers.Serializer):
+
+    id = serializers.SerializerMethodField()
+    pulp_id = serializers.SerializerMethodField()
+    created = serializers.SerializerMethodField()
+    modified = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    summary_fields = serializers.SerializerMethodField()
+
+    class Meta:
+        model = None
+        fields = [
+            'id',
+            'pulp_id',
+            'created',
+            'modified',
+            'state',
+            'summary_fields',
+        ]
+
+    def get_id(self, obj):
+        return uuid_to_int(str(obj.task.pulp_id))
+
+    def get_pulp_id(self, obj):
+        return obj.task.pulp_id
+
+    def get_created(self, obj):
+        return obj.task.pulp_created
+
+    def get_modified(self, obj):
+        return obj.task.pulp_last_updated
+
+    def get_state(self, obj):
+        state_map = {
+            'COMPLETED': 'SUCCESS'
+        }
+        state = obj.task.state.upper()
+        state = state_map.get(state, state)
+        return state
+
+    def get_summary_fields(self, obj):
+        return {
+            'request_username': obj.task.kwargs.get('request_username'),
+            'github_user': obj.task.kwargs.get('github_user'),
+            'github_repo': obj.task.kwargs.get('github_repo'),
+            'github_reference': obj.task.kwargs.get('github_reference'),
+            'alternate_role_name': obj.task.kwargs.get('alternate_role_name'),
+        }
 
 
 class LegacySyncTaskResponseSerializer(serializers.Serializer):
