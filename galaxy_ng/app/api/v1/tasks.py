@@ -312,7 +312,7 @@ def legacy_role_import(
         logger.info(f'superuser_can_create_namespaces: {superuser_can_create_namespaces}')
     if not request_user:
         logger.error(f'username {request_username} does not exist in galaxy')
-        raise Exception(f'username {request_username} does not exist in galaxy')
+        # raise Exception(f'username {request_username} does not exist in galaxy')
 
     logger.info(f'github_user: {github_user}')
     logger.info(f'github_repo: {github_repo}')
