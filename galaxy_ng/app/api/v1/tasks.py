@@ -292,6 +292,7 @@ def legacy_role_import(
     """
 
     task = None
+    task_id = None
     try:
         task = Task.current()
     except Exception:
