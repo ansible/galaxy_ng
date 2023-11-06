@@ -74,6 +74,13 @@ class Namespace(
 
     @avatar_url.setter
     def avatar_url(self, value):
+
+        pk = self.last_created_pulp_metadata.pk
+        # allow to rebuild latest namespace metadata
+        if metadata := AnsibleNamespaceMetadata.objects.filter(pk=pk).first():
+            metadata.delete()
+        self.last_created_pulp_metadata = None
+
         self._avatar_url = value
 
     def __str__(self):

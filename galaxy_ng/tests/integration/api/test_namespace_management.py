@@ -9,6 +9,7 @@ from ansible.errors import AnsibleError
 from ..utils import get_client
 from ..utils import generate_unused_namespace
 from ..utils import get_all_namespaces
+from ..utils import wait_for_all_tasks
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -163,3 +164,57 @@ def test_namespace_edit_with_user(ansible_config, user_property):
     assert resp['users'] != []
     assert username in [x['name'] for x in resp['users']]
     assert sorted(resp['users'][0]['object_roles']) == sorted(object_roles)
+
+
+@pytest.mark.namespace
+@pytest.mark.all
+def test_namespace_edit_logo(ansible_config):
+
+    config = ansible_config("admin")
+    api_client = get_client(config, request_token=True, require_auth=True)
+    api_prefix = config.get("api_prefix").rstrip("/")
+
+    new_namespace = generate_unused_namespace(api_client=api_client)
+
+    payload = {
+        'name': new_namespace,
+    }
+    my_namespace = api_client(f'{api_prefix}/_ui/v1/my-namespaces/', args=payload, method='POST')
+    assert my_namespace["avatar_url"] == ''
+
+    namespaces = api_client(f'{api_prefix}/_ui/v1/my-namespaces/')
+
+    name = my_namespace["name"]
+
+    payload = {
+        "name": name,
+        "avatar_url": "http://placekitten.com/400/400"
+    }
+    api_client(f'{api_prefix}/_ui/v1/my-namespaces/{name}/', args=payload, method='PUT')
+
+    wait_for_all_tasks(api_client)
+    updated_namespace = api_client(f'{api_prefix}/_ui/v1/my-namespaces/{name}/')
+    assert updated_namespace["avatar_url"] != ""
+
+    payload = {
+        "name": name,
+        "avatar_url": "http://placekitten.com/123/456"
+    }
+    resp = api_client(f'{api_prefix}/_ui/v1/my-namespaces/{name}/', args=payload, method='PUT')
+
+    wait_for_all_tasks(api_client)
+    updated_again_namespace = api_client(f'{api_prefix}/_ui/v1/my-namespaces/{name}/')
+    assert updated_namespace["avatar_url"] != updated_again_namespace["avatar_url"]
+
+    # verify no additional namespaces are created
+    resp = api_client(f'{api_prefix}/_ui/v1/my-namespaces/')
+    assert resp["meta"]["count"] == namespaces["meta"]["count"]
+
+    # verify no side effects
+    # fields that should NOT change
+    for field in ["pulp_href", "name", "company", "email", "description", "resources", "links"]:
+        assert my_namespace[field] == updated_again_namespace[field]
+
+    # fields that changed
+    for field in ["avatar_url", "metadata_sha256", "avatar_sha256"]:
+        assert my_namespace[field] != updated_again_namespace[field]
