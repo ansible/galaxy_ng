@@ -10,10 +10,7 @@ from galaxy_ng.app.api.v1.models import LegacyRole, LegacyRoleTag
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 from galaxy_ng.app.api.v1.utils import sort_versions
 
-from galaxy_ng.app.utils.galaxy import (
-    uuid_to_int,
-    int_to_uuid
-)
+from galaxy_ng.app.utils.galaxy import uuid_to_int
 
 
 class LegacyNamespacesSerializer(serializers.ModelSerializer):

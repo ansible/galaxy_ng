@@ -218,7 +218,6 @@ class LegacyRoleVersionsViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMix
         return get_object_or_404(LegacyRole, id=self.kwargs["pk"])
 
 
-#class LegacyRoleImportsViewSet(viewsets.GenericViewSet, LegacyTasksMixin):
 class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
     """Legacy role imports."""
 
