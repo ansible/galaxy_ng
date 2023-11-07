@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Ensure changes were made to tests
         env:
