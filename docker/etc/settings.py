@@ -140,6 +140,7 @@ if clowder_config and clowder_config.isClowderEnabled():
 # Logging
 # -------
 LOGGING = {
+    "dynaconf_merge": True,
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
