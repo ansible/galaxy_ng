@@ -2,6 +2,8 @@ import datetime
 
 from rest_framework import serializers
 
+from social_django.models import UserSocialAuth
+
 from pulpcore.plugin.util import get_url
 
 from galaxy_ng.app.models.auth import User
@@ -125,6 +127,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     avatar_url = serializers.SerializerMethodField()
+    github_id = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -138,7 +141,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
             'full_name',
             'date_joined',
             'avatar_url',
-            # 'active'
+            'github_id',
         ]
 
     def get_username(self, obj):
@@ -177,6 +180,12 @@ class LegacyUserSerializer(serializers.ModelSerializer):
             username = obj.username
         url = f'https://github.com/{username}.png'
         return url
+
+    def get_github_id(self, obj):
+        social_user = UserSocialAuth.objects.filter(user=obj).first()
+        if not social_user:
+            return None
+        return social_user.id
 
 
 class LegacyRoleSerializer(serializers.ModelSerializer):
