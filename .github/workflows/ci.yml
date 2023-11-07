@@ -56,10 +56,10 @@ jobs:
     needs: check_commit
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
       # lint_requirements contains tools needed for flake8, etc.
@@ -100,11 +100,11 @@ jobs:
       deprecations-s3: ${{ steps.deprecations.outputs.deprecations-s3 }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
 
