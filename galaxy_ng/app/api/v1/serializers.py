@@ -13,7 +13,6 @@ from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 from galaxy_ng.app.api.v1.utils import sort_versions
 
 from galaxy_ng.app.utils.galaxy import (
-    int_to_uuid,
     uuid_to_int
 )
 
@@ -708,7 +707,7 @@ class LegacyRoleImportDetailSerializer(serializers.Serializer):
 
     def get_pulp_id(self, obj):
         return str(obj.task.pulp_id)
-    
+
     def get_error(self, obj):
         return {
             'code': None,

@@ -26,7 +26,6 @@ from galaxy_ng.app.api.v1.models import (
 from galaxy_ng.app.api.v1.serializers import (
     LegacyImportSerializer,
     LegacyImportListSerializer,
-    LegacyTaskDetailSerializer,
     LegacyRoleImportDetailSerializer,
     LegacyRoleSerializer,
     LegacyRoleUpdateSerializer,
