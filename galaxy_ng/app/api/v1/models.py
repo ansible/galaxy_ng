@@ -186,6 +186,13 @@ class LegacyRoleDownloadCount(models.Model):
 
 
 class LegacyRoleImport(models.Model):
+    role = models.ForeignKey(
+        'LegacyRole',
+        related_name='role',
+        editable=True,
+        on_delete=models.CASCADE,
+        null=True
+    )
     task = models.OneToOneField(
         Task, on_delete=models.CASCADE, editable=False, related_name="+", primary_key=True
     )

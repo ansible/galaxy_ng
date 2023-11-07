@@ -293,13 +293,14 @@ def legacy_role_import(
 
     task = None
     task_id = None
+    import_model = None
     try:
         task = Task.current()
     except Exception:
         pass
     if task:
         task_id = task.pulp_id
-        LegacyRoleImport.objects.get_or_create(task_id=Task.current().pulp_id)
+        import_model, _ = LegacyRoleImport.objects.get_or_create(task_id=Task.current().pulp_id)
 
     logger.info('starting role import')
     logger.info(f'task_id: {task_id}')
@@ -444,6 +445,12 @@ def legacy_role_import(
             this_role.name = role_name
 
         this_role.save()
+
+    # bind the role to the import log model
+    if import_model:
+        import_model.refresh_from_db()
+        import_model.role = this_role
+        import_model.save()
 
     logger.info(f'{this_role} import complete')
     return True

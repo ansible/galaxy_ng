@@ -1,3 +1,5 @@
+import datetime
+
 from rest_framework import serializers
 
 from pulpcore.plugin.util import get_url
@@ -10,7 +12,10 @@ from galaxy_ng.app.api.v1.models import LegacyRole, LegacyRoleTag
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 from galaxy_ng.app.api.v1.utils import sort_versions
 
-from galaxy_ng.app.utils.galaxy import uuid_to_int
+from galaxy_ng.app.utils.galaxy import (
+    int_to_uuid,
+    uuid_to_int
+)
 
 
 class LegacyNamespacesSerializer(serializers.ModelSerializer):
@@ -644,7 +649,11 @@ class LegacyTaskResultsSerializer(serializers.Serializer):
 
     class Meta:
         model = None
-        fields = ['id', 'state', 'summary_fields']
+        fields = [
+            'id',
+            'state',
+            'summary_fields'
+        ]
 
 
 class LegacyTaskDetailSerializer(serializers.Serializer):
@@ -654,6 +663,84 @@ class LegacyTaskDetailSerializer(serializers.Serializer):
     class Meta:
         model = None
         fields = ['results']
+
+
+class LegacyRoleImportDetailSerializer(serializers.Serializer):
+
+    STATE_MAP = {
+        'COMPLETED': 'SUCCESS'
+    }
+
+    MSG_TYPE_MAP = {
+        'RUNNING': 'INFO',
+        'WAITING': 'INFO',
+        'COMPLETED': 'SUCCESS'
+    }
+
+    id = serializers.SerializerMethodField()
+    pulp_id = serializers.SerializerMethodField()
+    role_id = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    error = serializers.SerializerMethodField()
+    summary_fields = serializers.SerializerMethodField()
+
+    class Meta:
+        model = None
+        fields = [
+            'id',
+            'pulp_id',
+            'state',
+            'role_id',
+            'summary_fields',
+        ]
+
+    def get_role_id(self, obj):
+        if obj.role:
+            return obj.role.id
+        return None
+
+    def get_state(self, obj):
+        task = obj.task
+        return self.STATE_MAP.get(task.state.upper(), task.state.upper())
+
+    def get_id(self, obj):
+        return uuid_to_int(str(obj.task.pulp_id))
+
+    def get_pulp_id(self, obj):
+        return str(obj.task.pulp_id)
+    
+    def get_error(self, obj):
+        return {
+            'code': None,
+            'description': None,
+            'traceback': None
+        }
+
+    def get_summary_fields(self, obj):
+        task = obj.task
+
+        task_messages = []
+
+        for message in obj.messages:
+            msg_type = self.MSG_TYPE_MAP.get(message['level'], message['level'])
+            ts = datetime.datetime.utcfromtimestamp(message['time']).isoformat()
+            msg_state = self.STATE_MAP.get(message['state'].upper(), message['state'].upper())
+            msg = {
+                'id': ts,
+                'state': msg_state,
+                'message_type': msg_type,
+                'message_text': message['message']
+            }
+            task_messages.append(msg)
+
+        return {
+            'request_username': task.kwargs.get('request_username'),
+            'github_user': task.kwargs.get('github_user'),
+            'github_repo': task.kwargs.get('github_repo'),
+            'github_reference': task.kwargs.get('github_reference'),
+            'alternate_role_name': task.kwargs.get('alternate_role_name'),
+            'task_messages': task_messages
+        }
 
 
 class LegacyRoleTagSerializer(serializers.ModelSerializer):

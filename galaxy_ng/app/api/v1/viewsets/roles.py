@@ -26,6 +26,8 @@ from galaxy_ng.app.api.v1.models import (
 from galaxy_ng.app.api.v1.serializers import (
     LegacyImportSerializer,
     LegacyImportListSerializer,
+    LegacyTaskDetailSerializer,
+    LegacyRoleImportDetailSerializer,
     LegacyRoleSerializer,
     LegacyRoleUpdateSerializer,
     LegacyRoleContentSerializer,
@@ -33,7 +35,10 @@ from galaxy_ng.app.api.v1.serializers import (
 )
 
 from galaxy_ng.app.api.v1.viewsets.tasks import LegacyTasksMixin
-from galaxy_ng.app.api.v1.filtersets import LegacyRoleFilter
+from galaxy_ng.app.api.v1.filtersets import (
+    LegacyRoleFilter,
+    LegacyRoleImportFilter,
+)
 
 
 GALAXY_AUTHENTICATION_CLASSES = perform_import(
@@ -221,10 +226,17 @@ class LegacyRoleVersionsViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMix
 class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
     """Legacy role imports."""
 
-    serializer_class = LegacyImportListSerializer
     permission_classes = [LegacyAccessPolicy]
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
     queryset = LegacyRoleImport.objects.order_by('task__pulp_created')
+
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = LegacyRoleImportFilter
+
+    def get_serializer_class(self):
+        if self.request.query_params.get('id') or self.request.query_params.get('detail'):
+            return LegacyRoleImportDetailSerializer
+        return LegacyImportListSerializer
 
     def list(self, request, *args, **kwargs):
         """
