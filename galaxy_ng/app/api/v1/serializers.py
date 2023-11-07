@@ -182,10 +182,13 @@ class LegacyUserSerializer(serializers.ModelSerializer):
         return url
 
     def get_github_id(self, obj):
-        social_user = UserSocialAuth.objects.filter(user=obj).first()
-        if not social_user:
+        try:
+            social_user = UserSocialAuth.objects.filter(user=obj).first()
+            if not social_user:
+                return None
+            return social_user.id
+        except Exception:
             return None
-        return social_user.id
 
 
 class LegacyRoleSerializer(serializers.ModelSerializer):
