@@ -30,6 +30,10 @@ from pulpcore.plugin.models import Task
 
 from git import Repo
 
+from galaxy_ng.app.utils.galaxy import (
+    uuid_to_int,
+)
+
 
 # logger = logging.getLogger(__name__)
 logger = logging.getLogger("galaxy_ng.app.api.v1.tasks.legacy_role_import")
@@ -255,6 +259,8 @@ def compute_all_versions(this_role, gitrepo):
             versions.remove(version)
 
     versions = sort_versions(versions)
+    for version in versions:
+        logger.info(f'tag: {version["tag"]} version: {version["version"]}')
 
     return versions
 
@@ -292,6 +298,7 @@ def legacy_role_import(
     """
 
     task = None
+    v1_task_id = None
     task_id = None
     import_model = None
     try:
@@ -299,32 +306,35 @@ def legacy_role_import(
     except Exception:
         pass
     if task:
+        v1_task_id = uuid_to_int(str(task.pulp_id))
         task_id = task.pulp_id
-        import_model, _ = LegacyRoleImport.objects.get_or_create(task_id=Task.current().pulp_id)
+        import_model, _ = LegacyRoleImport.objects.get_or_create(task_id=task_id)
 
-    logger.info('starting role import')
-    logger.info(f'task_id: {task_id}')
-    logger.info(f'importer username: {request_username}')
+    logger.info(f'Starting import: task_id={v1_task_id}, pulp_id={task_id}')
+    logger.info('')
 
     # find the request user
     request_user = User.objects.filter(username=request_username).first()
-    logger.info(f'matched user: {request_user}')
-    if request_user and request_user.is_superuser:
-        logger.info(f'superuser_can_create_namespaces: {superuser_can_create_namespaces}')
-    if not request_user:
-        logger.error(f'username {request_username} does not exist in galaxy')
-        # raise Exception(f'username {request_username} does not exist in galaxy')
+    request_user_id = request_user.id if request_user else None
 
+    logger.info('==== PARAMETERS ====')
+    logger.info(f'importer username: {request_username}')
+    logger.info(f'matched user: {request_user} id:{request_user_id}')
     logger.info(f'github_user: {github_user}')
     logger.info(f'github_repo: {github_repo}')
     logger.info(f'github_reference: {github_reference}')
     logger.info(f'alternate_role_name: {alternate_role_name}')
+    logger.info('')
+
+    if not request_user:
+        logger.error(f'username {request_username} does not exist in galaxy')
 
     # prevent empty strings?
     if not github_reference:
         github_reference = None
 
     # some roles have their github_user set differently from their namespace name ...
+    logger.info('==== CHECK FOR MATCHING ROLE(S) ====')
     real_role, real_namespace_name, real_github_user, real_github_repo, clone_url = \
         find_real_role(github_user, github_repo)
     if real_role:
@@ -332,6 +342,12 @@ def legacy_role_import(
             f'user:{github_user} repo:{github_repo}'
             + f' matched existing role {real_role} id:{real_role.id}'
         )
+    else:
+        logger.info(
+            f'user:{github_user} repo:{github_repo}'
+            + ' did not match any existing roles'
+        )
+    logger.info('')
 
     # the user should have a legacy and v3 namespace if they logged in ...
     namespace = LegacyNamespace.objects.filter(name=real_namespace_name).first()
@@ -371,27 +387,33 @@ def legacy_role_import(
             clone_url = f'https://github.com/{github_user}/{github_repo}'
 
         # process the checkout ...
+        logger.info('===== CLONING REPO =====')
         gitrepo, github_reference, last_commit = \
             do_git_checkout(clone_url, checkout_path, github_reference)
+        logger.info('')
 
         # relevant data for this new role version ...
+        logger.info('===== GIT ATTRIBUTES =====')
         github_commit = last_commit.hexsha
         github_commit_message = last_commit.message
         github_commit_date = last_commit.committed_datetime.isoformat()
-
         logger.info(f'github_reference(branch): {github_reference}')
         logger.info(f'github_commit: {github_commit}')
         logger.info(f'github_commit_message: {github_commit_message}')
         logger.info(f'github_commit_date: {github_commit_date}')
+        logger.info('')
 
         # Parse legacy role with galaxy-importer.
+        logger.info('===== LOADING ROLE =====')
         try:
             importer_config = Config()
             result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
         except Exception as e:
             logger.exception(e)
             raise e
+        logger.info('')
 
+        logger.info('===== PROCESSING LOADER RESULTS ====')
         # munge the role name via an order of precedence
         role_name = result["name"] or alternate_role_name or \
             github_repo.replace("ansible-role-", "")
@@ -430,20 +452,26 @@ def legacy_role_import(
                 namespace=namespace,
                 name=role_name
             )
-            logger.info(f'created new role id {this_role.id}')
+            logger.info(f'created new role id:{this_role.id} {this_role}')
 
         # set the enumerated versions ...
+        logger.info('')
+        logger.info('===== COMPUTING ROLE VERSIONS ====')
         new_versions = compute_all_versions(this_role, gitrepo)
         new_full_metadata['versions'] = new_versions
+        logger.info('')
 
         # Save the new metadata
         this_role.full_metadata = new_full_metadata
 
         # Set the correct name ...
         if this_role.name != role_name:
+            logger.info('==== CHECK NEW ROLE NAME ====')
             logger.info(f'changing role name from {this_role.name} to {role_name}')
             this_role.name = role_name
+            logger.info('')
 
+        logger.info('==== SAVING ROLE ====')
         this_role.save()
 
     # bind the role to the import log model
@@ -452,7 +480,8 @@ def legacy_role_import(
         import_model.role = this_role
         import_model.save()
 
-    logger.info(f'{this_role} import complete')
+    logger.info('')
+    logger.info('Import completed')
     return True
 
 
