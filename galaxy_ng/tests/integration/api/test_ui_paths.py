@@ -885,14 +885,16 @@ def test_api_ui_v1_tags_roles(ansible_config):
 
         resp = uclient.get('_ui/v1/tags/roles')
         resp.status_code == 200
-        assert resp.json()["meta"]["count"] == 0
+        aggregate_total = sum([x['count'] for x in resp.json()['data']])
+        assert aggregate_total == 0
 
         # run command to populate role tags table
         _populate_tags_cmd()
 
         resp = uclient.get('_ui/v1/tags/roles')
         resp.status_code == 200
-        assert resp.json()["meta"]["count"] > 0
+        aggregate_total = sum([x['count'] for x in resp.json()['data']])
+        assert aggregate_total > 0
 
         # add additional tags to test count
         # tags ["docker", "system"]

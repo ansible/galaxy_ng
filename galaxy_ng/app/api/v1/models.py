@@ -3,6 +3,8 @@ from django.db import models
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.models.auth import User
 
+from pulpcore.plugin.models import Task
+
 
 """
 The core cli accepts a single string argument for the role as user would like to install.
@@ -181,3 +183,35 @@ class LegacyRoleDownloadCount(models.Model):
     )
 
     count = models.IntegerField(default=0)
+
+
+class LegacyRoleImport(models.Model):
+    role = models.ForeignKey(
+        'LegacyRole',
+        related_name='role',
+        editable=True,
+        on_delete=models.CASCADE,
+        null=True
+    )
+    task = models.OneToOneField(
+        Task, on_delete=models.CASCADE, editable=False, related_name="+", primary_key=True
+    )
+    messages = models.JSONField(default=list, editable=False)
+
+    class Meta:
+        ordering = ["task__pulp_created"]
+
+    def add_log_record(self, log_record, state=None):
+        """
+        Records a single log message but does not save the LegacyRoleImport object.
+
+        Args:
+            log_record(logging.LogRecord): The logging record to record on messages.
+
+        """
+        self.messages.append({
+            "state": state,
+            "message": log_record.msg,
+            "level": log_record.levelname,
+            "time": log_record.created
+        })

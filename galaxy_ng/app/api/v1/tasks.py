@@ -22,13 +22,21 @@ from galaxy_ng.app.utils.namespaces import generate_v3_namespace_from_attributes
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
+from galaxy_ng.app.api.v1.models import LegacyRoleImport
 from galaxy_ng.app.api.v1.utils import sort_versions
 from galaxy_ng.app.api.v1.utils import parse_version_tag
 
+from pulpcore.plugin.models import Task
+
 from git import Repo
 
+from galaxy_ng.app.utils.galaxy import (
+    uuid_to_int,
+)
 
-logger = logging.getLogger(__name__)
+
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("galaxy_ng.app.api.v1.tasks.legacy_role_import")
 
 
 def find_real_role(github_user, github_repo):
@@ -62,10 +70,9 @@ def find_real_role(github_user, github_repo):
     candidates = LegacyRole.objects.filter(
         full_metadata__github_user=github_user,
         full_metadata__github_repo=github_repo
-    )
+    ).order_by('created')
     if candidates.count() > 0:
         real_role = candidates.first()
-        logger.info(f'Using {real_role} as basis for import task')
         rr_github_user = real_role.full_metadata.get('github_user')
         rr_github_repo = real_role.full_metadata.get('github_repo')
         real_namespace_name = real_role.namespace.name
@@ -101,7 +108,7 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
         - the last commit object from the github_reference or $HEAD
     :rtype: tuple(git.Repo, string, git.Commit)
     """
-    logger.info(f'CLONING {clone_url}')
+    logger.info(f'cloning {clone_url} ...')
 
     # pygit didn't have an obvious way to prevent interactive clones ...
     cmd_args = ['git', 'clone', '--recurse-submodules', clone_url, checkout_path]
@@ -237,7 +244,8 @@ def compute_all_versions(this_role, gitrepo):
             'created': ts,
             'modified': ts,
         }
-        logger.info(f'adding new version from tag: {vdata}')
+        if tag.name not in current_tags:
+            logger.info(f'adding new version from tag: {tag.name}')
         versions.append(vdata)
 
     # remove old tag versions if they no longer exist in the repo
@@ -251,6 +259,8 @@ def compute_all_versions(this_role, gitrepo):
             versions.remove(version)
 
     versions = sort_versions(versions)
+    for version in versions:
+        logger.info(f'tag: {version["tag"]} version: {version["version"]}')
 
     return versions
 
@@ -286,33 +296,58 @@ def legacy_role_import(
     there will not be any duplicate key errors. However,
     the "commit" field should always reflect the latest import.
     """
-    logger.info('START LEGACY ROLE IMPORT')
-    logger.info(f'REQUEST_USERNAME:{request_username}')
-    logger.info(f'GITHUB_USER:{github_user}')
-    logger.info(f'GITHUB_REPO:{github_repo}')
-    logger.info(f'GITHUB_REFERENCE:{github_reference}')
-    logger.info(f'ALTERNATE_ROLE_NAME:{alternate_role_name}')
-    logger.info(f'superuser_can_create_namespaces: {superuser_can_create_namespaces}')
 
-    clone_url = None
+    task = None
+    v1_task_id = None
+    task_id = None
+    import_model = None
+    try:
+        task = Task.current()
+    except Exception:
+        pass
+    if task:
+        v1_task_id = uuid_to_int(str(task.pulp_id))
+        task_id = task.pulp_id
+        import_model, _ = LegacyRoleImport.objects.get_or_create(task_id=task_id)
 
+    logger.info(f'Starting import: task_id={v1_task_id}, pulp_id={task_id}')
+    logger.info('')
+
+    # find the request user
     request_user = User.objects.filter(username=request_username).first()
-    logger.info(f'REQUEST_USER: {request_user}')
+    request_user_id = request_user.id if request_user else None
+
+    logger.info('==== PARAMETERS ====')
+    logger.info(f'importer username: {request_username}')
+    logger.info(f'matched user: {request_user} id:{request_user_id}')
+    logger.info(f'github_user: {github_user}')
+    logger.info(f'github_repo: {github_repo}')
+    logger.info(f'github_reference: {github_reference}')
+    logger.info(f'alternate_role_name: {alternate_role_name}')
+    logger.info('')
+
+    if not request_user:
+        logger.error(f'username {request_username} does not exist in galaxy')
 
     # prevent empty strings?
     if not github_reference:
         github_reference = None
 
     # some roles have their github_user set differently from their namespace name ...
+    logger.info('==== CHECK FOR MATCHING ROLE(S) ====')
     real_role, real_namespace_name, real_github_user, real_github_repo, clone_url = \
         find_real_role(github_user, github_repo)
     if real_role:
-        logger.info(f'Using {real_role} as basis for import task')
-
-    # this shouldn't happen but just in case ...
-    if request_username and not User.objects.filter(username=request_username).exists():
-        logger.error(f'Username {request_username} does not exist in galaxy')
-        raise Exception(f'Username {request_username} does not exist in galaxy')
+        logger.info(
+            f'user:{github_user} repo:{github_repo}'
+            + f' matched existing role {real_role} id:{real_role.id}'
+        )
+    else:
+        logger.info(
+            f'user:{github_user} repo:{github_repo}'
+            + ' did not match any existing roles'
+        )
+    logger.info('')
 
     # the user should have a legacy and v3 namespace if they logged in ...
     namespace = LegacyNamespace.objects.filter(name=real_namespace_name).first()
@@ -320,10 +355,10 @@ def legacy_role_import(
 
         if not request_user.is_superuser or \
                 (request_user.is_superuser and not superuser_can_create_namespaces):
-            logger.error(f'No legacy namespace exists for {github_user}')
-            raise Exception(f'No legacy namespace exists for {github_user}')
+            logger.error(f'No standalone namespace exists for {github_user}')
+            raise Exception(f'No standalone namespace exists for {github_user}')
 
-        logger.info(f'create legacynamespace {real_namespace_name}')
+        logger.info(f'create standalone namespace {real_namespace_name}')
         namespace, _ = LegacyNamespace.objects.get_or_create(name=real_namespace_name)
 
     # we have to have a v3 namespace because of the rbac based ownership ...
@@ -332,8 +367,8 @@ def legacy_role_import(
 
         if not request_user.is_superuser or \
                 (request_user.is_superuser and not superuser_can_create_namespaces):
-            logger.error(f'No v3 namespace exists for {github_user}')
-            raise Exception(f'No v3 namespace exists for {github_user}')
+            logger.error(f'no v3 namespace exists for {github_user}')
+            raise Exception(f'no v3 namespace exists for {github_user}')
 
         # transformed name ... ?
         v3_name = generate_v3_namespace_from_attributes(username=real_namespace_name)
@@ -352,33 +387,43 @@ def legacy_role_import(
             clone_url = f'https://github.com/{github_user}/{github_repo}'
 
         # process the checkout ...
+        logger.info('===== CLONING REPO =====')
         gitrepo, github_reference, last_commit = \
             do_git_checkout(clone_url, checkout_path, github_reference)
+        logger.info('')
 
         # relevant data for this new role version ...
+        logger.info('===== GIT ATTRIBUTES =====')
         github_commit = last_commit.hexsha
         github_commit_message = last_commit.message
         github_commit_date = last_commit.committed_datetime.isoformat()
-
-        logger.info(f'GITHUB_REFERENCE: {github_reference}')
-        logger.info(f'GITHUB_COMMIT: {github_commit}')
-        logger.info(f'GITHUB_COMMIT_MESSAGE: {github_commit_message}')
-        logger.info(f'GITHUB_COMMIT_DATE: {github_commit_date}')
+        logger.info(f'github_reference(branch): {github_reference}')
+        logger.info(f'github_commit: {github_commit}')
+        logger.info(f'github_commit_message: {github_commit_message}')
+        logger.info(f'github_commit_date: {github_commit_date}')
+        logger.info('')
 
         # Parse legacy role with galaxy-importer.
-        importer_config = Config()
-        result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
-        galaxy_info = result["metadata"]["galaxy_info"]
-        logger.debug(f"FOUND TAGS: {galaxy_info['galaxy_tags']}")
+        logger.info('===== LOADING ROLE =====')
+        try:
+            importer_config = Config()
+            result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
+        except Exception as e:
+            logger.exception(e)
+            raise e
+        logger.info('')
 
+        logger.info('===== PROCESSING LOADER RESULTS ====')
         # munge the role name via an order of precedence
         role_name = result["name"] or alternate_role_name or \
             github_repo.replace("ansible-role-", "")
+        logger.info(f'enumerated role name {role_name}')
 
+        galaxy_info = result["metadata"]["galaxy_info"]
         new_full_metadata = {
             'imported': datetime.datetime.now().isoformat(),
             'clone_url': clone_url,
-            'tags': galaxy_info["galaxy_tags"],
+            'tags': galaxy_info.get("galaxy_tags", []),
             'commit': github_commit,
             'github_user': real_github_user,
             'github_repo': real_github_repo,
@@ -407,21 +452,36 @@ def legacy_role_import(
                 namespace=namespace,
                 name=role_name
             )
+            logger.info(f'created new role id:{this_role.id} {this_role}')
 
         # set the enumerated versions ...
+        logger.info('')
+        logger.info('===== COMPUTING ROLE VERSIONS ====')
         new_versions = compute_all_versions(this_role, gitrepo)
         new_full_metadata['versions'] = new_versions
+        logger.info('')
 
         # Save the new metadata
         this_role.full_metadata = new_full_metadata
 
         # Set the correct name ...
         if this_role.name != role_name:
+            logger.info('==== CHECK NEW ROLE NAME ====')
+            logger.info(f'changing role name from {this_role.name} to {role_name}')
             this_role.name = role_name
+            logger.info('')
 
+        logger.info('==== SAVING ROLE ====')
         this_role.save()
 
-    logger.debug('STOP LEGACY ROLE IMPORT')
+    # bind the role to the import log model
+    if import_model:
+        import_model.refresh_from_db()
+        import_model.role = this_role
+        import_model.save()
+
+    logger.info('')
+    logger.info('Import completed')
     return True
 
 

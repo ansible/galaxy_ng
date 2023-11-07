@@ -25,6 +25,25 @@ INSTALLED_APPS = [
 ]
 
 
+LOGGING = {
+    "loggers": {
+        "galaxy_ng.app.api.v1.tasks.legacy_role_import": {
+            "level": "INFO",
+            "handlers": ["legacyrole_import"],
+            "propagate": False,
+        }
+    },
+    "handlers": {
+        "legacyrole_import": {
+            "level": "DEBUG",
+            "class": "galaxy_ng.app.api.v1.logutils.LegacyRoleImportHandler",
+            "formatter": "simple",
+        }
+    },
+    "dynaconf_merge": True,
+}
+
+
 AUTH_USER_MODEL = 'galaxy.User'
 
 # FIXME(cutwater): 1. Rename GALAXY_API_ROOT in pulp-ansible to ANSIBLE_API_ROOT

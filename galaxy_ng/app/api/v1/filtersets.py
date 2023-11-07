@@ -6,6 +6,7 @@ from django_filters.rest_framework import filterset
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
+from galaxy_ng.app.api.v1.models import LegacyRoleImport
 from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 
 
@@ -166,3 +167,42 @@ class LegacyRoleFilter(filterset.FilterSet):
             queryset = queryset.filter(namespace__name__icontains=keyword)
 
         return queryset
+
+
+class LegacyRoleImportFilter(filterset.FilterSet):
+    """
+    Filter legacy role imports.
+
+    Used by the UI to find the last import log by role id.
+    """
+
+    order_by = filters.OrderingFilter(
+        fields=(
+            ('task__pulp_created', 'created'),
+        )
+    )
+
+    role_id = filters.NumberFilter(field_name='role__id')
+    role_name = filters.NumberFilter(field_name='role__name')
+    namespace_id = filters.NumberFilter(field_name='role__namespace_id')
+    namespace_name = filters.NumberFilter(field_name='role__namespace_name')
+    github_user = filters.CharFilter(method='github_user_filter')
+    github_repo = filters.CharFilter(method='github_repo_filter')
+    state = filters.CharFilter(method='state_filter')
+
+    class Meta:
+        model = LegacyRoleImport
+        fields = [
+            'role_id',
+            'role_name',
+            'namespace_id',
+            'namespace_name',
+            'github_user',
+            'github_repo',
+            'state'
+        ]
+
+    def state_filter(self, queryset, name, value):
+        if value.lower() == 'success':
+            value = 'completed'
+        return queryset.filter(task__state=value.lower())

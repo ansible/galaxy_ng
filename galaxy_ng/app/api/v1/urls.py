@@ -17,9 +17,19 @@ from galaxy_ng.app.api.v1.viewsets import (
 
 urlpatterns = [
     path(
+        'imports',
+        LegacyRoleImportsViewSet.as_view({"get": "list", "post": "create"}),
+        name='legacy_role-imports-no-trailing-slash'
+    ),
+    path(
         'imports/',
-        LegacyRoleImportsViewSet.as_view({"post": "create", "get": "get_task"}),
+        LegacyRoleImportsViewSet.as_view({"get": "list", "post": "create"}),
         name='legacy_role-imports'
+    ),
+    path(
+        'imports/<int:pk>/',
+        LegacyRoleImportsViewSet.as_view({"get": "retrieve"}),
+        name='legacy_role-import'
     ),
 
     path(

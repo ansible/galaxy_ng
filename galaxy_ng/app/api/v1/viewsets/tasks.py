@@ -18,6 +18,7 @@ from galaxy_ng.app.api.v1.serializers import (
     LegacyTaskQuerySerializer,
     LegacyTaskDetailSerializer
 )
+from galaxy_ng.app.api.v1.models import LegacyRoleImport
 
 
 logger = logging.getLogger(__name__)
@@ -70,7 +71,6 @@ class LegacyTasksMixin:
             'WAITING': 'INFO',
             'COMPLETED': 'SUCCESS'
         }
-        msg_type = msg_type_map.get(state, state)
 
         # generate a message for the response
         msg = ''
@@ -86,17 +86,29 @@ class LegacyTasksMixin:
                     + this_task.error['traceback']
                 )
 
+        task_messages = []
+
+        # get messages from the model if this was a role import
+        roleimport = LegacyRoleImport.objects.filter(task=this_task).first()
+        if roleimport:
+            for message in roleimport.messages:
+                msg_type = msg_type_map.get(message['level'], message['level'])
+                ts = datetime.datetime.utcfromtimestamp(message['time']).isoformat()
+                msg_state = state_map.get(message['state'].upper(), message['state'].upper())
+                msg = {
+                    'id': ts,
+                    'state': msg_state,
+                    'message_type': msg_type,
+                    'message_text': message['message']
+                }
+                task_messages.append(msg)
+
         return Response({'results': [
             {
                 'state': state,
                 'id': task_id,
                 'summary_fields': {
-                    'task_messages': [{
-                        'id': datetime.datetime.now().isoformat(),
-                        'message_text': msg,
-                        'message_type': msg_type,
-                        'state': state
-                    }]
+                    'task_messages': task_messages
                 }
             }
         ]})
