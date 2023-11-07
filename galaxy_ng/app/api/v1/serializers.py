@@ -2,8 +2,6 @@ import datetime
 
 from rest_framework import serializers
 
-from social_django.models import UserSocialAuth
-
 from pulpcore.plugin.util import get_url
 
 from galaxy_ng.app.models.auth import User
@@ -182,6 +180,12 @@ class LegacyUserSerializer(serializers.ModelSerializer):
         return url
 
     def get_github_id(self, obj):
+
+        # have to defer this import because of the other
+        # deployment profiles trying to access the missing
+        # database table.
+        from social_django.models import UserSocialAuth
+
         try:
             social_user = UserSocialAuth.objects.filter(user=obj).first()
             if not social_user:
@@ -189,6 +193,8 @@ class LegacyUserSerializer(serializers.ModelSerializer):
             return social_user.id
         except Exception:
             return None
+
+        return None
 
 
 class LegacyRoleSerializer(serializers.ModelSerializer):
