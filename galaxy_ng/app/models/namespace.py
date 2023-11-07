@@ -8,7 +8,7 @@ from django.conf import settings
 
 from pulpcore.plugin.util import get_url
 
-from pulp_ansible.app.models import AnsibleNamespaceMetadata, Content
+from pulp_ansible.app.models import AnsibleNamespaceMetadata
 
 from galaxy_ng.app.access_control import mixins
 from galaxy_ng.app.constants import DeploymentMode
@@ -76,12 +76,7 @@ class Namespace(
     def avatar_url(self, value):
 
         if self.last_created_pulp_metadata:
-            pk = self.last_created_pulp_metadata.pk
             # allow to rebuild latest namespace metadata
-            if metadata := AnsibleNamespaceMetadata.objects.filter(pk=pk).first():
-                if content := Content.objects.filter(ansible_ansiblenamespacemetadata=pk).first():
-                    content.delete()
-                metadata.delete()
             self.last_created_pulp_metadata = None
 
         self._avatar_url = value
