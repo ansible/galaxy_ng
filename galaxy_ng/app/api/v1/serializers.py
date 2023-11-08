@@ -125,6 +125,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     avatar_url = serializers.SerializerMethodField()
+    github_id = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -138,7 +139,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
             'full_name',
             'date_joined',
             'avatar_url',
-            # 'active'
+            'github_id',
         ]
 
     def get_username(self, obj):
@@ -177,6 +178,23 @@ class LegacyUserSerializer(serializers.ModelSerializer):
             username = obj.username
         url = f'https://github.com/{username}.png'
         return url
+
+    def get_github_id(self, obj):
+
+        # have to defer this import because of the other
+        # deployment profiles trying to access the missing
+        # database table.
+        from social_django.models import UserSocialAuth
+
+        try:
+            social_user = UserSocialAuth.objects.filter(user=obj).first()
+            if not social_user:
+                return None
+            return social_user.id
+        except Exception:
+            return None
+
+        return None
 
 
 class LegacyRoleSerializer(serializers.ModelSerializer):
