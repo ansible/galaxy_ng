@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import subprocess
+import traceback
 import tempfile
 import uuid
 
@@ -409,7 +410,11 @@ def legacy_role_import(
             importer_config = Config()
             result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
         except Exception as e:
-            logger.exception(e)
+            logger.info('')
+            logger.error(f'Role loading failed! {str(e)}')
+            logger.info('')
+            tb_str = traceback.format_exc()
+            logger.error(tb_str)
             raise e
         logger.info('')
 
