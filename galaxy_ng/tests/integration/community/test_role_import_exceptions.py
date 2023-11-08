@@ -3,11 +3,8 @@
 
 import pytest
 
-from ansible.errors import AnsibleError
-
 from ..utils import (
     ansible_galaxy,
-    get_client,
     SocialGithubClient,
     GithubAdminClient,
 )
@@ -34,12 +31,6 @@ def test_role_import_exceptions(ansible_config):
     """" Exceptions should end up in the client facing logs """
 
     config = ansible_config("admin")
-    api_client = get_client(
-        config=config,
-        request_token=False,
-        require_auth=True
-    )
-
     github_user = 'jctanner'
     github_repo = 'busted-role'
     cleanup_social_user(github_user, ansible_config)
@@ -54,7 +45,7 @@ def test_role_import_exceptions(ansible_config):
         ga.delete_user(login=github_user)
     except Exception:
         pass
-    guser = ga.create_user(login=github_user, password='redhat', email='jctanner.foo@bar.com')
+    ga.create_user(login=github_user, password='redhat', email='jctanner.foo@bar.com')
 
     # Login with the user first to create the v1+v3 namespaces
     with SocialGithubClient(config=user_cfg) as client:
