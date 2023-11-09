@@ -238,7 +238,7 @@ def is_standalone():
 
 
 def is_ephemeral_env():
-    return "ephemeral" in os.getenv(
+    return "c-rh-c-eph" in os.getenv(
         "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
     )
 
