@@ -4,7 +4,6 @@
 import pytest
 
 from ..utils import (
-    ansible_galaxy,
     SocialGithubClient,
     GithubAdminClient,
 )
@@ -29,8 +28,6 @@ def extract_default_config(ansible_config):
 @pytest.mark.deployment_community
 def test_v1_user_github_ids(ansible_config):
     """" The github_id should show up in the v1 user serializer """
-
-    config = ansible_config("admin")
 
     for x in range(0, 10):
 
