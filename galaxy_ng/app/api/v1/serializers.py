@@ -190,7 +190,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
             social_user = UserSocialAuth.objects.filter(user=obj).first()
             if not social_user:
                 return None
-            return social_user.id
+            return int(social_user.uid)
         except Exception:
             return None
 
