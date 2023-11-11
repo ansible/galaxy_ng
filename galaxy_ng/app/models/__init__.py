@@ -25,6 +25,11 @@ from .container import (
 
 from .aiindex import AIIndexDenyList
 
+from .survey import (
+    CollectionSurvey,
+    LegacyRoleSurvey,
+)
+
 __all__ = (
     'Group',
     'User',
