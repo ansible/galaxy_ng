@@ -5,6 +5,7 @@ from .auth import (
 from .collectionimport import (
     CollectionImport,
 )
+from .config import Setting
 from .namespace import (
     Namespace,
     NamespaceLink,
@@ -31,6 +32,7 @@ __all__ = (
     'CollectionImport',
     'Namespace',
     'NamespaceLink',
+    'Setting',
     'SyncList',
     'ContainerDistribution',
     'ContainerDistroReadme',

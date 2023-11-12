@@ -290,3 +290,7 @@ GALAXY_METRICS_COLLECTION_REDHAT_USERNAME = None
 GALAXY_METRICS_COLLECTION_REDHAT_PASSWORD = None
 # RH account's org id (required for x-rh-identity auth type)
 GALAXY_METRICS_COLLECTION_ORG_ID = None
+
+# When set to True will enable the DYNAMIC settungs feature
+# Individual allowed dynamic keys are set on ./dynamic_settings.py
+GALAXY_DYNAMIC_SETTINGS = False

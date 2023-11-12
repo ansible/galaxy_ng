@@ -1,4 +1,5 @@
 import json
+import logging
 import ldap
 import pkg_resources
 import os
@@ -6,6 +7,11 @@ import re
 from typing import Any, Dict, List
 from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
+from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
+from django.apps import apps
+
+
+logger = logging.getLogger(__name__)
 
 
 def post(settings: Dynaconf) -> Dict[str, Any]:
@@ -41,6 +47,9 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     # other dynaconf hooks (such as keycloak), those changes need to be applied to the
     # rest framework auth classes too.
     data.update(configure_authentication_classes(settings, data))
+
+    # This must go last, so that all the default settings are loaded before dynamic and validation
+    data.update(configure_dynamic_settings(settings))
 
     validate(settings)
     return data
@@ -582,3 +591,85 @@ def validate(settings: Dynaconf) -> None:
     )
 
     settings.validators.validate()
+
+
+def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
+    """Dynaconf 3.2.2 allows registration of hooks on methods `get` and `as_dict`
+
+    For galaxy this enables the Dynamic Settings feature, which triggers a
+    specified function after every key is accessed.
+
+    So after the normal get process, the registered hook will be able to
+    change the value before it is returned allowing reading overrides from
+    database and cache.
+    """
+    if settings.get("GALAXY_DYNAMIC_SETTINGS") is not True:
+        return {}
+
+    # Perform lazy imports here to avoid breaking when system runs with older
+    # dynaconf versions
+    try:
+        from dynaconf.hooking import Hook, Action, HookValue
+        from dynaconf import DynaconfFormatError, DynaconfParseError
+        from dynaconf.loaders.base import SourceMetadata
+        from dynaconf.base import Settings
+    except ImportError as exc:
+        # Graceful degradation for dynaconf < 3.2.3 where  method hooking is not available
+        logger.error(
+            "Galaxy Dynamic Settings requires Dynaconf >=3.2.3, "
+            "system will work normally but dynamic settings from database will be ignored: %s",
+            str(exc)
+        )
+        return {}
+
+    logger.info("Enabling Dynamic Settings Feature")
+
+    def read_settings_from_cache_or_db(
+        temp_settings: Settings,
+        value: HookValue,
+        key: str,
+        *args,
+        **kwargs
+    ) -> Any:
+        """A function to be attached on Dynaconf Afterget hook.
+        Load everything from settings cache or db, process parsing and mergings,
+        returns the desired key value
+        """
+        if not apps.ready or key.upper() not in DYNAMIC_SETTINGS_SCHEMA:
+            # If app is starting up or key is not on allowed list bypass and just return the value
+            return value.value
+
+        # lazy import because it can't happen before apps are ready
+        from galaxy_ng.app.tasks.settings_cache import get_settings_from_cache, get_settings_from_db
+        if data := get_settings_from_cache():
+            metadata = SourceMetadata(loader="hooking", identifier="cache")
+        else:
+            data = get_settings_from_db()
+            if data:
+                metadata = SourceMetadata(loader="hooking", identifier="db")
+
+        # This is the main part, it will update temp_settings with data coming from settings db
+        # and by calling update it will process dynaconf parsing and merging.
+        try:
+            if data:
+                temp_settings.update(data, loader_identifier=metadata, tomlfy=True)
+        except (DynaconfFormatError, DynaconfParseError) as exc:
+            logger.error("Error loading dynamic settings: %s", str(exc))
+
+        if not data:
+            logger.debug("Dynamic settings are empty, reading key %s from default sources", key)
+        elif key in [_k.split("__")[0] for _k in data]:
+            logger.debug("Dynamic setting for key: %s loaded from %s", key, metadata.identifier)
+        else:
+            logger.debug(
+                "Key %s not on db/cache, %s other keys loaded from %s",
+                key, len(data), metadata.identifier
+            )
+
+        return temp_settings.get(key, value.value)
+
+    return {
+        "_registered_hooks": {
+            Action.AFTER_GET: [Hook(read_settings_from_cache_or_db)]
+        }
+    }
