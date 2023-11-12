@@ -172,4 +172,16 @@ urlpatterns = [
     path("tasks/", viewsets.TaskViewSet.as_view({"get": "list"}), name="tasks-list"),
     path("tasks/<str:pk>/", viewsets.TaskViewSet.as_view({"get": "retrieve"}), name="tasks-detail"),
     path("excludes/", views.ExcludesView.as_view(), name="excludes-file"),
+
+    path(
+        "survey/collection/",
+        viewsets.CollectionSurveyRollupList.as_view({'get': 'list'}),
+        name='collection-survey-rollup-list'
+    ),
+    path(
+        "survey/role/",
+        viewsets.LegacyRoleSurveyRollupList.as_view({'get': 'list'}),
+        name='legacyrole-survey-rollup-list'
+    )
+
 ]

@@ -26,8 +26,8 @@ from .container import (
 from .aiindex import AIIndexDenyList
 
 from .survey import (
-    CollectionSurvey,
-    LegacyRoleSurvey,
+    CollectionSurveyRollup,
+    LegacyRoleSurveyRollup,
 )
 
 __all__ = (
@@ -43,4 +43,6 @@ __all__ = (
     'ContainerRegistryRemote',
     'ContainerRegistryRepos',
     'AIIndexDenyList',
+    'CollectionSurveyRollup',
+    'LegacyRoleSurveyRollup',
 )

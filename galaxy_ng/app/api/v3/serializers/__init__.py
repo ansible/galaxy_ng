@@ -25,6 +25,11 @@ from .execution_environment import (
     ContainerRepositoryHistorySerializer
 )
 
+from .survey import (
+    CollectionSurveyRollupSerializer,
+    LegacyRoleSurveyRollupSerializer,
+)
+
 __all__ = (
     'CollectionUploadSerializer',
     'GroupSummarySerializer',

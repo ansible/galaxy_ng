@@ -16,6 +16,9 @@ class SurveyBase(models.Model):
     class Meta:
         abstract = True
 
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
     docs = models.IntegerField(
         null=True,
         validators=[MinValueValidator(0), MaxValueValidator(5)]
@@ -56,3 +59,19 @@ class LegacyRoleSurvey(SurveyBase):
 
     class Meta:
         unique_together = ('user', 'role',)
+
+
+class CollectionSurveyRollup(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
+    score = models.DecimalField(max_digits=5, decimal_places=2)
+
+
+class LegacyRoleSurveyRollup(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    role = models.ForeignKey(LegacyRole, on_delete=models.CASCADE)
+    score = models.DecimalField(max_digits=5, decimal_places=2)

@@ -23,6 +23,11 @@ from .execution_environments import (
     ContainerTagViewset
 )
 
+from .survey import (
+    CollectionSurveyRollupList,
+    LegacyRoleSurveyRollupList,
+)
+
 __all__ = (
     'CollectionArtifactDownloadView',
     'CollectionUploadViewSet',
@@ -38,5 +43,7 @@ __all__ = (
     'ContainerRepositoryManifestViewSet',
     'ContainerRepositoryHistoryViewSet',
     'ContainerReadmeViewSet',
-    'ContainerTagViewset'
+    'ContainerTagViewset',
+    'CollectionSurveyRollupList',
+    'LegacyRoleSurveyRollupList',
 )
