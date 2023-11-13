@@ -6,10 +6,14 @@ See: https://issues.redhat.com/browse/AAH-1303
 import pytest
 from ansible.errors import AnsibleError
 
-from ..utils import get_client
-from ..utils import generate_unused_namespace
-from ..utils import get_all_namespaces
-from ..utils import wait_for_all_tasks
+from ..utils import (
+    build_collection as galaxy_build_collection,
+    get_all_namespaces,
+    get_client,
+    generate_unused_namespace,
+    wait_for_all_tasks,
+    wait_for_task,
+)
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -218,3 +222,89 @@ def test_namespace_edit_logo(ansible_config):
     # fields that changed
     for field in ["avatar_url", "metadata_sha256", "avatar_sha256"]:
         assert my_namespace[field] != updated_again_namespace[field]
+
+
+@pytest.mark.namespace
+@pytest.mark.all
+def test_namespace_logo_propagates_to_collections(ansible_config, galaxy_client, upload_artifact):
+    admin_config = ansible_config("admin")
+    api_prefix = admin_config.get("api_prefix").rstrip("/")
+    api_client = get_client(admin_config, request_token=True, require_auth=True)
+
+    namespace_name = generate_unused_namespace(api_client=api_client)
+
+    payload = {
+        'name': namespace_name
+    }
+    my_namespace = api_client(f'{api_prefix}/_ui/v1/my-namespaces/', args=payload, method='POST')
+    wait_for_all_tasks(api_client)
+    assert my_namespace["avatar_url"] == ''
+    assert my_namespace["avatar_sha256"] is None
+    assert my_namespace["metadata_sha256"] is not None
+
+    artifact = galaxy_build_collection(namespace=namespace_name)
+
+    upload_task = upload_artifact(admin_config, api_client, artifact)
+    resp = wait_for_task(api_client, upload_task)
+    assert resp["state"] == "completed"
+
+    search_url = (
+        api_prefix
+        + '/v3/plugin/ansible/search/collection-versions/'
+        + f'?namespace={namespace_name}&name={artifact.name}'
+    )
+    resp = api_client.request(search_url)
+    assert resp['data'][0]['namespace_metadata']["avatar_url"] is None
+    assert my_namespace["avatar_sha256"] is None
+    assert my_namespace["metadata_sha256"] is not None
+
+    # upload logo
+    payload = {
+        "name": namespace_name,
+        "avatar_url": "http://placekitten.com/123/456"
+    }
+    api_client(f'{api_prefix}/_ui/v1/my-namespaces/{namespace_name}/', args=payload, method='PUT')
+    wait_for_all_tasks(api_client)
+
+    my_namespace = api_client(f'{api_prefix}/_ui/v1/my-namespaces/{namespace_name}/')
+
+    search_url = (
+        api_prefix
+        + '/v3/plugin/ansible/search/collection-versions/'
+        + f'?namespace={namespace_name}&name={artifact.name}'
+    )
+    resp = api_client.request(search_url)
+    namespace_metadata = resp['data'][0]['namespace_metadata']
+
+    assert namespace_metadata["avatar_url"] == my_namespace["avatar_url"]
+    assert my_namespace["avatar_sha256"] is not None
+    assert my_namespace["metadata_sha256"] is not None
+
+    # change namespace
+    payload = {
+        "name": namespace_name,
+        "description": "hehe hihi haha",
+        "company": "RedHat Inc.",
+        "avatar_url": "http://placekitten.com/654/321"
+    }
+    my_namespace = api_client(
+        f'{api_prefix}/_ui/v1/my-namespaces/{namespace_name}/',
+        args=payload,
+        method='PUT'
+    )
+    assert my_namespace["avatar_sha256"] is not None
+    assert my_namespace["metadata_sha256"] is not None
+    wait_for_all_tasks(api_client)
+
+    my_namespace = api_client(f'{api_prefix}/_ui/v1/my-namespaces/{namespace_name}/')
+
+    search_url = (
+        api_prefix
+        + '/v3/plugin/ansible/search/collection-versions/'
+        + f'?namespace={namespace_name}&name={artifact.name}'
+    )
+    resp = api_client.request(search_url)
+    namespace_metadata = resp['data'][0]['namespace_metadata']
+    assert namespace_metadata["avatar_url"] == my_namespace["avatar_url"]
+    assert namespace_metadata["description"] == "hehe hihi haha"
+    assert namespace_metadata["company"] == "RedHat Inc."
