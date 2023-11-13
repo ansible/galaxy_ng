@@ -71,7 +71,7 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
     avatar_artifact = None
 
     if download_logo:
-        avatar_artifact = _download_avatar(galaxy_ns.avatar_url)
+        avatar_artifact = _download_avatar(galaxy_ns._avatar_url)
 
     avatar_sha = None
     if avatar_artifact:

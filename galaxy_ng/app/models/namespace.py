@@ -75,10 +75,6 @@ class Namespace(
     @avatar_url.setter
     def avatar_url(self, value):
 
-        if self.last_created_pulp_metadata:
-            # allow to rebuild latest namespace metadata
-            self.last_created_pulp_metadata = None
-
         self._avatar_url = value
 
     def __str__(self):
