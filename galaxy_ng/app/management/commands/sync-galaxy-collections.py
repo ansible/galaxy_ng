@@ -45,6 +45,7 @@ class Command(BaseCommand):
         parser.add_argument("--repository", help="name for the repository", default="published")
         parser.add_argument("--rebuild_only", action="store_true", help="only rebuild metadata")
         parser.add_argument("--limit", type=int)
+        parser.add_argument("--latest", action='store_true', help='sync latest version only')
 
     def echo(self, message, style=None):
         style = style or self.style.SUCCESS
@@ -99,11 +100,22 @@ class Command(BaseCommand):
             if should_sync and not options['rebuild_only']:
 
                 # build a single collection requirements
-                requirements = {
-                    'collections': [
-                        collection_info['namespace']['name'] + '.' + collection_info['name']
-                    ]
-                }
+                if not options['latest']:
+                    requirements = {
+                        'collections': [
+                            collection_info['namespace']['name'] + '.' + collection_info['name']
+                        ]
+                    }
+                else:
+                    requirements = {
+                        'collections': [
+                            {
+                                'name': collection_info['namespace']['name'] + '.' + collection_info['name'],
+                                'version': collection_info['latest_version']['version']
+                            }
+                        ]
+                    }
+
                 requirements_yaml = yaml.dump(requirements)
 
                 # set the remote's requirements
