@@ -32,6 +32,10 @@ from .execution_environment import (
     ContainerRemoteSerializer
 )
 
+from .search import (
+    SearchResultsSerializer
+)
+
 __all__ = (
     # auth
     'LoginSerializer',
@@ -57,5 +61,7 @@ __all__ = (
     'ContainerRepositorySerializer',
     'ContainerRepositoryImageSerializer',
     'ContainerRegistryRemoteSerializer',
-    'ContainerRemoteSerializer'
+    'ContainerRemoteSerializer',
+    # Search
+    'SearchResultsSerializer',
 )

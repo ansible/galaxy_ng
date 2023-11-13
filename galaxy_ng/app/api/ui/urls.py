@@ -107,6 +107,15 @@ ai_index_paths = [
     )
 ]
 
+search_paths = [
+    # GET _ui/v1/search/
+    path(
+        "",
+        views.SearchListView.as_view({"get": "list"}),
+        name="search-view",
+    )
+]
+
 signing_paths = [
     # _ui/v1/collection_signing/
     path(
@@ -178,6 +187,10 @@ if settings.GALAXY_FEATURE_FLAGS['ai_deny_index']:
     paths.append(
         path('ai_deny_index/', include(ai_index_paths)),
     )
+
+paths.append(
+    path('search/', include(search_paths))
+)
 
 app_name = "ui"
 

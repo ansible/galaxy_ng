@@ -19,6 +19,11 @@ from .ai_index import (
     AIDenyIndexDetailView,
 )
 
+from .search import (
+    SearchListView
+)
+
+
 __all__ = (
     # auth
     "LoginView",
@@ -48,5 +53,9 @@ __all__ = (
     # AI/Wisdom
     "AIDenyIndexAddView",
     "AIDenyIndexListView",
-    "AIDenyIndexDetailView"
+    "AIDenyIndexDetailView",
+
+    # Search
+    "SearchListView",
+
 )
