@@ -26,7 +26,9 @@ from .execution_environment import (
 )
 
 from .survey import (
+    CollectionSurveySerializer,
     CollectionSurveyRollupSerializer,
+    LegacyRoleSurveySerializer,
     LegacyRoleSurveyRollupSerializer,
 )
 
@@ -44,4 +46,8 @@ __all__ = (
     'ContainerTagSerializer',
     'ContainerManifestDetailSerializer',
     'ContainerReadmeSerializer',
+    'CollectionSurveySerializer',
+    'CollectionSurveyRollupSerializer',
+    'LegacyRoleSurveySerializer',
+    'LegacyRoleSurveyRollupSerializer',    
 )

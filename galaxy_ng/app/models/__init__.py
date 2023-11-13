@@ -28,6 +28,8 @@ from .aiindex import AIIndexDenyList
 from .survey import (
     CollectionSurveyRollup,
     LegacyRoleSurveyRollup,
+    CollectionSurvey,
+    LegacyRoleSurvey,
 )
 
 __all__ = (
@@ -45,4 +47,6 @@ __all__ = (
     'AIIndexDenyList',
     'CollectionSurveyRollup',
     'LegacyRoleSurveyRollup',
+    'CollectionSurvey',
+    'LegacyRoleSurvey',
 )

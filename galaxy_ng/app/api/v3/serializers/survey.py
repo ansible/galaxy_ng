@@ -1,9 +1,32 @@
 from rest_framework import serializers
 
 from galaxy_ng.app.models import (
+    CollectionSurvey,
     CollectionSurveyRollup,
+    LegacyRoleSurvey,
     LegacyRoleSurveyRollup,
 )
+
+from galaxy_ng.app.utils.survey import SURVEY_FIELDS
+
+
+class CollectionSurveySerializer(serializers.ModelSerializer):
+
+    responses = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CollectionSurvey
+        fields = [
+            'id',
+            'created',
+            'modified',
+            'collection',
+            'user',
+            'responses'
+        ]
+    
+    def get_responses(self, obj):
+        return dict((k, getattr(obj, k)) for k in SURVEY_FIELDS)
 
 
 class CollectionSurveyRollupSerializer(serializers.ModelSerializer):
@@ -30,13 +53,32 @@ class CollectionSurveyRollupSerializer(serializers.ModelSerializer):
         return obj.collection.name
 
 
+class LegacyRoleSurveySerializer(serializers.ModelSerializer):
+
+    responses = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LegacyRoleSurvey
+        fields = [
+            'id',
+            'created',
+            'modified',
+            'role',
+            'user',
+            'responses',
+        ]
+
+    def get_responses(self, obj):
+        return dict((k, getattr(obj, k)) for k in SURVEY_FIELDS)
+
+
 class LegacyRoleSurveyRollupSerializer(serializers.ModelSerializer):
 
     namespace = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
 
     class Meta:
-        model = CollectionSurveyRollup
+        model = LegacyRoleSurveyRollup
         fields = [
             'id',
             'created',

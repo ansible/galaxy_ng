@@ -174,14 +174,25 @@ urlpatterns = [
     path("excludes/", views.ExcludesView.as_view(), name="excludes-file"),
 
     path(
-        "survey/collection/",
+        "scores/collections/",
         viewsets.CollectionSurveyRollupList.as_view({'get': 'list'}),
         name='collection-survey-rollup-list'
     ),
     path(
-        "survey/role/",
+        "scores/roles/",
         viewsets.LegacyRoleSurveyRollupList.as_view({'get': 'list'}),
         name='legacyrole-survey-rollup-list'
+    ),
+
+    path(
+        "survey/collection/",
+        viewsets.CollectionSurveyList.as_view({'get': 'list'}),
+        name='collection-survey-list'
+    ),
+    path(
+        "survey/role/",
+        viewsets.LegacyRoleSurveyList.as_view({'get': 'list'}),
+        name='legacyrole-survey-list'
     )
 
 ]

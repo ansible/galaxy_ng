@@ -26,6 +26,8 @@ from .execution_environments import (
 from .survey import (
     CollectionSurveyRollupList,
     LegacyRoleSurveyRollupList,
+    CollectionSurveyList,
+    LegacyRoleSurveyList,
 )
 
 __all__ = (
@@ -46,4 +48,6 @@ __all__ = (
     'ContainerTagViewset',
     'CollectionSurveyRollupList',
     'LegacyRoleSurveyRollupList',
+    'CollectionSurveyList',
+    'LegacyRoleSurveyList',
 )

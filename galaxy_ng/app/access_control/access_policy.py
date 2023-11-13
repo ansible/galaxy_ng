@@ -88,7 +88,9 @@ class GalaxyStatements:
         Converts the statement list into the full pulp access policy.
         """
 
+        print(f'GET_PULP_ACCESS_POLICY {name}')
         statements = self._get_statements().get(name, default)
+        print(f'STATEMENTS: {statements}')
 
         if not statements and default is None:
             return None
@@ -123,11 +125,18 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
     @classmethod
     def get_access_policy(cls, view):
+
+        print(f'GET_ACCESS_POLICY cls.NAME:{cls.NAME} view:{view}')
+
         statements = GALAXY_STATEMENTS
+        from pprint import pprint; pprint(statements)
 
         # If this is a galaxy access policy, load from the statement file
         if cls.NAME:
-            return statements.get_pulp_access_policy(cls.NAME, default=[])
+            #return statements.get_pulp_access_policy(cls.NAME, default=[])
+            res = statements.get_pulp_access_policy(cls.NAME, default=[])
+            print(f'RETURN(1) {res}')
+            return res
 
         # Check if the view has a url pattern. If it does, check for customized
         # policies from statements/pulp.py
@@ -136,15 +145,19 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
             override_ap = PULP_VIEWSETS.get(viewname, None)
             if override_ap:
+                print(f'RETURN(2) MOCK {override_ap}')
                 return MockPulpAccessPolicy(override_ap)
 
-        except AttributeError:
+        except AttributeError as e:
+            print(f'ERROR(1) {e}')
             pass
 
         # If no customized policies exist, try to load the one defined on the view itself
         try:
+            print(f'RETURN(3) view.DEFAULT_ACCESS_POLICY')
             return MockPulpAccessPolicy(view.DEFAULT_ACCESS_POLICY)
-        except AttributeError:
+        except AttributeError as e:
+            print(f'ERROR(2) {e}')
             pass
 
         # As a last resort, require admin rights
@@ -820,3 +833,11 @@ class LegacyAccessPolicy(AccessPolicyBase):
             return True
 
         return False
+
+
+class SurveyAccessPolicy(AccessPolicyBase):
+    NAME = "SurveyAccessPolicy"
+
+    def is_survey_user(self, request, viewset, action):
+        print('IS_SURVEY_USER')
+        return True
