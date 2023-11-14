@@ -2,17 +2,10 @@ from django.conf import settings
 from django_filters import rest_framework as filters
 from rest_framework import viewsets
 
-from galaxy_ng.app.access_control.access_policy import SurveyAccessPolicy
+# from galaxy_ng.app.access_control.access_policy import SurveyAccessPolicy
 
-from rest_framework.permissions import AllowAny
 from rest_framework.settings import perform_import
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-
-GALAXY_AUTHENTICATION_CLASSES = perform_import(
-    settings.GALAXY_AUTHENTICATION_CLASSES,
-    'GALAXY_AUTHENTICATION_CLASSES'
-)
-
 
 from galaxy_ng.app.models import (
     CollectionSurvey,
@@ -34,6 +27,11 @@ from galaxy_ng.app.api.v3.filtersets import (
 )
 
 
+GALAXY_AUTHENTICATION_CLASSES = perform_import(
+    settings.GALAXY_AUTHENTICATION_CLASSES,
+    'GALAXY_AUTHENTICATION_CLASSES'
+)
+
 
 class CollectionSurveyRollupList(viewsets.ModelViewSet):
     queryset = CollectionSurveyRollup.objects.all()
@@ -41,7 +39,6 @@ class CollectionSurveyRollupList(viewsets.ModelViewSet):
 
     # access_policy.py is lame.
     permission_classes = [IsAuthenticatedOrReadOnly]
-
 
 
 class LegacyRoleSurveyRollupList(viewsets.ModelViewSet):

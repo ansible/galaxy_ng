@@ -107,10 +107,11 @@ class Command(BaseCommand):
                         ]
                     }
                 else:
+                    fqn = collection_info['namespace']['name'] + '.' + collection_info['name']
                     requirements = {
                         'collections': [
                             {
-                                'name': collection_info['namespace']['name'] + '.' + collection_info['name'],
+                                'name': fqn,
                                 'version': collection_info['latest_version']['version']
                             }
                         ]

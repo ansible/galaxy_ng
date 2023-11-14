@@ -1,9 +1,7 @@
 from django.db.models import Q
-from django.db.models import Case, Value, When
 from django_filters import filters
 from django_filters.rest_framework import filterset
 
-from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.survey import LegacyRoleSurvey
 from galaxy_ng.app.models.survey import CollectionSurvey
 
@@ -14,19 +12,20 @@ class BaseSurveyFilter(filterset.FilterSet):
 
     sort = filters.OrderingFilter(
         fields=(
-            ('created','created'),
+            ('created', 'created'),
         )
     )
 
     def user_filter(self, queryset, name, value):
-        print(f'FILTER {name} {value}')
+
+        # allow filtering on uid and username ...
         if value.isdigit():
             queryset = queryset.filter(
-                Q(user__id=int(value)) |
-                Q(user__username=value)
+                Q(user__id=int(value)) | Q(user__username=value)
             )
         else:
             queryset = queryset.filter(user__username=value)
+
         return queryset
 
 

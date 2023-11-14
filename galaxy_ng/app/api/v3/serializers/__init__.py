@@ -49,5 +49,5 @@ __all__ = (
     'CollectionSurveySerializer',
     'CollectionSurveyRollupSerializer',
     'LegacyRoleSurveySerializer',
-    'LegacyRoleSurveyRollupSerializer',    
+    'LegacyRoleSurveyRollupSerializer',
 )
