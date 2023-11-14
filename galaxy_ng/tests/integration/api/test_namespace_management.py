@@ -15,6 +15,7 @@ from ..utils import (
     wait_for_task,
 )
 
+
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
@@ -224,15 +225,14 @@ def test_namespace_edit_logo(ansible_config):
         assert my_namespace[field] != updated_again_namespace[field]
 
 
-@pytest.mark.namespace
-@pytest.mark.all
-def test_namespace_logo_propagates_to_collections(ansible_config, galaxy_client, upload_artifact):
+def _test_namespace_logo_propagates_to_collections(ansible_config, upload_artifact, is_insights):
     admin_config = ansible_config("admin")
     api_prefix = admin_config.get("api_prefix").rstrip("/")
     api_client = get_client(admin_config, request_token=True, require_auth=True)
 
     namespace_name = generate_unused_namespace(api_client=api_client)
 
+    # create empty namespace
     payload = {
         'name': namespace_name
     }
@@ -244,10 +244,12 @@ def test_namespace_logo_propagates_to_collections(ansible_config, galaxy_client,
 
     artifact = galaxy_build_collection(namespace=namespace_name)
 
+    # upload collection to namespace
     upload_task = upload_artifact(admin_config, api_client, artifact)
     resp = wait_for_task(api_client, upload_task)
     assert resp["state"] == "completed"
 
+    # verify cv index is correct
     search_url = (
         api_prefix
         + '/v3/plugin/ansible/search/collection-versions/'
@@ -255,10 +257,8 @@ def test_namespace_logo_propagates_to_collections(ansible_config, galaxy_client,
     )
     resp = api_client.request(search_url)
     assert resp['data'][0]['namespace_metadata']["avatar_url"] is None
-    assert my_namespace["avatar_sha256"] is None
-    assert my_namespace["metadata_sha256"] is not None
 
-    # upload logo
+    # upload logo to namespace
     payload = {
         "name": namespace_name,
         "avatar_url": "http://placekitten.com/123/456"
@@ -266,28 +266,43 @@ def test_namespace_logo_propagates_to_collections(ansible_config, galaxy_client,
     api_client(f'{api_prefix}/_ui/v1/my-namespaces/{namespace_name}/', args=payload, method='PUT')
     wait_for_all_tasks(api_client)
 
+    # namespace logo was updated correctly
     my_namespace = api_client(f'{api_prefix}/_ui/v1/my-namespaces/{namespace_name}/')
+    assert my_namespace["avatar_url"] is not None
 
     search_url = (
         api_prefix
         + '/v3/plugin/ansible/search/collection-versions/'
         + f'?namespace={namespace_name}&name={artifact.name}'
     )
-    resp = api_client.request(search_url)
-    namespace_metadata = resp['data'][0]['namespace_metadata']
+    resp = api_client(search_url)
+    cv_namespace_metadata = resp['data'][0]['namespace_metadata']
 
-    assert namespace_metadata["avatar_url"] == my_namespace["avatar_url"]
+    namespace_metadata = api_client(
+        api_prefix
+        + '/pulp/api/v3/content/ansible/namespaces/'
+        f'?name={namespace_name}&ordering=-pulp_created'
+    )['results'][0]
+
+    # verify that collection is using latest namespace avatar
+    assert cv_namespace_metadata['avatar_url'] == namespace_metadata['avatar_url']
+
+    # in insights mode, avatar_url is stored in '_avatar_url' field
+    # and is not hosted in the system, therefore it's different
+    if is_insights is False:
+        assert cv_namespace_metadata["avatar_url"] == my_namespace["avatar_url"]
+
     assert my_namespace["avatar_sha256"] is not None
     assert my_namespace["metadata_sha256"] is not None
 
-    # change namespace
+    # update namespace
     payload = {
         "name": namespace_name,
         "description": "hehe hihi haha",
         "company": "RedHat Inc.",
         "avatar_url": "http://placekitten.com/654/321"
     }
-    my_namespace = api_client(
+    api_client(
         f'{api_prefix}/_ui/v1/my-namespaces/{namespace_name}/',
         args=payload,
         method='PUT'
@@ -298,13 +313,38 @@ def test_namespace_logo_propagates_to_collections(ansible_config, galaxy_client,
 
     my_namespace = api_client(f'{api_prefix}/_ui/v1/my-namespaces/{namespace_name}/')
 
+    # verify cv metadata are latest and correct
     search_url = (
         api_prefix
         + '/v3/plugin/ansible/search/collection-versions/'
         + f'?namespace={namespace_name}&name={artifact.name}'
     )
-    resp = api_client.request(search_url)
-    namespace_metadata = resp['data'][0]['namespace_metadata']
-    assert namespace_metadata["avatar_url"] == my_namespace["avatar_url"]
-    assert namespace_metadata["description"] == "hehe hihi haha"
-    assert namespace_metadata["company"] == "RedHat Inc."
+    resp = api_client(search_url)
+    cv_namespace_metadata = resp['data'][0]['namespace_metadata']
+    assert cv_namespace_metadata["description"] == "hehe hihi haha"
+    assert cv_namespace_metadata["company"] == "RedHat Inc."
+
+    namespace_metadata = api_client(
+        api_prefix
+        + '/pulp/api/v3/content/ansible/namespaces/'
+        f'?name={namespace_name}&ordering=-pulp_created'
+    )['results'][0]
+
+    # verify cv idnex is using latest matedata
+    assert cv_namespace_metadata['avatar_url'] == namespace_metadata['avatar_url']
+
+    if is_insights is False:
+        assert cv_namespace_metadata["avatar_url"] == my_namespace["avatar_url"]
+
+
+@pytest.mark.namespace
+@pytest.mark.deployment_community
+@pytest.mark.deployment_standalone
+def test_namespace_logo_propagates_to_collections(ansible_config, upload_artifact):
+    _test_namespace_logo_propagates_to_collections(ansible_config, upload_artifact, False)
+
+
+@pytest.mark.namespace
+@pytest.mark.deployment_cloud
+def test_insights_namespace_logo_propagates_to_collections(ansible_config, upload_artifact):
+    _test_namespace_logo_propagates_to_collections(ansible_config, upload_artifact, True)
