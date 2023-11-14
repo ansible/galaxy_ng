@@ -1,0 +1,54 @@
+namespaces:
+  - name: ns_test_1
+    group: group_1
+  - name: ns_test_2
+    group: group_1
+
+collections:
+  # name is the suffix, collection_dep_a_collection_3
+  - name: collection_3
+    version: 1.0.0
+    namespace: ns_test_1
+    repository: repo_1
+    signed: true
+  - name: collection_4
+    version: 1.0.0
+    namespace: ns_test_1
+    repository: published
+    signed: false
+
+groups:
+  - name: group_1
+  - name: group_2
+
+users:
+  - username: user_1
+    password: P@ssword!
+    group: group_1
+
+repositories:
+  - name: repo_1
+  - name: repo_2
+
+remotes:
+  - name: remote_test_1
+    url: http://foo.bar/
+    signed_only: false
+    tls_validation: false
+
+roles:
+  - name: role_1
+    description: role_1_description
+    permissions:
+      - "galaxy.upload_to_namespace"
+      - "ansible.modify_ansible_repo_content"
+
+execution_environments:
+  - name: ee_test_1
+    upstream_name: upstream_1
+    remote_registry: remote_registry_1
+
+remote_registries:
+  - name: remote_registry_1
+    url: https//remote.registry1.com
+
