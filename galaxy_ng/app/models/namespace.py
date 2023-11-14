@@ -74,7 +74,6 @@ class Namespace(
 
     @avatar_url.setter
     def avatar_url(self, value):
-
         self._avatar_url = value
 
     def __str__(self):
