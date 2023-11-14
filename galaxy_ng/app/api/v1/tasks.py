@@ -420,8 +420,8 @@ def legacy_role_import(
 
         logger.info('===== PROCESSING LOADER RESULTS ====')
         # munge the role name via an order of precedence
-        role_name = result["name"] or alternate_role_name or \
-            github_repo.replace("ansible-role-", "")
+        role_name = result["metadata"]["galaxy_info"].get("role_name") or \
+            alternate_role_name or github_repo.replace("ansible-role-", "")
         logger.info(f'enumerated role name {role_name}')
 
         galaxy_info = result["metadata"]["galaxy_info"]
