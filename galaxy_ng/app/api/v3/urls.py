@@ -185,12 +185,12 @@ urlpatterns = [
     ),
 
     path(
-        "survey/collection/",
+        "surveys/collections/",
         viewsets.CollectionSurveyList.as_view({'get': 'list'}),
         name='collection-survey-list'
     ),
     path(
-        "survey/role/",
+        "surveys/roles/",
         viewsets.LegacyRoleSurveyList.as_view({'get': 'list'}),
         name='legacyrole-survey-list'
     )

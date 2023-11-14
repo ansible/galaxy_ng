@@ -13,6 +13,8 @@ from galaxy_ng.app.utils.survey import SURVEY_FIELDS
 class CollectionSurveySerializer(serializers.ModelSerializer):
 
     responses = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    collection = serializers.SerializerMethodField()
 
     class Meta:
         model = CollectionSurvey
@@ -24,7 +26,20 @@ class CollectionSurveySerializer(serializers.ModelSerializer):
             'user',
             'responses'
         ]
-    
+
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'username': obj.user.username
+        }
+
+    def get_collection(self, obj):
+        return {
+            'id': obj.collection.pulp_id,
+            'namespace': obj.collection.namespace,
+            'name': obj.collection.name
+        }
+
     def get_responses(self, obj):
         return dict((k, getattr(obj, k)) for k in SURVEY_FIELDS)
 
@@ -56,6 +71,8 @@ class CollectionSurveyRollupSerializer(serializers.ModelSerializer):
 class LegacyRoleSurveySerializer(serializers.ModelSerializer):
 
     responses = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = LegacyRoleSurvey
@@ -67,6 +84,19 @@ class LegacyRoleSurveySerializer(serializers.ModelSerializer):
             'user',
             'responses',
         ]
+
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'username': obj.user.username
+        }
+
+    def get_role(self, obj):
+        return {
+            'id': obj.role.id,
+            'namespace': obj.role.namespace.name,
+            'name': obj.role.name
+        }
 
     def get_responses(self, obj):
         return dict((k, getattr(obj, k)) for k in SURVEY_FIELDS)
