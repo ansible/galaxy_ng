@@ -2,7 +2,7 @@ from django.conf import settings
 from django_filters import rest_framework as filters
 from rest_framework import viewsets
 
-# from galaxy_ng.app.access_control.access_policy import SurveyAccessPolicy
+from galaxy_ng.app.access_control.access_policy import SurveyAccessPolicy
 
 from rest_framework.settings import perform_import
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -53,19 +53,27 @@ class CollectionSurveyList(viewsets.ModelViewSet):
     queryset = CollectionSurvey.objects.all()
     serializer_class = CollectionSurveySerializer
 
-    # access_policy.py is lame.
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SurveyAccessPolicy]
 
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = CollectionSurveyFilter
+
+    def get_queryset(self):
+        return CollectionSurvey.objects.filter(
+            user=self.request.user
+        )
 
 
 class LegacyRoleSurveyList(viewsets.ModelViewSet):
     queryset = LegacyRoleSurvey.objects.all()
     serializer_class = LegacyRoleSurveySerializer
 
-    # access_policy.py is lame.
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SurveyAccessPolicy]
 
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = LegacyRoleSurveyFilter
+
+    def get_queryset(self):
+        return LegacyRoleSurvey.objects.filter(
+            user=self.request.user
+        )

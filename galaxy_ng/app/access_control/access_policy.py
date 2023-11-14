@@ -828,5 +828,41 @@ class LegacyAccessPolicy(AccessPolicyBase):
 class SurveyAccessPolicy(AccessPolicyBase):
     NAME = "SurveyAccessPolicy"
 
+    @classmethod
+    def get_access_policy(cls, view):
+
+        # statements = GALAXY_STATEMENTS
+
+        '''
+        # If this is a galaxy access policy, load from the statement file
+        if cls.NAME:
+            return statements.get_pulp_access_policy(cls.NAME, default=[])
+        '''
+
+        # Check if the view has a url pattern. If it does, check for customized
+        # policies from statements/pulp.py
+        try:
+            viewname = get_view_urlpattern(view)
+
+            override_ap = PULP_VIEWSETS.get(viewname, None)
+            if override_ap:
+                return MockPulpAccessPolicy(override_ap)
+
+        except AttributeError:
+            pass
+
+        # If no customized policies exist, try to load the one defined on the view itself
+        try:
+            return MockPulpAccessPolicy(view.DEFAULT_ACCESS_POLICY)
+        except AttributeError:
+            pass
+
+        # As a last resort, require admin rights
+        return MockPulpAccessPolicy(
+            {
+                "statements": [{"action": "*", "principal": "admin", "effect": "allow"}],
+            }
+        )
+
     def is_survey_user(self, request, viewset, action):
         return True
