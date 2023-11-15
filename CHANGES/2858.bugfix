@@ -1,0 +1,1 @@
+Support ``exclude_fields`` and ``fields`` filters in ``v3/namespaces`` endpoint.
