@@ -81,6 +81,7 @@ repositories: tests verifying custom repositories
 all: tests that are unmarked and should pass in all deployment modes
 galaxy_stage_ansible: tests that run against galaxy-stage.ansible.com
 installer_smoke_test: smoke tests to validate AAP installation (VM)
+load_data: tests that load data that will be verified after upgrade or backup/restore
 """
 
 logger = logging.getLogger(__name__)

@@ -5,17 +5,20 @@ namespaces:
     group: group_1
 
 collections:
-  # name is the suffix, collection_dep_a_collection_3
+  # name is the suffix, collection_dep_a_{name}
+  # example: collection_dep_a_collection_3
   - name: collection_3
     version: 1.0.0
     namespace: ns_test_1
     repository: repo_1
     signed: true
+    deprecated: false
   - name: collection_4
     version: 1.0.0
     namespace: ns_test_1
     repository: published
     signed: false
+    deprecated: true
 
 groups:
   - name: group_1
@@ -24,7 +27,14 @@ groups:
 users:
   - username: user_1
     password: P@ssword!
+    email: email11@email.com
+    is_superuser: true
     group: group_1
+  - username: user_2
+    password: P@ssword!
+    email: email2@email.com
+    is_superuser: true
+    group: group_2
 
 repositories:
   - name: repo_1
@@ -50,5 +60,5 @@ execution_environments:
 
 remote_registries:
   - name: remote_registry_1
-    url: https//remote.registry1.com
+    url: https//remote2.registry1.com
 
