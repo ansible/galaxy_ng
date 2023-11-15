@@ -15,4 +15,4 @@ class SearchResultsSerializer(serializers.Serializer):
     tags = serializers.JSONField(source="tag_names")
     platforms = serializers.JSONField(source="platform_names")
     relevance = serializers.FloatField()
-    search = serializers.CharField()
+    search_vector = serializers.CharField()

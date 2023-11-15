@@ -57,7 +57,7 @@ QUERYSET_VALUES = [
     "tag_names",
     "content_type",
     "latest_version",
-    "search",
+    "search_vector",
     "relevance",
 ]
 RANK_NORMALIZATION = 32
@@ -65,64 +65,7 @@ EMPTY_QUERY = SearchQuery(Value(None))
 
 
 class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
-    """Lists Search results for Collections + Roles.
-    Aggregates search from Collections and Roles in the same results set.
-
-
-    ## filtering
-
-    - **search_type:** ["sql", "websearch"]
-    - **keywords:** string
-        - queried against name,namespace,description,tags,platform
-        - when search_type is websearch allows operators e.g: "this OR that AND (A OR B) -notthis"
-        - when search_type is sql performs a SQL ilike on the same fields
-    - **type:** ["collection", "role"]
-    - **deprecated:** boolean
-    - **name:** string (iexact query)
-    - **namespace:** string (iexact query)
-    - **tags:** string[] (allows multiple &tags=..&tags=..)
-    - **platform:** string
-
-    ## Sorting
-
-    Sorting is performed by passing `order_by` parameter, optionally prefixed with `-` for DESC,
-    the allowed fields are:
-
-    - name
-    - namespace_name
-    - download_count
-    - last_updated
-    - relevance (only when search_type is websearch)
-
-    ## Pagination
-
-    Pagination is based on `limit` and `offset` parameters.
-
-    ## Results
-
-    Results are embedded in the pagination serializer including
-    `meta:count` and `links:first,previous,next,last`.
-
-    The `data` key contains the results in the format::
-
-    ```python
-    {
-      "name": "brunogphmzthghu",
-      "namespace": "brunovrhvjkdh",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit.",
-      "type": "role",
-      "latest_version": "1.4.9",
-      "avatar_url": "https://github.com/brunogphmzthghu.png,
-      "contents": [],
-      "download_count": 9999,
-      "last_updated": "2023-11-09T15:17:01.235457Z",
-      "deprecated": false,
-      "tags": ["development", "java", "python"],
-      "platforms": [{"name": "Ubuntu", "versions": ["jammy", "focal"]}]
-    }
-    ```
-    """
-
+    """Search collections and roles"""
     permission_classes = [AllowAny]
     serializer_class = SearchResultsSerializer
 
@@ -146,7 +89,63 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
         ]
     )
     def list(self, *args, **kwargs):
-        """Override the default method just to provide extended schema"""
+        """Lists Search results for Collections + Roles.
+        Aggregates search from Collections and Roles in the same results set.
+
+
+        ## filtering
+
+        - **search_type:** ["sql", "websearch"]
+        - **keywords:** string
+            - queried against name,namespace,description,tags,platform
+            - when search_type is websearch allows operators e.g: "this OR that AND (A OR B) -notthis"
+            - when search_type is sql performs a SQL ilike on the same fields
+        - **type:** ["collection", "role"]
+        - **deprecated:** boolean
+        - **name:** string (iexact query)
+        - **namespace:** string (iexact query)
+        - **tags:** string[] (allows multiple &tags=..&tags=..)
+        - **platform:** string
+
+        ## Sorting
+
+        Sorting is performed by passing `order_by` parameter, optionally prefixed with `-` for DESC,
+        the allowed fields are:
+
+        - name
+        - namespace_name
+        - download_count
+        - last_updated
+        - relevance (only when search_type is websearch)
+
+        ## Pagination
+
+        Pagination is based on `limit` and `offset` parameters.
+
+        ## Results
+
+        Results are embedded in the pagination serializer including
+        `meta:count` and `links:first,previous,next,last`.
+
+        The `data` key contains the results in the format::
+
+        ```python
+        {
+          "name": "brunogphmzthghu",
+          "namespace": "brunovrhvjkdh",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit.",
+          "type": "role",
+          "latest_version": "1.4.9",
+          "avatar_url": "https://github.com/brunogphmzthghu.png,
+          "contents": [],
+          "download_count": 9999,
+          "last_updated": "2023-11-09T15:17:01.235457Z",
+          "deprecated": false,
+          "tags": ["development", "java", "python"],
+          "platforms": [{"name": "Ubuntu", "versions": ["jammy", "focal"]}]
+        }
+        ```
+        """
         return super().list(*args, **kwargs)
 
     def get_queryset(self):
@@ -203,12 +202,10 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
         )
         namespace_qs = Namespace.objects.filter(name=OuterRef("namespace"))
 
-        vector = Value("")
         relevance = Value(0)
         if query:
-            vector = F("search_vector")
             relevance = Func(
-                F("search"),
+                F("search_vector"),
                 query,
                 RANK_NORMALIZATION,
                 function="ts_rank",
@@ -231,7 +228,7 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
                 latest_version=F("version"),
                 content_list=F("contents"),
                 namespace_avatar=Subquery(namespace_qs.values("_avatar_url")),
-                search=vector,
+                # search_vector=F("search_vector"),
                 relevance=relevance,
             )
             .values(*QUERYSET_VALUES)
@@ -247,14 +244,14 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
             # TODO: Build search_vector field in the LegacyRole model and update via trigger or
             # hook during import.
             vector = (
-                SearchVector("name", weight="A")
-                + SearchVector("namespace_name", weight="B")
-                + SearchVector("description_text", weight="C")
-                + SearchVector("tag_names", weight="D")
-                + SearchVector("platform_names")
+                SearchVector("namespace__name", weight="A")
+                + SearchVector("name", weight="A")
+                + SearchVector("full_metadata__tags", weight="B")
+                + SearchVector("full_metadata__platforms", weight="C")
+                + SearchVector(KT("full_metadata__description"), weight="D")
             )
             relevance = Func(
-                F("search"),
+                F("search_vector"),
                 query,
                 RANK_NORMALIZATION,
                 function="ts_rank",
@@ -273,9 +270,10 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
             latest_version=KT("full_metadata__versions__-1__version"),
             content_list=Value([], JSONField()),  # There is no contents for roles
             namespace_avatar=F("namespace__avatar_url"),
-            search=vector,
+            search_vector=vector,
             relevance=relevance,
         ).values(*QUERYSET_VALUES)
+        print(qs._query)
         return qs
 
     def filter_and_sort(self, collections, roles, filter_params, sort, type="", query=None):
@@ -305,8 +303,8 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
             collections = collections.filter(platform_names=platform)  # never match but required
 
         if query:
-            collections = collections.filter(search=query)
-            roles = roles.filter(search=query)
+            collections = collections.filter(search_vector=query)
+            roles = roles.filter(search_vector=query)
         elif keywords := filter_params.get("keywords"):  # search_type=sql
             query = (
                 Q(name__icontains=keywords)
