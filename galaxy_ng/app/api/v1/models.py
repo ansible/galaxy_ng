@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
 
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.models.auth import User
@@ -183,6 +185,19 @@ class LegacyRoleDownloadCount(models.Model):
     )
 
     count = models.IntegerField(default=0)
+
+
+class LegacyRoleSearchVector(models.Model):
+    role = models.OneToOneField(
+        LegacyRole,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+    search_vector = SearchVectorField(default="")
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = (GinIndex(fields=["search_vector"]),)
 
 
 class LegacyRoleImport(models.Model):

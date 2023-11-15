@@ -1,3 +1,4 @@
+from django.db import connection
 from django.contrib.postgres.aggregates import JSONBAgg
 from django.contrib.postgres.search import SearchQuery, SearchVector
 from django.db.models import (
@@ -273,7 +274,8 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
             search_vector=vector,
             relevance=relevance,
         ).values(*QUERYSET_VALUES)
-        print(qs._query)
+        print(qs.all())
+        print(connection.queries)
         return qs
 
     def filter_and_sort(self, collections, roles, filter_params, sort, type="", query=None):
