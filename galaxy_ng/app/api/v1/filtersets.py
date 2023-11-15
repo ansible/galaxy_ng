@@ -186,8 +186,8 @@ class LegacyRoleImportFilter(filterset.FilterSet):
     role_name = filters.NumberFilter(field_name='role__name')
     namespace_id = filters.NumberFilter(field_name='role__namespace_id')
     namespace_name = filters.NumberFilter(field_name='role__namespace_name')
-    github_user = filters.CharFilter(method='github_user_filter')
-    github_repo = filters.CharFilter(method='github_repo_filter')
+    github_user = filters.CharFilter(field_name='task__kwargs__github_user')
+    github_repo = filters.CharFilter(field_name='task__kwargs__github_repo')
     state = filters.CharFilter(method='state_filter')
 
     class Meta:
