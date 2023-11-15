@@ -190,9 +190,18 @@ urlpatterns = [
         name='collection-survey-list'
     ),
     path(
+        "surveys/collections/<str:pk>/",
+        viewsets.LegacyRoleSurveyList.as_view({'post': 'create'}),
+        name='collection-survey-create'
+    ),
+    path(
         "surveys/roles/",
         viewsets.LegacyRoleSurveyList.as_view({'get': 'list'}),
         name='legacyrole-survey-list'
+    ),
+    path(
+        "surveys/roles/<int:id>/",
+        viewsets.LegacyRoleSurveyList.as_view({'post': 'create'}),
+        name='legacyrole-survey-create'
     )
-
 ]

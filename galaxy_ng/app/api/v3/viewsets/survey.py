@@ -1,11 +1,16 @@
 from django.conf import settings
 from django_filters import rest_framework as filters
+from django.shortcuts import get_object_or_404
+
 from rest_framework import viewsets
-
-from galaxy_ng.app.access_control.access_policy import SurveyAccessPolicy
-
 from rest_framework.settings import perform_import
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework import status
+
+from galaxy_ng.app.api.base import LocalSettingsMixin
+from galaxy_ng.app.access_control.access_policy import SurveyAccessPolicy
+
 
 from galaxy_ng.app.models import (
     CollectionSurvey,
@@ -24,6 +29,10 @@ from galaxy_ng.app.api.v3.serializers import (
 from galaxy_ng.app.api.v3.filtersets import (
     CollectionSurveyFilter,
     LegacyRoleSurveyFilter,
+)
+
+from galaxy_ng.app.api.v1.models import (
+    LegacyRole
 )
 
 
@@ -64,7 +73,7 @@ class CollectionSurveyList(viewsets.ModelViewSet):
         )
 
 
-class LegacyRoleSurveyList(viewsets.ModelViewSet):
+class LegacyRoleSurveyList(LocalSettingsMixin, viewsets.ModelViewSet):
     queryset = LegacyRoleSurvey.objects.all()
     serializer_class = LegacyRoleSurveySerializer
 
@@ -77,3 +86,26 @@ class LegacyRoleSurveyList(viewsets.ModelViewSet):
         return LegacyRoleSurvey.objects.filter(
             user=self.request.user
         )
+
+    def create(self, *args, **kwargs):
+        print(f'ARGS:{args} KWARGS:{kwargs}')
+        role_id = kwargs.get('id')
+
+        if not role_id:
+            return Response(
+                {"message": "role id not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        role = get_object_or_404(LegacyRole, id=role_id)
+
+        defaults = self.request.data
+        print(f'DATA: {defaults}')
+
+        survey, _ = LegacyRoleSurvey.objects.get_or_create(
+            user=self.request.user,
+            role=role,
+            defaults=defaults
+        )
+
+        return Response({'id': survey.id}, status=status.HTTP_201_CREATED)
