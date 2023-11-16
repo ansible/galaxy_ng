@@ -2,6 +2,7 @@ import logging
 import json
 import pytest
 
+from galaxy_ng.tests.integration.conftest import is_hub_4_7_or_higher
 from galaxy_ng.tests.integration.utils.repo_management_utils import create_repo_and_dist, \
     upload_new_artifact
 from galaxykit.collections import sign_collection, deprecate_collection, \
@@ -18,11 +19,11 @@ from galaxykit.utils import GalaxyClientError, wait_for_task
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.min_hub_version("4.7dev")
 class TestLoadData:
 
+    @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.load_data
-    def test_load_data(self, galaxy_client, data):
+    def test_load_data(self, galaxy_client, data, ansible_config):
         """
         Test loading data that will be verified at a later stage
         after the AAP upgrade or backup/restore
@@ -58,19 +59,20 @@ class TestLoadData:
             add_group(gc, ns["name"], ns["group"],
                       object_roles=["galaxy.collection_namespace_owner"])
 
-        for repo in data["repositories"]:
-            try:
-                logger.debug(f"Creating repository and distribution {repo['name']}")
-                create_repo_and_dist(gc, repo["name"])
-            except GalaxyClientError as e:
-                if "This field must be unique" in e.response.text:
-                    logger.debug(f"Repository {repo['name']} already exists. Not a problem.")
-                else:
-                    raise e
+        if is_hub_4_7_or_higher(ansible_config):
+            for repo in data["repositories"]:
+                try:
+                    logger.debug(f"Creating repository and distribution {repo['name']}")
+                    create_repo_and_dist(gc, repo["name"])
+                except GalaxyClientError as e:
+                    if "This field must be unique" in e.response.text:
+                        logger.debug(f"Repository {repo['name']} already exists. Not a problem.")
+                    else:
+                        raise e
 
         for remote in data["remotes"]:
             try:
-                logger.debug(f"Creating remote and distribution {remote['name']}")
+                logger.debug(f"Creating remote {remote['name']}")
                 create_remote(gc, remote["name"], remote["url"])
             except GalaxyClientError as e:
                 if "This field must be unique" in e.response.text:
@@ -83,6 +85,10 @@ class TestLoadData:
                     raise e
 
         for collection in data["collections"]:
+            if (collection["repository"] != "published"
+                    and not is_hub_4_7_or_higher(ansible_config)):
+                continue
+
             try:
                 artifact = upload_new_artifact(
                     gc, collection["namespace"], collection["repository"],

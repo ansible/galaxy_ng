@@ -572,6 +572,11 @@ def is_hub_4_5(ansible_config):
     return parse_version(hub_version) < parse_version('4.6')
 
 
+def is_hub_4_7_or_higher(ansible_config):
+    hub_version = get_hub_version(ansible_config)
+    return parse_version(hub_version) >= parse_version('4.7')
+
+
 # add the "all" label to any unmarked tests
 def pytest_collection_modifyitems(items, config):
     for item in items:
