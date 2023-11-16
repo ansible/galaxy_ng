@@ -1,6 +1,5 @@
-from django.db import connection
 from django.contrib.postgres.aggregates import JSONBAgg
-from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.contrib.postgres.search import SearchQuery
 from django.db.models import (
     Exists,
     F,
@@ -43,8 +42,8 @@ FILTER_PARAMS = [
 SORT_PARAM = "order_by"
 SORTABLE_FIELDS = ["name", "namespace_name", "download_count", "last_updated", "relevance"]
 SORTABLE_FIELDS += [f"-{item}" for item in SORTABLE_FIELDS]
-DEFAULT_SORT = "-download_count"
-DEFAULT_SEARCH_TYPE = "sql"  # websearch,sql
+DEFAULT_SORT = "-download_count,-relevance"
+DEFAULT_SEARCH_TYPE = "websearch"  # websearch,sql
 QUERYSET_VALUES = [
     "namespace_avatar",
     "content_list",
@@ -58,15 +57,15 @@ QUERYSET_VALUES = [
     "tag_names",
     "content_type",
     "latest_version",
-    "search_vector",
+    "search",
     "relevance",
 ]
 RANK_NORMALIZATION = 32
-EMPTY_QUERY = SearchQuery(Value(None))
 
 
 class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
     """Search collections and roles"""
+
     permission_classes = [AllowAny]
     serializer_class = SearchResultsSerializer
 
@@ -99,7 +98,7 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
         - **search_type:** ["sql", "websearch"]
         - **keywords:** string
             - queried against name,namespace,description,tags,platform
-            - when search_type is websearch allows operators e.g: "this OR that AND (A OR B) -notthis"
+            - when search_type is websearch allows operators e.g: "this OR that AND (A OR B) -C"
             - when search_type is sql performs a SQL ilike on the same fields
         - **type:** ["collection", "role"]
         - **deprecated:** boolean
@@ -185,11 +184,12 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
 
     def get_sorting_param(self, request):
         """Validates the sorting parameter is valid."""
-        sort = request.query_params.get(SORT_PARAM, DEFAULT_SORT)
-        if sort not in SORTABLE_FIELDS:
-            raise ValidationError(f"{SORT_PARAM} requires one of {SORTABLE_FIELDS}")
-        search_type = request.query_params.get("search_type", "sql")
-        if "relevance" in sort and search_type != "websearch":
+        sort = request.query_params.get(SORT_PARAM, DEFAULT_SORT).split(",")
+        for item in sort:
+            if item not in SORTABLE_FIELDS:
+                raise ValidationError(f"{SORT_PARAM} requires one of {SORTABLE_FIELDS}")
+        search_type = request.query_params.get("search_type", DEFAULT_SEARCH_TYPE)
+        if ("relevance" in sort or "-relevance" in sort) and search_type != "websearch":
             raise ValidationError("'order_by=relevance' works only with 'search_type=websearch'")
         return sort
 
@@ -229,7 +229,7 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
                 latest_version=F("version"),
                 content_list=F("contents"),
                 namespace_avatar=Subquery(namespace_qs.values("_avatar_url")),
-                # search_vector=F("search_vector"),
+                search=F("search_vector"),
                 relevance=relevance,
             )
             .values(*QUERYSET_VALUES)
@@ -239,20 +239,10 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
 
     def get_role_queryset(self, query=None):
         """Build the LegacyRole queryset from annotations."""
-        vector = Value("")
         relevance = Value(0)
         if query:
-            # TODO: Build search_vector field in the LegacyRole model and update via trigger or
-            # hook during import.
-            vector = (
-                SearchVector("namespace__name", weight="A")
-                + SearchVector("name", weight="A")
-                + SearchVector("full_metadata__tags", weight="B")
-                + SearchVector("full_metadata__platforms", weight="C")
-                + SearchVector(KT("full_metadata__description"), weight="D")
-            )
             relevance = Func(
-                F("search_vector"),
+                F("search"),
                 query,
                 RANK_NORMALIZATION,
                 function="ts_rank",
@@ -270,12 +260,10 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
             download_count=Coalesce(F("legacyroledownloadcount__count"), Value(0)),
             latest_version=KT("full_metadata__versions__-1__version"),
             content_list=Value([], JSONField()),  # There is no contents for roles
-            namespace_avatar=F("namespace__avatar_url"),
-            search_vector=vector,
+            namespace_avatar=F("namespace__namespace___avatar_url"),  # v3 namespace._avatar_url
+            search=F("legacyrolesearchvector__search_vector"),
             relevance=relevance,
         ).values(*QUERYSET_VALUES)
-        print(qs.all())
-        print(connection.queries)
         return qs
 
     def filter_and_sort(self, collections, roles, filter_params, sort, type="", query=None):
@@ -305,8 +293,8 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
             collections = collections.filter(platform_names=platform)  # never match but required
 
         if query:
-            collections = collections.filter(search_vector=query)
-            roles = roles.filter(search_vector=query)
+            collections = collections.filter(search=query)
+            roles = roles.filter(search=query)
         elif keywords := filter_params.get("keywords"):  # search_type=sql
             query = (
                 Q(name__icontains=keywords)
@@ -319,11 +307,11 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
             roles = roles.filter(query)
 
         if type.lower() == "role":
-            qs = roles.order_by(sort)
+            qs = roles.order_by(*sort)
         elif type.lower() == "collection":
-            qs = collections.order_by(sort)
+            qs = collections.order_by(*sort)
         else:
-            qs = collections.union(roles, all=True).order_by(sort)
+            qs = collections.union(roles, all=True).order_by(*sort)
         return qs
 
 
@@ -335,7 +323,7 @@ def test():
     print(f"{' START ':#^40}")
     s = SearchListView()
     data = s.get_search_results(
-        {"type": "", "search_type": "websearch", "keywords": "java web"}, sort="-relevance"
+        {"type": "", "keywords": "java web"}, sort="-relevance"
     )
     print(f"{' SQLQUERY ':#^40}")
     print(data._query)

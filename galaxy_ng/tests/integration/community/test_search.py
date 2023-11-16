@@ -119,7 +119,9 @@ def test_namespace_with_sql_search(admin_client):
 @pytest.mark.deployment_community
 def test_name_with_sql_search(admin_client):
     """Test search."""
-    name = admin_client(f"/api/_ui/v1/search/?namespace=ansible&name={COLLECTION_NAME}")
+    name = admin_client(
+        f"/api/_ui/v1/search/?search_type=sql&namespace=ansible&name={COLLECTION_NAME}"
+    )
     assert name["meta"]["count"] == 1
     assert name["data"][0]["name"] == COLLECTION_NAME
     assert name["data"][0]["namespace"] == NAMESPACE_NAME
@@ -131,7 +133,7 @@ def test_name_with_sql_search(admin_client):
 @pytest.mark.deployment_community
 def test_tags_with_sql_search(admin_client):
     """Test search."""
-    tag_url = "/api/_ui/v1/search/?namespace=ansible"
+    tag_url = "/api/_ui/v1/search/?search_type=sql&namespace=ansible"
     for tag in COLLECTION_TAGS:
         tag_url += f"&tags={tag}"
     tags = admin_client(tag_url)
@@ -146,7 +148,7 @@ def test_tags_with_sql_search(admin_client):
 @pytest.mark.deployment_community
 def test_type_with_sql_search(admin_client):
     """Test search."""
-    content_type = admin_client("/api/_ui/v1/search/?namespace=ansible&type=role")
+    content_type = admin_client("/api/_ui/v1/search/?search_type=sql&namespace=ansible&type=role")
     assert content_type["meta"]["count"] == 1
     assert content_type["data"][0]["name"] == ROLE_NAME
     assert content_type["data"][0]["namespace"] == NAMESPACE_NAME
@@ -158,7 +160,7 @@ def test_type_with_sql_search(admin_client):
 @pytest.mark.deployment_community
 def test_platform_with_sql_search(admin_client):
     """Test search."""
-    platform = admin_client("/api/_ui/v1/search/?namespace=ansible&platform=fedora")
+    platform = admin_client("/api/_ui/v1/search/?search_type=sql&namespace=ansible&platform=fedora")
     assert platform["meta"]["count"] == 1
     assert platform["data"][0]["name"] == ROLE_NAME
     assert platform["data"][0]["namespace"] == NAMESPACE_NAME
@@ -170,14 +172,18 @@ def test_platform_with_sql_search(admin_client):
 @pytest.mark.deployment_community
 def test_deprecated_with_sql_search(admin_client):
     """Test search."""
-    deprecated = admin_client("/api/_ui/v1/search/?namespace=ansible&deprecated=true")
+    deprecated = admin_client(
+        "/api/_ui/v1/search/?search_type=sql&namespace=ansible&deprecated=true"
+    )
     assert deprecated["meta"]["count"] == 0
 
 
 @pytest.mark.deployment_community
 def test_keywords_with_sql_search(admin_client):
     """Test search."""
-    keywords = admin_client("/api/_ui/v1/search/?namespace=ansible&keywords=infinidash")
+    keywords = admin_client(
+        "/api/_ui/v1/search/?search_type=sql&namespace=ansible&keywords=infinidash"
+    )
     assert keywords["meta"]["count"] == 1
     assert keywords["data"][0]["name"] == COLLECTION_NAME
     assert keywords["data"][0]["namespace"] == NAMESPACE_NAME
@@ -189,7 +195,9 @@ def test_keywords_with_sql_search(admin_client):
 @pytest.mark.deployment_community
 def test_sorting_with_sql_search(admin_client):
     """Test search."""
-    sorting = admin_client("/api/_ui/v1/search/?namespace=ansible&order_by=-last_updated")
+    sorting = admin_client(
+        "/api/_ui/v1/search/?search_type=sql&namespace=ansible&order_by=-last_updated"
+    )
     assert sorting["meta"]["count"] == 2
     assert sorting["data"][0]["type"] == "role"
     assert sorting["data"][1]["type"] == "collection"
@@ -198,7 +206,7 @@ def test_sorting_with_sql_search(admin_client):
 @pytest.mark.deployment_community
 def test_facets_with_web_search(admin_client):
     """Search using vector websearch"""
-    namespace = admin_client("/api/_ui/v1/search/?namespace=ansible&search_type=websearch")
+    namespace = admin_client("/api/_ui/v1/search/?namespace=ansible")
     assert namespace["meta"]["count"] == 2
 
     # IMPORTANT: Keep filtering by namespace to avoid including content from other tests
@@ -207,9 +215,7 @@ def test_facets_with_web_search(admin_client):
 @pytest.mark.deployment_community
 def test_name_with_web_search(admin_client):
     """Search using vector websearch"""
-    name = admin_client(
-        f"/api/_ui/v1/search/?namespace=ansible&search_type=websearch&name={COLLECTION_NAME}"
-    )
+    name = admin_client(f"/api/_ui/v1/search/?namespace=ansible&name={COLLECTION_NAME}")
     assert name["meta"]["count"] == 1
     assert name["data"][0]["name"] == COLLECTION_NAME
     assert name["data"][0]["namespace"] == NAMESPACE_NAME
@@ -221,7 +227,7 @@ def test_name_with_web_search(admin_client):
 @pytest.mark.deployment_community
 def test_tags_with_web_search(admin_client):
     """Search using vector websearch"""
-    tag_url = "/api/_ui/v1/search/?namespace=ansible&search_type=websearch"
+    tag_url = "/api/_ui/v1/search/?namespace=ansible"
     for tag in COLLECTION_TAGS:
         tag_url += f"&tags={tag}"
     tags = admin_client(tag_url)
@@ -236,9 +242,7 @@ def test_tags_with_web_search(admin_client):
 @pytest.mark.deployment_community
 def test_type_with_web_search(admin_client):
     """Search using vector websearch"""
-    content_type = admin_client(
-        "/api/_ui/v1/search/?namespace=ansible&search_type=websearch&type=role"
-    )
+    content_type = admin_client("/api/_ui/v1/search/?namespace=ansible&type=role")
     assert content_type["meta"]["count"] == 1
     assert content_type["data"][0]["name"] == ROLE_NAME
     assert content_type["data"][0]["namespace"] == NAMESPACE_NAME
@@ -250,9 +254,7 @@ def test_type_with_web_search(admin_client):
 @pytest.mark.deployment_community
 def test_platform_with_web_search(admin_client):
     """Search using vector websearch"""
-    platform = admin_client(
-        "/api/_ui/v1/search/?namespace=ansible&search_type=websearch&platform=fedora"
-    )
+    platform = admin_client("/api/_ui/v1/search/?namespace=ansible&platform=fedora")
     assert platform["meta"]["count"] == 1
     assert platform["data"][0]["name"] == ROLE_NAME
     assert platform["data"][0]["namespace"] == NAMESPACE_NAME
@@ -264,18 +266,14 @@ def test_platform_with_web_search(admin_client):
 @pytest.mark.deployment_community
 def test_deprecated_with_web_search(admin_client):
     """Search using vector websearch"""
-    deprecated = admin_client(
-        "/api/_ui/v1/search/?namespace=ansible&search_type=websearch&deprecated=true"
-    )
+    deprecated = admin_client("/api/_ui/v1/search/?namespace=ansible&deprecated=true")
     assert deprecated["meta"]["count"] == 0
 
 
 @pytest.mark.deployment_community
 def test_keywords_with_web_search(admin_client):
     """Search using vector websearch"""
-    keywords = admin_client(
-        "/api/_ui/v1/search/?namespace=ansible&search_type=websearch&keywords=infinidash"
-    )
+    keywords = admin_client("/api/_ui/v1/search/?namespace=ansible&keywords=infinidash")
     assert keywords["meta"]["count"] == 1
     assert keywords["data"][0]["name"] == COLLECTION_NAME
     assert keywords["data"][0]["namespace"] == NAMESPACE_NAME
@@ -287,9 +285,7 @@ def test_keywords_with_web_search(admin_client):
 @pytest.mark.deployment_community
 def test_sorting_with_web_search(admin_client):
     """Search using vector websearch"""
-    sorting = admin_client(
-        "/api/_ui/v1/search/?namespace=ansible&search_type=websearch&order_by=-last_updated"
-    )
+    sorting = admin_client("/api/_ui/v1/search/?namespace=ansible&order_by=-last_updated")
     assert sorting["meta"]["count"] == 2
     assert sorting["data"][0]["type"] == "role"
     assert sorting["data"][1]["type"] == "collection"
@@ -304,9 +300,7 @@ def test_compound_query_with_web_search(admin_client):
         "infinidash%20OR%20java",
         "api%20-kubernetes",
     ]:
-        websearch = admin_client(
-            f"/api/_ui/v1/search/?namespace=ansible&search_type=websearch&keywords={term}"
-        )
+        websearch = admin_client(f"/api/_ui/v1/search/?namespace=ansible&keywords={term}")
         assert websearch["meta"]["count"] == 1
         assert websearch["data"][0]["name"] == COLLECTION_NAME
         assert websearch["data"][0]["namespace"] == NAMESPACE_NAME
@@ -320,9 +314,7 @@ def test_compound_query_with_web_search(admin_client):
         "kubernetes%20OR%20java",
         "api%20-infinidash",
     ]:
-        websearch = admin_client(
-            f"/api/_ui/v1/search/?namespace=ansible&search_type=websearch&keywords={term}"
-        )
+        websearch = admin_client(f"/api/_ui/v1/search/?namespace=ansible&keywords={term}")
         assert websearch["meta"]["count"] == 1
         assert websearch["data"][0]["name"] == ROLE_NAME
         assert websearch["data"][0]["namespace"] == NAMESPACE_NAME
@@ -336,8 +328,7 @@ def test_relevance_with_web_search(admin_client):
     """Search using vector websearch"""
     # Both has api tag and fedora term as a platform for role and description for collection
     keywords = admin_client(
-        "/api/_ui/v1/search/?namespace=ansible&search_type=websearch"
-        "&keywords=api%20AND%20fedora&order_by=-relevance"
+        "/api/_ui/v1/search/?namespace=ansible" "&keywords=api%20AND%20fedora&order_by=-relevance"
     )
     assert keywords["meta"]["count"] == 2
     assert keywords["data"][0]["name"] == ROLE_NAME

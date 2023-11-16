@@ -29,6 +29,7 @@ BEGIN
     ON CONFLICT (role_id)
     DO
       UPDATE SET search_vector = _search_vector, modified = current_timestamp;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS update_ts_vector ON galaxy_legacyrole;
@@ -50,4 +51,13 @@ class Migration(migrations.Migration):
         ("galaxy", "0046_legacyrolesearchvector"),
     ]
 
-    operations = []
+    operations = [
+        migrations.RunSQL(
+            sql=CREATE_ROLE_TS_VECTOR_TRIGGER,
+            reverse_sql=DROP_ROLE_TS_VECTOR_TRIGGER,
+        ),
+        migrations.RunSQL(
+            sql=REBUILD_ROLES_TS_VECTOR,
+            reverse_sql=migrations.RunSQL.noop,
+        )
+    ]
