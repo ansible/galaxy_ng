@@ -3,36 +3,37 @@
 from django.db import migrations
 
 REBUILD_ROLES_TS_VECTOR = """
-UPDATE galaxy_legacyrole SET name = name; 
+UPDATE galaxy_legacyrole SET name = name;
 """
 
 CREATE_ROLE_TS_VECTOR_TRIGGER = """
 CREATE OR REPLACE FUNCTION update_role_ts_vector()
-    RETURNS TRIGGER AS
-$$
+    RETURNS TRIGGER
+    AS $$
 DECLARE
     _search_vector tsvector;
+    _namespace text;
 BEGIN
-    SELECT ((((
-        setweight(to_tsvector(COALESCE(ln."name", '')), 'A')
-        || setweight(to_tsvector(COALESCE(lr."name", '')), 'A'))
-        || setweight(to_tsvector(COALESCE(((lr."full_metadata"->'tags'))::text, '')), 'B')) 
-        || setweight(to_tsvector(COALESCE(((lr."full_metadata"->'platforms'))::text, '')), 'C')) 
-        || setweight(to_tsvector(COALESCE((lr."full_metadata"->>'description'), '')), 'D'))
-    into _search_vector
-    FROM galaxy_legacyrole lr
-    INNER JOIN galaxy_legacynamespace ln ON (lr.namespace_id = ln.id)
-    WHERE lr.id = NEW.id;
+    _namespace := (select name from galaxy_legacynamespace WHERE id = NEW.namespace_id);
+    _search_vector := ((((
+        setweight(to_tsvector(COALESCE(_namespace, '')), 'A')
+        || setweight(to_tsvector(COALESCE(NEW."name", '')), 'A'))
+        || setweight(to_tsvector(COALESCE(((NEW."full_metadata"->'tags'))::text, '')), 'B')) 
+        || setweight(to_tsvector(COALESCE(((NEW."full_metadata"->'platforms'))::text, '')), 'C')) 
+        || setweight(to_tsvector(COALESCE((NEW."full_metadata"->>'description'), '')), 'D'));
 
     INSERT INTO galaxy_legacyrolesearchvector(role_id,search_vector,modified)
-    VALUES(new.id,_search_vector,current_timestamp)
+        VALUES(new.id,_search_vector,current_timestamp)
     ON CONFLICT (role_id)
-    DO
-      UPDATE SET search_vector = _search_vector, modified = current_timestamp;
+        DO UPDATE SET
+            search_vector = _search_vector, modified = current_timestamp;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
+
 DROP TRIGGER IF EXISTS update_ts_vector ON galaxy_legacyrole;
+
 CREATE TRIGGER update_ts_vector
     AFTER INSERT OR UPDATE
     ON galaxy_legacyrole
