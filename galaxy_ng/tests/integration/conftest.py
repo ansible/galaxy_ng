@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import yaml
 
 import pytest
 from orionutils.utils import increment_version
@@ -82,6 +83,7 @@ all: tests that are unmarked and should pass in all deployment modes
 galaxy_stage_ansible: tests that run against galaxy-stage.ansible.com
 installer_smoke_test: smoke tests to validate AAP installation (VM)
 load_data: tests that load data that will be verified after upgrade or backup/restore
+verify_data: tests that verify the data previously loaded by load_data test
 """
 
 logger = logging.getLogger(__name__)
@@ -545,6 +547,14 @@ def keep_generated_test_artifact(ansible_config):
         "skeleton",
         config={"namespace": expected_ns, "version": test_version, "tags": ["tools"]},
     )
+
+
+@pytest.fixture(scope="session")
+def data():
+    path = 'galaxy_ng/tests/integration/load_data.yaml'
+    with open(path, 'r') as yaml_file:
+        data = yaml.safe_load(yaml_file)
+    return data
 
 
 def min_hub_version(ansible_config, spec):

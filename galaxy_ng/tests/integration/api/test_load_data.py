@@ -1,11 +1,11 @@
 import logging
 import json
 import pytest
-import yaml
 
 from galaxy_ng.tests.integration.utils.repo_management_utils import create_repo_and_dist, \
-    upload_new_artifact, add_content_units
-from galaxykit.collections import sign_collection, deprecate_collection
+    upload_new_artifact
+from galaxykit.collections import sign_collection, deprecate_collection, \
+    move_or_copy_collection
 from galaxykit.containers import create_container, delete_container
 from galaxykit.namespaces import add_group
 from galaxykit.registries import create_registry, delete_registry
@@ -22,16 +22,12 @@ logger = logging.getLogger(__name__)
 class TestLoadData:
 
     @pytest.mark.load_data
-    def test_load_data(self, galaxy_client):
+    def test_load_data(self, galaxy_client, data):
         """
         Test loading data that will be verified at a later stage
         after the AAP upgrade or backup/restore
         """
         gc = galaxy_client("admin")
-        path = 'galaxy_ng/tests/integration/load_data.yaml'
-
-        with open(path, 'r') as yaml_file:
-            data = yaml.safe_load(yaml_file)
 
         for group in data["groups"]:
             # creates a group, nothing happens if it already exists
@@ -94,11 +90,12 @@ class TestLoadData:
                 collection_resp_1 = gc.get(
                     f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
                 )
-                repo_pulp_href = get_repository_href(gc, collection["repository"])
-                content_units = [collection_resp_1["results"][0]["pulp_href"]]
-                add_content_units(gc, content_units, repo_pulp_href)
+                move_or_copy_collection(gc, artifact.namespace, artifact.name,
+                                        artifact.version, "staging",
+                                        destination=collection["repository"])
                 if collection["signed"]:
                     logger.debug("Signing collection")
+                    repo_pulp_href = get_repository_href(gc, collection["repository"])
                     sign_collection(gc, collection_resp_1["results"][0]["pulp_href"],
                                     repo_pulp_href)
                 if collection["deprecated"]:
