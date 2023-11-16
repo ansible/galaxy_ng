@@ -149,15 +149,7 @@ class NamespaceSerializer(serializers.ModelSerializer):
         links = validated_data.pop('links', None)
         download_logo = False
         if "avatar_url" in validated_data:
-            if instance.avatar_url != validated_data["avatar_url"]:
-                if validated_data["avatar_url"]:
-                    download_logo = True
-                else:
-                    download_logo = False
-
-            if (instance.last_created_pulp_metadata
-                    and instance.last_created_pulp_metadata.avatar_sha256 is None):
-                download_logo = True
+            download_logo = True
 
         if links is not None:
             instance.set_links(links)
