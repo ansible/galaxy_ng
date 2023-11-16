@@ -10,6 +10,7 @@ from rest_framework import status
 
 from galaxy_ng.app.api.base import LocalSettingsMixin
 from galaxy_ng.app.access_control.access_policy import SurveyAccessPolicy
+from galaxy_ng.app.utils.survey import calculate_survey_score
 
 
 from galaxy_ng.app.models import (
@@ -93,19 +94,28 @@ class LegacyRoleSurveyList(LocalSettingsMixin, viewsets.ModelViewSet):
 
         if not role_id:
             return Response(
-                {"message": "role id not found"}, 
+                {"message": "role id not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
 
         role = get_object_or_404(LegacyRole, id=role_id)
 
         defaults = self.request.data
-        print(f'DATA: {defaults}')
 
         survey, _ = LegacyRoleSurvey.objects.get_or_create(
             user=self.request.user,
             role=role,
             defaults=defaults
         )
+
+        # re-compute score ...
+        new_score = calculate_survey_score(LegacyRoleSurvey.objects.filter(role=role))
+        score,_ = LegacyRoleSurveyRollup.objects.get_or_create(
+            role=role,
+            defaults={'score': new_score}
+        )
+        if score.score != new_score:
+            score.score = new_score
+            score.save()
 
         return Response({'id': survey.id}, status=status.HTTP_201_CREATED)
