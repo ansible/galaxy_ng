@@ -42,7 +42,6 @@ FILTER_PARAMS = [
 SORT_PARAM = "order_by"
 SORTABLE_FIELDS = ["name", "namespace_name", "download_count", "last_updated", "relevance"]
 SORTABLE_FIELDS += [f"-{item}" for item in SORTABLE_FIELDS]
-DEFAULT_SORT = "-download_count,-relevance"
 DEFAULT_SEARCH_TYPE = "websearch"  # websearch,sql
 QUERYSET_VALUES = [
     "namespace_avatar",
@@ -184,11 +183,14 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
 
     def get_sorting_param(self, request):
         """Validates the sorting parameter is valid."""
-        sort = request.query_params.get(SORT_PARAM, DEFAULT_SORT).split(",")
+        search_type = request.query_params.get("search_type", DEFAULT_SEARCH_TYPE)
+        default_sort = "-download_count,-relevance"
+        if search_type == "sql":
+            default_sort = "-download_count,-last_updated"
+        sort = request.query_params.get(SORT_PARAM, default_sort).split(",")
         for item in sort:
             if item not in SORTABLE_FIELDS:
                 raise ValidationError(f"{SORT_PARAM} requires one of {SORTABLE_FIELDS}")
-        search_type = request.query_params.get("search_type", DEFAULT_SEARCH_TYPE)
         if ("relevance" in sort or "-relevance" in sort) and search_type != "websearch":
             raise ValidationError("'order_by=relevance' works only with 'search_type=websearch'")
         return sort
@@ -322,9 +324,7 @@ def test():
     print()
     print(f"{' START ':#^40}")
     s = SearchListView()
-    data = s.get_search_results(
-        {"type": "", "keywords": "java web"}, sort="-relevance"
-    )
+    data = s.get_search_results({"type": "", "keywords": "java web"}, sort="-relevance")
     print(f"{' SQLQUERY ':#^40}")
     print(data._query)
     print(f"{' COUNT ':#^40}")
