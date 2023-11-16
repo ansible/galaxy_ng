@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-13 11:35+0000\n"
+"POT-Creation-Date: 2023-11-16 13:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,25 +19,25 @@ msgstr ""
 msgid "Back to list"
 msgstr ""
 
-#: app/access_control/access_policy.py:363
+#: app/access_control/access_policy.py:402
 msgid "Namespace in filename not found."
 msgstr "파일 이름의 네임스페이스를 찾을 수 없습니다."
 
-#: app/access_control/access_policy.py:396
+#: app/access_control/access_policy.py:435
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:410
+#: app/access_control/access_policy.py:449
 msgid "Namespace not found."
 msgstr "네임스페이스를 찾을 수 없습니다."
 
-#: app/access_control/access_policy.py:479
+#: app/access_control/access_policy.py:518
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:532 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:571 app/api/v3/views/sync.py:49
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
@@ -45,36 +45,46 @@ msgstr ""
 "요구 사항 파일을 지정하지 않고 dockerfile.ansible.com의 콘텐츠를 동기화할 수 "
 "없습니다."
 
-#: app/access_control/fields.py:17
+#: app/access_control/fields.py:21
 msgid "object_roles field is required"
 msgstr "object_roles 필드는 필수입니다"
 
-#: app/access_control/fields.py:21
+#: app/access_control/fields.py:25
 msgid "id or name field is required"
 msgstr "ID 또는 이름 필드는 필수입니다"
 
-#: app/access_control/fields.py:27
+#: app/access_control/fields.py:31
 msgid "object_roles must be a list of strings"
 msgstr "object_roles는 문자열 목록이어야 합니다"
 
-#: app/access_control/fields.py:35
+#: app/access_control/fields.py:39
 msgid "Role {} does not exist"
 msgstr "역할 {} 이/가 존재하지 않습니다"
 
-#: app/access_control/fields.py:50
+#: app/access_control/fields.py:54
 msgid "Groups must be a list of group objects"
 msgstr "그룹은 그룹 오브젝트 목록이어야 합니다."
 
-#: app/access_control/fields.py:68
+#: app/access_control/fields.py:72
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
 msgstr "그룹 이름=%s, id=%s이/가 존재하지 않습니다."
 
-#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
 msgid "Invalid group name or ID"
 msgstr "잘못된 그룹 이름 또는 ID"
 
-#: app/access_control/mixins.py:55
+#: app/access_control/fields.py:100
+#| msgid "Groups must be a list of group objects"
+msgid "Users must be a list of user objects"
+msgstr ""
+
+#: app/access_control/fields.py:113
+#| msgid "Invalid group name or ID"
+msgid "Invalid user username or ID"
+msgstr ""
+
+#: app/access_control/mixins.py:56 app/access_control/mixins.py:105
 #, python-brace-format
 msgid ""
 "Role {role} does not exist or does not have any permissions related to this "
@@ -278,24 +288,24 @@ msgstr "예상되는 최대 이름 길이는 %s입니다"
 msgid "Expected version to be max length of %s"
 msgstr "예상 버전의 최대 길이는 %s입니다"
 
-#: app/api/v3/serializers/namespace.py:69
+#: app/api/v3/serializers/namespace.py:73
 #, python-format
 msgid "'%s' is not a valid url."
 msgstr "\"%s\"은/는 유효한 URL이 아닙니다."
 
-#: app/api/v3/serializers/namespace.py:106
+#: app/api/v3/serializers/namespace.py:112
 msgid "Attribute 'name' is required"
 msgstr "'name' 속성이 필요합니다."
 
-#: app/api/v3/serializers/namespace.py:109
+#: app/api/v3/serializers/namespace.py:115
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr "이름에는 소문자, 밑줄 및 숫자만 포함할 수 있습니다."
 
-#: app/api/v3/serializers/namespace.py:112
+#: app/api/v3/serializers/namespace.py:118
 msgid "Name must be longer than 2 characters"
 msgstr "이름은 2자 이상이어야 합니다."
 
-#: app/api/v3/serializers/namespace.py:115
+#: app/api/v3/serializers/namespace.py:121
 msgid "Name cannot begin with '_'"
 msgstr "이름은 '_'로 시작할 수 없습니다."
 
@@ -897,6 +907,12 @@ msgstr ""
 #: app/exceptions.py:8
 msgid "Data conflicts with existing entity."
 msgstr "데이터가 기존 엔티티와 충돌합니다."
+
+#: app/management/commands/populate-role-tags.py:20
+msgid ""
+"Populate the 'LegacyRoleTag' model with tags from LegacyRole "
+"'full_metadata__tags'."
+msgstr ""
 
 #: app/tasks/index_registry.py:28
 #, python-brace-format

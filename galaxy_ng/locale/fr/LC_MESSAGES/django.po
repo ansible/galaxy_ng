@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-13 11:35+0000\n"
+"POT-Creation-Date: 2023-11-16 13:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,25 +19,25 @@ msgstr ""
 msgid "Back to list"
 msgstr ""
 
-#: app/access_control/access_policy.py:363
+#: app/access_control/access_policy.py:402
 msgid "Namespace in filename not found."
 msgstr "L'espace de nommage n'a pas été trouvé dans le nom de fichier."
 
-#: app/access_control/access_policy.py:396
+#: app/access_control/access_policy.py:435
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:410
+#: app/access_control/access_policy.py:449
 msgid "Namespace not found."
 msgstr "Espace de nommage non trouvé."
 
-#: app/access_control/access_policy.py:479
+#: app/access_control/access_policy.py:518
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:532 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:571 app/api/v3/views/sync.py:49
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
@@ -45,36 +45,46 @@ msgstr ""
 "La synchronisation du contenu de galaxy.ansible.com sans spécifier un "
 "fichier d'exigences n'est pas autorisée."
 
-#: app/access_control/fields.py:17
+#: app/access_control/fields.py:21
 msgid "object_roles field is required"
 msgstr "Le champ object_roles est obligatoire"
 
-#: app/access_control/fields.py:21
+#: app/access_control/fields.py:25
 msgid "id or name field is required"
 msgstr "Le champ nom ou id est obligatoire."
 
-#: app/access_control/fields.py:27
+#: app/access_control/fields.py:31
 msgid "object_roles must be a list of strings"
 msgstr "object_roles doit être une liste de chaînes de caractères"
 
-#: app/access_control/fields.py:35
+#: app/access_control/fields.py:39
 msgid "Role {} does not exist"
 msgstr "Le rôle {} n'existe pas."
 
-#: app/access_control/fields.py:50
+#: app/access_control/fields.py:54
 msgid "Groups must be a list of group objects"
 msgstr "Les groupes doivent correspondre à une liste d'objets de groupe"
 
-#: app/access_control/fields.py:68
+#: app/access_control/fields.py:72
 #, python-format
 msgid "Group name=%s, id=%s does not exist"
 msgstr "Le groupe nom=%s, id=%s n'existe pas"
 
-#: app/access_control/fields.py:72 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
 msgid "Invalid group name or ID"
 msgstr "Nom de groupe ou ID invalide"
 
-#: app/access_control/mixins.py:55
+#: app/access_control/fields.py:100
+#| msgid "Groups must be a list of group objects"
+msgid "Users must be a list of user objects"
+msgstr ""
+
+#: app/access_control/fields.py:113
+#| msgid "Invalid group name or ID"
+msgid "Invalid user username or ID"
+msgstr ""
+
+#: app/access_control/mixins.py:56 app/access_control/mixins.py:105
 #, python-brace-format
 msgid ""
 "Role {role} does not exist or does not have any permissions related to this "
@@ -289,26 +299,26 @@ msgstr "Le nom doit avoir une longueur maximale de %s"
 msgid "Expected version to be max length of %s"
 msgstr "La version attendue est d'une longueur maximale de %s"
 
-#: app/api/v3/serializers/namespace.py:69
+#: app/api/v3/serializers/namespace.py:73
 #, python-format
 msgid "'%s' is not a valid url."
 msgstr "\"%s\" n'est pas un choix valide."
 
-#: app/api/v3/serializers/namespace.py:106
+#: app/api/v3/serializers/namespace.py:112
 msgid "Attribute 'name' is required"
 msgstr "L'attribut \"nom\" est obligatoire"
 
-#: app/api/v3/serializers/namespace.py:109
+#: app/api/v3/serializers/namespace.py:115
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr ""
 "Le nom ne peut contenir que des lettres minuscules, des caractères de "
 "soulignement et des chiffres"
 
-#: app/api/v3/serializers/namespace.py:112
+#: app/api/v3/serializers/namespace.py:118
 msgid "Name must be longer than 2 characters"
 msgstr "Le nom doit comporter plus de 2 caractères"
 
-#: app/api/v3/serializers/namespace.py:115
+#: app/api/v3/serializers/namespace.py:121
 msgid "Name cannot begin with '_'"
 msgstr "Le nom ne peut pas commencer par '_'"
 
@@ -912,6 +922,12 @@ msgstr ""
 #: app/exceptions.py:8
 msgid "Data conflicts with existing entity."
 msgstr "Les données entrent en conflit avec une entité existante."
+
+#: app/management/commands/populate-role-tags.py:20
+msgid ""
+"Populate the 'LegacyRoleTag' model with tags from LegacyRole "
+"'full_metadata__tags'."
+msgstr ""
 
 #: app/tasks/index_registry.py:28
 #, python-brace-format
