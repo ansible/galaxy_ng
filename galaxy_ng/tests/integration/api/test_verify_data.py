@@ -2,6 +2,7 @@ import logging
 import pytest
 
 from galaxy_ng.tests.integration.conftest import is_hub_4_7_or_higher
+from galaxy_ng.tests.integration.utils.iqe_utils import is_upgrade_from_aap23_hub46
 from galaxy_ng.tests.integration.utils.repo_management_utils import search_collection_endpoint
 from galaxykit.collections import collection_info
 from galaxykit.groups import get_group_id
@@ -13,6 +14,8 @@ from galaxykit.roles import get_role
 from galaxykit.users import get_user
 
 logger = logging.getLogger(__name__)
+
+SKIP_MESSAGE = "Load data stage was run on AAP 2.3, without repository management"
 
 
 class TestVerifyData:
@@ -51,8 +54,9 @@ class TestVerifyData:
         """
         gc = galaxy_client("admin")
         for expected_col in data["collections"]:
-            if (expected_col["repository"] != "published"
-                    and not is_hub_4_7_or_higher(ansible_config)):
+            if (expected_col["repository"]
+                != "published" and not is_hub_4_7_or_higher(
+                    ansible_config)) or is_upgrade_from_aap23_hub46():
                 continue
 
             expected_name = f"collection_dep_a_{expected_col['name']}"
@@ -85,6 +89,7 @@ class TestVerifyData:
             get_group_id(gc, expected_group["name"])
 
     @pytest.mark.min_hub_version("4.7dev")
+    @pytest.mark.skipif(is_upgrade_from_aap23_hub46(), reason=SKIP_MESSAGE)
     @pytest.mark.verify_data
     def test_verify_data_repos(self, galaxy_client, data):
         """
@@ -105,7 +110,8 @@ class TestVerifyData:
             role_info_1 = get_role(gc, expected_rbac_role["name"])
             assert role_info_1["name"] == expected_rbac_role["name"]
             assert role_info_1["description"] == expected_rbac_role["description"]
-            assert sorted(role_info_1["permissions"]) == sorted(expected_rbac_role["permissions"])
+            assert sorted(role_info_1["permissions"]) == sorted(
+                expected_rbac_role["permissions"])
 
     @pytest.mark.min_hub_version("4.7dev")
     @pytest.mark.verify_data
