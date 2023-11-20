@@ -275,6 +275,11 @@ def avoid_docker_limit_rate():
     return avoid_limit_rate in ('true', 'True', 1, '1', True)
 
 
+def is_upgrade_from_aap23_hub46():
+    upgrade = os.getenv("UPGRADE_FROM_AAP23_HUB46", False)
+    return upgrade in ('true', 'True', 1, '1', True)
+
+
 def pull_and_tag_test_image(container_engine, registry, tag=None):
     image = "alpine"
     tag = "alpine:latest" if tag is None else tag
@@ -665,3 +670,25 @@ def require_signature_for_approval():
     api_client = get_client(config)
     settings = api_client("_ui/v1/settings/")
     return settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL")
+
+
+def sign_collection_on_demand(client, signing_service, repo, ns, collection_name,
+                              collection_version):
+    # to be moved to galaxykit
+    sign_url = "_ui/v1/collection_signing/"
+    sign_payload = {
+        "signing_service": signing_service,
+        "distro_base_path": repo,
+        "namespace": ns,
+        "collection": collection_name,
+        "version": collection_version,
+    }
+    client.post(sign_url, sign_payload)
+
+
+def galaxy_auto_sign_collections():
+    ansible_config = get_ansible_config()
+    config = ansible_config("admin")
+    api_client = get_client(config)
+    settings = api_client("_ui/v1/settings/")
+    return settings.get("GALAXY_AUTO_SIGN_COLLECTIONS")

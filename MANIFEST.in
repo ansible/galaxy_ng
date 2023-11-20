@@ -17,4 +17,5 @@ exclude docs_requirements.txt
 exclude .readthedocs.yaml
 include django-automated-logging-LICENSE.txt
 include galaxy_ng/automated_logging/templates/dal/admin/view.html
+include galaxy_ng/tests/integration/load_data.yaml
 recursive-include galaxy_ng *.py

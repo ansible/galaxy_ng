@@ -1,0 +1,91 @@
+namespaces:
+  - name: ns_test_1
+    group: group_1
+  - name: ns_test_2
+    group: group_1
+  - name: ns_test_3
+    group: group_2
+  - name: ns_test_4
+    group: group_2
+
+collections:
+  # name is the suffix, collection_dep_a_{name}
+  # example: collection_dep_a_collection_3
+  - name: collection_1
+    version: 1.0.0
+    namespace: ns_test_1
+    repository: repo-test-1
+    signed: true
+    deprecated: false
+  - name: collection_2
+    version: 1.0.0
+    namespace: ns_test_1
+    repository: published
+    signed: false
+    deprecated: true
+  - name: collection_3
+    version: 1.2.3
+    namespace: ns_test_1
+    repository: published
+    signed: true
+    deprecated: false
+  - name: collection_4
+    version: 1.0.0
+    namespace: ns_test_1
+    repository: published
+    signed: false
+    deprecated: false
+
+groups:
+  - name: group_1
+  - name: group_2
+
+users:
+  - username: user_1
+    password: P@ssword!
+    email: email11@email.com
+    is_superuser: true
+    group: group_1
+  - username: user_2
+    password: P@ssword!
+    email: email2@email.com
+    is_superuser: true
+    group: group_2
+  - username: user_3
+    password: P@ssword!
+    email: email3@email.com
+    is_superuser: false
+    group: group_2
+
+repositories:
+  - name: repo-test-1
+  - name: repo-test-2
+  - name: repo-test-3
+  - name: repo-test-4
+
+remotes:
+  - name: remote_test_1
+    url: http://foo.bar/
+    signed_only: false
+    tls_validation: false
+  - name: remote_test_2
+    url: http://foo.var/
+    signed_only: true
+    tls_validation: true
+
+roles:
+  - name: role_1
+    description: role_1_description
+    permissions:
+      - "galaxy.upload_to_namespace"
+      - "ansible.modify_ansible_repo_content"
+
+execution_environments:
+  - name: ee_test_1
+    upstream_name: upstream_1
+    remote_registry: remote_registry_1
+
+remote_registries:
+  - name: remote_registry_1
+    url: https://remote2.registry1.com
+
