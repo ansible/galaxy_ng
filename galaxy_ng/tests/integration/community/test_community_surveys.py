@@ -99,6 +99,18 @@ def imported_role(ansible_config):
     yield role_ds
 
 
+@pytest.fixture
+def published_collection(ansible_config, published):
+    admin_config = ansible_config("admin")
+    admin_client = get_client(
+        config=admin_config,
+        request_token=False,
+        require_auth=True
+    )
+
+    return admin_client(f'/api/v3/collections/{published.namespace}/{published.name}/')
+
+
 @pytest.mark.deployment_community
 def test_community_role_survey(ansible_config, default_config, imported_role):
     roleid = imported_role['id']
@@ -153,3 +165,63 @@ def test_community_role_survey(ansible_config, default_config, imported_role):
         given_score = float(ds['results'][0]['score'])
 
     assert given_score > 0 and given_score <= 5
+
+
+@pytest.mark.deployment_community
+def test_community_collection_survey(ansible_config, default_config, published_collection):
+
+    col_namespace = published_collection['namespace']
+    col_name = published_collection['name']
+
+    ga = GithubAdminClient()
+
+    possible_values = [None] + list(range(0,6))
+    user_survey_map = {
+        'bob1': dict((x, random.choice(possible_values)) for x in SURVEY_FIELDS),
+        'bob2': dict((x, random.choice(possible_values)) for x in SURVEY_FIELDS),
+        'bob3': dict((x, random.choice(possible_values)) for x in SURVEY_FIELDS),
+    }
+
+    for username, payload in user_survey_map.items():
+        cleanup_social_user(username, ansible_config)
+        ga.delete_user(login=username)
+        gcfg = ga.create_user(
+            login=username,
+            password='foobar1234',
+            email=username + '@noreply.github.com'
+        )
+        gcfg['username'] = username
+        gcfg.update(default_config)
+
+        with SocialGithubClient(config=gcfg) as sclient:
+
+            me = sclient.get('_ui/v1/me/').json()
+
+            # submit the survey ...
+            rkwargs = {
+                'absolute_url': f'/api/v3/surveys/collections/{col_namespace}/{col_name}/',
+                'data': payload,
+            }
+            resp = sclient.post(**rkwargs)
+            assert resp.status_code == 201
+
+            # now check that we can find the survey ...
+            resp = sclient.get(absolute_url='/api/v3/surveys/collections/')
+            ds = resp.json()
+            import epdb; epdb.st()
+
+            assert ds['meta']['count'] == 1
+            assert ds['data'][0]['user']['id'] == me['id']
+            assert ds['data'][0]['user']['username'] == username
+            for k,v in payload.items():
+                assert ds['data'][0]['responses'][k] == v
+
+    # validate the score has been computed for the role ...
+    with SocialGithubClient(config=gcfg) as sclient:
+        resp = sclient.get(absolute_url=f'/api/v3/scores/collections/{col_namespace}/{col_name}/')
+        ds = resp.json()
+        assert ds['count'] == 1
+        given_score = float(ds['results'][0]['score'])
+
+    assert given_score > 0 and given_score <= 5
+

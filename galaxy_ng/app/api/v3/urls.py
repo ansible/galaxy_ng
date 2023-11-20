@@ -179,6 +179,11 @@ urlpatterns = [
         name='collection-survey-rollup-list'
     ),
     path(
+        "scores/collections/<str:namespace>/<str:name>/",
+        viewsets.CollectionSurveyRollupList.as_view({'get': 'retrieve_collection'}),
+        name='collection-survey-rollup-list-by-fqn'
+    ),
+    path(
         "scores/roles/",
         viewsets.LegacyRoleSurveyRollupList.as_view({'get': 'list'}),
         name='legacyrole-survey-rollup-list'
@@ -190,9 +195,14 @@ urlpatterns = [
         name='collection-survey-list'
     ),
     path(
+        "surveys/collections/<str:namespace>/<str:name>/",
+        viewsets.CollectionSurveyList.as_view({'post': 'create'}),
+        name='collection-survey-create1'
+    ),
+    path(
         "surveys/collections/<str:pk>/",
-        viewsets.LegacyRoleSurveyList.as_view({'post': 'create'}),
-        name='collection-survey-create'
+        viewsets.CollectionSurveyList.as_view({'post': 'create'}),
+        name='collection-survey-create2'
     ),
     path(
         "surveys/roles/",

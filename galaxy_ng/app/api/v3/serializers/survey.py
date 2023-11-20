@@ -62,7 +62,7 @@ class CollectionSurveyRollupSerializer(serializers.ModelSerializer):
         ]
 
     def get_namespace(self, obj):
-        return obj.collection.namespace.name
+        return obj.collection.namespace
 
     def get_name(self, obj):
         return obj.collection.name
