@@ -3,15 +3,15 @@ import json
 import pytest
 
 from galaxy_ng.tests.integration.conftest import is_hub_4_7_or_higher
+from galaxy_ng.tests.integration.utils.iqe_utils import sign_collection_on_demand
 from galaxy_ng.tests.integration.utils.repo_management_utils import create_repo_and_dist, \
     upload_new_artifact
-from galaxykit.collections import sign_collection, deprecate_collection, \
+from galaxykit.collections import deprecate_collection, \
     move_or_copy_collection
 from galaxykit.containers import create_container, delete_container
 from galaxykit.namespaces import add_group
 from galaxykit.registries import create_registry, delete_registry
 from galaxykit.remotes import create_remote, update_remote
-from galaxykit.repositories import get_repository_href
 from galaxykit.roles import put_update_role
 from galaxykit.users import update_user
 from galaxykit.utils import GalaxyClientError, wait_for_task
@@ -66,14 +66,16 @@ class TestLoadData:
                     create_repo_and_dist(gc, repo["name"])
                 except GalaxyClientError as e:
                     if "This field must be unique" in e.response.text:
-                        logger.debug(f"Repository {repo['name']} already exists. Not a problem.")
+                        logger.debug(
+                            f"Repository {repo['name']} already exists. Not a problem.")
                     else:
                         raise e
 
         for remote in data["remotes"]:
             try:
                 logger.debug(f"Creating remote {remote['name']}")
-                create_remote(gc, remote["name"], remote["url"])
+                create_remote(gc, remote["name"], remote["url"], remote["signed_only"],
+                              remote["tls_validation"])
             except GalaxyClientError as e:
                 if "This field must be unique" in e.response.text:
                     logger.debug(f"Remote {remote['name']} already exists. Updating it.")
@@ -93,17 +95,14 @@ class TestLoadData:
                 artifact = upload_new_artifact(
                     gc, collection["namespace"], collection["repository"],
                     collection["version"], collection["name"])
-                collection_resp_1 = gc.get(
-                    f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
-                )
                 move_or_copy_collection(gc, artifact.namespace, artifact.name,
                                         artifact.version, "staging",
                                         destination=collection["repository"])
                 if collection["signed"]:
                     logger.debug("Signing collection")
-                    repo_pulp_href = get_repository_href(gc, collection["repository"])
-                    sign_collection(gc, collection_resp_1["results"][0]["pulp_href"],
-                                    repo_pulp_href)
+                    sign_collection_on_demand(
+                        gc, "ansible-default", collection["repository"],
+                        artifact.namespace, artifact.name, artifact.version)
                 if collection["deprecated"]:
                     logger.debug("Deprecating collection")
                     deprecate_collection(gc, collection["namespace"], artifact.name,

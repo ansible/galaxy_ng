@@ -87,5 +87,5 @@ execution_environments:
 
 remote_registries:
   - name: remote_registry_1
-    url: https//remote2.registry1.com
+    url: https://remote2.registry1.com
 
