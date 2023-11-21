@@ -2,8 +2,8 @@
 
 import logging
 
-from galaxy_ng.app.models.auth import User
-from galaxy_ng.app.utils.galaxy import generate_unverified_email
+# from galaxy_ng.app.models.auth import User
+# from galaxy_ng.app.utils.galaxy import generate_unverified_email
 
 
 logger = logging.getLogger(__name__)
@@ -50,6 +50,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         f'create_user(4): enumerate username:{username} email:{email} github_id:{github_id}'
     )
 
+    '''
     # check for all possible emails ...
     possible_emails = [generate_unverified_email(github_id)]
     if email:
@@ -125,6 +126,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
             'is_new': False,
             'user': found_username
         }
+    '''
 
     new_user = strategy.create_user(**fields)
     logger.info(f'create_user(13): {new_user}')
