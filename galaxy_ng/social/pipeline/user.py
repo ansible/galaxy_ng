@@ -16,12 +16,7 @@ def get_username(strategy, details, backend, user=None, *args, **kwargs):
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
 
     if user:
-        logger.info(f'create_user(1): user-kwarg:{user}:{user.id}')
-    else:
-        logger.info(f'create_user(1): user-kwarg:{user}')
-    logger.info(f'create_user(2): details:{details}')
-
-    if user:
+        # update username if changed ...
         if user.username != details.get('username'):
             user.username = details.get('username')
             user.save()
@@ -37,19 +32,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         logger.info(f'create_user(3): no fields for {user}:{user.id}')
         return
 
-    # bypass the strange logic that can't find the user ... ?
-    username = details.get('username')
-    email = details.get('email')
-    github_id = details.get('id')
-    if not github_id:
-        github_id = kwargs['response']['id']
-    logger.info(
-        f'create_user(4): enumerate username:{username} email:{email} github_id:{github_id}'
-    )
-
-    new_user = strategy.create_user(**fields)
-    logger.info(f'create_user(13): {new_user}')
     return {
         'is_new': True,
-        'user': new_user
+        'user': strategy.create_user(**fields)
     }
