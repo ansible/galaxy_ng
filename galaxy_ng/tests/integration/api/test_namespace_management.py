@@ -173,6 +173,7 @@ def test_namespace_edit_with_user(ansible_config, user_property):
 
 @pytest.mark.namespace
 @pytest.mark.all
+@pytest.mark.min_hub_version("4.9dev")
 def test_namespace_edit_logo(ansible_config):
 
     config = ansible_config("admin")
@@ -340,6 +341,7 @@ def _test_namespace_logo_propagates_to_collections(ansible_config, upload_artifa
 @pytest.mark.namespace
 @pytest.mark.deployment_community
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.9dev")
 def test_namespace_logo_propagates_to_collections(ansible_config, upload_artifact):
     _test_namespace_logo_propagates_to_collections(ansible_config, upload_artifact, False)
 
