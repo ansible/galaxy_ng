@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
 import logging
+from django.contrib.auth import get_user_model
 
 
 logger = logging.getLogger(__name__)
+
+
+User = get_user_model()
 
 
 USER_FIELDS = ['username', 'email']
@@ -20,7 +24,6 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         if user.username != details.get('username'):
             user.username = details.get('username')
             user.save()
-        logger.info(f'create_user(2): returning user-kwarg {user}:{user.id}')
         return {'is_new': False}
 
     fields = dict(
@@ -29,10 +32,20 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     )
 
     if not fields:
-        logger.info(f'create_user(3): no fields for {user}:{user.id}')
         return
 
+    # bypass the strange logic that can't find the user ... ?
+    username = details.get('username')
+    if username:
+        found_user = User.objects.filter(username=username).first()
+        if found_user is not None:
+            return {
+                'is_new': False,
+                'user': found_user
+            }
+
+    new_user = strategy.create_user(**fields)
     return {
         'is_new': True,
-        'user': strategy.create_user(**fields)
+        'user': new_user
     }
