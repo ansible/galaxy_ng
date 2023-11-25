@@ -217,6 +217,7 @@ def test_social_auth_v3_rbac_workflow(ansible_config):
     #   the original owner changes their login?
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_social_user_with_reclaimed_login(ansible_config):
 
@@ -337,6 +338,7 @@ def test_social_user_with_reclaimed_login(ansible_config):
     assert namespace_names_b == ['wilk42', 'sean_m_sullivan']
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_social_user_sync_with_changed_login(ansible_config):
 

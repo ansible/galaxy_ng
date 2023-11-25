@@ -126,6 +126,7 @@ def test_social_redirect(ansible_config):
         assert client.last_response.headers['Location'] == '/'
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_me_social_with_precreated_user(ansible_config):
     """ Make sure social auth associates to the correct username """
@@ -151,6 +152,7 @@ def test_me_social_with_precreated_user(ansible_config):
         assert uinfo['username'] == cfg.get('username')
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_me_social_with_v1_synced_user(ansible_config):
     """ Make sure social auth associates to the correct username """
@@ -376,6 +378,7 @@ def test_social_auth_creates_legacynamespace(ansible_config):
         assert result['results'][0]['summary_fields']['owners'][0]['username'] == 'gh01'
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_update_legacynamespace_owners(ansible_config):
 

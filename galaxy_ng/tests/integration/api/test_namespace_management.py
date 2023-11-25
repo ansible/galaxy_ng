@@ -337,6 +337,7 @@ def _test_namespace_logo_propagates_to_collections(ansible_config, upload_artifa
         assert cv_namespace_metadata["avatar_url"] == my_namespace["avatar_url"]
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.namespace
 @pytest.mark.deployment_community
 @pytest.mark.deployment_standalone

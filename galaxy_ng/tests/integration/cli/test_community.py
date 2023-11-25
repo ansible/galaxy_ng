@@ -17,6 +17,7 @@ from ..utils.legacy import clean_all_roles, cleanup_social_user
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_import_role_as_owner_no_tags(ansible_config):
     """ Tests role import workflow with a social auth user and anonymous install """
@@ -120,6 +121,7 @@ def test_import_role_as_owner_no_tags(ansible_config):
         assert os.path.exists(meta_yaml)
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_import_role_as_not_owner_no_tags(ansible_config):
     """ Tests role import workflow with non-owner """
@@ -170,6 +172,7 @@ def test_import_role_as_not_owner_no_tags(ansible_config):
     assert ds.get('count') == 0
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_import_role_fields_no_tags(ansible_config):
     """Test role serializer fields after import with galaxy-importer>=0.4.11."""

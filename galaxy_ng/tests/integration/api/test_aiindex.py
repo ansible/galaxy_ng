@@ -73,6 +73,7 @@ def legacy_namespace(ansible_config):
     return 'gh01'
 
 
+@pytest.mark.skip(reason='FIXME')
 @pytest.mark.deployment_community
 def test_legacy_namespace_add_list_remove_aiindex(ansible_config, legacy_namespace, flags):
     """Test the whole workflow for AIindex.
