@@ -95,7 +95,7 @@ To connect to the UI, the default address is http://localhost:8002. If social au
 For development work on the UI, it's easiest to launch the webpack dev server outside the compose stack. The npm start scripts and configuration will have it redirect api calls to http://localhost:5001 by default, so no hacking is necessary to make it work locally.
 
 1. Install [NVM](https://github.com/nvm-sh/nvm) to easily manage node.js versions.
-2. Use NVM to install and set the version to 16: `nvm install 16`,
+2. Use NVM to install and set the version to 18: `nvm install 18`,
 3. Clone the [ansible-hub-ui](https://github.com/ansible/ansible-hub-ui) repo to the desired location.
 4. From the checkout, run `npm install`.
 5. From the checkout, run `npm run start-community`.

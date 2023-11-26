@@ -158,7 +158,7 @@ COMPOSE_PROFILE=standalone-keycloak
     This option is only relevant to Red Hat employees. Community contributors should skip this.
 
 1. In your `.compose.env` file set `COMPOSE_PROFILE=insights` and comment out `ANSIBLE_HUB_UI_PATH` (if its set).
-2. Install node. Node v16+ is known to work. Older versions may work as well.
+2. Install node. Node v18+ is known to work. Older versions may work as well.
 3. Switch to your `ansible-hub-ui` checkout and run the following
 
     ```bash
