@@ -8,8 +8,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("ansible", "0055_alter_collectionversion_version_alter_role_version"),
-        ("galaxy", "0045_setting"),
+        ("galaxy", "0047_update_role_search_vector_trigger"),
     ]
 
     operations = [
