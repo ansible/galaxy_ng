@@ -16,5 +16,7 @@ class LegacyRootView(api_base.APIView):
             'imports': f'/{API_PATH_PREFIX}/v1/imports/',
             'roles': f'/{API_PATH_PREFIX}/v1/roles/',
             'users': f'/{API_PATH_PREFIX}/v1/users/',
-            'namespaces': f'/{API_PATH_PREFIX}/v1/namespaces/'
+            'namespaces': f'/{API_PATH_PREFIX}/v1/namespaces/',
+            'surveys': f'/{API_PATH_PREFIX}/v1/surveys/',
+            'scores': f'/{API_PATH_PREFIX}/v1/scores/',
         })

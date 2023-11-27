@@ -820,3 +820,43 @@ class LegacyAccessPolicy(AccessPolicyBase):
             return True
 
         return False
+
+
+class SurveyAccessPolicy(AccessPolicyBase):
+
+    NAME = "SurveyAccessPolicy"
+
+    @classmethod
+    def get_access_policy(cls, view):
+
+        statements = [
+            {
+                "action": [
+                    "get",
+                    "list",
+                    "retrieve",
+                ],
+                "principal": "*",
+                "effect": "allow",
+            },
+            {
+                "action": [
+                    "create",
+                    "update",
+                ],
+                "principal": "authenticated",
+                "effect": "allow",
+                "condition": "is_survey_user",
+            },
+        ]
+
+        # As a last resort, require admin rights
+        return MockPulpAccessPolicy(
+            {
+                "statements": statements,
+            }
+        )
+
+    def is_survey_user(self, request, viewset, action):
+        print(f'IS_SURVEY_USER ... {viewset} {action}')
+        return True
