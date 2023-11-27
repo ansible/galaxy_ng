@@ -5,6 +5,8 @@
 # policies.
 
 from galaxy_ng.app.access_control.statements.legacy import LEGACY_STATEMENTS
+from galaxy_ng.app.access_control.statements.survey import SURVEY_STATEMENTS
+
 
 _collection_statements = [
     {
@@ -417,3 +419,4 @@ STANDALONE_STATEMENTS = {
 }
 
 STANDALONE_STATEMENTS.update(LEGACY_STATEMENTS)
+STANDALONE_STATEMENTS.update(SURVEY_STATEMENTS)

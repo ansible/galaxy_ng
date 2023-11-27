@@ -108,6 +108,7 @@ class CollectionSurveyList(viewsets.ModelViewSet):
     pagination_class = SurveyPagination
 
     permission_classes = [SurveyAccessPolicy]
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = CollectionSurveyFilter
@@ -118,8 +119,6 @@ class CollectionSurveyList(viewsets.ModelViewSet):
         )
 
     def create(self, *args, **kwargs):
-        print(f'ARGS:{args} KWARGS:{kwargs}')
-
         # the collection serializer doesn't include an ID,
         # so all we have to go by is namespace.name ...
         namespace = kwargs.get('namespace')
@@ -160,6 +159,7 @@ class LegacyRoleSurveyList(viewsets.ModelViewSet):
     pagination_class = SurveyPagination
 
     permission_classes = [SurveyAccessPolicy]
+    authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = LegacyRoleSurveyFilter
@@ -170,7 +170,6 @@ class LegacyRoleSurveyList(viewsets.ModelViewSet):
         )
 
     def create(self, *args, **kwargs):
-        print(f'ARGS:{args} KWARGS:{kwargs}')
         role_id = kwargs.get('id')
 
         if not role_id:
