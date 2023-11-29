@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django_filters import rest_framework as filters
 from django.shortcuts import get_object_or_404
 
@@ -165,6 +166,7 @@ class LegacyRoleSurveyList(viewsets.ModelViewSet):
     filterset_class = LegacyRoleSurveyFilter
 
     def get_queryset(self):
+        print(f'USER: {self.request.user} {type(self.request.user)}')
         return LegacyRoleSurvey.objects.filter(
             user=self.request.user
         )

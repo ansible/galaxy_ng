@@ -830,6 +830,17 @@ class SurveyAccessPolicy(AccessPolicyBase):
 
     NAME = "SurveyAccessPolicy"
 
+    '''
     def is_survey_user(self, request, viewset, action):
+
+        print(f'IS_SURVEY_USER {request.user} {type(request.user)} {request.user.username}')
+
+        if action == 'create':
+            return True
+
         print(f'IS_SURVEY_USER ... {viewset} {action}')
+        print(f'REQUEST.USER ... {request.user}')
+
+        # return False
         return True
+    '''
