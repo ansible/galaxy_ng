@@ -2,7 +2,10 @@ import logging
 import os
 import tempfile
 import subprocess
+import yaml
+from urllib.parse import urljoin
 
+from django.conf import settings
 from galaxy_ng.app.auth.auth import TaskAuthenticationClass
 
 
@@ -24,7 +27,7 @@ def build_image_task(
 
     def_file = os.path.join(tdir, "execution-environment.yml")
     with open(def_file, 'w') as f:
-        f.write(execution_environment_yaml)
+        yaml.dump(execution_environment_yaml, f)
 
     container_registry = os.environ.get("CONTAINER_REGISTRY", "localhost:5001")
     ssl_verify = os.environ.get("SSL_VERIFY", False)
@@ -33,6 +36,8 @@ def build_image_task(
 
     token = TaskAuthenticationClass().get_token(username)
 
+    url = urljoin(settings.ANSIBLE_API_HOSTNAME, settings.GALAXY_API_PATH_PREFIX)
+
     log.info(f"Adding ansible.cfg to {tdir}")
     cfgfile = os.path.join(tdir, 'ansible.cfg')
     with open(cfgfile, 'w') as f:
@@ -40,14 +45,13 @@ def build_image_task(
         f.write('server_list = automation_hub\n')
         f.write('\n')
         f.write('[galaxy_server.automation_hub]\n')
-        f.write('url=http://localhost:5001/api/galaxy/\n')
+        f.write(f'url={url}\n')
         f.write(f'token={token}\n')
 
     log.info(f"Running ansible-builder build --tag={tag}")
     subprocess.run(
         [
             "ansible-builder", "build", f"--tag={tag}"
-            # "--build-arg", f"ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN='{token}'"
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

@@ -376,27 +376,34 @@ class ContainerAnsibleBuilderViewSet(api_base.GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         data = serializer.validated_data
-        def_yaml = data.get("execution_environment_yaml")
+        ee_yaml = data.get("execution_environment_yaml")
         dest_name = data.get("destination_container_repository")
         dest_tag = data.get("container_tag")
         source_collection_repositories = data.get("source_collection_repositories")
 
         # validate yaml
         try:
-            yaml_dict = yaml.safe_load(def_yaml)
+            def_file = yaml.safe_load(ee_yaml)
         except yaml.parser.ParserError:
             raise ValidationError(
                 detail={'execution_environment_yaml': _('Invalid YAML file.')}
             )
 
         # validate collections in yaml
-        collections = yaml_dict.get("dependencies", {}).get("galaxy", {}).get("collections")
+        collections = def_file.get("dependencies", {}).get("galaxy", {}).get("collections")
         for collection in collections:
             namespace, name = collection.split(".")
             try:
                 Collection.objects.get(namespace=namespace, name=name)
             except Collection.DoesNotExist:
                 raise NotFound(_('Collection {} not found.').format(collection))
+
+        ansible_copy = dict(src="./ansible.cfg", dest="./")
+
+        if adf := def_file.get("additional_build_files", None):
+            adf.append(ansible_copy)
+        else:
+            def_file.update(dict(additional_build_files=[ansible_copy]))
 
         exclusive_resources = []
 
@@ -408,8 +415,6 @@ class ContainerAnsibleBuilderViewSet(api_base.GenericViewSet):
             distros = AnsibleDistribution.objects.filter(repository=repo.pk)
             exclusive_resources.extend(distros)
 
-        print(source_collection_repositories)
-
         user = self.request.user
 
         build_task = dispatch(
@@ -417,11 +422,10 @@ class ContainerAnsibleBuilderViewSet(api_base.GenericViewSet):
             exclusive_resources=exclusive_resources,
             shared_resources=source_collection_repositories,
             kwargs={
-                "execution_environment_yaml": def_yaml,
+                "execution_environment_yaml": def_file,
                 "container_name": dest_name,
                 "container_tag": dest_tag,
                 "username": user.username,
             }
         )
         return Response(data={"task_id": build_task.pk}, status='202')
-        # return Response(data={"task_id": "build_task.pk"}, status='202')
