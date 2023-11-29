@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 
 from galaxy_ng.app.access_control.access_policy import SurveyAccessPolicy
-from galaxy_ng.app.api.v1.utils_survey import calculate_survey_score
+from galaxy_ng.app.api.v1.utils.survey import calculate_survey_score
 
 
 from galaxy_ng.app.api.v1.models import (
@@ -22,19 +22,19 @@ from galaxy_ng.app.api.v1.models import (
     LegacyRole
 )
 
-from galaxy_ng.app.api.v1.serializers_survey import (
+from galaxy_ng.app.api.v1.serializers.survey import (
     CollectionSurveyRollupSerializer,
     CollectionSurveySerializer,
     LegacyRoleSurveyRollupSerializer,
     LegacyRoleSurveySerializer,
 )
 
-from galaxy_ng.app.api.v1.filtersets_survey import (
+from galaxy_ng.app.api.v1.filtersets.survey import (
     CollectionSurveyFilter,
     LegacyRoleSurveyFilter,
 )
 
-from galaxy_ng.app.api.v1.filtersets_scores import (
+from galaxy_ng.app.api.v1.filtersets.scores import (
     CollectionSurveyRollupFilter,
     LegacyRoleSurveyRollupFilter,
 )

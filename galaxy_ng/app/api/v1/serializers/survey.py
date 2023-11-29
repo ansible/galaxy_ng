@@ -7,7 +7,7 @@ from galaxy_ng.app.api.v1.models import (
     LegacyRoleSurveyRollup,
 )
 
-from galaxy_ng.app.api.v1.utils_survey import SURVEY_FIELDS
+from galaxy_ng.app.api.v1.utils.survey import SURVEY_FIELDS
 
 
 class CollectionSurveySerializer(serializers.ModelSerializer):
