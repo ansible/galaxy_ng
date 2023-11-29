@@ -1,17 +1,24 @@
 import logging
+import yaml
 
 from django.core import exceptions
 from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django_filters import filters
 from django_filters.rest_framework import DjangoFilterBackend, filterset
+from django.utils.translation import gettext_lazy as _
+from rest_framework.response import Response
+from rest_framework.exceptions import NotFound, ValidationError
 from drf_spectacular.utils import extend_schema
+
 from pulpcore.plugin.util import get_objects_for_user
-from pulp_container.app import models as container_models
 from pulpcore.plugin import models as core_models
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
 from pulpcore.plugin.viewsets import OperationPostponedResponse
+
+from pulp_container.app import models as container_models
+from pulp_ansible.app.models import Collection, AnsibleDistribution
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
@@ -21,6 +28,8 @@ from galaxy_ng.app.tasks.deletion import (
     delete_container_distribution,
     delete_container_image_manifest,
 )
+from galaxy_ng.app.tasks.build_ee import build_image_task
+
 
 log = logging.getLogger(__name__)
 
@@ -349,3 +358,70 @@ class ContainerTagViewset(ContainerContentBaseViewset):
         repo = self.get_distro().repository
         repo_version = repo.latest_version()
         return repo_version.get_content(container_models.Tag.objects)
+
+
+# FIXME: nginx unlock size limit on podman push (>413 Request Entity Too Large)
+class ContainerAnsibleBuilderViewSet(api_base.GenericViewSet):
+    permission_classes = [access_policy.ContainerAnsibleBuilderPolicy]
+    serializer_class = serializers.ContainerAnsibleBuilderSerializer
+
+    @extend_schema(
+        description="Trigger an asynchronous task to create an execution environment repository",
+        summary="Build an image",
+        request=serializers.ContainerAnsibleBuilderSerializer,
+        responses={202: AsyncOperationResponseSerializer},
+    )
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=self.request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        def_yaml = data.get("execution_environment_yaml")
+        dest_name = data.get("destination_container_repository")
+        dest_tag = data.get("container_tag")
+        source_collection_repositories = data.get("source_collection_repositories")
+
+        # validate yaml
+        try:
+            yaml_dict = yaml.safe_load(def_yaml)
+        except yaml.parser.ParserError:
+            raise ValidationError(
+                detail={'execution_environment_yaml': _('Invalid YAML file.')}
+            )
+
+        # validate collections in yaml
+        collections = yaml_dict.get("dependencies", {}).get("galaxy", {}).get("collections")
+        for collection in collections:
+            namespace, name = collection.split(".")
+            try:
+                Collection.objects.get(namespace=namespace, name=name)
+            except Collection.DoesNotExist:
+                raise NotFound(_('Collection {} not found.').format(collection))
+
+        exclusive_resources = []
+
+        dest_distro = container_models.ContainerDistribution.objects.filter(name=dest_name).first()
+        if dest_distro:
+            exclusive_resources.append(dest_distro)
+
+        for repo in source_collection_repositories:
+            distros = AnsibleDistribution.objects.filter(repository=repo.pk)
+            exclusive_resources.extend(distros)
+
+        print(source_collection_repositories)
+
+        user = self.request.user
+
+        build_task = dispatch(
+            build_image_task,
+            exclusive_resources=exclusive_resources,
+            shared_resources=source_collection_repositories,
+            kwargs={
+                "execution_environment_yaml": def_yaml,
+                "container_name": dest_name,
+                "container_tag": dest_tag,
+                "username": user.username,
+            }
+        )
+        return Response(data={"task_id": build_task.pk}, status='202')
+        # return Response(data={"task_id": "build_task.pk"}, status='202')

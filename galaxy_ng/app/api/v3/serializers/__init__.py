@@ -22,7 +22,8 @@ from .execution_environment import (
     ContainerManifestSerializer,
     ContainerManifestDetailSerializer,
     ContainerReadmeSerializer,
-    ContainerRepositoryHistorySerializer
+    ContainerRepositoryHistorySerializer,
+    ContainerAnsibleBuilderSerializer
 )
 
 __all__ = (
@@ -39,4 +40,5 @@ __all__ = (
     'ContainerTagSerializer',
     'ContainerManifestDetailSerializer',
     'ContainerReadmeSerializer',
+    'ContainerAnsibleBuilderSerializer'
 )

@@ -764,6 +764,10 @@ class ContainerRemoteAccessPolicy(AccessPolicyBase):
         return False
 
 
+class ContainerAnsibleBuilderPolicy(AccessPolicyBase):
+    NAME = "ContainerAnsibleBuilderViewSet"
+
+
 class LandingPageAccessPolicy(AccessPolicyBase):
     NAME = "LandingPageViewSet"
 

@@ -414,6 +414,14 @@ STANDALONE_STATEMENTS = {
             "condition": "has_distro_permission:container.change_containerdistribution"
         },
     ],
+
+    'ContainerAnsibleBuilderViewSet': [
+        {
+            "action": "create",
+            "principal": "authenticated",
+            "effect": "allow",
+        }
+    ]
 }
 
 STANDALONE_STATEMENTS.update(LEGACY_STATEMENTS)

@@ -121,6 +121,17 @@ download_ui() {
 
 setup_webserver_snippets
 
+setup_ansible_builder() {
+    echo "setting up ansible builder tool"
+
+    # Error: cannot set up namespace using "/usr/bin/newuidmap": 
+    # should have setuid or have filecaps setuid: exit status 1
+    dnf -y reinstall shadow-utils
+
+    # Error: creating lock file directory: mkdir /opt/settings/cni: permission denied
+    chown -R pulp:pulp /opt/settings/
+}
+
 if [[ "$ENABLE_SIGNING" -eq "1" ]]; then
     setup_signing_keyring
     setup_repo_keyring &
@@ -136,6 +147,9 @@ fi
 if [[ "$UPDATE_UI" -eq "1" ]]; then
     download_ui
 fi
+
+# TODO:: only setup if EE is enabled
+setup_ansible_builder
 
 # if [[ "$SETUP_TEST_DATA" -eq "1" ]]; then
 #     set_up_test_data

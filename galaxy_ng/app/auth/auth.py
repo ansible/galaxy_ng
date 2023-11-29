@@ -4,12 +4,12 @@ import logging
 
 from django.conf import settings
 from django.db import transaction
-
-from pulpcore.plugin.util import get_objects_for_group
-
-from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository
+from django.contrib.sessions.backends.db import SessionStore
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+
+from pulpcore.plugin.util import get_objects_for_group
+from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository
 
 from galaxy_ng.app.models import SyncList
 from galaxy_ng.app.models.auth import Group, User
@@ -147,3 +147,53 @@ class RHIdentityAuthentication(BaseAuthentication):
             return json.loads(json_string)
         except ValueError:
             raise AuthenticationFailed
+
+
+class TaskAuthenticationClass(BaseAuthentication):
+    def verify_session(self, token):
+        try:
+            session = SessionStore(session_key=token)
+            return session["user"]
+        except KeyError:
+            return None
+
+    def basic_auth(self, token):
+        auth_decoded = base64.b64decode(token).decode("utf-8")
+        username, token = auth_decoded.split(":")
+
+        return self.verify_session(token)
+
+    def token_auth(self, token):
+        return self.verify_session(token)
+
+    def authenticate(self, request):
+        auth = request.META.get("HTTP_AUTHORIZATION", "").split()
+
+        if not auth:
+            return None
+
+        (auth_type, token) = auth
+        auth_type = auth_type.lower()
+
+        if auth_type != "basic" and auth_type != "token":
+            return None
+
+        if auth_type == "basic":
+            session_username = self.basic_auth(token)
+
+        if auth_type == "token":
+            session_username = self.token_auth(token)
+
+        try:
+            user = User.objects.get(username=session_username)
+        except User.DoesNotExist:
+            return None
+
+        return (user, None)
+
+    def get_token(self, username):
+        session = SessionStore()
+        session["user"] = username
+        session.create()
+
+        return session.session_key

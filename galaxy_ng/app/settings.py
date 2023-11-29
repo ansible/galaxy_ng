@@ -74,9 +74,10 @@ GALAXY_PAGINATION_CLASS = "pulp_ansible.app.galaxy.v3.pagination.LimitOffsetPagi
 
 # Galaxy authentication classes are used to set REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES
 GALAXY_AUTHENTICATION_CLASSES = [
-    "rest_framework.authentication.SessionAuthentication",
+    "galaxy_ng.app.auth.auth.TaskAuthenticationClass",
     "rest_framework.authentication.TokenAuthentication",
     "rest_framework.authentication.BasicAuthentication",
+    "rest_framework.authentication.SessionAuthentication",
 ]
 
 REST_FRAMEWORK__DEFAULT_PERMISSION_CLASSES = (
