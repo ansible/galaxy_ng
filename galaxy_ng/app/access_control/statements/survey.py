@@ -6,11 +6,9 @@ SURVEY_STATEMENTS = {
                 "list",
                 "retrieve",
                 "create",
-                # "update",
             ],
             "principal": "authenticated",
             "effect": "allow",
-            # "condition": "is_survey_user",
         },
     ],
     "SurveyRollupAccessPolicy": [
@@ -30,7 +28,6 @@ SURVEY_STATEMENTS = {
             ],
             "principal": "authenticated",
             "effect": "allow",
-            # "condition": "is_survey_user",
         },
     ]
 }

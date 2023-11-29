@@ -55,7 +55,7 @@ class SurveyPagination(PageNumberPagination):
 
 
 class CollectionSurveyRollupList(viewsets.ModelViewSet):
-    queryset = CollectionSurveyRollup.objects.all()
+    queryset = CollectionSurveyRollup.objects.all().order_by('created')
     serializer_class = CollectionSurveyRollupSerializer
     pagination_class = SurveyPagination
 
@@ -92,7 +92,7 @@ class CollectionSurveyRollupList(viewsets.ModelViewSet):
 
 
 class LegacyRoleSurveyRollupList(viewsets.ModelViewSet):
-    queryset = LegacyRoleSurveyRollup.objects.all()
+    queryset = LegacyRoleSurveyRollup.objects.all().order_by('created')
     serializer_class = LegacyRoleSurveyRollupSerializer
     pagination_class = SurveyPagination
 
@@ -104,7 +104,7 @@ class LegacyRoleSurveyRollupList(viewsets.ModelViewSet):
 
 
 class CollectionSurveyList(viewsets.ModelViewSet):
-    queryset = CollectionSurvey.objects.all()
+    queryset = CollectionSurvey.objects.all().order_by('created')
     serializer_class = CollectionSurveySerializer
     pagination_class = SurveyPagination
 
@@ -115,6 +115,13 @@ class CollectionSurveyList(viewsets.ModelViewSet):
     filterset_class = CollectionSurveyFilter
 
     def get_queryset(self):
+
+        # Anonymous users shouldn't see anyone's survey responses
+        # The access policy should prevent this code from executing,
+        # but we'll have it just in case.
+        if isinstance(self.request.user, AnonymousUser):
+            return CollectionSurvey.objects.none()
+
         return CollectionSurvey.objects.filter(
             user=self.request.user
         )
@@ -155,7 +162,7 @@ class CollectionSurveyList(viewsets.ModelViewSet):
 
 
 class LegacyRoleSurveyList(viewsets.ModelViewSet):
-    queryset = LegacyRoleSurvey.objects.all()
+    queryset = LegacyRoleSurvey.objects.all().order_by('created')
     serializer_class = LegacyRoleSurveySerializer
     pagination_class = SurveyPagination
 
@@ -166,7 +173,13 @@ class LegacyRoleSurveyList(viewsets.ModelViewSet):
     filterset_class = LegacyRoleSurveyFilter
 
     def get_queryset(self):
-        print(f'USER: {self.request.user} {type(self.request.user)}')
+
+        # Anonymous users shouldn't see anyone's survey responses
+        # The access policy should prevent this code from executing,
+        # but we'll have it just in case.
+        if isinstance(self.request.user, AnonymousUser):
+            return LegacyRoleSurvey.objects.none()
+
         return LegacyRoleSurvey.objects.filter(
             user=self.request.user
         )
