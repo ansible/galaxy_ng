@@ -178,6 +178,17 @@ pipeline {
                 }
             }
 
+            stage('Hub Load Data') {
+                steps {
+                    container('aapqa-ansible') {
+                        script {
+                            stepsFactory.aapqaAutomationHubSteps.setup(installInfo)
+                            stepsFactory.aapqaAutomationHubSteps.runAutomationHubLoadDataTests(installInfo)
+                            stepsFactory.commonSteps.saveXUnitResultsToJenkins(xunitFile: 'ah-results-load.xml')
+                        }
+                    }
+                }
+            }
 
             stage('Upgrade AAP 2.4') {
                 steps {
@@ -281,6 +292,19 @@ pipeline {
                                     """
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            stage('Hub Verify Data Tests') {
+                steps {
+                    container('aapqa-ansible') {
+                        script {
+                            upgradeFlags.add('input/install/flags/upgrade_from_aap_23.yml')
+                            stepsFactory.aapqaAutomationHubSteps.setup(installInfo)
+                            stepsFactory.aapqaAutomationHubSteps.runAutomationHubVerifyDataTests(installInfo + [upgradeVarFiles: upgradeFlags])
+                            stepsFactory.commonSteps.saveXUnitResultsToJenkins(xunitFile: 'ah-results-verify.xml')
                         }
                     }
                 }
