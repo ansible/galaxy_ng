@@ -8,7 +8,7 @@ from django_filters import filters
 from django_filters.rest_framework import DjangoFilterBackend, filterset
 from django.utils.translation import gettext_lazy as _
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 
 from pulpcore.plugin.util import get_objects_for_user
@@ -16,9 +16,8 @@ from pulpcore.plugin import models as core_models
 from pulpcore.plugin.serializers import AsyncOperationResponseSerializer
 from pulpcore.plugin.tasking import dispatch
 from pulpcore.plugin.viewsets import OperationPostponedResponse
-
 from pulp_container.app import models as container_models
-from pulp_ansible.app.models import Collection, AnsibleDistribution
+from pulp_ansible.app.models import AnsibleDistribution
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
@@ -28,7 +27,7 @@ from galaxy_ng.app.tasks.deletion import (
     delete_container_distribution,
     delete_container_image_manifest,
 )
-from galaxy_ng.app.tasks.build_ee import build_image_task
+from galaxy_ng.app.tasks.ansible_builder import build_task
 
 
 log = logging.getLogger(__name__)
@@ -383,49 +382,45 @@ class ContainerAnsibleBuilderViewSet(api_base.GenericViewSet):
 
         # validate yaml
         try:
-            def_file = yaml.safe_load(ee_yaml)
+            def_yaml = yaml.safe_load(ee_yaml)
         except yaml.parser.ParserError:
             raise ValidationError(
                 detail={'execution_environment_yaml': _('Invalid YAML file.')}
             )
 
-        # validate collections in yaml
-        collections = def_file.get("dependencies", {}).get("galaxy", {}).get("collections")
-        for collection in collections:
-            namespace, name = collection.split(".")
-            try:
-                Collection.objects.get(namespace=namespace, name=name)
-            except Collection.DoesNotExist:
-                raise NotFound(_('Collection {} not found.').format(collection))
+        cfg_location = dict(src="./ansible.cfg", dest="./")
 
-        ansible_copy = dict(src="./ansible.cfg", dest="./")
-
-        if adf := def_file.get("additional_build_files", None):
-            adf.append(ansible_copy)
+        # add ansible.cfg location to additional_build_files
+        if adf := def_yaml.get("additional_build_files", None):
+            adf.append(cfg_location)
         else:
-            def_file.update(dict(additional_build_files=[ansible_copy]))
+            def_yaml.update(dict(additional_build_files=[cfg_location]))
+
+        def_yaml = yaml.safe_dump(def_yaml, sort_keys=False)
 
         exclusive_resources = []
 
+        # get container distro and add it to exclusive resources
         dest_distro = container_models.ContainerDistribution.objects.filter(name=dest_name).first()
         if dest_distro:
             exclusive_resources.append(dest_distro)
 
+        # get all distributions related to repositories
         for repo in source_collection_repositories:
             distros = AnsibleDistribution.objects.filter(repository=repo.pk)
             exclusive_resources.extend(distros)
 
         user = self.request.user
 
-        build_task = dispatch(
-            build_image_task,
+        task = dispatch(
+            build_task,
             exclusive_resources=exclusive_resources,
             shared_resources=source_collection_repositories,
             kwargs={
-                "execution_environment_yaml": def_file,
+                "execution_environment_yaml": def_yaml,
                 "container_name": dest_name,
                 "container_tag": dest_tag,
                 "username": user.username,
             }
         )
-        return Response(data={"task_id": build_task.pk}, status='202')
+        return Response(data={"task_id": task.pk}, status='202')

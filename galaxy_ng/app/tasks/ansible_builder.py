@@ -2,17 +2,15 @@ import logging
 import os
 import tempfile
 import subprocess
-import yaml
 from urllib.parse import urljoin
 
 from django.conf import settings
 from galaxy_ng.app.auth.auth import TaskAuthenticationClass
 
-
 log = logging.getLogger(__name__)
 
 
-def build_image_task(
+def build_task(
     execution_environment_yaml,
     container_name,
     container_tag,
@@ -25,9 +23,9 @@ def build_image_task(
     if not os.path.exists(tdir):
         os.makedirs(tdir)
 
-    def_file = os.path.join(tdir, "execution-environment.yml")
-    with open(def_file, 'w') as f:
-        yaml.dump(execution_environment_yaml, f)
+    ee_path = os.path.join(tdir, "execution-environment.yml")
+    with open(ee_path, 'w') as f:
+        f.write(execution_environment_yaml)
 
     container_registry = os.environ.get("CONTAINER_REGISTRY", "localhost:5001")
     ssl_verify = os.environ.get("SSL_VERIFY", False)
@@ -49,7 +47,7 @@ def build_image_task(
         f.write(f'token={token}\n')
 
     log.info(f"Running ansible-builder build --tag={tag}")
-    subprocess.run(
+    process = subprocess.run(
         [
             "ansible-builder", "build", f"--tag={tag}"
         ],
@@ -58,8 +56,11 @@ def build_image_task(
         cwd=tdir
     )
 
+    if process.returncode != 0:
+        raise RuntimeError(str(process.stdout))
+
     log.info(f"Running podman push {tag}")
-    subprocess.run(
+    process = subprocess.run(
         [
             "podman", "push", tag,
             "--creds", f"{username}:{token}",
@@ -69,3 +70,6 @@ def build_image_task(
         stderr=subprocess.PIPE,
         cwd=tdir
     )
+
+    if process.returncode != 0:
+        raise RuntimeError(str(process.stdout))
