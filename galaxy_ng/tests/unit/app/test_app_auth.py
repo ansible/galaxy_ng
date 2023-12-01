@@ -1,3 +1,6 @@
+import base64
+from types import SimpleNamespace
+
 from unittest.mock import Mock
 
 from django.contrib.contenttypes.models import ContentType
@@ -5,11 +8,12 @@ from django.test import override_settings
 from pulp_ansible.app.models import AnsibleDistribution, AnsibleRepository
 from pulpcore.plugin.models.role import Role
 
-from galaxy_ng.app.auth.auth import RHIdentityAuthentication
+from galaxy_ng.app.auth.auth import RHIdentityAuthentication, TaskAuthentication
 from galaxy_ng.app.constants import DeploymentMode
-from galaxy_ng.app.models import Group, SyncList, User
+from galaxy_ng.app.models import Group, SyncList, User, auth
 from galaxy_ng.tests.unit.api import rh_auth as rh_auth_utils
 from galaxy_ng.tests.unit.api.base import BaseTestCase
+from django.contrib.sessions.backends.db import SessionStore
 
 
 @override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value)
@@ -55,3 +59,51 @@ class TestRHIdentityAuth(BaseTestCase):
 
         # assert objects do not exist: repo
         self.assertFalse(AnsibleRepository.objects.filter(name=synclist_name))
+
+
+@override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
+class TestTaskAuthentication(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.user = auth.User.objects.create_user(username="foo", password="bar")
+
+    def test_verify_session(self):
+        user = "foobar"
+        token = TaskAuthentication().get_token(user)
+        self.assertEqual(user, TaskAuthentication().verify_session(token))
+        self.assertEqual(user, SessionStore(session_key=token)["user"])
+
+    def test_non_existent_session(self):
+        token = "thistokendoesntexistinsession"
+        user = "foobar"
+        TaskAuthentication().get_token(user)
+
+        self.assertEqual(None, TaskAuthentication().verify_session(token))
+
+    # test authentication with user and password
+    def test_basic_auth(self):
+        token = TaskAuthentication().get_token(self.user.username)
+        basic_auth_format = f"{self.user.username}:{token}".encode("utf-8")
+        basic_token = base64.b64encode(basic_auth_format).decode('utf-8')
+
+        request = SimpleNamespace(
+            META={
+                "HTTP_AUTHORIZATION": f"Basic {basic_token}"
+            }
+        )
+
+        auth_user = TaskAuthentication().authenticate(request)
+        self.assertEqual(auth_user[0].username, self.user.username)
+
+    def test_token_auth(self):
+        token = TaskAuthentication().get_token(self.user.username)
+
+        request = SimpleNamespace(
+            META={
+                "HTTP_AUTHORIZATION": f"Token {token}"
+            }
+        )
+
+        auth_user = TaskAuthentication().authenticate(request)
+        self.assertEqual(auth_user[0].username, self.user.username)
