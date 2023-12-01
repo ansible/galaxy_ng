@@ -5,7 +5,7 @@ import subprocess
 from urllib.parse import urljoin
 
 from django.conf import settings
-from galaxy_ng.app.auth.auth import TaskAuthenticationClass
+from galaxy_ng.app.auth.auth import TaskAuthentication
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def build_task(
 
     tag = f"{container_registry}/{container_name}:{container_tag}"
 
-    token = TaskAuthenticationClass().get_token(username)
+    token = TaskAuthentication().get_token(username)
 
     url = urljoin(settings.ANSIBLE_API_HOSTNAME, settings.GALAXY_API_PATH_PREFIX)
 

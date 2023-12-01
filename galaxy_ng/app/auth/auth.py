@@ -149,7 +149,7 @@ class RHIdentityAuthentication(BaseAuthentication):
             raise AuthenticationFailed
 
 
-class TaskAuthenticationClass(BaseAuthentication):
+class TaskAuthentication(BaseAuthentication):
     def verify_session(self, token):
         try:
             session = SessionStore(session_key=token)
