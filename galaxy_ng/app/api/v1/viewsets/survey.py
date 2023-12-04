@@ -68,8 +68,6 @@ class CollectionSurveyRollupList(viewsets.ModelViewSet):
     def retrieve_collection(self, *args, **kwargs):
         """Get the score object by namespace/name path."""
 
-        print(f'PAGINATION: {self.pagination_class}')
-
         namespace = kwargs['namespace']
         name = kwargs['name']
 

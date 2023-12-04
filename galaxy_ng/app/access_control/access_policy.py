@@ -127,7 +127,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
         # If this is a galaxy access policy, load from the statement file
         if cls.NAME:
-            print(f'POLICIES FROM cls.NAME: {cls.NAME}')
             return statements.get_pulp_access_policy(cls.NAME, default=[])
 
         # Check if the view has a url pattern. If it does, check for customized
@@ -137,7 +136,6 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
             override_ap = PULP_VIEWSETS.get(viewname, None)
             if override_ap:
-                print('POLICIES FROM override_ap FROM viewname:{viewname}')
                 return MockPulpAccessPolicy(override_ap)
 
         except AttributeError:
@@ -145,13 +143,11 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
         # If no customized policies exist, try to load the one defined on the view itself
         try:
-            print('POLICIES FROM view.DEFAULT_ACCESS_POLICY')
             return MockPulpAccessPolicy(view.DEFAULT_ACCESS_POLICY)
         except AttributeError:
             pass
 
         # As a last resort, require admin rights
-        print('POLICIES FROM MockPulpAccessPolicy')
         return MockPulpAccessPolicy(
             {
                 "statements": [{"action": "*", "principal": "admin", "effect": "allow"}],
