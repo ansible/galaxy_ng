@@ -39,8 +39,7 @@ class IndexRegistryEEView(api_base.APIView):
         serializable_meta = {}
         for key in self.request.META:
             val = self.request.META[key]
-            # E721 do not compare types
-            if type(val) == str:
+            if isinstance(val, str):
                 serializable_meta[key] = val
 
         request_data = {
