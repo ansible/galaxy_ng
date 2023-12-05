@@ -278,6 +278,5 @@ def test_namespace_logo_propagates_to_collections(galaxy_client):
 
 @pytest.mark.namespace
 @pytest.mark.deployment_cloud
-@pytest.mark.this
 def test_insights_namespace_logo_propagates_to_collections(galaxy_client):
     _test_namespace_logo_propagates_to_collections(galaxy_client, True)
