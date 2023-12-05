@@ -319,7 +319,7 @@ class ContainerAnsibleBuilderSerializer(serializers.Serializer):
         help_text=_("Tag to apply to the new image.")
     )
     source_collection_repositories = RelatedField(
-        required=False,
+        required=True,
         many=True,
         help_text=_("List of ansible repositories to source collections from."),
         view_name="repositories-ansible/ansible-detail",

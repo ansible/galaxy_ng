@@ -10,6 +10,18 @@ from galaxy_ng.app.auth.auth import TaskAuthentication
 log = logging.getLogger(__name__)
 
 
+def _create_ansible_cfg(tmp_dir, token):
+    url = urljoin(settings.ANSIBLE_API_HOSTNAME, settings.GALAXY_API_PATH_PREFIX)
+    cfgfile = os.path.join(tmp_dir, 'ansible.cfg')
+    with open(cfgfile, 'w') as f:
+        f.write('[galaxy]\n')
+        f.write('server_list = automation_hub\n')
+        f.write('\n')
+        f.write('[galaxy_server.automation_hub]\n')
+        f.write(f'url={url}\n')
+        f.write(f'token={token}\n')
+
+
 def build_task(
     execution_environment_yaml,
     container_name,
@@ -34,17 +46,8 @@ def build_task(
 
     token = TaskAuthentication().get_token(username)
 
-    url = urljoin(settings.ANSIBLE_API_HOSTNAME, settings.GALAXY_API_PATH_PREFIX)
-
     log.info(f"Adding ansible.cfg to {tdir}")
-    cfgfile = os.path.join(tdir, 'ansible.cfg')
-    with open(cfgfile, 'w') as f:
-        f.write('[galaxy]\n')
-        f.write('server_list = automation_hub\n')
-        f.write('\n')
-        f.write('[galaxy_server.automation_hub]\n')
-        f.write(f'url={url}\n')
-        f.write(f'token={token}\n')
+    _create_ansible_cfg(tdir, token)
 
     log.info(f"Running ansible-builder build --tag={tag}")
     process = subprocess.run(
