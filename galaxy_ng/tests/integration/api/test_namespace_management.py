@@ -204,7 +204,7 @@ def _test_namespace_logo_propagates_to_collections(galaxy_client, is_insights):
         gc, namespace_name, "published", "1.0.1", tags=["application"]
     )
     if is_stage_environment():
-        sleep(100)
+        sleep(90)
 
     resp = search_collection(gc, namespace=namespace_name, name=artifact.name)
 
@@ -216,6 +216,8 @@ def _test_namespace_logo_propagates_to_collections(galaxy_client, is_insights):
         "avatar_url": "http://placekitten.com/123/456"
     }
     gc.put(f"_ui/v1/my-namespaces/{namespace_name}/", body=payload)
+    if is_stage_environment():
+        sleep(90)
     wait_for_all_tasks_gk(gc)
 
     # namespace logo was updated correctly
@@ -246,6 +248,8 @@ def _test_namespace_logo_propagates_to_collections(galaxy_client, is_insights):
         "avatar_url": "http://placekitten.com/654/321"
     }
     gc.put(f"_ui/v1/my-namespaces/{namespace_name}/", body=payload)
+    if is_stage_environment():
+        sleep(90)
     assert my_namespace["avatar_sha256"] is not None
     assert my_namespace["metadata_sha256"] is not None
     wait_for_all_tasks_gk(gc)
