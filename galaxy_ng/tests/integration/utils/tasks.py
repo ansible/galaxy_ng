@@ -32,6 +32,7 @@ def wait_for_all_tasks(client, timeout=300):
 
         time.sleep(1)
 
+
 def wait_for_all_tasks_gk(gc, timeout=300):
     ready = False
     wait_until = time.time() + timeout
