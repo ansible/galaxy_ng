@@ -80,7 +80,7 @@ class TestContainerAnsibleBuilderViewSet(BaseTestCase):
                 'galaxy': {
                     'collections': [
                         {
-                            'name': 'newswangerd.main_collection',
+                            'name': 'builder_namespace.builder_collection',
                             'version': '1.0.0'
                         }
                     ]
@@ -194,7 +194,7 @@ class TestContainerAnsibleBuilderViewSet(BaseTestCase):
 
         self.assertDictEqual(
             {'collections': [
-                {'name': 'newswangerd.main_collection', 'version': '1.0.0'}
+                {'name': 'builder_namespace.builder_collection', 'version': '1.0.0'}
             ]},
             yaml_requirements
         )

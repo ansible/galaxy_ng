@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from django_filters import filters
 from django_filters.rest_framework import DjangoFilterBackend, filterset
 from django.utils.translation import gettext_lazy as _
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 
@@ -412,7 +411,7 @@ class ContainerAnsibleBuilderViewSet(api_base.GenericViewSet):
 
         user = self.request.user
 
-        task = dispatch(
+        result = dispatch(
             build_task,
             exclusive_resources=exclusive_resources,
             shared_resources=source_collection_repositories,
@@ -423,4 +422,4 @@ class ContainerAnsibleBuilderViewSet(api_base.GenericViewSet):
                 "username": user.username,
             }
         )
-        return Response(data={"task_id": task.pk}, status='202')
+        return OperationPostponedResponse(result, request)

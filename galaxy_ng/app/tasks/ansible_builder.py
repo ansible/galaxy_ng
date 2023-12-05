@@ -10,6 +10,17 @@ from galaxy_ng.app.auth.auth import TaskAuthentication
 log = logging.getLogger(__name__)
 
 
+def _process_errors(process):
+    errors = []
+    if process.stderr:
+        errors.append(process.stderr)
+
+    if process.stdout:
+        errors.append(process.stdout)
+
+    return "".join(str(errors))
+
+
 def _create_ansible_cfg(tmp_dir, token):
     url = urljoin(settings.ANSIBLE_API_HOSTNAME, settings.GALAXY_API_PATH_PREFIX)
     cfgfile = os.path.join(tmp_dir, 'ansible.cfg')
@@ -60,7 +71,7 @@ def build_task(
     )
 
     if process.returncode != 0:
-        raise RuntimeError(str(process.stdout))
+        raise RuntimeError(_process_errors(process))
 
     log.info(f"Running podman push {tag}")
     process = subprocess.run(
@@ -75,4 +86,4 @@ def build_task(
     )
 
     if process.returncode != 0:
-        raise RuntimeError(str(process.stdout))
+        raise RuntimeError(_process_errors(process))
