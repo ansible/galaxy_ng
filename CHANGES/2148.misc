@@ -1,1 +1,0 @@
-Add PULP_DEBUG=1 to oci_env base profile to enable serving static files and django pretty api format
