@@ -151,9 +151,6 @@ class TestContainerAnsibleBuilderViewSet(BaseTestCase):
             ]
         )
 
-        print("self repo")
-        print(self.repository)
-
         data = {
             "destination_container_repository": "new_builder_image",
             "container_tag": "1.0.0",
