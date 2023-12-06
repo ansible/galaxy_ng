@@ -79,7 +79,7 @@ def test_container_ansible_builder_build_with_galaxy_dependencies_task(galaxy_cl
     container_name = f"bar_builder_image_{randstr(8)}"
 
     payload = {
-        "execution_environment_yaml": """---
+        "execution_environment_yaml": f"""---
 version: 3
 images:
   base_image:
@@ -98,8 +98,8 @@ dependencies:
     package_pip: ansible-runner==2.2.1
   galaxy:
     collections:
-    - name: newswangerd.main_collection
-      version: 1.0.0
+    - name: {artifact.namespace}.{artifact.name}
+      version: {artifact.version}
 """,
         "destination_container_repository": container_name,
         "container_tag": "latest",
