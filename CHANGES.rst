@@ -13,6 +13,49 @@ Changelog
 
 .. towncrier release notes start
 
+4.9.0 (2023-12-06)
+==================
+
+Features
+--------
+
+- Added management command `metrics-collection-automation-analytics`.
+  Renamed command `analytics-export-s3` to `metrics-collection-lighspeed`.
+  `AA-1757 <https://issues.redhat.com/browse/AA-1757>`_
+- Add support for dynamic settings
+  `AAH-2009 <https://issues.redhat.com/browse/AAH-2009>`_
+- Add _ui/v1/tags/collections and _ui/v1/tags/roles endpoints. Add sorting by name and count, and enable filtering by name (exact, partial and startswith match).
+  `AAH-2761 <https://issues.redhat.com/browse/AAH-2761>`_
+- Added ``username_autocomplete`` filter to ``LegacyRole``.
+  `AAH-2782 <https://issues.redhat.com/browse/AAH-2782>`_
+
+
+Bugfixes
+--------
+
+- Fix changing my namespace logo.
+  `AAH-2296 <https://issues.redhat.com/browse/AAH-2296>`_
+- Ensure beta-galaxy users can delete and deprecate their collections
+  `AAH-2632 <https://issues.redhat.com/browse/AAH-2632>`_
+- Add pulp_certs:/etc/pulp/certs volume to persist ``database_fields.symmetric.key`` and certificates on oci-env reload
+  `AAH-2648 <https://issues.redhat.com/browse/AAH-2648>`_
+- Fixed ``username`` filter in ``/api/v1/users`` endpoint.
+  `AAH-2731 <https://issues.redhat.com/browse/AAH-2731>`_
+- Fixed server error 500 on ``/api/v1/namespaces`` if browsable api is enabled
+  `AAH-2733 <https://issues.redhat.com/browse/AAH-2733>`_
+- Allow all authenticated users to list and retrieve other users when using github social auth.
+  `AAH-2781 <https://issues.redhat.com/browse/AAH-2781>`_
+
+
+Misc
+----
+
+- `AAH-2125 <https://issues.redhat.com/browse/AAH-2125>`_, `AAH-2148 <https://issues.redhat.com/browse/AAH-2148>`_, `AAH-2638 <https://issues.redhat.com/browse/AAH-2638>`_, `AAH-2760 <https://issues.redhat.com/browse/AAH-2760>`_, `AAH-2775 <https://issues.redhat.com/browse/AAH-2775>`_, `AAH-2802 <https://issues.redhat.com/browse/AAH-2802>`_
+
+
+----
+
+
 4.8.0 (2023-09-13)
 ==================
 

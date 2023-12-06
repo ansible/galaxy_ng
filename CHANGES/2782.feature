@@ -1,1 +1,0 @@
-Added ``username_autocomplete`` filter to ``LegacyRole``.
