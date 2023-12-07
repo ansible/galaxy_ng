@@ -1,9 +1,7 @@
 import pytest
 
-from galaxykit.utils import wait_for_task, wait_for_url
-from galaxykit.collections import upload_artifact
-from ..constants import USERNAME_PUBLISHER
-from orionutils.generator import build_collection, randstr
+from galaxykit.utils import wait_for_task
+from orionutils.generator import randstr
 
 
 @pytest.mark.deployment_standalone
@@ -50,26 +48,12 @@ dependencies:
 
 
 @pytest.mark.deployment_standalone
-def test_container_ansible_builder_build_with_galaxy_dependencies_task(galaxy_client):
-    artifact = build_collection(
-        "skeleton",
-        config={
-            "namespace": USERNAME_PUBLISHER,
-        }
-    )
+def test_container_ansible_builder_build_with_galaxy_dependencies_task(galaxy_client, published):
     gc_admin = galaxy_client("admin")
-    resp = upload_artifact(None, gc_admin, artifact)
-    wait_for_task(gc_admin, resp)
-
-    dest_url = (
-        f"content/staging/v3/collections/{artifact.namespace}/"
-        f"{artifact.name}/versions/{artifact.version}/"
-    )
-    wait_for_url(gc_admin, dest_url)
 
     col_search = gc_admin.get(
         "v3/plugin/ansible/search/collection-versions/"
-        f"?namespace={artifact.namespace}&name={artifact.name}&version={artifact.version}"
+        f"?namespace={published.namespace}&name={published.name}&version={published.version}"
     )["data"]
 
     assert len(col_search) == 1
@@ -98,8 +82,8 @@ dependencies:
     package_pip: ansible-runner==2.2.1
   galaxy:
     collections:
-    - name: {artifact.namespace}.{artifact.name}
-      version: {artifact.version}
+    - name: {published.namespace}.{published.name}
+      version: {published.version}
 """,
         "destination_container_repository": container_name,
         "container_tag": "latest",
