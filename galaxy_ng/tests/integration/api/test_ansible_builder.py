@@ -105,6 +105,7 @@ dependencies:
     assert ee["name"] == container_name
 
 
+@pytest.mark.deployment_standalone
 def test_container_ansible_builder_build_multiple_tags_task(galaxy_client):
 
     container_name = f"baz_builder_image_{randstr(8)}"
