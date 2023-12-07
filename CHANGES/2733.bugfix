@@ -1,1 +1,0 @@
-Fixed server error 500 on ``/api/v1/namespaces`` if browsable api is enabled
