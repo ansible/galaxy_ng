@@ -14,6 +14,7 @@ class LegacyNamespaceFilter(filterset.FilterSet):
 
     keywords = filters.CharFilter(method='keywords_filter')
     owner = filters.CharFilter(method='owner_filter')
+    provider = filters.CharFilter(method='provider_filter')
 
     sort = filters.OrderingFilter(
         fields=(
@@ -51,6 +52,9 @@ class LegacyNamespaceFilter(filterset.FilterSet):
         queryset = queryset.filter(id__in=pks)
 
         return queryset
+
+    def provider_filter(self, queryset, name, value):
+        return queryset.filter(namespace__name=value)
 
 
 class LegacyUserFilter(filterset.FilterSet):

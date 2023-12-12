@@ -6,10 +6,12 @@ import pytest
 from ..utils import (
     ansible_galaxy,
     SocialGithubClient,
+    get_client,
+    generate_unused_namespace,
 )
-from ..utils.legacy import (
-    cleanup_social_user,
-)
+
+from ..utils.legacy import cleanup_social_user
+from ..utils.legacy import generate_unused_legacy_namespace
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -77,3 +79,44 @@ def test_social_auth_creates_v3_namespace_as_v1_provider(ansible_config):
         resp = client.get(f'v1/namespaces/?name={github_user}')
         res = resp.json()
         assert res['results'][0]['avatar_url'] == avatar_url
+
+
+@pytest.mark.deployment_community
+def test_v1_namespace_provider_filter(ansible_config):
+
+    admin_config = ansible_config('admin')
+    admin_client = get_client(config=admin_config, request_token=False, require_auth=True)
+
+    # 2 v1 namespaces
+    v1_a_name = generate_unused_legacy_namespace(admin_client)
+    v1_a = admin_client('/api/v1/namespaces/', method='POST', args={'name': v1_a_name})
+    v1_a_id = v1_a['id']
+    v1_b_name = generate_unused_legacy_namespace(admin_client)
+    v1_b = admin_client('/api/v1/namespaces/', method='POST', args={'name': v1_b_name})
+    v1_b_id = v1_b['id']
+
+    # make 1 v3 namespace
+    v3_a_name = generate_unused_namespace(admin_client)
+    v3_a = admin_client(
+        '/api/v3/namespaces/', method='POST', args={'name': v3_a_name, 'groups': []}
+    )
+    v3_a_id = v3_a['id']
+    v3_b_name = generate_unused_namespace(admin_client)
+    v3_b = admin_client(
+        '/api/v3/namespaces/', method='POST', args={'name': v3_b_name, 'groups': []}
+    )
+    v3_b_id = v3_b['id']
+
+    # bind v1_a to v3 and v1_b to v3_b
+    admin_client(f'/api/v1/namespaces/{v1_a_id}/providers/', method='POST', args={'id': v3_a_id})
+    admin_client(f'/api/v1/namespaces/{v1_b_id}/providers/', method='POST', args={'id': v3_b_id})
+
+    # check the filter ..
+    resp_a = admin_client(f'/api/v1/namespaces/?provider={v3_a_name}')
+    resp_b = admin_client(f'/api/v1/namespaces/?provider={v3_b_name}')
+
+    assert resp_a['count'] == 1
+    assert resp_a['results'][0]['id'] == v1_a_id, resp_a
+
+    assert resp_b['count'] == 1
+    assert resp_b['results'][0]['id'] == v1_b_id, resp_b
