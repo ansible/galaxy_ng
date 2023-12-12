@@ -394,6 +394,12 @@ class AnsibleConfigFixture(dict):
 
         if is_sync_testing():
             self.PROFILES = SYNC_PROFILES
+        elif aap_gateway():
+            self.PROFILES = DEPLOYED_PAH_PROFILES
+            admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
+            self.PROFILES["admin"]["username"] = "admin"
+            self.PROFILES["admin"]["password"] = admin_pass
+            self.PROFILES["admin"]["token"] = None
         elif is_stage_environment():
             self.PROFILES = EPHEMERAL_PROFILES
         elif not is_dev_env_standalone():
@@ -646,12 +652,37 @@ def has_old_credentials():
 @lru_cache()
 def get_hub_version(ansible_config):
     if aap_gateway():
-        username = ansible_config("admin").PROFILES.get("admin").get("username")
-        password = ansible_config("admin").PROFILES.get("admin").get("password")
-        gw_root_url = ansible_config("admin").get("gw_root_url")
-        gc = GalaxyClient(galaxy_root="foo", auth={"username": username, "password": password},
-                          gw_auth=True, https_verify=False, gw_root_url=gw_root_url)
-        galaxy_ng_version = gc.get(gc.gw_galaxy_url)["galaxy_ng_version"]
+        galaxy_client = get_galaxy_client(ansible_config)
+        role = "admin"
+        gc = galaxy_client(role, gw_auth=True, ignore_cache=True)
+        galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
+        return galaxy_ng_version
+    else:
+        if is_standalone():
+            role = "iqe_admin"
+        elif is_ephemeral_env():
+            # I can't get a token from the ephemeral environment.
+            # Changed to Basic token authentication until the issue is resolved
+            del os.environ["HUB_AUTH_URL"]
+            role = "partner_engineer"
+            galaxy_client = get_galaxy_client(ansible_config)
+            gc = galaxy_client(role, basic_token=True, ignore_cache=True)
+            galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
+            return galaxy_ng_version
+        else:
+            role = "admin"
+        try:
+            gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
+        except GalaxyError:
+            # FIXME: versions prior to 4.7 have different credentials. This needs to be fixed.
+            gc = GalaxyClient(galaxy_root="http://localhost:5001/api/automation-hub/",
+                              auth={"username": "admin", "password": "admin"})
+        return gc.get(gc.galaxy_root)["galaxy_ng_version"]
+    if aap_gateway():
+        galaxy_client = get_galaxy_client(ansible_config)
+        role = "admin"
+        gc = galaxy_client(role, gw_auth=True, ignore_cache=True)
+        galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
         return galaxy_ng_version
     else:
         if is_standalone():
