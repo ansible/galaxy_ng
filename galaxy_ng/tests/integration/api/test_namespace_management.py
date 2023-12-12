@@ -13,7 +13,7 @@ from galaxykit.users import get_me
 
 from ..utils.iqe_utils import is_stage_environment
 from ..utils.repo_management_utils import upload_new_artifact
-from ..utils.tasks import wait_for_all_tasks_gk
+from ..utils.tasks import wait_for_all_tasks_gk, wait_for_namespace_tasks_gk
 from ..utils.tools import generate_random_string
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -39,6 +39,7 @@ def test_namespace_create_and_delete(api_version, galaxy_client):
     new_namespace = f"ns_test_{generate_random_string()}"
     payload = {'name': new_namespace, 'groups': []}
     resp = gc.post(f"{api_version}/namespaces/", body=payload)
+    wait_for_namespace_tasks_gk(gc)
     assert resp['name'] == new_namespace
     if api_version == "v3":
         get_namespace(gc, new_namespace)

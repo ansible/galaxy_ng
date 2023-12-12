@@ -89,6 +89,18 @@ def wait_for_task_ui_client(uclient, task):
     assert state == 'completed'
 
 
+def wait_for_namespace_tasks_gk(gc, timeout=300):
+    ready = False
+    wait_until = time.time() + timeout
+    while not ready:
+        if wait_until < time.time():
+            raise TaskWaitingTimeout()
+        running_count = gc.get("pulp/api/v3/tasks/?state=running&name__contains=namespace")["count"]
+        waiting_count = gc.get("pulp/api/v3/tasks/?state=waiting&name__contains=namespace")["count"]
+        ready = running_count == 0 and waiting_count == 0
+        time.sleep(1)
+
+
 class TaskFailed(Exception):
     def __init__(self, message):
         self.message = message
