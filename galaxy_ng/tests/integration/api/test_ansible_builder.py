@@ -14,10 +14,10 @@ def test_container_ansible_builder_build_task(galaxy_client):
 version: 3
 images:
   base_image:
-    name: quay.io/centos/centos:stream8
+    name: registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 options:
-  user: '1000'
+  package_manager_path: /usr/bin/microdnf
 
 dependencies:
   python_interpreter:
@@ -67,10 +67,10 @@ def test_container_ansible_builder_build_with_galaxy_dependencies_task(galaxy_cl
 version: 3
 images:
   base_image:
-    name: quay.io/centos/centos:stream8
+    name: registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 options:
-  user: '1000'
+  package_manager_path: /usr/bin/microdnf
 
 dependencies:
   python_interpreter:
@@ -115,10 +115,10 @@ def test_container_ansible_builder_build_multiple_tags_task(galaxy_client):
 version: 3
 images:
   base_image:
-    name: quay.io/centos/centos:stream8
+    name: registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 options:
-  user: '1000'
+  package_manager_path: /usr/bin/microdnf
 
 dependencies:
   python_interpreter:
