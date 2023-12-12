@@ -1,3 +1,5 @@
+import random
+import string
 import time
 
 from galaxykit.users import delete_user as delete_user_gk
@@ -160,3 +162,59 @@ def cleanup_social_user_gk(username, galaxy_client):
 
     # cleanup the user
     delete_user_gk(gc_admin, username)
+
+
+def generate_legacy_namespace(exclude=None):
+    """ Create a valid random legacy namespace string """
+
+    # This should be a list of pre-existing namespaces
+    if exclude is None:
+        exclude = []
+
+    def is_valid(ns):
+        """ Assert namespace meets backend requirements """
+        if ns is None:
+            return False
+        if ns in exclude:
+            return False
+        if len(namespace) < 3:
+            return False
+        if len(namespace) > 64:
+            return False
+        for char in namespace:
+            if char not in string.ascii_lowercase + string.ascii_uppercase + string.digits:
+                return False
+
+        return True
+
+    namespace = None
+    while not is_valid(namespace):
+        namespace = ''
+        namespace += random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits)
+        for x in range(0, random.choice(range(3, 63))):
+            namespace += random.choice(string.ascii_lowercase + string.digits + '_')
+
+    return namespace
+
+
+def get_all_legacy_namespaces(api_client=None):
+    namespaces = []
+    next_page = '/api/v1/namespaces/'
+    while next_page:
+        resp = api_client(next_page)
+        namespaces.extend(resp['results'])
+        next_page = resp.get('next')
+        if next_page:
+            # trim the proto+host+port ...
+            ix = next_page.index('/api')
+            next_page = next_page[ix:]
+    return namespaces
+
+
+def generate_unused_legacy_namespace(api_client=None):
+    """ Make a random legacy_namespace string that does not exist """
+
+    assert api_client is not None, "api_client is a required param"
+    existing = get_all_legacy_namespaces(api_client=api_client)
+    existing = dict((x['name'], x) for x in existing)
+    return generate_legacy_namespace(exclude=list(existing.keys()))
