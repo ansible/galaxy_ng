@@ -14,6 +14,13 @@ from galaxy_ng.app.api.v1.viewsets import (
     LegacyUsersViewSet
 )
 
+from galaxy_ng.app.api.v1.viewsets import (
+    CollectionSurveyRollupList,
+    CollectionSurveyList,
+    LegacyRoleSurveyRollupList,
+    LegacyRoleSurveyList,
+)
+
 
 urlpatterns = [
     path(
@@ -114,6 +121,48 @@ urlpatterns = [
         'namespaces/<int:pk>/providers/',
         LegacyNamespaceProvidersViewSet.as_view({"get": "list", "put": "update", "post": "update"}),
         name='legacy_namespace_providers-list'
+    ),
+
+    path(
+        "scores/collections/",
+        CollectionSurveyRollupList.as_view({'get': 'list'}),
+        name='collection-survey-rollup-list'
+    ),
+    path(
+        "scores/collections/<str:namespace>/<str:name>/",
+        CollectionSurveyRollupList.as_view({'get': 'retrieve_collection'}),
+        name='collection-survey-rollup-list-by-fqn'
+    ),
+    path(
+        "scores/roles/",
+        LegacyRoleSurveyRollupList.as_view({'get': 'list'}),
+        name='legacyrole-survey-rollup-list'
+    ),
+
+    path(
+        "surveys/collections/",
+        CollectionSurveyList.as_view({'get': 'list'}),
+        name='collection-survey-list'
+    ),
+    path(
+        "surveys/collections/<str:namespace>/<str:name>/",
+        CollectionSurveyList.as_view({'post': 'create'}),
+        name='collection-survey-create1'
+    ),
+    path(
+        "surveys/collections/<str:pk>/",
+        CollectionSurveyList.as_view({'post': 'create'}),
+        name='collection-survey-create2'
+    ),
+    path(
+        "surveys/roles/",
+        LegacyRoleSurveyList.as_view({'get': 'list'}),
+        name='legacyrole-survey-list'
+    ),
+    path(
+        "surveys/roles/<int:id>/",
+        LegacyRoleSurveyList.as_view({'post': 'create'}),
+        name='legacyrole-survey-create'
     ),
 
     path('', LegacyRootView.as_view(), name='legacy-root')

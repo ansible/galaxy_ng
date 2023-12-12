@@ -20,6 +20,13 @@ from .sync import (
     LegacyRolesSyncViewSet,
 )
 
+from .survey import (
+    CollectionSurveyRollupList,
+    LegacyRoleSurveyRollupList,
+    CollectionSurveyList,
+    LegacyRoleSurveyList,
+)
+
 
 __all__ = (
     LegacyNamespacesViewSet,
@@ -32,4 +39,8 @@ __all__ = (
     LegacyRoleContentViewSet,
     LegacyRoleVersionsViewSet,
     LegacyRoleImportsViewSet,
+    CollectionSurveyRollupList,
+    LegacyRoleSurveyRollupList,
+    CollectionSurveyList,
+    LegacyRoleSurveyList,
 )

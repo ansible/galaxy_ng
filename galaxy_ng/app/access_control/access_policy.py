@@ -820,3 +820,8 @@ class LegacyAccessPolicy(AccessPolicyBase):
             return True
 
         return False
+
+
+class SurveyAccessPolicy(AccessPolicyBase):
+
+    NAME = "SurveyAccessPolicy"
