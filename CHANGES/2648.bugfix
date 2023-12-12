@@ -1,1 +1,0 @@
-Add pulp_certs:/etc/pulp/certs volume to persist ``database_fields.symmetric.key`` and certificates on oci-env reload
