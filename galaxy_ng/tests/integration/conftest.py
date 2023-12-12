@@ -7,6 +7,7 @@ import pytest
 from orionutils.utils import increment_version
 from pkg_resources import parse_version, Requirement
 
+from galaxykit import GalaxyClient
 from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id
 from galaxykit.namespaces import create_namespace
@@ -30,7 +31,7 @@ from .utils.iqe_utils import (
     is_standalone,
     is_ephemeral_env,
     galaxy_stage_ansible_user_cleanup, remove_from_cache,
-    get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version
+    get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version, aap_gateway
 )
 from .utils.tools import generate_random_artifact_version
 
@@ -297,11 +298,20 @@ def galaxy_client(ansible_config):
 
 
 def pytest_sessionstart(session):
-    ansible_config = get_ansible_config()
-    hub_version = get_hub_version(ansible_config)
-    if not is_standalone() and not is_ephemeral_env() and not is_dev_env_standalone():
-        set_test_data(ansible_config, hub_version)
-    logger.debug(f"Running tests against hub version {hub_version}")
+    if aap_gateway():
+        ansible_config = get_ansible_config()
+        url = ansible_config("admin").get("url")
+        username = ansible_config("admin").PROFILES.get("admin").get("username")
+        password = ansible_config("admin").PROFILES.get("admin").get("password")
+        gc = GalaxyClient(galaxy_root=url, auth={"username": username, "password": password},
+                          gw_auth=True, https_verify=False)
+        pass
+    else:
+        ansible_config = get_ansible_config()
+        hub_version = get_hub_version(ansible_config)
+        if not is_standalone() and not is_ephemeral_env() and not is_dev_env_standalone():
+            set_test_data(ansible_config, hub_version)
+        logger.debug(f"Running tests against hub version {hub_version}")
 
 
 def pytest_runtest_setup(item):
@@ -517,6 +527,15 @@ def gh_user_1_pre(ansible_config):
     gc = get_galaxy_client(ansible_config)
     galaxy_stage_ansible_user_cleanup(gc, "github_user")
     return gc("github_user", github_social_auth=True, ignore_cache=True)
+
+
+@pytest.fixture(scope="function")
+def gw_user_1(ansible_config):
+    """
+    Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
+    """
+    gc = get_galaxy_client(ansible_config)
+    return gc("github_user", github_social_auth=True)
 
 
 @pytest.fixture(scope="function")
