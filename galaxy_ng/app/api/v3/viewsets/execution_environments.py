@@ -377,7 +377,7 @@ class ContainerAnsibleBuilderViewSet(api_base.GenericViewSet):
         ee_yaml = data.get("execution_environment_yaml")
         dest_name = data.get("destination_container_repository")
         dest_tag = data.get("container_tag")
-        source_collection_repositories = data.get("source_collection_repositories")
+        source_collection_repositories = data.get("source_collection_repositories", [])
 
         # validate yaml
         try:
