@@ -275,11 +275,12 @@ class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
         role_name = kwargs.get('alternate_role_name') or \
             kwargs['github_repo'].replace('ansible-role-', '')
 
-        task_id = self.legacy_dispatch(legacy_role_import, kwargs=kwargs)
+        task_id, pulp_id = self.legacy_dispatch(legacy_role_import, kwargs=kwargs)
 
         return Response({
             'results': [{
                 'id': task_id,
+                'pulp_id': pulp_id,
                 'github_user': kwargs['github_user'],
                 'github_repo': kwargs['github_repo'],
                 'github_reference': kwargs.get('github_reference'),
