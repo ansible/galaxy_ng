@@ -103,13 +103,29 @@ class TestContainerAnsibleBuilderViewSet(BaseTestCase):
         with open(self.temp_yaml, 'w') as f:
             f.write(self.execution_environment_yaml)
 
+        ansible_v = subprocess.run(
+            ["ansible", "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=self.temp_dir
+        )
+        print("ansible v", ansible_v)
+
+        ansibleg_v = subprocess.run(
+            ["ansible-galaxy", "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=self.temp_dir
+        )
+        print("ansible-galaxy v", ansibleg_v)
+
         builder_v = subprocess.run(
             ["ansible-builder", "--version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=self.temp_dir
         )
-        print(builder_v)
+        print("builder v", builder_v)
 
         process = subprocess.run(
             ["ansible-builder", "create"],
