@@ -104,12 +104,13 @@ class TestContainerAnsibleBuilderViewSet(BaseTestCase):
             f.write(self.execution_environment_yaml)
 
         process = subprocess.run(
-            "ansible-builder create",
-            shell=True,
+            ["ansible-builder", "create"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=self.temp_dir
         )
+
+        print("process", process)
 
         self.assertEqual(process.returncode, 0)
 
