@@ -569,7 +569,9 @@ class LegacyImportSerializer(serializers.Serializer):
 
     github_user = serializers.CharField()
     github_repo = serializers.CharField()
+    alternate_namespace_name = serializers.CharField(required=False)
     alternate_role_name = serializers.CharField(required=False)
+    alternate_clone_url = serializers.CharField(required=False)
     github_reference = serializers.CharField(required=False)
 
     class Meta:
@@ -577,7 +579,9 @@ class LegacyImportSerializer(serializers.Serializer):
         fields = [
             'github_user',
             'github_repo',
+            'alternate_namespace_name',
             'alternate_role_name',
+            'alternate_clone_url',
             'github_reference',
         ]
 
