@@ -19,8 +19,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
   test:
     runs-on: ubuntu-latest
+    needs: build
 
     strategy:
       fail-fast: false
@@ -36,9 +40,14 @@ jobs:
         with:
           fetch-depth: 1
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: plugin_package
+          path: dist/
+
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
 
       - name: Install httpie
         run: |
@@ -206,9 +215,14 @@ jobs:
         with:
           fetch-depth: 1
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: plugin_package
+          path: dist/
+
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
 
       - uses: ruby/setup-ruby@v1
         with:
