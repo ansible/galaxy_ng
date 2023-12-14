@@ -160,7 +160,8 @@ def test_namespace_edit_logo(galaxy_client):
 
     payload = {
         "name": name,
-        "avatar_url": "http://placekitten.com/400/400"
+        # "avatar_url": "http://placekitten.com/400/400"
+        "avatar_url": "https://avatars.githubusercontent.com/u/1869705?v=4"
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
     wait_for_all_tasks_gk(gc)
@@ -169,7 +170,8 @@ def test_namespace_edit_logo(galaxy_client):
 
     payload = {
         "name": name,
-        "avatar_url": "http://placekitten.com/123/456"
+        # "avatar_url": "http://placekitten.com/123/456"
+        "avatar_url": "https://avatars.githubusercontent.com/u/481677?v=4"
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
     wait_for_all_tasks_gk(gc)
@@ -214,7 +216,8 @@ def _test_namespace_logo_propagates_to_collections(galaxy_client, is_insights):
     # upload logo to namespace
     payload = {
         "name": namespace_name,
-        "avatar_url": "http://placekitten.com/123/456"
+        # "avatar_url": "http://placekitten.com/123/456"
+        "avatar_url": "https://avatars.githubusercontent.com/u/1869705?v=4"
     }
     gc.put(f"_ui/v1/my-namespaces/{namespace_name}/", body=payload)
     if is_stage_environment():
@@ -246,7 +249,8 @@ def _test_namespace_logo_propagates_to_collections(galaxy_client, is_insights):
         "name": namespace_name,
         "description": "hehe hihi haha",
         "company": "RedHat Inc.",
-        "avatar_url": "http://placekitten.com/654/321"
+        # "avatar_url": "http://placekitten.com/654/321"
+        "avatar_url": "https://avatars.githubusercontent.com/u/481677?v=4"
     }
     gc.put(f"_ui/v1/my-namespaces/{namespace_name}/", body=payload)
     if is_stage_environment():
