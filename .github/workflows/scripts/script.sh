@@ -12,7 +12,6 @@ set -mveuo pipefail
 
 # make sure this script runs at the repo root
 cd "$(dirname "$(realpath -e "$0")")"/../../..
-REPO_ROOT="$PWD"
 
 source .github/workflows/scripts/utils.sh
 
@@ -30,72 +29,64 @@ export PULP_URL="https://pulp"
 
 if [[ "$TEST" = "docs" ]]; then
   if [[ "$GITHUB_WORKFLOW" == "Galaxy CI" ]]; then
-    pip install towncrier==19.9.0
-    towncrier --yes --version 4.0.0.ci
+    towncrier build --yes --version 4.0.0.ci
   fi
   cd docs
   make PULP_URL="$PULP_URL" diagrams html
   tar -cvf docs.tar ./_build
   cd ..
 
-  if [ -f $POST_DOCS_TEST ]; then
-    source $POST_DOCS_TEST
+  if [ -f "$POST_DOCS_TEST" ]; then
+    source "$POST_DOCS_TEST"
   fi
   exit
 fi
 
 REPORTED_STATUS="$(pulp status)"
 
-if [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
-  REPORTED_VERSION="$(echo $REPORTED_STATUS | jq --arg plugin galaxy --arg legacy_plugin galaxy_ng -r '.versions[] | select(.component == $plugin or .component == $legacy_plugin) | .version')"
-  response=$(curl --write-out %{http_code} --silent --output /dev/null https://pypi.org/project/galaxy-ng/$REPORTED_VERSION/)
-  if [ "$response" == "200" ];
-  then
-    echo "galaxy_ng $REPORTED_VERSION has already been released. Skipping running tests."
-    exit
-  fi
-fi
-
 echo "machine pulp
 login admin
 password password
 " | cmd_user_stdin_prefix bash -c "cat >> ~pulp/.netrc"
 # Some commands like ansible-galaxy specifically require 600
-cmd_user_stdin_prefix bash -c "chmod 600 ~pulp/.netrc"
+cmd_prefix bash -c "chmod 600 ~pulp/.netrc"
 
-cd ../pulp-openapi-generator
-if [ "$(echo "$REPORTED_STATUS" | jq -r '.versions[0].package')" = "null" ]
+# Infer the client name from the package name by replacing "-" with "_".
+# Use the component to infer the package name on older versions of pulpcore.
+
+if [ "$(echo "$REPORTED_STATUS" | jq -r '.domain_enabled')" = "true" ]
 then
-  # We are on an old version of pulpcore without package in the status report
-  for app_label in $(echo "$REPORTED_STATUS" | jq -r '.versions[].component')
+  # Workaround: Domains are not supported by the published bindings.
+  # Generate new bindings for all packages.
+  pushd ../pulp-openapi-generator
+  for item in $(echo "$REPORTED_STATUS" | jq -r '.versions[]|(.package // ("pulp_" + .component)|sub("pulp_core"; "pulpcore"))|sub("-"; "_")')
   do
-    if [ "$app_label" = "core" ]
-    then
-      item=pulpcore
-    else
-      item="pulp_${app_label}"
-    fi
     ./generate.sh "${item}" python
     cmd_prefix pip3 install "/root/pulp-openapi-generator/${item}-client"
     sudo rm -rf "./${item}-client"
   done
+  popd
 else
-  for item in $(echo "$REPORTED_STATUS" | jq -r '.versions[].package|sub("-"; "_")')
+  # Sadly: Different pulpcore-versions aren't either...
+  pushd ../pulp-openapi-generator
+  for item in $(echo "$REPORTED_STATUS" | jq -r '.versions[]|select(.component!="galaxy")|(.package // ("pulp_" + .component)|sub("pulp_core"; "pulpcore"))|sub("-"; "_")')
   do
     ./generate.sh "${item}" python
     cmd_prefix pip3 install "/root/pulp-openapi-generator/${item}-client"
     sudo rm -rf "./${item}-client"
   done
+  popd
 fi
 
-cd $REPO_ROOT
-
-cat unittest_requirements.txt | cmd_stdin_prefix bash -c "cat > /tmp/unittest_requirements.txt"
-cat functest_requirements.txt | cmd_stdin_prefix bash -c "cat > /tmp/functest_requirements.txt"
-cmd_prefix pip3 install -r /tmp/unittest_requirements.txt -r /tmp/functest_requirements.txt
+# At this point, this is a safeguard only, so let's not make too much fuzz about the old status format.
+echo "$REPORTED_STATUS" | jq -r '.versions[]|select(.package)|(.package|sub("_"; "-")) + "-client==" + .version' > bindings_requirements.txt
+cmd_stdin_prefix bash -c "cat > /tmp/unittest_requirements.txt" < unittest_requirements.txt
+cmd_stdin_prefix bash -c "cat > /tmp/functest_requirements.txt" < functest_requirements.txt
+cmd_stdin_prefix bash -c "cat > /tmp/bindings_requirements.txt" < bindings_requirements.txt
+cmd_prefix pip3 install -r /tmp/unittest_requirements.txt -r /tmp/functest_requirements.txt -r /tmp/bindings_requirements.txt
 
 CERTIFI=$(cmd_prefix python3 -c 'import certifi; print(certifi.where())')
-cmd_prefix bash -c "cat /etc/pulp/certs/pulp_webserver.crt  | tee -a "$CERTIFI" > /dev/null"
+cmd_prefix bash -c "cat /etc/pulp/certs/pulp_webserver.crt >> '$CERTIFI'"
 
 # check for any uncommitted migrations
 echo "Checking for uncommitted migrations..."
@@ -109,29 +100,25 @@ if [[ "$TEST" == "performance" ]]; then
   if [[ -z ${PERFORMANCE_TEST+x} ]]; then
     cmd_user_prefix bash -c "pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance"
   else
-    cmd_user_prefix bash -c "pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance.test_$PERFORMANCE_TEST"
+    cmd_user_prefix bash -c "pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 galaxy_ng.tests.performance.test_${PERFORMANCE_TEST}"
   fi
   exit
 fi
 
-if [ -f $FUNC_TEST_SCRIPT ]; then
-  source $FUNC_TEST_SCRIPT
+if [ -f "$FUNC_TEST_SCRIPT" ]; then
+  source "$FUNC_TEST_SCRIPT"
 else
-
-    if [[ "$GITHUB_WORKFLOW" == "Galaxy Nightly CI/CD" ]] || [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
+    if [[ "$GITHUB_WORKFLOW" == "Galaxy Nightly CI/CD" ]]
+    then
         cmd_user_prefix bash -c "pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8 --nightly"
         cmd_user_prefix bash -c "pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m 'not parallel' --nightly"
 
-    
     else
         cmd_user_prefix bash -c "pytest -v -r sx --color=yes --suppress-no-test-exit-code --pyargs galaxy_ng.tests.functional -m parallel -n 8"
         cmd_user_prefix bash -c "pytest -v -r sx --color=yes --pyargs galaxy_ng.tests.functional -m 'not parallel'"
-
-    
     fi
-
 fi
 
-if [ -f $POST_SCRIPT ]; then
-  source $POST_SCRIPT
+if [ -f "$POST_SCRIPT" ]; then
+  source "$POST_SCRIPT"
 fi

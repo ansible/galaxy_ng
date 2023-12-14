@@ -12,27 +12,24 @@ set -euv
 # make sure this script runs at the repo root
 cd "$(dirname "$(realpath -e "$0")")"/../../..
 
-
-mkdir ~/.gem || true
-touch ~/.gem/credentials
-echo "---
-:rubygems_api_key: $RUBYGEMS_API_KEY" > ~/.gem/credentials
-sudo chmod 600 ~/.gem/credentials
-
-export VERSION=$(ls galaxy_ng_client* | sed -rn 's/galaxy_ng_client-(.*)\.gem/\1/p')
+VERSION="$1"
 
 if [[ -z "$VERSION" ]]; then
-  echo "No client package found."
-  exit
+  echo "No version specified."
+  exit 1
 fi
 
-export response=$(curl --write-out %{http_code} --silent --output /dev/null https://rubygems.org/gems/galaxy_ng_client/versions/$VERSION)
+RESPONSE="$(curl --write-out '%{http_code}' --silent --output /dev/null "https://rubygems.org/gems/galaxy_ng_client/versions/$VERSION")"
 
-if [ "$response" == "200" ];
+if [ "$RESPONSE" == "200" ];
 then
   echo "galaxy_ng client $VERSION has already been released. Skipping."
   exit
 fi
 
-GEM_FILE="$(ls galaxy_ng_client-*)"
-gem push ${GEM_FILE}
+mkdir -p ~/.gem
+touch ~/.gem/credentials
+echo "---
+:rubygems_api_key: $RUBYGEMS_API_KEY" > ~/.gem/credentials
+sudo chmod 600 ~/.gem/credentials
+gem push "galaxy_ng_client-${VERSION}.gem"

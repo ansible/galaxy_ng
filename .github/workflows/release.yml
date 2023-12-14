@@ -12,148 +12,145 @@ on:
     inputs:
       release:
         description: "Release tag (e.g. 3.2.1)"
-      before_script:
-        description: |
-          Bash code to run before bindings and docs are built. This should only be used when re-running
-          a workflow to correct some aspect of the docs. e.g.: git checkout origin/3.14 CHANGES.rst
-        required: false
 
-env:
-  RELEASE_WORKFLOW: true
+defaults:
+  run:
+    working-directory: "galaxy_ng"
 
 jobs:
   build-artifacts:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
 
     strategy:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: "actions/checkout@v4"
         with:
           fetch-depth: 0
+          path: "galaxy_ng"
 
-      - uses: actions/setup-python@v4
+      - uses: "actions/setup-python@v4"
         with:
           python-version: "3.8"
 
-      - name: Install python dependencies
+      - name: "Install python dependencies"
         run: |
           echo ::group::PYDEPS
-          pip install packaging~=21.3 bump2version gitpython towncrier==19.9.0 wheel requests
+          pip install 'packaging~=21.3' bump2version gitpython towncrier wheel requests
           echo ::endgroup::
 
-      - name: Configure Git with ansible name and email
+      - name: "Configure Git with ansible name and email"
         run: |
           git config --global user.name 'ansible'
           git config --global user.email 'ansible-infra@redhat.com'
 
-      - name: Setting secrets
-        run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
+      - name: "Setting secrets"
+        run: |
+          python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
-          SECRETS_CONTEXT: ${{ toJson(secrets) }}
+          SECRETS_CONTEXT: "${{ toJson(secrets) }}"
 
-      - name: Create the release commit, tag it, create a post-release commit, and build plugin package
-        run: python .github/workflows/scripts/release.py ${{ github.event.inputs.release }}
+      - name: "Create the release commit, tag it, create a post-release commit, and build plugin package"
+        run: |
+          python .github/workflows/scripts/release.py ${{ github.event.inputs.release }}
 
-      - name: 'Tar files'
-        run: tar -cvf galaxy_ng.tar .
-
-      - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v3
+      - name: "Upload Package whl"
+        uses: "actions/upload-artifact@v3"
         with:
-          name: galaxy_ng.tar
-          path: galaxy_ng.tar
+          name: "plugin_package"
+          path: "galaxy_ng/dist/"
+          if-no-files-found: "error"
+
+      - name: "Tar files"
+        run: |
+          tar -cvf galaxy_ng.tar .
+
+      - name: "Upload Artifact"
+        uses: "actions/upload-artifact@v3"
+        with:
+          name: "galaxy_ng.tar"
+          path: "galaxy_ng/galaxy_ng.tar"
 
 
   build-bindings-docs:
-    needs: build-artifacts
-    runs-on: ubuntu-latest
+    needs:
+      - "build-artifacts"
+    runs-on: "ubuntu-latest"
     # Install scripts expect TEST to be set, 'docs' is most appropriate even though we don't run tests
     env:
-      TEST: docs
+      TEST: "docs"
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: "actions/download-artifact@v3"
         with:
-          name: galaxy_ng.tar
+          name: "galaxy_ng.tar"
+          path: "galaxy_ng/"
 
-      - uses: actions/setup-python@v4
+      - uses: "actions/checkout@v4"
         with:
-          python-version: "3.8"
+          fetch-depth: 1
+          repository: "pulp/pulp-openapi-generator"
+          path: "pulp-openapi-generator"
 
-      - name: Untar repository
+      - uses: "actions/setup-python@v4"
+        with:
+          python-version: "3.9"
+
+      - name: "Untar repository"
         run: |
           tar -xf galaxy_ng.tar
 
-      # update to the branch's latest ci files rather than the ones from the release tag. this is
-      # helpful when there was a problem with the ci files during the release which needs to be
-      # fixed after the release tag has been created
-      - name: Update ci files
+      - name: "Install python dependencies"
         run: |
-          git checkout "origin/${GITHUB_REF##*/}" -- .ci
-          git checkout "origin/${GITHUB_REF##*/}" -- .github
-
-      - name: Install httpie
-        run: |
-          echo ::group::HTTPIE
-          pip install httpie
+          echo ::group::PYDEPS
+          pip install towncrier twine wheel httpie docker netaddr boto3 ansible mkdocs
+          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/galaxy_ng/.ci/assets/httpie/" >> $GITHUB_ENV
           echo ::endgroup::
-          echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
 
       # Building the bindings and docs requires accessing the OpenAPI specs endpoint, so we need to
       # setup the Pulp instance.
-      - name: Before Install
-        run: .github/workflows/scripts/before_install.sh
-        shell: bash
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          GITHUB_PULL_REQUEST: ${{ github.event.number }}
-          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
-          GITHUB_BRANCH: ${{ github.head_ref }}
-          GITHUB_REPO_SLUG: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
-          GITHUB_USER: ${{ github.event.pull_request.user.login }}
-
-      - name: Install
+      - name: "Before Install"
         run: |
-          export PLUGIN_VERSION=${{ github.event.inputs.release }}
-          .github/workflows/scripts/install.sh
+          .github/workflows/scripts/before_install.sh
+        shell: "bash"
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          GITHUB_PULL_REQUEST: ${{ github.event.number }}
-          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
-          GITHUB_BRANCH: ${{ github.head_ref }}
-          GITHUB_REPO_SLUG: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
-          GITHUB_USER: ${{ github.event.pull_request.user.login }}
-        shell: bash
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_CONTEXT: "${{ github.event.pull_request.commits_url }}"
+          GITHUB_USER: "${{ github.event.pull_request.user.login }}"
 
-      - name: Additional before_script
-        run: ${{ github.event.inputs.before_script }}
-        shell: bash
+      - name: "Install"
+        run: |
+          .github/workflows/scripts/install.sh
+        shell: "bash"
+        env:
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_CONTEXT: "${{ github.event.pull_request.commits_url }}"
+          GITHUB_USER: "${{ github.event.pull_request.user.login }}"
 
-      - name: Install Python client
-        run: .github/workflows/scripts/install_python_client.sh
-        shell: bash
-
-      - name: Upload python client packages
-        uses: actions/upload-artifact@v3
+      - name: "Install Python client"
+        run: |
+          .github/workflows/scripts/install_python_client.sh
+        shell: "bash"
+      - name: "Upload python client packages"
+        uses: "actions/upload-artifact@v3"
         with:
-          name: python-client.tar
-          path: python-client.tar
+          name: "python-client.tar"
+          path: "galaxy_ng/galaxy-python-client.tar"
+          if-no-files-found: "error"
 
-      - name: Upload python client docs
-        uses: actions/upload-artifact@v3
+      - name: "Upload python client docs"
+        uses: "actions/upload-artifact@v3"
         with:
-          name: python-client-docs.tar
-          path: python-client-docs.tar
+          name: "python-client-docs.tar"
+          path: "galaxy_ng/galaxy-python-client-docs.tar"
+          if-no-files-found: "error"
 
-      - name: Logs
+      - name: "Logs"
         if: always()
         run: |
           echo "Need to debug? Please check: https://github.com/marketplace/actions/debugging-with-tmate"
@@ -166,59 +163,57 @@ jobs:
           docker exec pulp bash -c "pip3 list && pip3 install pipdeptree && pipdeptree"
 
 
-  publish:
-    runs-on: ubuntu-latest
-    needs: build-bindings-docs
+  publish-tag:
+    runs-on: "ubuntu-latest"
+    needs:
+      - "build-bindings-docs"
 
     env:
-      TEST: publish
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: "actions/download-artifact@v3"
         with:
-          name: galaxy_ng.tar
+          name: "galaxy_ng.tar"
+          path: "galaxy_ng/"
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.8"
+      - name: "Untar repository"
+        run: |
+          tar -xf galaxy_ng.tar
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "2.6"
-
-      - name: Configure Git with ansible name and email
+      - name: "Configure Git with ansible name and email"
         run: |
           git config --global user.name 'ansible'
           git config --global user.email 'ansible-infra@redhat.com'
 
-      - name: Untar repository
+      - name: "Setting secrets"
         run: |
-          tar -xf galaxy_ng.tar
-
-      # update to the branch's latest ci files rather than the ones from the release tag. this is
-      # helpful when there was a problem with the ci files during the release which needs to be
-      # fixed after the release tag has been created
-      - name: Update ci files
-        run: |
-          git checkout "origin/${GITHUB_REF##*/}" -- .ci
-          git checkout "origin/${GITHUB_REF##*/}" -- .github
-
-      - name: Setting secrets
-        run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
+          python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
-          SECRETS_CONTEXT: ${{ toJson(secrets) }}
+          SECRETS_CONTEXT: "${{ toJson(secrets) }}"
 
-      - name: Install python dependencies
+      - name: "Push branch and tag to GitHub"
         run: |
-          echo ::group::PYDEPS
-          pip install gitpython requests packaging~=21.3 tweepy
-          echo ::endgroup::
+          bash .github/workflows/scripts/push_branch_and_tag_to_github.sh ${{ github.event.inputs.release }}
 
-      - name: Push branch and tag to GitHub
-        run: bash .github/workflows/scripts/push_branch_and_tag_to_github.sh ${{ github.event.inputs.release }}
+  create-gh-release:
+    runs-on: "ubuntu-latest"
+    needs:
+      - "build-bindings-docs"
+      - "publish-tag"
 
-      
+    steps:
+      - name: "Create release on GitHub"
+        uses: "actions/github-script@v7"
+        env:
+          TAG_NAME: "${{ inputs.release }}"
+        with:
+          script: |
+            const { TAG_NAME } = process.env;
 
-      - name: Create release on GitHub
-        run: bash .github/workflows/scripts/create_release_from_tag.sh ${{ github.event.inputs.release }}
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: TAG_NAME,
+              make_latest: "legacy",
+            });
