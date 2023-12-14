@@ -73,6 +73,7 @@ def test_publish_newer_certified_collection_version(
 
 @pytest.mark.all
 @pytest.mark.cli
+@pytest.mark.skip(reason="pulp is changing how this works")
 def test_publish_same_collection_version(ansible_config, galaxy_client):
     """Test you cannot publish same collection version already published."""
 
