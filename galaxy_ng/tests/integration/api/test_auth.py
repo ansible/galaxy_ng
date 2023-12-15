@@ -36,7 +36,7 @@ def test_token_auth(profile, ansible_config):
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 def test_auth_admin(ansible_config):
-    """Test whether admin can not access API root using invalid token."""
+    """Test whether admin can not access collections page using invalid token."""
 
     config = ansible_config("admin")
     client = get_client(
@@ -45,8 +45,7 @@ def test_auth_admin(ansible_config):
         headers={"Authorization": f"Bearer {uuid4()}"}
     )
     with pytest.raises(GalaxyError) as ctx:
-        # url not provided defaults to API root.
-        client("", method="GET")
+        client("v3/collections/", method="GET")
     assert ctx.value.http_code == 403
 
 
@@ -62,5 +61,5 @@ def test_auth_exception(ansible_config, published):
         headers={"Authorization": f"Bearer {uuid4()}"}
     )
     with pytest.raises(GalaxyError) as ctx:
-        client("", method="GET")
+        client("v3/collections/", method="GET")
     assert ctx.value.http_code == 403

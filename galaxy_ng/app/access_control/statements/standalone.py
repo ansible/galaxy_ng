@@ -124,14 +124,8 @@ STANDALONE_STATEMENTS = {
     "AppRootViewSet": [
         {
             "action": ["retrieve"],
-            "principal": "authenticated",
+            "principal": "*",
             "effect": "allow",
-        },
-        {
-            "action": ["retrieve"],
-            "principal": "anonymous",
-            "effect": "allow",
-            "condition": "unauthenticated_collection_download_enabled",
         },
     ],
 

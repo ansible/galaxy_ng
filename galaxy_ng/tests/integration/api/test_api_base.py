@@ -1,4 +1,5 @@
 import pytest
+import requests
 
 from ..utils import get_client
 
@@ -8,8 +9,9 @@ from ..utils import get_client
 def test_galaxy_api_root(ansible_config, artifact):
     """Test galaxy API root."""
 
-    # TODO: change to `basic_user` profile when can access pulp-v3 api root
-    config = ansible_config("admin")
+    config = ansible_config("basic_user")
+    api_root = config["url"]
+    
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
 
@@ -20,7 +22,7 @@ def test_galaxy_api_root(ansible_config, artifact):
     )
 
     # verify api root works
-    response = api_client(api_prefix + '/')
+    response = requests.get(f"{api_root}").json()
     assert "v3" in response["available_versions"]
     assert "pulp-v3" in response["available_versions"]
 
