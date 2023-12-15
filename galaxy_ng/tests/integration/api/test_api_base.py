@@ -11,7 +11,7 @@ def test_galaxy_api_root(ansible_config, artifact):
 
     config = ansible_config("basic_user")
     api_root = config["url"]
-    
+
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
 
