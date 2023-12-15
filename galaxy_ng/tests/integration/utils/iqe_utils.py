@@ -394,12 +394,6 @@ class AnsibleConfigFixture(dict):
 
         if is_sync_testing():
             self.PROFILES = SYNC_PROFILES
-        elif aap_gateway():
-            self.PROFILES = DEPLOYED_PAH_PROFILES
-            admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
-            self.PROFILES["admin"]["username"] = "admin"
-            self.PROFILES["admin"]["password"] = admin_pass
-            self.PROFILES["admin"]["token"] = None
         elif is_stage_environment():
             self.PROFILES = EPHEMERAL_PROFILES
         elif not is_dev_env_standalone():
@@ -652,10 +646,12 @@ def has_old_credentials():
 @lru_cache()
 def get_hub_version(ansible_config):
     if aap_gateway():
-        galaxy_client = get_galaxy_client(ansible_config)
-        role = "admin"
-        gc = galaxy_client(role, gw_auth=True, ignore_cache=True)
-        galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
+        username = ansible_config("admin").PROFILES.get("admin").get("username")
+        password = ansible_config("admin").PROFILES.get("admin").get("password")
+        gw_root_url = ansible_config("admin").get("gw_root_url")
+        gc = GalaxyClient(galaxy_root="foo", auth={"username": username, "password": password},
+                          gw_auth=True, https_verify=False, gw_root_url=gw_root_url)
+        galaxy_ng_version = gc.get(gc.gw_galaxy_url)["galaxy_ng_version"]
         return galaxy_ng_version
     else:
         if is_standalone():

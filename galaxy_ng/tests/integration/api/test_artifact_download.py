@@ -7,6 +7,8 @@ from orionutils.generator import build_collection, randstr
 
 from galaxykit.collections import upload_artifact
 from galaxykit.utils import wait_for_task
+from galaxykit.collections import upload_artifact
+from galaxykit.utils import GalaxyClientError, wait_for_task
 from ..conftest import is_hub_4_5
 from ..constants import USERNAME_PUBLISHER
 from ..utils import (
