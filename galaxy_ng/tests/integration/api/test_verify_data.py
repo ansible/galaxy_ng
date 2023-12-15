@@ -3,7 +3,7 @@ import pytest
 
 from galaxy_ng.tests.integration.conftest import is_hub_4_7_or_higher
 from galaxy_ng.tests.integration.utils.iqe_utils import is_upgrade_from_aap23_hub46, \
-    galaxy_auto_sign_collections
+    galaxy_auto_sign_collections, is_upgrade_from_aap22_hub45
 from galaxy_ng.tests.integration.utils.repo_management_utils import search_collection_endpoint
 from galaxykit.collections import collection_info
 from galaxykit.groups import get_group_id
@@ -16,9 +16,11 @@ from galaxykit.users import get_user
 
 logger = logging.getLogger(__name__)
 
-SKIP_MESSAGE = "Load data stage was run on AAP 2.3, without repository management"
+SKIP_MESSAGE_23 = "Load data stage was run on AAP 2.3, without repository management"
+SKIP_MESSAGE_22 = "Load data stage was skipped. No data to verify now."
 
 
+@pytest.mark.skipif(is_upgrade_from_aap22_hub45(), reason=SKIP_MESSAGE_22)
 class TestVerifyData:
 
     @pytest.mark.min_hub_version("4.6dev")
@@ -96,7 +98,7 @@ class TestVerifyData:
             get_group_id(gc, expected_group["name"])
 
     @pytest.mark.min_hub_version("4.7dev")
-    @pytest.mark.skipif(is_upgrade_from_aap23_hub46(), reason=SKIP_MESSAGE)
+    @pytest.mark.skipif(is_upgrade_from_aap23_hub46(), reason=SKIP_MESSAGE_23)
     @pytest.mark.verify_data
     def test_verify_data_repos(self, galaxy_client, data):
         """

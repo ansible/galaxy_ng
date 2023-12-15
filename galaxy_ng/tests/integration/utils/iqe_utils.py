@@ -280,6 +280,11 @@ def is_upgrade_from_aap23_hub46():
     return upgrade in ('true', 'True', 1, '1', True)
 
 
+def is_upgrade_from_aap22_hub45():
+    upgrade = os.getenv("UPGRADE_FROM_AAP22_HUB45", False)
+    return upgrade in ('true', 'True', 1, '1', True)
+
+
 def pull_and_tag_test_image(container_engine, registry, tag=None):
     image = "alpine"
     tag = "alpine:latest" if tag is None else tag
