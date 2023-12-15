@@ -28,6 +28,8 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.min_hub_version("4.7dev")
 class TestRepositories:
+
+    @pytest.mark.skip(reason="pulp is changing how this works")
     @pytest.mark.all
     @pytest.mark.repositories
     def test_cant_upload_same_collection_same_repo(self, galaxy_client):
