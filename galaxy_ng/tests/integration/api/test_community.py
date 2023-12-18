@@ -457,6 +457,7 @@ def test_v1_sync_with_user_and_limit(ansible_config):
     resp = api_client('/api/v1/sync/', method='POST', args=pargs)
     assert isinstance(resp, dict)
     assert resp.get('task') is not None
+    assert resp.get('pulp_id') is not None
     wait_for_v1_task(resp=resp, api_client=api_client)
 
     # verify filtering in the way that the CLI does it
