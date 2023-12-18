@@ -850,6 +850,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         resp = api_admin_client('/api/v1/sync/', method='POST', args=pargs)
         assert isinstance(resp, dict)
         assert resp.get('task') is not None
+        assert resp.get('pulp_id') is not None
         wait_for_v1_task(resp=resp, api_client=api_admin_client)
 
     def _populate_tags_cmd():

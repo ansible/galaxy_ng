@@ -40,5 +40,8 @@ class LegacyRolesSyncViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, L
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         kwargs = dict(serializer.validated_data)
-        task_id = self.legacy_dispatch(legacy_sync_from_upstream, kwargs=kwargs)
-        return Response({'task': task_id})
+        task_id, pulp_id = self.legacy_dispatch(legacy_sync_from_upstream, kwargs=kwargs)
+        return Response({
+            'task': task_id,
+            'pulp_id': pulp_id,
+        })

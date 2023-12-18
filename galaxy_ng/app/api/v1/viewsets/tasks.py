@@ -40,7 +40,7 @@ class LegacyTasksMixin:
         """Dispatch wrapper for legacy tasks."""
         task = dispatch(function, kwargs=kwargs)
         legacy_id = uuid_to_int(str(task.pulp_id))
-        return legacy_id
+        return legacy_id, str(task.pulp_id)
 
     @extend_schema(
         parameters=[],

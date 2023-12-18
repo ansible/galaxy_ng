@@ -53,6 +53,7 @@ def test_admin_can_import_legacy_roles(ansible_config):
         'github_user': github_user,
     }
     resp = admin_client('/api/v1/imports/', method='POST', args=payload)
+    assert resp['results'][0]['pulp_id'] is not None, resp
     task_id = resp['results'][0]['id']
     res = wait_for_v1_task(task_id=task_id, api_client=admin_client, check=False)
 
@@ -90,6 +91,7 @@ def test_admin_can_import_legacy_roles(ansible_config):
 
     # try to import again ...
     resp = admin_client('/api/v1/imports/', method='POST', args=payload)
+    assert resp['results'][0]['pulp_id'] is not None, resp
     task_id = resp['results'][0]['id']
     res = wait_for_v1_task(task_id=task_id, api_client=admin_client, check=False)
     assert res['results'][0]['state'] == 'SUCCESS', res
