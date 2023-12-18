@@ -9,8 +9,9 @@ from orionutils.generator import build_collection, randstr
 from pkg_resources import parse_version
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
+from galaxykit.collections import upload_artifact, get_collection_from_repo, get_collection, \
+    get_ui_collection
 from galaxykit.utils import wait_for_task, GalaxyClientError
-from galaxykit.collections import upload_artifact
 from ..utils.iqe_utils import require_signature_for_approval
 
 from ..utils import (
@@ -83,20 +84,11 @@ def test_api_publish(artifact, use_distribution, hub_version, galaxy_client):
             logger.debug("Waiting for upload to be completed")
             wait_for_task(gc, r)
 
+    resp = upload_artifact(None, gc, artifact, use_distribution=use_distribution)
+    logger.debug("Waiting for upload to be completed")
+    resp = wait_for_task(gc, resp)
+    assert resp["state"] == "completed"
 
-    with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
-        try:
-            resp = upload_artifact(None, gc, artifact, use_distribution=use_distribution)
-
-        except CapturingGalaxyError as capture:
-            error_body = capture.http_error.read()
-            logger.error("Upload failed with error response: %s", error_body)
-            raise
-        else:
-            logger.debug("Waiting for upload to be completed")
-            resp = wait_for_task(gc, resp)
-            logging.debug(resp)
-            assert resp["state"] == "completed"
 
 
 @pytest.mark.min_hub_version("4.6dev")
@@ -105,30 +97,19 @@ def test_validated_publish(ansible_config, artifact, galaxy_client):
     """
     Publish a collection to the validated repo.
     """
-
     gc = galaxy_client("partner_engineer")
     logging.debug(f"artifact name {artifact.name}")
     logging.debug(f"artifact namespace {artifact.namespace}")
 
-    with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
-        try:
-            resp = upload_artifact(None, gc, artifact)
-        except CapturingGalaxyError as capture:
-            error_body = capture.http_error.read()
-            logger.error("Upload failed with error response: %s", error_body)
-            raise
-        else:
-            resp = wait_for_task(gc, resp)
-            assert resp["state"] == "completed"
+    resp = upload_artifact(None, gc, artifact)
+    logger.debug("Waiting for upload to be completed")
+    resp = wait_for_task(gc, resp)
+    assert resp["state"] == "completed"
 
-        set_certification(ansible_config(), gc, artifact, level="validated")
-
-        collection_url = (
-            "content/validated/v3/collections/"
-            f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-        )
-        collection_resp = gc.get(collection_url)
-        assert collection_resp["name"] == artifact.name
+    set_certification(ansible_config(), gc, artifact, level="validated")
+    collection_resp = get_collection_from_repo(gc, "validated", artifact.namespace,
+                             artifact.name, "1.0.0")
+    assert collection_resp["name"] == artifact.name
 
 
 @pytest.mark.skip
@@ -340,22 +321,17 @@ def test_ansible_requires(ansible_config, spec, galaxy_client):
         extra_files={"meta/runtime.yml": {"requires_ansible": requires_ansible}},
     )
 
+
     resp = upload_artifact(None, gc, artifact)
     resp = wait_for_task(gc, resp)
-
     assert resp["state"] == result
 
     if result == "completed":
         set_certification(ansible_config(), gc, artifact)
-
-        collection_url = f"v3/collections/{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-        collection_resp = gc.get(collection_url)
+        collection_resp = get_collection(gc, artifact.namespace, artifact.name, "1.0.0")
         assert collection_resp["requires_ansible"] == requires_ansible
-
-        ui_collection_url = (
-            f"_ui/v1/repo/published/{artifact.namespace}/{artifact.name}/?versions=1.0.0"
-        )
-        ui_collection_resp = gc.get(ui_collection_url)
+        ui_collection_resp = get_ui_collection(gc, "published", artifact.namespace,
+                                               artifact.name, "1.0.0")
         assert ui_collection_resp["latest_version"]["requires_ansible"] == requires_ansible
 
 
@@ -463,6 +439,7 @@ def test_api_publish_log_missing_ee_deps(galaxy_client):
     """
 
     gc = galaxy_client("basic_user")
+
     artifact = build_collection(
         "skeleton",
         config={
@@ -500,6 +477,7 @@ def test_api_publish_ignore_files_logged(galaxy_client):
     Test that galaxy-importer logs when ansible-test sanity ignore files are present.
     """
     gc = galaxy_client("basic_user")
+
     artifact = build_collection(
         "skeleton",
         config={
