@@ -12,18 +12,9 @@ See: AAH-2150
 import pytest
 import logging
 
-from ..utils import get_client
 from galaxykit.users import get_me
 
 log = logging.getLogger(__name__)
-
-
-@pytest.fixture(scope="function")
-def settings(ansible_config):
-    config = ansible_config("admin")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(config, request_token=False, require_auth=True)
-    return api_client(f"{api_prefix}/_ui/v1/settings/")
 
 
 def is_present(group, groups):
@@ -44,12 +35,11 @@ def is_present(group, groups):
 
 
 @pytest.mark.standalone_only
-def test_ldap_is_enabled(skip_if_ldap_disabled, ansible_config):
+def test_ldap_is_enabled(skip_if_ldap_disabled, galaxy_client):
     """test whether ldap user can login"""
-    config = ansible_config("admin")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(config, request_token=False, require_auth=True)
-    assert api_client(f"{api_prefix}/_ui/v1/settings/")["GALAXY_AUTH_LDAP_ENABLED"] is True
+    gc = galaxy_client("admin")
+    gc.get_settings()
+    assert gc.get_settings()["GALAXY_AUTH_LDAP_ENABLED"] is True
 
 
 @pytest.mark.standalone_only
