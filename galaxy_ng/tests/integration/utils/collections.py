@@ -394,7 +394,7 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
         # Setup local keystore
         # gpg --no-default-keyring --keyring trustedkeys.gpg
         # gpg --import clowder-data.key
-        with pkg_resources.path("dev.data", "ansible-sign.gpg") as keyfilename:
+        with pkg_resources.path("dev.common", "ansible-sign-pub.gpg") as keyfilename:
             subprocess.run(
                 [
                     "gpg",
@@ -412,13 +412,16 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
             )
 
         # Run gpg to generate signature
-        with pkg_resources.path("dev.data", "collection_sign.sh") as collection_sign:
-            result = subprocess.check_output(
-                [collection_sign, os.path.join(tdir.name, "MANIFEST.json")],
-                env={
-                    "KEYRING": keyring.name,
-                },
-            )
+        with pkg_resources.path("dev.common", "collection_sign.sh") as collection_sign:
+            command = [collection_sign, os.path.join(tdir.name, "MANIFEST.json")]
+            env = {"KEYRING": keyring.name}
+            logger.debug(f"Executing command {command}. Environment {env}")
+            try:
+                result = subprocess.check_output(command, env=env)
+            except subprocess.CalledProcessError as e:
+                logger.debug(f"Command failed with exit code {e.returncode}")
+                logger.debug(e.output)
+                raise
             signature_filename = json.loads(result)["signature"]
 
         # Prepare API endpoint URLs needed to POST signature
