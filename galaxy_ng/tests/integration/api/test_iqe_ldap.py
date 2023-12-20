@@ -35,6 +35,7 @@ def is_present(group, groups):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.iqe_ldap
 def test_ldap_is_enabled(skip_if_ldap_disabled, galaxy_client):
     """test whether ldap user can login"""
     gc = galaxy_client("admin")
@@ -43,6 +44,7 @@ def test_ldap_is_enabled(skip_if_ldap_disabled, galaxy_client):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.iqe_ldap
 def test_ldap_user_can_log_in(skip_if_ldap_disabled, galaxy_client, ldap_user):
     """
     Verifies that a user on LDAP server can log into automation hub
@@ -55,6 +57,7 @@ def test_ldap_user_can_log_in(skip_if_ldap_disabled, galaxy_client, ldap_user):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.iqe_ldap
 def test_ldap_admin_user_is_superuser_in_ahub(skip_if_ldap_disabled, galaxy_client, ldap_user):
     """
     Verifies that a user from an admin group on LDAP server is a superuser in ahub
@@ -69,6 +72,7 @@ def test_ldap_admin_user_is_superuser_in_ahub(skip_if_ldap_disabled, galaxy_clie
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.iqe_ldap
 def test_ldap_personal_information_synced(skip_if_ldap_disabled, galaxy_client, ldap_user):
     """
     Verifies that personal information is correctly imported to ahub
@@ -86,6 +90,7 @@ def test_ldap_personal_information_synced(skip_if_ldap_disabled, galaxy_client, 
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.iqe_ldap
 def test_ldap_groups_synced(skip_if_ldap_disabled, settings, galaxy_client, ldap_user):
     """
     Verifies that groups are correctly created in ahub
@@ -106,6 +111,7 @@ def test_ldap_groups_synced(skip_if_ldap_disabled, settings, galaxy_client, ldap
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.iqe_ldap
 def test_ldap_mirror_only_existing_groups(skip_if_ldap_disabled,
                                           settings,
                                           galaxy_client,
@@ -125,6 +131,7 @@ def test_ldap_mirror_only_existing_groups(skip_if_ldap_disabled,
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.iqe_ldap
 def test_ldap_ignored_groups(skip_if_ldap_disabled, galaxy_client, ldap_user):
     """
     Verifies that groups can be ignored and not created in ahub
@@ -141,6 +148,7 @@ def test_ldap_ignored_groups(skip_if_ldap_disabled, galaxy_client, ldap_user):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.iqe_ldap
 def test_ldap_user_with_no_group(skip_if_ldap_disabled, galaxy_client, ldap_user):
     """
     Verifies that users that does not belong to any group are also synced
