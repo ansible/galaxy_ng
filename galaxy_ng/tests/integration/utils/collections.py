@@ -413,6 +413,13 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
 
         # Run gpg to generate signature
         with pkg_resources.path("dev.common", "collection_sign.sh") as collection_sign:
+            gpg_version_command = [
+                "gpg",
+                "--version"
+            ]
+            gpg_version = subprocess.check_output(gpg_version_command)
+            logger.debug(f"gpg version result: {gpg_version}")
+
             command = [collection_sign, os.path.join(tdir.name, "MANIFEST.json")]
             env = {"KEYRING": keyring.name}
             logger.debug(f"Executing command {command}. Environment {env}")
