@@ -73,6 +73,7 @@ slow_in_cloud: tests that take too long to be run against stage
 max_hub_version: This marker takes an argument that indicates the maximum hub version
 min_hub_version: This marker takes an argument that indicates the minimum hub version
 iqe_rbac_test: imported iqe tests checking role permissions
+iqe_ldap: imported iqe tests checking ldap integration
 sync: sync tests against stage
 certified_sync: sync tests container against container
 auto_approve: run tests that require AUTO_APPROVE to be set to true
