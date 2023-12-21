@@ -19,6 +19,7 @@ from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.utils.galaxy import upstream_role_iterator
 from galaxy_ng.app.utils.legacy import process_namespace
 from galaxy_ng.app.utils.namespaces import generate_v3_namespace_from_attributes
+from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
@@ -271,8 +272,10 @@ def legacy_role_import(
     github_user=None,
     github_repo=None,
     github_reference=None,
+    alternate_namespace_name=None,
     alternate_role_name=None,
-    superuser_can_create_namespaces=False
+    alternate_clone_url=None,
+    superuser_can_create_namespaces=False,
 ):
     """
     Import a legacy role by user, repo and or reference.
@@ -285,9 +288,17 @@ def legacy_role_import(
         The github repository name that the role lives in.
     :param github_reference:
         A commit, branch or tag name to import.
+    :param alternate_namespace_name:
+        NO-OP ... future for UI
     :param alternate_role_name:
-        Override the enumerated role name when the repo does
-        not conform to the ansible-role-<name> convention.
+        NO-OP ... future for UI
+    :param alternate_clone_url:
+        Override the enumerated clone url for the repo.
+        Only used for testing right now.
+    :param superuser_can_create_namespaces:
+        If the function is called by a superuser, it still
+        won't be allowed to create namespaces on the fly
+        without this being set to True
 
     This function attempts to clone the github repository to a
     temporary directory and uses galaxy-importer functions to
@@ -324,6 +335,8 @@ def legacy_role_import(
     logger.info(f'github_user: {github_user}')
     logger.info(f'github_repo: {github_repo}')
     logger.info(f'github_reference: {github_reference}')
+    logger.info(f'alternate_clone_url: {alternate_clone_url}')
+    logger.info(f'alternate_namespace_name: {alternate_namespace_name}')
     logger.info(f'alternate_role_name: {alternate_role_name}')
     logger.info('')
 
@@ -349,6 +362,9 @@ def legacy_role_import(
             + ' did not match any existing roles'
         )
     logger.info('')
+
+    if alternate_clone_url:
+        clone_url = alternate_clone_url
 
     # the user should have a legacy and v3 namespace if they logged in ...
     namespace = LegacyNamespace.objects.filter(name=real_namespace_name).first()
@@ -419,10 +435,65 @@ def legacy_role_import(
         logger.info('')
 
         logger.info('===== PROCESSING LOADER RESULTS ====')
+
+        # Allow the meta/main.yml to define the destination namespace ...
+        new_namespace_name = namespace.name
+        if alternate_namespace_name:
+            new_namespace_name = alternate_namespace_name
+            logger.info(f'overriding namespace name via parameter: {alternate_namespace_name}')
+        elif result['metadata']['galaxy_info'].get('namespace'):
+            new_namespace_name = result['metadata']['galaxy_info'].get('namespace')
+            logger.info(f'overriding namespace name via metadata: {new_namespace_name}')
+
+        if namespace.name != new_namespace_name:
+
+            # does it exist and is the user an owner?
+            found = LegacyNamespace.objects.filter(name=new_namespace_name).first()
+            if found:
+                provider = found.namespace
+                if provider:
+                    owners = get_v3_namespace_owners(provider)
+                else:
+                    owners = []
+
+                if not provider and not request_user.is_superuser:
+                    logger.error(
+                        f'legacy namespace {found} has no provider namespace to define owners'
+                    )
+                    raise Exception('permission denied')
+
+                if request_user not in owners and not request_user.is_superuser:
+                    logger.error(
+                        f'{request_user.username} is not an owner'
+                        f' of provider namespace {provider.name}'
+                    )
+                    raise Exception('permission denied')
+
+            else:
+                # we need to create the namespace but only if allowed ...
+                if not request_user.is_superuser or not superuser_can_create_namespaces:
+                    logger.error(
+                        f'legacy namespace {new_namespace_name} does not exist'
+                    )
+                    raise Exception('permission denied')
+
+                logger.info('creating legacy namespace {new_namespace_name}')
+                namespace, _ = LegacyNamespace.objects.get_or_create(name=new_namespace_name)
+
+            namespace, _ = LegacyNamespace.objects.get_or_create(name=new_namespace_name)
+            real_role = None
+
         # munge the role name via an order of precedence
-        role_name = result["metadata"]["galaxy_info"].get("role_name") or \
-            alternate_role_name or github_repo.replace("ansible-role-", "")
+        if alternate_role_name:
+            role_name = alternate_role_name
+        elif result["metadata"]["galaxy_info"].get("role_name"):
+            role_name = result["metadata"]["galaxy_info"]["role_name"]
+        else:
+            role_name = github_repo.replace("ansible-role-", "")
+
         logger.info(f'enumerated role name {role_name}')
+        if real_role and real_role.name != role_name:
+            real_role = None
 
         galaxy_info = result["metadata"]["galaxy_info"]
         new_full_metadata = {
@@ -487,7 +558,7 @@ def legacy_role_import(
 
     logger.info('')
     logger.info('Import completed')
-    return True
+    return this_role
 
 
 def legacy_sync_from_upstream(

@@ -1,6 +1,10 @@
 import random
 import string
+import os
+import subprocess
+import tempfile
 import time
+import yaml
 
 from galaxykit.users import delete_user as delete_user_gk
 from .client_ansible_lib import get_client
@@ -53,6 +57,17 @@ def clean_all_roles(ansible_config):
         if resp['next'] is None:
             break
         next_url = resp['next']
+        ix = next_url.index('/api')
+        next_url = next_url[ix:]
+
+    # cleanup_social_user would delete these -IF- all
+    # are associated to a user but we can't rely on that
+    for role_data in pre_existing:
+        role_url = f'/api/v1/roles/{role_data["id"]}/'
+        try:
+            admin_client(role_url, method='DELETE')
+        except Exception:
+            pass
 
     usernames = [x['github_user'] for x in pre_existing]
     usernames = sorted(set(usernames))
@@ -218,3 +233,64 @@ def generate_unused_legacy_namespace(api_client=None):
     existing = get_all_legacy_namespaces(api_client=api_client)
     existing = dict((x['name'], x) for x in existing)
     return generate_legacy_namespace(exclude=list(existing.keys()))
+
+
+class LegacyRoleGitRepoBuilder:
+
+    def __init__(
+        self,
+        namespace=None,
+        name=None,
+        meta_namespace=None,
+        meta_name=None
+    ):
+        self.namespace = namespace
+        self.name = name
+        self.meta_namespace = meta_namespace
+        self.meta_name = meta_name
+
+        self.workdir = tempfile.mkdtemp(prefix='gitrepo_')
+        self.role_dir = None
+
+        self.role_init()
+        self.role_edit()
+        self.git_init()
+        self.git_commit()
+
+        self.fix_perms()
+
+    def fix_perms(self):
+        subprocess.run(f'chown -R pulp:pulp {self.workdir}', shell=True)
+
+    def role_init(self):
+        cmd = f'ansible-galaxy role init {self.namespace}.{self.name}'
+        self.role_dir = os.path.join(self.workdir, self.namespace + '.' + self.name)
+        pid = subprocess.run(cmd, shell=True, cwd=self.workdir)
+        assert pid.returncode == 0
+        assert os.path.exists(self.role_dir)
+
+    def role_edit(self):
+        if self.meta_namespace or self.meta_name:
+
+            meta_file = os.path.join(self.role_dir, 'meta', 'main.yml')
+            with open(meta_file, 'r') as f:
+                meta = yaml.safe_load(f.read())
+
+            if self.meta_namespace:
+                meta['galaxy_info']['namespace'] = self.meta_namespace
+            if self.meta_name:
+                meta['galaxy_info']['role_name'] = self.meta_name
+
+            with open(meta_file, 'w') as f:
+                f.write(yaml.dump(meta))
+
+    def git_init(self):
+        subprocess.run('git init', shell=True, cwd=self.role_dir)
+
+    def git_commit(self):
+
+        subprocess.run('git config --global user.email "root@localhost"', shell=True)
+        subprocess.run('git config --global user.name "root at localhost"', shell=True)
+
+        subprocess.run('git add *', shell=True, cwd=self.role_dir)
+        subprocess.run('git commit -m "first checkin"', shell=True, cwd=self.role_dir)

@@ -263,17 +263,12 @@ class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
         to the pulp tasking system and translating the
         task UUID to an integer to retain v1 compatibility.
         """
-        serializer_class = LegacyImportSerializer
-        serializer = serializer_class(data=request.data)
+        serializer = LegacyImportSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         kwargs = dict(serializer.validated_data)
 
         # tell the defered task who started this job
         kwargs['request_username'] = request.user.username
-
-        # synthetically create the name for the response
-        role_name = kwargs.get('alternate_role_name') or \
-            kwargs['github_repo'].replace('ansible-role-', '')
 
         task_id, pulp_id = self.legacy_dispatch(legacy_role_import, kwargs=kwargs)
 
@@ -284,9 +279,12 @@ class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
                 'github_user': kwargs['github_user'],
                 'github_repo': kwargs['github_repo'],
                 'github_reference': kwargs.get('github_reference'),
+                'alternate_namespace_name': kwargs.get('alternate_namespace_name'),
+                'alternate_role_name': kwargs.get('alternate_role_name'),
+                'alternate_clone_url': kwargs.get('alternate_clone_url'),
                 'summary_fields': {
                     'role': {
-                        'name': role_name
+                        'name': None
                     }
                 }
             }]

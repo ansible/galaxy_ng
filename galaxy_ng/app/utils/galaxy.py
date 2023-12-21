@@ -443,12 +443,13 @@ def upstream_role_iterator(
     pagenum = 0
     role_count = 0
     while next_url:
-        logger.info(f'fetch {pagenum} {next_url} role-count:{role_count}')
+        logger.info(f'fetch {pagenum} {next_url} role-count:{role_count} ...')
 
         page = safe_fetch(next_url)
 
         # Some upstream pages return ISEs for whatever reason.
         if page.status_code >= 500:
+            logger.error(f'{next_url} returned 500ISE. incrementing the page manually')
             if 'page=' in next_url:
                 next_url = next_url.replace(f'page={pagenum}', f'page={pagenum+1}')
             else:
@@ -520,9 +521,16 @@ def upstream_role_iterator(
         if ds.get('next'):
             next_url = ds['next']
         elif ds.get('next_link'):
-            next_url = _baseurl + ds['next_link']
+            next_url = ds['next_link']
         else:
             # break if no next page
             break
+
+        api_prefix = '/api/v1'
+        if not next_url.startswith(_baseurl):
+            if not next_url.startswith(api_prefix):
+                next_url = _baseurl + api_prefix + next_url
+            else:
+                next_url = _baseurl + next_url
 
         pagenum += 1
