@@ -24,7 +24,7 @@ fi
 source $VENVPATH/bin/activate
 echo "PYTHON: $(which python)"
 
-sudo dnf update gnupg
+dnf update gnupg
 gpg --version
 
 pip3 install --upgrade pip wheel
