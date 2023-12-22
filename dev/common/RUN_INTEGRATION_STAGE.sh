@@ -24,6 +24,9 @@ fi
 source $VENVPATH/bin/activate
 echo "PYTHON: $(which python)"
 
+sudo dnf update gnupg
+gpg --version
+
 pip3 install --upgrade pip wheel
 
 pip3 install -r integration_requirements.txt
