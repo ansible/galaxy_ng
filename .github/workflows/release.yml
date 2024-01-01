@@ -60,7 +60,7 @@ jobs:
         run: tar -cvf galaxy_ng.tar .
 
       - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: galaxy_ng.tar
           path: galaxy_ng.tar
@@ -142,13 +142,13 @@ jobs:
         shell: bash
 
       - name: Upload python client packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-client.tar
           path: python-client.tar
 
       - name: Upload python client docs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-client-docs.tar
           path: python-client-docs.tar
