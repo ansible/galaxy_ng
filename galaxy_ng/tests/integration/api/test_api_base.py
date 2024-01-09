@@ -1,6 +1,21 @@
 import pytest
+import requests
 
 from ..utils import get_client
+
+
+@pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.deployment_standalone
+def test_galaxy_api_root_standalone_no_auth_access(ansible_config):
+    """Test galaxy API root."""
+
+    config = ansible_config("basic_user")
+    api_root = config["url"]
+
+    # verify api root works without authentication
+    response = requests.get(f"{api_root}").json()
+    assert "v3" in response["available_versions"]
+    assert "pulp-v3" in response["available_versions"]
 
 
 @pytest.mark.min_hub_version("4.6dev")
@@ -8,8 +23,8 @@ from ..utils import get_client
 def test_galaxy_api_root(ansible_config, artifact):
     """Test galaxy API root."""
 
-    # TODO: change to `basic_user` profile when can access pulp-v3 api root
-    config = ansible_config("admin")
+    config = ansible_config("basic_user")
+
     api_prefix = config.get("api_prefix")
     api_prefix = api_prefix.rstrip("/")
 
