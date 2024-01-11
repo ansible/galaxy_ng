@@ -412,6 +412,18 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
             )
             logger.debug(f"gpg keyring result: {gpg_keyring}")
 
+            # gpg --no-default-keyring --keyring /tmp/tmp_3ockke9 --list-keys
+            gpg_debug = subprocess.check_output(
+                [
+                    "gpg",
+                    "--no-default-keyring",
+                    "--keyring",
+                    keyring.name,
+                    "--list-keys"
+                ]
+            )
+            logger.debug(f"gpg debug: {gpg_debug}")
+
         # Run gpg to generate signature
         with pkg_resources.path("dev.common", "collection_sign.sh") as collection_sign:
             gpg_version_command = [
