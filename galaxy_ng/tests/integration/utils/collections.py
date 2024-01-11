@@ -395,10 +395,10 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
         # gpg --no-default-keyring --keyring trustedkeys.gpg
         # gpg --import clowder-data.key
         with pkg_resources.path("dev.common", "ansible-sign-pub.gpg") as keyfilename:
-            subprocess.run(
+            gpg_keyring = subprocess.check_output(
                 [
                     "gpg",
-                    "--quiet",
+                    "--debug-all",
                     "--batch",
                     "--pinentry-mode",
                     "loopback",
@@ -410,6 +410,7 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
                     keyfilename,
                 ]
             )
+            logger.debug(f"gpg keyring result: {gpg_keyring}")
 
         # Run gpg to generate signature
         with pkg_resources.path("dev.common", "collection_sign.sh") as collection_sign:
