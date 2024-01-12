@@ -394,7 +394,8 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
         # Setup local keystore
         # gpg --no-default-keyring --keyring trustedkeys.gpg
         # gpg --import clowder-data.key
-        with pkg_resources.path("dev.common", "ansible-sign-pub.gpg") as keyfilename:
+        with pkg_resources.path("galaxy_ng.tests.integration.utils.gpg",
+                                "qe-sign-pub.gpg") as keyfilename:
             gpg_keyring = subprocess.check_output(
                 [
                     "gpg",
@@ -412,7 +413,6 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
             )
             logger.debug(f"gpg keyring result: {gpg_keyring}")
 
-            # gpg --no-default-keyring --keyring /tmp/tmp_3ockke9 --list-keys
             gpg_debug = subprocess.check_output(
                 [
                     "gpg",
@@ -422,10 +422,11 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
                     "--list-keys"
                 ]
             )
-            logger.debug(f"gpg debug: {gpg_debug}")
+            logger.debug(f"gpg list keys: {gpg_debug}")
 
         # Run gpg to generate signature
-        with pkg_resources.path("dev.common", "collection_sign.sh") as collection_sign:
+        with pkg_resources.path("galaxy_ng.tests.integration.utils.gpg",
+                                "collection_sign.sh") as collection_sign:
             gpg_version_command = [
                 "gpg",
                 "--version"
