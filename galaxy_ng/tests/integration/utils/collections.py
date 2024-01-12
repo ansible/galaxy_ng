@@ -394,15 +394,13 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
         # Setup local keystore
         # gpg --no-default-keyring --keyring trustedkeys.gpg
         # gpg --import clowder-data.key
-        with pkg_resources.path("dev.common", "ansible-sign-pub.gpg") as keyfilename:
-            subprocess.run(
+        with pkg_resources.path("galaxy_ng.tests.integration.utils.gpg",
+                                "qe-sign-priv.gpg") as keyfilename:
+            gpg_keyring = subprocess.check_output(
                 [
                     "gpg",
-                    "--quiet",
+                    "--debug-all",
                     "--batch",
-                    "--pinentry-mode",
-                    "loopback",
-                    "--yes",
                     "--no-default-keyring",
                     "--keyring",
                     keyring.name,
@@ -410,9 +408,29 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
                     keyfilename,
                 ]
             )
+            logger.debug(f"gpg keyring result: {gpg_keyring}")
+
+            gpg_debug = subprocess.check_output(
+                [
+                    "gpg",
+                    "--no-default-keyring",
+                    "--keyring",
+                    keyring.name,
+                    "--list-keys"
+                ]
+            )
+            logger.debug(f"gpg list keys: {gpg_debug}")
 
         # Run gpg to generate signature
-        with pkg_resources.path("dev.common", "collection_sign.sh") as collection_sign:
+        with pkg_resources.path("galaxy_ng.tests.integration.utils.gpg",
+                                "collection_sign.sh") as collection_sign:
+            gpg_version_command = [
+                "gpg",
+                "--version"
+            ]
+            gpg_version = subprocess.check_output(gpg_version_command)
+            logger.debug(f"gpg version result: {gpg_version}")
+
             command = [collection_sign, os.path.join(tdir.name, "MANIFEST.json")]
             env = {"KEYRING": keyring.name}
             logger.debug(f"Executing command {command}. Environment {env}")

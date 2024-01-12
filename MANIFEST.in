@@ -19,3 +19,5 @@ include django-automated-logging-LICENSE.txt
 include galaxy_ng/automated_logging/templates/dal/admin/view.html
 include galaxy_ng/tests/integration/load_data.yaml
 recursive-include galaxy_ng *.py
+include galaxy_ng/tests/integration/utils/gpg/collection_sign.sh
+include galaxy_ng/tests/integration/utils/gpg/qe-sign-priv.gpg
