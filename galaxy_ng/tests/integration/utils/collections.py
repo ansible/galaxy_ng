@@ -395,15 +395,12 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
         # gpg --no-default-keyring --keyring trustedkeys.gpg
         # gpg --import clowder-data.key
         with pkg_resources.path("galaxy_ng.tests.integration.utils.gpg",
-                                "qe-sign-pub.gpg") as keyfilename:
+                                "qe-sign-priv.gpg") as keyfilename:
             gpg_keyring = subprocess.check_output(
                 [
                     "gpg",
                     "--debug-all",
                     "--batch",
-                    "--pinentry-mode",
-                    "loopback",
-                    "--yes",
                     "--no-default-keyring",
                     "--keyring",
                     keyring.name,
