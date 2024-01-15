@@ -100,9 +100,8 @@ class GalaxyKitClient:
         remote=False,
         basic_token=False,
         github_social_auth=False,
-        gw_auth=False,
     ):
-
+        gw_auth=aap_gateway()
         self._basic_token = basic_token
         try:
             config = self.config()
@@ -174,6 +173,7 @@ class GalaxyKitClient:
             container_engine = config.get("container_engine")
             container_registry = config.get("container_registry")
             token_type = None if not basic_token else "Basic"
+            gw_root_url = config.get("gw_root_url")
             g_client = GalaxyClient(
                 url,
                 auth=auth,
@@ -183,7 +183,8 @@ class GalaxyKitClient:
                 https_verify=ssl_verify,
                 token_type=token_type,
                 github_social_auth=github_social_auth,
-                gw_auth=gw_auth
+                gw_auth=gw_auth,
+                gw_root_url=gw_root_url
             )
             client_cache[cache_key] = g_client
             if ignore_cache:
@@ -273,7 +274,7 @@ def is_dev_env_standalone():
     return dev_env_standalone in ('true', 'True', 1, '1', True)
 
 def aap_gateway():
-    dev_env_standalone = os.getenv("AAP_GATEWAY", True)
+    dev_env_standalone = os.getenv("AAP_GATEWAY", False)
     return dev_env_standalone in ('true', 'True', 1, '1', True)
 
 
@@ -393,12 +394,6 @@ class AnsibleConfigFixture(dict):
 
         if is_sync_testing():
             self.PROFILES = SYNC_PROFILES
-        elif aap_gateway():
-            self.PROFILES = DEPLOYED_PAH_PROFILES
-            admin_pass = os.getenv("HUB_ADMIN_PASS", "AdminPassword")
-            self.PROFILES["admin"]["username"] = "admin"
-            self.PROFILES["admin"]["password"] = admin_pass
-            self.PROFILES["admin"]["token"] = None
         elif is_stage_environment():
             self.PROFILES = EPHEMERAL_PROFILES
         elif not is_dev_env_standalone():
@@ -470,9 +465,10 @@ class AnsibleConfigFixture(dict):
         self.PROFILES["ee_admin"]["password"] = "Th1sP4ssd"
         self.PROFILES["org_admin"]["token"] = None
         self.PROFILES["org_admin"]["password"] = "Th1sP4ssd"
-        token = get_standalone_token(self.PROFILES["admin"], server=self.get("url"),
-                                     ssl_verify=False)
-        self.PROFILES["admin"]["token"] = token
+        if not aap_gateway():
+            token = get_standalone_token(self.PROFILES["admin"], server=self.get("url"),
+                                         ssl_verify=False)
+            self.PROFILES["admin"]["token"] = token
 
     def __repr__(self):
         return f'<AnsibleConfigFixture: {self.namespace}>'
@@ -611,7 +607,11 @@ class AnsibleConfigFixture(dict):
                 'LOCAL_AUTH_URL',
                 None
             )
-
+        elif key == 'gw_root_url':
+            return os.environ.get(
+                'GW_ROOT_URL',
+                None
+            )
         else:
             raise Exception(f'Unknown config key: {self.namespace}.{key}')
 
@@ -646,10 +646,12 @@ def has_old_credentials():
 @lru_cache()
 def get_hub_version(ansible_config):
     if aap_gateway():
-        galaxy_client = get_galaxy_client(ansible_config)
-        role = "admin"
-        gc = galaxy_client(role, gw_auth=True, ignore_cache=True)
-        galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
+        username = ansible_config("admin").PROFILES.get("admin").get("username")
+        password = ansible_config("admin").PROFILES.get("admin").get("password")
+        gw_root_url = ansible_config("admin").get("gw_root_url")
+        gc = GalaxyClient(galaxy_root="foo", auth={"username": username, "password": password},
+                          gw_auth=True, https_verify=False, gw_root_url=gw_root_url)
+        galaxy_ng_version = gc.get(gc.gw_galaxy_url)["galaxy_ng_version"]
         return galaxy_ng_version
     else:
         if is_standalone():

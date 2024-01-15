@@ -298,20 +298,13 @@ def galaxy_client(ansible_config):
 
 
 def pytest_sessionstart(session):
-    if aap_gateway():
-        ansible_config = get_ansible_config()
-        url = ansible_config("admin").get("url")
-        username = ansible_config("admin").PROFILES.get("admin").get("username")
-        password = ansible_config("admin").PROFILES.get("admin").get("password")
-        gc = GalaxyClient(galaxy_root=url, auth={"username": username, "password": password},
-                          gw_auth=True, https_verify=False)
-        pass
-    else:
-        ansible_config = get_ansible_config()
-        hub_version = get_hub_version(ansible_config)
-        if not is_standalone() and not is_ephemeral_env() and not is_dev_env_standalone():
-            set_test_data(ansible_config, hub_version)
-        logger.debug(f"Running tests against hub version {hub_version}")
+    ansible_config = get_ansible_config()
+    hub_version = get_hub_version(ansible_config)
+    if not is_standalone() and not is_ephemeral_env() and not is_dev_env_standalone():
+        # if not aap_gateway():
+            # TODO what should be done here?
+        set_test_data(ansible_config, hub_version)
+    logger.debug(f"Running tests against hub version {hub_version}")
 
 
 def pytest_runtest_setup(item):
