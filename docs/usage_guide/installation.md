@@ -6,12 +6,17 @@ tags:
 
 # How to install Galaxy NG
 
-Galaxy NG is a Pulp plugin ...
+Galaxy NG is a [Pulp plugin](https://pulpproject.org/content-plugins/). As a plugin, Galaxy_NG has multiple installation methods available. Historically the galaxy team advocated for the [pulp_installer](https://github.com/pulp/pulp_installer) project as the best path for installation. Unfortunately the pulp-installer project is no longer being released or updated for newer pulp versions and we have to drop support for it.
 
-## Installing from source using pulp-installer
+We currently support 2 methods to spin up galaxy_ng
 
-The [pulp_installer](https://github.com/pulp/pulp_installer) project is no longer being released. The galaxy dev team no longer validates this install method.
+1. Pulp OCI Images with docker
+2. Pulp OCI Images with [oci_env](https://github.com/pulp/oci_env) + docker
 
+
+If you'd like to learn more about the oci-env path, please check the [community devstack](/galaxy_ng/community/devstack/#oci-env) page. 
+
+The rest of this document covers using the OCI images directly with docker.
 
 ## Installing with docker and oci images
 
@@ -52,23 +57,23 @@ If you want to run galaxy-importer standalone, check the [README.md](https://git
 
 Create a pulp_settings.env file with the following content ...
 ```
-PULP_CONTENT_ORIGIN=http://localhost:8080                                                                                                
-PULP_ANSIBLE_API_HOSTNAME=http://localhost:8080                                                                                                                                                                                                                                   
+PULP_CONTENT_ORIGIN=http://localhost:8080
+PULP_ANSIBLE_API_HOSTNAME=http://localhost:8080
 PULP_GALAXY_API_PATH_PREFIX=/api/galaxy/                            
-PULP_ANSIBLE_CONTENT_HOSTNAME=http://localhost:8080/pulp/content/api/galaxy/v3/artifacts/collections/                                    
-PULP_CONTENT_PATH_PREFIX=/pulp/content/api/galaxy/v3/artifacts/collections/                                                              
+PULP_ANSIBLE_CONTENT_HOSTNAME=http://localhost:8080/pulp/content/api/galaxy/v3/artifacts/collections/
+PULP_CONTENT_PATH_PREFIX=/pulp/content/api/galaxy/v3/artifacts/collections/
 PULP_GALAXY_AUTHENTICATION_CLASSES=['rest_framework.authentication.SessionAuthentication', 'rest_framework.authentication.TokenAuthentication', 'rest_framework.authentication.BasicAuthentication', 'django.contrib.auth.backends.ModelBackend']
-PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true                                                                                               
+PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true
 PULP_GALAXY_DEPLOYMENT_MODE=standalone                              
 PULP_GALAXY_AUTO_SIGN_COLLECTIONS=false                             
 PULP_GALAXY_COLLECTION_SIGNING_SERVICE=ansible-default              
-PULP_RH_ENTITLEMENT_REQUIRED=insights                                                                                                    
-PULP_TOKEN_AUTH_DISABLED=false                                                                                                           
+PULP_RH_ENTITLEMENT_REQUIRED=insights
+PULP_TOKEN_AUTH_DISABLED=false
 PULP_TOKEN_SERVER=http://localhost:8080/token/                      
-PULP_TOKEN_SIGNATURE_ALGORITHM=ES256                                                                                                    
+PULP_TOKEN_SIGNATURE_ALGORITHM=ES256
 PULP_PUBLIC_KEY_PATH=/src/galaxy_ng/dev/common/container_auth_public_key.pem                
-PULP_PRIVATE_KEY_PATH=/src/galaxy_ng/dev/common/container_auth_private_key.pem                                                           
-PULP_ANALYTICS=false                                                                                                                    
+PULP_PRIVATE_KEY_PATH=/src/galaxy_ng/dev/common/container_auth_private_key.pem
+PULP_ANALYTICS=false
 PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=true     
 PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD=true
 PULP_GALAXY_ENABLE_LEGACY_ROLES=true
@@ -80,6 +85,19 @@ PULP_WORKERS=1
 ```
 
 Any setting containing "localhost:8080" will be environment specific. Whenever the system is spun up, the backend expects incoming and redirected requests to go to that address. This example uses "localhost:8080" because we will use docker in the next step to bind the underlying host's port 8080 to the container's port 80.
+
+Understanding every setting in the file is beyond the scope of this document, but there are a few to highlight ...
+
+- PULP_DEFAULT_ADMIN_PASSWORD
+    - sets the http password for the "admin" user
+- PULP_WORKERS
+    - defines the number of asynchronous workers to run in the container
+- PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS
+    - allows listing collections without authentication
+- PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
+    - allows downloading collections without authentication
+- PULP_GALAXY_ENABLE_LEGACY_ROLES
+    - enables api/v1/roles and related features
 
 ### Run docker
 
