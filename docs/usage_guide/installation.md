@@ -41,6 +41,13 @@ run_ansible_test=false
 run_flake8=false                                                    
 ```
 
+The galaxy-importer settings are version specific. If you plan to run an older version of galaxy-importer, you should check the source repo for the definitive list of settings available.
+
+https://github.com/ansible/galaxy-importer/blob/master/galaxy_importer/config.py#L43-L57
+
+If you want to run galaxy-importer standalone, check the [README.md](https://github.com/ansible/galaxy-importer/blob/master/README.md)
+
+
 ### Defining the pulp settings
 
 Create a pulp_settings.env file with the following content ...
@@ -72,13 +79,44 @@ PULP_DEFAULT_ADMIN_PASSWORD=password
 PULP_WORKERS=1
 ```
 
+Any setting containing "localhost:8080" will be environment specific. Whenever the system is spun up, the backend expects incoming and redirected requests to go to that address. This example uses "localhost:8080" because we will use docker in the next step to bind the underlying host's port 8080 to the container's port 80.
+
 ### Run docker
 
 Start the container with these docker args ...
 ```
 docker run \                                                        
+    --name=galaxy_ng \
     -v $(pwd)/galaxy-importer.cfg:/etc/galaxy-importer/galaxy-importer.cfg
     --env-file=pulp_settings.env \
     -p 8080:80 \                                                    
     quay.io/pulp/galaxy:4.9.0 
+```
+
+The container uses the s6 init system to spin up postgresql, gunicorn, nginx and various pulp services all in the same container. Once migrations have finished and the log entries settle and end with a "New worker XXXXXX discovered", the system is ready to use.
+
+### Using the container
+
+##### API basics
+
+The container should come up with a default "admin" account with a password of "password". Pass "-u admin:password" with any curl command that interacts with an endpoint that requires authentication. Many endpoints in galaxy_ng are redirects so it's best to pass "-L" to all curl commands. 
+
+To check access to the system run this curl command ...
+```
+curl -u admin:password -L http://localhost:8080/api/galaxy/pulp/api/v3/status/
+```
+
+To list collections ...
+```
+curl -u admin:password -L http://localhost:8080/api/galaxy/v3/collections/
+```
+To list roles ...
+```
+curl -u admin:password -L http://localhost:8080/api/galaxy/v1/roles/
+```
+
+To explore other available endpoints ...
+```
+docker exec -it galaxy_ng pip install django-extensions
+docker exec -it galaxy_ng pulpcore-manager show_urls
 ```
