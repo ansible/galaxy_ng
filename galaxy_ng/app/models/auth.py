@@ -4,6 +4,8 @@ from django.contrib.auth import models as auth_models
 
 from pulpcore.plugin.models import Group as PulpGroup
 
+from .organization import Organization
+
 log = logging.getLogger(__name__)
 
 __all__ = (
@@ -21,7 +23,11 @@ RH_PARTNER_ENGINEER_GROUP = f"{SYSTEM_SCOPE}:partner-engineers"
 class User(auth_models.AbstractUser):
     """Custom user model."""
 
-    pass
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            self.organizations.add(Organization.objects.get_default())
 
 
 class GroupManager(auth_models.GroupManager):
@@ -29,9 +35,8 @@ class GroupManager(auth_models.GroupManager):
         return super().create(name=self._make_name(scope, name))
 
     def get_or_create_identity(self, scope, name):
-        group, _ = super().get_or_create(name=self._make_name(scope, name))
-
-        return group, _
+        name = self._make_name(scope, name)
+        return super().get_or_create(name=name)
 
     @staticmethod
     def _make_name(scope, name):
