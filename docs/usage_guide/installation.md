@@ -6,231 +6,135 @@ tags:
 
 # How to install Galaxy NG
 
-Galaxy NG is a Pulp plugin and can be installed just like any other Pulp plugin, the recommendation
-is to install using the [pulp installer](https://docs.pulpproject.org/pulp_installer/) however if
-for any reason an installation from scratch is needed, all the details can be found on 
-[installing pulpcore](https://docs.pulpproject.org/pulpcore/installation/instructions.html#pypi-installation)
+Galaxy NG is a [Pulp plugin](https://pulpproject.org/content-plugins/). As a plugin, Galaxy_NG has multiple installation methods available. Historically the galaxy team advocated for the [pulp_installer](https://github.com/pulp/pulp_installer) project as the best path for installation. Unfortunately the pulp-installer project is no longer being released or updated for newer pulp versions and we have to drop support for it.
 
-## Installing from source using pulp-installer
+We currently support 2 methods to spin up galaxy_ng
 
-!!! info
-    This is the recommended installation process for a production ready system. If you are looking
-    for information on how to install on a development environment see [development setup page](../dev/getting_started.md)
-
-The following provides instructions for installing GalaxyNG on a virtual machine, with an example playbook that installs Pulp and Galaxy NG from PyPi packages.
-
-Future iterations will include support for installing from RPMs and installing to Kubernetes and OpenShift. 
-
-### Requirements
-Requires ansible-core 2.10+
-
-You will be using the Pulp Installer to complete the installation, so please review the requirements at [the Pulp Installer project](https://github.com/pulp/pulp_installer#system-requirements).
+1. Pulp OCI Images with docker
+2. Pulp OCI Images with [oci_env](https://github.com/pulp/oci_env) + docker
 
 
-### Installation steps
+If you'd like to learn more about the oci-env path, please check the [community devstack](/galaxy_ng/community/devstack/#oci-env) page. 
 
-1. Install the Pulp Installer:
+The rest of this document covers using the OCI images directly with docker.
 
-    ```bash
-    ansible-galaxy collection install pulp.pulp_installer
-    ```
+## Installing with docker and oci images
 
-2. Clone the gist containing Ansible playbooks and variable files needed to complete the install into a directory called `example`:
+The easiest method to running galaxy_ng is through pulp's [OCI images](https://github.com/pulp/pulp-oci-images).
 
-    ```bash
-    git clone https://gist.github.com/629ba52d68301cc9798227b87704df84.git example
-    ```
+The full list of published images is on [quay.io](https://quay.io/repository/pulp/galaxy?tab=tags&tag=latest)
 
-3. Set your working directory to the `example` directory created above ex: `cd example`.
+The images contain all of the software necessary to run the galaxy_ng backend, but will need some special config set to be functional. The rest of the steps in this section will explain how to create the required config and to launch a docker container.
 
-4. Within the variable file `enduser-install-vars.yml` change the value of `pulp_default_admin_password` (initial password for the Pulp admin user).
+### Defining the galaxy-importer.cfg
 
-
-5. Install Pulp Installer role dependencies by running the following commands to download roles from [Community Galaxy](https://galaxy.ansible.com):
-
-    ```bash
-    ansible-galaxy install -r ~/.ansible/collections/ansible_collections/pulp/pulp_installer/requirements.yml
-    ```
-
-Finally, you will run the `enduser-install.yml` playbook. The following sections describe two different ways to run the playbook, depending on whether you wish to install from Python packages or from RPMs.
-
-
-???+ "Install using Python packages"
-
-     The following provides an example of how to start playbook execution. It assumes an inventory file called `hosts` exists in the current directory and contains the target host(s) where Galaxy server is to be installed:
-
-    ```bash
-    ansible-playbook enduser-install.yml -i hosts --extra-vars "@enduser-install-vars.yml"
-    ``` 
-
-??? "Install using upstream RPMs"
-
-    The following provides an example of how to start playbook execution. It assumes an inventory file called `hosts` exists in the current directory and contains the target host(s) where Galaxy server is to be installed:
-
-    ```bash
-    ansible-playbook enduser-install.yml -i hosts --extra-vars "@upstream-rpm-install-vars.yml"
-    ``` 
-
-!!! tip
-    For more information about inventory files, view [Intro to Ansible Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html)
-
-### Logging in
-
-By default the local Galaxy NG server is listening on port 80. Point your browser to the host where the server was installed, and a login page will be presented. For example, point your browser to https://127.0.0.1
-
-In the login dialog, use "`admin`" as the username, and the password supplied in your playbook. This is the value of `pulp_default_admin_password`.
-
-### Uploading a collection
-
-Once logged in, you will be taken to the Collections page, and presented with an empty list. Since the server was just installed, and the database is empty, there are no collections to display.
-
-!!! info
-    If you need an example collection, we suggest downloading [this demo collection from Community Galaxy](https://galaxy.ansible.com/newswangerd/collection_demo). Click the [Download tarball](https://galaxy.ansible.com/download/newswangerd-collection_demo-1.0.11.tar.gz) link, and save it to your local file system. As you follow the steps in the *Create a namespace* section below, use *newswangerd* for the namespace name.
-
-
-### Create a namespace
-To publish a collection to the server, you will first need a namespace. Create a new namespace using the following steps:
-
-1. Click on the *Namespaces* menu.
-2. Click the *Create* button at the top of the page.
-3. In the resulting dialog, enter a value for the *Name*. The value you enter must match the namespace value in the collection archive metadata that you will be publishing. 
-4. Leave the *Namespace Owners* field blank.
-5. Click the *Create* button.
-
-### Upload the archive
-With the new namespace created, you will be taken to a page showing the collections available in the namespace. To publish the first collection, click on the *Upload collection* button in the top-right corner of the page. Using the dialog, choose the collection archive file from the local file system.
-
-The collection archive will upload, and an import job will be started. You will be taken to the *My Imports* page where you can view the job output as it runs. During the import process the server analyzes the archive metadata, unpacks the archive, and analyzes the content.
-
-View the new collection by clicking on the *Collections* menu option. The *Collections* page now contains a clickable tile for the newly published collection.
-
-!!! important
-    If the system is configured to require approvals the collection will not be automatically published but will wait for approval on `staging` repository.
-
-### Publish an archive using the CLI
-With [Ansible](https://github.com/ansible/ansible) installed, you can publish a collection to the Galaxy server using the `ansible-galaxy` command. Below are the steps to follow:
-
-1. If you have not already done so, log into the Galaxy server using your web browser and create a namespace as described above.
-2. Click on the *API Token* menu, and click *Load Token* button. You will copy and paste the token value into an  `ansible.cfg` file in the next step.
-3. In the same directory as the collection archive file, create an `ansible.cfg` file that contains the following, setting the correct server name or IP address in the *url* value, and setting the *token* value to the token displayed in step 2 above:
-
-   ```ini
-   [galaxy]
-   server_list = local_server
-
-   [galaxy_server.local_server]
-   url=https://localhost/api/galaxy/
-   token=your-token-here
-   ```
-4. In the directory containing your collection archive and `ansible.cfg` file, run the publish command. The following shows an example:
-
-   ```bash
-   ansible-galaxy collection publish newswangerd-collection_demo-1.0.10.tar.gz --ignore-certs
-   ```
-   ```
-   Publishing collection artifact 'newswangerd-collection_demo-1.0.10.tar.gz' to local_server http://localhost/api/galaxy/
-   Collection has been published to the Galaxy server local_server http://localhost/api/galaxy/
-   Waiting until Galaxy import task http://localhost/api/galaxy/v3/imports/collections/b8155faf-e6af-4873-9cf0-ce4c8b30e166/ has completed
-   Collection has been successfully published and imported to the Galaxy server local_server http://localhost/api/galaxy/
-   ```
-
-#### Running admin commands
-
-If you need to run Django admin commands, use `pulpcore-manager` by doing the following:
-
-1. Switch to the `pulp` user:
-
-    ```bash
-    sudo su - pulp --shell /bin/bash
-    ```
-2. Set the `PULP_SETTINGS` variable: 
-
-    ```bash
-    export PULP_SETTINGS=/etc/pulp/settings.py
-    ```
-
-3. Run `pulpcore-manager`:
-
-    ```bash
-    /usr/local/lib/pulp/bin/pulpcore-manager
-    ```
-
-### Working with the importer
-
-The process that imports collections into Galaxy is the [galaxy-importer](https://github.com/ansible/galaxy-importer). During installation a packaged version of *galaxy-importer* is installed from PyPi.
-
-On the Galaxy server host, run the following to see which is installed:
-
-```bash
-source /usr/local/lib/pulp/bin/activate
-pip list | grep galaxy-importer
+Create a galaxy-importer.cfg with the following content ...
+```                                                                 
+[galaxy-importer]                                                                                                                        
+ansible_local_tmp=~/.ansible/tmp                                                                                                         
+ansible_test_local_image=false                                      
+check_required_tags=false                                                                                                                
+check_runtime_yaml=false                                                                                                                 
+check_changelog=false                                               
+infra_osd=false                                                                                                                          
+local_image_docker=false                                            
+log_level_main=INFO                                                 
+require_v1_or_greater=false                                         
+run_ansible_doc=false                                               
+run_ansible_lint=false                                              
+run_ansible_test=false                                              
+run_flake8=false                                                    
 ```
 
-#### Running Importer from source
+The galaxy-importer settings are version specific. If you plan to run an older version of galaxy-importer, you should check the source repo for the definitive list of settings available.
 
-To run the latest code, or to test a pull request or an experimental branch, it might be desirable to use the source project directly.
+https://github.com/ansible/galaxy-importer/blob/master/galaxy_importer/config.py#L43-L57
 
-On the Galaxy server host, clone the project. Make sure to put it in a directory that the `pulp` user can access, and set the ownership to  `pulp:users`. For example, as the root user:
+If you want to run galaxy-importer standalone, check the [README.md](https://github.com/ansible/galaxy-importer/blob/master/README.md)
 
-```bash
-cd /usr/local/lib/pulp
-git clone https://github.com/ansible/galaxy-importer.git
-chown -R pulp:users galaxy-importer
+
+### Defining the pulp settings
+
+Create a pulp_settings.env file with the following content ...
+```
+PULP_CONTENT_ORIGIN=http://localhost:8080
+PULP_ANSIBLE_API_HOSTNAME=http://localhost:8080
+PULP_GALAXY_API_PATH_PREFIX=/api/galaxy/                            
+PULP_ANSIBLE_CONTENT_HOSTNAME=http://localhost:8080/pulp/content/api/galaxy/v3/artifacts/collections/
+PULP_CONTENT_PATH_PREFIX=/pulp/content/api/galaxy/v3/artifacts/collections/
+PULP_GALAXY_AUTHENTICATION_CLASSES=['rest_framework.authentication.SessionAuthentication', 'rest_framework.authentication.TokenAuthentication', 'rest_framework.authentication.BasicAuthentication', 'django.contrib.auth.backends.ModelBackend']
+PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true
+PULP_GALAXY_DEPLOYMENT_MODE=standalone                              
+PULP_GALAXY_AUTO_SIGN_COLLECTIONS=false                             
+PULP_GALAXY_COLLECTION_SIGNING_SERVICE=ansible-default              
+PULP_RH_ENTITLEMENT_REQUIRED=insights
+PULP_TOKEN_AUTH_DISABLED=false
+PULP_TOKEN_SERVER=http://localhost:8080/token/                      
+PULP_TOKEN_SIGNATURE_ALGORITHM=ES256
+PULP_PUBLIC_KEY_PATH=/src/galaxy_ng/dev/common/container_auth_public_key.pem                
+PULP_PRIVATE_KEY_PATH=/src/galaxy_ng/dev/common/container_auth_private_key.pem
+PULP_ANALYTICS=false
+PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=true     
+PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD=true
+PULP_GALAXY_ENABLE_LEGACY_ROLES=true
+PULP_GALAXY_FEATURE_FLAGS__execution_environments=false
+PULP_SOCIAL_AUTH_LOGIN_REDIRECT_URL=/
+PULP_GALAXY_FEATURE_FLAGS__ai_deny_index=true
+PULP_DEFAULT_ADMIN_PASSWORD=password
+PULP_WORKERS=1
 ```
 
-As the root user, run the following to install the source copy and replace the packaged version:
+Any setting containing "localhost:8080" will be environment specific. Whenever the system is spun up, the backend expects incoming and redirected requests to go to that address. This example uses "localhost:8080" because we will use docker in the next step to bind the underlying host's port 8080 to the container's port 80.
 
-```bash
-source /usr/local/lib/pulp/bin/activate
-cd /usr/local/lib/pulp/galaxy-importer
-pip install --upgrade -e .
+Understanding every setting in the file is beyond the scope of this document, but there are a few to highlight ...
+
+- PULP_DEFAULT_ADMIN_PASSWORD
+    - sets the http password for the "admin" user
+- PULP_WORKERS
+    - defines the number of asynchronous workers to run in the container
+- PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS
+    - allows listing collections without authentication
+- PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD
+    - allows downloading collections without authentication
+- PULP_GALAXY_ENABLE_LEGACY_ROLES
+    - enables api/v1/roles and related features
+
+### Run docker
+
+Start the container with these docker args ...
+```
+docker run \                                                        
+    --name=galaxy_ng \
+    -v $(pwd)/galaxy-importer.cfg:/etc/galaxy-importer/galaxy-importer.cfg
+    --env-file=pulp_settings.env \
+    -p 8080:80 \                                                    
+    quay.io/pulp/galaxy:4.9.0 
 ```
 
-Restart the Pulp services:
+The container uses the s6 init system to spin up postgresql, gunicorn, nginx and various pulp services all in the same container. Once migrations have finished and the log entries settle and end with a "New worker XXXXXX discovered", the system is ready to use.
 
-```bash
-systemctl restart pulp*
+### Using the container
+
+##### API basics
+
+The container should come up with a default "admin" account with a password of "password". Pass "-u admin:password" with any curl command that interacts with an endpoint that requires authentication. Many endpoints in galaxy_ng are redirects so it's best to pass "-L" to all curl commands. 
+
+To check access to the system run this curl command ...
+```
+curl -u admin:password -L http://localhost:8080/api/galaxy/pulp/api/v3/status/
 ```
 
-##### Configuring and running ansible-test
-
-As the root user, create the directory `/etc/galaxy-importer`, and within this directory create the file `galaxy-importer.cfg`. The following is a sample configuration file:
-
-```ini
-[galaxy-importer]
-LOG_LEVEL_MAIN = INFO
-RUN_FLAKE8 = False
-RUN_ANSIBLE_TEST = False
-INFRA_OSD = False
+To list collections ...
+```
+curl -u admin:password -L http://localhost:8080/api/galaxy/v3/collections/
+```
+To list roles ...
+```
+curl -u admin:password -L http://localhost:8080/api/galaxy/v1/roles/
 ```
 
-If you wish to run `ansible-test` during collection import, set `RUN_ANSIBLE_TEST = True`. By default `ansible-test` will be executed directly, which requires having [Ansible](https://github.com/ansible/ansible) installed. It's also possible to run `ansible-test` sandboxed in a container image using the following options:
-
-* `ANSIBLE_TEST_LOCAL_IMAGE` - Set to `True`, if `ansible-test` should be executed in a container image. Requires having Docker installed. Defaults to `False`.
-
-Changing the configuration does not require restarting Pulp services. Each time the importer runs, it reads the configuration and responds accordingly.
-
-##### Using docker to run ansible-test
-
-Using docker may require modifying the system firewall configuration to allow DNS queries between the daemon and running containers. For example, on a vanilla Centos 8 system:
-
-```bash
-# Masquerading allows for docker ingress and egress (the juicy bit)
-firewall-cmd --zone=public --add-masquerade --permanent
-
-# Specifically allow incoming traffic on port 80/443 (nothing new here)
-firewall-cmd --zone=public --add-port=80/tcp
-firewall-cmd --zone=public --add-port=443/tcp
-
-# Reload firewall to apply permanent rules
-firewall-cmd --reload
-
-# Restart the Docker daemon
-systemctl restart docker
+To explore other available endpoints ...
 ```
-
-And since the Pulp task system user the `docker` command to interact with the docker daemon, the `pulp` user needs to be added to the `docker` group. The following is an example taken from a Centos 8 system:
-
-```bash
-usermod -a -G docker pulp
-``` 
+docker exec -it galaxy_ng pip install django-extensions
+docker exec -it galaxy_ng pulpcore-manager show_urls
+```
