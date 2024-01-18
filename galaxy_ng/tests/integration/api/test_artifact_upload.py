@@ -9,6 +9,8 @@ from orionutils.generator import build_collection, randstr
 from pkg_resources import parse_version
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
+from galaxykit.utils import wait_for_task, GalaxyClientError
+from galaxykit.collections import upload_artifact
 from ..utils.iqe_utils import require_signature_for_approval
 
 from ..utils import (
@@ -16,7 +18,6 @@ from ..utils import (
     get_client,
     modify_artifact,
     set_certification,
-    wait_for_task,
 )
 
 from ..utils import build_collection as bc
@@ -56,83 +57,77 @@ def gen_name_for_invalid():
 @pytest.mark.stage_health
 @pytest.mark.parametrize("use_distribution", [True, False])
 @pytest.mark.all
-def test_api_publish(ansible_config, artifact, upload_artifact, use_distribution, hub_version):
+def test_api_publish(artifact, use_distribution, hub_version, galaxy_client):
     """Test the most basic, valid artifact upload via the API.
 
     Should successfully return a task URL to get updates of the progress,
     which should indicate a successful import.
     """
-
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("admin")
 
     # inbound repos aren't created anymore. This will create one to verify that they still
     # work on legacy clients
     if use_distribution:
         if parse_version(hub_version) < parse_version('4.6'):
             pytest.skip("Hub version is 4.5")
-        admin_client = get_client(ansible_config("admin"))
-        distros = admin_client("pulp/api/v3/distributions/ansible/"
+        distros = gc.get("pulp/api/v3/distributions/ansible/"
                                f"ansible/?name=inbound-{artifact.namespace}")
 
         if distros["count"] == 0:
-            repo = admin_client(
-                "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]
-            wait_for_task(admin_client, admin_client(
-                "pulp/api/v3/distributions/ansible/ansible/",
-                args={
+            repo = gc.get("pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]
+            r = gc.post("pulp/api/v3/distributions/ansible/ansible/", body={
                     "repository": repo["pulp_href"],
                     "name": f"inbound-{artifact.namespace}",
                     "base_path": f"inbound-{artifact.namespace}",
-                },
-                method="POST"
-            ))
+                })
+            logger.debug("Waiting for upload to be completed")
+            wait_for_task(gc, r)
+
 
     with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
         try:
-            resp = upload_artifact(config, api_client, artifact,
-                                   use_distribution=use_distribution)
+            resp = upload_artifact(None, gc, artifact, use_distribution=use_distribution)
+
         except CapturingGalaxyError as capture:
             error_body = capture.http_error.read()
             logger.error("Upload failed with error response: %s", error_body)
             raise
         else:
-            resp = wait_for_task(api_client, resp)
+            logger.debug("Waiting for upload to be completed")
+            resp = wait_for_task(gc, resp)
             logging.debug(resp)
             assert resp["state"] == "completed"
 
 
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
-def test_validated_publish(ansible_config, artifact, upload_artifact, galaxy_client):
+def test_validated_publish(ansible_config, artifact, galaxy_client):
     """
     Publish a collection to the validated repo.
     """
 
-    config = ansible_config("admin")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     logging.debug(f"artifact name {artifact.name}")
     logging.debug(f"artifact namespace {artifact.namespace}")
 
     with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
         try:
-            resp = upload_artifact(config, api_client, artifact)
+            resp = upload_artifact(None, gc, artifact)
         except CapturingGalaxyError as capture:
             error_body = capture.http_error.read()
             logger.error("Upload failed with error response: %s", error_body)
             raise
         else:
-            resp = wait_for_task(api_client, resp)
+            resp = wait_for_task(gc, resp)
             assert resp["state"] == "completed"
 
-        set_certification(api_client, gc, artifact, level="validated")
+        set_certification(ansible_config(), gc, artifact, level="validated")
 
         collection_url = (
-            "/content/validated/v3/collections/"
+            "content/validated/v3/collections/"
             f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
         )
-        collection_resp = api_client(collection_url)
+        collection_resp = gc.get(collection_url)
         assert collection_resp["name"] == artifact.name
 
 
@@ -157,45 +152,40 @@ def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
 
 @pytest.mark.stage_health
 @pytest.mark.all
-def test_api_publish_invalid_tarball(ansible_config, artifact, upload_artifact):
+def test_api_publish_invalid_tarball(artifact, galaxy_client):
     """Test error responses when uploading a file that is not a tarball."""
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("basic_user")
 
     with open(artifact.filename, "wb") as f:
         f.write(randstr(1024).encode("utf8"))
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
 
     assert resp["state"] == "failed"
 
 
-def test_api_publish_missing_filename(ansible_config, artifact, upload_artifact):
+def test_api_publish_missing_filename(galaxy_client, artifact):
     """Test handling of uploads missing the filename parameter."""
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("basic_user")
 
-    with pytest.raises(CapturingGalaxyError) as excinfo:
+    with pytest.raises(GalaxyClientError) as excinfo:
         with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
-            resp = upload_artifact(config, api_client, artifact, no_filename=True)
-    resp = json.loads(excinfo.value.http_error.read())
+            upload_artifact(None, gc, artifact, no_filename=True)
 
-    assert excinfo.value.http_error.status == 400
-    assert resp["errors"]
-    assert resp["errors"][0]["status"] == "400"
-    assert resp["errors"][0]["source"] == {"parameter": "file"}
-    assert resp["errors"][0]["code"] == "invalid"
-    assert resp["errors"][0]["detail"]
+    assert excinfo.value.response.status_code == 400
+    assert excinfo.value.args[0]["status"] == "400"
+    assert excinfo.value.args[0]["source"] == {"parameter": "file"}
+    assert excinfo.value.args[0]["code"] == "invalid"
+    assert excinfo.value.args[0]["detail"]
 
 
 @pytest.mark.importer
 @pytest.mark.stage_health
 @pytest.mark.all
-def test_api_publish_broken_manifest(ansible_config, artifact, upload_artifact):
+def test_api_publish_broken_manifest(artifact, galaxy_client):
     """Test handling of uploads missing the collection name parameter."""
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("basic_user")
 
     with modify_artifact(artifact) as artifact_dir:
         manifest_path = os.path.join(artifact_dir, "MANIFEST.json")
@@ -205,8 +195,8 @@ def test_api_publish_broken_manifest(ansible_config, artifact, upload_artifact):
         with open(manifest_path, "w") as fp:
             json.dump(manifest, fp)
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
 
     assert resp["state"] == "failed"
     assert "Invalid collection metadata. 'name' is required" in resp["error"]["description"]
@@ -221,10 +211,9 @@ INVALID_NAMES = {
 
 @pytest.mark.parametrize("wrong_name", INVALID_NAMES)
 @pytest.mark.all
-def test_api_publish_invalid_filename(ansible_config, artifact, upload_artifact, wrong_name):
+def test_api_publish_invalid_filename(galaxy_client, artifact, wrong_name):
     """Test handling of uploads with invalid filenames."""
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("basic_user")
 
     # use the param lambda function to alter the tarball filename ...
     wrong_name = INVALID_NAMES[wrong_name](os.path.basename(artifact.filename))
@@ -235,36 +224,29 @@ def test_api_publish_invalid_filename(ansible_config, artifact, upload_artifact,
     artifact.filename = filename
 
     # Ensure an excepton is thrown by the client lib ...
-    with pytest.raises(CapturingGalaxyError) as excinfo:
-        with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
-            resp = upload_artifact(config, api_client, artifact)
-    text = excinfo.value.http_error.read()
-    assert excinfo.value.http_error.status == 400, f"{excinfo.value.http_error.status}: {text}"
+    with pytest.raises(GalaxyClientError) as excinfo:
+        with patch("ansible.galaxy.api.GalaxyError", GalaxyClientError):
+            upload_artifact(None, gc, artifact)
 
-    resp = json.loads(text)
-    assert resp["errors"]
-    assert resp["errors"][0]["status"] == "400"
-    assert resp["errors"][0]["source"] == {"parameter": "filename"}
-    assert resp["errors"][0]["detail"]
-    assert resp["errors"][0]["code"] == "invalid"
+    assert excinfo.value.response.status_code == 400
+    assert excinfo.value.args[0]["status"] == "400"
+    assert excinfo.value.args[0]["source"] == {"parameter": "filename"}
+    assert excinfo.value.args[0]["code"] == "invalid"
+    assert excinfo.value.args[0]["detail"]
 
 
-def test_api_publish_missing_file(ansible_config, artifact, upload_artifact):
+def test_api_publish_missing_file(galaxy_client, artifact):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("basic_user")
+    with pytest.raises(GalaxyClientError) as excinfo:
+        with patch("ansible.galaxy.api.GalaxyError", GalaxyClientError):
+            upload_artifact(None, gc, artifact, no_file=True)
 
-    with pytest.raises(CapturingGalaxyError) as excinfo:
-        with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
-            resp = upload_artifact(config, api_client, artifact, no_file=True)
-    resp = json.loads(excinfo.value.http_error.read())
-
-    assert excinfo.value.http_error.status == 400
-    assert resp["errors"]
-    assert resp["errors"][0]["status"] == "400"
-    assert resp["errors"][0]["source"] == {"parameter": "file"}
-    assert resp["errors"][0]["code"] == "required"
-    assert resp["errors"][0]["detail"]
+    assert excinfo.value.response.status_code == 400
+    assert excinfo.value.args[0]["status"] == "400"
+    assert excinfo.value.args[0]["source"] == {"parameter": "file"}
+    assert excinfo.value.args[0]["code"] == "required"
+    assert excinfo.value.args[0]["detail"]
 
 
 MAX_LENGTH_AUTHOR = 64
@@ -294,20 +276,16 @@ MAX_LENGTH_VERSION = 128
 @pytest.mark.stage_health
 @pytest.mark.importer
 @pytest.mark.all
-def test_long_field_values(ansible_config, upload_artifact, field):
+def test_long_field_values(galaxy_client, field):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("basic_user")
     fieldname, fieldvalue, fieldmax = field
     artifact = build_collection(
         "skeleton", config={"namespace": USERNAME_PUBLISHER, fieldname: fieldvalue}
     )
-
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
-
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
     assert resp["state"] == "failed"
-
     # Should END with an error
     assert "must not be greater than %s characters" % fieldmax in resp["error"]["description"]
     assert fieldname in resp["error"]["description"]
@@ -346,7 +324,7 @@ def test_long_field_values(ansible_config, upload_artifact, field):
 @pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
                                                              "work with signatures required "
                                                              "on move.")
-def test_ansible_requires(ansible_config, upload_artifact, spec, settings, galaxy_client):
+def test_ansible_requires(ansible_config, spec, galaxy_client):
     """
     Test handling of POSTs to the artifact endpoint neglecting to submit a file.
 
@@ -354,8 +332,6 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings, galax
     and that the returned field matches the collection metadata.
     """
 
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     _, requires_ansible, result = spec
     artifact = build_collection(
@@ -364,38 +340,35 @@ def test_ansible_requires(ansible_config, upload_artifact, spec, settings, galax
         extra_files={"meta/runtime.yml": {"requires_ansible": requires_ansible}},
     )
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
 
     assert resp["state"] == result
 
     if result == "completed":
-        config = ansible_config("partner_engineer")
-        partner_engineer_client = get_client(config)
-        set_certification(partner_engineer_client, gc, artifact)
+        set_certification(ansible_config(), gc, artifact)
 
         collection_url = f"v3/collections/{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-        collection_resp = api_client(collection_url)
+        collection_resp = gc.get(collection_url)
         assert collection_resp["requires_ansible"] == requires_ansible
 
         ui_collection_url = (
             f"_ui/v1/repo/published/{artifact.namespace}/{artifact.name}/?versions=1.0.0"
         )
-        ui_collection_resp = api_client(ui_collection_url)
+        ui_collection_resp = gc.get(ui_collection_url)
         assert ui_collection_resp["latest_version"]["requires_ansible"] == requires_ansible
 
 
 @pytest.mark.stage_health
 @pytest.mark.importer
 @pytest.mark.all
-def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
+def test_ansible_lint_exception(galaxy_client, hub_version):
     """
     Ensure that:
         * ansible-lint runs against our uploaded collection
         * the bug in https://github.com/ansible/galaxy-importer/pull/115 remains fixed.
     """
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("basic_user")
 
     broken_role_yaml = [{"name": "a task", "not.a.real.module": {"fake": "fake"}}]
 
@@ -411,8 +384,8 @@ def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
         },
     )
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -433,13 +406,12 @@ def test_ansible_lint_exception(ansible_config, upload_artifact, hub_version):
 @pytest.mark.stage_health
 @pytest.mark.importer
 @pytest.mark.all
-def test_ansible_lint_exception_AAH_2606(ansible_config, upload_artifact, hub_version):
+def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
     """
     https://issues.redhat.com/browse/AAH-2609
         - ansible-lint output is missing.
     """
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
+    gc = galaxy_client("basic_user")
 
     IGNORE_CONTENT = \
         "plugins/modules/lm_otel_collector.py validate-modules:use-run-command-not-popen\n"
@@ -472,8 +444,8 @@ def test_ansible_lint_exception_AAH_2606(ansible_config, upload_artifact, hub_ve
         },
     )
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
     log_messages = [item["message"] for item in resp["messages"]]
     log_messages = "\n".join(log_messages)
     for line in expected:
@@ -482,7 +454,7 @@ def test_ansible_lint_exception_AAH_2606(ansible_config, upload_artifact, hub_ve
 
 @pytest.mark.importer
 @pytest.mark.all
-def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
+def test_api_publish_log_missing_ee_deps(galaxy_client):
     """
     Test that galaxy-importer logs when meta/execution-environment.yml
     lists a python deps file or system deps file and the listed file is not found.
@@ -490,9 +462,7 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
     In this case a requirements.txt file exists but bindep.txt does not.
     """
 
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
-
+    gc = galaxy_client("basic_user")
     artifact = build_collection(
         "skeleton",
         config={
@@ -509,8 +479,8 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
         },
     )
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -525,13 +495,11 @@ def test_api_publish_log_missing_ee_deps(ansible_config, upload_artifact):
 
 @pytest.mark.importer
 @pytest.mark.all
-def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
+def test_api_publish_ignore_files_logged(galaxy_client):
     """
     Test that galaxy-importer logs when ansible-test sanity ignore files are present.
     """
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
-
+    gc = galaxy_client("basic_user")
     artifact = build_collection(
         "skeleton",
         config={
@@ -547,8 +515,8 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
         },
     )
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
 
     log_messages = [item["message"] for item in resp["messages"]]
 
@@ -562,15 +530,13 @@ def test_api_publish_ignore_files_logged(ansible_config, upload_artifact):
 
 @pytest.mark.deployment_cloud
 @pytest.mark.importer
-def test_publish_fail_required_tag(ansible_config, upload_artifact):
+def test_publish_fail_required_tag(galaxy_client):
     """
     Test cloud publish fails when collection metadata tags do not include
     at least one tag in the galaxy-importer REQUIRED_TAG_LIST,
     as set by the galaxy-importer config CHECK_REQUIRED_TAGS.
     """
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
-
+    gc = galaxy_client("basic_user")
     artifact = build_collection(
         "skeleton",
         config={
@@ -579,8 +545,8 @@ def test_publish_fail_required_tag(ansible_config, upload_artifact):
         },
     )
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
 
     assert resp["state"] == "failed"
     assert (

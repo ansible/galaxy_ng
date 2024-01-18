@@ -352,7 +352,7 @@ def get_collection_full_path(namespace, collection_name):
     return os.path.join(get_collections_namespace_path(namespace), collection_name)
 
 
-def set_certification(client, gc, collection, level="published", hub_4_5=False):
+def set_certification(config, gc, collection, level="published", hub_4_5=False):
     """Moves a collection from the `staging` to the `published` repository.
 
     For use in instances that use repository-based certification and that
@@ -360,7 +360,7 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
     """
 
     if hub_4_5:
-        if client.config["use_move_endpoint"]:
+        if config["use_move_endpoint"]:
             url = (
                 f"v3/collections/{collection.namespace}/{collection.name}/versions/"
                 f"{collection.version}/move/staging/published/"
@@ -374,7 +374,7 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
             return wait_for_url(gc, dest_url)
 
     # exit early if config is set to auto approve
-    if not client.config["use_move_endpoint"]:
+    if not config["use_move_endpoint"]:
         return
 
     # check if artifact is in staging repo, if not wait
@@ -384,7 +384,7 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
     )
     wait_for_url(gc, staging_artifact_url)
 
-    if client.config["upload_signatures"]:
+    if config["upload_signatures"]:
         # Write manifest to temp file
         tf = tarfile.open(collection.filename, mode="r:gz")
         tdir = tempfile.TemporaryDirectory()

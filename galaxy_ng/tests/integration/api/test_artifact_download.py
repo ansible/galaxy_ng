@@ -40,11 +40,7 @@ def test_download_artifact(ansible_config, galaxy_client):
     resp = wait_for_task(gc, resp)
     assert resp["state"] == "completed"
     hub_4_5 = is_hub_4_5(ansible_config)
-    # TODO
-    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
-
-    # download collection
-    config = ansible_config("basic_user")
+    set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
     with tempfile.TemporaryDirectory() as dir:
         filename = f"{namespace}-{name}-{version}.tar.gz"
@@ -79,24 +75,28 @@ def test_download_artifact(ansible_config, galaxy_client):
 # TODO: make download logic more DRY in these tests
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
-def test_download_artifact_validated(ansible_config, artifact, upload_artifact, galaxy_client):
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config, request_token=True, require_auth=True)
+def test_download_artifact_validated(ansible_config, galaxy_client):
     gc = galaxy_client("partner_engineer")
 
-    resp = upload_artifact(config, api_client, artifact)
-    wait_for_task(api_client, resp)
-
-    set_certification(api_client, gc, artifact, level="validated")
-
-    # download collection
-    config = ansible_config("basic_user")
+    # create, upload and certify a collection
+    namespace = USERNAME_PUBLISHER
+    name = f"{USERNAME_PUBLISHER}_{randstr(8)}"
+    version = "1.0.0"
+    artifact = build_collection("skeleton", config={
+        "namespace": namespace,
+        "name": name,
+        "version": version,
+    })
+    resp = upload_artifact(None, gc, artifact)
+    logger.debug("Waiting for upload to be completed")
+    resp = wait_for_task(gc, resp)
+    assert resp["state"] == "completed"
+    set_certification(ansible_config(), gc, artifact, level="validated")
 
     with tempfile.TemporaryDirectory() as dir:
-        api_root = config["url"]
         filename = f"{artifact.namespace}-{artifact.name}-{artifact.version}.tar.gz"
         tarball_path = f"{dir}/{filename}"
-        url = f"{api_root}v3/plugin/ansible/content/validated/collections/artifacts/{filename}"
+        url = f"{gc.galaxy_root}v3/plugin/ansible/content/validated/collections/artifacts/{filename}"
 
         cmd = [
             "curl",
@@ -106,7 +106,7 @@ def test_download_artifact_validated(ansible_config, artifact, upload_artifact, 
             "-H",
             "'Content-Type: application/json'",
             "-u",
-            f"{config['username']}:{config['password']}",
+            f"{gc.username}:{gc.password}",
             "-o",
             tarball_path,
             url,
