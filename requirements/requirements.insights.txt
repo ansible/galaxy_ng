@@ -163,7 +163,7 @@ frozenlist==1.4.0
     #   aiosignal
 future==0.18.3
     # via pyjwkest
-galaxy-importer==0.4.18
+galaxy-importer==0.4.19
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
