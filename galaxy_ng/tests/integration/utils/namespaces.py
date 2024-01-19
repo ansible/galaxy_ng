@@ -43,16 +43,15 @@ def generate_namespace(exclude=None):
     return namespace
 
 
-def get_all_namespaces(api_client=None, api_version='v3'):
+def get_all_namespaces(gc=None, api_version='v3'):
     """ Create a list of namespaces visible to the client """
 
-    assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    assert gc is not None, "api_client is a required param"
 
     namespaces = []
-    next_page = f'{api_prefix}/{api_version}/namespaces/'
+    next_page = f'{api_version}/namespaces/'
     while next_page:
-        resp = api_client(next_page)
+        resp = gc.get(next_page)
         namespaces.extend(resp['data'])
         next_page = resp.get('links', {}).get('next')
     return namespaces

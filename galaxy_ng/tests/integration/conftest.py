@@ -392,10 +392,9 @@ def sync_instance_crc():
 
 
 @pytest.fixture(scope="function")
-def settings(ansible_config):
-    config = ansible_config("admin")
-    api_client = get_client(config)
-    return api_client("_ui/v1/settings/")
+def settings(galaxy_client):
+    gc = galaxy_client("admin")
+    return gc.get("_ui/v1/settings/")
 
 
 def set_test_data(ansible_config, hub_version):
