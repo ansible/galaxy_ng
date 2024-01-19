@@ -521,10 +521,8 @@ def copy_collection_version(client, collection, src_repo_name, dest_repo_name):
     return wait_for_url(gc, dest_url)
 
 
-def get_all_collections_by_repo(api_client=None):
+def get_all_collections_by_repo(gc):
     """ Return a dict of each repo and their collections """
-    assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
     collections = {
         'staging': {},
         'published': {},
@@ -532,9 +530,9 @@ def get_all_collections_by_repo(api_client=None):
         'rh-certified': {},
     }
     for repo in collections.keys():
-        next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
+        next_page = f'{gc.galaxy_root}_ui/v1/collection-versions/?repository={repo}'
         while next_page:
-            resp = api_client(next_page)
+            resp = gc.get(next_page)
             for _collection in resp['data']:
                 key = (
                     _collection['namespace'],
@@ -546,11 +544,10 @@ def get_all_collections_by_repo(api_client=None):
     return collections
 
 
-def get_all_repository_collection_versions(api_client):
+def get_all_repository_collection_versions(gc):
     """ Return a dict of each repo and their collection versions """
 
-    assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    assert gc is not None, "api_client is a required param"
 
     repositories = [
         'staging',
@@ -561,9 +558,9 @@ def get_all_repository_collection_versions(api_client):
 
     collections = []
     for repo in repositories:
-        next_page = f'{api_prefix}/content/{repo}/v3/collections/'
+        next_page = f'{gc.galaxy_root}content/{repo}/v3/collections/'
         while next_page:
-            resp = api_client(next_page)
+            resp = gc.get(next_page)
             collections.extend(resp['data'])
             next_page = resp.get('links', {}).get('next')
 
@@ -571,7 +568,7 @@ def get_all_repository_collection_versions(api_client):
     for collection in collections:
         next_page = collection['versions_url']
         while next_page:
-            resp = api_client(next_page)
+            resp = gc.get(next_page)
             for cv in resp['data']:
                 cv['namespace'] = collection['namespace']
                 cv['name'] = collection['name']

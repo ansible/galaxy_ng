@@ -11,7 +11,7 @@ from galaxykit import GalaxyClient
 from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id
 from galaxykit.namespaces import create_namespace
-from galaxykit.utils import GalaxyClientError
+from galaxykit.utils import GalaxyClientError, wait_for_url
 from galaxykit.users import get_user
 from .constants import USERNAME_PUBLISHER, GALAXY_STAGE_ANSIBLE_PROFILES
 from .utils import (
@@ -21,7 +21,6 @@ from .utils import (
     set_certification,
     set_synclist,
     iterate_all,
-    wait_for_url,
 )
 
 from .utils import upload_artifact as _upload_artifact
@@ -174,21 +173,18 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
     # publish
-    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=config
+        galaxy_client=gc
     )
 
     # certify v1
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
+    set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -200,16 +196,15 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     )
 
     # Publish but do -NOT- certify newer version ...
-    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=config
+        galaxy_client=gc
     )
     dest_url = (
         f"v3/plugin/ansible/content/staging/collections/index/"
         f"{artifact2.namespace}/{artifact2.name}/versions/{artifact2.version}/"
     )
-    wait_for_url(api_client, dest_url)
+    wait_for_url(gc, dest_url)
     return artifact, artifact2
 
 
