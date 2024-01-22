@@ -10,28 +10,24 @@
 set -euv
 
 # make sure this script runs at the repo root
-cd "$(dirname "$(realpath -e "$0")")"/../../..
+cd "$(dirname "$(realpath -e "$0")")/../../.."
 
-pip install twine
-
-export VERSION=$(ls dist | sed -rn 's/galaxy_ng-client-(.*)\.tar.gz/\1/p')
+VERSION="$1"
 
 if [[ -z "$VERSION" ]]; then
-  echo "No client package found."
-  exit
+  echo "No version specified."
+  exit 1
 fi
 
-export response=$(curl --write-out %{http_code} --silent --output /dev/null https://pypi.org/project/galaxy-ng-client/$VERSION/)
+RESPONSE="$(curl --write-out '%{http_code}' --silent --output /dev/null "https://pypi.org/project/galaxy-ng-client/$VERSION/")"
 
-if [ "$response" == "200" ];
+if [ "$RESPONSE" == "200" ];
 then
   echo "galaxy_ng client $VERSION has already been released. Skipping."
   exit
 fi
 
-twine check dist/galaxy_ng_client-$VERSION-py3-none-any.whl || exit 1
-twine check dist/galaxy_ng-client-$VERSION.tar.gz || exit 1
-twine upload dist/galaxy_ng_client-$VERSION-py3-none-any.whl -u pulp -p $PYPI_PASSWORD
-twine upload dist/galaxy_ng-client-$VERSION.tar.gz -u pulp -p $PYPI_PASSWORD
-
-exit $?
+twine upload -u __token__ -p "$PYPI_API_TOKEN" \
+"dist/galaxy_ng_client-$VERSION-py3-none-any.whl" \
+"dist/galaxy_ng-client-$VERSION.tar.gz" \
+;
