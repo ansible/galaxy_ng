@@ -1,19 +1,20 @@
 import json
+from gettext import gettext as _
 
 from rest_framework import serializers
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 
 from pulpcore.plugin.util import get_users_with_perms
-from pulpcore.plugin.serializers import IdentityField
-
-from pulp_container.app import models as container_models
+from pulpcore.plugin.serializers import IdentityField, RelatedField
 from pulpcore.plugin import models as core_models
+from pulp_container.app import models as container_models
+from pulp_ansible.app import models as ansible_models
 
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import MyPermissionsField
-
 from galaxy_ng.app.api.ui import serializers as ui_serializers
+
 
 namespace_fields = ("id", "pulp_href", "name", "my_permissions",
                     "owners", "created_at", "updated_at")
@@ -301,3 +302,43 @@ class ContainerReadmeSerializer(serializers.ModelSerializer):
             "updated_at",
             "created_at"
         )
+
+
+class ContainerAnsibleBuilderSerializer(serializers.Serializer):
+    execution_environment_yaml = serializers.CharField(
+        required=True,
+        help_text=_("Execution-environment.yml file that will be provided to ansible-builder.")
+    )
+    destination_container_repository = serializers.CharField(
+        required=True,
+        help_text=_("Container repository to publish the new container image.")
+    )
+    container_tag = serializers.CharField(
+        required=False,
+        default="latest",
+        help_text=_("Tag to apply to the new image.")
+    )
+    source_collection_repositories = RelatedField(
+        required=False,
+        many=True,
+        help_text=_("List of ansible repositories to source collections from."),
+        view_name="repositories-ansible/ansible-detail",
+        queryset=ansible_models.AnsibleRepository.objects.all()
+    )
+    # TODO: pulp_file FileRepository
+    # builder_context_repository = RelatedField(
+    #     required=False,
+    #     many=True,
+    #     allow_null=True,
+    #     view_name="",
+    #     queryset=,
+    #     help_text=_("List of  Pulp File repositories."),
+    # )
+
+    class Meta:
+        fields = [
+            "execution_environment_yaml",
+            "destination_container_repository",
+            "container_tag",
+            "source_collection_repositories"
+        ]

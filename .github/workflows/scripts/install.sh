@@ -15,6 +15,9 @@ set -euv
 
 source .github/workflows/scripts/utils.sh
 
+PLUGIN_VERSION="$(sed -n -e 's/^\s*current_version\s*=\s*//p' .bumpversion.cfg | python -c 'from packaging.version import Version; print(Version(input()))')"
+PLUGIN_NAME="./galaxy_ng/dist/galaxy_ng-${PLUGIN_VERSION}-py3-none-any.whl"
+
 export PULP_API_ROOT="/api/galaxy/pulp/"
 
 PIP_REQUIREMENTS=("pulp-cli")
@@ -29,11 +32,6 @@ pip install ${PIP_REQUIREMENTS[*]}
 
 cd .ci/ansible/
 
-if [[ "${RELEASE_WORKFLOW:-false}" == "true" ]]; then
-  PLUGIN_NAME=./galaxy_ng/dist/galaxy_ng-$PLUGIN_VERSION-py3-none-any.whl
-else
-  PLUGIN_NAME=./galaxy_ng
-fi
 cat >> vars/main.yaml << VARSYAML
 image:
   name: pulp

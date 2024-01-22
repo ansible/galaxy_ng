@@ -20,7 +20,8 @@ from .execution_environments import (
     ContainerRepositoryManifestViewSet,
     ContainerRepositoryHistoryViewSet,
     ContainerReadmeViewSet,
-    ContainerTagViewset
+    ContainerTagViewset,
+    ContainerAnsibleBuilderViewSet
 )
 
 __all__ = (
@@ -38,5 +39,6 @@ __all__ = (
     'ContainerRepositoryManifestViewSet',
     'ContainerRepositoryHistoryViewSet',
     'ContainerReadmeViewSet',
-    'ContainerTagViewset'
+    'ContainerTagViewset',
+    'ContainerAnsibleBuilderViewSet'
 )

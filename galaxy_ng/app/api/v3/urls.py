@@ -81,6 +81,13 @@ container_paths = [
         viewsets.ContainerRepositoryViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
         name="container-repository-detail",
     ),
+
+    # Generate definition file and build an image with ansible builder
+    path(
+        "image-builder/",
+        viewsets.ContainerAnsibleBuilderViewSet.as_view({"post": "create"}),
+        name="container-build-image"
+    )
 ]
 
 plugin_paths = [

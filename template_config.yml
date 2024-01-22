@@ -87,7 +87,7 @@ pulp_settings_s3: null
 pulpprojectdotorg_key_id: null
 pydocstyle: true
 pypi_username: null
-python_version: '3.8'
+python_version: '3.9'
 release_email: ansible-infra@redhat.com
 release_user: ansible
 run_pulpcore_tests_for_plugins: false

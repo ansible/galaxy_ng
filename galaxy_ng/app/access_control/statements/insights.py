@@ -126,6 +126,7 @@ _INSIGHTS_STATEMENTS = {
     'ContainerReadmeViewset': _deny_all,
     'ContainerRegistryRemoteViewSet': _deny_all,
     'ContainerRemoteViewSet': _deny_all,
+    'ContainerAnsibleBuilderViewSet': _deny_all,
 
 
     "LandingPageViewSet": [
