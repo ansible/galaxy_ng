@@ -146,6 +146,14 @@ gh-action/community:
 gh-action/certified-sync:
 	python3 dev/oci_env_integration/actions/certified-sync.py
 
+.PHONY: gh-action/galaxy_collection_standalone
+gh-action/galaxy_collection_standalone:
+	python3 dev/oci_env_integration/actions/galaxy_collection.py
+
+.PHONY: gh-action/galaxy_collection_keycloak
+gh-action/galaxy_collection_keycloak:
+	python3 dev/oci_env_integration/actions/galaxy_collection.py
+
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from python script
 	$(call exec_or_run, api, "/bin/bash", "-c", "/entrypoint.sh manage shell < app/dev/common/setup_test_data.py")

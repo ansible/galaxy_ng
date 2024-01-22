@@ -32,6 +32,7 @@ class OCIEnvIntegrationTest:
         env_file (string, required): oci-env env file to use for the tests. These are all loaded
             from dev/oci_env_integration/oci_env_configs
         run_tests (boolean, required): if true, integration tests will be run inside this instance
+        run_playbooks (boolean, optional): if true, Galaxy Collection playbook tests will be run inside this instance
         db_restore (string, optional): database backup to restore before running tests These are all
             loaded from dev/oci_env_integration/oci_env_configs. When defining this, omit
             the file extension (ex: fixture, not fixtur.tar.gz)
@@ -126,6 +127,21 @@ class OCIEnvIntegrationTest:
                     "exec bash /src/galaxy_ng/profiles/base/run_integration.sh"
                     f" {pytest_flags} {self.flags}"
                 )
+
+    def run_playbooks(self):
+        for env in self.envs:
+            if wait_time := self.envs[env].get("wait_before_tests", 20):
+                print(f"waiting {wait_time} seconds")
+                time.sleep(wait_time)
+
+            if self.envs[env]["run_playbooks"]:
+                if len(self.envs[env]["playbooks"]) > 0:
+                    for playbook in self.envs[env]["playbooks"]:
+                        print(f"testing the {playbook} playbook")
+                        self.exec_cmd(
+                            env,
+                            f"exec ansible-playbook src/galaxy_ng/dev/galaxy_collection_plays/{playbook} -vvv"
+                        )
 
     def dump_logs(self):
         if not self.do_dump_logs:

@@ -3,27 +3,51 @@ name: Galaxy Collection CI
 on:
   pull_request:
     branches:
-      - "*"
+      - '**'
     paths-ignore:
       - "CHANGES/**"
       - "docs/**"
       - "mkdocs.yml"
   push:
     branches:
-      - "*"
+      - '**'
   workflow_dispatch:
 
 jobs:
-  galaxy_collection:
+  integration:
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - TEST_PROFILE: standalone
+          - TEST_PROFILE: keycloak
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout galaxy_ng
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
+
+      # Note: COMPOSE_INTERACTIVE_NO_CLI=1 is required for oci-env to work correctly when there's no interactive terminal
+      - name: Set environment variables
+        run: |
+          echo "OCI_ENV_PATH=${HOME}/work/galaxy_ng/oci_env" >> $GITHUB_ENV
+          echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> $GITHUB_ENV
+          echo "OCI_VERBOSE=1" >> $GITHUB_ENV
+          echo "GH_DUMP_LOGS=1" >> $GITHUB_ENV
+
+      - name: Update apt
+        run: sudo apt -y update
+
+      - name: Install LDAP requirements
+        run: sudo apt-get install -y libsasl2-dev python3 libldap2-dev libssl-dev build-essential
+
+      - name: setup oci-env
+        run: |
+          git clone https://github.com/pulp/oci_env.git $OCI_ENV_PATH
+          pip install -e $OCI_ENV_PATH/client/
+          mkdir $OCI_ENV_PATH/db_backup/
 
       - name: Checkout the galaxy collection
         uses: actions/checkout@v4
@@ -42,23 +66,5 @@ jobs:
           ansible-galaxy collection build -vvv
           ansible-galaxy collection install galaxy-galaxy-1.0.0.tar.gz -vvv
 
-      - name: Spin up a standalone galaxy_ng installation
-        run: |
-          echo "COMPOSE_PROFILE=standalone" > .compose.env
-          echo "DEV_SOURCE_PATH=galaxy_ng" >> .compose.env
-          make docker/all
-          ./compose up -d
-          pip3 install --upgrade requests pyyaml
-          python3 dev/common/poll.py
-
-      - name: Test the user playbook
-        run: ansible-playbook dev/galaxy_collection_plays/user.yml -vvv
-
-      - name: Test the content playbook
-        run: ansible-playbook dev/galaxy_collection_plays/content.yml -vvv
-
-      - name: Test the repo playbook
-        run: ansible-playbook dev/galaxy_collection_plays/repo.yml -vvv
-
-      - name: Test the ee playbook
-        run: ansible-playbook dev/galaxy_collection_plays/ee.yml -vvv
+      - name: run playbook tests
+        run: make gh-action/${{ matrix.env.TEST_PROFILE }}
