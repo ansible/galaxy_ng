@@ -20,7 +20,6 @@ from galaxy_ng.tests.integration.utils import (
     build_collection as galaxy_build_collection,
     get_all_collections_by_repo,
     get_all_namespaces,
-    get_client,
     set_certification,
     create_local_signature_for_tarball,
 )
@@ -131,7 +130,7 @@ def test_collection_auto_sign_on_approval(ansible_config, flags, galaxy_client, 
     assert collection["signatures"][0]["pulp_created"] is not None
 
     # Assert that the collection is signed on UI API
-    collection_on_ui = gc.get(f"_ui/v1/repo/published/deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+    collection_on_ui = gc.get(f"_ui/v1/repo/published/?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
         f"&sign_state=signed&version={artifact.version}"
     )["data"][0]
     assert collection_on_ui["sign_state"] == "signed"
