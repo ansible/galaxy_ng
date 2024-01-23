@@ -32,14 +32,14 @@ def ansible_galaxy(
     #       refresh tokens, so you'd have to get an access token from the
     #       auth_url with a "password" grant OR skip the auth_url and go
     #       straight to the api urls with a basic auth header
-    if ansible_config:
+    if ansible_config is not None:
         if token is None and ansible_config.get('token'):
             token = ansible_config.get('token')
         url = ansible_config.get('url')
         auth_url = ansible_config.get('auth_url')
         username = ansible_config.get('username')
         password = ansible_config.get('password')
-    if galaxy_client:
+    if galaxy_client is not None:
         token = galaxy_client.token
         url = galaxy_client.galaxy_root
         auth_url = galaxy_client.auth_url
