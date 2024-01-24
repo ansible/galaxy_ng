@@ -123,7 +123,7 @@ class OCIEnvIntegrationTest:
             if self.envs[env]["run_tests"]:
                 self.exec_cmd(
                     env,
-                    "exec bash /src/galaxy_ng/profiles/base/run_integration.sh"
+                    "exec bash /app/profiles/base/run_integration.sh"
                     f" {pytest_flags} {self.flags}"
                 )
 

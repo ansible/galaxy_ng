@@ -12,7 +12,7 @@ def post(settings):
     """
     data = {
         k[5:]: parse_conf_data(v, tomlfy=True, box_settings=settings)
-        for k, v in dotenv_values("/src/galaxy_ng/.compose.env").items()
+        for k, v in dotenv_values("/app/.compose.env").items()
         if k.startswith("PULP_")
     }
     return data

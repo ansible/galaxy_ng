@@ -35,7 +35,7 @@ oci-env -e ${env_path} compose exec pulp /bin/bash \
     -c "python3.11 -m pip install git+https://github.com/pulp/pulp-smash.git"
 
 oci-env -e ${env_path} compose exec pulp /bin/bash \
-    -c "python3.11 -m pip install -r /src/galaxy_ng/unittest_requirements.txt"
+    -c "python3.11 -m pip install -r /app/unittest_requirements.txt"
 
 oci-env -e ${env_path} compose exec pulp /bin/bash \
     -c "sudo -u postgres psql -c 'ALTER USER pulp CREATEDB;'"

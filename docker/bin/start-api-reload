@@ -18,7 +18,7 @@ GUNICORN_OPTIONS=(
   --workers "${GUNICORN_WORKERS}"
   --reload-extra-file /etc/pulp/settings.py 
   --reload-extra-file /etc/pulp/dynaconf_hooks.py 
-  --reload-extra-file /src/galaxy_ng/.compose.env
+  --reload-extra-file /app/.compose.env
   --access-logfile -
   --reload
 )

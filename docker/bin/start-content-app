@@ -11,6 +11,7 @@ readonly BIND_PORT="${GUNICORN_PORT:-24816}"
 readonly WORKER_CLASS='aiohttp.GunicornWebWorker'
 readonly APP_MODULE='pulpcore.content:server'
 
+mkdir -p /var/lib/pulp/{assets,media,scripts,tmp}
 
 exec gunicorn \
   --bind "${BIND_HOST}:${BIND_PORT}" \

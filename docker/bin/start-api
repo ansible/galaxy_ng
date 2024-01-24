@@ -31,4 +31,7 @@ if [[ -n "${GUNICORN_LOGGER_CLASS}" ]]; then
     GUNICORN_OPTIONS+=(--logger-class "${GUNICORN_LOGGER_CLASS}")
 fi
 
+
+mkdir -p /var/lib/pulp/{assets,media,scripts,tmp}
+
 exec "${GUNICORN}" "${GUNICORN_OPTIONS[@]}" "${APP_MODULE}"

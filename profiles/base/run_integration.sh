@@ -4,13 +4,13 @@ VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
 source $VENVPATH/bin/activate
 
-cd /src/galaxy_ng/
+cd /app/
 
 django-admin shell < ./dev/common/setup_test_data.py
 cd galaxy_ng
 django-admin makemessages --all
 
-cd /src/galaxy_ng/
+cd /app/
 
 # Mark taxonomy:
 

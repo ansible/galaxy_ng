@@ -108,7 +108,7 @@ docker/test/integration/container:      ## Run integration tests.
 
 .PHONY: oci-env/integration
 oci-env/integration:
-	oci-env exec bash /src/galaxy_ng/profiles/base/run_integration.sh $(FLAGS)
+	oci-env exec bash /app/profiles/base/run_integration.sh $(FLAGS)
 
 .PHONY: gh-action/ldap
 gh-action/ldap:

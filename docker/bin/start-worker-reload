@@ -4,4 +4,4 @@ set -o errexit
 set -o nounset
 
 WATCHED_FILES=$(python -c "print(' '.join([f'/src/{item}' for item in '$DEV_SOURCE_PATH'.split(':')]))")
-exec find $WATCHED_FILES \( -path /src/galaxy_ng/.venv -o -path /src/galaxy_ng/build -o -path /src/galaxy_ng/.eggs \) -prune -o -name '*.py' -o -name '*.env' | entr -n -r pulpcore-worker
+exec find $WATCHED_FILES \( -path /app/.venv -o -path /app/build -o -path /app/.eggs \) -prune -o -name '*.py' -o -name '*.env' | entr -n -r pulpcore-worker

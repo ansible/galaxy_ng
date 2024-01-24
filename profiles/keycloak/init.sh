@@ -16,8 +16,8 @@ fi
 set -e
 
 # intialize keycloak
-ansible-galaxy collection install /src/galaxy_ng/profiles/keycloak/community-general-5.7.0.tar.gz
-ansible-playbook -v /src/galaxy_ng/profiles/keycloak/keycloak-playbook.yaml
+ansible-galaxy collection install /app/profiles/keycloak/community-general-5.7.0.tar.gz
+ansible-playbook -v /app/profiles/keycloak/keycloak-playbook.yaml
 
 # Wait for s6 list to able able to take locks
 set +e

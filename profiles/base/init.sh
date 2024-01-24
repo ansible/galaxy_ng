@@ -24,9 +24,9 @@ setup_webserver_snippets() {
 
 setup_signing_keyring() {
     log_message "Setting up signing keyring."
-    for KEY_FINGERPRINT in $(gpg --show-keys --with-colons --with-fingerprint /src/galaxy_ng/dev/common/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}')
+    for KEY_FINGERPRINT in $(gpg --show-keys --with-colons --with-fingerprint /app/dev/common/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}')
     do
-        gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import /src/galaxy_ng/dev/common/ansible-sign.key
+        gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import /app/dev/common/ansible-sign.key
         echo "${KEY_FINGERPRINT}:6:" | gpg --batch --no-default-keyring --keyring /etc/pulp/certs/galaxy.kbx --import-ownertrust
     done
 }
@@ -51,15 +51,15 @@ setup_repo_keyring() {
 
 setup_collection_signing_service() {
     log_message "Setting up signing service."
-    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /src/galaxy_ng/dev/common/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
+    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /app/dev/common/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
     export KEY_ID=${KEY_FINGERPRINT: -16}
-    gpg --batch --import /src/galaxy_ng/dev/common/ansible-sign.key
+    gpg --batch --import /app/dev/common/ansible-sign.key
     echo "${KEY_FINGERPRINT}:6:" | gpg --import-ownertrust
 
     HAS_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' || true)
     if [[ "$HAS_SIGNING" -eq "0" ]]; then
         log_message "Creating signing service. using key ${KEY_ID}"
-        django-admin add-signing-service ansible-default /src/galaxy_ng/dev/common/collection_sign.sh ${KEY_ID} || true
+        django-admin add-signing-service ansible-default /app/dev/common/collection_sign.sh ${KEY_ID} || true
     else
         log_message "Signing service already exists."
     fi
@@ -73,15 +73,15 @@ setup_container_signing_service() {
     fi
 
     log_message "Setting up container signing service."
-    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /src/galaxy_ng/dev/common/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
+    export KEY_FINGERPRINT=$(gpg --show-keys --with-colons --with-fingerprint /app/dev/common/ansible-sign.key | awk -F: '$1 == "fpr" {print $10;}' | head -n1)
     export KEY_ID=${KEY_FINGERPRINT: -16}
-    gpg --batch --import /src/galaxy_ng/dev/common/ansible-sign.key
+    gpg --batch --import /app/dev/common/ansible-sign.key
     echo "${KEY_FINGERPRINT}:6:" | gpg --import-ownertrust
 
     HAS_CONTAINER_SIGNING=$(django-admin shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="container-default").count())' || true)
     if [[ "$HAS_CONTAINER_SIGNING" -eq "0" ]]; then
         log_message "Creating container signing service. using key ${KEY_ID}"
-        django-admin add-signing-service container-default /src/galaxy_ng/dev/common/container_sign.sh ${KEY_ID} --class container:ManifestSigningService || true
+        django-admin add-signing-service container-default /app/dev/common/container_sign.sh ${KEY_ID} --class container:ManifestSigningService || true
     else
         log_message "Container signing service already exists."
     fi
@@ -105,7 +105,7 @@ set_pulp_user_perms() {
 
 download_ui() {
     # download the latest version of the UI from github
-    python3 /src/galaxy_ng/setup.py prepare_static --force-download-ui
+    python3 /app/setup.py prepare_static --force-download-ui
     echo "yes" | django-admin collectstatic
 }
 
