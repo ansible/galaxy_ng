@@ -29,7 +29,7 @@ if [ $skip_pr_check == "true" ]; then exit 0; fi
 APP_NAME="automation-hub"  # name of app-sre "application" folder this component lives in
 COMPONENT_NAME="automation-hub"  # name of app-sre "resourceTemplate" in deploy.yaml for this component
 IMAGE="quay.io/cloudservices/automation-hub-galaxy-ng"
-COMPONENTS_W_RESOURCES="all"  # components which should preserve resource settings (optional, default: none)
+COMPONENTS_W_RESOURCES="automation-hub"  # components which should preserve resource settings (optional, default: none)
 
 export IMAGE_FRONTEND="quay.io/cloudservices/ansible-hub-ui"
 export IMAGE_FRONTEND_SHA1=$(curl -s https://api.github.com/repos/ansible/ansible-hub-ui/commits/master | jq -r '.sha')
