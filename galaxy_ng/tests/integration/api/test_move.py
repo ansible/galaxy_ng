@@ -6,17 +6,12 @@ See: https://issues.redhat.com/browse/AAH-1268
 import pytest
 from orionutils.generator import build_collection
 
-from galaxykit.collections import upload_artifact
-from galaxykit.utils import wait_for_task as gk_wait_for_task
+from galaxykit.collections import upload_artifact, move_or_copy_collection, sign_collection, deprecate_collection
+from galaxykit.repositories import get_repository_href
+from galaxykit.utils import wait_for_task, wait_for_url
 from ..conftest import is_hub_4_5
 from ..constants import USERNAME_PUBLISHER
-from ..utils import (
-    copy_collection_version,
-    get_client,
-    set_certification,
-    wait_for_task,
-    wait_for_url,
-)
+from ..utils import set_certification
 from ..utils.iqe_utils import is_ocp_env
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -30,13 +25,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.all
 def test_move_collection_version(ansible_config, galaxy_client):
     """Tests whether a collection can be moved from repo to repo"""
-    config = ansible_config("partner_engineer")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
+    gc_admin = galaxy_client("partner_engineer")
 
     def get_all_collections():
         collections = {
@@ -44,9 +33,9 @@ def test_move_collection_version(ansible_config, galaxy_client):
             'published': {}
         }
         for repo in collections.keys():
-            next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
+            next_page = f'_ui/v1/collection-versions/?repository={repo}'
             while next_page:
-                resp = api_client(next_page)
+                resp = gc_admin.get(next_page)
                 for _collection in resp['data']:
                     key = (_collection['namespace'], _collection['name'], _collection['version'])
                     collections[repo][key] = _collection
@@ -66,14 +55,13 @@ def test_move_collection_version(ansible_config, galaxy_client):
     assert ckey not in pre['published']
 
     # import and wait ...
-    gc_admin = galaxy_client("partner_engineer")
     resp = upload_artifact(None, gc_admin, artifact)
-    gk_wait_for_task(gc_admin, resp)
+    wait_for_task(gc_admin, resp)
     dest_url = (
         f"content/staging/v3/collections/{artifact.namespace}/"
         f"{artifact.name}/versions/{artifact.version}/"
     )
-    wait_for_url(api_client, dest_url)
+    wait_for_url(gc_admin, dest_url)
 
     # Make sure it ended up in staging but not in published ...
     before = get_all_collections()
@@ -82,7 +70,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
 
     # Certify and check the response...
     hub_4_5 = is_hub_4_5(ansible_config)
-    cert_result = set_certification(api_client, gc_admin, artifact, hub_4_5=hub_4_5)
+    cert_result = set_certification(ansible_config(), gc_admin, artifact, hub_4_5=hub_4_5)
 
     assert cert_result['namespace']['name'] == artifact.namespace
     assert cert_result['name'] == artifact.name
@@ -121,13 +109,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
 def test_copy_collection_version(ansible_config, galaxy_client):
     """Tests whether a collection can be copied from repo to repo"""
 
-    config = ansible_config("partner_engineer")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
+    gc_admin = galaxy_client("partner_engineer")
 
     def get_all_collections():
         collections = {
@@ -135,9 +117,9 @@ def test_copy_collection_version(ansible_config, galaxy_client):
             'community': {}
         }
         for repo in collections.keys():
-            next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
+            next_page = f'_ui/v1/collection-versions/?repository={repo}'
             while next_page:
-                resp = api_client(next_page)
+                resp = gc_admin.get(next_page)
                 for _collection in resp['data']:
                     key = (_collection['namespace'], _collection['name'], _collection['version'])
                     collections[repo][key] = _collection
@@ -157,14 +139,13 @@ def test_copy_collection_version(ansible_config, galaxy_client):
     assert ckey not in pre['community']
 
     # import and wait ...
-    gc_admin = galaxy_client("partner_engineer")
     resp = upload_artifact(None, gc_admin, artifact)
-    gk_wait_for_task(gc_admin, resp)
+    wait_for_task(gc_admin, resp)
     dest_url = (
         f"content/staging/v3/collections/{artifact.namespace}/"
         f"{artifact.name}/versions/{artifact.version}/"
     )
-    wait_for_url(api_client, dest_url)
+    wait_for_url(gc_admin, dest_url)
 
     # Make sure it ended up in staging ...
     before = get_all_collections()
@@ -172,12 +153,8 @@ def test_copy_collection_version(ansible_config, galaxy_client):
     assert ckey not in before['community']
 
     # Copy the collection to /community/
-    copy_result = copy_collection_version(
-        api_client,
-        artifact,
-        src_repo_name="staging",
-        dest_repo_name="community"
-    )
+    copy_result = move_or_copy_collection(gc_admin, artifact.namespace, artifact.name,
+                                          destination="community", operation="copy")
 
     # Check the response...
     assert copy_result["namespace"]["name"] == artifact.namespace
@@ -197,20 +174,13 @@ def test_copy_collection_version(ansible_config, galaxy_client):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.this
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
 def test_copy_associated_content(ansible_config, galaxy_client):
     """Tests whether a collection and associated content is copied from repo to repo"""
 
     # TODO: add check for ansible namespace metadata
-
-    config = ansible_config("admin")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
 
     artifact = build_collection(
         "skeleton",
@@ -223,17 +193,13 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     # import and wait ...
     gc_admin = galaxy_client("admin")
     resp = upload_artifact(None, gc_admin, artifact)
-    gk_wait_for_task(gc_admin, resp)
+    wait_for_task(gc_admin, resp)
 
     # get staging repo version
-    staging_repo = api_client(
-        f'{api_prefix}/pulp/api/v3/repositories/ansible/ansible/?name=staging'
-    )["results"][0]
+    pulp_href = get_repository_href(gc_admin, "staging")
 
-    pulp_href = staging_repo["pulp_href"]
-
-    collection_version = api_client(
-        f'{api_prefix}/pulp/api/v3/content/ansible/collection_versions/'
+    collection_version = gc_admin.get(
+        f'pulp/api/v3/content/ansible/collection_versions/'
         f'?namespace={artifact.namespace}&name={artifact.name}&version={artifact.version}'
     )["results"][0]
 
@@ -242,78 +208,48 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     collection = f'content/staging/v3/collections/{artifact.namespace}/{artifact.name}/'
     collection_version = f'{collection}versions/{artifact.version}/'
     collection_mark = (
-        f'{api_prefix}/pulp/api/v3/content/ansible/collection_marks/'
+        f'pulp/api/v3/content/ansible/collection_marks/'
         f'?marked_collection={cv_href}'
     )
 
-    col_deprecation = api_client(collection)["deprecated"]
+    col_deprecation = gc_admin.get(collection)["deprecated"]
     assert col_deprecation is False
 
-    col_signature = api_client(collection_version)["signatures"]
+    col_signature = gc_admin.get(collection_version)["signatures"]
     assert len(col_signature) == 0
 
-    col_marked = api_client(collection_mark)["results"]
+    col_marked = gc_admin.get(collection_mark)["results"]
     assert len(col_marked) == 0
 
-    signing_service = api_client(
-        f'{api_prefix}/pulp/api/v3/signing-services/?name=ansible-default'
-    )["results"][0]
-
-    # sign collection
-    signed_collection = api_client(
-        f'{pulp_href}sign/',
-        args={
-            "content_units": [cv_href],
-            "signing_service": signing_service["pulp_href"]
-        },
-        method="POST"
-    )
-
-    resp = wait_for_task(api_client, signed_collection)
-    assert resp['state'] == 'completed'
+    sign_collection(gc_admin, cv_href, pulp_href)
 
     # mark collection
-    marked_collection = api_client(
+    marked_collection = gc_admin.post(
         f'{pulp_href}mark/',
-        args={
+        body={
             "content_units": [cv_href],
             "value": "marked"
-        },
-        method="POST"
+        }
     )
 
-    resp = wait_for_task(api_client, marked_collection)
+    resp = wait_for_task(gc_admin, marked_collection)
     assert resp['state'] == 'completed'
 
     # deprecate collection
-    deprecate_collection = api_client(
-        f'{api_prefix}/v3/plugin/ansible/content/staging/collections/'
-        f'index/{artifact.namespace}/{artifact.name}/',
-        args={
-            "deprecated": True
-        },
-        method="PATCH"
-    )
+    deprecate_collection(gc_admin, artifact.namespace, artifact.name, "staging")
 
-    resp = wait_for_task(api_client, deprecate_collection)
-    assert resp['state'] == 'completed'
-
-    col_deprecation = api_client(collection)["deprecated"]
+    col_deprecation = gc_admin.get(collection)["deprecated"]
     assert col_deprecation is True
 
-    col_signature = api_client(collection_version)["signatures"]
+    col_signature = gc_admin.get(collection_version)["signatures"]
     assert len(col_signature) == 1
 
-    col_marked = api_client(collection_mark)["results"]
+    col_marked = gc_admin.get(collection_mark)["results"]
     assert len(col_marked) == 1
 
     # Copy the collection to /community/
-    copy_result = copy_collection_version(
-        api_client,
-        artifact,
-        src_repo_name="staging",
-        dest_repo_name="community"
-    )
+    copy_result = move_or_copy_collection(gc_admin, artifact.namespace, artifact.name,
+                                          destination="community", operation="copy")
 
     assert copy_result["namespace"]["name"] == artifact.namespace
     assert copy_result["name"] == artifact.name
@@ -322,14 +258,17 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     collection = f'content/community/v3/collections/{artifact.namespace}/{artifact.name}/'
     collection_version = f'{collection}versions/{artifact.version}/'
     collection_mark = (
-        f'{api_prefix}/pulp/api/v3/content/ansible/collection_marks/'
+        f'pulp/api/v3/content/ansible/collection_marks/'
         f'?marked_collection={cv_href}'
     )
 
-    col_deprecation = api_client(collection)["deprecated"]
+    col_deprecation = gc_admin.get(collection)["deprecated"]
     assert col_deprecation is True
 
-    col_signature = api_client(collection_version)["signatures"]
+    col_signature = gc_admin.get(collection_version)["signatures"]
     assert len(col_signature) == 1
+
+    col_marked = gc_admin.get(collection_mark)["results"]
+    assert len(col_marked) == 1
 
     assert "marked" in copy_result["marks"]
