@@ -3,7 +3,7 @@ import pytest
 from ..utils import get_client
 
 
-@pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.deployment_standalone
 def test_galaxy_api_root_standalone_no_auth_access(galaxy_client):
     """Test galaxy API root."""
