@@ -112,8 +112,8 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
 
 requirements = [
     "galaxy-importer>=0.4.16,<0.5.0",
-    "pulpcore>=3.28.12,<3.29.0",
-    "pulp_ansible>=0.20.0,<0.21.0",
+    "pulpcore>=3.28.21,<3.29.0",
+    "pulp_ansible>=0.20.3,<0.21.0",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.15.0,<2.16.0",
@@ -128,6 +128,9 @@ requirements = [
     "marshmallow<4.0.0,>=3.6.1",
     "django-picklefield<4.0.0,>=3.0.1",
     "django-ipware<4.0.0,>=3.0.0",
+    # to fix a compatibility issue
+    'backports.zoneinfo==0.2.1;python_version<"3.9"',
+    "setuptools<66",
 ]
 
 
