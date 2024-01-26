@@ -20,12 +20,15 @@ def generate_random_string(length=8):
     return str(uuid.uuid4().hex)[:length]
 
 
-def iterate_all(api_client, url):
+def iterate_all(api_client, url, gc=None):
     """Iterate through all of the items on every page in a paginated list view."""
     next = url
     key = "data"
     while next is not None:
-        r = api_client(next)
+        if gc:
+            r = gc.get(next)
+        else:
+            r = api_client(next)
         # pulp uses "results"
         if "data" not in r:
             key = "results"

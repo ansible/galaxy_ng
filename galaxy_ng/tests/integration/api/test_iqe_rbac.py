@@ -23,7 +23,7 @@ from galaxykit.utils import GalaxyClientError
 
 from galaxy_ng.tests.integration.utils import uuid4
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group, \
-    create_test_user, create_local_image_container, create_namespace, \
+    create_test_user, create_emtpy_local_image_container, create_namespace, \
     upload_test_artifact, collection_exists, user_exists
 
 
@@ -756,7 +756,7 @@ class TestRBAC:
         object permissions to push an image, the user can't push an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, _ = add_new_user_to_new_group(gc)
         gc_user = galaxy_client(user)
         try:
@@ -774,7 +774,7 @@ class TestRBAC:
         the user can push an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["container.namespace_push_containerdistribution"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -798,7 +798,7 @@ class TestRBAC:
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         gc_user = galaxy_client(user)
         gc_user.push_image(ee_name + ":latest")
 
@@ -814,7 +814,7 @@ class TestRBAC:
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         gc_user = galaxy_client(user)
         try:
             gc_user.push_image(ee_name + ":latest")
@@ -831,7 +831,7 @@ class TestRBAC:
         object permissions to delete an image, the user can't delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.add_containernamespace",
@@ -854,7 +854,7 @@ class TestRBAC:
         global permissions to delete an image, the user can delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.delete_containerrepository",
@@ -875,7 +875,7 @@ class TestRBAC:
         global permissions to delete an image, the user can't delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.add_containernamespace",

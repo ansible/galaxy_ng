@@ -13,6 +13,7 @@ collections:
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_logging_cid_value_in_task(ansible_config):
+    # TODO: test with gateway
     config = ansible_config("admin")
     api_prefix = config.get("api_prefix").rstrip("/")
     api_client = get_client(config, request_token=True)
@@ -41,37 +42,38 @@ def test_logging_cid_value_in_task(ansible_config):
 @pytest.mark.pulp_api
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-def test_task_delete(ansible_config):
-    config = ansible_config("admin")
-    api_client = get_client(config, request_token=True)
+def test_task_delete(galaxy_client):
+    gc = galaxy_client("admin")
 
     # Create a remote and repo to use for sync
-    remote = api_client("pulp/api/v3/remotes/ansible/collection/", method="POST", args={
+    remote = gc.post("pulp/api/v3/remotes/ansible/collection/", body={
         "name": generate_random_string(),
         "url": "https://galaxy.ansible.com",
         "requirements_file": REQUIREMENTS_YAML
     })
 
-    repo = api_client("pulp/api/v3/repositories/ansible/ansible/", method="POST", args={
+    repo = gc.post("pulp/api/v3/repositories/ansible/ansible/", body={
         "name": generate_random_string(),
         "remote": remote["pulp_href"]
     })
 
+    '''
     cleanup = PulpObjectBase(api_client)
     cleanup.cleanup_hrefs = [
         remote["pulp_href"],
         repo["pulp_href"]
     ]
+    '''
 
     # Launch a sync task, since that seems to be the only that can keep the tasking
     # system busy long enough to cancel a task
-    task = api_client(repo["pulp_href"] + "/sync/", method="POST", args={
+    task = gc.post(repo["pulp_href"] + "sync/", body={
         "optimize": False
     })["task"]
 
     # cancel the task
-    api_client(task, method="PATCH", args={"state": "canceled"})
+    gc.patch(task, body={"state": "canceled"})
 
     # verify the task's status
-    task = api_client(task)
+    task = gc.get(task)
     assert task["state"] in ["canceled", "canceling"]

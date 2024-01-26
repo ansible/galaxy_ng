@@ -172,7 +172,7 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
 # /api/automation-hub/_ui/v1/collection_signing/{path}/{namespace}/{collection}/
 # /api/automation-hub/_ui/v1/collection_signing/{path}/{namespace}/{collection}/{version}/
 # /api/automation-hub/_ui/v1/controllers/
-
+# TODO: skip if GW?
 
 # /api/automation-hub/_ui/v1/distributions/
 @pytest.mark.deployment_standalone

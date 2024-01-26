@@ -3,13 +3,11 @@ from datetime import datetime
 import pytest
 from jsonschema import validate as validate_json
 
-from ansible.galaxy.api import GalaxyError
-
+from galaxykit.utils import wait_for_task, GalaxyClientError
 from ..schemas import (
     schema_objectlist,
     schema_task,
 )
-from ..utils import get_client, wait_for_task
 
 REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n    version: 1.0.11"
 
@@ -18,18 +16,13 @@ REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n    ve
 # /api/automation-hub/content/community/v3/sync/
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.6dev")
-def test_api_ui_v1_remote_sync(ansible_config):
+def test_api_ui_v1_remote_sync(galaxy_client):
 
-    cfg = ansible_config("admin")
-    api_client = get_client(cfg, request_token=True, require_auth=True)
-
+    gc = galaxy_client("admin")
     # get the remotes
-    resp = api_client("_ui/v1/remotes/", args={}, method="GET")
+    resp = gc.get("_ui/v1/remotes/")
     validate_json(instance=resp, schema=schema_objectlist)
-
     # update the community remote
-    cfg = ansible_config('admin')
-    api_prefix = cfg.get("api_prefix").rstrip("/")
     payload = {
         'url': 'https://beta-galaxy.ansible.com/api/',
         'auth_url': None,
@@ -51,16 +44,16 @@ def test_api_ui_v1_remote_sync(ansible_config):
         'rate_limit': 8,
         'signed_only': False,
     }
-    resp = api_client("content/community/v3/sync/config/", args=payload, method="PUT")
+    resp = gc.put("content/community/v3/sync/config/", body=payload)
 
     # verify change
     assert resp['requirements_file'] == REQUIREMENTS_FILE
 
     # sync
-    resp = api_client("content/community/v3/sync/", args=payload, method="POST")
-    task = {'task': f'{api_prefix}/pulp/api/v3/tasks/{resp["task"]}/'}
+    resp = gc.post("content/community/v3/sync/", body=payload)
+    task = {'task': f'pulp/api/v3/tasks/{resp["task"]}/'}
     validate_json(instance=task, schema=schema_task)
-    resp = wait_for_task(api_client, task)
+    resp = wait_for_task(gc, task)
 
     try:
         if "Internal Server Error" in resp["error"]["description"]:
@@ -69,11 +62,7 @@ def test_api_ui_v1_remote_sync(ansible_config):
         pass
 
     # search collections for synced collection
-    resp = api_client(
-        f"{api_prefix}/_ui/v1/repo/community/?namespace=newswangerd&name=collection_demo",
-        args={},
-        method="GET"
-    )
+    resp = gc.get("_ui/v1/repo/community/?namespace=newswangerd&name=collection_demo")
 
     ds = resp['data']
     assert len(ds) == 1
@@ -83,29 +72,26 @@ def test_api_ui_v1_remote_sync(ansible_config):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-def test_sync_community_with_no_requirements_file(ansible_config):
-    cfg = ansible_config("admin")
-    api_client = get_client(cfg, request_token=True, require_auth=True)
-
-    remote = api_client("pulp/api/v3/remotes/ansible/collection/?name=community")["results"][0]
-    resp = api_client(
+def test_sync_community_with_no_requirements_file(galaxy_client):
+    gc = galaxy_client("admin")
+    remote = gc.get("pulp/api/v3/remotes/ansible/collection/?name=community")["results"][0]
+    resp = gc.patch(
         remote["pulp_href"],
-        method="PATCH",
-        args={
+        body={
             "requirements_file": None,
             "url": "https://beta-galaxy.ansible.com/api/",
         }
     )
-    wait_for_task(api_client, resp)
+    wait_for_task(gc, resp)
 
-    repo = api_client("pulp/api/v3/repositories/ansible/ansible/?name=community")["results"][0]
+    repo = gc.get("pulp/api/v3/repositories/ansible/ansible/?name=community")["results"][0]
 
     try:
-        api_client(f'{repo["pulp_href"]}sync/', method="POST")
+        gc.post(f'{repo["pulp_href"]}sync/', body={})
         # This API call should fail
         assert False
-    except GalaxyError as ge:
-        assert ge.http_code == 400
+    except GalaxyClientError as ge:
+        assert ge.response.status_code == 400
         # galaxy kit can't parse pulp error messages, so the contents of the error
         # message can't be verified.
         # assert "requirements_file" in ge.message

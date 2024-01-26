@@ -4,13 +4,9 @@ from ..utils import get_client, iterate_all
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-def test_repository_labels(ansible_config):
+def test_repository_labels(galaxy_client):
     # Get an API client running with admin user credentials
-    client = get_client(
-        config=ansible_config("admin"),
-        request_token=True,
-    )
-    api_prefix = client.config.get("api_prefix").rstrip("/")
+    gc=galaxy_client("admin")
 
     labels = {
         "!hide_from_search": {"rh-certified", "validated", "published", "community"},
@@ -22,10 +18,10 @@ def test_repository_labels(ansible_config):
     }
 
     for label in labels:
-        url = api_prefix + "/pulp/api/v3/repositories/ansible/ansible/?pulp_label_select={}"
+        url = "pulp/api/v3/repositories/ansible/ansible/?pulp_label_select={}"
         repos = {
             resp["name"] for resp in iterate_all(
-                client, url.format(label))
+                None, url.format(label), gc)
         }
         # now we have test cases that create multiple repos, we don't want
         # to take them into account in this test case

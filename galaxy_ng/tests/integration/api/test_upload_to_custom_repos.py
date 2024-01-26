@@ -8,10 +8,12 @@ from ..utils import (
     CollectionInspector,
     wait_for_all_tasks
 )
+from ..utils.repo_management_utils import create_repo_and_dist
+from ..utils.tasks import wait_for_all_tasks_gk
 from ..utils.tools import generate_random_string
 
 
-def _upload_test_common(config, client, artifact, base_path, dest_base_path=None):
+def _upload_test_common(config, client, artifact, base_path, dest_base_path=None, gc=None):
     api_prefix = config.get("api_prefix")
     url = config["url"]
 
@@ -34,19 +36,30 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
 
     assert proc.returncode == 0
 
-    wait_for_all_tasks(client)
+    if gc:
+        wait_for_all_tasks_gk(gc)
+        collection_url = (
+            f"content/{dest_base_path}/v3/collections/"
+            f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
+        )
+        collection_resp = gc.get(collection_url)
+        assert collection_resp["name"] == artifact.name
+    else:
+        wait_for_all_tasks(client)
+        collection_url = (
+            f"{api_prefix}content/{dest_base_path}/v3/collections/"
+            f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
+        )
+        collection_resp = client(collection_url)
+        assert collection_resp["name"] == artifact.name
 
-    collection_url = (
-        f"{api_prefix}content/{dest_base_path}/v3/collections/"
-        f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-    )
-
-    collection_resp = client(collection_url)
-    assert collection_resp["name"] == artifact.name
 
     # test download
     with tempfile.TemporaryDirectory() as dir:
-        api_root = config["url"]
+        if gc:
+            api_root = gc.galaxy_root
+        else:
+            api_root = config["url"]
         filename = f"{artifact.namespace}-{artifact.name}-{artifact.version}.tar.gz"
         tarball_path = f"{dir}/{filename}"
         url = (
@@ -81,21 +94,15 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
+def test_publish_to_custom_staging_repo(ansible_config, artifact, settings, galaxy_client):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be true")
     config = ansible_config(profile="admin")
-    client = get_client(
-        config=config
-    )
+    gc = galaxy_client("admin")
+    repo_name = f"repo-test-{generate_random_string()}"
+    create_repo_and_dist(gc, repo_name, pipeline="staging")
 
-    repo = AnsibleDistroAndRepo(
-        client,
-        f"repo-test-{generate_random_string()}",
-        repo_body={"pulp_labels": {"pipeline": "staging"}}
-    )
-
-    _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
+    _upload_test_common(config, None, artifact, repo_name, gc=gc)
 
 
 @pytest.mark.deployment_community
