@@ -132,7 +132,6 @@ def test_pulp_roles_endpoint(galaxy_client):
 @pytest.mark.pulp_api
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-@pytest.mark.this
 def test_pulp_task_endpoint(galaxy_client, require_auth, ansible_config):
 
     gc = galaxy_client("ee_admin")

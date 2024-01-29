@@ -174,7 +174,6 @@ def test_copy_collection_version(ansible_config, galaxy_client):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.this
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
 def test_copy_associated_content(ansible_config, galaxy_client):

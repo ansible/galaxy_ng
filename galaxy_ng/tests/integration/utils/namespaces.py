@@ -57,24 +57,21 @@ def get_all_namespaces(gc=None, api_version='v3'):
     return namespaces
 
 
-def generate_unused_namespace(api_client=None, api_version='v3'):
+def generate_unused_namespace(gc=None, api_version='v3'):
     """ Make a random namespace string that does not exist """
 
-    assert api_client is not None, "api_client is a required param"
-    existing = get_all_namespaces(api_client=api_client, api_version=api_version)
+    assert gc is not None, "api_client is a required param"
+    existing = get_all_namespaces(gc=gc, api_version=api_version)
     existing = dict((x['name'], x) for x in existing)
     return generate_namespace(exclude=list(existing.keys()))
 
 
-def create_unused_namespace(api_client=None):
+def create_unused_namespace(gc=None):
     """ Make a namespace for testing """
-
-    assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-
-    ns = generate_unused_namespace(api_client=api_client)
+    assert gc is not None, "api_client is a required param"
+    ns = generate_unused_namespace(gc=gc)
     payload = {'name': ns, 'groups': []}
-    api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
+    gc.post(f'v3/namespaces/', body=payload)
     return ns
 
 

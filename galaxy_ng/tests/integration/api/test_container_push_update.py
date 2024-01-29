@@ -7,7 +7,8 @@ from urllib.parse import urlparse
 
 import pytest
 
-from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
+from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image, \
+    remove_from_cache
 from galaxykit.utils import wait_for_task
 
 
@@ -47,6 +48,7 @@ def test_can_update_container_push(ansible_config, require_auth, galaxy_client):
     gc = galaxy_client("admin")
     if not require_auth:
         del gc.headers["Authorization"]
+        remove_from_cache("admin")
 
     # Get the pulp_href for the pushed repo
     image = gc.get("pulp/api/v3/repositories/container/container-push/?name=alpine")

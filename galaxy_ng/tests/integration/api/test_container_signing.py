@@ -3,12 +3,12 @@
 See: https://issues.redhat.com/browse/AAH-1358
 """
 import subprocess
-import time
 from urllib.parse import urlparse
 
 import pytest
 
-from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
+from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image, \
+    remove_from_cache
 from galaxykit.container_images import get_container
 from galaxykit.utils import wait_for_task
 
@@ -59,6 +59,7 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
     gc = galaxy_client("admin")
     if not require_auth:
         del gc.headers["Authorization"]
+        remove_from_cache("admin")
 
     # Get the pulp_href for the pushed image
     image = gc.get("pulp/api/v3/repositories/container/container-push/?name=alpine")

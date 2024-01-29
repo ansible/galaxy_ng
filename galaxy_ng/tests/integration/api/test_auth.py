@@ -7,8 +7,8 @@ import pytest
 from ansible.galaxy.api import GalaxyError
 
 from galaxykit.utils import GalaxyClientError
-from ..utils import get_client
 from ..utils import uuid4
+from ..utils.iqe_utils import remove_from_cache
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -23,12 +23,15 @@ def test_token_auth(profile, galaxy_client):
     """
     gc = galaxy_client(profile)
     del gc.headers["Authorization"]
+    remove_from_cache(profile)
+
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/collections/")
     assert ctx.value.response.status_code == 403
     gc = galaxy_client(profile, ignore_cache=True)
     resp = gc.get("")
     assert "available_versions" in resp
+
 
 
 @pytest.mark.deployment_standalone
@@ -38,6 +41,7 @@ def test_auth_admin(galaxy_client):
 
     gc = galaxy_client("admin")
     gc.headers["Authorization"] = f"Bearer {uuid4()}"
+    remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/collections/")
     assert ctx.value.response.status_code == 403
@@ -50,6 +54,7 @@ def test_auth_exception(galaxy_client):
 
     gc = galaxy_client("basic_user")
     gc.headers["Authorization"] = f"Bearer {uuid4()}"
+    remove_from_cache("basic_user")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/collections/")
     assert ctx.value.response.status_code == 403

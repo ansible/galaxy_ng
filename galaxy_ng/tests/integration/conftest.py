@@ -7,7 +7,6 @@ import pytest
 from orionutils.utils import increment_version
 from pkg_resources import parse_version, Requirement
 
-from galaxykit import GalaxyClient
 from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id
 from galaxykit.namespaces import create_namespace
@@ -120,7 +119,7 @@ def published(ansible_config, artifact, galaxy_client):
 
     # certify
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
+    set_certification(config, gc, artifact, hub_4_5=hub_4_5)
 
     return artifact
 

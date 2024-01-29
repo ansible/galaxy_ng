@@ -571,10 +571,9 @@ def test_api_ui_v1_me(ansible_config, settings):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-def test_api_ui_v1_my_namespaces(ansible_config):
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config, request_token=True, require_auth=True)
-    new_namespace = generate_unused_namespace(api_client=api_client, api_version='_ui/v1')
+def test_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
+    gc = galaxy_client("partner_engineer")
+    new_namespace = generate_unused_namespace(gc, api_version='_ui/v1')
 
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:

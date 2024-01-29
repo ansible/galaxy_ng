@@ -12,9 +12,8 @@ import pytest
 from galaxykit.groups import create_group_v3, create_group, get_roles, delete_group, \
     delete_group_v3, get_group_v3
 from galaxykit.namespaces import create_namespace
-from ..utils import UIClient, get_client
 
-from ..utils.iqe_utils import AnsibleConfigFixture
+from ..utils.iqe_utils import AnsibleConfigFixture, remove_from_cache
 
 pytestmark = pytest.mark.qa  # noqa: F821
 CLIENT_CONFIG = AnsibleConfigFixture("admin")
@@ -42,6 +41,7 @@ def test_group_role_listing(galaxy_client, test_data):
     if not test_data["require_auth"]:
         gc = galaxy_client("basic_user", ignore_cache=True)
         del gc.headers["Authorization"]
+        remove_from_cache("basic_user")
 
     # Create Group
     group_name = str(uuid.uuid4())
