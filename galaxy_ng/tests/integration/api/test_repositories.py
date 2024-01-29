@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 class TestRepositories:
     @pytest.mark.all
     @pytest.mark.repositories
+    @pytest.mark.skip(reason="pulp is changing how this works")
     def test_cant_upload_same_collection_same_repo(self, galaxy_client):
         """
         Verifies that the same collection / version cannot be uploaded to the same repo
