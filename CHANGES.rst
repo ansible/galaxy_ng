@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.9.1 (2024-01-30)
+==================
+
+Bugfixes
+--------
+
+- bump pulp_ansible to enable re-upload of deleted collection version
+  `AAH-2588 <https://issues.redhat.com/browse/AAH-2588>`_
+
+
+----
+
+
 4.9.0 (2023-12-06)
 ==================
 
