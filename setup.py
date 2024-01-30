@@ -19,7 +19,8 @@ version = "4.10.0dev"
 class PrepareStaticCommand(Command):
     DEV_UI_DOWNLOAD_URL = (
         "https://github.com/ansible/ansible-hub-ui/"
-        "releases/download/dev/automation-hub-ui-dist.tar.gz")
+        "releases/download/dev/automation-hub-ui-dist.tar.gz"
+    )
 
     ALTERNATE_UI_DOWNLOAD_URL = os.environ.get("ALTERNATE_UI_DOWNLOAD_URL")
 
@@ -31,9 +32,9 @@ class PrepareStaticCommand(Command):
 
     user_options = [
         (
-            'force-download-ui',
+            "force-download-ui",
             None,
-            'Replace any existing static files with the ones downloaded from github.'
+            "Replace any existing static files with the ones downloaded from github.",
         ),
     ]
 
@@ -76,13 +77,13 @@ class PrepareStaticCommand(Command):
 
 class SDistCommand(_SDistCommand):
     def run(self):
-        self.run_command('prepare_static')
+        self.run_command("prepare_static")
         return super().run()
 
 
 class BuildPyCommand(_BuildPyCommand):
     def run(self):
-        self.run_command('prepare_static')
+        self.run_command("prepare_static")
         return super().run()
 
 
@@ -105,8 +106,7 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
     else:
         repo = plugin.replace("-", "_")
         return (
-            f"{plugin}@git+https://git@github.com/"
-            f"{gh_namespace}/{repo}.git@{ref}#egg={plugin}"
+            f"{plugin}@git+https://git@github.com/" f"{gh_namespace}/{repo}.git@{ref}#egg={plugin}"
         )
 
 
@@ -124,6 +124,7 @@ requirements = [
     "insights_analytics_collector>=0.3.0",
     "boto3",
     "distro",
+    "django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base@devel",  # noqa 501
     # From vendored automated_logging
     "marshmallow<4.0.0,>=3.6.1",
     "django-picklefield<4.0.0,>=3.0.1",
@@ -133,7 +134,7 @@ requirements = [
 
 # https://softwareengineering.stackexchange.com/questions/223634/what-is-meant-by-now-you-have-two-problems
 def strip_package_name(spec):
-    operators = ['=', '>', '<', '~', '!', '^', '@']
+    operators = ["=", ">", "<", "~", "!", "^", "@"]
     for idc, char in enumerate(spec):
         if char in operators:
             return spec[:idc]
@@ -152,13 +153,11 @@ if unpin_requirements:
          #steps-to-run-dev-environment-with-specific-upstream-branch
     """
     DEV_SOURCE_PATH = os.getenv(
-        "DEV_SOURCE_PATH",
-        default="pulpcore:pulp_ansible:pulp_container:galaxy_importer"
+        "DEV_SOURCE_PATH", default="pulpcore:pulp_ansible:pulp_container:galaxy_importer"
     ).split(":")
     DEV_SOURCE_PATH += [path.replace("_", "-") for path in DEV_SOURCE_PATH]
     requirements = [
-        strip_package_name(req)
-        if req.lower().startswith(tuple(DEV_SOURCE_PATH)) else req
+        strip_package_name(req) if req.lower().startswith(tuple(DEV_SOURCE_PATH)) else req
         for req in requirements
     ]
     print("Installing with unpinned DEV_SOURCE_PATH requirements", requirements)
