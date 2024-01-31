@@ -7,33 +7,33 @@
 
 
 ---
-name: Galaxy Update Labels
+name: "Galaxy Update Labels"
 on:
   push:
     branches:
-    - main
+      - "main"
     paths:
-    - 'template_config.yml'
+      - "template_config.yml"
 
 jobs:
   update_backport_labels:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/setup-python@v4
+      - uses: "actions/setup-python@v4"
         with:
           python-version: "3.9"
-      - name: Configure Git with ansible name and email
+      - name: "Configure Git with ansible name and email"
         run: |
           git config --global user.name 'ansible'
           git config --global user.email 'ansible-infra@redhat.com'
-      - name: Install python dependencies
+      - name: "Install python dependencies"
         run: |
           echo ::group::PYDEPS
           pip install requests pyyaml
           echo ::endgroup::
-      - uses: actions/checkout@v3
-      - name: Update labels
+      - uses: "actions/checkout@v3"
+      - name: "Update labels"
         run: |
           python3 .github/workflows/scripts/update_backport_labels.py
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: "${{ secrets.RELEASE_TOKEN }}"

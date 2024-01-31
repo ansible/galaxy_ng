@@ -7,60 +7,60 @@
 
 
 ---
-name: Galaxy CI Update
+name: "Galaxy CI Update"
 on:
   workflow_dispatch:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
 
     strategy:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: "actions/checkout@v4"
         with:
-          repository: pulp/plugin_template
-          path: plugin_template
           fetch-depth: 0
+          repository: "pulp/plugin_template"
+          path: "plugin_template"
 
-      - uses: actions/setup-python@v4
+      - uses: "actions/setup-python@v4"
         with:
           python-version: "3.9"
 
-      - name: Install python dependencies
+      - name: "Install python dependencies"
         run: |
           echo ::group::PYDEPS
           pip install gitpython requests packaging jinja2 pyyaml
           echo ::endgroup::
 
-      - name: Configure Git with ansible name and email
+      - name: "Configure Git with ansible name and email"
         run: |
           git config --global user.name 'ansible'
           git config --global user.email 'ansible-infra@redhat.com'
-      - uses: actions/checkout@v3
+      - uses: "actions/checkout@v4"
         with:
-          path: galaxy_ng
-          ref: 'master'
           fetch-depth: 0
+          path: "galaxy_ng"
+          ref: "master"
 
-      - name: Run update
-        working-directory: galaxy_ng
+      - name: "Run update"
+        working-directory: "galaxy_ng"
         run: |
           ../plugin_template/scripts/update_ci.sh
 
-      - name: Create Pull Request for CI files
-        uses: peter-evans/create-pull-request@v4
+      - name: "Create Pull Request for CI files"
+        uses: "peter-evans/create-pull-request@v4"
         with:
-          token: ${{ secrets.RELEASE_TOKEN }}
-          path: galaxy_ng
-          committer: ansible <ansible-infra@redhat.com>
-          author: ansible <ansible-infra@redhat.com>
-          title: 'Update CI files for branch master'
-          body: 'No-Issue'
-          branch: 'update-ci/master'
-          base: 'master'
+          token: "${{ secrets.RELEASE_TOKEN }}"
+          path: "galaxy_ng"
+          committer: "ansible <ansible-infra@redhat.com>"
+          author: "ansible <ansible-infra@redhat.com>"
+          title: "Update CI files for branch master"
+          body: ""
+          branch: "update-ci/master"
+          base: "master"
           commit-message: |
             Update CI files
 
