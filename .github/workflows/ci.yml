@@ -61,7 +61,7 @@ jobs:
           fetch-depth: 1
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
       # lint_requirements contains tools needed for flake8, etc.
       - name: Install requirements
         run: pip3 install -r lint_requirements.txt
@@ -106,7 +106,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
 
       - name: Install httpie
         run: |
