@@ -133,7 +133,7 @@ A full configuration for all the repositories will look something like this:
 
 ```cfg title="~/.ansible.cfg"
 [galaxy]
-server_list = publishd, certified, community, staging, rejected
+server_list = published, certified, community, staging, rejected
 
 [galaxy_server.published]
 url=http://localhost:5001/api/galaxy/
