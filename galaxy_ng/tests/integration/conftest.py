@@ -466,6 +466,23 @@ def set_test_data(ansible_config, hub_version):
             # role already assigned to group. It's ok.
             pass
     gc.add_user_to_group(username="ee_admin", group_id=ee_group_id)
+    if aap_gateway():
+        users = ["iqe_normal_user", "jdoe", "ee_admin", "org-admin"]
+        for user in users:
+            body = {"username": user,"password":"Th1sP4ssd", "is_superuser": True}
+            if users == "iqe_normal_user":
+                body["is_superuser"] = False
+            gc.headers.update({"Referer": f"{gc.gw_root_url}access/users/create"})
+            gc.headers.update({"X-Csrftoken": gc.gw_client.csrftoken})
+            try:
+                gc.post(f"{gc.gw_root_url}api/gateway/v1/users/", body=body)
+            except GalaxyClientError as e:
+                if "already exists" in e.response.text:
+                    # user already exists. It's ok.
+                    pass
+                else:
+                    raise e
+
 
 
 @pytest.fixture(scope="session")

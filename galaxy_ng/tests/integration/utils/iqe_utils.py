@@ -720,9 +720,9 @@ def get_vault_loader():
 
 def require_signature_for_approval():
     ansible_config = get_ansible_config()
-    config = ansible_config("admin")
-    api_client = get_client(config)
-    settings = api_client("_ui/v1/settings/")
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc = galaxy_client("admin")
+    settings = gc.get_settings()
     return settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL")
 
 

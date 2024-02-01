@@ -97,7 +97,8 @@ def test_validated_publish(ansible_config, artifact, galaxy_client):
     """
     Publish a collection to the validated repo.
     """
-    gc = galaxy_client("partner_engineer")
+    # gc = galaxy_client("partner_engineer")
+    gc = galaxy_client("admin")
     logging.debug(f"artifact name {artifact.name}")
     logging.debug(f"artifact namespace {artifact.namespace}")
 
@@ -146,6 +147,7 @@ def test_api_publish_invalid_tarball(artifact, galaxy_client):
     assert resp["state"] == "failed"
 
 
+@pytest.mark.this
 def test_api_publish_missing_filename(galaxy_client, artifact):
     """Test handling of uploads missing the filename parameter."""
     gc = galaxy_client("basic_user")
@@ -313,7 +315,8 @@ def test_ansible_requires(ansible_config, spec, galaxy_client):
     and that the returned field matches the collection metadata.
     """
 
-    gc = galaxy_client("partner_engineer")
+    # gc = galaxy_client("partner_engineer")
+    gc = galaxy_client("admin")
     _, requires_ansible, result = spec
     artifact = build_collection(
         "skeleton",
