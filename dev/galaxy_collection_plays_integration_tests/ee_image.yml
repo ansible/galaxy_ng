@@ -1,0 +1,113 @@
+---
+- name: Test the execution environment (EE) repository module
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: false
+  ignore_errors: true
+  collections:
+    - galaxy.galaxy
+  vars:
+    repository: test-namespace/ee-minimal-rhel8
+    tag: latest
+    fake_image: quay.io/ansible/http-test-container:2.0.0
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars/vars.yml
+
+  tasks:
+    # Preparing an image:
+    # - Pulling a small image from Quay (does not matter what image it is)
+    # - Tagging it so that it can be pushed to private automation hub
+    # - Pushing the image
+    # - Deleting the images from the local system
+    # The tasks do not use the podman collection because it may not be
+    # available on the testing system.
+    - name: Ensure a small container image is available
+      ansible.builtin.command:
+        cmd: "podman pull {{ fake_image }}"
+      changed_when: true
+
+    - name: Ensure the image has the correct tag
+      ansible.builtin.command:
+        cmd: "podman tag {{ fake_image }} {{ hub_host }}/{{ repository }}:{{ tag }}"
+      changed_when: true
+
+#    - name: Ensure the image is pushed in private automation hub
+#      ansible.builtin.command:
+#        cmd: "podman push --tls-verify=false --remove-signatures
+#              --creds={{ ah_username }}:{{ ah_password }}
+#              {{ hub_host }}/{{ repository }}:{{ tag }}"
+#      changed_when: true
+#
+#    # Preparing a README file
+#    - name: Ensure a temporary file exists
+#      ansible.builtin.tempfile:
+#      register: tempfile
+#
+#    - name: Ensure some contents are stored in the temporary file
+#      ansible.builtin.copy:
+#        dest: "{{ tempfile['path'] }}"
+#        mode: 0600
+#        content: |
+#          # Mi entorno de ejecución
+#
+#          * bullet 1
+#          * bullet 2
+#
+#    - name: Create repository
+#      ah_ee_repository:
+#        name: ansible-automation-platform-19/ee-29-rhel8
+#        registry: redhat
+#        upstream_name: redhat
+#        state: present
+#        description: Supported execution environment
+#        include_tags: latest
+#        readme: |
+#          # My execution environment
+#
+#          * bullet 1
+#          * bullet 2
+#        ah_host: "{{ ah_host }}"
+#        ah_username: "{{ ah_username }}"
+#        ah_password: "{{ ah_password }}"
+#
+#    - name: Tag image
+#      ah_ee_image:
+#        name: ansible-automation-platform-19/ee-29-rhel8:latest
+#        state: present
+#        append: false
+#        tags:
+#          - v2
+#          - "2.0"
+#          - prod1
+#        ah_host: "{{ ah_host }}"
+#        ah_username: "{{ ah_username }}"
+#        ah_password: "{{ ah_password }}"
+#
+#    - name: Append Tags to image
+#      ah_ee_image:
+#        name: ansible-automation-platform-19/ee-29-rhel8:2.0.0-15
+#        state: present
+#        append: true
+#        tags:
+#              - prod2
+#              - prod2.0
+#        ah_host: "{{ ah_host }}"
+#        ah_username: "{{ ah_username }}"
+#        ah_password: "{{ ah_password }}"
+#
+#    - name: Remove image
+#      ah_ee_image:
+#        name: ansible-automation-platform-19/ee-29-rhel8:2.0.0-15
+#        state: absent
+#        ah_host: "{{ ah_host }}"
+#        ah_username: "{{ ah_username }}"
+#        ah_password: "{{ ah_password }}"
+#
+#    - name: Ensure the images are removed
+#      ansible.builtin.command:
+#        cmd: "podman rmi {{ fake_image }} {{ hub_host }}/{{ repository }}:{{ tag }}"
+#      changed_when: true
+...

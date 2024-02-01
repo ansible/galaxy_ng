@@ -1,0 +1,137 @@
+---
+- name: Galaxy + AH Collection Tests for Content Automation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  ignore_errors: true
+  collections:
+    - galaxy.galaxy
+
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars.yml
+
+  tasks:
+    - name: Create a group
+      ah_group:
+        name: revoke_access_test
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Add user to the group
+      ah_user:
+        username: "access_test_user"
+        password: "access_test_user"
+        first_name: "access_test_user"
+        last_name: "access_test_user"
+        groups:
+          - revoke_access_test
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: create a collection remote as that user, expected to fail
+      collection_remote:
+        name: community-test-group-roles
+        url: https://beta-galaxy.ansible.com/
+        requirements:
+          - name: infra.ee_utilities
+          - name: infra.controller_configuration
+        ah_host: "{{ ah_host }}"
+        ah_username: "access_test_user"
+        ah_password: "access_test_user"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+      register: result
+      failed_when: "'HTTP 403' not in result.msg"
+
+    - name: try to create namespace, expected to fail
+      ah_namespace:
+        name: revoke_access_test
+        company: Automator Inc.
+        email: automator@redhat.com
+        description: The namespace for all things automation
+        ah_host: "{{ ah_host }}"
+        ah_username: "access_test_user"
+        ah_password: "access_test_user"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+      register: result
+      failed_when: "'HTTP 403' not in result.msg"
+
+    - name: give access
+      group_roles:
+        state: present
+        groups:
+          - revoke_access_test
+        role_list:
+          - roles:
+              - galaxy.collection_remote_owner
+          - roles:
+              - galaxy.content_admin
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: try to change the remote, will pass this time
+      collection_remote:
+        name: community-test-group-roles
+        url: https://galaxy.ansible.com/
+        requirements:
+          - name: infra.ee_utilities
+          - name: infra.controller_configuration
+        ah_host: "{{ ah_host }}"
+        ah_username: "access_test_user"
+        ah_password: "access_test_user"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: try to create namespace, will pass this time
+      ah_namespace:
+        name: revoke_access_test
+        company: Automator Inc.
+        email: automator@redhat.com
+        description: The namespace for all things automation
+        ah_host: "{{ ah_host }}"
+        ah_username: "access_test_user"
+        ah_password: "access_test_user"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the user
+      ah_user:
+        state: absent
+        username: access_test_user
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the group
+      ah_group:
+        state: absent
+        name: revoke_access_test
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: delete the remote
+      collection_remote:
+        name: community-test-group-roles
+        url: https://beta-galaxy.ansible.com/
+        state: absent
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: delete the namespace
+      ah_namespace:
+        name: revoke_access_test
+        state: absent
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"

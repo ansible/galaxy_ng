@@ -1,0 +1,60 @@
+---
+- name: Galaxy + AH Collection Tests for Repo Automation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  ignore_errors: true
+  collections:
+    - galaxy.galaxy
+
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars/vars.yml
+
+  tasks:
+    - name: create a collection remote
+      collection_remote:
+        name: community-infra
+        url: https://beta-galaxy.ansible.com/
+        requirements:
+          - name: infra.ee_utilities
+          - name: infra.controller_configuration
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Configure remote from a file
+      collection_remote:
+        name: remote_req_file
+        url: https://galaxy.ansible.com/api/
+        requirements_file: vars/collection_requirement_file.yml
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: create a collection repository
+      collection_repository:
+        name: collection-repo-community-infra
+        pulp_labels:
+          pipeline: "approved"
+        distribution:
+          name: "distribution"
+          state: present
+        remote: community-infra
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+#    - name: Sync community repo and wait up to 60 seconds
+#      collection_repository_sync:
+#        name: collection-repo-community-infra
+#        wait: true
+#        timeout: 60
+#        ah_host: "{{ ah_host }}"
+#        ah_username: "{{ ah_username }}"
+#        ah_password: "{{ ah_password }}"
+#        ah_path_prefix: "{{ ah_path_prefix }}"

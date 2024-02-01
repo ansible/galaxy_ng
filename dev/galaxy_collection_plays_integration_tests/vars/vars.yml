@@ -1,0 +1,5 @@
+ah_host: http://localhost:5001
+hub_host: localhost:5001
+ah_username: admin
+ah_password: admin
+ah_path_prefix: galaxy

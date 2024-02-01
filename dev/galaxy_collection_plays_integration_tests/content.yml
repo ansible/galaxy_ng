@@ -1,0 +1,102 @@
+---
+- name: Galaxy + AH Collection Tests for Content Automation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  ignore_errors: true
+  collections:
+    - galaxy.galaxy
+
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars/vars.yml
+
+    - name: Include dispatch vars
+      ansible.builtin.include_vars:
+        file: vars/dispatch_vars.yml
+
+  tasks:
+    - name: Create the automate namespace
+      ah_namespace:
+        name: automate
+        company: Automator Inc.
+        email: automator@redhat.com
+        description: The namespace for all things automation
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+
+    - name: Rename automate namespace to automator
+      ah_namespace:
+        name: automate
+        new_name: automator
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the automator namespace
+      ah_namespace:
+        state: absent
+        name: automator
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Ensure there is a galaxy namespace
+      ah_namespace:
+        name: galaxy
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Creates directory
+      ansible.builtin.file:
+        path: "{{ ah_configuration_working_dir }}"
+        state: directory
+
+    - name: Download Tower tarball
+      ansible.builtin.get_url:
+        url: https://galaxy.ansible.com/download/infra-controller_configuration-2.4.0.tar.gz
+        dest: "{{ ah_configuration_working_dir }}/infra-controller_configuration-2.4.0.tar.gz"
+        mode: '0440'
+
+    - name: Upload Tower collection to automation hub
+      ah_collection_upload:
+        path: "{{ ah_configuration_working_dir }}/infra-controller_configuration-2.4.0.tar.gz"
+        wait: true
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+
+    - name: Approve the galaxy collection
+      ah_approval:
+        namespace: infra
+        name: controller_configuration
+        version: "2.4.0"
+        request_timeout: 60
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+
+    - name: Delete the galaxy collection
+      ah_collection:
+        state: absent
+        namespace: infra
+        name: controller_configuration
+        version: "2.4.0"
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+
+#    - name: Publish Collections
+#      ansible.builtin.include_role:
+#        name: publish
+#      vars:
+#        ah_collections:
+#          - collection_name: cisco.iosxr
+#            git_url: https://github.com/ansible-collections/cisco.iosxr
+#        ah_auto_approve: true

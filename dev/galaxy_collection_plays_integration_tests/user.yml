@@ -3,6 +3,7 @@
   hosts: localhost
   connection: local
   gather_facts: false
+  ignore_errors: true
   collections:
     - galaxy.galaxy
 
