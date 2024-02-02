@@ -44,10 +44,9 @@ RUN chgrp -R 0 $HOME && \
     chmod -R g=u $HOME
 
 RUN set -ex; \
-    install -dm 0775 -o galaxy /var/lib/pulp/artifact \
-                               /var/lib/pulp/{media,scripts,tmp} \
-                               /etc/pulp/certs \
-                               /etc/pulp/keys \
+    install -dm 0775 -o galaxy \
+                               /var/lib/pulp/{artifact,media,scripts,tmp} \
+                               /etc/pulp/{certs,keys} \
                                /tmp/ansible && \
     pip3.11 install --no-deps --editable /app && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
@@ -76,8 +75,6 @@ RUN for file in \
 
 USER galaxy
 WORKDIR /app
-VOLUME [ "/var/lib/pulp/artifact", \
-         "/var/lib/pulp/scripts", \
-         "/var/lib/pulp/tmp", \         
+VOLUME [ "/var/lib/pulp", \     
          "/tmp/ansible" ]
 ENTRYPOINT [ "/entrypoint.sh" ]
