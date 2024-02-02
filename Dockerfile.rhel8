@@ -22,7 +22,7 @@ COPY requirements/requirements.insights.txt /tmp/requirements.txt
 # NOTE: en_US.UTF-8 locale is provided by glibc-langpack-en
 RUN set -ex; \
     DNF="dnf -y --disableplugin=subscription-manager" && \
-    INSTALL_PKGS="glibc-langpack-en git-core libpq python3.11 python3.11-pip" && \
+    INSTALL_PKGS="glibc-langpack-en git-core libpq python3.11 python3.11-pip skopeo" && \
     INSTALL_PKGS_BUILD="gcc libpq-devel python3.11-devel openldap-devel" && \
     LANG=C ${DNF} install ${INSTALL_PKGS} ${INSTALL_PKGS_BUILD} && \
     python3.11 -m venv "${VIRTUAL_ENV}" && \
@@ -44,16 +44,17 @@ RUN chgrp -R 0 $HOME && \
     chmod -R g=u $HOME
 
 RUN set -ex; \
-    install -dm 0775 -o galaxy /var/lib/pulp/artifact \
-                               /var/lib/pulp/tmp \
-                               /etc/pulp/certs \
+    install -dm 0775 -o galaxy \
+                               /var/lib/pulp/{artifact,assets,media,scripts,tmp} \
+                               /etc/pulp/{certs,keys} \
                                /tmp/ansible && \
     pip3.11 install --no-deps --editable /app && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
     install -Dm 0644 /app/ansible.cfg /etc/ansible/ansible.cfg && \
     install -Dm 0644 /app/docker/etc/settings.py /etc/pulp/settings.py && \
     install -Dm 0755 /app/docker/entrypoint.sh /entrypoint.sh && \
-    install -Dm 0755 /app/docker/bin/* /usr/local/bin/
+    install -Dm 0755 /app/docker/bin/* /usr/local/bin/ && \
+    install -Dm 0775 /app/galaxy-operator/bin/* /usr/bin/    
 
 USER galaxy
 WORKDIR /app
