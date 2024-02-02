@@ -77,6 +77,7 @@ RUN for file in \
 USER galaxy
 WORKDIR /app
 VOLUME [ "/var/lib/pulp/artifact", \
-         "/var/lib/pulp/tmp", \
+         "/var/lib/pulp/scripts", \
+         "/var/lib/pulp/tmp", \         
          "/tmp/ansible" ]
 ENTRYPOINT [ "/entrypoint.sh" ]
