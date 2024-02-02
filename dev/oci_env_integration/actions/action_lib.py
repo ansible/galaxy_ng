@@ -32,7 +32,7 @@ class OCIEnvIntegrationTest:
         env_file (string, required): oci-env env file to use for the tests. These are all loaded
             from dev/oci_env_integration/oci_env_configs
         run_tests (boolean, required): if true, integration tests will be run inside this instance
-        run_playbooks (boolean, optional): if true, Galaxy Collection playbook tests will be run inside this instance
+        run_playbooks (boolean, required): if true, Galaxy Collection playbook tests will be run inside this instance
         db_restore (string, optional): database backup to restore before running tests These are all
             loaded from dev/oci_env_integration/oci_env_configs. When defining this, omit
             the file extension (ex: fixture, not fixtur.tar.gz)

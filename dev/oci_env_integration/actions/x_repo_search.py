@@ -5,6 +5,7 @@ env = action_lib.OCIEnvIntegrationTest(
         {
             "env_file": "standalone.compose.env",
             "run_tests": True,
+            "run_playbooks": False,
             "db_restore": None,
             "pytest_flags": "-m x_repo_search"
         }
