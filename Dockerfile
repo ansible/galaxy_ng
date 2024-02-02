@@ -67,8 +67,7 @@ COPY scripts/* /usr/bin/
 RUN for file in \
       /usr/bin/route_paths.py \
       /usr/bin/wait_on_postgres.py \
-      /usr/bin/readyz.py \
-      /usr/bin/add_signing_service.sh ; \
+      /usr/bin/readyz.py ; \
     do touch $file ; chmod g+rw+x $file ; chgrp root $file ; done
 
 # DEV (end)
