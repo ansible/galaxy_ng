@@ -147,7 +147,6 @@ def test_api_publish_invalid_tarball(artifact, galaxy_client):
     assert resp["state"] == "failed"
 
 
-@pytest.mark.this
 def test_api_publish_missing_filename(galaxy_client, artifact):
     """Test handling of uploads missing the filename parameter."""
     gc = galaxy_client("basic_user")

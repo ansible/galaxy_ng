@@ -51,61 +51,37 @@ REGEX_403 = r"HTTP Code: 403"
 # /api/automation-hub/_ui/v1/auth/login/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_login(ansible_config):
+def test_gw_api_ui_v1_login(galaxy_client):
 
-    cfg = ansible_config("basic_user")
-
-    # an authenticated session has a csrftoken and a sessionid
-    with UIClient(config=cfg) as uclient:
-        assert uclient.cookies['csrftoken'] is not None
-        assert uclient.cookies['sessionid'] is not None
-
-
-# /api/automation-hub/_ui/v1/auth/login/
-@pytest.mark.deployment_standalone
-@pytest.mark.api_ui
-@pytest.mark.min_hub_version("4.7dev")
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_login_cache_header(ansible_config):
-
-    cfg = ansible_config("basic_user")
+    gc = galaxy_client("basic_user")
 
     # an authenticated session has a csrftoken and a sessionid
-    with UIClient(config=cfg) as uclient:
-        assert uclient.cookies['csrftoken'] is not None
-        assert uclient.cookies['sessionid'] is not None
-
-        # verify the auth/login related urls provide a must-revalidate cache type
-        resp = uclient.get('_ui/v1/auth/login/')
-        assert resp.headers['Cache-Control'] == 'no-cache, no-store, must-revalidate'
+    assert gc.cookies['csrftoken'] is not None
+    assert gc.cookies['gateway_sessionid'] is not None
 
 
 # /api/automation-hub/_ui/v1/auth/logout/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_logout(ansible_config):
-
-    cfg = ansible_config("basic_user")
-    uclient = UIClient(config=cfg)
+@pytest.mark.this
+def test_gw_api_ui_v1_logout(galaxy_client):
+    gc = galaxy_client("basic_user")
 
     # check the auth first
-    uclient.login()
-    assert uclient.cookies['csrftoken'] is not None
-    assert uclient.cookies['sessionid'] is not None
+    assert gc.cookies['csrftoken'] is not None
+    assert gc.cookies['gateway_sessionid'] is not None
+
+    gc.gw_client.logout()
 
     # logout should clear the sessionid but not the csrftoken
-    uclient.logout(expected_code=204)
-    assert uclient.cookies['csrftoken'] is not None
-    assert 'sessionid' not in uclient.cookies
+    assert gc.gw_client.cookies['csrftoken'] is not None
+    assert 'sessionid' not in gc.gw_client.cookies
 
 
 # /api/automation-hub/_ui/v1/collection-versions/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
+def test_gw_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -133,8 +109,7 @@ def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertifiedv2):
+def test_gw_api_ui_v1_collection_versions_version_range(ansible_config, uncertifiedv2):
     """Test the ?version_range query parameter."""
     c1, c2 = uncertifiedv2
     cfg = ansible_config('basic_user')
@@ -177,13 +152,13 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
 # /api/automation-hub/_ui/v1/collection_signing/{path}/{namespace}/{collection}/
 # /api/automation-hub/_ui/v1/collection_signing/{path}/{namespace}/{collection}/{version}/
 # /api/automation-hub/_ui/v1/controllers/
+# TODO: skip if GW?
 
 # /api/automation-hub/_ui/v1/distributions/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_distributions(ansible_config):
+def test_gw_api_ui_v1_distributions(ansible_config):
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
         resp = uclient.get('_ui/v1/distributions/?limit=1000')
@@ -227,8 +202,7 @@ def test_api_ui_v1_distributions(ansible_config):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_distributions_by_id(ansible_config):
+def test_gw_api_ui_v1_distributions_by_id(ansible_config):
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
 
@@ -257,8 +231,7 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/execution-environments/registries/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_execution_environments_registries(ansible_config):
+def test_gw_api_ui_v1_execution_environments_registries(ansible_config):
 
     cfg = ansible_config('ee_admin')
     with UIClient(config=cfg) as uclient:
@@ -353,8 +326,7 @@ def local_container():
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_feature_flags(ansible_config):
+def test_gw_api_ui_v1_feature_flags(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -374,8 +346,7 @@ def test_api_ui_v1_feature_flags(ansible_config):
 # /api/automation-hub/_ui/v1/groups/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_groups(ansible_config):
+def test_gw_api_ui_v1_groups(ansible_config):
 
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
@@ -409,8 +380,7 @@ def test_api_ui_v1_groups(ansible_config):
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_groups_users(ansible_config):
+def test_gw_api_ui_v1_groups_users(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -438,8 +408,7 @@ def test_api_ui_v1_groups_users(ansible_config):
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_groups_users_add_delete(ansible_config):
+def test_gw_api_ui_v1_groups_users_add_delete(ansible_config):
 
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
@@ -496,8 +465,7 @@ def test_api_ui_v1_groups_users_add_delete(ansible_config):
 # /api/automation-hub/_ui/v1/groups/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_groups_by_id(ansible_config):
+def test_gw_api_ui_v1_groups_by_id(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -521,8 +489,7 @@ def test_api_ui_v1_groups_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/imports/collections/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_imports_collections(ansible_config):
+def test_gw_api_ui_v1_imports_collections(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -555,8 +522,7 @@ def test_api_ui_v1_imports_collections(ansible_config):
 # /api/automation-hub/_ui/v1/me/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_me(ansible_config, settings):
+def test_gw_api_ui_v1_me(ansible_config, settings):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -585,8 +551,7 @@ def test_api_ui_v1_me(ansible_config, settings):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
+def test_gw_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
     gc = galaxy_client("partner_engineer")
     new_namespace = generate_unused_namespace(gc, api_version='_ui/v1')
 
@@ -643,8 +608,7 @@ def test_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_my_namespaces_name(ansible_config):
+def test_gw_api_ui_v1_my_namespaces_name(ansible_config):
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
         # get the response
@@ -669,8 +633,7 @@ def test_api_ui_v1_my_namespaces_name(ansible_config):
 # /api/automation-hub/_ui/v1/remotes/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_remotes(ansible_config):
+def test_gw_api_ui_v1_remotes(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -693,8 +656,7 @@ def test_api_ui_v1_remotes(ansible_config):
 # /api/automation-hub/_ui/v1/remotes/{pulp_id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_remotes_by_id(ansible_config):
+def test_gw_api_ui_v1_remotes_by_id(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -719,8 +681,7 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
+def test_gw_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -736,8 +697,7 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_collection_detail_view(ansible_config, published):
+def test_gw_api_ui_v1_collection_detail_view(ansible_config, published):
 
     namespace = published.namespace
     name = published.name
@@ -762,8 +722,7 @@ def test_api_ui_v1_collection_detail_view(ansible_config, published):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_settings(ansible_config):
+def test_gw_api_ui_v1_settings(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -788,8 +747,7 @@ def test_api_ui_v1_settings(ansible_config):
 # /api/automation-hub/_ui/v1/tags/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_tags(ansible_config):
+def test_gw_api_ui_v1_tags(ansible_config):
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -806,7 +764,7 @@ def test_api_ui_v1_tags(ansible_config):
 
 # /api/automation-hub/_ui/v1/tags/collections/
 @pytest.mark.deployment_community
-def test_api_ui_v1_tags_collections(ansible_config, upload_artifact):
+def test_gw_api_ui_v1_tags_collections(ansible_config, upload_artifact):
 
     config = ansible_config("basic_user")
     api_client = get_client(config)
@@ -863,7 +821,7 @@ def test_api_ui_v1_tags_collections(ansible_config, upload_artifact):
 
 # /api/automation-hub/_ui/v1/tags/roles/
 @pytest.mark.deployment_community
-def test_api_ui_v1_tags_roles(ansible_config):
+def test_gw_api_ui_v1_tags_roles(ansible_config):
     """Test endpoint's sorting and filtering"""
 
     def _sync_role(github_user, role_name):
@@ -940,8 +898,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
 # /api/automation-hub/_ui/v1/users/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_users(ansible_config):
+def test_gw_api_ui_v1_users(ansible_config):
 
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
@@ -981,8 +938,7 @@ def test_api_ui_v1_users(ansible_config):
 # /api/automation-hub/_ui/v1/users/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
-def test_api_ui_v1_users_by_id(ansible_config):
+def test_gw_api_ui_v1_users_by_id(ansible_config):
 
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
