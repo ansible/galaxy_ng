@@ -19,8 +19,8 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - TEST_PROFILE: standalone
-          - TEST_PROFILE: keycloak
+          - TEST_PROFILE: galaxy_collection_standalone
+          - TEST_PROFILE: galaxy_collection_keycloak
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
