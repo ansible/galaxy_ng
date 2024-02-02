@@ -9,7 +9,7 @@ issue_format = "`AAH-{issue} <https://issues.redhat.com/browse/AAH-{issue}>`_"
 
 [tool.black]
 line-length = 100
-target-version = ["py36", "py37"]
+target-version = ["py311"]
 exclude = '''
 /(
     \.eggs
@@ -21,6 +21,12 @@ exclude = '''
   | migrations
 )/
 '''
+
+
+[tool.isort]
+profile = "black"
+line_length = 100
+split_on_trailing_comma = true
 
 
 [tool.darker]
