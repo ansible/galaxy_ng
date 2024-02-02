@@ -148,11 +148,11 @@ gh-action/certified-sync:
 
 .PHONY: gh-action/galaxy_collection_standalone
 gh-action/galaxy_collection_standalone:
-	python3 dev/oci_env_integration/actions/galaxy_collection.py
+	python3 dev/oci_env_integration/actions/galaxy_collection_standalone.py
 
 .PHONY: gh-action/galaxy_collection_keycloak
 gh-action/galaxy_collection_keycloak:
-	python3 dev/oci_env_integration/actions/galaxy_collection.py
+	python3 dev/oci_env_integration/actions/galaxy_collection_keycloak.py
 
 .PHONY: docker/loaddata
 docker/loaddata:  ## Load initial data from python script

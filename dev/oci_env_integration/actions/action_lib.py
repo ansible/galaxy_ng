@@ -65,6 +65,7 @@ class OCIEnvIntegrationTest:
         try:
             self.set_up_env()
             self.run_test()
+            self.run_playbooks()
         except Exception as e:
             print(e)
             self.failed = True
@@ -130,11 +131,11 @@ class OCIEnvIntegrationTest:
 
     def run_playbooks(self):
         for env in self.envs:
-            if wait_time := self.envs[env].get("wait_before_tests", 20):
-                print(f"waiting {wait_time} seconds")
-                time.sleep(wait_time)
-
             if self.envs[env]["run_playbooks"]:
+                if wait_time := self.envs[env].get("wait_before_tests", 20):
+                    print(f"waiting {wait_time} seconds")
+                    time.sleep(wait_time)
+
                 if len(self.envs[env]["playbooks"]) > 0:
                     for playbook in self.envs[env]["playbooks"]:
                         print(f"testing the {playbook} playbook")
