@@ -1,19 +1,15 @@
 """test_collection_delete.py - Tests related to collection deletion.
 """
 
-import time
 
 import pytest
-from ansible.galaxy.api import GalaxyError
 
-from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxykit.collections import delete_collection, get_collection
 from galaxykit.utils import wait_for_task, GalaxyClientError
 
 from ..utils import (
     get_all_collections_by_repo,
     get_all_repository_collection_versions,
-    get_client,
 )
 from ..utils.iqe_utils import is_stage_environment
 
@@ -76,6 +72,8 @@ def test_delete_collection_version(galaxy_client, uncertifiedv2):
                 matches.append(k)
         for rcv in matches:
             rcv_url = cv_before[rcv]['href']
+            # workaround
+            rcv_url = rcv_url.replace("/api/galaxy/", "/api/hub/")
             resp = gc.delete(rcv_url)
             wait_for_task(gc, resp, timeout=10000)
 
@@ -116,13 +114,15 @@ def test_delete_default_repos(galaxy_client, uncertifiedv2):
 
     # Attempt to modify default distros and delete distros and repos
     for path in PROTECTED_BASE_PATHS:
-        results = gc.get(f"pulp/api/v3/distributions/ansible/ansible?base_path={path}")
+        results = gc.get(f"pulp/api/v3/distributions/ansible/ansible/?base_path={path}")
         assert results["count"] == 1
 
         distro = results["results"][0]
         assert distro["repository"] is not None
 
         try:
+            # workaround
+            distro["pulp_href"] = distro["pulp_href"].replace("/api/galaxy/", "/api/hub/")
             gc.delete(distro["pulp_href"])
             # This API call should fail
             assert False
@@ -130,6 +130,8 @@ def test_delete_default_repos(galaxy_client, uncertifiedv2):
             assert ge.response.status_code == 403
 
         try:
+            # workaround
+            distro["repository"] = distro["repository"].replace("/api/galaxy/", "/api/hub/")
             gc.delete(distro["repository"])
             # This API call should fail
             assert False

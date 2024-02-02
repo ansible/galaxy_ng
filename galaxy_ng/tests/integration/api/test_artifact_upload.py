@@ -315,8 +315,7 @@ def test_ansible_requires(ansible_config, spec, galaxy_client):
     and that the returned field matches the collection metadata.
     """
 
-    # gc = galaxy_client("partner_engineer")
-    gc = galaxy_client("admin")
+    gc = galaxy_client("partner_engineer")
     _, requires_ansible, result = spec
     artifact = build_collection(
         "skeleton",

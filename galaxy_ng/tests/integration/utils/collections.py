@@ -532,6 +532,8 @@ def get_all_collections_by_repo(gc):
     for repo in collections.keys():
         next_page = f'{gc.galaxy_root}_ui/v1/collection-versions/?repository={repo}'
         while next_page:
+            # workaround
+            next_page = next_page.replace("/api/galaxy/", "/api/hub/")
             resp = gc.get(next_page)
             for _collection in resp['data']:
                 key = (
@@ -558,8 +560,13 @@ def get_all_repository_collection_versions(gc):
 
     collections = []
     for repo in repositories:
-        next_page = f'{gc.galaxy_root}content/{repo}/v3/collections/'
+        # next_page = f'{gc.galaxy_root}content/{repo}/v3/collections/'
+        # previous line should work but responds 302 redirect but requests library
+        # does not include auth ??
+        next_page = f'{gc.galaxy_root}content/{repo}/v3/plugin/ansible/content/{repo}/collections/index/'
         while next_page:
+            # workaround
+            next_page = next_page.replace("/api/galaxy/", "/api/hub/")
             resp = gc.get(next_page)
             collections.extend(resp['data'])
             next_page = resp.get('links', {}).get('next')
@@ -568,6 +575,7 @@ def get_all_repository_collection_versions(gc):
     for collection in collections:
         next_page = collection['versions_url']
         while next_page:
+            next_page = next_page.replace("/api/galaxy/", "/api/hub/")
             resp = gc.get(next_page)
             for cv in resp['data']:
                 cv['namespace'] = collection['namespace']
