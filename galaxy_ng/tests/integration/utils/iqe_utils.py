@@ -746,3 +746,6 @@ def galaxy_auto_sign_collections():
     api_client = get_client(config)
     settings = api_client("_ui/v1/settings/")
     return settings.get("GALAXY_AUTO_SIGN_COLLECTIONS")
+
+def fix_prefix_workaround(url):
+    return url.replace("/api/galaxy/", "/api/hub/")

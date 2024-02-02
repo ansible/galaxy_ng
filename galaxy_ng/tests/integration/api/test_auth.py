@@ -16,6 +16,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.parametrize("profile", ("basic_user", "partner_engineer", "org_admin", "admin"))
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
+@pytest.mark.skip_in_gw
 def test_token_auth(profile, galaxy_client):
     """Test whether normal auth is required and works to access APIs.
 

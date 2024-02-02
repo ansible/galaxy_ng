@@ -12,7 +12,7 @@ from galaxykit.utils import wait_for_task, wait_for_url
 from ..conftest import is_hub_4_5
 from ..constants import USERNAME_PUBLISHER
 from ..utils import set_certification
-from ..utils.iqe_utils import is_ocp_env
+from ..utils.iqe_utils import is_ocp_env, fix_prefix_workaround
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -35,6 +35,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
         for repo in collections.keys():
             next_page = f'_ui/v1/collection-versions/?repository={repo}'
             while next_page:
+                next_page = fix_prefix_workaround(next_page)
                 resp = gc_admin.get(next_page)
                 for _collection in resp['data']:
                     key = (_collection['namespace'], _collection['name'], _collection['version'])
@@ -119,6 +120,7 @@ def test_copy_collection_version(ansible_config, galaxy_client):
         for repo in collections.keys():
             next_page = f'_ui/v1/collection-versions/?repository={repo}'
             while next_page:
+                next_page = fix_prefix_workaround(next_page)
                 resp = gc_admin.get(next_page)
                 for _collection in resp['data']:
                     key = (_collection['namespace'], _collection['name'], _collection['version'])
@@ -205,6 +207,10 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     cv_href = collection_version["pulp_href"]
 
     collection = f'content/staging/v3/collections/{artifact.namespace}/{artifact.name}/'
+    collection = f'content/staging/v3/plugin/ansible/content/staging/collections/index/{artifact.namespace}/{artifact.name}/'
+
+    # content/staging/v3/plugin/ansible/content/staging/collections/index/autohubtest2/collection_dep_a_hwhtkfor/
+
     collection_version = f'{collection}versions/{artifact.version}/'
     collection_mark = (
         f'pulp/api/v3/content/ansible/collection_marks/'
@@ -255,6 +261,7 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     assert copy_result["version"] == artifact.version
 
     collection = f'content/community/v3/collections/{artifact.namespace}/{artifact.name}/'
+    collection = f'content/community/v3/plugin/ansible/content/staging/collections/index/{artifact.namespace}/{artifact.name}/'
     collection_version = f'{collection}versions/{artifact.version}/'
     collection_mark = (
         f'pulp/api/v3/content/ansible/collection_marks/'

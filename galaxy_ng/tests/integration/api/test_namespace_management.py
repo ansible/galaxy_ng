@@ -186,6 +186,7 @@ def test_namespace_edit_logo(galaxy_client):
     # verify no side effects
     # fields that should NOT change
     for field in ["pulp_href", "name", "company", "email", "description", "resources", "links"]:
+        # FIXME
         assert my_namespace[field] == updated_again_namespace[field]
 
     # fields that changed

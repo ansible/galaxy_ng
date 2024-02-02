@@ -85,6 +85,7 @@ galaxy_stage_ansible: tests that run against galaxy-stage.ansible.com
 installer_smoke_test: smoke tests to validate AAP installation (VM)
 load_data: tests that load data that will be verified after upgrade or backup/restore
 verify_data: tests that verify the data previously loaded by load_data test
+skip_in_gw: tests that need to be skipped if hub is behind the gateway (temporary)
 """
 
 logger = logging.getLogger(__name__)

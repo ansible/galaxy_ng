@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env
+from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env, fix_prefix_workaround
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 
 from galaxy_ng.tests.integration.utils.repo_management_utils import (
@@ -578,6 +578,10 @@ class TestXRepoSearch:
             f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_2.name}"
         )
 
+        collection_resp_1["results"][0]["pulp_href"] = fix_prefix_workaround(
+            collection_resp_1["results"][0]["pulp_href"])
+        collection_resp_2["results"][0]["pulp_href"] = fix_prefix_workaround(
+            collection_resp_2["results"][0]["pulp_href"])
         content_units = [
             collection_resp_1["results"][0]["pulp_href"],
             collection_resp_2["results"][0]["pulp_href"],
@@ -732,6 +736,7 @@ class TestXRepoSearch:
         assert matches == 2
 
     @pytest.mark.x_repo_search
+    @pytest.mark.skip_in_gw # creates a new user, skip in gateway
     def test_private_repo(self, galaxy_client):
         """
         Verifies that a basic user can't view private repos
@@ -765,6 +770,7 @@ class TestXRepoSearch:
         assert matches == 0
 
     @pytest.mark.x_repo_search
+    @pytest.mark.skip_in_gw
     def test_any_user_can_see_non_private_repos(self, galaxy_client):
         """
         Verifies that a user without permissions can view repos that are not private
@@ -798,6 +804,7 @@ class TestXRepoSearch:
         assert matches == 2
 
     @pytest.mark.x_repo_search
+    @pytest.mark.skip_in_gw # creates a new user, so skip in gw
     def test_private_repo_with_perm(self, galaxy_client):
         """
         Verifies that a user with view permissions can view private repos
