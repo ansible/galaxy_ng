@@ -23,7 +23,7 @@ from .container import (
     ContainerRegistryRepos
 
 )
-
+from .organization import Organization, OrganizationTeam
 from .aiindex import AIIndexDenyList
 
 __all__ = (
@@ -39,5 +39,7 @@ __all__ = (
     'ContainerNamespace',
     'ContainerRegistryRemote',
     'ContainerRegistryRepos',
+    'Organization',
+    'OrganizationTeam',
     'AIIndexDenyList',
 )
