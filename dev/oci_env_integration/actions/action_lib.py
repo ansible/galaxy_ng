@@ -129,12 +129,32 @@ class OCIEnvIntegrationTest:
                     f" {pytest_flags} {self.flags}"
                 )
 
+    def install_galaxy_collection(self, env):
+        self.exec_cmd(
+            env,
+            "exec git clone https://github.com/ansible/galaxy_collection /src/galaxy_collection_test"
+        )
+
+        # The ansible.cfg defined in the collection repository might break the test. We want the same variables for installation and running.
+        self.exec_cmd(env, "exec rm -f /src/galaxy_collection_test/ansible.cfg")
+        self.exec_cmd(env, "exec rm -f /src/galaxy_collection_test/galaxy.yml")
+        self.exec_cmd(env, "exec mv /src/galaxy_collection_test/.github/files/galaxy.yml.j2 /src/galaxy_collection_test/")
+        self.exec_cmd(
+            env,
+            'exec ansible all -i localhost, -c local -m template -a "src=/src/galaxy_collection_test/galaxy.yml.j2 dest=/src/galaxy_collection_test/galaxy.yml" -e collection_namespace=galaxy -e collection_name=galaxy -e collection_version=1.0.0 -e collection_repo=https://github.com/ansible/automation_hub_collection'
+        )
+        self.exec_cmd(env, "exec ansible-galaxy collection build --output-path /src/galaxy_collection_test/ /src/galaxy_collection_test/ -vvv")
+        self.exec_cmd(env, "exec ansible-galaxy collection install /src/galaxy_collection_test/galaxy-galaxy-1.0.0.tar.gz -vvv --force")
+        self.exec_cmd(env, "exec rm -rf /src/galaxy_collection_test")
+
     def run_playbooks(self):
         for env in self.envs:
             if self.envs[env]["run_playbooks"]:
                 if wait_time := self.envs[env].get("wait_before_tests", 20):
                     print(f"waiting {wait_time} seconds")
                     time.sleep(wait_time)
+
+                self.install_galaxy_collection(env)
 
                 if len(self.envs[env]["playbooks"]) > 0:
                     for playbook in self.envs[env]["playbooks"]:
