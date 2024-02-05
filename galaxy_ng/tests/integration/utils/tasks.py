@@ -72,16 +72,14 @@ def wait_for_task(api_client, resp, task_id=None, timeout=6000, raise_on_error=F
     return resp
 
 
-def wait_for_task_ui_client(uclient, task):
+def wait_for_task_ui_client(gc, task):
     counter = 0
     state = None
     while state in [None, 'waiting', 'running']:
         counter += 1
         if counter >= 60:
             raise Exception('Task is taking too long')
-        resp = uclient.get(absolute_url=task['task'])
-        assert resp.status_code == 200
-        ds = resp.json()
+        ds = gc.get(task['task'])
         state = ds['state']
         if state == 'completed':
             break

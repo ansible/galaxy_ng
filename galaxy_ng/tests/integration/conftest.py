@@ -106,21 +106,18 @@ def ansible_config():
 @pytest.fixture(scope="function")
 def published(ansible_config, artifact, galaxy_client):
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
     # publish
-    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
-        ansible_config=config
+        galaxy_client=gc
     )
 
     # certify
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(config, gc, artifact, hub_4_5=hub_4_5)
+    set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
     return artifact
 

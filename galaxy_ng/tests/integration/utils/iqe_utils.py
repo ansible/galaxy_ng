@@ -749,3 +749,24 @@ def galaxy_auto_sign_collections():
 
 def fix_prefix_workaround(url):
     return url.replace("/api/galaxy/", "/api/hub/")
+
+def get_paginated(client, relative_url: str = None) -> list:
+    """Iterate through all results in a paginated queryset"""
+    ds = client.get(relative_url)
+
+    key = 'results'
+    if 'data' in ds:
+        key = 'data'
+        results = ds['data']
+    else:
+        results = ds['results']
+
+    next_url = ds['links']['next']
+    while next_url:
+        next_url = fix_prefix_workaround(next_url)
+        _ds = client.get(next_url)
+
+        results.extend(_ds[key])
+        next_url = _ds['links']['next']
+
+    return results
