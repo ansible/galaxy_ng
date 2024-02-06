@@ -28,7 +28,8 @@ def test_galaxy_api_root(galaxy_client, artifact):
     assert "v3" in response["available_versions"]
     assert "pulp-v3" in response["available_versions"]
 
-    v3_root = gc.get(response['available_versions']['v3'])
+    # v3_root = gc.get(response['available_versions']['v3'])
+    v3_root = gc.get("v3/plugin/ansible/content/published/collections/")
     assert "published" in v3_root
 
     pulp_root = gc.get(response['available_versions']['pulp-v3'])

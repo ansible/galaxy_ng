@@ -2,11 +2,12 @@ import pytest
 import subprocess
 import tempfile
 
+from galaxykit.collections import get_collection_from_repo
 from ..utils import (
     AnsibleDistroAndRepo,
     get_client,
     CollectionInspector,
-    wait_for_all_tasks
+    wait_for_all_tasks, ansible_galaxy
 )
 from ..utils.repo_management_utils import create_repo_and_dist
 from ..utils.tasks import wait_for_all_tasks_gk
@@ -15,34 +16,18 @@ from ..utils.tools import generate_random_string
 
 def _upload_test_common(config, client, artifact, base_path, dest_base_path=None, gc=None):
     api_prefix = config.get("api_prefix")
-    url = config["url"]
 
     if dest_base_path is None:
-        url = f"{config['url']}content/{base_path}/"
         dest_base_path = base_path
 
-    cmd = [
-        "ansible-galaxy",
-        "collection",
-        "publish",
-        "--api-key",
-        config["token"],
-        "--server",
-        url,
-        artifact.filename,
-        "--ignore-certs"
-    ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    assert proc.returncode == 0
+    ansible_galaxy(
+        f"collection publish {artifact.filename} -vvv",
+        galaxy_client=gc, server=base_path, server_url=gc.galaxy_root + f"content/{base_path}/"
+    )
 
     if gc:
         wait_for_all_tasks_gk(gc)
-        collection_url = (
-            f"content/{dest_base_path}/v3/collections/"
-            f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
-        )
-        collection_resp = gc.get(collection_url)
+        collection_resp = get_collection_from_repo(gc, dest_base_path, artifact.namespace, artifact.name, "1.0.0")
         assert collection_resp["name"] == artifact.name
     else:
         wait_for_all_tasks(client)

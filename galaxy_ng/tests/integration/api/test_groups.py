@@ -40,7 +40,10 @@ def test_group_role_listing(galaxy_client, test_data):
     gc = galaxy_client("admin", ignore_cache=True)
     if not test_data["require_auth"]:
         gc = galaxy_client("basic_user", ignore_cache=True)
-        del gc.headers["Authorization"]
+        try:
+            del gc.headers["Authorization"]
+        except KeyError:
+            gc.gw_client.logout()
         remove_from_cache("basic_user")
 
     # Create Group

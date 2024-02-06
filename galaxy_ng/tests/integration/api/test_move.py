@@ -58,10 +58,8 @@ def test_move_collection_version(ansible_config, galaxy_client):
     # import and wait ...
     resp = upload_artifact(None, gc_admin, artifact)
     wait_for_task(gc_admin, resp)
-    dest_url = (
-        f"content/staging/v3/collections/{artifact.namespace}/"
-        f"{artifact.name}/versions/{artifact.version}/"
-    )
+    dest_url = (f"content/staging/v3/plugin/ansible/content/staging/collections/"
+                f"index/{artifact.namespace}/{artifact.name}/versions/{artifact.version}/")
     wait_for_url(gc_admin, dest_url)
 
     # Make sure it ended up in staging but not in published ...
@@ -147,6 +145,8 @@ def test_copy_collection_version(ansible_config, galaxy_client):
         f"content/staging/v3/collections/{artifact.namespace}/"
         f"{artifact.name}/versions/{artifact.version}/"
     )
+    dest_url = (f"content/staging/v3/plugin/ansible/content/staging/collections/"
+                f"index/{artifact.namespace}/{artifact.name}/versions/{artifact.version}/")
     wait_for_url(gc_admin, dest_url)
 
     # Make sure it ended up in staging ...
