@@ -20,6 +20,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Add user to the group
       ah_user:
@@ -33,6 +34,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: create a collection remote as that user, expected to fail
       collection_remote:
@@ -45,6 +47,7 @@
         ah_username: "access_test_user"
         ah_password: "access_test_user"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
       register: result
       failed_when: "'HTTP 403' not in result.msg"
 
@@ -58,6 +61,7 @@
         ah_username: "access_test_user"
         ah_password: "access_test_user"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
       register: result
       failed_when: "'HTTP 403' not in result.msg"
 
@@ -75,6 +79,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: try to change the remote, will pass this time
       collection_remote:
@@ -87,6 +92,7 @@
         ah_username: "access_test_user"
         ah_password: "access_test_user"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: try to create namespace, will pass this time
       ah_namespace:
@@ -98,6 +104,7 @@
         ah_username: "access_test_user"
         ah_password: "access_test_user"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Delete the user
       ah_user:
@@ -107,6 +114,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Delete the group
       ah_group:
@@ -116,6 +124,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: delete the remote
       collection_remote:
@@ -126,6 +135,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: delete the namespace
       ah_namespace:
@@ -135,3 +145,4 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false

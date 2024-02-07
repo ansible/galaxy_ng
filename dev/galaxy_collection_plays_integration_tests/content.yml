@@ -26,6 +26,7 @@
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
+        validate_certs: false
 
     - name: Rename automate namespace to automator
       ah_namespace:
@@ -35,6 +36,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Delete the automator namespace
       ah_namespace:
@@ -44,6 +46,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Ensure there is a galaxy namespace
       ah_namespace:
@@ -52,6 +55,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Creates directory
       ansible.builtin.file:
@@ -71,6 +75,7 @@
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
+        validate_certs: false
 
     - name: Approve the galaxy collection
       ah_approval:
@@ -81,6 +86,7 @@
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
+        validate_certs: false
 
     - name: Delete the galaxy collection
       ah_collection:
@@ -91,6 +97,7 @@
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
+        validate_certs: false
 
 #    - name: Publish Collections
 #      ansible.builtin.include_role:
@@ -100,3 +107,5 @@
 #          - collection_name: cisco.iosxr
 #            git_url: https://github.com/ansible-collections/cisco.iosxr
 #        ah_auto_approve: true
+#        validate_certs: false
+

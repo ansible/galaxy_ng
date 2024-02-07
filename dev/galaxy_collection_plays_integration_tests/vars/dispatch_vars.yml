@@ -42,9 +42,13 @@ ah_namespaces:
     links:
       - name: "Nothing"
         url: "https://github.com/ansible/awx"
+    validate_certs: false
   - name: infra
+    validate_certs: false
   - name: test_namespace
+    validate_certs: false
   - name: galaxy
+    validate_certs: false
 
 ah_repositories:
   - name: dispatch_test
@@ -54,7 +58,8 @@ ah_repositories:
       - name: infra.controller_configuration
     wait: true
     interval: 25
-    timeout: 1000000
+    timeout: 100
+    validate_certs: false
 
 ah_collection_remotes:
   - name: dispatch_test
@@ -62,6 +67,7 @@ ah_collection_remotes:
     requirements:
       - name: infra.ee_utilities
       - name: infra.controller_configuration
+    validate_certs: false
 
 ah_roles:
   - name: galaxy.stuff.mcstuffins
@@ -73,17 +79,23 @@ ah_roles:
       - view_user
       - add_ansiblerepository
       - add_collectionremote
+    validate_certs: false
   - name: galaxy.stuff.mcstuffins
     state: absent
+    validate_certs: false
 
 ah_groups:
   - name: operators
+    validate_certs: false
   - name: administrators
+    validate_certs: false
   - name: managers
+    validate_certs: false
 
 ah_users:
   # Ensure user operator1 exists (no group, no details)
   - username: dispatch_test1
+    validate_certs: false
   # Ensure user admin1 exists (all details, two groups)
   - username: dispatch_test2
     # Testing with UTF-8 characters
@@ -94,31 +106,39 @@ ah_users:
     groups:
       - operators
       - administrators
+    validate_certs: false
   # Testing user update\
   - username: dispatch_test3
     first_name: Róża
     is_superuser: true
+    validate_certs: false
   # Testing group membership
   - username: dispatch_test4
     groups: operators
     state: present
+    validate_certs: false
   # Ensure operator1 is member of group operators and managers
   - username: dispatch_test5
     groups:
       - managers
     append: true
+    validate_certs: false
   # Ensure operator1 is member of group administrators only
   - username: dispatch_test6
     groups:
       - administrators
     append: false
+    validate_certs: false
   # Ensure operator1 is member of no group
   - username: dispatch_test7
     groups: []
     append: false
+    validate_certs: false
   # Testing password change
   - username: dispatch_test8
     password: test123456
+    validate_certs: false
   - username: dispatch_test9
     state: absent
+    validate_certs: false
 ...

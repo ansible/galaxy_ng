@@ -20,6 +20,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Add 3 new users who are developers
       ah_user:
@@ -33,6 +34,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
       loop:
         - red
         - green
@@ -45,6 +47,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Create an omnipotent role with all permissions
       ah_role:
@@ -55,6 +58,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
 # TODO: Add a test that permissions/roles can be added to a group after
 # https://github.com/ansible/galaxy_collection/issues/179 is resolved.
@@ -72,6 +76,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
       loop:
         - ceo
         - cfo
@@ -85,6 +90,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
 
     - name: Delete the developers and executives groups
       ah_group:
@@ -94,6 +100,7 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
       loop:
         - developers
         - executives
@@ -106,3 +113,4 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false

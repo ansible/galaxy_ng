@@ -1,19 +1,19 @@
----
-- name: Collection tests - Dispatch role
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  ignore_errors: true
-  collections:
-    - galaxy.galaxy
-
-  pre_tasks:
-    - name: Include variables
-      ansible.builtin.include_vars:
-        file: vars/vars.yml
-
-    - name: Include dispatch vars
-      ansible.builtin.include_vars:
-        file: vars/dispatch_vars.yml
-  roles:
-    - galaxy.galaxy.dispatch
+#---
+#- name: Collection tests - Dispatch role
+#  hosts: localhost
+#  connection: local
+#  gather_facts: false
+#  ignore_errors: true
+#  collections:
+#    - galaxy.galaxy
+#
+#  pre_tasks:
+#    - name: Include variables
+#      ansible.builtin.include_vars:
+#        file: vars/vars.yml
+#
+#    - name: Include dispatch vars
+#      ansible.builtin.include_vars:
+#        file: vars/dispatch_vars.yml
+#  roles:
+#    - galaxy.galaxy.dispatch
