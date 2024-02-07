@@ -57,6 +57,15 @@
         ah_path_prefix: "{{ ah_path_prefix }}"
         validate_certs: false
 
+    - name: Ensure there is a infra namespace
+      ah_namespace:
+        name: infra
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: false
+
     - name: Creates directory
       ansible.builtin.file:
         path: "{{ ah_configuration_working_dir }}"
@@ -78,11 +87,11 @@
         validate_certs: false
 
     - name: Approve the galaxy collection
+      timeout: 60
       ah_approval:
         namespace: infra
         name: controller_configuration
         version: "2.4.0"
-        request_timeout: 60
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"

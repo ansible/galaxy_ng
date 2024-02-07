@@ -1,33 +1,26 @@
-#---
-#- name: Collection tests - EE Image
-#  hosts: localhost
-#  connection: local
-#  become: false
-#  gather_facts: false
-#  ignore_errors: true
-#  collections:
-#    - galaxy.galaxy
-#  vars:
-#    repository: test-namespace/ee-minimal-rhel8
-#    tag: latest
-#    fake_image: quay.io/ansible/http-test-container:2.0.0
-#  pre_tasks:
-#    - name: Include variables
-#      ansible.builtin.include_vars:
-#        file: vars/vars.yml
-#
-#  tasks:
-#    # Preparing an image:
-#    # - Pulling a small image from Quay (does not matter what image it is)
-#    # - Tagging it so that it can be pushed to private automation hub
-#    # - Pushing the image
-#    # - Deleting the images from the local system
-#    # The tasks do not use the podman collection because it may not be
-#    # available on the testing system.
-#    - name: Ensure a small container image is available
-#      ansible.builtin.command:
-#        cmd: "podman pull {{ fake_image }}"
-#      changed_when: true
+---
+- name: Collection tests - EE Image
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: false
+  ignore_errors: true
+  collections:
+    - galaxy.galaxy
+  vars:
+    repository: test-namespace/ee-minimal-rhel8
+    tag: latest
+    fake_image: quay.io/ansible/http-test-container:2.0.0
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars/vars.yml
+
+  tasks:
+    - name: Ensure a small container image is available
+      ansible.builtin.command:
+        cmd: "podman pull {{ fake_image }}"
+        changed_when: true
 #
 #    - name: Ensure the image has the correct tag
 #      ansible.builtin.command:
