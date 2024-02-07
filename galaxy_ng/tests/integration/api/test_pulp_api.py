@@ -6,6 +6,7 @@ from jsonschema import validate as validate_json
 
 from galaxykit.utils import wait_for_task, GalaxyClientError
 from ..schemas import schema_pulp_objectlist, schema_pulp_roledetail, schema_task_detail
+from ..utils.iqe_utils import remove_from_cache
 from ..utils.rbac_utils import create_emtpy_local_image_container
 
 
@@ -139,14 +140,18 @@ def test_pulp_task_endpoint(galaxy_client, require_auth, ansible_config):
     name = create_emtpy_local_image_container(ansible_config("admin"), gc)
 
     if not require_auth:
-        del gc.headers["Authorization"]
+        try:
+            del gc.headers["Authorization"]
+        except KeyError:
+            gc.gw_client.logout()
+        remove_from_cache("ee_admin")
 
     delete_resp = gc.delete(
-        f"v3/plugin/execution-environments/repositories/{name}/"
+        f"v3/plugin/execution-environments/repositories/{name}/", relogin=False
     )
     task_url = delete_resp["task"]
 
-    task_detail = gc.get(task_url)
+    task_detail = gc.get(task_url, relogin=False)
     validate_json(instance=task_detail, schema=schema_task_detail)
 
     wait_for_task(gc, delete_resp)

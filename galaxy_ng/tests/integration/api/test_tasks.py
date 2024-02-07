@@ -1,6 +1,7 @@
 import pytest
 
 from ..utils import get_client, UIClient, PulpObjectBase
+from ..utils.iqe_utils import aap_gateway
 from ..utils.tools import generate_random_string
 
 REQUIREMENTS_YAML = """
@@ -39,6 +40,7 @@ def test_logging_cid_value_in_task(galaxy_client, ansible_config):
 @pytest.mark.pulp_api
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gateway_logging_cid_value_in_task(galaxy_client):
     gc = galaxy_client("admin")
     ans_repo = gc.get(

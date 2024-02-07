@@ -47,16 +47,19 @@ def test_can_update_container_push(ansible_config, require_auth, galaxy_client):
     # Get an API client running with admin user credentials
     gc = galaxy_client("admin")
     if not require_auth:
-        del gc.headers["Authorization"]
+        try:
+            del gc.headers["Authorization"]
+        except KeyError:
+            gc.gw_client.logout()
         remove_from_cache("admin")
 
     # Get the pulp_href for the pushed repo
-    image = gc.get("pulp/api/v3/repositories/container/container-push/?name=alpine")
+    image = gc.get("pulp/api/v3/repositories/container/container-push/?name=alpine", relogin=False)
     container_href = image["results"][0]["pulp_href"]
 
     for value in (42, 1):
         # Make a Patch request changing the retain_repo_versions attribute to value
-        response = gc.patch(container_href, body={"retain_repo_versions": value})
+        response = gc.patch(container_href, body={"retain_repo_versions": value}, relogin=False)
 
         resp = wait_for_task(gc, response)
         assert resp["state"] == "completed"

@@ -38,7 +38,7 @@ from ..utils import (
     wait_for_task_ui_client,
     wait_for_task,
 )
-from ..utils.iqe_utils import get_paginated, remove_from_cache
+from ..utils.iqe_utils import get_paginated, remove_from_cache, aap_gateway
 from ..utils.legacy import (
     clean_all_roles,
     wait_for_v1_task
@@ -53,6 +53,7 @@ REGEX_403 = r"HTTP Code: 403"
 # /api/automation-hub/_ui/v1/auth/login/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_login(galaxy_client):
     gc = galaxy_client("basic_user", ignore_cache=True)
 
@@ -64,6 +65,7 @@ def test_gw_api_ui_v1_login(galaxy_client):
 # /api/automation-hub/_ui/v1/auth/logout/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_logout(galaxy_client):
     gc = galaxy_client("basic_user", ignore_cache=True)
 
@@ -83,6 +85,7 @@ def test_gw_api_ui_v1_logout(galaxy_client):
 # /api/automation-hub/_ui/v1/collection-versions/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_collection_versions(galaxy_client, uncertifiedv2):
     gc = galaxy_client('basic_user')
     ds = gc.get('_ui/v1/collection-versions/')
@@ -100,6 +103,7 @@ def test_gw_api_ui_v1_collection_versions(galaxy_client, uncertifiedv2):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_collection_versions_version_range(galaxy_client, uncertifiedv2):
     """Test the ?version_range query parameter."""
     c1, c2 = uncertifiedv2
@@ -141,6 +145,7 @@ def test_gw_api_ui_v1_collection_versions_version_range(galaxy_client, uncertifi
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_distributions(galaxy_client):
     gc = galaxy_client('basic_user')
     ds = gc.get('_ui/v1/distributions/?limit=1000')
@@ -181,6 +186,7 @@ def test_gw_api_ui_v1_distributions(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_distributions_by_id(galaxy_client):
     gc = galaxy_client('basic_user')
     # get the response
@@ -203,6 +209,7 @@ def test_gw_api_ui_v1_distributions_by_id(galaxy_client):
 # /api/automation-hub/_ui/v1/execution-environments/registries/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_execution_environments_registries(galaxy_client):
     gc = galaxy_client('ee_admin')
 
@@ -285,6 +292,7 @@ def local_container():
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_feature_flags(galaxy_client):
 
     gc = galaxy_client('basic_user')
@@ -300,6 +308,7 @@ def test_gw_api_ui_v1_feature_flags(galaxy_client):
 # /api/automation-hub/_ui/v1/groups/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_groups(galaxy_client):
 
     gc = galaxy_client('partner_engineer')
@@ -326,6 +335,7 @@ def test_gw_api_ui_v1_groups(galaxy_client):
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_groups_users(galaxy_client):
 
     gc = galaxy_client('basic_user')
@@ -349,6 +359,7 @@ def test_gw_api_ui_v1_groups_users(galaxy_client):
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_groups_users_add_delete(galaxy_client):
 
     gc = galaxy_client('partner_engineer')
@@ -394,6 +405,7 @@ def test_gw_api_ui_v1_groups_users_add_delete(galaxy_client):
 # /api/automation-hub/_ui/v1/groups/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_groups_by_id(galaxy_client):
 
     gc = galaxy_client('basic_user')
@@ -411,6 +423,7 @@ def test_gw_api_ui_v1_groups_by_id(galaxy_client):
 # /api/automation-hub/_ui/v1/imports/collections/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_imports_collections(galaxy_client):
     gc = galaxy_client('basic_user')
     # get the response
@@ -436,6 +449,7 @@ def test_gw_api_ui_v1_imports_collections(galaxy_client):
 # /api/automation-hub/_ui/v1/me/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_me(galaxy_client, settings):
     gc = galaxy_client('basic_user')
     # get the response
@@ -459,6 +473,7 @@ def test_gw_api_ui_v1_me(galaxy_client, settings):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_my_namespaces(galaxy_client):
     gc = galaxy_client("partner_engineer")
     new_namespace = generate_unused_namespace(gc, api_version='_ui/v1')
@@ -506,6 +521,7 @@ def test_gw_api_ui_v1_my_namespaces(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_my_namespaces_name(galaxy_client):
     gc = galaxy_client('partner_engineer')
     # get the response
@@ -529,6 +545,7 @@ def test_gw_api_ui_v1_my_namespaces_name(galaxy_client):
 # /api/automation-hub/_ui/v1/remotes/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_remotes(galaxy_client):
     gc = galaxy_client('basic_user')
     # get the response
@@ -546,6 +563,7 @@ def test_gw_api_ui_v1_remotes(galaxy_client):
 # /api/automation-hub/_ui/v1/remotes/{pulp_id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_remotes_by_id(galaxy_client):
 
     gc = galaxy_client('basic_user')
@@ -565,6 +583,7 @@ def test_gw_api_ui_v1_remotes_by_id(galaxy_client):
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_repo_distro_by_basepath(galaxy_client):
 
     gc = galaxy_client('basic_user')
@@ -578,6 +597,7 @@ def test_gw_api_ui_v1_repo_distro_by_basepath(galaxy_client):
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_collection_detail_view(galaxy_client, published):
 
     namespace = published.namespace
@@ -599,6 +619,7 @@ def test_gw_api_ui_v1_collection_detail_view(galaxy_client, published):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_settings(galaxy_client):
     gc = galaxy_client('basic_user')
 
@@ -619,6 +640,7 @@ def test_gw_api_ui_v1_settings(galaxy_client):
 # /api/automation-hub/_ui/v1/tags/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_tags(galaxy_client):
 
     gc = galaxy_client('basic_user')
@@ -631,141 +653,10 @@ def test_gw_api_ui_v1_tags(galaxy_client):
 
 
 # /api/automation-hub/_ui/v1/tags/collections/
-@pytest.mark.deployment_community
-def test_gw_api_ui_v1_tags_collections(ansible_config, upload_artifact):
-
-    config = ansible_config("basic_user")
-    api_client = get_client(config)
-
-    def build_upload_wait(tags):
-        artifact = build_collection(
-            "skeleton",
-            config={
-                "namespace": USERNAME_PUBLISHER,
-                "tags": tags,
-            }
-        )
-        resp = upload_artifact(config, api_client, artifact)
-        resp = wait_for_task(api_client, resp)
-
-    build_upload_wait(["tools", "database", "postgresql"])
-    build_upload_wait(["tools", "database", "mysql"])
-    build_upload_wait(["tools", "database"])
-    build_upload_wait(["tools"])
-
-    with UIClient(config=config) as uclient:
-
-        # get the response
-        resp = uclient.get('_ui/v1/tags/collections')
-        assert resp.status_code == 200
-
-        ds = resp.json()
-        validate_json(instance=ds, schema=schema_objectlist)
-
-        resp = uclient.get('_ui/v1/tags/collections?name=tools')
-        ds = resp.json()
-        assert len(ds["data"]) == 1
-
-        # result count should be 2 (mysql, postgresql)
-        resp = uclient.get('_ui/v1/tags/collections?name__icontains=sql')
-        ds = resp.json()
-        assert len(ds["data"]) == 2
-
-        resp = uclient.get('_ui/v1/tags/collections?name=test123')
-        ds = resp.json()
-        assert len(ds["data"]) == 0
-
-        # verify sort by name is correct
-        resp = uclient.get('_ui/v1/tags/collections?sort=name')
-        tags = [tag["name"] for tag in resp.json()["data"]]
-        assert tags == sorted(tags)
-
-        # verify sort by -count is correct
-        resp = uclient.get('_ui/v1/tags/collections/?sort=-count')
-        data = resp.json()["data"]
-        assert data[0]["name"] == "tools"
-        assert data[1]["name"] == "database"
-
-
-# /api/automation-hub/_ui/v1/tags/roles/
-@pytest.mark.deployment_community
-def test_gw_api_ui_v1_tags_roles(ansible_config):
-    """Test endpoint's sorting and filtering"""
-
-    def _sync_role(github_user, role_name):
-        pargs = json.dumps({"github_user": github_user, "role_name": role_name}).encode('utf-8')
-        resp = api_admin_client('/api/v1/sync/', method='POST', args=pargs)
-        assert isinstance(resp, dict)
-        assert resp.get('task') is not None
-        assert resp.get('pulp_id') is not None
-        wait_for_v1_task(resp=resp, api_client=api_admin_client)
-
-    def _populate_tags_cmd():
-        proc = subprocess.run(
-            "django-admin populate-role-tags",
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
-        assert proc.returncode == 0
-
-    config = ansible_config("basic_user")
-
-    admin_config = ansible_config("admin")
-    api_admin_client = get_client(
-        admin_config,
-        request_token=False,
-        require_auth=True
-    )
-
-    with UIClient(config=config) as uclient:
-
-        # get the response
-        resp = uclient.get('_ui/v1/tags/roles')
-        assert resp.status_code == 200
-
-        ds = resp.json()
-        validate_json(instance=ds, schema=schema_objectlist)
-
-        # clean all roles ...
-        clean_all_roles(ansible_config)
-
-        # start the sync
-        _sync_role("geerlingguy", "docker")
-
-        resp = uclient.get('_ui/v1/tags/roles')
-        resp.status_code == 200
-        aggregate_total = sum([x['count'] for x in resp.json()['data']])
-        assert aggregate_total == 0
-
-        # run command to populate role tags table
-        _populate_tags_cmd()
-
-        resp = uclient.get('_ui/v1/tags/roles')
-        resp.status_code == 200
-        aggregate_total = sum([x['count'] for x in resp.json()['data']])
-        assert aggregate_total > 0
-
-        # add additional tags to test count
-        # tags ["docker", "system"]
-        _sync_role("6nsh", "docker")
-        # tags ["docker"]
-        _sync_role("0x28d", "docker_ce")
-        _populate_tags_cmd()
-
-        resp = uclient.get('_ui/v1/tags/roles?sort=-count')
-        resp.status_code == 200
-        assert resp.json()["meta"]["count"] > 0
-
-        # test correct count sorting
-        tags = [tag for tag in uclient.get('_ui/v1/tags/roles').json()["data"]]
-
-        assert sorted(tags, key=lambda r: r["count"], reverse=True)[:2] == resp.json()["data"][:2]
-        assert resp.json()["data"][0]["name"] == "docker"
-        assert resp.json()["data"][1]["name"] == "system"
-
-
 # /api/automation-hub/_ui/v1/users/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_users(galaxy_client):
     gc = galaxy_client('partner_engineer')
     # get the response
@@ -797,6 +688,7 @@ def test_gw_api_ui_v1_users(galaxy_client):
 # /api/automation-hub/_ui/v1/users/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_users_by_id(galaxy_client):
     gc = galaxy_client('partner_engineer')
     resp = gc.get('_ui/v1/users/?username=jdoe')
@@ -813,70 +705,3 @@ def test_gw_api_ui_v1_users_by_id(galaxy_client):
     assert ds['username'] == 'jdoe'
     # assert ds['is_superuser'] is False
     assert {'id': group_id, 'name': 'system:partner-engineers'} in ds['groups']
-
-
-# /api/automation-hub/_ui/v1/users/
-@pytest.mark.deployment_cloud
-@pytest.mark.api_ui
-def test_users_list_insights_access(ansible_config):
-    """Check insights mode access to users endpoint"""
-
-    config = ansible_config("basic_user")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    url = f"{api_prefix}/_ui/v1/users/"
-    api_client = get_client(config, request_token=True, require_auth=True)
-
-    with pytest.raises(GalaxyError, match=REGEX_403):
-        api_client(url, method="GET")
-
-    with pytest.raises(GalaxyError, match=REGEX_403):
-        api_client(url, method="POST", args=b"{}")
-
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config, request_token=True, require_auth=True)
-
-    resp = api_client(url, method="GET")
-    assert "data" in resp.keys()
-
-    with pytest.raises(GalaxyError, match=REGEX_403):
-        api_client(url, method="POST", args=b"{}")
-
-
-# /api/automation-hub/_ui/v1/users/{id}/
-@pytest.mark.deployment_cloud
-@pytest.mark.api_ui
-def test_users_detail_insights_access(ansible_config):
-    """Check insights mode access to users endpoint"""
-
-    config = ansible_config("basic_user")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(config, request_token=True, require_auth=True)
-
-    admin_config = ansible_config("partner_engineer")
-    admin_client = get_client(admin_config, request_token=True, require_auth=True)
-
-    user_id = admin_client(
-        f"{api_prefix}/_ui/v1/users/?username={config['username']}")["data"][0]["id"]
-    url = f"{api_prefix}/_ui/v1/users/{user_id}/"
-
-    with pytest.raises(GalaxyError, match=REGEX_403):
-        api_client(url, method="GET")
-
-    with pytest.raises(GalaxyError, match=REGEX_403):
-        api_client(url, method="PUT")
-
-    with pytest.raises(GalaxyError, match=REGEX_403):
-        api_client(url, method="DELETE")
-
-    api_client = admin_client
-
-    user = api_client(url, method="GET")
-    assert user["id"] == user_id
-
-    print(user)
-
-    put_resp = api_client(url, method="PUT", args=user)
-    assert put_resp == user
-
-    with pytest.raises(GalaxyError, match=REGEX_403):
-        api_client(url, method="DELETE")

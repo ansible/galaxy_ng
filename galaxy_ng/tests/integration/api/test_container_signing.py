@@ -58,20 +58,23 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
     # Get an API client running with admin user credentials
     gc = galaxy_client("admin")
     if not require_auth:
-        del gc.headers["Authorization"]
+        try:
+            del gc.headers["Authorization"]
+        except KeyError:
+            gc.gw_client.logout()
         remove_from_cache("admin")
 
     # Get the pulp_href for the pushed image
-    image = gc.get("pulp/api/v3/repositories/container/container-push/?name=alpine")
+    image = gc.get("pulp/api/v3/repositories/container/container-push/?name=alpine", relogin=False)
     container_href = image["results"][0]["pulp_href"]
 
     # Get the pulp_href for signing service
 
-    signing_service = gc.get("pulp/api/v3/signing-services/?name=container-default")
+    signing_service = gc.get("pulp/api/v3/signing-services/?name=container-default", relogin=False)
     ss_href = signing_service["results"][0]["pulp_href"]
 
     # Sign the image
-    r = gc.post(f"{container_href}sign/", body={"manifest_signing_service": ss_href})
+    r = gc.post(f"{container_href}sign/", body={"manifest_signing_service": ss_href}, relogin=False)
     resp = wait_for_task(gc, r)
     assert resp["state"] == "completed"
 

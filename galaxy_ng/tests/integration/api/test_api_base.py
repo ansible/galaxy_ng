@@ -1,10 +1,12 @@
 import pytest
 
 from ..utils import get_client
+from ..utils.iqe_utils import remove_from_cache
 
 
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.deployment_standalone
+@pytest.mark.skip_in_gw
 def test_galaxy_api_root_standalone_no_auth_access(galaxy_client):
     """Test galaxy API root."""
 
@@ -14,6 +16,7 @@ def test_galaxy_api_root_standalone_no_auth_access(galaxy_client):
     response = gc.get("")
     assert "v3" in response["available_versions"]
     assert "pulp-v3" in response["available_versions"]
+    remove_from_cache("basic_user")
 
 
 @pytest.mark.min_hub_version("4.6dev")

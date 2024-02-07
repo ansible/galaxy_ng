@@ -7,7 +7,7 @@ import pytest
 
 from galaxykit.utils import GalaxyClientError
 from ..utils import uuid4
-from ..utils.iqe_utils import remove_from_cache
+from ..utils.iqe_utils import remove_from_cache, aap_gateway
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -64,27 +64,51 @@ def test_auth_exception(galaxy_client):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
-@pytest.mark.skip
-def test_gateway_auth_admin(galaxy_client):
-    """Test whether admin can not access collections page using invalid token."""
-    # TODO: MODIFY FOR GW
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
+def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
+    """Test whether admin can not access collections page using invalid gateway_sessionid."""
     gc = galaxy_client("admin")
-    gc.headers["Authorization"] = f"Bearer {uuid4()}"
+    alt_cookies = gc.gw_client.cookies
+    alt_cookies["gateway_sessionid"] = uuid4()
+    gc.headers["Cookie"] = f"csrftoken={alt_cookies['csrftoken']}; gateway_sessionid={alt_cookies['gateway_sessionid']}"
     remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
-        gc.get("v3/collections/")
+        gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
     assert ctx.value.response.status_code == 403
+    remove_from_cache("admin")
 
 
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.skip
-def test_gateway_auth_exception(galaxy_client):
-    """Test whether an HTTP exception when using an invalid token."""
-    # TODO: MODIFY FOR GW
-    gc = galaxy_client("basic_user")
-    gc.headers["Authorization"] = f"Bearer {uuid4()}"
-    remove_from_cache("basic_user")
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
+def test_gateway_auth_admin_gateway_csrftoken(galaxy_client):
+    """Test whether admin can not access collections page using invalid csrftoken."""
+    # TODO: This test fails, invalid csrftoken does not return 403. Is it correct?
+    gc = galaxy_client("admin")
+    alt_cookies = gc.gw_client.cookies
+    alt_cookies["csrftoken"] = uuid4()
+    gc.headers["Cookie"] = f"csrftoken={alt_cookies['csrftoken']}; gateway_sessionid={alt_cookies['gateway_sessionid']}"
+    remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
-        gc.get("v3/collections/")
+        gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
+    assert ctx.value.response.status_code == 403
+    remove_from_cache("admin")
+
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.galaxyapi_smoke
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
+def test_gateway_token_auth(galaxy_client):
+    """Test whether normal auth is required and works to access APIs.
+
+    Also tests the settings for user profiles used for testing.
+    """
+    gc = galaxy_client("admin")
+    del gc.headers["Cookie"]
+    remove_from_cache("admin")
+
+    with pytest.raises(GalaxyClientError) as ctx:
+        gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
     assert ctx.value.response.status_code == 403
