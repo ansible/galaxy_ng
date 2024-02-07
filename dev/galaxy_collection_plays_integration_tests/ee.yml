@@ -1,5 +1,5 @@
 ---
-- name: Galaxy + AH Collection Tests for Execution Environment Automation
+- name: Collection tests - EE
   hosts: localhost
   connection: local
   gather_facts: false

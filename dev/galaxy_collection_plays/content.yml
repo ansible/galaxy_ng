@@ -1,0 +1,89 @@
+---
+- name: Galaxy + AH Collection Tests for Content Automation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - galaxy.galaxy
+
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars.yml
+
+  tasks:
+    - name: Authenticate and retrieve API token
+      ah_token:
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Create the automate namespace
+      ah_namespace:
+        name: automate
+        company: Automator Inc.
+        email: automator@redhat.com
+        description: The namespace for all things automation
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Rename automate namespace to automator
+      ah_namespace:
+        name: automate
+        new_name: automator
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the automator namespace
+      ah_namespace:
+        state: absent
+        name: automator
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Ensure there is a galaxy namespace
+      ah_namespace:
+        name: galaxy
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Upload the galaxy collection to the galaxy namespace
+      ah_collection:
+        namespace: galaxy
+        name: galaxy
+        path: "{{ ah_artifact_runner_absolute_path }}"
+        version: "1.0.0"
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Approve the galaxy collection
+      ah_approval:
+        namespace: galaxy
+        name: galaxy
+        version: "1.0.0"
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the galaxy collection
+      ah_collection:
+        state: absent
+        namespace: galaxy
+        name: galaxy
+        version: "1.0.0"
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Deauthenticate
+      ah_token:
+        state: absent
+        ah_host: "{{ ah_host }}"
+        ah_token: "{{ ah_token }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"

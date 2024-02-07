@@ -1,5 +1,5 @@
 ---
-- name: Test the execution environment (EE) repository module
+- name: Collection tests - EE Image
   hosts: localhost
   connection: local
   become: false

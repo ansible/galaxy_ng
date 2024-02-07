@@ -1,0 +1,107 @@
+---
+- name: Galaxy + AH Collection Tests for User Automation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - galaxy.galaxy
+
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars.yml
+
+  tasks:
+    - name: Create a developers group
+      ah_group:
+        name: developers
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Add 3 new users who are developers
+      ah_user:
+        username: "dev_{{ item }}"
+        password: password!@3w6$%
+        first_name: Developer
+        last_name: "{{ item | capitalize }}"
+        groups:
+          - developers
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+      loop:
+        - red
+        - green
+        - blue
+
+    - name: Create an executives group
+      ah_group:
+        name: executives
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Create an omnipotent role with all permissions
+      ah_role:
+        name: galaxy.omnipotent
+        description: Manage anything and everything
+        perms: all
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+# TODO: Add a test that permissions/roles can be added to a group after
+# https://github.com/ansible/galaxy_collection/issues/179 is resolved.
+
+    - name: Create new executive users
+      ah_user:
+        username: "{{ item }}"
+        password: executive!@3w6$%
+        is_superuser: true
+        email: "{{ item }}@redhat.com"
+        groups:
+          - executives
+          - developers
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+      loop:
+        - ceo
+        - cfo
+        - cto
+
+    - name: Delete the red developer
+      ah_user:
+        state: absent
+        username: dev_red
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the developers and executives groups
+      ah_group:
+        state: absent
+        name: "{{ item }}"
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+      loop:
+        - developers
+        - executives
+
+    - name: Delete the omnipotent role
+      ah_role:
+        state: absent
+        name: galaxy.omnipotent
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"

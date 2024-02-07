@@ -1,0 +1,62 @@
+---
+- name: Galaxy + AH Collection Tests for Execution Environment Automation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - galaxy.galaxy
+
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars.yml
+
+  tasks:
+    - name: Add redhat.io registry
+      ah_ee_registry:
+        name: redhat
+        url: registry.redhat.io
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"
+
+        # Can be uncommented after AAH-2607 is resolved.
+        #
+        #    - name: Index redhat.io registry
+        #      ah_ee_registry_index:
+        #        name: redhat
+        #        ah_host: "{{ ah_host }}"
+        #        ah_username: "{{ ah_username }}"
+        #        ah_password: "{{ ah_password }}"
+        #        ah_path_prefix: "{{ ah_path_prefix }}"
+        #
+        #    - name: Update aap22ee29rhel8 ee repository
+        #      ah_ee_repository:
+        #        name: ansible-automation-platform-22/ee-29-rhel8
+        #        description: AAP RHEL execution environment
+        #        readme: |
+        #          # RHEL execution environment
+        #          * Contains ansible
+        #        ah_host: "{{ ah_host }}"
+        #        ah_username: "{{ ah_username }}"
+        #        ah_password: "{{ ah_password }}"
+        #        ah_path_prefix: "{{ ah_path_prefix }}"
+        #
+        #    - name: Delete the aap22ee29rhel8 repository
+        #      ah_ee_repository:
+        #        name: ansible-automation-platform-22/ee-29-rhel8
+        #        state: absent
+        #        ah_host: "{{ ah_host }}"
+        #        ah_username: "{{ ah_username }}"
+        #        ah_password: "{{ ah_password }}"
+        #        ah_path_prefix: "{{ ah_path_prefix }}"
+
+    - name: Delete the redhat.io registry
+      ah_ee_registry:
+        name: redhat
+        state: absent
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        ah_path_prefix: "{{ ah_path_prefix }}"

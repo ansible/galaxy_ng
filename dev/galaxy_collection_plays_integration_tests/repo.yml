@@ -1,5 +1,5 @@
 ---
-- name: Galaxy + AH Collection Tests for Repo Automation
+- name: Collection tests - Repo
   hosts: localhost
   connection: local
   gather_facts: false

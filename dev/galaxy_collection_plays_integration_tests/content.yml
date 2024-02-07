@@ -1,5 +1,5 @@
 ---
-- name: Galaxy + AH Collection Tests for Content Automation
+- name: Collection tests - Content
   hosts: localhost
   connection: local
   gather_facts: false
