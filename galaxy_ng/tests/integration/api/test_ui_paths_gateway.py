@@ -54,7 +54,7 @@ REGEX_403 = r"HTTP Code: 403"
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_gw_api_ui_v1_login(galaxy_client):
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("basic_user", ignore_cache=True)
 
     # an authenticated session has a csrftoken and a sessionid
     assert gc.cookies['csrftoken'] is not None
@@ -65,7 +65,7 @@ def test_gw_api_ui_v1_login(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 def test_gw_api_ui_v1_logout(galaxy_client):
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("basic_user", ignore_cache=True)
 
     # check the auth first
     assert gc.cookies['csrftoken'] is not None

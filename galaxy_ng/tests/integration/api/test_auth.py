@@ -4,7 +4,6 @@ See: https://github.com/ansible/galaxy-dev/issues/149
 
 """
 import pytest
-from ansible.galaxy.api import GalaxyError
 
 from galaxykit.utils import GalaxyClientError
 from ..utils import uuid4
@@ -37,6 +36,7 @@ def test_token_auth(profile, galaxy_client):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
+@pytest.mark.skip_in_gw
 def test_auth_admin(galaxy_client):
     """Test whether admin can not access collections page using invalid token."""
 
@@ -50,9 +50,38 @@ def test_auth_admin(galaxy_client):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
+@pytest.mark.skip_in_gw
 def test_auth_exception(galaxy_client):
     """Test whether an HTTP exception when using an invalid token."""
 
+    gc = galaxy_client("basic_user")
+    gc.headers["Authorization"] = f"Bearer {uuid4()}"
+    remove_from_cache("basic_user")
+    with pytest.raises(GalaxyClientError) as ctx:
+        gc.get("v3/collections/")
+    assert ctx.value.response.status_code == 403
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.galaxyapi_smoke
+@pytest.mark.skip
+def test_gateway_auth_admin(galaxy_client):
+    """Test whether admin can not access collections page using invalid token."""
+    # TODO: MODIFY FOR GW
+    gc = galaxy_client("admin")
+    gc.headers["Authorization"] = f"Bearer {uuid4()}"
+    remove_from_cache("admin")
+    with pytest.raises(GalaxyClientError) as ctx:
+        gc.get("v3/collections/")
+    assert ctx.value.response.status_code == 403
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.galaxyapi_smoke
+@pytest.mark.skip
+def test_gateway_auth_exception(galaxy_client):
+    """Test whether an HTTP exception when using an invalid token."""
+    # TODO: MODIFY FOR GW
     gc = galaxy_client("basic_user")
     gc.headers["Authorization"] = f"Bearer {uuid4()}"
     remove_from_cache("basic_user")
