@@ -80,7 +80,6 @@ def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
-@pytest.mark.skip
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gateway_auth_admin_gateway_csrftoken(galaxy_client):
     """Test whether admin can not access collections page using invalid csrftoken."""
