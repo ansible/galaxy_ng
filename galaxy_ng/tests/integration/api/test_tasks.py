@@ -76,7 +76,7 @@ def test_task_delete(galaxy_client):
     })
 
     repo = gc.post("pulp/api/v3/repositories/ansible/ansible/", body={
-        "name": generate_random_string(),
+        "name": f"repo-test-{generate_random_string()}",
         "remote": remote["pulp_href"]
     })
 

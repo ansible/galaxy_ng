@@ -27,7 +27,7 @@ from .tasks import wait_for_task as gng_wait_for_task
 from galaxykit.utils import wait_for_url, wait_for_task, GalaxyClientError
 
 from .tools import iterate_all, iterate_all_gk
-from .iqe_utils import get_ansible_config, get_galaxy_client
+from .iqe_utils import get_ansible_config, get_galaxy_client, fix_prefix_workaround
 
 try:
     import importlib.resources as pkg_resources
@@ -533,7 +533,7 @@ def get_all_collections_by_repo(gc):
         next_page = f'{gc.galaxy_root}_ui/v1/collection-versions/?repository={repo}'
         while next_page:
             # workaround
-            next_page = next_page.replace("/api/galaxy/", "/api/hub/")
+            next_page = fix_prefix_workaround(next_page)
             resp = gc.get(next_page)
             for _collection in resp['data']:
                 key = (
@@ -566,7 +566,7 @@ def get_all_repository_collection_versions(gc):
         next_page = f'{gc.galaxy_root}content/{repo}/v3/plugin/ansible/content/{repo}/collections/index/'
         while next_page:
             # workaround
-            next_page = next_page.replace("/api/galaxy/", "/api/hub/")
+            next_page = fix_prefix_workaround(next_page)
             resp = gc.get(next_page)
             collections.extend(resp['data'])
             next_page = resp.get('links', {}).get('next')
@@ -575,7 +575,7 @@ def get_all_repository_collection_versions(gc):
     for collection in collections:
         next_page = collection['versions_url']
         while next_page:
-            next_page = next_page.replace("/api/galaxy/", "/api/hub/")
+            next_page = fix_prefix_workaround(next_page)
             resp = gc.get(next_page)
             for cv in resp['data']:
                 cv['namespace'] = collection['namespace']

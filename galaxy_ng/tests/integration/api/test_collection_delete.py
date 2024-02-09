@@ -11,7 +11,7 @@ from ..utils import (
     get_all_collections_by_repo,
     get_all_repository_collection_versions,
 )
-from ..utils.iqe_utils import is_stage_environment
+from ..utils.iqe_utils import is_stage_environment, fix_prefix_workaround
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -73,7 +73,7 @@ def test_delete_collection_version(galaxy_client, uncertifiedv2):
         for rcv in matches:
             rcv_url = cv_before[rcv]['href']
             # workaround
-            rcv_url = rcv_url.replace("/api/galaxy/", "/api/hub/")
+            rcv_url = fix_prefix_workaround(rcv_url)
             resp = gc.delete(rcv_url)
             wait_for_task(gc, resp, timeout=10000)
 
@@ -122,7 +122,7 @@ def test_delete_default_repos(galaxy_client, uncertifiedv2):
 
         try:
             # workaround
-            distro["pulp_href"] = distro["pulp_href"].replace("/api/galaxy/", "/api/hub/")
+            distro["pulp_href"] = fix_prefix_workaround(distro["pulp_href"])
             gc.delete(distro["pulp_href"])
             # This API call should fail
             assert False
@@ -131,7 +131,7 @@ def test_delete_default_repos(galaxy_client, uncertifiedv2):
 
         try:
             # workaround
-            distro["repository"] = distro["repository"].replace("/api/galaxy/", "/api/hub/")
+            distro["repository"] = fix_prefix_workaround(distro["repository"])
             gc.delete(distro["repository"])
             # This API call should fail
             assert False
