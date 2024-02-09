@@ -21,3 +21,4 @@ include galaxy_ng/tests/integration/load_data.yaml
 recursive-include galaxy_ng *.py
 include galaxy_ng/tests/integration/utils/gpg/collection_sign.sh
 include galaxy_ng/tests/integration/utils/gpg/qe-sign-priv.gpg
+include galaxy-operator/bin/readyz.py
