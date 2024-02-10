@@ -1,0 +1,144 @@
+#---
+ah_configuration_working_dir: "test"
+ah_validate_certs: false
+ah_configuration_namespace_secure_logging: false
+
+ah_ee_registries:
+  - name: quay
+    url: https://quay.io/
+    rate_limit: 100
+    download_concurrency: 25
+    tls_validation: false
+  - name: redhat
+    url: https://registry.redhat.io/v2/
+    rate_limit: 100000
+    download_concurrency: 25
+    tls_validation: false
+    interval: 20
+    timeout: 1100
+
+ah_ee_repositories:
+  # Adding a Remote repository
+  - name: config_as_code_ee
+    description: The infra config as code official EE
+    registry: quay
+    upstream_name: redhat_cop/config_as_code_ee
+    include_tags:
+      - latest
+      - test_include
+    exclude_tags:
+      - test_exclude
+    wait: true
+    interval: 5
+    timeout: 600
+
+ah_namespaces:
+  - name: dispatch_test
+    company: Community Test
+    email: user@example.com
+    avatar_url: https://github.com/ansible/awx-logos/blob/master/awx/ui/client/assets/logo-header.svg
+    description: string
+    resources: "# Community\nA Namespace test with changes"
+    links:
+      - name: "Nothing"
+        url: "https://github.com/ansible/awx"
+    validate_certs: false
+  - name: infra
+    validate_certs: false
+  - name: test_namespace
+    validate_certs: false
+  - name: galaxy
+    validate_certs: false
+
+ah_repositories:
+  - name: dispatch_test
+    url: https://beta-galaxy.ansible.com/
+    requirements:
+      - name: infra.ee_utilities
+      - name: infra.controller_configuration
+    wait: true
+    interval: 25
+    timeout: 100
+    validate_certs: false
+
+ah_collection_remotes:
+  - name: dispatch_test
+    url: https://beta-galaxy.ansible.com/
+    requirements:
+      - name: infra.ee_utilities
+      - name: infra.controller_configuration
+    validate_certs: false
+
+ah_roles:
+  - name: galaxy.stuff.mcstuffins
+    description: dispatch_test
+    perms:
+      - add_user
+      - change_user
+      - delete_user
+      - view_user
+      - add_ansiblerepository
+      - add_collectionremote
+    validate_certs: false
+  - name: galaxy.stuff.mcstuffins
+    state: absent
+    validate_certs: false
+
+ah_groups:
+  - name: operators
+    validate_certs: false
+  - name: administrators
+    validate_certs: false
+  - name: managers
+    validate_certs: false
+
+ah_users:
+  # Ensure user operator1 exists (no group, no details)
+  - username: dispatch_test1
+    validate_certs: false
+  # Ensure user admin1 exists (all details, two groups)
+  - username: dispatch_test2
+    # Testing with UTF-8 characters
+    first_name: Czesława
+    last_name: Dąbrowski
+    email: cdabrowski@example.com
+    password: vs9mrD55NP
+    groups:
+      - operators
+      - administrators
+    validate_certs: false
+  # Testing user update\
+  - username: dispatch_test3
+    first_name: Róża
+    is_superuser: true
+    validate_certs: false
+  # Testing group membership
+  - username: dispatch_test4
+    groups: operators
+    state: present
+    validate_certs: false
+  # Ensure operator1 is member of group operators and managers
+  - username: dispatch_test5
+    groups:
+      - managers
+    append: true
+    validate_certs: false
+  # Ensure operator1 is member of group administrators only
+  - username: dispatch_test6
+    groups:
+      - administrators
+    append: false
+    validate_certs: false
+  # Ensure operator1 is member of no group
+  - username: dispatch_test7
+    groups: []
+    append: false
+    validate_certs: false
+  # Testing password change
+  - username: dispatch_test8
+    password: test123456
+    validate_certs: false
+  - username: dispatch_test9
+    state: absent
+    validate_certs: false
+...

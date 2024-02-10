@@ -1,0 +1,74 @@
+---
+- name: Collection tests - EE
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  ignore_errors: true
+  collections:
+    - galaxy.galaxy
+
+  pre_tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: vars.yml
+
+  tasks:
+    - name: Add redhat.io registry
+      ah_ee_registry:
+        name: redhat
+        url: https://registry.redhat.io
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: false
+
+    - name: create a repo
+      ah_ee_repository:
+        name: ansible-automation-platform-19/ee-29-rhel8
+        description: AAP RHEL execution environment
+        registry: redhat
+        upstream_name: redhat
+        readme: |
+          # RHEL execution environment
+          * Contains ansible
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: false
+
+    - name: Index redhat.io registry
+      ah_ee_registry_index:
+        name: redhat
+        wait: true
+        timeout: 300
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+
+    - name: Registry Sync
+      ah_ee_registry_sync:
+        name: redhat
+        wait: true
+        timeout: 300
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+
+    - name: Repo Sync
+      ah_ee_repository_sync:
+        name: ansible-automation-platform-19/ee-29-rhel8
+        wait: true
+        timeout: 300
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+
+    - name: Delete the redhat.io registry
+      ah_ee_registry:
+        name: redhat
+        state: absent
+        ah_host: "{{ ah_host }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: false
+

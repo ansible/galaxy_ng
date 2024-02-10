@@ -1,0 +1,10 @@
+#ah_host: http://localhost:5001
+#hub_host: localhost:5001
+#ah_username: iqe_admin
+#ah_password: redhat
+#ah_path_prefix: galaxy
+ah_host: http://localhost:55001
+hub_host: localhost:55001
+ah_username: admin
+ah_password: admin
+ah_path_prefix: galaxy
