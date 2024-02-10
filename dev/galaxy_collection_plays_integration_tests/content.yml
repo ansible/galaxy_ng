@@ -108,13 +108,13 @@
         ah_password: "{{ ah_password }}"
         validate_certs: false
 
-#    - name: Publish Collections
-#      ansible.builtin.include_role:
-#        name: publish
-#      vars:
-#        ah_collections:
-#          - collection_name: cisco.iosxr
-#            git_url: https://github.com/ansible-collections/cisco.iosxr
-#        ah_auto_approve: true
-#        validate_certs: false
+    - name: Publish Collections
+      ansible.builtin.include_role:
+        name: publish
+      vars:
+        ah_collections:
+        - collection_name: cisco.iosxr
+          git_url: https://github.com/ansible-collections/cisco.iosxr
+        ah_auto_approve: true
+        validate_certs: false
 
