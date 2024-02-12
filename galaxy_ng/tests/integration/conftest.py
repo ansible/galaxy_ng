@@ -127,8 +127,6 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     """ Create and publish+certify collection version N and N+1 """
 
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
@@ -136,12 +134,12 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=config
+        galaxy_client=gc
     )
 
     # certify v1
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
+    set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -153,14 +151,13 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     )
 
     # publish newer version
-    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=config
+        galaxy_client=gc
     )
 
     # certify newer version
-    set_certification(api_client, gc, artifact2, hub_4_5=hub_4_5)
+    set_certification(ansible_config(), gc, artifact2, hub_4_5=hub_4_5)
 
     return (artifact, artifact2)
 

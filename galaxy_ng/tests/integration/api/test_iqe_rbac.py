@@ -59,7 +59,7 @@ class TestRBAC:
         gc = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             create_test_user(gc)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_update_user(self, galaxy_client):
@@ -96,7 +96,7 @@ class TestRBAC:
         resp["password"] = "changechangechange"
         with pytest.raises(GalaxyClientError) as ctx:
             update_user(gc_user, resp)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_delete_user(self, galaxy_client):
@@ -281,7 +281,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             gc_user.create_group(new_group_name)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_missing_role_permission_add_namespace(self, galaxy_client):
@@ -301,7 +301,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             create_namespace(gc_user, group)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_add_namespace(self, galaxy_client):
@@ -385,7 +385,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             upload_test_artifact(gc_user, ns2_name)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_global_role_upload_to_namespace(self, galaxy_client):
@@ -446,7 +446,7 @@ class TestRBAC:
             gc_user.delete_collection(
                 namespace_name, artifact.name, artifact.version, repository="published"
             )
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
 
     @pytest.mark.iqe_rbac_test
@@ -475,7 +475,7 @@ class TestRBAC:
                 source="published",
                 destination="rejected",
             )
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_reject_collection(self, galaxy_client):
@@ -551,7 +551,7 @@ class TestRBAC:
             move_or_copy_collection(
                 gc_user, namespace_name, artifact.name, artifact.version
             )  # approve collection
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_missing_role_add_remote_registry(self, galaxy_client):
@@ -568,7 +568,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             create_registry(gc_user, f"remote_registry_{uuid4()}", "url")
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_add_remote_registry(self, galaxy_client):
@@ -664,7 +664,7 @@ class TestRBAC:
         ee_name = f"ee_{uuid4()}"
         with pytest.raises(GalaxyClientError) as ctx:
             create_container(gc_user, ee_name, "upstream_name", remote_registry)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_delete_ee(self, galaxy_client):
@@ -733,7 +733,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             community_remote_config(gc_user, "http://google.com/", "username", "password")
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_user_role_get_remotes(self, galaxy_client):
