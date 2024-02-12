@@ -11,7 +11,7 @@ from galaxykit.namespaces import get_namespace, get_namespace_collections
 from galaxykit.repositories import search_collection
 from galaxykit.users import get_me
 
-from ..utils.iqe_utils import is_stage_environment
+from ..utils.iqe_utils import is_stage_environment, fix_prefix_workaround
 from ..utils.repo_management_utils import upload_new_artifact
 from ..utils.tasks import wait_for_all_tasks_gk, wait_for_namespace_tasks_gk
 from ..utils.tools import generate_random_string
@@ -187,6 +187,9 @@ def test_namespace_edit_logo(galaxy_client):
     # fields that should NOT change
     for field in ["pulp_href", "name", "company", "email", "description", "resources", "links"]:
         # FIXME
+        if field == "pulp_href":
+            updated_again_namespace[field] = (
+                fix_prefix_workaround(updated_again_namespace[field]))
         assert my_namespace[field] == updated_again_namespace[field]
 
     # fields that changed

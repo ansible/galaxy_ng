@@ -1,5 +1,4 @@
 import subprocess
-from urllib.parse import urlparse
 
 import pytest
 
@@ -19,22 +18,20 @@ def test_delete_ee_and_content(ansible_config, galaxy_client):
     config = ansible_config("admin")
 
     container_engine = config["container_engine"]
-    url = config['url']
-    parsed_url = urlparse(url)
-    cont_reg = parsed_url.netloc
+    container_registry = config["container_registry"]
 
     # Pull alpine image
-    pull_and_tag_test_image(container_engine, cont_reg)
+    pull_and_tag_test_image(container_engine, container_registry)
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(parsed_url.path)[0]}"]
+           f"{config['password']}", container_registry]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{cont_reg}/alpine:latest"]
+    cmd = [container_engine, "push", f"{container_registry}/alpine:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
@@ -86,28 +83,27 @@ def test_shared_content_is_not_deleted(ansible_config, galaxy_client):
     gc = galaxy_client("admin")
     config = ansible_config("admin")
     container_engine = config["container_engine"]
-    url = config['url']
-    parsed_url = urlparse(url)
-    cont_reg = parsed_url.netloc
+    container_registry = config["container_registry"]
     # Pull alpine image
-    image = pull_and_tag_test_image(container_engine, cont_reg, "alpine1:latest")
+    image = pull_and_tag_test_image(container_engine, container_registry, "alpine1:latest")
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(parsed_url.path)[0]}"]
+           f"{config['password']}", container_registry]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{cont_reg}/alpine1:latest"]
+    cmd = [container_engine, "push", f"{container_registry}/alpine1:latest"]
 
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Copy 'alpine1' and rename to 'alpine2'
-    subprocess.check_call([container_engine, "tag", image, f"{cont_reg}/alpine2:latest"])
-    cmd = [container_engine, "push", f"{cont_reg}/alpine2:latest"]
+    subprocess.check_call([container_engine, "tag", image,
+                           f"{container_registry}/alpine2:latest"])
+    cmd = [container_engine, "push", f"{container_registry}/alpine2:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)

@@ -81,7 +81,10 @@ def wait_for_task_ui_client(gc, task):
         if counter >= 60:
             raise Exception('Task is taking too long')
         ds = gc.get(f"pulp/api/v3/tasks/{task_id}/")
-        state = ds.json()['state']
+        try:
+            state = ds.json()['state']
+        except AttributeError:
+            state = ds['state']
         if state == 'completed':
             break
         time.sleep(SLEEP_SECONDS_POLLING)
