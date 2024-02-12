@@ -1,10 +1,7 @@
 """test_landing_page.py - Test related to landing page endpoint.
 """
 import pytest
-from ansible.galaxy.api import GalaxyError
-
 from galaxykit.utils import GalaxyClientError
-from ..utils import get_client
 
 
 def test_pulp_sync_enhancement_endpoints(galaxy_client):

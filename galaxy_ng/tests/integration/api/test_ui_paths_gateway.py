@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 
 import random
-import json
-import subprocess
-
 import pytest
-
-from orionutils.generator import build_collection
-from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
 
 from galaxykit.utils import GalaxyClientError
-from ..constants import DEFAULT_DISTROS, USERNAME_PUBLISHER
+from ..constants import DEFAULT_DISTROS
 from ..schemas import (
     schema_collection_import,
     schema_collection_import_detail,
@@ -31,19 +25,8 @@ from ..schemas import (
     schema_ui_collection_summary,
     schema_user,
 )
-from ..utils import (
-    UIClient,
-    generate_unused_namespace,
-    get_client,
-    wait_for_task_ui_client,
-    wait_for_task,
-)
+from ..utils import generate_unused_namespace, wait_for_task_ui_client
 from ..utils.iqe_utils import get_paginated, remove_from_cache, aap_gateway
-from ..utils.legacy import (
-    clean_all_roles,
-    wait_for_v1_task
-)
-
 from .rbac_actions.utils import ReusableLocalContainer
 
 
@@ -81,7 +64,6 @@ def test_gw_api_ui_v1_logout(galaxy_client):
     remove_from_cache("basic_user")
 
 
-
 # /api/automation-hub/_ui/v1/collection-versions/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
@@ -100,6 +82,7 @@ def test_gw_api_ui_v1_collection_versions(galaxy_client, uncertifiedv2):
         cv_resp = gc.get(cv_url)
         validate_json(instance=cv_resp, schema=schema_collectionversion)
         validate_json(instance=cv_resp['metadata'], schema=schema_collectionversion_metadata)
+
 
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
@@ -265,7 +248,6 @@ def test_gw_api_ui_v1_execution_environments_registries(galaxy_client):
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get(f"_ui/v1/execution-environments/registries/{id}/")
     assert ctx.value.response.status_code == 404
-
 
 
 # /api/automation-hub/_ui/v1/execution-environments/registries/{pulp_id}/

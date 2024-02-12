@@ -16,7 +16,6 @@ from ..schemas import (
 from ..utils.rbac_utils import create_local_image_container
 
 
-
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/history/
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")

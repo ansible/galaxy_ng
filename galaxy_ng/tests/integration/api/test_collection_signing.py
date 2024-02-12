@@ -35,7 +35,6 @@ log = logging.getLogger(__name__)
 NAMESPACE = "signing"
 
 
-
 @pytest.fixture(scope="function")
 def flags(galaxy_client):
     gc = galaxy_client("admin")
@@ -120,7 +119,8 @@ def test_collection_auto_sign_on_approval(ansible_config, flags, galaxy_client, 
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
 
     # Assert that the collection is signed on v3 api
-    collection = get_collection_from_repo(gc, "published", artifact.namespace, artifact.name, artifact.version)
+    collection = get_collection_from_repo(gc, "published",
+                                          artifact.namespace, artifact.name, artifact.version)
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] == signing_service
     assert collection["signatures"][0]["signature"] is not None
@@ -130,9 +130,9 @@ def test_collection_auto_sign_on_approval(ansible_config, flags, galaxy_client, 
     assert collection["signatures"][0]["pulp_created"] is not None
 
     # Assert that the collection is signed on UI API
-    collection_on_ui = gc.get(f"_ui/v1/repo/published/?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-        f"&sign_state=signed&version={artifact.version}"
-    )["data"][0]
+    collection_on_ui = gc.get(f"_ui/v1/repo/published/"
+                              f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+                              f"&sign_state=signed&version={artifact.version}")["data"][0]
     assert collection_on_ui["sign_state"] == "signed"
     metadata = collection_on_ui["latest_version"]["metadata"]
     assert len(metadata["signatures"]) >= 1
@@ -204,7 +204,8 @@ def test_collection_sign_on_demand(flags, galaxy_client, settings, sign_url):
     }
     sign_on_demand(gc, signing_service, sign_url.format(**sign_payload), **sign_payload)
     # Assert that the collection is signed on v3 api
-    collection = get_collection_from_repo(gc, "staging", artifact.namespace, artifact.name, artifact.version)
+    collection = get_collection_from_repo(gc, "staging",
+                                          artifact.namespace, artifact.name, artifact.version)
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] == signing_service
     assert collection["signatures"][0]["signature"] is not None
@@ -214,9 +215,9 @@ def test_collection_sign_on_demand(flags, galaxy_client, settings, sign_url):
     assert collection["signatures"][0]["pulp_created"] is not None
 
     # Assert that the collection is signed on UI API
-    collection_on_ui = gc.get(f"_ui/v1/repo/staging/?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-        f"&sign_state=signed&version={artifact.version}"
-    )["data"][0]
+    collection_on_ui = gc.get(f"_ui/v1/repo/staging/?deprecated=false&namespace="
+                              f"{NAMESPACE}&name={artifact.name}&sign_state=signed"
+                              f"&version={artifact.version}")["data"][0]
     assert collection_on_ui["sign_state"] == "signed"
     metadata = collection_on_ui["latest_version"]["metadata"]
     assert len(metadata["signatures"]) >= 1
@@ -226,7 +227,8 @@ def test_collection_sign_on_demand(flags, galaxy_client, settings, sign_url):
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
     # Assert that the collection is signed on UI API (detail )
-    collection_on_ui = get_ui_collection(gc, "staging", NAMESPACE, artifact.name, artifact.version)
+    collection_on_ui = get_ui_collection(gc, "staging",
+                                         NAMESPACE, artifact.name, artifact.version)
     assert collection_on_ui["sign_state"] == "signed"
     metadata = collection_on_ui["latest_version"]["metadata"]
     assert len(metadata["signatures"]) >= 1
@@ -280,8 +282,8 @@ def test_collection_move_with_signatures(ansible_config, flags, galaxy_client, s
         sign_on_demand(gc, signing_service, **sign_payload)
 
         # Assert that the collection is signed on v3 api
-        collection = get_collection_from_repo(gc, "staging", artifact.namespace, artifact.name,
-                                              artifact.version)
+        collection = get_collection_from_repo(gc, "staging", artifact.namespace,
+                                              artifact.name, artifact.version)
         assert len(collection["signatures"]) >= 1
         assert collection["signatures"][0]["signing_service"] == signing_service
 
@@ -301,8 +303,8 @@ def test_collection_move_with_signatures(ansible_config, flags, galaxy_client, s
 
     # After moving to /published/
     # Assert that the collection is signed on v3 api
-    collection = get_collection_from_repo(gc, "published", artifact.namespace, artifact.name,
-                                          artifact.version)
+    collection = get_collection_from_repo(gc, "published", artifact.namespace,
+                                          artifact.name, artifact.version)
 
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] == signing_service
@@ -371,13 +373,14 @@ def test_copy_collection_without_signatures(flags, galaxy_client, settings):
     sign_on_demand(gc, signing_service, **sign_payload)
 
     # Assert that the collection is signed on v3 api
-    collection = get_collection_from_repo(gc, "staging", artifact.namespace, artifact.name,
-                                          artifact.version)
+    collection = get_collection_from_repo(gc, "staging", artifact.namespace,
+                                          artifact.name, artifact.version)
 
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] == signing_service
 
-    copy_result = move_or_copy_collection(gc, artifact.namespace, artifact.name, artifact.version, source="staging",
+    copy_result = move_or_copy_collection(gc, artifact.namespace, artifact.name,
+                                          artifact.version, source="staging",
                                           destination="community", operation="copy")
 
     assert copy_result["namespace"]["name"] == artifact.namespace
@@ -496,7 +499,8 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
 
 @pytest.mark.skipif(not require_signature_for_approval(),
                     reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-def test_move_with_no_signing_service_not_superuser_signature_required(flags, galaxy_client, settings):
+def test_move_with_no_signing_service_not_superuser_signature_required(
+        flags, galaxy_client, settings):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
@@ -542,7 +546,8 @@ def test_move_with_no_signing_service_not_superuser_signature_required(flags, ga
 
     # use the PE user to approve the collection
     published_href = get_repository_href(gc, "published")
-    move_content_between_repos(gc, [collection_href], staging_href, [published_href])
+    move_content_between_repos(gc, [collection_href], staging_href,
+                               [published_href])
 
     assert gc.get(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
@@ -571,7 +576,8 @@ def test_move_with_no_signing_service(flags, galaxy_client, settings, artifact):
     # Test moving collection without signature
     ####################################################
     with pytest.raises(GalaxyClientError) as e:
-        move_content_between_repos(gc, [collection_href], staging_href, [published_href])
+        move_content_between_repos(gc, [collection_href], staging_href,
+                                   [published_href])
 
     assert e.value.response.status_code == 400
     assert "Signatures are required" in e.value.response.text
@@ -602,7 +608,8 @@ def test_move_with_no_signing_service(flags, galaxy_client, settings, artifact):
     wait_for_task(gc, signature_upload_response.json())
 
     # move the collection
-    move_content_between_repos(gc, [collection_href], staging_href, [published_href])
+    move_content_between_repos(gc, [collection_href], staging_href,
+                               [published_href])
     assert gc.get(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
@@ -634,10 +641,10 @@ def test_move_with_signing_service(flags, galaxy_client, settings, artifact):
     )["results"][0]["pulp_href"]
 
     resp = gc.post(staging_href + "move_collection_version/", body={
-            "collection_versions": [collection_href],
-            "destination_repositories": [published_href],
-            "signing_service": signing_href
-        })
+        "collection_versions": [collection_href],
+        "destination_repositories": [published_href],
+        "signing_service": signing_href
+    })
 
     wait_for_task(gc, resp)
 

@@ -11,7 +11,6 @@ from ..conftest import is_hub_4_5
 from ..constants import USERNAME_PUBLISHER
 from ..utils import (
     CollectionInspector,
-    get_client,
     set_certification,
 )
 
@@ -43,7 +42,8 @@ def test_download_artifact(ansible_config, galaxy_client):
     with tempfile.TemporaryDirectory() as dir:
         filename = f"{namespace}-{name}-{version}.tar.gz"
         tarball_path = f"{dir}/{filename}"
-        url = f"{gc.galaxy_root}v3/plugin/ansible/content/published/collections/artifacts/{filename}"
+        url = (f"{gc.galaxy_root}v3/plugin/ansible/content/"
+               f"published/collections/artifacts/{filename}")
 
         cmd = [
             "curl",
@@ -95,7 +95,8 @@ def test_download_artifact_validated(ansible_config, galaxy_client):
     with tempfile.TemporaryDirectory() as dir:
         filename = f"{artifact.namespace}-{artifact.name}-{artifact.version}.tar.gz"
         tarball_path = f"{dir}/{filename}"
-        url = f"{gc.galaxy_root}v3/plugin/ansible/content/validated/collections/artifacts/{filename}"
+        url = (f"{gc.galaxy_root}v3/plugin/ansible/content/"
+               f"validated/collections/artifacts/{filename}")
 
         cmd = [
             "curl",

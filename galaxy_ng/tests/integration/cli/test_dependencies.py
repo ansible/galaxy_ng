@@ -5,7 +5,7 @@ import attr
 import pytest
 
 from ..conftest import is_hub_4_5
-from ..utils import ansible_galaxy, build_collection, get_client, set_certification
+from ..utils import ansible_galaxy, build_collection, set_certification
 
 pytestmark = pytest.mark.qa  # noqa: F821
 

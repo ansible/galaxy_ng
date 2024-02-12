@@ -65,7 +65,7 @@ def test_delete_ee_and_content(ansible_config, galaxy_client):
     # Ensure content list is empty by checking each content href
     content_hrefs = [item["pulp_href"] for item in content_list["results"]]
 
-    #FIXME: all items are found. Check it.
+    # FIXME: all items are found. Check it.
     for item in content_hrefs:
         failed = None
         try:

@@ -43,7 +43,6 @@ def test_delete_collection(galaxy_client, uncertifiedv2):
             get_collection(gc, cnamespace, cname, ckey[2])
 
 
-
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.delete
 @pytest.mark.collection_version_delete
@@ -89,7 +88,6 @@ def test_delete_collection_version(galaxy_client, uncertifiedv2):
         # since all of it's children were deleted ...
         with pytest.raises(GalaxyClientError):
             get_collection(gc, cnamespace, cname, ckey[2])
-
 
 
 @pytest.mark.delete

@@ -563,7 +563,8 @@ def get_all_repository_collection_versions(gc):
         # next_page = f'{gc.galaxy_root}content/{repo}/v3/collections/'
         # previous line should work but responds 302 redirect but requests library
         # does not include auth ??
-        next_page = f'{gc.galaxy_root}content/{repo}/v3/plugin/ansible/content/{repo}/collections/index/'
+        next_page = (f'{gc.galaxy_root}content/{repo}/'
+                     f'v3/plugin/ansible/content/{repo}/collections/index/')
         while next_page:
             # workaround
             next_page = fix_prefix_workaround(next_page)

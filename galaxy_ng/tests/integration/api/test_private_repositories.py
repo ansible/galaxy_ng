@@ -8,6 +8,7 @@ from ..utils.iqe_utils import fix_prefix_workaround
 @pytest.fixture
 def repo_factory(galaxy_client):
     gc = galaxy_client("admin")
+
     def _repo_factory(repo_url, private=False):
         return gc.post(
             repo_url,
@@ -24,6 +25,7 @@ def repo_factory(galaxy_client):
 @pytest.fixture
 def distro_factory(galaxy_client):
     gc = galaxy_client("admin")
+
     def _distro_factory(repo, distro_url):
         distro_task = gc.post(
             distro_url,

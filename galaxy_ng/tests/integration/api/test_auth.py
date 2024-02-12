@@ -33,7 +33,6 @@ def test_token_auth(profile, galaxy_client):
     assert "available_versions" in resp
 
 
-
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.skip_in_gw
@@ -70,7 +69,8 @@ def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
     gc = galaxy_client("admin")
     alt_cookies = gc.gw_client.cookies
     alt_cookies["gateway_sessionid"] = uuid4()
-    gc.headers["Cookie"] = f"csrftoken={alt_cookies['csrftoken']}; gateway_sessionid={alt_cookies['gateway_sessionid']}"
+    gc.headers["Cookie"] = (f"csrftoken={alt_cookies['csrftoken']}; "
+                            f"gateway_sessionid={alt_cookies['gateway_sessionid']}")
     remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
@@ -87,13 +87,13 @@ def test_gateway_auth_admin_gateway_csrftoken(galaxy_client):
     gc = galaxy_client("admin")
     alt_cookies = gc.gw_client.cookies
     alt_cookies["csrftoken"] = uuid4()
-    gc.headers["Cookie"] = f"csrftoken={alt_cookies['csrftoken']}; gateway_sessionid={alt_cookies['gateway_sessionid']}"
+    gc.headers["Cookie"] = (f"csrftoken={alt_cookies['csrftoken']};"
+                            f" gateway_sessionid={alt_cookies['gateway_sessionid']}")
     remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
     assert ctx.value.response.status_code == 403
     remove_from_cache("admin")
-
 
 
 @pytest.mark.deployment_standalone

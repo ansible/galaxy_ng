@@ -736,7 +736,7 @@ class TestXRepoSearch:
         assert matches == 2
 
     @pytest.mark.x_repo_search
-    @pytest.mark.skip_in_gw # creates a new user, skip in gateway
+    @pytest.mark.skip_in_gw
     def test_private_repo(self, galaxy_client):
         """
         Verifies that a basic user can't view private repos
@@ -804,7 +804,7 @@ class TestXRepoSearch:
         assert matches == 2
 
     @pytest.mark.x_repo_search
-    @pytest.mark.skip_in_gw # creates a new user, so skip in gw
+    @pytest.mark.skip_in_gw
     def test_private_repo_with_perm(self, galaxy_client):
         """
         Verifies that a user with view permissions can view private repos

@@ -71,16 +71,16 @@ def test_api_publish(artifact, use_distribution, hub_version, galaxy_client):
     if use_distribution:
         if parse_version(hub_version) < parse_version('4.6'):
             pytest.skip("Hub version is 4.5")
-        distros = gc.get("pulp/api/v3/distributions/ansible/"
-                               f"ansible/?name=inbound-{artifact.namespace}")
+        distros = gc.get("pulp/api/v3/distributions/"
+                         "ansible/ansible/?name=inbound-{artifact.namespace}")
 
         if distros["count"] == 0:
             repo = gc.get("pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]
             r = gc.post("pulp/api/v3/distributions/ansible/ansible/", body={
-                    "repository": repo["pulp_href"],
-                    "name": f"inbound-{artifact.namespace}",
-                    "base_path": f"inbound-{artifact.namespace}",
-                })
+                "repository": repo["pulp_href"],
+                "name": f"inbound-{artifact.namespace}",
+                "base_path": f"inbound-{artifact.namespace}",
+            })
             logger.debug("Waiting for upload to be completed")
             wait_for_task(gc, r)
 
@@ -88,7 +88,6 @@ def test_api_publish(artifact, use_distribution, hub_version, galaxy_client):
     logger.debug("Waiting for upload to be completed")
     resp = wait_for_task(gc, resp)
     assert resp["state"] == "completed"
-
 
 
 @pytest.mark.min_hub_version("4.6dev")
@@ -109,7 +108,7 @@ def test_validated_publish(ansible_config, artifact, galaxy_client):
 
     set_certification(ansible_config(), gc, artifact, level="validated")
     collection_resp = get_collection_from_repo(gc, "validated", artifact.namespace,
-                             artifact.name, "1.0.0")
+                                               artifact.name, "1.0.0")
     assert collection_resp["name"] == artifact.name
 
 
@@ -321,7 +320,6 @@ def test_ansible_requires(ansible_config, spec, galaxy_client):
         config={"namespace": USERNAME_PUBLISHER},
         extra_files={"meta/runtime.yml": {"requires_ansible": requires_ansible}},
     )
-
 
     resp = upload_artifact(None, gc, artifact)
     resp = wait_for_task(gc, resp)

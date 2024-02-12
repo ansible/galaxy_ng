@@ -2,8 +2,6 @@
 
 import pytest
 
-from ..utils import get_client
-
 pytestmark = pytest.mark.qa  # noqa: F821
 
 

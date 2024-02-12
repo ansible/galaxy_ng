@@ -101,7 +101,7 @@ class GalaxyKitClient:
         basic_token=False,
         github_social_auth=False,
     ):
-        gw_auth=aap_gateway()
+        gw_auth = aap_gateway()
         self._basic_token = basic_token
         try:
             config = self.config()
@@ -273,6 +273,7 @@ def is_dev_env_standalone():
     dev_env_standalone = os.getenv("DEV_ENV_STANDALONE", True)
     return dev_env_standalone in ('true', 'True', 1, '1', True)
 
+
 def aap_gateway():
     dev_env_standalone = os.getenv("AAP_GATEWAY", False)
     return dev_env_standalone in ('true', 'True', 1, '1', True)
@@ -433,7 +434,6 @@ class AnsibleConfigFixture(dict):
         if not os.path.exists(galaxy_token_fn):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
-
 
     def __hash__(self):
         # To avoid TypeError: unhashable type: 'AnsibleConfigFixture'
@@ -720,11 +720,13 @@ def galaxy_auto_sign_collections():
     settings = api_client("_ui/v1/settings/")
     return settings.get("GALAXY_AUTO_SIGN_COLLECTIONS")
 
+
 def fix_prefix_workaround(url):
     if aap_gateway():
         return url.replace("/api/galaxy/", "/api/hub/")
     else:
         return url
+
 
 def get_paginated(client, relative_url: str = None) -> list:
     """Iterate through all results in a paginated queryset"""

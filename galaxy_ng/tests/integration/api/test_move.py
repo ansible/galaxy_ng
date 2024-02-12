@@ -6,7 +6,8 @@ See: https://issues.redhat.com/browse/AAH-1268
 import pytest
 from orionutils.generator import build_collection
 
-from galaxykit.collections import upload_artifact, move_or_copy_collection, sign_collection, deprecate_collection
+from galaxykit.collections import (upload_artifact, move_or_copy_collection, sign_collection,
+                                   deprecate_collection)
 from galaxykit.repositories import get_repository_href
 from galaxykit.utils import wait_for_task, wait_for_url
 from ..conftest import is_hub_4_5
@@ -206,10 +207,8 @@ def test_copy_associated_content(ansible_config, galaxy_client):
 
     cv_href = collection_version["pulp_href"]
 
-    collection = f'content/staging/v3/collections/{artifact.namespace}/{artifact.name}/'
-    collection = f'content/staging/v3/plugin/ansible/content/staging/collections/index/{artifact.namespace}/{artifact.name}/'
-
-    # content/staging/v3/plugin/ansible/content/staging/collections/index/autohubtest2/collection_dep_a_hwhtkfor/
+    collection = (f'content/staging/v3/plugin/ansible/content/staging/collections/index/'
+                  f'{artifact.namespace}/{artifact.name}/')
 
     collection_version = f'{collection}versions/{artifact.version}/'
     collection_mark = (
@@ -260,8 +259,8 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     assert copy_result["name"] == artifact.name
     assert copy_result["version"] == artifact.version
 
-    collection = f'content/community/v3/collections/{artifact.namespace}/{artifact.name}/'
-    collection = f'content/community/v3/plugin/ansible/content/staging/collections/index/{artifact.namespace}/{artifact.name}/'
+    collection = (f'content/community/v3/plugin/ansible/content/staging/'
+                  f'collections/index/{artifact.namespace}/{artifact.name}/')
     collection_version = f'{collection}versions/{artifact.version}/'
     collection_mark = (
         f'pulp/api/v3/content/ansible/collection_marks/'

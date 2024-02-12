@@ -12,7 +12,7 @@ import tempfile
 
 from openapi_spec_validator import validate_spec
 
-from ..utils import get_client, is_docker_installed
+from ..utils import is_docker_installed
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -35,7 +35,7 @@ def test_galaxy_openapi_no_pulp_variables(galaxy_client):
     """Tests whether openapi.json has valid path names"""
 
     gc = galaxy_client("basic_user")
-    galaxy_spec = gc.get(f'v3/openapi.json')
+    galaxy_spec = gc.get('v3/openapi.json')
     assert 'paths' in galaxy_spec
 
     paths_keys = list(galaxy_spec['paths'].keys())

@@ -131,7 +131,6 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     create_namespace(gc, artifact.namespace, "")
 
     # publish v1
-    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
         galaxy_client=gc
@@ -290,8 +289,6 @@ def pytest_sessionstart(session):
     ansible_config = get_ansible_config()
     hub_version = get_hub_version(ansible_config)
     if not is_standalone() and not is_ephemeral_env() and not is_dev_env_standalone():
-        # if not aap_gateway():
-            # TODO what should be done here?
         set_test_data(ansible_config, hub_version)
     logger.debug(f"Running tests against hub version {hub_version}")
 
@@ -464,11 +461,11 @@ def set_test_data(ansible_config, hub_version):
     if aap_gateway():
         users = ["iqe_normal_user", "jdoe", "ee_admin", "org-admin"]
         for user in users:
-            body = {"username": user,"password":"Th1sP4ssd", "is_superuser": True}
+            body = {"username": user, "password": "Th1sP4ssd", "is_superuser": True}
             if users == "iqe_normal_user":
                 body["is_superuser"] = False
-            gc.headers.update({"Referer": f"{gc.gw_root_url}access/users/create"})
-            gc.headers.update({"X-Csrftoken": gc.gw_client.csrftoken})
+            gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
+            gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
             try:
                 gc.post(f"{gc.gw_root_url}api/gateway/v1/users/", body=body)
             except GalaxyClientError as e:
@@ -479,7 +476,6 @@ def set_test_data(ansible_config, hub_version):
                     raise e
             del gc.headers["Referer"]
             del gc.headers["X-Csrftoken"]
-
 
 
 @pytest.fixture(scope="session")

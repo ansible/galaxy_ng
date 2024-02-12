@@ -1,6 +1,6 @@
 import pytest
 
-from ..utils import get_client, UIClient, PulpObjectBase
+from ..utils import UIClient
 from ..utils.iqe_utils import aap_gateway
 from ..utils.tools import generate_random_string
 

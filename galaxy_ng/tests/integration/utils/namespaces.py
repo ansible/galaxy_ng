@@ -74,7 +74,7 @@ def create_unused_namespace(gc=None):
     assert gc is not None, "api_client is a required param"
     ns = generate_unused_namespace(gc=gc)
     payload = {'name': ns, 'groups': []}
-    gc.post(f'v3/namespaces/', body=payload)
+    gc.post('v3/namespaces/', body=payload)
     return ns
 
 

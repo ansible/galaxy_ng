@@ -1,12 +1,12 @@
 import pytest
-from ..utils import get_client, iterate_all
+from ..utils import iterate_all
 
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_repository_labels(galaxy_client):
     # Get an API client running with admin user credentials
-    gc=galaxy_client("admin")
+    gc = galaxy_client("admin")
 
     labels = {
         "!hide_from_search": {"rh-certified", "validated", "published", "community"},

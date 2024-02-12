@@ -1,6 +1,5 @@
 import pytest
 
-from ..utils import get_client
 from ..utils.iqe_utils import remove_from_cache
 
 

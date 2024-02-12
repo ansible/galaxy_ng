@@ -9,7 +9,7 @@ import uuid
 
 import pytest
 
-from galaxykit.groups import create_group_v3, create_group, get_roles, delete_group, \
+from galaxykit.groups import create_group_v3, create_group, get_roles, \
     delete_group_v3, get_group_v3
 from galaxykit.namespaces import create_namespace
 

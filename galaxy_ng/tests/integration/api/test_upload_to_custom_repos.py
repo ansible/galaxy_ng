@@ -27,7 +27,8 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
 
     if gc:
         wait_for_all_tasks_gk(gc)
-        collection_resp = get_collection_from_repo(gc, dest_base_path, artifact.namespace, artifact.name, "1.0.0")
+        collection_resp = get_collection_from_repo(gc, dest_base_path, artifact.namespace,
+                                                   artifact.name, "1.0.0")
         assert collection_resp["name"] == artifact.name
     else:
         wait_for_all_tasks(client)
@@ -37,7 +38,6 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
         )
         collection_resp = client(collection_url)
         assert collection_resp["name"] == artifact.name
-
 
     # test download
     with tempfile.TemporaryDirectory() as dir:

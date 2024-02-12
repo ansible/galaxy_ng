@@ -17,7 +17,7 @@ from ..utils.tools import generate_random_string
 @pytest.mark.deployment_standalone
 def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
-    total = 10 # 4 passes, 5 fails
+    total = 10
 
     gc = galaxy_client("admin")
 
@@ -37,7 +37,8 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
     server_url = gc.galaxy_root + 'content/' + repo_name + '/'
 
     args_list = [f"collection publish -vvvv {x.filename}" for x in artifacts]
-    kwargs_list = [{'galaxy_client': gc, 'server_url': server_url, 'server': repo_name} for x in artifacts]
+    kwargs_list = [{'galaxy_client': gc, 'server_url': server_url, 'server': repo_name}
+                   for x in artifacts]
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=total) as executor:
 
