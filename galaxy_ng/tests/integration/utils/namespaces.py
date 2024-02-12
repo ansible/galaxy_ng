@@ -6,6 +6,7 @@ import string
 
 from .collections import delete_all_collections_in_namespace, \
     delete_all_collections_in_namespace_gk
+from .iqe_utils import fix_prefix_workaround
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ def get_all_namespaces(gc=None, api_version='v3'):
     next_page = f'{api_version}/namespaces/'
     while next_page:
         # workaround
-        next_page = next_page.replace("/api/galaxy/", "/api/hub/")
+        next_page = fix_prefix_workaround(next_page)
         resp = gc.get(next_page)
         namespaces.extend(resp['data'])
         next_page = resp.get('links', {}).get('next')
