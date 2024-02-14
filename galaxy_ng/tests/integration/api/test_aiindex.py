@@ -7,10 +7,8 @@ from ..utils import (
     get_client
 )
 
-# should we import this like this
-# or move that function to utils?
-from .test_community import cleanup_social_user
 from ..utils.repo_management_utils import create_test_namespace
+from ..utils.legacy import cleanup_social_user
 
 
 @pytest.fixture(scope="function")
