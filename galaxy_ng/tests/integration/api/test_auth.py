@@ -51,7 +51,7 @@ def test_auth_admin(ansible_config):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
-def test_auth_exception(ansible_config, published):
+def test_auth_exception(ansible_config):
     """Test whether an HTTP exception when using an invalid token."""
 
     config = ansible_config("basic_user")

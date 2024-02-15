@@ -3,7 +3,7 @@ import pytest
 from ..utils import (
     UIClient,
     SocialGithubClient,
-    generate_unused_namespace,
+    generate_unused_namespace_name,
     get_client
 )
 
@@ -31,7 +31,7 @@ def pe_namespace(ansible_config) -> str:
     """create a new namespace owned by PE user."""
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
-    new_namespace = generate_unused_namespace(api_client=api_client, api_version="_ui/v1")
+    new_namespace = generate_unused_namespace_name(api_client=api_client, api_version="_ui/v1")
     with UIClient(config=config) as uclient:
         # get user
         resp = uclient.get("_ui/v1/me/")
