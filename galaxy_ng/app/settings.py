@@ -22,6 +22,7 @@ MIDDLEWARE = [
 
 INSTALLED_APPS = [
     'rest_framework.authtoken',
+    'ansible_base.resource_registry',
     'dynaconf_merge',
 ]
 
@@ -295,3 +296,6 @@ GALAXY_METRICS_COLLECTION_ORG_ID = None
 # When set to True will enable the DYNAMIC settungs feature
 # Individual allowed dynamic keys are set on ./dynamic_settings.py
 GALAXY_DYNAMIC_SETTINGS = False
+
+# DJANGO ANSIBLE BASE RESOURCES REGISTRY SETTINGS
+ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = "galaxy_ng.app.api.resource_api"
