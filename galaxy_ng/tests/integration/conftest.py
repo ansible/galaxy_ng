@@ -33,8 +33,6 @@ from .utils.iqe_utils import (
 )
 from .utils.tools import generate_random_artifact_version
 
-# from orionutils.generator import build_collection
-
 
 MARKER_CONFIG = """
 qa: Mark tests to run in the vortex job.

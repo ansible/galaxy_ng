@@ -5,7 +5,7 @@ import pytest
 from galaxykit.containers import get_container_distribution, delete_container
 from galaxykit.utils import wait_for_task, GalaxyClientError
 
-from ..utils.iqe_utils import pull_and_tag_test_image
+from ..utils.iqe_utils import pull_and_tag_test_image, fix_prefix_workaround
 
 
 # this is to be enabled when https://github.com/ansible/galaxy_ng/pull/1627
@@ -43,6 +43,8 @@ def test_delete_ee_and_content(ansible_config, galaxy_client):
     assert distro_response["results"][0]["base_path"] == 'alpine'
 
     # Grab the repository href from the json and make get request
+    distro_response["results"][0]["repository"] = (
+        fix_prefix_workaround(distro_response["results"][0]["repository"]))
     repo_response = gc.get(distro_response["results"][0]["repository"])
 
     # Grab <latest_version_href> field from this Container Push Repo Instance
@@ -61,11 +63,11 @@ def test_delete_ee_and_content(ansible_config, galaxy_client):
 
     # Ensure content list is empty by checking each content href
     content_hrefs = [item["pulp_href"] for item in content_list["results"]]
-
     # FIXME: all items are found. Check it.
     for item in content_hrefs:
         failed = None
         try:
+            item = fix_prefix_workaround(item)
             gc.get(item)
             failed = False
         except GalaxyClientError as ge:
@@ -115,6 +117,11 @@ def test_shared_content_is_not_deleted(ansible_config, galaxy_client):
     assert distro_response2["results"][0]["base_path"] == 'alpine2'
 
     # Grab the repository href from the json and make get request
+    distro_response1["results"][0]["repository"] = (
+        fix_prefix_workaround(distro_response1["results"][0]["repository"]))
+    distro_response2["results"][0]["repository"] = (
+        fix_prefix_workaround(distro_response2["results"][0]["repository"]))
+
     repo_response_1 = gc.get(distro_response1["results"][0]["repository"])
     repo_response_2 = gc.get(distro_response2["results"][0]["repository"])
 
@@ -142,6 +149,7 @@ def test_shared_content_is_not_deleted(ansible_config, galaxy_client):
     for item in content_hrefs:
         success = None
         try:
+            item = fix_prefix_workaround(item)
             gc.get(item)
             success = True
         except GalaxyClientError as ge:
