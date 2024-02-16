@@ -27,13 +27,8 @@ from ..schemas import (
 )
 from ..utils import generate_unused_namespace, wait_for_task_ui_client
 from ..utils.iqe_utils import get_paginated, remove_from_cache, aap_gateway
-from .rbac_actions.utils import ReusableLocalContainer
 
 
-REGEX_403 = r"HTTP Code: 403"
-
-
-# /api/automation-hub/_ui/v1/auth/login/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -45,7 +40,6 @@ def test_gw_api_ui_v1_login(galaxy_client):
     assert gc.cookies['gateway_sessionid'] is not None
 
 
-# /api/automation-hub/_ui/v1/auth/logout/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -64,7 +58,6 @@ def test_gw_api_ui_v1_logout(galaxy_client):
     remove_from_cache("basic_user")
 
 
-# /api/automation-hub/_ui/v1/collection-versions/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -113,18 +106,7 @@ def test_gw_api_ui_v1_collection_versions_version_range(galaxy_client, uncertifi
         gc.get(f'{v_path}&version_range=not_a_semver_version')
     assert ctx.value.response.status_code == 400
 
-# /api/automation-hub/_ui/v1/collection-versions/{version}/
-# ^ tested by previous function
 
-
-# /api/automation-hub/_ui/v1/collection_signing/
-# /api/automation-hub/_ui/v1/collection_signing/{path}/
-# /api/automation-hub/_ui/v1/collection_signing/{path}/{namespace}/
-# /api/automation-hub/_ui/v1/collection_signing/{path}/{namespace}/{collection}/
-# /api/automation-hub/_ui/v1/collection_signing/{path}/{namespace}/{collection}/{version}/
-# /api/automation-hub/_ui/v1/controllers/
-
-# /api/automation-hub/_ui/v1/distributions/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
@@ -165,7 +147,6 @@ def test_gw_api_ui_v1_distributions(galaxy_client):
                          "This is the jira to fix the test: AAH-2601")
 
 
-# /api/automation-hub/_ui/v1/distributions/{pulp_id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
@@ -189,7 +170,6 @@ def test_gw_api_ui_v1_distributions_by_id(galaxy_client):
         assert _ds['pulp_id'] == distro_id
 
 
-# /api/automation-hub/_ui/v1/execution-environments/registries/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -250,27 +230,6 @@ def test_gw_api_ui_v1_execution_environments_registries(galaxy_client):
     assert ctx.value.response.status_code == 404
 
 
-# /api/automation-hub/_ui/v1/execution-environments/registries/{pulp_id}/
-# ^ tested by previous function
-
-
-# /api/automation-hub/_ui/v1/execution-environments/registries/{id}/index/
-# ^ tested by previous function
-
-
-# /api/automation-hub/_ui/v1/execution-environments/registries/{id}/sync/
-# ^ tested by previous function
-
-
-# /api/automation-hub/_ui/v1/execution-environments/remotes/
-# /api/automation-hub/_ui/v1/execution-environments/remotes/{pulp_id}/
-
-@pytest.fixture
-def local_container():
-    return ReusableLocalContainer('int_tests')
-
-
-# /api/automation-hub/_ui/v1/feature-flags/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
@@ -287,7 +246,6 @@ def test_gw_api_ui_v1_feature_flags(galaxy_client):
     assert ds['legacy_roles'] is False
 
 
-# /api/automation-hub/_ui/v1/groups/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -310,11 +268,6 @@ def test_gw_api_ui_v1_groups(galaxy_client):
     assert ds['pulp_href'].endswith(f"/{ds['id']}/")
 
 
-# /api/automation-hub/_ui/v1/groups/{group_pk}/model-permissions/
-# /api/automation-hub/_ui/v1/groups/{group_pk}/model-permissions/{id}/
-
-
-# /api/automation-hub/_ui/v1/groups/{group_pk}/users/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -338,7 +291,6 @@ def test_gw_api_ui_v1_groups_users(galaxy_client):
     assert "jdoe" in [x["username"] for x in users_ds["data"]]
 
 
-# /api/automation-hub/_ui/v1/groups/{group_pk}/users/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -384,7 +336,6 @@ def test_gw_api_ui_v1_groups_users_add_delete(galaxy_client):
     assert user_name not in [x['username'] for x in users_ds['data']]
 
 
-# /api/automation-hub/_ui/v1/groups/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -402,7 +353,6 @@ def test_gw_api_ui_v1_groups_by_id(galaxy_client):
         assert ds['id'] == gid
 
 
-# /api/automation-hub/_ui/v1/imports/collections/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -420,16 +370,6 @@ def test_gw_api_ui_v1_imports_collections(galaxy_client):
         validate_json(instance=jds, schema=schema_collection_import_detail)
 
 
-# /api/automation-hub/_ui/v1/imports/collections/{task_id}/
-# ^ tested by the previous function
-
-
-# /api/automation-hub/_ui/v1/landing-page/
-# ^ tested in tests/integration/api/test_landing_page.py
-
-
-# /api/automation-hub/_ui/v1/me/
-@pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_me(galaxy_client, settings):
@@ -447,11 +387,6 @@ def test_gw_api_ui_v1_me(galaxy_client, settings):
         assert ds['auth_provider'] == ['django']
 
 
-# /api/automation-hub/_ui/v1/my-distributions/
-# /api/automation-hub/_ui/v1/my-distributions/{pulp_id}/
-
-
-# /api/automation-hub/_ui/v1/my-namespaces/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
@@ -499,7 +434,6 @@ def test_gw_api_ui_v1_my_namespaces(galaxy_client):
     assert new_namespace not in namespace_names
 
 
-# /api/automation-hub/_ui/v1/my-namespaces/{name}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
@@ -511,20 +445,6 @@ def test_gw_api_ui_v1_my_namespaces_name(galaxy_client):
     validate_json(instance=resp, schema=schema_namespace_detail)
 
 
-# /api/automation-hub/_ui/v1/my-synclists/
-# /api/automation-hub/_ui/v1/my-synclists/{id}/
-# /api/automation-hub/_ui/v1/my-synclists/{id}/curate/
-
-
-# /api/automation-hub/_ui/v1/namespaces/
-# ^ tested in tests/integration/api/test_namespace_management.py
-
-
-# /api/automation-hub/_ui/v1/namespaces/{name}/
-# ^ tested in tests/integration/api/test_namespace_management.py
-
-
-# /api/automation-hub/_ui/v1/remotes/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -542,7 +462,6 @@ def test_gw_api_ui_v1_remotes(galaxy_client):
     assert 'rh-certified' in remote_names
 
 
-# /api/automation-hub/_ui/v1/remotes/{pulp_id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -562,7 +481,6 @@ def test_gw_api_ui_v1_remotes_by_id(galaxy_client):
         gc.get(f'_ui/v1/remotes/{pulp_id}/')
 
 
-# /api/automation-hub/_ui/v1/repo/{distro_base_path}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -576,7 +494,6 @@ def test_gw_api_ui_v1_repo_distro_by_basepath(galaxy_client):
         validate_json(instance=ds, schema=schema_objectlist)
 
 
-# /api/automation-hub/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -597,7 +514,6 @@ def test_gw_api_ui_v1_collection_detail_view(galaxy_client, published):
     assert version in all_versions
 
 
-# /api/automation-hub/_ui/v1/settings/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
@@ -615,11 +531,6 @@ def test_gw_api_ui_v1_settings(galaxy_client):
     assert ds['GALAXY_REQUIRE_CONTENT_APPROVAL'] is True
 
 
-# /api/automation-hub/_ui/v1/synclists/
-# /api/automation-hub/_ui/v1/synclists/{id}/
-
-
-# /api/automation-hub/_ui/v1/tags/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -634,8 +545,6 @@ def test_gw_api_ui_v1_tags(galaxy_client):
     # FIXME - ui tags api does not support POST?
 
 
-# /api/automation-hub/_ui/v1/tags/collections/
-# /api/automation-hub/_ui/v1/users/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -667,7 +576,6 @@ def test_gw_api_ui_v1_users(galaxy_client):
     assert ds['last_name'] == payload['last_name']
 
 
-# /api/automation-hub/_ui/v1/users/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
