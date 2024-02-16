@@ -7,6 +7,10 @@ from . import views
 from galaxy_ng.app.api import urls as api_urls
 from galaxy_ng.ui import urls as ui_urls
 
+from ansible_base.resource_registry.urls import (
+    urlpatterns as resource_api_urls,
+)
+
 from drf_spectacular.views import (
     SpectacularJSONAPIView,
     SpectacularYAMLAPIView,
@@ -45,6 +49,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("healthz", views.health_view),
+    path(f"{API_PATH_PREFIX}", include(resource_api_urls))
 ]
 
 if settings.get("API_ROOT") != "/pulp/":
