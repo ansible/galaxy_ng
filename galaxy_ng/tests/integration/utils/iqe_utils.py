@@ -238,9 +238,10 @@ def is_standalone():
 
 
 def is_ephemeral_env():
-    return "c-rh-c-eph" in os.getenv(
+    api_root = os.getenv(
         "HUB_API_ROOT", "http://localhost:5001/api/automation-hub/"
     )
+    return "c-rh-c-eph" in api_root or "crc-eph" in api_root
 
 
 def is_galaxy_stage():
