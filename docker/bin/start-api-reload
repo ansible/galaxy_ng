@@ -5,7 +5,7 @@ set -o errexit
 set -o nounset
 
 
-readonly GUNICORN='/venv/bin/gunicorn'
+readonly GUNICORN=${GUNICORN:-'/venv/bin/gunicorn'}
 readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
 
