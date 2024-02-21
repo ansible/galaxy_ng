@@ -45,9 +45,9 @@ bleach==3.3.1
     # via galaxy-importer
 bleach-allowlist==1.0.3
     # via galaxy-importer
-boto3==1.34.44
+boto3==1.34.46
     # via galaxy-ng (setup.py)
-botocore==1.34.44
+botocore==1.34.46
     # via
     #   boto3
     #   s3transfer
@@ -157,7 +157,7 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-future==0.18.3
+future==1.0.0
     # via pyjwkest
 galaxy-importer==0.4.20
     # via
@@ -450,7 +450,7 @@ urllib3==2.0.7
     #   requests
 uuid6==2024.1.12
     # via pulpcore
-wcmatch==8.5
+wcmatch==8.5.1
     # via ansible-lint
 webencodings==0.5.1
     # via bleach
