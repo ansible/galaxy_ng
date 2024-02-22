@@ -2,7 +2,6 @@ import json
 import os
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from dynaconf.utils import upperfy
 
 
 class Command(BaseCommand):
@@ -51,7 +50,7 @@ class Command(BaseCommand):
             k = key
             if prefix in key:
                 k = key[len(prefix):]
-            v = settings.get(upperfy(key), default=None)
+            v = settings.get(key, default=None)
             config["configuration"].update({k: v})
         return config
 
