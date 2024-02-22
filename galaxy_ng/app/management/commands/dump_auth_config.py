@@ -1,9 +1,9 @@
 import json
 import os
 from django.core.management.base import BaseCommand
-from galaxy_ng.app.models.config import Setting
 from django.conf import settings
 from dynaconf.utils import upperfy
+
 
 class Command(BaseCommand):
     KEYCLOAK_AUTH_KEYS = [
@@ -55,13 +55,17 @@ class Command(BaseCommand):
             config["configuration"].update({k: v})
         return config
 
-
     def handle(self, *args, **options):
         try:
             data = []
 
             # Add Keycloak auth config
-            data.append(self.format_config_data("keycloak", self.KEYCLOAK_AUTH_KEYS, "SOCIAL_AUTH_KEYCLOAK_"))
+            data.append(
+                self.format_config_data(
+                    "keycloak",
+                    self.KEYCLOAK_AUTH_KEYS,
+                    "SOCIAL_AUTH_KEYCLOAK_"),
+            )
 
             # Add LDAP auth config
             data.append(self.format_config_data("ldap", self.LDAP_AUTH_KEYS, "AUTH_LDAP_"))
