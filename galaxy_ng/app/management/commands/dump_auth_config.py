@@ -11,22 +11,23 @@ class Command(BaseCommand):
         "SOCIAL_AUTH_KEYCLOAK_KEY",
         "SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY",
         "SOCIAL_AUTH_KEYCLOAK_SECRET",
-        "KEYCLOAK_PROTOCOL",
-        "KEYCLOAK_HOST",
-        "KEYCLOAK_PORT",
-        "KEYCLOAK_REALM",
     ]
 
     LDAP_AUTH_KEYS = [
         "AUTH_LDAP_SERVER_URI",
         "AUTH_LDAP_BIND_DN",
         "AUTH_LDAP_BIND_PASSWORD",
+        "AUTH_LDAP_USER_DN_TEMPLATE",
+        "AUTH_LDAP_USER_SEARCH",
         "AUTH_LDAP_USER_SEARCH_BASE_DN",
         "AUTH_LDAP_USER_SEARCH_SCOPE",
         "AUTH_LDAP_USER_SEARCH_FILTER",
+        "AUTH_LDAP_GROUP_SEARCH",
         "AUTH_LDAP_GROUP_SEARCH_BASE_DN",
         "AUTH_LDAP_GROUP_SEARCH_SCOPE",
         "AUTH_LDAP_GROUP_SEARCH_FILTER",
+        "AUTH_LDAP_GROUP_TYPE",
+        "AUTH_LDAP_GROUP_TYPE_PARAMS",
         "AUTH_LDAP_USER_ATTR_MAP",
     ]
 
@@ -41,10 +42,17 @@ class Command(BaseCommand):
             help="Output JSON file path",
         )
 
+    def is_enabled(self, keys):
+        values = []
+        for key in keys:
+            values.append(settings.get(key, default=None))
+        return all(values)
+
     def format_config_data(self, type, keys, prefix):
         config = {
-            "type": type,
-            "configuration": {}
+            "type": f"galaxy.authentication.authenticator_plugins.{type}",
+            "enabled": self.is_enabled(keys),
+            "configuration": {},
         }
         for key in keys:
             k = key
