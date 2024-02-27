@@ -1,0 +1,33 @@
+# https://github.com/pulp/oci_env/blob/main/base/local_scripts/generate_client.sh
+# https://github.com/pulp/oci_env/blob/main/base/container_scripts/install_client.sh
+
+- name: make sure there's a checkout of pulp-openapi-generator
+  shell: test -d ../../../pulp-openapi-generator || git clone https://github.com/pulp/pulp-openapi-generator ../../../pulp-openapi-generator
+  connection: local
+
+- name: get the pulp container IP
+  shell: docker inspect pulp | jq '.[0].NetworkSettings.Networks.pulp_ci_bridge.IPAddress' | tr -d '"'
+  connection: local
+  register: pulp_ip
+
+- name: run the generate script
+  galaxy_ng.tools.local_run:
+    command: >
+       cd ../../../pulp-openapi-generator;
+       export USE_LOCAL_API_JSON=true;
+       curl -L -k -u admin:password -o api.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/docs/api.json?bindings&plugin={{ item }}';
+       bash -x generate.sh {{ item }} python
+  connection: local
+  loop:
+      - galaxy_ng
+      - pulp_ansible
+      - pulp_container
+      - pulpcore
+
+- name: install the generated client inside the pulp container
+  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install -e .
+  loop:
+      - galaxy_ng
+      - pulp_ansible
+      - pulp_container
+      - pulpcore

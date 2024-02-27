@@ -17,6 +17,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 log.info("settings.FIXTURE_DIRS(module scope): %s", settings.FIXTURE_DIRS)
 
 
+# @pytest.skip(reason="fixme", allow_module_level=True)
 class TestUiMySyncListViewSet(BaseSyncListViewSet):
     def setUp(self):
         super().setUp()

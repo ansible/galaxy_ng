@@ -1,0 +1,58 @@
+# Ansible playbook to start the pulp service container and its supporting services
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: add the pulp container as an inventory host
+      add_host:
+        name: pulp
+
+- name: Prep the container for tests
+  hosts: pulp
+  connection: docker
+  gather_facts: false
+  tasks:
+
+    - name: "Install functional test requirements"
+      command:
+        cmd: "pip3 install -r /src/galaxy_ng/functest_requirements.txt"
+
+    #- name: install the pulpcli
+    #  command:
+    #    cmd: "pip3 install pulp-cli"
+
+    #- name: "run pulp config"
+    #  shell: |
+    #      #/bin/bash
+    #      PULP_API_ROOT="/api/galaxy/pulp/"
+    #      pulp config create --base-url https://pulp --api-root "$PULP_API_ROOT"
+
+    - name: "Setup pulp smash"
+      include_role:
+        name: galaxy_ng.tools.pulp_smash
+
+    - name: "Setup pulp client(s)"
+      include_role:
+        name: galaxy_ng.tools.pulp_client
+
+
+- name: Run the tests
+  hosts: pulp
+  connection: docker
+  gather_facts: false
+  tasks:
+
+    - name: I NEED epdb =(
+      shell: pip3 install epdb
+
+    - name: "copy the helper script"
+      copy:
+        src: run_functional.sh
+        dest: /tmp/run_functional.sh
+        mode: "0777"
+
+    - name: "Run the functional tests"
+      galaxy_ng.tools.local_run:
+        command: docker exec pulp /bin/bash -c '/tmp/run_functional.sh'
+

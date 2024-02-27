@@ -1,0 +1,15 @@
+diff --git a/images/Containerfile.core.base b/images/Containerfile.core.base
+index c05669c..7d84cb8 100644
+--- a/images/Containerfile.core.base
++++ b/images/Containerfile.core.base
+@@ -130,6 +130,10 @@ COPY images/assets/add_signing_service.sh /usr/bin/add_signing_service.sh
+ COPY images/assets/pulp-api /usr/bin/pulp-api
+ COPY images/assets/pulp-content /usr/bin/pulp-content
+ COPY images/assets/pulp-worker /usr/bin/pulp-worker
++COPY images/assets/switch_python /usr/bin/switch_python
++
++ARG PYTHON_VERSION=3.11
++RUN switch_python "$PYTHON_VERSION"
+ 
+ # Need to precreate when running pulp as the pulp user
+ RUN touch /var/log/galaxy_api_access.log && \
