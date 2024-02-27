@@ -1,5 +1,7 @@
 import aiohttp
 import asyncio
+import contextlib
+import xml.etree.cElementTree as et
 
 from django.db import transaction
 from django.forms.fields import ImageField
@@ -15,6 +17,9 @@ from pulpcore.plugin.models import RepositoryContent, Artifact, ContentArtifact
 from galaxy_ng.app.models import Namespace
 
 
+MAX_AVATAR_SIZE = 3 * 1024 * 1024  # 3MB
+
+
 def dispatch_create_pulp_namespace_metadata(galaxy_ns, download_logo):
 
     dispatch(
@@ -26,11 +31,16 @@ def dispatch_create_pulp_namespace_metadata(galaxy_ns, download_logo):
     )
 
 
-def _download_avatar(url):
+def _download_avatar(url, namespace_name):
+    # User-Agent needs to be added to avoid timing out on throtled servers.
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0)'  # +
+        ' Gecko/20100101 Firefox/71.0'
+    }
     timeout = aiohttp.ClientTimeout(total=None, sock_connect=600, sock_read=600)
     conn = aiohttp.TCPConnector(force_close=True)
     session = aiohttp.ClientSession(
-        connector=conn, timeout=timeout, headers=None, requote_redirect_url=False
+        connector=conn, timeout=timeout, headers=headers, requote_redirect_url=False
     )
 
     try:
@@ -41,19 +51,29 @@ def _download_avatar(url):
     finally:
         asyncio.get_event_loop().run_until_complete(session.close())
 
-    try:
+    # Limit size of the avatar to avoid memory issues when validating it
+    if img.artifact_attributes["size"] > MAX_AVATAR_SIZE:
+        raise ValidationError(
+            f"Avatar for {namespace_name} on {url} larger than {MAX_AVATAR_SIZE / 1024 / 1024}MB"
+        )
+
+    with contextlib.suppress(Artifact.DoesNotExist):
         return Artifact.objects.get(sha256=img.artifact_attributes["sha256"])
-    except Artifact.DoesNotExist:
-        pass
 
     with open(img.path, "rb") as f:
         tf = PulpTemporaryUploadedFile.from_file(f)
-
         try:
             ImageField().to_python(tf)
         except ValidationError:
-            print("file is not an image")
-            return
+            # Not a PIL valid image lets handle SVG case
+            tag = None
+            with contextlib.suppress(et.ParseError):
+                f.seek(0)
+                tag = et.parse(f).find(".").tag
+            if tag != '{http://www.w3.org/2000/svg}svg':
+                raise ValidationError(
+                    f"Provided avatar_url for {namespace_name} on {url} is not a valid image"
+                )
 
         # the artifact has to be saved before the file is closed, or s3transfer
         # will throw an error.
@@ -71,7 +91,7 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
     avatar_artifact = None
 
     if download_logo:
-        avatar_artifact = _download_avatar(galaxy_ns._avatar_url)
+        avatar_artifact = _download_avatar(galaxy_ns._avatar_url, galaxy_ns.name)
 
     avatar_sha = None
     if avatar_artifact:
