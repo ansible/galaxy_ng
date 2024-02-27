@@ -5,7 +5,7 @@ from django.conf import settings
 
 
 class Command(BaseCommand):
-    KEYCLOAK_AUTH_KEYS = [
+    KEYCLOAK_KEYS = [
         "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL",
         "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL",
         "SOCIAL_AUTH_KEYCLOAK_KEY",
@@ -13,22 +13,21 @@ class Command(BaseCommand):
         "SOCIAL_AUTH_KEYCLOAK_SECRET",
     ]
 
-    LDAP_AUTH_KEYS = [
+    LDAP_KEYS = [
         "AUTH_LDAP_SERVER_URI",
         "AUTH_LDAP_BIND_DN",
         "AUTH_LDAP_BIND_PASSWORD",
         "AUTH_LDAP_USER_DN_TEMPLATE",
-        "AUTH_LDAP_USER_SEARCH",
         "AUTH_LDAP_USER_SEARCH_BASE_DN",
         "AUTH_LDAP_USER_SEARCH_SCOPE",
         "AUTH_LDAP_USER_SEARCH_FILTER",
-        "AUTH_LDAP_GROUP_SEARCH",
         "AUTH_LDAP_GROUP_SEARCH_BASE_DN",
         "AUTH_LDAP_GROUP_SEARCH_SCOPE",
         "AUTH_LDAP_GROUP_SEARCH_FILTER",
-        "AUTH_LDAP_GROUP_TYPE",
         "AUTH_LDAP_GROUP_TYPE_PARAMS",
         "AUTH_LDAP_USER_ATTR_MAP",
+        "AUTH_LDAP_CONNECTION_OPTIONS",
+        "AUTH_LDAP_START_TLS",
     ]
 
     help = "Dump auth config data from database to a JSON file"
@@ -48,6 +47,36 @@ class Command(BaseCommand):
             values.append(settings.get(key, default=None))
         return all(values)
 
+    def post_config_ldap(self):
+        post_config = {}
+        # Configure USER_SEARCH and GROUP_SEARCH
+        AUTH_LDAP_USER_SEARCH_BASE_DN = settings.get("AUTH_LDAP_USER_SEARCH_BASE_DN", default=None)
+        AUTH_LDAP_USER_SEARCH_SCOPE = settings.get("AUTH_LDAP_USER_SEARCH_SCOPE", default=None)
+        AUTH_LDAP_USER_SEARCH_FILTER = settings.get("AUTH_LDAP_USER_SEARCH_FILTER", default=None)
+        AUTH_LDAP_GROUP_SEARCH_BASE_DN = settings.get("AUTH_LDAP_GROUP_SEARCH_BASE_DN", default=None)
+        AUTH_LDAP_GROUP_SEARCH_SCOPE = settings.get("AUTH_LDAP_GROUP_SEARCH_SCOPE", default=None)
+        AUTH_LDAP_GROUP_SEARCH_FILTER = settings.get("AUTH_LDAP_GROUP_SEARCH_FILTER", default=None)
+
+        post_config["USER_SEARCH"] = [
+                AUTH_LDAP_USER_SEARCH_BASE_DN,
+                AUTH_LDAP_USER_SEARCH_SCOPE,
+                AUTH_LDAP_USER_SEARCH_FILTER,
+            ]
+
+        post_config["GROUP_SEARCH"] = [
+                AUTH_LDAP_GROUP_SEARCH_BASE_DN,
+                AUTH_LDAP_GROUP_SEARCH_SCOPE,
+                AUTH_LDAP_GROUP_SEARCH_FILTER,
+            ]
+
+        # Configure GROUP_TYPE
+        post_config["GROUP_TYPE"] = None
+        AUTH_LDAP_GROUP_TYPE = settings.get("AUTH_LDAP_GROUP_TYPE")
+        if AUTH_LDAP_GROUP_TYPE:
+            post_config["GROUP_TYPE"] = type(AUTH_LDAP_GROUP_TYPE).__name__
+
+        return post_config
+
     def format_config_data(self, type, keys, prefix):
         config = {
             "type": f"galaxy.authentication.authenticator_plugins.{type}",
@@ -60,6 +89,11 @@ class Command(BaseCommand):
                 k = key[len(prefix):]
             v = settings.get(key, default=None)
             config["configuration"].update({k: v})
+
+        # handle post configuration for ldap:
+        if type == "ldap":
+            config["configuration"].update(self.post_config_ldap())
+
         return config
 
     def handle(self, *args, **options):
@@ -70,12 +104,12 @@ class Command(BaseCommand):
             data.append(
                 self.format_config_data(
                     "keycloak",
-                    self.KEYCLOAK_AUTH_KEYS,
+                    self.KEYCLOAK_KEYS,
                     "SOCIAL_AUTH_KEYCLOAK_"),
             )
 
             # Add LDAP auth config
-            data.append(self.format_config_data("ldap", self.LDAP_AUTH_KEYS, "AUTH_LDAP_"))
+            data.append(self.format_config_data("ldap", self.LDAP_KEYS, "AUTH_LDAP_"))
 
             # Define the path for the output JSON file
             output_file = options["output_file"]
