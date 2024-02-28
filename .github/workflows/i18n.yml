@@ -70,7 +70,7 @@ jobs:
 
       - name: Create a Pull Request (only if files were updated)
         if: env.openPR == 'true'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           committer: ansible <ansible-infra@redhat.com>
