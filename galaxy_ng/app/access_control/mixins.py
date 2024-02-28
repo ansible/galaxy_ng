@@ -70,7 +70,7 @@ class UserModelPermissionsMixin:
     @property
     def users(self):
         return get_users_with_perms_attached_roles(
-            self, include_model_permissions=False, for_concrete_model=True)
+            self, include_model_permissions=False, for_concrete_model=True, with_group_users=False)
 
     @users.setter
     def users(self, users):
@@ -89,7 +89,7 @@ class UserModelPermissionsMixin:
                 obj = self._meta.concrete_model.objects.get(pk=self.pk)
 
             current_users = get_users_with_perms_attached_roles(
-                obj, include_model_permissions=False)
+                obj, include_model_permissions=False, with_group_users=False)
             for user in current_users:
                 for perm in current_users[user]:
                     remove_role(perm, user, obj)
