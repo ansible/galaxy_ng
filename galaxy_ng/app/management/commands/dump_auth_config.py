@@ -53,21 +53,24 @@ class Command(BaseCommand):
         AUTH_LDAP_USER_SEARCH_BASE_DN = settings.get("AUTH_LDAP_USER_SEARCH_BASE_DN", default=None)
         AUTH_LDAP_USER_SEARCH_SCOPE = settings.get("AUTH_LDAP_USER_SEARCH_SCOPE", default=None)
         AUTH_LDAP_USER_SEARCH_FILTER = settings.get("AUTH_LDAP_USER_SEARCH_FILTER", default=None)
-        AUTH_LDAP_GROUP_SEARCH_BASE_DN = settings.get("AUTH_LDAP_GROUP_SEARCH_BASE_DN", default=None)
+        AUTH_LDAP_GROUP_SEARCH_BASE_DN = settings.get(
+            "AUTH_LDAP_GROUP_SEARCH_BASE_DN",
+            default=None
+        )
         AUTH_LDAP_GROUP_SEARCH_SCOPE = settings.get("AUTH_LDAP_GROUP_SEARCH_SCOPE", default=None)
         AUTH_LDAP_GROUP_SEARCH_FILTER = settings.get("AUTH_LDAP_GROUP_SEARCH_FILTER", default=None)
 
         post_config["USER_SEARCH"] = [
-                AUTH_LDAP_USER_SEARCH_BASE_DN,
-                AUTH_LDAP_USER_SEARCH_SCOPE,
-                AUTH_LDAP_USER_SEARCH_FILTER,
-            ]
+            AUTH_LDAP_USER_SEARCH_BASE_DN,
+            AUTH_LDAP_USER_SEARCH_SCOPE,
+            AUTH_LDAP_USER_SEARCH_FILTER,
+        ]
 
         post_config["GROUP_SEARCH"] = [
-                AUTH_LDAP_GROUP_SEARCH_BASE_DN,
-                AUTH_LDAP_GROUP_SEARCH_SCOPE,
-                AUTH_LDAP_GROUP_SEARCH_FILTER,
-            ]
+            AUTH_LDAP_GROUP_SEARCH_BASE_DN,
+            AUTH_LDAP_GROUP_SEARCH_SCOPE,
+            AUTH_LDAP_GROUP_SEARCH_FILTER,
+        ]
 
         # Configure GROUP_TYPE
         post_config["GROUP_TYPE"] = None
