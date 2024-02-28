@@ -15,6 +15,7 @@ check_commit:
           START_COMMIT: {{ "${{ github.event.before }}" }}
           END_COMMIT: {{ "${{ github.event.after }}" }}
         run: |
+          cd ..
           python .ci/scripts/validate_commit_message_custom.py
 
   lint_po:
