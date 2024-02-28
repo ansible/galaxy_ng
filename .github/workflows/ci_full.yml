@@ -2,9 +2,6 @@
 name: galaxy_ng/ci
 on: {pull_request: {branches: ['**']}, push: {branches: ['**']}}
 
-concurrency:
-  cancel-in-progress: true
-
 jobs:
 
   check_commit:
