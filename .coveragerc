@@ -1,0 +1,5 @@
+[run]
+data_file = /tmp/.coverage
+omit = 
+	galaxy_ng/_vendor/*
+	galaxy_ng/tests/*

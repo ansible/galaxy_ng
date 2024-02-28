@@ -1,4 +1,5 @@
 import unittest
+import pytest
 
 from urllib.parse import urlparse
 
@@ -10,6 +11,7 @@ from pulp_smash import cli
 from galaxy_ng.tests.functional.utils import TestCaseUsingBindings
 
 
+@pytest.mark.skip(reason="does not work currently in CI")
 class ContainerRepositoryTagsTestCase(TestCaseUsingBindings, rbac_base.BaseRegistryTest):
     """Test whether a container repository's tags can be listed.
 

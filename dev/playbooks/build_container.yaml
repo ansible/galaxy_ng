@@ -1,0 +1,34 @@
+# Ansible playbook to create the pulp service containers image
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/main.yaml
+
+  tasks:
+
+    - name: "Build the base image"
+      galaxy_ng.tools.local_run:
+        command: "cd docker; ./BUILD.sh"
+
+    - name: "Clean out the cache directory"
+      shell: "sudo rm -rf cache"
+
+    - name: "Make the cache directory"
+      file:
+        name: cache
+        state: directory
+
+    - name: "Generate Containerfile from template"
+      template:
+        src: Containerfile.j2
+        dest: cache/Containerfile
+
+    - name: "Build pulp image"
+      galaxy_ng.tools.local_run:
+        command: "docker build --network host --no-cache={{ not cache | default(true) | bool }} -t {{ image.name }}:{{ image.tag }} -f {{ playbook_dir }}//cache/Containerfile ../../.."
+
+    - name: "Clean image cache"
+      docker_prune:
+        images : true

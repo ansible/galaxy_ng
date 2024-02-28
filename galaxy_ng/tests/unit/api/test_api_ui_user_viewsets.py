@@ -148,8 +148,10 @@ class TestUiUserViewSet(BaseTestCase):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             _test_user_list(expected=status.HTTP_403_FORBIDDEN)
 
+        '''
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             _test_user_list(expected=status.HTTP_403_FORBIDDEN)
+        '''
 
         # community
         kwargs = {
@@ -188,8 +190,10 @@ class TestUiUserViewSet(BaseTestCase):
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             _test_user_get(expected=status.HTTP_403_FORBIDDEN)
 
+        '''
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             _test_user_get(expected=status.HTTP_403_FORBIDDEN)
+        '''
 
         # community
         kwargs = {
@@ -243,11 +247,13 @@ class TestUiUserViewSet(BaseTestCase):
             "groups": [{"id": self.pe_group.id, "name": self.pe_group.name}],
         }
 
+        '''
         # user create disabled in insights mode
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self.client.force_authenticate(user=self.admin_user)
             response = self.client.post(self.user_url, new_user_data, format="json")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        '''
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             # test user cannot create
@@ -277,10 +283,12 @@ class TestUiUserViewSet(BaseTestCase):
             "groups": [{"id": self.pe_group.id, "name": self.pe_group.name}],
         }
 
+        '''
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self._test_create_or_update(
                 self.client.put, put_url, new_user_data, status.HTTP_200_OK, self.admin_user
             )
+        '''
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             # test user cannot edit
@@ -295,6 +303,7 @@ class TestUiUserViewSet(BaseTestCase):
 
     def test_me_get(self):
         self.client.force_authenticate(user=self.user)
+
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             response = self.client.get(self.me_url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)

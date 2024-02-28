@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+NEWV=$1
+if [[ "$NEWV" == "3.8" ]]; then
+    echo "using default python 3.8"
+    exit 0
+fi
+
+echo "switching python to $NEWV"
+
+rm -f /usr/local/bin/pip3
+dnf install -y python${NEWV} python${NEWV}-pip python${NEWV}-devel
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${NEWV} 1
+update-alternatives --set python3 /usr/bin/python${NEWV}
+update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip-${NEWV} 1
+update-alternatives --set pip3 /usr/bin/pip-${NEWV}

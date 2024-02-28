@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import uuid
-from unittest import skip
 
 from django.test import TestCase
 from galaxy_ng.app.utils.galaxy import upstream_role_iterator
@@ -11,14 +10,12 @@ from galaxy_ng.app.utils.galaxy import int_to_uuid
 
 class TestGalaxyUtils(TestCase):
 
-    @skip("FIXME")
     def test_upstream_role_iterator_with_user(self):
         roles = []
         for namespace, role, versions in upstream_role_iterator(github_user="jctanner"):
             roles.append(role)
         assert sorted(set([x['github_user'] for x in roles])) == ['jctanner']
 
-    @skip("FIXME")
     def test_upstream_role_iterator_with_user_and_name(self):
         roles = []
         iterator_kwargs = {
@@ -31,7 +28,6 @@ class TestGalaxyUtils(TestCase):
         assert roles[0]['github_user'] == 'geerlingguy'
         assert roles[0]['name'] == 'docker'
 
-    @skip("FIXME")
     def test_upstream_role_iterator_with_limit(self):
         limit = 10
         count = 0
