@@ -1,3 +1,4 @@
 mock
 orionutils
 pytest-django
+pytest<8
