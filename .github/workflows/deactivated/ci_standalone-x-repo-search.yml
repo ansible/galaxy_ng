@@ -1,6 +1,6 @@
 ---
 name: Standalone Cross Repository Search tests
-on: 
+on:
   pull_request:
     branches:
       - '**'

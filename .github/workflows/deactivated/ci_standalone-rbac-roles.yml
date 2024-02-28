@@ -1,6 +1,6 @@
 ---
 name: Standalone RBAC Roles
-on: 
+on:
   pull_request:
     branches:
       - '**'

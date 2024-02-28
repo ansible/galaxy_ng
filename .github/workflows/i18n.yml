@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   # run weekly
   schedule:
-  - cron: '30 5 1 * *'
+    - cron: '30 5 1 * *'
 
 jobs:
   i18n:
@@ -15,11 +15,11 @@ jobs:
     strategy:
       matrix:
         branch:
-        - 'master'
-        - 'stable-4.6'
-        - 'stable-4.7'
-        - 'stable-4.8'
-        - 'stable-4.9'
+          - 'master'
+          - 'stable-4.6'
+          - 'stable-4.7'
+          - 'stable-4.8'
+          - 'stable-4.9'
 
     steps:
       - uses: actions/checkout@v4

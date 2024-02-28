@@ -1,6 +1,6 @@
 ---
 name: Local Standalone Sync Against Local Insights
-on: 
+on:
   pull_request:
     branches:
       - '**'
