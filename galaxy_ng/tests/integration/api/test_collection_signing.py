@@ -417,7 +417,6 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
     5. Upload the signature to staging
     6. assert collection signature task has spawned
     """
-    # TODO: take into consideration require auth param
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is not set")
 
@@ -475,7 +474,7 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
         repo_href = get_repository_href(gc, "staging")
         signature_file = open(signature_filename, "rb")
         response = requests.post(
-            gc.galaxy_root + "content/ansible/collection_signatures/",
+            gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
             files={"file": signature_file},
             data={
                 "repository": repo_href,

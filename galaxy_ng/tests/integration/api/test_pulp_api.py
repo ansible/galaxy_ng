@@ -6,11 +6,17 @@ from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
 
 from galaxykit.utils import wait_for_task, GalaxyClientError
+from .rbac_actions.utils import ReusableLocalContainer
 from ..schemas import schema_pulp_objectlist, schema_pulp_roledetail, schema_task_detail
 from ..utils import get_client
 from ..utils.rbac_utils import create_emtpy_local_image_container
 
 REGEX_40X = r"HTTP Code: 40\d"
+
+
+@pytest.fixture
+def local_container():
+    return ReusableLocalContainer('int_tests')
 
 
 @pytest.mark.deployment_standalone
