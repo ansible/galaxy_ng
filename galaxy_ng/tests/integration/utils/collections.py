@@ -644,7 +644,10 @@ def delete_all_collections_in_namespace(api_client, namespace_name):
 
     # accumlate a list of matching collections in each repo
     ctuples = set()
-    cmap = get_all_collections_by_repo(api_client)
+    ansible_config = get_ansible_config()
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc = galaxy_client("admin")
+    cmap = get_all_collections_by_repo(gc)
     for repo, cvs in cmap.items():
         for cv_spec in cvs.keys():
             if cv_spec[0] == namespace_name:
