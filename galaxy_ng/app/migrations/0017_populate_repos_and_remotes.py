@@ -31,7 +31,7 @@ REPOSITORIES = [
         "next_version": 1,
         "remote": {
             "name": "rh-certified",
-            "url": "https://console.redhat.com/api/automation-hub/",
+            "url": "https://console.redhat.com/api/automation-hub/content/published/",
             "requirements_file": None,
             "token": None,
             "auth_url": (
