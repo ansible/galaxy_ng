@@ -2,12 +2,15 @@ import random
 import string
 
 import pytest
+from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
 
 from galaxykit.utils import wait_for_task, GalaxyClientError
 from ..schemas import schema_pulp_objectlist, schema_pulp_roledetail, schema_task_detail
-from ..utils.iqe_utils import remove_from_cache
+from ..utils import get_client
 from ..utils.rbac_utils import create_emtpy_local_image_container
+
+REGEX_40X = r"HTTP Code: 40\d"
 
 
 @pytest.mark.deployment_standalone
@@ -123,28 +126,14 @@ def test_pulp_roles_endpoint(galaxy_client):
     assert TEST_ROLE_NAME not in role_names
 
 
-@pytest.mark.parametrize(
-    "require_auth",
-    [
-        True,
-        False,
-    ],
-)
 @pytest.mark.pulp_api
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-def test_pulp_task_endpoint(galaxy_client, require_auth, ansible_config):
+def test_gw_pulp_task_endpoint(galaxy_client, ansible_config):
 
     gc = galaxy_client("ee_admin")
 
     name = create_emtpy_local_image_container(ansible_config("admin"), gc)
-
-    if not require_auth:
-        try:
-            del gc.headers["Authorization"]
-        except KeyError:
-            gc.gw_client.logout()
-        remove_from_cache("ee_admin")
 
     delete_resp = gc.delete(
         f"v3/plugin/execution-environments/repositories/{name}/", relogin=False
@@ -158,3 +147,34 @@ def test_pulp_task_endpoint(galaxy_client, require_auth, ansible_config):
     with pytest.raises(GalaxyClientError) as e:
         gc.get(f"v3/plugin/execution-environments/repositories/{name}/")
     assert e.value.response.status_code == 404
+
+
+@pytest.mark.parametrize(
+    "require_auth",
+    [
+        True,
+        False,
+    ],
+)
+@pytest.mark.pulp_api
+@pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.7dev")
+@pytest.mark.skip_in_gw
+def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
+    name = local_container.get_container()['name']
+    config = ansible_config("ee_admin")
+    api_prefix = config.get("api_prefix").rstrip("/")
+    api_client = get_client(config, request_token=True, require_auth=require_auth)
+
+    delete_resp = api_client(
+        f"{api_prefix}/v3/plugin/execution-environments/repositories/{name}/", method="DELETE"
+    )
+    task_url = delete_resp["task"][len(f'{api_prefix}/'):]
+
+    task_detail = api_client(f"{api_prefix}/{task_url}", method="GET")
+    validate_json(instance=task_detail, schema=schema_task_detail)
+
+    wait_for_task(api_client, delete_resp)
+    with pytest.raises(GalaxyError, match=REGEX_40X):
+        api_client(
+            f"{api_prefix}/v3/plugin/execution-environments/repositories/{name}/", method="GET")
