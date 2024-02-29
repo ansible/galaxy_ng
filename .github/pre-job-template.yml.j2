@@ -25,5 +25,6 @@ check_commit:
         uses: actions/checkout@v2
 
       - run: |
+          cd ..
           pip install lint-po
           lint-po ./galaxy_ng/locale/*/LC_MESSAGES/*.po

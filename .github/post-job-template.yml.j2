@@ -14,5 +14,7 @@ update_manifest:
         env:
           GITHUB_PULL_REQUEST: {{ "${{ github.event.number }}" }}
           MANIFEST_PASSPHRASE: {{ "${{ secrets.MANIFEST_PASSPHRASE }}" }}
-        run: .github/workflows/scripts/update_manifest.sh
         shell: bash
+        run: |
+          cd ..
+          .github/workflows/scripts/update_manifest.sh
