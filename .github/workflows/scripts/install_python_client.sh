@@ -9,45 +9,61 @@
 
 set -mveuo pipefail
 
-export PULP_URL="${PULP_URL:-https://pulp}"
-
 # make sure this script runs at the repo root
 cd "$(dirname "$(realpath -e "$0")")"/../../..
 
-pip install twine wheel
+source .github/workflows/scripts/utils.sh
 
-export REPORTED_VERSION=$(http $PULP_URL/pulp/api/v3/status/ | jq --arg plugin galaxy --arg legacy_plugin galaxy_ng -r '.versions[] | select(.component == $plugin or .component == $legacy_plugin) | .version')
-export DESCRIPTION="$(git describe --all --exact-match `git rev-parse HEAD`)"
-if [[ $DESCRIPTION == 'tags/'$REPORTED_VERSION ]]; then
-  export VERSION=${REPORTED_VERSION}
-else
-  export EPOCH="$(date +%s)"
-  export VERSION=${REPORTED_VERSION}${EPOCH}
-fi
+PULP_URL="${PULP_URL:-https://pulp}"
+export PULP_URL
+PULP_API_ROOT="${PULP_API_ROOT:-/pulp/}"
+export PULP_API_ROOT
 
-export response=$(curl --write-out %{http_code} --silent --output /dev/null https://pypi.org/project/galaxy-ng-client/$VERSION/)
+REPORTED_STATUS="$(pulp status)"
+REPORTED_VERSION="$(echo "$REPORTED_STATUS" | jq --arg plugin "galaxy" -r '.versions[] | select(.component == $plugin) | .version')"
+VERSION="$(echo "$REPORTED_VERSION" | python -c 'from packaging.version import Version; print(Version(input()))')"
 
-if [ "$response" == "200" ];
-then
-  echo "galaxy_ng client $VERSION has already been released. Installing from PyPI."
-  docker exec pulp pip3 install galaxy-ng-client==$VERSION
-  mkdir -p dist
-  tar cvf python-client.tar ./dist
-  exit
-fi
-
-cd ../pulp-openapi-generator
+pushd ../pulp-openapi-generator
 rm -rf galaxy_ng-client
-./generate.sh galaxy_ng python $VERSION
-cd galaxy_ng-client
+
+if pulp debug has-plugin --name "core" --specifier ">=3.44.0.dev"
+then
+  curl --fail-with-body -k -o api.json "${PULP_URL}${PULP_API_ROOT}api/v3/docs/api.json?bindings&component=galaxy"
+  USE_LOCAL_API_JSON=1 ./generate.sh galaxy_ng python "$VERSION"
+else
+  ./generate.sh galaxy_ng python "$VERSION"
+fi
+
+pushd galaxy_ng-client
 python setup.py sdist bdist_wheel --python-tag py3
-find . -name "*.whl" -exec docker exec pulp pip3 install /root/pulp-openapi-generator/galaxy_ng-client/{} \;
-tar cvf ../../galaxy_ng/python-client.tar ./dist
+
+twine check "dist/galaxy_ng_client-$VERSION-py3-none-any.whl"
+twine check "dist/galaxy_ng-client-$VERSION.tar.gz"
+
+cmd_prefix pip3 install "/root/pulp-openapi-generator/galaxy_ng-client/dist/galaxy_ng_client-${VERSION}-py3-none-any.whl"
+tar cvf ../../galaxy_ng/galaxy-python-client.tar ./dist
 
 find ./docs/* -exec sed -i 's/Back to README/Back to HOME/g' {} \;
 find ./docs/* -exec sed -i 's/README//g' {} \;
 cp README.md docs/index.md
 sed -i 's/docs\///g' docs/index.md
 find ./docs/* -exec sed -i 's/\.md//g' {} \;
-tar cvf ../../galaxy_ng/python-client-docs.tar ./docs
-exit $?
+
+cat >> mkdocs.yml << DOCSYAML
+---
+site_name: GalaxyNg Client
+site_description: Galaxy bindings
+site_author: Pulp Team
+site_url: https://docs.pulpproject.org/galaxy_ng_client/
+repo_name: pulp/galaxy_ng
+repo_url: https://github.com/pulp/galaxy_ng
+theme: readthedocs
+DOCSYAML
+
+# Building the bindings docs
+mkdocs build
+
+# Pack the built site.
+tar cvf ../../galaxy_ng/galaxy-python-client-docs.tar ./site
+popd
+popd

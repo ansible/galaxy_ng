@@ -166,6 +166,7 @@ setup(
     name=package_name,
     version=version,
     description="galaxy-ng plugin for the Pulp Project",
+    long_description="galaxy-ng plugin for the Pulp Project",
     license="GPLv2+",
     author="Red Hat, Inc.",
     author_email="info@ansible.com",

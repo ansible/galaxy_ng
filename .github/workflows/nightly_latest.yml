@@ -46,7 +46,7 @@ jobs:
           echo "HTTPIE_CONFIG_DIR=$GITHUB_WORKSPACE/.ci/assets/httpie/" >> $GITHUB_ENV
 
       - name: Before Install
-        
+
         run: .github/workflows/scripts/before_install.sh
         shell: bash
         env:
@@ -65,7 +65,7 @@ jobs:
           ruby-version: "2.6"
 
       - name: Install
-        
+
         run: .github/workflows/scripts/install.sh
         shell: bash
         env:
@@ -79,7 +79,7 @@ jobs:
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
 
       - name: Before Script
-        
+
         run: .github/workflows/scripts/before_script.sh
         shell: bash
         env:
@@ -93,13 +93,13 @@ jobs:
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
 
       - name: Setting secrets
-        
+
         run: python3 .github/workflows/scripts/secrets.py "$SECRETS_CONTEXT"
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
 
       - name: Install Python client
-        
+
         run: .github/workflows/scripts/install_python_client.sh
         shell: bash
 

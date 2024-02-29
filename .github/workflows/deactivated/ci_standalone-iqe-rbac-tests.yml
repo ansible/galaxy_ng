@@ -1,6 +1,6 @@
 ---
 name: Standalone IQE RBAC tests
-on: 
+on:
   pull_request:
     branches:
       - '**'

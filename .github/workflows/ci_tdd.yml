@@ -1,6 +1,6 @@
 ---
 name: TDD
-on: 
+on:
   pull_request:
     branches:
       - '*'

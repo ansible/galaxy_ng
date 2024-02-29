@@ -15,6 +15,7 @@ check_commit:
           START_COMMIT: {{ "${{ github.event.before }}" }}
           END_COMMIT: {{ "${{ github.event.after }}" }}
         run: |
+          cd ..
           python .ci/scripts/validate_commit_message_custom.py
 
   lint_po:
@@ -24,5 +25,6 @@ check_commit:
         uses: actions/checkout@v2
 
       - run: |
+          cd ..
           pip install lint-po
           lint-po ./galaxy_ng/locale/*/LC_MESSAGES/*.po
