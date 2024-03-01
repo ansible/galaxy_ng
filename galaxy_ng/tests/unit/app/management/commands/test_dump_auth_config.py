@@ -81,9 +81,5 @@ class TestDumpAuthConfigCommand(TestCase):
         ]
     def test_json_returned_from_cmd(self):
         output = StringIO()
-        call_command("dump_auth_config", stdout=output)
-
-        print(f"expected_config json dumped:\n{json.dumps(self.expected_config)}")
-        print(f"output.getvalue():\n{output.getvalue().rstrip()}")
-
+        call_command("dump-auth-config", stdout=output)
         assert output.getvalue().rstrip() == json.dumps(self.expected_config)
