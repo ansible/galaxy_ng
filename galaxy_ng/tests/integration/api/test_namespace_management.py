@@ -211,6 +211,7 @@ def test_namespace_edit_logo(galaxy_client):
     wait_for_all_tasks_gk(gc)
     updated_again_namespace = gc.get(f"_ui/v1/my-namespaces/{name}/")
     assert updated_namespace["avatar_url"] != updated_again_namespace["avatar_url"]
+    assert updated_namespace["avatar_sha256"] is not None
 
     # verify no additional namespaces are created
     resp = gc.get("_ui/v1/my-namespaces/")
