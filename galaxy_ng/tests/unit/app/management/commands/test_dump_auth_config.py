@@ -1,8 +1,8 @@
 from io import StringIO
 import json
-import os
 from django.core.management import call_command
-from django.test import TestCase, modify_settings, override_settings
+from django.test import TestCase, override_settings
+
 
 @override_settings(SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL="ACCESS_TOKEN_URL")
 @override_settings(SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL="AUTHORIZATION_URL")
@@ -79,6 +79,7 @@ class TestDumpAuthConfigCommand(TestCase):
                 }
             }
         ]
+
     def test_json_returned_from_cmd(self):
         output = StringIO()
         call_command("dump-auth-config", stdout=output)
