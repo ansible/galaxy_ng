@@ -24,13 +24,6 @@ ansible_config = get_ansible_config()
 CLIENT_CONFIG = ansible_config("admin")
 ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 
-ansible_config = get_ansible_config()
-galaxy_client = get_galaxy_client(ansible_config)
-if is_ephemeral_env():
-    gc_admin = galaxy_client("admin", basic_token=True)
-else:
-    gc_admin = galaxy_client("admin", basic_token=False)
-
 API_ROOT = CLIENT_CONFIG["url"]
 PULP_API_ROOT = f"{API_ROOT}pulp/api/v3/"
 SERVER = API_ROOT.split("/api/")[0]
@@ -541,6 +534,14 @@ class ReusableLocalContainer:
         # 1. get namespace pulp_id from repositories
         # 2. get roles in namespace
         # 3. remove roles and groups (clean container namespace)
+
+        ansible_config = get_ansible_config()
+        galaxy_client = get_galaxy_client(ansible_config)
+        if is_ephemeral_env():
+            gc_admin = galaxy_client("admin", basic_token=True)
+        else:
+            gc_admin = galaxy_client("admin")
+
         self._container = get_container(gc_admin, self._name)
         ns_r = gc_admin.get(f"pulp/api/v3/pulp_container/namespaces/?name={self._ns_name}")
         pulp_namespace_path = ns_r["results"][0]["pulp_href"]
