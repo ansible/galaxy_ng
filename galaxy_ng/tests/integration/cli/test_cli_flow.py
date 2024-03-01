@@ -74,12 +74,11 @@ def test_publish_newer_certified_collection_version(
 @pytest.mark.all
 @pytest.mark.cli
 @pytest.mark.skip(reason="pulp is changing how this works")
-def test_publish_same_collection_version(ansible_config, galaxy_client):
+def test_publish_same_collection_version(ansible_config, galaxy_client, new_v3_namespace):
     """Test you cannot publish same collection version already published."""
 
     gc = galaxy_client("partner_engineer")
-    cnamespace = create_test_namespace(gc)
-    collection = build_collection(namespace=cnamespace)
+    collection = build_collection(namespace=new_v3_namespace)
     ansible_galaxy(
         f"collection publish {collection.filename}",
         ansible_config=ansible_config("admin")
@@ -94,13 +93,13 @@ def test_publish_same_collection_version(ansible_config, galaxy_client):
 
 @pytest.mark.all
 @pytest.mark.cli
-def test_publish_and_install_by_self(ansible_config, published, cleanup_collections):
+def test_publish_and_install_by_self(ansible_config, published_artifact, cleanup_collections):
     """A publishing user has the permission to install an uncertified version of their
     own collection.
     """
 
     ansible_galaxy(
-        f"collection install {published.namespace}.{published.name}:{published.version}",
+        f"collection install {published_artifact.namespace}.{published_artifact.name}:{published_artifact.version}",
         ansible_config=ansible_config("basic_user"),
     )
 
@@ -121,11 +120,11 @@ def test_publish_and_expect_uncertified_hidden(
     uncertified collection, but not an unspecified version range.
     """
     ansible_galaxy(
-        f"collection install {published.namespace}.{published.name}",
+        f"collection install {published_artifact.namespace}.{published_artifact.name}",
         check_retcode=0,
         ansible_config=ansible_config("basic_user"),
     )
     ansible_galaxy(
-        f"collection install {published.namespace}.{published.name}:1.0.0",
+        f"collection install {published_artifact.namespace}.{published_artifact.name}:1.0.0",
         ansible_config=ansible_config("basic_user"),
     )

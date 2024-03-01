@@ -42,7 +42,7 @@ class DependencySpec:
     ),
     ids=lambda s: s.name,
 )
-def test_collection_dependency_install(ansible_config, published, cleanup_collections,
+def test_collection_dependency_install(ansible_config, published_artifact, cleanup_collections,
                                        params, galaxy_client):
     """Collections defining dependencies can be installed and their dependencies are installed
     as well.
@@ -54,7 +54,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
 
     spec = params.spec
     retcode = params.retcode
-    artifact2 = build_collection(dependencies={f"{published.namespace}.{published.name}": spec})
+    artifact2 = build_collection(dependencies={f"{published_artifact.namespace}.{published_artifact.name}": spec})
 
     try:
         ansible_galaxy(
@@ -89,6 +89,6 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
                 pid.returncode == retcode
             ), f"Unexpected {'failure' if pid.returncode else 'success'} during installing \
             {artifact2.namespace}.{artifact2.name}:{artifact2.version} \
-            with dependency {published.namespace}.{published.name}{spec}"
+            with dependency {published_artifact.namespace}.{published_artifact.name}{spec}"
         except AssertionError:
             raise

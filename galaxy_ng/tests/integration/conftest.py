@@ -16,6 +16,8 @@ from .constants import USERNAME_PUBLISHER, GALAXY_STAGE_ANSIBLE_PROFILES
 from .utils import (
     ansible_galaxy,
     build_collection,
+    cleanup_namespace,
+    create_unused_namespace,
     get_client,
     set_certification,
     set_synclist,
@@ -104,7 +106,8 @@ def ansible_config():
 
 
 @pytest.fixture(scope="function")
-def published(ansible_config, artifact, galaxy_client):
+def published_artifact(ansible_config, artifact, galaxy_client):
+    """Make and return a published collection."""
     # make sure the expected namespace exists ...
     config = ansible_config("partner_engineer")
     api_client = get_client(config)
@@ -122,7 +125,8 @@ def published(ansible_config, artifact, galaxy_client):
     hub_4_5 = is_hub_4_5(ansible_config)
     set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
 
-    return artifact
+    yield artifact
+    cleanup_namespace(artifact.namespace, api_client=api_client)
 
 
 @pytest.fixture(scope="function")
@@ -165,7 +169,8 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     # certify newer version
     set_certification(api_client, gc, artifact2, hub_4_5=hub_4_5)
 
-    return (artifact, artifact2)
+    yield (artifact, artifact2)
+    cleanup_namespace(artifact.namespace, api_client=api_client)
 
 
 @pytest.fixture(scope="function")
@@ -173,16 +178,15 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config)
+    pe_config = ansible_config("partner_engineer")
+    api_client = get_client(pe_config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
     # publish
-    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=config
+        ansible_config=pe_config
     )
 
     # certify v1
@@ -199,17 +203,17 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     )
 
     # Publish but do -NOT- certify newer version ...
-    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=config
+        ansible_config=pe_config
     )
     dest_url = (
         f"v3/plugin/ansible/content/staging/collections/index/"
         f"{artifact2.namespace}/{artifact2.name}/versions/{artifact2.version}/"
     )
     wait_for_url(api_client, dest_url)
-    return artifact, artifact2
+    yield artifact, artifact2
+    cleanup_namespace(artifact.namespace, api_client=api_client)
 
 
 @pytest.fixture(scope="function")
@@ -255,7 +259,8 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
         f"{artifact2.namespace}/{artifact2.name}/versions/{artifact2.version}/"
     )
     wait_for_url(api_client, dest_url)
-    return artifact, artifact2
+    yield artifact, artifact2
+    cleanup_namespace(artifact.namespace, api_client=api_client)
 
 
 @pytest.fixture(scope="function")
@@ -622,3 +627,16 @@ def ldap_user(galaxy_client, request):
         return user
 
     return _
+
+
+###############################################
+# auto-clean fixtures
+###############################################
+
+@pytest.fixture
+def new_v3_namespace(ansible_config):
+    config = ansible_config("admin")
+    client = get_client(config)
+    ns = create_unused_namespace(api_client=client)
+    yield ns
+    cleanup_namespace(ns, api_client=client)

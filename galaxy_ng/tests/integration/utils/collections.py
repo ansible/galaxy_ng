@@ -525,12 +525,18 @@ def get_all_collections_by_repo(api_client=None):
     """ Return a dict of each repo and their collections """
     assert api_client is not None, "api_client is a required param"
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    collections = {
-        'staging': {},
-        'published': {},
-        'community': {},
-        'rh-certified': {},
-    }
+
+    # get all distributions ...
+    # /api/galaxy/pulp/api/v3/distributions/
+    distro_names = []
+    next_page = f'{api_prefix}/pulp/api/v3/distributions/'
+    while next_page:
+        resp = api_client(next_page)
+        next_page = resp.get('links', {}).get('next')
+        for distro in resp['results']:
+            distro_names.append(distro['name'])
+
+    collections = dict((x, {}) for x in distro_names)
     for repo in collections.keys():
         next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
         while next_page:
@@ -638,25 +644,43 @@ def delete_all_collections(api_client):
 def delete_all_collections_in_namespace(api_client, namespace_name):
 
     assert api_client is not None, "api_client is a required param"
+    api_prefix = api_client.config.get("api_prefix").rstrip("/")
 
     # accumlate a list of matching collections in each repo
     ctuples = set()
+
+    '''
     cmap = get_all_collections_by_repo(api_client)
     for repo, cvs in cmap.items():
         for cv_spec in cvs.keys():
             if cv_spec[0] == namespace_name:
                 ctuples.add((repo, cv_spec[0], cv_spec[1]))
+    '''
+
+    #import epdb; epdb.st()
+    next_page = f'{api_prefix}/_ui/v1/collection-versions/?namespace={namespace_name}'
+    while next_page:
+        resp = api_client(next_page)
+        next_page = resp.get('links', {}).get('next')
+
+        for collection in resp['data']:
+            for repository_name in collection['repository_list']:
+                ctuples.add((repository_name, collection['namespace'], collection['name']))
 
     # delete each collection ...
+    results = []
     for ctuple in ctuples:
         crepo = ctuple[0]
         cname = ctuple[2]
 
-        recursive_delete(api_client, namespace_name, cname, crepo)
+        res = recursive_delete(api_client, namespace_name, cname, crepo)
+        results.append(res)
+
+    return results
 
 
-def recursvive_delete(api_client, namespace_name, cname, crepo):
-    return recursive_delete(api_client, namespace_name, cname, crepo)
+#def recursvive_delete(api_client, namespace_name, cname, crepo):
+#    return recursive_delete(api_client, namespace_name, cname, crepo)
 
 
 def recursive_delete(api_client, namespace_name, cname, crepo):
@@ -672,7 +696,7 @@ def recursive_delete(api_client, namespace_name, cname, crepo):
 
     if dependants:
         for ns, name in dependants:
-            recursvive_delete(api_client, ns, name, crepo)
+            recursive_delete(api_client, ns, name, crepo)
 
     # Try deleting the whole collection ...
     try:

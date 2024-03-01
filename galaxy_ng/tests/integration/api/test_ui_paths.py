@@ -32,7 +32,7 @@ from ..schemas import (
 )
 from ..utils import (
     UIClient,
-    generate_unused_namespace,
+    generate_unused_namespace_name,
     get_client,
     wait_for_task_ui_client,
     wait_for_task,
@@ -574,7 +574,7 @@ def test_api_ui_v1_me(ansible_config, settings):
 def test_api_ui_v1_my_namespaces(ansible_config):
     config = ansible_config("partner_engineer")
     api_client = get_client(config, request_token=True, require_auth=True)
-    new_namespace = generate_unused_namespace(api_client=api_client, api_version='_ui/v1')
+    new_namespace = generate_unused_namespace_name(api_client=api_client, api_version='_ui/v1')
 
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
@@ -718,11 +718,11 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-def test_api_ui_v1_collection_detail_view(ansible_config, published):
+def test_api_ui_v1_collection_detail_view(ansible_config, published_artifact):
 
-    namespace = published.namespace
-    name = published.name
-    version = published.version
+    namespace = published_artifact.namespace
+    name = published_artifact.name
+    version = published_artifact.version
 
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:

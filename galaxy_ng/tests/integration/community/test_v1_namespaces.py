@@ -7,7 +7,7 @@ from ..utils import (
     ansible_galaxy,
     SocialGithubClient,
     get_client,
-    generate_unused_namespace,
+    generate_unused_namespace_name,
 )
 
 from ..utils.legacy import cleanup_social_user
@@ -96,12 +96,12 @@ def test_v1_namespace_provider_filter(ansible_config):
     v1_b_id = v1_b['id']
 
     # make 1 v3 namespace
-    v3_a_name = generate_unused_namespace(admin_client)
+    v3_a_name = generate_unused_namespace_name(admin_client)
     v3_a = admin_client(
         '/api/v3/namespaces/', method='POST', args={'name': v3_a_name, 'groups': []}
     )
     v3_a_id = v3_a['id']
-    v3_b_name = generate_unused_namespace(admin_client)
+    v3_b_name = generate_unused_namespace_name(admin_client)
     v3_b = admin_client(
         '/api/v3/namespaces/', method='POST', args={'name': v3_b_name, 'groups': []}
     )
