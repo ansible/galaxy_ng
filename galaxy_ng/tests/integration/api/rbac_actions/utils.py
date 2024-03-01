@@ -150,9 +150,11 @@ def ensure_test_container_is_pulled():
 def podman_push(username, password, container, tag="latest"):
     _ansible_config = get_ansible_config()
     _galaxy_client = get_galaxy_client(_ansible_config)
-    gc = _galaxy_client("admin")
-    create_local_image_container(_ansible_config("admin"), gc,
-                                 "ee_ns_int_tests/ee_local_int_tests", "latest")
+    gc = _galaxy_client({
+        "username": username,
+        "password": password,
+    })
+    create_local_image_container(_ansible_config("admin"), gc, container, tag)
     return 0
 
 

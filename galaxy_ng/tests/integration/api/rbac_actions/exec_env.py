@@ -1,5 +1,6 @@
 import requests
 
+from galaxykit.utils import GalaxyClientError
 from .utils import (
     API_ROOT,
     PULP_API_ROOT,
@@ -177,7 +178,11 @@ def ee_namespace_remove_role(user, password, expect_pass, extra):
 
 def create_ee_local(user, password, expect_pass, extra):
     name = gen_string()
-    return_code = podman_push(user['username'], password, name)
+    try:
+        podman_push(user['username'], password, name)
+        return_code = 0
+    except GalaxyClientError:
+        return_code = 1
 
     if return_code == 0:
         del_container(name)
@@ -192,7 +197,11 @@ def create_ee_in_existing_namespace(user, password, expect_pass, extra):
     namespace = extra["local_ee"].get_namespace()["name"]
     name = f"{namespace}/{gen_string()}"
 
-    return_code = podman_push(user['username'], password, name)
+    try:
+        podman_push(user['username'], password, name)
+        return_code = 0
+    except GalaxyClientError:
+        return_code = 1
 
     if return_code == 0:
         del_container(name)
@@ -207,7 +216,11 @@ def push_updates_to_existing_ee(user, password, expect_pass, extra):
     container = extra["local_ee"].get_container()["name"]
     tag = gen_string()
 
-    return_code = podman_push(user['username'], password, container, tag=tag)
+    try:
+        podman_push(user['username'], password, container, tag=tag)
+        return_code = 0
+    except GalaxyClientError:
+        return_code = 1
 
     if expect_pass:
         assert return_code == 0
