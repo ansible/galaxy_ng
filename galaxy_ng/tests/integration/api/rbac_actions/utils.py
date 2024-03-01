@@ -17,7 +17,9 @@ from ansible.galaxy.api import GalaxyError
 
 from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env, get_ansible_config, \
     get_galaxy_client, AnsibleConfigFixture
+from galaxy_ng.tests.integration.utils.rbac_utils import create_local_image_container
 from galaxykit.container_images import get_container, get_container_images_latest
+
 ansible_config = get_ansible_config()
 CLIENT_CONFIG = ansible_config("admin")
 ADMIN_CLIENT = get_client(CLIENT_CONFIG)
@@ -146,37 +148,12 @@ def ensure_test_container_is_pulled():
 
 
 def podman_push(username, password, container, tag="latest"):
-    ensure_test_container_is_pulled()
-    container_engine = CLIENT_CONFIG["container_engine"]
-    container_registry = CLIENT_CONFIG["container_registry"]
-
-    new_container = f"{container_registry}/{container}:{tag}"
-    tag_cmd = [container_engine, "image", "tag", TEST_CONTAINER, new_container]
-
-    subprocess.run(tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    if container_engine == "docker":
-        login_cmd = ["docker", "login", "-u", username, "-p", password, container_registry]
-        subprocess.run(login_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    if container_engine == "podman":
-        push_cmd = [
-            container_engine,
-            "push",
-            "--creds",
-            f"{username}:{password}",
-            new_container,
-            "--remove-signatures",
-            "--tls-verify=false"]
-
-    if container_engine == "docker":
-        push_cmd = [
-            container_engine,
-            "push",
-            new_container]
-
-    rc = subprocess.run(push_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return rc.returncode
+    _ansible_config = get_ansible_config()
+    _galaxy_client = get_galaxy_client(_ansible_config)
+    gc = _galaxy_client("admin")
+    create_local_image_container(_ansible_config("admin"), gc,
+                                 "ee_ns_int_tests/ee_local_int_tests", "latest")
+    return 0
 
 
 def del_user(pk):

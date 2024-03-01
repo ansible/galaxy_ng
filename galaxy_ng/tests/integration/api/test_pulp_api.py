@@ -8,7 +8,7 @@ from jsonschema import validate as validate_json
 from galaxykit.utils import wait_for_task, GalaxyClientError
 from .rbac_actions.utils import ReusableLocalContainer
 from ..schemas import schema_pulp_objectlist, schema_pulp_roledetail, schema_task_detail
-from ..utils import get_client
+from ..utils import get_client, wait_for_task as wait_for_task_gng
 from ..utils.rbac_utils import create_emtpy_local_image_container
 
 REGEX_40X = r"HTTP Code: 40\d"
@@ -180,7 +180,7 @@ def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
     task_detail = api_client(f"{api_prefix}/{task_url}", method="GET")
     validate_json(instance=task_detail, schema=schema_task_detail)
 
-    wait_for_task(api_client, delete_resp)
+    wait_for_task_gng(api_client, delete_resp)
     with pytest.raises(GalaxyError, match=REGEX_40X):
         api_client(
             f"{api_prefix}/v3/plugin/execution-environments/repositories/{name}/", method="GET")

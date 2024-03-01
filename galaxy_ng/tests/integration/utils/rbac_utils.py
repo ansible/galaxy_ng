@@ -85,7 +85,7 @@ def create_emtpy_local_image_container(config, client):
     return ee_name
 
 
-def create_local_image_container(config, client, name=None):
+def create_local_image_container(config, client, name=None, tag=None):
     """
     This method is used to create a container.
     """
@@ -100,13 +100,13 @@ def create_local_image_container(config, client, name=None):
     else:
         ee_name = f"ee_{generate_random_string()}"
     try:
-        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name)
+        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name, tag)
         client.push_image(full_name)
     except GalaxyClientError:
         logger.debug("Image push failed. Clearing cache and retrying.")
         subprocess.check_call([client.container_client.engine,
                                "system", "prune", "-a", "--volumes", "-f"])
-        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name)
+        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name, tag)
         client.push_image(full_name)
     return ee_name
 
