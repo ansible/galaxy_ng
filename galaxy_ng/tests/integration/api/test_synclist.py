@@ -117,7 +117,7 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings
     resp = upload_artifact(config, api_client, collection)
     resp = wait_for_task(api_client, resp)
     gc = galaxy_client("partner_engineer")
-    set_certification(api_client, gc, collection)
+    set_certification(config, gc, collection)
     collection_key = (collection.namespace, collection.name)
 
     config = ansible_config("org_admin")
