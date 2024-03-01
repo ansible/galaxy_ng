@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
@@ -17,17 +18,12 @@ class Command(BaseCommand):
         "AUTH_LDAP_SERVER_URI",
         "AUTH_LDAP_BIND_DN",
         "AUTH_LDAP_BIND_PASSWORD",
-        "AUTH_LDAP_USER_DN_TEMPLATE",
         "AUTH_LDAP_USER_SEARCH_BASE_DN",
         "AUTH_LDAP_USER_SEARCH_SCOPE",
         "AUTH_LDAP_USER_SEARCH_FILTER",
         "AUTH_LDAP_GROUP_SEARCH_BASE_DN",
         "AUTH_LDAP_GROUP_SEARCH_SCOPE",
         "AUTH_LDAP_GROUP_SEARCH_FILTER",
-        "AUTH_LDAP_GROUP_TYPE_PARAMS",
-        "AUTH_LDAP_USER_ATTR_MAP",
-        "AUTH_LDAP_CONNECTION_OPTIONS",
-        "AUTH_LDAP_START_TLS",
     ]
 
     help = "Dump auth config data from database to a JSON file"
@@ -37,7 +33,7 @@ class Command(BaseCommand):
             "output_file",
             nargs="?",
             type=str,
-            default="/auth_config.json",
+            default=None,
             help="Output JSON file path",
         )
 
@@ -49,6 +45,13 @@ class Command(BaseCommand):
 
     def post_config_ldap(self):
         post_config = {}
+        # Other required platform params
+        post_config["USER_ATTR_MAP"] = settings.get("AUTH_LDAP_USER_ATTR_MAP")
+        post_config["USER_DN_TEMPLATE"] = settings.get("AUTH_LDAP_USER_DN_TEMPLATE")
+        post_config["GROUP_TYPE_PARAMS"] = settings.get("AUTH_LDAP_GROUP_TYPE_PARAMS")
+        post_config["CONNECTION_OPTIONS"] = settings.get("AUTH_LDAP_CONNECTION_OPTIONS")
+        post_config["START_TLS"] = settings.get("AUTH_LDAP_START_TLS")
+
         # Configure USER_SEARCH and GROUP_SEARCH
         AUTH_LDAP_USER_SEARCH_BASE_DN = settings.get("AUTH_LDAP_USER_SEARCH_BASE_DN", default=None)
         AUTH_LDAP_USER_SEARCH_SCOPE = settings.get("AUTH_LDAP_USER_SEARCH_SCOPE", default=None)
@@ -114,18 +117,24 @@ class Command(BaseCommand):
             # Add LDAP auth config
             data.append(self.format_config_data("ldap", self.LDAP_KEYS, "AUTH_LDAP_"))
 
-            # Define the path for the output JSON file
-            output_file = options["output_file"]
+            # write to file if requested
+            if options["output_file"]:
+                # Define the path for the output JSON file
+                output_file = options["output_file"]
 
-            # Ensure the directory exists
-            os.makedirs(os.path.dirname(output_file), exist_ok=True)
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-            # Write data to the JSON file
-            with open(output_file, "w") as f:
-                json.dump(data, f, indent=4)
+                # Write data to the JSON file
+                with open(output_file, "w") as f:
+                    json.dump(data, f, indent=4)
 
-            self.stdout.write(
-                self.style.SUCCESS(f"Auth config data dumped to {output_file}")
-            )
+                self.stdout.write(
+                    self.style.SUCCESS(f"Auth config data dumped to {output_file}")
+                )
+            else:
+                self.stdout.write(json.dumps(data))
+
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"An error occurred: {str(e)}"))
+            sys.exit(1)
