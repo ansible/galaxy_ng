@@ -205,7 +205,6 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
 
     # make sure the expected namespace exists ...
     config = ansible_config("partner_engineer")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
@@ -220,7 +219,7 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
         f"v3/plugin/ansible/content/published/collections/index/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
-    wait_for_url(api_client, dest_url)
+    wait_for_url(gc, dest_url)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -241,7 +240,7 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
         f"v3/plugin/ansible/content/published/collections/index/"
         f"{artifact2.namespace}/{artifact2.name}/versions/{artifact2.version}/"
     )
-    wait_for_url(api_client, dest_url)
+    wait_for_url(gc, dest_url)
     return artifact, artifact2
 
 

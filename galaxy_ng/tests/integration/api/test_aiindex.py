@@ -27,11 +27,11 @@ def namespace(ansible_config, galaxy_client) -> str:
 
 
 @pytest.fixture(scope="function")
-def pe_namespace(ansible_config) -> str:
+def pe_namespace(ansible_config, galaxy_client) -> str:
     """create a new namespace owned by PE user."""
     config = ansible_config("partner_engineer")
-    api_client = get_client(config, request_token=True, require_auth=True)
-    new_namespace = generate_unused_namespace(api_client=api_client, api_version="_ui/v1")
+    gc = galaxy_client("partner_engineer")
+    new_namespace = generate_unused_namespace(gc=gc, api_version="_ui/v1")
     with UIClient(config=config) as uclient:
         # get user
         resp = uclient.get("_ui/v1/me/")
