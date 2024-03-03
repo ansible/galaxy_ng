@@ -496,10 +496,8 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
     assert collection["signatures"][0]["signing_service"] is None
 
 
-@pytest.mark.skipif(not require_signature_for_approval(),
-                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
 def test_move_with_no_signing_service_not_superuser_signature_required(
-        flags, galaxy_client, settings):
+        flags, galaxy_client, settings, skip_if_not_require_signature_for_approval):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.

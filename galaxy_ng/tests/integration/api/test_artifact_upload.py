@@ -12,7 +12,6 @@ from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
 from galaxykit.collections import upload_artifact, get_collection_from_repo, get_collection, \
     get_ui_collection
 from galaxykit.utils import wait_for_task, GalaxyClientError
-from ..utils.iqe_utils import require_signature_for_approval
 
 from ..utils import (
     CapturingGalaxyError,
@@ -302,10 +301,8 @@ def test_long_field_values(galaxy_client, field):
 @pytest.mark.importer
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
-@pytest.mark.skipif(require_signature_for_approval(),
-                    reason="This test needs refactoring to work with signatures"
-                           " required on move.")
-def test_ansible_requires(ansible_config, spec, galaxy_client):
+def test_ansible_requires(ansible_config, spec, galaxy_client,
+                          skip_if_require_signature_for_approval):
     """
     Test handling of POSTs to the artifact endpoint neglecting to submit a file.
 

@@ -29,7 +29,8 @@ from .utils.iqe_utils import (
     is_standalone,
     is_ephemeral_env,
     galaxy_stage_ansible_user_cleanup, remove_from_cache,
-    get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version, aap_gateway
+    get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version, aap_gateway,
+    require_signature_for_approval
 )
 from .utils.tools import generate_random_artifact_version
 
@@ -634,3 +635,15 @@ def ldap_user(galaxy_client, request):
         return user
 
     return _
+
+
+@pytest.fixture(scope="session")
+def skip_if_require_signature_for_approval():
+    if require_signature_for_approval():
+        pytest.skip("This test needs refactoring to work with signatures required on move.")
+
+
+@pytest.fixture(scope="session")
+def skip_if_not_require_signature_for_approval():
+    if not require_signature_for_approval():
+        pytest.skip("This test needs refactoring to work with signatures required on move.")
