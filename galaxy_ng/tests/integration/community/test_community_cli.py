@@ -104,7 +104,7 @@ def test_import_role_as_owner_no_tags(ansible_config):
 
     # validate install command
     with tempfile.TemporaryDirectory() as roles_path:
-        cfg = ansible_config('anonymous_user')
+        cfg = ansible_config(github_user)
         install_pid = ansible_galaxy(
             f"role install -p {roles_path} {github_user}.{role_name}",
             ansible_config=cfg,

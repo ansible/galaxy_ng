@@ -122,8 +122,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings, galaxy_cli
         f"repo-test-{generate_random_string()}",
     )
     gc = galaxy_client("admin")
-    _upload_test_common(config, None, artifact, repo.get_distro()["base_path"],
-                        "published", gc=gc)
+    _upload_test_common(config, None, artifact, repo.get_distro()["base_path"], gc=gc)
 
     cv = client(
         f"{api_prefix}content/published/v3/collections/"
@@ -136,7 +135,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings, galaxy_cli
 @pytest.mark.deployment_community
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
-def test_auto_approve_multiple(ansible_config, artifact, settings):
+def test_auto_approve_multiple(ansible_config, artifact, settings, galaxy_client):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")
     config = ansible_config(profile="admin")
@@ -152,7 +151,8 @@ def test_auto_approve_multiple(ansible_config, artifact, settings):
 
     published = custom_published_repo.get_distro()["base_path"]
 
-    _upload_test_common(config, client, artifact, "staging", published)
+    gc = galaxy_client("admin")
+    _upload_test_common(config, None, artifact, published, gc=gc)
 
     cv = client(
         f"{api_prefix}content/{published}/v3/collections/"
