@@ -12,7 +12,7 @@ from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
 from galaxykit.collections import upload_artifact, get_collection_from_repo, get_collection, \
     get_ui_collection
 from galaxykit.utils import wait_for_task, GalaxyClientError
-from ..utils.iqe_utils import require_signature_for_approval
+from ..utils.iqe_utils import require_signature_for_approval, is_ephemeral_env
 
 from ..utils import (
     CapturingGalaxyError,
@@ -302,9 +302,9 @@ def test_long_field_values(galaxy_client, field):
 @pytest.mark.importer
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
-@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
-                                                             "work with signatures required "
-                                                             "on move.")
+@pytest.mark.skipif(require_signature_for_approval() or is_ephemeral_env(),
+                    reason="This test needs refactoring to work with signatures"
+                           " required on move.")
 def test_ansible_requires(ansible_config, spec, galaxy_client):
     """
     Test handling of POSTs to the artifact endpoint neglecting to submit a file.
@@ -312,7 +312,7 @@ def test_ansible_requires(ansible_config, spec, galaxy_client):
     Also verifies that the collections endpoint properly returns a `requires_ansible` field,
     and that the returned field matches the collection metadata.
     """
-
+    # GALAXY_SIGNATURE_UPLOAD_ENABLED="false" in ephemeral env
     gc = galaxy_client("partner_engineer")
     _, requires_ansible, result = spec
     artifact = build_collection(

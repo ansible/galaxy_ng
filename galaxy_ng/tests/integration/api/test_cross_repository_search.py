@@ -1,17 +1,18 @@
 import pytest
 
 from galaxykit.repositories import search_collection
-from ..utils.iqe_utils import require_signature_for_approval
+from ..utils.iqe_utils import require_signature_for_approval, is_ephemeral_env
 from ..utils import get_client, SocialGithubClient
 
 
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.all
-@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
-                                                             "work with signatures required "
-                                                             "on move.")
+@pytest.mark.skipif(require_signature_for_approval() or is_ephemeral_env(),
+                    reason="This test needs refactoring to work with signatures"
+                           " required on move.")
 def test_x_repo_search_acl_basic_user(uncertifiedv2, galaxy_client):
     """Check if admin and basic user can perform x-repo searches"""
+    # GALAXY_SIGNATURE_UPLOAD_ENABLED="false" in ephemeral env
     gc_admin = galaxy_client("admin")
 
     # Enumerate published collection info ...
