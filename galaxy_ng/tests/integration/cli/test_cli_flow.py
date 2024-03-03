@@ -44,14 +44,12 @@ def test_publish_newer_version_collection(galaxy_client, cleanup_collections, un
 
 @pytest.mark.all
 @pytest.mark.cli
-@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
-                                                             "work with signatures required "
-                                                             "on move.")
 def test_publish_newer_certified_collection_version(
     galaxy_client,
     cleanup_collections,
     certifiedv2,
-    settings
+    settings,
+    skip_if_require_signature_for_approval
 ):
     """Test whether a newer certified collection version can be installed.
 
