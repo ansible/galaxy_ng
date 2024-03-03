@@ -14,8 +14,7 @@ import requests
 
 from orionutils.generator import build_collection
 
-from galaxy_ng.tests.integration.utils.iqe_utils import require_signature_for_approval, \
-    is_ephemeral_env
+from galaxy_ng.tests.integration.utils.iqe_utils import require_signature_for_approval
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
     build_collection as galaxy_build_collection,
@@ -497,7 +496,7 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
     assert collection["signatures"][0]["signing_service"] is None
 
 
-@pytest.mark.skipif(not require_signature_for_approval() or is_ephemeral_env(),
+@pytest.mark.skipif(not require_signature_for_approval(),
                     reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
 def test_move_with_no_signing_service_not_superuser_signature_required(
         flags, galaxy_client, settings):

@@ -1,13 +1,13 @@
 import pytest
 
 from galaxykit.repositories import search_collection
-from ..utils.iqe_utils import require_signature_for_approval, is_ephemeral_env
+from ..utils.iqe_utils import require_signature_for_approval
 from ..utils import get_client, SocialGithubClient
 
 
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.all
-@pytest.mark.skipif(require_signature_for_approval() or is_ephemeral_env(),
+@pytest.mark.skipif(require_signature_for_approval(),
                     reason="This test needs refactoring to work with signatures"
                            " required on move.")
 def test_x_repo_search_acl_basic_user(uncertifiedv2, galaxy_client):

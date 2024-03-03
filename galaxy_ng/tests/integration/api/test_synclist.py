@@ -3,7 +3,7 @@
 import pytest
 from orionutils.generator import build_collection
 
-from ..utils.iqe_utils import require_signature_for_approval, is_ephemeral_env
+from ..utils.iqe_utils import require_signature_for_approval
 from ..constants import USERNAME_PUBLISHER
 from ..utils import get_client, set_certification, wait_for_task
 
@@ -85,7 +85,7 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 @pytest.mark.synclist
 @pytest.mark.deployment_cloud
 @pytest.mark.slow_in_cloud
-@pytest.mark.skipif(require_signature_for_approval() or is_ephemeral_env(),
+@pytest.mark.skipif(require_signature_for_approval(),
                     reason="This test needs refactoring to work with signatures"
                            " required on move.")
 def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings, galaxy_client):
