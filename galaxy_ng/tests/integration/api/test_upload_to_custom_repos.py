@@ -125,7 +125,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings, galaxy_cli
     _upload_test_common(config, None, artifact, repo.get_distro()["base_path"], gc=gc)
 
     cv = client(
-        f"{api_prefix}content/published/v3/collections/"
+        f"{api_prefix}content/{repo.get_distro()['base_path']}/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
     )
 
@@ -152,7 +152,7 @@ def test_auto_approve_multiple(ansible_config, artifact, settings, galaxy_client
     published = custom_published_repo.get_distro()["base_path"]
 
     gc = galaxy_client("admin")
-    _upload_test_common(config, None, artifact, published, gc=gc)
+    _upload_test_common(config, None, artifact, "staging", published, gc=gc)
 
     cv = client(
         f"{api_prefix}content/{published}/v3/collections/"
