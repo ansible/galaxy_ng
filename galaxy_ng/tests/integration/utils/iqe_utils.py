@@ -1,7 +1,9 @@
 """Utility functions for AH tests."""
 import os
 import subprocess
+import time
 from functools import lru_cache
+from json import JSONDecodeError
 from unittest.mock import patch
 
 from pkg_resources import parse_version
@@ -695,8 +697,17 @@ def require_signature_for_approval():
     ansible_config = get_ansible_config()
     galaxy_client = get_galaxy_client(ansible_config)
     gc = galaxy_client("admin")
-    settings = gc.get_settings()
-    return settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL")
+    max_attempts = 5
+    delay = 1
+    # we need retries because in ephemeral env we get 502 sometimes
+    for attempt in range(1, max_attempts + 1):
+        try:
+            settings = gc.get_settings()
+            return settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL")
+        except JSONDecodeError as e:
+            if attempt == max_attempts:
+                raise e
+            time.sleep(delay)
 
 
 def sign_collection_on_demand(client, signing_service, repo, ns, collection_name,
