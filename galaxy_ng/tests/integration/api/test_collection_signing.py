@@ -14,7 +14,6 @@ import requests
 
 from orionutils.generator import build_collection
 
-from galaxy_ng.tests.integration.utils.iqe_utils import require_signature_for_approval
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
     build_collection as galaxy_build_collection,
@@ -550,9 +549,8 @@ def test_move_with_no_signing_service_not_superuser_signature_required(
     assert gc.get(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
-@pytest.mark.skipif(not require_signature_for_approval(),
-                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-def test_move_with_no_signing_service(flags, galaxy_client, settings, artifact):
+def test_move_with_no_signing_service(flags, galaxy_client, settings, artifact,
+                                      skip_if_not_require_signature_for_approval):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
@@ -611,9 +609,8 @@ def test_move_with_no_signing_service(flags, galaxy_client, settings, artifact):
     assert gc.get(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
-@pytest.mark.skipif(not require_signature_for_approval(),
-                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-def test_move_with_signing_service(flags, galaxy_client, settings, artifact):
+def test_move_with_signing_service(flags, galaxy_client, settings, artifact,
+                                   skip_if_not_require_signature_for_approval):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.

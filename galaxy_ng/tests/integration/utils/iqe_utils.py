@@ -693,7 +693,6 @@ def get_vault_loader():
     return VaultSecretFetcher.from_settings(vault_settings)
 
 
-@lru_cache()
 def require_signature_for_approval():
     ansible_config = get_ansible_config()
     galaxy_client = get_galaxy_client(ansible_config)

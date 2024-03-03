@@ -2,7 +2,6 @@
 import logging
 import pytest
 
-from ..utils.iqe_utils import require_signature_for_approval
 from ..utils import ansible_galaxy
 from ..utils import get_collection_full_path
 from ..utils import CollectionInspector
@@ -108,14 +107,12 @@ def test_publish_and_install_by_self(galaxy_client, published, cleanup_collectio
 @pytest.mark.all
 @pytest.mark.cli
 @pytest.mark.deployment_cloud
-@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
-                                                             "work with signatures required "
-                                                             "on move.")
 def test_publish_and_expect_uncertified_hidden(
     ansible_config,
     published,
     cleanup_collections,
-    settings
+    settings,
+    skip_if_require_signature_for_approval
 ):
     """A discovering/consumer user has the permission to download a specific version of an
     uncertified collection, but not an unspecified version range.
