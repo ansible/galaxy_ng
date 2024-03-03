@@ -49,7 +49,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("healthz", views.health_view),
-    path(f"{API_PATH_PREFIX}", include(resource_api_urls))
+    path(f"{API_PATH_PREFIX}/", include(resource_api_urls))
 ]
 
 if settings.get("API_ROOT") != "/pulp/":
