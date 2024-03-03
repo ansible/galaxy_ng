@@ -697,7 +697,7 @@ def require_signature_for_approval():
     ansible_config = get_ansible_config()
     galaxy_client = get_galaxy_client(ansible_config)
     gc = galaxy_client("admin")
-    max_attempts = 10
+    max_attempts = 5
     delay = 3
     # we need retries because in ephemeral env we get 502 sometimes
     for attempt in range(1, max_attempts + 1):
