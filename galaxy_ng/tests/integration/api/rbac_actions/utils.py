@@ -18,7 +18,7 @@ from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env, get_an
     get_galaxy_client, AnsibleConfigFixture
 from galaxy_ng.tests.integration.utils.rbac_utils import create_local_image_container
 from galaxykit.container_images import get_container, get_container_images_latest
-from galaxykit.repositories import create_repository, create_distribution_v2
+from galaxykit.repositories import create_repository, create_distribution
 
 ansible_config = get_ansible_config()
 CLIENT_CONFIG = ansible_config("admin")
@@ -434,7 +434,8 @@ class ReusableAnsibleRepository:
             pipeline=pipeline,
             remote=None,
         )
-        self._distro = create_distribution_v2(gc, name, self._repo["pulp_href"])
+        create_distribution(gc, name, self._repo["pulp_href"])
+        self._distro = {"base_path": name, "name": name, "repository": self._repo["pulp_href"]}
 
         if add_collection:
             self._add_collection()
