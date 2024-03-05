@@ -19,6 +19,8 @@ from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env, get_an
     get_galaxy_client, AnsibleConfigFixture
 from galaxy_ng.tests.integration.utils.rbac_utils import create_local_image_container
 from galaxykit.container_images import get_container, get_container_images_latest
+from galaxykit.repositories import create_repository, create_distribution, \
+    create_distribution_v2
 
 ansible_config = get_ansible_config()
 CLIENT_CONFIG = ansible_config("admin")
@@ -418,18 +420,32 @@ class ReusableContainerRegistry:
         self.cleanup()
 
 
-class ReusableAnsibleRepository(AnsibleDistroAndRepo):
+class ReusableAnsibleRepository:
     def __init__(self, name, is_staging, is_private=False, add_collection=False):
-        repo_body = {}
+        _ansible_config = get_ansible_config()
+        galaxy_client = get_galaxy_client(_ansible_config)
+        gc = galaxy_client("admin")
+        pipeline = None
         if is_staging:
-            repo_body["pulp_labels"] = {"pipeline": "staging"}
-        if is_private:
-            repo_body["private"] = True
-        super().__init__(
-            ADMIN_CLIENT, name, repo_body=repo_body, distro_body=None)
+            pipeline = "staging"
+        self._repo = create_repository(
+            gc,
+            name,
+            hide_from_search=False,
+            private=is_private,
+            pipeline=pipeline,
+            remote=None,
+        )
+        self._distro = create_distribution_v2(gc, name, self._repo["pulp_href"])
 
         if add_collection:
             self._add_collection()
+
+    def get_distro(self):
+        return self._distro
+
+    def get_repo(self):
+        return self._repo
 
     def _add_collection(self):
         namespace = gen_namespace(gen_string())

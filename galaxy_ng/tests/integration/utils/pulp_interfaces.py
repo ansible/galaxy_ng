@@ -1,7 +1,3 @@
-import time
-
-from ansible.galaxy.api import GalaxyError
-
 from galaxy_ng.tests.integration.utils import (
     wait_for_task, wait_for_all_tasks
 )
@@ -24,9 +20,7 @@ class PulpObjectBase:
             except:  # noqa
                 pass
 
-        # FIXME - the POST call will often result in an error with the oci+insights profile ...
-        # wait_for_all_tasks(self.client)
-        time.sleep(10)
+        wait_for_all_tasks(self.client)
 
         self.cleanup_hrefs = []
 
@@ -55,31 +49,11 @@ class AnsibleDistroAndRepo(PulpObjectBase):
         self.create()
 
     def create(self):
-        '''
         self._repo = self.client(
             f"{self.api_prefix}pulp/api/v3/repositories/ansible/ansible/",
             args=self._repo_body,
             method="POST"
         )
-        '''
-        # FIXME - the POST call will often result in an error with the oci+insights profile ...
-        _repo = None
-        retries = 10
-        for x in range(0, retries):
-            try:
-                _repo = self.client(
-                    f"{self.api_prefix}pulp/api/v3/repositories/ansible/ansible/",
-                    args=self._repo_body,
-                    method="POST"
-                )
-                break
-            except Exception as e:
-                print(e)
-                time.sleep(5)
-
-        if _repo is None:
-            raise Exception("failed to create repo")
-        self._repo = _repo
 
         resp = self.client(
             f"{self.api_prefix}pulp/api/v3/distributions/ansible/ansible/",
