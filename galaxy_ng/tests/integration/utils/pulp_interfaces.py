@@ -25,14 +25,8 @@ class PulpObjectBase:
                 pass
 
         # FIXME - the POST call will often result in an error with the oci+insights profile ...
-        retries = 10
-        for x in range(0, retries):
-            try:
-                wait_for_all_tasks(self.client)
-                break
-            except GalaxyError as e:
-                print(e)
-                time.sleep(5)
+        # wait_for_all_tasks(self.client)
+        time.sleep(10)
 
         self.cleanup_hrefs = []
 
