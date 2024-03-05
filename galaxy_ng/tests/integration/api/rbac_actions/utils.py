@@ -473,7 +473,7 @@ class ReusableRemoteContainer:
         ).json()
 
         namespace_id = container['namespace']['id']
-        pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}/"
+        pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
 
         # get roles first
         roles = session.get(
