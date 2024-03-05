@@ -473,17 +473,17 @@ class ReusableRemoteContainer:
         ).json()
 
         namespace_id = container['namespace']['id']
-        pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}"
+        pulp_namespace_path = f"pulp/api/v3/pulp_container/namespaces/{namespace_id}/"
 
         # get roles first
         roles = session.get(
-            f"{API_ROOT}{pulp_namespace_path}/list_roles",
+            f"{API_ROOT}{pulp_namespace_path}/list_roles/",
             auth=ADMIN_CREDENTIALS
         ).json()
 
         for role in roles['roles']:
             self.pulp_namespace = session.post(
-                f"{API_ROOT}{pulp_namespace_path}/remove_role",
+                f"{API_ROOT}{pulp_namespace_path}/remove_role/",
                 json={
                     'role': role['role']
                 },
