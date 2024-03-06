@@ -12,26 +12,43 @@ router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
 router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='my-namespaces')
 router.register('my-synclists', viewsets.MySyncListViewSet, basename='my-synclists')
 router.register('users', viewsets.UserViewSet, basename='users')
-router.register('collection-versions',
-                viewsets.CollectionVersionViewSet, basename='collection-versions')
 router.register(
-    'imports/collections',
-    viewsets.CollectionImportViewSet,
-    basename='collection-imports',
+    'collection-versions', viewsets.CollectionVersionViewSet, basename='collection-versions'
+)
+router.register(
+    'imports/collections', viewsets.CollectionImportViewSet, basename='collection-imports'
 )
 router.register('tags', viewsets.TagsViewSet, basename='tags')
 router.register('synclists', viewsets.SyncListViewSet, basename='synclists')
 router.register('remotes', viewsets.CollectionRemoteViewSet, basename='remotes')
 router.register('distributions', viewsets.DistributionViewSet, basename='distributions')
 router.register('my-distributions', viewsets.MyDistributionViewSet, basename='my-distributions')
-
 router.register('tags/collections', viewsets.CollectionsTagsViewSet, basename='collections-tags')
 router.register('tags/roles', viewsets.RolesTagsViewSet, basename='roles-tags')
 
+# organization_router = routers.SimpleRouter()
+# organization_router.register(
+#     'repositories', viewsets.OrganizationRepositoryViewSet, basename='organization-repository'
+# )
 
 auth_views = [
     path("login/", views.LoginView.as_view(), name="auth-login"),
     path("logout/", views.LogoutView.as_view(), name="auth-logout"),
+]
+
+organization_paths = [
+    path(
+        "repositories/",
+        viewsets.OrganizationRepositoryViewSet.as_view({"get": "list"}),
+        name="organization-repository-list",
+    ),
+    path(
+        "repositories/<str:repository_id>/",
+         viewsets.OrganizationRepositoryViewSet.as_view(
+             {"get": "retrieve", "post": "create", "delete": "destroy"}
+         ),
+        name="organization-repository-detail",
+    ),
 ]
 
 container_paths = [
@@ -151,7 +168,6 @@ signing_paths = [
 
 paths = [
     path('', include(router.urls)),
-
     path('auth/', include(auth_views)),
     path("settings/", views.SettingsView.as_view(), name="settings"),
     path("landing-page/", views.LandingPageView.as_view(), name="landing-page"),
@@ -169,6 +185,7 @@ paths = [
         viewsets.CollectionViewSet.as_view({'get': 'retrieve'}),
         name='collections-detail'
     ),
+    path("organizations/<int:organization_id>/", include(organization_paths)),
     # NOTE: Using path instead of SimpleRouter because SimpleRouter expects retrieve
     # to look up values with an ID
     path(

@@ -259,7 +259,7 @@ STANDALONE_STATEMENTS = {
     'TagViewSet': [
         {
             "action": ["list", "retrieve"],
-            "principal": "authenticated",
+            "principal  ": "authenticated",
             "effect": "allow",
         },
     ],
@@ -408,6 +408,19 @@ STANDALONE_STATEMENTS = {
             "condition": "has_distro_permission:container.change_containerdistribution"
         },
     ],
+
+    "OrganizationResource": [
+        {
+            "action": ["create", "destroy"],
+            "principal": "admin",
+            "effect": "allow",
+        },
+        {
+            "action": ["list", "retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+    ]
 }
 
 STANDALONE_STATEMENTS.update(LEGACY_STATEMENTS)

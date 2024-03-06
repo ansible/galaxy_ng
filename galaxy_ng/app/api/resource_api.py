@@ -28,4 +28,9 @@ RESOURCE_LIST = (
         shared_resource=SharedResource(serializer=OrganizationType, is_provider=False),
         name_field="name",
     ),
+    ResourceConfig(
+        models.Organization,
+        shared_resource=SharedResource(serializer=OrganizationType, is_provider=False),
+        name_field="name",
+    )
 )

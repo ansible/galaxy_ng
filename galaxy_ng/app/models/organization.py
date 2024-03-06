@@ -8,6 +8,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 from django_lifecycle import AFTER_UPDATE, BEFORE_CREATE, LifecycleModelMixin, hook
 from pulpcore.plugin.models import Group as PulpGroup
+from pulp_ansible.app.models import AnsibleRepository
 
 from galaxy_ng.app.models.auth import Group
 
@@ -84,3 +85,10 @@ def _create_related_team(sender, instance, created, **kwargs):
         organization=Organization.objects.get_default(),
         group=instance,
     )
+
+
+class OrganizationRepository(models.Model):
+    """A joint model between organizations and ansible repositories."""
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    repository = models.OneToOneField(AnsibleRepository, on_delete=models.CASCADE)

@@ -820,3 +820,7 @@ class LegacyAccessPolicy(AccessPolicyBase):
             return True
 
         return False
+
+
+class OrganizationResourceAccessPolicy(AccessPolicyBase):
+    NAME = "OrganizationResource"

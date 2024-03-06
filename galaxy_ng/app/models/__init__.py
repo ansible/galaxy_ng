@@ -10,7 +10,7 @@ from .container import (
     ContainerRegistryRepos,
 )
 from .namespace import Namespace, NamespaceLink
-from .organization import Organization, Team
+from .organization import Organization, OrganizationRepository, Team
 from .synclist import SyncList
 
 __all__ = (
@@ -34,6 +34,7 @@ __all__ = (
     "NamespaceLink",
     # organization
     "Organization",
+    "OrganizationRepository",
     "Team",
     # synclist
     "SyncList",
