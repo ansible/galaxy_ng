@@ -258,8 +258,8 @@ def is_galaxy_stage():
 
 
 def is_keycloak():
-    keycloak_url = os.getenv("HUB_AUTH_URL")
-    return bool(keycloak_url)
+    auth_backend = os.getenv("HUB_TEST_AUTHENTICATION_BACKEND", "")
+    return "keycloak" in auth_backend
 
 
 def is_ocp_env():
