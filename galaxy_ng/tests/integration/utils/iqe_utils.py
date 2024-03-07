@@ -257,6 +257,11 @@ def is_galaxy_stage():
     )
 
 
+def is_keycloak():
+    keycloak_url = os.getenv("HUB_AUTH_URL")
+    return bool(keycloak_url)
+
+
 def is_ocp_env():
     # this check will not be necessary when content signing is enabled in operator
     # we also have containerized aap, in that case check proper env var as well

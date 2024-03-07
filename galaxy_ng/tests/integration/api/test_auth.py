@@ -8,6 +8,7 @@ import pytest
 from galaxykit.utils import GalaxyClientError
 from urllib.parse import urlparse
 from ..utils import uuid4
+from ..utils.iqe_utils import is_keycloak
 from ..utils.iqe_utils import remove_from_cache, aap_gateway
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -116,6 +117,8 @@ def test_gateway_token_auth(galaxy_client):
 
 @pytest.mark.deployment_standalone
 def test_ui_login_csrftoken(galaxy_client):
+    if is_keycloak():
+        pytest.skip("This test is not valid for keycloak")
     gc = galaxy_client("admin")
     r = gc.get("_ui/v1/auth/login/", parse_json=False)
     csrftoken = r.cookies.get("csrftoken")
