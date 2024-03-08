@@ -539,7 +539,7 @@ class ReusableLocalContainer:
         if is_ephemeral_env():
             gc_admin = galaxy_client("admin", basic_token=True)
         else:
-            gc_admin = galaxy_client("admin")
+            gc_admin = galaxy_client("admin", ignore_cache=True)
 
         self._container = get_container(gc_admin, self._name)
         ns_r = gc_admin.get(f"pulp/api/v3/pulp_container/namespaces/?name={self._ns_name}")
