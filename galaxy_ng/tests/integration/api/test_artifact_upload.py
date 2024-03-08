@@ -75,13 +75,17 @@ def test_api_publish(artifact, use_distribution, hub_version, galaxy_client):
 
         if distros["count"] == 0:
             repo = gc.get("pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]
-            r = gc.post("pulp/api/v3/distributions/ansible/ansible/", body={
-                "repository": repo["pulp_href"],
-                "name": f"inbound-{artifact.namespace}",
-                "base_path": f"inbound-{artifact.namespace}",
-            })
-            logger.debug("Waiting for upload to be completed")
-            wait_for_task(gc, r)
+            try:
+                r = gc.post("pulp/api/v3/distributions/ansible/ansible/", body={
+                    "repository": repo["pulp_href"],
+                    "name": f"inbound-{artifact.namespace}",
+                    "base_path": f"inbound-{artifact.namespace}",
+                })
+                logger.debug("Waiting for upload to be completed")
+                wait_for_task(gc, r)
+            except GalaxyClientError as e:
+                if "must be unique" not in e.response.text:
+                    raise e
 
     resp = upload_artifact(None, gc, artifact, use_distribution=use_distribution)
     logger.debug("Waiting for upload to be completed")

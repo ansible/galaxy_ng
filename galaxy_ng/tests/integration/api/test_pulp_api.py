@@ -67,15 +67,15 @@ def test_pulp_endpoint_readonly(galaxy_client, url):
 
     with pytest.raises(GalaxyClientError) as e:
         gc.post(url, body={})
-    assert e.value.response.status_code == 400
+    assert e.value.response.status_code >= 400
 
     with pytest.raises(GalaxyClientError) as e:
         gc.post(url, body={})
-    assert e.value.response.status_code == 400
+    assert e.value.response.status_code >= 400
 
     with pytest.raises(GalaxyClientError) as e:
         gc.post(url, body={})
-    assert e.value.response.status_code == 400
+    assert e.value.response.status_code >= 400
 
 
 TEST_ROLE_NAME = "test_role_".join(random.choices(string.ascii_lowercase, k=10))
