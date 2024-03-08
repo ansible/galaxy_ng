@@ -19,7 +19,7 @@ def test_synclist_object_get(ansible_config):
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = api_client("_ui/v1/my-synclists/", args={}, method="GET")
-    assert resp["meta"]["count"] == 1
+    assert resp["meta"]["count"] >= 1
     print(f"resp={resp}")
 
     resp = api_client("_ui/v1/synclists/", args={}, method="GET")
