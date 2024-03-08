@@ -345,8 +345,9 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
 # /api/automation-hub/_ui/v1/execution-environments/remotes/{pulp_id}/
 
 @pytest.fixture
-def local_container():
-    return ReusableLocalContainer('int_tests')
+def local_container(galaxy_client):
+    gc = galaxy_client("admin", ignore_cache=True)
+    return ReusableLocalContainer('int_tests', gc)
 
 
 # /api/automation-hub/_ui/v1/feature-flags/

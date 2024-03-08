@@ -15,8 +15,9 @@ REGEX_40X = r"HTTP Code: 40\d"
 
 
 @pytest.fixture
-def local_container():
-    return ReusableLocalContainer('int_tests')
+def local_container(galaxy_client):
+    gc = galaxy_client("admin", ignore_cache=True)
+    return ReusableLocalContainer('int_tests', gc)
 
 
 @pytest.mark.deployment_standalone
