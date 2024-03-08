@@ -6,6 +6,7 @@ See: https://github.com/ansible/galaxy-dev/issues/149
 import pytest
 
 from galaxykit.utils import GalaxyClientError
+from urllib.parse import urlparse
 from ..utils import uuid4
 from ..utils.iqe_utils import remove_from_cache, aap_gateway
 
@@ -111,3 +112,26 @@ def test_gateway_token_auth(galaxy_client):
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
     assert ctx.value.response.status_code == 403
+
+
+@pytest.mark.deployment_standalone
+def test_ui_login_csrftoken(galaxy_client):
+    gc = galaxy_client("admin")
+    r = gc.get("_ui/v1/auth/login/", parse_json=False)
+    csrftoken = r.cookies.get("csrftoken")
+
+    parsed_url = urlparse(gc.galaxy_root)
+    url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+    headers = {
+        "Cookie": f"csrftoken={csrftoken}",
+        "Origin": url,
+        "Referer": f"{url}/ui/login/?next=%2F",
+        "X-Csrftoken": csrftoken
+    }
+    body = {
+        "username": gc.username,
+        "password": gc.password
+    }
+    r = gc.post("_ui/v1/auth/login/", body=body, headers=headers, parse_json=False)
+    assert r.cookies.get("sessionid")
