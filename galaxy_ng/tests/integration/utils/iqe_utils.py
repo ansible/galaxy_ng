@@ -105,6 +105,8 @@ class GalaxyKitClient:
     ):
         gw_auth = aap_gateway()
         self._basic_token = basic_token
+        if is_ephemeral_env():
+            self._basic_token = True
         try:
             config = self.config()
         except TypeError:
@@ -166,7 +168,7 @@ class GalaxyKitClient:
                         url,
                         ignore_cache=ignore_cache,
                         ssl_verify=ssl_verify,
-                        basic_token=basic_token,
+                        basic_token=self._basic_token,
                     )  # ignore_cache=True
                     role.update(token=token)
                     auth = role
@@ -174,7 +176,7 @@ class GalaxyKitClient:
                     auth = role
             container_engine = config.get("container_engine")
             container_registry = config.get("container_registry")
-            token_type = None if not basic_token else "Basic"
+            token_type = None if not self._basic_token else "Basic"
             gw_root_url = config.get("gw_root_url")
             g_client = GalaxyClient(
                 url,
