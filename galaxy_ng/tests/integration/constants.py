@@ -169,7 +169,7 @@ EPHEMERAL_PROFILES = {
         "password": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
                      "vault_key": "password"},
         "token": {"vault_path": "secrets/qe/stage/users/ansible-hub-qe-basic",
-                     "vault_key": "token"},
+                  "vault_key": "token"},
     },
     # in partner engineer group, not an SSO org admin username: ansible-hub-qe-pe2
     "partner_engineer": {
