@@ -5,7 +5,7 @@ import attr
 import pytest
 
 from ..conftest import is_hub_4_5
-from ..utils import ansible_galaxy, build_collection, get_client, set_certification
+from ..utils import ansible_galaxy, build_collection, set_certification
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -51,7 +51,7 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
     - Dependency specs with no matching collections (galaxy-dev#104)
     - NPM-style specs (not part of semver) are invalid
     """
-
+    gc = galaxy_client("partner_engineer")
     spec = params.spec
     retcode = params.retcode
     artifact2 = build_collection(dependencies={f"{published.namespace}.{published.name}": spec})
@@ -60,8 +60,9 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
         ansible_galaxy(
             f"collection publish {artifact2.filename} --server=automation_hub",
             check_retcode=retcode,
-            ansible_config=ansible_config("basic_user")
+            galaxy_client=gc
         )
+
     except AssertionError:
         if params.xfail:
             return pytest.xfail()
@@ -70,17 +71,16 @@ def test_collection_dependency_install(ansible_config, published, cleanup_collec
 
     if retcode == 0:
         config = ansible_config("partner_engineer")
-        client = get_client(config)
         hub_4_5 = is_hub_4_5(ansible_config)
-        gc = galaxy_client("partner_engineer")
-        set_certification(client, gc, artifact2, hub_4_5=hub_4_5)
+
+        set_certification(config, gc, artifact2, hub_4_5=hub_4_5)
 
         pid = ansible_galaxy(
             f"collection install -vvv --ignore-cert \
                 {artifact2.namespace}.{artifact2.name}:{artifact2.version} --server"
             f"=automation_hub",
             check_retcode=False,
-            ansible_config=ansible_config("basic_user"),
+            galaxy_client=gc
             # cleanup=False
         )
 

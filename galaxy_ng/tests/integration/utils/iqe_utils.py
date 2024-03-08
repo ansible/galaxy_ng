@@ -1,7 +1,9 @@
 """Utility functions for AH tests."""
 import os
 import subprocess
+import time
 from functools import lru_cache
+from json import JSONDecodeError
 from unittest.mock import patch
 
 from pkg_resources import parse_version
@@ -99,10 +101,12 @@ class GalaxyKitClient:
         token=None,
         remote=False,
         basic_token=False,
-        github_social_auth=False
+        github_social_auth=False,
     ):
-
+        gw_auth = aap_gateway()
         self._basic_token = basic_token
+        if is_ephemeral_env():
+            self._basic_token = True
         try:
             config = self.config()
         except TypeError:
@@ -144,7 +148,7 @@ class GalaxyKitClient:
                 if isinstance(role, str):
                     profile_config = self.config(role)
                     user = profile_config
-                    if not github_social_auth:
+                    if not github_social_auth and not gw_auth:
                         if profile_config.get("auth_url"):
                             token = profile_config.get("token")
                         if token is None:
@@ -158,13 +162,13 @@ class GalaxyKitClient:
                         "auth_url": profile_config.get("auth_url"),
                         "token": token,
                     }
-                elif not github_social_auth:
+                elif not github_social_auth and not gw_auth:
                     token = get_standalone_token(
                         role,
                         url,
                         ignore_cache=ignore_cache,
                         ssl_verify=ssl_verify,
-                        basic_token=basic_token,
+                        basic_token=self._basic_token,
                     )  # ignore_cache=True
                     role.update(token=token)
                     auth = role
@@ -172,7 +176,8 @@ class GalaxyKitClient:
                     auth = role
             container_engine = config.get("container_engine")
             container_registry = config.get("container_registry")
-            token_type = None if not basic_token else "Basic"
+            token_type = None if not self._basic_token else "Basic"
+            gw_root_url = config.get("gw_root_url")
             g_client = GalaxyClient(
                 url,
                 auth=auth,
@@ -181,7 +186,9 @@ class GalaxyKitClient:
                 container_tls_verify=ssl_verify,
                 https_verify=ssl_verify,
                 token_type=token_type,
-                github_social_auth=github_social_auth
+                github_social_auth=github_social_auth,
+                gw_auth=gw_auth,
+                gw_root_url=gw_root_url
             )
             client_cache[cache_key] = g_client
             if ignore_cache:
@@ -268,6 +275,11 @@ def is_sync_testing():
 
 def is_dev_env_standalone():
     dev_env_standalone = os.getenv("DEV_ENV_STANDALONE", True)
+    return dev_env_standalone in ('true', 'True', 1, '1', True)
+
+
+def aap_gateway():
+    dev_env_standalone = os.getenv("AAP_GATEWAY", False)
     return dev_env_standalone in ('true', 'True', 1, '1', True)
 
 
@@ -385,37 +397,39 @@ class AnsibleConfigFixture(dict):
         self.profile = profile
         self.namespace = namespace
 
-        if is_sync_testing():
-            self.PROFILES = SYNC_PROFILES
-        elif is_stage_environment():
-            self.PROFILES = EPHEMERAL_PROFILES
-        elif not is_dev_env_standalone():
-            self.PROFILES = DEPLOYED_PAH_PROFILES
-            self._set_credentials_when_not_docker_pah()
-        elif is_ephemeral_env():
-            self.PROFILES = DEPLOYED_PAH_PROFILES
-            self.PROFILES["admin"]["token"] = None
-            self.PROFILES["org_admin"]["token"] = None
-            self.PROFILES["partner_engineer"]["token"] = None
-            self.PROFILES["basic_user"]["token"] = None
-        elif is_galaxy_stage():
-            self.PROFILES = GALAXY_STAGE_ANSIBLE_PROFILES
-        else:
-            for profile_name in PROFILES:
-                p = PROFILES[profile_name]
-                credential_set = backend_map.get(self._auth_backend, "galaxy")
-                if p['username'] is None:
-                    continue
+        if profile:
+            if is_sync_testing():
+                self.PROFILES = SYNC_PROFILES
+            elif is_stage_environment():
+                self.PROFILES = EPHEMERAL_PROFILES
+            elif not is_dev_env_standalone():
+                self.PROFILES = DEPLOYED_PAH_PROFILES
+                self._set_credentials_when_not_docker_pah()
+            elif is_ephemeral_env():
+                self.PROFILES = DEPLOYED_PAH_PROFILES
+                self.PROFILES["admin"]["token"] = None
+                self.PROFILES["org_admin"]["token"] = None
+                self.PROFILES["partner_engineer"]["token"] = None
+                self.PROFILES["basic_user"]["token"] = None
+            elif is_galaxy_stage():
+                self.PROFILES = GALAXY_STAGE_ANSIBLE_PROFILES
+            else:
+                for profile_name in PROFILES:
+                    p = PROFILES[profile_name]
+                    credential_set = backend_map.get(self._auth_backend, "galaxy")
+                    if p['username'] is None:
+                        continue
 
-                if username := p["username"].get(credential_set):
-                    self.PROFILES[profile_name] = {
-                        "username": username,
-                        "token": CREDENTIALS[username].get("token"),
-                        "password": CREDENTIALS[username].get("password")
-                    }
+                    if username := p["username"].get(credential_set):
+                        self.PROFILES[profile_name] = {
+                            "username": username,
+                            "token": CREDENTIALS[username].get("token"),
+                            "password": CREDENTIALS[username].get("password")
+                        }
 
-            if self._auth_backend == "community":
-                self.PROFILES["anonymous_user"] = PROFILES.get('anonymous_user')
+                if self._auth_backend == "community":
+                    self.PROFILES["anonymous_user"] = PROFILES.get('anonymous_user')
+            self.set_profile(profile)
 
         # workaround for a weird error with the galaxy cli lib ...
         galaxy_token_fn = os.path.expanduser('~/.ansible/galaxy_token')
@@ -424,9 +438,6 @@ class AnsibleConfigFixture(dict):
         if not os.path.exists(galaxy_token_fn):
             with open(galaxy_token_fn, 'w') as f:
                 f.write('')
-
-        if profile:
-            self.set_profile(profile)
 
     def __hash__(self):
         # To avoid TypeError: unhashable type: 'AnsibleConfigFixture'
@@ -458,9 +469,10 @@ class AnsibleConfigFixture(dict):
         self.PROFILES["ee_admin"]["password"] = "Th1sP4ssd"
         self.PROFILES["org_admin"]["token"] = None
         self.PROFILES["org_admin"]["password"] = "Th1sP4ssd"
-        token = get_standalone_token(self.PROFILES["admin"], server=self.get("url"),
-                                     ssl_verify=False)
-        self.PROFILES["admin"]["token"] = token
+        if not aap_gateway():
+            token = get_standalone_token(self.PROFILES["admin"], server=self.get("url"),
+                                         ssl_verify=False)
+            self.PROFILES["admin"]["token"] = token
 
     def __repr__(self):
         return f'<AnsibleConfigFixture: {self.namespace}>'
@@ -599,7 +611,11 @@ class AnsibleConfigFixture(dict):
                 'LOCAL_AUTH_URL',
                 None
             )
-
+        elif key == 'gw_root_url':
+            return os.environ.get(
+                'GW_ROOT_URL',
+                None
+            )
         else:
             raise Exception(f'Unknown config key: {self.namespace}.{key}')
 
@@ -633,26 +649,35 @@ def has_old_credentials():
 
 @lru_cache()
 def get_hub_version(ansible_config):
-    if is_standalone():
-        role = "iqe_admin"
-    elif is_ephemeral_env():
-        # I can't get a token from the ephemeral environment.
-        # Changed to Basic token authentication until the issue is resolved
-        del os.environ["HUB_AUTH_URL"]
-        role = "partner_engineer"
-        galaxy_client = get_galaxy_client(ansible_config)
-        gc = galaxy_client(role, basic_token=True, ignore_cache=True)
-        galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
+    if aap_gateway():
+        username = ansible_config("admin").PROFILES.get("admin").get("username")
+        password = ansible_config("admin").PROFILES.get("admin").get("password")
+        gw_root_url = ansible_config("admin").get("gw_root_url")
+        gc = GalaxyClient(galaxy_root="foo", auth={"username": username, "password": password},
+                          gw_auth=True, https_verify=False, gw_root_url=gw_root_url)
+        galaxy_ng_version = gc.get_server_version()
         return galaxy_ng_version
     else:
-        role = "admin"
-    try:
-        gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
-    except GalaxyError:
-        # FIXME: versions prior to 4.7 have different credentials. This needs to be fixed.
-        gc = GalaxyClient(galaxy_root="http://localhost:5001/api/automation-hub/",
-                          auth={"username": "admin", "password": "admin"})
-    return gc.get(gc.galaxy_root)["galaxy_ng_version"]
+        if is_standalone():
+            role = "iqe_admin"
+        elif is_ephemeral_env():
+            # I can't get a token from the ephemeral environment.
+            # Changed to Basic token authentication until the issue is resolved
+            del os.environ["HUB_AUTH_URL"]
+            role = "partner_engineer"
+            galaxy_client = get_galaxy_client(ansible_config)
+            gc = galaxy_client(role, basic_token=True, ignore_cache=True)
+            galaxy_ng_version = gc.get(gc.galaxy_root)["galaxy_ng_version"]
+            return galaxy_ng_version
+        else:
+            role = "admin"
+        try:
+            gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
+        except GalaxyError:
+            # FIXME: versions prior to 4.7 have different credentials. This needs to be fixed.
+            gc = GalaxyClient(galaxy_root="http://localhost:5001/api/automation-hub/",
+                              auth={"username": "admin", "password": "admin"})
+        return gc.get(gc.galaxy_root)["galaxy_ng_version"]
 
 
 @lru_cache()
@@ -672,10 +697,19 @@ def get_vault_loader():
 
 def require_signature_for_approval():
     ansible_config = get_ansible_config()
-    config = ansible_config("admin")
-    api_client = get_client(config)
-    settings = api_client("_ui/v1/settings/")
-    return settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL")
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc = galaxy_client("admin")
+    max_attempts = 5
+    delay = 3
+    # we need retries because in ephemeral env we get 502 sometimes
+    for attempt in range(1, max_attempts + 1):
+        try:
+            settings = gc.get_settings()
+            return settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL")
+        except JSONDecodeError as e:
+            if attempt == max_attempts:
+                raise e
+            time.sleep(delay)
 
 
 def sign_collection_on_demand(client, signing_service, repo, ns, collection_name,
@@ -698,3 +732,32 @@ def galaxy_auto_sign_collections():
     api_client = get_client(config)
     settings = api_client("_ui/v1/settings/")
     return settings.get("GALAXY_AUTO_SIGN_COLLECTIONS")
+
+
+def fix_prefix_workaround(url):
+    if aap_gateway():
+        return url.replace("/api/galaxy/", "/api/hub/")
+    else:
+        return url
+
+
+def get_paginated(client, relative_url: str = None) -> list:
+    """Iterate through all results in a paginated queryset"""
+    ds = client.get(relative_url)
+
+    key = 'results'
+    if 'data' in ds:
+        key = 'data'
+        results = ds['data']
+    else:
+        results = ds['results']
+
+    next_url = ds['links']['next']
+    while next_url:
+        next_url = fix_prefix_workaround(next_url)
+        _ds = client.get(next_url)
+
+        results.extend(_ds[key])
+        next_url = _ds['links']['next']
+
+    return results

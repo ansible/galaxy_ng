@@ -15,19 +15,22 @@ from galaxy_ng.tests.integration.utils import (
 
 from ansible.galaxy.api import GalaxyError
 
-from galaxy_ng.tests.integration.utils.iqe_utils import is_ephemeral_env, get_ansible_config, \
+from galaxy_ng.tests.integration.utils.iqe_utils import get_ansible_config, \
     get_galaxy_client, AnsibleConfigFixture
+from galaxy_ng.tests.integration.utils.rbac_utils import create_local_image_container
 from galaxykit.container_images import get_container, get_container_images_latest
 ansible_config = get_ansible_config()
 CLIENT_CONFIG = ansible_config("admin")
 ADMIN_CLIENT = get_client(CLIENT_CONFIG)
 
+'''
 ansible_config = get_ansible_config()
 galaxy_client = get_galaxy_client(ansible_config)
 if is_ephemeral_env():
     gc_admin = galaxy_client("admin", basic_token=True)
 else:
-    gc_admin = galaxy_client("admin", basic_token=False)
+    gc_admin = galaxy_client("admin", basic_token=False, ignore_cache=True)
+'''
 
 API_ROOT = CLIENT_CONFIG["url"]
 PULP_API_ROOT = f"{API_ROOT}pulp/api/v3/"
@@ -146,37 +149,14 @@ def ensure_test_container_is_pulled():
 
 
 def podman_push(username, password, container, tag="latest"):
-    ensure_test_container_is_pulled()
-    container_engine = CLIENT_CONFIG["container_engine"]
-    container_registry = CLIENT_CONFIG["container_registry"]
-
-    new_container = f"{container_registry}/{container}:{tag}"
-    tag_cmd = [container_engine, "image", "tag", TEST_CONTAINER, new_container]
-
-    subprocess.run(tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    if container_engine == "docker":
-        login_cmd = ["docker", "login", "-u", username, "-p", password, container_registry]
-        subprocess.run(login_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    if container_engine == "podman":
-        push_cmd = [
-            container_engine,
-            "push",
-            "--creds",
-            f"{username}:{password}",
-            new_container,
-            "--remove-signatures",
-            "--tls-verify=false"]
-
-    if container_engine == "docker":
-        push_cmd = [
-            container_engine,
-            "push",
-            new_container]
-
-    rc = subprocess.run(push_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return rc.returncode
+    _ansible_config = get_ansible_config()
+    _galaxy_client = get_galaxy_client(_ansible_config)
+    gc = _galaxy_client({
+        "username": username,
+        "password": password,
+    })
+    create_local_image_container(_ansible_config("admin"), gc, container, tag)
+    return 0
 
 
 def del_user(pk):
@@ -505,13 +485,13 @@ class ReusableRemoteContainer:
 
         # get roles first
         roles = session.get(
-            f"{API_ROOT}{pulp_namespace_path}/list_roles",
+            f"{API_ROOT}{pulp_namespace_path}/list_roles/",
             auth=ADMIN_CREDENTIALS
         ).json()
 
         for role in roles['roles']:
             self.pulp_namespace = session.post(
-                f"{API_ROOT}{pulp_namespace_path}/remove_role",
+                f"{API_ROOT}{pulp_namespace_path}/remove_role/",
                 json={
                     'role': role['role']
                 },
@@ -546,11 +526,11 @@ class ReusableRemoteContainer:
 
 
 class ReusableLocalContainer:
-    def __init__(self, name):
+    def __init__(self, name, gc):
         self._ns_name = f"ee_ns_{name}"
         self._repo_name = f"ee_local_{name}"
         self._name = f"{self._ns_name}/{self._repo_name}"
-
+        self.gc = gc
         self._reset()
 
     def _reset(self):
@@ -562,19 +542,20 @@ class ReusableLocalContainer:
         # 1. get namespace pulp_id from repositories
         # 2. get roles in namespace
         # 3. remove roles and groups (clean container namespace)
-        self._container = get_container(gc_admin, self._name)
-        ns_r = gc_admin.get(f"pulp/api/v3/pulp_container/namespaces/?name={self._ns_name}")
+
+        self._container = get_container(self.gc, self._name)
+        ns_r = self.gc.get(f"pulp/api/v3/pulp_container/namespaces/?name={self._ns_name}")
         pulp_namespace_path = ns_r["results"][0]["pulp_href"]
         # get roles first
-        roles = gc_admin.get(f"{pulp_namespace_path}list_roles")
+        roles = self.gc.get(f"{pulp_namespace_path}list_roles")
         for role in roles["roles"]:
             body = {
                 'role': role["role"]
             }
-            gc_admin.post(path=f"{pulp_namespace_path}remove_role/", body=body)
+            self.gc.post(path=f"{pulp_namespace_path}remove_role/", body=body)
 
-        self._namespace = gc_admin.get(pulp_namespace_path)
-        self._manifest = get_container_images_latest(gc_admin, self._name)
+        self._namespace = self.gc.get(pulp_namespace_path)
+        self._manifest = get_container_images_latest(self.gc, self._name)
 
     def get_container(self):
         return self._container

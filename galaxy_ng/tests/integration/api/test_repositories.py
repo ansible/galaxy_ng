@@ -2,7 +2,7 @@ import pytest
 import logging
 import time
 
-from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env
+from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env, fix_prefix_workaround
 from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact
 
 from galaxy_ng.tests.integration.utils.repo_management_utils import (
@@ -108,6 +108,8 @@ class TestRepositories:
         collection_resp = gc_admin.get(
             f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
         )
+        collection_resp["results"][0]["pulp_href"] = fix_prefix_workaround(
+            collection_resp["results"][0]["pulp_href"])
         content_units = [collection_resp["results"][0]["pulp_href"]]
         add_content_units(gc_admin, content_units, repo_pulp_href_1)
 

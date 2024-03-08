@@ -82,9 +82,10 @@ def test_social_auth_creates_v3_namespace_as_v1_provider(ansible_config):
 
 
 @pytest.mark.deployment_community
-def test_v1_namespace_provider_filter(ansible_config):
+def test_v1_namespace_provider_filter(ansible_config, galaxy_client):
 
     admin_config = ansible_config('admin')
+    gc = galaxy_client('admin')
     admin_client = get_client(config=admin_config, request_token=False, require_auth=True)
 
     # 2 v1 namespaces
@@ -96,12 +97,12 @@ def test_v1_namespace_provider_filter(ansible_config):
     v1_b_id = v1_b['id']
 
     # make 1 v3 namespace
-    v3_a_name = generate_unused_namespace(admin_client)
+    v3_a_name = generate_unused_namespace(gc)
     v3_a = admin_client(
         '/api/v3/namespaces/', method='POST', args={'name': v3_a_name, 'groups': []}
     )
     v3_a_id = v3_a['id']
-    v3_b_name = generate_unused_namespace(admin_client)
+    v3_b_name = generate_unused_namespace(gc)
     v3_b = admin_client(
         '/api/v3/namespaces/', method='POST', args={'name': v3_b_name, 'groups': []}
     )

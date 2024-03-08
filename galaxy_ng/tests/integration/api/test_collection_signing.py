@@ -14,19 +14,20 @@ import requests
 
 from orionutils.generator import build_collection
 
-from galaxy_ng.tests.integration.utils.iqe_utils import require_signature_for_approval
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
     build_collection as galaxy_build_collection,
-    copy_collection_version,
     get_all_collections_by_repo,
     get_all_namespaces,
-    get_client,
     set_certification,
-    wait_for_task,
     create_local_signature_for_tarball,
 )
 from galaxy_ng.tests.integration.utils.repo_management_utils import create_test_namespace
+from galaxykit.collections import upload_artifact, get_collection_from_repo, get_ui_collection, \
+    move_or_copy_collection
+from galaxykit.distributions import get_v1_distributions
+from galaxykit.repositories import get_repository_href, move_content_between_repos
+from galaxykit.utils import wait_for_task, GalaxyClientError
 
 log = logging.getLogger(__name__)
 
@@ -34,46 +35,26 @@ NAMESPACE = "signing"
 
 
 @pytest.fixture(scope="function")
-def config(ansible_config):
-    # FIXME: have this run partner_engineer profile
-    return ansible_config("admin")
-
-
-@pytest.fixture(scope="function")
-def api_client(config):
-    return get_client(config=config, request_token=True, require_auth=True)
-
-
-@pytest.fixture(scope="function")
-def flags(api_client):
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
+def flags(galaxy_client):
+    gc = galaxy_client("admin")
+    return gc.get("_ui/v1/feature-flags/")
 
 
 @pytest.fixture(scope="function", autouse=True)
-def namespace(api_client):
+def namespace(galaxy_client):
     # ensure namespace exists
-    existing = dict((x["name"], x) for x in get_all_namespaces(api_client=api_client))
+    gc = galaxy_client("admin")
+    existing = dict((x["name"], x) for x in get_all_namespaces(gc))
     if NAMESPACE not in existing:
         payload = {"name": NAMESPACE, "groups": []}
-        api_prefix = api_client.config.get("api_prefix").rstrip("/")
-        api_client(f"{api_prefix}/v3/namespaces/", args=payload, method="POST")
+        gc.post("v3/namespaces/", body=payload)
         return True  # created
     return False  # not created
 
 
-def import_and_wait(api_client, artifact, upload_artifact, config):
-    # import and wait ...
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
-    assert resp["state"] == "completed"
-    return resp
-
-
-def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
+def sign_on_demand(gc, signing_service, sign_url=None, **payload):
     """Sign a collection on demand calling /sign/collections/"""
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    sign_url = sign_url or f"{api_prefix}/_ui/v1/collection_signing/"
+    sign_url = sign_url or "_ui/v1/collection_signing/"
     sign_payload = {"signing_service": signing_service, **payload}
 
     '''
@@ -81,8 +62,7 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
     cvs = get_all_repository_collection_versions(api_client=api_client)
     import epdb; epdb.st()
     '''
-
-    resp = api_client(sign_url, method="POST", args=sign_payload)
+    resp = gc.post(sign_url, body=sign_payload)
     log.info("Sign Task: %s", resp)
     # FIXME - pulp tasks do not seem to accept token auth, so no way to check task progress
     time.sleep(SLEEP_SECONDS_ONETIME)
@@ -92,8 +72,7 @@ def sign_on_demand(api_client, signing_service, sign_url=None, **payload):
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.deployment_standalone
-def test_collection_auto_sign_on_approval(api_client, config, settings, flags,
-                                          upload_artifact, galaxy_client):
+def test_collection_auto_sign_on_approval(ansible_config, flags, galaxy_client, settings):
     """Test whether a collection is uploaded and automatically signed on approval
     when GALAXY_AUTO_SIGN_COLLECTIONS is set to true.
     """
@@ -116,31 +95,31 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags,
     ckey = (artifact.namespace, artifact.name, artifact.version)
 
     # import and wait ...
-    import_and_wait(api_client, artifact, upload_artifact, config)
+    gc = galaxy_client("admin")
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
+    assert resp["state"] == "completed"
 
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         # perform manual approval
         # Certify and check the response...
         gc = galaxy_client("partner_engineer")
-        cert_result = set_certification(api_client, gc, artifact)
+        cert_result = set_certification(ansible_config(), gc, artifact)
         assert cert_result["namespace"]["name"] == artifact.namespace
         assert cert_result["name"] == artifact.name
         assert cert_result["version"] == artifact.version
         assert cert_result["href"] is not None
         assert cert_result["metadata"]["tags"] == ["tools"]
 
-    collections = get_all_collections_by_repo(api_client)
+    collections = get_all_collections_by_repo(gc)
     assert ckey not in collections["staging"]
     assert ckey in collections["published"]
 
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
 
     # Assert that the collection is signed on v3 api
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    collection = api_client(
-        f"{api_prefix}/content/published/v3/collections/"
-        f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
-    )
+    collection = get_collection_from_repo(gc, "published",
+                                          artifact.namespace, artifact.name, artifact.version)
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] == signing_service
     assert collection["signatures"][0]["signature"] is not None
@@ -150,11 +129,9 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags,
     assert collection["signatures"][0]["pulp_created"] is not None
 
     # Assert that the collection is signed on UI API
-    collection_on_ui = api_client(
-        f"{api_prefix}/_ui/v1/repo/published/"
-        f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-        f"&sign_state=signed&version={artifact.version}"
-    )["data"][0]
+    collection_on_ui = gc.get(f"_ui/v1/repo/published/"
+                              f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
+                              f"&sign_state=signed&version={artifact.version}")["data"][0]
     assert collection_on_ui["sign_state"] == "signed"
     metadata = collection_on_ui["latest_version"]["metadata"]
     assert len(metadata["signatures"]) >= 1
@@ -169,20 +146,20 @@ def test_collection_auto_sign_on_approval(api_client, config, settings, flags,
 @pytest.mark.parametrize(
     "sign_url",
     [
-        "{api_prefix}/_ui/v1/collection_signing/",
-        "{api_prefix}/_ui/v1/collection_signing/{distro_base_path}/",
-        "{api_prefix}/_ui/v1/collection_signing/{distro_base_path}/{namespace}/",
+        "_ui/v1/collection_signing/",
+        "_ui/v1/collection_signing/{distro_base_path}/",
+        "_ui/v1/collection_signing/{distro_base_path}/{namespace}/",
         (
-            "{api_prefix}/_ui/v1/collection_signing/"
+            "_ui/v1/collection_signing/"
             "{distro_base_path}/{namespace}/{collection}/"
         ),
         (
-            "{api_prefix}/_ui/v1/collection_signing/"
+            "_ui/v1/collection_signing/"
             "{distro_base_path}/{namespace}/{collection}/{version}/"
         ),
     ],
 )
-def test_collection_sign_on_demand(api_client, config, settings, flags, upload_artifact, sign_url):
+def test_collection_sign_on_demand(flags, galaxy_client, settings, sign_url):
     """Test whether a collection can be signed on-demand by calling _ui/v1/collection_signing/"""
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip(
@@ -204,30 +181,30 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
     ckey = (artifact.namespace, artifact.name, artifact.version)
 
     # import and wait ...
-    import_and_wait(api_client, artifact, upload_artifact, config)
+    gc = galaxy_client("admin")
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
+    assert resp["state"] == "completed"
 
     # Collection must be on /staging/
-    collections = get_all_collections_by_repo(api_client)
+    collections = get_all_collections_by_repo(gc)
     assert ckey in collections["staging"]
     assert ckey not in collections["published"]
 
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
 
     # Sign the collection
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
     sign_payload = {
-        "api_prefix": api_prefix,
+        "api_prefix": gc.galaxy_root,
         "distro_base_path": "staging",
         "namespace": NAMESPACE,
         "collection": artifact.name,
         "version": artifact.version,
     }
-    sign_on_demand(api_client, signing_service, sign_url.format(**sign_payload), **sign_payload)
+    sign_on_demand(gc, signing_service, sign_url.format(**sign_payload), **sign_payload)
     # Assert that the collection is signed on v3 api
-    collection = api_client(
-        f"{api_prefix}/content/staging/v3/collections/"
-        f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
-    )
+    collection = get_collection_from_repo(gc, "staging",
+                                          artifact.namespace, artifact.name, artifact.version)
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] == signing_service
     assert collection["signatures"][0]["signature"] is not None
@@ -237,11 +214,9 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
     assert collection["signatures"][0]["pulp_created"] is not None
 
     # Assert that the collection is signed on UI API
-    collection_on_ui = api_client(
-        f"{api_prefix}/_ui/v1/repo/staging/"
-        f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
-        f"&sign_state=signed&version={artifact.version}"
-    )["data"][0]
+    collection_on_ui = gc.get(f"_ui/v1/repo/staging/?deprecated=false&namespace="
+                              f"{NAMESPACE}&name={artifact.name}&sign_state=signed"
+                              f"&version={artifact.version}")["data"][0]
     assert collection_on_ui["sign_state"] == "signed"
     metadata = collection_on_ui["latest_version"]["metadata"]
     assert len(metadata["signatures"]) >= 1
@@ -251,10 +226,8 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
     # Assert that the collection is signed on UI API (detail )
-    collection_on_ui = api_client(
-        f"{api_prefix}/_ui/v1/repo/staging/{NAMESPACE}/{artifact.name}"
-        f"/?version={artifact.version}"
-    )
+    collection_on_ui = get_ui_collection(gc, "staging",
+                                         NAMESPACE, artifact.name, artifact.version)
     assert collection_on_ui["sign_state"] == "signed"
     metadata = collection_on_ui["latest_version"]["metadata"]
     assert len(metadata["signatures"]) >= 1
@@ -267,8 +240,7 @@ def test_collection_sign_on_demand(api_client, config, settings, flags, upload_a
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.deployment_standalone
-def test_collection_move_with_signatures(api_client, config, settings, flags,
-                                         upload_artifact, galaxy_client):
+def test_collection_move_with_signatures(ansible_config, flags, galaxy_client, settings):
     """Test whether a collection can be moved from repo to repo with its
     signatures.
     """
@@ -286,10 +258,13 @@ def test_collection_move_with_signatures(api_client, config, settings, flags,
     ckey = (artifact.namespace, artifact.name, artifact.version)
 
     # import and wait ...
-    import_and_wait(api_client, artifact, upload_artifact, config)
+    gc = galaxy_client("admin")
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
+    assert resp["state"] == "completed"
 
     # Collection must be on /staging/
-    collections = get_all_collections_by_repo(api_client)
+    collections = get_all_collections_by_repo(gc)
     assert ckey in collections["staging"]
     assert ckey not in collections["published"]
 
@@ -303,24 +278,21 @@ def test_collection_move_with_signatures(api_client, config, settings, flags,
             "collection": artifact.name,
             "version": artifact.version,
         }
-        sign_on_demand(api_client, signing_service, **sign_payload)
+        sign_on_demand(gc, signing_service, **sign_payload)
 
         # Assert that the collection is signed on v3 api
-        api_prefix = api_client.config.get("api_prefix").rstrip("/")
-        collection = api_client(
-            f"{api_prefix}/content/staging/v3/collections/"
-            f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
-        )
+        collection = get_collection_from_repo(gc, "staging", artifact.namespace,
+                                              artifact.name, artifact.version)
         assert len(collection["signatures"]) >= 1
         assert collection["signatures"][0]["signing_service"] == signing_service
 
         # Assert that the collection is signed on UI API
-        collections = get_all_collections_by_repo(api_client)
+        collections = get_all_collections_by_repo(gc)
         assert collections["staging"][ckey]["sign_state"] == "signed"
 
         # Move the collection to /published/
         gc = galaxy_client("partner_engineer")
-        cert_result = set_certification(api_client, gc, artifact)
+        cert_result = set_certification(ansible_config(), gc, artifact)
         assert cert_result["namespace"]["name"] == artifact.namespace
         assert cert_result["name"] == artifact.name
         assert cert_result["version"] == artifact.version
@@ -330,11 +302,9 @@ def test_collection_move_with_signatures(api_client, config, settings, flags,
 
     # After moving to /published/
     # Assert that the collection is signed on v3 api
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    collection = api_client(
-        f"{api_prefix}/content/published/v3/collections/"
-        f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
-    )
+    collection = get_collection_from_repo(gc, "published", artifact.namespace,
+                                          artifact.name, artifact.version)
+
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] == signing_service
     assert collection["signatures"][0]["signature"] is not None
@@ -344,8 +314,8 @@ def test_collection_move_with_signatures(api_client, config, settings, flags,
     assert collection["signatures"][0]["pulp_created"] is not None
 
     # # Assert that the collection is signed on UI API
-    collection_on_ui = api_client(
-        f"{api_prefix}/_ui/v1/repo/published/"
+    collection_on_ui = gc.get(
+        f"_ui/v1/repo/published/"
         f"?deprecated=false&namespace={NAMESPACE}&name={artifact.name}"
         f"&sign_state=signed&version={artifact.version}"
     )["data"][0]
@@ -362,7 +332,7 @@ def test_collection_move_with_signatures(api_client, config, settings, flags,
 @pytest.mark.collection_move
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-def test_copy_collection_without_signatures(api_client, config, settings, flags, upload_artifact):
+def test_copy_collection_without_signatures(flags, galaxy_client, settings):
     """Test whether a collection can be added to a second repo without its signatures."""
     can_sign = flags.get("can_create_signatures")
     if not can_sign:
@@ -381,10 +351,13 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
     ckey = (artifact.namespace, artifact.name, artifact.version)
 
     # import and wait ...
-    import_and_wait(api_client, artifact, upload_artifact, config)
+    gc = galaxy_client("admin")
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
+    assert resp["state"] == "completed"
 
     # Collection must be on /staging/
-    collections = get_all_collections_by_repo(api_client)
+    collections = get_all_collections_by_repo(gc)
     assert ckey in collections["staging"]
 
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE")
@@ -396,25 +369,18 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
         "collection": artifact.name,
         "version": artifact.version,
     }
-    sign_on_demand(api_client, signing_service, **sign_payload)
+    sign_on_demand(gc, signing_service, **sign_payload)
 
     # Assert that the collection is signed on v3 api
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    collection = api_client(
-        f"{api_prefix}/content/staging/v3/collections/"
-        f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
-    )
+    collection = get_collection_from_repo(gc, "staging", artifact.namespace,
+                                          artifact.name, artifact.version)
 
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] == signing_service
 
-    # Copy the collection to /community/
-    copy_result = copy_collection_version(
-        api_client,
-        artifact,
-        src_repo_name="staging",
-        dest_repo_name="community"
-    )
+    copy_result = move_or_copy_collection(gc, artifact.namespace, artifact.name,
+                                          artifact.version, source="staging",
+                                          destination="community", operation="copy")
 
     assert copy_result["namespace"]["name"] == artifact.namespace
     assert copy_result["name"] == artifact.name
@@ -426,7 +392,7 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
     assert len(copy_result["signatures"]) == 1
 
     # Assert that the collection is signed on ui/stating but not on ui/community
-    collections = get_all_collections_by_repo(api_client)
+    collections = get_all_collections_by_repo(gc)
     assert collections["staging"][ckey]["sign_state"] == "signed"
     assert collections["community"][ckey]["sign_state"] == "signed"
 
@@ -441,7 +407,7 @@ def test_copy_collection_without_signatures(api_client, config, settings, flags,
         False,
     ],
 )
-def test_upload_signature(config, require_auth, settings, upload_artifact):
+def test_upload_signature(require_auth, flags, galaxy_client, settings):
     """
     1. If staging repository doesn't have a gpgkey, skip test
     2. Generate a collection
@@ -450,13 +416,11 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     5. Upload the signature to staging
     6. assert collection signature task has spawned
     """
-    api_client = get_client(config=config, request_token=True, require_auth=require_auth)
-
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is not set")
 
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-    distributions = api_client(f"{api_prefix}/_ui/v1/distributions/")
+    gc = galaxy_client("admin")
+    distributions = get_v1_distributions(gc)
     if not distributions:
         pytest.skip("No distribution found")
 
@@ -482,9 +446,10 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     )
     ckey = (artifact.namespace, artifact.name, artifact.version)
     # import and wait ...
-    import_and_wait(api_client, artifact, upload_artifact, config)
-    # Collection must be on /staging/
-    collections = get_all_collections_by_repo(api_client)
+    resp = upload_artifact(None, gc, artifact)
+    resp = wait_for_task(gc, resp)
+    assert resp["state"] == "completed"    # Collection must be on /staging/
+    collections = get_all_collections_by_repo(gc)
     assert ckey in collections["staging"]
     assert ckey not in collections["published"]
 
@@ -504,22 +469,16 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
         if not os.path.exists(signature_filename):
             pytest.skip("Signature cannot be created")
 
-        baseurl = config.get('url').rstrip('/') + '/' + 'pulp/api/v3/'
-
         collection_version_pk = collections["staging"][ckey]["id"]
-        staging_resp = requests.get(
-            baseurl + "repositories/ansible/ansible/?name=staging",
-            auth=("admin", "admin"),
-        )
-        repo_href = staging_resp.json()["results"][0]["pulp_href"]
+        repo_href = get_repository_href(gc, "staging")
         signature_file = open(signature_filename, "rb")
         response = requests.post(
-            baseurl + "content/ansible/collection_signatures/",
+            gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
             files={"file": signature_file},
             data={
                 "repository": repo_href,
                 "signed_collection": (
-                    f"{api_prefix}/pulp/api/v3/"
+                    f"{gc.galaxy_root}pulp/api/v3/"
                     f"content/ansible/collection_versions/{collection_version_pk}/"
                 ),
             },
@@ -530,90 +489,68 @@ def test_upload_signature(config, require_auth, settings, upload_artifact):
     time.sleep(SLEEP_SECONDS_ONETIME)  # wait for the task to finish
 
     # Assert that the collection is signed on v3 api
-    collection = api_client(
-        f"{api_prefix}/content/staging/v3/collections/"
-        f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
-    )
+    collection = get_collection_from_repo(gc, "staging",
+                                          artifact.namespace, artifact.name, artifact.version)
     assert len(collection["signatures"]) >= 1
     assert collection["signatures"][0]["signing_service"] is None
 
 
-@pytest.mark.skipif(not require_signature_for_approval(),
-                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
 def test_move_with_no_signing_service_not_superuser_signature_required(
-    ansible_config,
-    upload_artifact,
-    settings,
-    galaxy_client
-):
+        flags, galaxy_client, settings, skip_if_not_require_signature_for_approval):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
     """
+    # GALAXY_SIGNATURE_UPLOAD_ENABLED="false" in ephemeral env
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
     # need the admin client
-    admin_config = ansible_config("admin")
-    admin_client = get_client(admin_config, request_token=True, require_auth=True)
+    gc_admin = galaxy_client("admin")
 
     # need a new regular user
-    partner_eng_config = ansible_config("partner_engineer")
-    partner_eng_client = get_client(partner_eng_config, request_token=True, require_auth=True)
+    gc = galaxy_client("partner_engineer")
 
     # need a new namespace
-    gc = galaxy_client("partner_engineer")
     namespace = create_test_namespace(gc)
 
     # make the collection
     artifact = galaxy_build_collection(namespace=namespace)
 
     # use admin to upload the collection
-    upload_task = upload_artifact(admin_config, admin_client, artifact)
-    resp = wait_for_task(admin_client, upload_task)
+    upload_task = upload_artifact(None, gc_admin, artifact)
+    wait_for_task(gc_admin, upload_task)
 
     # create a signature
     signature = create_local_signature_for_tarball(artifact.filename)
 
     # upload the signature
-    baseurl = admin_config.get('url').rstrip('/') + '/' + 'pulp/api/v3/'
-    staging_href = admin_client(
-        "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]["pulp_href"]
-    collection_href = admin_client(
+    staging_href = get_repository_href(gc, "staging")
+    collection_href = gc_admin.get(
         f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
     )["results"][0]["pulp_href"]
+
     signature_upload_response = requests.post(
-        baseurl + "content/ansible/collection_signatures/",
+        gc_admin.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
         files={"file": signature},
         data={
             "repository": staging_href,
             "signed_collection": collection_href,
         },
-        auth=(admin_config.get('username'), admin_config.get('password')),
+        auth=(gc_admin.username, gc_admin.password),
     )
-    wait_for_task(admin_client, signature_upload_response.json())
+    wait_for_task(gc_admin, signature_upload_response.json())
 
     # use the PE user to approve the collection
-    published_href = partner_eng_client(
-        "pulp/api/v3/repositories/ansible/ansible/?name=published")["results"][0]["pulp_href"]
-    resp = requests.post(
-        partner_eng_config["server"] + staging_href + "move_collection_version/",
-        json={
-            "collection_versions": [collection_href],
-            "destination_repositories": [published_href]
-        },
-        auth=(partner_eng_config["username"], partner_eng_config["password"])
-    )
+    published_href = get_repository_href(gc, "published")
+    move_content_between_repos(gc, [collection_href], staging_href,
+                               [published_href])
 
-    assert resp.status_code == 202
-    assert "task" in resp.json()
-    wait_for_task(partner_eng_client, resp.json())
-    assert partner_eng_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
+    assert gc.get(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
-@pytest.mark.skipif(not require_signature_for_approval(),
-                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact, settings):
+def test_move_with_no_signing_service(flags, galaxy_client, settings, artifact,
+                                      skip_if_not_require_signature_for_approval):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
@@ -621,36 +558,25 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     if not settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL is required to be enabled")
 
-    config = ansible_config("admin")
-    api_client = get_client(config, request_token=True, require_auth=True)
+    gc = galaxy_client("admin")
+    upload_task = upload_artifact(None, gc, artifact)
+    wait_for_task(gc, upload_task)
+    staging_href = get_repository_href(gc, "staging")
+    published_href = get_repository_href(gc, "published")
 
-    resp = upload_artifact(config, api_client, artifact)
-    wait_for_task(api_client, resp)
-    staging_href = api_client(
-        "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]["pulp_href"]
-    published_href = api_client(
-        "pulp/api/v3/repositories/ansible/ansible/?name=published")["results"][0]["pulp_href"]
-    collection_href = api_client(
+    collection_href = gc.get(
         f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
     )["results"][0]["pulp_href"]
 
     ####################################################
     # Test moving collection without signature
     ####################################################
+    with pytest.raises(GalaxyClientError) as e:
+        move_content_between_repos(gc, [collection_href], staging_href,
+                                   [published_href])
 
-    resp = requests.post(
-        config["server"] + staging_href + "move_collection_version/",
-        json={
-            "collection_versions": [collection_href],
-            "destination_repositories": [published_href]
-        },
-        auth=(config["username"], config["password"])
-    )
-
-    assert resp.status_code == 400
-    err = resp.json().get("collection_versions", None)
-    assert err is not None
-    assert "Signatures are required" in err
+    assert e.value.response.status_code == 400
+    assert "Signatures are required" in e.value.response.text
 
     ####################################################
     # Test signing the collection before moving
@@ -660,39 +586,31 @@ def test_move_with_no_signing_service(ansible_config, artifact, upload_artifact,
     signature = create_local_signature_for_tarball(artifact.filename)
 
     # upload signature
-    baseurl = config.get('url').rstrip('/') + '/' + 'pulp/api/v3/'
+
+    staging_href = get_repository_href(gc, "staging")
+    collection_href = gc.get(
+        f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
+    )["results"][0]["pulp_href"]
+
     signature_upload_response = requests.post(
-        baseurl + "content/ansible/collection_signatures/",
+        gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
         files={"file": signature},
         data={
             "repository": staging_href,
             "signed_collection": collection_href,
         },
-        auth=(config.get('username'), config.get('password')),
+        auth=(gc.username, gc.password),
     )
-    wait_for_task(api_client, signature_upload_response.json())
+    wait_for_task(gc, signature_upload_response.json())
 
     # move the collection
-    resp = requests.post(
-        config["server"] + staging_href + "move_collection_version/",
-        json={
-            "collection_versions": [collection_href],
-            "destination_repositories": [published_href]
-        },
-        auth=(config["username"], config["password"])
-    )
-
-    assert resp.status_code == 202
-    assert "task" in resp.json()
-
-    wait_for_task(api_client, resp.json())
-
-    assert api_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
+    move_content_between_repos(gc, [collection_href], staging_href,
+                               [published_href])
+    assert gc.get(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
 
 
-@pytest.mark.skipif(not require_signature_for_approval(),
-                    reason="GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is required to be enabled")
-def test_move_with_signing_service(ansible_config, artifact, upload_artifact, settings):
+def test_move_with_signing_service(flags, galaxy_client, settings, artifact,
+                                   skip_if_not_require_signature_for_approval):
     """
     Test signature validation on the pulp {repo_href}/move_collection_version/ api when
     signatures are required.
@@ -701,38 +619,28 @@ def test_move_with_signing_service(ansible_config, artifact, upload_artifact, se
     if not settings.get("GALAXY_COLLECTION_SIGNING_SERVICE"):
         pytest.skip("GALAXY_COLLECTION_SIGNING_SERVICE is required to be set")
 
-    config = ansible_config("admin")
-    api_client = get_client(config, request_token=True, require_auth=True)
-
+    gc = galaxy_client("admin")
     # this should never be None ...
     signing_service = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE") or "ansible-default"
+    upload_task = upload_artifact(None, gc, artifact)
+    wait_for_task(gc, upload_task)
 
-    resp = upload_artifact(config, api_client, artifact)
-    resp = wait_for_task(api_client, resp)
-    staging_href = api_client(
-        "pulp/api/v3/repositories/ansible/ansible/?name=staging")["results"][0]["pulp_href"]
-    published_href = api_client(
-        "pulp/api/v3/repositories/ansible/ansible/?name=published")["results"][0]["pulp_href"]
-    collection_href = api_client(
+    staging_href = get_repository_href(gc, "staging")
+    published_href = get_repository_href(gc, "published")
+    collection_href = gc.get(
         f"pulp/api/v3/content/ansible/collection_versions/?name={artifact.name}"
     )["results"][0]["pulp_href"]
-    signing_href = api_client(
+
+    signing_href = gc.get(
         f"pulp/api/v3/signing-services/?name={signing_service}"
     )["results"][0]["pulp_href"]
 
-    resp = requests.post(
-        config["server"] + staging_href + "move_collection_version/",
-        json={
-            "collection_versions": [collection_href],
-            "destination_repositories": [published_href],
-            "signing_service": signing_href
-        },
-        auth=(config["username"], config["password"])
-    )
+    resp = gc.post(staging_href + "move_collection_version/", body={
+        "collection_versions": [collection_href],
+        "destination_repositories": [published_href],
+        "signing_service": signing_href
+    })
 
-    assert resp.status_code == 202
-    assert "task" in resp.json()
+    wait_for_task(gc, resp)
 
-    wait_for_task(api_client, resp.json())
-
-    assert api_client(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1
+    assert gc.get(f"v3/collections?name={artifact.name}")["meta"]["count"] == 1

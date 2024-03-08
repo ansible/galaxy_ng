@@ -3,7 +3,6 @@
 import pytest
 from orionutils.generator import build_collection
 
-from ..utils.iqe_utils import require_signature_for_approval
 from ..constants import USERNAME_PUBLISHER
 from ..utils import get_client, set_certification, wait_for_task
 
@@ -85,15 +84,13 @@ def test_synclist_object_edit(ansible_config, upload_artifact):
 @pytest.mark.synclist
 @pytest.mark.deployment_cloud
 @pytest.mark.slow_in_cloud
-@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
-                                                             "work with signatures required "
-                                                             "on move.")
-def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings, galaxy_client):
+def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings,
+                                       galaxy_client, skip_if_require_signature_for_approval):
     """Edit SyncList object to exclude a collection,
     confirm see in content/{SyncList.name}/v3/excludes/
     confirm no change to content/{SyncList.name}/v3/collections/
     """
-
+    # GALAXY_SIGNATURE_UPLOAD_ENABLED="false" in ephemeral env
     # NOTE: on stage env, a toggle action does:
     # PUT https://console.stage.redhat.com/api/automation-hub/_ui/v1/my-synclists/1/
 
@@ -117,7 +114,7 @@ def test_edit_synclist_see_in_excludes(ansible_config, upload_artifact, settings
     resp = upload_artifact(config, api_client, collection)
     resp = wait_for_task(api_client, resp)
     gc = galaxy_client("partner_engineer")
-    set_certification(api_client, gc, collection)
+    set_certification(config, gc, collection)
     collection_key = (collection.namespace, collection.name)
 
     config = ansible_config("org_admin")

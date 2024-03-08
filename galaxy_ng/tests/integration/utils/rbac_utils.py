@@ -55,7 +55,7 @@ def create_namespace(client, group, object_roles=None):
     return namespace_name
 
 
-def create_local_image_container(config, client):
+def create_emtpy_local_image_container(config, client):
     """
     This method is used to create an empty container to push images later in the tests.
     To do so, an image is pushed and deleted afterwards.
@@ -82,6 +82,32 @@ def create_local_image_container(config, client):
     subprocess.check_call([client.container_client.engine,
                            "system", "prune", "-a", "--volumes", "-f"])
     pull_and_tag_image(client, container_engine, registry, image, ee_name, tag="latest")
+    return ee_name
+
+
+def create_local_image_container(config, client, name=None, tag=None):
+    """
+    This method is used to create a container.
+    """
+    container_engine = config.get("container_engine")
+    registry = "docker.io/library/"
+    image = "alpine"
+    if avoid_docker_limit_rate():
+        registry = "quay.io/libpod/"
+        image = f"{registry}alpine"
+    if name:
+        ee_name = name
+    else:
+        ee_name = f"ee_{generate_random_string()}"
+    try:
+        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name, tag)
+        client.push_image(full_name)
+    except GalaxyClientError:
+        logger.debug("Image push failed. Clearing cache and retrying.")
+        subprocess.check_call([client.container_client.engine,
+                               "system", "prune", "-a", "--volumes", "-f"])
+        full_name = pull_and_tag_image(client, container_engine, registry, image, ee_name, tag)
+        client.push_image(full_name)
     return ee_name
 
 
