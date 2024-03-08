@@ -2,51 +2,49 @@ import pytest
 import subprocess
 import tempfile
 
+from galaxykit.collections import get_collection_from_repo
 from ..utils import (
     AnsibleDistroAndRepo,
     get_client,
     CollectionInspector,
-    wait_for_all_tasks
+    wait_for_all_tasks, ansible_galaxy
 )
+from ..utils.repo_management_utils import create_repo_and_dist
+from ..utils.tasks import wait_for_all_tasks_gk
 from ..utils.tools import generate_random_string
 
 
-def _upload_test_common(config, client, artifact, base_path, dest_base_path=None):
+def _upload_test_common(config, client, artifact, base_path, dest_base_path=None, gc=None):
     api_prefix = config.get("api_prefix")
-    url = config["url"]
 
     if dest_base_path is None:
-        url = f"{config['url']}content/{base_path}/"
         dest_base_path = base_path
 
-    cmd = [
-        "ansible-galaxy",
-        "collection",
-        "publish",
-        "--api-key",
-        config["token"],
-        "--server",
-        url,
-        artifact.filename,
-        "--ignore-certs"
-    ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    assert proc.returncode == 0
-
-    wait_for_all_tasks(client)
-
-    collection_url = (
-        f"{api_prefix}content/{dest_base_path}/v3/collections/"
-        f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
+    ansible_galaxy(
+        f"collection publish {artifact.filename} -vvv",
+        galaxy_client=gc, server=base_path, server_url=gc.galaxy_root + f"content/{base_path}/"
     )
 
-    collection_resp = client(collection_url)
-    assert collection_resp["name"] == artifact.name
+    if gc:
+        wait_for_all_tasks_gk(gc)
+        collection_resp = get_collection_from_repo(gc, dest_base_path, artifact.namespace,
+                                                   artifact.name, "1.0.0")
+        assert collection_resp["name"] == artifact.name
+    else:
+        wait_for_all_tasks(client)
+        collection_url = (
+            f"{api_prefix}content/{dest_base_path}/v3/collections/"
+            f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
+        )
+        collection_resp = client(collection_url)
+        assert collection_resp["name"] == artifact.name
 
     # test download
     with tempfile.TemporaryDirectory() as dir:
-        api_root = config["url"]
+        if gc:
+            api_root = gc.galaxy_root
+        else:
+            api_root = config["url"]
         filename = f"{artifact.namespace}-{artifact.name}-{artifact.version}.tar.gz"
         tarball_path = f"{dir}/{filename}"
         url = (
@@ -81,43 +79,36 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-def test_publish_to_custom_staging_repo(ansible_config, artifact, settings):
+def test_publish_to_custom_staging_repo(ansible_config, artifact, settings, galaxy_client):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL") is not True:
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be true")
     config = ansible_config(profile="admin")
-    client = get_client(
-        config=config
-    )
+    gc = galaxy_client("admin")
+    repo_name = f"repo-test-{generate_random_string()}"
+    create_repo_and_dist(gc, repo_name, pipeline="staging")
 
-    repo = AnsibleDistroAndRepo(
-        client,
-        f"repo-test-{generate_random_string()}",
-        repo_body={"pulp_labels": {"pipeline": "staging"}}
-    )
-
-    _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
+    _upload_test_common(config, None, artifact, repo_name, gc=gc)
 
 
 @pytest.mark.deployment_community
 @pytest.mark.min_hub_version("4.7dev")
-def test_publish_to_custom_repo(ansible_config, artifact, settings):
+def test_publish_to_custom_repo(ansible_config, artifact, settings, galaxy_client):
     config = ansible_config(profile="admin")
     client = get_client(
         config=config
     )
-
     repo = AnsibleDistroAndRepo(
         client,
         f"repo-test-{generate_random_string()}",
     )
-
-    _upload_test_common(config, client, artifact, repo.get_distro()["base_path"])
+    gc = galaxy_client("admin")
+    _upload_test_common(config, None, artifact, repo.get_distro()["base_path"], gc=gc)
 
 
 @pytest.mark.deployment_community
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
-def test_publish_and_auto_approve(ansible_config, artifact, settings):
+def test_publish_and_auto_approve(ansible_config, artifact, settings, galaxy_client):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")
     config = ansible_config(profile="admin")
@@ -130,11 +121,11 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
         client,
         f"repo-test-{generate_random_string()}",
     )
-
-    _upload_test_common(config, client, artifact, repo.get_distro()["base_path"], "published")
+    gc = galaxy_client("admin")
+    _upload_test_common(config, None, artifact, repo.get_distro()["base_path"], gc=gc)
 
     cv = client(
-        f"{api_prefix}content/published/v3/collections/"
+        f"{api_prefix}content/{repo.get_distro()['base_path']}/v3/collections/"
         f"{artifact.namespace}/{artifact.name}/versions/1.0.0/"
     )
 
@@ -144,7 +135,7 @@ def test_publish_and_auto_approve(ansible_config, artifact, settings):
 @pytest.mark.deployment_community
 @pytest.mark.auto_approve
 @pytest.mark.min_hub_version("4.7dev")
-def test_auto_approve_muliple(ansible_config, artifact, settings):
+def test_auto_approve_multiple(ansible_config, artifact, settings, galaxy_client):
     if settings.get("GALAXY_REQUIRE_CONTENT_APPROVAL"):
         pytest.skip("GALAXY_REQUIRE_CONTENT_APPROVAL must be false")
     config = ansible_config(profile="admin")
@@ -160,7 +151,8 @@ def test_auto_approve_muliple(ansible_config, artifact, settings):
 
     published = custom_published_repo.get_distro()["base_path"]
 
-    _upload_test_common(config, client, artifact, "staging", published)
+    gc = galaxy_client("admin")
+    _upload_test_common(config, None, artifact, "staging", published, gc=gc)
 
     cv = client(
         f"{api_prefix}content/{published}/v3/collections/"

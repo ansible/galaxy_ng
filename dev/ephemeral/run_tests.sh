@@ -12,7 +12,7 @@ ${VENV_PATH}/bin/pip install -r integration_requirements.txt
 
 echo "Running pytest ..."
 ${VENV_PATH}/bin/pytest \
-    --capture=no -m "deployment_cloud or all" \
+    --capture=no --log-cli-level=ERROR -m "deployment_cloud or all" \
     -v \
     galaxy_ng/tests/integration $@
 RC=$?

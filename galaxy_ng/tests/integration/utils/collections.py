@@ -27,7 +27,7 @@ from .tasks import wait_for_task as gng_wait_for_task
 from galaxykit.utils import wait_for_url, wait_for_task, GalaxyClientError
 
 from .tools import iterate_all, iterate_all_gk
-from .iqe_utils import get_ansible_config, get_galaxy_client
+from .iqe_utils import get_ansible_config, get_galaxy_client, fix_prefix_workaround
 
 try:
     import importlib.resources as pkg_resources
@@ -352,7 +352,7 @@ def get_collection_full_path(namespace, collection_name):
     return os.path.join(get_collections_namespace_path(namespace), collection_name)
 
 
-def set_certification(client, gc, collection, level="published", hub_4_5=False):
+def set_certification(config, gc, collection, level="published", hub_4_5=False):
     """Moves a collection from the `staging` to the `published` repository.
 
     For use in instances that use repository-based certification and that
@@ -360,7 +360,7 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
     """
 
     if hub_4_5:
-        if client.config["use_move_endpoint"]:
+        if config["use_move_endpoint"]:
             url = (
                 f"v3/collections/{collection.namespace}/{collection.name}/versions/"
                 f"{collection.version}/move/staging/published/"
@@ -374,7 +374,7 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
             return wait_for_url(gc, dest_url)
 
     # exit early if config is set to auto approve
-    if not client.config["use_move_endpoint"]:
+    if not config["use_move_endpoint"]:
         return
 
     # check if artifact is in staging repo, if not wait
@@ -384,7 +384,7 @@ def set_certification(client, gc, collection, level="published", hub_4_5=False):
     )
     wait_for_url(gc, staging_artifact_url)
 
-    if client.config["upload_signatures"]:
+    if config["upload_signatures"]:
         # Write manifest to temp file
         tf = tarfile.open(collection.filename, mode="r:gz")
         tdir = tempfile.TemporaryDirectory()
@@ -500,10 +500,8 @@ def copy_collection_version(client, collection, src_repo_name, dest_repo_name):
     return wait_for_url(gc, dest_url)
 
 
-def get_all_collections_by_repo(api_client=None):
+def get_all_collections_by_repo(gc):
     """ Return a dict of each repo and their collections """
-    assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
     collections = {
         'staging': {},
         'published': {},
@@ -511,9 +509,11 @@ def get_all_collections_by_repo(api_client=None):
         'rh-certified': {},
     }
     for repo in collections.keys():
-        next_page = f'{api_prefix}/_ui/v1/collection-versions/?repository={repo}'
+        next_page = f'{gc.galaxy_root}_ui/v1/collection-versions/?repository={repo}'
         while next_page:
-            resp = api_client(next_page)
+            # workaround
+            next_page = fix_prefix_workaround(next_page)
+            resp = gc.get(next_page)
             for _collection in resp['data']:
                 key = (
                     _collection['namespace'],
@@ -525,11 +525,10 @@ def get_all_collections_by_repo(api_client=None):
     return collections
 
 
-def get_all_repository_collection_versions(api_client):
+def get_all_repository_collection_versions(gc):
     """ Return a dict of each repo and their collection versions """
 
-    assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    assert gc is not None, "api_client is a required param"
 
     repositories = [
         'staging',
@@ -540,9 +539,12 @@ def get_all_repository_collection_versions(api_client):
 
     collections = []
     for repo in repositories:
-        next_page = f'{api_prefix}/content/{repo}/v3/collections/'
+        next_page = (f'{gc.galaxy_root}content/{repo}/'
+                     f'v3/plugin/ansible/content/{repo}/collections/index/')
         while next_page:
-            resp = api_client(next_page)
+            # workaround
+            next_page = fix_prefix_workaround(next_page)
+            resp = gc.get(next_page)
             collections.extend(resp['data'])
             next_page = resp.get('links', {}).get('next')
 
@@ -550,7 +552,8 @@ def get_all_repository_collection_versions(api_client):
     for collection in collections:
         next_page = collection['versions_url']
         while next_page:
-            resp = api_client(next_page)
+            next_page = fix_prefix_workaround(next_page)
+            resp = gc.get(next_page)
             for cv in resp['data']:
                 cv['namespace'] = collection['namespace']
                 cv['name'] = collection['name']
@@ -620,7 +623,10 @@ def delete_all_collections_in_namespace(api_client, namespace_name):
 
     # accumlate a list of matching collections in each repo
     ctuples = set()
-    cmap = get_all_collections_by_repo(api_client)
+    ansible_config = get_ansible_config()
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc = galaxy_client("admin")
+    cmap = get_all_collections_by_repo(gc)
     for repo, cvs in cmap.items():
         for cv_spec in cvs.keys():
             if cv_spec[0] == namespace_name:

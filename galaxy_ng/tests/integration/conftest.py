@@ -9,7 +9,8 @@ from pkg_resources import parse_version, Requirement
 from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id
 from galaxykit.namespaces import create_namespace
-from galaxykit.utils import GalaxyClientError
+from galaxykit.utils import GalaxyClientError, wait_for_url
+from galaxykit.users import get_user
 from .constants import USERNAME_PUBLISHER, GALAXY_STAGE_ANSIBLE_PROFILES
 from .utils import (
     ansible_galaxy,
@@ -18,7 +19,6 @@ from .utils import (
     set_certification,
     set_synclist,
     iterate_all,
-    wait_for_url,
 )
 
 from .utils import upload_artifact as _upload_artifact
@@ -28,11 +28,10 @@ from .utils.iqe_utils import (
     is_standalone,
     is_ephemeral_env,
     galaxy_stage_ansible_user_cleanup, remove_from_cache,
-    get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version
+    get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version, aap_gateway,
+    require_signature_for_approval
 )
 from .utils.tools import generate_random_artifact_version
-
-# from orionutils.generator import build_collection
 
 
 MARKER_CONFIG = """
@@ -81,6 +80,9 @@ repositories: tests verifying custom repositories
 all: tests that are unmarked and should pass in all deployment modes
 galaxy_stage_ansible: tests that run against galaxy-stage.ansible.com
 installer_smoke_test: smoke tests to validate AAP installation (VM)
+load_data: tests that load data that will be verified after upgrade or backup/restore
+verify_data: tests that verify the data previously loaded by load_data test
+skip_in_gw: tests that need to be skipped if hub is behind the gateway (temporary)
 """
 
 logger = logging.getLogger(__name__)
@@ -101,21 +103,18 @@ def ansible_config():
 @pytest.fixture(scope="function")
 def published(ansible_config, artifact, galaxy_client):
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
     # publish
-    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename} -vvv --server=automation_hub",
-        ansible_config=config
+        galaxy_client=gc
     )
 
     # certify
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
+    set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
     return artifact
 
@@ -125,21 +124,18 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     """ Create and publish+certify collection version N and N+1 """
 
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
     # publish v1
-    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=config
+        galaxy_client=gc
     )
 
     # certify v1
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
+    set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -151,14 +147,13 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     )
 
     # publish newer version
-    config = ansible_config("partner_engineer")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=config
+        galaxy_client=gc
     )
 
     # certify newer version
-    set_certification(api_client, gc, artifact2, hub_4_5=hub_4_5)
+    set_certification(ansible_config(), gc, artifact2, hub_4_5=hub_4_5)
 
     return (artifact, artifact2)
 
@@ -168,21 +163,18 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     """ Create and publish collection version N and N+1 but only certify N"""
 
     # make sure the expected namespace exists ...
-    config = ansible_config("partner_engineer")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
     # publish
-    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact.filename}",
-        ansible_config=config
+        galaxy_client=gc
     )
 
     # certify v1
     hub_4_5 = is_hub_4_5(ansible_config)
-    set_certification(api_client, gc, artifact, hub_4_5=hub_4_5)
+    set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -194,16 +186,15 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     )
 
     # Publish but do -NOT- certify newer version ...
-    config = ansible_config("basic_user")
     ansible_galaxy(
         f"collection publish {artifact2.filename}",
-        ansible_config=config
+        galaxy_client=gc
     )
     dest_url = (
         f"v3/plugin/ansible/content/staging/collections/index/"
         f"{artifact2.namespace}/{artifact2.name}/versions/{artifact2.version}/"
     )
-    wait_for_url(api_client, dest_url)
+    wait_for_url(gc, dest_url)
     return artifact, artifact2
 
 
@@ -213,7 +204,6 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
 
     # make sure the expected namespace exists ...
     config = ansible_config("partner_engineer")
-    api_client = get_client(config)
     gc = galaxy_client("partner_engineer")
     create_namespace(gc, artifact.namespace, "")
 
@@ -228,7 +218,7 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
         f"v3/plugin/ansible/content/published/collections/index/"
         f"{artifact.namespace}/{artifact.name}/versions/{artifact.version}/"
     )
-    wait_for_url(api_client, dest_url)
+    wait_for_url(gc, dest_url)
 
     # Increase collection version
     new_version = increment_version(artifact.version)
@@ -249,7 +239,7 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
         f"v3/plugin/ansible/content/published/collections/index/"
         f"{artifact2.namespace}/{artifact2.name}/versions/{artifact2.version}/"
     )
-    wait_for_url(api_client, dest_url)
+    wait_for_url(gc, dest_url)
     return artifact, artifact2
 
 
@@ -389,10 +379,9 @@ def sync_instance_crc():
 
 
 @pytest.fixture(scope="function")
-def settings(ansible_config):
-    config = ansible_config("admin")
-    api_client = get_client(config)
-    return api_client("_ui/v1/settings/")
+def settings(galaxy_client):
+    gc = galaxy_client("admin")
+    return gc.get("_ui/v1/settings/")
 
 
 def set_test_data(ansible_config, hub_version):
@@ -465,6 +454,24 @@ def set_test_data(ansible_config, hub_version):
             # role already assigned to group. It's ok.
             pass
     gc.add_user_to_group(username="ee_admin", group_id=ee_group_id)
+    if aap_gateway():
+        users = ["iqe_normal_user", "jdoe", "ee_admin", "org-admin"]
+        for user in users:
+            body = {"username": user, "password": "Th1sP4ssd", "is_superuser": True}
+            if users == "iqe_normal_user":
+                body["is_superuser"] = False
+            gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
+            gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
+            try:
+                gc.post(f"{gc.gw_root_url}api/gateway/v1/users/", body=body)
+            except GalaxyClientError as e:
+                if "already exists" in e.response.text:
+                    # user already exists. It's ok.
+                    pass
+                else:
+                    raise e
+            del gc.headers["Referer"]
+            del gc.headers["X-Csrftoken"]
 
 
 @pytest.fixture(scope="session")
@@ -512,6 +519,15 @@ def gh_user_1_pre(ansible_config):
     gc = get_galaxy_client(ansible_config)
     galaxy_stage_ansible_user_cleanup(gc, "github_user")
     return gc("github_user", github_social_auth=True, ignore_cache=True)
+
+
+@pytest.fixture(scope="function")
+def gw_user_1(ansible_config):
+    """
+    Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
+    """
+    gc = get_galaxy_client(ansible_config)
+    return gc("github_user", github_social_auth=True)
 
 
 @pytest.fixture(scope="function")
@@ -566,3 +582,53 @@ def pytest_collection_modifyitems(items, config):
     for item in items:
         if not any(item.iter_markers()):
             item.add_marker("all")
+
+
+@pytest.fixture(scope="session")
+def skip_if_ldap_disabled(ansible_config):
+    config = ansible_config("admin")
+    client = get_client(config)
+    resp = client("_ui/v1/settings/")
+    try:
+        ldap_enabled = resp["GALAXY_AUTH_LDAP_ENABLED"]
+        if not ldap_enabled:
+            pytest.skip("This test can only be run if LDAP is enabled")
+    except KeyError:
+        pytest.skip("This test can only be run if LDAP is enabled")
+
+
+@pytest.fixture
+def ldap_user(galaxy_client, request):
+    def _(name):
+        ldap_password = "Th1sP4ssd"
+        user = {"username": name, "password": ldap_password}
+
+        def clean_test_user_and_groups():
+            gc = galaxy_client("admin")
+            _user = get_user(gc, name)
+            for group in _user["groups"]:
+                gc.delete_group(group["name"])
+            try:
+                gc.delete_user(name)
+            except GalaxyClientError as e:
+                if e.args[0] == 403:
+                    logger.debug(f"user {name} is superuser and can't be deleted")
+                else:
+                    raise e
+
+        request.addfinalizer(clean_test_user_and_groups)
+        return user
+
+    return _
+
+
+@pytest.fixture(scope="session")
+def skip_if_require_signature_for_approval():
+    if require_signature_for_approval():
+        pytest.skip("This test needs refactoring to work with signatures required on move.")
+
+
+@pytest.fixture(scope="session")
+def skip_if_not_require_signature_for_approval():
+    if not require_signature_for_approval():
+        pytest.skip("This test needs refactoring to work with signatures required on move.")

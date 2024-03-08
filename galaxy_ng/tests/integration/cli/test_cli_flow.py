@@ -2,7 +2,6 @@
 import logging
 import pytest
 
-from ..utils.iqe_utils import require_signature_for_approval
 from ..utils import ansible_galaxy
 from ..utils import get_collection_full_path
 from ..utils import CollectionInspector
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.cli
 @pytest.mark.all
-def test_publish_newer_version_collection(ansible_config, cleanup_collections, uncertifiedv2):
+def test_publish_newer_version_collection(galaxy_client, cleanup_collections, uncertifiedv2):
     """Test whether a newer version of collection can be installed after being published.
 
     If the collection version was not certified the version to be installed
@@ -24,11 +23,12 @@ def test_publish_newer_version_collection(ansible_config, cleanup_collections, u
     # FIXME - ^^^ is that really possible?
     v1 = uncertifiedv2[0]
     v2 = uncertifiedv2[1]
-
+    gc = galaxy_client("basic_user")
     # Install collection without version ...
     install_pid = ansible_galaxy(
         f"collection install {v1.namespace}.{v1.name}",
-        ansible_config=ansible_config("basic_user"),
+        # ansible_config=ansible_config("basic_user"),
+        galaxy_client=gc,
         cleanup=False,
         check_retcode=False
     )
@@ -43,14 +43,12 @@ def test_publish_newer_version_collection(ansible_config, cleanup_collections, u
 
 @pytest.mark.all
 @pytest.mark.cli
-@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
-                                                             "work with signatures required "
-                                                             "on move.")
 def test_publish_newer_certified_collection_version(
-    ansible_config,
+    galaxy_client,
     cleanup_collections,
     certifiedv2,
-    settings
+    settings,
+    skip_if_require_signature_for_approval
 ):
     """Test whether a newer certified collection version can be installed.
 
@@ -59,11 +57,12 @@ def test_publish_newer_certified_collection_version(
 
     v1 = certifiedv2[0]
     v2 = certifiedv2[1]
-
+    gc = galaxy_client("basic_user")
     # Ensure v2 gets installed by default ...
     ansible_galaxy(
         f"collection install {v1.namespace}.{v1.name}",
-        ansible_config=ansible_config("basic_user")
+        # ansible_config=ansible_config("basic_user")
+        galaxy_client=gc
     )
     collection_path = get_collection_full_path(v1.namespace, v1.name)
     ci = CollectionInspector(directory=collection_path)
@@ -94,28 +93,26 @@ def test_publish_same_collection_version(ansible_config, galaxy_client):
 
 @pytest.mark.all
 @pytest.mark.cli
-def test_publish_and_install_by_self(ansible_config, published, cleanup_collections):
+def test_publish_and_install_by_self(galaxy_client, published, cleanup_collections):
     """A publishing user has the permission to install an uncertified version of their
     own collection.
     """
 
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}:{published.version}",
-        ansible_config=ansible_config("basic_user"),
+        galaxy_client=galaxy_client("basic_user"),
     )
 
 
 @pytest.mark.all
 @pytest.mark.cli
 @pytest.mark.deployment_cloud
-@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
-                                                             "work with signatures required "
-                                                             "on move.")
 def test_publish_and_expect_uncertified_hidden(
     ansible_config,
     published,
     cleanup_collections,
-    settings
+    settings,
+    skip_if_require_signature_for_approval
 ):
     """A discovering/consumer user has the permission to download a specific version of an
     uncertified collection, but not an unspecified version range.

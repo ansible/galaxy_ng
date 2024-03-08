@@ -23,7 +23,7 @@ from galaxykit.utils import GalaxyClientError
 
 from galaxy_ng.tests.integration.utils import uuid4
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group, \
-    create_test_user, create_local_image_container, create_namespace, \
+    create_test_user, create_emtpy_local_image_container, create_namespace, \
     upload_test_artifact, collection_exists, user_exists
 
 
@@ -59,7 +59,7 @@ class TestRBAC:
         gc = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             create_test_user(gc)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_update_user(self, galaxy_client):
@@ -96,7 +96,7 @@ class TestRBAC:
         resp["password"] = "changechangechange"
         with pytest.raises(GalaxyClientError) as ctx:
             update_user(gc_user, resp)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_delete_user(self, galaxy_client):
@@ -281,7 +281,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             gc_user.create_group(new_group_name)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_missing_role_permission_add_namespace(self, galaxy_client):
@@ -301,7 +301,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             create_namespace(gc_user, group)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_add_namespace(self, galaxy_client):
@@ -385,7 +385,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             upload_test_artifact(gc_user, ns2_name)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_global_role_upload_to_namespace(self, galaxy_client):
@@ -446,7 +446,7 @@ class TestRBAC:
             gc_user.delete_collection(
                 namespace_name, artifact.name, artifact.version, repository="published"
             )
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
         assert collection_exists(gc, namespace_name, artifact.name, artifact.version)
 
     @pytest.mark.iqe_rbac_test
@@ -475,7 +475,7 @@ class TestRBAC:
                 source="published",
                 destination="rejected",
             )
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_reject_collection(self, galaxy_client):
@@ -551,7 +551,7 @@ class TestRBAC:
             move_or_copy_collection(
                 gc_user, namespace_name, artifact.name, artifact.version
             )  # approve collection
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_missing_role_add_remote_registry(self, galaxy_client):
@@ -568,7 +568,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             create_registry(gc_user, f"remote_registry_{uuid4()}", "url")
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_add_remote_registry(self, galaxy_client):
@@ -664,7 +664,7 @@ class TestRBAC:
         ee_name = f"ee_{uuid4()}"
         with pytest.raises(GalaxyClientError) as ctx:
             create_container(gc_user, ee_name, "upstream_name", remote_registry)
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_role_delete_ee(self, galaxy_client):
@@ -733,7 +733,7 @@ class TestRBAC:
         gc_user = galaxy_client(user)
         with pytest.raises(GalaxyClientError) as ctx:
             community_remote_config(gc_user, "http://google.com/", "username", "password")
-        assert ctx.value.args[0]["status"] == "403"
+        assert ctx.value.args[0] == 403
 
     @pytest.mark.iqe_rbac_test
     def test_user_role_get_remotes(self, galaxy_client):
@@ -756,7 +756,7 @@ class TestRBAC:
         object permissions to push an image, the user can't push an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, _ = add_new_user_to_new_group(gc)
         gc_user = galaxy_client(user)
         try:
@@ -774,7 +774,7 @@ class TestRBAC:
         the user can push an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = ["container.namespace_push_containerdistribution"]
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
@@ -798,7 +798,7 @@ class TestRBAC:
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         gc_user = galaxy_client(user)
         gc_user.push_image(ee_name + ":latest")
 
@@ -814,7 +814,7 @@ class TestRBAC:
         role_user = f"galaxy.rbac_test_role_{uuid4()}"
         gc.create_role(role_user, "any_description", permissions_user)
         gc.add_role_to_group(role_user, group["id"])
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         gc_user = galaxy_client(user)
         try:
             gc_user.push_image(ee_name + ":latest")
@@ -831,7 +831,7 @@ class TestRBAC:
         object permissions to delete an image, the user can't delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.add_containernamespace",
@@ -854,7 +854,7 @@ class TestRBAC:
         global permissions to delete an image, the user can delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.delete_containerrepository",
@@ -875,7 +875,7 @@ class TestRBAC:
         global permissions to delete an image, the user can't delete an image
         """
         gc = galaxy_client("admin")
-        ee_name = create_local_image_container(ansible_config("admin"), gc)
+        ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, group = add_new_user_to_new_group(gc)
         permissions_user = [
             "container.add_containernamespace",

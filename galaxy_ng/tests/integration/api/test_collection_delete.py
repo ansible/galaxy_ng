@@ -1,20 +1,17 @@
 """test_collection_delete.py - Tests related to collection deletion.
 """
 
-import time
 
 import pytest
-from ansible.galaxy.api import GalaxyError
 
-from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
+from galaxykit.collections import delete_collection, get_collection
+from galaxykit.utils import wait_for_task, GalaxyClientError
 
 from ..utils import (
     get_all_collections_by_repo,
     get_all_repository_collection_versions,
-    get_client,
-    wait_for_task,
 )
-from ..utils.iqe_utils import is_stage_environment
+from ..utils.iqe_utils import is_stage_environment, fix_prefix_workaround
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -24,16 +21,9 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.collection_delete
 @pytest.mark.slow_in_cloud
 @pytest.mark.all
-def test_delete_collection(ansible_config, uncertifiedv2):
+def test_delete_collection(galaxy_client, uncertifiedv2):
     """Tests whether a collection can be deleted"""
-    config = ansible_config("partner_engineer")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
-
+    gc = galaxy_client("partner_engineer")
     # Enumerate published collection info ...
     collectionv1 = uncertifiedv2[0]
     cnamespace = collectionv1.namespace
@@ -43,40 +33,14 @@ def test_delete_collection(ansible_config, uncertifiedv2):
         ckeys.append((cv.namespace, cv.name, cv.version))
 
     # Try deleting the whole collection ...
-    resp = api_client(
-        (f'{api_prefix}/v3/plugin/ansible/content'
-         f'/published/collections/index/{cnamespace}/{cname}/'),
-        method='DELETE'
-    )
-
-    # wait for the orphan_cleanup job to finish ...
-    try:
-        wait_for_task(api_client, resp, timeout=10000)
-    except GalaxyError as ge:
-        # FIXME - pulp tasks do not seem to accept token auth
-        if ge.http_code in [403, 404]:
-            time.sleep(SLEEP_SECONDS_ONETIME)
-        else:
-            raise Exception(ge)
-
+    delete_collection(gc, cnamespace, cname)
     # Make sure they're all gone ...
-    after = get_all_collections_by_repo(api_client)
+    after = get_all_collections_by_repo(gc)
     for ckey in ckeys:
         assert ckey not in after['staging']
         assert ckey not in after['published']
-
-    # Does the collection still exist?
-    failed = None
-    try:
-        api_client(f'{api_prefix}/collections/{cnamespace}/{cname}/')
-        failed = False
-    except GalaxyError as ge:
-        if ge.http_code in [403, 404]:
-            failed = True
-        else:
-            raise Exception(ge)
-
-    assert failed
+        with pytest.raises(GalaxyClientError):
+            get_collection(gc, cnamespace, cname, ckey[2])
 
 
 @pytest.mark.galaxyapi_smoke
@@ -84,17 +48,11 @@ def test_delete_collection(ansible_config, uncertifiedv2):
 @pytest.mark.collection_version_delete
 @pytest.mark.slow_in_cloud
 @pytest.mark.all
-def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv2):
+def test_delete_collection_version(galaxy_client, uncertifiedv2):
     """Tests whether a collection version can be deleted"""
-    config = ansible_config("partner_engineer")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
+    gc = galaxy_client("partner_engineer")
 
-    cv_before = get_all_repository_collection_versions(api_client)
+    cv_before = get_all_repository_collection_versions(gc)
 
     # Enumerate published collection info ...
     collectionv1 = uncertifiedv2[0]
@@ -113,52 +71,31 @@ def test_delete_collection_version(ansible_config, upload_artifact, uncertifiedv
                 matches.append(k)
         for rcv in matches:
             rcv_url = cv_before[rcv]['href']
-            resp = api_client(rcv_url, method='DELETE')
-
-            # wait for the orphan_cleanup job to finish ...
-            try:
-                wait_for_task(api_client, resp, timeout=10000)
-            except GalaxyError as ge:
-                # FIXME - pulp tasks do not seem to accept token auth
-                if ge.http_code in [403, 404]:
-                    time.sleep(SLEEP_SECONDS_ONETIME)
-                else:
-                    raise Exception(ge)
+            # workaround
+            rcv_url = fix_prefix_workaround(rcv_url)
+            resp = gc.delete(rcv_url)
+            wait_for_task(gc, resp, timeout=10000)
 
     # make sure the collection-versions are gone ...
-    cv_after = get_all_repository_collection_versions(api_client)
+    cv_after = get_all_repository_collection_versions(gc)
     for ckey in ckeys:
         matches = []
         for k, v in cv_after.items():
             if k[1:] == ckey:
                 matches.append(k)
         assert len(matches) == 0
-
-    # make sure the collection was automatically purged
-    # since all of it's children were deleted ...
-    failed = None
-    try:
-        api_client(f'{api_prefix}/collections/{cnamespace}/{cname}/')
-        failed = False
-    except GalaxyError as ge:
-        if ge.http_code in [403, 404]:
-            failed = True
-        else:
-            raise Exception(ge)
-
-    assert failed
+        # make sure the collection was automatically purged
+        # since all of it's children were deleted ...
+        with pytest.raises(GalaxyClientError):
+            get_collection(gc, cnamespace, cname, ckey[2])
 
 
 @pytest.mark.delete
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.all
-def test_delete_default_repos(ansible_config, upload_artifact, uncertifiedv2):
+def test_delete_default_repos(galaxy_client, uncertifiedv2):
     """Verifies that default repos cannot be deleted"""
-    config = ansible_config("admin")
-    api_client = get_client(
-        config=config,
-    )
-
+    gc = galaxy_client("admin")
     PROTECTED_BASE_PATHS = (
         "rh-certified",
         "validated",
@@ -175,36 +112,39 @@ def test_delete_default_repos(ansible_config, upload_artifact, uncertifiedv2):
 
     # Attempt to modify default distros and delete distros and repos
     for path in PROTECTED_BASE_PATHS:
-        results = api_client(f"pulp/api/v3/distributions/ansible/ansible?base_path={path}")
+        results = gc.get(f"pulp/api/v3/distributions/ansible/ansible/?base_path={path}")
         assert results["count"] == 1
 
         distro = results["results"][0]
         assert distro["repository"] is not None
 
         try:
-            api_client(distro["pulp_href"], method="DELETE")
+            # workaround
+            distro["pulp_href"] = fix_prefix_workaround(distro["pulp_href"])
+            gc.delete(distro["pulp_href"])
             # This API call should fail
             assert False
-        except GalaxyError as ge:
-            assert ge.http_code == 403
+        except GalaxyClientError as ge:
+            assert ge.response.status_code == 403
 
         try:
-            api_client(distro["repository"], method="DELETE")
+            # workaround
+            distro["repository"] = fix_prefix_workaround(distro["repository"])
+            gc.delete(distro["repository"])
             # This API call should fail
             assert False
-        except GalaxyError as ge:
-            assert ge.http_code == 403
+        except GalaxyClientError as ge:
+            assert ge.response.status_code == 403
 
         try:
-            api_client(
+            gc.put(
                 distro["pulp_href"],
-                method="PUT",
-                args={
+                body={
                     **distro,
                     "repository": None
                 }
             )
             # This API call should fail
             assert False
-        except GalaxyError as ge:
-            assert ge.http_code == 403
+        except GalaxyClientError as ge:
+            assert ge.response.status_code == 403

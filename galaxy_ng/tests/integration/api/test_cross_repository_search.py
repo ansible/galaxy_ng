@@ -1,23 +1,16 @@
 import pytest
 
-from ..utils.iqe_utils import require_signature_for_approval
+from galaxykit.repositories import search_collection
 from ..utils import get_client, SocialGithubClient
 
 
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.all
-@pytest.mark.skipif(require_signature_for_approval(), reason="This test needs refactoring to "
-                                                             "work with signatures required "
-                                                             "on move.")
-def test_x_repo_search_acl_basic_user(ansible_config, uncertifiedv2, settings):
+def test_x_repo_search_acl_basic_user(uncertifiedv2, galaxy_client,
+                                      skip_if_require_signature_for_approval):
     """Check if admin and basic user can perform x-repo searches"""
-    config = ansible_config("admin")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
+    # GALAXY_SIGNATURE_UPLOAD_ENABLED="false" in ephemeral env
+    gc_admin = galaxy_client("admin")
 
     # Enumerate published collection info ...
     ckeys = []
@@ -27,21 +20,11 @@ def test_x_repo_search_acl_basic_user(ansible_config, uncertifiedv2, settings):
     # /api/automation-hub/v3/plugin/ansible/search/collection-versions/
     namespace = ckeys[0][0]
     name = ckeys[0][1]
-    search_url = (
-        api_prefix
-        + '/v3/plugin/ansible/search/collection-versions/'
-        + f'?namespace={namespace}&name={name}'
-    )
-    resp = api_client.request(search_url)
+    resp = search_collection(gc_admin, namespace=namespace, name=name)
     assert resp['meta']['count'] == 2
 
-    config = ansible_config("basic_user")
-    basic_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
-    resp = basic_client.request(search_url)
+    gc_basic = galaxy_client("basic_user")
+    resp = search_collection(gc_basic, namespace=namespace, name=name)
     assert resp['meta']['count'] == 2
 
 

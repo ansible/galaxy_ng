@@ -7,6 +7,8 @@ from time import sleep
 
 import pytest
 
+from galaxy_ng.tests.integration.utils.iqe_utils import fix_prefix_workaround
+
 from ansible.errors import AnsibleError
 
 from galaxykit.repositories import search_collection
@@ -220,6 +222,10 @@ def test_namespace_edit_logo(galaxy_client):
     # verify no side effects
     # fields that should NOT change
     for field in ["pulp_href", "name", "company", "email", "description", "resources", "links"]:
+        # FIXME
+        if field == "pulp_href":
+            updated_again_namespace[field] = (
+                fix_prefix_workaround(updated_again_namespace[field]))
         assert my_namespace[field] == updated_again_namespace[field]
 
     # fields that changed

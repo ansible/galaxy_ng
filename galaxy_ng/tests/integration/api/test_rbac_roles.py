@@ -624,7 +624,7 @@ REUSABLE_EXTRA = {}
 
 
 # initialize the extra objects once for all the tests. This saves ~20 seconds per test
-def _get_reusable_extras():
+def _get_reusable_extras(gc):
     global REUSABLE_EXTRA
 
     if len(REUSABLE_EXTRA) == 0:
@@ -635,7 +635,7 @@ def _get_reusable_extras():
             "collection": ReusableCollection(gen_string()),
             "registry": _registry,
             "remote_ee": ReusableRemoteContainer(gen_string(), _registry_pk),
-            "local_ee": ReusableLocalContainer(gen_string()),
+            "local_ee": ReusableLocalContainer(gen_string(), gc),
             "custom_staging_repo": ReusableAnsibleRepository(
                 f"repo-test-{generate_random_string()}", is_staging=True),
             "custom_repo": ReusableAnsibleRepository(
@@ -650,7 +650,7 @@ def _get_reusable_extras():
 
 @pytest.mark.rbac_roles
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
-def test_global_role_actions(role):
+def test_global_role_actions(role, galaxy_client):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
     user = create_user(USERNAME, PASSWORD)
@@ -658,8 +658,8 @@ def test_global_role_actions(role):
     group_id = group['id']
 
     expected_allows = ROLES_TO_TEST[role]
-
-    extra = _get_reusable_extras()
+    gc = galaxy_client("admin", ignore_cache=True)
+    extra = _get_reusable_extras(gc)
 
     failures = []
     # Test global actions
@@ -679,10 +679,11 @@ def test_global_role_actions(role):
 
 @pytest.mark.rbac_roles
 @pytest.mark.parametrize("role", OBJECT_ROLES_TO_TEST)
-def test_object_role_actions(role):
+def test_object_role_actions(role, galaxy_client):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
-    extra = _get_reusable_extras()
+    gc = galaxy_client("admin", ignore_cache=True)
+    extra = _get_reusable_extras(gc)
 
     namespace_href = extra["collection"].get_namespace()["pulp_href"]
     repo_href = extra["custom_repo"].get_repo()["pulp_href"]
@@ -740,8 +741,9 @@ def test_object_role_actions(role):
 
 
 @pytest.mark.rbac_roles
-def test_role_actions_for_admin():
-    extra = _get_reusable_extras()
+def test_role_actions_for_admin(galaxy_client):
+    gc = galaxy_client("admin", ignore_cache=True)
+    extra = _get_reusable_extras(gc)
     failures = []
 
     # Test global actions

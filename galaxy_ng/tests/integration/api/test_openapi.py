@@ -12,7 +12,7 @@ import tempfile
 
 from openapi_spec_validator import validate_spec
 
-from ..utils import get_client, is_docker_installed
+from ..utils import is_docker_installed
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -31,18 +31,11 @@ PULPY_VARIABLES = [
 
 @pytest.mark.openapi
 @pytest.mark.all
-def test_galaxy_openapi_no_pulp_variables(ansible_config):
+def test_galaxy_openapi_no_pulp_variables(galaxy_client):
     """Tests whether openapi.json has valid path names"""
 
-    config = ansible_config("basic_user")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
-
-    galaxy_spec = api_client(f'{api_prefix}/v3/openapi.json')
+    gc = galaxy_client("basic_user")
+    galaxy_spec = gc.get('v3/openapi.json')
     assert 'paths' in galaxy_spec
 
     paths_keys = list(galaxy_spec['paths'].keys())
@@ -56,36 +49,21 @@ def test_galaxy_openapi_no_pulp_variables(ansible_config):
            " and pulpcore version is upgraded"
 )
 @pytest.mark.all
-def test_galaxy_openapi_validation(ansible_config):
+def test_galaxy_openapi_validation(galaxy_client):
     """Tests whether openapi.json passes openapi linter"""
 
-    config = ansible_config("basic_user")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
-
-    galaxy_spec = api_client(f'{api_prefix}/v3/openapi.json')
+    gc = galaxy_client("basic_user")
+    galaxy_spec = gc.get('v3/openapi.json')
     validate_spec(galaxy_spec)
 
 
 @pytest.mark.openapi
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
-def test_pulp_openapi_has_variables(ansible_config):
+def test_pulp_openapi_has_variables(galaxy_client):
     """Tests whether openapi.json has valid path names for pulp"""
-
-    config = ansible_config("basic_user")
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
-
-    pulp_spec = api_client(f'{api_prefix}/pulp/api/v3/docs/api.json')
+    gc = galaxy_client("basic_user")
+    pulp_spec = gc.get('pulp/api/v3/docs/api.json')
     assert 'paths' in pulp_spec
 
     paths_keys = list(pulp_spec['paths'].keys())
@@ -98,23 +76,17 @@ def test_pulp_openapi_has_variables(ansible_config):
 @pytest.mark.openapi_generate_bindings
 @pytest.mark.skipif(not is_docker_installed(), reason="docker is not installed on this machine")
 @pytest.mark.all
-def test_openapi_bindings_generation(ansible_config):
+def test_openapi_bindings_generation(ansible_config, galaxy_client):
     """Verify client bindings can be built from the pulp'ish api spec"""
 
     config = ansible_config("basic_user")
+    gc = galaxy_client("basic_user")
 
     if config["container_engine"] != "docker":
         pytest.skip("Container engine is not Docker")
 
-    api_prefix = config.get("api_prefix").rstrip("/")
-    api_client = get_client(
-        config=config,
-        request_token=True,
-        require_auth=True
-    )
-
-    pulp_spec = api_client(f'{api_prefix}/pulp/api/v3/docs/api.json')
-    status = api_client(f'{api_prefix}/pulp/api/v3/status/')
+    pulp_spec = gc.get('pulp/api/v3/docs/api.json')
+    status = gc.get('pulp/api/v3/status/')
     version = [x['version'] for x in status['versions'] if x['component'] == 'galaxy'][0]
     my_id = subprocess.run(
         'id -u',

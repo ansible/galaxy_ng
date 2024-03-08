@@ -6,6 +6,7 @@ import string
 
 from .collections import delete_all_collections_in_namespace, \
     delete_all_collections_in_namespace_gk
+from .iqe_utils import fix_prefix_workaround
 
 logger = logging.getLogger(__name__)
 
@@ -43,39 +44,37 @@ def generate_namespace(exclude=None):
     return namespace
 
 
-def get_all_namespaces(api_client=None, api_version='v3'):
+def get_all_namespaces(gc=None, api_version='v3'):
     """ Create a list of namespaces visible to the client """
 
-    assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    assert gc is not None, "api_client is a required param"
 
     namespaces = []
-    next_page = f'{api_prefix}/{api_version}/namespaces/'
+    next_page = f'{api_version}/namespaces/'
     while next_page:
-        resp = api_client(next_page)
+        # workaround
+        next_page = fix_prefix_workaround(next_page)
+        resp = gc.get(next_page)
         namespaces.extend(resp['data'])
         next_page = resp.get('links', {}).get('next')
     return namespaces
 
 
-def generate_unused_namespace(api_client=None, api_version='v3'):
+def generate_unused_namespace(gc=None, api_version='v3'):
     """ Make a random namespace string that does not exist """
 
-    assert api_client is not None, "api_client is a required param"
-    existing = get_all_namespaces(api_client=api_client, api_version=api_version)
+    assert gc is not None, "api_client is a required param"
+    existing = get_all_namespaces(gc=gc, api_version=api_version)
     existing = dict((x['name'], x) for x in existing)
     return generate_namespace(exclude=list(existing.keys()))
 
 
-def create_unused_namespace(api_client=None):
+def create_unused_namespace(gc=None):
     """ Make a namespace for testing """
-
-    assert api_client is not None, "api_client is a required param"
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
-
-    ns = generate_unused_namespace(api_client=api_client)
+    assert gc is not None, "api_client is a required param"
+    ns = generate_unused_namespace(gc=gc)
     payload = {'name': ns, 'groups': []}
-    api_client(f'{api_prefix}/v3/namespaces/', args=payload, method='POST')
+    gc.post('v3/namespaces/', body=payload)
     return ns
 
 
