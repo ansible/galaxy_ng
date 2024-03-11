@@ -15,15 +15,14 @@ def create_default_organization(apps, schema_editor):
         modified_on=now,
     )
 
-    schema_editor.execute("""
+    schema_editor.execute(
+        """
         INSERT INTO galaxy_team (name, description, created_on, modified_on, group_id, organization_id)
         SELECT grp.name, '', now(), now(), grp.id, %s
         FROM auth_group AS grp
-    """, (org.id,))
-
-    schema_editor.execute("""
-        UPDATE auth_group SET name = %s || '::' || name
-    """, (settings.DEFAULT_ORGANIZATION_NAME,))
+    """,
+        (org.id,),
+    )
 
 
 def delete_default_organization(apps, schema_editor):
@@ -31,15 +30,9 @@ def delete_default_organization(apps, schema_editor):
     Team = apps.get_model("galaxy", "Team")
     Organization = apps.get_model("galaxy", "Organization")
 
-    schema_editor.execute("""
-        UPDATE auth_group SET name = regexp_replace(name, '^.+?::', '')
-    """)
-
     Team.objects.using(db_alias).delete()
 
-    Organization.objects.using(db_alias).filter(
-        name=settings.DEFAULT_ORGANIZATION_NAME
-    ).delete()
+    Organization.objects.using(db_alias).filter(name=settings.DEFAULT_ORGANIZATION_NAME).delete()
 
 
 class Migration(migrations.Migration):

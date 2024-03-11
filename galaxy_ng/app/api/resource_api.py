@@ -3,7 +3,8 @@ from ansible_base.resource_registry.registry import (
     ServiceAPIConfig,
     SharedResource,
 )
-from ansible_base.resource_registry.shared_types import UserType, TeamType, OrganizationType
+from ansible_base.resource_registry.shared_types import OrganizationType, TeamType, UserType
+
 from galaxy_ng.app import models
 
 
@@ -26,5 +27,5 @@ RESOURCE_LIST = (
         models.Organization,
         shared_resource=SharedResource(serializer=OrganizationType, is_provider=False),
         name_field="name",
-    )
+    ),
 )
