@@ -299,3 +299,7 @@ GALAXY_DYNAMIC_SETTINGS = False
 
 # DJANGO ANSIBLE BASE RESOURCES REGISTRY SETTINGS
 ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = "galaxy_ng.app.api.resource_api"
+ANSIBLE_BASE_ORGANIZATION_MODEL = "galaxy.Organization"
+
+# WARNING: This setting is used in database migrations to create a default organization.
+DEFAULT_ORGANIZATION_NAME = "Default"
