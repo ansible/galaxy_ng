@@ -288,6 +288,11 @@ def avoid_docker_limit_rate():
     return avoid_limit_rate in ('true', 'True', 1, '1', True)
 
 
+def is_upgrade_from_aap24_hub47():
+    upgrade = os.getenv("UPGRADE_FROM_AAP24_HUB47", False)
+    return upgrade in ('true', 'True', 1, '1', True)
+
+
 def is_upgrade_from_aap23_hub46():
     upgrade = os.getenv("UPGRADE_FROM_AAP23_HUB46", False)
     return upgrade in ('true', 'True', 1, '1', True)
