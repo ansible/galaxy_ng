@@ -3,7 +3,7 @@ import pytest
 
 from galaxy_ng.tests.integration.conftest import is_hub_4_7_or_higher
 from galaxy_ng.tests.integration.utils.iqe_utils import is_upgrade_from_aap23_hub46, \
-    galaxy_auto_sign_collections, is_upgrade_from_aap22_hub45
+    galaxy_auto_sign_collections, is_upgrade_from_aap22_hub45, is_ocp_env
 from galaxy_ng.tests.integration.utils.repo_management_utils import search_collection_endpoint
 from galaxykit.collections import collection_info
 from galaxykit.groups import get_group_id
@@ -69,20 +69,24 @@ class TestVerifyData:
             assert actual_col["version"] == expected_col["version"]
             assert actual_col["name"] == expected_name
             assert actual_col["namespace"]["name"] == expected_col["namespace"]
-            if not galaxy_auto_sign_collections():
-                if expected_col["signed"]:
-                    assert len(actual_col["signatures"]) > 0
+            if not is_ocp_env():
+                # FIXME: remove the above conditional when content signing is enabled
+                if not galaxy_auto_sign_collections():
+                    if expected_col["signed"]:
+                        assert len(actual_col["signatures"]) > 0
+                    else:
+                        assert len(actual_col["signatures"]) == 0
                 else:
-                    assert len(actual_col["signatures"]) == 0
-            else:
-                assert len(actual_col["signatures"]) > 0
+                    assert len(actual_col["signatures"]) > 0
             if is_hub_4_7_or_higher(ansible_config):
                 _, actual_col = search_collection_endpoint(gc, name=expected_name)
                 assert actual_col[0]["is_deprecated"] == expected_col["deprecated"]
-                if galaxy_auto_sign_collections():
-                    assert actual_col[0]["is_signed"] is True
-                else:
-                    assert actual_col[0]["is_signed"] == expected_col["signed"]
+                if not is_ocp_env():
+                    # FIXME: remove the above conditional when content signing is enabled
+                    if galaxy_auto_sign_collections():
+                        assert actual_col[0]["is_signed"] is True
+                    else:
+                        assert actual_col[0]["is_signed"] == expected_col["signed"]
                 assert actual_col[0]["cv_name"] == expected_name
                 assert actual_col[0]["cv_version"] == expected_col["version"]
                 assert actual_col[0]["repo_name"] == expected_col["repository"]

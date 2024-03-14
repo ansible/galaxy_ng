@@ -3,7 +3,7 @@ import json
 import pytest
 
 from galaxy_ng.tests.integration.conftest import is_hub_4_7_or_higher
-from galaxy_ng.tests.integration.utils.iqe_utils import sign_collection_on_demand
+from galaxy_ng.tests.integration.utils.iqe_utils import sign_collection_on_demand, is_ocp_env
 from galaxy_ng.tests.integration.utils.repo_management_utils import create_repo_and_dist, \
     upload_new_artifact
 from galaxykit.collections import deprecate_collection, \
@@ -98,11 +98,15 @@ class TestLoadData:
                 move_or_copy_collection(gc, artifact.namespace, artifact.name,
                                         artifact.version, "staging",
                                         destination=collection["repository"])
-                if collection["signed"]:
+                if collection["signed"] and not is_ocp_env():
                     logger.debug("Signing collection")
                     sign_collection_on_demand(
                         gc, "ansible-default", collection["repository"],
                         artifact.namespace, artifact.name, artifact.version)
+                if collection["signed"] and is_ocp_env():
+                    # FIXME
+                    logger.debug("Not Signing collection, collection signing not enabled"
+                                 "on ocp environment")
                 if collection["deprecated"]:
                     logger.debug("Deprecating collection")
                     deprecate_collection(gc, collection["namespace"], artifact.name,
