@@ -23,7 +23,10 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
+
+      - name: install ansible
+        run: pip3 install ansible
 
       - name: Checkout the galaxy collection
         uses: actions/checkout@v4

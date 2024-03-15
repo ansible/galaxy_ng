@@ -1,4 +1,4 @@
-# This file contains dev requirements to be installed on dev host only 
+# This file contains dev requirements to be installed on dev host only
 # to add requirements to dev container see requirements/requirements-dev.txt
 
 coverage
@@ -15,3 +15,5 @@ check-manifest
 
 darker
 isort
+
+pip-tools
