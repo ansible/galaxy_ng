@@ -60,7 +60,7 @@ def test_sync():
     resp = wait_for_task(api_client_remote, resp=resp, raise_on_error=True)
     assert resp["state"] == "completed"
 
-    set_certification(api_client_remote, gc_remote, artifact)
+    set_certification(api_client_remote.config, gc_remote, artifact)
 
     # sync and check
     body = {
