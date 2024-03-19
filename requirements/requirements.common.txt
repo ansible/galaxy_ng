@@ -306,7 +306,7 @@ pathspec==0.12.1
     #   yamllint
 pbr==6.0.0
     # via bindep
-pillow==10.0.1
+pillow==10.2.0
     # via pulp-ansible
 platformdirs==4.2.0
     # via black
