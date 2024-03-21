@@ -627,12 +627,13 @@ class LegacyImportListSerializer(serializers.Serializer):
         return state
 
     def get_summary_fields(self, obj):
+        kwargs = obj.task.enc_kwargs or {}
         return {
-            'request_username': obj.task.kwargs.get('request_username'),
-            'github_user': obj.task.kwargs.get('github_user'),
-            'github_repo': obj.task.kwargs.get('github_repo'),
-            'github_reference': obj.task.kwargs.get('github_reference'),
-            'alternate_role_name': obj.task.kwargs.get('alternate_role_name'),
+            'request_username': kwargs.get('request_username'),
+            'github_user': kwargs.get('github_user'),
+            'github_repo': kwargs.get('github_repo'),
+            'github_reference': kwargs.get('github_reference'),
+            'alternate_role_name': kwargs.get('alternate_role_name'),
         }
 
 
@@ -765,12 +766,13 @@ class LegacyRoleImportDetailSerializer(serializers.Serializer):
             }
             task_messages.append(msg)
 
+        kwargs = task.enc_kwargs or {}
         return {
-            'request_username': task.kwargs.get('request_username'),
-            'github_user': task.kwargs.get('github_user'),
-            'github_repo': task.kwargs.get('github_repo'),
-            'github_reference': task.kwargs.get('github_reference'),
-            'alternate_role_name': task.kwargs.get('alternate_role_name'),
+            'request_username': kwargs.get('request_username'),
+            'github_user': kwargs.get('github_user'),
+            'github_repo': kwargs.get('github_repo'),
+            'github_reference': kwargs.get('github_reference'),
+            'alternate_role_name': kwargs.get('alternate_role_name'),
             'task_messages': task_messages
         }
 
