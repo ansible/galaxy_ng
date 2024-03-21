@@ -9,6 +9,7 @@ import pytest
 from orionutils.generator import build_collection
 from ansible.galaxy.api import GalaxyError
 from jsonschema import validate as validate_json
+from requests import HTTPError
 
 from ..constants import DEFAULT_DISTROS, USERNAME_PUBLISHER
 from ..schemas import (
@@ -163,8 +164,9 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
         assert ds['data'][0]["version"] == c2.version
 
         # test invalid
-        resp = uclient.get(f'{v_path}&version_range=not_a_semver_version')
-        assert resp.status_code == 400
+        with pytest.raises(HTTPError) as ctx:
+            uclient.get(f'{v_path}&version_range=not_a_semver_version')
+        assert ctx.value.strerror.status_code == 400
 
 
 # /api/automation-hub/_ui/v1/collection-versions/{version}/
@@ -325,9 +327,9 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         assert resp.status_code == 204
 
         # make sure it's gone
-        resp = uclient.get(f"_ui/v1/execution-environments/registries/{id}/")
-        assert resp.status_code == 404
-
+        with pytest.raises(HTTPError) as ctx:
+            uclient.get(f"_ui/v1/execution-environments/registries/{id}/")
+        assert ctx.value.strerror.status_code == 404
 
 # /api/automation-hub/_ui/v1/execution-environments/registries/{pulp_id}/
 # ^ tested by previous function
@@ -713,8 +715,9 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
         # FIXME - there is no suitable pulp_id for a remote?
         pulp_ids = [x['pk'] for x in ds['data']]
         for pulp_id in pulp_ids:
-            resp = uclient.get('_ui/v1/remotes/{pulp_id}/')
-            assert resp.status_code == 404
+            with pytest.raises(HTTPError) as ctx:
+                uclient.get('_ui/v1/remotes/{pulp_id}/')
+            assert ctx.value.strerror.status_code == 404
 
 
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/

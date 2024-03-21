@@ -8,6 +8,7 @@ import string
 import uuid
 
 import pytest
+from requests import HTTPError
 
 from galaxykit.groups import create_group_v3, create_group, get_roles, \
     delete_group_v3, get_group_v3
@@ -121,5 +122,6 @@ def test_group_role_listing(ansible_config, test_data):
         del_group_resp = uclient.delete(f'pulp/api/v3/groups/{group_response["id"]}/')
         assert del_group_resp.status_code == 204
 
-        detail_group_response = uclient.get(f'pulp/api/v3/groups/{group_response["id"]}/')
-        assert detail_group_response.status_code == 404
+        with pytest.raises(HTTPError) as ctx:
+            uclient.get(f'pulp/api/v3/groups/{group_response["id"]}/')
+        assert ctx.value.strerror.status_code == 404
