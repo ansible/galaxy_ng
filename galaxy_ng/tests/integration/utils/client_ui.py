@@ -263,4 +263,3 @@ class UIClient:
         resp = self._rs.delete(self.baseurl + relative_url, headers=pheaders)
         raise_for_status(resp)
         return resp
-
