@@ -112,15 +112,15 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
 
 requirements = [
     "galaxy-importer>=0.4.19,<0.5.0",
-    "pulpcore>=3.28.12,<3.29.0",
-    "pulp_ansible>=0.20.0,<0.21.0",
+    "pulpcore>=3.49.0,<3.50.0",
+    "pulp_ansible>=0.21.0,<0.22.0",
+    "pulp-container>=2.19.2,<2.20.0",
     "django-prometheus>=2.0.0",
-    "drf-spectacular",
-    "pulp-container>=2.15.0,<2.16.0",
     "social-auth-core>=4.4.2",
     "social-auth-app-django>=5.2.0",
-    "dynaconf>=3.1.12,<3.1.13",
     "django-auth-ldap==4.0.0",
+    "drf-spectacular",
+    "dynaconf",  # unversioned because pulpcore already sets it
     "insights_analytics_collector>=0.3.0",
     "boto3",
     "distro",
