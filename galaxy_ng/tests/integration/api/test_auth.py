@@ -116,7 +116,6 @@ def test_gateway_token_auth(galaxy_client):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.this
 def test_ui_login_csrftoken(galaxy_client):
     if is_keycloak():
         pytest.skip("This test is not valid for keycloak")
