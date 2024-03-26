@@ -3,17 +3,13 @@
 set -o errexit
 set -o nounset
 
-readonly GUNICORN=${GUNICORN:-'/venv/bin/gunicorn'}
+readonly ENTRYPOINT=${ENTRYPOINT:-'/venv/bin/pulpcore-content'}
 readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 
 readonly BIND_HOST='0.0.0.0'
 readonly BIND_PORT="${GUNICORN_PORT:-24816}"
-readonly WORKER_CLASS='aiohttp.GunicornWebWorker'
-readonly APP_MODULE='pulpcore.content:server'
 
-exec "${GUNICORN}" \
+exec "${ENTRYPOINT}" \
   --bind "${BIND_HOST}:${BIND_PORT}" \
-  --worker-class "${WORKER_CLASS}" \
   --workers "${GUNICORN_WORKERS}" \
-  --access-logfile - \
-  "${APP_MODULE}"
+  --access-logfile -

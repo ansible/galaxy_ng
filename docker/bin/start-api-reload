@@ -5,13 +5,12 @@ set -o errexit
 set -o nounset
 
 
-readonly GUNICORN=${GUNICORN:-'/venv/bin/gunicorn'}
+readonly ENTRYPOINT=${ENTRYPOINT:-'/venv/bin/pulpcore-api'}
 readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
 
 readonly BIND_HOST='0.0.0.0'
 readonly BIND_PORT=8000
-readonly APP_MODULE='pulpcore.app.wsgi:application'
 
 GUNICORN_OPTIONS=(
   --bind "${BIND_HOST}:${BIND_PORT}"
@@ -27,4 +26,4 @@ if [[ -n "${GUNICORN_LOGGER_CLASS}" ]]; then
     GUNICORN_OPTIONS+=(--logger-class "${GUNICORN_LOGGER_CLASS}")
 fi
 
-exec "${GUNICORN}" "${GUNICORN_OPTIONS[@]}" "${APP_MODULE}"
+exec "${ENTRYPOINT}" "${GUNICORN_OPTIONS[@]}"
