@@ -74,10 +74,10 @@ jobs:
         run: make oci/standalone/poll
 
       - name: create the test users+data
-        run: docker exec -it ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
+        run: docker exec -it ci-standalone_pulp_1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
 
       - name: make messages
-        run: docker exec -it ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng/galaxy_ng; django-admin makemessages --all'
+        run: docker exec -it ci-standalone_pulp_1 bash -c 'cd /src/galaxy_ng/galaxy_ng; django-admin makemessages --all'
 
       - name: Test the user playbook
         run: ansible-playbook dev/galaxy_collection_plays/user.yml -vvv
