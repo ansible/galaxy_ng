@@ -6,7 +6,9 @@ profile=$1
 echo "USING PROFILE ${profile}"
 
 # find the oci-env checkout
-OCI_ENV_PATH=$(dirname $(pip show oci-env | egrep ^Location | awk '{print $2}'))
+if [[ -z $OCI_ENV_PATH ]]; then
+    OCI_ENV_PATH=$(dirname $(pip show oci-env | egrep ^Location | awk '{print $2}'))
+fi
 echo "FOUND OCI_ENV_PATH: ${OCI_ENV_PATH}"
 
 
