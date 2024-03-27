@@ -84,3 +84,8 @@ def _create_related_team(sender, instance, created, **kwargs):
         organization=Organization.objects.get_default(),
         group=instance,
     )
+
+
+@receiver(signal=signals.post_delete, sender=Team)
+def _delete_group(sender, instance, **kwargs):
+    instance.group.delete()

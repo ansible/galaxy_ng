@@ -9,19 +9,35 @@ from ansible_base.resource_registry.shared_types import OrganizationType, TeamTy
 from ansible_base.resource_registry.shared_types import UserType, TeamType
 from galaxy_ng.app import models
 
+
 from ansible_base.resource_registry.utils.resource_type_processor import ResourceTypeProcessor
+
+
+class UserMapper:
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 
 class GalaxyUserProcessor(ResourceTypeProcessor):
     def pre_serialize_additional(self):
-        setattr(self.instance, "external_auth_provider", None)
-        setattr(self.instance, "external_auth_uid", None)
-        setattr(self.instance, "organizations", [])
-        setattr(self.instance, "organizations_administered", [])
-        setattr(self.instance, "teams_administered", [])
-        setattr(self.instance, "teams", self.instance.groups)
+        teams = models.Team.objects.filter(group__pk__in=self.instance.groups.all())
 
-        return self.instance
+        user = UserMapper(
+            username=self.instance.username,
+            email=self.instance.email,
+            first_name=self.instance.first_name,
+            last_name=self.instance.last_name,
+            is_superuser=self.instance.is_superuser,
+            external_auth_provider=None,
+            external_auth_uid=None,
+            organizations=[],
+            teams=teams,
+            organizations_administered=[],
+            teams_administered=[],
+        )
+
+        return user
 
 
 class APIConfig(ServiceAPIConfig):
