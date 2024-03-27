@@ -4,8 +4,14 @@ env = action_lib.OCIEnvIntegrationTest(
     envs=[
         {
             "env_file": "keycloak.compose.env",
-            "run_tests": True,
-            "run_playbooks": False,
+            "run_tests": False,
+            "run_playbooks": True,
+            "playbooks": [
+                "user.yml",
+                "content.yml",
+                "repo.yml",
+                "ee.yml",
+            ],
             "db_restore": None,
 
             # the keycloak profile performs some setup after the service

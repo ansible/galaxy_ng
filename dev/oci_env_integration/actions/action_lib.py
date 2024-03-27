@@ -32,6 +32,8 @@ class OCIEnvIntegrationTest:
         env_file (string, required): oci-env env file to use for the tests. These are all loaded
             from dev/oci_env_integration/oci_env_configs
         run_tests (boolean, required): if true, integration tests will be run inside this instance
+        run_playbooks (boolean, required): if true, Galaxy Collection playbook tests will be run
+            inside this instance
         db_restore (string, optional): database backup to restore before running tests These are all
             loaded from dev/oci_env_integration/oci_env_configs. When defining this, omit
             the file extension (ex: fixture, not fixtur.tar.gz)
@@ -64,6 +66,7 @@ class OCIEnvIntegrationTest:
         try:
             self.set_up_env()
             self.run_test()
+            self.run_playbooks()
         except Exception as e:
             print(e)
             self.failed = True
@@ -126,6 +129,41 @@ class OCIEnvIntegrationTest:
                     "exec bash /src/galaxy_ng/profiles/base/run_integration.sh"
                     f" {pytest_flags} {self.flags}"
                 )
+
+    def install_galaxy_collection(self, env):
+        self.exec_cmd(
+            env,
+            "exec git clone https://github.com/ansible/galaxy_collection /src/galaxy_collection_test"  # noqa E501
+        )
+
+        # The ansible.cfg defined in the collection repository might break the test.
+        # We want the same variables for installation and running.
+        self.exec_cmd(env, "exec rm -f /src/galaxy_collection_test/ansible.cfg")
+        self.exec_cmd(env, "exec rm -f /src/galaxy_collection_test/galaxy.yml")
+        self.exec_cmd(env, "exec mv /src/galaxy_collection_test/.github/files/galaxy.yml.j2 /src/galaxy_collection_test/")  # noqa E501
+        self.exec_cmd(
+            env,
+            'exec ansible all -i localhost, -c local -m template -a "src=/src/galaxy_collection_test/galaxy.yml.j2 dest=/src/galaxy_collection_test/galaxy.yml" -e collection_namespace=galaxy -e collection_name=galaxy -e collection_version=1.0.0 -e collection_repo=https://github.com/ansible/automation_hub_collection'  # noqa E501
+        )
+        self.exec_cmd(env, "exec ansible-galaxy collection build --output-path /src/galaxy_collection_test/ /src/galaxy_collection_test/ -vvv")  # noqa E501
+        self.exec_cmd(env, "exec ansible-galaxy collection install /src/galaxy_collection_test/galaxy-galaxy-1.0.0.tar.gz -vvv --force")  # noqa E501
+
+    def run_playbooks(self):
+        for env in self.envs:
+            if self.envs[env]["run_playbooks"]:
+                if wait_time := self.envs[env].get("wait_before_tests", 20):
+                    print(f"waiting {wait_time} seconds")
+                    time.sleep(wait_time)
+
+                self.install_galaxy_collection(env)
+
+                if len(self.envs[env]["playbooks"]) > 0:
+                    for playbook in self.envs[env]["playbooks"]:
+                        print(f"testing the {playbook} playbook")
+                        self.exec_cmd(
+                            env,
+                            f"exec ansible-playbook src/galaxy_ng/dev/galaxy_collection_plays/{playbook} -vvv"  # noqa E501
+                        )
 
     def dump_logs(self):
         if not self.do_dump_logs:

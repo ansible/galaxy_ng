@@ -5,6 +5,7 @@ env = action_lib.OCIEnvIntegrationTest(
         {
             "env_file": "community.compose.env",
             "run_tests": True,
+            "run_playbooks": False,
             "db_restore": None,
         }
     ]
