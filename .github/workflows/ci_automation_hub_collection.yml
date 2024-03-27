@@ -68,7 +68,9 @@ jobs:
           mkdir $OCI_ENV_PATH/db_backup/
 
       - name: run the standalone stack detached
-        run: OCI_COMPOSE_DETACH=1 make oci/standalone
+        run:
+          OCI_COMPOSE_DETACH=1 make oci/standalone
+          make oci/standalone/poll
 
       - name: Test the user playbook
         run: ansible-playbook dev/galaxy_collection_plays/user.yml -vvv
