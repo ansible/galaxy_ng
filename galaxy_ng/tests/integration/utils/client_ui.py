@@ -10,6 +10,13 @@ from urllib.parse import urlparse, unquote
 logger = logging.getLogger(__name__)
 
 
+def raise_for_status(response):
+    if 400 <= response.status_code:
+        http_error_msg = f'{response.status_code} Error: {response.text}'
+        logging.debug(http_error_msg)
+        raise requests.exceptions.HTTPError(http_error_msg, response)
+
+
 class UIClient:
 
     """ An HTTP client to mimic the UI """
@@ -83,6 +90,7 @@ class UIClient:
             headers=pheaders,
             json={'username': self.username, 'password': self.password}
         )
+        raise_for_status(resp)
 
         # assert that the login succeeded
         assert resp.status_code in (200, 204)
@@ -95,6 +103,7 @@ class UIClient:
             self.baseurl.split("/api/")[0] + "/login/",
             allow_redirects=True,
         )
+        raise_for_status(resp)
 
         # assert that the keycloak login page loaded correctly
         assert resp.status_code == 200
@@ -112,6 +121,7 @@ class UIClient:
             },
             allow_redirects=True,
         )
+        raise_for_status(resp)
 
         # assert that the login succeeded
         assert resp.status_code in (200, 204)
@@ -129,6 +139,7 @@ class UIClient:
             'Referer': self.login_url,
         }
         res = self._rs.post(self.logout_url, json={}, headers=pheaders)
+        raise_for_status(res)
 
         if expected_code is not None:
             if res.status_code != expected_code:
@@ -158,6 +169,7 @@ class UIClient:
 
         # get the response
         resp = self._rs.get(this_url, headers=pheaders)
+        raise_for_status(resp)
         return resp
 
     def get_paginated(self, relative_url: str = None, absolute_url: str = None) -> list:
@@ -206,12 +218,14 @@ class UIClient:
 
         # get the response
         resp = self._rs.post(self.baseurl + relative_url, json=payload, headers=pheaders)
+        raise_for_status(resp)
         return resp
 
     def put(self, relative_url: str, payload: dict) -> requests.models.Response:
         pheaders = {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Referer': self.login_url
         }
 
         # send cookies whenever possible ...
@@ -226,6 +240,7 @@ class UIClient:
 
         # get the response
         resp = self._rs.put(self.baseurl + relative_url, json=payload, headers=pheaders)
+        raise_for_status(resp)
         return resp
 
     def delete(self, relative_url: str) -> requests.models.Response:
@@ -246,4 +261,5 @@ class UIClient:
 
         # get the response
         resp = self._rs.delete(self.baseurl + relative_url, headers=pheaders)
+        raise_for_status(resp)
         return resp
