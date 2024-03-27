@@ -40,6 +40,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
+    data.update(configure_dab_resource_registry(settings))
 
     # This should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
@@ -52,6 +53,17 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_dynamic_settings(settings))
 
     validate(settings)
+    return data
+
+
+def configure_dab_resource_registry(settings: Dynaconf) -> Dict[str, Any]:
+    flags = settings.get("GALAXY_FEATURE_FLAGS")
+
+    data = {}
+    if flags["dab_resource_registry"]:
+        data["INSTALLED_APPS"] = ['ansible_base.resource_registry', 'dynaconf_merge']
+        data["ANSIBLE_BASE_RESOURCE_CONFIG_MODULE"] = "galaxy_ng.app.api.resource_api"
+
     return data
 
 
