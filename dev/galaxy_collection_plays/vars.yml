@@ -1,5 +1,5 @@
-ah_host: http://localhost:5001
+ah_host: http://localhost:55001
 ah_username: iqe_admin
 ah_password: redhat
-ah_path_prefix: automation-hub
+ah_path_prefix: galaxy
 ah_artifact_runner_absolute_path: /home/runner/work/galaxy_ng/galaxy_ng/galaxy_collection/galaxy-galaxy-1.0.0.tar.gz

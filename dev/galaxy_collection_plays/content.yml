@@ -70,6 +70,8 @@
         ah_host: "{{ ah_host }}"
         ah_token: "{{ ah_token }}"
         ah_path_prefix: "{{ ah_path_prefix }}"
+      async: 600
+      poll: 10
 
     - name: Delete the galaxy collection
       ah_collection:

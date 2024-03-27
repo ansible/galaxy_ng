@@ -11,14 +11,6 @@ if [[ -z $OCI_ENV_PATH ]]; then
 fi
 echo "FOUND OCI_ENV_PATH: ${OCI_ENV_PATH}"
 
-
-if [[ -n $OCI_COMPOSE_DETACH ]]; then
-  DETACH_ARGS="--detach"
-else
-  DETACH_ARGS=""
-fi
-
 export COMPOSE_INTERACTIVE_NO_CLI=1
 env_path=dev/oci_env_integration/oci_env_configs/$profile.compose.env
-oci-env -e ${env_path} compose build --progress=plain
-oci-env -e ${env_path} compose up ${DETACH_ARGS}
+oci-env -e ${env_path} poll

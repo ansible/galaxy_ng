@@ -286,6 +286,10 @@ docs/serve:
 oci/standalone:
 	dev/oci_start standalone
 
+.PHONY: oci/standalone/poll
+oci/standalone/poll:
+	dev/oci_poll standalone
+
 .PHONY: oci/insights
 oci/insights:
 	dev/oci_start insights
