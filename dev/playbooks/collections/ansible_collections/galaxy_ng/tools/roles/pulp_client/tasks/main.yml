@@ -19,8 +19,11 @@
        curl -L -k -u admin:password -o status.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/status/';
        curl -L -k -u admin:password -o api.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/docs/api.json?bindings&plugin={{ item }}';
        if [[ "{{ item }}" == "galaxy_ng" ]]; then
+        cat status.json | head
         export REPORTED_VERSION=$(jq '.versions[] | select (.component == "galaxy").version' status.json | tr -d '"')
+        echo "REPORTED_VERSION: ${REPORTED_VERSION}"
         export VERSION="$(echo "$REPORTED_VERSION" | python -c 'from packaging.version import Version; print(Version(input()))')"
+        echo "FINAL_VERSION: ${FINAL_VERSION}"
        else
         export VERSION=""
        fi;
@@ -33,8 +36,7 @@
       - pulpcore
 
 - name: install the generated client inside the pulp container
-  #shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install -e .
-  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install .
+  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install -e .
   loop:
       - galaxy_ng
       - pulp_ansible
