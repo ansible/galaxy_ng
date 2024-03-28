@@ -19,14 +19,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         username = options['username']
         try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            try:
-                user = User.objects.create(username=username)
-                user.save()
-            except Exception as e:
-                raise CommandError("Could not create user: {}".format(e))
+            _user, is_created = User.objects.get_or_create(username=username)
+        except Exception as e:
+            raise CommandError("Could not create user: {}".format(e))
 
+        if is_created:
             self.stdout.write("Created user '{}'".format(username))
-
-        self.stdout.write("User '{}' already exists".format(username))
+        else:
+            self.stdout.write("User '{}' already exists".format(username))
