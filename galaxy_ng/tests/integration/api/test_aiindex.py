@@ -149,8 +149,6 @@ def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespa
     8. Assert permission error raises
     """
 
-    #import epdb; epdb.st()
-
     if not flags.get("ai_deny_index"):
         pytest.skip("ai_deny_index flag is not enabled")
 
