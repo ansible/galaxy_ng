@@ -15,8 +15,16 @@
     command: >
        cd ../../../pulp-openapi-generator;
        export USE_LOCAL_API_JSON=true;
+       export PULP_URL='https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/';
+       curl -L -k -u admin:password -o status.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/status/';
        curl -L -k -u admin:password -o api.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/docs/api.json?bindings&plugin={{ item }}';
-       bash -x generate.sh {{ item }} python
+       if [[ "{{ item }}" == "galaxy_ng" ]]; then
+        export REPORTED_VERSION=$(jq '.versions[] | select (.component == "galaxy").version' status.json | tr -d '"')
+        export VERSION="$(echo "$REPORTED_VERSION" | python -c 'from packaging.version import Version; print(Version(input()))')"
+       else
+        export VERSION=""
+       fi;
+       bash -x generate.sh {{ item }} python $VERSION
   connection: local
   loop:
       - galaxy_ng
@@ -25,7 +33,8 @@
       - pulpcore
 
 - name: install the generated client inside the pulp container
-  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install -e .
+  #shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install -e .
+  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install .
   loop:
       - galaxy_ng
       - pulp_ansible
