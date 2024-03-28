@@ -1,4 +1,5 @@
 import pytest
+import requests
 
 from ..utils import (
     UIClient,
@@ -147,6 +148,9 @@ def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespa
     7. Repeat step 2 with a basic user
     8. Assert permission error raises
     """
+
+    #import epdb; epdb.st()
+
     if not flags.get("ai_deny_index"):
         pytest.skip("ai_deny_index flag is not enabled")
 
@@ -194,12 +198,11 @@ def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespa
     # 7. Repeat step 2 with a basic user
     with UIClient(config=ansible_config("basic_user")) as uclient:
         # 8. Assert permission error raises
-        assert (
+        with pytest.raises(requests.exceptions.HTTPError, match=r'.*403.*permission_denied.*') as excinfo:
             uclient.post(
                 "_ui/v1/ai_deny_index/namespace/",
                 payload={"reference": namespace}
-            ).status_code == 403
-        )
+            )
 
     with UIClient(config=ansible_config("partner_engineer")) as uclient:
         # 9. add to the AI Index, a namespace owned by PE
