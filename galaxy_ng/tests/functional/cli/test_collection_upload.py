@@ -2,6 +2,7 @@
 
 import subprocess
 import tempfile
+import os
 
 from pulp_smash.pulp3.bindings import delete_orphans
 from pulp_smash.utils import http_get
@@ -37,7 +38,7 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
             cmd = "ansible-galaxy collection publish -vvv -c {}".format(collection_path)
 
-            subprocess.check_output(cmd.split())
+            subprocess.check_output(cmd.split(), cwd=os.environ['HOME'])
 
         # Verify that the collection was published
         collections = self.collections_api.list("published")
@@ -80,7 +81,7 @@ class UploadCollectionTestCase(TestCaseUsingBindings):
 
             cmd = "ansible-galaxy collection publish -vvv -c {}".format(collection_path)
 
-            subprocess.check_output(cmd.split())
+            subprocess.check_output(cmd.split(), cwd=os.environ['HOME'])
 
             # Try to copy access log from container if tests are running outside of a container
             # else copy direct because tests are running in the container
