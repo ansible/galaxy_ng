@@ -7,10 +7,6 @@ from . import views
 from galaxy_ng.app.api import urls as api_urls
 from galaxy_ng.ui import urls as ui_urls
 
-from ansible_base.resource_registry.urls import (
-    urlpatterns as resource_api_urls,
-)
-
 from drf_spectacular.views import (
     SpectacularJSONAPIView,
     SpectacularYAMLAPIView,
@@ -49,21 +45,24 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("healthz", views.health_view),
-    path(f"{API_PATH_PREFIX}", include(resource_api_urls))
 ]
+
+if settings["GALAXY_FEATURE_FLAGS"]["dab_resource_registry"]:
+    from ansible_base.resource_registry.urls import (
+        urlpatterns as resource_api_urls,
+    )
+    urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(resource_api_urls)))
 
 if settings.get("API_ROOT") != "/pulp/":
     urlpatterns.append(
-        path(
-            "pulp/api/<path:api_path>",
-            views.PulpAPIRedirectView.as_view(),
-            name="pulp_redirect")
+        path("pulp/api/<path:api_path>", views.PulpAPIRedirectView.as_view(), name="pulp_redirect")
     )
 
 if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
     urlpatterns.append(url("", include("social_django.urls", namespace="social")))
-    urlpatterns.append(path("login/",
-                       lambda request: redirect("/login/keycloak/", permanent=False)))
+    urlpatterns.append(
+        path("login/", lambda request: redirect("/login/keycloak/", permanent=False))
+    )
 
 if settings.get("SOCIAL_AUTH_GITHUB_KEY"):
-    urlpatterns.append(url('', include('social_django.urls', namespace='github')))
+    urlpatterns.append(url("", include("social_django.urls", namespace="github")))
