@@ -18,7 +18,7 @@
        export PULP_URL='https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/';
        curl -L -k -u admin:password -o status.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/status/';
        curl -L -k -u admin:password -o api.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/docs/api.json?bindings&plugin={{ item }}';
-       if [[ "{{ item }}" == "galaxy_ng" ]]; then
+       if [ "{{ item }}" == "galaxy_ng" ]; then
         cat status.json | head
         export REPORTED_VERSION=$(jq '.versions[] | select (.component == "galaxy").version' status.json | tr -d '"')
         echo "REPORTED_VERSION: ${REPORTED_VERSION}"
