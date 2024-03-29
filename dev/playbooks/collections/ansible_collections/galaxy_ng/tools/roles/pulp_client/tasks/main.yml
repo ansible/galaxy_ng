@@ -53,9 +53,12 @@
       - pulpcore
 
 - name: install the generated client inside the pulp container
-  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install -e .
+  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install .
   loop:
       - galaxy_ng
       - pulp_ansible
       - pulp_container
       - pulpcore
+
+- name: show what we eneded up with
+  shell: pip3 list | grep -e galaxy -e pulp -e ansible
