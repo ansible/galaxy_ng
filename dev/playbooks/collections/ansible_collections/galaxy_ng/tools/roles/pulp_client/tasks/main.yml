@@ -10,13 +10,41 @@
   connection: local
   register: pulp_ip
 
+#- name: run the generate script
+#  galaxy_ng.tools.local_run:
+#    command: >
+#       cd ../../../pulp-openapi-generator;
+#       export USE_LOCAL_API_JSON=true;
+#       export PULP_URL='https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/';
+#       curl -L -k -u admin:password -o status.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/status/';
+#       curl -L -k -u admin:password -o api.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/docs/api.json?bindings&plugin={{ item }}';
+#       if [ "{{ item }}" == "galaxy_ng" ]; then
+#        cat status.json | head
+#        export REPORTED_VERSION=$(jq '.versions[] | select (.component == "galaxy").version' status.json | tr -d '"')
+#        echo "REPORTED_VERSION: ${REPORTED_VERSION}"
+#        export VERSION="$(echo "$REPORTED_VERSION" | python -c 'from packaging.version import Version; print(Version(input()))')"
+#        echo "FINAL_VERSION: ${FINAL_VERSION}"
+#       else
+#        export VERSION=""
+#       fi;
+#       bash -x generate.sh {{ item }} python $VERSION
+#  connection: local
+#  loop:
+#      - galaxy_ng
+#      - pulp_ansible
+#      - pulp_container
+#      - pulpcore
+
+- name: copy the generate script to a tmp location
+  copy:
+    src: generate.sh
+    dest: /tmp/generate.sh
+    mode: '0777'
+  connection: local
+
 - name: run the generate script
   galaxy_ng.tools.local_run:
-    command: >
-       cd ../../../pulp-openapi-generator;
-       export USE_LOCAL_API_JSON=true;
-       curl -L -k -u admin:password -o api.json 'https://{{ pulp_ip.stdout }}/api/galaxy/pulp/api/v3/docs/api.json?bindings&plugin={{ item }}';
-       bash -x generate.sh {{ item }} python
+    command: /tmp/generate.sh {{ pulp_ip.stdout }} {{ item }} 
   connection: local
   loop:
       - galaxy_ng
@@ -25,9 +53,12 @@
       - pulpcore
 
 - name: install the generated client inside the pulp container
-  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install -e .
+  shell: cd /src/pulp-openapi-generator/{{ item }}-client/; pip3 install .
   loop:
       - galaxy_ng
       - pulp_ansible
       - pulp_container
       - pulpcore
+
+- name: show what we eneded up with
+  shell: pip3 list | grep -e galaxy -e pulp -e ansible
