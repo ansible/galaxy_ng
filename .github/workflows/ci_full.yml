@@ -89,13 +89,13 @@ jobs:
         run: pip3 install ansible
 
       - name: run the build container playbook
-        run: cd dev/playbooks; ansible-playbook -i 'localhost,' --forks=1 -v build_container.yaml
+        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v build_container.yaml
 
       - name: run the start container playbook
-        run: cd dev/playbooks; ansible-playbook -i 'localhost,' --forks=1 -v start_container.yaml
+        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v start_container.yaml
 
       - name: run the unit test playbook
-        run: cd dev/playbooks; ansible-playbook -i 'localhost,' --forks=1 -v run_unit_tests.yaml
+        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_unit_tests.yaml
 
       - name: run the functional test playbook
-        run: cd dev/playbooks; ansible-playbook -i 'localhost,' --forks=1 -v run_functional_tests.yaml
+        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_functional_tests.yaml
