@@ -4,6 +4,7 @@
 import json
 import pytest
 import subprocess
+import time
 
 from ansible.errors import AnsibleError
 
@@ -276,9 +277,13 @@ def test_social_auth_delete_collection(ansible_config):
             token=client.get_hub_token(),
         )
 
-        exists_resp = client.get(
-            f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
-        )
+        for x in range(0, 20):
+            exists_resp = client.get(
+                f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
+            )
+            if exists_resp.status_code == 200:
+                break
+            time.sleep(5)
         assert exists_resp.status_code == 200
 
         del_resp = client.delete(
@@ -329,9 +334,13 @@ def test_social_auth_deprecate_collection(ansible_config):
             token=client.get_hub_token(),
         )
 
-        exists_resp = client.get(
-            f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
-        )
+        for x in range(0, 20):
+            exists_resp = client.get(
+                f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
+            )
+            if exists_resp.status_code == 200:
+                break
+            time.sleep(5)
         assert exists_resp.status_code == 200
 
         dep_resp = client.patch(
