@@ -12,7 +12,7 @@ fi
 cd pulp-openapi-generator;
 
 export USE_LOCAL_API_JSON=true;
-export PULP_URL='https://${PULP_IP}/api/galaxy/pulp/api/v3/';
+export PULP_URL="https://${PULP_IP}/api/galaxy/pulp/api/v3/";
 
 curl -L -k -u admin:password -o status.json "https://${PULP_IP}/api/galaxy/pulp/api/v3/status/";
 curl -L -k -u admin:password -o api.json "https://${PULP_IP}/api/galaxy/pulp/api/v3/docs/api.json?bindings&plugin=${PLUGIN}";
