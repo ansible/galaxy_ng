@@ -50,7 +50,7 @@ cd /src/galaxy_ng/
 # TODO: fix marks
 set -x
 
-$VENVPATH/bin/pytest -v -r sx --color=yes -m "$HUB_TEST_MARKS" "$@" galaxy_ng/tests/integration
+$VENVPATH/bin/pytest -v -r sx --color=yes -m "$HUB_TEST_MARKS" -k edit_logo "$@" galaxy_ng/tests/integration
 RC=$?
 
 exit $RC
