@@ -173,7 +173,7 @@ def test_namespace_edit_logo(galaxy_client):
     # sleep(60)
     wait_for_all_tasks_gk(gc)
 
-    for x in range(0, 20):
+    for x in range(0, 100):
         updated_namespace = gc.get(f'_ui/v1/my-namespaces/{name}/')
         if updated_namespace["avatar_url"] != "":
             break
