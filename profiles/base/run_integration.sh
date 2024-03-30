@@ -46,6 +46,9 @@ cd /src/galaxy_ng/
 # echo $MARKS
 
 
+cat /proc/cpuinfo | grep processor
+free -m
+
 
 # TODO: fix marks
 set -x
