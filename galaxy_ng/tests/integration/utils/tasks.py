@@ -39,6 +39,22 @@ def wait_for_all_tasks_gk(gc, timeout=300):
     while not ready:
         if wait_until < time.time():
             raise TaskWaitingTimeout()
+
+        next_url = "pulp/api/v3/tasks/"
+        while next_url:
+            resp = gc.get(next_url)
+
+            for res in resp['results']:
+                if res['state'] != 'completed':
+                    print(f"{res['pulp_href']} {res['state']}")
+
+            if not resp['next']:
+                break
+
+            next_url = resp['next']
+            ix = next_url.index("pulp/api/v3/tasks/")
+            next_url = next_url[ix:]
+
         running_count = gc.get("pulp/api/v3/tasks/?state=running")["count"]
         waiting_count = gc.get("pulp/api/v3/tasks/?state=waiting")["count"]
         ready = running_count == 0 and waiting_count == 0

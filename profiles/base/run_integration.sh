@@ -53,7 +53,8 @@ free -m
 # TODO: fix marks
 set -x
 
-$VENVPATH/bin/pytest -v -r sx --color=yes -m "$HUB_TEST_MARKS" -k edit_logo "$@" galaxy_ng/tests/integration
+export PYTHONUNBUFFERED=1
+$VENVPATH/bin/pytest -v -r sx --capture=no --color=yes -m "$HUB_TEST_MARKS" -k edit_logo "$@" galaxy_ng/tests/integration
 RC=$?
 
 exit $RC
