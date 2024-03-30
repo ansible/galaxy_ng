@@ -170,7 +170,7 @@ def test_namespace_edit_logo(galaxy_client):
         "avatar_url": f"{artifacts_baseurl}/images/pexels-daniel-nettesheim-1162361.jpg"
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
-    # sleep(60)
+    sleep(60)
     wait_for_all_tasks_gk(gc)
     updated_namespace = gc.get(f'_ui/v1/my-namespaces/{name}/')
     assert updated_namespace["avatar_url"] != ""
