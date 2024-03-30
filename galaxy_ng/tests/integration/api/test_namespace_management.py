@@ -171,13 +171,13 @@ def test_namespace_edit_logo(galaxy_client):
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
     # sleep(60)
-    # wait_for_all_tasks_gk(gc)
+    wait_for_all_tasks_gk(gc)
 
     for x in range(0, 20):
         updated_namespace = gc.get(f'_ui/v1/my-namespaces/{name}/')
         if updated_namespace["avatar_url"] != "":
             break
-        time.sleep(5)
+        sleep(5)
 
     assert updated_namespace["avatar_url"] != ""
 
@@ -187,7 +187,14 @@ def test_namespace_edit_logo(galaxy_client):
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
     wait_for_all_tasks_gk(gc)
-    updated_again_namespace = gc.get(f"_ui/v1/my-namespaces/{name}/")
+
+    for x in range(0, 20):
+        updated_again_namespace = gc.get(f"_ui/v1/my-namespaces/{name}/")
+        if updated_namespace["avatar_url"] != updated_again_namespace["avatar_url"] and \
+                updated_namespace["avatar_sha256"] is not None:
+            break
+        sleep(5)
+
     assert updated_namespace["avatar_url"] != updated_again_namespace["avatar_url"]
     assert updated_namespace["avatar_sha256"] is not None
 
