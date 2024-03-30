@@ -32,6 +32,13 @@ services:
     image: "localhost/oci_env/galaxy_ng:base"
     entrypoint: "/bin/true"
 
+  artifacts:
+    image: nginx:latest
+    hostname: artifacts
+    domainname: test777.com 
+    volumes:
+        - '{SRC_DIR}/galaxy_ng/dev/test_artifacts:/usr/share/nginx/html' 
+
   pulp:
     image: "localhost/oci_env/galaxy_ng:base"
     # this is required in order to run podman inside the container

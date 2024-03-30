@@ -6,6 +6,7 @@ See: https://issues.redhat.com/browse/AAH-1303
 from time import sleep
 
 import pytest
+import socket
 
 from galaxykit.namespaces import get_namespace, get_namespace_collections
 from galaxykit.repositories import search_collection
@@ -147,6 +148,12 @@ def test_namespace_edit_with_user(galaxy_client, user_property):
 @pytest.mark.all
 @pytest.mark.min_hub_version("4.9dev")
 def test_namespace_edit_logo(galaxy_client):
+
+    # short hostnames don't pass serializer validation
+    # dns resoultion with aiohttp is wonky so we need to use the IP
+    artifacts_ip = socket.gethostbyname("artifacts")
+    artifacts_baseurl = f'http://{artifacts_ip}'
+
     gc = galaxy_client("admin")
     new_namespace = f"ns_test_{generate_random_string()}"
     payload = {
@@ -160,19 +167,17 @@ def test_namespace_edit_logo(galaxy_client):
 
     payload = {
         "name": name,
-        # "avatar_url": "http://placekitten.com/400/400"
-        "avatar_url": "https://avatars.githubusercontent.com/u/1869705?v=4"
+        "avatar_url": f"{artifacts_baseurl}/images/pexels-daniel-nettesheim-1162361.jpg"
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
-    sleep(60)
+    # sleep(60)
     wait_for_all_tasks_gk(gc)
     updated_namespace = gc.get(f'_ui/v1/my-namespaces/{name}/')
     assert updated_namespace["avatar_url"] != ""
 
     payload = {
         "name": name,
-        # "avatar_url": "http://placekitten.com/123/456"
-        "avatar_url": "https://avatars.githubusercontent.com/u/481677?v=4"
+        "avatar_url": f"{artifacts_baseurl}/images/pexels-viktoria-goda-1107495.jpg"
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
     wait_for_all_tasks_gk(gc)
