@@ -10,7 +10,7 @@ from pulpcore.plugin.files import PulpTemporaryUploadedFile
 
 from pulpcore.plugin.download import HttpDownloader
 
-from pulp_ansible.app.models import AnsibleNamespaceMetadata, AnsibleNamespace
+from pulp_ansible.app.models import AnsibleNamespaceMetadata, AnsibleNamespace, AnsibleRepository
 from pulpcore.plugin.tasking import add_and_remove, dispatch
 from pulpcore.plugin.models import RepositoryContent, Artifact, ContentArtifact
 
@@ -22,7 +22,9 @@ MAX_AVATAR_SIZE = 3 * 1024 * 1024  # 3MB
 
 def dispatch_create_pulp_namespace_metadata(galaxy_ns, download_logo):
 
-    dispatch(
+    #raise Exception('FUCK YOU')
+
+    return dispatch(
         _create_pulp_namespace,
         kwargs={
             "galaxy_ns_pk": galaxy_ns.pk,
@@ -84,12 +86,19 @@ def _download_avatar(url, namespace_name):
 
 
 def _create_pulp_namespace(galaxy_ns_pk, download_logo):
+
+    print('*' * 100)
+    print(f'CREATE PULP NAMESPACE START')
+    print('*' * 100)
+    #raise Exception('FUCK YOU')
+
     # get metadata values
     galaxy_ns = Namespace.objects.get(pk=galaxy_ns_pk)
     links = {x.name: x.url for x in galaxy_ns.links.all()}
 
     avatar_artifact = None
 
+    print(f'call _download_avatar')
     if download_logo:
         avatar_artifact = _download_avatar(galaxy_ns._avatar_url, galaxy_ns.name)
 
@@ -108,20 +117,25 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
     }
 
     namespace_data["name"] = galaxy_ns.name
+    print('get or create ansiblenamespace')
     namespace, created = AnsibleNamespace.objects.get_or_create(name=namespace_data["name"])
     metadata = AnsibleNamespaceMetadata(namespace=namespace, **namespace_data)
+    print('calculate sha256')
     metadata.calculate_metadata_sha256()
+    print('filter for matching metadata objects')
     content = AnsibleNamespaceMetadata.objects.filter(
         metadata_sha256=metadata.metadata_sha256
     ).first()
 
     # If the metadata already exists, don't do anything
     if content:
+        print(f'skip altering namespace')
         content.touch()
         galaxy_ns.last_created_pulp_metadata = content
         galaxy_ns.save()
 
     else:
+        print('create contentartifact')
         with transaction.atomic():
             metadata.save()
             ContentArtifact.objects.create(
@@ -149,8 +163,12 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
         )
 
         repos = [x.repository for x in repo_content_qs]
+        if not repos:
+            repos.append(AnsibleRepository.objects.filter(name='published').first())
 
-        return dispatch(
+        '''
+        print(f'DISPATCH _add_namespace_metadata_to_repos ...')
+        dtask = dispatch(
             _add_namespace_metadata_to_repos,
             kwargs={
                 "namespace_pk": metadata.pk,
@@ -158,12 +176,23 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
             },
             exclusive_resources=repos
         )
+        print(f'DISPATCHED _add_namespace_metadata_to_repos as {dtask.pulp_id}')
+        return dtask
+        '''
+
+        _add_namespace_metadata_to_repos(metadata.pk, [x.pk for x in repos])
 
 
 def _add_namespace_metadata_to_repos(namespace_pk, repo_list):
+
+    print('*' * 100)
+    print(f'ADD NAMESPACE METADATA TO REPOS START {repo_list}')
+    print('*' * 100)
+
     for pk in repo_list:
-        add_and_remove(
+        dtask = add_and_remove(
             pk,
             add_content_units=[namespace_pk, ],
             remove_content_units=[]
         )
+        print(f'CALLED ADD_AND_REMOVE ON repo:{pk} ns:{namespace_pk} AS {dtask}')

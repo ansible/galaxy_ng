@@ -141,7 +141,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
 
         instance.links.set(new_links)
 
-        dispatch_create_pulp_namespace_metadata(instance, True)
+        taskid = dispatch_create_pulp_namespace_metadata(instance, True)
+        print(f'DISPATCHED [create] create pulp namespace metadata as {taskid.pulp_id}')
         return instance
 
     @transaction.atomic
@@ -156,7 +157,8 @@ class NamespaceSerializer(serializers.ModelSerializer):
 
         instance = super().update(instance, validated_data)
         instance.save()
-        dispatch_create_pulp_namespace_metadata(instance, download_logo)
+        taskid = dispatch_create_pulp_namespace_metadata(instance, download_logo)
+        print(f'DISPATCHED [update] create pulp namespace metadata as {taskid.pulp_id}')
         return instance
 
 
