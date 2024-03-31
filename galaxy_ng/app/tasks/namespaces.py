@@ -166,6 +166,7 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
         if not repos:
             repos.append(AnsibleRepository.objects.filter(name='published').first())
 
+        '''
         print(f'DISPATCH _add_namespace_metadata_to_repos ...')
         dtask = dispatch(
             _add_namespace_metadata_to_repos,
@@ -177,6 +178,9 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
         )
         print(f'DISPATCHED _add_namespace_metadata_to_repos as {dtask.pulp_id}')
         return dtask
+        '''
+
+        _add_namespace_metadata_to_repos(metadata.pk, [x.pk for x in repos])
 
 
 def _add_namespace_metadata_to_repos(namespace_pk, repo_list):
