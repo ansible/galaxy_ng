@@ -160,7 +160,20 @@ def test_namespace_edit_logo(galaxy_client):
         'name': new_namespace,
     }
     my_namespace = gc.post("_ui/v1/my-namespaces/", body=payload)
+
+    wait_for_all_tasks_gk(gc)
+    # print('sleep 60')
+    sleep(60)
+    wait_for_all_tasks_gk(gc)
+
+    for x in range(0, 100):
+        my_namespace = gc.get(f'_ui/v1/my-namespaces/{new_namespace}/')
+        if my_namespace["avatar_url"] == "":
+            break
+        sleep(5)
+
     assert my_namespace["avatar_url"] == ''
+    # import epdb; epdb.st()
 
     namespaces = gc.get('_ui/v1/my-namespaces/')
     name = my_namespace["name"]
@@ -170,7 +183,7 @@ def test_namespace_edit_logo(galaxy_client):
         "avatar_url": f"{artifacts_baseurl}/images/pexels-daniel-nettesheim-1162361.jpg"
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
-    #sleep(60)
+    # sleep(60)
     wait_for_all_tasks_gk(gc)
     sleep(60)
     wait_for_all_tasks_gk(gc)
