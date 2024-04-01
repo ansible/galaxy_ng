@@ -154,6 +154,8 @@ def test_namespace_edit_logo(galaxy_client):
     }
     my_namespace = gc.post("_ui/v1/my-namespaces/", body=payload)
     assert my_namespace["avatar_url"] == ''
+    sleep(60)
+    wait_for_all_tasks_gk(gc)
 
     namespaces = gc.get('_ui/v1/my-namespaces/')
     name = my_namespace["name"]
