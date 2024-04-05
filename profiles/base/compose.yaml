@@ -20,7 +20,7 @@ services:
     build:
       args:
         PYTHON_VERSION: 3.11
-        # BASE_IMAGE: ghcr.io/pulp/pulp-ci-centos:latest
+        BASE_IMAGE: ghcr.io/pulp/pulp-ci-centos9:3.50.0-python39
 
   # pre installs all of the python dependencies, including for integration tests
   _galaxy_base:
