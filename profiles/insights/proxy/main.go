@@ -244,6 +244,14 @@ func isEOFerror(err error) bool {
 }
 
 func retryHTTPRequest(client *http.Client, req *http.Request, maxRetries int) (*http.Response, error) {
+
+    for name, values := range req.Header {
+        // Each header can have multiple values, so we iterate through them.
+        for _, value := range values {
+            fmt.Printf("REQUEST_HEADER: %s: %s\n", name, value)
+        }
+    }
+
 	for retry := 0; retry < maxRetries; retry++ {
 		resp, err := client.Do(req)
 		if err != nil {
@@ -307,6 +315,10 @@ func main() {
 	// taken from https://dev.to/b0r/implement-reverse-proxy-in-gogolang-2cp4
 	reverseProxy := http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 
+        fmt.Printf("***********************************************************\n")
+        fmt.Printf("STARTING NEW PROXY REQUEST ...\n")
+        fmt.Printf("***********************************************************\n")
+
 		// Handle the keycloak auth url
 		if req.URL.Path == "/auth/realms/redhat-external/protocol/openid-connect/token" {
 			getAccessToken(rw, req)
@@ -351,7 +363,7 @@ func main() {
 		headers := upstreamServerResponse.Header
 		for key, values := range headers {
 			for _, value := range values {
-				fmt.Printf("HEADER %s: %s\n", key, value)
+				fmt.Printf("RESPONSE HEADER %s: %s\n", key, value)
 			}
 		}
 		fmt.Printf("STATUS CODE: %d\n", upstreamServerResponse.StatusCode)
