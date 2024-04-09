@@ -50,7 +50,7 @@ Authentication class and deployment mode by default is already set tho the follo
 You don't need to change it, **just confirm this is the setting you have in place.**
 
 ```bash
-PULP_GALAXY_AUTHENTICATION_CLASSES=['rest_framework.authentication.SessionAuthentication','rest_framework.authentication.TokenAuthentication','rest_framework.authentication.BasicAuthentication']
+PULP_GALAXY_AUTHENTICATION_CLASSES=['galaxy_ng.app.auth.session.SessionAuthentication','rest_framework.authentication.TokenAuthentication','rest_framework.authentication.BasicAuthentication']
 PULP_GALAXY_DEPLOYMENT_MODE=standalone
 ```
 

@@ -165,7 +165,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
 
         # Replace AUTH CLASSES
         data["GALAXY_AUTHENTICATION_CLASSES"] = [
-            "rest_framework.authentication.SessionAuthentication",
+            "galaxy_ng.app.auth.session.SessionAuthentication",
             "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
             "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
         ]
@@ -232,19 +232,19 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
         data["GALAXY_AUTHENTICATION_BACKENDS"] = backends
 
         data['DEFAULT_AUTHENTICATION_CLASSES'] = [
-            "rest_framework.authentication.SessionAuthentication",
+            "galaxy_ng.app.auth.session.SessionAuthentication",
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework.authentication.BasicAuthentication",
         ]
 
         data['GALAXY_AUTHENTICATION_CLASSES'] = [
-            "rest_framework.authentication.SessionAuthentication",
+            "galaxy_ng.app.auth.session.SessionAuthentication",
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework.authentication.BasicAuthentication",
         ]
 
         data['REST_FRAMEWORK_AUTHENTICATION_CLASSES'] = [
-            "rest_framework.authentication.SessionAuthentication",
+            "galaxy_ng.app.auth.session.SessionAuthentication",
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework.authentication.BasicAuthentication",
         ]

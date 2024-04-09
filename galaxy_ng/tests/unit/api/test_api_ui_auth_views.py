@@ -58,7 +58,7 @@ class TestLoginViewsStandalone(APITestCase):
         self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
         response: Response = self.client.get(self.me_url)
-        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, http_code.HTTP_401_UNAUTHORIZED)
 
     def test_login_wrong_password(self):
         response: Response = self.client.post(
@@ -112,7 +112,7 @@ class TestLoginViewsStandalone(APITestCase):
         self.assertEqual(response.status_code, http_code.HTTP_204_NO_CONTENT)
 
         response: Response = self.client.get(self.me_url)
-        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, http_code.HTTP_401_UNAUTHORIZED)
 
     def _test_login(self, username, password, client=None):
         client = client or self.client
