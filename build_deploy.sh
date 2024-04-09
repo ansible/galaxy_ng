@@ -4,8 +4,18 @@ set -o errexit
 set -o nounset
 set -o verbose
 
+# Create tmp dir to store data in during job run (do NOT store in $WORKSPACE)
+readonly TMP_JOB_DIR=$(mktemp -d -p "$HOME" -t "jenkins-${JOB_NAME}-${BUILD_NUMBER}-XXXXXX")
+echo "job tmp dir location: $TMP_JOB_DIR"
 
-readonly DOCKER_CONF="${PWD}/.docker"
+function job_cleanup() {
+    echo "cleaning up job tmp dir: $TMP_JOB_DIR"
+    rm -fr $TMP_JOB_DIR
+}
+
+trap job_cleanup EXIT ERR SIGINT SIGTERM
+
+readonly DOCKER_CONF="${TMP_JOB_DIR}/.docker"
 readonly IMAGE='quay.io/cloudservices/automation-hub-galaxy-ng'
 readonly IMAGE_TAG="$(git rev-parse --short=7 HEAD)"
 
