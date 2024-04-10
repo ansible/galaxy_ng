@@ -3,8 +3,10 @@ RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
 
 COPY . /opt/galaxy_ng/
 WORKDIR /opt/galaxy_ng/
-RUN ls -al /opt/galaxy_ng
-RUN cp /opt/galaxy_ng/profiles/base/nginx.conf.j2 /nginx/.
+
+# override the image's nginx templating scripts ...
+RUN cp -p /opt/galaxy_ng/profiles/base/nginx/template_nginx.py /nginx/.
+RUN cp /opt/galaxy_ng/profiles/base/nginx/nginx.conf.j2 /nginx/.
 
 # preinstall galaxy_ng in thebase image
 RUN python3.11 -m pip install .
