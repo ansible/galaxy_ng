@@ -6,6 +6,10 @@ WORKDIR /opt/galaxy_ng/
 
 RUN switch_python 3.11
 
+# override the image's nginx templating scripts ...
+RUN cp -p /opt/galaxy_ng/profiles/base/nginx/template_nginx.py /nginx/.
+RUN cp /opt/galaxy_ng/profiles/base/nginx/nginx.conf.j2 /nginx/.
+
 # preinstall galaxy_ng in thebase image
 RUN python3.11 -m pip install .
 
