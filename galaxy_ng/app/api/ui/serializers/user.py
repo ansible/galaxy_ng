@@ -44,7 +44,9 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def get_auth_provider(self, user):
-        if hasattr(user, 'social_auth') and user.social_auth.all():
+        if hasattr(user, 'social_auth') \
+                and 'social_django' in settings.INSTALLED_APPS \
+                and user.social_auth.all():
             providers = []
             for social in user.social_auth.all():
                 providers.append(social.provider)
