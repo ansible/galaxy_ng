@@ -402,11 +402,6 @@ def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
             "meta/runtime.yml:1: yaml[new-line-at-end-of-file]:"
             + " No new line character at the end of file"
         ),
-        (
-            "tests/sanity/ignore-2.10.txt:1: sanity[cannot-ignore]:"
-            + " Ignore file contains validate-modules:use-run-command-not-popen at line 1,"
-            + " which is not a permitted ignore."
-        )
     ]
 
     artifact = bc(
