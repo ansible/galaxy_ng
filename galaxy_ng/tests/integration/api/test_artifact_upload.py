@@ -382,7 +382,6 @@ def test_ansible_lint_exception(galaxy_client, hub_version):
 @pytest.mark.stage_health
 @pytest.mark.importer
 @pytest.mark.all
-@pytest.mark.skip(reason="needs refactoring for new lint version")
 def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
     """
     https://issues.redhat.com/browse/AAH-2609
