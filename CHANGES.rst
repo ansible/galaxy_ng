@@ -13,6 +13,19 @@ Changelog
 
 .. towncrier release notes start
 
+4.9.2 (2024-04-18)
+==================
+
+Bugfixes
+--------
+
+- Support SVG avatar image on namespaces
+  `AAH-2836 <https://issues.redhat.com/browse/AAH-2836>`_
+- Fixed issue where group members were also showing up as users in the Namespace owners list.
+  `AAH-3121 <https://issues.redhat.com/browse/AAH-3121>`_
+
+
+----
 4.9.1 (2024-01-30)
 ==================
 
