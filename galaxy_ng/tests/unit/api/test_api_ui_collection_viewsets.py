@@ -247,7 +247,7 @@ class TestUiCollectionRemoteViewSet(BaseTestCase):
         super().setUp()
         self.remote_data = {
             "name": "rh-certified",
-            "url": "https://console.redhat.com/api/automation-hub/",
+            "url": "https://console.redhat.com/api/automation-hub/content/published/",
         }
         self.remote = CollectionRemote.objects.get(name=self.remote_data["name"])
         self.repository = AnsibleRepository.objects.get(name=self.remote_data["name"])
