@@ -29,6 +29,11 @@ http {
          server 127.0.0.1:24817;
     }
 
+    map $http_x_forwarded_proto $x_forwarded_proto_header {
+        default $http_x_forwarded_proto;
+        ""      $scheme;  # If the header is empty or not present, use the current scheme
+    }
+
     server {
         # Gunicorn docs suggest the use of the "deferred" directive on Linux.
         {% if https | default(false) -%}
