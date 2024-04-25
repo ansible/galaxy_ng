@@ -80,7 +80,7 @@ class ViewOnlyTestCase(BaseTestCase):
 
     def test_unauthenticated_access_to_collections(self):
         response = self.client.get(self.collections_detail_url)
-        self.assertEqual(response.data['errors'][0]['status'], '403')
+        self.assertEqual(response.data['errors'][0]['status'], '401')
         with self.settings(GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=True):
             response = self.client.get(self.collections_detail_url)
             self.assertEqual(response.data['name'], self.collection.name)
@@ -92,7 +92,7 @@ class ViewOnlyTestCase(BaseTestCase):
 
     def test_unauthenticated_access_to_namespace(self):
         response = self.client.get(self.ns_detail_url)
-        self.assertEqual(response.data['errors'][0]['status'], '403')
+        self.assertEqual(response.data['errors'][0]['status'], '401')
         with self.settings(GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=True):
             response = self.client.get(self.ns_detail_url)
             self.assertEqual(response.data['name'], self.namespace.name)

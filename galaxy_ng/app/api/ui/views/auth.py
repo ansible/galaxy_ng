@@ -6,15 +6,14 @@ from django.contrib import auth as django_auth
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.cache import patch_cache_control
-from rest_framework.authentication import SessionAuthentication
 
 from rest_framework.response import Response
 from rest_framework import status as http_code
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
-
 from galaxy_ng.app.api.ui.serializers import LoginSerializer
+from galaxy_ng.app.auth.session import SessionAuthentication
 
 from requests import post as requests_post
 

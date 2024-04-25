@@ -113,7 +113,7 @@ Assuming that on `galaxy_ng.app.settings` there is the default
 
 ```py title="Galaxy internal default config"
 GALAXY_AUTHENTICATION_CLASSES = [
-    "rest_framework.authentication.SessionAuthentication",
+    "galaxy_ng.app.auth.session.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
     "rest_framework.authentication.BasicAuthentication",
 ]

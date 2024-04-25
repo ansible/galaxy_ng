@@ -71,14 +71,14 @@ class TestTokenViewStandalone(APITestCase):
         new_client = APIClient()
 
         response: Response = new_client.get(self.me_url)
-        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, http_code.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
             response.data,
             {
                 "errors": [
                     {
                         "code": "not_authenticated",
-                        "status": "403",
+                        "status": "401",
                         "title": "Authentication credentials were not provided.",
                     }
                 ]
@@ -90,7 +90,7 @@ class TestTokenViewStandalone(APITestCase):
         new_client.credentials(HTTP_AUTHORIZATION="Token c451947e96372bc215c1a9e9e9d01eca910cd144")
 
         response: Response = new_client.get(self.me_url)
-        self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, http_code.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
             response.data,
             {
@@ -98,7 +98,7 @@ class TestTokenViewStandalone(APITestCase):
                     {
                         "detail": "Invalid token.",
                         "code": "authentication_failed",
-                        "status": "403",
+                        "status": "401",
                         "title": "Incorrect authentication credentials.",
                     }
                 ]

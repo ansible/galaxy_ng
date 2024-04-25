@@ -29,7 +29,7 @@ def test_token_auth(profile, galaxy_client):
 
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/collections/")
-    assert ctx.value.response.status_code == 403
+    assert ctx.value.response.status_code == 401
     gc = galaxy_client(profile, ignore_cache=True)
     resp = gc.get("")
     assert "available_versions" in resp
@@ -46,7 +46,7 @@ def test_auth_admin(galaxy_client):
     remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/collections/")
-    assert ctx.value.response.status_code == 403
+    assert ctx.value.response.status_code == 401
 
 
 @pytest.mark.deployment_standalone
@@ -60,7 +60,7 @@ def test_auth_exception(galaxy_client):
     remove_from_cache("basic_user")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/collections/")
-    assert ctx.value.response.status_code == 403
+    assert ctx.value.response.status_code == 401
 
 
 @pytest.mark.deployment_standalone
