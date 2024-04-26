@@ -590,8 +590,8 @@ def configure_resource_provider(settings: Dynaconf) -> Dict[str, Any]:
     HUB_API_ROOT = settings.get("HUB_API_ROOT")
     if HUB_API_ROOT and (ANSIBLE_BASE_JWT_KEY in HUB_API_ROOT):
         data = {
-            "ANSIBLE_API_HOSTNAME": settings.get("ANSIBLE_API_HOSTNAME"),
-            "ANSIBLE_CONTENT_HOSTNAME": settings.get("ANSIBLE_CONTENT_HOSTNAME"),
+            "ANSIBLE_API_HOSTNAME": settings.get("ANSIBLE_API_HOSTNAME", ""),
+            "ANSIBLE_CONTENT_HOSTNAME": settings.get("ANSIBLE_CONTENT_HOSTNAME", ""),
         }
         gw_url = urlparse(ANSIBLE_BASE_JWT_KEY)
         if gw_url.scheme and gw_url.hostname:
