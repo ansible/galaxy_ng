@@ -587,10 +587,11 @@ def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
 def configure_resource_provider(settings: Dynaconf) -> Dict[str, Any]:
     # The following variable is either a URL or a key file path.
     ANSIBLE_BASE_JWT_KEY = settings.get("ANSIBLE_BASE_JWT_KEY")
-    if ANSIBLE_BASE_JWT_KEY:
+    HUB_API_ROOT = settings.get("HUB_API_ROOT")
+    if HUB_API_ROOT and (ANSIBLE_BASE_JWT_KEY in HUB_API_ROOT):
         data = {
-            "ANSIBLE_API_HOSTNAME": settings.get("ANSIBLE_API_HOSTNAME"),
-            "ANSIBLE_CONTENT_HOSTNAME": settings.get("ANSIBLE_CONTENT_HOSTNAME"),
+            "ANSIBLE_API_HOSTNAME": settings.get("ANSIBLE_API_HOSTNAME", ""),
+            "ANSIBLE_CONTENT_HOSTNAME": settings.get("ANSIBLE_CONTENT_HOSTNAME", ""),
         }
         gw_url = urlparse(ANSIBLE_BASE_JWT_KEY)
         if gw_url.scheme and gw_url.hostname:
