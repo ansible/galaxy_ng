@@ -188,6 +188,8 @@ def test_namespace_edit_logo(galaxy_client):
     }
     my_namespace = gc.post("_ui/v1/my-namespaces/", body=payload)
     assert my_namespace["avatar_url"] == ''
+    sleep(60)
+    wait_for_all_tasks_gk(gc)
 
     namespaces = gc.get('_ui/v1/my-namespaces/')
     name = my_namespace["name"]
@@ -198,6 +200,7 @@ def test_namespace_edit_logo(galaxy_client):
         "avatar_url": "https://avatars.githubusercontent.com/u/1869705?v=4"
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
+    sleep(60)
     wait_for_all_tasks_gk(gc)
     updated_namespace = gc.get(f'_ui/v1/my-namespaces/{name}/')
     assert updated_namespace["avatar_url"] != ""
