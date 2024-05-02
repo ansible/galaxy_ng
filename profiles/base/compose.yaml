@@ -43,6 +43,7 @@ services:
       #- LOCK_REQUIREMENTS=0
     volumes:
       - "pulp_certs:/etc/pulp/certs/"
+      - "{SRC_DIR}/galaxy_ng/profiles/base/nginx:/nginx"
     depends_on:
       - _galaxy_base
 
