@@ -104,7 +104,7 @@ django==4.2.11
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@devel
+django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base@devel
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -331,7 +331,7 @@ pulp-container==2.19.2
     # via galaxy-ng (setup.py)
 pulp-glue==0.23.2
     # via pulpcore
-pulpcore==3.49.1
+pulpcore==3.49.7
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -441,7 +441,9 @@ sqlparse==0.4.4
 subprocess-tee==0.4.1
     # via ansible-lint
 tablib[html,ods,xls,xlsx,yaml]==3.5.0
-    # via django-import-export
+    # via
+    #   django-import-export
+    #   pulpcore
 types-setuptools==69.2.0.20240317
     # via requirements-parser
 typing-extensions==4.10.0
