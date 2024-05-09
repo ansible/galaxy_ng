@@ -585,10 +585,11 @@ def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
 
 
 def configure_resource_provider(settings: Dynaconf) -> Dict[str, Any]:
+    flags = settings.get("GALAXY_FEATURE_FLAGS")
+
     # The following variable is either a URL or a key file path.
     ANSIBLE_BASE_JWT_KEY = settings.get("ANSIBLE_BASE_JWT_KEY")
-    HUB_API_ROOT = settings.get("HUB_API_ROOT")
-    if HUB_API_ROOT and (ANSIBLE_BASE_JWT_KEY in HUB_API_ROOT):
+    if flags["dab_resource_registry"]:
         data = {
             "ANSIBLE_API_HOSTNAME": settings.get("ANSIBLE_API_HOSTNAME", ""),
             "ANSIBLE_CONTENT_HOSTNAME": settings.get("ANSIBLE_CONTENT_HOSTNAME", ""),
