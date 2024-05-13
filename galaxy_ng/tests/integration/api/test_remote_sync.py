@@ -8,7 +8,6 @@ from ..schemas import (
     schema_objectlist,
     schema_task,
 )
-from ..utils.iqe_utils import fix_prefix_workaround
 
 REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n    version: 1.0.11"
 
@@ -76,7 +75,6 @@ def test_api_ui_v1_remote_sync(galaxy_client):
 def test_sync_community_with_no_requirements_file(galaxy_client):
     gc = galaxy_client("admin")
     remote = gc.get("pulp/api/v3/remotes/ansible/collection/?name=community")["results"][0]
-    remote["pulp_href"] = fix_prefix_workaround(remote["pulp_href"])
     resp = gc.patch(
         remote["pulp_href"],
         body={
@@ -87,7 +85,6 @@ def test_sync_community_with_no_requirements_file(galaxy_client):
     wait_for_task(gc, resp)
 
     repo = gc.get("pulp/api/v3/repositories/ansible/ansible/?name=community")["results"][0]
-    repo["pulp_href"] = fix_prefix_workaround(repo["pulp_href"])
     try:
         gc.post(f'{repo["pulp_href"]}sync/', body={})
         # This API call should fail
