@@ -13,7 +13,7 @@ from galaxykit.utils import wait_for_task, wait_for_url
 from ..conftest import is_hub_4_5
 from ..constants import USERNAME_PUBLISHER
 from ..utils import set_certification
-from ..utils.iqe_utils import is_ocp_env, fix_prefix_workaround
+from ..utils.iqe_utils import is_ocp_env
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -36,7 +36,6 @@ def test_move_collection_version(ansible_config, galaxy_client):
         for repo in collections.keys():
             next_page = f'_ui/v1/collection-versions/?repository={repo}'
             while next_page:
-                next_page = fix_prefix_workaround(next_page)
                 resp = gc_admin.get(next_page)
                 for _collection in resp['data']:
                     key = (_collection['namespace'], _collection['name'], _collection['version'])
@@ -119,7 +118,6 @@ def test_copy_collection_version(ansible_config, galaxy_client):
         for repo in collections.keys():
             next_page = f'_ui/v1/collection-versions/?repository={repo}'
             while next_page:
-                next_page = fix_prefix_workaround(next_page)
                 resp = gc_admin.get(next_page)
                 for _collection in resp['data']:
                     key = (_collection['namespace'], _collection['name'], _collection['version'])

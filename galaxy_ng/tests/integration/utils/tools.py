@@ -6,8 +6,6 @@ from random import randint
 import random
 import string
 
-from galaxy_ng.tests.integration.utils.iqe_utils import fix_prefix_workaround
-
 
 def is_docker_installed():
     return shutil.which("docker") is not None
@@ -28,10 +26,8 @@ def iterate_all(api_client, url, gc=None):
     key = "data"
     while next is not None:
         if gc:
-            next = fix_prefix_workaround(next)
             r = gc.get(next)
         else:
-            next = fix_prefix_workaround(next)
             r = api_client(next)
         # pulp uses "results"
         if "data" not in r:

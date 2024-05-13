@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env, fix_prefix_workaround
+from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env
 from galaxy_ng.tests.integration.utils.rbac_utils import add_new_user_to_new_group
 
 from galaxy_ng.tests.integration.utils.repo_management_utils import (
@@ -577,11 +577,6 @@ class TestXRepoSearch:
         collection_resp_2 = gc.get(
             f"pulp/api/v3/content/ansible/collection_versions/?name={artifact_2.name}"
         )
-
-        collection_resp_1["results"][0]["pulp_href"] = fix_prefix_workaround(
-            collection_resp_1["results"][0]["pulp_href"])
-        collection_resp_2["results"][0]["pulp_href"] = fix_prefix_workaround(
-            collection_resp_2["results"][0]["pulp_href"])
         content_units = [
             collection_resp_1["results"][0]["pulp_href"],
             collection_resp_2["results"][0]["pulp_href"],

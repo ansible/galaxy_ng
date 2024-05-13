@@ -2,7 +2,6 @@ import pytest
 
 from galaxykit.utils import wait_for_task
 from ..utils import uuid4
-from ..utils.iqe_utils import fix_prefix_workaround
 
 
 @pytest.fixture
@@ -36,8 +35,6 @@ def distro_factory(galaxy_client):
             }
         )
         task_results = wait_for_task(gc, distro_task)
-        task_results['created_resources'][0] = (
-            fix_prefix_workaround(task_results['created_resources'][0]))
         return gc.get(task_results['created_resources'][0])
 
     return _distro_factory
