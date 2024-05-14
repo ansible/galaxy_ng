@@ -7,6 +7,7 @@ from ansible.galaxy.api import GalaxyError
 @pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.all
 @pytest.mark.deployment_community
+@pytest.mark.skip_in_gw
 def test_dab_service_index_is_not_available(ansible_config):
 
     config = ansible_config("admin")
