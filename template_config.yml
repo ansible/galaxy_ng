@@ -45,9 +45,7 @@ plugin_name: galaxy_ng
 plugins:
 - app_label: galaxy
   name: galaxy_ng
-post_job_template:
-  name: update_manifest
-  path: galaxy_ng/.github/post-job-template.yml.j2
+post_job_template: {}
 pre_job_template:
   name: check_commit
   path: galaxy_ng/.github/pre-job-template.yml.j2
