@@ -14,12 +14,14 @@ REGEX_403 = r"HTTP Code: 403"
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.9dev")
+@pytest.mark.skip_in_gw
 def test_api_ui_v1_namespace_owners_users_and_group_separation(ansible_config):
 
     # https://issues.redhat.com/browse/AAH-3121
     # Namespace owners should have a list of users that are directly added as owners.
     # That list of users should -not- include users of groups that have been
     # added as owners.
+    # TODO: make this test compatible with GW
 
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
