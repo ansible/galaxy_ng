@@ -108,7 +108,7 @@ def test_publish_and_install_by_self(galaxy_client, published, cleanup_collectio
 @pytest.mark.cli
 @pytest.mark.deployment_cloud
 def test_publish_and_expect_uncertified_hidden(
-    ansible_config,
+    galaxy_client,
     published,
     cleanup_collections,
     settings,
@@ -120,9 +120,9 @@ def test_publish_and_expect_uncertified_hidden(
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}",
         check_retcode=0,
-        ansible_config=ansible_config("basic_user"),
+        galaxy_client=galaxy_client("basic_user"),
     )
     ansible_galaxy(
         f"collection install {published.namespace}.{published.name}:1.0.0",
-        ansible_config=ansible_config("basic_user"),
+        galaxy_client=galaxy_client("basic_user"),
     )

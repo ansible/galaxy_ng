@@ -76,7 +76,7 @@ def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
     remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
-    assert ctx.value.response.status_code == 403
+    assert ctx.value.response.status_code == 401
     remove_from_cache("admin")
 
 
@@ -94,7 +94,7 @@ def test_gateway_auth_admin_gateway_csrftoken(galaxy_client):
     remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
-    assert ctx.value.response.status_code == 403
+    assert ctx.value.response.status_code == 401
     remove_from_cache("admin")
 
 
@@ -112,7 +112,7 @@ def test_gateway_token_auth(galaxy_client):
 
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
-    assert ctx.value.response.status_code == 403
+    assert ctx.value.response.status_code == 401
 
 
 @pytest.mark.deployment_standalone
