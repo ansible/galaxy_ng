@@ -62,9 +62,8 @@ def test_role_import_exceptions(ansible_config):
         check_retcode=False
     )
 
-    # core always exits zero...
-    # https://github.com/ansible/ansible/issues/82175
-    assert import_pid.returncode == 0
+    # should have exited non-zero ...
+    assert import_pid.returncode == 1
 
     stdout = import_pid.stdout.decode('utf-8')
     assert 'Traceback (most recent call last):' in stdout
