@@ -309,3 +309,7 @@ oci/community:
 .PHONY: oci/dab
 oci/dab:
 	dev/oci_start dab
+
+.PHONY: oci/dab_jwt
+oci/dab_jwt:
+	dev/oci_start dab_jwt
