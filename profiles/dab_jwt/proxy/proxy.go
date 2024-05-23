@@ -9,11 +9,11 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-    "log"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-    "os"
+	"os"
 	"strings"
 	"time"
 
@@ -64,12 +64,11 @@ func init() {
 }
 
 func getEnv(key string, fallback string) string {
-    if key, ok := os.LookupEnv(key); ok {
-        return key
-    }
-    return fallback
+	if key, ok := os.LookupEnv(key); ok {
+		return key
+	}
+	return fallback
 }
-
 
 // BasicAuth middleware
 func BasicAuth(next http.Handler, users map[string]User) http.Handler {
@@ -81,45 +80,45 @@ func BasicAuth(next http.Handler, users map[string]User) http.Handler {
 			return
 		}
 
-        lowerAuth := strings.ToLower(auth)
-        if strings.HasPrefix(lowerAuth, "token") { 
-            // token auth should go straight to the downstream ...
-        } else {
-            const basicPrefix = "Basic "
-            if !strings.HasPrefix(auth, basicPrefix) {
-                http.Error(w, "Unauthorized2", http.StatusUnauthorized)
-                return
-            }
+		lowerAuth := strings.ToLower(auth)
+		if strings.HasPrefix(lowerAuth, "token") {
+			// token auth should go straight to the downstream ...
+		} else {
+			const basicPrefix = "Basic "
+			if !strings.HasPrefix(auth, basicPrefix) {
+				http.Error(w, "Unauthorized2", http.StatusUnauthorized)
+				return
+			}
 
-            decoded, err := base64.StdEncoding.DecodeString(auth[len(basicPrefix):])
-            if err != nil {
-                http.Error(w, "Unauthorized3", http.StatusUnauthorized)
-                return
-            }
+			decoded, err := base64.StdEncoding.DecodeString(auth[len(basicPrefix):])
+			if err != nil {
+				http.Error(w, "Unauthorized3", http.StatusUnauthorized)
+				return
+			}
 
-            credentials := strings.SplitN(string(decoded), ":", 2)
-            fmt.Printf("credentials %s\n", credentials)
-            if len(credentials) != 2 {
-                http.Error(w, "Unauthorized4", http.StatusUnauthorized)
-                return
-            }
+			credentials := strings.SplitN(string(decoded), ":", 2)
+			fmt.Printf("credentials %s\n", credentials)
+			if len(credentials) != 2 {
+				http.Error(w, "Unauthorized4", http.StatusUnauthorized)
+				return
+			}
 
-            user, exists := users[credentials[0]]
-            if !exists || user.Password != credentials[1] {
-                http.Error(w, "Unauthorized5", http.StatusUnauthorized)
-                return
-            }
+			user, exists := users[credentials[0]]
+			if !exists || user.Password != credentials[1] {
+				http.Error(w, "Unauthorized5", http.StatusUnauthorized)
+				return
+			}
 
-            // Generate the JWT token
-            token, err := generateJWT(user)
-            if err != nil {
-                http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-                return
-            }
+			// Generate the JWT token
+			token, err := generateJWT(user)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
 
-            // Set the X-DAB-JW-TOKEN header
-            r.Header.Set("X-DAB-JW-TOKEN", token)
-        }
+			// Set the X-DAB-JW-TOKEN header
+			r.Header.Set("X-DAB-JW-TOKEN", token)
+		}
 
 		next.ServeHTTP(w, r)
 	})
@@ -169,9 +168,9 @@ func jwtKeyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    proxyPort := getEnv("PROXY_PORT", "8080")
+	proxyPort := getEnv("PROXY_PORT", "8080")
 	//target := "http://localhost:5001" // Downstream host is localhost on port 5001
-    target := getEnv("UPSTREAM_URL", "http://localhost:5001")
+	target := getEnv("UPSTREAM_URL", "http://localhost:5001")
 	url, err := url.Parse(target)
 	if err != nil {
 		panic(err)
@@ -181,7 +180,7 @@ func main() {
 
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
-        log.Printf("Request: %s %s", req.Method, req.URL.String())
+		log.Printf("Request: %s %s", req.Method, req.URL.String())
 		// Alter the request headers here
 		req.Header.Add("X-Proxy-Header", "Header-Value")
 		originalDirector(req)
@@ -196,15 +195,14 @@ func main() {
 	// Define users
 	users := map[string]User{
 		"admin": {
-			Username:    "admin",
-			Password:    "admin",
-			FirstName:   "ad",
-			LastName:    "min",
-			IsSuperuser: true,
-			Email:       "admin@example.com",
-			Organizations: map[string]interface{}{
-			},
-			Teams:         []string{},
+			Username:        "admin",
+			Password:        "admin",
+			FirstName:       "ad",
+			LastName:        "min",
+			IsSuperuser:     true,
+			Email:           "admin@example.com",
+			Organizations:   map[string]interface{}{},
+			Teams:           []string{},
 			IsSystemAuditor: true,
 		},
 		"jdoe": {
@@ -218,7 +216,7 @@ func main() {
 				"org1": "Organization 1",
 				"org2": "Organization 2",
 			},
-			Teams:         []string{},
+			Teams:           []string{},
 			IsSystemAuditor: false,
 		},
 	}
@@ -231,4 +229,3 @@ func main() {
 		panic(err)
 	}
 }
-
