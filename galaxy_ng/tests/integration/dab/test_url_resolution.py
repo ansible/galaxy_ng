@@ -1,4 +1,9 @@
-def test_dab_collection_download_url_hostnames(galaxy_client, published):
+import os
+import pytest
+
+
+@pytest.mark.skipif(not os.getenv("ENABLE_DAB_TESTS"), reason="Skipping test because ENABLE_DAB_TESTS is not set")
+def test_dab_collection_download_url_hostnames(settings, galaxy_client, published):
     """
     We want the download url to point at the gateway
     """
