@@ -317,15 +317,15 @@ objects:
           - name: IMPORTER_IMAGE_TAG
             value: ${IMPORTER_IMAGE_TAG}
           - name: IMPORTER_MEMORY_REQUEST
-            value: 1Gi
+            value: ${IMPORTER_MEMORY_REQUEST}
           - name: IMPORTER_MEMORY_LIMIT
-            value: 2Gi
+            value: ${IMPORTER_MEMORY_LIMIT}
           - name: IMPORTER_CPU_REQUEST
-            value: 500m
+            value: ${IMPORTER_CPU_REQUEST}
           - name: IMPORTER_CPU_LIMIT
-            value: 1000m
+            value: ${IMPORTER_CPU_LIMIT}
           - name: IMPORTER_JOB_TIMEOUT
-            value: "1800"
+            value: ${IMPORTER_JOB_TIMEOUT}
           - name: PULP_REDIS_SSL
             value: ${REDIS_SSL}
           - name: ENABLE_SIGNING
@@ -471,3 +471,15 @@ parameters:
   value: 200m
 - name: PULP_WORKER_CPU_LIMIT
   value: 500m
+
+# importer resource requirements
+- name: IMPORTER_MEMORY_REQUEST
+  value: 1Gi
+- name: IMPORTER_MEMORY_LIMIT
+  value: 2Gi
+- name: IMPORTER_CPU_REQUEST
+  value: 500m
+- name: IMPORTER_CPU_LIMIT
+  value: 1000m
+- name: IMPORTER_JOB_TIMEOUT
+  value: "1800"
