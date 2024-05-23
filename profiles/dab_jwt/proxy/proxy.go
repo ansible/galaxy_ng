@@ -1,4 +1,25 @@
-// a JWT proxy for hub  1234
+/*************************************************************
+
+    DAB JWT Proxy
+
+    Given a galaxy_ng stack that is configured to enable
+    ansible_base.jwt_consumer.hub.auth.HubJWTAuth from
+    an upstream proxy, this script serves as that proxy.
+
+    The clients use basic auth to talk to the proxy,
+    and then the proxy replaces their authorization header
+    with a JWT before passing it on to the galaxy system.
+    The galaxy backend decrypts and decodes the token
+    to determine the username, email, first, last, teams,
+    and groups.
+
+    If the client tries to auth via a token, the proxy
+    should not alter the authorization header and instead
+    pass it unmodified to galaxy. This presumably keeps
+    backwards compatibility for ansible-galaxy cli clients
+    which have been configured to use django api tokens.
+
+*************************************************************/
 
 package main
 
@@ -168,29 +189,6 @@ func jwtKeyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	proxyPort := getEnv("PROXY_PORT", "8080")
-	//target := "http://localhost:5001" // Downstream host is localhost on port 5001
-	target := getEnv("UPSTREAM_URL", "http://localhost:5001")
-	url, err := url.Parse(target)
-	if err != nil {
-		panic(err)
-	}
-
-	proxy := httputil.NewSingleHostReverseProxy(url)
-
-	originalDirector := proxy.Director
-	proxy.Director = func(req *http.Request) {
-		log.Printf("Request: %s %s", req.Method, req.URL.String())
-		// Alter the request headers here
-		req.Header.Add("X-Proxy-Header", "Header-Value")
-		originalDirector(req)
-	}
-
-	proxy.ModifyResponse = func(resp *http.Response) error {
-		// Alter the response headers here
-		resp.Header.Add("X-Proxy-Response-Header", "Header-Value")
-		return nil
-	}
 
 	// Define users
 	users := map[string]User{
@@ -221,7 +219,42 @@ func main() {
 		},
 	}
 
+	// listen port
+	proxyPort := getEnv("PROXY_PORT", "8080")
+
+	// downstream host
+	target := getEnv("UPSTREAM_URL", "http://localhost:5001")
+
+	// verify the url
+	url, err := url.Parse(target)
+	if err != nil {
+		panic(err)
+	}
+
+	// instantiate the proxy
+	proxy := httputil.NewSingleHostReverseProxy(url)
+
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		// log every reqest
+		log.Printf("Request: %s %s", req.Method, req.URL.String())
+
+		// TODO: add any relevant headers to the downstream request
+		// req.Header.Add("X-Proxy-Header", "Header-Value")
+		originalDirector(req)
+	}
+
+	proxy.ModifyResponse = func(resp *http.Response) error {
+		// TODO: add any relevant headers to the response
+		//resp.Header.Add("X-Proxy-Response-Header", "Header-Value")
+		return nil
+	}
+
+	// serve /api/gateway/v1/jwt_key/ from this service so the client can
+	// get the decryption keys for the jwts
 	http.HandleFunc("/api/gateway/v1/jwt_key/", jwtKeyHandler)
+
+	// send everything else downstream
 	http.Handle("/", BasicAuth(proxy, users))
 
 	fmt.Printf("Starting proxy server on :%s\n", proxyPort)
