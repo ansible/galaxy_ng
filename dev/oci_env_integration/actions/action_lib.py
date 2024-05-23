@@ -60,8 +60,6 @@ class OCIEnvIntegrationTest:
         self.do_teardown = os.environ.get("GH_TEARDOWN", "1") == "1"
         self.flags = os.environ.get("GH_FLAGS", "")
 
-        import epdb; epdb.st()
-
         self.failed = False
         try:
             self.set_up_env()
