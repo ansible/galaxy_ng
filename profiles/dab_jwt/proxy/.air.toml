@@ -1,0 +1,9 @@
+[build]
+bin = "proxy"
+cmd = "go build -o proxy proxy.go"
+full_bin = "./proxy"
+
+exclude_regex = ["*.swp"]
+
+[run]
+cmd = "./proxy"
