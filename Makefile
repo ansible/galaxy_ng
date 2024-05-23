@@ -143,7 +143,7 @@ gh-action/community:
 	python3 dev/oci_env_integration/actions/community.py
 
 .PHONY: gh-action/dab_jwt
-gh-action/community:
+gh-action/dab_jwt:
 	python3 dev/oci_env_integration/actions/dab_jwt.py
 
 .PHONY: gh-action/certified-sync
