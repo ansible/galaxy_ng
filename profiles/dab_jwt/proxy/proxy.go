@@ -207,9 +207,9 @@ func main() {
 			Teams:         []string{},
 			IsSystemAuditor: true,
 		},
-		"john_doe": {
-			Username:    "john_doe",
-			Password:    "password123",
+		"jdoe": {
+			Username:    "jdoe",
+			Password:    "redhat",
 			FirstName:   "John",
 			LastName:    "Doe",
 			IsSuperuser: false,
@@ -217,19 +217,6 @@ func main() {
 			Organizations: map[string]interface{}{
 				"org1": "Organization 1",
 				"org2": "Organization 2",
-			},
-			Teams:         []string{},
-			IsSystemAuditor: false,
-		},
-		"jane_smith": {
-			Username:    "jane_smith",
-			Password:    "password456",
-			FirstName:   "Jane",
-			LastName:    "Smith",
-			IsSuperuser: false,
-			Email:       "jane.smith@example.com",
-			Organizations: map[string]interface{}{
-				"org1": "Organization 1",
 			},
 			Teams:         []string{},
 			IsSystemAuditor: false,

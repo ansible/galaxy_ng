@@ -18,7 +18,7 @@ set -x
 
 export HUB_API_ROOT=http://jwtproxy:8080/api/galaxy/
 export HUB_ADMIN_PASS=admin
-export HUB_USE_MOVE_ENDPOINT=1
+export HUB_USE_MOVE_ENDPOINT=0
 
 $VENVPATH/bin/pytest -v -r sx --color=yes -m "$HUB_TEST_MARKS" "$@" galaxy_ng/tests/integration/dab
 RC=$?
