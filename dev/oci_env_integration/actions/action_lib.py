@@ -121,11 +121,18 @@ class OCIEnvIntegrationTest:
                 time.sleep(wait_time)
 
             if self.envs[env]["run_tests"]:
-                self.exec_cmd(
-                    env,
-                    "exec bash /src/galaxy_ng/profiles/base/run_integration.sh"
-                    f" {pytest_flags} {self.flags}"
-                )
+                if self.envs[env].get("test_script"):
+                    self.exec_cmd(
+                        env,
+                        f"exec bash {self.envs[env]['test_script']}"
+                        f" {pytest_flags} {self.flags}"
+                    )
+                else:
+                    self.exec_cmd(
+                        env,
+                        "exec bash /src/galaxy_ng/profiles/base/run_integration.sh"
+                        f" {pytest_flags} {self.flags}"
+                    )
 
     def dump_logs(self):
         if not self.do_dump_logs:
