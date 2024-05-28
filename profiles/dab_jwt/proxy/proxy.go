@@ -91,28 +91,44 @@ func getEnv(key string, fallback string) string {
 	return fallback
 }
 
+func pathHasPrefix(path string, prefixes []string) bool {
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 // BasicAuth middleware
 func BasicAuth(next http.Handler, users map[string]User) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		prefixes := []string{"/v2", "/token"}
+
+		path := r.URL.Path
 		auth := r.Header.Get("Authorization")
-		if auth == "" {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-			http.Error(w, "Unauthorized1", http.StatusUnauthorized)
-			return
-		}
+		log.Printf("Authorization: %s", auth)
 
 		lowerAuth := strings.ToLower(auth)
-		if strings.HasPrefix(lowerAuth, "token") {
-			// token auth should go straight to the downstream ...
-		} else {
+		/*
+			if auth == "" || strings.HasPrefix(lowerAuth, "token") || strings.HasPrefix(lowerAuth, "bearer"){
+				// no auth OR token auth should go straight to the downstream ...
+			    log.Printf("skip jwt generation")
+			} else {
+		*/
+
+		if strings.HasPrefix(lowerAuth, "basic") && !pathHasPrefix(path, prefixes) {
+
 			const basicPrefix = "Basic "
 			if !strings.HasPrefix(auth, basicPrefix) {
+				log.Printf("Unauthorized2")
 				http.Error(w, "Unauthorized2", http.StatusUnauthorized)
 				return
 			}
 
 			decoded, err := base64.StdEncoding.DecodeString(auth[len(basicPrefix):])
 			if err != nil {
+				log.Printf("Unauthorized3")
 				http.Error(w, "Unauthorized3", http.StatusUnauthorized)
 				return
 			}
@@ -120,12 +136,14 @@ func BasicAuth(next http.Handler, users map[string]User) http.Handler {
 			credentials := strings.SplitN(string(decoded), ":", 2)
 			fmt.Printf("credentials %s\n", credentials)
 			if len(credentials) != 2 {
+				log.Printf("Unauthorized4")
 				http.Error(w, "Unauthorized4", http.StatusUnauthorized)
 				return
 			}
 
 			user, exists := users[credentials[0]]
 			if !exists || user.Password != credentials[1] {
+				log.Printf("Unauthorized5")
 				http.Error(w, "Unauthorized5", http.StatusUnauthorized)
 				return
 			}
@@ -199,6 +217,17 @@ func main() {
 			LastName:        "min",
 			IsSuperuser:     true,
 			Email:           "admin@example.com",
+			Organizations:   map[string]interface{}{},
+			Teams:           []string{},
+			IsSystemAuditor: true,
+		},
+		"notifications_admin": {
+			Username:        "notifications_admin",
+			Password:        "redhat",
+			FirstName:       "notifications",
+			LastName:        "admin",
+			IsSuperuser:     true,
+			Email:           "notifications_admin@example.com",
 			Organizations:   map[string]interface{}{},
 			Teams:           []string{},
 			IsSystemAuditor: true,
