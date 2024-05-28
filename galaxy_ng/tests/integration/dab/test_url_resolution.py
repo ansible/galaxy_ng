@@ -2,6 +2,7 @@ import os
 import pytest
 
 
+@pytest.mark.deployment_standalone
 @pytest.mark.skipif(
     not os.getenv("ENABLE_DAB_TESTS"),
     reason="Skipping test because ENABLE_DAB_TESTS is not set"
