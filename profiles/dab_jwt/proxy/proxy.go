@@ -38,7 +38,13 @@ import (
 	"strings"
 	"time"
 
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/json"
+	"errors"
+
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 )
 
 // User represents a user's information
@@ -100,6 +106,39 @@ func pathHasPrefix(path string, prefixes []string) bool {
 	return false
 }
 
+func generateHmacSha256SharedSecret(nonce *string) (string, error) {
+
+	const ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
+	var SharedSecretNotFound = errors.New("The setting ANSIBLE_BASE_SHARED_SECRET was not set, some functionality may be disabled")
+
+	if ANSIBLE_BASE_SHARED_SECRET == "" {
+		log.Println("The setting ANSIBLE_BASE_SHARED_SECRET was not set, some functionality may be disabled.")
+		return "", SharedSecretNotFound
+	}
+
+	if nonce == nil {
+		currentNonce := fmt.Sprintf("%d", time.Now().Unix())
+		nonce = &currentNonce
+	}
+
+	message := map[string]string{
+		"nonce":         *nonce,
+		"shared_secret": ANSIBLE_BASE_SHARED_SECRET,
+	}
+
+	messageBytes, err := json.Marshal(message)
+	if err != nil {
+		return "", err
+	}
+
+	mac := hmac.New(sha256.New, []byte(ANSIBLE_BASE_SHARED_SECRET))
+	mac.Write(messageBytes)
+	signature := fmt.Sprintf("%x", mac.Sum(nil))
+
+	secret := fmt.Sprintf("%s:%s", *nonce, signature)
+	return secret, nil
+}
+
 // BasicAuth middleware
 func BasicAuth(next http.Handler, users map[string]User) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -157,6 +196,9 @@ func BasicAuth(next http.Handler, users map[string]User) http.Handler {
 
 			// Set the X-DAB-JW-TOKEN header
 			r.Header.Set("X-DAB-JW-TOKEN", token)
+
+			// Remove the Authorization header
+			r.Header.Del("Authorization")
 		}
 
 		next.ServeHTTP(w, r)
@@ -268,8 +310,20 @@ func main() {
 		// log every reqest
 		log.Printf("Request: %s %s", req.Method, req.URL.String())
 
-		// TODO: add any relevant headers to the downstream request
-		// req.Header.Add("X-Proxy-Header", "Header-Value")
+		// just assume this proxy is http ...
+		req.Header.Add("X-Forwarded-Proto", "https")
+
+		// https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/headers#x-envoy-internal
+		req.Header.Add("X-Envoy-Internal", "true")
+
+		// each request has a unique ID
+		newUUID := uuid.New()
+		req.Header.Add("X-Request-Id", newUUID.String())
+
+		// make the x-trusted-proxy header
+		newSecret, _ := generateHmacSha256SharedSecret(nil)
+		req.Header.Add("X-Trusted-Proxy", newSecret)
+
 		originalDirector(req)
 	}
 
