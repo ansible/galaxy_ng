@@ -36,7 +36,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
-    "sync"
+	"sync"
 	"time"
 
 	"crypto/hmac"
@@ -296,13 +296,26 @@ func generateJWT(user User) (string, error) {
 			Issuer:    "ansible-issuer",
 		},
 	}
-    log.Printf("\tMake claim for %s\n", user)
+	log.Printf("\tMake claim for %s\n", user)
 	log.Printf("\tClaim %s\n", claims)
-    jsonData, _ := json.Marshal(claims)
-    log.Printf("\t%s\n", jsonData)
+	jsonData, _ := json.Marshal(claims)
+	log.Printf("\t%s\n", jsonData)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	return token.SignedString(rsaPrivateKey)
+}
+
+// Function to check if a CSRF token is known
+func isCSRFTokenKnown(token string) bool {
+	tokenTable.RLock()
+	defer tokenTable.RUnlock()
+
+	for _, session := range tokenTable.data {
+		if session.CSRFToken == token {
+			return true
+		}
+	}
+	return false
 }
 
 /************************************************************
@@ -314,8 +327,8 @@ func BasicAuth(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-	    log.Printf("Request: %s %s", r.Method, r.URL.String())
-        PrintHeaders(r)
+		log.Printf("Request: %s %s", r.Method, r.URL.String())
+		PrintHeaders(r)
 
 		// don't muck the auth header for these paths
 		prefixes := []string{"/v2", "/token"}
@@ -330,10 +343,22 @@ func BasicAuth(next http.Handler) http.Handler {
 		// normalize the header for comparison
 		lowerAuth := strings.ToLower(auth)
 
+		// is there a csrftoken and is it valid?
+		csrftoken, err := GetCookieValue(r, "csrftoken")
+		if err == nil && !isCSRFTokenKnown(csrftoken) {
+			log.Printf("\tcsrftoken: %s\n", csrftoken)
+			log.Printf("Unauthorized Invalid csrftoken\n")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(401)
+			responseBody := fmt.Sprintf(`{"error": "invalid csrftoken"}`)
+			w.Write([]byte(responseBody))
+			return
+		}
+
 		// is there a sessionid ...?
-        gatewaySessionID, _ := GetCookieValue(r, "gateway_sessionid")
-        gatewaySessionIDPtr := &gatewaySessionID
-        sessionUsernamePtr := sessionIDToUsername(gatewaySessionIDPtr)
+		gatewaySessionID, _ := GetCookieValue(r, "gateway_sessionid")
+		gatewaySessionIDPtr := &gatewaySessionID
+		sessionUsernamePtr := sessionIDToUsername(gatewaySessionIDPtr)
 
 		// Check if the pointer is nil and convert it to a string
 		var sessionUsername string
@@ -346,23 +371,24 @@ func BasicAuth(next http.Handler) http.Handler {
 		if (strings.HasPrefix(lowerAuth, "basic") || sessionUsername != "") && !pathHasPrefix(path, prefixes) {
 
 			if sessionUsername != "" {
-			    var user User;
+				var user User
 				user, _ = users[sessionUsername]
-                log.Printf("*****************************************")
-                log.Printf("username:%s user:%s\n", sessionUsername, user)
-                log.Printf("*****************************************")
+				log.Printf("*****************************************")
+				log.Printf("username:%s user:%s\n", sessionUsername, user)
+				log.Printf("*****************************************")
 
-                // Generate the JWT token
-                token, err := generateJWT(user)
-                if err != nil {
-                    http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-                    return
-                }
+				// Generate the JWT token
+				token, err := generateJWT(user)
+				if err != nil {
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
 
-			    // Set the X-DAB-JW-TOKEN header
-			    r.Header.Set("X-DAB-JW-TOKEN", token)
+				// Set the X-DAB-JW-TOKEN header
+				r.Header.Set("X-DAB-JW-TOKEN", token)
 
 			} else {
+
 				const basicPrefix = "Basic "
 				if !strings.HasPrefix(auth, basicPrefix) {
 					log.Printf("Unauthorized2\n")
@@ -386,22 +412,22 @@ func BasicAuth(next http.Handler) http.Handler {
 				}
 
 				user, exists := users[credentials[0]]
-                log.Printf("extracted user:%s from creds[0]:%s creds:%s\n", user, credentials[0], credentials)
+				log.Printf("extracted user:%s from creds[0]:%s creds:%s\n", user, credentials[0], credentials)
 				if !exists || user.Password != credentials[1] {
 					log.Printf("Unauthorized5\n")
 					http.Error(w, "Unauthorized5", http.StatusUnauthorized)
 					return
 				}
 
-                // Generate the JWT token
-                token, err := generateJWT(user)
-                if err != nil {
-                    http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-                    return
-                }
+				// Generate the JWT token
+				token, err := generateJWT(user)
+				if err != nil {
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
 
-			    // Set the X-DAB-JW-TOKEN header
-			    r.Header.Set("X-DAB-JW-TOKEN", token)
+				// Set the X-DAB-JW-TOKEN header
+				r.Header.Set("X-DAB-JW-TOKEN", token)
 			}
 
 			// Remove the Authorization header
@@ -447,7 +473,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			Value:   csrfToken,
 			Expires: time.Now().Add(24 * time.Hour),
 		})
-   
+
 		// Manually format the response to match the regex pattern
 		responseBody := fmt.Sprintf(`{"csrfToken": "%s"}`, csrfToken)
 
@@ -484,7 +510,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "CSRF token header not found", http.StatusForbidden)
 			return
 		}
-   
+
 		if cookie.Value != csrfTokenHeader {
 			http.Error(w, "CSRF token in cookie does not match header", http.StatusForbidden)
 			return
@@ -502,7 +528,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		})
 
 		// Set the sessionid token as a cookie
-        gatewaySessionID := GenerateSessionID()
+		gatewaySessionID := GenerateSessionID()
 		http.SetCookie(w, &http.Cookie{
 			Name:    "gateway_sessionid",
 			Value:   gatewaySessionID,
