@@ -157,7 +157,7 @@ def test_api_v3_plugin_execution_environments_repositories(ansible_config, galax
     assert ns_name in [x['name'] for x in namespace_resp['results']]
 
     namespace_id = repository_resp['namespace']['id']
-    ns_detail_resp = gc.get(f'pulp/api/v3/pulp_container/namespaces/{namespace_id}')
+    ns_detail_resp = gc.get(f'pulp/api/v3/pulp_container/namespaces/{namespace_id}/')
     validate_json(instance=ns_detail_resp, schema=schema_pulp_container_namespace_detail)
 
     # assert new namespace was created
