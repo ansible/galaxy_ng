@@ -52,14 +52,6 @@ import (
 	TYPES
 ************************************************************/
 
-// Global table to store CSRF tokens, session IDs, and usernames
-var tokenTable = struct {
-	sync.RWMutex
-	data map[string]UserSession
-}{
-	data: make(map[string]UserSession),
-}
-
 // UserSession represents the user session information
 type UserSession struct {
 	Username  string
@@ -109,6 +101,22 @@ type LoginResponse struct {
 /************************************************************
 	GLOBALS & SETTINGS
 ************************************************************/
+
+// Global table to store CSRF tokens, session IDs, and usernames
+var tokenTable = struct {
+	sync.RWMutex
+	data map[string]UserSession
+}{
+	data: make(map[string]UserSession),
+}
+
+// tokens we discover in the response headers ...
+var csrfTokenStore = struct {
+	sync.RWMutex
+	tokens []string
+}{
+	tokens: make([]string, 0),
+}
 
 var (
 	rsaPrivateKey *rsa.PrivateKey
@@ -180,7 +188,6 @@ var users = map[string]User{
 		Teams:           []string{},
 		IsSystemAuditor: false,
 	},
-
 }
 
 /************************************************************
@@ -201,7 +208,22 @@ func init() {
 func PrintHeaders(r *http.Request) {
 	for name, values := range r.Header {
 		for _, value := range values {
-			log.Printf("\theader \t%s: %s\n", name, value)
+			log.Printf("\trequest header \t%s: %s\n", name, value)
+		}
+	}
+}
+
+func PrintResponseHeaders(resp *http.Response) {
+	if resp == nil {
+		fmt.Println("Response is nil")
+		return
+	}
+
+	fmt.Println("Response Headers:")
+	for key, values := range resp.Header {
+		for _, value := range values {
+			//fmt.Printf("%s: %s\n", key, value)
+			log.Printf("\tresponse header \t%s: %s\n", key, value)
 		}
 	}
 }
@@ -229,6 +251,27 @@ func GetCookieValue(r *http.Request, name string) (string, error) {
 		return "", err
 	}
 	return cookie.Value, nil
+}
+
+// GetCookieValue retrieves the value of a specific cookie by name
+//
+//	Set-Cookie: csrftoken=TXb2gLP6dGd8pksgZ88ICXhbW664wCbQ; expires=Thu, 29 May 2025 ...
+func ExtractCSRFCookie(resp *http.Response) (string, error) {
+	if resp == nil {
+		return "", fmt.Errorf("response is nil")
+	}
+
+	// Retrieve the Set-Cookie headers
+	cookies := resp.Cookies()
+
+	// Loop through cookies to find the CSRF token
+	for _, cookie := range cookies {
+		if cookie.Name == "csrftoken" {
+			return cookie.Value, nil
+		}
+	}
+
+	return "", fmt.Errorf("CSRF token not found")
 }
 
 func pathHasPrefix(path string, prefixes []string) bool {
@@ -344,6 +387,28 @@ func isCSRFTokenKnown(token string) bool {
 	return false
 }
 
+// check if we've ever seen this token come back in the response headers
+// from the downstream service
+func isDownstreamCSRFToken(token string) bool {
+	csrfTokenStore.RLock()
+	defer csrfTokenStore.RUnlock()
+	for _, t := range csrfTokenStore.tokens {
+		if t == token {
+			return true
+		}
+	}
+	return false
+}
+
+func printKnownCSRFTokens() {
+	tokenTable.RLock()
+	defer tokenTable.RUnlock()
+
+	for _, session := range tokenTable.data {
+		log.Printf("\t\tcsrf:%s sid:%s uid:%s\n", session.CSRFToken, session.SessionID, session.Username)
+	}
+}
+
 /************************************************************
 	HANDLERS
 ************************************************************/
@@ -372,8 +437,16 @@ func BasicAuth(next http.Handler) http.Handler {
 		// is there a csrftoken and is it valid?
 		csrftoken, err := GetCookieValue(r, "csrftoken")
 		if err == nil && !isCSRFTokenKnown(csrftoken) {
-			log.Printf("\tcsrftoken: %s\n", csrftoken)
+
+			// allow if this was a token from the downstream ...
+			if isDownstreamCSRFToken(csrftoken) {
+                log.Printf("Found known downstream csrftoken in request headers: %s\n", csrftoken);
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			log.Printf("Unauthorized Invalid csrftoken\n")
+			printKnownCSRFTokens()
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(401)
 			responseBody := fmt.Sprintf(`{"error": "invalid csrftoken"}`)
@@ -625,6 +698,17 @@ func main() {
 	proxy.ModifyResponse = func(resp *http.Response) error {
 		// TODO: add any relevant headers to the response
 		//resp.Header.Add("X-Proxy-Response-Header", "Header-Value")
+		PrintResponseHeaders(resp)
+
+		// did the response contain any csrftokens? save them ...
+		csrftoken, err := ExtractCSRFCookie(resp)
+		if err == nil {
+			log.Printf("### FOUND CSRFTOKEN IN RESPONSE ---> %s\n", csrftoken)
+			csrfTokenStore.Lock()
+			defer csrfTokenStore.Unlock()
+			csrfTokenStore.tokens = append(csrfTokenStore.tokens, csrftoken)
+		}
+
 		return nil
 	}
 
