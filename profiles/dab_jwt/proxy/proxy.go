@@ -141,6 +141,17 @@ var users = map[string]User{
 		Teams:           []string{},
 		IsSystemAuditor: true,
 	},
+	"ee_admin": {
+		Username:        "ee_admin",
+		Password:        "redhat",
+		FirstName:       "ee",
+		LastName:        "admin",
+		IsSuperuser:     true,
+		Email:           "notifications_admin@example.com",
+		Organizations:   map[string]interface{}{},
+		Teams:           []string{},
+		IsSystemAuditor: true,
+	},
 	"jdoe": {
 		Username:    "jdoe",
 		Password:    "redhat",
