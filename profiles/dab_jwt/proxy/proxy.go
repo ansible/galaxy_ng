@@ -147,7 +147,7 @@ var users = map[string]User{
 		FirstName:       "ee",
 		LastName:        "admin",
 		IsSuperuser:     true,
-		Email:           "notifications_admin@example.com",
+		Email:           "ee_admin@example.com",
 		Organizations:   map[string]interface{}{},
 		Teams:           []string{},
 		IsSystemAuditor: true,
@@ -166,6 +166,21 @@ var users = map[string]User{
 		Teams:           []string{},
 		IsSystemAuditor: false,
 	},
+	"iqe_normal_user": {
+		Username:    "iqe_normal_user",
+		Password:    "redhat",
+		FirstName:   "iqe",
+		LastName:    "normal_user",
+		IsSuperuser: false,
+		Email:       "iqe_normal_user@example.com",
+		Organizations: map[string]interface{}{
+			"org1": "Organization 1",
+			"org2": "Organization 2",
+		},
+		Teams:           []string{},
+		IsSystemAuditor: false,
+	},
+
 }
 
 /************************************************************
@@ -564,6 +579,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// LoginHandler handles the login requests
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+}
+
 func main() {
 
 	// listen port
@@ -615,6 +634,7 @@ func main() {
 
 	// allow direct logins
 	http.HandleFunc("/api/gateway/v1/login/", LoginHandler)
+	http.HandleFunc("/api/gateway/v1/logout/", LogoutHandler)
 
 	// send everything else downstream
 	http.Handle("/", BasicAuth(proxy))
