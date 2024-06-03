@@ -646,8 +646,11 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     change the value before it is returned allowing reading overrides from
     database and cache.
     """
-    if settings.get("GALAXY_DYNAMIC_SETTINGS") is not True:
-        return {}
+    #if settings.get("GALAXY_DYNAMIC_SETTINGS") is not True:
+    #    return {}
+    enabled_hooks = settings.get("DYNACONF_AFTER_GET_HOOKS")
+    if not enabled_hooks:
+        return
 
     # Perform lazy imports here to avoid breaking when system runs with older
     # dynaconf versions
@@ -739,8 +742,13 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
 
         return value.value
 
+    # avoid scope errors by not using a list comprehension
+    hook_functions = []
+    for func_name in enabled_hooks:
+        hook_functions.append(Hook(locals()[func_name]))
+
     return {
         "_registered_hooks": {
-            Action.AFTER_GET: [Hook(read_settings_from_cache_or_db), Hook(alter_hostname_settings)]
+            Action.AFTER_GET: hook_functions
         }
     }
