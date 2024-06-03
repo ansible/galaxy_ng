@@ -124,8 +124,7 @@ requirements = [
     "insights_analytics_collector>=0.3.0",
     "boto3",
     "distro",
-    #"django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base@devel",  # noqa 501
-    "django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base.git@12e464c58f99bd6fb7f27aec11ba55fe4b3dbac8",  # noqa 501
+    "django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base@devel",  # noqa 501
     "django-crum==0.7.9",
     # From vendored automated_logging
     "marshmallow<4.0.0,>=3.6.1",
