@@ -646,8 +646,8 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     change the value before it is returned allowing reading overrides from
     database and cache.
     """
-    #if settings.get("GALAXY_DYNAMIC_SETTINGS") is not True:
-    #    return {}
+    # we expect a list of function names here, which have to be in scope of
+    # locals() for this specific file
     enabled_hooks = settings.get("DYNACONF_AFTER_GET_HOOKS")
     if not enabled_hooks:
         return
