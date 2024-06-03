@@ -678,7 +678,6 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
         Load everything from settings cache or db, process parsing and mergings,
         returns the desired key value
         """
-
         if not apps.ready or key.upper() not in DYNAMIC_SETTINGS_SCHEMA:
             # If app is starting up or key is not on allowed list bypass and just return the value
             return value.value
