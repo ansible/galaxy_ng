@@ -36,6 +36,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"crypto/hmac"
@@ -46,6 +47,17 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
+
+/************************************************************
+	TYPES
+************************************************************/
+
+// UserSession represents the user session information
+type UserSession struct {
+	Username  string
+	CSRFToken string
+	SessionID string
+}
 
 // User represents a user's information
 type User struct {
@@ -75,10 +87,112 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
+// LoginRequest represents the login request payload
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// LoginResponse represents the login response payload
+type LoginResponse struct {
+	CSRFToken string `json:"csrfToken"`
+}
+
+/************************************************************
+	GLOBALS & SETTINGS
+************************************************************/
+
+// Global table to store CSRF tokens, session IDs, and usernames
+var tokenTable = struct {
+	sync.RWMutex
+	data map[string]UserSession
+}{
+	data: make(map[string]UserSession),
+}
+
+// tokens we discover in the response headers ...
+var csrfTokenStore = struct {
+	sync.RWMutex
+	tokens []string
+}{
+	tokens: make([]string, 0),
+}
+
 var (
 	rsaPrivateKey *rsa.PrivateKey
 	rsaPublicKey  *rsa.PublicKey
 )
+
+var ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
+
+// Define users
+var users = map[string]User{
+	"admin": {
+		Username:        "admin",
+		Password:        "admin",
+		FirstName:       "ad",
+		LastName:        "min",
+		IsSuperuser:     true,
+		Email:           "admin@example.com",
+		Organizations:   map[string]interface{}{},
+		Teams:           []string{},
+		IsSystemAuditor: true,
+	},
+	"notifications_admin": {
+		Username:        "notifications_admin",
+		Password:        "redhat",
+		FirstName:       "notifications",
+		LastName:        "admin",
+		IsSuperuser:     true,
+		Email:           "notifications_admin@example.com",
+		Organizations:   map[string]interface{}{},
+		Teams:           []string{},
+		IsSystemAuditor: true,
+	},
+	"ee_admin": {
+		Username:        "ee_admin",
+		Password:        "redhat",
+		FirstName:       "ee",
+		LastName:        "admin",
+		IsSuperuser:     true,
+		Email:           "ee_admin@example.com",
+		Organizations:   map[string]interface{}{},
+		Teams:           []string{},
+		IsSystemAuditor: true,
+	},
+	"jdoe": {
+		Username:    "jdoe",
+		Password:    "redhat",
+		FirstName:   "John",
+		LastName:    "Doe",
+		IsSuperuser: false,
+		Email:       "john.doe@example.com",
+		Organizations: map[string]interface{}{
+			"org1": "Organization 1",
+			"org2": "Organization 2",
+		},
+		Teams:           []string{},
+		IsSystemAuditor: false,
+	},
+	"iqe_normal_user": {
+		Username:    "iqe_normal_user",
+		Password:    "redhat",
+		FirstName:   "iqe",
+		LastName:    "normal_user",
+		IsSuperuser: false,
+		Email:       "iqe_normal_user@example.com",
+		Organizations: map[string]interface{}{
+			"org1": "Organization 1",
+			"org2": "Organization 2",
+		},
+		Teams:           []string{},
+		IsSystemAuditor: false,
+	},
+}
+
+/************************************************************
+	FUNCTIONS
+************************************************************/
 
 func init() {
 	// Generate RSA keys
@@ -90,11 +204,74 @@ func init() {
 	rsaPublicKey = &rsaPrivateKey.PublicKey
 }
 
+// PrintHeaders prints all headers from the request
+func PrintHeaders(r *http.Request) {
+	for name, values := range r.Header {
+		for _, value := range values {
+			log.Printf("\trequest header \t%s: %s\n", name, value)
+		}
+	}
+}
+
+func PrintResponseHeaders(resp *http.Response) {
+	if resp == nil {
+		fmt.Println("Response is nil")
+		return
+	}
+
+	fmt.Println("Response Headers:")
+	for key, values := range resp.Header {
+		for _, value := range values {
+			//fmt.Printf("%s: %s\n", key, value)
+			log.Printf("\tresponse header \t%s: %s\n", key, value)
+		}
+	}
+}
+
+// PrintFormValues prints all form values from the request
+func PrintFormValues(r *http.Request) {
+	for key, values := range r.MultipartForm.Value {
+		for _, value := range values {
+			log.Printf("\tform %s: %s\n", key, value)
+		}
+	}
+}
+
 func getEnv(key string, fallback string) string {
 	if key, ok := os.LookupEnv(key); ok {
 		return key
 	}
 	return fallback
+}
+
+// GetCookieValue retrieves the value of a specific cookie by name
+func GetCookieValue(r *http.Request, name string) (string, error) {
+	cookie, err := r.Cookie(name)
+	if err != nil {
+		return "", err
+	}
+	return cookie.Value, nil
+}
+
+// GetCookieValue retrieves the value of a specific cookie by name
+//
+//	Set-Cookie: csrftoken=TXb2gLP6dGd8pksgZ88ICXhbW664wCbQ; expires=Thu, 29 May 2025 ...
+func ExtractCSRFCookie(resp *http.Response) (string, error) {
+	if resp == nil {
+		return "", fmt.Errorf("response is nil")
+	}
+
+	// Retrieve the Set-Cookie headers
+	cookies := resp.Cookies()
+
+	// Loop through cookies to find the CSRF token
+	for _, cookie := range cookies {
+		if cookie.Name == "csrftoken" {
+			return cookie.Value, nil
+		}
+	}
+
+	return "", fmt.Errorf("CSRF token not found")
 }
 
 func pathHasPrefix(path string, prefixes []string) bool {
@@ -106,9 +283,36 @@ func pathHasPrefix(path string, prefixes []string) bool {
 	return false
 }
 
+// GenerateCSRFToken generates a new CSRF token
+func GenerateCSRFToken() string {
+	return uuid.New().String()
+}
+
+// GenerateSessionID generates a new session ID
+func GenerateSessionID() string {
+	return uuid.New().String()
+}
+
+// sessionIDToUsername checks the tokenTable for the sessionID and returns the username or nil
+func sessionIDToUsername(sessionID *string) *string {
+	if sessionID == nil || *sessionID == "" {
+		return nil
+	}
+
+	tokenTable.RLock()
+	defer tokenTable.RUnlock()
+
+	userSession, exists := tokenTable.data[*sessionID]
+	if !exists {
+		return nil
+	}
+
+	return &userSession.Username
+}
+
 func generateHmacSha256SharedSecret(nonce *string) (string, error) {
 
-	const ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
+	//const ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
 	var SharedSecretNotFound = errors.New("The setting ANSIBLE_BASE_SHARED_SECRET was not set, some functionality may be disabled")
 
 	if ANSIBLE_BASE_SHARED_SECRET == "" {
@@ -139,72 +343,6 @@ func generateHmacSha256SharedSecret(nonce *string) (string, error) {
 	return secret, nil
 }
 
-// BasicAuth middleware
-func BasicAuth(next http.Handler, users map[string]User) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		prefixes := []string{"/v2", "/token"}
-
-		path := r.URL.Path
-		auth := r.Header.Get("Authorization")
-		log.Printf("Authorization: %s", auth)
-
-		lowerAuth := strings.ToLower(auth)
-		/*
-			if auth == "" || strings.HasPrefix(lowerAuth, "token") || strings.HasPrefix(lowerAuth, "bearer"){
-				// no auth OR token auth should go straight to the downstream ...
-			    log.Printf("skip jwt generation")
-			} else {
-		*/
-
-		if strings.HasPrefix(lowerAuth, "basic") && !pathHasPrefix(path, prefixes) {
-
-			const basicPrefix = "Basic "
-			if !strings.HasPrefix(auth, basicPrefix) {
-				log.Printf("Unauthorized2")
-				http.Error(w, "Unauthorized2", http.StatusUnauthorized)
-				return
-			}
-
-			decoded, err := base64.StdEncoding.DecodeString(auth[len(basicPrefix):])
-			if err != nil {
-				log.Printf("Unauthorized3")
-				http.Error(w, "Unauthorized3", http.StatusUnauthorized)
-				return
-			}
-
-			credentials := strings.SplitN(string(decoded), ":", 2)
-			fmt.Printf("credentials %s\n", credentials)
-			if len(credentials) != 2 {
-				log.Printf("Unauthorized4")
-				http.Error(w, "Unauthorized4", http.StatusUnauthorized)
-				return
-			}
-
-			user, exists := users[credentials[0]]
-			if !exists || user.Password != credentials[1] {
-				log.Printf("Unauthorized5")
-				http.Error(w, "Unauthorized5", http.StatusUnauthorized)
-				return
-			}
-
-			// Generate the JWT token
-			token, err := generateJWT(user)
-			if err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-
-			// Set the X-DAB-JW-TOKEN header
-			r.Header.Set("X-DAB-JW-TOKEN", token)
-
-			// Remove the Authorization header
-			r.Header.Del("Authorization")
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
 // generateJWT generates a JWT for the user
 func generateJWT(user User) (string, error) {
 	claims := UserClaims{
@@ -227,13 +365,182 @@ func generateJWT(user User) (string, error) {
 			Issuer:    "ansible-issuer",
 		},
 	}
+	log.Printf("\tMake claim for %s\n", user)
+	log.Printf("\tClaim %s\n", claims)
+	jsonData, _ := json.Marshal(claims)
+	log.Printf("\t%s\n", jsonData)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	return token.SignedString(rsaPrivateKey)
 }
 
+// Function to check if a CSRF token is known
+func isCSRFTokenKnown(token string) bool {
+	tokenTable.RLock()
+	defer tokenTable.RUnlock()
+
+	for _, session := range tokenTable.data {
+		if session.CSRFToken == token {
+			return true
+		}
+	}
+	return false
+}
+
+// check if we've ever seen this token come back in the response headers
+// from the downstream service
+func isDownstreamCSRFToken(token string) bool {
+	csrfTokenStore.RLock()
+	defer csrfTokenStore.RUnlock()
+	for _, t := range csrfTokenStore.tokens {
+		if t == token {
+			return true
+		}
+	}
+	return false
+}
+
+func printKnownCSRFTokens() {
+	tokenTable.RLock()
+	defer tokenTable.RUnlock()
+
+	for _, session := range tokenTable.data {
+		log.Printf("\t\tcsrf:%s sid:%s uid:%s\n", session.CSRFToken, session.SessionID, session.Username)
+	}
+}
+
+/************************************************************
+	HANDLERS
+************************************************************/
+
+// BasicAuth middleware
+func BasicAuth(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		log.Printf("Request: %s %s", r.Method, r.URL.String())
+		PrintHeaders(r)
+
+		// don't muck the auth header for these paths
+		prefixes := []string{"/v2", "/token"}
+
+		// the path CAN determine if auth should be mucked
+		path := r.URL.Path
+
+		// extract the authorization header
+		auth := r.Header.Get("Authorization")
+		log.Printf("\tAuthorization: %s", auth)
+
+		// normalize the header for comparison
+		lowerAuth := strings.ToLower(auth)
+
+		// is there a csrftoken and is it valid?
+		csrftoken, err := GetCookieValue(r, "csrftoken")
+		if err == nil && !isCSRFTokenKnown(csrftoken) {
+
+			// allow if this was a token from the downstream ...
+			if isDownstreamCSRFToken(csrftoken) {
+                log.Printf("Found known downstream csrftoken in request headers: %s\n", csrftoken);
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			log.Printf("Unauthorized Invalid csrftoken\n")
+			printKnownCSRFTokens()
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(401)
+			responseBody := fmt.Sprintf(`{"error": "invalid csrftoken"}`)
+			w.Write([]byte(responseBody))
+			return
+		}
+
+		// is there a sessionid ...?
+		gatewaySessionID, _ := GetCookieValue(r, "gateway_sessionid")
+		gatewaySessionIDPtr := &gatewaySessionID
+		sessionUsernamePtr := sessionIDToUsername(gatewaySessionIDPtr)
+
+		// Check if the pointer is nil and convert it to a string
+		var sessionUsername string
+		if sessionUsernamePtr != nil {
+			sessionUsername = *sessionUsernamePtr
+		} else {
+			sessionUsername = ""
+		}
+
+		if (strings.HasPrefix(lowerAuth, "basic") || sessionUsername != "") && !pathHasPrefix(path, prefixes) {
+
+			if sessionUsername != "" {
+				var user User
+				user, _ = users[sessionUsername]
+				log.Printf("*****************************************")
+				log.Printf("username:%s user:%s\n", sessionUsername, user)
+				log.Printf("*****************************************")
+
+				// Generate the JWT token
+				token, err := generateJWT(user)
+				if err != nil {
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+
+				// Set the X-DAB-JW-TOKEN header
+				r.Header.Set("X-DAB-JW-TOKEN", token)
+
+			} else {
+
+				const basicPrefix = "Basic "
+				if !strings.HasPrefix(auth, basicPrefix) {
+					log.Printf("Unauthorized2\n")
+					http.Error(w, "Unauthorized2", http.StatusUnauthorized)
+					return
+				}
+
+				decoded, err := base64.StdEncoding.DecodeString(auth[len(basicPrefix):])
+				if err != nil {
+					log.Printf("Unauthorized3\n")
+					http.Error(w, "Unauthorized3", http.StatusUnauthorized)
+					return
+				}
+
+				credentials := strings.SplitN(string(decoded), ":", 2)
+				fmt.Printf("credentials %s\n", credentials)
+				if len(credentials) != 2 {
+					log.Printf("Unauthorized4\n")
+					http.Error(w, "Unauthorized4", http.StatusUnauthorized)
+					return
+				}
+
+				user, exists := users[credentials[0]]
+				log.Printf("extracted user:%s from creds[0]:%s creds:%s\n", user, credentials[0], credentials)
+				if !exists || user.Password != credentials[1] {
+					log.Printf("Unauthorized5\n")
+					http.Error(w, "Unauthorized5", http.StatusUnauthorized)
+					return
+				}
+
+				// Generate the JWT token
+				token, err := generateJWT(user)
+				if err != nil {
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+
+				// Set the X-DAB-JW-TOKEN header
+				r.Header.Set("X-DAB-JW-TOKEN", token)
+			}
+
+			// Remove the Authorization header
+			r.Header.Del("Authorization")
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // jwtKeyHandler handles requests to /api/gateway/v1/jwt_key/
 func jwtKeyHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Request: %s %s", r.Method, r.URL.String())
+
 	pubKeyBytes, err := x509.MarshalPKIXPublicKey(rsaPublicKey)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -248,47 +555,108 @@ func jwtKeyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(pubKeyPem)
 }
 
-func main() {
+// LoginHandler handles the login requests
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Define users
-	users := map[string]User{
-		"admin": {
-			Username:        "admin",
-			Password:        "admin",
-			FirstName:       "ad",
-			LastName:        "min",
-			IsSuperuser:     true,
-			Email:           "admin@example.com",
-			Organizations:   map[string]interface{}{},
-			Teams:           []string{},
-			IsSystemAuditor: true,
-		},
-		"notifications_admin": {
-			Username:        "notifications_admin",
-			Password:        "redhat",
-			FirstName:       "notifications",
-			LastName:        "admin",
-			IsSuperuser:     true,
-			Email:           "notifications_admin@example.com",
-			Organizations:   map[string]interface{}{},
-			Teams:           []string{},
-			IsSystemAuditor: true,
-		},
-		"jdoe": {
-			Username:    "jdoe",
-			Password:    "redhat",
-			FirstName:   "John",
-			LastName:    "Doe",
-			IsSuperuser: false,
-			Email:       "john.doe@example.com",
-			Organizations: map[string]interface{}{
-				"org1": "Organization 1",
-				"org2": "Organization 2",
-			},
-			Teams:           []string{},
-			IsSystemAuditor: false,
-		},
+	log.Printf("Request: %s %s", r.Method, r.URL.String())
+	PrintHeaders(r)
+
+	switch r.Method {
+	case http.MethodGet:
+		// Generate a CSRF token for the GET request
+		csrfToken := GenerateCSRFToken()
+
+		// Set the CSRF token as a cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:    "csrfToken",
+			Value:   csrfToken,
+			Expires: time.Now().Add(24 * time.Hour),
+		})
+
+		// Manually format the response to match the regex pattern
+		responseBody := fmt.Sprintf(`{"csrfToken": "%s"}`, csrfToken)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(responseBody))
+
+	case http.MethodPost:
+
+		// Parse the multipart form
+		err := r.ParseMultipartForm(10 << 20) // 10 MB max memory
+		if err != nil {
+			http.Error(w, "Failed to parse multipart form", http.StatusBadRequest)
+			return
+		}
+
+		PrintFormValues(r)
+
+		// Extract form values
+		username := r.FormValue("username")
+		//password := r.FormValue("password")
+		//csrfTokenForm := r.FormValue("csrfToken")
+
+		// Retrieve the CSRF token from the request header
+		csrfTokenHeader := r.Header.Get("X-CSRFtoken")
+
+		// Retrieve the CSRF token from the cookies
+		cookie, err := r.Cookie("csrfToken")
+		if err != nil {
+			http.Error(w, "CSRF token cookie not found", http.StatusForbidden)
+			return
+		}
+
+		if csrfTokenHeader == "" {
+			http.Error(w, "CSRF token header not found", http.StatusForbidden)
+			return
+		}
+
+		if cookie.Value != csrfTokenHeader {
+			http.Error(w, "CSRF token in cookie does not match header", http.StatusForbidden)
+			return
+		}
+
+		// Here you would normally validate the username and password.
+		// For this example, we assume the login is always successful.
+
+		// Set the CSRF token as a cookie
+		csrfToken := GenerateCSRFToken()
+		http.SetCookie(w, &http.Cookie{
+			Name:    "csrftoken",
+			Value:   csrfToken,
+			Expires: time.Now().Add(24 * time.Hour),
+		})
+
+		// Set the sessionid token as a cookie
+		gatewaySessionID := GenerateSessionID()
+		http.SetCookie(w, &http.Cookie{
+			Name:    "gateway_sessionid",
+			Value:   gatewaySessionID,
+			Expires: time.Now().Add(24 * time.Hour),
+		})
+
+		// add this session to the table
+		tokenTable.Lock()
+		tokenTable.data[gatewaySessionID] = UserSession{
+			Username:  username,
+			CSRFToken: csrfToken,
+			SessionID: gatewaySessionID,
+		}
+		tokenTable.Unlock()
+
+		// Respond with a success message (you can customize this as needed)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"message": "Login successful"}`))
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// LoginHandler handles the login requests
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+}
+
+func main() {
 
 	// listen port
 	proxyPort := getEnv("PROXY_PORT", "8080")
@@ -330,6 +698,17 @@ func main() {
 	proxy.ModifyResponse = func(resp *http.Response) error {
 		// TODO: add any relevant headers to the response
 		//resp.Header.Add("X-Proxy-Response-Header", "Header-Value")
+		PrintResponseHeaders(resp)
+
+		// did the response contain any csrftokens? save them ...
+		csrftoken, err := ExtractCSRFCookie(resp)
+		if err == nil {
+			log.Printf("### FOUND CSRFTOKEN IN RESPONSE ---> %s\n", csrftoken)
+			csrfTokenStore.Lock()
+			defer csrfTokenStore.Unlock()
+			csrfTokenStore.tokens = append(csrfTokenStore.tokens, csrftoken)
+		}
+
 		return nil
 	}
 
@@ -337,8 +716,12 @@ func main() {
 	// get the decryption keys for the jwts
 	http.HandleFunc("/api/gateway/v1/jwt_key/", jwtKeyHandler)
 
+	// allow direct logins
+	http.HandleFunc("/api/gateway/v1/login/", LoginHandler)
+	http.HandleFunc("/api/gateway/v1/logout/", LogoutHandler)
+
 	// send everything else downstream
-	http.Handle("/", BasicAuth(proxy, users))
+	http.Handle("/", BasicAuth(proxy))
 
 	fmt.Printf("Starting proxy server on :%s\n", proxyPort)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", proxyPort), nil); err != nil {

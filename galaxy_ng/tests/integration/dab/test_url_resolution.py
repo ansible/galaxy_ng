@@ -13,7 +13,7 @@ def test_dab_collection_download_url_hostnames(settings, galaxy_client, publishe
     """
     gc = galaxy_client("admin")
     cv_url = 'v3/plugin/ansible/content/published/collections/index/'
-    cv_url += f'{published.namespace}/{published.name}/versions/{published.version}'
+    cv_url += f'{published.namespace}/{published.name}/versions/{published.version}/'
     cv_info = gc.get(cv_url)
     download_url = cv_info['download_url']
     assert download_url.startswith(gc.galaxy_root)
