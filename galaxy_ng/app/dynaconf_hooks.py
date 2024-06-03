@@ -10,6 +10,7 @@ from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 from django.apps import apps
+from crum import get_current_request
 
 
 logger = logging.getLogger(__name__)
@@ -677,6 +678,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
         Load everything from settings cache or db, process parsing and mergings,
         returns the desired key value
         """
+
         if not apps.ready or key.upper() not in DYNAMIC_SETTINGS_SCHEMA:
             # If app is starting up or key is not on allowed list bypass and just return the value
             return value.value
@@ -710,8 +712,36 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
 
         return temp_settings.get(key, value.value)
 
+    def alter_hostname_settings(
+        temp_settings: Settings,
+        value: HookValue,
+        key: str,
+        *args,
+        **kwargs
+    ) -> Any:
+        """Use the request headers to dynamically alter the content origin and api hostname.
+        This is useful in scenarios where the hub is accessible directly and through a
+        reverse proxy.
+        """
+
+        ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME']
+
+        if not apps.ready or key.upper() not in ALLOWED_KEYS:
+            # If app is starting up or key is not on allowed list bypass and just return the value
+            return value.value
+
+        req = get_current_request()
+        if req is not None:
+            headers = dict(req.headers)
+            proto = headers.get('X-Forwarded-Proto', 'http')
+            host = headers.get('Host', 'localhost:5001')
+            baseurl = proto + '://' + host
+            return baseurl
+
+        return value.value
+
     return {
         "_registered_hooks": {
-            Action.AFTER_GET: [Hook(read_settings_from_cache_or_db)]
+            Action.AFTER_GET: [Hook(read_settings_from_cache_or_db), Hook(alter_hostname_settings)]
         }
     }

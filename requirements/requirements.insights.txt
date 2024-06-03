@@ -123,7 +123,9 @@ django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansibl
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
 django-crum==0.7.9
-    # via django-ansible-base
+    # via
+    #   django-ansible-base
+    #   galaxy-ng (setup.py)
 django-filter==23.5
     # via pulpcore
 django-guid==3.4.0
