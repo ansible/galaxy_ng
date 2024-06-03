@@ -650,7 +650,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     # locals() for this specific file
     enabled_hooks = settings.get("DYNACONF_AFTER_GET_HOOKS")
     if not enabled_hooks:
-        return
+        return {}
 
     # Perform lazy imports here to avoid breaking when system runs with older
     # dynaconf versions
