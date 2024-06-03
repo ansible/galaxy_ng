@@ -14,7 +14,7 @@ SLEEP_SECONDS_POLLING = float(os.environ.get(os.environ.get("GALAXY_SLEEP_SECOND
 SLEEP_SECONDS_ONETIME = float(os.environ.get(os.environ.get("GALAXY_SLEEP_SECONDS_ONETIME", 3)))
 
 # how many times to sleep when polling
-POLLING_MAX_ATTEMPTS = init(os.environ.get(os.environ.get("GALAXY_POLLING_MAX_ATTEMPTS", 10)))
+POLLING_MAX_ATTEMPTS = int(os.environ.get(os.environ.get("GALAXY_POLLING_MAX_ATTEMPTS", 10)))
 
 DEFAULT_DISTROS = {
     'community': {'basepath': 'community'},
