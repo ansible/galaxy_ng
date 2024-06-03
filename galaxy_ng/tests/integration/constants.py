@@ -8,13 +8,13 @@ USERNAME_CONSUMER = "autohubtest3"
 USERNAME_PUBLISHER = "autohubtest2"
 
 # time.sleep() seconds for checks that poll in a loop
-SLEEP_SECONDS_POLLING = float(os.environ.get(os.environ.get("GALAXY_SLEEP_SECONDS_POLLING", 1)))
+SLEEP_SECONDS_POLLING = float(os.environ.get(os.environ.get("GALAXY_SLEEP_SECONDS_POLLING", "1")))
 
 # time.sleep() seconds for checks that wait once
-SLEEP_SECONDS_ONETIME = float(os.environ.get(os.environ.get("GALAXY_SLEEP_SECONDS_ONETIME", 3)))
+SLEEP_SECONDS_ONETIME = float(os.environ.get(os.environ.get("GALAXY_SLEEP_SECONDS_ONETIME", "3")))
 
 # how many times to sleep when polling
-POLLING_MAX_ATTEMPTS = int(os.environ.get(os.environ.get("GALAXY_POLLING_MAX_ATTEMPTS", 10)))
+POLLING_MAX_ATTEMPTS = int(os.environ.get(os.environ.get("GALAXY_POLLING_MAX_ATTEMPTS", "10")))
 
 DEFAULT_DISTROS = {
     'community': {'basepath': 'community'},
