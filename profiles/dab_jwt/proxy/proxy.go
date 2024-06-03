@@ -679,7 +679,7 @@ func main() {
 		log.Printf("Request: %s %s", req.Method, req.URL.String())
 
 		// just assume this proxy is http ...
-		req.Header.Add("X-Forwarded-Proto", "https")
+		req.Header.Add("X-Forwarded-Proto", "http")
 
 		// https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/headers#x-envoy-internal
 		req.Header.Add("X-Envoy-Internal", "true")

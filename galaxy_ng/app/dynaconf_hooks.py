@@ -726,18 +726,20 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
         reverse proxy.
         """
 
+        # we only want to modify these settings base on request headers
         ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME']
 
+        # If app is starting up or key is not on allowed list bypass and just return the value
         if not apps.ready or key.upper() not in ALLOWED_KEYS:
-            # If app is starting up or key is not on allowed list bypass and just return the value
             return value.value
 
+        # we have to assume the proxy or the edge device(s) set these headers correctly
         req = get_current_request()
         if req is not None:
             headers = dict(req.headers)
-            proto = headers.get('X-Forwarded-Proto', 'http')
-            host = headers.get('Host', 'localhost:5001')
-            baseurl = proto + '://' + host
+            proto = headers.get("X-Forwarded-Proto", "http")
+            host = headers.get("Host", "localhost:5001")
+            baseurl = proto + "://" + host
             return baseurl
 
         return value.value
