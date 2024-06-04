@@ -19,9 +19,11 @@ MIDDLEWARE = [
     # END: Pulp standard middleware
     'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
+MIDDLEWARE += ('crum.CurrentRequestUserMiddleware',)
 
 INSTALLED_APPS = [
     'rest_framework.authtoken',
+    'crum',
     'dynaconf_merge',
 ]
 

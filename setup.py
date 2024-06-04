@@ -125,6 +125,7 @@ requirements = [
     "boto3",
     "distro",
     "django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base@devel",  # noqa 501
+    "django-crum==0.7.9",
     # From vendored automated_logging
     "marshmallow<4.0.0,>=3.6.1",
     "django-picklefield<4.0.0,>=3.0.1",

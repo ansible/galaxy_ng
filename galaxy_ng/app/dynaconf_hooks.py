@@ -10,6 +10,7 @@ from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 from django.apps import apps
+from crum import get_current_request
 
 
 logger = logging.getLogger(__name__)
@@ -645,7 +646,10 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     change the value before it is returned allowing reading overrides from
     database and cache.
     """
-    if settings.get("GALAXY_DYNAMIC_SETTINGS") is not True:
+    # we expect a list of function names here, which have to be in scope of
+    # locals() for this specific file
+    enabled_hooks = settings.get("DYNACONF_AFTER_GET_HOOKS")
+    if not enabled_hooks:
         return {}
 
     # Perform lazy imports here to avoid breaking when system runs with older
@@ -710,8 +714,43 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
 
         return temp_settings.get(key, value.value)
 
+    def alter_hostname_settings(
+        temp_settings: Settings,
+        value: HookValue,
+        key: str,
+        *args,
+        **kwargs
+    ) -> Any:
+        """Use the request headers to dynamically alter the content origin and api hostname.
+        This is useful in scenarios where the hub is accessible directly and through a
+        reverse proxy.
+        """
+
+        # we only want to modify these settings base on request headers
+        ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME']
+
+        # If app is starting up or key is not on allowed list bypass and just return the value
+        if not apps.ready or key.upper() not in ALLOWED_KEYS:
+            return value.value
+
+        # we have to assume the proxy or the edge device(s) set these headers correctly
+        req = get_current_request()
+        if req is not None:
+            headers = dict(req.headers)
+            proto = headers.get("X-Forwarded-Proto", "http")
+            host = headers.get("Host", "localhost:5001")
+            baseurl = proto + "://" + host
+            return baseurl
+
+        return value.value
+
+    # avoid scope errors by not using a list comprehension
+    hook_functions = []
+    for func_name in enabled_hooks:
+        hook_functions.append(Hook(locals()[func_name]))
+
     return {
         "_registered_hooks": {
-            Action.AFTER_GET: [Hook(read_settings_from_cache_or_db)]
+            Action.AFTER_GET: hook_functions
         }
     }
