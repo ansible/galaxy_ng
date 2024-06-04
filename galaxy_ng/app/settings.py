@@ -77,7 +77,7 @@ GALAXY_PAGINATION_CLASS = "pulp_ansible.app.galaxy.v3.pagination.LimitOffsetPagi
 
 # Galaxy authentication classes are used to set REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES
 GALAXY_AUTHENTICATION_CLASSES = [
-    "galaxy_ng.app.auth.session.SessionAuthentication",
+    "rest_framework.authentication.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
     "rest_framework.authentication.BasicAuthentication",
     "ansible_base.jwt_consumer.hub.auth.HubJWTAuth",
@@ -308,3 +308,6 @@ ANSIBLE_BASE_JWT_KEY = "https://localhost"
 
 # WARNING: This setting is used in database migrations to create a default organization.
 DEFAULT_ORGANIZATION_NAME = "Default"
+
+# Disables editing and managing users and groups.
+DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = True
