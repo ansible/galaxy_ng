@@ -249,28 +249,6 @@ def test_gw_api_ui_v1_feature_flags(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
-def test_gw_api_ui_v1_groups(galaxy_client):
-
-    gc = galaxy_client('partner_engineer')
-    # get the response
-    ds = gc.get('_ui/v1/groups/')
-    validate_json(instance=ds, schema=schema_objectlist)
-
-    for grp in ds['data']:
-        validate_json(instance=grp, schema=schema_group)
-
-    # try to make a group
-    suffix = random.choice(range(0, 1000))
-    payload = {'name': f'foobar{suffix}'}
-    ds = gc.post('_ui/v1/groups/', body=payload)
-    validate_json(instance=ds, schema=schema_group)
-    assert ds['name'] == payload['name']
-    assert ds['pulp_href'].endswith(f"/{ds['id']}/")
-
-
-@pytest.mark.deployment_standalone
-@pytest.mark.api_ui
-@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_api_ui_v1_groups_users(galaxy_client):
 
     gc = galaxy_client('basic_user')
@@ -289,51 +267,6 @@ def test_gw_api_ui_v1_groups_users(galaxy_client):
     users_ds = gc.get(f'_ui/v1/groups/{pe_id}/users/')
     validate_json(instance=users_ds, schema=schema_objectlist)
     assert "jdoe" in [x["username"] for x in users_ds["data"]]
-
-
-@pytest.mark.deployment_standalone
-@pytest.mark.api_ui
-@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
-def test_gw_api_ui_v1_groups_users_add_delete(galaxy_client):
-
-    gc = galaxy_client('partner_engineer')
-    suffix = random.choice(range(0, 1000))
-    group_name = f'group{suffix}'
-    user_name = f'user{suffix}'
-
-    # make the group
-    group_ds = gc.post('_ui/v1/groups/', body={'name': group_name})
-    validate_json(instance=group_ds, schema=schema_group)
-    group_id = group_ds['id']
-
-    # make the user
-    user_ds = gc.post(
-        '_ui/v1/users/',
-        body={
-            'username': user_name,
-            'first_name': 'foo',
-            'last_name': 'bar',
-            'email': 'foo@barz.com',
-            'groups': [group_ds],
-            'password': 'abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-+',
-            'is_superuser': False
-        }
-    )
-    validate_json(instance=user_ds, schema=schema_user)
-
-    # validate the new user is in the group's userlist
-    users_ds = gc.get(f'_ui/v1/groups/{group_id}/users/')
-    validate_json(instance=users_ds, schema=schema_objectlist)
-    assert user_name in [x['username'] for x in users_ds['data']]
-
-    # remove the user from the group
-    user_id = user_ds['id']
-    gc.delete(f'_ui/v1/groups/{group_id}/users/{user_id}/', parse_json=False)
-
-    # validate the new user is NOT in the group's userlist
-    users_ds = gc.get(f'_ui/v1/groups/{group_id}/users/')
-    validate_json(instance=users_ds, schema=schema_objectlist)
-    assert user_name not in [x['username'] for x in users_ds['data']]
 
 
 @pytest.mark.deployment_standalone
@@ -543,37 +476,6 @@ def test_gw_api_ui_v1_tags(galaxy_client):
     validate_json(instance=ds, schema=schema_objectlist)
 
     # FIXME - ui tags api does not support POST?
-
-
-@pytest.mark.deployment_standalone
-@pytest.mark.api_ui
-@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
-def test_gw_api_ui_v1_users(galaxy_client):
-    gc = galaxy_client('partner_engineer')
-    # get the response
-    ds = gc.get('_ui/v1/users/')
-    validate_json(instance=ds, schema=schema_objectlist)
-
-    assert len(ds['data']) >= 1
-    for user in ds['data']:
-        validate_json(instance=user, schema=schema_user)
-
-    # try creating a user
-    suffix = random.choice(range(0, 9999))
-    payload = {
-        'username': f'foobar{suffix}',
-        'first_name': 'foobar',
-        'last_name': f'{suffix}'
-    }
-    ds = gc.post('_ui/v1/users/', body=payload)
-    validate_json(instance=ds, schema=schema_user)
-
-    # should NOT be superuser by default
-    assert not ds['is_superuser']
-
-    assert ds['username'] == payload['username']
-    assert ds['first_name'] == payload['first_name']
-    assert ds['last_name'] == payload['last_name']
 
 
 @pytest.mark.deployment_standalone

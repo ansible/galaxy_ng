@@ -175,10 +175,11 @@ class CurrentUserSerializer(UserSerializer):
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_model_permissions(self, obj):
         permissions = {}
+        allow_group_user_edits = settings.get("DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED", True)
         for i, j in PERMISSIONS.items():
             permissions[i] = j
             permissions[i]["has_model_permission"] = obj.has_perm(i)
-        if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
+        if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY") or not allow_group_user_edits:
             permissions["galaxy.delete_user"]['has_model_permission'] = False
             permissions["galaxy.change_user"]['has_model_permission'] = False
             permissions["galaxy.add_user"]['has_model_permission'] = False
