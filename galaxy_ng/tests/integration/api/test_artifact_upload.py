@@ -435,7 +435,7 @@ def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
             for line in lines:
                 if line in log_messages:
                     found = True
-                    breal
+                    break
             if not found:
                 raise Exception(f"did not find any of {lines} in the log output")
 
