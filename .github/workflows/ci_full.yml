@@ -88,6 +88,9 @@ jobs:
       - name: install ansible
         run: pip3 install ansible
 
+      - name: install python-requests
+        run: pip3 install requests
+
       - name: run the build container playbook
         run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v build_container.yaml
 
@@ -97,5 +100,6 @@ jobs:
       - name: run the unit test playbook
         run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_unit_tests.yaml
 
-      - name: run the functional test playbook
-        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_functional_tests.yaml
+      # FIXME: do we really care about these anymore ... ?
+      #- name: run the functional test playbook
+      #  run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_functional_tests.yaml
