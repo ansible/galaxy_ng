@@ -15,7 +15,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
     reason="Skipping test because ENABLE_DAB_TESTS is set"
 )
 def test_system_auditor_role_permissions_without_gateway(galaxy_client):
-    """Tests ability to list roles assigned to a namespace."""
+    """Tests the galaxy.system_auditor role can be added to a user and has the right perms."""
 
     gc = galaxy_client("admin", ignore_cache=True)
 
