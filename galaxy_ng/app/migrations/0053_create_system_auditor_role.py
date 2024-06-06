@@ -36,5 +36,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_system_auditor_role),
+        migrations.RunPython(create_system_auditor_role, delete_system_auditor_role),
     ]
