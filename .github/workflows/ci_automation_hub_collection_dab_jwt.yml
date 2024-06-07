@@ -31,7 +31,8 @@ jobs:
       - name: Checkout the galaxy collection
         uses: actions/checkout@v4
         with:
-          repository: ansible/galaxy_collection
+          repository: bmclaughlin/galaxy_collection
+          branch: bugfix-get-galaxy-path-prefix
           path: galaxy_collection
 
       - name: Build and install the collection
