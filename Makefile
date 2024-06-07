@@ -294,6 +294,10 @@ oci/standalone:
 oci/standalone/poll:
 	dev/oci_poll standalone
 
+.PHONY: oci/dab_jwt/poll
+oci/dab_jwt/poll:
+	dev/oci_poll dab_jwt
+
 .PHONY: oci/insights
 oci/insights:
 	dev/oci_start insights
