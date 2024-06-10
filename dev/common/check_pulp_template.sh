@@ -17,6 +17,7 @@ git clone https://github.com/pulp/plugin_template $BASEDIR/plugin_template
 
 cd $BASEDIR/plugin_template
 git checkout $PLUGIN_GIT_REF
+pip install -r requirements.txt
 ./plugin-template --github galaxy_ng
 
 echo "Results ..."
