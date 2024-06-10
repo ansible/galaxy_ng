@@ -9,7 +9,7 @@ def create_system_auditor_role(apps, schema_editor):
 
     # Create the role
     role, created = Role.objects.get_or_create(
-        name='galaxy.system_auditor',
+        name='galaxy.auditor',
         defaults={'description': 'Role with read-only permissions to all resources'}
     )
 
@@ -21,7 +21,7 @@ def delete_system_auditor_role(apps, schema_editor):
     Role = apps.get_model("core", "Role")
 
     try:
-        role = Role.objects.get(name='galaxy.system_auditor')
+        role = Role.objects.get(name='galaxy.auditor')
     except Role.DoesNotExist:
         return
 

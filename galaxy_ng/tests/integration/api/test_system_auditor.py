@@ -30,7 +30,7 @@ def test_system_auditor_role_permissions_without_gateway(galaxy_client):
     # assign the galaxy.system_auditor role to the user
     rinfo = gc.post(
         f"pulp/api/v3/users/{uid}/roles/",
-        body=json.dumps({'content_object': None, 'role': 'galaxy.system_auditor'})
+        body=json.dumps({'content_object': None, 'role': 'galaxy.auditor'})
     )
 
     # check that all the permssions are view_* only ...
