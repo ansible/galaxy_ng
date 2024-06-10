@@ -182,9 +182,9 @@ def upstream_namespace_iterator(
         # Some upstream pages return ISEs for whatever reason.
         if page.status_code >= 500:
             if 'page=' in next_url:
-                next_url = next_url.replace(f'page={pagenum}', f'page={pagenum+1}')
+                next_url = next_url.replace(f'page={pagenum}', f'page={pagenum + 1}')
             else:
-                next_url = next_url.rstrip('/') + '/?page={pagenum+1}'
+                next_url = next_url.rstrip('/') + '/?page={pagenum + 1}'
             pagenum += 1
             continue
 
@@ -350,7 +350,7 @@ def upstream_collection_iterator(
         # Some upstream pages return ISEs for whatever reason.
         if page.status_code >= 500:
             if 'page=' in next_url:
-                next_url = next_url.replace(f'page={pagenum}', f'page={pagenum+1}')
+                next_url = next_url.replace(f'page={pagenum}', f'page={pagenum + 1}')
             else:
                 next_url = next_url.rstrip('/') + '/?page={pagenum+1}'
             pagenum += 1
@@ -451,9 +451,9 @@ def upstream_role_iterator(
         if page.status_code >= 500:
             logger.error(f'{next_url} returned 500ISE. incrementing the page manually')
             if 'page=' in next_url:
-                next_url = next_url.replace(f'page={pagenum}', f'page={pagenum+1}')
+                next_url = next_url.replace(f'page={pagenum}', f'page={pagenum + 1}')
             else:
-                next_url = next_url.rstrip('/') + '/?page={pagenum+1}'
+                next_url = next_url.rstrip('/') + '/?page={pagenum + 1}'
             pagenum += 1
             continue
 

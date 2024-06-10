@@ -48,7 +48,7 @@ def poll(url=None, attempts=100, wait_time=1):
         hostname = env['PULP_ANSIBLE_API_HOSTNAME']
 
     for i in range(attempts):
-        print(f"Waiting for API to start (attempt {i+1} of {attempts})")
+        print(f"Waiting for API to start (attempt {i + 1} of {attempts})")
         # re request the api root each time because it's not alwasy available until the
         # app boots
 
