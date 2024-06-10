@@ -66,10 +66,10 @@ PERMISSIONS = {
         "global_description": _("Delete any existing collection."),
         "ui_category": _("Collections"),
     },
-    "ansible.view_ansible_repo_content": {
+    "ansible.view_ansiblerepository": {
         "name": _("View Ansible repo content"),
-        "object_description": _("View content of this Ansible repository."),
-        "global_description": _("View collections in any existing namespace."),
+        "object_description": _("View this Ansible repository."),
+        "global_description": _("View this Ansible repository."),
         "ui_category": _("Collections"),
     },
     "ansible.modify_ansible_repo_content": {
@@ -247,6 +247,12 @@ PERMISSIONS = {
         "object_description": _("Manage container namespace roles."),
         "global_description": _("Manage container namespace roles existing in the system."),
         "ui_category": _("Execution Environments"),
+    },
+    "galaxy.view_containerregistryremote": {
+        "name": _("View remote registry"),
+        "object_description": None,
+        "global_description": _("View remote registries in the system."),
+        "ui_category": _("Container Registry Remotes"),
     },
     "galaxy.add_containerregistryremote": {
         "name": _("Add remote registry"),
