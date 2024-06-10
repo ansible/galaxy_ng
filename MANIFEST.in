@@ -1,4 +1,4 @@
-include CHANGES.rst
+include CHANGES.md
 include COMMITMENT
 include LICENSE
 include integration_requirements.txt
