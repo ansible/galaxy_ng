@@ -145,6 +145,26 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
+    # View anything but not add/edit/delete.
+    "galaxy.auditor": {
+        "permissions": {
+            "ansible.view_ansiblerepository",
+            "ansible.view_collection",
+            "ansible.view_collectionremote",
+            "auth.view_group",
+            "container.namespace_view_containerdistribution",
+            "container.view_containernamespace",
+            "container.view_containerrepository",
+            "core.view_group",
+            "core.view_task",
+            "galaxy.view_containernamespace",
+            "galaxy.view_containerregistryremote",
+            "galaxy.view_group",
+            "galaxy.view_namespace",
+            "galaxy.view_user",
+        },
+        "inherit_from": []
+    },
 }
 
 
