@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'crum',
     'dynaconf_merge',
+    'ansible_base.resource_registry',
 ]
 
 

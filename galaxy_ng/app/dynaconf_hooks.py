@@ -64,12 +64,11 @@ def configure_dab_resource_registry(settings: Dynaconf) -> Dict[str, Any]:
 
     data = {}
     if flags["dab_resource_registry"]:
-        data["INSTALLED_APPS"] = ['ansible_base.resource_registry', 'dynaconf_merge']
         data["ANSIBLE_BASE_RESOURCE_CONFIG_MODULE"] = "galaxy_ng.app.api.resource_api"
 
         # this always needs social_django installed ...
         if "social_django" not in settings.INSTALLED_APPS:
-            data["INSTALLED_APPS"].append("social_django")
+            data["INSTALLED_APPS"] = ["social_django"]
 
     return data
 
