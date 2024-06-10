@@ -54,10 +54,22 @@ PERMISSIONS = {
         "global_description": _("Upload collections to any existing namespace."),
         "ui_category": _("Collection Namespaces"),
     },
+    "ansible.view_collection": {
+        "name": _("View collection"),
+        "object_description": _("View this collection."),
+        "global_description": _("View any existing collection."),
+        "ui_category": _("Collections"),
+    },
     "ansible.delete_collection": {
         "name": _("Delete collection"),
         "object_description": _("Delete this collection."),
         "global_description": _("Delete any existing collection."),
+        "ui_category": _("Collections"),
+    },
+    "ansible.view_ansible_repo_content": {
+        "name": _("View Ansible repo content"),
+        "object_description": _("View content of this Ansible repository."),
+        "global_description": _("View collections in any existing namespace."),
         "ui_category": _("Collections"),
     },
     "ansible.modify_ansible_repo_content": {
