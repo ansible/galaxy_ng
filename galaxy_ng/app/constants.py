@@ -200,16 +200,34 @@ PERMISSIONS = {
         ),
         "ui_category": _("Ansible Repository"),
     },
+    "container.view_containernamespace": {
+        "name": _("View container namespace permissions"),
+        "object_description": _("View permissions on this container namespace."),
+        "global_description": _("View permissions on any existing container namespace."),
+        "ui_category": _("Execution Environments"),
+    },
     "container.change_containernamespace": {
         "name": _("Change container namespace permissions"),
         "object_description": _("Edit permissions on this container namespace."),
         "global_description": _("Edit permissions on any existing container namespace."),
         "ui_category": _("Execution Environments"),
     },
+    "container.namespace_view_containerdistribution": {
+        "name": _("View containers"),
+        "object_description": _("View all objects in this container namespace."),
+        "global_description": _("View all objects in any container namespace in the system."),
+        "ui_category": _("Execution Environments"),
+    },
     "container.namespace_change_containerdistribution": {
         "name": _("Change containers"),
         "object_description": _("Edit all objects in this container namespace."),
         "global_description": _("Edit all objects in any container namespace in the system."),
+        "ui_category": _("Execution Environments"),
+    },
+    "container.namespace_view_content_containerpushrepository" : {
+        "name": _("View image tags"),
+        "object_description": _("View an image's tag in this container namespace"),
+        "global_description": _("View an image's tag in any container namespace the system."),
         "ui_category": _("Execution Environments"),
     },
     "container.namespace_modify_content_containerpushrepository" : {
@@ -222,6 +240,12 @@ PERMISSIONS = {
         "name": _("Create new containers"),
         "object_description": None,
         "global_description": _("Add new containers to the system."),
+        "ui_category": _("Execution Environments"),
+    },
+    "container.view_containerrepository": {
+        "name": _("View container repository"),
+        "object_description": _("View this container repository."),
+        "global_description": _("View any existing container repository in the system."),
         "ui_category": _("Execution Environments"),
     },
     "container.delete_containerrepository": {
