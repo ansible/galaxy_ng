@@ -30,6 +30,12 @@ PERMISSIONS = {
         # Category to group the permission in the UI.
         "ui_category": _("Collection Namespaces"),
     },
+    "galaxy.view_namespace": {
+        "name": _("View namespace"),
+        "object_description": _("View this namespace."),
+        "global_description": _("View any existing namespace."),
+        "ui_category": _("Collection Namespaces"),
+    },
     "galaxy.change_namespace": {
         "name": _("Change namespace"),
         "object_description": _("Edit this namespace."),
