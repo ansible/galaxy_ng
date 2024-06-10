@@ -66,12 +66,12 @@ PERMISSIONS = {
         "global_description": _("Delete any existing collection."),
         "ui_category": _("Collections"),
     },
-    #"ansible.view_ansiblerepository": {
+    # "ansible.view_ansiblerepository": {
     #    "name": _("View Ansible repository"),
     #    "object_description": _("View this Ansible repository."),
     #    "global_description": _("View this Ansible repository."),
     #    "ui_category": _("Collections"),
-    #},
+    # },
     "ansible.modify_ansible_repo_content": {
         "name": _("Modify Ansible repo content"),
         "object_description": _("Modify content of this Ansible repository."),
