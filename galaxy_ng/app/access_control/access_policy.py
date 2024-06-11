@@ -573,8 +573,8 @@ class AccessPolicyBase(AccessPolicyFromDB):
                 })
         return True
 
-    def is_direct_shared_resource_management_disabled(self, request, view, action):
-        return not settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED
+    def is_local_resource_management_disabled(self, request, view, action):
+        return not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT
 
     def user_is_superuser(self, request, view, action):
         if getattr(self, "swagger_fake_view", False):

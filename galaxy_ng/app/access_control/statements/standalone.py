@@ -113,7 +113,7 @@ _group_statements = _group_role_statements + [
         "action": ["create", "destroy", "update", "partial_update"],
         "principal": "*",
         "effect": "deny",
-        "condition": "is_direct_shared_resource_management_disabled"
+        "condition": "is_local_resource_management_disabled"
     },
 ]
 
@@ -164,7 +164,7 @@ _user_statements = [
         "action": ["create", "destroy", "update", "partial_update"],
         "principal": "*",
         "effect": "deny",
-        "condition": "is_direct_shared_resource_management_disabled"
+        "condition": "is_local_resource_management_disabled"
     },
 ]
 _deny_all = [
@@ -270,7 +270,7 @@ STANDALONE_STATEMENTS = {
             "action": ["create", "destroy", "update", "partial_update"],
             "principal": "*",
             "effect": "deny",
-            "condition": "is_direct_shared_resource_management_disabled"
+            "condition": "is_local_resource_management_disabled"
         },
     ],
     #  disable synclists for on prem installations
