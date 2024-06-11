@@ -18,7 +18,10 @@ class TestPermissions(BaseTestCase):
             'galaxy.delete_synclist',
             'galaxy.view_synclist',
             'galaxy.add_synclist',
-            'galaxy.change_synclist'
+            'galaxy.change_synclist',
+            'galaxy.view_containernamespace',
+            'core.view_group',
+            'auth.view_group',
         }
 
         constant_permissions = constant_permissions.union(ignored_permissions)
