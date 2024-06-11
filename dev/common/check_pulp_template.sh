@@ -26,6 +26,7 @@ MODIFIED_FILES=$(git status 2>/dev/null | grep 'modified:' | awk '{print $2}')
 EXIT_CODE=0
 for MF in $MODIFIED_FILES; do
     echo "FAILURE template-plugin would modifiy $BASEDIR/galaxy_ng/$MF"
+    git diff $MF
     EXIT_CODE=1
 done
 if [[ $EXIT_CODE == 0 ]]; then
