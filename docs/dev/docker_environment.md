@@ -37,7 +37,7 @@ the code for you might need to create a virtual environment and install the pack
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r dev_requirements.txt
-python -m pip install -r docs_requirements.txt
+python -m pip install -r doc_requirements.txt
 python -m pip install -r integration_requirements.txt
 python -m pip install -e .
 ```

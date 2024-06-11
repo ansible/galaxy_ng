@@ -273,7 +273,7 @@ dev/bumpversion-release:
 	bump2version --verbose release
 
 docs/install:
-	@pip install -r docs_requirements.txt
+	@pip install -r doc_requirements.txt
 	@pip install -U 'Jinja2==3.0.1'
 
 docs/build:
