@@ -145,6 +145,17 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
+    # View and cancel any task.
+    "galaxy.auditor": {
+        "permissions": {
+            "ansible.view_ansiblerepository",
+            "ansible.view_collectionremote",
+            "core.view_task",
+            "galaxy.view_group",
+            "galaxy.view_user",
+        },
+        "inherit_from": [],
+    },
 }
 
 
