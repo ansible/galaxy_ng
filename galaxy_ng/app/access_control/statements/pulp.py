@@ -589,7 +589,7 @@ PULP_CORE_VIEWSETS = {
             "action": ["create", "destroy"],
             "principal": "*",
             "effect": "deny",
-            "condition": "is_direct_shared_resource_management_disabled"
+            "condition": "is_local_resource_management_disabled"
         },
     ]},
     "users": {"statements": _user_statements},

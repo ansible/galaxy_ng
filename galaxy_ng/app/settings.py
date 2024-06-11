@@ -310,4 +310,4 @@ ANSIBLE_BASE_JWT_KEY = "https://localhost"
 DEFAULT_ORGANIZATION_NAME = "Default"
 
 # Disables editing and managing users and groups.
-DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = True
+ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
