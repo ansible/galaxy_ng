@@ -145,6 +145,12 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
+    # View and cancel any task.
+    "galaxy.auditor": {
+        "permissions": {
+        },
+        "inherit_from": [],
+    },
 }
 
 
