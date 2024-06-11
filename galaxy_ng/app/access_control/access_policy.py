@@ -573,6 +573,22 @@ class AccessPolicyBase(AccessPolicyFromDB):
                 })
         return True
 
+    def is_direct_shared_resource_management_disabled(self, request, view, action):
+        return not settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED
+
+    def user_is_superuser(self, request, view, action):
+        if getattr(self, "swagger_fake_view", False):
+            # If OpenAPI schema is requested, don't check for superuser
+            return False
+        user = view.get_object()
+        return user.is_superuser
+
+    def is_current_user(self, request, view, action):
+        if getattr(self, "swagger_fake_view", False):
+            # If OpenAPI schema is requested, don't check for current user
+            return False
+        return request.user == view.get_object()
+
 
 class AIDenyIndexAccessPolicy(AccessPolicyBase):
     NAME = "AIDenyIndexView"
@@ -612,19 +628,6 @@ class CollectionRemoteAccessPolicy(AccessPolicyBase):
 
 class UserAccessPolicy(AccessPolicyBase):
     NAME = "UserViewSet"
-
-    def user_is_superuser(self, request, view, action):
-        if getattr(self, "swagger_fake_view", False):
-            # If OpenAPI schema is requested, don't check for superuser
-            return False
-        user = view.get_object()
-        return user.is_superuser
-
-    def is_current_user(self, request, view, action):
-        if getattr(self, "swagger_fake_view", False):
-            # If OpenAPI schema is requested, don't check for current user
-            return False
-        return request.user == view.get_object()
 
 
 class MyUserAccessPolicy(AccessPolicyBase):

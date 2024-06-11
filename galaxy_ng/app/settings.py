@@ -308,3 +308,6 @@ ANSIBLE_BASE_JWT_KEY = "https://localhost"
 
 # WARNING: This setting is used in database migrations to create a default organization.
 DEFAULT_ORGANIZATION_NAME = "Default"
+
+# Disables editing and managing users and groups.
+DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = True

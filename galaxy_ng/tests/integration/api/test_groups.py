@@ -6,6 +6,7 @@ See: https://issues.redhat.com/browse/AAH-1303
 import random
 import string
 import uuid
+import os
 
 import pytest
 from requests import HTTPError
@@ -34,6 +35,10 @@ API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
 @pytest.mark.pulp_api
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.6dev")
+@pytest.mark.skipif(
+    os.getenv("ENABLE_DAB_TESTS"),
+    reason="Group creation is disabled in the DAB test profile."
+)
 def test_gw_group_role_listing(galaxy_client, test_data):
     """Tests ability to list roles assigned to a namespace."""
 

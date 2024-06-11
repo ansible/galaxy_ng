@@ -76,7 +76,7 @@ _collection_statements = [
     }
 ]
 
-_group_statements = [
+_group_role_statements = [
     {
         "action": ["list", "retrieve"],
         "principal": "authenticated",
@@ -86,22 +86,87 @@ _group_statements = [
         "action": "destroy",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:galaxy.delete_group"
+        "condition": [
+            "has_model_perms:galaxy.delete_group",
+        ]
     },
     {
         "action": "create",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:galaxy.add_group"
+        "condition": [
+            "has_model_perms:galaxy.add_group",
+        ]
     },
     {
         "action": ["update", "partial_update"],
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:galaxy.update_group"
+        "condition": [
+            "has_model_perms:galaxy.update_group",
+        ]
     },
 ]
 
+_group_statements = _group_role_statements + [
+    {
+        "action": ["create", "destroy", "update", "partial_update"],
+        "principal": "*",
+        "effect": "deny",
+        "condition": "is_direct_shared_resource_management_disabled"
+    },
+]
+
+_user_statements = [
+    {
+        "action": ["list"],
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": ["v3_can_view_users"],
+    },
+    {
+        "action": ["retrieve"],
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": ["v3_can_view_users"],
+    },
+    {
+        "action": "destroy",
+        "principal": "*",
+        "effect": "deny",
+        "condition": ["user_is_superuser"]
+    },
+    {
+        "action": "destroy",
+        "principal": "*",
+        "effect": "deny",
+        "condition": ["is_current_user"]
+    },
+    {
+        "action": "destroy",
+        "principal": "*",
+        "effect": "allow",
+        "condition": "has_model_perms:galaxy.delete_user"
+    },
+    {
+        "action": "create",
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": "has_model_perms:galaxy.add_user"
+    },
+    {
+        "action": ["update", "partial_update"],
+        "principal": "authenticated",
+        "effect": "allow",
+        "condition": "has_model_perms:galaxy.change_user"
+    },
+    {
+        "action": ["create", "destroy", "update", "partial_update"],
+        "principal": "*",
+        "effect": "deny",
+        "condition": "is_direct_shared_resource_management_disabled"
+    },
+]
 _deny_all = [
     {
         "principal": "*",
@@ -187,50 +252,7 @@ STANDALONE_STATEMENTS = {
             "condition": "has_model_perms:ansible.change_collectionremote"
         }
     ],
-    'UserViewSet': [
-        {
-            "action": ["list"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["v3_can_view_users"],
-        },
-        {
-            "action": ["retrieve"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": ["v3_can_view_users"],
-        },
-        {
-            "action": "destroy",
-            "principal": "*",
-            "effect": "deny",
-            "condition": ["user_is_superuser"]
-        },
-        {
-            "action": "destroy",
-            "principal": "*",
-            "effect": "deny",
-            "condition": ["is_current_user"]
-        },
-        {
-            "action": "destroy",
-            "principal": "*",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.delete_user"
-        },
-        {
-            "action": "create",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.add_user"
-        },
-        {
-            "action": ["update", "partial_update"],
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.change_user"
-        },
-    ],
+    'UserViewSet': _user_statements,
     'MyUserViewSet': [
         {
             "action": ["retrieve"],
@@ -243,6 +265,12 @@ STANDALONE_STATEMENTS = {
             "principal": "authenticated",
             "effect": "allow",
             "condition": "is_current_user"
+        },
+        {
+            "action": ["create", "destroy", "update", "partial_update"],
+            "principal": "*",
+            "effect": "deny",
+            "condition": "is_direct_shared_resource_management_disabled"
         },
     ],
     #  disable synclists for on prem installations

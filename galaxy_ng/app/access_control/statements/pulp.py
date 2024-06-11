@@ -1,13 +1,18 @@
 from galaxy_ng.app.access_control.statements.standalone import (
     _collection_statements as _galaxy_collection_statements,
     _group_statements as _galaxy_group_statements,
+    _group_role_statements as _galaxy_group_role_statements
 )
 
+from galaxy_ng.app.access_control.statements.standalone import _user_statements
 
 _collection_statements = {"statements": _galaxy_collection_statements}
 
 
 _group_statements = {"statements": _galaxy_group_statements}
+
+
+_group_role_statements = {"statements": _galaxy_group_role_statements}
 
 
 _deny_all = {
@@ -565,8 +570,29 @@ PULP_ANSIBLE_VIEWSETS = {
 
 
 PULP_CORE_VIEWSETS = {
-    "groups/roles": _group_statements,
+    "groups/roles": _group_role_statements,
     "groups": _group_statements,
+    "groups/users": {"statements": [
+        # We didn't have an access policy here before 4.10. The default pulp access policy
+        # checks core.group permissions, rather than galaxy.group permissions, which isn't
+        # used in our system. The end result should be that only admins can make modifications
+        # on this endpoint. This should be changed to match the validation we use for the
+        # ui apis (https://github.com/ansible/galaxy_ng/blob/7e6b335326fd1d1f366e3c5dd81b3f6e
+        # 75da9e1e/galaxy_ng/app/api/ui/serializers/user.py#L62), but given that we're looking
+        # at adopting DAB RBAC, I'm going to leave this as is for now.
+        {
+            "action": "*",
+            "principal": "admin",
+            "effect": "allow"
+        },
+        {
+            "action": ["create", "destroy"],
+            "principal": "*",
+            "effect": "deny",
+            "condition": "is_direct_shared_resource_management_disabled"
+        },
+    ]},
+    "users": {"statements": _user_statements},
     "roles": {
         "statements": [
             {
