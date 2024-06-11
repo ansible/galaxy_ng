@@ -37,11 +37,11 @@ jobs:
           repository: "pulp/pulp-openapi-generator"
           path: "pulp-openapi-generator"
 
-      - uses: "actions/setup-python@v4"
+      - uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
 
-      - uses: "actions/download-artifact@v3"
+      - uses: "actions/download-artifact@v4"
         with:
           name: "plugin_package"
           path: "galaxy_ng/dist/"
@@ -108,21 +108,23 @@ jobs:
           GITHUB_USER: "${{ github.event.pull_request.user.login }}"
       - name: Upload python client packages
         if: ${{ env.TEST == 'pulp' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "python-client.tar"
           path: "galaxy_ng/galaxy-python-client.tar"
           if-no-files-found: "error"
           retention-days: 5
+          overwrite: true
 
       - name: Upload python client docs
         if: ${{ env.TEST == 'pulp' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "python-client-docs.tar"
           path: "galaxy_ng/galaxy-python-client-docs.tar"
           if-no-files-found: "error"
           retention-days: 5
+          overwrite: true
 
       - name: "Logs"
         if: always()

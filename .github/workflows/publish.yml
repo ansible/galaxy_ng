@@ -39,11 +39,11 @@ jobs:
           repository: "pulp/pulp-openapi-generator"
           path: "pulp-openapi-generator"
 
-      - uses: "actions/setup-python@v4"
+      - uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
 
-      - uses: "actions/download-artifact@v3"
+      - uses: "actions/download-artifact@v4"
         with:
           name: "plugin_package"
           path: "galaxy_ng/dist/"
@@ -83,19 +83,24 @@ jobs:
         run: |
           .github/workflows/scripts/install_python_client.sh
         shell: "bash"
+
       - name: "Upload python client packages"
-        uses: "actions/upload-artifact@v3"
+        uses: "actions/upload-artifact@v4"
         with:
           name: "python-client.tar"
-          path: "galaxy_ng/galaxy-python-client.tar"
+          path: |
+            galaxy_ng/galaxy-python-client.tar
           if-no-files-found: "error"
+          overwrite: true
 
       - name: "Upload python client docs"
-        uses: "actions/upload-artifact@v3"
+        uses: "actions/upload-artifact@v4"
         with:
           name: "python-client-docs.tar"
-          path: "galaxy_ng/galaxy-python-client-docs.tar"
+          path: |
+            galaxy_ng/galaxy-python-client-docs.tar
           if-no-files-found: "error"
+          overwrite: true
 
       - name: "Logs"
         if: always()

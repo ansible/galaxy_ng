@@ -24,10 +24,8 @@ RESPONSE="$(curl --write-out '%{http_code}' --silent --output /dev/null "https:/
 if [ "$RESPONSE" == "200" ];
 then
   echo "galaxy_ng client $VERSION has already been released. Skipping."
-  exit
+else
+  twine upload -u __token__ -p "$PYPI_API_TOKEN" \
+  "dist/galaxy_ng_client-$VERSION-py3-none-any.whl" \
+  "dist/galaxy_ng-client-$VERSION.tar.gz"
 fi
-
-twine upload -u __token__ -p "$PYPI_API_TOKEN" \
-"dist/galaxy_ng_client-$VERSION-py3-none-any.whl" \
-"dist/galaxy_ng-client-$VERSION.tar.gz" \
-;

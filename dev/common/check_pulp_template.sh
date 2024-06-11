@@ -17,6 +17,7 @@ git clone https://github.com/pulp/plugin_template $BASEDIR/plugin_template
 
 cd $BASEDIR/plugin_template
 git checkout $PLUGIN_GIT_REF
+pip install -r requirements.txt
 ./plugin-template --github galaxy_ng
 
 echo "Results ..."
@@ -25,6 +26,7 @@ MODIFIED_FILES=$(git status 2>/dev/null | grep 'modified:' | awk '{print $2}')
 EXIT_CODE=0
 for MF in $MODIFIED_FILES; do
     echo "FAILURE template-plugin would modifiy $BASEDIR/galaxy_ng/$MF"
+    git diff $MF
     EXIT_CODE=1
 done
 if [[ $EXIT_CODE == 0 ]]; then

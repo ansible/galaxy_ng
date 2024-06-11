@@ -19,7 +19,7 @@ jobs:
   update_backport_labels:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/setup-python@v4"
+      - uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
       - name: "Configure Git with ansible name and email"
@@ -31,7 +31,7 @@ jobs:
           echo ::group::PYDEPS
           pip install requests pyyaml
           echo ::endgroup::
-      - uses: "actions/checkout@v3"
+      - uses: "actions/checkout@v4"
       - name: "Update labels"
         run: |
           python3 .github/workflows/scripts/update_backport_labels.py
