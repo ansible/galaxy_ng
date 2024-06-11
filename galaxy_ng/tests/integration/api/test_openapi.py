@@ -13,7 +13,7 @@ import tempfile
 from openapi_spec_validator import validate_spec
 
 from ..utils import is_docker_installed
-
+from ..utils.iqe_utils import is_dev_env_standalone
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -31,6 +31,7 @@ PULPY_VARIABLES = [
 
 @pytest.mark.openapi
 @pytest.mark.all
+@pytest.mark.skipif(not is_dev_env_standalone(), reason="AAP-20597")
 def test_galaxy_openapi_no_pulp_variables(galaxy_client):
     """Tests whether openapi.json has valid path names"""
 
@@ -60,6 +61,7 @@ def test_galaxy_openapi_validation(galaxy_client):
 @pytest.mark.openapi
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
+@pytest.mark.skipif(not is_dev_env_standalone(), reason="AAP-20597")
 def test_pulp_openapi_has_variables(galaxy_client):
     """Tests whether openapi.json has valid path names for pulp"""
     gc = galaxy_client("basic_user")
