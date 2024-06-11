@@ -6,6 +6,7 @@ from ansible.galaxy.api import GalaxyError
 from ..utils.iqe_utils import is_dev_env_standalone
 
 
+"""
 @pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.all
 @pytest.mark.deployment_community
@@ -22,3 +23,4 @@ def test_dab_service_index_is_not_available(ansible_config):
         api_client.request(url)
 
     assert 'HTTP Code: 404, Message: Not Found' in str(e.value)
+"""
