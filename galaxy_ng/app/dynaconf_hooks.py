@@ -406,8 +406,13 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     # environments would have to be reconfigured, this is a lot easier.
     galaxy_auth_classes = data.get(
         "GALAXY_AUTHENTICATION_CLASSES",
-        settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
+        settings.get("GALAXY_AUTHENTICATION_CLASSES", [])
     )
+    flags = settings.get("GALAXY_FEATURE_FLAGS")
+    if flags["dab_resource_registry"]:
+        galaxy_auth_classes.append(
+            "ansible_base.jwt_consumer.hub.auth.HubJWTAuth"
+        )
 
     if galaxy_auth_classes:
         return {
