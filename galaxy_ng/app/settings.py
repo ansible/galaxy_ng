@@ -80,7 +80,6 @@ GALAXY_AUTHENTICATION_CLASSES = [
     "galaxy_ng.app.auth.session.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
     "rest_framework.authentication.BasicAuthentication",
-    "ansible_base.jwt_consumer.hub.auth.HubJWTAuth",
 ]
 
 REST_FRAMEWORK__DEFAULT_PERMISSION_CLASSES = (
