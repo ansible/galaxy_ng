@@ -110,6 +110,14 @@
     - name: munge the certifi store (so functional tests don't error on self-signed cert)
       shell: cat /etc/pulp/certs/pulp_webserver.crt >> $(python3 -c 'import certifi; print(certifi.where())')
 
+    ###################################################################
+    # Always run collectstatic to catch errors triggered by it earlier
+    ###################################################################
+    - block:
+        - name: "re-collect static files"
+          shell: cd /src/galaxy_ng; django-admin collectstatic --noinput
+      when: lookup('env', 'GALAXY_EDITABLE_INSTALL', default='false') == 'false'
+
     ##############################################################
     # EDITABLE INSTALL(S)
     ##############################################################

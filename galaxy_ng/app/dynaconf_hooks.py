@@ -42,7 +42,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
-    data.update(configure_dab_resource_registry(settings))
     data.update(configure_resource_provider(settings))
 
     # This should go last, and it needs to receive the data from the previous configuration
@@ -56,21 +55,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_dynamic_settings(settings))
 
     validate(settings)
-    return data
-
-
-def configure_dab_resource_registry(settings: Dynaconf) -> Dict[str, Any]:
-    flags = settings.get("GALAXY_FEATURE_FLAGS")
-
-    data = {}
-    if flags["dab_resource_registry"]:
-        data["INSTALLED_APPS"] = ['ansible_base.resource_registry', 'dynaconf_merge']
-        data["ANSIBLE_BASE_RESOURCE_CONFIG_MODULE"] = "galaxy_ng.app.api.resource_api"
-
-        # this always needs social_django installed ...
-        if "social_django" not in settings.INSTALLED_APPS:
-            data["INSTALLED_APPS"].append("social_django")
-
     return data
 
 
@@ -158,7 +142,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         data["GALAXY_FEATURE_FLAGS__external_authentication"] = True
 
         # Add to installed apps
-        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge"]
+        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge_unique"]
 
         # Add to authentication backends
         data["AUTHENTICATION_BACKENDS"] = [
@@ -222,7 +206,7 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
     if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
 
         # Add to installed apps
-        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge"]
+        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge_unique"]
 
         # Make sure the UI knows to do ext auth
         data["GALAXY_FEATURE_FLAGS__external_authentication"] = True
@@ -278,7 +262,7 @@ def configure_logging(settings: Dynaconf) -> Dict[str, Any]:
         )
     }
     if data["GALAXY_ENABLE_API_ACCESS_LOG"]:
-        data["INSTALLED_APPS"] = ["galaxy_ng._vendor.automated_logging", "dynaconf_merge"]
+        data["INSTALLED_APPS"] = ["galaxy_ng._vendor.automated_logging", "dynaconf_merge_unique"]
         data["MIDDLEWARE"] = [
             "automated_logging.middleware.AutomatedLoggingMiddleware",
             "dynaconf_merge",

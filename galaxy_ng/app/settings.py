@@ -24,7 +24,9 @@ MIDDLEWARE += ('crum.CurrentRequestUserMiddleware',)
 INSTALLED_APPS = [
     'rest_framework.authtoken',
     'crum',
-    'dynaconf_merge',
+    'ansible_base.resource_registry',
+    'social_django',
+    'dynaconf_merge_unique',  # will merge only items that are not defined yet
 ]
 
 
@@ -302,6 +304,7 @@ GALAXY_METRICS_COLLECTION_ORG_ID = None
 GALAXY_DYNAMIC_SETTINGS = False
 
 # DJANGO ANSIBLE BASE RESOURCES REGISTRY SETTINGS
+ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = "galaxy_ng.app.api.resource_api"
 ANSIBLE_BASE_ORGANIZATION_MODEL = "galaxy.Organization"
 ANSIBLE_BASE_JWT_VALIDATE_CERT = False
 ANSIBLE_BASE_JWT_KEY = "https://localhost"
