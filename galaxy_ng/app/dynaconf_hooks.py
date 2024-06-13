@@ -142,7 +142,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         data["GALAXY_FEATURE_FLAGS__external_authentication"] = True
 
         # Add to installed apps
-        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge"]
+        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge_unique"]
 
         # Add to authentication backends
         data["AUTHENTICATION_BACKENDS"] = [
@@ -206,7 +206,7 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
     if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
 
         # Add to installed apps
-        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge"]
+        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge_unique"]
 
         # Make sure the UI knows to do ext auth
         data["GALAXY_FEATURE_FLAGS__external_authentication"] = True
@@ -262,7 +262,7 @@ def configure_logging(settings: Dynaconf) -> Dict[str, Any]:
         )
     }
     if data["GALAXY_ENABLE_API_ACCESS_LOG"]:
-        data["INSTALLED_APPS"] = ["galaxy_ng._vendor.automated_logging", "dynaconf_merge"]
+        data["INSTALLED_APPS"] = ["galaxy_ng._vendor.automated_logging", "dynaconf_merge_unique"]
         data["MIDDLEWARE"] = [
             "automated_logging.middleware.AutomatedLoggingMiddleware",
             "dynaconf_merge",
