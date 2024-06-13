@@ -24,9 +24,10 @@ MIDDLEWARE += ('crum.CurrentRequestUserMiddleware',)
 INSTALLED_APPS = [
     'rest_framework.authtoken',
     'crum',
-    'dynaconf_merge',
+    'ansible_base.resource_registry',
+    'social_django',
+    'dynaconf_merge_unique',
 ]
-
 
 LOGGING = {
     "loggers": {
@@ -80,6 +81,7 @@ GALAXY_AUTHENTICATION_CLASSES = [
     "galaxy_ng.app.auth.session.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
     "rest_framework.authentication.BasicAuthentication",
+    "ansible_base.jwt_consumer.hub.auth.HubJWTAuth",
 ]
 
 REST_FRAMEWORK__DEFAULT_PERMISSION_CLASSES = (
@@ -103,7 +105,7 @@ GALAXY_FEATURE_FLAGS = {
     'execution_environments': True,  # False will make execution_environments endpoints 404
     'legacy_roles': False,
     'ai_deny_index': False,  # False will make _ui/v1/ai_deny_index/ to 404
-    'dab_resource_registry': False,
+    'dab_resource_registry': True,  # Always True, but kept because the flag may be check elsewhere
     'external_authentication': False,
 }
 
@@ -296,17 +298,27 @@ GALAXY_METRICS_COLLECTION_REDHAT_PASSWORD = None
 # RH account's org id (required for x-rh-identity auth type)
 GALAXY_METRICS_COLLECTION_ORG_ID = None
 
-# When set to True will enable the DYNAMIC settungs feature
+# When set to True will enable the DYNAMIC settings feature
 # Individual allowed dynamic keys are set on ./dynamic_settings.py
 GALAXY_DYNAMIC_SETTINGS = False
 
 # DJANGO ANSIBLE BASE RESOURCES REGISTRY SETTINGS
+ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = "galaxy_ng.app.api.resource_api"
 ANSIBLE_BASE_ORGANIZATION_MODEL = "galaxy.Organization"
 ANSIBLE_BASE_JWT_VALIDATE_CERT = False
-ANSIBLE_BASE_JWT_KEY = "https://localhost"
+
+# WARNING: When set to a url such as https://localhost this will
+# cause a hook configure_resource_provider to set API_HOSTNAME/CONTENT_HOSTNAME
+# scheme and netloc to the same. This variable must be None (or unset)
+# whenever galaxy is running standalone (without a RESOURCE_SERVER proxy)
+# and set to `https://resource_server` when running behind the resource proxy.
+ANSIBLE_BASE_JWT_KEY = None
+
+# NOTE: For the Resource Sync Feature the following are required:
+# RESOURCE_SERVER = {"URL": str, "SECRET_KEY": str, "VALIDATE_HTTPS": bool}
 
 # WARNING: This setting is used in database migrations to create a default organization.
 DEFAULT_ORGANIZATION_NAME = "Default"
 
-# Disables editing and managing users and groups.
+# If False it disables editing and managing users and groups.
 ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
