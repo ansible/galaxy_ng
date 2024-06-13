@@ -14,6 +14,10 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from ansible_base.resource_registry.urls import (
+    urlpatterns as resource_api_urls,
+)
+
 API_PATH_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
 
 galaxy_urls = [
@@ -47,11 +51,7 @@ urlpatterns = [
     path("healthz", views.health_view),
 ]
 
-if settings["GALAXY_FEATURE_FLAGS"]["dab_resource_registry"]:
-    from ansible_base.resource_registry.urls import (
-        urlpatterns as resource_api_urls,
-    )
-    urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(resource_api_urls)))
+urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(resource_api_urls)))
 
 if settings.get("API_ROOT") != "/pulp/":
     urlpatterns.append(

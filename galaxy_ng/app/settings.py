@@ -24,9 +24,10 @@ MIDDLEWARE += ('crum.CurrentRequestUserMiddleware',)
 INSTALLED_APPS = [
     'rest_framework.authtoken',
     'crum',
-    'dynaconf_merge',
+    'ansible_base.resource_registry',
+    'social_django',
+    'dynaconf_merge_unique',
 ]
-
 
 LOGGING = {
     "loggers": {
@@ -80,6 +81,7 @@ GALAXY_AUTHENTICATION_CLASSES = [
     "galaxy_ng.app.auth.session.SessionAuthentication",
     "rest_framework.authentication.TokenAuthentication",
     "rest_framework.authentication.BasicAuthentication",
+    "ansible_base.jwt_consumer.hub.auth.HubJWTAuth",
 ]
 
 REST_FRAMEWORK__DEFAULT_PERMISSION_CLASSES = (
@@ -103,7 +105,7 @@ GALAXY_FEATURE_FLAGS = {
     'execution_environments': True,  # False will make execution_environments endpoints 404
     'legacy_roles': False,
     'ai_deny_index': False,  # False will make _ui/v1/ai_deny_index/ to 404
-    'dab_resource_registry': False,
+    'dab_resource_registry': True,  # Always True, but kept because the flag may be check elsewhere
     'external_authentication': False,
 }
 
@@ -301,6 +303,7 @@ GALAXY_METRICS_COLLECTION_ORG_ID = None
 GALAXY_DYNAMIC_SETTINGS = False
 
 # DJANGO ANSIBLE BASE RESOURCES REGISTRY SETTINGS
+ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = "galaxy_ng.app.api.resource_api"
 ANSIBLE_BASE_ORGANIZATION_MODEL = "galaxy.Organization"
 ANSIBLE_BASE_JWT_VALIDATE_CERT = False
 ANSIBLE_BASE_JWT_KEY = "https://localhost"

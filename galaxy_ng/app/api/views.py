@@ -2,6 +2,8 @@ import os
 
 import galaxy_importer
 
+from importlib.metadata import version, PackageNotFoundError
+
 from django.apps import apps
 from django.conf import settings
 from django.http import HttpResponseRedirect
@@ -17,6 +19,14 @@ from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.utils import get_aap_version
 
 
+def get_version_from_metadata(package_name):
+    """Uses importlib.metadata.version to retrieve package version"""
+    try:
+        return version(package_name)
+    except PackageNotFoundError:
+        return f"cannot retrieve {package_name} version"
+
+
 # define the version matrix at the module level to avoid the redefinition on every API call.
 VERSIONS = {
     "available_versions": {
@@ -30,6 +40,7 @@ VERSIONS = {
     "pulp_core_version": apps.get_app_config('core').version,
     "pulp_ansible_version": apps.get_app_config('ansible').version,
     "pulp_container_version": apps.get_app_config('container').version,
+    "ansible_base_version": get_version_from_metadata("django-ansible-base"),
 }
 
 # Add in v1 support if configured

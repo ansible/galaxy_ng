@@ -42,7 +42,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
-    data.update(configure_dab_resource_registry(settings))
     data.update(configure_resource_provider(settings))
 
     # This should go last, and it needs to receive the data from the previous configuration
@@ -56,21 +55,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_dynamic_settings(settings))
 
     validate(settings)
-    return data
-
-
-def configure_dab_resource_registry(settings: Dynaconf) -> Dict[str, Any]:
-    flags = settings.get("GALAXY_FEATURE_FLAGS")
-
-    data = {}
-    if flags["dab_resource_registry"]:
-        data["INSTALLED_APPS"] = ['ansible_base.resource_registry', 'dynaconf_merge']
-        data["ANSIBLE_BASE_RESOURCE_CONFIG_MODULE"] = "galaxy_ng.app.api.resource_api"
-
-        # this always needs social_django installed ...
-        if "social_django" not in settings.INSTALLED_APPS:
-            data["INSTALLED_APPS"].append("social_django")
-
     return data
 
 
@@ -406,15 +390,8 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     # environments would have to be reconfigured, this is a lot easier.
     galaxy_auth_classes = data.get(
         "GALAXY_AUTHENTICATION_CLASSES",
-        settings.get("GALAXY_AUTHENTICATION_CLASSES", [])
+        settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
     )
-    flags = settings.get("GALAXY_FEATURE_FLAGS")
-
-    if flags["dab_resource_registry"]:
-        hub_jwt_auth = "ansible_base.jwt_consumer.hub.auth.HubJWTAuth"
-        if hub_jwt_auth not in galaxy_auth_classes:
-            galaxy_auth_classes.append(hub_jwt_auth)
-
     if galaxy_auth_classes:
         return {
             "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES": galaxy_auth_classes
@@ -592,26 +569,26 @@ def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
 
 
 def configure_resource_provider(settings: Dynaconf) -> Dict[str, Any]:
-    flags = settings.get("GALAXY_FEATURE_FLAGS")
-
     # The following variable is either a URL or a key file path.
     ANSIBLE_BASE_JWT_KEY = settings.get("ANSIBLE_BASE_JWT_KEY")
-    if flags["dab_resource_registry"]:
-        data = {
-            "ANSIBLE_API_HOSTNAME": settings.get("ANSIBLE_API_HOSTNAME", ""),
-            "ANSIBLE_CONTENT_HOSTNAME": settings.get("ANSIBLE_CONTENT_HOSTNAME", ""),
-        }
-        gw_url = urlparse(ANSIBLE_BASE_JWT_KEY)
-        if gw_url.scheme and gw_url.hostname:
-            for k in data:
-                k_parsed = urlparse(data[k])
-                if gw_url.scheme and gw_url.hostname:
-                    k_updated = k_parsed._replace(
-                        scheme=gw_url.scheme,
-                        netloc=gw_url.netloc,
-                    )
-                    data.update({k: urlunparse(k_updated)})
-            return data
+    if ANSIBLE_BASE_JWT_KEY is None:
+        return {}
+
+    data = {
+        "ANSIBLE_API_HOSTNAME": settings.get("ANSIBLE_API_HOSTNAME", ""),
+        "ANSIBLE_CONTENT_HOSTNAME": settings.get("ANSIBLE_CONTENT_HOSTNAME", ""),
+    }
+    gw_url = urlparse(ANSIBLE_BASE_JWT_KEY)
+    if gw_url.scheme and gw_url.hostname:
+        for k in data:
+            k_parsed = urlparse(data[k])
+            if gw_url.scheme and gw_url.hostname:
+                k_updated = k_parsed._replace(
+                    scheme=gw_url.scheme,
+                    netloc=gw_url.netloc,
+                )
+                data.update({k: urlunparse(k_updated)})
+        return data
     return {}
 
 
