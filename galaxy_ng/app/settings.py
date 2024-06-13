@@ -306,7 +306,7 @@ GALAXY_DYNAMIC_SETTINGS = False
 ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = "galaxy_ng.app.api.resource_api"
 ANSIBLE_BASE_ORGANIZATION_MODEL = "galaxy.Organization"
 ANSIBLE_BASE_JWT_VALIDATE_CERT = False
-ANSIBLE_BASE_JWT_KEY = "https://localhost"
+ANSIBLE_BASE_JWT_KEY = None  # This must be set in the environment.
 
 # WARNING: This setting is used in database migrations to create a default organization.
 DEFAULT_ORGANIZATION_NAME = "Default"
