@@ -1,3 +1,5 @@
+DUMMY CHANGE TO TRIGGER CI
+
 # Galaxy NG
 
 [![Build Status](https://github.com/ansible/galaxy_ng/actions/workflows/ci.yml/badge.svg)](https://github.com/ansible/galaxy_ng/actions/workflows/ci.yml)
