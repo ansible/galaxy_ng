@@ -1,6 +1,5 @@
 import os
-
-import galaxy_importer
+import logging
 
 from importlib.metadata import version, PackageNotFoundError
 
@@ -18,13 +17,16 @@ from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.api.utils import get_aap_version
 
+logger = logging.getLogger(__name__)
+
 
 def get_version_from_metadata(package_name):
     """Uses importlib.metadata.version to retrieve package version"""
     try:
         return version(package_name)
-    except PackageNotFoundError:
-        return f"cannot retrieve {package_name} version"
+    except PackageNotFoundError as exc:
+        logger.error("cannot retrieve %s version: %s", package_name, str(exc))
+        return ""
 
 
 # define the version matrix at the module level to avoid the redefinition on every API call.
@@ -36,7 +38,7 @@ VERSIONS = {
     "server_version": apps.get_app_config("galaxy").version,
     "galaxy_ng_version": apps.get_app_config("galaxy").version,
     "galaxy_ng_commit": os.environ.get("GIT_COMMIT", ""),
-    "galaxy_importer_version": galaxy_importer.__version__,
+    "galaxy_importer_version": get_version_from_metadata("galaxy-importer"),
     "pulp_core_version": apps.get_app_config('core').version,
     "pulp_ansible_version": apps.get_app_config('ansible').version,
     "pulp_container_version": apps.get_app_config('container').version,
