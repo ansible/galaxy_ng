@@ -33,6 +33,27 @@ accessed it will start the loading process, which consists of:
 
 A diagram can be visualized on: https://xmind.app/m/VPSF59/
 
+FAQ:
+
+- How do I know from which source a variable came from?
+A: `dynaconf inspect -k KEY` on command line or `inspect_settings` function
+    read more on https://www.dynaconf.com/advanced/#inspecting-history
+
+- How do I get a value from settings during the execution of a bash script?
+A: `dynaconf get KEY` will output the raw value for the key (or ret code 1)
+    read more on https://www.dynaconf.com/cli/#dynaconf-get
+
+- How do I merge value coming from other sources if  it's a data structure?
+A: Use any supported merging strategy e.g:
+
+    export PULP_DATABASES__default__ENGINE=sqlite
+    export PULP_DATABASES__default="@merge ENGINE=foobar"
+    export PULP_INSTALLED_APPS="@merge_unique awesome_app"
+    export PULP_INSTALLED_APPS='@json ["awesome_app", "dynaconf_merge_unique"]'
+    export PULP_LISTOFTHINGS___0__key=value
+    read more https://www.dynaconf.com/merging/
+              https://www.dynaconf.com/envvars/#type-casting-and-lazy-values
+
 Caveats:
 
 - In this file you cannot have conditionals based on other keys,
