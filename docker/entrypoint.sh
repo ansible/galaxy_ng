@@ -104,6 +104,8 @@ run_service() {
         setup_repo_keyring &
     fi
 
+    schedule_resource_sync_task
+
     exec "${service_path}" "$@"
 }
 
@@ -120,6 +122,8 @@ run_manage() {
     elif [[ "$ENABLE_SIGNING" -eq "2" ]]; then
         setup_signing_keyring
     fi
+
+    schedule_resource_sync_task
 
     exec django-admin "$@"
 }
@@ -188,6 +192,15 @@ setup_container_signing_service() {
         django-admin add-signing-service container-default /var/lib/pulp/scripts/container_sign.sh ${KEY_ID} --class container:ManifestSigningService 2>/dev/null || true
     else
         log_message "Container signing service already exists."
+    fi
+}
+
+schedule_resource_sync_task() {
+    if dynaconf get RESOURCE_SERVER__URL >/dev/null 2>&1; then
+        log_message "Scheduling Resource Sync Task to execute every 15 minutes"
+        django-admin task-scheduler --id dab_sync --interval 15 --path "galaxy_ng.app.tasks.resource_sync.run" || true
+    else
+        log_message "Resource Server is not enabled, skipping sync scheduling"
     fi
 }
 
