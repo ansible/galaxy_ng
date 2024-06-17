@@ -1,3 +1,65 @@
+"""
+I know, this file looks like a Django settings file but it's not!
+
+TL;DR:
+
+This file is a settings fragment, which will be bundled with other settings
+files from other Pulp plugins, deployment customizations through
+`/etc/pulp/settings.py` and also with variables from the environment,
+from database, Redis and some loaded conditionally through hooks.
+
+Long story:
+
+Dynaconf is the library that manages settings in the Pulp application, the way
+settings are loaded is defined in `pulpcore.app.settings`, in that file some
+validators are also defined, as soon as Django requests `pulpcore.app.settings`
+Dynaconf will step in and using Python module hooks will deliver a Dynaconf
+object instead of a regular Django settings class.
+
+This Dynaconf class will be available in `django.conf.settings`, and since it is
+completely compatible with Django LazySettings, the first time a variable is
+accessed it will start the loading process, which consists of:
+
+1. Loading the values ​​from pulpcore.app.settings.py
+2. Loading the values ​​from {plugin}.app.settings for each plugin
+   (including galaxy_ng, in an undefined order)
+3. Loading the values ​​from /etc/pulp/settings.py and /etc/pulp/settings.local.py
+4. Loading the values ​​of environment variables prefixed with `PULP_`
+5. Running the hooks defined in `{plugin}/app/dynaconf_hooks.py` for each of the
+   plugins and loading the values ​​returned by the hooks.
+6. Loading values ​​defined in the database in the `config.Setting` model for keys
+   that can be changed during runtime.
+7. Deliver the `settings` to `django.conf` module on sys.modules namespace
+
+A diagram can be visualized on: https://xmind.app/m/VPSF59/
+
+Caveats:
+
+- In this file you cannot have conditionals based on other keys,
+  e.g.: `if "x" not in INSTALLED_APPS`
+  because the final state of `INSTALLED_APPS` will only be known at the end of
+  the loading process, if you need conditionals use dynaconf_hooks.py.
+- In this file you cannot use other settings extensions for Django, it has to be
+  done the Dynaconf way.
+- This file should not be imported directly (just like any Django settings)
+- Only variables in uppercase are considered
+- On standalone scripts DO NOT use `settings.configure()` instead use
+  `settings.DYNACONF.configure()` or prefer to use management command because
+  those have the full django context defined.
+
+Cautions and tips:
+
+- Values ​​can be merged, if you want a data structure to be open for adding keys
+  and values ​​or to be joined with values ​​coming from other sources, use
+  `dynaconf_merge` or `dynaconf_merge_unique` (examples in the file)
+- Validators can be defined in dynaconf_hooks.py
+- Use settings.get(key) as the django.conf.settings will be a dict like obj
+- dot notation also works for data structures
+  `settings.get('databases.default.engine')`
+
+Read more on: https://www.dynaconf.com/django/
+"""
+
 import os
 
 DEBUG = False

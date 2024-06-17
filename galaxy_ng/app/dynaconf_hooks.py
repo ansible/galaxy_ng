@@ -1,3 +1,16 @@
+"""
+This file defines a post load hook for dynaconf,
+After loading all the settings files from all enabled Pulp plugins and envvars,
+dynaconf will call a function named `post` and if that function returns a
+dictionary containing {key:value} those values will be added, or merged to
+the previously loaded settings.
+
+This file exists to enable conditionally loaded settings variables, variables
+that depends on other variable state and then requires the final state of the
+settings before making conditionals.
+
+Read more: https://www.dynaconf.com/advanced/#hooks
+"""
 import json
 import logging
 import ldap
