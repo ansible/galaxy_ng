@@ -42,6 +42,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
+    data.update(configure_dab_required_settings(settings))
     data.update(configure_resource_provider(settings))
 
     # This should go last, and it needs to receive the data from the previous configuration
@@ -737,3 +738,14 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
             Action.AFTER_GET: hook_functions
         }
     }
+
+
+def configure_dab_required_settings(settings: Dynaconf) -> Dict[str, Any]:
+    """Load all keys defined on dab dynamic_settings if not already defined."""
+    data = {}
+    notset = object()
+    from ansible_base.lib.dynamic_config import dynamic_settings
+    for key in dir(dynamic_settings):
+        if key.isupper() and settings.get(key, notset) is notset:
+            data[key] = getattr(dynamic_settings, key)
+    return data
