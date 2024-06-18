@@ -1,3 +1,14 @@
+"""
+This file sets a schema for dynamic settings, dynamic settings is a Feature
+that when enabled will load settings variables from database and cache
+but will load only the variables that are defined on this file.
+
+The Schema and Validators defined on the DYNAMIC_SETTINGS_SCHEMA can be used
+to validate API entries for new settings and also to build dynamic UI to CRUD
+on the settings model.
+
+The feature is enabled on `dynaconf_hooks.py`
+"""
 from dynaconf import Validator
 
 DYNAMIC_SETTINGS_SCHEMA = {
