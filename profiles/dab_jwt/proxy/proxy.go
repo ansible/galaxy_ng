@@ -201,6 +201,10 @@ var orgs = map[string]Organization{
 		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee2",
 		Name:      "Organization 2",
 	},
+	"pe": {
+		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee3",
+		Name:      "system:partner-engineers",
+	},
 }
 
 var teams = map[string]Team{
@@ -214,6 +218,12 @@ var teams = map[string]Team{
 		Name:      "bteam",
 		Org:       "default",
 	},
+	"peteam": {
+		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771ac",
+		Name:      "peteam",
+		Org:       "pe",
+	},
+
 }
 
 // Define users
@@ -259,14 +269,16 @@ var users = map[string]User{
 		Password:    "redhat",
 		FirstName:   "John",
 		LastName:    "Doe",
-		IsSuperuser: false,
+		//IsSuperuser: false,
+		IsSuperuser: true,
 		Email:       "john.doe@example.com",
 		Organizations: []string{
 			"default",
 			"org1",
 			"org2",
+            "pe",
 		},
-		Teams:           []string{},
+		Teams:           []string{"peteam"},
 		IsSystemAuditor: false,
 		Sub:             "bc243368-a9d4-4f8f-9ffe-5d2d921fce96",
 	},
