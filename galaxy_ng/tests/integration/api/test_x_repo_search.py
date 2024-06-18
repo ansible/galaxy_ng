@@ -136,8 +136,12 @@ class TestXRepoSearch:
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)
         namespace_name = f"ns_{generate_random_string()}"
         namespace_name_mod = namespace_name + "_mod"
-        create_namespace(gc, namespace_name, "ns_group_for_tests")
-        create_namespace(gc, namespace_name + "_mod", "ns_group_for_tests")
+        try:
+            create_namespace(gc, namespace_name, "ns_group_for_tests")
+            create_namespace(gc, namespace_name + "_mod", "ns_group_for_tests")
+        except ValueError:
+            create_namespace(gc, namespace_name, None)
+            create_namespace(gc, namespace_name + "_mod", None)
 
         artifact_1 = upload_new_artifact(
             gc, namespace_name, test_repo_name, "1.0.1", tags=["application"]
