@@ -95,54 +95,53 @@ pulp-1          |  'version': '1'}
 
 // JWT claims
 type UserClaims struct {
-	Version         int                    `json:"version"`
-	Iss             string                 `json:"iss"`
-	Aud             string                 `json:"aud"`
-	Expires         int64                    `json:"exp"`
-	GlobalRoles     []string               `json:"global_roles"`
-	UserData        UserData				`json:"user_data"`
-	Sub             string                 `json:"sub"`
-	ObjectRoles          map[string]interface{} `json:"object_roles"`
-	Objects				 map[string]interface{} `json:"objects"`
+	Version     int                    `json:"version"`
+	Iss         string                 `json:"iss"`
+	Aud         string                 `json:"aud"`
+	Expires     int64                  `json:"exp"`
+	GlobalRoles []string               `json:"global_roles"`
+	UserData    UserData               `json:"user_data"`
+	Sub         string                 `json:"sub"`
+	ObjectRoles map[string]interface{} `json:"object_roles"`
+	Objects     map[string]interface{} `json:"objects"`
 }
 
 // Implement the jwt.Claims interface
 func (c UserClaims) Valid() error {
-    if time.Unix(c.Expires, 0).Before(time.Now()) {
-        return fmt.Errorf("token is expired")
-    }
-    return nil
+	if time.Unix(c.Expires, 0).Before(time.Now()) {
+		return fmt.Errorf("token is expired")
+	}
+	return nil
 }
 
 type UserData struct {
-	Username        string                 `json:"username"`
-	FirstName       string                 `json:"first_name"`
-	LastName        string                 `json:"last_name"`
-	IsSuperuser     bool                   `json:"is_superuser"`
-	Email           string                 `json:"email"`
+	Username    string `json:"username"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	IsSuperuser bool   `json:"is_superuser"`
+	Email       string `json:"email"`
 }
 
 type Organization struct {
 	AnsibleId string `json:"ansible_id"`
-	Name string `json:"name"`
+	Name      string `json:"name"`
 }
 
 type Team struct {
 	AnsibleId string `json:"ansible_id"`
-	Name string `json:"name"`
-	Org string `json:"org"`	
+	Name      string `json:"name"`
+	Org       string `json:"org"`
 }
 
 type TeamObject struct {
 	AnsibleId string `json:"ansible_id"`
-	Name string `json:"name"`
-	Org int `json:"org"`	
+	Name      string `json:"name"`
+	Org       int    `json:"org"`
 }
-
 
 type ObjectRole struct {
 	ContentType string `json:"content_type"`
-	Objects []int `json:"objects"`
+	Objects     []int  `json:"objects"`
 }
 
 // LoginRequest represents the login request payload
@@ -185,35 +184,35 @@ var ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
 
 var orgmap = map[string]int{
 	"default": 0,
-	"org1": 1,
-	"org2": 2,
+	"org1":    1,
+	"org2":    2,
 }
 
 var orgs = map[string]Organization{
 	"default": {
 		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee0",
-		Name: "Default",
+		Name:      "Default",
 	},
 	"org1": {
 		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee1",
-		Name: "Organization 1",
+		Name:      "Organization 1",
 	},
 	"org2": {
 		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee2",
-		Name: "Organization 2",
+		Name:      "Organization 2",
 	},
 }
 
 var teams = map[string]Team{
 	"ateam": {
 		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771aa",
-		Name: "ateam",
-		Org: "org1",
+		Name:      "ateam",
+		Org:       "org1",
 	},
 	"bteam": {
 		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771ab",
-		Name: "bteam",
-		Org: "default",
+		Name:      "bteam",
+		Org:       "default",
 	},
 }
 
@@ -452,30 +451,30 @@ func generateJWT(user User) (string, error) {
 
 	localOrgMap := map[string]int{}
 	counter := -1
-	for _,orgName := range user.Organizations {
+	for _, orgName := range user.Organizations {
 		counter += 1
 		localOrgMap[orgName] = counter
 		userOrgs = append(userOrgs, orgs[orgName])
 	}
-	for _,team := range user.Teams {
+	for _, team := range user.Teams {
 		orgName := teams[team].Org
 		orgIndex := localOrgMap[orgName]
 		userTeams = append(userTeams, TeamObject{
 			AnsibleId: teams[team].AnsibleId,
-			Name: team,
-			Org: orgIndex,
+			Name:      team,
+			Org:       orgIndex,
 		})
 	}
 
 	objects := map[string]interface{}{
 		"organization": userOrgs,
-		"team": userTeams,
+		"team":         userTeams,
 	}
 	objectRoles := map[string]interface{}{}
 	if len(userTeams) > 0 {
 		objectRoles["Team Member"] = ObjectRole{
 			ContentType: "team",
-			Objects: []int{0},
+			Objects:     []int{0},
 		}
 	}
 
@@ -498,7 +497,7 @@ func generateJWT(user User) (string, error) {
 		},
 		Sub:         user.Sub,
 		ObjectRoles: objectRoles,
-		Objects: objects,
+		Objects:     objects,
 	}
 	log.Printf("\tMake claim for %s\n", user)
 	log.Printf("\tClaim %s\n", claims)
@@ -575,7 +574,7 @@ func BasicAuth(next http.Handler) http.Handler {
 
 			// allow if this was a token from the downstream ...
 			if isDownstreamCSRFToken(csrftoken) {
-                log.Printf("Found known downstream csrftoken in request headers: %s\n", csrftoken);
+				log.Printf("Found known downstream csrftoken in request headers: %s\n", csrftoken)
 				next.ServeHTTP(w, r)
 				return
 			}
