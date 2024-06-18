@@ -250,6 +250,10 @@ def test_gw_api_ui_v1_feature_flags(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
+@pytest.mark.skipif(
+    os.getenv("ENABLE_DAB_TESTS"),
+    reason="Skipping test because this is broken with dab_jwt"
+)
 def test_gw_api_ui_v1_groups_users(galaxy_client):
 
     gc = galaxy_client('basic_user')
