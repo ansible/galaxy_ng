@@ -1,4 +1,11 @@
 FROM localhost/oci_env/pulp:base
+
+# Define the build argument
+ARG DJANGO_ANSIBLE_BASE_BRANCH=2024.6.11
+
+# Set the environment variable based on the build argument
+ENV DJANGO_ANSIBLE_BASE_BRANCH=${DJANGO_ANSIBLE_BASE_BRANCH}
+
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
 
 COPY . /opt/galaxy_ng/
