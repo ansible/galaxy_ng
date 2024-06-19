@@ -18,7 +18,6 @@ import pkg_resources
 import os
 import re
 from typing import Any, Dict, List
-from urllib.parse import urlparse, urlunparse
 from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
