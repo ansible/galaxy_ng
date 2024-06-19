@@ -16,5 +16,16 @@ services:
       PULP_WORKERS: "1"
       DJANGO_ANSIBLE_BASE_BRANCH: "devel"
 
+  jwtproxy:
+    build:
+      context: "{SRC_DIR}/galaxy_ng/profiles/dab_jwt/proxy"
+    ports:
+      - "{JWT_PROXY_PORT}:{JWT_PROXY_PORT}"
+    environment:
+      UPSTREAM_URL: "http://pulp:{API_PORT}"
+      PROXY_PORT: "{JWT_PROXY_PORT}"
+    volumes:
+      - "{SRC_DIR}/galaxy_ng/profiles/dab_jwt/proxy:/app:rw"
+
 volumes:
   pulp_certs:
