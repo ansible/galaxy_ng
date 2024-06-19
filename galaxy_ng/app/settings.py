@@ -390,11 +390,11 @@ ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = "galaxy_ng.app.api.resource_api"
 ANSIBLE_BASE_ORGANIZATION_MODEL = "galaxy.Organization"
 ANSIBLE_BASE_JWT_VALIDATE_CERT = False
 
-# WARNING: When set to a url such as https://localhost this will
-# cause a hook configure_resource_provider to set API_HOSTNAME/CONTENT_HOSTNAME
-# scheme and netloc to the same. This variable must be None (or unset)
-# whenever galaxy is running standalone (without a RESOURCE_SERVER proxy)
-# and set to `https://resource_server` when running behind the resource proxy.
+# This is meant to be a url to the resource server
+# which the JWT consumer code can obtain a certificate
+# from for decrypting the JWT. If the hub system can
+# reach the resource server via an internal url,
+# use that here for the best network performance.
 ANSIBLE_BASE_JWT_KEY = None
 
 # NOTE: For the Resource Sync Feature the following are required:
