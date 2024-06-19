@@ -109,6 +109,15 @@ download_ui() {
     echo "yes" | django-admin collectstatic
 }
 
+schedule_resource_sync_task() {
+    if dynaconf get RESOURCE_SERVER__URL >/dev/null 2>&1; then
+        log_message "Scheduling Resource Sync Task to execute every 15 minutes"
+        django-admin task-scheduler --id dab_sync --interval 15 --path "galaxy_ng.app.tasks.resource_sync.run" || true
+    else
+        log_message "Resource Server is not enabled, skipping sync scheduling"
+    fi
+}
+
 # set_up_test_data() {
 #     cd /src/galaxy_ng
 #     # make docker/loaddata
@@ -140,3 +149,5 @@ fi
 # if [[ "$SETUP_TEST_DATA" -eq "1" ]]; then
 #     set_up_test_data
 # fi
+
+schedule_resource_sync_task
