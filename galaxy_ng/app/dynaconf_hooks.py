@@ -56,7 +56,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
     data.update(configure_dab_required_settings(settings))
-    data.update(configure_resource_provider(settings))
 
     # This should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
@@ -580,30 +579,6 @@ def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
     legacy_roles = settings.get("GALAXY_ENABLE_LEGACY_ROLES", False)
     data["GALAXY_FEATURE_FLAGS__legacy_roles"] = legacy_roles
     return data
-
-
-def configure_resource_provider(settings: Dynaconf) -> Dict[str, Any]:
-    # The following variable is either a URL or a key file path.
-    ANSIBLE_BASE_JWT_KEY = settings.get("ANSIBLE_BASE_JWT_KEY")
-    if ANSIBLE_BASE_JWT_KEY is None:
-        return {}
-
-    data = {
-        "ANSIBLE_API_HOSTNAME": settings.get("ANSIBLE_API_HOSTNAME", ""),
-        "ANSIBLE_CONTENT_HOSTNAME": settings.get("ANSIBLE_CONTENT_HOSTNAME", ""),
-    }
-    gw_url = urlparse(ANSIBLE_BASE_JWT_KEY)
-    if gw_url.scheme and gw_url.hostname:
-        for k in data:
-            k_parsed = urlparse(data[k])
-            if gw_url.scheme and gw_url.hostname:
-                k_updated = k_parsed._replace(
-                    scheme=gw_url.scheme,
-                    netloc=gw_url.netloc,
-                )
-                data.update({k: urlunparse(k_updated)})
-        return data
-    return {}
 
 
 def validate(settings: Dynaconf) -> None:
