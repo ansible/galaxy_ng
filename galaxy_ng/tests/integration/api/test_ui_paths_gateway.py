@@ -254,6 +254,7 @@ def test_gw_api_ui_v1_feature_flags(galaxy_client):
     os.getenv("ENABLE_DAB_TESTS"),
     reason="Skipping test because this is broken with dab_jwt"
 )
+@pytest.mark.skip(reason="groups can't be created in hub anymore")
 def test_gw_api_ui_v1_groups_users(galaxy_client):
 
     gc = galaxy_client('basic_user')
@@ -329,6 +330,7 @@ def test_gw_api_ui_v1_me(galaxy_client, settings):
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
+@pytest.mark.skip(reason="groups can't be created in hub anymore")
 def test_gw_api_ui_v1_my_namespaces(galaxy_client):
     gc = galaxy_client("partner_engineer")
     new_namespace = generate_unused_namespace(gc, api_version='_ui/v1')
@@ -495,8 +497,9 @@ def test_gw_api_ui_v1_users_by_id(galaxy_client):
     resp = gc.get('_ui/v1/users/?username=jdoe')
     id = resp["data"][0]["id"]
 
-    resp = gc.get('_ui/v1/groups/?name=system:partner-engineers')
-    group_id = resp["data"][0]["id"]
+    # there's no groups as they cannot be created directly in the hub
+    # resp = gc.get('_ui/v1/groups/?name=system:partner-engineers')
+    # group_id = resp["data"][0]["id"]
 
     # get the response
     ds = gc.get(f'_ui/v1/users/{id}/')
@@ -505,4 +508,4 @@ def test_gw_api_ui_v1_users_by_id(galaxy_client):
     assert ds['id'] == id
     assert ds['username'] == 'jdoe'
     # assert ds['is_superuser'] is False
-    assert {'id': group_id, 'name': 'system:partner-engineers'} in ds['groups']
+    # assert {'id': group_id, 'name': 'system:partner-engineers'} in ds['groups']
