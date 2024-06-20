@@ -698,7 +698,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
         """
 
         # we only want to modify these settings base on request headers
-        ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME']
+        ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME', 'TOKEN_SERVER']
 
         # If app is starting up or key is not on allowed list bypass and just return the value
         if not apps.ready or key.upper() not in ALLOWED_KEYS:
@@ -711,6 +711,8 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
             proto = headers.get("X-Forwarded-Proto", "http")
             host = headers.get("Host", "localhost:5001")
             baseurl = proto + "://" + host
+            if key.upper() == 'TOKEN_SERVER':
+                baseurl += '/token/'
             return baseurl
 
         return value.value
