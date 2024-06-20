@@ -1,5 +1,6 @@
 import os
 import pytest
+import requests
 
 
 @pytest.mark.deployment_standalone
@@ -41,3 +42,34 @@ def test_dab_collection_download_url_hostnames(settings, galaxy_client, publishe
         assert dl_resp.status_code == 200
         assert dl_resp.headers.get('Content-Type') == 'application/gzip'
         assert dl_resp.url.startswith("http://localhost:5001")
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.skipif(
+    not os.getenv("ENABLE_DAB_TESTS"),
+    reason="Skipping test because ENABLE_DAB_TESTS is not set"
+)
+def test_dab_token_server_hostnames(settings, galaxy_client):
+    """
+    The www-authenticate header from /v2/ should preserve the original hostname
+    """
+
+    v2_hosts = [
+        'jwtproxy:8080',
+        'localhost:5001',
+    ]
+
+    for v2_host in v2_hosts:
+        rr = requests.get('http://' + v2_host + '/v2/')
+        headers = {}
+        for k, v in dict(rr.headers).items():
+            headers[k.lower()] = v
+
+        # Bearer realm="http://jwtproxy:8080/token/",service="jwtproxy:8080"
+        auth = headers['www-authenticate']
+        auth_parts = auth.split(',')
+        bearer_realm = auth_parts[0].split('"')[1]
+        service = auth_parts[1].split('"')[1]
+
+        assert bearer_realm == 'http://' + v2_host + '/token/'
+        assert service == v2_host
