@@ -1,5 +1,5 @@
 epdb
-requests
+requests==2.31.0
 # pulp requires compatibility with python 3.8
 ansible-core<2.17.0
 pytest
