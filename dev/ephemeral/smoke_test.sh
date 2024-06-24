@@ -48,7 +48,7 @@ else
     #DOCKER_IMAGE="python:3"
     DOCKER_IMAGE="quay.io/fedora/python-310"
     $DOCKERCMD run \
-        -v $(pwd):/app \
+        -v $(pwd):/app:z \
         --env HUB_USE_MOVE_ENDPOINT="${HUB_USE_MOVE_ENDPOINT}" \
         --env HUB_API_ROOT="${HUB_API_ROOT}" \
         --env HUB_AUTH_URL="${HUB_AUTH_URL}" \
