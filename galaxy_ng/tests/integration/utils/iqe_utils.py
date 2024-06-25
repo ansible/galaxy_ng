@@ -685,7 +685,10 @@ def get_hub_version(ansible_config):
             gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
         except GalaxyError:
             # FIXME: versions prior to 4.7 have different credentials. This needs to be fixed.
-            api_root = os.environ.get("HUB_API_ROOT", "http://localhost:5001/api/automation-hub/")
+            if is_sync_testing():
+                api_root = "http://localhost:5001/api/automation-hub/"
+            else:
+                api_root = os.environ.get("HUB_API_ROOT", "http://localhost:5001/api/automation-hub/")
             api_root = api_root.rstrip("/") + "/"
             gc = GalaxyClient(galaxy_root=api_root,
                               auth={"username": "admin", "password": "admin"})
