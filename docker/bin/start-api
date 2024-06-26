@@ -32,4 +32,6 @@ if [[ -n "${GUNICORN_LOGGER_CLASS}" ]]; then
     GUNICORN_OPTIONS+=(--logger-class "${GUNICORN_LOGGER_CLASS}")
 fi
 
+schedule_resource_sync_task
+
 exec "${ENTRYPOINT}" "${GUNICORN_OPTIONS[@]}"
