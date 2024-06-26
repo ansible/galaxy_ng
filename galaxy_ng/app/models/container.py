@@ -7,20 +7,16 @@ from galaxy_ng.app.access_control import mixins
 
 
 class ContainerDistribution(
-        container_models.ContainerDistribution,
-        LifecycleModelMixin,
-        mixins.GroupModelPermissionsMixin):
-
+    container_models.ContainerDistribution, LifecycleModelMixin, mixins.GroupModelPermissionsMixin
+):
     class Meta:
         proxy = True
         default_related_name = "%(app_label)s_%(model_name)s"
 
 
 class ContainerNamespace(
-        container_models.ContainerNamespace,
-        LifecycleModelMixin,
-        mixins.GroupModelPermissionsMixin):
-
+    container_models.ContainerNamespace, LifecycleModelMixin, mixins.GroupModelPermissionsMixin
+):
     class Meta:
         proxy = True
         default_related_name = "%(app_label)s_%(model_name)s"
@@ -28,8 +24,8 @@ class ContainerNamespace(
 
 class ContainerDistroReadme(models.Model):
     container = models.OneToOneField(
-        container_models.ContainerDistribution,
-        on_delete=models.CASCADE, primary_key=True)
+        container_models.ContainerDistribution, on_delete=models.CASCADE, primary_key=True
+    )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True, null=True)
     text = models.TextField(blank=True)
@@ -39,13 +35,10 @@ class ContainerRegistryRemote(
     pulp_models.Remote,
     mixins.GroupModelPermissionsMixin,
 ):
-
     class Meta:
         default_related_name = "%(app_label)s_%(model_name)s"
 
-    RED_HAT_REGISTY_DOMAINS = (
-        'registry.redhat.io',
-    )
+    RED_HAT_REGISTRY_DOMAINS = ("registry.redhat.io", "catalog.redhat.com")
 
     def get_connection_fields(self):
         copy_fields = (
@@ -72,9 +65,9 @@ class ContainerRegistryRemote(
         return result
 
     def get_registry_backend(self):
-        for registry in self.RED_HAT_REGISTY_DOMAINS:
+        for registry in self.RED_HAT_REGISTRY_DOMAINS:
             if registry in self.url:
-                return 'redhat'
+                return "redhat"
         return None
 
 
@@ -87,5 +80,5 @@ class ContainerRegistryRepos(models.Model):
         container_models.ContainerRemote,
         on_delete=models.CASCADE,
         primary_key=True,
-        related_name="registry"
+        related_name="registry",
     )
