@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 13:30+0000\n"
+"POT-Creation-Date: 2024-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,17 +70,15 @@ msgstr "Les groupes doivent correspondre à une liste d'objets de groupe"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "Le groupe nom=%s, id=%s n'existe pas"
 
-#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:159
 msgid "Invalid group name or ID"
 msgstr "Nom de groupe ou ID invalide"
 
 #: app/access_control/fields.py:100
-#| msgid "Groups must be a list of group objects"
 msgid "Users must be a list of user objects"
 msgstr ""
 
 #: app/access_control/fields.py:113
-#| msgid "Invalid group name or ID"
 msgid "Invalid user username or ID"
 msgstr ""
 
@@ -138,7 +136,7 @@ msgstr ""
 "La collection \"{namespace}.{name}\" n'a pas été trouvé lors de la mise à "
 "jour de la synclist {synclist}"
 
-#: app/api/ui/serializers/user.py:75
+#: app/api/ui/serializers/user.py:77
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
@@ -146,23 +144,23 @@ msgstr ""
 "L'autorisation 'galaxy.change_group' est nécessaire pour modifier un groupe "
 "d'utilisateurs dont l'utilisateur demandeur ne fait pas partie."
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:92 app/api/ui/serializers/user.py:98
 msgid "Must be a super user to grant super user permissions."
 msgstr ""
 "Il faut être un super utilisateur pour accorder des autorisations de super "
 "utilisateur."
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:112
 msgid "Must be a super user to change another user's password."
 msgstr ""
 "Il faut être un super utilisateur pour changer le mot de passe d'un autre "
 "utilisateur."
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:128
 msgid "You do not have permissions to modify super users."
 msgstr "Vous n'avez pas le droit de modifier les super utilisateurs."
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:155
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "Le groupe nom=%(name)s, id=%(id)s n'existe pas"
