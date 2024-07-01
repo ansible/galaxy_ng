@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 13:30+0000\n"
+"POT-Creation-Date: 2024-07-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,17 +70,15 @@ msgstr "Groepen moet een lijst van groepsobjecten zijn"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "Groepsnaam=%s, id=%s bestaat niet"
 
-#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:159
 msgid "Invalid group name or ID"
 msgstr "Ongeldige groepsnaam of id"
 
 #: app/access_control/fields.py:100
-#| msgid "Groups must be a list of group objects"
 msgid "Users must be a list of user objects"
 msgstr ""
 
 #: app/access_control/fields.py:113
-#| msgid "Invalid group name or ID"
 msgid "Invalid user username or ID"
 msgstr ""
 
@@ -136,7 +134,7 @@ msgstr ""
 "Collectie \"{namespace}.{name}\" niet gevonden tijdens het bijwerken van "
 "synclist {synclist}"
 
-#: app/api/ui/serializers/user.py:75
+#: app/api/ui/serializers/user.py:77
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
@@ -144,23 +142,23 @@ msgstr ""
 "De machtiging 'galaxy.change_group' is nodig om een gebruikersgroep te "
 "veranderen waar de aanvragende gebruiker geen deel van uitmaakt."
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:92 app/api/ui/serializers/user.py:98
 msgid "Must be a super user to grant super user permissions."
 msgstr ""
 "Moet een supergebruiker zijn om machtigingen voor een supergebruiker te "
 "verlenen."
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:112
 msgid "Must be a super user to change another user's password."
 msgstr ""
 "Moet een supergebruiker zijn om het wachtwoord van een andere gebruiker te "
 "wijzigen."
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:128
 msgid "You do not have permissions to modify super users."
 msgstr "Je hebt geen rechten om supergebruikers te wijzigen."
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:155
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "Groepsnaam=%(name)s, id=%(id)s bestaat niet"
