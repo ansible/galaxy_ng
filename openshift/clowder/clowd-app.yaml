@@ -179,6 +179,8 @@ objects:
             value: ${GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES}
           - name: PULP_GALAXY_FEATURE_FLAGS__execution_environments
             value: 'false'
+          - name: PULP_GALAXY_FEATURE_FLAGS__dab_resource_registry
+            value: 'false'
           - name: PULP_ANSIBLE_COLLECT_DOWNLOAD_LOG
             value: ${ANSIBLE_COLLECT_DOWNLOAD_LOG}
           - name: PULP_ANSIBLE_COLLECT_DOWNLOAD_COUNT
