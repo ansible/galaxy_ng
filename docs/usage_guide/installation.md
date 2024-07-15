@@ -103,12 +103,12 @@ Understanding every setting in the file is beyond the scope of this document, bu
 
 Start the container with these docker args ...
 ```
-docker run \                                                        
+docker run \
     --name=galaxy_ng \
-    -v $(pwd)/galaxy-importer.cfg:/etc/galaxy-importer/galaxy-importer.cfg
+    -v $(pwd)/galaxy-importer.cfg:/etc/galaxy-importer/galaxy-importer.cfg \
     --env-file=pulp_settings.env \
-    -p 8080:80 \                                                    
-    quay.io/pulp/galaxy:4.9.0 
+    -p 8080:80 \
+    quay.io/pulp/galaxy:latest
 ```
 
 The container uses the s6 init system to spin up postgresql, gunicorn, nginx and various pulp services all in the same container. Once migrations have finished and the log entries settle and end with a "New worker XXXXXX discovered", the system is ready to use.
