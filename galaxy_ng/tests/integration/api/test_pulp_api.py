@@ -166,7 +166,6 @@ def test_gw_pulp_task_endpoint(galaxy_client, ansible_config):
 @pytest.mark.pulp_api
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-@pytest.mark.skip_in_gw
 def test_pulp_task_endpoint(ansible_config, local_container, require_auth):
     name = local_container.get_container()['name']
     config = ansible_config("ee_admin")

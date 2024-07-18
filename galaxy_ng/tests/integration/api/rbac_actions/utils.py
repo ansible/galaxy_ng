@@ -547,7 +547,7 @@ class ReusableLocalContainer:
         ns_r = self.gc.get(f"pulp/api/v3/pulp_container/namespaces/?name={self._ns_name}")
         pulp_namespace_path = ns_r["results"][0]["pulp_href"]
         # get roles first
-        roles = self.gc.get(f"{pulp_namespace_path}list_roles")
+        roles = self.gc.get(f"{pulp_namespace_path}list_roles/")
         for role in roles["roles"]:
             body = {
                 'role': role["role"]

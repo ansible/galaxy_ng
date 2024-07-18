@@ -65,7 +65,6 @@ def test_gw_can_update_container_push(ansible_config, galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7.1")
 @pytest.mark.min_hub_version("4.6.6")
-@pytest.mark.skip_in_gw
 def test_can_update_container_push(ansible_config, require_auth):
     config = ansible_config("admin")
     container_engine = config["container_engine"]

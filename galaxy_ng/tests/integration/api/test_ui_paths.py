@@ -42,7 +42,7 @@ from ..utils.legacy import (
     clean_all_roles,
     wait_for_v1_task
 )
-
+from ..utils.iqe_utils import aap_gateway
 from .rbac_actions.utils import ReusableLocalContainer
 
 
@@ -52,7 +52,6 @@ REGEX_403 = r"HTTP Code: 403"
 # /api/automation-hub/_ui/v1/auth/login/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_login(ansible_config):
 
     cfg = ansible_config("basic_user")
@@ -67,7 +66,6 @@ def test_api_ui_v1_login(ansible_config):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.7dev")
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_login_cache_header(ansible_config):
 
     cfg = ansible_config("basic_user")
@@ -85,7 +83,6 @@ def test_api_ui_v1_login_cache_header(ansible_config):
 # /api/automation-hub/_ui/v1/auth/logout/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_logout(ansible_config):
 
     cfg = ansible_config("basic_user")
@@ -105,7 +102,6 @@ def test_api_ui_v1_logout(ansible_config):
 # /api/automation-hub/_ui/v1/collection-versions/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 
     cfg = ansible_config('basic_user')
@@ -134,7 +130,6 @@ def test_api_ui_v1_collection_versions(ansible_config, uncertifiedv2):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertifiedv2):
     """Test the ?version_range query parameter."""
     c1, c2 = uncertifiedv2
@@ -184,7 +179,6 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_distributions(ansible_config):
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -229,7 +223,6 @@ def test_api_ui_v1_distributions(ansible_config):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_distributions_by_id(ansible_config):
     cfg = ansible_config('basic_user')
     with UIClient(config=cfg) as uclient:
@@ -259,7 +252,6 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/execution-environments/registries/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_execution_environments_registries(ansible_config):
 
     cfg = ansible_config('ee_admin')
@@ -356,7 +348,6 @@ def local_container(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_feature_flags(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -377,7 +368,6 @@ def test_api_ui_v1_feature_flags(ansible_config):
 # /api/automation-hub/_ui/v1/groups/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_groups(ansible_config):
 
     cfg = ansible_config('partner_engineer')
@@ -393,16 +383,17 @@ def test_api_ui_v1_groups(ansible_config):
         for grp in ds['data']:
             validate_json(instance=grp, schema=schema_group)
 
-        # try to make a group
-        suffix = random.choice(range(0, 1000))
-        payload = {'name': f'foobar{suffix}'}
-        resp = uclient.post('_ui/v1/groups/', payload=payload)
-        assert resp.status_code == 201
+        if not aap_gateway():
+            # try to make a group
+            suffix = random.choice(range(0, 1000))
+            payload = {'name': f'foobar{suffix}'}
+            resp = uclient.post('_ui/v1/groups/', payload=payload)
+            assert resp.status_code == 201
 
-        ds = resp.json()
-        validate_json(instance=ds, schema=schema_group)
-        assert ds['name'] == payload['name']
-        assert ds['pulp_href'].endswith(f"/{ds['id']}/")
+            ds = resp.json()
+            validate_json(instance=ds, schema=schema_group)
+            assert ds['name'] == payload['name']
+            assert ds['pulp_href'].endswith(f"/{ds['id']}/")
 
 
 # /api/automation-hub/_ui/v1/groups/{group_pk}/model-permissions/
@@ -412,7 +403,6 @@ def test_api_ui_v1_groups(ansible_config):
 # /api/automation-hub/_ui/v1/groups/{group_pk}/users/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_groups_users(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -499,7 +489,6 @@ def test_api_ui_v1_groups_users_add_delete(ansible_config):
 # /api/automation-hub/_ui/v1/groups/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_groups_by_id(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -524,7 +513,6 @@ def test_api_ui_v1_groups_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/imports/collections/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_imports_collections(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -558,7 +546,6 @@ def test_api_ui_v1_imports_collections(ansible_config):
 # /api/automation-hub/_ui/v1/me/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_me(ansible_config, settings):
 
     cfg = ansible_config('basic_user')
@@ -588,7 +575,6 @@ def test_api_ui_v1_me(ansible_config, settings):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
     gc = galaxy_client("partner_engineer")
     new_namespace = generate_unused_namespace(gc, api_version='_ui/v1')
@@ -646,7 +632,6 @@ def test_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_my_namespaces_name(ansible_config):
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
@@ -672,7 +657,6 @@ def test_api_ui_v1_my_namespaces_name(ansible_config):
 # /api/automation-hub/_ui/v1/remotes/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_remotes(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -696,7 +680,6 @@ def test_api_ui_v1_remotes(ansible_config):
 # /api/automation-hub/_ui/v1/remotes/{pulp_id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_remotes_by_id(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -723,7 +706,6 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -740,7 +722,6 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_collection_detail_view(ansible_config, published):
 
     namespace = published.namespace
@@ -766,7 +747,6 @@ def test_api_ui_v1_collection_detail_view(ansible_config, published):
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.min_hub_version("4.6dev")
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_settings(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -792,7 +772,6 @@ def test_api_ui_v1_settings(ansible_config):
 # /api/automation-hub/_ui/v1/tags/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_tags(ansible_config):
 
     cfg = ansible_config('basic_user')
@@ -944,7 +923,6 @@ def test_api_ui_v1_tags_roles(ansible_config):
 # /api/automation-hub/_ui/v1/users/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_users(ansible_config):
 
     cfg = ansible_config('partner_engineer')
@@ -961,31 +939,31 @@ def test_api_ui_v1_users(ansible_config):
         for user in ds['data']:
             validate_json(instance=user, schema=schema_user)
 
-        # try creating a user
-        suffix = random.choice(range(0, 9999))
-        payload = {
-            'username': f'foobar{suffix}',
-            'first_name': 'foobar',
-            'last_name': f'{suffix}'
-        }
-        resp = uclient.post('_ui/v1/users/', payload=payload)
-        assert resp.status_code == 201
+        if not aap_gateway():
+            # try creating a user
+            suffix = random.choice(range(0, 9999))
+            payload = {
+                'username': f'foobar{suffix}',
+                'first_name': 'foobar',
+                'last_name': f'{suffix}'
+            }
+            resp = uclient.post('_ui/v1/users/', payload=payload)
+            assert resp.status_code == 201
 
-        ds = resp.json()
-        validate_json(instance=ds, schema=schema_user)
+            ds = resp.json()
+            validate_json(instance=ds, schema=schema_user)
 
-        # should NOT be superuser by default
-        assert not ds['is_superuser']
+            # should NOT be superuser by default
+            assert not ds['is_superuser']
 
-        assert ds['username'] == payload['username']
-        assert ds['first_name'] == payload['first_name']
-        assert ds['last_name'] == payload['last_name']
+            assert ds['username'] == payload['username']
+            assert ds['first_name'] == payload['first_name']
+            assert ds['last_name'] == payload['last_name']
 
 
 # /api/automation-hub/_ui/v1/users/{id}/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.skip_in_gw
 def test_api_ui_v1_users_by_id(ansible_config):
 
     cfg = ansible_config('partner_engineer')

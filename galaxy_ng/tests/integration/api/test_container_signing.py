@@ -85,7 +85,6 @@ def test_gw_push_and_sign_a_container(ansible_config, flags, galaxy_client):
     ],
 )
 @pytest.mark.deployment_standalone
-@pytest.mark.skip_in_gw
 def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_client):
     can_sign = flags.get("container_signing")
     if not can_sign:

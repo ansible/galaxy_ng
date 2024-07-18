@@ -19,7 +19,6 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.parametrize("profile", ("basic_user", "partner_engineer", "org_admin", "admin"))
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
-@pytest.mark.skip_in_gw
 def test_token_auth(profile, galaxy_client, ansible_config):
     """Test whether normal auth is required and works to access APIs.
 
@@ -31,7 +30,10 @@ def test_token_auth(profile, galaxy_client, ansible_config):
         expected_status_code = 403
 
     gc = galaxy_client(profile)
-    del gc.headers["Authorization"]
+    if not aap_gateway():
+        del gc.headers["Authorization"]
+    else:
+        del gc.headers['Cookie']
     remove_from_cache(profile)
 
     with pytest.raises(GalaxyClientError) as ctx:
@@ -131,7 +133,6 @@ def test_gateway_token_auth(galaxy_client):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.skip_in_gw
 def test_ui_login_csrftoken(galaxy_client):
     if is_keycloak():
         pytest.skip("This test is not valid for keycloak")

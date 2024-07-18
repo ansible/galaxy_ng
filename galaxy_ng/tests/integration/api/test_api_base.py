@@ -5,13 +5,16 @@ from ..utils.iqe_utils import remove_from_cache
 
 @pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.deployment_standalone
-@pytest.mark.skip_in_gw
 def test_galaxy_api_root_standalone_no_auth_access(galaxy_client):
     """Test galaxy API root."""
 
     gc = galaxy_client("basic_user")
     remove_from_cache("basic_user")
-    del gc.headers["Authorization"]
+
+    if gc.headers.get('Authorization'):
+        del gc.headers['Authorization']
+
+    assert gc.headers.get('Authorization', None) is None
     # verify api root works without authentication
     response = gc.get("")
     assert "v3" in response["available_versions"]

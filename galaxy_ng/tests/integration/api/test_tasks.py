@@ -13,7 +13,6 @@ collections:
 @pytest.mark.pulp_api
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
-@pytest.mark.skip_in_gw
 def test_logging_cid_value_in_task(galaxy_client, ansible_config):
     gc = galaxy_client("admin")
     config = ansible_config("admin")
