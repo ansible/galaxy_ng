@@ -16,7 +16,7 @@ from ..utils.tools import generate_random_string
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-@pytest.mark.parametrize("profile", ("basic_user", "partner_engineer", "org_admin", "admin"))
+@pytest.mark.parametrize("profile", ("basic_user", "partner_engineer", "org-admin", "admin"))
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 def test_token_auth(profile, galaxy_client, ansible_config):
@@ -40,7 +40,10 @@ def test_token_auth(profile, galaxy_client, ansible_config):
         gc.get("v3/collections/")
     assert ctx.value.response.status_code == expected_status_code
     gc = galaxy_client(profile, ignore_cache=True)
+    print('-----------------')
+    print('gc root', gc.galaxy_root)
     resp = gc.get("")
+    print('resp', resp)
     assert "available_versions" in resp
 
 

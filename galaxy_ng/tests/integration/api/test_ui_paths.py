@@ -425,6 +425,10 @@ def test_api_ui_v1_groups_users(ansible_config):
         assert resp.status_code == 200
         users_ds = resp.json()
         validate_json(instance=users_ds, schema=schema_objectlist)
+        print('-------------------------')
+        print('users', users_ds)
+        print('users data', users_ds["data"])
+        print('resp', resp)
         assert "jdoe" in [x["username"] for x in users_ds["data"]]
 
 
@@ -981,6 +985,11 @@ def test_api_ui_v1_users_by_id(ansible_config):
 
         ds = resp.json()
         validate_json(instance=ds, schema=schema_user)
+
+        print('-----------------------')
+        print('ds', ds)
+        print('resp', resp)
+        print('is_superuser', ds['is_superuser'])
 
         assert ds['id'] == id
         assert ds['username'] == 'jdoe'
