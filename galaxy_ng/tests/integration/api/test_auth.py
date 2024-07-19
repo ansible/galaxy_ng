@@ -98,9 +98,8 @@ def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
-def test_gateway_create_ns_gateway_csrftoken(galaxy_client):
-    """Test whether admin can not access collections page using invalid csrftoken."""
-    # TODO: This test fails, invalid csrftoken does not return 403. Is it correct?
+def test_gateway_create_ns_csrftoken(galaxy_client):
+    """Test whether admin can create a namespace using an invalid csrftoken."""
     gc = galaxy_client("admin")
     alt_cookies = gc.gw_client.cookies
     alt_cookies["csrftoken"] = uuid4()
