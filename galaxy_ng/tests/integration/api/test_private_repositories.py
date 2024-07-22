@@ -43,7 +43,6 @@ def distro_factory(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.private_repos
 @pytest.mark.min_hub_version("4.7dev")
-@pytest.mark.skip_in_gw
 def test_private_repositories(repo_factory, galaxy_client):
     gc_admin = galaxy_client("admin", ignore_cache=True)
     gc_basic = galaxy_client("basic_user", ignore_cache=True)
@@ -71,7 +70,6 @@ def test_private_repositories(repo_factory, galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.private_repos
 @pytest.mark.min_hub_version("4.7dev")
-@pytest.mark.skip_in_gw
 def test_distributions_with_private_repositories(
     galaxy_client, distro_factory, repo_factory
 ):

@@ -466,7 +466,7 @@ def set_test_data(ansible_config, hub_version):
         users = ["iqe_normal_user", "jdoe", "ee_admin", "org-admin"]
         for user in users:
             body = {"username": user, "password": "Th1sP4ssd", "is_superuser": True}
-            if users == "iqe_normal_user":
+            if user == "iqe_normal_user":
                 body["is_superuser"] = False
             gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
             gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
@@ -474,8 +474,10 @@ def set_test_data(ansible_config, hub_version):
                 gc.post(f"{gc.gw_root_url}api/gateway/v1/users/", body=body)
             except GalaxyClientError as e:
                 if "already exists" in e.response.text:
-                    # user already exists. It's ok.
-                    pass
+                    _user = gc.get(
+                        f"{gc.gw_root_url}api/gateway/v1/users/?username={user}")
+                    user_id = _user["results"][0]["id"]
+                    gc.patch(f"{gc.gw_root_url}api/gateway/v1/users/{user_id}/", body=body)
                 else:
                     raise e
             del gc.headers["Referer"]
