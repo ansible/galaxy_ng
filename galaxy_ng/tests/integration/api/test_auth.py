@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 from ..utils import uuid4
 from ..utils.iqe_utils import is_keycloak, get_hub_version
 from ..utils.iqe_utils import remove_from_cache, aap_gateway
+from ..utils.tools import generate_random_string
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -97,17 +98,17 @@ def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
-def test_gateway_auth_admin_gateway_csrftoken(galaxy_client):
-    """Test whether admin can not access collections page using invalid csrftoken."""
-    # TODO: This test fails, invalid csrftoken does not return 403. Is it correct?
+def test_gateway_create_ns_csrftoken(galaxy_client):
+    """Test whether admin can create a namespace using an invalid csrftoken."""
     gc = galaxy_client("admin")
     alt_cookies = gc.gw_client.cookies
     alt_cookies["csrftoken"] = uuid4()
     gc.headers["Cookie"] = (f"csrftoken={alt_cookies['csrftoken']};"
                             f" gateway_sessionid={alt_cookies['gateway_sessionid']}")
     remove_from_cache("admin")
+    create_body = {"name": f"test_ns_{generate_random_string(4).lower()}", "groups": []}
     with pytest.raises(GalaxyClientError) as ctx:
-        gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
+        gc.post("v3/namespaces/", create_body, relogin=False)
     assert ctx.value.response.status_code == 401
     remove_from_cache("admin")
 
