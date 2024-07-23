@@ -196,8 +196,16 @@ class TestRepositories:
         copy_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
         matches, results = search_collection_endpoint(gc_admin, name=artifact.name)
         expected = [
-            {"cv_name": artifact.name, "repo_name": test_repo_name_1, "is_signed": use_collection_signatures},
-            {"cv_name": artifact.name, "repo_name": test_repo_name_2, "is_signed": use_collection_signatures},
+            {
+                "cv_name": artifact.name,
+                "repo_name": test_repo_name_1,
+                "is_signed": use_collection_signatures
+            },
+            {
+                "cv_name": artifact.name,
+                "repo_name": test_repo_name_2,
+                "is_signed": use_collection_signatures
+            },
         ]
         assert verify_repo_data(expected, results)
 
@@ -237,7 +245,11 @@ class TestRepositories:
 
         move_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
         _, results = search_collection_endpoint(gc_admin, name=artifact.name)
-        expected = [{"cv_name": artifact.name, "repo_name": test_repo_name_2, "is_signed": use_collection_signatures}]
+        expected = [{
+            "cv_name": artifact.name,
+            "repo_name": test_repo_name_2,
+            "is_signed": use_collection_signatures
+        }]
         assert verify_repo_data(expected, results)
         matches, _ = search_collection_endpoint(
             gc_admin, name=artifact.name, repository_name=test_repo_name_1
