@@ -119,7 +119,7 @@ def test_validated_publish(ansible_config, artifact, galaxy_client):
 @pytest.mark.all
 def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
     """Test error responses when posting to the collections endpoint."""
-    config = ansible_config("basic_user")
+    config = ansible_config("admin")
     api_client = get_client(config)
 
     with pytest.raises(CapturingGalaxyError) as excinfo:
@@ -138,7 +138,7 @@ def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
 @pytest.mark.all
 def test_api_publish_invalid_tarball(artifact, galaxy_client):
     """Test error responses when uploading a file that is not a tarball."""
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
 
     with open(artifact.filename, "wb") as f:
         f.write(randstr(1024).encode("utf8"))
@@ -151,7 +151,7 @@ def test_api_publish_invalid_tarball(artifact, galaxy_client):
 
 def test_api_publish_missing_filename(galaxy_client, artifact):
     """Test handling of uploads missing the filename parameter."""
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
 
     with pytest.raises(GalaxyClientError) as excinfo:
         with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
@@ -169,7 +169,7 @@ def test_api_publish_missing_filename(galaxy_client, artifact):
 @pytest.mark.all
 def test_api_publish_broken_manifest(artifact, galaxy_client):
     """Test handling of uploads missing the collection name parameter."""
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
 
     with modify_artifact(artifact) as artifact_dir:
         manifest_path = os.path.join(artifact_dir, "MANIFEST.json")
@@ -197,7 +197,7 @@ INVALID_NAMES = {
 @pytest.mark.all
 def test_api_publish_invalid_filename(galaxy_client, artifact, wrong_name):
     """Test handling of uploads with invalid filenames."""
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
 
     # use the param lambda function to alter the tarball filename ...
     wrong_name = INVALID_NAMES[wrong_name](os.path.basename(artifact.filename))
@@ -221,7 +221,7 @@ def test_api_publish_invalid_filename(galaxy_client, artifact, wrong_name):
 
 def test_api_publish_missing_file(galaxy_client, artifact):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
     with pytest.raises(GalaxyClientError) as excinfo:
         with patch("ansible.galaxy.api.GalaxyError", GalaxyClientError):
             upload_artifact(None, gc, artifact, no_file=True)
@@ -262,7 +262,7 @@ MAX_LENGTH_VERSION = 128
 @pytest.mark.all
 def test_long_field_values(galaxy_client, field):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
     fieldname, fieldvalue, fieldmax = field
     artifact = build_collection(
         "skeleton", config={"namespace": USERNAME_PUBLISHER, fieldname: fieldvalue}
@@ -344,7 +344,7 @@ def test_ansible_lint_exception(galaxy_client, hub_version):
         * ansible-lint runs against our uploaded collection
         * the bug in https://github.com/ansible/galaxy-importer/pull/115 remains fixed.
     """
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
 
     broken_role_yaml = [{"name": "a task", "not.a.real.module": {"fake": "fake"}}]
 
@@ -387,7 +387,7 @@ def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
     https://issues.redhat.com/browse/AAH-2609
         - ansible-lint output is missing.
     """
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
 
     IGNORE_CONTENT = \
         "plugins/modules/lm_otel_collector.py validate-modules:use-run-command-not-popen\n"
@@ -450,7 +450,7 @@ def test_api_publish_log_missing_ee_deps(galaxy_client):
     In this case a requirements.txt file exists but bindep.txt does not.
     """
 
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
 
     artifact = build_collection(
         "skeleton",
@@ -488,7 +488,7 @@ def test_api_publish_ignore_files_logged(galaxy_client):
     """
     Test that galaxy-importer logs when ansible-test sanity ignore files are present.
     """
-    gc = galaxy_client("basic_user")
+    gc = galaxy_client("admin")
 
     artifact = build_collection(
         "skeleton",
