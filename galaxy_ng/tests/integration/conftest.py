@@ -400,7 +400,8 @@ def use_collection_signatures(settings):
 def autohubtest2(galaxy_client):
     """A carry over pre-created namespace from the original IQE tests."""
     gc = galaxy_client("admin")
-    return create_namespace("autohubtest2", gc=gc)
+    create_namespace(gc, "autohubtest2", "")
+    return {"name": "autohubtest2"}
 
 
 def set_test_data(ansible_config, hub_version):
