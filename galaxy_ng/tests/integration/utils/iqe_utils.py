@@ -534,9 +534,13 @@ class AnsibleConfigFixture(dict):
                 return None
 
         elif key == "username":
+            if self.profile == 'admin' and os.environ.get('HUB_ADMIN_USER'):
+                return os.environ.get('HUB_ADMIN_USER')
             return self.PROFILES[self.profile]["username"]
 
         elif key == "password":
+            if self.profile == 'admin' and os.environ.get('HUB_ADMIN_PASS'):
+                return os.environ.get('HUB_ADMIN_PASS')
             return self.PROFILES[self.profile]["password"]
 
         elif key == 'use_move_endpoint':
@@ -660,8 +664,14 @@ def has_old_credentials():
 @lru_cache()
 def get_hub_version(ansible_config):
     if aap_gateway():
-        username = ansible_config("admin").PROFILES.get("admin").get("username")
-        password = ansible_config("admin").PROFILES.get("admin").get("password")
+        # Why would we do this? ...
+        # username = ansible_config("admin").PROFILES.get("admin").get("username")
+        # password = ansible_config("admin").PROFILES.get("admin").get("password")
+
+        cfg = ansible_config("admin")
+        username = cfg.get('username')
+        password = cfg.get('password')
+
         gw_root_url = ansible_config("admin").get("gw_root_url")
         gc = GalaxyClient(galaxy_root="foo", auth={"username": username, "password": password},
                           gw_auth=True, https_verify=False, gw_root_url=gw_root_url)
