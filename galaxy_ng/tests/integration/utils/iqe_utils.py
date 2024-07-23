@@ -664,15 +664,11 @@ def has_old_credentials():
 @lru_cache()
 def get_hub_version(ansible_config):
     if aap_gateway():
-        # Why would we do this? ...
-        # username = ansible_config("admin").PROFILES.get("admin").get("username")
-        # password = ansible_config("admin").PROFILES.get("admin").get("password")
-
         cfg = ansible_config("admin")
         username = cfg.get('username')
         password = cfg.get('password')
+        gw_root_url = cfg.get("gw_root_url")
 
-        gw_root_url = ansible_config("admin").get("gw_root_url")
         gc = GalaxyClient(galaxy_root="foo", auth={"username": username, "password": password},
                           gw_auth=True, https_verify=False, gw_root_url=gw_root_url)
         galaxy_ng_version = gc.get_server_version()
