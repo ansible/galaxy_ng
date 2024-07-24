@@ -168,7 +168,7 @@ class TestRepositories:
     @pytest.mark.repositories
     @pytest.mark.deployment_standalone
     @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
-    def test_copy_signed_cv_endpoint(self, galaxy_client):
+    def test_copy_signed_cv_endpoint(self, use_collection_signatures, galaxy_client):
         """
         Verifies a signed cv can be copied to a different repo
         """
@@ -190,13 +190,22 @@ class TestRepositories:
         test_repo_name_2 = f"repo-test-{generate_random_string()}"
         repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
 
-        sign_collection(gc_admin, content_units[0], repo_pulp_href_1)
+        if use_collection_signatures:
+            sign_collection(gc_admin, content_units[0], repo_pulp_href_1)
 
         copy_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
         matches, results = search_collection_endpoint(gc_admin, name=artifact.name)
         expected = [
-            {"cv_name": artifact.name, "repo_name": test_repo_name_1, "is_signed": True},
-            {"cv_name": artifact.name, "repo_name": test_repo_name_2, "is_signed": True},
+            {
+                "cv_name": artifact.name,
+                "repo_name": test_repo_name_1,
+                "is_signed": use_collection_signatures
+            },
+            {
+                "cv_name": artifact.name,
+                "repo_name": test_repo_name_2,
+                "is_signed": use_collection_signatures
+            },
         ]
         assert verify_repo_data(expected, results)
 
@@ -209,7 +218,7 @@ class TestRepositories:
     @pytest.mark.repositories
     @pytest.mark.deployment_standalone
     @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
-    def test_move_signed_cv_endpoint(self, galaxy_client):
+    def test_move_signed_cv_endpoint(self, use_collection_signatures, galaxy_client):
         """
         Verifies a signed cv can be moved to a different repo
         """
@@ -231,11 +240,16 @@ class TestRepositories:
         test_repo_name_2 = f"repo-test-{generate_random_string()}"
         repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
 
-        sign_collection(gc_admin, content_units[0], repo_pulp_href_1)
+        if use_collection_signatures:
+            sign_collection(gc_admin, content_units[0], repo_pulp_href_1)
 
         move_content_between_repos(gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2])
         _, results = search_collection_endpoint(gc_admin, name=artifact.name)
-        expected = [{"cv_name": artifact.name, "repo_name": test_repo_name_2, "is_signed": True}]
+        expected = [{
+            "cv_name": artifact.name,
+            "repo_name": test_repo_name_2,
+            "is_signed": use_collection_signatures
+        }]
         assert verify_repo_data(expected, results)
         matches, _ = search_collection_endpoint(
             gc_admin, name=artifact.name, repository_name=test_repo_name_1

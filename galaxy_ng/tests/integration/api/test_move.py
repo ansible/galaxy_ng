@@ -177,7 +177,12 @@ def test_copy_collection_version(ansible_config, galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
-def test_copy_associated_content(ansible_config, galaxy_client):
+def test_copy_associated_content(
+    use_collection_signatures,
+    autohubtest2,
+    ansible_config,
+    galaxy_client
+):
     """Tests whether a collection and associated content is copied from repo to repo"""
 
     # TODO: add check for ansible namespace metadata
@@ -185,13 +190,15 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     artifact = build_collection(
         "skeleton",
         config={
-            "namespace": USERNAME_PUBLISHER,
+            "namespace": autohubtest2['name'],
             "tags": ["tools", "copytest"],
         }
     )
 
-    # import and wait ...
+    # make admin client
     gc_admin = galaxy_client("admin")
+
+    # import and wait ...
     resp = upload_artifact(None, gc_admin, artifact)
     wait_for_task(gc_admin, resp)
 
@@ -223,7 +230,8 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     col_marked = gc_admin.get(collection_mark)["results"]
     assert len(col_marked) == 0
 
-    sign_collection(gc_admin, cv_href, pulp_href)
+    if use_collection_signatures:
+        sign_collection(gc_admin, cv_href, pulp_href)
 
     # mark collection
     marked_collection = gc_admin.post(
@@ -243,8 +251,9 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     col_deprecation = gc_admin.get(collection)["deprecated"]
     assert col_deprecation is True
 
-    col_signature = gc_admin.get(collection_version)["signatures"]
-    assert len(col_signature) == 1
+    if use_collection_signatures:
+        col_signature = gc_admin.get(collection_version)["signatures"]
+        assert len(col_signature) == 1
 
     col_marked = gc_admin.get(collection_mark)["results"]
     assert len(col_marked) == 1
@@ -268,8 +277,9 @@ def test_copy_associated_content(ansible_config, galaxy_client):
     col_deprecation = gc_admin.get(collection)["deprecated"]
     assert col_deprecation is True
 
-    col_signature = gc_admin.get(collection_version)["signatures"]
-    assert len(col_signature) == 1
+    if use_collection_signatures:
+        col_signature = gc_admin.get(collection_version)["signatures"]
+        assert len(col_signature) == 1
 
     col_marked = gc_admin.get(collection_mark)["results"]
     assert len(col_marked) == 1

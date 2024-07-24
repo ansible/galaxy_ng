@@ -4,6 +4,8 @@ import logging
 import random
 import string
 
+from galaxykit.utils import GalaxyClientError
+
 from .collections import delete_all_collections_in_namespace, \
     delete_all_collections_in_namespace_gk
 
@@ -116,3 +118,18 @@ def cleanup_namespace_gk(name, gc_admin):
 
         resp = gc_admin.get(f'v3/namespaces/?name={name}')
         assert resp['meta']['count'] == 0
+
+
+def create_namespace(namespace_name, gc=None):
+    """ Make a namespace for testing if it does not exist."""
+    assert gc is not None, "api_client is a required param"
+    # check if it already exists ...
+    try:
+        resp = gc.get(f"_ui/v1/namespaces/{namespace_name}/")
+        return resp
+    except GalaxyClientError:
+        pass
+
+    # create it
+    payload = {"name": namespace_name, "groups": []}
+    return gc.post("v3/namespaces/", body=payload)
