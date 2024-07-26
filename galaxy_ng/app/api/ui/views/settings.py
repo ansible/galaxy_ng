@@ -27,5 +27,6 @@ class SettingsView(api_base.APIView):
             "GALAXY_LDAP_DISABLE_REFERRALS",
             "KEYCLOAK_URL",
         ]
-        data = {key: settings.as_dict().get(key, None) for key in keyset}
+        settings_dict = settings.as_dict()
+        data = {key: settings_dict.get(key, None) for key in keyset}
         return Response(data)
