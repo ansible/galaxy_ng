@@ -102,14 +102,14 @@ def test_gateway_create_ns_csrftoken(galaxy_client):
     """Test whether admin can create a namespace using an invalid csrftoken."""
     gc = galaxy_client("admin")
     alt_cookies = gc.gw_client.cookies
-    alt_cookies["csrftoken"] = uuid4()
+    alt_cookies["csrftoken"] = "f8QJ2hHGP3NS2HaNid10eoptnzWDvFqn"  # wrong token
     gc.headers["Cookie"] = (f"csrftoken={alt_cookies['csrftoken']};"
                             f" gateway_sessionid={alt_cookies['gateway_sessionid']}")
     remove_from_cache("admin")
     create_body = {"name": f"test_ns_{generate_random_string(4).lower()}", "groups": []}
     with pytest.raises(GalaxyClientError) as ctx:
-        gc.post("v3/namespaces/", create_body, relogin=False)
-    assert ctx.value.response.status_code == 401
+        gc.post("v3/namespaces/", create_body, relogin=False, parse_json=False)
+    assert ctx.value.response.status_code == 403
     remove_from_cache("admin")
 
 
