@@ -730,11 +730,10 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
 
 
 def configure_dab_required_settings(settings: Dynaconf) -> Dict[str, Any]:
-    """Load all keys defined on dab dynamic_settings if not already defined."""
-    data = {}
-    notset = object()
+    """Import DAB settings with settings context."""
     from ansible_base.lib.dynamic_config import dynamic_settings
-    for key in dir(dynamic_settings):
-        if key.isupper() and settings.get(key, notset) is notset:
-            data[key] = getattr(dynamic_settings, key)
-    return data
+    from inspect import getsource
+    settings.set("INSTALLED_APPS", ["ansible_base.rbac", "dynaconf_merge_unique"])
+    shared_globals = settings.as_dict()
+    exec(getsource(dynamic_settings), shared_globals)  # I know :)
+    return shared_globals
