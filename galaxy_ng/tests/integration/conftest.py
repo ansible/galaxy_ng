@@ -499,7 +499,6 @@ def set_test_data(ansible_config, hub_version):
                 else:
                     raise e
             del gc.headers["Referer"]
-            del gc.headers["X-Csrftoken"]
 
 
 @pytest.fixture(scope="session")
