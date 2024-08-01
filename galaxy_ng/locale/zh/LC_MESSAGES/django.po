@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 13:30+0000\n"
+"POT-Creation-Date: 2024-08-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -68,17 +68,15 @@ msgstr "组必须是一个组对象的列表"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "组名=%s, id=%s 不存在"
 
-#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:159
 msgid "Invalid group name or ID"
 msgstr "无效的组名称或 ID"
 
 #: app/access_control/fields.py:100
-#| msgid "Groups must be a list of group objects"
 msgid "Users must be a list of user objects"
 msgstr ""
 
 #: app/access_control/fields.py:113
-#| msgid "Invalid group name or ID"
 msgid "Invalid user username or ID"
 msgstr ""
 
@@ -127,25 +125,25 @@ msgid ""
 "{synclist}"
 msgstr "更新同步列表 {synclist} 时未找到集合 \"{namespace}.{name}\""
 
-#: app/api/ui/serializers/user.py:75
+#: app/api/ui/serializers/user.py:77
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
 msgstr "更改请求用户不在的用户组需要具有 'galaxy.change_group' 权限。"
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:92 app/api/ui/serializers/user.py:98
 msgid "Must be a super user to grant super user permissions."
 msgstr "必须是超级用户才能授予超级用户权限。"
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:112
 msgid "Must be a super user to change another user's password."
 msgstr "必须是超级用户才能更改其他用户的密码。"
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:128
 msgid "You do not have permissions to modify super users."
 msgstr "您没有修改超级用户的权限。"
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:155
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "组名=%(name)s, id=%(id)s 不存在"
