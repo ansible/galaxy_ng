@@ -33,6 +33,11 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: (Linux) Install docker compose
+        run: |
+          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
+          install /tmp/docker-compose /usr/local/bin/
+
       # Note: COMPOSE_INTERACTIVE_NO_CLI=1 is required for oci-env to work correctly when there's no interactive terminal
       - name: Set environment variables
         run: |
