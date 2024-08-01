@@ -15,6 +15,7 @@ from galaxykit.groups import create_group_v3, create_group, get_roles, \
     delete_group_v3, get_group_v3
 from galaxykit.namespaces import create_namespace
 from ..utils import UIClient, get_client
+from ..utils.iqe_utils import aap_gateway
 
 from ..utils.iqe_utils import AnsibleConfigFixture
 
@@ -39,6 +40,7 @@ API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
     os.getenv("ENABLE_DAB_TESTS"),
     reason="Group creation is disabled in the DAB test profile."
 )
+@pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
 def test_gw_group_role_listing(galaxy_client, test_data):
     """Tests ability to list roles assigned to a namespace."""
 
