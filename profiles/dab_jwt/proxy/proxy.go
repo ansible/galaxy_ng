@@ -605,6 +605,7 @@ func BasicAuth(next http.Handler) http.Handler {
 
 		// is there a csrftoken and is it valid?
 		csrftoken, err := GetCookieValue(r, "csrftoken")
+        log.Printf("CHECKING CSRFTOKEN %s", csrftoken)
 		if err == nil && !isCSRFTokenKnown(csrftoken) {
 
 			// allow if this was a token from the downstream ...
@@ -617,7 +618,7 @@ func BasicAuth(next http.Handler) http.Handler {
 			log.Printf("Unauthorized Invalid csrftoken\n")
 			printKnownCSRFTokens()
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(401)
+			w.WriteHeader(403)
 			responseBody := fmt.Sprintf(`{"error": "invalid csrftoken"}`)
 			w.Write([]byte(responseBody))
 			return
