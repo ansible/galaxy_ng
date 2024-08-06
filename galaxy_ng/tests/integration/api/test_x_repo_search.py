@@ -560,10 +560,22 @@ class TestXRepoSearch:
     @pytest.mark.parametrize("is_signed", [True, False])
     @pytest.mark.x_repo_search
     @pytest.mark.skipif(is_ocp_env(), reason="Content signing not enabled in AAP Operator")
-    def test_search_by_is_signed_true_false(self, galaxy_client, is_signed):
+    def test_search_by_is_signed_true_false(
+        self,
+        use_collection_signatures,
+        galaxy_client,
+        is_signed
+    ):
         """
         Verifies that search endpoint can search by is_signed
         """
+
+        # we shouldn't be here if the system doesn't have signatures
+        # enabled and a valid signing service, but we have pipelines
+        # that seem to have issues using the correct marks.
+        if not use_collection_signatures:
+            pytest.skip("signatures are required for this test")
+
         test_repo_name = f"repo-test-1-{generate_random_string()}"
         gc = galaxy_client("iqe_admin")
         repo_pulp_href = create_repo_and_dist(gc, test_repo_name)

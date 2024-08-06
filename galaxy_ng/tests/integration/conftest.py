@@ -386,6 +386,24 @@ def settings(galaxy_client):
     return gc.get("_ui/v1/settings/")
 
 
+@pytest.fixture(scope="function")
+def use_collection_signatures(settings):
+    """A shortcut to know if a test should attempt to work with signatures."""
+    service = settings["GALAXY_COLLECTION_SIGNING_SERVICE"]
+    required = settings["GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"]
+    if service is not None and required:
+        return True
+    return False
+
+
+@pytest.fixture(scope="function")
+def autohubtest2(galaxy_client):
+    """A carry over pre-created namespace from the original IQE tests."""
+    gc = galaxy_client("admin")
+    create_namespace(gc, "autohubtest2", "")
+    return {"name": "autohubtest2"}
+
+
 def set_test_data(ansible_config, hub_version):
     role = "admin"
     gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
@@ -481,7 +499,6 @@ def set_test_data(ansible_config, hub_version):
                 else:
                     raise e
             del gc.headers["Referer"]
-            del gc.headers["X-Csrftoken"]
 
 
 @pytest.fixture(scope="session")
