@@ -436,6 +436,7 @@ class TestXRepoSearch:
 
     @pytest.mark.parametrize("is_deprecated", [True, False])
     @pytest.mark.x_repo_search
+    @pytest.mark.skip_in_gw
     def test_search_by_is_deprecated_true_false(self, galaxy_client, is_deprecated):
         """
         Verifies that search endpoint can search by is_deprecated parameter
