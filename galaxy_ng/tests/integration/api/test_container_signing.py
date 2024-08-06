@@ -27,24 +27,21 @@ def test_gw_push_and_sign_a_container(ansible_config, flags, galaxy_client):
         pytest.skip("GALAXY_CONTAINER_SIGNING_SERVICE is not configured")
 
     config = ansible_config("admin")
-    url = config['url']
-    parsed_url = urlparse(url)
-    cont_reg = parsed_url.netloc
-
     container_engine = config["container_engine"]
+    container_registry = config["container_registry"]
 
     # Pull alpine image
-    pull_and_tag_test_image(container_engine, cont_reg)
+    pull_and_tag_test_image(container_engine, container_registry)
 
     # Login to local registry with tls verify disabled
     cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", f"{config['url'].split(parsed_url.path)[0]}"]
+           f"{config['password']}", container_registry]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
 
     # Push image to local registry
-    cmd = [container_engine, "push", f"{cont_reg}/alpine:latest"]
+    cmd = [container_engine, "push", f"{container_registry}/alpine:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
