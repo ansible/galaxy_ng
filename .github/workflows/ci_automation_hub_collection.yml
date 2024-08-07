@@ -25,6 +25,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: (Linux) Install docker compose
+        run: |
+          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
+          install /tmp/docker-compose /usr/local/bin/
+
       - name: install ansible
         run: pip3 install ansible
 
@@ -74,10 +79,10 @@ jobs:
         run: make oci/standalone/poll
 
       - name: create the test users+data
-        run: docker exec -t ci-standalone_pulp_1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
+        run: docker exec -t ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
 
       - name: make messages
-        run: docker exec -t ci-standalone_pulp_1 bash -c 'cd /src/galaxy_ng/galaxy_ng; django-admin makemessages --all'
+        run: docker exec -t ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng/galaxy_ng; django-admin makemessages --all'
 
       - name: Test the user playbook
         run: ansible-playbook dev/galaxy_collection_plays/user.yml -vvv
