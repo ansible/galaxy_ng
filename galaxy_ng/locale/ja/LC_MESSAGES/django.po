@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 13:30+0000\n"
+"POT-Creation-Date: 2024-08-01 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,17 +70,15 @@ msgstr "グループは、グループオブジェクトの一覧でなければ
 msgid "Group name=%s, id=%s does not exist"
 msgstr "グループ名=%s、id=%s は存在しません"
 
-#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:159
 msgid "Invalid group name or ID"
 msgstr "無効なグループ名または ID"
 
 #: app/access_control/fields.py:100
-#| msgid "Groups must be a list of group objects"
 msgid "Users must be a list of user objects"
 msgstr ""
 
 #: app/access_control/fields.py:113
-#| msgid "Invalid group name or ID"
 msgid "Invalid user username or ID"
 msgstr ""
 
@@ -137,7 +135,7 @@ msgstr ""
 "同期リスト {synclist} の更新中にコレクション \"{namespace}.{name}\" が見つか"
 "りませんでした"
 
-#: app/api/ui/serializers/user.py:75
+#: app/api/ui/serializers/user.py:77
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
@@ -145,23 +143,23 @@ msgstr ""
 "要求するユーザーが所属しないユーザーグループを変更するには、「galaxy."
 "change_group」パーミッションが必要です。"
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:92 app/api/ui/serializers/user.py:98
 msgid "Must be a super user to grant super user permissions."
 msgstr ""
 "スーパーユーザーパーミッションを付与するには、スーパーユーザーである必要があ"
 "ります。"
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:112
 msgid "Must be a super user to change another user's password."
 msgstr ""
 "別のユーザーのパスワードを変更するには、スーパーユーザーである必要がありま"
 "す。"
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:128
 msgid "You do not have permissions to modify super users."
 msgstr "スーパーユーザーを変更するパーミッションがありません。"
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:155
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "グループ名=%(name)s、id=%(id)s は存在しません"
