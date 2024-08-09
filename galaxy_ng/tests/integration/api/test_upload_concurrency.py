@@ -10,11 +10,13 @@ from ..utils import (
 from ..utils.repo_management_utils import search_collection_endpoint, create_repo_and_dist, \
     create_test_namespace
 from ..utils.tools import generate_random_string
+from ..utils.iqe_utils import aap_gateway
 
 
 @pytest.mark.min_hub_version("4.8dev")
 # if this is backported, remove the min_hub_version marker
 @pytest.mark.deployment_standalone
+@pytest.mark.skipif(aap_gateway(), reason="This test does not work with the jwt proxy")
 def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
     total = 10

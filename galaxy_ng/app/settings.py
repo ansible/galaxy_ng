@@ -108,6 +108,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'crum',
     'ansible_base.resource_registry',
+    'ansible_base.rbac',
     'social_django',
     'dynaconf_merge_unique',
 ]
@@ -388,6 +389,7 @@ GALAXY_DYNAMIC_SETTINGS = False
 # DJANGO ANSIBLE BASE RESOURCES REGISTRY SETTINGS
 ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = "galaxy_ng.app.api.resource_api"
 ANSIBLE_BASE_ORGANIZATION_MODEL = "galaxy.Organization"
+ANSIBLE_BASE_TEAM_MODEL = "galaxy.Team"
 ANSIBLE_BASE_JWT_VALIDATE_CERT = False
 
 # This is meant to be a url to the resource server
@@ -399,6 +401,24 @@ ANSIBLE_BASE_JWT_KEY = None
 
 # NOTE: For the Resource Sync Feature the following are required:
 # RESOURCE_SERVER = {"URL": str, "SECRET_KEY": str, "VALIDATE_HTTPS": bool}
+
+# -- ANSIBLE BASE RBAC --
+# If a role does not already exist that can give those object permissions
+# then the system must create one, this is used for naming the auto-created role
+ANSIBLE_BASE_ROLE_CREATOR_NAME = "{obj._meta.model_name} Creator Role"
+# Require change permission to get delete permission
+ANSIBLE_BASE_DELETE_REQUIRE_CHANGE = False
+# For assignments
+ANSIBLE_BASE_ALLOW_TEAM_PARENTS = False
+ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN = False
+ANSIBLE_BASE_ALLOW_TEAM_ORG_MEMBER = True
+# For role definitions
+ANSIBLE_BASE_ALLOW_CUSTOM_TEAM_ROLES = True
+# required for user level rbac roles&permissions
+ANSIBLE_BASE_ALLOW_SINGLETON_USER_ROLES = True
+ANSIBLE_BASE_ALLOW_SINGLETON_TEAM_ROLES = True
+# Pass ignore_conflicts=False for bulk_create calls for role evaluations
+ANSIBLE_BASE_EVALUATIONS_IGNORE_CONFLICTS = False
 
 # WARNING: This setting is used in database migrations to create a default organization.
 DEFAULT_ORGANIZATION_NAME = "Default"

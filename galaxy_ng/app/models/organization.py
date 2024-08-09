@@ -10,6 +10,7 @@ from django_lifecycle import AFTER_UPDATE, BEFORE_CREATE, LifecycleModelMixin, h
 from pulpcore.plugin.models import Group as PulpGroup
 
 from galaxy_ng.app.models.auth import Group
+from ansible_base.resource_registry.fields import AnsibleResourceField
 
 
 class OrganizationManager(models.Manager):
@@ -27,7 +28,12 @@ class Organization(LifecycleModelMixin, AbstractOrganization):
         help_text="The list of users in this organization.",
     )
 
+    resource = AnsibleResourceField(primary_key_field="id")
+
     objects = OrganizationManager()
+
+    class Meta(AbstractOrganization.Meta):
+        permissions = [('member_organization', 'User is a member of this organization')]
 
     @hook(AFTER_UPDATE)
     def _after_update(self):
@@ -50,6 +56,12 @@ class Team(LifecycleModelMixin, AbstractTeam):
         related_name="+",
         help_text="Related group record.",
     )
+
+    resource = AnsibleResourceField(primary_key_field="id")
+
+    # Team member permission is used by DAB RBAC
+    class Meta(AbstractTeam.Meta):
+        permissions = [('member_team', 'Has all permissions granted to this team')]
 
     def group_name(self):
         if self.organization.name == settings.DEFAULT_ORGANIZATION_NAME:

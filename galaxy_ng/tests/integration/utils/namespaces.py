@@ -59,6 +59,15 @@ def get_all_namespaces(gc=None, api_version='v3'):
     return namespaces
 
 
+def get_namespace(namespace_name, gc=None):
+    """ Create a list of namespaces visible to the client """
+
+    assert gc is not None, "api_client is a required param"
+
+    page = f'_ui/v1/namespaces/{namespace_name}/'
+    return gc.get(page, retries=1)
+
+
 def generate_unused_namespace(gc=None, api_version='v3'):
     """ Make a random namespace string that does not exist """
 

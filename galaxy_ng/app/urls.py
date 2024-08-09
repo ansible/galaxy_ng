@@ -52,6 +52,7 @@ urlpatterns = [
 ]
 
 urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(resource_api_urls)))
+# urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(dab_rbac_urls)))
 
 if settings.get("API_ROOT") != "/pulp/":
     urlpatterns.append(

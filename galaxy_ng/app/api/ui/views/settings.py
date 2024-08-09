@@ -26,6 +26,7 @@ class SettingsView(api_base.APIView):
             "GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS",
             "GALAXY_LDAP_DISABLE_REFERRALS",
             "KEYCLOAK_URL",
+            "ALLOW_LOCAL_RESOURCE_MANAGEMENT",
         ]
         settings_dict = settings.as_dict()
         data = {key: settings_dict.get(key, None) for key in keyset}

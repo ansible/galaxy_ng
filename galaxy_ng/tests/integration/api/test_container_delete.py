@@ -20,13 +20,15 @@ def test_delete_ee_and_content(ansible_config, galaxy_client):
 
     container_engine = config["container_engine"]
     container_registry = config["container_registry"]
+    username = config['username']
+    password = config['password']
 
     # Pull alpine image
     pull_and_tag_test_image(container_engine, container_registry)
 
     # Login to local registry with tls verify disabled
-    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", container_registry]
+    cmd = [container_engine, "login", "-u", username, "-p",
+           password, container_registry]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)
@@ -84,11 +86,19 @@ def test_shared_content_is_not_deleted(ansible_config, galaxy_client):
     config = ansible_config("admin")
     container_engine = config["container_engine"]
     container_registry = config["container_registry"]
+    username = config['username']
+    password = config['password']
+
+    # FIXME - these settings are wrong for dab_jwt ...
+    if 'jwtproxy' in gc.galaxy_root:
+        container_registry = gc.galaxy_root.split('/')[2]
+        password = 'redhat'
+
     # Pull alpine image
     image = pull_and_tag_test_image(container_engine, container_registry, "alpine1:latest")
     # Login to local registry with tls verify disabled
-    cmd = [container_engine, "login", "-u", f"{config['username']}", "-p",
-           f"{config['password']}", container_registry]
+    cmd = [container_engine, "login", "-u", username, "-p",
+           password, container_registry]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
     subprocess.check_call(cmd)

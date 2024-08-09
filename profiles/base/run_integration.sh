@@ -50,6 +50,10 @@ cd /src/galaxy_ng/
 # TODO: fix marks
 set -x
 
+export GALAXYKIT_SLEEP_SECONDS_POLLING="1"
+export GALAXYKIT_SLEEP_SECONDS_ONETIME="1"
+export GALAXYKIT_POLLING_MAX_ATTEMPTS="50"
+
 $VENVPATH/bin/pytest -v -r sx --color=yes -m "$HUB_TEST_MARKS" "$@" galaxy_ng/tests/integration
 RC=$?
 

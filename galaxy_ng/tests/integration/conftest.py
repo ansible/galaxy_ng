@@ -33,6 +33,8 @@ from .utils.iqe_utils import (
     require_signature_for_approval
 )
 from .utils.tools import generate_random_artifact_version
+from .utils.namespaces import generate_namespace
+from .utils.namespaces import get_namespace
 
 
 MARKER_CONFIG = """
@@ -402,6 +404,21 @@ def autohubtest2(galaxy_client):
     gc = galaxy_client("admin")
     create_namespace(gc, "autohubtest2", "")
     return {"name": "autohubtest2"}
+
+
+@pytest.fixture(scope="function")
+def random_namespace(galaxy_client):
+    """Make a randomized namespace."""
+    gc = galaxy_client("admin")
+    ns_name = 'namespace_' + generate_namespace()
+    create_namespace(gc, ns_name, "")
+    return get_namespace(ns_name, gc=gc)
+
+
+@pytest.fixture(scope="function")
+def random_username(galaxy_client):
+    """Make a random username."""
+    return 'user_' + generate_namespace()
 
 
 def set_test_data(ansible_config, hub_version):
