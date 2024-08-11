@@ -17,11 +17,12 @@ cd /src/galaxy_ng/
 set -x
 
 export HUB_API_ROOT=http://jwtproxy:8080/api/galaxy/
-export HUB_ADMIN_PASS=admin
+# export HUB_ADMIN_PASS=admin
 export HUB_USE_MOVE_ENDPOINT=1
 export HUB_LOCAL=1
 export ENABLE_DAB_TESTS=1
 export HUB_TEST_MARKS="deployment_standalone and not skip_in_gw"
+export JWT_PROXY=true
 export AAP_GATEWAY=true
 export GW_ROOT_URL=http://jwtproxy:8080
 

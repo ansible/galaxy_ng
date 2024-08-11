@@ -90,7 +90,8 @@ _LOCKED_ROLES = {
         "permissions": {
             "container.change_containernamespace",
             "container.namespace_add_containerdistribution",
-            "container.manage_roles_containernamespace"
+            "container.manage_roles_containernamespace",
+            "container.view_containernamespace"
         },
         "inherit_from": ["galaxy.execution_environment_collaborator"],
     },

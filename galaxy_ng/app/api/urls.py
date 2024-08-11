@@ -3,6 +3,7 @@ from django.urls import include, path
 
 from . import views
 from .ui import urls as ui_urls
+from .ui_v2 import urls as ui_v2_urls
 from .v1 import urls as v1_urls
 from .v3 import urls as v3_urls
 
@@ -60,6 +61,7 @@ v3_combined = [
 
 urlpatterns = [
     path("_ui/", include((ui_urls, app_name), namespace="ui")),
+    path("_ui/v2/", include((ui_v2_urls, app_name), namespace="ui_v2")),
 
     path("", include((v3_combined, app_name), namespace='v3')),
 

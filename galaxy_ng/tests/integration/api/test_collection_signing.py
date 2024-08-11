@@ -474,6 +474,7 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
         signature_file = open(signature_filename, "rb")
         response = requests.post(
             gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
+            verify=False,
             files={"file": signature_file},
             data={
                 "repository": repo_href,
@@ -532,6 +533,7 @@ def test_move_with_no_signing_service_not_superuser_signature_required(
 
     signature_upload_response = requests.post(
         gc_admin.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
+        verify=False,
         files={"file": signature},
         data={
             "repository": staging_href,
@@ -594,6 +596,7 @@ def test_move_with_no_signing_service(flags, galaxy_client, settings, artifact,
 
     signature_upload_response = requests.post(
         gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
+        verify=False,
         files={"file": signature},
         data={
             "repository": staging_href,

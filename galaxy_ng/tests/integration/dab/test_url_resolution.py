@@ -5,8 +5,8 @@ import requests
 
 @pytest.mark.deployment_standalone
 @pytest.mark.skipif(
-    not os.getenv("ENABLE_DAB_TESTS"),
-    reason="Skipping test because ENABLE_DAB_TESTS is not set"
+    not os.getenv("JWT_PROXY"),
+    reason="Skipping test because it only works with JWT_PROXY."
 )
 def test_dab_collection_download_url_hostnames(settings, galaxy_client, published):
     """
@@ -46,14 +46,13 @@ def test_dab_collection_download_url_hostnames(settings, galaxy_client, publishe
 
 @pytest.mark.deployment_standalone
 @pytest.mark.skipif(
-    not os.getenv("ENABLE_DAB_TESTS"),
-    reason="Skipping test because ENABLE_DAB_TESTS is not set"
+    not os.getenv("JWT_PROXY"),
+    reason="Skipping test because it only works with JWT_PROXY."
 )
 def test_dab_token_server_hostnames(settings, galaxy_client):
     """
     The www-authenticate header from /v2/ should preserve the original hostname
     """
-
     v2_hosts = [
         'jwtproxy:8080',
         'localhost:5001',
