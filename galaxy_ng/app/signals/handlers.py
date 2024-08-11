@@ -359,11 +359,18 @@ def delete_pulp_user_role(sender, instance, **kwargs):
         return
     with pulp_rbac_signals():
         rd = RoleDefinition.objects.filter(name=instance.role.name).first()
+        print(f'delete_pulp_user_role sender.user:{sender.user} instance.user:{instance.user}')
         if rd:
             if instance.content_object:
-                rd.remove_permission(instance.user, instance.content_object)
+                try:
+                    rd.remove_permission(instance.user, instance.content_object)
+                except Exception as e:
+                    logger.warning(e)
             else:
-                rd.remove_global_permission(instance.user)
+                try:
+                    rd.remove_global_permission(instance.user)
+                except Exception as e:
+                    logger.warning(e)
 
 
 @receiver(post_save, sender=GroupRole)
