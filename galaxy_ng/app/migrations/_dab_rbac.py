@@ -33,8 +33,9 @@ def split_pulp_roles(apps, schema_editor):
                     new_role = Role(**new_data)
                     new_role.save()
                     split_roles[pulp_assignment.content_type_id] = new_role
-            pulp_assignment.role = split_roles[pulp_assignment.content_type_id]
-            pulp_assignment.save(update_fields=['role'])
+
+                pulp_assignment.role = split_roles[pulp_assignment.content_type_id]
+                pulp_assignment.save(update_fields=['role'])
 
 
 def copy_roles_to_role_definitions(apps, schema_editor):
@@ -80,6 +81,11 @@ def migrate_role_assignments(apps, schema_editor):
         rd = RoleDefinition.objects.filter(name=group_role.role.name).first()
         if not rd:
             continue
+
+        # FIXME - why?
+        if not hasattr(group_role.group, 'team'):
+            continue
+
         actor = group_role.group.team
         if not group_role.object_id:
             RoleTeamAssignment.objects.create(role_definition=rd, team=actor)
