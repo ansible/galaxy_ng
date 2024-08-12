@@ -26,7 +26,16 @@ class SettingsView(api_base.APIView):
             "GALAXY_LDAP_MIRROR_ONLY_EXISTING_GROUPS",
             "GALAXY_LDAP_DISABLE_REFERRALS",
             "KEYCLOAK_URL",
+            "ANSIBLE_BASE_JWT_VALIDATE_CERT",
+            "ANSIBLE_BASE_JWT_KEY",
             "ALLOW_LOCAL_RESOURCE_MANAGEMENT",
+            "ANSIBLE_BASE_ROLES_REQUIRE_VIEW",
+            "DYNACONF_AFTER_GET_HOOKS",
+            "ANSIBLE_API_HOSTNAME",
+            "ANSIBLE_CONTENT_HOSTNAME",
+            "CONTENT_ORIGIN",
+            "TOKEN_SERVER",
+            "TOKEN_AUTH_DISABLED",
         ]
         settings_dict = settings.as_dict()
         data = {key: settings_dict.get(key, None) for key in keyset}
