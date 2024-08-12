@@ -784,6 +784,15 @@ def test_api_ui_v1_settings(ansible_config):
         assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is False
         assert ds['GALAXY_REQUIRE_CONTENT_APPROVAL'] is True
 
+        assert ds["ALLOW_LOCAL_RESOURCE_MANAGEMENT"] in [True, False]
+        assert ds["ANSIBLE_BASE_ROLES_REQUIRE_VIEW"] in [True, False]
+        assert ds["TOKEN_AUTH_DISABLED"] in [True, False]
+        assert "ANSIBLE_API_HOSTNAME" in ds
+        assert "ANSIBLE_CONTENT_HOSTNAME" in ds
+        assert "CONTENT_ORIGIN" in ds
+        assert "TOKEN_SERVER" in ds
+        assert "DYNACONF_AFTER_GET_HOOKS" in ds
+
 
 # /api/automation-hub/_ui/v1/synclists/
 # /api/automation-hub/_ui/v1/synclists/{id}/
