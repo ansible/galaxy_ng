@@ -31,7 +31,7 @@ class UserSerializer(UserSerializerV1):
 
         extra_kwargs = {
             'password': {'write_only': True, 'required': True},
-            'email': {'required': True}
+            'email': {'required': False}
         }
 
     def get_resource(self, obj):
