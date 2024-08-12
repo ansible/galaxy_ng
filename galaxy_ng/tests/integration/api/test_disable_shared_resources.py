@@ -1,18 +1,23 @@
-import os
 import pytest
 from galaxykit.utils import GalaxyClientError
 import uuid
 
 
 @pytest.fixture
-def test_group(galaxy_client):
+def test_group(settings, galaxy_client):
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=false")
+
     gc = galaxy_client("admin")
 
     return gc.get("_ui/v1/groups/?name=ns_group_for_tests")["data"][0]
 
 
 @pytest.fixture
-def test_user(galaxy_client):
+def test_user(settings, galaxy_client):
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=false")
+
     gc = galaxy_client("admin")
 
     return gc.get("_ui/v1/users/?username=admin")["data"][0]
@@ -26,11 +31,10 @@ def test_user(galaxy_client):
     ]
 )
 @pytest.mark.deployment_standalone
-@pytest.mark.skipif(
-    not os.getenv("ENABLE_DAB_TESTS"),
-    reason="Skipping test because ENABLE_DAB_TESTS is not set"
-)
-def test_dab_groups_are_read_only(galaxy_client, url, test_group):
+def test_dab_groups_are_read_only(settings, galaxy_client, url, test_group):
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') in [None, True]:
+        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+
     gc = galaxy_client("admin")
 
     group_pk = test_group["id"]
@@ -69,11 +73,10 @@ def test_dab_groups_are_read_only(galaxy_client, url, test_group):
     ]
 )
 @pytest.mark.deployment_standalone
-@pytest.mark.skipif(
-    not os.getenv("ENABLE_DAB_TESTS"),
-    reason="Skipping test because ENABLE_DAB_TESTS is not set"
-)
-def test_dab_users_are_read_only(galaxy_client, url, test_user):
+def test_dab_users_are_read_only(settings, galaxy_client, url, test_user):
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') in [None, True]:
+        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+
     gc = galaxy_client("admin")
 
     user_pk = test_user["id"]
@@ -103,11 +106,10 @@ def test_dab_users_are_read_only(galaxy_client, url, test_user):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.skipif(
-    not os.getenv("ENABLE_DAB_TESTS"),
-    reason="Skipping test because ENABLE_DAB_TESTS is not set"
-)
-def test_dab_cant_modify_group_memberships(galaxy_client, test_user, test_group):
+def test_dab_cant_modify_group_memberships(settings, galaxy_client, test_user, test_group):
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') in [None, True]:
+        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+
     gc = galaxy_client("admin")
 
     hub_user_detail = f"_ui/v1/users/{test_user['id']}/"
@@ -130,11 +132,10 @@ def test_dab_cant_modify_group_memberships(galaxy_client, test_user, test_group)
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.skipif(
-    not os.getenv("ENABLE_DAB_TESTS"),
-    reason="Skipping test because ENABLE_DAB_TESTS is not set"
-)
-def test_dab_can_modify_roles(galaxy_client, test_user, test_group):
+def test_dab_can_modify_roles(settings, galaxy_client, test_user, test_group):
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') in [None, True]:
+        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+
     gc = galaxy_client("admin")
 
     gc.post(f"pulp/api/v3/groups/{test_group['id']}/roles/", body={

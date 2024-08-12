@@ -24,18 +24,22 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -125,11 +129,14 @@ type UserData struct {
 }
 
 type Organization struct {
+	Id        int    `json:"id"`
 	AnsibleId string `json:"ansible_id"`
 	Name      string `json:"name"`
+	CodeName  string `json:"code_name"`
 }
 
 type Team struct {
+	Id        int    `json:"id"`
 	AnsibleId string `json:"ansible_id"`
 	Name      string `json:"name"`
 	Org       string `json:"org"`
@@ -157,6 +164,27 @@ type LoginResponse struct {
 	CSRFToken string `json:"csrfToken"`
 }
 
+type OrgResponse struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	SummaryFields struct {
+		Resource struct {
+			AnsibleID string `json:"ansible_id"`
+		} `json:"resource"`
+	} `json:"summary_fields"`
+}
+
+type TeamResponse struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	Organization  int    `json:"organization"`
+	SummaryFields struct {
+		Resource struct {
+			AnsibleID string `json:"ansible_id"`
+		} `json:"resource"`
+	} `json:"summary_fields"`
+}
+
 type UserResponse struct {
 	ID            int    `json:"id"`
 	Username      string `json:"username"`
@@ -165,6 +193,19 @@ type UserResponse struct {
 			AnsibleID string `json:"ansible_id"`
 		} `json:"resource"`
 	} `json:"summary_fields"`
+}
+
+type OrgRequest struct {
+	Name string `json:"name"`
+}
+
+type TeamRequest struct {
+	Name         string `json:"name"`
+	Organization int    `json:"organization"`
+}
+
+type AssociationRequest struct {
+	Instances []int `json:"instances"`
 }
 
 /************************************************************
@@ -194,43 +235,56 @@ var (
 
 var ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
 
+/*
 var orgmap = map[string]int{
 	"default": 0,
 	"org1":    1,
 	"org2":    2,
 }
+*/
 
-var orgs = map[string]Organization{
+var prepopulatedOrgs = map[string]Organization{
 	"default": {
+		Id:        1,
 		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee0",
 		Name:      "Default",
+		CodeName:  "default",
 	},
 	"org1": {
+		Id:        2,
 		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee1",
 		Name:      "Organization 1",
+		CodeName:  "org1",
 	},
 	"org2": {
+		Id:        3,
 		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee2",
 		Name:      "Organization 2",
+		CodeName:  "org2",
 	},
 	"pe": {
+		Id:        4,
 		AnsibleId: "bc243368-a9d4-4f8f-9ffe-5d2d921fcee3",
 		Name:      "system:partner-engineers",
+		CodeName:  "pe",
 	},
 }
 
-var teams = map[string]Team{
+var prepopulatedTeams = map[string]Team{
 	"ateam": {
+		Id:        1,
 		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771aa",
 		Name:      "ateam",
 		Org:       "org1",
 	},
 	"bteam": {
+		Id:        2,
 		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771ab",
 		Name:      "bteam",
 		Org:       "default",
 	},
 	"peteam": {
+		Id:        3,
 		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771ac",
 		Name:      "peteam",
 		Org:       "pe",
@@ -324,18 +378,29 @@ var (
 	idCounter  = 6
 )
 
+var (
+	teams         = map[string]Team{}
+	teamsMutex    = &sync.Mutex{}
+	teamIdCounter = 4
+)
+
+var (
+	orgs         = map[string]Organization{}
+	orgsMutex    = &sync.Mutex{}
+	orgIdCounter = 4
+)
+
 /************************************************************
 	FUNCTIONS
 ************************************************************/
 
-func init() {
-	// Generate RSA keys
-	var err error
-	rsaPrivateKey, err = rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		panic(err)
+func containsString(list []string, str string) bool {
+	for _, v := range list {
+		if v == str {
+			return true
+		}
 	}
-	rsaPublicKey = &rsaPrivateKey.PublicKey
+	return false
 }
 
 // PrintHeaders prints all headers from the request
@@ -478,19 +543,87 @@ func generateHmacSha256SharedSecret(nonce *string) (string, error) {
 }
 
 // generateJWT generates a JWT for the user
-func generateJWT(user User) (string, error) {
+func generateJWT(argUser User) (string, error) {
+
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+
+	teamsMutex.Lock()
+	defer teamsMutex.Unlock()
+
+	usersMutex.Lock()
+	defer usersMutex.Unlock()
+
+	/*
+	   oData1, _ := json.MarshalIndent(orgs, "", "  ")
+	   oString1 := string(oData1)
+	   fmt.Println(oString1)
+	*/
+
+	user := users[argUser.Username]
 
 	// make a list of org structs for this user ...
 	userOrgs := []Organization{}
 	userTeams := []TeamObject{}
 
+	// what orgs is this user a direct member of? ...
 	localOrgMap := map[string]int{}
 	counter := -1
 	for _, orgName := range user.Organizations {
 		counter += 1
 		localOrgMap[orgName] = counter
-		userOrgs = append(userOrgs, orgs[orgName])
+		fmt.Println("# ADD ORG", orgName, "TO USERORGS ..")
+
+		thisOrg, ok := orgs[orgName]
+		if !ok {
+			fmt.Println(orgName, "was not in the orgs map!!!")
+			panic("FUDGE!!!")
+		}
+
+		userOrgs = append(userOrgs, thisOrg)
+
+		/*
+		   oData, _ := json.MarshalIndent(thisOrg, "", "  ")
+		   oString := string(oData)
+		   fmt.Println(oString)
+		*/
+
 	}
+
+	// what orgs is this user an indirect member of? ...
+	for _, teamCodeName := range user.Teams {
+		team := teams[teamCodeName]
+		orgName := team.Org
+		fmt.Println("# TEAM:", team, "ORG:", orgName)
+
+		/*
+		   jData, _ := json.MarshalIndent(localOrgMap, "", "  ")
+		   jString := string(jData)
+		   fmt.Println(jString)
+		*/
+
+		// check if related org is in the list+map ...
+		found := false
+		highestIndex := -1
+		for orgName2, orgIndex2 := range localOrgMap {
+			fmt.Println("\t#ORG2", fmt.Sprintf("ix: %d", orgIndex2), "name:", orgName2)
+			if orgName2 == orgName {
+				found = true
+				break
+			}
+			if highestIndex < orgIndex2 {
+				highestIndex = orgIndex2
+			}
+		}
+
+		// add it to the list+map if not already there ...
+		if found == false {
+			newIndex := highestIndex + 1
+			localOrgMap[orgName] = newIndex
+			userOrgs = append(userOrgs, orgs[orgName])
+		}
+	}
+
 	for _, team := range user.Teams {
 		orgName := teams[team].Org
 		orgIndex := localOrgMap[orgName]
@@ -500,6 +633,19 @@ func generateJWT(user User) (string, error) {
 			Org:       orgIndex,
 		})
 	}
+
+	/*
+	   oData1, _ := json.MarshalIndent(orgs, "", "  ")
+	   oString1 := string(oData1)
+	   fmt.Println(oString1)
+	*/
+
+	oData, _ := json.MarshalIndent(userOrgs, "", "  ")
+	oString := string(oData)
+	fmt.Println(oString)
+
+	fmt.Println("# userorgs", userOrgs)
+	fmt.Println("# userteams", userTeams)
 
 	objects := map[string]interface{}{
 		"organization": userOrgs,
@@ -534,10 +680,14 @@ func generateJWT(user User) (string, error) {
 		ObjectRoles: objectRoles,
 		Objects:     objects,
 	}
-	log.Printf("\tMake claim for %s\n", user)
-	log.Printf("\tClaim %s\n", claims)
-	jsonData, _ := json.Marshal(claims)
-	log.Printf("\t%s\n", jsonData)
+
+	jsonData, _ := json.MarshalIndent(claims, "", "  ")
+	jsonString := string(jsonData)
+
+	log.Printf("-------------------------------------\n")
+	log.Printf("Created JWT for %s ...\n", user.Username)
+	log.Println(jsonString)
+	log.Printf("-------------------------------------\n")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	return token.SignedString(rsaPrivateKey)
@@ -605,7 +755,7 @@ func BasicAuth(next http.Handler) http.Handler {
 
 		// is there a csrftoken and is it valid?
 		csrftoken, err := GetCookieValue(r, "csrftoken")
-        log.Printf("CHECKING CSRFTOKEN %s", csrftoken)
+		log.Printf("CHECKING CSRFTOKEN %s", csrftoken)
 		if err == nil && !isCSRFTokenKnown(csrftoken) {
 
 			// allow if this was a token from the downstream ...
@@ -826,6 +976,103 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
+func OrganizationHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		getOrgs(w, r)
+	case http.MethodPost:
+		addOrg(w, r)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+func TeamHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		getTeams(w, r)
+	case http.MethodPost:
+		addTeam(w, r)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+func AssociateTeamUsersHandler(w http.ResponseWriter, r *http.Request) {
+
+	teamsMutex.Lock()
+	defer teamsMutex.Unlock()
+
+	usersMutex.Lock()
+	defer usersMutex.Unlock()
+
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract the team_id from the URL path
+	pathParts := strings.Split(r.URL.Path, "/")
+	if len(pathParts) < 9 || pathParts[7] != "associate" {
+		http.Error(w, "Invalid URL path", http.StatusBadRequest)
+		return
+	}
+	teamIDStr := pathParts[5]
+	teamID, _ := strconv.Atoi(teamIDStr)
+	fmt.Println("teamid", teamID)
+
+	// find the team codename ...
+	var teamName = ""
+	for _, team := range teams {
+		fmt.Println(team)
+		if team.Id == teamID {
+			fmt.Println(team)
+			teamName = team.Name
+			break
+		}
+	}
+	fmt.Println("teamname", teamName)
+
+	// fmt.Println("body", r.Body)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("Request Body:", string(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	// AssociationRequest
+	var newAssociationRequest AssociationRequest
+	if err := json.NewDecoder(r.Body).Decode(&newAssociationRequest); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println(newAssociationRequest)
+
+	for _, uid := range newAssociationRequest.Instances {
+		fmt.Println("uid", uid)
+		// find this user ..
+		for _, user := range users {
+			if user.Id == uid {
+				fmt.Println(user)
+				fmt.Println(user.Teams)
+				if containsString(user.Teams, teamName) == false {
+					fmt.Println("add", user.Username, "to", teamName)
+					user.Teams = append(user.Teams, teamName)
+					users[user.Username] = user
+				} else {
+					fmt.Println("do not need to add", teamName, "to", user)
+				}
+			} else {
+				fmt.Println(user.Id, "!=", uid)
+			}
+		}
+	}
+
+}
+
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -835,6 +1082,93 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+}
+
+func getOrgs(w http.ResponseWriter, r *http.Request) {
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+
+	var orgList []Organization
+	for _, org := range orgs {
+		orgList = append(orgList, org)
+	}
+	sort.Slice(orgList, func(i, j int) bool {
+		return orgList[i].Id < orgList[j].Id
+	})
+
+	var responseOrgs []OrgResponse
+
+	for _, orgdata := range orgList {
+		responseOrg := OrgResponse{
+			ID:   orgdata.Id,
+			Name: orgdata.Name,
+			SummaryFields: struct {
+				Resource struct {
+					AnsibleID string `json:"ansible_id"`
+				} `json:"resource"`
+			}{Resource: struct {
+				AnsibleID string `json:"ansible_id"`
+			}{AnsibleID: orgdata.AnsibleId}},
+		}
+		responseOrgs = append(responseOrgs, responseOrg)
+	}
+
+	response := map[string][]OrgResponse{
+		"results": responseOrgs,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func getTeams(w http.ResponseWriter, r *http.Request) {
+	teamsMutex.Lock()
+	defer teamsMutex.Unlock()
+
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+
+	var teamList []Team
+	for _, team := range teams {
+		teamList = append(teamList, team)
+	}
+	sort.Slice(teamList, func(i, j int) bool {
+		return teamList[i].Id < teamList[j].Id
+	})
+
+	var responseTeams []TeamResponse
+
+	for _, teamdata := range teamList {
+
+		var orgId = 0
+		for _, org := range orgs {
+			if org.CodeName == teamdata.Org {
+				orgId = org.Id
+				break
+			}
+		}
+
+		responseTeam := TeamResponse{
+			ID:           teamdata.Id,
+			Name:         teamdata.Name,
+			Organization: orgId,
+			SummaryFields: struct {
+				Resource struct {
+					AnsibleID string `json:"ansible_id"`
+				} `json:"resource"`
+			}{Resource: struct {
+				AnsibleID string `json:"ansible_id"`
+			}{AnsibleID: teamdata.AnsibleId}},
+		}
+		responseTeams = append(responseTeams, responseTeam)
+	}
+
+	response := map[string][]TeamResponse{
+		"results": responseTeams,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
@@ -851,7 +1185,6 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 
 	var responseUsers []UserResponse
 
-	//for _, userdata := range users {
 	for _, userdata := range userList {
 		responseUser := UserResponse{
 			ID:       userdata.Id,
@@ -873,6 +1206,150 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func addOrg(w http.ResponseWriter, r *http.Request) {
+	// fmt.Println("body", r.Body)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("Request Body:", string(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	var newOrgRequest OrgRequest
+	if err := json.NewDecoder(r.Body).Decode(&newOrgRequest); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if newOrgRequest.Name == "" {
+		http.Error(w, "Org name can not be blank", http.StatusConflict)
+		return
+	}
+
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+
+	highestId := 0
+	for _, org := range orgs {
+		if org.Name == newOrgRequest.Name || org.CodeName == newOrgRequest.Name {
+			http.Error(w, "org name is already taken", http.StatusBadRequest)
+			return
+		}
+		if org.Id > highestId {
+			highestId = org.Id
+		}
+	}
+
+	var newOrg Organization
+
+	newOrg.CodeName = newOrgRequest.Name
+	newOrg.Name = newOrgRequest.Name
+	newOrg.Id = highestId + 1
+	newAnsibleID := uuid.NewString()
+	newOrg.AnsibleId = newAnsibleID
+	orgs[newOrg.CodeName] = newOrg
+
+	fmt.Println(newOrg)
+
+	responseOrg := OrgResponse{
+		ID:   newOrg.Id,
+		Name: newOrg.Name,
+		SummaryFields: struct {
+			Resource struct {
+				AnsibleID string `json:"ansible_id"`
+			} `json:"resource"`
+		}{Resource: struct {
+			AnsibleID string `json:"ansible_id"`
+		}{AnsibleID: newOrg.AnsibleId}},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(responseOrg)
+}
+
+func addTeam(w http.ResponseWriter, r *http.Request) {
+
+	// fmt.Println("body", r.Body)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("Request Body:", string(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	var newTeamRequest TeamRequest
+	if err := json.NewDecoder(r.Body).Decode(&newTeamRequest); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if newTeamRequest.Name == "" {
+		http.Error(w, "Team name can not be blank", http.StatusConflict)
+		return
+	}
+
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+
+	teamsMutex.Lock()
+	defer teamsMutex.Unlock()
+
+	if _, exists := teams[newTeamRequest.Name]; exists {
+		http.Error(w, "Team already exists", http.StatusConflict)
+		return
+	}
+
+	orgName := ""
+	for _, org := range orgs {
+		if org.Id == newTeamRequest.Organization {
+			orgName = org.CodeName
+			break
+		}
+	}
+	if orgName == "" {
+		http.Error(w, "Org not found", http.StatusConflict)
+		return
+	}
+
+	highestId := 0
+	for _, team := range teams {
+		if team.Id > highestId {
+			highestId = team.Id
+		}
+	}
+
+	var newTeam Team
+
+	newTeam.Name = newTeamRequest.Name
+	newTeam.Id = highestId + 1
+	newAnsibleID := uuid.NewString()
+	newTeam.AnsibleId = newAnsibleID
+	newTeam.Org = orgName
+	teams[newTeam.Name] = newTeam
+
+	responseTeam := TeamResponse{
+		ID:           newTeam.Id,
+		Name:         newTeam.Name,
+		Organization: newTeamRequest.Organization,
+		SummaryFields: struct {
+			Resource struct {
+				AnsibleID string `json:"ansible_id"`
+			} `json:"resource"`
+		}{Resource: struct {
+			AnsibleID string `json:"ansible_id"`
+		}{AnsibleID: newAnsibleID}},
+	}
+
+	idCounter++
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(responseTeam)
 }
 
 func addUser(w http.ResponseWriter, r *http.Request) {
@@ -923,6 +1400,11 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if newUser.Username == "" {
+		http.Error(w, "username can not be blank.", http.StatusBadRequest)
+		return
+	}
+
 	usersMutex.Lock()
 	defer usersMutex.Unlock()
 
@@ -963,9 +1445,35 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
+	// Generate RSA keys
+	log.Printf("# Making RSA keys\n")
+	var err error
+	rsaPrivateKey, err = rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		panic(err)
+	}
+	rsaPublicKey = &rsaPrivateKey.PublicKey
+
+	// build orgs ...
+	log.Printf("# Making Orgs\n")
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+	for _, org := range prepopulatedOrgs {
+		orgs[org.CodeName] = org
+	}
+
+	// build teams ...
+	log.Printf("# Making Teams\n")
+	teamsMutex.Lock()
+	defer teamsMutex.Unlock()
+	for _, team := range prepopulatedTeams {
+		teams[team.Name] = team
+	}
+
+	// build users ...
+	log.Printf("# Making Users\n")
 	usersMutex.Lock()
 	defer usersMutex.Unlock()
-
 	for _, user := range prepopulatedUsers {
 		users[user.Username] = user
 	}
@@ -1035,6 +1543,15 @@ func main() {
 	http.HandleFunc("/api/gateway/v1/login/", LoginHandler)
 	http.HandleFunc("/api/gateway/v1/logout/", LogoutHandler)
 	http.HandleFunc("/api/gateway/v1/users/", UserHandler)
+	// http.HandleFunc("/api/gateway/v1/teams/", TeamHandler)
+	http.HandleFunc("/api/gateway/v1/teams/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/api/gateway/v1/teams/") && strings.Contains(r.URL.Path, "/users/associate/") {
+			AssociateTeamUsersHandler(w, r)
+		} else {
+			TeamHandler(w, r)
+		}
+	})
+	http.HandleFunc("/api/gateway/v1/organizations/", OrganizationHandler)
 
 	// send everything else downstream
 	http.Handle("/", BasicAuth(proxy))

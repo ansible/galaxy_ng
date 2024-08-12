@@ -13,17 +13,19 @@ Read more: https://www.dynaconf.com/advanced/#hooks
 """
 import json
 import logging
-import ldap
-import pkg_resources
 import os
 import re
 from typing import Any, Dict, List
+
+import ldap
+import pkg_resources
+from ansible_base.lib.dynamic_config.settings_logic import get_dab_settings
+from crum import get_current_request
+from django.apps import apps
 from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
-from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
-from django.apps import apps
-from crum import get_current_request
 
+from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 
 logger = logging.getLogger(__name__)
 
@@ -626,10 +628,10 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     # Perform lazy imports here to avoid breaking when system runs with older
     # dynaconf versions
     try:
-        from dynaconf.hooking import Hook, Action, HookValue
         from dynaconf import DynaconfFormatError, DynaconfParseError
-        from dynaconf.loaders.base import SourceMetadata
         from dynaconf.base import Settings
+        from dynaconf.hooking import Action, Hook, HookValue
+        from dynaconf.loaders.base import SourceMetadata
     except ImportError as exc:
         # Graceful degradation for dynaconf < 3.2.3 where  method hooking is not available
         logger.error(
@@ -657,7 +659,10 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
             return value.value
 
         # lazy import because it can't happen before apps are ready
-        from galaxy_ng.app.tasks.settings_cache import get_settings_from_cache, get_settings_from_db
+        from galaxy_ng.app.tasks.settings_cache import (
+            get_settings_from_cache,
+            get_settings_from_db,
+        )
         if data := get_settings_from_cache():
             metadata = SourceMetadata(loader="hooking", identifier="cache")
         else:
@@ -730,11 +735,11 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
 
 
 def configure_dab_required_settings(settings: Dynaconf) -> Dict[str, Any]:
-    """Load all keys defined on dab dynamic_settings if not already defined."""
-    data = {}
-    notset = object()
-    from ansible_base.lib.dynamic_config import dynamic_settings
-    for key in dir(dynamic_settings):
-        if key.isupper() and settings.get(key, notset) is notset:
-            data[key] = getattr(dynamic_settings, key)
-    return data
+    dab_settings = get_dab_settings(
+        installed_apps=settings.INSTALLED_APPS + ['ansible_base.jwt_consumer'],
+        rest_framework=settings.REST_FRAMEWORK,
+        spectacular_settings=settings.SPECTACULAR_SETTINGS,
+        authentication_backends=settings.AUTHENTICATION_BACKENDS,
+        middleware=settings.MIDDLEWARE,
+    )
+    return {k: v for k, v in dab_settings.items() if k not in settings}
