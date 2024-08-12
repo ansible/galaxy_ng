@@ -41,9 +41,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         password = serializer.validated_data.get('password')
         if password:
-            user = User(
-                email=serializer.validated_data['email'],
-                username=serializer.validated_data['username']
+            user, _ = User.objects.get_or_create(
+                username=serializer.validated_data['username'],
+                defaults=serializer.validated_data
             )
             user.set_password(password)
             user.save()
