@@ -39,4 +39,10 @@ class SettingsView(api_base.APIView):
         ]
         settings_dict = settings.as_dict()
         data = {key: settings_dict.get(key, None) for key in keyset}
+
+        # these might not be strings ...
+        if data.get("DYNACONF_AFTER_GET_HOOKS") is not None:
+            data["DYNACONF_AFTER_GET_HOOKS"] = \
+                [str(func) for func in settings_dict["DYNACONF_AFTER_GET_HOOKS"]]
+
         return Response(data)
