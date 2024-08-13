@@ -10,7 +10,6 @@ from .users import (
 
 from .roles import (
     LegacyRolesViewSet,
-    # LegacyRoleViewSet,
     LegacyRoleContentViewSet,
     LegacyRoleVersionsViewSet,
     LegacyRoleImportsViewSet
@@ -22,14 +21,13 @@ from .sync import (
 
 
 __all__ = (
-    LegacyNamespacesViewSet,
-    LegacyNamespaceOwnersViewSet,
-    LegacyNamespaceProvidersViewSet,
-    LegacyUsersViewSet,
-    LegacyRolesViewSet,
-    LegacyRolesSyncViewSet,
-    # LegacyRoleViewSet,
-    LegacyRoleContentViewSet,
-    LegacyRoleVersionsViewSet,
-    LegacyRoleImportsViewSet,
+    "LegacyNamespacesViewSet",
+    "LegacyNamespaceOwnersViewSet",
+    "LegacyNamespaceProvidersViewSet",
+    "LegacyUsersViewSet",
+    "LegacyRolesViewSet",
+    "LegacyRolesSyncViewSet",
+    "LegacyRoleContentViewSet",
+    "LegacyRoleVersionsViewSet",
+    "LegacyRoleImportsViewSet",
 )
