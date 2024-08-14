@@ -11,12 +11,15 @@ from .filters import UserViewFilter
 from .filters import GroupViewFilter
 from .filters import OrganizationFilter
 from .filters import TeamFilter
+from .filters import CollectionFilter
 from .serializers import UserSerializer
 from .serializers import GroupSerializer
 from .serializers import OrganizationSerializer
 from .serializers import TeamSerializer
+from .serializers import CollectionSerializer
 from .permissions import IsSuperUserOrReadOnly
 
+from pulp_ansible.app.models import Collection
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.auth import Group
 from galaxy_ng.app.models.organization import Organization
@@ -168,3 +171,13 @@ class TeamViewSet(viewsets.ModelViewSet):
             team.group.user_set.remove(user)
 
         return Response({"detail": "Users disassociated successfully."}, status=status.HTTP_200_OK)
+
+
+class CollectionViewSet(viewsets.ModelViewSet):
+
+    queryset = Collection.objects.all().order_by('namespace', 'name')
+    serializer_class = CollectionSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = CollectionFilter
+    pagination_class = DefaultPaginator
+    permission_classes = [IsSuperUserOrReadOnly]

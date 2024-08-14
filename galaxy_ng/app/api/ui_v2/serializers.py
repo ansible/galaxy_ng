@@ -1,6 +1,7 @@
 # from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from pulp_ansible.app.models import Collection
 from galaxy_ng.app.api.ui.serializers import UserSerializer as UserSerializerV1
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.auth import Group
@@ -128,3 +129,15 @@ class TeamSerializer(serializers.ModelSerializer):
             'resource_type': obj.resource.content_type.name,
             'ansible_id': obj.resource.ansible_id,
         }
+
+
+class CollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Collection
+        fields = [
+            'pulp_id',
+            'namespace',
+            'name',
+            'pulp_created',
+            'pulp_last_updated',
+        ]

@@ -1,5 +1,6 @@
 import django_filters
 
+from pulp_ansible.app.models import Collection
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.auth import Group
 from galaxy_ng.app.models.organization import Organization
@@ -71,3 +72,14 @@ class TeamFilter(django_filters.FilterSet):
             "name__contains",
             "name__icontains"
         ]
+
+
+class CollectionFilter(django_filters.FilterSet):
+    class Meta:
+        model = Collection
+        fields = [
+            "namespace",
+            "name",
+        ]
+
+
