@@ -271,7 +271,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
 
-        if not is_social_auth and user.has_perm(perm) and self.v3_can_view_repo_content(
+        if not is_social_auth and (user.has_perm(perm) or user.has_perm(perm, collection) or user.has_perm(social_perm) or user.has_perm(social_perm, namespace)) and self.v3_can_view_repo_content(
             request,
             view,
             action,

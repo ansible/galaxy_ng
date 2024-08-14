@@ -9,6 +9,7 @@ from ..utils import set_certification
 
 from galaxykit.client import GalaxyClient
 from galaxykit.collections import upload_test_collection
+from galaxykit.utils import wait_for_task
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -25,7 +26,11 @@ def namespace_object_owner_roledef(galaxy_client):
     roledefs = dict((x['name'], x) for x in roledefs['results'])
 
     if roledef_name in roledefs:
-        return roledefs[roledef_name]
+        #return roledefs[roledef_name]
+        try:
+            gc.delete(roledefs[roledef_name]['url'])
+        except:
+            pass
 
     payload = {
         'name': roledef_name,
@@ -41,7 +46,7 @@ def namespace_object_owner_roledef(galaxy_client):
 @pytest.fixture
 def collection_object_owner_roledef(galaxy_client):
 
-    roledef_name = 'galaxy.collection_object_owner4'
+    roledef_name = 'galaxy.collection_object_owner'
 
     gc = galaxy_client("admin", ignore_cache=True)
 
@@ -49,7 +54,11 @@ def collection_object_owner_roledef(galaxy_client):
     roledefs = dict((x['name'], x) for x in roledefs['results'])
 
     if roledef_name in roledefs:
-        return roledefs[roledef_name]
+        #return roledefs[roledef_name]
+        try:
+            gc.delete(roledefs[roledef_name]['url'])
+        except:
+            pass
 
     payload = {
         'name': roledef_name,
@@ -57,6 +66,7 @@ def collection_object_owner_roledef(galaxy_client):
         'permissions': [
             'galaxy.view_collection',
             'galaxy.change_collection',
+            'galaxy.delete_collection',
             'ansible.delete_collection',
         ],
     }
@@ -276,7 +286,7 @@ def test_dab_rbac_namespace_object_owner_by_user_or_team(
         payload = {
             'user': me_ds['id'],
             'role_definition': collection_object_owner_roledef['id'],
-            #'object_id': col_id,
+            'object_id': col_id,
         }
         gc.post('_ui/v2/role_user_assignments/', body=payload)
 
@@ -293,9 +303,16 @@ def test_dab_rbac_namespace_object_owner_by_user_or_team(
         }
         gc.post('_ui/v2/role_team_assignments/', body=payload)
 
-    #import epdb; epdb.st()
-    # try to delete the collection ...
-    resp = ugc.delete(
-        f"v3/plugin/ansible/content/published/collections/index/{col['namespace']}/{col['name']}/versions/{col['version']}/"
-    )
-    import epdb; epdb.st()
+
+    # try to delete the CV first and then the whole collection ...
+    delete_urls = [
+        f"v3/plugin/ansible/content/published/collections/index/{col['namespace']}/{col['name']}/versions/{col['version']}/",
+        f"v3/plugin/ansible/content/published/collections/index/{col['namespace']}/{col['name']}/",
+    ]
+    for delete_url in delete_urls:
+
+        # try to delete the collection ...
+        task = ugc.delete(delete_url)
+        assert 'task' in task
+        result = wait_for_task(ugc, task)
+        assert result['state'] == 'completed'
