@@ -81,5 +81,3 @@ class CollectionFilter(django_filters.FilterSet):
             "namespace",
             "name",
         ]
-
-

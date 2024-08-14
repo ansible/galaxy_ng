@@ -268,16 +268,45 @@ class AccessPolicyBase(AccessPolicyFromDB):
         user = request.user
         perm = "ansible.delete_collection"
         social_perm = "galaxy.change_namespace"
-        collection = view.get_object()
-        namespace = models.Namespace.objects.get(name=collection.namespace)
+        # could be a collection or could be a collectionversion ...
+        obj = view.get_object()
+        namespace = models.Namespace.objects.get(name=obj.namespace)
 
-        if not is_social_auth and (user.has_perm(perm) or user.has_perm(perm, collection) or user.has_perm(social_perm) or user.has_perm(social_perm, namespace)) and self.v3_can_view_repo_content(
+        #for x in dir(collection):
+        #    print(f'attrib: {x}')
+
+        model_name = obj.__class__.__name__
+        print(f'MODEL NAME: {model_name}')
+
+        # can the user change or modify this namespace?
+        has_namespace_perm = False
+        if user.has_perm("galaxy.change_namespace"):
+            has_namespace_perm = True
+        elif user.has_perm("galaxy.change_namespace", namespace):
+            has_namespace_perm = True
+
+        # can the user delete this specific object?
+        has_object_perm = False
+        if user.has_perm("ansible.deletecollection"):
+            has_object_perm = True
+        elif model_name == 'Collection':
+            has_object_perm = user.has_perm("ansible.delete_collection", obj)
+        elif model_name == 'CollectionVersion':
+            has_object_perm = user.has_perm("ansible.delete_collectionversion", obj)
+
+        can_view = self.v3_can_view_repo_content(
             request,
             view,
             action,
-        ):
+        )
+
+        print(f'DELETE ns_perm:{has_namespace_perm} obj_perm:{has_object_perm} can_view:{can_view}')
+
+        # if not is_social_auth and (user.has_perm(perm) or user.has_perm(perm, collection) or user.has_perm(social_perm) or user.has_perm(social_perm, namespace)) and self.v3_can_view_repo_content(
+        if not is_social_auth and (has_namespace_perm or has_object_perm) and can_view:
             return True
-        elif is_social_auth and user.has_perm(social_perm, namespace):
+        # elif is_social_auth and user.has_perm(social_perm, namespace):
+        elif is_social_auth and has_namespace_perm:
             return True
         return False
 

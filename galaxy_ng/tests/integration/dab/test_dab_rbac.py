@@ -1,13 +1,11 @@
 import json
-import os
 from collections import namedtuple
 
 import pytest
 from ..utils.client_basic import BasicAuthClient
 from ..utils import set_certification
+from ..utils.collections import delete_all_collections
 
-
-from galaxykit.client import GalaxyClient
 from galaxykit.collections import upload_test_collection
 from galaxykit.utils import wait_for_task
 
@@ -26,10 +24,9 @@ def namespace_object_owner_roledef(galaxy_client):
     roledefs = dict((x['name'], x) for x in roledefs['results'])
 
     if roledef_name in roledefs:
-        #return roledefs[roledef_name]
         try:
             gc.delete(roledefs[roledef_name]['url'])
-        except:
+        except Exception:
             pass
 
     payload = {
@@ -54,10 +51,9 @@ def collection_object_owner_roledef(galaxy_client):
     roledefs = dict((x['name'], x) for x in roledefs['results'])
 
     if roledef_name in roledefs:
-        #return roledefs[roledef_name]
         try:
             gc.delete(roledefs[roledef_name]['url'])
-        except:
+        except Exception:
             pass
 
     payload = {
@@ -70,9 +66,7 @@ def collection_object_owner_roledef(galaxy_client):
             'ansible.delete_collection',
         ],
     }
-    #import epdb; epdb.st()
     return gc.post("_ui/v2/role_definitions/", body=json.dumps(payload))
-
 
 
 @pytest.fixture
@@ -90,7 +84,7 @@ def random_user_client(
         gw = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
 
         # create the user in the proxy ...
-        user = gw.post(
+        gw.post(
             "/api/gateway/v1/users/",
             body=json.dumps({"username": random_username, "password": "redhat1234"})
         )
@@ -106,7 +100,7 @@ def random_user_client(
             )
         )
 
-    # get the user's galaxy level details ...
+    # force user creation in galaxy ...
     ugc = BasicAuthClient(gc.galaxy_root, random_username, 'redhat1234')
     ugc.get('_ui/v1/me/')
 
@@ -160,6 +154,11 @@ def random_team_with_user_client(
         ugc.get(f'_ui/v2/users/?username={random_username}')
 
     else:
+
+        # force user claims to process ...
+        udata = ugc.get(f'_ui/v2/users/?username={random_username}')['results'][0]
+        user_id = udata['id']
+
         team_data = gc.post(
             "_ui/v2/teams/",
             body=json.dumps({
@@ -218,13 +217,15 @@ def test_dab_rbac_namespace_object_owner_by_user_or_team(
     """Tests the galaxy.system_auditor role can be added to a user and has the right perms."""
 
     team_data = random_team_with_user_client[0]
+    team_name = team_data['name']
     ugc = random_team_with_user_client[1]
 
-    random_username = ugc.username
-    org_name = random_username.replace('user_', 'org_')
-    team_name = random_username.replace('user_', 'team_')
+    # random_username = ugc.username
+    # org_name = random_username.replace('user_', 'org_')
+    # team_name = random_username.replace('user_', 'team_')
 
     gc = galaxy_client("admin", ignore_cache=True)
+    delete_all_collections(gc)
 
     if assignment_type == 'user':
         # get the galaxy level user info ...
@@ -261,18 +262,26 @@ def test_dab_rbac_namespace_object_owner_by_user_or_team(
     )
     assert company_resp['company'] == 'foobar'
 
-    # try to upload a collection as the user...
-    col = upload_test_collection(ugc, namespace=random_namespace['name'])
     Artifact = namedtuple('Artifact', ['name', 'namespace', 'published', 'version'])
+
+    # try to upload a collection as the user...
+    col = upload_test_collection(ugc, namespace=random_namespace['name'], version='1.0.0')
     artifact = Artifact(**col)
     assert artifact.namespace == random_namespace['name']
 
-    # certify the collection ...
-    if settings.get('GALAXY_REQUIRE_CONTENT_APPROVAL') == True:
-        set_certification(ansible_config(), gc, artifact)
+    col2 = upload_test_collection(
+        ugc, namespace=artifact.namespace, collection_name=artifact.name, version='1.0.1'
+    )
+    artifact2 = Artifact(**col2)
+    assert artifact2.namespace == random_namespace['name']
 
+    # certify the collection ...
+    if settings.get('GALAXY_REQUIRE_CONTENT_APPROVAL') is True:
+        set_certification(ansible_config(), gc, artifact)
+        set_certification(ansible_config(), gc, artifact2)
+
+    '''
     # get the collection detail ...
-    #col_data = ugc.get(f"v3/plugin/ansible/content/published/collections/index/{artifact.namespace}/{artifact.name}/")
     col_data = ugc.get(f"_ui/v2/collections/?namespace={artifact.namespace}&name={artifact.name}")
     col_data = col_data['results'][0]
     col_id = col_data['pulp_id']
@@ -302,12 +311,16 @@ def test_dab_rbac_namespace_object_owner_by_user_or_team(
             'object_id': col_id,
         }
         gc.post('_ui/v2/role_team_assignments/', body=payload)
-
+    '''
 
     # try to delete the CV first and then the whole collection ...
+    baseurl = (
+        "v3/plugin/ansible/content/published/collections/index/"
+        + f"{col['namespace']}/{col['name']}/"
+    )
     delete_urls = [
-        f"v3/plugin/ansible/content/published/collections/index/{col['namespace']}/{col['name']}/versions/{col['version']}/",
-        f"v3/plugin/ansible/content/published/collections/index/{col['namespace']}/{col['name']}/",
+        baseurl + f"versions/{col['version']}/",
+        baseurl
     ]
     for delete_url in delete_urls:
 

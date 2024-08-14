@@ -599,7 +599,12 @@ def get_all_repository_collection_versions(gc):
 def delete_all_collections(api_client):
     """Deletes all collections regardless of dependency chains."""
 
-    api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    if hasattr(api_client, 'config'):
+        api_prefix = api_client.config.get("api_prefix").rstrip("/")
+    else:
+        baseurl = api_client.galaxy_root
+        parser = urlparse(baseurl)
+        api_prefix = parser.path.rstrip('/')
 
     # iterate until none are left
     while True:
@@ -621,11 +626,19 @@ def delete_all_collections(api_client):
             # if other collections require this one, the delete will fail
             resp = None
             try:
-                resp = api_client(
-                    (f'{api_prefix}/v3/plugin/ansible/content'
-                        f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
-                    method='DELETE'
-                )
+                if callable(api_client):
+                    # !galaxykit
+                    resp = api_client(
+                        (f'{api_prefix}/v3/plugin/ansible/content'
+                            f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
+                        method='DELETE'
+                    )
+                else:
+                    # galaxkit ...
+                    resp = api_client.delete(
+                        (f'{api_prefix}/v3/plugin/ansible/content'
+                            f'/{crepo}/collections/index/{namespace_name}/{cname}/')
+                    )
             except GalaxyError:
                 pass
 
