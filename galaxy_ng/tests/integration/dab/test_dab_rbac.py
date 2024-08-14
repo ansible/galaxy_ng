@@ -1,13 +1,170 @@
 import json
 import os
+from collections import namedtuple
 
 import pytest
+from ..utils.client_basic import BasicAuthClient
+from ..utils import set_certification
+
 
 from galaxykit.client import GalaxyClient
 from galaxykit.collections import upload_test_collection
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
+
+
+@pytest.fixture
+def namespace_object_owner_roledef(galaxy_client):
+
+    roledef_name = 'galaxy.collection_namespace_object_owner'
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    roledefs = gc.get("_ui/v2/role_definitions/")
+    roledefs = dict((x['name'], x) for x in roledefs['results'])
+
+    if roledef_name in roledefs:
+        return roledefs[roledef_name]
+
+    payload = {
+        'name': roledef_name,
+        'content_type': 'galaxy.namespace',
+        'permissions': [
+            'galaxy.change_namespace',
+            'galaxy.upload_to_namespace'
+        ],
+    }
+    return gc.post("_ui/v2/role_definitions/", body=json.dumps(payload))
+
+
+@pytest.fixture
+def collection_object_owner_roledef(galaxy_client):
+
+    roledef_name = 'galaxy.collection_object_owner4'
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    roledefs = gc.get("_ui/v2/role_definitions/")
+    roledefs = dict((x['name'], x) for x in roledefs['results'])
+
+    if roledef_name in roledefs:
+        return roledefs[roledef_name]
+
+    payload = {
+        'name': roledef_name,
+        'content_type': 'galaxy.collection',
+        'permissions': [
+            'galaxy.view_collection',
+            'galaxy.change_collection',
+            'ansible.delete_collection',
+        ],
+    }
+    #import epdb; epdb.st()
+    return gc.post("_ui/v2/role_definitions/", body=json.dumps(payload))
+
+
+
+@pytest.fixture
+def random_user_client(
+    settings,
+    galaxy_client,
+    random_username,
+):
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+
+        # Need galaxykit to use basic auth ...
+        gw = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
+
+        # create the user in the proxy ...
+        user = gw.post(
+            "/api/gateway/v1/users/",
+            body=json.dumps({"username": random_username, "password": "redhat1234"})
+        )
+
+    else:
+        # create the user in ui/v2 ...
+        gc.post(
+            "_ui/v2/users/",
+            body=json.dumps({
+                "username": random_username,
+                "email": random_username + '@localhost',
+                "password": "redhat1234"}
+            )
+        )
+
+    # get the user's galaxy level details ...
+    ugc = BasicAuthClient(gc.galaxy_root, random_username, 'redhat1234')
+    ugc.get('_ui/v1/me/')
+
+    return ugc
+
+
+@pytest.fixture
+def random_team_with_user_client(
+    settings,
+    galaxy_client,
+    random_user_client,
+):
+
+    random_username = random_user_client.username
+    org_name = random_username.replace('user_', 'org_')
+    team_name = random_username.replace('user_', 'team_')
+
+    gc = galaxy_client("admin", ignore_cache=True)
+    ugc = random_user_client
+
+    # make the team ...
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+
+        gw = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
+
+        # get the gateway's userid for this user ...
+        user_data = random_user_client.get('/api/gateway/v1/me/')['results'][0]
+        gateway_uid = user_data['id']
+
+        # create an org (Default doesn't sync)
+        org_data = gw.post(
+            "/api/gateway/v1/organizations/",
+            body=json.dumps({"name": org_name})
+        )
+        org_id = org_data['id']
+
+        # create a team
+        team_data = gw.post(
+            "/api/gateway/v1/teams/",
+            body=json.dumps({"name": team_name, "organization": org_id})
+        )
+        team_id = team_data['id']
+
+        gw.post(
+            f"/api/gateway/v1/teams/{team_id}/users/associate/",
+            body=json.dumps({"instances": [gateway_uid]}),
+            want_json=False,
+        )
+
+        # force user claims to process ...
+        ugc.get(f'_ui/v2/users/?username={random_username}')
+
+    else:
+        team_data = gc.post(
+            "_ui/v2/teams/",
+            body=json.dumps({
+                "name": team_name,
+            })
+        )
+        team_id = team_data['id']
+
+        # add the user to the team ...
+        gc.post(
+            f'_ui/v2/teams/{team_id}/users/associate/',
+            body=json.dumps({'instances': [user_id]})
+        )
+
+    return (team_data, ugc)
 
 
 @pytest.mark.skip(reason="we are not aiming for 1:1 anymore")
@@ -36,204 +193,109 @@ def test_dab_roledefs_match_pulp_roles(galaxy_client):
     '''
 
 
-@pytest.mark.skip(reason=(
-    "the galaxy.collection_namespace_owner role is global"
-    " and does not allow object assignment"
-))
 @pytest.mark.deployment_standalone
-def test_dab_rbac_namespace_owner_by_user(
+@pytest.mark.parametrize("assignment_type", ["user", "team"])
+def test_dab_rbac_namespace_object_owner_by_user_or_team(
+    assignment_type,
+    ansible_config,
     settings,
     galaxy_client,
     random_namespace,
-    random_username
+    namespace_object_owner_roledef,
+    collection_object_owner_roledef,
+    random_team_with_user_client,
 ):
     """Tests the galaxy.system_auditor role can be added to a user and has the right perms."""
 
-    gc = galaxy_client("admin", ignore_cache=True)
+    team_data = random_team_with_user_client[0]
+    ugc = random_team_with_user_client[1]
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        if not os.environ.get("JWT_PROXY"):
-            pytest.skip(reason="this only works with the jwtproxy")
-        # create the user in the proxy ...
-        gc.post(
-            "/api/gateway/v1/users/",
-            body=json.dumps({"username": random_username, "password": "redhat1234"})
-        )
-    else:
-        # create the user in ui/v2 ...
-        gc.post(
-            "_ui/v2/users/",
-            body=json.dumps({
-                "username": random_username,
-                "email": random_username + '@localhost',
-                "password": "redhat1234"}
-            )
-        )
-
-    # get the user's galaxy level details ...
-    auth = {'username': random_username, 'password': 'redhat1234'}
-    ugc = GalaxyClient(gc.galaxy_root, auth=auth)
-    me_ds = ugc.get('_ui/v1/me/')
-
-    # find the role for namespace owner ...
-    rd = gc.get('_ui/v2/role_definitions/?name=galaxy.collection_namespace_owner')
-    role_id = rd['results'][0]['id']
-
-    # assign the user role ...
-    payload = {
-        'user': me_ds['id'],
-        'role_definition': role_id,
-        'content_type': 'galaxy.namespace',
-        'object_id': random_namespace['id'],
-    }
-    gc.post('_ui/v2/role_user_assignments/', body=payload)
-
-    # try to update the namespace ...
-    ugc.put(
-        f"_ui/v1/namespaces/{random_namespace['name']}/",
-        body=json.dumps({
-            "name": random_namespace['name'],
-            "company": "foobar",
-        })
-    )
-
-    # try to upload a collection as the user...
-    upload_test_collection(ugc, namespace=random_namespace['name'])
-
-
-@pytest.mark.deployment_standalone
-# @pytest.mark.skipif(
-#    not os.getenv("ENABLE_DAB_TESTS"),
-#    reason="Skipping test because ENABLE_DAB_TESTS is not set"
-# )
-def test_dab_rbac_namespace_owner_by_team(
-    settings,
-    galaxy_client,
-    random_namespace,
-    random_username
-):
-    """Tests the galaxy.system_auditor role can be added to a user and has the right perms."""
-
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip("galaxykit uses drf tokens, which bypass JWT auth and claims processing")
-
+    random_username = ugc.username
     org_name = random_username.replace('user_', 'org_')
     team_name = random_username.replace('user_', 'team_')
 
     gc = galaxy_client("admin", ignore_cache=True)
 
-    # make the user ...
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        if not os.environ.get("JWT_PROXY"):
-            pytest.skip(reason="this only works with the jwtproxy")
-        # create the user in the proxy ...
-        gc.post(
-            "/api/gateway/v1/users/",
-            body=json.dumps({"username": random_username, "password": "redhat1234"})
-        )
-
-        auth = {'username': random_username, 'password': 'redhat1234'}
-        ugc = GalaxyClient(gc.galaxy_root, auth=auth)
+    if assignment_type == 'user':
+        # get the galaxy level user info ...
         me_ds = ugc.get('_ui/v1/me/')
-        user_id = me_ds['id']
-    else:
-        user_data = gc.post(
-            "_ui/v2/users/",
-            body=json.dumps({
-                "username": random_username,
-                "password": "redhat1234",
-                "email": random_username + '@localhost'
-            })
-        )
-        user_id = user_data['id']
-        auth = {'username': random_username, 'password': 'redhat1234'}
-        ugc = GalaxyClient(gc.galaxy_root, auth=auth)
 
-    # make the team ...
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-
-        # create an org (Default doesn't sync)
-        org_data = gc.post(
-            "/api/gateway/v1/organizations/",
-            body=json.dumps({"name": org_name})
-        )
-        org_id = org_data['id']
-
-        # create a team
-        team_data = gc.post(
-            "/api/gateway/v1/teams/",
-            body=json.dumps({"name": team_name, "organization": org_id})
-        )
-        team_id = team_data['id']
-
-        # get the gateway's userid for this user ...
-        # FIXME - pagination or filtering support?
-        users_data = gc.get(
-            "/api/gateway/v1/users/",
-        )
-        gateway_uid = None
-        for user in users_data['results']:
-            if user['username'] == random_username:
-                gateway_uid = user['id']
-                break
-
-        # add user to the team
-        #   Unforunately the API contract for this endpoint is to return
-        #   HTTP/1.1 204 No Content ... which means galaxyclient blows up
-        #   on a non-json response.
-        try:
-            gc.post(
-                f"/api/gateway/v1/teams/{team_id}/users/associate/",
-                body=json.dumps({"instances": [gateway_uid]})
-            )
-        except Exception:
-            pass
-
-        '''
-        # FIXME - galaxykit only wants to use tokens, which bypasses
-        #        jwt & claims processing
-
-        # check memberships in galaxy ...
-        me_rr = ugc.get(f'_ui/v1/me/', use_token=False)
-        #user_rr = ugc.get(f'_ui/v2/users/?username={random_username}')
-        import epdb; epdb.st()
-        '''
+        # assign the user role ...
+        payload = {
+            'user': me_ds['id'],
+            'role_definition': namespace_object_owner_roledef['id'],
+            'object_id': str(random_namespace['id']),
+        }
+        gc.post('_ui/v2/role_user_assignments/', body=payload)
 
     else:
-        team_data = gc.post(
-            "_ui/v2/teams/",
-            body=json.dumps({
-                "name": team_name,
-            })
-        )
-        team_id = team_data['id']
+        # get the galaxy level team info ...
+        gteam_data = gc.get(f'_ui/v2/teams/?name={team_name}')['results'][0]
+        team_id = gteam_data['id']
 
-        # add the user to the team ...
-        gc.post(
-            f'_ui/v2/teams/{team_id}/users/associate/',
-            body=json.dumps({'instances': [user_id]})
-        )
-
-    # find the role for namespace owner ...
-    rd = gc.get('_ui/v2/role_definitions/?name=galaxy.collection_namespace_owner')
-    role_id = rd['results'][0]['id']
-
-    # assign the team role ...
-    payload = {
-        'team': team_id,
-        'role_definition': role_id,
-        'object_id': str(random_namespace['id']),
-    }
-    gc.post('_ui/v2/role_team_assignments/', body=payload)
+        # assign the team role ...
+        payload = {
+            'team': team_id,
+            'role_definition': namespace_object_owner_roledef['id'],
+            'object_id': str(random_namespace['id']),
+        }
+        gc.post('_ui/v2/role_team_assignments/', body=payload)
 
     # try to update the namespace ...
-    ugc.put(
+    company_resp = ugc.put(
         f"_ui/v1/namespaces/{random_namespace['name']}/",
         body=json.dumps({
             "name": random_namespace['name'],
             "company": "foobar",
         })
     )
+    assert company_resp['company'] == 'foobar'
 
     # try to upload a collection as the user...
-    upload_test_collection(ugc, namespace=random_namespace['name'])
+    col = upload_test_collection(ugc, namespace=random_namespace['name'])
+    Artifact = namedtuple('Artifact', ['name', 'namespace', 'published', 'version'])
+    artifact = Artifact(**col)
+    assert artifact.namespace == random_namespace['name']
+
+    # certify the collection ...
+    if settings.get('GALAXY_REQUIRE_CONTENT_APPROVAL') == True:
+        set_certification(ansible_config(), gc, artifact)
+
+    # get the collection detail ...
+    #col_data = ugc.get(f"v3/plugin/ansible/content/published/collections/index/{artifact.namespace}/{artifact.name}/")
+    col_data = ugc.get(f"_ui/v2/collections/?namespace={artifact.namespace}&name={artifact.name}")
+    col_data = col_data['results'][0]
+    col_id = col_data['pulp_id']
+
+    # grant collection owner role ...
+    if assignment_type == 'user':
+        # get the galaxy level user info ...
+        me_ds = ugc.get('_ui/v1/me/')
+
+        # assign the user role ...
+        payload = {
+            'user': me_ds['id'],
+            'role_definition': collection_object_owner_roledef['id'],
+            #'object_id': col_id,
+        }
+        gc.post('_ui/v2/role_user_assignments/', body=payload)
+
+    else:
+        # get the galaxy level team info ...
+        gteam_data = gc.get(f'_ui/v2/teams/?name={team_name}')['results'][0]
+        team_id = gteam_data['id']
+
+        # assign the team role ...
+        payload = {
+            'team': team_id,
+            'role_definition': collection_object_owner_roledef['id'],
+            'object_id': col_id,
+        }
+        gc.post('_ui/v2/role_team_assignments/', body=payload)
+
+    #import epdb; epdb.st()
+    # try to delete the collection ...
+    resp = ugc.delete(
+        f"v3/plugin/ansible/content/published/collections/index/{col['namespace']}/{col['name']}/versions/{col['version']}/"
+    )
+    import epdb; epdb.st()
