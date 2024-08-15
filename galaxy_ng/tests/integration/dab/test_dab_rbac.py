@@ -237,3 +237,79 @@ def test_dab_rbac_namespace_owner_by_team(
 
     # try to upload a collection as the user...
     upload_test_collection(ugc, namespace=random_namespace['name'])
+
+
+@pytest.mark.deployment_standalone
+def test_dab_platform_auditor_bidirectional_sync(
+    settings,
+    galaxy_client,
+    random_username,
+):
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    # find the "platform auditor" roledef ...
+    pa_def = gc.get('_ui/v2/role_definitions/?name=Platform%20Auditor')['results'][0]
+
+    # make the user ...
+    user_data = gc.post(
+        "_ui/v2/users/",
+        body=json.dumps({
+            "username": random_username,
+            "password": "redhat1234",
+            "email": random_username + '@localhost'
+        })
+    )
+    uid = user_data['id']
+
+    ##################################################
+    # PULP => DAB
+    ##################################################
+
+    # assign the galaxy.system_auditor role to the user
+    pulp_assignment = gc.post(
+        f"pulp/api/v3/users/{uid}/roles/",
+        body=json.dumps({'content_object': None, 'role': 'galaxy.auditor'})
+    )
+
+    # ensure the user got the platform auditor roledef assignment
+    urds = gc.get(f'_ui/v2/role_user_assignments/?user__id={uid}')
+    assert urds['count'] == 1
+    assert urds['results'][0]['role_definition'] == pa_def['id']
+
+    # now remove the pulp role ..
+    try:
+        gc.delete(pulp_assignment['pulp_href'])
+    except Exception:
+        pass
+
+    # ensure the user no longer has the roledef assignment
+    urds = gc.get(f'_ui/v2/role_user_assignments/?user__id={uid}')
+    assert urds['count'] == 0
+
+    ##################################################
+    # DAB => PULP
+    ##################################################
+
+    # assign the roledefinition ...
+    roledef_assignment = gc.post(
+        '_ui/v2/role_user_assignments/',
+        body=json.dumps({
+            'user': uid,
+            'role_definition': pa_def['id'],
+        })
+    )
+
+    # ensure the user got the pulp role assignment
+    pulp_assignments = gc.get(f"pulp/api/v3/users/{uid}/roles/")
+    assert pulp_assignments['count'] == 1
+    assert pulp_assignments['results'][0]['role'] == 'galaxy.auditor'
+
+    # remove the roledef ...
+    try:
+        gc.delete(roledef_assignment['url'])
+    except Exception:
+        pass
+
+    pulp_assignments = gc.get(f"pulp/api/v3/users/{uid}/roles/")
+    assert pulp_assignments['count'] == 0
