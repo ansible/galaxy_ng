@@ -17,6 +17,7 @@ from ansible.galaxy.api import GalaxyError
 
 from galaxy_ng.tests.integration.utils.iqe_utils import get_ansible_config, \
     get_galaxy_client, AnsibleConfigFixture
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 from galaxy_ng.tests.integration.utils.rbac_utils import create_local_image_container
 from galaxykit.container_images import get_container, get_container_images_latest
 ansible_config = get_ansible_config()
@@ -130,7 +131,7 @@ def wait_for_task(resp, path=None, timeout=300):
                 raise
         else:
             ready = resp.json()["state"] not in ("running", "waiting")
-        time.sleep(5)
+        time.sleep(SLEEP_SECONDS_POLLING)
     return resp
 
 

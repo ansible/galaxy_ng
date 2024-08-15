@@ -2,6 +2,7 @@ import pytest
 import logging
 import time
 
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 from galaxy_ng.tests.integration.utils.iqe_utils import is_ocp_env
 from galaxy_ng.tests.integration.utils.rbac_utils import upload_test_artifact
 
@@ -126,7 +127,7 @@ class TestRepositories:
                 break
             except Exception as e:
                 print(e)
-                time.sleep(5)
+                time.sleep(SLEEP_SECONDS_POLLING)
 
         if repo_pulp_href_2 is None:
             raise Exception("failed to create repo and dist")
@@ -148,7 +149,7 @@ class TestRepositories:
                 break
             except Exception as e:
                 print(e)
-                time.sleep(5)
+                time.sleep(SLEEP_SECONDS_POLLING)
 
         # verify cv is only in destination repo
         _, results = search_collection_endpoint(gc_admin, name=artifact.name)

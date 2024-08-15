@@ -6,6 +6,7 @@ import tempfile
 import time
 import yaml
 
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 from galaxykit.users import delete_user as delete_user_gk
 from .client_ansible_lib import get_client
 from .namespaces import cleanup_namespace, cleanup_namespace_gk
@@ -32,7 +33,7 @@ def wait_for_v1_task(task_id=None, resp=None, api_client=None, check=True):
         state = task_resp['results'][0]['state']
         if state != 'RUNNING':
             break
-        time.sleep(.5)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
     if check:
         assert state == 'SUCCESS'

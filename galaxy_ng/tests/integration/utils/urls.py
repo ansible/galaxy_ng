@@ -7,6 +7,7 @@ from ansible.galaxy.api import GalaxyError
 
 from galaxykit.utils import GalaxyClientError
 from .errors import CapturingGalaxyError, TaskWaitingTimeout
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 
 
 def test_url_safe_join():
@@ -126,7 +127,7 @@ def wait_for_url(api_client, url, timeout_sec=6000):
         except (GalaxyError, CapturingGalaxyError, GalaxyClientError) as e:
             if "404" not in str(e):
                 raise
-            time.sleep(0.5)
+            time.sleep(SLEEP_SECONDS_POLLING)
         else:
             ready = True
     return res

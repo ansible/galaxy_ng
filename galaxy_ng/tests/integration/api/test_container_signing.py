@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 import pytest
 
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import get_client
 from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
 from galaxykit.container_images import get_container
@@ -136,7 +137,7 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
            args={"manifest_signing_service": ss_href})
 
     # sleep 2 second2
-    time.sleep(2)
+    time.sleep(SLEEP_SECONDS_ONETIME)
 
     repo = client(container_href)
     latest_version_href = repo["latest_version_href"]

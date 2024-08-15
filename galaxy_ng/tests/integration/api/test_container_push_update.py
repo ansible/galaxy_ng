@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 import pytest
 
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import get_client
 from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
 from galaxykit.utils import wait_for_task
@@ -107,7 +108,7 @@ def test_can_update_container_push(ansible_config, require_auth):
         client(container_href, method="PATCH", args={"retain_repo_versions": value})
 
         # sleep 2 seconds waiting task to finish
-        time.sleep(2)
+        time.sleep(SLEEP_SECONDS_ONETIME)
         # assert the change was persisted
         repo = client(container_href)
         assert repo["retain_repo_versions"] == value
