@@ -1,39 +1,8 @@
 import logging
-import os
-import shutil
-import yaml
-
 import pytest
-from orionutils.utils import increment_version
-from pkg_resources import parse_version, Requirement
-
-from galaxykit.collections import delete_collection
-from galaxykit.groups import get_group_id
-from galaxykit.namespaces import create_namespace
-from galaxykit.utils import GalaxyClientError, wait_for_url
-from galaxykit.users import get_user
-from ..integration.constants import USERNAME_PUBLISHER, GALAXY_STAGE_ANSIBLE_PROFILES
-from ..integration.utils import (
-    ansible_galaxy,
-    build_collection,
-    get_client,
-    set_certification,
-    set_synclist,
-    iterate_all,
-)
-
-from ..integration.utils import upload_artifact as _upload_artifact
 from ..integration.utils.iqe_utils import (
-    GalaxyKitClient,
-    is_dev_env_standalone,
-    is_standalone,
-    is_ephemeral_env,
-    galaxy_stage_ansible_user_cleanup, remove_from_cache,
-    get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version, aap_gateway,
-    require_signature_for_approval
+    get_ansible_config, get_galaxy_client
 )
-from ..integration.utils.tools import generate_random_artifact_version
-
 
 MARKER_CONFIG = """
 qa: Mark tests to run in the vortex job.
@@ -89,18 +58,15 @@ skip_in_gw: tests that need to be skipped if hub is behind the gateway (temporar
 
 logger = logging.getLogger(__name__)
 
-
 def pytest_configure(config):
     for line in MARKER_CONFIG.split('\n'):
         if not line:
             continue
         config.addinivalue_line('markers', line)
 
-
 @pytest.fixture(scope="session")
 def ansible_config():
     return get_ansible_config()
-
 
 @pytest.fixture(scope="session")
 def galaxy_client(ansible_config):

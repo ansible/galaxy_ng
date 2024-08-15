@@ -26,8 +26,8 @@ def api_client(ansible_config):
         
         
 @pytest.mark.deployment_community
-@pytest.mark.parametrize("url,baseline", URLS.items())
-def test_api_performance(ansible_config, api_client, url, baseline):
+@pytest.mark.parametrize("url,info", URLS.items())
+def test_api_performance(ansible_config, api_client, url, info):
     
     threshold = 0.25
     results = []
@@ -38,6 +38,6 @@ def test_api_performance(ansible_config, api_client, url, baseline):
         resp = uclient.get(url)
         elapsed_time = time.time() - start_time
         
-        difference = (elapsed_time - baseline) / baseline
+        difference = (elapsed_time - info['baseline']) / info['baseline']
         results.append({url: difference})
         assert difference < threshold
