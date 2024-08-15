@@ -725,7 +725,7 @@ def require_signature_for_approval():
     galaxy_client = get_galaxy_client(ansible_config)
     gc = galaxy_client("admin")
     # we need retries because in ephemeral env we get 502 sometimes
-    for attempt in range(1, max_attempts + 1):
+    for attempt in range(1, POLLING_MAX_ATTEMPTS + 1):
         try:
             settings = gc.get_settings()
             return settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL")
