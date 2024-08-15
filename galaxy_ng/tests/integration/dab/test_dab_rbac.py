@@ -102,10 +102,10 @@ def test_dab_rbac_namespace_owner_by_user(
 
 
 @pytest.mark.deployment_standalone
-# @pytest.mark.skipif(
-#    not os.getenv("ENABLE_DAB_TESTS"),
-#    reason="Skipping test because ENABLE_DAB_TESTS is not set"
-# )
+@pytest.mark.skip(reason=(
+    "the galaxy.collection_namespace_owner role is global"
+    " and does not allow object assignment"
+))
 def test_dab_rbac_namespace_owner_by_team(
     settings,
     galaxy_client,

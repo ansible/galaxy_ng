@@ -209,7 +209,7 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
             RoleDefinition.objects.create(
                 name=instance.name,
                 managed=instance.locked,
-                description=instance.description
+                description=instance.description or instance.name,
             )
         # TODO: other fields? like description
 
