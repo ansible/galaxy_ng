@@ -245,6 +245,22 @@ def test_dab_user_platform_auditor_bidirectional_sync(
     galaxy_client,
     random_username,
 ):
+    """
+    Integration test for the m2m and signals that copy user roles to roledefs
+    and vice-versa for the galaxy.auditor and Platform Auditor role.
+
+    * when given the galaxy.auditor role, the "Platform Auditor" roledef
+      should also be granted automatically,
+    * when revoking the galaxy.auditor role, the "Platform Auditor" roledef
+      should also be revoked automatically,
+
+    * when given the "Platform Auditor" roledef the galaxy.auditor role
+      should also be granted automatically,
+    * when revoking the "Platform Auditor" roledef the galaxy.auditor role
+      should also be revoked automatically,
+    """
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
 
@@ -321,6 +337,22 @@ def test_dab_team_platform_auditor_bidirectional_sync(
     galaxy_client,
     random_username,
 ):
+    """
+    Integration test for the m2m and signals that copy group roles to
+    team roledefs and vice-versa for the galaxy.auditor and Platform Auditor role.
+
+    * when given the galaxy.auditor role, the "Platform Auditor" roledef
+      should also be granted automatically,
+    * when revoking the galaxy.auditor role, the "Platform Auditor" roledef
+      should also be revoked automatically,
+
+    * when given the "Platform Auditor" roledef the galaxy.auditor role
+      should also be granted automatically,
+    * when revoking the "Platform Auditor" roledef the galaxy.auditor role
+      should also be revoked automatically,
+    """
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
 
