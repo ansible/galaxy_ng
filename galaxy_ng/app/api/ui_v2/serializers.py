@@ -31,7 +31,7 @@ class UserSerializer(UserSerializerV1):
 
         extra_kwargs = {
             'password': {'write_only': True, 'required': True},
-            'email': {'required': True}
+            'email': {'required': False}
         }
 
     def get_resource(self, obj):
@@ -48,9 +48,9 @@ class UserSerializer(UserSerializerV1):
         return value
 
     def create(self, validated_data):
-        user = User(
-            email=validated_data['email'],
-            username=validated_data['username']
+        user, _ = User.objects.get_or_create(
+            username=validated_data['username'],
+            defaults=validated_data
         )
         user.set_password(validated_data['password'])
         user.save()

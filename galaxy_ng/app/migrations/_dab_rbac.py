@@ -54,7 +54,13 @@ def copy_roles_to_role_definitions(apps, schema_editor):
                 dab_perms.append(dabperm)
 
         if dab_perms:
-            roledef, created = RoleDefinition.objects.get_or_create(name=corerole.name)
+            roledef, created = RoleDefinition.objects.get_or_create(
+                name=corerole.name,
+                defaults={
+                    'description': corerole.description or corerole.name,
+                    'managed': corerole.locked,
+                }
+            )
             if created:
                 print(f'CREATED RoleDefinition from {corerole} {corerole.name}')
                 roledef.permissions.set(dab_perms)

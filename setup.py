@@ -126,7 +126,7 @@ requirements = [
     "social-auth-app-django>=5.2.0",
     "django-auth-ldap==4.0.0",
     "drf-spectacular",
-    "dynaconf",  # unversioned because pulpcore already sets it
+    "dynaconf>=3.2.6",
     "insights_analytics_collector>=0.3.0",
     "boto3",
     "distro",
