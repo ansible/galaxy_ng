@@ -1,9 +1,7 @@
 import time
-
 import pytest
 
 from galaxy_ng.tests.performance.constants import URLS
-
 from ..integration.utils import (
     UIClient,
     SocialGithubClient,
@@ -21,9 +19,6 @@ def api_client(ansible_config):
         require_auth=False
     )
     return api_client
-  
-        
-        
         
 @pytest.mark.deployment_community
 @pytest.mark.parametrize("url,info", URLS.items())
