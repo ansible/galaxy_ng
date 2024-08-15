@@ -206,7 +206,11 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
     with pulp_rbac_signals():
         rd = RoleDefinition.objects.filter(name=instance.name).first()
         if not rd:
-            RoleDefinition.objects.create(name=instance.name)
+            RoleDefinition.objects.create(
+                name=instance.name,
+                managed=instance.locked,
+                description=instance.description or instance.name,
+            )
         # TODO: other fields? like description
 
 
