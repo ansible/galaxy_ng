@@ -352,6 +352,7 @@ def lazy_content_type_correction(rd, obj):
 @receiver(post_save, sender=UserRole)
 def copy_pulp_user_role(sender, instance, created, **kwargs):
     """When a pulp role is granted to a user, grant the equivalent dab role."""
+
     # FIXME - this is a temporary workaround to allow on-demand
     #   assigment of task roles to users from pulpcore's AFTER_CREATE
     #   hook on the Task model which calls ...
