@@ -18,7 +18,7 @@ URLS = {
     '_ui/v1/distributions/' : {
         'baseline' : 0.5,
         'method' : 'GET'
-    }, 
+    },
     '_ui/v1/imports/collections/' : {
         'baseline' : 0.5,
         'method' : 'GET'
@@ -44,10 +44,6 @@ URLS = {
         'method' : 'GET'
     },
     '_ui/v1/tags/collections/': {
-        'baseline' : 0.5,
-        'method' : 'GET'
-    },
-    '_ui/v1/distributions/': {
         'baseline' : 0.5,
         'method' : 'GET'
     },

@@ -58,15 +58,18 @@ skip_in_gw: tests that need to be skipped if hub is behind the gateway (temporar
 
 logger = logging.getLogger(__name__)
 
+
 def pytest_configure(config):
     for line in MARKER_CONFIG.split('\n'):
         if not line:
             continue
         config.addinivalue_line('markers', line)
 
+
 @pytest.fixture(scope="session")
 def ansible_config():
     return get_ansible_config()
+
 
 @pytest.fixture(scope="session")
 def galaxy_client(ansible_config):
