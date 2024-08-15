@@ -178,9 +178,6 @@ def copy_permissions_role_to_role(roleA, roleB):
 
     A call to this method establishes that roleA should become the source-of-truth
     """
-
-    print(f'# copy_permissions_role_to_role a:{roleA} b:{roleB}')
-
     permissionsA = list(roleA.permissions.prefetch_related("content_type"))
     permissionsB = list(roleB.permissions.prefetch_related("content_type"))
     fullnamesA = set(f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsA)
@@ -214,9 +211,6 @@ def copy_permissions_role_to_role(roleA, roleB):
 @receiver(post_save, sender=Role)
 def copy_role_to_role_definition(sender, instance, created, **kwargs):
     """When a dab role is granted to a user, grant the equivalent pulp role."""
-
-    print(f'copy_role_to_role_definition sender:{sender} instance:{instance}')
-
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
@@ -235,9 +229,6 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Role)
 def delete_role_to_role_definition(sender, instance, **kwargs):
     """When a dab role is granted to a user, grant the equivalent pulp role."""
-
-    print(f'# delete_role_to_role_definition sender:{sender} instance:{instance}')
-
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
@@ -248,9 +239,6 @@ def delete_role_to_role_definition(sender, instance, **kwargs):
 
 
 def copy_permission_role_to_rd(instance, action, model, pk_set, reverse, **kwargs):
-
-    print(f'# copy_permission_role_to_rd instance:{instance} action:{action} model:{model} pk_set:{pk_set} reverse:{reverse}')
-
     if rbac_signal_in_progress():
         return
     if action.startswith("pre_"):
@@ -279,9 +267,6 @@ m2m_changed.connect(copy_permission_role_to_rd, sender=Role.permissions.through)
 @receiver(post_save, sender=RoleDefinition)
 def copy_role_definition_to_role(sender, instance, created, **kwargs):
     """When a dab role is granted to a user, grant the equivalent pulp role."""
-
-    print(f'# copy_role_definition_to_role sender:{sender} instance:{instance} created:{created}')
-
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
@@ -295,9 +280,6 @@ def copy_role_definition_to_role(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=RoleDefinition)
 def delete_role_definition_to_role(sender, instance, **kwargs):
     """When a dab role is granted to a user, grant the equivalent pulp role."""
-
-    print(f'# delete_role_definition_to_role sender:{sender} instance:{instance}')
-
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
@@ -308,9 +290,6 @@ def delete_role_definition_to_role(sender, instance, **kwargs):
 
 
 def copy_permission_rd_to_role(instance, action, model, pk_set, reverse, **kwargs):
-
-    print(f'# copy_permission_rd_to_role instance:{instance} action:{action} model:{model} pk_set:{pk_set} reverse:{reverse}')
-
     if rbac_signal_in_progress():
         return
     if action.startswith("pre_"):
@@ -357,7 +336,6 @@ def lazy_content_type_correction(rd, obj):
             # If permissions will not pass the validator, then we do not want to do this
             validate_permissions_for_model(list(rd.permissions.all()), ct)
         except ValidationError as exc:
-            # import traceback; traceback.print_stack()
             logger.warning(
                 f'Assignment to {rd.name} for {type(obj)}'
                 + f' violates a DAB role validation rule: {str(exc)}'
@@ -375,9 +353,6 @@ def lazy_content_type_correction(rd, obj):
 @receiver(post_save, sender=UserRole)
 def copy_pulp_user_role(sender, instance, created, **kwargs):
     """When a pulp role is granted to a user, grant the equivalent dab role."""
-
-    print(f'# copy_pulp_user_role sender:{sender} instance:{instance} created:{created}')
-
     # FIXME - this is a temporary workaround to allow on-demand
     #   assigment of task roles to users from pulpcore's AFTER_CREATE
     #   hook on the Task model which calls ...
@@ -386,11 +361,9 @@ def copy_pulp_user_role(sender, instance, created, **kwargs):
         return
 
     if rbac_signal_in_progress():
-        print(f'# IN PROGRESS - SKIP')
         return
     with pulp_rbac_signals():
         roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
-        print(f'# ROLEDEF_NAME:{roledef_name}')
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if rd:
             if instance.content_object:
@@ -402,15 +375,11 @@ def copy_pulp_user_role(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=UserRole)
 def delete_pulp_user_role(sender, instance, **kwargs):
-
-    print(f'# delete_pulp_user_role sender:{sender} instance:{instance}')
-
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
         roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
-        print(f'delete_pulp_user_role sender.user:{sender.user} instance.user:{instance.user}')
         if rd:
             if instance.content_object:
                 try:
@@ -426,9 +395,6 @@ def delete_pulp_user_role(sender, instance, **kwargs):
 
 @receiver(post_save, sender=GroupRole)
 def copy_pulp_group_role(sender, instance, created, **kwargs):
-
-    print(f'# copy_pulp_group_role sender:{sender} instance:{instance} created:{created}')
-
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
@@ -445,9 +411,6 @@ def copy_pulp_group_role(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=GroupRole)
 def delete_pulp_group_role(sender, instance, **kwargs):
-
-    print(f'# delete_pulp_group_role sender:{sender} instance:{instance}')
-
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
@@ -475,12 +438,18 @@ def _get_pulp_role_kwargs(assignment):
         entity = assignment.team.group
     else:
         raise Exception(f"Could not find entity for DAB assignment {assignment}")
-    role_name = ROLEDEF_TO_PULP.get(assignment.role_definition.name, assignment.role_definition.name)
+    role_name = ROLEDEF_TO_PULP.get(
+        assignment.role_definition.name,
+        assignment.role_definition.name
+    )
     return (role_name, entity), kwargs
 
 
 def _apply_dab_assignment(assignment):
-    role_name = ROLEDEF_TO_PULP.get(assignment.role_definition.name, assignment.role_definition.name)
+    role_name = ROLEDEF_TO_PULP.get(
+        assignment.role_definition.name,
+        assignment.role_definition.name
+    )
     if not Role.objects.filter(name=role_name).exists():
         return  # some platform roles will not have matching pulp roles
     args, kwargs = _get_pulp_role_kwargs(assignment)
@@ -488,7 +457,10 @@ def _apply_dab_assignment(assignment):
 
 
 def _unapply_dab_assignment(assignment):
-    role_name = ROLEDEF_TO_PULP.get(assignment.role_definition.name, assignment.role_definition.name)
+    role_name = ROLEDEF_TO_PULP.get(
+        assignment.role_definition.name,
+        assignment.role_definition.name
+    )
     if not Role.objects.filter(name=role_name).exists():
         return  # some platform roles will not have matching pulp roles
     args, kwargs = _get_pulp_role_kwargs(assignment)
@@ -498,28 +470,19 @@ def _unapply_dab_assignment(assignment):
 @receiver(post_save, sender=RoleUserAssignment)
 def copy_dab_user_role_assignment(sender, instance, created, **kwargs):
     """When a dab role is granted to a user, grant the equivalent pulp role."""
-
-    print(f'# copy_dab_user_role_assignment sender:{sender} instance:{instance} created:{created}')
-
     if rbac_signal_in_progress():
-        print(f'# INPROGRESS - SKIP')
         return
     with dab_rbac_signals():
         if instance.role_definition.name == TEAM_MEMBER_ROLE and \
                 isinstance(instance, RoleUserAssignment):
             instance.content_object.group.user_set.add(instance.user)
-            print(f'# team memer role stuff - skipping')
             return
-        print(f'# CALL _apply_dab_assignment')
         _apply_dab_assignment(instance)
 
 
 @receiver(post_delete, sender=RoleUserAssignment)
 def delete_dab_user_role_assignment(sender, instance, **kwargs):
     """When a dab role is revoked from a user, revoke the equivalent pulp role."""
-
-    print(f'# delete_dab_user_role_assignment sender:{sender} instance:{instance}')
-
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
@@ -536,9 +499,6 @@ def delete_dab_user_role_assignment(sender, instance, **kwargs):
 @receiver(post_save, sender=RoleTeamAssignment)
 def copy_dab_team_role_assignment(sender, instance, created, **kwargs):
     """When a dab role is granted to a team, grant the equivalent pulp role."""
-
-    print(f'# copy_dab_team_role_assignment sender:{sender} instance:{instance} created:{created}')
-
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
@@ -548,9 +508,6 @@ def copy_dab_team_role_assignment(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=RoleTeamAssignment)
 def delete_dab_team_role_assignment(sender, instance, **kwargs):
     """When a dab role is revoked from a team, revoke the equivalent pulp role."""
-
-    print(f'# delete_dab_team_role_assignment sender:{sender} instance:{instance}')
-
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
@@ -560,9 +517,6 @@ def delete_dab_team_role_assignment(sender, instance, **kwargs):
 # Connect User.groups to the role in DAB
 
 def copy_dab_group_to_role(instance, action, model, pk_set, reverse, **kwargs):
-
-    print(f'# copy_dab_group_to_role instance:{instance} action:{action} model:{model} pk_set:{pk_set} reverse:{reverse}')
-
     if rbac_signal_in_progress():
         return
     if action.startswith("pre_"):
