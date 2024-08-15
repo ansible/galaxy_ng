@@ -240,7 +240,7 @@ def test_dab_rbac_namespace_owner_by_team(
 
 
 @pytest.mark.deployment_standalone
-def test_dab_platform_auditor_bidirectional_sync(
+def test_dab_user_platform_auditor_bidirectional_sync(
     settings,
     galaxy_client,
     random_username,
@@ -312,4 +312,90 @@ def test_dab_platform_auditor_bidirectional_sync(
         pass
 
     pulp_assignments = gc.get(f"pulp/api/v3/users/{uid}/roles/")
+    assert pulp_assignments['count'] == 0
+
+
+@pytest.mark.deployment_standalone
+def test_dab_team_platform_auditor_bidirectional_sync(
+    settings,
+    galaxy_client,
+    random_username,
+):
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    # find the "platform auditor" roledef ...
+    pa_def = gc.get('_ui/v2/role_definitions/?name=Platform%20Auditor')['results'][0]
+
+    org_name = random_username.replace('user_', 'org_')
+    team_name = random_username.replace('user_', 'team_')
+
+    # make the org ...
+    gc.post(
+        "_ui/v2/organizations/",
+        body=json.dumps({"name": org_name})
+    )
+
+    # make the team ...
+    team_data = gc.post(
+        "_ui/v2/teams/",
+        body=json.dumps({
+            "name": team_name,
+            "organization": org_name,
+        })
+    )
+    teamid = team_data['id']
+    guid = team_data['group']['id']
+
+    ##################################################
+    # PULP => DAB
+    ##################################################
+
+    # assign the galaxy.system_auditor role to the group
+    pulp_assignment = gc.post(
+        f"pulp/api/v3/groups/{guid}/roles/",
+        body=json.dumps({'content_object': None, 'role': 'galaxy.auditor'})
+    )
+
+    # ensure the team got the platform auditor roledef assignment
+    trds = gc.get(f'_ui/v2/role_team_assignments/?team__id={teamid}')
+    assert trds['count'] == 1
+    assert trds['results'][0]['role_definition'] == pa_def['id']
+
+    # now remove the pulp role ..
+    try:
+        gc.delete(pulp_assignment['pulp_href'])
+    except Exception:
+        pass
+
+    # ensure the team no longer has the roledef assignment
+    trds = gc.get(f'_ui/v2/role_team_assignments/?team__id={teamid}')
+    assert trds['count'] == 0
+
+    ##################################################
+    # DAB => PULP
+    ##################################################
+
+    # assign the roledefinition ...
+    roledef_assignment = gc.post(
+        '_ui/v2/role_team_assignments/',
+        body=json.dumps({
+            'team': teamid,
+            'role_definition': pa_def['id'],
+        })
+    )
+
+    # ensure the user got the pulp role assignment
+    pulp_assignments = gc.get(f"pulp/api/v3/groups/{guid}/roles/")
+    assert pulp_assignments['count'] == 1
+    assert pulp_assignments['results'][0]['role'] == 'galaxy.auditor'
+
+    # remove the roledef ...
+    try:
+        gc.delete(roledef_assignment['url'])
+    except Exception:
+        pass
+
+    # ensure the role was removed
+    pulp_assignments = gc.get(f"pulp/api/v3/groups/{guid}/roles/")
     assert pulp_assignments['count'] == 0
