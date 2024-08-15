@@ -214,7 +214,6 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
-
         roledef_name = PULP_TO_ROLEDEF(instance.name, instance.name)
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if not rd:
