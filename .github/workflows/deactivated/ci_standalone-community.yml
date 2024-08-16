@@ -68,6 +68,3 @@ jobs:
 
       - name: run the integration tests
         run: DUMP_LOGS=1 ./dev/standalone-community/RUN_INTEGRATION.sh
-
-      - name: run the performance tests
-        run: DUMP_LOGS=1 ./dev/standalone-community/RUN_PERFORMANCE.sh
