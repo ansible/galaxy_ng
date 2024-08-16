@@ -214,7 +214,7 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
-        roledef_name = PULP_TO_ROLEDEF(instance.name, instance.name)
+        roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if not rd:
             RoleDefinition.objects.create(
@@ -231,7 +231,7 @@ def delete_role_to_role_definition(sender, instance, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        roledef_name = PULP_TO_ROLEDEF(instance.name, instance.name)
+        roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if rd:
             rd.delete()
@@ -251,7 +251,7 @@ def copy_permission_role_to_rd(instance, action, model, pk_set, reverse, **kwarg
             + " not supported due to galaxy_ng signals"
         )
 
-    roledef_name = PULP_TO_ROLEDEF(instance.name, instance.name)
+    roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
     rd = RoleDefinition.objects.filter(name=roledef_name).first()
     if rd:
         copy_permissions_role_to_role(instance, rd)
@@ -269,7 +269,7 @@ def copy_role_definition_to_role(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        role_name = ROLEDEF_TO_PULP(instance.name, instance.name)
+        role_name = ROLEDEF_TO_PULP.get(instance.name, instance.name)
         role = Role.objects.filter(name=role_name).first()
         if not role:
             Role.objects.create(name=role_name)
@@ -282,7 +282,7 @@ def delete_role_definition_to_role(sender, instance, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        role_name = ROLEDEF_TO_PULP(instance.name, instance.name)
+        role_name = ROLEDEF_TO_PULP.get(instance.name, instance.name)
         role = Role.objects.filter(name=role_name).first()
         if role:
             role.delete()
@@ -302,7 +302,7 @@ def copy_permission_rd_to_role(instance, action, model, pk_set, reverse, **kwarg
             + " not supported due to galaxy_ng signals"
         )
 
-    role_name = ROLEDEF_TO_PULP(instance.name, instance.name)
+    role_name = ROLEDEF_TO_PULP.get(instance.name, instance.name)
     role = Role.objects.filter(name=role_name).first()
     if role:
         copy_permissions_role_to_role(instance, role)
@@ -365,11 +365,6 @@ def copy_pulp_user_role(sender, instance, created, **kwargs):
     with pulp_rbac_signals():
         roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
-
-        print('---------------------------------------------------------')
-        print(f'# copy_pulp_user_role {sender} {instance} {created} --> {roledef_name}:{rd}')
-        print('---------------------------------------------------------')
-
         if rd:
             if instance.content_object:
                 lazy_content_type_correction(rd, instance.content_object)
@@ -409,6 +404,7 @@ def copy_pulp_group_role(sender, instance, created, **kwargs):
         team = Team.objects.filter(group=instance.group)
         if rd and team.exists():
             team = team.first()
+            # FIXME - multi-type roledefs
             try:
                 if instance.content_object:
                     rd.give_permission(team, instance.content_object)
@@ -428,6 +424,7 @@ def delete_pulp_group_role(sender, instance, **kwargs):
         team = Team.objects.filter(group=instance.group)
         if rd and team.exists():
             team = team.first()
+            # FIXME - multi-type roledefs
             try:
                 if instance.content_object:
                     rd.remove_permission(team, instance.content_object)
