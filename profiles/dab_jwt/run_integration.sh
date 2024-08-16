@@ -26,6 +26,13 @@ export JWT_PROXY=true
 export AAP_GATEWAY=true
 export GW_ROOT_URL=http://jwtproxy:8080
 
+export GALAXYKIT_SLEEP_SECONDS_POLLING=.5
+export GALAXYKIT_SLEEP_SECONDS_ONETIME=.5
+export GALAXYKIT_POLLING_MAX_ATTEMPTS=50
+export GALAXY_SLEEP_SECONDS_POLLING=.5
+export GALAXY_SLEEP_SECONDS_ONETIME=.5
+export GALAXY_POLLING_MAX_ATTEMPTS=50
+
 #$VENVPATH/bin/pytest -v -r sx --color=yes "$@" galaxy_ng/tests/integration/dab
 $VENVPATH/bin/pytest -v -r sx --color=yes -m "$HUB_TEST_MARKS" "$@" galaxy_ng/tests/integration
 RC=$?

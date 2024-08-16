@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 from pkg_resources import parse_version
 
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
+from galaxy_ng.tests.integration.constants import POLLING_MAX_ATTEMPTS
 from galaxy_ng.tests.integration.constants import GALAXY_STAGE_ANSIBLE_PROFILES, \
     EPHEMERAL_PROFILES, PROFILES, CREDENTIALS, SYNC_PROFILES, DEPLOYED_PAH_PROFILES
 from galaxy_ng.tests.integration.utils import get_client
@@ -722,17 +724,15 @@ def require_signature_for_approval():
     ansible_config = get_ansible_config()
     galaxy_client = get_galaxy_client(ansible_config)
     gc = galaxy_client("admin")
-    max_attempts = 5
-    delay = 3
     # we need retries because in ephemeral env we get 502 sometimes
-    for attempt in range(1, max_attempts + 1):
+    for attempt in range(1, POLLING_MAX_ATTEMPTS + 1):
         try:
             settings = gc.get_settings()
             return settings.get("GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL")
         except JSONDecodeError as e:
-            if attempt == max_attempts:
+            if attempt == POLLING_MAX_ATTEMPTS:
                 raise e
-            time.sleep(delay)
+            time.sleep(SLEEP_SECONDS_POLLING)
 
 
 def sign_collection_on_demand(client, signing_service, repo, ns, collection_name,

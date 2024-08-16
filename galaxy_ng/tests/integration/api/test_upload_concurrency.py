@@ -11,6 +11,7 @@ from ..utils.repo_management_utils import search_collection_endpoint, create_rep
     create_test_namespace
 from ..utils.tools import generate_random_string
 from ..utils.iqe_utils import aap_gateway
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 
 
 @pytest.mark.min_hub_version("4.8dev")
@@ -64,6 +65,6 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
         )
         if matches == len(artifacts):
             break
-        time.sleep(10)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
     assert matches == len(artifacts)

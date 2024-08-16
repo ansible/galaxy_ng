@@ -45,6 +45,16 @@ from pulpcore.plugin.models.role import GroupRole, UserRole, Role
 logger = logging.getLogger(__name__)
 
 
+PULP_TO_ROLEDEF = {
+    'galaxy.auditor': 'Platform Auditor',
+}
+
+
+ROLEDEF_TO_PULP = {
+    'Platform Auditor': 'galaxy.auditor',
+}
+
+
 @receiver(post_save, sender=AnsibleRepository)
 def ensure_retain_repo_versions_on_repository(sender, instance, created, **kwargs):
     """Ensure repository has retain_repo_versions set when created.
@@ -204,10 +214,11 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
-        rd = RoleDefinition.objects.filter(name=instance.name).first()
+        roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
+        rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if not rd:
             RoleDefinition.objects.create(
-                name=instance.name,
+                name=roledef_name,
                 managed=instance.locked,
                 description=instance.description or instance.name,
             )
@@ -220,7 +231,8 @@ def delete_role_to_role_definition(sender, instance, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        rd = RoleDefinition.objects.filter(name=instance.name).first()
+        roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
+        rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if rd:
             rd.delete()
 
@@ -239,7 +251,8 @@ def copy_permission_role_to_rd(instance, action, model, pk_set, reverse, **kwarg
             + " not supported due to galaxy_ng signals"
         )
 
-    rd = RoleDefinition.objects.filter(name=instance.name).first()
+    roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
+    rd = RoleDefinition.objects.filter(name=roledef_name).first()
     if rd:
         copy_permissions_role_to_role(instance, rd)
 
@@ -256,9 +269,10 @@ def copy_role_definition_to_role(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        role = Role.objects.filter(name=instance.name).first()
+        role_name = ROLEDEF_TO_PULP.get(instance.name, instance.name)
+        role = Role.objects.filter(name=role_name).first()
         if not role:
-            Role.objects.create(name=instance.name)
+            Role.objects.create(name=role_name)
         # TODO: other fields? like description
 
 
@@ -268,7 +282,8 @@ def delete_role_definition_to_role(sender, instance, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        role = Role.objects.filter(name=instance.name).first()
+        role_name = ROLEDEF_TO_PULP.get(instance.name, instance.name)
+        role = Role.objects.filter(name=role_name).first()
         if role:
             role.delete()
 
@@ -287,7 +302,8 @@ def copy_permission_rd_to_role(instance, action, model, pk_set, reverse, **kwarg
             + " not supported due to galaxy_ng signals"
         )
 
-    role = Role.objects.filter(name=instance.name).first()
+    role_name = ROLEDEF_TO_PULP.get(instance.name, instance.name)
+    role = Role.objects.filter(name=role_name).first()
     if role:
         copy_permissions_role_to_role(instance, role)
 
@@ -319,7 +335,6 @@ def lazy_content_type_correction(rd, obj):
             # If permissions will not pass the validator, then we do not want to do this
             validate_permissions_for_model(list(rd.permissions.all()), ct)
         except ValidationError as exc:
-            # import traceback; traceback.print_stack()
             logger.warning(
                 f'Assignment to {rd.name} for {type(obj)}'
                 + f' violates a DAB role validation rule: {str(exc)}'
@@ -348,7 +363,8 @@ def copy_pulp_user_role(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
-        rd = RoleDefinition.objects.filter(name=instance.role.name).first()
+        roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
+        rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if rd:
             if instance.content_object:
                 lazy_content_type_correction(rd, instance.content_object)
@@ -362,8 +378,8 @@ def delete_pulp_user_role(sender, instance, **kwargs):
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
-        rd = RoleDefinition.objects.filter(name=instance.role.name).first()
-        print(f'delete_pulp_user_role sender.user:{sender.user} instance.user:{instance.user}')
+        roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
+        rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if rd:
             if instance.content_object:
                 try:
@@ -382,12 +398,20 @@ def copy_pulp_group_role(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
-        rd = RoleDefinition.objects.filter(name=instance.role.name).first()
-        if rd and hasattr(instance.group, "team"):
-            if instance.content_object:
-                rd.give_permission(instance.group.team, instance.content_object)
-            else:
-                rd.give_global_permission(instance.group.team)
+        roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
+        rd = RoleDefinition.objects.filter(name=roledef_name).first()
+
+        team = Team.objects.filter(group=instance.group)
+        if rd and team.exists():
+            team = team.first()
+            # FIXME - multi-type roledefs
+            try:
+                if instance.content_object:
+                    rd.give_permission(team, instance.content_object)
+                else:
+                    rd.give_global_permission(team)
+            except ValidationError as e:
+                logger.error(e)
 
 
 @receiver(post_delete, sender=GroupRole)
@@ -395,12 +419,19 @@ def delete_pulp_group_role(sender, instance, **kwargs):
     if rbac_signal_in_progress():
         return
     with pulp_rbac_signals():
-        rd = RoleDefinition.objects.filter(name=instance.role.name).first()
-        if rd and hasattr(instance.group, "team"):
-            if instance.content_object:
-                rd.remove_permission(instance.group.team, instance.content_object)
-            else:
-                rd.remove_global_permission(instance.group.team)
+        roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
+        rd = RoleDefinition.objects.filter(name=roledef_name).first()
+        team = Team.objects.filter(group=instance.group)
+        if rd and team.exists():
+            team = team.first()
+            # FIXME - multi-type roledefs
+            try:
+                if instance.content_object:
+                    rd.remove_permission(team, instance.content_object)
+                else:
+                    rd.remove_global_permission(team)
+            except ValidationError as e:
+                logger.error(e)
 
 
 # DAB RBAC assignments to pulp UserRole TeamRole
@@ -416,18 +447,30 @@ def _get_pulp_role_kwargs(assignment):
         entity = assignment.team.group
     else:
         raise Exception(f"Could not find entity for DAB assignment {assignment}")
-    return (assignment.role_definition.name, entity), kwargs
+    role_name = ROLEDEF_TO_PULP.get(
+        assignment.role_definition.name,
+        assignment.role_definition.name
+    )
+    return (role_name, entity), kwargs
 
 
 def _apply_dab_assignment(assignment):
-    if not Role.objects.filter(name=assignment.role_definition.name).exists():
+    role_name = ROLEDEF_TO_PULP.get(
+        assignment.role_definition.name,
+        assignment.role_definition.name
+    )
+    if not Role.objects.filter(name=role_name).exists():
         return  # some platform roles will not have matching pulp roles
     args, kwargs = _get_pulp_role_kwargs(assignment)
     assign_role(*args, **kwargs)
 
 
 def _unapply_dab_assignment(assignment):
-    if not Role.objects.filter(name=assignment.role_definition.name).exists():
+    role_name = ROLEDEF_TO_PULP.get(
+        assignment.role_definition.name,
+        assignment.role_definition.name
+    )
+    if not Role.objects.filter(name=role_name).exists():
         return  # some platform roles will not have matching pulp roles
     args, kwargs = _get_pulp_role_kwargs(assignment)
     remove_role(*args, **kwargs)

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
+from rest_framework import views
 
 from ansible_base.rest_pagination.default_paginator import DefaultPaginator
 
@@ -23,13 +24,31 @@ from galaxy_ng.app.models.organization import Organization
 from galaxy_ng.app.models.organization import Team
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by('id')
-    serializer_class = UserSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = UserViewFilter
+class BaseView(views.APIView):
+    """
+    A view to define the base properties for the views in
+    ansible_base.rbac. Set ANSIBLE_BASE_CUSTOM_VIEW_PARENT
+    to this class in settings so that the rbac endpoints
+    follow the defined pagination and permission classes.
+    """
     pagination_class = DefaultPaginator
     permission_classes = [IsSuperUserOrReadOnly]
+
+    # openapi compatibility ...
+    def endpoint_pieces(*args, **kwargs):
+        return ''
+
+
+class BaseViewSet(viewsets.ModelViewSet):
+    filter_backends = (DjangoFilterBackend,)
+    pagination_class = DefaultPaginator
+    permission_classes = [IsSuperUserOrReadOnly]
+
+
+class UserViewSet(BaseViewSet):
+    queryset = User.objects.all().order_by('id')
+    serializer_class = UserSerializer
+    filterset_class = UserViewFilter
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -69,23 +88,17 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
-class GroupViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupViewSet(BaseViewSet):
     queryset = Group.objects.all().order_by('id')
     serializer_class = GroupSerializer
-    filter_backends = (DjangoFilterBackend,)
     filterset_class = GroupViewFilter
-    pagination_class = DefaultPaginator
-    permission_classes = [IsSuperUserOrReadOnly]
 
 
-class OrganizationViewSet(viewsets.ModelViewSet):
+class OrganizationViewSet(BaseViewSet):
 
     queryset = Organization.objects.all().order_by('pk')
     serializer_class = OrganizationSerializer
-    filter_backends = (DjangoFilterBackend,)
     filterset_class = OrganizationFilter
-    pagination_class = DefaultPaginator
-    permission_classes = [IsSuperUserOrReadOnly]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -101,14 +114,11 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class TeamViewSet(viewsets.ModelViewSet):
+class TeamViewSet(BaseViewSet):
 
     queryset = Team.objects.all().order_by('id')
     serializer_class = TeamSerializer
-    filter_backends = (DjangoFilterBackend,)
     filterset_class = TeamFilter
-    pagination_class = DefaultPaginator
-    permission_classes = [IsSuperUserOrReadOnly]
 
     def create(self, request, *args, **kwargs):
 

@@ -30,7 +30,7 @@ def wait_for_all_tasks(client, timeout=300):
 
         ready = running_count == 0 and waiting_count == 0
 
-        time.sleep(1)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
 
 def wait_for_all_tasks_gk(gc, timeout=300):
@@ -42,7 +42,7 @@ def wait_for_all_tasks_gk(gc, timeout=300):
         running_count = gc.get("pulp/api/v3/tasks/?state=running")["count"]
         waiting_count = gc.get("pulp/api/v3/tasks/?state=waiting")["count"]
         ready = running_count == 0 and waiting_count == 0
-        time.sleep(1)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
 
 def wait_for_task(api_client, resp, task_id=None, timeout=6000, raise_on_error=False):
@@ -100,7 +100,7 @@ def wait_for_namespace_tasks_gk(gc, timeout=300):
         running_count = gc.get("pulp/api/v3/tasks/?state=running&name__contains=namespace")["count"]
         waiting_count = gc.get("pulp/api/v3/tasks/?state=waiting&name__contains=namespace")["count"]
         ready = running_count == 0 and waiting_count == 0
-        time.sleep(1)
+        time.sleep(SLEEP_SECONDS_POLLING)
 
 
 class TaskFailed(Exception):

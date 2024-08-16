@@ -10,6 +10,7 @@ from ansible.errors import AnsibleError
 
 from urllib.parse import urlparse
 
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 from ..utils import (
     ansible_galaxy,
     build_collection,
@@ -283,7 +284,7 @@ def test_social_auth_delete_collection(ansible_config):
             )
             if exists_resp.status_code == 200:
                 break
-            time.sleep(5)
+            time.sleep(SLEEP_SECONDS_POLLING)
         assert exists_resp.status_code == 200
 
         del_resp = client.delete(
@@ -340,7 +341,7 @@ def test_social_auth_deprecate_collection(ansible_config):
             )
             if exists_resp.status_code == 200:
                 break
-            time.sleep(5)
+            time.sleep(SLEEP_SECONDS_POLLING)
         assert exists_resp.status_code == 200
 
         dep_resp = client.patch(

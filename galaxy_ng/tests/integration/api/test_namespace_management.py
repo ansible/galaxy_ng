@@ -11,6 +11,7 @@ from galaxykit.namespaces import get_namespace, get_namespace_collections
 from galaxykit.repositories import search_collection
 from galaxykit.users import get_me
 
+from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from ..utils.iqe_utils import is_stage_environment
 from ..utils.repo_management_utils import upload_new_artifact
 from ..utils.tasks import wait_for_all_tasks_gk, wait_for_namespace_tasks_gk
@@ -157,7 +158,7 @@ def test_namespace_edit_logo(galaxy_client):
     }
     my_namespace = gc.post("_ui/v1/my-namespaces/", body=payload)
     assert my_namespace["avatar_url"] == ''
-    sleep(60)
+    sleep(SLEEP_SECONDS_ONETIME)
     wait_for_all_tasks_gk(gc)
 
     namespaces = gc.get('_ui/v1/my-namespaces/')
@@ -169,7 +170,7 @@ def test_namespace_edit_logo(galaxy_client):
         "avatar_url": "https://avatars.githubusercontent.com/u/1869705?v=4"
     }
     gc.put(f"_ui/v1/my-namespaces/{name}/", body=payload)
-    sleep(60)
+    sleep(SLEEP_SECONDS_ONETIME)
     wait_for_all_tasks_gk(gc)
     updated_namespace = gc.get(f'_ui/v1/my-namespaces/{name}/')
     assert updated_namespace["avatar_url"] != ""
