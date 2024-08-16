@@ -34,6 +34,10 @@ class BaseView(views.APIView):
     pagination_class = DefaultPaginator
     permission_classes = [IsSuperUserOrReadOnly]
 
+    # openapi compatibility ...
+    def endpoint_pieces(*args, **kwargs):
+        return ''
+
 
 class BaseViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
