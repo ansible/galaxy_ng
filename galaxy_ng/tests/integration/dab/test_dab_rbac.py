@@ -440,6 +440,17 @@ def test_dab_user_assignment_filtering_as_user(
     random_namespace,
     random_username,
 ):
+    """
+    Integration test to assert a user can be assigned as the owner
+    of a namespace and then also be able to query their role assignments.
+
+    * This assumes there is a galaxy.collection_namespace_owner roledef
+      and that it has a content type defined.
+    * This also assumes the role_user_assignments endpoint is user
+      accessible and filterable.
+    * The role_user_assignments endpoint behaves differently for
+      evaluating a superuser vs a user for access.
+    """
     if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
         pytest.skip("this test relies on local resource creation")
 
