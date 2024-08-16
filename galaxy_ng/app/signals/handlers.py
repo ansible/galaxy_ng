@@ -365,6 +365,11 @@ def copy_pulp_user_role(sender, instance, created, **kwargs):
     with pulp_rbac_signals():
         roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
+
+        print('---------------------------------------------------------')
+        print(f'# copy_pulp_user_role {sender} {instance} {created} --> {roledef_name}:{rd}')
+        print('---------------------------------------------------------')
+
         if rd:
             if instance.content_object:
                 lazy_content_type_correction(rd, instance.content_object)
@@ -400,13 +405,17 @@ def copy_pulp_group_role(sender, instance, created, **kwargs):
     with pulp_rbac_signals():
         roledef_name = PULP_TO_ROLEDEF.get(instance.role.name, instance.role.name)
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
+
         team = Team.objects.filter(group=instance.group)
         if rd and team.exists():
             team = team.first()
-            if instance.content_object:
-                rd.give_permission(team, instance.content_object)
-            else:
-                rd.give_global_permission(team)
+            try:
+                if instance.content_object:
+                    rd.give_permission(team, instance.content_object)
+                else:
+                    rd.give_global_permission(team)
+            except ValidationError as e:
+                logger.error(e)
 
 
 @receiver(post_delete, sender=GroupRole)
@@ -419,10 +428,13 @@ def delete_pulp_group_role(sender, instance, **kwargs):
         team = Team.objects.filter(group=instance.group)
         if rd and team.exists():
             team = team.first()
-            if instance.content_object:
-                rd.remove_permission(team, instance.content_object)
-            else:
-                rd.remove_global_permission(team)
+            try:
+                if instance.content_object:
+                    rd.remove_permission(team, instance.content_object)
+                else:
+                    rd.remove_global_permission(team)
+            except ValidationError as e:
+                logger.error(e)
 
 
 # DAB RBAC assignments to pulp UserRole TeamRole
