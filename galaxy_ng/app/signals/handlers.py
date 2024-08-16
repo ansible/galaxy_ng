@@ -168,6 +168,13 @@ def rbac_signal_in_progress():
     return bool(rbac_state.dab_action or rbac_state.pulp_action)
 
 
+def pulp_role_to_single_content_type_or_none(pulprole):
+    content_types = set(perm.content_type for perm in pulprole.permissions.all())
+    if len(list(content_types)) == 1:
+        return list(content_types)[0]
+    return None
+
+
 def copy_permissions_role_to_role(roleA, roleB):
     """Make permissions on roleB match roleA
 
@@ -217,9 +224,15 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
         roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
         rd = RoleDefinition.objects.filter(name=roledef_name).first()
         if not rd:
+            content_type = pulp_role_to_single_content_type_or_none(instance)
+            logger.info(
+                f'CREATE ROLEDEF name:{roledef_name}'
+                + f' managed:{instance.locked} ctype:{content_type}'
+            )
             RoleDefinition.objects.create(
                 name=roledef_name,
                 managed=instance.locked,
+                content_type=content_type,
                 description=instance.description or instance.name,
             )
         # TODO: other fields? like description
