@@ -60,3 +60,6 @@ jobs:
 
       - name: run integration tests
         run: make gh-action/${{ matrix.env.TEST_PROFILE }}
+
+      - name: run performance tests
+        run: make gh-action/${{ matrix.env.TEST_PROFILE }}
