@@ -30,7 +30,7 @@ class UserSerializer(UserSerializerV1):
         ]
 
         extra_kwargs = {
-            'password': {'write_only': True, 'required': True},
+            'password': {'write_only': True, 'required': False},
             'email': {'required': False}
         }
 
@@ -41,11 +41,6 @@ class UserSerializer(UserSerializerV1):
         teams = Team.objects.filter(users=obj)
         teams_serializer = TeamSerializer(teams, many=True)
         return teams_serializer.data
-
-    def validate_email(self, value):
-        if not value:
-            raise serializers.ValidationError("Email is required")
-        return value
 
     def create(self, validated_data):
         user, _ = User.objects.get_or_create(
