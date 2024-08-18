@@ -108,40 +108,7 @@ class UserViewSet(BaseViewSet):
         # Return the created user data (excluding sensitive fields like password)
         return Response(UserDetailSerializer(user).data, status=status.HTTP_201_CREATED)
 
-    """
-    def perform_create(self, serializer):
-        print(f"## VIEW PERFORM_CREATE {serializer}")
-
-        '''
-        password = serializer.validated_data.get('password')
-        if password:
-
-            # can't get_or_create with groups/teams/orgs ...
-            validated_data = copy.deepcopy(serializer.validated_data)
-            groups = validated_data.pop('groups', None)
-            teams = validated_data.pop('teams', None)
-            orgs = validated_data.pop('organizations', None)
-
-            user, _ = User.objects.get_or_create(
-                username=validated_data['username'],
-                defaults=validated_data
-            )
-            user.set_password(password)
-            user.save()
-            serializer.instance = user
-        else:
-            serializer.save()
-        '''
-
-        serializer.save()
-    """
-
     '''
-    def perform_create(self, serializer):
-        print(f'## PERFORM CREATE data:{serializer.validated_data}')
-        return super().create(serializer)
-    '''
-
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -151,6 +118,22 @@ class UserViewSet(BaseViewSet):
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
         return Response(serializer.data)
+    '''
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        print(f'VIEW UPDATE SERIALIZER {serializer}')
+        serializer.is_valid(raise_exception=True)
+        # serializer.is_valid(raise_exception=False)
+
+        # print(f'VIEW UPDATE MAKE RESPONSE FROM {serializer.data}')
+        #return Response(serializer.data)
+
+        user = serializer.save()
+
+        return Response(UserDetailSerializer(user).data, status=status.HTTP_200_OK)
 
     def perform_update(self, serializer):
         password = serializer.validated_data.get('password')

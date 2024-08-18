@@ -42,6 +42,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         print(f'# DETAIL SERIALIZER GET GROUPS {obj}')
         groups = obj.groups.all()
         groups_serializer = GroupSerializer(groups, many=True)
+        print(f'# DETAIL SERIALIZER RETURN {groups_serializer.data}')
         return groups_serializer.data
 
     def get_teams(self, obj):
@@ -99,8 +100,19 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
             #'email': {'allow_blank': False, 'required': False}
         }
 
-    #def get_groups(self, obj):
-    #    return []
+    def is_valid(self, *args, **kwargs):
+        print(f'# SERIALIZER IS_VALID args:{args} kwargs:{kwargs}')
+        return super().is_valid(*args, **kwargs)
+
+    def to_internal_value(self, data):
+        print(f'# SERIALIZER TO_INTERNAL_VALUE data:{data}')
+
+        #data.pop('groups', None)
+        #data.pop('teams', None)
+        #data.pop('organizations', None)
+        #data.pop('resource', None)
+
+        return super().to_internal_value(data)
 
     def create(self, validated_data):
 
@@ -113,18 +125,6 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
 
         # Create the user without the groups data
         user = User.objects.create_user(**validated_data)
-
-        '''
-        # Handle adding the user to the specified groups
-        if groups_data:
-            for group_dict in groups_data:
-                group_name = group_dict.get('name')
-                group_name = group_dict.get('name')
-
-                if group_name:
-                    group, created = Group.objects.get_or_create(name=group_name)
-                    user.groups.add(group)
-        '''
 
         if groups_data:
             for group_dict in groups_data:
@@ -180,6 +180,23 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
 
         return user
 
+    def update(self, instance, validated_data):
+        print(f'## SERIALIZER UPDATE instance:{instance} validated_data:{validated_data}')
+
+        # Update the rest of the fields as usual
+        instance.username = validated_data.get('username', instance.username)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.email = validated_data.get('email', instance.email)
+
+        # If password is provided, update it securely
+        password = validated_data.get('password', None)
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+
+        return instance
 
 
 #class UserSerializer(UserSerializerV1):
