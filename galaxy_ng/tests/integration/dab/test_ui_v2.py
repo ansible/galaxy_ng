@@ -139,6 +139,7 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
         "_ui/v2/users/",
         body=json.dumps(user_payload)
     )
+    #import epdb; epdb.st()
 
     # validate fields ...
     assert resp["username"] == random_username
@@ -148,7 +149,12 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
     assert resp["email"] == user_payload.get("email", "")
     assert resp["resource"]["ansible_id"] is not None
 
+    # get the full rendered user detail
+    uresp = gc.get(f'_ui/v2/users/?username={random_username}')
+    #import epdb; epdb.st()
+
     if expected_groups:
+        #import epdb; epdb.st()
         actual_groups = [x['name'] for x in resp['groups']]
         assert sorted(expected_groups) == sorted(actual_groups)
 
@@ -173,6 +179,7 @@ def test_ui_v2_user_create_invalid_data(
     settings,
     galaxy_client,
     invalid_payload,
+    random_username,
 ):
     """Test user creation in ui/v2/users/ with invalid data."""
 
@@ -185,6 +192,8 @@ def test_ui_v2_user_create_invalid_data(
         "first_name": "jim",
         "last_name": "bob",
     })
+    if 'username' not in invalid_payload[0]:
+        invalid_payload[0]['username'] = random_username
 
     exc = None
     try:
