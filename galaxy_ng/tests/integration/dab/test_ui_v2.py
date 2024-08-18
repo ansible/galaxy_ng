@@ -13,6 +13,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.parametrize("user_payload", [
     {},
     {"email": "foobar@foobar.com"},
+    {"password": None},
 ])
 def test_ui_v2_user_create(
     settings,
@@ -31,8 +32,10 @@ def test_ui_v2_user_create(
         "username": random_username,
         "first_name": "jim",
         "last_name": "bob",
-        "password": "redhat1234"
+        # "password": "redhat1234"
     })
+    if "password" not in user_payload:
+        user_payload["password"] = "redhat1234"
 
     # create the user in ui/v2 ...
     resp = gc.post(
@@ -48,11 +51,12 @@ def test_ui_v2_user_create(
     assert resp["email"] == user_payload.get("email", "")
     assert resp["resource"]["ansible_id"] is not None
 
-    # validate login ...
-    auth = {'username': random_username, 'password': 'redhat1234'}
-    ugc = GalaxyClient(gc.galaxy_root, auth=auth)
-    me_ds = ugc.get('_ui/v1/me/')
-    assert me_ds["username"] == random_username
+    # validate login if a password was created...
+    if user_payload["password"] is not None:
+        auth = {'username': random_username, 'password': 'redhat1234'}
+        ugc = GalaxyClient(gc.galaxy_root, auth=auth)
+        me_ds = ugc.get('_ui/v1/me/')
+        assert me_ds["username"] == random_username
 
 
 @pytest.mark.deployment_standalone
@@ -170,7 +174,7 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
     ({"email": "@whoops"}, "Enter a valid email address."),
     ({"username": ""}, "This field may not be blank"),
     ({"password": "short"}, "This password is too short"),
-    ({"password": ""}, "This password is too short"),
+    ({"password": ""}, "This field may not be blank"),
     ({"groups": [{"name": "HITHERE"}]}, "does not exist"),
     ({"teams": [{"name": "HITHERE"}]}, "does not exist"),
 ])

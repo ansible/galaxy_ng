@@ -2,7 +2,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import password_validation
-from django.core.validators import EmailValidator
 from django.utils.translation import gettext_lazy as _
 
 from galaxy_ng.app.models.auth import User
@@ -90,7 +89,12 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
             'username': {'allow_blank': False, 'required': True},
             'resource': {'read_only': True},
             'date_joined': {'read_only': True},
-            'password': {'write_only': True, 'allow_blank': True, 'required': False},
+            'password': {
+                'write_only': True,
+                'allow_blank': False,
+                'allow_null': True,
+                'required': False
+            },
         }
 
     def is_valid(self, *args, **kwargs):
