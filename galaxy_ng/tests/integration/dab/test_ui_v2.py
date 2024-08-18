@@ -167,8 +167,10 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
 @pytest.mark.deployment_standalone
 @pytest.mark.parametrize("invalid_payload", [
     ({"email": "invalidemail"}, "Enter a valid email address."),
+    ({"email": "@whoops"}, "Enter a valid email address."),
     ({"username": ""}, "This field may not be blank"),
     ({"password": "short"}, "This password is too short"),
+    ({"password": ""}, "This password is too short"),
     ({"groups": [{"name": "HITHERE"}]}, "does not exist"),
     ({"teams": [{"name": "HITHERE"}]}, "does not exist"),
 ])

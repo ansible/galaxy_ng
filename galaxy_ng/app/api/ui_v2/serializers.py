@@ -100,7 +100,7 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
         return super().to_internal_value(data)
 
     def validate_password(self, password):
-        if password:
+        if password is not None:
             password_validation.validate_password(password)
             return password
         return password
