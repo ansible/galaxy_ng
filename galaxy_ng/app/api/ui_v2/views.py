@@ -50,25 +50,39 @@ class UserViewSet(BaseViewSet):
     serializer_class = UserSerializer
     filterset_class = UserViewFilter
 
+    '''
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    '''
 
     def perform_create(self, serializer):
+
+        '''
         password = serializer.validated_data.get('password')
         if password:
+
+            # can't get_or_create with groups/teams/orgs ...
+            validated_data = copy.deepcopy(serializer.validated_data)
+            groups = validated_data.pop('groups', None)
+            teams = validated_data.pop('teams', None)
+            orgs = validated_data.pop('organizations', None)
+
             user, _ = User.objects.get_or_create(
-                username=serializer.validated_data['username'],
-                defaults=serializer.validated_data
+                username=validated_data['username'],
+                defaults=validated_data
             )
             user.set_password(password)
             user.save()
             serializer.instance = user
         else:
             serializer.save()
+        '''
+
+        serializer.save()
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
