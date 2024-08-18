@@ -118,7 +118,7 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
                 body=json.dumps({"name": team_name, "organization": org_name})
             )
 
-            # expected_groups.append(group_name)
+            expected_groups.append(group_name)
             expected_teams.append(team_name)
             # expected_orgs.append(org_name)
 

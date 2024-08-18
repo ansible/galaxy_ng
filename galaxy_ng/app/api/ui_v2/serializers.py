@@ -200,6 +200,7 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
                 try:
                     team = Team.objects.get(**team_filter)
                     team.users.add(user)
+                    user.groups.add(team.group)
                 except Team.DoesNotExist:
                     raise ValidationError(detail={
                         'teams': _('Team name=%(name)s, id=%(id)s does not exist') % {
