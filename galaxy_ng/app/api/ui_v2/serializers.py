@@ -114,6 +114,12 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
 
         return super().to_internal_value(data)
 
+    def validate_password(self, password):
+        if password:
+            password_validation.validate_password(password)
+            return password
+        return password
+
     def create(self, validated_data):
 
         print(f'## SERIALIZER CREATE {validated_data}')
