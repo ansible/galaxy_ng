@@ -139,7 +139,6 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
         "_ui/v2/users/",
         body=json.dumps(user_payload)
     )
-    #import epdb; epdb.st()
 
     # validate fields ...
     assert resp["username"] == random_username
@@ -150,11 +149,9 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
     assert resp["resource"]["ansible_id"] is not None
 
     # get the full rendered user detail
-    uresp = gc.get(f'_ui/v2/users/?username={random_username}')
-    #import epdb; epdb.st()
+    # uresp = gc.get(f'_ui/v2/users/?username={random_username}')
 
     if expected_groups:
-        #import epdb; epdb.st()
         actual_groups = [x['name'] for x in resp['groups']]
         assert sorted(expected_groups) == sorted(actual_groups)
 

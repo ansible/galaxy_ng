@@ -59,45 +59,6 @@ class UserViewSet(BaseViewSet):
             return UserCreateUpdateSerializer
         return super().get_serializer_class()
 
-    '''
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    '''
-
-    '''
-    def create(self, request, *args, **kwargs):
-        print(f'## VIEW CREATE {request} {args} {kwargs}')
-        return super().create(request, *args, **kwargs)
-    '''
-
-    """
-    def create(self, request, *args, **kwargs):
-
-        print(f'## VIEW CREATE args:{args} kwargs:{kwargs}')
-
-        # Instantiate the serializer with the incoming data
-        serializer = self.get_serializer(data=request.data)
-
-        # Validate the data
-        if serializer.is_valid():
-
-            # print(f'## IT IS FUCKING VALID!? WTF!!?? {serializer}')
-            # print(f'VIEWSET CREATE VALID=True data:{serializer.data}')
-            print(f'VIEWSET CREATE VALID=True data:{serializer.validated_data}')
-
-            # If valid, save the new instance
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        else:
-            # If invalid, return a 400 Bad Request response with the errors
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    """
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -108,31 +69,12 @@ class UserViewSet(BaseViewSet):
         # Return the created user data (excluding sensitive fields like password)
         return Response(UserDetailSerializer(user).data, status=status.HTTP_201_CREATED)
 
-    '''
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        if getattr(instance, '_prefetched_objects_cache', None):
-            instance._prefetched_objects_cache = {}
-        return Response(serializer.data)
-    '''
-
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        print(f'VIEW UPDATE SERIALIZER {serializer}')
-        serializer.is_valid(raise_exception=True)
-        # serializer.is_valid(raise_exception=False)
-
-        # print(f'VIEW UPDATE MAKE RESPONSE FROM {serializer.data}')
-        #return Response(serializer.data)
-
         user = serializer.save()
-
         return Response(UserDetailSerializer(user).data, status=status.HTTP_200_OK)
 
     def perform_update(self, serializer):

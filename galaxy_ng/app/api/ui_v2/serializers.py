@@ -5,7 +5,6 @@ from django.contrib.auth import password_validation
 from django.core.validators import EmailValidator
 from django.utils.translation import gettext_lazy as _
 
-from galaxy_ng.app.api.ui.serializers import UserSerializer as UserSerializerV1
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.auth import Group
 from galaxy_ng.app.models.organization import Organization
@@ -23,7 +22,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'username',
-            # 'password',
             'first_name',
             'last_name',
             'email',
@@ -39,10 +37,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return obj.resource.summary_fields()
 
     def get_groups(self, obj):
-        print(f'# DETAIL SERIALIZER GET GROUPS {obj}')
         groups = obj.groups.all()
         groups_serializer = GroupSerializer(groups, many=True)
-        print(f'# DETAIL SERIALIZER RETURN {groups_serializer.data}')
         return groups_serializer.data
 
     def get_teams(self, obj):
@@ -86,32 +82,21 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
             'organizations',
             'date_joined',
             'is_superuser',
-            #'auth_provider',
             'resource',
         ]
 
         extra_kwargs = {
             'id': {'read_only': True, 'required': True},
             'username': {'allow_blank': False, 'required': True},
-            # 'auth_provider': {'read_only': True},
             'resource': {'read_only': True},
             'date_joined': {'read_only': True},
             'password': {'write_only': True, 'allow_blank': True, 'required': False},
-            #'email': {'allow_blank': False, 'required': False}
         }
 
     def is_valid(self, *args, **kwargs):
-        print(f'# SERIALIZER IS_VALID args:{args} kwargs:{kwargs}')
         return super().is_valid(*args, **kwargs)
 
     def to_internal_value(self, data):
-        print(f'# SERIALIZER TO_INTERNAL_VALUE data:{data}')
-
-        #data.pop('groups', None)
-        #data.pop('teams', None)
-        #data.pop('organizations', None)
-        #data.pop('resource', None)
-
         return super().to_internal_value(data)
 
     def validate_password(self, password):
@@ -121,9 +106,6 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
         return password
 
     def create(self, validated_data):
-
-        print(f'## SERIALIZER CREATE {validated_data}')
-
         # Pop the groups data from the validated data
         groups_data = validated_data.pop('groups', None)
         teams_data = validated_data.pop('teams', None)
@@ -187,8 +169,6 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
         return user
 
     def update(self, instance, validated_data):
-        print(f'## SERIALIZER UPDATE instance:{instance} validated_data:{validated_data}')
-
         # Update the rest of the fields as usual
         instance.username = validated_data.get('username', instance.username)
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -201,256 +181,7 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
             instance.set_password(password)
 
         instance.save()
-
         return instance
-
-
-#class UserSerializer(UserSerializerV1):
-class UserSerializerBAD(serializers.ModelSerializer):
-    #email = serializers.EmailField()
-    resource = serializers.SerializerMethodField()
-    groups = serializers.SerializerMethodField()
-    teams = serializers.SerializerMethodField()
-    organizations = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = [
-            'id',
-            'username',
-            'password',
-            'first_name',
-            'last_name',
-            'email',
-            'groups',
-            'teams',
-            'organizations',
-            'date_joined',
-            'is_superuser',
-            #'auth_provider',
-            'resource',
-        ]
-
-        extra_kwargs = {
-            'username': {'allow_blank': False, 'required': True},
-            # 'auth_provider': {'read_only': True},
-            'resource': {'read_only': True},
-            'date_joined': {'read_only': True},
-            'password': {'write_only': True, 'allow_blank': True, 'required': False},
-            #'email': {'allow_blank': False, 'required': False}
-        }
-
-    '''
-    def save(self, *args, **kwargs):
-        print(f'SAVE: args:{args} kwargs:{kwargs}')
-        super().save(*args, **kwargs)
-    '''
-
-    def validate(self, data):
-        data = super().validate(data)
-
-        print('\n' * 10)
-        print(f'SERALIZSER VALIDATED ... {data}')
-        print('\n' * 10)
-
-        self.validate_email(data.get('email'))
-        return data
-
-    def validate_username(self, value):
-        # Ensure the username is provided
-        if not value:
-            raise serializers.ValidationError("Username is required.")
-        return value
-
-    def validate_email(self, email):
-
-        print(f'VALIDATE FUCKING EMAIL: {email}')
-
-        if email is not None:
-            email_validator = EmailValidator()
-            try:
-                email_validator(email)
-            except Exception:
-                raise ValidationError("Enter a valid email address.")
-            #if '@' not in email:
-            #    raise serializers.ValidationError("Enter a valid email address.")
-        # raise serializers.ValidationError("Enter a valid email address")
-        return email
-
-    def validate_resource(self, resource):
-        return None
-
-    def validate_password(self, password):
-        if password:
-            password_validation.validate_password(password)
-            return password
-        return password
-
-    def validate_groups(self, groups):
-
-        print(f'# SERIALIZER VALIDATE GROUPS groups:{groups}')
-
-        request_user = self.context['request'].user
-
-        group_set = set(groups)
-        instance_group_set = set()
-        if self.instance:
-            instance_group_set = set(list(self.instance.groups.all()))
-
-        group_difference = instance_group_set.symmetric_difference(group_set)
-
-        if not request_user.has_perm('galaxy.change_group'):
-            authed_user_groups = request_user.groups.all()
-            for g in group_difference:
-                if not authed_user_groups.filter(pk=g.id).exists():
-                    raise ValidationError(detail={
-                        "groups": _("'galaxy.change_group' permission is required to change"
-                                    " a users group that the requesting user is not in.")
-                    })
-
-        return groups
-
-    def validate_teams(self, teams):
-
-        print(f'VALIDATE TEAMS: {teams}')
-
-        return teams
-
-    def validate_organizations(self, organizations):
-        return organizations
-
-    def get_resource(self, obj):
-        return obj.resource.summary_fields()
-
-    def get_groups(self, obj):
-        print(f'## SERIALZIZER GET GROUPS: {obj}')
-        if isinstance(obj, dict):
-            return []
-
-        #groups = Group.objects.filter(users=obj)
-        groups = obj.groups.all()
-        groups_serializer = GroupSerializer(groups, many=True)
-        return groups_serializer.data
-
-    def get_teams(self, obj):
-        teams = Team.objects.filter(users=obj)
-        teams_serializer = TeamSerializer(teams, many=True)
-        return teams_serializer.data
-
-    def get_organizations(self, obj):
-        # FIXME - team membership doesn't imply this should also
-        #         show the orgs from those teams ... right?
-        orgs = Organization.objects.filter(users=obj)
-        orgs_serializer = OrganizationSerializer(orgs, many=True)
-        return orgs_serializer.data
-
-    def create(self, data):
-
-        print(f'## SERIALIZER_CREATE: data:{data}')
-
-        instance = super().create(data)
-        instance = self._set_password(instance, data, updating=False)
-        instance.save()
-        return instance
-
-    def update(self, instance, data):
-        if instance.is_superuser and not self.context['request'].user.is_superuser:
-            raise ValidationError(detail={
-                "username": _("You do not have permissions to modify super users.")
-            })
-
-        instance = self._set_password(instance, data, updating=True)
-
-        # FIXME - we can't update this ...
-        data.pop('auth_provider', None)
-
-        # FIXME - we can't update the resource ...
-        data.pop('resource', None)
-
-        return super().update(instance, data)
-
-    def _set_password(self, instance, data, updating):
-        # password doesn't get set the same as other data, so delete it
-        # before the serializer saves
-        password = data.pop('password', None)
-        if password:
-            if updating:
-                user = self.context['request'].user
-                if not user.is_superuser and user.pk != instance.pk:
-                    raise ValidationError(detail={
-                        "password": _("Must be a super user to change another user's password.")
-                    })
-
-            instance.set_password(password)
-
-        return instance
-
-    def to_internal_value(self, data):
-        groups = data.get('groups')
-        if groups:
-            group_ids = []
-            #group_data = []
-            for group in groups:
-                group_filter = {}
-                for field in group:
-                    if field in ('id', 'name'):
-                        group_filter[field] = group[field]
-                try:
-                    group = Group.objects.get(**group_filter)
-                    group_ids.append(group.id)
-                    #group_data.append({'name': group.name, 'id': group.id})
-                except Group.DoesNotExist:
-                    raise ValidationError(detail={
-                        'groups': _('Group name=%(name)s, id=%(id)s does not exist') % {
-                            'name': group.get('name'), 'id': group.get('id')}
-                    })
-                except ValueError:
-                    raise ValidationError(detail={'group': _('Invalid group name or ID')})
-            data['groups'] = group_ids
-            #data['groups'] = group_data
-
-        teams = data.get('teams')
-        if teams:
-            team_ids = []
-            for team in teams:
-                team_filter = {}
-                for field in team:
-                    if field in ('id', 'name'):
-                        team_filter[field] = team[field]
-                try:
-                    team = Team.objects.get(**team_filter)
-                    team_ids.append(team.id)
-                except Team.DoesNotExist:
-                    raise ValidationError(detail={
-                        'teams': _('Team name=%(name)s, id=%(id)s does not exist') % {
-                            'name': team.get('name'), 'id': team.get('id')}
-                    })
-                except ValueError:
-                    raise ValidationError(detail={'teams': _('Invalid team name or ID')})
-            data['teams'] = team_ids
-
-        orgs = data.get('organizations')
-        if orgs:
-            org_ids = []
-            for org in orgs:
-                org_filter = {}
-                for field in org:
-                    if field in ('id', 'name'):
-                        org_filter[field] = org[field]
-                try:
-                    org = Organization.objects.get(**org_filter)
-                    org_ids.append(org.id)
-                except Organization.DoesNotExist:
-                    raise ValidationError(detail={
-                        'organizations': _('Org name=%(name)s, id=%(id)s does not exist') % {
-                            'name': org.get('name'), 'id': org.get('id')}
-                    })
-                except ValueError:
-                    raise ValidationError(detail={'organizations': _('Invalid org name or ID')})
-            data['organizations'] = org_ids
-
-		# This final super will call all the validate_<field> functions ...
-        return super().to_internal_value(data)
 
 
 class GroupSerializer(serializers.ModelSerializer):
