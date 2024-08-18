@@ -12,7 +12,8 @@ from .filters import UserViewFilter
 from .filters import GroupViewFilter
 from .filters import OrganizationFilter
 from .filters import TeamFilter
-from .serializers import UserSerializer
+from .serializers import UserDetailSerializer
+from .serializers import UserCreateUpdateSerializer
 from .serializers import GroupSerializer
 from .serializers import OrganizationSerializer
 from .serializers import TeamSerializer
@@ -47,8 +48,16 @@ class BaseViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(BaseViewSet):
     queryset = User.objects.all().order_by('id')
-    serializer_class = UserSerializer
     filterset_class = UserViewFilter
+
+    def get_serializer_class(self):
+        # FIXME - a single serializer for this viewset
+        #         seems painful to implement.
+        if self.action in ['list', 'retrieve', 'destroy']:
+            return UserDetailSerializer
+        elif self.action in ['create', 'update', 'partial_update']:
+            return UserCreateUpdateSerializer
+        return super().get_serializer_class()
 
     '''
     def create(self, request, *args, **kwargs):
@@ -59,7 +68,49 @@ class UserViewSet(BaseViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     '''
 
+    '''
+    def create(self, request, *args, **kwargs):
+        print(f'## VIEW CREATE {request} {args} {kwargs}')
+        return super().create(request, *args, **kwargs)
+    '''
+
+    """
+    def create(self, request, *args, **kwargs):
+
+        print(f'## VIEW CREATE args:{args} kwargs:{kwargs}')
+
+        # Instantiate the serializer with the incoming data
+        serializer = self.get_serializer(data=request.data)
+
+        # Validate the data
+        if serializer.is_valid():
+
+            # print(f'## IT IS FUCKING VALID!? WTF!!?? {serializer}')
+            # print(f'VIEWSET CREATE VALID=True data:{serializer.data}')
+            print(f'VIEWSET CREATE VALID=True data:{serializer.validated_data}')
+
+            # If valid, save the new instance
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            # If invalid, return a 400 Bad Request response with the errors
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    """
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Save the user, which internally handles group assignment
+        user = serializer.save()
+
+        # Return the created user data (excluding sensitive fields like password)
+        return Response(UserDetailSerializer(user).data, status=status.HTTP_201_CREATED)
+
+    """
     def perform_create(self, serializer):
+        print(f"## VIEW PERFORM_CREATE {serializer}")
 
         '''
         password = serializer.validated_data.get('password')
@@ -83,6 +134,13 @@ class UserViewSet(BaseViewSet):
         '''
 
         serializer.save()
+    """
+
+    '''
+    def perform_create(self, serializer):
+        print(f'## PERFORM CREATE data:{serializer.validated_data}')
+        return super().create(serializer)
+    '''
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
