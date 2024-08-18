@@ -109,6 +109,61 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
             return password
         return password
 
+    def validate_groups(self, groups):
+        if groups is not None:
+            for group_dict in groups:
+                group_filter = {}
+                for field in group_dict.keys():
+                    if field in ('id', 'name'):
+                        group_filter[field] = group_dict[field]
+
+                try:
+                    Group.objects.get(**group_filter)
+                except Group.DoesNotExist:
+                    raise ValidationError(detail={
+                        'groups': _('Group name=%(name)s, id=%(id)s does not exist') % {
+                            'name': group_dict.get('name'), 'id': group_dict.get('id')}
+                    })
+                except ValueError:
+                    raise ValidationError(detail={'group': _('Invalid group name or ID')})
+        return groups
+
+    def validate_teams(self, teams):
+        if teams is not None:
+            for team_dict in teams:
+                team_filter = {}
+                for field in team_dict.keys():
+                    if field in ('id', 'name'):
+                        team_filter[field] = team_dict[field]
+                try:
+                    Team.objects.get(**team_filter)
+                except Team.DoesNotExist:
+                    raise ValidationError(detail={
+                        'teams': _('Team name=%(name)s, id=%(id)s does not exist') % {
+                            'name': team_dict.get('name'), 'id': team_dict.get('id')}
+                    })
+                except ValueError:
+                    raise ValidationError(detail={'teams': _('Invalid team name or ID')})
+        return teams
+
+    def validate_organizations(self, organizations):
+        if organizations is not None:
+            for org_dict in organizations:
+                org_filter = {}
+                for field in org_dict.keys():
+                    if field in ('id', 'name'):
+                        org_filter[field] = org_dict[field]
+                try:
+                    Organization.objects.get(**org_filter)
+                except Organization.DoesNotExist:
+                    raise ValidationError(detail={
+                        'organizations': _('Org name=%(name)s, id=%(id)s does not exist') % {
+                            'name': org_dict.get('name'), 'id': org_dict.get('id')}
+                    })
+                except ValueError:
+                    raise ValidationError(detail={'organizations': _('Invalid org name or ID')})
+        return organizations
+
     def create(self, validated_data):
         # Pop the groups data from the validated data
         groups_data = validated_data.pop('groups', None)

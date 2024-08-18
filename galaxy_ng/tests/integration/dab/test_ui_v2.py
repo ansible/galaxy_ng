@@ -1,3 +1,4 @@
+import copy
 import json
 
 import pytest
@@ -177,6 +178,7 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
     ({"password": ""}, "This field may not be blank"),
     ({"groups": [{"name": "HITHERE"}]}, "does not exist"),
     ({"teams": [{"name": "HITHERE"}]}, "does not exist"),
+    ({"organizations": [{"name": "HITHERE"}]}, "does not exist"),
 ])
 def test_ui_v2_user_create_invalid_data(
     settings,
@@ -251,3 +253,57 @@ def test_ui_v2_user_edit(
     ugc = GalaxyClient(gc.galaxy_root, auth=auth)
     me_ds = ugc.get('_ui/v1/me/')
     assert me_ds["username"] == random_username
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.parametrize("invalid_payload", [
+    ({"email": "invalidemail"}, "Enter a valid email address."),
+    ({"email": "@whoops"}, "Enter a valid email address."),
+    ({"username": ""}, "This field may not be blank"),
+    ({"password": "short"}, "This password is too short"),
+    ({"password": ""}, "This field may not be blank"),
+    ({"groups": [{"name": "HITHERE"}]}, "does not exist"),
+    ({"teams": [{"name": "HITHERE"}]}, "does not exist"),
+    ({"organizations": [{"name": "HITHERE"}]}, "does not exist"),
+])
+def test_ui_v2_user_edit_invalid_data(
+    settings,
+    galaxy_client,
+    invalid_payload,
+    random_username,
+):
+    """Test user creation in ui/v2/users/ with invalid data."""
+
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip(reason="this only works local resource management enabled")
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    user_payload = {
+        "username": random_username,
+        "first_name": "jim",
+        "last_name": "bob",
+        "password": "redhat1234"
+    }
+
+    # create the user in ui/v2 ...
+    user_data = gc.post(
+        "_ui/v2/users/",
+        body=json.dumps(user_payload)
+    )
+    uid = user_data['id']
+
+    new_payload = copy.deepcopy(user_data)
+    new_payload.update(invalid_payload[0])
+
+    exc = None
+    try:
+        gc.put(
+            f"_ui/v2/users/{uid}/",
+            body=json.dumps(new_payload)
+        )
+    except Exception as e:
+        exc = e
+
+    assert exc.response.status_code == 400
+    assert invalid_payload[1] in exc.response.text
