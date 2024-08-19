@@ -72,7 +72,7 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
     random_username,
     user_payload,
 ):
-    """Test user creation in ui/v2/users/."""
+    """Test user creation in ui/v2/users/ with invalid payloads."""
 
     if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
         pytest.skip(reason="this only works local resource management enabled")
@@ -186,7 +186,7 @@ def test_ui_v2_user_create_invalid_data(
     invalid_payload,
     random_username,
 ):
-    """Test user creation in ui/v2/users/ with invalid data."""
+    """Test user edits in ui/v2/users/ with invalid data."""
 
     if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
         pytest.skip(reason="this only works local resource management enabled")
@@ -272,7 +272,7 @@ def test_ui_v2_user_edit_invalid_data(
     invalid_payload,
     random_username,
 ):
-    """Test user creation in ui/v2/users/ with invalid data."""
+    """Test user edits in ui/v2/users/ with invalid data."""
 
     if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
         pytest.skip(reason="this only works local resource management enabled")
