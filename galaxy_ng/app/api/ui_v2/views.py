@@ -12,7 +12,8 @@ from .filters import UserViewFilter
 from .filters import GroupViewFilter
 from .filters import OrganizationFilter
 from .filters import TeamFilter
-from .serializers import UserSerializer
+from .serializers import UserDetailSerializer
+from .serializers import UserCreateUpdateSerializer
 from .serializers import GroupSerializer
 from .serializers import OrganizationSerializer
 from .serializers import TeamSerializer
@@ -47,38 +48,34 @@ class BaseViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(BaseViewSet):
     queryset = User.objects.all().order_by('id')
-    serializer_class = UserSerializer
     filterset_class = UserViewFilter
+
+    def get_serializer_class(self):
+        # FIXME - a single serializer for this viewset
+        #         seems painful to implement.
+        if self.action in ['list', 'retrieve', 'destroy']:
+            return UserDetailSerializer
+        elif self.action in ['create', 'update', 'partial_update']:
+            return UserCreateUpdateSerializer
+        return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def perform_create(self, serializer):
-        password = serializer.validated_data.get('password')
-        if password:
-            user, _ = User.objects.get_or_create(
-                username=serializer.validated_data['username'],
-                defaults=serializer.validated_data
-            )
-            user.set_password(password)
-            user.save()
-            serializer.instance = user
-        else:
-            serializer.save()
+        # Save the user, which internally handles group assignment
+        user = serializer.save()
+
+        # Return the created user data (excluding sensitive fields like password)
+        return Response(UserDetailSerializer(user).data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        if getattr(instance, '_prefetched_objects_cache', None):
-            instance._prefetched_objects_cache = {}
-        return Response(serializer.data)
+        user = serializer.save()
+        return Response(UserDetailSerializer(user).data, status=status.HTTP_200_OK)
 
     def perform_update(self, serializer):
         password = serializer.validated_data.get('password')
