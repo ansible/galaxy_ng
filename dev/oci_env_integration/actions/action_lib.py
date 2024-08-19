@@ -146,20 +146,18 @@ class OCIEnvIntegrationTest:
             return
         for env in self.envs:
             self.exec_cmd(env, "compose down -v")
-            
-            
-            
+
 
 class OCIEnvPerformanceTest(OCIEnvIntegrationTest):
     def __init__(self, envs):
         super().__init__(envs)
-        
+
     def set_up_env(self):
         return super().set_up_env()
-    
+
     def teardown(self):
         return super().teardown()
-    
+
     def run_test(self):
         for env in self.envs:
             pytest_flags = self.envs[env].get("pytest_flags")
