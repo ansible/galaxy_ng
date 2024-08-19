@@ -53,6 +53,7 @@ permission_registry.register(
     CollectionRemote,
     ContainerRegistryRemote,
     Namespace,
+    Organization,
     Team,
     parent_field_name=None
 )

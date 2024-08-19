@@ -8,6 +8,23 @@ from ansible_base.rbac.migrations._utils import give_permissions
 logger = logging.getLogger(__name__)
 
 
+PULP_TO_ROLEDEF = {
+    'galaxy.auditor': 'Platform Auditor',
+}
+
+
+ROLEDEF_TO_PULP = {
+    'Platform Auditor': 'galaxy.auditor',
+}
+
+
+def pulp_role_to_single_content_type_or_none(pulprole):
+    content_types = set(perm.content_type for perm in pulprole.permissions.all())
+    if len(list(content_types)) == 1:
+        return list(content_types)[0]
+    return None
+
+
 def create_permissions_as_operation(apps, schema_editor):
     # TODO: possibly create permissions for more apps here
     for app_label in {'ansible', 'container', 'core', 'galaxy'}:
@@ -54,11 +71,14 @@ def copy_roles_to_role_definitions(apps, schema_editor):
                 dab_perms.append(dabperm)
 
         if dab_perms:
+            roledef_name = PULP_TO_ROLEDEF.get(corerole.name, corerole.name)
+            content_type = pulp_role_to_single_content_type_or_none(corerole)
             roledef, created = RoleDefinition.objects.get_or_create(
-                name=corerole.name,
+                name=roledef_name,
                 defaults={
                     'description': corerole.description or corerole.name,
                     'managed': corerole.locked,
+                    'content_type': content_type,
                 }
             )
             if created:

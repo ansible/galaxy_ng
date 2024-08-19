@@ -431,3 +431,65 @@ def test_dab_team_platform_auditor_bidirectional_sync(
     # ensure the role was removed
     pulp_assignments = gc.get(f"pulp/api/v3/groups/{guid}/roles/")
     assert pulp_assignments['count'] == 0
+
+
+@pytest.mark.deployment_standalone
+def test_dab_user_assignment_filtering_as_user(
+    settings,
+    galaxy_client,
+    random_namespace,
+    random_username,
+):
+    """
+    Integration test to assert a user can be assigned as the owner
+    of a namespace and then also be able to query their role assignments.
+
+    * This assumes there is a galaxy.collection_namespace_owner roledef
+      and that it has a content type defined.
+    * This also assumes the role_user_assignments endpoint is user
+      accessible and filterable.
+    * The role_user_assignments endpoint behaves differently for
+      evaluating a superuser vs a user for access.
+    """
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip("this test relies on local resource creation")
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    # find the namespace owner roledef ...
+    roledef = gc.get(
+        '_ui/v2/role_definitions/?name=galaxy.collection_namespace_owner'
+    )['results'][0]
+
+    # make the user ...
+    user_data = gc.post(
+        "_ui/v2/users/",
+        body=json.dumps({
+            "username": random_username,
+            "password": "redhat1234",
+            "email": random_username + '@localhost'
+        })
+    )
+    uid = user_data['id']
+
+    # assign the user to the namespace ...
+    assignment = gc.post(
+        '_ui/v2/role_user_assignments/',
+        body=json.dumps({
+            'user': uid,
+            'role_definition': roledef['id'],
+            'object_id': str(random_namespace['id']),
+        })
+    )
+
+    # see if we can find the assignment through filtering as the user ...
+    auth = {'username': random_username, 'password': 'redhat1234'}
+    ugc = GalaxyClient(gc.galaxy_root, auth=auth)
+    queryparams = [
+        f"object_id={random_namespace['id']}",
+        f"object_id={random_namespace['id']}&content_type__model=namespace",
+    ]
+    for qp in queryparams:
+        resp = ugc.get(f'_ui/v2/role_user_assignments/?{qp}')
+        assert resp['count'] == 1
+        assert resp['results'][0]['id'] == assignment['id']

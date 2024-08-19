@@ -1,4 +1,5 @@
 import django_filters
+from django_filters import filters
 
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.auth import Group
@@ -7,27 +8,28 @@ from galaxy_ng.app.models.organization import Team
 
 
 class UserViewFilter(django_filters.FilterSet):
-    resource__ansible_id = django_filters.CharFilter(
-        field_name="resource__ansible_id", lookup_expr="exact"
-    )
 
-    username__contains = django_filters.CharFilter(
-        field_name="username", lookup_expr="icontains"
-    )
-
-    username__icontains = django_filters.CharFilter(
-        field_name="username", lookup_expr="icontains"
+    sort = filters.OrderingFilter(
+        fields=(
+            ('username', 'username'),
+            ('email', 'email'),
+            ('first_name', 'first_name'),
+            ('last_name', 'last_name'),
+            ('date_joined', 'date_joined')
+        )
     )
 
     class Meta:
         model = User
-        fields = [
-            "username",
-            "username__contains",
-            "username__icontains",
-            "is_superuser",
-            "resource__ansible_id"
-        ]
+        fields = {
+            'username': ['exact', 'icontains', 'contains', 'startswith'],
+            'email': ['exact', 'contains', 'startswith'],
+            'first_name': ['exact', 'contains', 'startswith'],
+            'last_name': ['exact', 'contains', 'startswith'],
+            'date_joined': ['exact'],
+            'resource__ansible_id': ['exact'],
+            'is_superuser': ['exact'],
+        }
 
 
 class GroupViewFilter(django_filters.FilterSet):
