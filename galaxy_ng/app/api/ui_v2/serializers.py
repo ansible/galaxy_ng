@@ -229,6 +229,12 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
         return user
 
     def update(self, instance, validated_data):
+
+        # handle these out of band ...
+        groups_data = validated_data.pop('groups', [])
+        teams_data = validated_data.pop('teams', [])
+        orgs_data = validated_data.pop('organizations', [])
+
         # Update the rest of the fields as usual
         instance.username = validated_data.get('username', instance.username)
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -239,6 +245,46 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
         password = validated_data.get('password', None)
         if password:
             instance.set_password(password)
+
+        if groups_data:
+            new_groups = []
+            for group_dict in groups_data:
+                group_filter = {}
+                for field in group_dict.keys():
+                    if field in ('id', 'name'):
+                        group_filter[field] = group_dict[field]
+                new_groups.append(Group.objects.get(**group_filter))
+            instance.groups.set(new_groups)
+
+        if teams_data:
+            new_teams = []
+            for team_dict in teams_data:
+                team_filter = {}
+                for field in team_dict.keys():
+                    if field in ('id', 'name'):
+                        team_filter[field] = team_dict[field]
+                new_teams.append(Team.objects.get(**team_filter))
+            new_team_ids = [team.id for team in new_teams]
+            for team in Team.objects.filter(users=instance).exclude(id__in=new_team_ids):
+                team.users.remove(instance)
+                team.group.users.remove(instance)
+            for team in new_teams:
+                team.users.add(instance)
+                team.group.users.add(instance)
+
+        if orgs_data:
+            new_orgs = []
+            for org_dict in orgs_data:
+                org_filter = {}
+                for field in org_dict.keys():
+                    if field in ('id', 'name'):
+                        org_filter[field] = org_dict[field]
+                org = Organization.objects.get(**org_filter)
+            new_org_ids = [org.id for org in new_orgs]
+            for org in Organization.objects.filter(users=instance).exclude(id__in=new_org_ids):
+                org.users.remove(instance)
+            for org in new_orgs:
+                org.users.add(instance)
 
         instance.save()
         return instance
