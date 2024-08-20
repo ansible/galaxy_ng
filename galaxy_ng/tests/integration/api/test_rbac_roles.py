@@ -273,6 +273,7 @@ OBJECT_ROLES_TO_TEST = {
         upload_collection_to_custom_staging_repo,
         deprecate_collections,
         undeprecate_collections,
+        delete_collection,
     },
     "galaxy.collection_publisher": {
         create_collection_namespace,
