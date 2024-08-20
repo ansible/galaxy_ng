@@ -261,24 +261,34 @@ class AccessPolicyBase(AccessPolicyFromDB):
         return True
 
     def v3_can_destroy_collections(self, request, view, action):
-        SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
-        SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
-        is_social_auth = all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET])
-
         user = request.user
-        perm = "ansible.delete_collection"
-        social_perm = "galaxy.change_namespace"
-        collection = view.get_object()
+
+        # first check for global permissions ...
+        for delete_permission in ["galaxy.change_namespace", "ansible.delete_collection"]:
+            if user.has_perm(delete_permission):
+                return True
+
+        # could be a collection or could be a collectionversion ...
+        obj = view.get_object()
+        model_name = obj.__class__.__name__
+        if model_name == 'Collection':
+            collection = obj
+        elif model_name == 'CollectionVersion':
+            collection = obj.collection
+        else:
+            raise Exception(
+                f'model type {model_name} is not suitable for v3_can_destroy_collections'
+            )
         namespace = models.Namespace.objects.get(name=collection.namespace)
 
-        if not is_social_auth and user.has_perm(perm) and self.v3_can_view_repo_content(
-            request,
-            view,
-            action,
-        ):
+        # check namespace object level permissions ...
+        if user.has_perm("galaxy.change_namespace", namespace):
             return True
-        elif is_social_auth and user.has_perm(social_perm, namespace):
+
+        # check collection object level permissions ...
+        if user.has_perm("ansible.delete_collection", collection):
             return True
+
         return False
 
     def v3_can_view_users(self, request, view, action):
