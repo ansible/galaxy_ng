@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [[ ! -d pulp-oci-images ]]; then
     git clone https://github.com/pulp/pulp-oci-images
 fi
