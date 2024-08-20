@@ -1,11 +1,11 @@
 diff --git a/images/Containerfile.core.base b/images/Containerfile.core.base
-index c05669c..7d84cb8 100644
+index e85a8ab..9372d54 100644
 --- a/images/Containerfile.core.base
 +++ b/images/Containerfile.core.base
-@@ -130,6 +130,10 @@ COPY images/assets/add_signing_service.sh /usr/bin/add_signing_service.sh
- COPY images/assets/pulp-api /usr/bin/pulp-api
+@@ -116,6 +116,10 @@ COPY images/assets/pulp-api /usr/bin/pulp-api
  COPY images/assets/pulp-content /usr/bin/pulp-content
  COPY images/assets/pulp-worker /usr/bin/pulp-worker
+ COPY images/assets/constraints.txt /constraints.txt
 +COPY images/assets/switch_python /usr/bin/switch_python
 +
 +ARG PYTHON_VERSION=3.11
