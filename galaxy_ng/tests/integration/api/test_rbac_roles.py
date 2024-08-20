@@ -280,6 +280,7 @@ OBJECT_ROLES_TO_TEST = {
         change_collection_namespace,
         upload_collection_to_namespace,
         upload_collection_to_custom_staging_repo,
+        delete_collection,
         deprecate_collections,
         undeprecate_collections,
     },
