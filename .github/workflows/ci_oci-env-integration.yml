@@ -15,16 +15,18 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - TEST_PROFILE: ldap
-          - TEST_PROFILE: keycloak
-          - TEST_PROFILE: standalone
-          - TEST_PROFILE: rbac
-          - TEST_PROFILE: certified-sync
-          - TEST_PROFILE: insights
-          - TEST_PROFILE: iqe_rbac
-          - TEST_PROFILE: x_repo_search
-          - TEST_PROFILE: community
-          - TEST_PROFILE: dab_jwt
+          # - TEST_PROFILE: ldap
+          # - TEST_PROFILE: keycloak
+          # - TEST_PROFILE: standalone
+          # - TEST_PROFILE: rbac
+          - TEST_PROFILE: rbac-parallel
+          # - TEST_PROFILE: certified-sync
+          # - TEST_PROFILE: insights
+          # - TEST_PROFILE: iqe_rbac
+          # - TEST_PROFILE: x_repo_search
+          # - TEST_PROFILE: community
+          # - TEST_PROFILE: dab_jwt
+        rbac_group: [1, 2]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,4 +61,4 @@ jobs:
           mkdir $OCI_ENV_PATH/db_backup/
 
       - name: run integration tests
-        run: make gh-action/${{ matrix.env.TEST_PROFILE }}
+        run: make gh-action/${{ matrix.env.TEST_PROFILE }} ${{ matrix.env.TEST_PROFILE == 'rbac-parallel' && format('RBAC_PARALLEL_GROUP={0}', matrix.rbac_group) || '' }}

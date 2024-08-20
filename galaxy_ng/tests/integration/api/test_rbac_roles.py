@@ -649,8 +649,8 @@ def _get_reusable_extras(gc):
 
     return REUSABLE_EXTRA
 
-
 @pytest.mark.rbac_roles
+@pytest.mark.rbac_parallel_group_1
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
 def test_global_role_actions(role, subtests, galaxy_client):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
@@ -673,8 +673,8 @@ def test_global_role_actions(role, subtests, galaxy_client):
     requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
     requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
 
-
 @pytest.mark.rbac_roles
+@pytest.mark.rbac_parallel_group_2
 @pytest.mark.parametrize("role", OBJECT_ROLES_TO_TEST)
 def test_object_role_actions(role, subtests, galaxy_client):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
@@ -733,6 +733,7 @@ def test_object_role_actions(role, subtests, galaxy_client):
 
 
 @pytest.mark.rbac_roles
+@pytest.mark.rbac_parallel_group_2
 def test_role_actions_for_admin(subtests, galaxy_client):
     gc = galaxy_client("admin", ignore_cache=True)
     extra = _get_reusable_extras(gc)
@@ -745,6 +746,7 @@ def test_role_actions_for_admin(subtests, galaxy_client):
 
 
 @pytest.mark.rbac_roles
+@pytest.mark.rbac_parallel_group_2
 def test_all_actions_are_tested():
     """
     Ensures that all of the actions defined in ROLES_TO_TEST and OBJECT_ROLES_TO_TEST
