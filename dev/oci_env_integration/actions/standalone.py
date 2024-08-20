@@ -9,14 +9,3 @@ env = action_lib.OCIEnvIntegrationTest(
         }
     ]
 )
-
-
-env_2 = action_lib.OCIEnvPerformanceTest(
-    envs=[
-        {
-            "env_file": "ldap.compose.env",
-            "run_tests": True,
-            "db_restore": None,
-        }
-    ]
-)
