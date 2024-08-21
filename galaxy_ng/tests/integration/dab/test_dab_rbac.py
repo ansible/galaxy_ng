@@ -548,3 +548,147 @@ def test_dab_user_assignment_filtering_as_user(
         resp = ugc.get(f'_ui/v2/role_user_assignments/?{qp}')
         assert resp['count'] == 1
         assert resp['results'][0]['id'] == assignment['id']
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.skipif(
+    os.environ.get('JWT_PROXY') is not None,
+    reason="Skipped because jwt proxy is in use"
+)
+@pytest.mark.parametrize("use_team", [False, True])
+def test_dab_rbac_ee_ownership_with_user_or_team(
+    use_team,
+    settings,
+    galaxy_client,
+    random_username,
+):
+    """
+    Integration test to validate assigning a ee_namespace_owner
+    roledefinition to a user or team will copy the roledef to the
+    relevant pulp role assignment and reflect in the list_roles
+    endpoint for the container namespace.
+
+    * This does not check for functionality of the roledef.
+    * This only validates the assignments.
+    """
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip("this test relies on local resource creation")
+
+    ROLE_NAME = 'galaxy.execution_environment_namespace_owner'
+    registry_name = random_username.replace('user_', 'registry_')
+    remote_name = random_username.replace('user_', 'remote_')
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    # make the user ...
+    user_data = gc.post(
+        "_ui/v2/users/",
+        body=json.dumps({
+            "username": random_username,
+            "password": "redhat1234",
+            "email": random_username + '@localhost'
+        })
+    )
+    uid = user_data['id']
+
+    if use_team:
+        org_name = random_username.replace('user_', 'org_')
+        team_name = random_username.replace('user_', 'team_')
+
+        # make the org ...
+        gc.post(
+            "_ui/v2/organizations/",
+            body=json.dumps({"name": org_name})
+        )
+
+        # make the team ...
+        team_data = gc.post(
+            "_ui/v2/teams/",
+            body=json.dumps({
+                "name": team_name,
+                "organization": org_name,
+            })
+        )
+        team_id = team_data['id']
+
+        # add the user to the team ...
+        gc.post(
+            f'_ui/v2/teams/{team_id}/users/associate/',
+            body=json.dumps({'instances': [uid]})
+        )
+
+        # what is the group name?
+        group_name = team_data['group']['name']
+
+    # make a registry ...
+    registry_data = gc.post(
+        "_ui/v1/execution-environments/registries/",
+        body=json.dumps({
+            "name": registry_name,
+            "url": "https://quay.io/devspaces/ansible-creator-ee"
+        })
+    )
+    registry_id = registry_data['pulp_href'].split('/')[-2]
+
+    # make a remote with the registry ...
+    gc.post(
+        "_ui/v1/execution-environments/remotes/",
+        body=json.dumps({
+            "name": remote_name,
+            "upstream_name": remote_name,
+            "registry": registry_id,
+            "include_tags": ["latest"],
+            "exclude_tags": [],
+        })
+    )
+
+    # find the "repository" ...
+    repo_data = gc.get(f'v3/plugin/execution-environments/repositories/{remote_name}/')
+
+    # what is the namespace data ..
+    namespace_data = repo_data['namespace']
+
+    # find the namespace owner roledef ...
+    roledef = gc.get(
+        f'_ui/v2/role_definitions/?name={ROLE_NAME}'
+    )['results'][0]
+
+    # make the roledef assignment ...
+    if not use_team:
+        assignment = gc.post(
+            '_ui/v2/role_user_assignments/',
+            body=json.dumps({
+                'user': uid,
+                'role_definition': roledef['id'],
+                'object_id': namespace_data['id'],
+            })
+        )
+    else:
+        assignment = gc.post(
+            '_ui/v2/role_team_assignments/',
+            body=json.dumps({
+                'team': team_id,
+                'role_definition': roledef['id'],
+                'object_id': namespace_data['id'],
+            })
+        )
+
+    # is the user now listed in the namespace's list_roles endpoint?
+    ns_roles = gc.get(namespace_data['pulp_href'] + 'list_roles/')
+    ns_role_map = dict((x['role'], x) for x in ns_roles['roles'])
+    if not use_team:
+        assert random_username in ns_role_map[ROLE_NAME]['users']
+    else:
+        assert group_name in ns_role_map[ROLE_NAME]['groups']
+
+    # delete the assignment
+    try:
+        gc.delete(assignment['url'])
+    except Exception:
+        pass
+    ns_roles = gc.get(namespace_data['pulp_href'] + 'list_roles/')
+    ns_role_map = dict((x['role'], x) for x in ns_roles['roles'])
+    if not use_team:
+        assert random_username not in ns_role_map[ROLE_NAME]['users']
+    else:
+        assert group_name not in ns_role_map[ROLE_NAME]['groups']
