@@ -61,9 +61,9 @@ jobs:
           mkdir $OCI_ENV_PATH/db_backup/
 
       - name: run integration tests
-        if: ${{ !startsWith(matrix.env.TEST_PROFILE, 'rbac_parallel') }}
+        if: ${{ !startsWith(matrix.env.TEST_PROFILE, 'rbac_parallel_group') }}
         run: make gh-action/${{ matrix.env.TEST_PROFILE }}
 
       - name: run parallel rbac integration tests
-        if: ${{ startsWith(matrix.env.TEST_PROFILE, 'rbac_parallel' }}
+        if: ${{ startsWith(matrix.env.TEST_PROFILE, 'rbac_parallel_group') }}
         run: make gh-action/rbac-parallel ${{ matrix.env.TEST_PROFILE }}
