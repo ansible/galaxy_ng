@@ -21,5 +21,8 @@ RUN python3.11 -m pip install .
 # set up venv for integration tests 
 RUN python3.11 -m pip install virtualenv && python3.11 -m venv /tmp/gng_testing
 RUN bash profiles/base/setup_venv.sh
+# This is a hotfix for bug in the rpm package postgresql-server-13.16-1.el9.x86_64
+#   that doesn't create /run/postgresql directory
+RUN mkdir -p /run/postgresql && chown postgres:postgres /run/postgresql
 
 WORKDIR /

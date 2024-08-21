@@ -51,4 +51,7 @@ RUN export plugin_path="$(pip3 show {{ item.name }} | sed -n -e 's/Location: //p
     ln $plugin_path/app/webserver_snippets/nginx.conf /etc/nginx/pulp/{{ item.name }}.conf || true
 {% endfor %}
 
+# FIXME - something is wrong here
+RUN mkdir -p /run/postgresql && chown postgres:postgres /run/postgresql
+
 ENTRYPOINT ["/init"]

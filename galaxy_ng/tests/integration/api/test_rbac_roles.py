@@ -273,12 +273,14 @@ OBJECT_ROLES_TO_TEST = {
         upload_collection_to_custom_staging_repo,
         deprecate_collections,
         undeprecate_collections,
+        delete_collection,
     },
     "galaxy.collection_publisher": {
         create_collection_namespace,
         change_collection_namespace,
         upload_collection_to_namespace,
         upload_collection_to_custom_staging_repo,
+        delete_collection,
         deprecate_collections,
         undeprecate_collections,
     },
@@ -650,7 +652,7 @@ def _get_reusable_extras(gc):
 
 @pytest.mark.rbac_roles
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
-def test_global_role_actions(role, galaxy_client):
+def test_global_role_actions(role, subtests, galaxy_client):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
     user = create_user(USERNAME, PASSWORD)
@@ -661,25 +663,20 @@ def test_global_role_actions(role, galaxy_client):
     gc = galaxy_client("admin", ignore_cache=True)
     extra = _get_reusable_extras(gc)
 
-    failures = []
     # Test global actions
     for action in GLOBAL_ACTIONS:
-        expect_pass = action in expected_allows or action in ACTIONS_FOR_ALL_USERS
-        try:
+        with subtests.test(action=action):
+            expect_pass = action in expected_allows or action in ACTIONS_FOR_ALL_USERS
             action(user, PASSWORD, expect_pass, extra)
-        except AssertionError:
-            failures.append(action.__name__)
 
     # cleanup user, group
     requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
     requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
 
-    assert failures == []
-
 
 @pytest.mark.rbac_roles
 @pytest.mark.parametrize("role", OBJECT_ROLES_TO_TEST)
-def test_object_role_actions(role, galaxy_client):
+def test_object_role_actions(role, subtests, galaxy_client):
     USERNAME = f"{NAMESPACE}_user_{gen_string()}"
 
     gc = galaxy_client("admin", ignore_cache=True)
@@ -712,7 +709,6 @@ def test_object_role_actions(role, galaxy_client):
             add_group_role(group["pulp_href"], role, repo_href)
             add_group_role(group["pulp_href"], role, private_repo_href)
 
-    failures = []
     expected_allows = OBJECT_ROLES_TO_TEST[role]
 
     # since we're also applying the namespace owner role to test if the user can
@@ -725,36 +721,27 @@ def test_object_role_actions(role, galaxy_client):
 
     # Test global actions
     for action in OBJECT_ACTIONS:
-        # re apply roles in case they get reset
-        _apply_roles()
-        expect_pass = action in expected_allows or action in ACTIONS_FOR_ALL_USERS
-        try:
+        with subtests.test(action=action):
+            # re apply roles in case they get reset
+            _apply_roles()
+            expect_pass = action in expected_allows or action in ACTIONS_FOR_ALL_USERS
             action(user, PASSWORD, expect_pass, extra)
-        except AssertionError:
-            failures.append(action.__name__)
 
     # cleanup user, group
     requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
     requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
 
-    assert failures == []
-
 
 @pytest.mark.rbac_roles
-def test_role_actions_for_admin(galaxy_client):
+def test_role_actions_for_admin(subtests, galaxy_client):
     gc = galaxy_client("admin", ignore_cache=True)
     extra = _get_reusable_extras(gc)
-    failures = []
 
     # Test global actions
     for action in GLOBAL_ACTIONS:
-        expect_pass = action not in DENIED_FOR_ALL_USERS
-        try:
+        with subtests.test(action=action):
+            expect_pass = action not in DENIED_FOR_ALL_USERS
             action({'username': ADMIN_USER}, ADMIN_PASSWORD, expect_pass, extra)
-        except AssertionError:
-            failures.append(action.__name__)
-
-    assert failures == []
 
 
 @pytest.mark.rbac_roles
