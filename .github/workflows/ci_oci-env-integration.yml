@@ -66,4 +66,4 @@ jobs:
 
       - name: run parallel rbac integration tests
         if: ${{ startsWith(matrix.env.TEST_PROFILE, 'rbac_parallel_group') }}
-        run: make gh-action/rbac-parallel ${{ matrix.env.TEST_PROFILE }}
+        run: make gh-action/rbac-parallel RBAC_PARALLEL_GROUP=${{ matrix.env.TEST_PROFILE }}
