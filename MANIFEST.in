@@ -23,4 +23,4 @@ include galaxy_ng/tests/integration/utils/gpg/collection_sign.sh
 include galaxy_ng/tests/integration/utils/gpg/qe-sign-priv.gpg
 include galaxy-operator/bin/readyz.py
 exclude .coveragerc
-exclude sonar-project.properties
+exclude .sonarcloud.properties
