@@ -649,6 +649,7 @@ def _get_reusable_extras(gc):
 
     return REUSABLE_EXTRA
 
+
 @pytest.mark.rbac_roles
 @pytest.mark.rbac_parallel_group_1
 @pytest.mark.parametrize("role", ROLES_TO_TEST)
@@ -672,6 +673,7 @@ def test_global_role_actions(role, subtests, galaxy_client):
     # cleanup user, group
     requests.delete(f"{API_ROOT}_ui/v1/users/{user['id']}/", auth=ADMIN_CREDENTIALS)
     requests.delete(f"{API_ROOT}_ui/v1/groups/{group_id}/", auth=ADMIN_CREDENTIALS)
+
 
 @pytest.mark.rbac_roles
 @pytest.mark.rbac_parallel_group_2
