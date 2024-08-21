@@ -26,7 +26,9 @@ jobs:
           - TEST_PROFILE: x_repo_search
           - TEST_PROFILE: community
           - TEST_PROFILE: dab_jwt
-        rbac_group: [1, 2]
+        include:
+          - TEST_PROFILE: rbac-parallel
+            rbac_group: [1, 2]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,4 +63,4 @@ jobs:
           mkdir $OCI_ENV_PATH/db_backup/
 
       - name: run integration tests
-        run: make gh-action/${{ matrix.env.TEST_PROFILE }} ${{ matrix.env.TEST_PROFILE == 'rbac-parallel' && format('RBAC_PARALLEL_GROUP={0}', matrix.rbac_group) || '' }}
+        run: make gh-action/${{ matrix.env.TEST_PROFILE }} ${{ matrix.env.TEST_PROFILE == 'rbac-parallel' && format('RBAC_PARALLEL_GROUP={0}', matrix.env.TEST_PROFILE.rbac_group) || '' }}
