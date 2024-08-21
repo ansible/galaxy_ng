@@ -19,16 +19,14 @@ jobs:
           - TEST_PROFILE: keycloak
           - TEST_PROFILE: standalone
           # - TEST_PROFILE: rbac
-          - TEST_PROFILE: rbac-parallel
+          - TEST_PROFILE: rbac_parallel_group_1
+          - TEST_PROFILE: rbac_parallel_group_2
           - TEST_PROFILE: certified-sync
           - TEST_PROFILE: insights
           - TEST_PROFILE: iqe_rbac
           - TEST_PROFILE: x_repo_search
           - TEST_PROFILE: community
           - TEST_PROFILE: dab_jwt
-        include:
-          - TEST_PROFILE: rbac-parallel
-            rbac_group: [1, 2]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,4 +61,9 @@ jobs:
           mkdir $OCI_ENV_PATH/db_backup/
 
       - name: run integration tests
-        run: make gh-action/${{ matrix.env.TEST_PROFILE }} ${{ matrix.env.TEST_PROFILE == 'rbac-parallel' && format('RBAC_PARALLEL_GROUP={0}', matrix.env.TEST_PROFILE.rbac_group) || '' }}
+        if: ${{ !startsWith(matrix.env.TEST_PROFILE, 'rbac_parallel') }}
+        run: make gh-action/${{ matrix.env.TEST_PROFILE }}
+
+      - name: run parallel rbac integration tests
+        if: ${{ startsWith(matrix.env.TEST_PROFILE, 'rbac_parallel' }}
+        run: make gh-action/rbac-parallel ${{ matrix.env.TEST_PROFILE }}
