@@ -1,4 +1,5 @@
 import json
+import os
 from collections import namedtuple
 
 import pytest
@@ -40,6 +41,111 @@ def test_dab_roledefs_match_pulp_roles(galaxy_client):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.skipif(
+    os.environ.get('JWT_PROXY') is not None,
+    reason="Skipped because jwt proxy is in use"
+)
+@pytest.mark.parametrize("use_team", [False, True])
+def test_dab_rbac_repository_owner_by_user_or_team(
+    use_team,
+    settings,
+    ansible_config,
+    galaxy_client,
+    random_username
+):
+
+    if settings.get('allow_local_resource_management') is False:
+        pytest.skip("this test relies on local resource creation")
+
+    gc = galaxy_client("admin", ignore_cache=True)
+
+    # create the user in ui/v2 ...
+    gc.post(
+        "_ui/v2/users/",
+        body=json.dumps({
+            "username": random_username,
+            "email": random_username + '@localhost',
+            "password": "redhat1234"}
+        )
+    )
+
+    # get the user's galaxy level details ...
+    auth = {'username': random_username, 'password': 'redhat1234'}
+    ugc = GalaxyClient(gc.galaxy_root, auth=auth)
+    me_ds = ugc.get('_ui/v1/me/')
+    uid = me_ds['id']
+
+    # find the role for repository owner ...
+    rd = gc.get('_ui/v2/role_definitions/?name=galaxy.ansible_repository_owner')
+    role_id = rd['results'][0]['id']
+
+    # make a repository
+    repo_name = random_username.replace('user_', 'repo_')
+    repo_data = gc.post(
+        'pulp/api/v3/repositories/ansible/ansible/',
+        body=json.dumps({"name": repo_name})
+    )
+    repo_id = repo_data['pulp_href'].split('/')[-2]
+
+    if not use_team:
+        # assign the user role ...
+        payload = {
+            'user': uid,
+            'role_definition': role_id,
+            'content_type': 'galaxy.ansiblerepository',
+            'object_id': repo_id,
+        }
+        gc.post('_ui/v2/role_user_assignments/', body=payload)
+
+    else:
+        org_name = random_username.replace('user_', 'org_')
+        team_name = random_username.replace('user_', 'team_')
+
+        # make the org ...
+        gc.post(
+            "_ui/v2/organizations/",
+            body=json.dumps({"name": org_name})
+        )
+
+        # make the team ...
+        team_data = gc.post(
+            "_ui/v2/teams/",
+            body=json.dumps({
+                "name": team_name,
+                "organization": org_name,
+            })
+        )
+        team_id = team_data['id']
+
+        # add the user to the team ...
+        gc.post(
+            f'_ui/v2/teams/{team_id}/users/associate/',
+            body=json.dumps({'instances': [uid]})
+        )
+
+        # assign the user role ...
+        payload = {
+            'team': team_id,
+            'role_definition': role_id,
+            'content_type': 'galaxy.ansiblerepository',
+            'object_id': repo_id,
+        }
+        gc.post('_ui/v2/role_team_assignments/', body=payload)
+
+    # change the name ..
+    change_task = ugc.patch(
+        repo_data['pulp_href'],
+        body=json.dumps({"name": repo_name + "foo"})
+    )
+    result = wait_for_task(ugc, change_task)
+    assert result['state'] == 'completed'
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.skipif(
+    os.environ.get('JWT_PROXY') is not None,
+    reason="Skipped because jwt proxy is in use"
+)
 @pytest.mark.parametrize("use_team", [False, True])
 def test_dab_rbac_namespace_owner_by_user_or_team(
     use_team,
@@ -63,7 +169,7 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
       to view a private repository that includes their collection.
     """
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('allow_local_resource_management') is False:
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
@@ -185,6 +291,10 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.skipif(
+    os.environ.get('JWT_PROXY') is not None,
+    reason="Skipped because jwt proxy is in use"
+)
 def test_dab_user_platform_auditor_bidirectional_sync(
     settings,
     galaxy_client,
