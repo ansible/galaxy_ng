@@ -109,6 +109,9 @@ class OCIEnvIntegrationTest:
         rc = subprocess.call(exec_cmd)
 
         assert rc == 0
+    
+    def get_test_script(self, env):
+        return "/src/galaxy_ng/profiles/base/run_integration.sh"
 
     def run_test(self):
         for env in self.envs:
@@ -121,6 +124,7 @@ class OCIEnvIntegrationTest:
                 time.sleep(wait_time)
 
             if self.envs[env]["run_tests"]:
+                script = self.get_test_script(env)
                 if self.envs[env].get("test_script"):
                     self.exec_cmd(
                         env,
@@ -130,7 +134,7 @@ class OCIEnvIntegrationTest:
                 else:
                     self.exec_cmd(
                         env,
-                        "exec bash /src/galaxy_ng/profiles/base/run_integration.sh"
+                        "exec bash {script}"
                         f" {pytest_flags} {self.flags}"
                     )
 
@@ -152,32 +156,5 @@ class OCIEnvPerformanceTest(OCIEnvIntegrationTest):
     def __init__(self, envs):
         super().__init__(envs)
 
-    def set_up_env(self):
-        return super().set_up_env()
-
-    def teardown(self):
-        return super().teardown()
-
-    def run_test(self):
-        for env in self.envs:
-            pytest_flags = self.envs[env].get("pytest_flags")
-            if pytest_flags is None:
-                pytest_flags = ""
-
-            if wait_time := self.envs[env].get("wait_before_tests", 20):
-                print(f"waiting {wait_time} seconds")
-                time.sleep(wait_time)
-
-            if self.envs[env]["run_tests"]:
-                if self.envs[env].get("test_script"):
-                    self.exec_cmd(
-                        env,
-                        f"exec bash {self.envs[env]['test_script']}"
-                        f" {pytest_flags} {self.flags}"
-                    )
-                else:
-                    self.exec_cmd(
-                        env,
-                        "exec bash /src/galaxy_ng/profiles/base/run_performance.sh"
-                        f" {pytest_flags} {self.flags}"
-                    )
+    def get_test_script(self, env):
+        return "/src/galaxy_ng/profiles/base/run_performance.sh"
