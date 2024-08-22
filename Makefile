@@ -130,6 +130,10 @@ gh-action/keycloak:
 gh-action/rbac:
 	python3 dev/oci_env_integration/actions/rbac.py
 
+.PHONY: gh-action/rbac-parallel
+gh-action/rbac-parallel:
+	python3 dev/oci_env_integration/actions/rbac-parallel.py $${RBAC_PARALLEL_GROUP}
+
 .PHONY: gh-action/insights
 gh-action/insights:
 	python3 dev/oci_env_integration/actions/insights.py

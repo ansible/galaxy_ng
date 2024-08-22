@@ -68,6 +68,8 @@ pulp_api: tests related to the pulp api endpoints
 ldap: tests related to the ldap integration
 role: Related to RBAC Roles
 rbac_roles: Tests checking Role permissions
+rbac_parallel_group_1: Parallelized rbac tests group 1
+rbac_parallel_group_2: Parallelized rbac tests group 2
 group: Related to Groups
 slow_in_cloud: tests that take too long to be run against stage
 max_hub_version: This marker takes an argument that indicates the maximum hub version
