@@ -110,6 +110,9 @@ class OCIEnvIntegrationTest:
 
         assert rc == 0
 
+    def get_test_script(self, env):
+        return "/src/galaxy_ng/profiles/base/run_integration.sh"
+
     def run_test(self):
         for env in self.envs:
             pytest_flags = self.envs[env].get("pytest_flags")
@@ -121,6 +124,7 @@ class OCIEnvIntegrationTest:
                 time.sleep(wait_time)
 
             if self.envs[env]["run_tests"]:
+                script = self.get_test_script(env)
                 if self.envs[env].get("test_script"):
                     self.exec_cmd(
                         env,
@@ -130,7 +134,7 @@ class OCIEnvIntegrationTest:
                 else:
                     self.exec_cmd(
                         env,
-                        "exec bash /src/galaxy_ng/profiles/base/run_integration.sh"
+                        f"exec bash {script}"
                         f" {pytest_flags} {self.flags}"
                     )
 
@@ -146,3 +150,11 @@ class OCIEnvIntegrationTest:
             return
         for env in self.envs:
             self.exec_cmd(env, "compose down -v")
+
+
+class OCIEnvPerformanceTest(OCIEnvIntegrationTest):
+    def __init__(self, envs):
+        super().__init__(envs)
+
+    def get_test_script(self, env):
+        return "/src/galaxy_ng/profiles/base/run_performance.sh"
