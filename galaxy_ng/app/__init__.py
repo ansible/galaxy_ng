@@ -135,7 +135,7 @@ def add_required_dab_attributes_to_models():
             "summary_fields": common_summary_fields,
             # "reverse_name": "repositories-container/container-detail"
             "reverse_name": "galaxy:api:v3:container-repository-detail",
-            "reverse_args": ("base_path",)
+            # "reverse_args": ("base_path",)
         },
         dab_rbac_models.RoleUserAssignment: {
             "reverse_name": "galaxy:api:ui_v2:roleuserassignment-detail"
