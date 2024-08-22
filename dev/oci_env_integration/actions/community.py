@@ -11,7 +11,7 @@ env = action_lib.OCIEnvIntegrationTest(
 )
 
 
-env_2 = action_lib.OCIEnvPerformanceTest(
+env_performance = action_lib.OCIEnvPerformanceTest(
     envs=[
         {
             "env_file": "community.compose.env",

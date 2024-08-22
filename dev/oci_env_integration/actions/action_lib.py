@@ -109,7 +109,7 @@ class OCIEnvIntegrationTest:
         rc = subprocess.call(exec_cmd)
 
         assert rc == 0
-    
+
     def get_test_script(self, env):
         return "/src/galaxy_ng/profiles/base/run_integration.sh"
 
@@ -124,7 +124,7 @@ class OCIEnvIntegrationTest:
                 time.sleep(wait_time)
 
             if self.envs[env]["run_tests"]:
-                script = self.get_test_script(env)
+                self.get_test_script(env)
                 if self.envs[env].get("test_script"):
                     self.exec_cmd(
                         env,

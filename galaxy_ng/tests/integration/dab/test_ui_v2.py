@@ -11,6 +11,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.parametrize("user_payload", [
     {},
     {"email": "foobar@foobar.com"},
@@ -61,6 +62,7 @@ def test_ui_v2_user_create(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.parametrize("user_payload", [
     {"groups": [{"name": "$RANDOM"}]},
     {"teams": [{"name": "$RANDOM", "organization": "$RANDOM"}]},
@@ -170,6 +172,7 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.parametrize("invalid_payload", [
     ({"email": "invalidemail"}, "Enter a valid email address."),
     ({"email": "@whoops"}, "Enter a valid email address."),
@@ -214,6 +217,7 @@ def test_ui_v2_user_create_invalid_data(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 def test_ui_v2_user_edit(
     settings,
     galaxy_client,
@@ -256,6 +260,7 @@ def test_ui_v2_user_edit(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.parametrize("invalid_payload", [
     ({"email": "invalidemail"}, "Enter a valid email address."),
     ({"email": "@whoops"}, "Enter a valid email address."),
