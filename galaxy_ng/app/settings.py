@@ -422,6 +422,8 @@ ANSIBLE_BASE_ALLOW_SINGLETON_USER_ROLES = True
 ANSIBLE_BASE_ALLOW_SINGLETON_TEAM_ROLES = True
 # Pass ignore_conflicts=False for bulk_create calls for role evaluations
 ANSIBLE_BASE_EVALUATIONS_IGNORE_CONFLICTS = False
+# The JWT roles should never be assigned to users through the API
+ALLOW_LOCAL_ASSIGNING_JWT_ROLES = False
 # Set up managed role definitions
 ANSIBLE_BASE_MANAGED_ROLE_REGISTRY = {
     'platform_auditor': {'name': 'Platform Auditor', 'shortname': 'sys_auditor'},
