@@ -124,7 +124,7 @@ class OCIEnvIntegrationTest:
                 time.sleep(wait_time)
 
             if self.envs[env]["run_tests"]:
-                self.get_test_script(env)
+                script = self.get_test_script(env)
                 if self.envs[env].get("test_script"):
                     self.exec_cmd(
                         env,
@@ -134,7 +134,7 @@ class OCIEnvIntegrationTest:
                 else:
                     self.exec_cmd(
                         env,
-                        "exec bash {script}"
+                        f"exec bash {script}"
                         f" {pytest_flags} {self.flags}"
                     )
 
