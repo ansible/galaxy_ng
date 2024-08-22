@@ -594,7 +594,11 @@ def assert_user_in_group(galaxy_client):
 
         assignment_r = gc.get(
             "_ui/v2/role_user_assignments/",
-            params={"user": user['id'], "content_type__model": "team"},
+            params={
+                "user": user['id'],
+                "content_type__model": "team",
+                "role_definition__name": "Galaxy Team Member"
+            },
         )
         group_ids = [assignment["object_id"] for assignment in assignment_r["results"]]
         if expected:

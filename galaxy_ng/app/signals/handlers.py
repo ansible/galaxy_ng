@@ -15,6 +15,7 @@ from django.db.models.signals import m2m_changed
 from django.db.models import CharField, Value
 from django.db.models.functions import Concat
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Group
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
@@ -121,6 +122,7 @@ def associate_namespace_metadata(sender, instance, created, **kwargs):
 # ___ DAB RBAC ___
 
 TEAM_MEMBER_ROLE = 'Galaxy Team Member'
+SHARED_TEAM_ROLE = 'Team Member'
 
 
 def create_managed_roles(*args, **kwargs) -> None:
@@ -495,7 +497,7 @@ def copy_dab_user_role_assignment(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        if instance.role_definition.name == TEAM_MEMBER_ROLE and \
+        if instance.role_definition.name in (TEAM_MEMBER_ROLE, SHARED_TEAM_ROLE) and \
                 isinstance(instance, RoleUserAssignment):
             instance.content_object.group.user_set.add(instance.user)
             return
@@ -508,12 +510,23 @@ def delete_dab_user_role_assignment(sender, instance, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        if instance.role_definition.name == TEAM_MEMBER_ROLE and \
+        if instance.role_definition.name in (TEAM_MEMBER_ROLE, SHARED_TEAM_ROLE) and \
                 isinstance(instance, RoleUserAssignment):
+            if instance.role_definition.name == TEAM_MEMBER_ROLE:
+                dup_name = SHARED_TEAM_ROLE
+            else:
+                dup_name = TEAM_MEMBER_ROLE
             # If the assignment does not have a content_object then it may be a global group role
             # this type of role is not compatible with DAB RBAC and what we do is still TBD
             if instance.content_object:
-                instance.content_object.group.user_set.remove(instance.user)
+                # Only remove assignment if other role does not grant this, otherwise leave it
+                other_assignment_qs = RoleUserAssignment.objects.filter(
+                    role_definition__name=dup_name,
+                    user=instance.user,
+                    object_id=instance.object_id
+                )
+                if not other_assignment_qs.exists():
+                    instance.content_object.group.user_set.remove(instance.user)
                 return
         _unapply_dab_assignment(instance)
 
@@ -545,17 +558,40 @@ def copy_dab_group_to_role(instance, action, model, pk_set, reverse, **kwargs):
         return
 
     member_rd = RoleDefinition.objects.get(name=TEAM_MEMBER_ROLE)
+    shared_member_rd = RoleDefinition.objects.get(name=SHARED_TEAM_ROLE)
     if reverse:
-        # NOTE: for we might prefer to use pk_set
-        # but it appears to be incorrectly empty on the reverse signal,
-        # the models itself on post_ actions seems good so we use that
-        team = Team.objects.get(group_id=instance.pk)
+        groups = [instance]
+    else:
+        if action == 'post_clear':
+            qs = RoleUserAssignment.objects.filter(role_definition=member_rd, user=instance)
+            groups = [assignment.content_object.group for assignment in qs]
+        else:
+            groups = Group.objects.filter(pk__in=pk_set)
+
+    # For every group affected by the change, assure that the DAB role assignments
+    # are changed to match the users in the pulp group
+    for group in groups:
+        team = Team.objects.get(group_id=group.pk)
         current_dab_members = set(
             assignment.user for assignment in RoleUserAssignment.objects.filter(
                 role_definition=member_rd, object_id=team.pk
             )
         )
-        desired_members = set(instance.user_set.all())
+        current_dab_shared_members = set(
+            assignment.user for assignment in RoleUserAssignment.objects.filter(
+                role_definition=shared_member_rd, object_id=team.pk
+            )
+        )
+        current_pulp_members = set(group.user_set.all())
+        not_allowed = current_dab_shared_members - current_pulp_members
+        if not_allowed:
+            usernames = ", ".join([u.username for u in not_allowed])
+            logger.info(
+                f'Can not remove users {usernames} from team {team.name}, '
+                'because they are managed by the resource provider'
+            )
+        # The local team member role should track all users not tracked in the shared member role
+        desired_members = current_pulp_members - current_dab_shared_members
         users_to_add = desired_members - current_dab_members
         users_to_remove = current_dab_members - desired_members
         with dab_rbac_signals():
@@ -563,21 +599,6 @@ def copy_dab_group_to_role(instance, action, model, pk_set, reverse, **kwargs):
                 member_rd.give_permission(user, team)
             for user in users_to_remove:
                 member_rd.remove_permission(user, team)
-        return
-
-    with dab_rbac_signals():
-        if action == 'post_add':
-            for group_id in pk_set:
-                team = Team.objects.get(group_id=group_id)
-                member_rd.give_permission(instance, team)
-        elif action == 'post_remove':
-            for group_id in pk_set:
-                team = Team.objects.get(group_id=group_id)
-                member_rd.remove_permission(instance, team)
-        elif action == 'post_clear':
-            qs = RoleUserAssignment.objects.filter(role_definition=member_rd, user=instance)
-            for assignment in qs:
-                member_rd.remove_permission(instance, assignment.content_object)
 
 
 m2m_changed.connect(copy_dab_group_to_role, sender=User.groups.through)
