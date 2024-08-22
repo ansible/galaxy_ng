@@ -89,10 +89,13 @@ def copy_roles_to_role_definitions(apps, schema_editor):
 def migrate_role_assignments(apps, schema_editor):
     UserRole = apps.get_model('core', 'UserRole')
     GroupRole = apps.get_model('core', 'GroupRole')
+    Group = apps.get_model('auth', 'Group')
+    Team = apps.get_model('galaxy', 'Team')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
     RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
     RoleTeamAssignment = apps.get_model('dab_rbac', 'RoleTeamAssignment')
 
+    # Migrate user role assignments
     for user_role in UserRole.objects.all():
         rd = RoleDefinition.objects.filter(name=user_role.role.name).first()
         if not rd:
@@ -103,6 +106,7 @@ def migrate_role_assignments(apps, schema_editor):
         else:
             give_permissions(apps, rd, users=[user_role.user], object_id=user_role.object_id, content_type_id=user_role.content_type_id)
 
+    # Migrate team/group role assignments
     for group_role in GroupRole.objects.all():
         rd = RoleDefinition.objects.filter(name=group_role.role.name).first()
         if not rd:
@@ -117,3 +121,16 @@ def migrate_role_assignments(apps, schema_editor):
             RoleTeamAssignment.objects.create(role_definition=rd, team=actor)
         else:
             give_permissions(apps, rd, teams=[actor], object_id=group_role.object_id, content_type_id=group_role.content_type_id)
+
+    # In DAB RBAC, team users are saved as a role assignment
+    # Migrate the pulp group users (relationship) to role assignment
+    member_rd = RoleDefinition.objects.get(name='Galaxy Team Member')
+    for group in Group.objects.prefetch_related('user_set').all():
+        user_list = list(group.user_set.all())
+        team = Team.objects.filter(group=group).first()
+        if not team:
+            logger.warning(f'Data migration could not find team by name {group.name}')
+            continue
+
+        if user_list:
+            give_permissions(apps, member_rd, users=user_list, object_id=team.id, content_type_id=member_rd.content_type_id)
