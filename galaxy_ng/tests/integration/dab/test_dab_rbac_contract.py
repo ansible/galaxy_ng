@@ -11,6 +11,7 @@ GALAXY_API_PATH_PREFIX = "/api/galaxy"  # cant import from settings on integrati
 
 # This tests the basic DAB RBAC contract using custom roles to do things.
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 def test_list_namespace_permissions(galaxy_client):
     gc = galaxy_client("admin")
     r = gc.get("_ui/v2/role_metadata/")
@@ -30,6 +31,7 @@ def test_list_namespace_permissions(galaxy_client):
 
 # look for the content_type choices
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 def test_role_definition_options(galaxy_client):
     gc = galaxy_client("admin")
     # TODO: add support for options in GalaxyClient in galaxykit
@@ -220,6 +222,7 @@ def check_system_role_user_assignments(client: GalaxyClient, user: dict, role: d
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.parametrize("by_api", ["dab", "pulp"])
 def test_create_custom_namespace_system_admin_role(custom_role_factory, galaxy_client, by_api):
     if by_api == "dab":
@@ -242,6 +245,7 @@ def test_create_custom_namespace_system_admin_role(custom_role_factory, galaxy_c
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 def test_give_user_custom_role_system(galaxy_client, custom_role_factory, namespace):
     # TODO: verify that assignment is seen in pulp API (HOW?)
     # Step 0: Setup test.
@@ -306,6 +310,7 @@ def test_give_user_custom_role_system(galaxy_client, custom_role_factory, namesp
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 def test_give_team_custom_role_system(
     settings,
     galaxy_client,
@@ -378,6 +383,7 @@ def test_give_team_custom_role_system(
 
 # TODO: We need another version of it for a team
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.parametrize("by_role_api", ["dab", "pulp"])
 @pytest.mark.parametrize("by_assignment_api", ["dab", "pulp"])
 def test_give_user_custom_role_object(
@@ -554,6 +560,7 @@ def test_give_team_custom_role_object(
     assert ctx.value.response.status_code == HTTPStatus.FORBIDDEN
 
 
+@pytest.mark.min_hub_version("4.10dev")
 def test_object_role_permission_validation(galaxy_client, custom_role_factory, namespace):
     gc = galaxy_client("admin")
 
@@ -594,7 +601,11 @@ def assert_user_in_group(galaxy_client):
 
         assignment_r = gc.get(
             "_ui/v2/role_user_assignments/",
-            params={"user": user['id'], "content_type__model": "team"},
+            params={
+                "user": user['id'],
+                "content_type__model": "team",
+                "role_definition__name": "Galaxy Team Member"
+            },
         )
         group_ids = [assignment["object_id"] for assignment in assignment_r["results"]]
         if expected:
@@ -629,6 +640,7 @@ def user_and_group(request, galaxy_client):
     return (user, group)
 
 
+@pytest.mark.min_hub_version("4.10dev")
 def test_group_sync_from_pulp_to_dab(galaxy_client, assert_user_in_group, user_and_group):
     gc = galaxy_client("admin")
     user, group = user_and_group

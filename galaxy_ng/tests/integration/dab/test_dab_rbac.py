@@ -295,6 +295,7 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
 )
+@pytest.mark.min_hub_version("4.10dev")
 def test_dab_user_platform_auditor_bidirectional_sync(
     settings,
     galaxy_client,
@@ -387,6 +388,7 @@ def test_dab_user_platform_auditor_bidirectional_sync(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 def test_dab_team_platform_auditor_bidirectional_sync(
     settings,
     galaxy_client,
@@ -489,6 +491,7 @@ def test_dab_team_platform_auditor_bidirectional_sync(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 def test_dab_user_assignment_filtering_as_user(
     settings,
     galaxy_client,
