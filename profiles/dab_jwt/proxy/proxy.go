@@ -31,7 +31,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 	"sync"
 
 	"github.com/google/uuid"
@@ -63,6 +62,7 @@ var (
 )
 
 var ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
+var SERVICE_ID = uuid.New().String()
 
 var (
 	users      = map[string]User{}
@@ -201,14 +201,16 @@ func main() {
 	http.HandleFunc("/api/gateway/v1/login/", LoginHandler)
 	http.HandleFunc("/api/gateway/v1/logout/", LogoutHandler)
 	http.HandleFunc("/api/gateway/v1/users/", UserHandler)
-	// http.HandleFunc("/api/gateway/v1/teams/", TeamHandler)
-	http.HandleFunc("/api/gateway/v1/teams/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/api/gateway/v1/teams/") && strings.Contains(r.URL.Path, "/users/associate/") {
-			AssociateTeamUsersHandler(w, r)
-		} else {
-			TeamHandler(w, r)
-		}
-	})
+	/*
+		http.HandleFunc("/api/gateway/v1/teams/", func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/api/gateway/v1/teams/") && strings.Contains(r.URL.Path, "/users/associate/") {
+				AssociateTeamUsersHandler(w, r)
+			} else {
+				TeamHandler(w, r)
+			}
+		})
+	*/
+	http.HandleFunc("/api/gateway/v1/teams/", TeamHandler)
 	http.HandleFunc("/api/gateway/v1/organizations/", OrganizationHandler)
 	http.HandleFunc("/api/gateway/v1/role_definitions/", RoleDefinitionsHandler)
 	http.HandleFunc("/api/gateway/v1/role_user_assignments/", RoleUserAssignmentsHandler)

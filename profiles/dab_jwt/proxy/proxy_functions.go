@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -167,22 +168,24 @@ func generateHmacSha256SharedSecret(nonce *string) (string, error) {
 // generateJWT generates a JWT for the user
 func GenerateUserClaims(argUser User) (UserClaims, error) {
 
-	//log.Printf("generateclaims %s\n", argUser.Username)
+	log.Printf("generateclaims %s\n", argUser.Username)
 
-	orgsMutex.Lock()
-	defer orgsMutex.Unlock()
+	/*
+		orgsMutex.Lock()
+		defer orgsMutex.Unlock()
 
-	teamsMutex.Lock()
-	defer teamsMutex.Unlock()
+		teamsMutex.Lock()
+		defer teamsMutex.Unlock()
 
-	usersMutex.Lock()
-	defer usersMutex.Unlock()
+		usersMutex.Lock()
+		defer usersMutex.Unlock()
 
-	roleDefinitionsMutex.Lock()
-	defer roleDefinitionsMutex.Unlock()
+		roleDefinitionsMutex.Lock()
+		defer roleDefinitionsMutex.Unlock()
 
-	roleUserAssignmentsMutex.Lock()
-	defer roleUserAssignmentsMutex.Unlock()
+		roleUserAssignmentsMutex.Lock()
+		defer roleUserAssignmentsMutex.Unlock()
+	*/
 
 	log.Printf("generateclaims %s\n", argUser.Username)
 	log.Printf("teams %s\n", teams)
@@ -506,4 +509,43 @@ func printKnownCSRFTokens() {
 	for _, session := range tokenTable.data {
 		log.Printf("\t\tcsrf:%s sid:%s uid:%s\n", session.CSRFToken, session.SessionID, session.Username)
 	}
+}
+
+func GetRequestUser(r *http.Request) (User, error) {
+	// Get the Authorization header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return User{}, fmt.Errorf("Authorization header missing")
+	}
+
+	// The token normally comes in the format "Basic <base64encoded(username:password)>"
+	if !strings.HasPrefix(authHeader, "Basic ") {
+		return User{}, fmt.Errorf("Invalid authorization method")
+	}
+
+	// Decode the base64 encoded credentials
+	encodedCredentials := strings.TrimPrefix(authHeader, "Basic ")
+	decodedCredentials, err := base64.StdEncoding.DecodeString(encodedCredentials)
+	if err != nil {
+		return User{}, fmt.Errorf("Invalid base64 encoded credentials")
+	}
+
+	// Split the decoded string into username and password
+	credentials := strings.SplitN(string(decodedCredentials), ":", 2)
+	if len(credentials) != 2 {
+		return User{}, fmt.Errorf("Invalid credentials format")
+	}
+
+	username := credentials[0]
+	user := users[username]
+	return user, nil
+}
+
+func GetOrganizationByName(orgname string) Organization {
+	for _, org := range orgs {
+		if org.Name == orgname || org.CodeName == orgname {
+			return org
+		}
+	}
+	return Organization{}
 }

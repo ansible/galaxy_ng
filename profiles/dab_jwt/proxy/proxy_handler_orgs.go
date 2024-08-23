@@ -118,6 +118,20 @@ func addOrg(w http.ResponseWriter, r *http.Request) {
 		}{AnsibleID: newOrg.AnsibleId}},
 	}
 
+	// create the org in the downstream service index ...
+	client := NewServiceIndexClient()
+	payload := ServiceIndexPayload{
+		AnsibleId:    newOrg.AnsibleId,
+		ServiceId:    SERVICE_ID,
+		ResourceType: "shared.organization",
+		ResourceData: ServiceIndexResourceData{
+			Name:        newOrg.Name,
+			Description: "",
+		},
+	}
+	user, _ := GetRequestUser(r)
+	client.PostData(user, payload)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(responseOrg)

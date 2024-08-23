@@ -147,6 +147,23 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 		}{AnsibleID: newAnsibleID}},
 	}
 
+	// create the team in the downstream service index ...
+	client := NewServiceIndexClient()
+	payload := ServiceIndexPayload{
+		AnsibleId:    newUser.Sub,
+		ServiceId:    SERVICE_ID,
+		ResourceType: "shared.user",
+		ResourceData: ServiceIndexResourceData{
+			UserName:  newUser.Username,
+			Email:     newUser.Email,
+			FirstName: newUser.FirstName,
+			LastName:  newUser.LastName,
+			SuperUser: newUser.IsSuperuser,
+		},
+	}
+	user, _ := GetRequestUser(r)
+	client.PostData(user, payload)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(responseUser)

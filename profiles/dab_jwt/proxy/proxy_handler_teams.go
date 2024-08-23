@@ -224,7 +224,23 @@ func addTeam(w http.ResponseWriter, r *http.Request) {
 		}{AnsibleID: newAnsibleID}},
 	}
 
-	idCounter++
+	//idCounter++
+
+	// create the team in the downstream service index ...
+	org := GetOrganizationByName(orgName)
+	client := NewServiceIndexClient()
+	payload := ServiceIndexPayload{
+		AnsibleId:    newTeam.AnsibleId,
+		ServiceId:    SERVICE_ID,
+		ResourceType: "shared.team",
+		ResourceData: ServiceIndexResourceData{
+			Name:         newTeam.Name,
+			Organization: &org.AnsibleId,
+			Description:  "",
+		},
+	}
+	user, _ := GetRequestUser(r)
+	client.PostData(user, payload)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
