@@ -93,7 +93,7 @@ type Team struct {
 	Id        int    `json:"id"`
 	AnsibleId string `json:"ansible_id"`
 	Name      string `json:"name"`
-	Org       string `json:"org"`
+	Org       int    `json:"org"`
 }
 
 // for the jwt
@@ -184,4 +184,10 @@ type RoleUserAssignment struct {
 	RoleDefinition int    `json:"role_definition"`
 	User           int    `json:"user"`
 	ObjectId       int    `json:"object_id"`
+}
+
+// Object Deletion
+type DeletedEntityKey struct {
+	ID          int
+	ContentType string
 }

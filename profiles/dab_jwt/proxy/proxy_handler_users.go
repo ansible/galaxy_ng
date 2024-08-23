@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"sort"
 
@@ -14,15 +15,17 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		getUsers(w, r)
+		getUsers(w)
 	case http.MethodPost:
 		addUser(w, r)
+	case http.MethodDelete:
+		deleteUser(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 
-func getUsers(w http.ResponseWriter, r *http.Request) {
+func getUsers(w http.ResponseWriter) {
 	//usersMutex.Lock()
 	//defer usersMutex.Unlock()
 
@@ -118,22 +121,29 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 	//usersMutex.Lock()
 	//defer usersMutex.Unlock()
 
-	if _, exists := users[newUser.Username]; exists {
+	checkUser := GetUserByUserName(newUser.Username)
+	if checkUser.Username == newUser.Username {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
 
-	highestId := 0
-	for _, user := range users {
-		if user.Id > highestId {
-			highestId = user.Id
-		}
+	keys := []int{}
+	for key := range users {
+		keys = append(keys, key)
 	}
+	for key := range deletedEntities {
+		if key.ContentType != "user" {
+			continue
+		}
+		keys = append(keys, key.ID)
+	}
+	highestId := MaxOrDefault(keys)
+	newId := highestId + 1
 
-	newUser.Id = highestId + 1
+	newUser.Id = newId
 	newAnsibleID := uuid.NewString()
 	newUser.Sub = newAnsibleID
-	users[newUser.Username] = newUser
+	users[newUser.Id] = newUser
 
 	responseUser := UserResponse{
 		ID:       newUser.Id,
@@ -167,4 +177,35 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(responseUser)
+}
+
+func deleteUser(w http.ResponseWriter, r *http.Request) {
+
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+
+	teamsMutex.Lock()
+	defer teamsMutex.Unlock()
+
+	roleUserAssignmentsMutex.Lock()
+	defer roleUserAssignmentsMutex.Unlock()
+
+	deletedEntitiesMutex.Lock()
+	defer deletedEntitiesMutex.Unlock()
+
+	userId := GetLastNumericPathElement(r.URL.Path)
+	user := users[userId]
+
+	ansibleId := user.Sub
+	DeleteUser(user)
+
+	// Perform any additional cleanup or API calls
+	ruser, _ := GetRequestUser(r)
+	client := NewServiceIndexClient()
+	if err := client.Delete(ruser, ansibleId); err != nil {
+		log.Printf("Failed to notify Service Index Client: %v", err)
+	}
+
+	// Respond with success
+	w.WriteHeader(http.StatusNoContent)
 }

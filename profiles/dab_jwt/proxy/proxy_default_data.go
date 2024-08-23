@@ -32,19 +32,19 @@ var prepopulatedTeams = map[string]Team{
 		Id:        1,
 		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771aa",
 		Name:      "ateam",
-		Org:       "org1",
+		Org:       2,
 	},
 	"bteam": {
 		Id:        2,
 		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771ab",
 		Name:      "bteam",
-		Org:       "default",
+		Org:       1,
 	},
 	"peteam": {
 		Id:        3,
 		AnsibleId: "34a58292-1e0f-49f0-9383-fb7e63d771ac",
 		Name:      "peteam",
-		Org:       "pe",
+		Org:       4,
 	},
 }
 

@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"sort"
-	"strconv"
-	"strings"
 
 	"github.com/google/uuid"
 )
@@ -17,90 +16,17 @@ import (
 func TeamHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		getTeams(w, r)
+		getTeams(w)
 	case http.MethodPost:
 		addTeam(w, r)
+	case http.MethodDelete:
+		deleteTeam(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 
-func AssociateTeamUsersHandler(w http.ResponseWriter, r *http.Request) {
-
-	teamsMutex.Lock()
-	defer teamsMutex.Unlock()
-
-	usersMutex.Lock()
-	defer usersMutex.Unlock()
-
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Extract the team_id from the URL path
-	pathParts := strings.Split(r.URL.Path, "/")
-	if len(pathParts) < 9 || pathParts[7] != "associate" {
-		http.Error(w, "Invalid URL path", http.StatusBadRequest)
-		return
-	}
-	teamIDStr := pathParts[5]
-	teamID, _ := strconv.Atoi(teamIDStr)
-	fmt.Println("teamid", teamID)
-
-	// find the team codename ...
-	var teamName = ""
-	for _, team := range teams {
-		fmt.Println(team)
-		if team.Id == teamID {
-			fmt.Println(team)
-			teamName = team.Name
-			break
-		}
-	}
-	fmt.Println("teamname", teamName)
-
-	// fmt.Println("body", r.Body)
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
-		return
-	}
-	fmt.Println("Request Body:", string(body))
-	r.Body = io.NopCloser(bytes.NewBuffer(body))
-
-	// AssociationRequest
-	var newAssociationRequest AssociationRequest
-	if err := json.NewDecoder(r.Body).Decode(&newAssociationRequest); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	fmt.Println(newAssociationRequest)
-
-	for _, uid := range newAssociationRequest.Instances {
-		fmt.Println("uid", uid)
-		// find this user ..
-		for _, user := range users {
-			if user.Id == uid {
-				fmt.Println(user)
-				fmt.Println(user.Teams)
-				if containsString(user.Teams, teamName) == false {
-					fmt.Println("add", user.Username, "to", teamName)
-					user.Teams = append(user.Teams, teamName)
-					users[user.Username] = user
-				} else {
-					fmt.Println("do not need to add", teamName, "to", user)
-				}
-			} else {
-				fmt.Println(user.Id, "!=", uid)
-			}
-		}
-	}
-
-}
-
-func getTeams(w http.ResponseWriter, r *http.Request) {
+func getTeams(w http.ResponseWriter) {
 	teamsMutex.Lock()
 	defer teamsMutex.Unlock()
 
@@ -119,13 +45,15 @@ func getTeams(w http.ResponseWriter, r *http.Request) {
 
 	for _, teamdata := range teamList {
 
-		var orgId = 0
-		for _, org := range orgs {
-			if org.CodeName == teamdata.Org {
-				orgId = org.Id
-				break
+		var orgId = teamdata.Org
+		/*
+			for _, org := range orgs {
+				if org.CodeName == teamdata.Org {
+					orgId = org.Id
+					break
+				}
 			}
-		}
+		*/
 
 		responseTeam := TeamResponse{
 			ID:           teamdata.Id,
@@ -178,38 +106,33 @@ func addTeam(w http.ResponseWriter, r *http.Request) {
 	teamsMutex.Lock()
 	defer teamsMutex.Unlock()
 
-	if _, exists := teams[newTeamRequest.Name]; exists {
+	checkTeam := GetTeamByName(newTeamRequest.Name)
+	if checkTeam.Name == newTeamRequest.Name {
 		http.Error(w, "Team already exists", http.StatusConflict)
 		return
 	}
 
-	orgName := ""
-	for _, org := range orgs {
-		if org.Id == newTeamRequest.Organization {
-			orgName = org.CodeName
-			break
+	keys := []int{}
+	for key := range teams {
+		keys = append(keys, key)
+	}
+	for key := range deletedEntities {
+		if key.ContentType != "team" {
+			continue
 		}
+		keys = append(keys, key.ID)
 	}
-	if orgName == "" {
-		http.Error(w, "Org not found", http.StatusConflict)
-		return
-	}
-
-	highestId := 0
-	for _, team := range teams {
-		if team.Id > highestId {
-			highestId = team.Id
-		}
-	}
+	highestId := MaxOrDefault(keys)
+	newId := highestId + 1
 
 	var newTeam Team
 
 	newTeam.Name = newTeamRequest.Name
-	newTeam.Id = highestId + 1
+	newTeam.Id = newId
 	newAnsibleID := uuid.NewString()
 	newTeam.AnsibleId = newAnsibleID
-	newTeam.Org = orgName
-	teams[newTeam.Name] = newTeam
+	newTeam.Org = newTeamRequest.Organization
+	teams[newTeam.Id] = newTeam
 
 	responseTeam := TeamResponse{
 		ID:           newTeam.Id,
@@ -224,10 +147,8 @@ func addTeam(w http.ResponseWriter, r *http.Request) {
 		}{AnsibleID: newAnsibleID}},
 	}
 
-	//idCounter++
-
 	// create the team in the downstream service index ...
-	org := GetOrganizationByName(orgName)
+	org := orgs[newTeamRequest.Organization]
 	client := NewServiceIndexClient()
 	payload := ServiceIndexPayload{
 		AnsibleId:    newTeam.AnsibleId,
@@ -245,4 +166,36 @@ func addTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(responseTeam)
+}
+
+func deleteTeam(w http.ResponseWriter, r *http.Request) {
+
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+
+	teamsMutex.Lock()
+	defer teamsMutex.Unlock()
+
+	roleUserAssignmentsMutex.Lock()
+	defer roleUserAssignmentsMutex.Unlock()
+
+	deletedEntitiesMutex.Lock()
+	defer deletedEntitiesMutex.Unlock()
+
+	teamId := GetLastNumericPathElement(r.URL.Path)
+	team := teams[teamId]
+
+	// delete org last
+	ansibleId := team.AnsibleId
+	DeleteTeam(team)
+
+	// Perform any additional cleanup or API calls
+	user, _ := GetRequestUser(r)
+	client := NewServiceIndexClient()
+	if err := client.Delete(user, ansibleId); err != nil {
+		log.Printf("Failed to notify Service Index Client: %v", err)
+	}
+
+	// Respond with success
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"sort"
 
@@ -15,15 +16,17 @@ import (
 func OrganizationHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		getOrgs(w, r)
+		getOrgs(w)
 	case http.MethodPost:
 		addOrg(w, r)
+	case http.MethodDelete:
+		deleteOrg(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 
-func getOrgs(w http.ResponseWriter, r *http.Request) {
+func getOrgs(w http.ResponseWriter) {
 	orgsMutex.Lock()
 	defer orgsMutex.Unlock()
 
@@ -84,25 +87,34 @@ func addOrg(w http.ResponseWriter, r *http.Request) {
 	orgsMutex.Lock()
 	defer orgsMutex.Unlock()
 
-	highestId := 0
 	for _, org := range orgs {
 		if org.Name == newOrgRequest.Name || org.CodeName == newOrgRequest.Name {
 			http.Error(w, "org name is already taken", http.StatusBadRequest)
 			return
 		}
-		if org.Id > highestId {
-			highestId = org.Id
-		}
 	}
+
+	keys := []int{}
+	for key := range orgs {
+		keys = append(keys, key)
+	}
+	for key := range deletedEntities {
+		if key.ContentType != "org" {
+			continue
+		}
+		keys = append(keys, key.ID)
+	}
+	highestId := MaxOrDefault(keys)
+	newId := highestId + 1
 
 	var newOrg Organization
 
 	newOrg.CodeName = newOrgRequest.Name
 	newOrg.Name = newOrgRequest.Name
-	newOrg.Id = highestId + 1
+	newOrg.Id = newId
 	newAnsibleID := uuid.NewString()
 	newOrg.AnsibleId = newAnsibleID
-	orgs[newOrg.CodeName] = newOrg
+	orgs[newOrg.Id] = newOrg
 
 	fmt.Println(newOrg)
 
@@ -135,4 +147,36 @@ func addOrg(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(responseOrg)
+}
+
+func deleteOrg(w http.ResponseWriter, r *http.Request) {
+
+	orgsMutex.Lock()
+	defer orgsMutex.Unlock()
+
+	teamsMutex.Lock()
+	defer teamsMutex.Unlock()
+
+	roleUserAssignmentsMutex.Lock()
+	defer roleUserAssignmentsMutex.Unlock()
+
+	deletedEntitiesMutex.Lock()
+	defer deletedEntitiesMutex.Unlock()
+
+	orgId := GetLastNumericPathElement(r.URL.Path)
+	org := orgs[orgId]
+
+	// delete org last
+	ansibleId := org.AnsibleId
+	DeleteOrganization(org)
+
+	// Perform any additional cleanup or API calls
+	user, _ := GetRequestUser(r)
+	client := NewServiceIndexClient()
+	if err := client.Delete(user, ansibleId); err != nil {
+		log.Printf("Failed to notify Service Index Client: %v", err)
+	}
+
+	// Respond with success
+	w.WriteHeader(http.StatusNoContent)
 }

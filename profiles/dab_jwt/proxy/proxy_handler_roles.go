@@ -10,8 +10,12 @@ func RoleDefinitionsHandler(w http.ResponseWriter, r *http.Request) {
 	roleDefinitionsMutex.Lock()
 	defer roleDefinitionsMutex.Unlock()
 
+	results := []RoleDefinition{}
+	for _, roledef := range roleDefinitions {
+		results = append(results, roledef)
+	}
 	response := map[string][]RoleDefinition{
-		"results": roleDefinitions,
+		"results": results,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -21,7 +25,7 @@ func RoleDefinitionsHandler(w http.ResponseWriter, r *http.Request) {
 func RoleUserAssignmentsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		getRoleUserAssignments(w, r)
+		getRoleUserAssignments(w)
 	case http.MethodPost:
 		addRoleUserAssignments(w, r)
 	default:
@@ -29,14 +33,17 @@ func RoleUserAssignmentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getRoleUserAssignments(w http.ResponseWriter, r *http.Request) {
+func getRoleUserAssignments(w http.ResponseWriter) {
 	roleUserAssignmentsMutex.Lock()
 	defer roleUserAssignmentsMutex.Unlock()
 
-	response := map[string][]RoleUserAssignment{
-		"results": roleUserAssignments,
+	results := []RoleUserAssignment{}
+	for _, assignment := range roleUserAssignments {
+		results = append(results, assignment)
 	}
-
+	response := map[string][]RoleUserAssignment{
+		"results": results,
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -52,8 +59,18 @@ func addRoleUserAssignments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newId := len(roleUserAssignments) + 1
-	//log.Printf("NEWID:%d\n", newId)
+	keys := []int{}
+	for key := range roleUserAssignments {
+		keys = append(keys, key)
+	}
+	for key := range deletedEntities {
+		if key.ContentType != "role_user_assignment" {
+			continue
+		}
+		keys = append(keys, key.ID)
+	}
+	highestId := MaxOrDefault(keys)
+	newId := highestId + 1
 
 	newUserAssignment := RoleUserAssignment{
 		Id:             newId,
@@ -61,7 +78,7 @@ func addRoleUserAssignments(w http.ResponseWriter, r *http.Request) {
 		User:           newAssignment.User,
 		ObjectId:       newAssignment.ObjectId,
 	}
-	roleUserAssignments = append(roleUserAssignments, newUserAssignment)
+	roleUserAssignments[newId] = newUserAssignment
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

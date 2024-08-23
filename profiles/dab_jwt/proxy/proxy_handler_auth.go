@@ -48,7 +48,7 @@ func BasicAuth(next http.Handler) http.Handler {
 			printKnownCSRFTokens()
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(403)
-			responseBody := fmt.Sprintf(`{"error": "invalid csrftoken"}`)
+			responseBody := `{"error": "invalid csrftoken"}`
 			w.Write([]byte(responseBody))
 			return
 		}
@@ -69,10 +69,11 @@ func BasicAuth(next http.Handler) http.Handler {
 		if (strings.HasPrefix(lowerAuth, "basic") || sessionUsername != "") && !pathHasPrefix(path, prefixes) {
 
 			if sessionUsername != "" {
-				var user User
-				user, _ = users[sessionUsername]
+				//var user User
+				// user, _ = users[sessionUsername]
+				user := GetUserByUserName(sessionUsername)
 				log.Printf("*****************************************")
-				log.Printf("username:%s user:%s\n", sessionUsername, user)
+				log.Printf("username:%s user:%d\n", sessionUsername, user.Id)
 				log.Printf("*****************************************")
 
 				// Generate the JWT token
@@ -109,9 +110,10 @@ func BasicAuth(next http.Handler) http.Handler {
 					return
 				}
 
-				user, exists := users[credentials[0]]
-				log.Printf("extracted user:%s from creds[0]:%s creds:%s\n", user, credentials[0], credentials)
-				if !exists || user.Password != credentials[1] {
+				//user, exists := users[credentials[0]]
+				user := GetUserByUserName(credentials[0])
+				//log.Printf("extracted user:%s from creds[0]:%s creds:%s\n", user, credentials[0], credentials)
+				if user.Password != credentials[1] {
 					log.Printf("Unauthorized5\n")
 					http.Error(w, "Unauthorized5", http.StatusUnauthorized)
 					return

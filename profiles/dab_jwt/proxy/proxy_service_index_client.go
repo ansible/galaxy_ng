@@ -94,3 +94,52 @@ func (c *ServiceIndexClient) PostData(user User, payload ServiceIndexPayload) er
 	// Optionally, read and process response body here
 	return nil
 }
+
+// PostData sends a POST request to the remote endpoint with User and Payload
+func (c *ServiceIndexClient) Delete(user User, resourceid string) error {
+
+	log.Printf("starting indexclient DELETE ...")
+
+	target := getEnv("UPSTREAM_URL", "http://localhost:5001")
+	endpoint := target + getEnv("UPSTREAM_API_PREFIX", "/api/galaxy") + "/service-index/resources/" + resourceid + "/"
+
+	log.Printf("using endpoint %s", endpoint)
+
+	// Generate the JWT token
+	log.Printf("generating token for request user ...")
+	token, err := generateJWT(user)
+	if err != nil {
+		//http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("token generation failed %s", err)
+		return err
+	}
+	log.Printf("generated token %s", token)
+
+	// Create a new POST request
+	log.Printf("DELETE %s", endpoint)
+	req, err := http.NewRequest("DELETE", endpoint, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	// Set headers
+	req.Header.Set("X-DAB-JW-TOKEN", token)
+	req.Header.Set("Content-Type", "application/json")
+
+	// Perform the request
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to make request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check for expected status codes
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("received unexpected response status: %d", resp.StatusCode)
+	}
+
+	log.Printf("DELETE request successful with status code %d", resp.StatusCode)
+
+	// Optionally, read and process response body here
+	return nil
+}

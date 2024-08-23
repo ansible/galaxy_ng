@@ -40,6 +40,9 @@ import (
 	GLOBALS & SETTINGS
 ************************************************************/
 
+var ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
+var SERVICE_ID = uuid.New().String()
+
 // Global table to store CSRF tokens, session IDs, and usernames
 var tokenTable = struct {
 	sync.RWMutex
@@ -61,33 +64,34 @@ var (
 	rsaPublicKey  *rsa.PublicKey
 )
 
-var ANSIBLE_BASE_SHARED_SECRET = "redhat1234"
-var SERVICE_ID = uuid.New().String()
-
 var (
-	users      = map[string]User{}
+	users      = map[int]User{}
 	usersMutex = &sync.Mutex{}
-	idCounter  = 6
 )
 
 var (
-	teams      = map[string]Team{}
+	teams      = map[int]Team{}
 	teamsMutex = &sync.Mutex{}
 )
 
 var (
-	orgs      = map[string]Organization{}
+	orgs      = map[int]Organization{}
 	orgsMutex = &sync.Mutex{}
 )
 
 var (
-	roleDefinitions      = []RoleDefinition{}
+	roleDefinitions      = map[int]RoleDefinition{}
 	roleDefinitionsMutex = &sync.Mutex{}
 )
 
 var (
-	roleUserAssignments      = []RoleUserAssignment{}
+	roleUserAssignments      = map[int]RoleUserAssignment{}
 	roleUserAssignmentsMutex = &sync.Mutex{}
+)
+
+var (
+	deletedEntities      = map[DeletedEntityKey]bool{}
+	deletedEntitiesMutex = &sync.Mutex{}
 )
 
 /************************************************************
@@ -109,7 +113,7 @@ func init() {
 	orgsMutex.Lock()
 	defer orgsMutex.Unlock()
 	for _, org := range prepopulatedOrgs {
-		orgs[org.CodeName] = org
+		orgs[org.Id] = org
 	}
 
 	// build teams ...
@@ -117,7 +121,7 @@ func init() {
 	teamsMutex.Lock()
 	defer teamsMutex.Unlock()
 	for _, team := range prepopulatedTeams {
-		teams[team.Name] = team
+		teams[team.Id] = team
 	}
 
 	// build users ...
@@ -125,14 +129,17 @@ func init() {
 	usersMutex.Lock()
 	defer usersMutex.Unlock()
 	for _, user := range prepopulatedUsers {
-		users[user.Username] = user
+		users[user.Id] = user
 	}
 
 	// build roledefs ..
 	log.Printf("# Making roledefs\n")
 	roleDefinitionsMutex.Lock()
 	defer roleDefinitionsMutex.Unlock()
-	roleDefinitions = append(roleDefinitions, prepopulatedRoleDefinitions...)
+	//roleDefinitions = append(roleDefinitions, prepopulatedRoleDefinitions...)
+	for _, roledef := range prepopulatedRoleDefinitions {
+		roleDefinitions[roledef.Id] = roledef
+	}
 
 }
 

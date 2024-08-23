@@ -43,10 +43,11 @@ func MyJWTHandler(w http.ResponseWriter, r *http.Request) {
 
 	username := credentials[0]
 	log.Printf("USERNAME:%s\n", username)
-	user := users[username]
+	//user := users[username]
+	user := GetUserByUserName(username)
 	log.Printf("MAKE CLAIMS")
 	claims, _ := GenerateUserClaims(user)
-	log.Printf("CLAIMS:%s\n", claims)
+	//log.Printf("CLAIMS:%s\n", claims)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(claims)
