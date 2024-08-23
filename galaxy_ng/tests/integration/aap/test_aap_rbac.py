@@ -1,15 +1,13 @@
 import json
 import os
-from collections import namedtuple
 
 import pytest
 
-from galaxykit.client import GalaxyClient
+# from galaxykit.client import GalaxyClient
 from galaxykit.client import BasicAuthClient
-from galaxykit.collections import upload_test_collection
-from galaxykit.utils import wait_for_task
-
-from ..utils import set_certification
+# from galaxykit.collections import upload_test_collection
+# from galaxykit.utils import wait_for_task
+# from galaxy_ng.tests.integration.utils import set_certification
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -26,8 +24,8 @@ def test_aap_team_member_vs_admin(
     galaxy_client,
     random_username
 ):
-    if settings.get('allow_local_resource_management') is False:
-        pytest.skip("this test relies on local resource creation")
+    # if settings.get('allow_local_resource_management') is False:
+    #     pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
     # ga = BasicAuthClient(gc.galaxy_root, 'admin', 'redhat1234')
@@ -62,16 +60,20 @@ def test_aap_team_member_vs_admin(
     galaxy_roledefs = ga.get('/api/galaxy/_ui/v2/role_definitions/')
     galaxy_roledefs = dict((x['name'], x) for x in galaxy_roledefs['results'])
 
+    '''
     # get galaxy's teams
     galaxy_teams = ga.get('/api/galaxy/_ui/v2/teams/?page_size=100')
     galaxy_teams_map = dict((x['name'], x) for x in galaxy_teams['results'])
+    '''
 
+    '''
     # get galaxy's users
     galaxy_users = ga.get('/api/galaxy/_ui/v2/users/?page_size=100')
     galaxy_users_map = dict((x['username'], x) for x in galaxy_users['results'])
+    '''
 
     # make the user a team member in the gateway ...
-    member_assignment = ga.post(
+    ga.post(
         '/api/gateway/v1/role_user_assignments/',
         body=json.dumps({
             'user': user_data['id'],
