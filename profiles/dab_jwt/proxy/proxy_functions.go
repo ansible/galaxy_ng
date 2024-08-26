@@ -254,10 +254,15 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 	}
 	//log.Printf("orgmap %s\n", orgNameMap)
 
+	// orgs that a team is part of but the user is not a member of
+	nonMemberOrgs := []string{}
+
 	uniqueOrgMap := make(map[int]bool)
 	memberOrgs := []Organization{}
+	adminOrgs := []Organization{}
 	uniqueTeamMap := make(map[int]bool)
 	memberTeams := []Team{}
+	adminTeams := []Team{}
 	globalRoles := []string{}
 
 	// iterate through role_user_assignments ...
@@ -275,29 +280,48 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 			globalRoles = append(globalRoles, "Platform Auditor")
 			continue
 		}
-		if roleDefinitions[roleId].Name != "Team Member" {
-			log.Printf("\tNOT A TEAM MEMBER ASSIGNMENT!\n")
-			continue
+
+		if roleDefinitions[roleId].Name == "Team Member" || roleDefinitions[roleId].Name != "Team Admin" {
+
+			thisteam := teams[assignment.ObjectId]
+			log.Printf("\tFOUND TEAM %s\n", thisteam.Name)
+			if !uniqueTeamMap[thisteam.Id] {
+				uniqueTeamMap[thisteam.Id] = true
+			}
+
+			if roleDefinitions[roleId].Name == "Team Member" {
+				memberTeams = append(memberTeams, thisteam)
+			}
+
+			if roleDefinitions[roleId].Name == "Team Admin" {
+				adminTeams = append(adminTeams, thisteam)
+			}
+
+			thisorg := orgs[thisteam.Org]
+			log.Printf("\tFOUND ORG %s\n", thisorg.Name)
+			if !uniqueOrgMap[thisorg.Id] {
+				uniqueOrgMap[thisorg.Id] = true
+				memberOrgs = append(memberOrgs, thisorg)
+			}
+
 		}
 
-		if _, exists := teams[assignment.ObjectId]; !exists {
-			log.Printf("\tDID NOT FIND TEAMID %d", assignment.ObjectId)
-			continue
-		}
+		if roleDefinitions[roleId].Name == "Organization Member" || roleDefinitions[roleId].Name != "Organization Admin" {
+			thisorg := orgs[assignment.ObjectId]
+			log.Printf("\tFOUND ORG %s\n", thisorg.Name)
+			if !uniqueOrgMap[thisorg.Id] {
+				uniqueOrgMap[thisorg.Id] = true
+				//memberOrgs = append(memberOrgs, thisorg)
+			}
 
-		thisteam := teams[assignment.ObjectId]
-		log.Printf("\tFOUND TEAM %s\n", thisteam.Name)
-		if !uniqueTeamMap[thisteam.Id] {
-			uniqueTeamMap[thisteam.Id] = true
-			memberTeams = append(memberTeams, thisteam)
-		}
+			if roleDefinitions[roleId].Name == "Organization Member" {
+				memberOrgs = append(memberOrgs, thisorg)
+			}
 
-		//thisorg := orgNameMap[thisteam.Org]
-		thisorg := orgs[thisteam.Org]
-		log.Printf("\tFOUND ORG %s\n", thisorg.Name)
-		if !uniqueOrgMap[thisorg.Id] {
-			uniqueOrgMap[thisorg.Id] = true
-			memberOrgs = append(memberOrgs, thisorg)
+			if roleDefinitions[roleId].Name == "Organization Admin" {
+				adminOrgs = append(adminOrgs, thisorg)
+			}
+
 		}
 
 	}
@@ -324,16 +348,46 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 	claimTeamObjectsIndex := map[string]int{}
 	claimTeamObjects := []TeamObject{}
 
-	for ix, org := range memberOrgs {
+	// iterate admin orgs
+	for _, org := range adminOrgs {
 		orgObj := OrganizationObject{
 			AnsibleId: org.AnsibleId,
 			Name:      org.Name,
 		}
-		claimOrgObjectsIndex[org.Name] = ix
-		claimOrgObjects = append(claimOrgObjects, orgObj)
+		exists := false
+		for _, iorg := range claimOrgObjects {
+			if iorg.Name == org.Name {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			claimOrgObjects = append(claimOrgObjects, orgObj)
+			claimOrgObjectsIndex[org.Name] = len(claimOrgObjects)
+		}
 	}
 
-	for ix, team := range memberTeams {
+	// iterate member orgs
+	for _, org := range memberOrgs {
+		orgObj := OrganizationObject{
+			AnsibleId: org.AnsibleId,
+			Name:      org.Name,
+		}
+		exists := false
+		for _, iorg := range claimOrgObjects {
+			if iorg.Name == org.Name {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			claimOrgObjects = append(claimOrgObjects, orgObj)
+			claimOrgObjectsIndex[org.Name] = len(claimOrgObjects)
+		}
+	}
+
+	// iterate admin teams
+	for _, team := range adminTeams {
 		orgName := orgs[team.Org].Name
 		orgIx := claimOrgObjectsIndex[orgName]
 		teamObj := TeamObject{
@@ -341,8 +395,40 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 			Name:      team.Name,
 			Org:       orgIx,
 		}
-		claimTeamObjectsIndex[team.Name] = ix
-		claimTeamObjects = append(claimTeamObjects, teamObj)
+		nonMemberOrgs = append(nonMemberOrgs, orgName)
+		exists := false
+		for _, iteam := range claimTeamObjects {
+			if iteam.Name == team.Name {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			claimTeamObjects = append(claimTeamObjects, teamObj)
+			claimTeamObjectsIndex[team.Name] = len(claimTeamObjects)
+		}
+	}
+	// iterate memberteams
+	for _, team := range memberTeams {
+		orgName := orgs[team.Org].Name
+		orgIx := claimOrgObjectsIndex[orgName]
+		teamObj := TeamObject{
+			AnsibleId: team.AnsibleId,
+			Name:      team.Name,
+			Org:       orgIx,
+		}
+		nonMemberOrgs = append(nonMemberOrgs, orgName)
+		exists := false
+		for _, iteam := range claimTeamObjects {
+			if iteam.Name == team.Name {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			claimTeamObjects = append(claimTeamObjects, teamObj)
+			claimTeamObjectsIndex[team.Name] = len(claimTeamObjects)
+		}
 	}
 
 	objects := map[string]interface{}{
@@ -351,14 +437,70 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 	}
 	objectRoles := map[string]interface{}{}
 
-	if len(claimTeamObjects) > 0 {
-		teamids := []int{}
-		for ix, _ := range claimTeamObjects {
-			teamids = append(teamids, ix)
+	if len(claimOrgObjects) > 0 {
+		if len(adminOrgs) > 0 {
+			adminorgids := []int{}
+			for _, org := range adminOrgs {
+				ix := claimTeamObjectsIndex[org.Name]
+				adminorgids = append(adminorgids, ix)
+			}
+			objectRoles["Organization Admin"] = ObjectRole{
+				ContentType: "organization",
+				Objects:     adminorgids,
+			}
 		}
-		objectRoles["Team Member"] = ObjectRole{
-			ContentType: "team",
-			Objects:     teamids,
+
+		if len(memberOrgs) > 0 {
+			memberorgids := []int{}
+			for _, org := range memberOrgs {
+
+				// was this inherited from a team?
+				inherited := false
+				for _, orgname := range nonMemberOrgs {
+					if orgname == org.Name {
+						inherited = true
+						break
+					}
+				}
+				if inherited {
+					continue
+				}
+
+				ix := claimTeamObjectsIndex[org.Name]
+				memberorgids = append(memberorgids, ix)
+			}
+			if len(memberorgids) > 0 {
+				objectRoles["Organization Member"] = ObjectRole{
+					ContentType: "organization",
+					Objects:     memberorgids,
+				}
+			}
+		}
+	}
+
+	if len(claimTeamObjects) > 0 {
+		if len(adminTeams) > 0 {
+			adminteamids := []int{}
+			for _, team := range adminTeams {
+				ix := claimTeamObjectsIndex[team.Name]
+				adminteamids = append(adminteamids, ix)
+			}
+			objectRoles["Team Admin"] = ObjectRole{
+				ContentType: "team",
+				Objects:     adminteamids,
+			}
+		}
+
+		if len(memberTeams) > 0 {
+			memberteamids := []int{}
+			for _, team := range memberTeams {
+				ix := claimTeamObjectsIndex[team.Name]
+				memberteamids = append(memberteamids, ix)
+			}
+			objectRoles["Team Member"] = ObjectRole{
+				ContentType: "team",
+				Objects:     memberteamids,
+			}
 		}
 	}
 
