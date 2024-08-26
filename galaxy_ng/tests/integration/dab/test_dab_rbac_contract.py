@@ -688,6 +688,8 @@ def test_team_members_are_migrated(galaxy_client, assert_user_in_group):
     "Make sure any existing team memberships are correct"
     gc = galaxy_client("admin")
 
-    team_assignments = gc.get("_ui/v2/role_user_assignments/", params={"role_definition__name": "Galaxy Team Member"})
+    team_assignments = gc.get("_ui/v2/role_user_assignments/", params={
+        "role_definition__name": "Galaxy Team Member"
+    })
     for assignment in team_assignments["results"]:
         assert_user_in_group(assignment["user"], int(assignment["object_id"]))
