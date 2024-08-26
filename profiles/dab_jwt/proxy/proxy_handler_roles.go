@@ -28,6 +28,8 @@ func RoleUserAssignmentsHandler(w http.ResponseWriter, r *http.Request) {
 		getRoleUserAssignments(w)
 	case http.MethodPost:
 		addRoleUserAssignments(w, r)
+	case http.MethodDelete:
+		deleteRoleUserAssignment(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -85,6 +87,29 @@ func addRoleUserAssignments(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newUserAssignment)
 }
 
+func deleteRoleUserAssignment(w http.ResponseWriter, r *http.Request) {
+	roleUserAssignmentsMutex.Lock()
+	defer roleUserAssignmentsMutex.Unlock()
+	deletedEntitiesMutex.Lock()
+	defer deletedEntitiesMutex.Unlock()
+
+	// get the id from the path
+	assignmentId := GetLastNumericPathElement(r.URL.Path)
+
+	// store the deleted entity
+	entity := DeletedEntityKey{
+		ID:          assignmentId,
+		ContentType: "role_user_assignment",
+	}
+	deletedEntities[entity] = true
+
+	// actually delete it now
+	delete(roleUserAssignments, assignmentId)
+
+	// Respond with success
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // TEAMS ...
 
 func RoleTeamAssignmentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +118,8 @@ func RoleTeamAssignmentsHandler(w http.ResponseWriter, r *http.Request) {
 		getRoleTeamAssignments(w)
 	case http.MethodPost:
 		addRoleTeamAssignments(w, r)
+	case http.MethodDelete:
+		deleteRoleUserAssignment(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -148,4 +175,27 @@ func addRoleTeamAssignments(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(newTeamAssignment)
+}
+
+func deleteRoleTeamAssignment(w http.ResponseWriter, r *http.Request) {
+	roleTeamAssignmentsMutex.Lock()
+	defer roleTeamAssignmentsMutex.Unlock()
+	deletedEntitiesMutex.Lock()
+	defer deletedEntitiesMutex.Unlock()
+
+	// get the id from the path
+	assignmentId := GetLastNumericPathElement(r.URL.Path)
+
+	// store the deleted entity
+	entity := DeletedEntityKey{
+		ID:          assignmentId,
+		ContentType: "role_team_assignment",
+	}
+	deletedEntities[entity] = true
+
+	// actually delete it now
+	delete(roleTeamAssignments, assignmentId)
+
+	// Respond with success
+	w.WriteHeader(http.StatusNoContent)
 }

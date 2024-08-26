@@ -510,7 +510,7 @@ func GetLastNumericPathElement(path string) int {
 }
 
 func DeleteOrganization(org Organization) {
-	DeleteAssignmentByObjectIdAndRoleNameSubstring(org.Id, "org")
+	DeleteUserAssignmentByObjectIdAndRoleNameSubstring(org.Id, "org")
 	// delete all teams under this org
 	for _, team := range teams {
 		if team.Org == org.Id {
@@ -527,7 +527,7 @@ func DeleteOrganization(org Organization) {
 }
 
 func DeleteTeam(team Team) {
-	DeleteAssignmentByObjectIdAndRoleNameSubstring(team.Id, "team")
+	DeleteUserAssignmentByObjectIdAndRoleNameSubstring(team.Id, "team")
 	entity := DeletedEntityKey{
 		ID:          team.Id,
 		ContentType: "team",
@@ -578,7 +578,7 @@ func DeleteUserAssignmentsByUserid(userid int) {
 	}
 }
 
-func DeleteAssignmentByObjectIdAndRoleNameSubstring(object_id int, substring string) {
+func DeleteUserAssignmentByObjectIdAndRoleNameSubstring(object_id int, substring string) {
 
 	idsToDelete := []int{}
 
