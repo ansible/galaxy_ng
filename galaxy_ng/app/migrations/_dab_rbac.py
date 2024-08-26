@@ -122,9 +122,17 @@ def migrate_role_assignments(apps, schema_editor):
         else:
             give_permissions(apps, rd, teams=[actor], object_id=group_role.object_id, content_type_id=group_role.content_type_id)
 
+    # Create the local member role if it does not yet exist
+    from ansible_base.rbac.permission_registry import permission_registry
+
+    # galaxy_ng/app/settings.py - ANSIBLE_BASE_MANAGED_ROLE_REGISTRY
+    rd_template = permission_registry.get_managed_role_constructor('galaxy_only_team_member')
+    member_rd, created = rd_template.get_or_create(apps)
+    if created:
+        logger.info(f'Created role definition {member_rd.name}')
+
     # In DAB RBAC, team users are saved as a role assignment
     # Migrate the pulp group users (relationship) to role assignment
-    member_rd = RoleDefinition.objects.get(name='Galaxy Team Member')
     for group in Group.objects.prefetch_related('user_set').all():
         user_list = list(group.user_set.all())
         team = Team.objects.filter(group=group).first()
