@@ -29,6 +29,23 @@ import (
 		return false
 	}
 */
+func uniqueSortedStrings(input []string) []string {
+	// First, sort the slice
+	sort.Strings(input)
+
+	// Then, create a new slice to hold unique values
+	unique := []string{}
+
+	// Loop through the sorted slice and add only unique values to the new slice
+	for i, str := range input {
+		if i == 0 || str != input[i-1] {
+			unique = append(unique, str)
+		}
+	}
+
+	return unique
+}
+
 func uniqueInts(nums []int) []int {
 	if len(nums) == 0 {
 		return nums
@@ -241,6 +258,7 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 	memberOrgs := []Organization{}
 	uniqueTeamMap := make(map[int]bool)
 	memberTeams := []Team{}
+	globalRoles := []string{}
 
 	// iterate through role_user_assignments ...
 	for _, assignment := range roleUserAssignments {
@@ -252,6 +270,11 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 			continue
 		}
 		roleId := assignment.RoleDefinition
+		if roleDefinitions[roleId].Name == "Platform Auditor" {
+			log.Printf("\tfound user assignment for platform auditor")
+			globalRoles = append(globalRoles, "Platform Auditor")
+			continue
+		}
 		if roleDefinitions[roleId].Name != "Team Member" {
 			log.Printf("\tNOT A TEAM MEMBER ASSIGNMENT!\n")
 			continue
@@ -277,6 +300,22 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 			memberOrgs = append(memberOrgs, thisorg)
 		}
 
+	}
+
+	for _, assignment := range roleTeamAssignments {
+
+		// is this for a team the user is a member of?
+		thisteam := teams[assignment.Team]
+		if !uniqueTeamMap[thisteam.Id] {
+			continue
+		}
+
+		roleId := assignment.RoleDefinition
+		if roleDefinitions[roleId].Name == "Platform Auditor" {
+			log.Printf("\tfound user assignment for platform auditor")
+			globalRoles = append(globalRoles, "Platform Auditor")
+			continue
+		}
 	}
 
 	// make a list of org structs for this user ...
@@ -323,6 +362,9 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 		}
 	}
 
+	// finalize the global roles
+	finalGlobalRoles := uniqueSortedStrings(globalRoles)
+
 	// make the expiration time
 	numericDate := jwt.NewNumericDate(time.Now().Add(time.Hour))
 	unixTime := numericDate.Unix()
@@ -332,7 +374,7 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 		Iss:         "ansible-issuer",
 		Aud:         "ansible-services",
 		Expires:     unixTime,
-		GlobalRoles: []string{},
+		GlobalRoles: finalGlobalRoles,
 		UserData: UserData{
 			Username:    user.Username,
 			FirstName:   user.FirstName,
@@ -495,7 +537,7 @@ func DeleteTeam(team Team) {
 }
 
 func DeleteUser(user User) {
-	DeleteUserAssingmentsByUserid(user.Id)
+	DeleteUserAssignmentsByUserid(user.Id)
 	entity := DeletedEntityKey{
 		ID:          user.Id,
 		ContentType: "user",
@@ -513,7 +555,7 @@ func GetRoleDefinitionById(id int) RoleDefinition {
 	return RoleDefinition{}
 }
 
-func DeleteUserAssingmentsByUserid(userid int) {
+func DeleteUserAssignmentsByUserid(userid int) {
 	idsToDelete := []int{}
 
 	for _, assignment := range roleUserAssignments {
