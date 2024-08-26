@@ -656,11 +656,6 @@ def test_group_sync_from_pulp_to_dab(galaxy_client, assert_user_in_group, user_a
     assert_user_in_group(user["id"], group["id"], expected=False)
 
 
-@pytest.mark.skip(reason=(
-    "Cannot be fixed until "
-    + "https://github.com/ansible/django-ansible-base/pull/562"
-    + " stops it giving a 400"
-))
 def test_team_member_sync_from_dab_to_pulp(galaxy_client, assert_user_in_group, user_and_group):
     gc = galaxy_client("admin")
     user, group = user_and_group
@@ -687,3 +682,12 @@ def test_team_member_sync_from_dab_to_pulp(galaxy_client, assert_user_in_group, 
     )
 
     assert_user_in_group(user["id"], group["id"], expected=True)
+
+
+def test_team_members_are_migrated(galaxy_client, assert_user_in_group):
+    "Make sure any existing team memberships are correct"
+    gc = galaxy_client("admin")
+
+    team_assignments = gc.get("_ui/v2/role_user_assignments/", params={"role_definition__name": "Galaxy Team Member"})
+    for assignment in team_assignments["results"]:
+        assert_user_in_group(assignment["user"], int(assignment["object_id"]))
