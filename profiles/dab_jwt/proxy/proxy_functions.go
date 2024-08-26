@@ -363,7 +363,7 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 		}
 		if !exists {
 			claimOrgObjects = append(claimOrgObjects, orgObj)
-			claimOrgObjectsIndex[org.Name] = len(claimOrgObjects)
+			claimOrgObjectsIndex[org.Name] = len(claimOrgObjects) - 1
 		}
 	}
 
@@ -382,7 +382,7 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 		}
 		if !exists {
 			claimOrgObjects = append(claimOrgObjects, orgObj)
-			claimOrgObjectsIndex[org.Name] = len(claimOrgObjects)
+			claimOrgObjectsIndex[org.Name] = len(claimOrgObjects) - 1
 		}
 	}
 
@@ -405,7 +405,7 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 		}
 		if !exists {
 			claimTeamObjects = append(claimTeamObjects, teamObj)
-			claimTeamObjectsIndex[team.Name] = len(claimTeamObjects)
+			claimTeamObjectsIndex[team.Name] = len(claimTeamObjects) - 1
 		}
 	}
 	// iterate memberteams
@@ -427,7 +427,7 @@ func GenerateUserClaims(user User) (UserClaims, error) {
 		}
 		if !exists {
 			claimTeamObjects = append(claimTeamObjects, teamObj)
-			claimTeamObjectsIndex[team.Name] = len(claimTeamObjects)
+			claimTeamObjectsIndex[team.Name] = len(claimTeamObjects) - 1
 		}
 	}
 
