@@ -84,3 +84,68 @@ func addRoleUserAssignments(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(newUserAssignment)
 }
+
+// TEAMS ...
+
+func RoleTeamAssignmentsHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		getRoleTeamAssignments(w)
+	case http.MethodPost:
+		addRoleTeamAssignments(w, r)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+func getRoleTeamAssignments(w http.ResponseWriter) {
+	roleTeamAssignmentsMutex.Lock()
+	defer roleTeamAssignmentsMutex.Unlock()
+
+	results := []RoleTeamAssignment{}
+	for _, assignment := range roleTeamAssignments {
+		results = append(results, assignment)
+	}
+	response := map[string][]RoleTeamAssignment{
+		"results": results,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func addRoleTeamAssignments(w http.ResponseWriter, r *http.Request) {
+	roleTeamAssignmentsMutex.Lock()
+	defer roleTeamAssignmentsMutex.Unlock()
+
+	var newAssignment RoleTeamAssignmentRequest
+	if err := json.NewDecoder(r.Body).Decode(&newAssignment); err != nil {
+		log.Printf("%\n", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	keys := []int{}
+	for key := range roleTeamAssignments {
+		keys = append(keys, key)
+	}
+	for key := range deletedEntities {
+		if key.ContentType != "role_team_assignment" {
+			continue
+		}
+		keys = append(keys, key.ID)
+	}
+	highestId := MaxOrDefault(keys)
+	newId := highestId + 1
+
+	newTeamAssignment := RoleTeamAssignment{
+		Id:             newId,
+		RoleDefinition: newAssignment.RoleDefinition,
+		Team:           newAssignment.Team,
+		ObjectId:       newAssignment.ObjectId,
+	}
+	roleTeamAssignments[newId] = newTeamAssignment
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newTeamAssignment)
+}

@@ -186,6 +186,22 @@ type RoleUserAssignment struct {
 	ObjectId       int    `json:"object_id"`
 }
 
+// list view
+type RoleTeamAssignment struct {
+	Id             int    `json:"id"`
+	ContentType    string `json:"content_type"`
+	RoleDefinition int    `json:"role_definition"`
+	Team           int    `json:"team"`
+	ObjectId       int    `json:"object_id"`
+}
+
+// payload for adding roledefs to users
+type RoleTeamAssignmentRequest struct {
+	Team           int `json:"team"`
+	RoleDefinition int `json:"role_definition"`
+	ObjectId       int `json:"object_id"`
+}
+
 // Object Deletion
 type DeletedEntityKey struct {
 	ID          int

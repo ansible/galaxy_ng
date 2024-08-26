@@ -90,6 +90,11 @@ var (
 )
 
 var (
+	roleTeamAssignments      = map[int]RoleTeamAssignment{}
+	roleTeamAssignmentsMutex = &sync.Mutex{}
+)
+
+var (
 	deletedEntities      = map[DeletedEntityKey]bool{}
 	deletedEntitiesMutex = &sync.Mutex{}
 )
