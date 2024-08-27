@@ -6,7 +6,7 @@ As noted in the overview, GalaxyNG is considered a [pulp plugin](https://docs.pu
 
 Governance of the various projects has increasingly leaned towards writing less code in the galaxy_ng repository and more in the pulp_ansible repository. The code in the pulp_ansible repository is sufficiently generic to be usable for not only GalaxyNG but also as components in the Red Hat Satellite product. GalaxyNG is slowly turning into more of an "integration project" than a project with unique features. This pattern of where to write code has slightly diverged in the case of the api/v1 codebase because of differences in pulp_ansible's implementation that are incompatible with many of the roles indexed by [galaxy](https://galaxy.ansible.com).
 
-As a hopeful contributor, you may need to first figure out where to write code for a new feature or a bugfix. General guidance is to start any new enhancements for api/v3 in the pulp_ansible project. Anything for api/v1 is in the galaxy_ng project. If you aren't sure or can't figure out where the code should be, please reach out on the IRC channels and we'll help guide you.
+As a hopeful contributor, you may need to first figure out where to write code for a new feature or a bugfix. General guidance is to start any new enhancements for api/v3 in the pulp_ansible project. Anything for api/v1 is in the galaxy_ng project. If you aren't sure or can't figure out where the code should be, please reach out on the Ansible forum and we'll help guide you.
 
 
 ### Services
