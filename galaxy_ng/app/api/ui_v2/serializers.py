@@ -4,6 +4,8 @@ from rest_framework.exceptions import ValidationError
 from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
 
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
+
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.auth import Group
 from galaxy_ng.app.models.organization import Organization
@@ -41,16 +43,17 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return groups_serializer.data
 
     def get_teams(self, obj):
-        teams = Team.objects.filter(users=obj)
+        """Return all 'local' team member assignments."""
+        roledef = RoleDefinition.objects.get(name='Galaxy Team Member')
+        assignments = RoleUserAssignment.objects.filter(
+            user=obj, role_definition=roledef
+        ).values_list('object_id', flat=True)
+        teams = Team.objects.filter(pk__in=list(assignments))
         teams_serializer = TeamSerializer(teams, many=True)
         return teams_serializer.data
 
     def get_organizations(self, obj):
-        # FIXME - team membership doesn't imply this should also
-        #         show the orgs from those teams ... right?
-        orgs = Organization.objects.filter(users=obj)
-        orgs_serializer = OrganizationSerializer(orgs, many=True)
-        return orgs_serializer.data
+        return []
 
 
 class UserCreateUpdateSerializer(UserDetailSerializer):
