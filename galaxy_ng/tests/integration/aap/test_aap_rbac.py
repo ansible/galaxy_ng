@@ -97,10 +97,9 @@ def test_aap_service_index_and_claims_processing(
     rr = ga.get(f'/api/galaxy/_ui/v2/teams/?name={team_name}')
     assert rr['count'] == 0
 
-    # FIXME: cascade delete on the group from the team isn't working
-    # group_name = org_name + '::' + team_name
-    # rr = ga.get(f'/api/galaxy/_ui/v2/groups/?name={group_name}')
-    # assert rr['count'] == 0
+    group_name = org_name + '::' + team_name
+    rr = ga.get(f'/api/galaxy/_ui/v2/groups/?name={group_name}')
+    assert rr['count'] == 0
 
     # delete the org in the gateway
     oid = org_data['id']
