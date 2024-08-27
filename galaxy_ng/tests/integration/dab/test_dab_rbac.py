@@ -119,10 +119,6 @@ def test_dab_rbac_repository_owner_by_user_or_team(
         team_id = team_data['id']
 
         # add the user to the team ...
-        # gc.post(
-        #     f'_ui/v2/teams/{team_id}/users/associate/',
-        #     body=json.dumps({'instances': [uid]})
-        # )
         add_user_to_team(gc, userid=uid, teamid=team_id)
 
         # assign the user role ...
@@ -227,10 +223,6 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
         team_id = team_data['id']
 
         # add the user to the team ...
-        # gc.post(
-        #    f'_ui/v2/teams/{team_id}/users/associate/',
-        #    body=json.dumps({'instances': [uid]})
-        # )
         add_user_to_team(gc, userid=uid, teamid=team_id)
 
         # assign the user role ...
@@ -618,10 +610,6 @@ def test_dab_rbac_ee_ownership_with_user_or_team(
         team_id = team_data['id']
 
         # add the user to the team ...
-        # gc.post(
-        #    f'_ui/v2/teams/{team_id}/users/associate/',
-        #    body=json.dumps({'instances': [uid]})
-        # )
         add_user_to_team(gc, userid=uid, teamid=team_id)
 
         # what is the group name?
