@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group as BaseGroup
 from django.db import models
 from django.db.models import signals
 from django.dispatch import receiver
-from django_lifecycle import AFTER_UPDATE, BEFORE_CREATE, LifecycleModelMixin, hook
+from django_lifecycle import AFTER_UPDATE, AFTER_DELETE, BEFORE_CREATE, LifecycleModelMixin, hook
 from pulpcore.plugin.models import Group as PulpGroup
 
 from galaxy_ng.app.models.auth import Group
@@ -83,6 +83,12 @@ class Team(LifecycleModelMixin, AbstractTeam):
             return
         self.group.name = self.group_name()
         self.group.save()
+
+    @hook(AFTER_DELETE)
+    def _delete_related_group(self, **kwargs):
+        group = getattr(self, "group", None)
+        if group:
+            group.delete()
 
 
 @receiver(signal=signals.post_save, sender=Group)

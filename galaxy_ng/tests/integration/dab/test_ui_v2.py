@@ -1,10 +1,14 @@
 import copy
 import json
+from http import HTTPStatus
 
 import pytest
 
 from galaxykit.client import GalaxyClient
+from galaxykit.utils import GalaxyClientError
+
 from galaxy_ng.tests.integration.utils.namespaces import generate_namespace
+from galaxy_ng.tests.integration.utils.tools import random_name
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -312,3 +316,46 @@ def test_ui_v2_user_edit_invalid_data(
 
     assert exc.response.status_code == 400
     assert invalid_payload[1] in exc.response.text
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
+def test_ui_v2_teams(
+    settings,
+    galaxy_client,
+    random_username,
+):
+    """Test teams creation and deletion."""
+
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip(reason="this only works local resource management enabled")
+
+    client = galaxy_client("admin", ignore_cache=True)
+
+    # Create a team
+    team_name = random_name('team')
+    team = client.post('_ui/v2/teams/', body={"name": team_name})
+    assert team["name"] == team_name
+
+    # Check that team exists
+    team = client.get(f"_ui/v2/teams/{team['id']}/")
+    assert team["name"] == team_name
+
+    # Check that associated group exists
+    group = client.get(f"_ui/v1/groups/{team['group']['id']}")
+    assert group["id"] == team["group"]["id"]
+    assert group["name"] == f"Default::{team_name}"
+
+    # Delete a team
+    response = client.delete(f"_ui/v2/teams/{team['id']}/", parse_json=False)
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    # Check that team does not exist
+    with pytest.raises(GalaxyClientError) as ctx:
+        client.get(f"_ui/v2/teams/{team['id']}/")
+    assert ctx.value.response.status_code == HTTPStatus.NOT_FOUND
+
+    # Check that associated group does not exist
+    with pytest.raises(GalaxyClientError) as ctx:
+        client.get(f"_ui/v1/groups/{team['group']['id']}")
+    assert ctx.value.response.status_code == HTTPStatus.NOT_FOUND

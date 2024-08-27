@@ -1,9 +1,10 @@
 from http import HTTPStatus
-import secrets
 
 import pytest
 from galaxykit import GalaxyClient
 from galaxykit.utils import GalaxyClientError
+
+from galaxy_ng.tests.integration.utils.tools import random_name
 
 
 GALAXY_API_PATH_PREFIX = "/api/galaxy"  # cant import from settings on integration tests
@@ -88,11 +89,6 @@ NS_FIXTURE_DATA = {
 
 DAB_ROLE_URL = "_ui/v2/role_definitions/"
 PULP_ROLE_URL = "pulp/api/v3/roles/"
-
-
-def random_name(prefix, *, length=12, sep='-'):
-    suffix = secrets.token_hex((length + 1) // 2)
-    return f"{prefix}{sep}{suffix}"
 
 
 # These fixtures are function-scoped, so they will be deleted.
