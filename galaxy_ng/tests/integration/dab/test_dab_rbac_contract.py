@@ -5,7 +5,7 @@ from galaxykit import GalaxyClient
 from galaxykit.utils import GalaxyClientError
 
 from galaxy_ng.tests.integration.utils.tools import random_name
-from galaxy_ng.tests.integration.utils.teams import add_user_to_team, remove_user_from_team
+from galaxy_ng.tests.integration.utils.teams import add_user_to_team
 
 
 GALAXY_API_PATH_PREFIX = "/api/galaxy"  # cant import from settings on integration tests
@@ -333,18 +333,13 @@ def test_give_team_custom_role_system(
     assert role_definition_resp["description"] == NS_FIXTURE_DATA["description"]
 
     # Step 3: Check that user with assigned system role has write access to a namespace.
-    try:
-        response = user_client.put(
-            f"_ui/v1/namespaces/{namespace['name']}/", body={
-                **namespace,
-                "company": "Test RBAC Company 2",
-            }
-        )
-        assert response["company"] == "Test RBAC Company 2"
-    except Exception as e:
-        print(e)
-        import epdb; epdb.st()
-        print(e)
+    response = user_client.put(
+        f"_ui/v1/namespaces/{namespace['name']}/", body={
+            **namespace,
+            "company": "Test RBAC Company 2",
+        }
+    )
+    assert response["company"] == "Test RBAC Company 2"
 
     # Step 4: Revoke system role from a user.
 

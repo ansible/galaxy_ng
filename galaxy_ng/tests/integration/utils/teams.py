@@ -60,4 +60,4 @@ def remove_user_from_team(client, userid=None, teamid=None):
 
     # delete all of the assignments
     for assignment in assignments['results']:
-        gc.delete(assignment['url'])
+        client.delete(assignment['url'])
