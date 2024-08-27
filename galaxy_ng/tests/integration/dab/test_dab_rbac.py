@@ -9,6 +9,7 @@ from galaxykit.collections import upload_test_collection
 from galaxykit.utils import wait_for_task
 
 from ..utils import set_certification
+from ..utils.teams import add_user_to_team
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -118,10 +119,11 @@ def test_dab_rbac_repository_owner_by_user_or_team(
         team_id = team_data['id']
 
         # add the user to the team ...
-        gc.post(
-            f'_ui/v2/teams/{team_id}/users/associate/',
-            body=json.dumps({'instances': [uid]})
-        )
+        # gc.post(
+        #     f'_ui/v2/teams/{team_id}/users/associate/',
+        #     body=json.dumps({'instances': [uid]})
+        # )
+        add_user_to_team(gc, userid=uid, teamid=team_id)
 
         # assign the user role ...
         payload = {
@@ -225,10 +227,11 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
         team_id = team_data['id']
 
         # add the user to the team ...
-        gc.post(
-            f'_ui/v2/teams/{team_id}/users/associate/',
-            body=json.dumps({'instances': [uid]})
-        )
+        # gc.post(
+        #    f'_ui/v2/teams/{team_id}/users/associate/',
+        #    body=json.dumps({'instances': [uid]})
+        # )
+        add_user_to_team(gc, userid=uid, teamid=team_id)
 
         # assign the user role ...
         payload = {
@@ -615,10 +618,11 @@ def test_dab_rbac_ee_ownership_with_user_or_team(
         team_id = team_data['id']
 
         # add the user to the team ...
-        gc.post(
-            f'_ui/v2/teams/{team_id}/users/associate/',
-            body=json.dumps({'instances': [uid]})
-        )
+        # gc.post(
+        #    f'_ui/v2/teams/{team_id}/users/associate/',
+        #    body=json.dumps({'instances': [uid]})
+        # )
+        add_user_to_team(gc, userid=uid, teamid=team_id)
 
         # what is the group name?
         group_name = team_data['group']['name']

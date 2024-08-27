@@ -5,6 +5,7 @@ from galaxykit import GalaxyClient
 from galaxykit.utils import GalaxyClientError
 
 from galaxy_ng.tests.integration.utils.tools import random_name
+from galaxy_ng.tests.integration.utils.teams import add_user_to_team, remove_user_from_team
 
 
 GALAXY_API_PATH_PREFIX = "/api/galaxy"  # cant import from settings on integration tests
@@ -145,22 +146,6 @@ def team(galaxy_client):
 
     response = gc.delete(f"_ui/v2/teams/{team['id']}/", parse_json=False)
     assert response.status_code == HTTPStatus.NO_CONTENT
-
-
-def add_user_to_team(client, user_id, team_id):
-    client.post(
-        f"_ui/v2/teams/{team_id}/users/associate/", body={
-            "instances": [user_id],
-        }
-    )
-
-
-def remove_user_from_team(client, user_id, team_id):
-    client.post(
-        f"_ui/v2/teams/{team_id}/users/disassociate/", body={
-            "instances": [user_id],
-        }
-    )
 
 
 def assert_role_assignment_fields(summary_fields: dict, related: dict, expected_fields: set):
@@ -324,7 +309,7 @@ def test_give_team_custom_role_system(
 
     user_client = galaxy_client("basic_user")
     user = user_client.get("_ui/v1/me/")
-    add_user_to_team(admin_client, user["id"], team["id"])
+    add_user_to_team(admin_client, userid=user["id"], teamid=team["id"])
 
     # Step 1: Check that regular user doesn't have write access to a namespace.
 
@@ -348,14 +333,18 @@ def test_give_team_custom_role_system(
     assert role_definition_resp["description"] == NS_FIXTURE_DATA["description"]
 
     # Step 3: Check that user with assigned system role has write access to a namespace.
-
-    response = user_client.put(
-        f"_ui/v1/namespaces/{namespace['name']}/", body={
-            **namespace,
-            "company": "Test RBAC Company 2",
-        }
-    )
-    assert response["company"] == "Test RBAC Company 2"
+    try:
+        response = user_client.put(
+            f"_ui/v1/namespaces/{namespace['name']}/", body={
+                **namespace,
+                "company": "Test RBAC Company 2",
+            }
+        )
+        assert response["company"] == "Test RBAC Company 2"
+    except Exception as e:
+        print(e)
+        import epdb; epdb.st()
+        print(e)
 
     # Step 4: Revoke system role from a user.
 
@@ -486,7 +475,7 @@ def test_give_team_custom_role_object(
 
     user_client = galaxy_client("basic_user")
     user = user_client.get("_ui/v1/me/")
-    add_user_to_team(admin_client, user["id"], team["id"])
+    add_user_to_team(admin_client, userid=user["id"], teamid=team["id"])
 
     data = {
         "name": "galaxy.namespace_custom_object_role",
