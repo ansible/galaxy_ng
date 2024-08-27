@@ -1,6 +1,6 @@
 [build]
 bin = "proxy"
-cmd = "go build -o proxy proxy.go"
+cmd = "go build -o proxy *.go"
 full_bin = "./proxy"
 
 exclude_regex = ["*.swp"]
