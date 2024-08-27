@@ -22,12 +22,6 @@ class OrganizationManager(models.Manager):
 class Organization(LifecycleModelMixin, AbstractOrganization):
     """An organization model."""
 
-    users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="organizations",
-        help_text="The list of users in this organization.",
-    )
-
     resource = AnsibleResourceField(primary_key_field="id")
 
     objects = OrganizationManager()
@@ -47,9 +41,6 @@ class Organization(LifecycleModelMixin, AbstractOrganization):
 class Team(LifecycleModelMixin, AbstractTeam):
     """A team model."""
 
-    users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="teams", help_text="The list of users in this team."
-    )
     group = models.OneToOneField(
         Group,
         on_delete=models.CASCADE,
