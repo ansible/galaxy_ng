@@ -194,6 +194,7 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
                 except ValueError:
                     raise ValidationError(detail={'group': _('Invalid group name or ID')})
 
+        '''
         if teams_data:
             for team_dict in teams_data:
                 team_filter = {}
@@ -211,7 +212,9 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
                     })
                 except ValueError:
                     raise ValidationError(detail={'teams': _('Invalid team name or ID')})
+        '''
 
+        '''
         if orgs_data:
             for org_dict in orgs_data:
                 org_filter = {}
@@ -228,6 +231,7 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
                     })
                 except ValueError:
                     raise ValidationError(detail={'organizations': _('Invalid org name or ID')})
+        '''
 
         return user
 

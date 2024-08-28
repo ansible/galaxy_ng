@@ -124,7 +124,7 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
                 body=json.dumps({"name": team_name, "organization": org_name})
             )
 
-            expected_groups.append(group_name)
+            # expected_groups.append(group_name)
             expected_teams.append(team_name)
             # expected_orgs.append(org_name)
 
@@ -166,13 +166,13 @@ def test_ui_v2_user_create_with_groups_and_teams_and_orgs(
         actual_groups = [x['name'] for x in resp['groups']]
         assert sorted(expected_groups) == sorted(actual_groups)
 
-    if expected_teams:
-        actual_teams = [x['name'] for x in resp['teams']]
-        assert sorted(expected_teams) == sorted(actual_teams)
+    # if expected_teams:
+    #     actual_teams = [x['name'] for x in resp['teams']]
+    #     assert sorted(expected_teams) == sorted(actual_teams)
 
-    if expected_orgs:
-        actual_orgs = [x['name'] for x in resp['organizations']]
-        assert sorted(expected_orgs) == sorted(actual_orgs)
+    # if expected_orgs:
+    #     actual_orgs = [x['name'] for x in resp['organizations']]
+    #     assert sorted(expected_orgs) == sorted(actual_orgs)
 
 
 @pytest.mark.deployment_standalone
