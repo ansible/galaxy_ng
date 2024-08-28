@@ -108,3 +108,89 @@ def test_aap_service_index_and_claims_processing(
     # make sure the org is gone from galaxy ...
     rr = ga.get(f'/api/galaxy/_ui/v2/organizations/?name={org_name}')
     assert rr['count'] == 0
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.skipif(
+    not os.environ.get('JWT_PROXY'),
+    reason="relies on jwt proxy"
+)
+def test_aap_platform_auditor_claims_processing(
+    settings,
+    ansible_config,
+    galaxy_client,
+    random_username
+):
+
+    gc = galaxy_client("admin", ignore_cache=True)
+    ga = BasicAuthClient(gc.galaxy_root, 'admin', 'admin')
+
+    # make the user in the gateway
+    user_data = ga.post(
+        '/api/gateway/v1/users/',
+        body=json.dumps({'username': random_username, 'password': 'redhat1234'})
+    )
+    uid = user_data['id']
+
+    # get the galaxy user data
+    uc = BasicAuthClient(gc.galaxy_root, random_username, 'redhat1234')
+    galaxy_user = uc.get(f'_ui/v2/users/?username={random_username}')
+    galaxy_user = galaxy_user['results'][0]
+    guid = galaxy_user['id']
+
+    # get all of gateway's roledefs ...
+    gateway_roledefs = ga.get('/api/gateway/v1/role_definitions/')
+    gateway_roledefs = dict((x['name'], x) for x in gateway_roledefs['results'])
+
+    # get all of galaxy's roledefs ...
+    galaxy_roledefs = ga.get('_ui/v2/role_definitions/')
+    galaxy_roledefs = dict((x['name'], x) for x in galaxy_roledefs['results'])
+
+    #########################################################
+    # ASSIGN
+    #########################################################
+
+    # assign the platform auditor roledef ...
+    gateway_assignment = ga.post(
+        '/api/gateway/v1/role_user_assignments/',
+        body=json.dumps({
+            'user': uid,
+            'role_definition': gateway_roledefs['Platform Auditor']['id'],
+        })
+    )
+
+    # force claims processing ...
+    uc.get(f'_ui/v2/users/?username={random_username}')
+
+    # validate assignment was created in galaxy ...
+    galaxy_assignments = ga.get(
+        '_ui/v2/role_user_assignments/',
+        params={'user': guid, 'role_definition': galaxy_roledefs['Platform Auditor']['id']}
+    )
+    assert galaxy_assignments['count'] == 1
+
+    # validate pulp assignment ...
+    pulp_roles = ga.get(f'pulp/api/v3/users/{guid}/roles/', params={'role': 'galaxy.auditor'})
+    assert pulp_roles['count'] == 1
+
+    #########################################################
+    # UN-ASSIGN
+    #########################################################
+
+    # unassign platform auditor
+    thisid = gateway_assignment['id']
+    ga.delete(f'/api/gateway/v1/role_user_assignments/{thisid}/', parse_json=False)
+
+    # force claims processing ...
+    uc.get(f'_ui/v2/users/?username={random_username}')
+
+    # check roledef assignments ...
+    galaxy_assignments = ga.get(
+        '_ui/v2/role_user_assignments/',
+        params={'user': guid, 'role_definition': galaxy_roledefs['Platform Auditor']['id']}
+    )
+    assert galaxy_assignments['count'] == 0
+
+    # validate pulp un-assignment ...
+    pulp_roles = ga.get(f'pulp/api/v3/users/{guid}/roles/', params={'role': 'galaxy.auditor'})
+    assert pulp_roles['count'] == 0
