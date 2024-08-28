@@ -43,10 +43,12 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return groups_serializer.data
 
     def get_teams(self, obj):
-        """Return all 'local' team member assignments."""
-        roledef = RoleDefinition.objects.get(name='Galaxy Team Member')
+        """Return all 'local' and 'non-local' team member assignments."""
+        roledefs = RoleDefinition.objects.filter(
+            name__icontains='Team Member'
+        ).values_list('id', flat=True)
         assignments = RoleUserAssignment.objects.filter(
-            user=obj, role_definition=roledef
+            user=obj, role_definition__in=list(roledefs)
         ).values_list('object_id', flat=True)
         teams = Team.objects.filter(pk__in=list(assignments))
         teams_serializer = TeamSerializer(teams, many=True)
