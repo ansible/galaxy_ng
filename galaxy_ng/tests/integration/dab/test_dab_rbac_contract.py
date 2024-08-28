@@ -466,7 +466,6 @@ def test_give_team_custom_role_object(
     team,
 ):
     if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT', True) is not True:
-        import epdb; epdb.st()
         pytest.skip("galaxykit uses drf tokens, which bypass JWT auth and claims processing")
 
     # Step 0: Setup test.

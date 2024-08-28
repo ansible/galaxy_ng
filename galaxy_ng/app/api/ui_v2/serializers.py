@@ -170,8 +170,10 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
     def create(self, validated_data):
         # Pop the groups data from the validated data
         groups_data = validated_data.pop('groups', None)
-        teams_data = validated_data.pop('teams', None)
-        orgs_data = validated_data.pop('organizations', None)
+        # teams_data = validated_data.pop('teams', None)
+        validated_data.pop('teams', None)
+        # orgs_data = validated_data.pop('organizations', None)
+        validated_data.pop('organizations', None)
 
         # Create the user without the groups data
         user = User.objects.create_user(**validated_data)
