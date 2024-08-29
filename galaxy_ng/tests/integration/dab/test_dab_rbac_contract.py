@@ -5,6 +5,7 @@ from galaxykit import GalaxyClient
 from galaxykit.utils import GalaxyClientError
 
 from galaxy_ng.tests.integration.utils.tools import random_name
+from galaxy_ng.tests.integration.utils.teams import add_user_to_team
 
 
 GALAXY_API_PATH_PREFIX = "/api/galaxy"  # cant import from settings on integration tests
@@ -147,22 +148,6 @@ def team(galaxy_client):
     assert response.status_code == HTTPStatus.NO_CONTENT
 
 
-def add_user_to_team(client, user_id, team_id):
-    client.post(
-        f"_ui/v2/teams/{team_id}/users/associate/", body={
-            "instances": [user_id],
-        }
-    )
-
-
-def remove_user_from_team(client, user_id, team_id):
-    client.post(
-        f"_ui/v2/teams/{team_id}/users/disassociate/", body={
-            "instances": [user_id],
-        }
-    )
-
-
 def assert_role_assignment_fields(summary_fields: dict, related: dict, expected_fields: set):
     assert expected_fields.issubset(summary_fields)
     assert expected_fields.issubset(related)
@@ -242,7 +227,11 @@ def test_create_custom_namespace_system_admin_role(custom_role_factory, galaxy_c
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
-def test_give_user_custom_role_system(galaxy_client, custom_role_factory, namespace):
+def test_give_user_custom_role_system(settings, galaxy_client, custom_role_factory, namespace):
+
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT', True) is not True:
+        pytest.skip("this test relies on local resource creation")
+
     # TODO: verify that assignment is seen in pulp API (HOW?)
     # Step 0: Setup test.
 
@@ -314,7 +303,7 @@ def test_give_team_custom_role_system(
     team,
     namespace,
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT', True) is not True:
         pytest.skip("galaxykit uses drf tokens, which bypass JWT auth and claims processing")
 
     # Step 0: Setup test.
@@ -324,7 +313,7 @@ def test_give_team_custom_role_system(
 
     user_client = galaxy_client("basic_user")
     user = user_client.get("_ui/v1/me/")
-    add_user_to_team(admin_client, user["id"], team["id"])
+    add_user_to_team(admin_client, userid=user["id"], teamid=team["id"])
 
     # Step 1: Check that regular user doesn't have write access to a namespace.
 
@@ -348,7 +337,6 @@ def test_give_team_custom_role_system(
     assert role_definition_resp["description"] == NS_FIXTURE_DATA["description"]
 
     # Step 3: Check that user with assigned system role has write access to a namespace.
-
     response = user_client.put(
         f"_ui/v1/namespaces/{namespace['name']}/", body={
             **namespace,
@@ -477,7 +465,7 @@ def test_give_team_custom_role_object(
     namespace,
     team,
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT', True) is not True:
         pytest.skip("galaxykit uses drf tokens, which bypass JWT auth and claims processing")
 
     # Step 0: Setup test.
@@ -486,7 +474,7 @@ def test_give_team_custom_role_object(
 
     user_client = galaxy_client("basic_user")
     user = user_client.get("_ui/v1/me/")
-    add_user_to_team(admin_client, user["id"], team["id"])
+    add_user_to_team(admin_client, userid=user["id"], teamid=team["id"])
 
     data = {
         "name": "galaxy.namespace_custom_object_role",
