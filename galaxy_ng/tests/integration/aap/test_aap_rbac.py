@@ -43,6 +43,11 @@ def test_aap_service_index_and_claims_processing(
         body=json.dumps({'name': team_name, 'organization': org_data['id']})
     )
 
+    # get galaxy's info about the team
+    galaxy_team_data = ga.get(f'_ui/v2/teams/?name={team_name}')
+    galaxy_team_data = galaxy_team_data['results'][0]
+    galaxy_group_name = galaxy_team_data['group']['name']
+
     # make the user in the gateway
     user_data = ga.post(
         '/api/gateway/v1/users/',
@@ -58,7 +63,7 @@ def test_aap_service_index_and_claims_processing(
     galaxy_roledefs = dict((x['name'], x) for x in galaxy_roledefs['results'])
 
     # make the user a team member in the gateway ...
-    ga.post(
+    team_assignment = ga.post(
         '/api/gateway/v1/role_user_assignments/',
         body=json.dumps({
             'user': user_data['id'],
@@ -81,6 +86,26 @@ def test_aap_service_index_and_claims_processing(
     new_teams = [x['name'] for x in new_user['teams']]
     assert new_teams == [team_name]
 
+    # the group should be shown ...
+    new_groups = [x['name'] for x in new_user['groups']]
+    assert new_groups == [galaxy_group_name]
+
+    ###########################################
+    # DELETION
+    ###########################################
+
+    # unassign the user from the team ...
+    assignment_id = team_assignment['id']
+    ga.delete(f'/api/gateway/v1/role_user_assignments/{assignment_id}/', parse_json=False)
+
+    # process claims again
+    new_data = uc.get(f'/api/galaxy/_ui/v2/users/?username={random_username}')
+    new_data = new_data['results'][0]
+
+    # make sure there's no teams and no groups
+    assert not new_data['teams']
+    assert not new_data['groups']
+
     # delete the user in the gateway ...
     uid = user_data['id']
     rr = ga.delete(f'/api/gateway/v1/users/{uid}/', parse_json=False)
@@ -97,8 +122,8 @@ def test_aap_service_index_and_claims_processing(
     rr = ga.get(f'/api/galaxy/_ui/v2/teams/?name={team_name}')
     assert rr['count'] == 0
 
-    group_name = org_name + '::' + team_name
-    rr = ga.get(f'/api/galaxy/_ui/v2/groups/?name={group_name}')
+    # the group should be deleted too
+    rr = ga.get(f'/api/galaxy/_ui/v2/groups/?name={galaxy_group_name}')
     assert rr['count'] == 0
 
     # delete the org in the gateway
