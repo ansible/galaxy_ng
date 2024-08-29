@@ -6,7 +6,7 @@ index 559ad3f..621ca6b 100644
  ARG FROM_TAG="latest"
  FROM pulp/base:${FROM_TAG}
  # https://ryandaniels.ca/blog/docker-dockerfile-arg-from-arg-trouble/
-+RUN dnf -y install xz
++RUN dnf -y install xz which gettext jq sudo
  
  RUN curl -Ls https://github.com/just-containers/s6-overlay/releases/download/v3.1.6.2/s6-overlay-x86_64.tar.xz | tar xvJ -C /
  RUN curl -Ls https://github.com/just-containers/s6-overlay/releases/download/v3.1.6.2/s6-overlay-noarch.tar.xz | tar xvJ -C /
