@@ -121,7 +121,7 @@ django==4.2.14
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[jwt_consumer] @ git+https://github.com/jctanner/django-ansible-base@HUB_NO_ORG_OR_TEAM_USERS
+django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base@devel
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)

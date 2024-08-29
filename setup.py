@@ -110,10 +110,10 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
         )
 
 
-django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', 'HUB_NO_ORG_OR_TEAM_USERS')
+django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', 'devel')
 django_ansible_base_dependency = (
     'django-ansible-base[jwt_consumer] @ '
-    f'git+https://github.com/jctanner/django-ansible-base@{django_ansible_base_branch}'
+    f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
 )
 
 requirements = [
