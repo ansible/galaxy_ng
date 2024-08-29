@@ -9,8 +9,6 @@ cd pulp-oci-images
 git reset --hard
 cd ..
 
-# exit 1
-
 cp -f switch_python pulp-oci-images/images/assets/.
 chmod +x pulp-oci-images/images/assets/switch_python
 
