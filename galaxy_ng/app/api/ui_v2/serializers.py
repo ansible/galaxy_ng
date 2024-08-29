@@ -170,81 +170,23 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
         return organizations
 
     def create(self, validated_data):
-        # Pop the groups data from the validated data
-        groups_data = validated_data.pop('groups', None)
-        # teams_data = validated_data.pop('teams', None)
+
+        # do not support group, team or org membership managment here
+        validated_data.pop('groups', None)
         validated_data.pop('teams', None)
-        # orgs_data = validated_data.pop('organizations', None)
         validated_data.pop('organizations', None)
 
         # Create the user without the groups data
         user = User.objects.create_user(**validated_data)
 
-        if groups_data:
-            for group_dict in groups_data:
-                group_filter = {}
-                for field in group_dict.keys():
-                    if field in ('id', 'name'):
-                        group_filter[field] = group_dict[field]
-
-                try:
-                    group = Group.objects.get(**group_filter)
-                    user.groups.add(group)
-                except Group.DoesNotExist:
-                    raise ValidationError(detail={
-                        'groups': _('Group name=%(name)s, id=%(id)s does not exist') % {
-                            'name': group_dict.get('name'), 'id': group_dict.get('id')}
-                    })
-                except ValueError:
-                    raise ValidationError(detail={'group': _('Invalid group name or ID')})
-
-        '''
-        if teams_data:
-            for team_dict in teams_data:
-                team_filter = {}
-                for field in team_dict.keys():
-                    if field in ('id', 'name'):
-                        team_filter[field] = team_dict[field]
-                try:
-                    team = Team.objects.get(**team_filter)
-                    team.users.add(user)
-                    user.groups.add(team.group)
-                except Team.DoesNotExist:
-                    raise ValidationError(detail={
-                        'teams': _('Team name=%(name)s, id=%(id)s does not exist') % {
-                            'name': team_dict.get('name'), 'id': team_dict.get('id')}
-                    })
-                except ValueError:
-                    raise ValidationError(detail={'teams': _('Invalid team name or ID')})
-        '''
-
-        '''
-        if orgs_data:
-            for org_dict in orgs_data:
-                org_filter = {}
-                for field in org_dict.keys():
-                    if field in ('id', 'name'):
-                        org_filter[field] = org_dict[field]
-                try:
-                    org = Organization.objects.get(**org_filter)
-                    org.users.add(user)
-                except Organization.DoesNotExist:
-                    raise ValidationError(detail={
-                        'organizations': _('Org name=%(name)s, id=%(id)s does not exist') % {
-                            'name': org_dict.get('name'), 'id': org_dict.get('id')}
-                    })
-                except ValueError:
-                    raise ValidationError(detail={'organizations': _('Invalid org name or ID')})
-        '''
-
         return user
 
     def update(self, instance, validated_data):
 
-        # handle these out of band ...
-        groups_data = validated_data.pop('groups', [])
-        teams_data = validated_data.pop('teams', [])
-        orgs_data = validated_data.pop('organizations', [])
+        # do not support group, team or org membership managment here
+        validated_data.pop('groups', [])
+        validated_data.pop('teams', [])
+        validated_data.pop('organizations', [])
 
         # Update the rest of the fields as usual
         instance.username = validated_data.get('username', instance.username)
@@ -256,46 +198,6 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
         password = validated_data.get('password', None)
         if password:
             instance.set_password(password)
-
-        if groups_data:
-            new_groups = []
-            for group_dict in groups_data:
-                group_filter = {}
-                for field in group_dict.keys():
-                    if field in ('id', 'name'):
-                        group_filter[field] = group_dict[field]
-                new_groups.append(Group.objects.get(**group_filter))
-            instance.groups.set(new_groups)
-
-        if teams_data:
-            new_teams = []
-            for team_dict in teams_data:
-                team_filter = {}
-                for field in team_dict.keys():
-                    if field in ('id', 'name'):
-                        team_filter[field] = team_dict[field]
-                new_teams.append(Team.objects.get(**team_filter))
-            new_team_ids = [team.id for team in new_teams]
-            for team in Team.objects.filter(users=instance).exclude(id__in=new_team_ids):
-                team.users.remove(instance)
-                team.group.users.remove(instance)
-            for team in new_teams:
-                team.users.add(instance)
-                team.group.users.add(instance)
-
-        if orgs_data:
-            new_orgs = []
-            for org_dict in orgs_data:
-                org_filter = {}
-                for field in org_dict.keys():
-                    if field in ('id', 'name'):
-                        org_filter[field] = org_dict[field]
-                org = Organization.objects.get(**org_filter)
-            new_org_ids = [org.id for org in new_orgs]
-            for org in Organization.objects.filter(users=instance).exclude(id__in=new_org_ids):
-                org.users.remove(instance)
-            for org in new_orgs:
-                org.users.add(instance)
 
         instance.save()
         return instance
