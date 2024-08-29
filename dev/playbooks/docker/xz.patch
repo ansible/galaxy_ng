@@ -1,0 +1,12 @@
+diff --git a/images/pulp_ci_centos/Containerfile b/images/pulp_ci_centos/Containerfile
+index 559ad3f..621ca6b 100644
+--- a/images/pulp_ci_centos/Containerfile
++++ b/images/pulp_ci_centos/Containerfile
+@@ -1,6 +1,7 @@
+ ARG FROM_TAG="latest"
+ FROM pulp/base:${FROM_TAG}
+ # https://ryandaniels.ca/blog/docker-dockerfile-arg-from-arg-trouble/
++RUN dnf -y install xz
+ 
+ RUN curl -Ls https://github.com/just-containers/s6-overlay/releases/download/v3.1.6.2/s6-overlay-x86_64.tar.xz | tar xvJ -C /
+ RUN curl -Ls https://github.com/just-containers/s6-overlay/releases/download/v3.1.6.2/s6-overlay-noarch.tar.xz | tar xvJ -C /

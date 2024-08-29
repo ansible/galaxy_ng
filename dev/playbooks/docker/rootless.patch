@@ -1,0 +1,13 @@
+diff --git a/images/Containerfile.core.base b/images/Containerfile.core.base
+index e85a8ab..4c0e9b5 100644
+--- a/images/Containerfile.core.base
++++ b/images/Containerfile.core.base
+@@ -79,7 +79,7 @@ RUN useradd -d /var/lib/pulp --system -u 700 -g pulp pulp
+ 
+ # Rootless podman inside rootless podman/docker
+ # https://www.redhat.com/sysadmin/podman-inside-container
+-RUN sed 's|^#mount_program|mount_program|g' -i /etc/containers/storage.conf
++# RUN sed 's|^#mount_program|mount_program|g' -i /etc/containers/storage.conf
+ # We modified the example so that we have a UID range of upto 65535.
+ # Because, for example, the image docker.io/library/busybox actually uses the user nobody(65534) for
+ # /home rather than the traditional nobody/nfsnbody usage (not an owner on a permanent filesystem.)
