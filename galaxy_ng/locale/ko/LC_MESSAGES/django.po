@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 13:30+0000\n"
+"POT-Creation-Date: 2024-09-01 05:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,25 +19,25 @@ msgstr ""
 msgid "Back to list"
 msgstr ""
 
-#: app/access_control/access_policy.py:402
+#: app/access_control/access_policy.py:412
 msgid "Namespace in filename not found."
 msgstr "파일 이름의 네임스페이스를 찾을 수 없습니다."
 
-#: app/access_control/access_policy.py:435
+#: app/access_control/access_policy.py:445
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:449
+#: app/access_control/access_policy.py:459
 msgid "Namespace not found."
 msgstr "네임스페이스를 찾을 수 없습니다."
 
-#: app/access_control/access_policy.py:518
+#: app/access_control/access_policy.py:528
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:571 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:581 app/api/v3/views/sync.py:49
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
@@ -70,17 +70,16 @@ msgstr "그룹은 그룹 오브젝트 목록이어야 합니다."
 msgid "Group name=%s, id=%s does not exist"
 msgstr "그룹 이름=%s, id=%s이/가 존재하지 않습니다."
 
-#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:159
+#: app/api/ui_v2/serializers.py:133
 msgid "Invalid group name or ID"
 msgstr "잘못된 그룹 이름 또는 ID"
 
 #: app/access_control/fields.py:100
-#| msgid "Groups must be a list of group objects"
 msgid "Users must be a list of user objects"
 msgstr ""
 
 #: app/access_control/fields.py:113
-#| msgid "Invalid group name or ID"
 msgid "Invalid user username or ID"
 msgstr ""
 
@@ -136,7 +135,7 @@ msgstr ""
 "{synclist} 동기화 목록을 업데이트하는 동안 컬렉션 \"{namespace}.{name}\"을 찾"
 "을 수 없습니다."
 
-#: app/api/ui/serializers/user.py:75
+#: app/api/ui/serializers/user.py:77
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
@@ -144,19 +143,19 @@ msgstr ""
 "변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 "
 "않습니다."
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:92 app/api/ui/serializers/user.py:98
 msgid "Must be a super user to grant super user permissions."
 msgstr "슈퍼유저 권한을 부여하려면 슈퍼유저여야 합니다."
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:112
 msgid "Must be a super user to change another user's password."
 msgstr "다른 사용자의 암호를 변경하려면 슈퍼유저여야 합니다."
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:128
 msgid "You do not have permissions to modify super users."
 msgstr "슈퍼 유저를 수정할 수 있는 권한이 없습니다."
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:155 app/api/ui_v2/serializers.py:129
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "그룹 이름=%(name)s, id=%(id)s이/가 존재하지 않습니다."
@@ -257,6 +256,28 @@ msgstr "컬렉션 가져오기 검색"
 #, python-format
 msgid "A group named %s already exists."
 msgstr "%s 이라는 그룹이 이미 존재합니다."
+
+#: app/api/ui_v2/serializers.py:147
+#, python-format
+#| msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgid "Team name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: app/api/ui_v2/serializers.py:151
+#| msgid "Invalid group name or ID"
+msgid "Invalid team name or ID"
+msgstr ""
+
+#: app/api/ui_v2/serializers.py:165
+#, python-format
+#| msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgid "Org name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: app/api/ui_v2/serializers.py:169
+#| msgid "Invalid group name or ID"
+msgid "Invalid org name or ID"
+msgstr ""
 
 #: app/api/utils.py:53
 #, python-brace-format

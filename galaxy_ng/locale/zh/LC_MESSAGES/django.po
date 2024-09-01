@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 13:30+0000\n"
+"POT-Creation-Date: 2024-09-01 05:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,25 +19,25 @@ msgstr ""
 msgid "Back to list"
 msgstr ""
 
-#: app/access_control/access_policy.py:402
+#: app/access_control/access_policy.py:412
 msgid "Namespace in filename not found."
 msgstr "未找到文件名中的命名空间。"
 
-#: app/access_control/access_policy.py:435
+#: app/access_control/access_policy.py:445
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:449
+#: app/access_control/access_policy.py:459
 msgid "Namespace not found."
 msgstr "未找到命名空间。"
 
-#: app/access_control/access_policy.py:518
+#: app/access_control/access_policy.py:528
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:571 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:581 app/api/v3/views/sync.py:49
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
@@ -68,17 +68,16 @@ msgstr "组必须是一个组对象的列表"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "组名=%s, id=%s 不存在"
 
-#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:159
+#: app/api/ui_v2/serializers.py:133
 msgid "Invalid group name or ID"
 msgstr "无效的组名称或 ID"
 
 #: app/access_control/fields.py:100
-#| msgid "Groups must be a list of group objects"
 msgid "Users must be a list of user objects"
 msgstr ""
 
 #: app/access_control/fields.py:113
-#| msgid "Invalid group name or ID"
 msgid "Invalid user username or ID"
 msgstr ""
 
@@ -127,25 +126,25 @@ msgid ""
 "{synclist}"
 msgstr "更新同步列表 {synclist} 时未找到集合 \"{namespace}.{name}\""
 
-#: app/api/ui/serializers/user.py:75
+#: app/api/ui/serializers/user.py:77
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
 msgstr "更改请求用户不在的用户组需要具有 'galaxy.change_group' 权限。"
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/serializers/user.py:92 app/api/ui/serializers/user.py:98
 msgid "Must be a super user to grant super user permissions."
 msgstr "必须是超级用户才能授予超级用户权限。"
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/serializers/user.py:112
 msgid "Must be a super user to change another user's password."
 msgstr "必须是超级用户才能更改其他用户的密码。"
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/serializers/user.py:128
 msgid "You do not have permissions to modify super users."
 msgstr "您没有修改超级用户的权限。"
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/serializers/user.py:155 app/api/ui_v2/serializers.py:129
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "组名=%(name)s, id=%(id)s 不存在"
@@ -245,6 +244,28 @@ msgstr "检索集合导入"
 #, python-format
 msgid "A group named %s already exists."
 msgstr "名为 %s 的组已存在。"
+
+#: app/api/ui_v2/serializers.py:147
+#, python-format
+#| msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgid "Team name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: app/api/ui_v2/serializers.py:151
+#| msgid "Invalid group name or ID"
+msgid "Invalid team name or ID"
+msgstr ""
+
+#: app/api/ui_v2/serializers.py:165
+#, python-format
+#| msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgid "Org name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: app/api/ui_v2/serializers.py:169
+#| msgid "Invalid group name or ID"
+msgid "Invalid org name or ID"
+msgstr ""
 
 #: app/api/utils.py:53
 #, python-brace-format
