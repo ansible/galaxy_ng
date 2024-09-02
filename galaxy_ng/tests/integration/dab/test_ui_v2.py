@@ -228,7 +228,7 @@ def test_ui_v2_teams(
     assert team["name"] == team_name
 
     # Check that associated group exists
-    group = client.get(f"_ui/v1/groups/{team['group']['id']}")
+    group = client.get(f"_ui/v1/groups/{team['group']['id']}", relogin=False)
     assert group["id"] == team["group"]["id"]
     assert group["name"] == f"Default::{team_name}"
 
