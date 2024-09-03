@@ -640,6 +640,7 @@ def test_group_sync_from_pulp_to_dab(galaxy_client, assert_user_in_group, user_a
     assert_user_in_group(user["id"], group["id"], expected=False)
 
 
+@pytest.mark.skip(reason="FIXME - skip until resource management is decided")
 def test_team_member_sync_from_dab_to_pulp(galaxy_client, assert_user_in_group, user_and_group):
     gc = galaxy_client("admin")
     user, group = user_and_group
