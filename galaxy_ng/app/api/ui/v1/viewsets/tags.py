@@ -7,7 +7,7 @@ from pulp_ansible.app.models import Tag
 from pulp_ansible.app.serializers import TagSerializer
 
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.ui import versioning
+from galaxy_ng.app.api.ui.v1 import versioning
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.v1.models import LegacyRoleTag
 from galaxy_ng.app.api.v1.serializers import LegacyRoleTagSerializer

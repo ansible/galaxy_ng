@@ -3,7 +3,7 @@ import logging
 from galaxy_ng.app import models
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.api.ui.v1 import serializers
 
 
 log = logging.getLogger(__name__)

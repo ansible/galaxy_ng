@@ -12,7 +12,7 @@ from rest_framework import status as http_code
 
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app.api.ui.serializers import LoginSerializer
+from galaxy_ng.app.api.ui.v1.serializers import LoginSerializer
 from galaxy_ng.app.auth.session import SessionAuthentication
 
 from requests import post as requests_post

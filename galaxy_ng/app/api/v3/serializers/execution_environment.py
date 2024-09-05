@@ -13,7 +13,7 @@ from pulpcore.plugin import models as core_models
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import MyPermissionsField
 
-from galaxy_ng.app.api.ui import serializers as ui_serializers
+from galaxy_ng.app.api.ui.v1 import serializers as ui_serializers
 
 namespace_fields = ("id", "pulp_href", "name", "my_permissions",
                     "owners", "created_at", "updated_at")

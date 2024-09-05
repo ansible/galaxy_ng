@@ -4,7 +4,7 @@ from rest_framework import mixins
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES as GALAXY_LOCKED_ROLES
-from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.api.ui.v1 import serializers
 from galaxy_ng.app.api.v3.serializers import (
     ContainerRepositorySerializer,
     NamespaceSummarySerializer
