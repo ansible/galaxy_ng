@@ -7,7 +7,7 @@ from pulp_container.app import models as container_models
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.api.ui.v1 import serializers
 from galaxy_ng.app.api.utils import GetObjectByIdMixin
 
 log = logging.getLogger(__name__)

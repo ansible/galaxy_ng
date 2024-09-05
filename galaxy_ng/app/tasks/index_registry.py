@@ -12,7 +12,7 @@ from pulpcore.plugin.tasking import dispatch
 
 from pulp_container.app import models as container_models
 
-from galaxy_ng.app.api.ui import serializers
+from galaxy_ng.app.api.ui.v1 import serializers
 from galaxy_ng.app import models
 
 

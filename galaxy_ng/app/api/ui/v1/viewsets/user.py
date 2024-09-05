@@ -5,7 +5,7 @@ from rest_framework import mixins
 
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app.api.ui import serializers, versioning
+from galaxy_ng.app.api.ui.v1 import serializers, versioning
 from galaxy_ng.app.api import base as api_base
 
 

@@ -25,7 +25,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 
 from galaxy_ng.app.api import base as api_base
-from galaxy_ng.app.api.ui.serializers import SearchResultsSerializer
+from galaxy_ng.app.api.ui.v1.serializers import SearchResultsSerializer
 from galaxy_ng.app.api.v1.models import LegacyRole
 from galaxy_ng.app.models.namespace import Namespace
 

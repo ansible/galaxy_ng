@@ -4,7 +4,7 @@ import mimetypes
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, _get_error_details
 
-from galaxy_ng.app.api.ui.serializers.base import Serializer
+from galaxy_ng.app.api.ui.v1.serializers.base import Serializer
 from galaxy_ng.app.api.utils import parse_collection_filename
 
 log = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ from pulp_ansible.app import models as pulp_models
 from pulpcore.plugin.util import get_objects_for_user
 
 from galaxy_ng.app.access_control import access_policy
-from galaxy_ng.app.api.ui import serializers, versioning
+from galaxy_ng.app.api.ui.v1 import serializers, versioning
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app import models
 

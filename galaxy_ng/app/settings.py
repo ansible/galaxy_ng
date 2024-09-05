@@ -405,7 +405,7 @@ ANSIBLE_BASE_JWT_KEY = None
 # -- ANSIBLE BASE RBAC --
 # The rbac viewsets inherit from a defined base class to get their
 # pagination settings
-ANSIBLE_BASE_CUSTOM_VIEW_PARENT = "galaxy_ng.app.api.ui_v2.views.BaseView"
+ANSIBLE_BASE_CUSTOM_VIEW_PARENT = "galaxy_ng.app.api.ui.v2.views.BaseView"
 # If a role does not already exist that can give those object permissions
 # then the system must create one, this is used for naming the auto-created role
 ANSIBLE_BASE_ROLE_CREATOR_NAME = "{obj._meta.model_name} Creator Role"
