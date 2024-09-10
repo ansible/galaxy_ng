@@ -46,5 +46,4 @@ __all__ = (
     'MyDistributionViewSet',
     'ContainerRegistryRemoteViewSet',
     'ContainerRemoteViewSet',
-    'ContainerTagViewset'
 )

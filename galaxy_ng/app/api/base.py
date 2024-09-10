@@ -91,7 +91,7 @@ class RelatedFieldsBaseSerializer(serializers.Serializer):
         # This should only be included as a sub serializer and shouldn't be used for
         # updating objects, so set read_only to true
         kwargs['read_only'] = True
-        return super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def to_representation(self, instance):
         result = OrderedDict()

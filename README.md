@@ -24,7 +24,7 @@ View the latest version of the spec at https://galaxy.ansible.com/api/v3/swagger
 
 * If you're interested in jumping in and helping out, [view the contributing guide](https://github.com/ansible/galaxy_ng/wiki#contributing-to-galaxyng).
 * To setup your development environment, [view the development setup guide](https://github.com/ansible/galaxy_ng/wiki/Development-Setup).
-* Chat with us on irc.libera.chat: #ansible-galaxy
+* Reach out to us on the [Ansible Forum](https://forum.ansible.com/tag/galaxy-ng).
 * Found a bug or have a feature idea? Please [open an issue](https://issues.redhat.com/projects/AAH/issues).
 
 ## Installation

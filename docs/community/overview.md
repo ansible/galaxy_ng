@@ -12,8 +12,7 @@ around https://galaxy.ansible.com.
 
 ### Galaxy
 
-Galaxy launched in 2013 by the company later known as "Ansible". The [release announcement](https://groups.google.com/g/ansible-project/c/W40GgVxbU6U/m/uk1ruEdC-TAJ) gives an interesting perspective
-of the original intent for the site that helps provide context for where we need the future of the galaxy_ng project to go.
+Galaxy launched in 2013 by the company later known as "Ansible".
 
 > What’s Galaxy?  Ansible Galaxy is an automation content site designed from the ground up with an emphasis on being very dynamic — offering up a lot of new ways to find content.
 
@@ -50,7 +49,8 @@ We do not yet have a timeline for the migration or the cut over.
 
 ## Communication and Feedback.
 
-The galaxy dev team, contributors and community can mostly be found on libera.chat's #ansible-galaxy irc channel.
+The galaxy dev team, contributors and community can mostly be found on the [Ansible Forum](https://forum.ansible.com/tag/galaxy-ng).
+See the [Ansible communication guide](https://docs.ansible.com/ansible/devel/community/communication.html) to learn more.
 
 For bug reports and feature requests, see "Filing Issues".
 

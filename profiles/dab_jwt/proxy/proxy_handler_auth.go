@@ -114,7 +114,13 @@ func BasicAuth(next http.Handler) http.Handler {
 				user := GetUserByUserName(credentials[0])
 				//log.Printf("extracted user:%s from creds[0]:%s creds:%s\n", user, credentials[0], credentials)
 				if user.Password != credentials[1] {
-					log.Printf("Unauthorized5\n")
+					log.Printf(
+						"Unauthorized5 %s '%s' != '%s' ... %s\n",
+						user.Username,
+						credentials[1],
+						user.Password,
+						user,
+					)
 					http.Error(w, "Unauthorized5", http.StatusUnauthorized)
 					return
 				}

@@ -14,17 +14,34 @@ type UserSession struct {
 
 // User represents a user's information
 type User struct {
-	Id              int
-	Username        string
-	Password        string
-	FirstName       string
-	LastName        string
-	IsSuperuser     bool
-	Email           string
-	Organizations   []string
-	Teams           []string
-	IsSystemAuditor bool
-	Sub             string
+	Id                int      `json:"id"`
+	Username          string   `json:"username"`
+	Password          string   `json:"password"`
+	FirstName         string   `json:"first_name"`
+	LastName          string   `json:"last_name"`
+	IsSuperuser       bool     `json:"is_superuser"`
+	Email             string   `json:"email"`
+	Organizations     []string `json:"organizations"`
+	Teams             []string `json:"teams"`
+	IsSystemAuditor   bool     `json:"is_systemauditor"`
+	IsPlatformAuditor bool     `json:"is_platformauditor"`
+	Sub               string
+}
+
+type UserResponse struct {
+	ID                int    `json:"id"`
+	Username          string `json:"username"`
+	FirstName         string `json:"first_name"`
+	LastName          string `json:"last_name"`
+	Email             string `json:"email"`
+	IsSuperUser       bool   `json:"is_superuser"`
+	IsPlatformAuditor bool   `json:"is_platformauditor"`
+	IsSystemAuditor   bool   `json:"is_systemauditor"`
+	SummaryFields     struct {
+		Resource struct {
+			AnsibleID string `json:"ansible_id"`
+		} `json:"resource"`
+	} `json:"summary_fields"`
 }
 
 /*
@@ -69,11 +86,12 @@ func (c UserClaims) Valid() error {
 }
 
 type UserData struct {
-	Username    string `json:"username"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	IsSuperuser bool   `json:"is_superuser"`
-	Email       string `json:"email"`
+	Username          string `json:"username"`
+	FirstName         string `json:"first_name"`
+	LastName          string `json:"last_name"`
+	IsSuperuser       bool   `json:"is_superuser"`
+	IsPlatformAuditor bool   `json:"is_platformauditor"`
+	Email             string `json:"email"`
 }
 
 type Organization struct {
@@ -133,16 +151,6 @@ type TeamResponse struct {
 	ID            int    `json:"id"`
 	Name          string `json:"name"`
 	Organization  int    `json:"organization"`
-	SummaryFields struct {
-		Resource struct {
-			AnsibleID string `json:"ansible_id"`
-		} `json:"resource"`
-	} `json:"summary_fields"`
-}
-
-type UserResponse struct {
-	ID            int    `json:"id"`
-	Username      string `json:"username"`
 	SummaryFields struct {
 		Resource struct {
 			AnsibleID string `json:"ansible_id"`

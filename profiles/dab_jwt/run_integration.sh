@@ -24,6 +24,8 @@ export ENABLE_DAB_TESTS=1
 export HUB_TEST_MARKS="deployment_standalone and not skip_in_gw"
 export JWT_PROXY=true
 export AAP_GATEWAY=true
+export AAP_GATEWAY_ADMIN_USERNAME=admin
+export AAP_GATEWAY_ADMIN_PASSWORD=admin
 export GW_ROOT_URL=http://jwtproxy:8080
 
 export GALAXYKIT_SLEEP_SECONDS_POLLING=.5
