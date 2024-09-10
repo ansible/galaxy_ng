@@ -222,6 +222,7 @@ func main() {
 			}
 		})
 	*/
+	http.HandleFunc("/api/gateway/v1/me/", MeHandler)
 	http.HandleFunc("/api/gateway/v1/teams/", TeamHandler)
 	http.HandleFunc("/api/gateway/v1/organizations/", OrganizationHandler)
 	http.HandleFunc("/api/gateway/v1/role_definitions/", RoleDefinitionsHandler)

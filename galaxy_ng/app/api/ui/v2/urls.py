@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from .views import CurrentUserViewSet
 from .views import UserViewSet
 from .views import GroupViewSet
 from .views import OrganizationViewSet
@@ -19,5 +20,11 @@ router.register(r'teams', TeamViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path(
+        'me/',
+        CurrentUserViewSet.as_view({'get': 'retrieve'}),
+        name='me'
+    ),
+
 ]
 urlpatterns.extend(dab_rbac_urls)

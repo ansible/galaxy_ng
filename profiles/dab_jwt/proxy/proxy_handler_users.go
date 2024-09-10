@@ -2,12 +2,62 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"reflect"
 	"sort"
 
 	"github.com/google/uuid"
 )
+
+// List of allowed fields to be updated
+var allowedFields = map[string]bool{
+	"username":         true,
+	"email":            true,
+	"first_name":       true,
+	"last_name":        true,
+	"is_superuser":     true,
+	"is_systemauditor": true,
+}
+
+func UserToResponseUser(user User) UserResponse {
+	responseUser := UserResponse{
+		ID:                user.Id,
+		Username:          user.Username,
+		FirstName:         user.FirstName,
+		LastName:          user.LastName,
+		Email:             user.Email,
+		IsSuperUser:       user.IsSuperuser,
+		IsPlatformAuditor: user.IsPlatformAuditor,
+		IsSystemAuditor:   user.IsSystemAuditor,
+		SummaryFields: struct {
+			Resource struct {
+				AnsibleID string `json:"ansible_id"`
+			} `json:"resource"`
+		}{Resource: struct {
+			AnsibleID string `json:"ansible_id"`
+		}{AnsibleID: user.Sub}},
+	}
+	return responseUser
+}
+
+func MeHandler(w http.ResponseWriter, r *http.Request) {
+	user, error := GetRequestUser(r)
+	if error != nil {
+		return
+	}
+	responseUser := UserToResponseUser(user)
+	var responseUsers []UserResponse
+	responseUsers = append(responseUsers, responseUser)
+
+	response := map[string][]UserResponse{
+		"results": responseUsers,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	//usersMutex.Lock()
@@ -15,9 +65,13 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		getUsers(w)
+		getUsers(w, r)
 	case http.MethodPost:
 		addUser(w, r)
+	case http.MethodPatch:
+		patchUser(w, r)
+	case http.MethodPut:
+		putUser(w, r)
 	case http.MethodDelete:
 		deleteUser(w, r)
 	default:
@@ -25,9 +79,19 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getUsers(w http.ResponseWriter) {
+func getUsers(w http.ResponseWriter, r *http.Request) {
 	//usersMutex.Lock()
 	//defer usersMutex.Unlock()
+
+	userId := GetLastNumericPathElement(r.URL.Path)
+	fmt.Printf("USERID: %d\n", userId)
+	if userId > 0 {
+		user := users[userId]
+		responseUser := UserToResponseUser(user)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseUser)
+		return
+	}
 
 	var userList []User
 	for _, user := range users {
@@ -40,17 +104,7 @@ func getUsers(w http.ResponseWriter) {
 	var responseUsers []UserResponse
 
 	for _, userdata := range userList {
-		responseUser := UserResponse{
-			ID:       userdata.Id,
-			Username: userdata.Username,
-			SummaryFields: struct {
-				Resource struct {
-					AnsibleID string `json:"ansible_id"`
-				} `json:"resource"`
-			}{Resource: struct {
-				AnsibleID string `json:"ansible_id"`
-			}{AnsibleID: userdata.Sub}},
-		}
+		responseUser := UserToResponseUser(userdata)
 		responseUsers = append(responseUsers, responseUser)
 	}
 
@@ -120,6 +174,9 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 
 	//usersMutex.Lock()
 	//defer usersMutex.Unlock()
+	log.Printf("newuser -> username:%s password:%s\n", newUser.Username, newUser.Password)
+	//tmpPassword := newUser.Password
+	//tmpUsername := newUser.Username
 
 	checkUser := GetUserByUserName(newUser.Username)
 	if checkUser.Username == newUser.Username {
@@ -140,39 +197,48 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 	highestId := MaxOrDefault(keys)
 	newId := highestId + 1
 
-	newUser.Id = newId
-	newAnsibleID := uuid.NewString()
-	newUser.Sub = newAnsibleID
-	users[newUser.Id] = newUser
-
-	responseUser := UserResponse{
-		ID:       newUser.Id,
-		Username: newUser.Username,
-		SummaryFields: struct {
-			Resource struct {
-				AnsibleID string `json:"ansible_id"`
-			} `json:"resource"`
-		}{Resource: struct {
-			AnsibleID string `json:"ansible_id"`
-		}{AnsibleID: newAnsibleID}},
+	// FIXME - why isn't the password being saved?
+	// FIXME - why is the username nulled at some point?
+	/*
+		newUser.Id = newId
+		newUser.Username = tmpUsername
+		newAnsibleID := uuid.NewString()
+		newUser.Sub = newAnsibleID
+		newUser.Password = tmpPassword
+	*/
+	createdUser := User{
+		Id:        newId,
+		Username:  newUser.Username,
+		FirstName: newUser.FirstName,
+		LastName:  newUser.LastName,
+		Email:     newUser.Email,
+		Password:  newUser.Password,
+		Sub:       uuid.NewString(),
 	}
+	users[newId] = createdUser
 
-	// create the team in the downstream service index ...
+	log.Print("---------------------------------------------")
+	log.Printf("NEWUSER: %d.%s:%s\n", createdUser.Id, createdUser.Username, createdUser.Password)
+	log.Print("---------------------------------------------")
+
+	responseUser := UserToResponseUser(createdUser)
+
+	// create the user in the downstream service index ...
 	client := NewServiceIndexClient()
 	payload := ServiceIndexPayload{
-		AnsibleId:    newUser.Sub,
+		AnsibleId:    createdUser.Sub,
 		ServiceId:    SERVICE_ID,
 		ResourceType: "shared.user",
 		ResourceData: ServiceIndexResourceData{
-			UserName:  newUser.Username,
-			Email:     newUser.Email,
-			FirstName: newUser.FirstName,
-			LastName:  newUser.LastName,
-			SuperUser: newUser.IsSuperuser,
+			UserName:  createdUser.Username,
+			Email:     createdUser.Email,
+			FirstName: createdUser.FirstName,
+			LastName:  createdUser.LastName,
+			SuperUser: createdUser.IsSuperuser,
 		},
 	}
-	user, _ := GetRequestUser(r)
-	client.PostData(user, payload)
+	ruser, _ := GetRequestUser(r)
+	client.PostData(ruser, payload)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -208,4 +274,73 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 
 	// Respond with success
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func patchUser(w http.ResponseWriter, r *http.Request) {
+	usersMutex.Lock()
+	defer usersMutex.Unlock()
+
+	userId := GetLastNumericPathElement(r.URL.Path)
+
+	// Check if the user exists
+	_, exists := users[userId]
+	if !exists {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	// Parse the full serialized User data from the JSON body
+	var newUser User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+	if err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Use reflection to ensure only allowed fields are updated
+	userValue := reflect.ValueOf(&newUser).Elem()
+	userType := reflect.TypeOf(newUser)
+
+	existingUser := users[userId]
+	log.Printf("euser.username:%s\n", existingUser.Username)
+	existingUserValue := reflect.ValueOf(&existingUser).Elem()
+
+	for i := 0; i < userValue.NumField(); i++ {
+		field := userType.Field(i)
+		jsonKey := field.Tag.Get("json")
+		log.Printf("process field:%s jsonKey:%s", field, jsonKey)
+
+		// Skip updating fields that are not in the allowedFields list
+		if _, ok := allowedFields[jsonKey]; !ok {
+			log.Printf("skip setting %s\n", jsonKey)
+			continue
+		}
+
+		newFieldValue := userValue.Field(i)
+		existingFieldValue := existingUserValue.Field(i)
+
+		// we can't allow null usernames or auth will get jacked ...
+		if jsonKey == "username" && newFieldValue.Kind() == reflect.String {
+			if newFieldValue.String() == "" {
+				log.Printf("skip updating %s because it is empty\n", jsonKey)
+				continue
+			}
+		}
+
+		// Update each field that is allowed to be changed
+		existingFieldValue.Set(newFieldValue)
+	}
+
+	// Save the updated user back into the users map
+	users[userId] = existingUser
+	responseUser := UserToResponseUser(existingUser)
+
+	// Return the updated user as a JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(responseUser)
+}
+
+func putUser(w http.ResponseWriter, r *http.Request) {
+	patchUser(w, r)
 }

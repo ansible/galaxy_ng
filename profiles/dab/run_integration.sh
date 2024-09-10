@@ -23,6 +23,8 @@ export HUB_LOCAL=1
 export ENABLE_DAB_TESTS=1
 export HUB_TEST_MARKS="(deployment_standalone or x_repo_search or all) and not package and not iqe_ldap and not skip_in_gw"
 export AAP_GATEWAY=true
+export AAP_GATEWAY_ADMIN_USERNAME=admin
+export AAP_GATEWAY_ADMIN_PASSWORD=admin
 export GW_ROOT_URL=https://localhost
 export CONTAINER_REGISTRY=localhost
 
