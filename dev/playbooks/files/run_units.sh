@@ -21,6 +21,7 @@ PYTEST_FLAGS=""
 PYTEST_FLAGS="$PYTEST_FLAGS --cov-report term-missing:skip-covered --cov=galaxy_ng"
 PYTEST_FLAGS="$PYTEST_FLAGS -v -r sx --color=yes"
 PYTEST_FLAGS="$PYTEST_FLAGS -p no:pulpcore"
+PYTEST_FLAGS="$PYTEST_FLAGS --junit-xml=/tmp/galaxy_ng-test-results.xml"
 
 # This command will run all unit tests in galaxy_ng/tests/unit.
 # If you need to run a single test, include '-k <substring>' in the PYTEST_FLAGS variable
