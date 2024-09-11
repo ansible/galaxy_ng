@@ -37,7 +37,7 @@ You can also find more information in the
 ## Code of Conduct
 
 Please see the official
-[Ansible Community Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
+[Ansible Community Code of Conduct](https://docs.ansible.com/ansible/devel/community/code_of_conduct.html).
 
 ## Installation
 
