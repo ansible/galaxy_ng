@@ -121,31 +121,6 @@ jobs:
           name: coverage
           path: coverage.xml
 
-      - name: Extract PR number from coverage.xml
-        run: |
-          echo "PR_NUMBER=$(grep -m 1 '<!-- PR' coverage.xml | awk '{print $3}')" >> $GITHUB_ENV
-
-      - name: Get PR info
-        uses: octokit/request-action@v2.x
-        id: pr_info
-        with:
-          route: GET /repos/{repo}/pulls/{number}
-          repo: ${{ github.event.repository.full_name }}
-          number: ${{ env.PR_NUMBER }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set PR info into env
-        run: |
-          echo "PR_BASE=${{ fromJson(steps.pr_info.outputs.data).base.ref }}" >> $GITHUB_ENV
-          echo "PR_HEAD=${{ fromJson(steps.pr_info.outputs.data).head.ref }}" >> $GITHUB_ENV
-
-      - name: Add base branch
-        run: |
-          gh pr checkout ${{ env.PR_NUMBER }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -154,9 +129,9 @@ jobs:
         with:
           args: >
             -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }}
-            -Dsonar.pullrequest.key=${{ env.PR_NUMBER }}
-            -Dsonar.pullrequest.branch=${{ env.PR_HEAD }}
-            -Dsonar.pullrequest.base=${{ env.PR_BASE }}
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+            -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
       # FIXME: do we really care about these anymore ... ?
       #- name: run the functional test playbook
