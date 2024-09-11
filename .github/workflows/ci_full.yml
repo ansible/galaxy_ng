@@ -111,6 +111,15 @@ jobs:
           --form "git_repository_url=https://github.com/${{ github.repository }}"
           "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}/api/results/upload/"'
 
+      - name: copy the junit.xml down to the host for sonarcloud
+        run: docker cp pulp:/tmp/galaxy_ng-test-results.xml coverage.xml
+
+      - name: Upload coverage as artifact
+        uses: actions/upload-artifact@v4
+        if: matrix.tests.sonar
+        with:
+          name: coverage
+          path: coverage.xml
 
       # FIXME: do we really care about these anymore ... ?
       #- name: run the functional test playbook
