@@ -457,6 +457,7 @@ def test_give_user_custom_role_object(
     assert_object_role_assignments(admin_client, user, namespace, 0)
 
 
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.deployment_standalone
 def test_give_team_custom_role_object(
     settings,
@@ -669,6 +670,7 @@ def test_team_member_sync_from_dab_to_pulp(galaxy_client, assert_user_in_group, 
     assert_user_in_group(user["id"], group["id"], expected=True)
 
 
+@pytest.mark.min_hub_version("4.10dev")
 def test_team_members_are_migrated(galaxy_client, assert_user_in_group):
     "Make sure any existing team memberships are correct"
     gc = galaxy_client("admin")
