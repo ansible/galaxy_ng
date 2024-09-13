@@ -26,17 +26,21 @@ from .execution_environment import (
 )
 
 __all__ = (
-    'CollectionUploadSerializer',
-    'GroupSummarySerializer',
-    'NamespaceSerializer',
-    'NamespaceSummarySerializer',
-    'TaskSerializer',
-    'TaskSummarySerializer',
-    'UnpaginatedCollectionVersionSerializer',
-    'ContainerRepositorySerializer',
-    'ContainerRepositoryHistorySerializer',
-    'ContainerManifestSerializer',
-    'ContainerTagSerializer',
-    'ContainerManifestDetailSerializer',
-    'ContainerReadmeSerializer',
+    # collection
+    "CollectionUploadSerializer",
+    # namespace
+    "NamespaceSerializer",
+    "NamespaceSummarySerializer",
+    # group
+    "GroupSummarySerializer",
+    # task
+    "TaskSerializer",
+    "TaskSummarySerializer",
+    # execution_environment
+    "ContainerRepositorySerializer",
+    "ContainerTagSerializer",
+    "ContainerManifestSerializer",
+    "ContainerManifestDetailSerializer",
+    "ContainerReadmeSerializer",
+    "ContainerRepositoryHistorySerializer",
 )
