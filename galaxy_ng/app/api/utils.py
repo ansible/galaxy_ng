@@ -21,7 +21,7 @@ CollectionFilename = namedtuple("CollectionFilename", ["namespace", "name", "ver
 
 LOCALHOST = "localhost"
 FILENAME_REGEXP = re.compile(
-    r"^(?P<namespace>\w+)-(?P<name>\w+)-" r"(?P<version>[0-9a-zA-Z.+-]+)\.tar\.gz$"
+    r"^(?P<namespace>\w+)-(?P<name>\w+)-(?P<version>[0-9a-zA-Z.+-]+)\.tar\.gz$"
 )
 VERSION_REGEXP = re.compile(r"""
 ^

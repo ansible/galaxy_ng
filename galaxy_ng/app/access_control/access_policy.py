@@ -228,10 +228,10 @@ class AccessPolicyBase(AccessPolicyFromDB):
             # if access_policy := self.get_access_policy(view):
             if access_policy.queryset_scoping:
                 scope = access_policy.queryset_scoping["function"]
-                if scope == "scope_queryset" or not (function := getattr(self, scope, None)):
+                if scope == "scope_queryset" or not (func := getattr(self, scope, None)):
                     return qs
                 kwargs = access_policy.queryset_scoping.get("parameters") or {}
-                qs = function(view, qs, **kwargs)
+                qs = func(view, qs, **kwargs)
         return qs
 
     # Define global conditions here
@@ -333,9 +333,8 @@ class AccessPolicyBase(AccessPolicyFromDB):
 
             repo = obj.repository.cast()
 
-        if permission == "ansible.view_ansiblerepository":
-            if not repo.private:
-                return True
+        if permission == "ansible.view_ansiblerepository" and not repo.private:
+            return True
 
         return request.user.has_perm(permission, repo)
 
@@ -605,15 +604,15 @@ class AIDenyIndexAccessPolicy(AccessPolicyBase):
 
     def can_edit_ai_deny_index(self, request, view, permission):
         """This permission applies to Namespace or LegacyNamespace on ai_deny_index/."""
-        object = view.get_object()
+        obj = view.get_object()
         has_permission = False
-        if isinstance(object, models.Namespace):
+        if isinstance(obj, models.Namespace):
             has_permission = has_model_or_object_permissions(
                 request.user,
                 "galaxy.change_namespace",
-                object
+                obj
             )
-        elif isinstance(object, LegacyNamespace):
+        elif isinstance(obj, LegacyNamespace):
             has_permission = LegacyAccessPolicy().is_namespace_owner(
                 request, view, permission
             )

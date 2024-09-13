@@ -16,11 +16,6 @@ def preprocess_debug_logger(endpoints, **kwargs):
                   path, path_regex, method, callback)
 
     return endpoints
-    # return [
-    #     (path, path_regex, method, callback) for path, path_regex, method, callback in endpoints
-    #     if log.debug('path=%s, path_regex=%s, method=%s, callback=%s',
-    #                  path, path_regex, method, callback)
-    # ]
 
 
 def preprocess_exclude_endpoints(endpoints, **kwargs):

@@ -37,7 +37,6 @@ from galaxy_ng.app.utils.galaxy import (
 )
 
 
-# logger = logging.getLogger(__name__)
 logger = logging.getLogger("galaxy_ng.app.api.v1.tasks.legacy_role_import")
 
 
@@ -158,7 +157,7 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
             )
             if pid.returncode != 0:
                 error = pid.stdout.decode('utf-8')
-                logger.error('{cmd} failed: {error}')
+                logger.error(f'{cmd} failed: {error}')
                 raise Exception(f'{cmd} failed')
 
         last_commit = [x for x in gitrepo.iter_commits()][0]
@@ -500,7 +499,6 @@ def legacy_role_import(
             'imported': datetime.datetime.now().isoformat(),
             'clone_url': clone_url,
             'tags': galaxy_info.get("galaxy_tags", []),
-            'commit': github_commit,
             'github_user': real_github_user,
             'github_repo': real_github_repo,
             'github_branch': github_reference,
@@ -627,7 +625,6 @@ def legacy_sync_from_upstream(
         rkey = (github_user, role_name)
         remote_id = rdata['id']
         role_versions = rversions[:]
-        # github_user = rdata['github_user']
         github_repo = rdata['github_repo']
         github_branch = rdata['github_branch']
         clone_url = f'https://github.com/{github_user}/{github_repo}'
@@ -637,7 +634,6 @@ def legacy_sync_from_upstream(
         commit_msg = rdata.get('commit_message')
         commit_url = rdata.get('commit_url')
         issue_tracker = rdata.get('issue_tracker_url', clone_url + '/issues')
-        # role_versions = sfields.get('versions', [])
         role_description = rdata.get('description')
         role_license = rdata.get('license')
         role_readme = rdata.get('readme')

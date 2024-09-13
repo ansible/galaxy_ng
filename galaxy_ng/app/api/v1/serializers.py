@@ -120,7 +120,6 @@ class LegacyUserSerializer(serializers.ModelSerializer):
     summary_fields = serializers.SerializerMethodField()
     date_joined = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
-    # active = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
@@ -158,7 +157,6 @@ class LegacyUserSerializer(serializers.ModelSerializer):
         return self.get_date_joined(obj)
 
     def get_date_joined(self, obj):
-        # return obj.created
         if hasattr(obj, '_created'):
             return obj._created
         if hasattr(obj, 'date_joined'):
@@ -557,7 +555,7 @@ class LegacySyncSerializer(serializers.Serializer):
     class Meta:
         model = None
         fields = [
-            'baseurl'
+            'baseurl',
             'github_user',
             'role_name',
             'role_version',

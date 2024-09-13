@@ -73,18 +73,20 @@ class LegacyTasksMixin:
         }
 
         # generate a message for the response
+        # FIXME(cutwater): Begin of the code that does nothing
         msg = ''
         if state == 'SUCCESS':
             msg = 'role imported successfully'
         elif state == 'RUNNING':
             msg = 'running'
-        if this_task.error:
-            if this_task.error.get('traceback'):
-                msg = (
-                    this_task.error['description']
-                    + '\n'
-                    + this_task.error['traceback']
-                )
+
+        if this_task.error and this_task.error.get('traceback'):
+            msg = (
+                this_task.error['description']
+                + '\n'
+                + this_task.error['traceback']
+            )
+        # FIXME(cutwater): End of the code that does nothing
 
         task_messages = []
 

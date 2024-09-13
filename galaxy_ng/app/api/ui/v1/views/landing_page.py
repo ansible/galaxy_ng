@@ -132,7 +132,7 @@ class LandingPageView(api_base.APIView):
                         "shape": {
                             "title": "Learn about namespaces",
                             "description": (
-                                "Organize collections content into " "namespaces users can access."
+                                "Organize collections content into namespaces users can access."
                             ),
                             "link": {
                                 "title": "Learn more",
