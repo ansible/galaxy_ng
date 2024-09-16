@@ -58,8 +58,6 @@ __all__ = (
     # distribution
     'DistributionSerializer',
     # container
-    'ContainerRepositorySerializer',
-    'ContainerRepositoryImageSerializer',
     'ContainerRegistryRemoteSerializer',
     'ContainerRemoteSerializer',
     # Search

@@ -339,9 +339,11 @@ AUTH_LDAP_GROUP_SEARCH_FILTER = None
 AUTHENTICATION_BACKEND_PRESET = 'local'  # 'ldap' or 'keycloak' or 'local' or 'custom'
 AUTHENTICATION_BACKEND_PRESETS_DATA = {
     'ldap': [
-        "galaxy_ng.app.auth.ldap.GalaxyLDAPBackend",
+        "galaxy_ng.app.auth.ldap.PrefixedLDAPBackend",
+        # "galaxy_ng.app.auth.ldap.GalaxyLDAPBackend",
         "django.contrib.auth.backends.ModelBackend",
-        "pulpcore.backends.ObjectRolePermissionBackend"
+        "pulpcore.backends.ObjectRolePermissionBackend",
+        "dynaconf_merge",
     ],
     'keycloak': [
         "social_core.backends.keycloak.KeycloakOAuth2",
@@ -442,3 +444,6 @@ DEFAULT_ORGANIZATION_NAME = "Default"
 
 # If False it disables editing and managing users and groups.
 ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
+
+# https://github.com/ansible/django-ansible-base/pull/611
+RENAMED_USERNAME_PREFIX = "galaxy_"
