@@ -42,6 +42,7 @@ def test_dab_roledefs_match_pulp_roles(galaxy_client):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.skipif(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
@@ -140,6 +141,7 @@ def test_dab_rbac_repository_owner_by_user_or_team(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.skipif(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
@@ -549,6 +551,7 @@ def test_dab_user_assignment_filtering_as_user(
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.skipif(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
