@@ -51,7 +51,6 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_socialauth(settings))
     data.update(configure_cors(settings))
     data.update(configure_pulp_ansible(settings))
-    data.update(configure_authentication_backends(settings))
     data.update(configure_renderers(settings))
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
@@ -63,6 +62,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     # of the galaxy auth classes, and if galaxy auth classes are overridden by any of the
     # other dynaconf hooks (such as keycloak), those changes need to be applied to the
     # rest framework auth classes too.
+    data.update(configure_authentication_backends(settings, data))
     data.update(configure_authentication_classes(settings, data))
 
     # This must go last, so that all the default settings are loaded before dynamic and validation
@@ -543,19 +543,42 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
     return data
 
 
-def configure_authentication_backends(settings: Dynaconf) -> Dict[str, Any]:
+def configure_authentication_backends(settings: Dynaconf, data: Dict[str, Any]) -> Dict[str, Any]:
     """Configure authentication backends for galaxy.
-    This function returns a dictionary that will be merged to the settings.
+
+    This adds backends in the following order:
+        1) default backends from pulp & settings.py
+        2) any backends added to data['AUTHENTICATION_BACKENDS'] by previous hooks
+        3) user AUTHENTICATION_BACKEND_PRESET to add additional backends
+           from the 'presets' defined in settings.py for ldap & keycloak
+        4) The backend required by https://github.com/ansible/django-ansible-base/pull/611
     """
-    data = {}
 
-    choosen_preset = settings.get("AUTHENTICATION_BACKEND_PRESET")
-    # If `custom` it will allow user to override and not raise Validation Error
-    # If `local` it will not be set and will use the default coming from pulp
+    # start with the default pulp settings
+    backends = settings.get("AUTHENTICATION_BACKENDS", [])
 
-    presets = settings.get("AUTHENTICATION_BACKEND_PRESETS_DATA", {})
-    if choosen_preset in presets:
-        data["AUTHENTICATION_BACKENDS"] = presets[choosen_preset]
+    # merge in backends set by the previous hooks ...
+    if (default_list := data.get("AUTHENTICATION_BACKENDS")) is not None:
+        backends.extend([item for item in default_list if item not in backends])
+
+    # Load preset data for deployment specific backends
+    preset_name = settings.get("AUTHENTICATION_BACKEND_PRESET")
+    if (preset_list := settings.AUTHENTICATION_BACKEND_PRESETS_DATA.get(preset_name)) is not None:
+        backends.extend([item for item in preset_list if item not in backends])
+
+    # insert the AAP migrated user backend
+    prefix_backend = "ansible_base.lib.backends.prefixed_user_auth.PrefixedUserAuthBackend"
+    if prefix_backend not in backends:
+        backends.append(prefix_backend)
+
+    # deduplicate dynaconf_merge ...
+    if backends.count("dynaconf_merge") > 1:
+        backends = [x for x in backends if x != 'dynaconf_merge']
+        backends.append('dynaconf_merge')
+
+    # if there are backends, add them to the final result
+    if len(backends) > 0:
+        data["AUTHENTICATION_BACKENDS"] = backends
 
     return data
 
