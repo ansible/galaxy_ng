@@ -68,8 +68,8 @@ services:
 
   postgres:
     image: "postgres:13"
-    ports:
-      - "5432:5432"
+    #ports:
+    #  - "5432:5432"
     environment:
       <<: *common-env
     healthcheck:
@@ -143,6 +143,7 @@ services:
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
+      - ".:/src/galaxy_ng"
     environment:
       <<: *common-env
     command: |
@@ -163,6 +164,7 @@ services:
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
+      - ".:/src/galaxy_ng"
     environment:
       <<: *common-env
     command: |
@@ -183,6 +185,7 @@ services:
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
+      - ".:/src/galaxy_ng"
     environment:
       <<: *common-env
     command: |
