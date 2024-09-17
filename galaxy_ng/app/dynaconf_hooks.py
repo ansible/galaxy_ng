@@ -29,6 +29,10 @@ from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 
 logger = logging.getLogger(__name__)
 
+DAB_SERVICE_BACKED_REDIRECT = (
+    "ansible_base.resource_registry.utils.service_backed_sso_pipeline.redirect_to_resource_server"
+)
+
 
 def post(settings: Dynaconf) -> Dict[str, Any]:
     """The dynaconf post hook is called after all the settings are loaded and set.
@@ -148,6 +152,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
             "social_core.pipeline.user.user_details",
             "galaxy_ng.app.pipelines.user_role",
             "galaxy_ng.app.pipelines.user_group",
+            DAB_SERVICE_BACKED_REDIRECT,
         )
 
         # Set external authentication feature flag
@@ -262,7 +267,8 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
             'galaxy_ng.social.pipeline.user.create_user',
             'social_core.pipeline.social_auth.associate_user',
             'social_core.pipeline.social_auth.load_extra_data',
-            'social_core.pipeline.user.user_details'
+            'social_core.pipeline.user.user_details',
+            DAB_SERVICE_BACKED_REDIRECT
         ]
 
     return data
