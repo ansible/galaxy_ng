@@ -4,39 +4,33 @@ from .collection import (
     CollectionVersionMoveViewSet,
     CollectionVersionCopyViewSet,
 )
-
-from .namespace import (
-    NamespaceViewSet,
-)
-
-from .task import (
-    TaskViewSet,
-)
-
+from .namespace import NamespaceViewSet
+from .task import TaskViewSet
 from .sync import SyncConfigViewSet
-
 from .execution_environments import (
     ContainerRepositoryViewSet,
     ContainerRepositoryManifestViewSet,
     ContainerRepositoryHistoryViewSet,
     ContainerReadmeViewSet,
-    ContainerTagViewset
+    ContainerTagViewset,
 )
 
 __all__ = (
-    'CollectionArtifactDownloadView',
-    'CollectionUploadViewSet',
-    'CollectionVersionMoveViewSet',
-    'CollectionVersionCopyViewSet',
-    'NamespaceViewSet',
-    'SyncConfigViewSet',
-    'TaskViewSet',
-    'UnpaginatedCollectionViewSet',
-    'UnpaginatedCollectionVersionViewSet',
-    'RepoMetadataViewSet',
-    'ContainerRepositoryViewSet',
-    'ContainerRepositoryManifestViewSet',
-    'ContainerRepositoryHistoryViewSet',
-    'ContainerReadmeViewSet',
-    'ContainerTagViewset'
+    # collection
+    "CollectionArtifactDownloadView",
+    "CollectionUploadViewSet",
+    "CollectionVersionMoveViewSet",
+    "CollectionVersionCopyViewSet",
+    # namespace
+    "NamespaceViewSet",
+    # task
+    "TaskViewSet",
+    # sync
+    "SyncConfigViewSet",
+    # execution_environments
+    "ContainerRepositoryViewSet",
+    "ContainerRepositoryManifestViewSet",
+    "ContainerRepositoryHistoryViewSet",
+    "ContainerReadmeViewSet",
+    "ContainerTagViewset",
 )
