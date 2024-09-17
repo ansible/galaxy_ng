@@ -21,6 +21,7 @@ x-common-env: &common-env
 
   PULP_DEBUG: 1
   PULP_GALAXY_DEPLOYMENT_MODE: 'standalone'
+  PULP_DEFAULT_FILE_STORAGE: "pulpcore.app.models.storage.FileSystem"
 
   # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/galaxy/'
