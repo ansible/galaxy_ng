@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import requests
 import warnings
 
@@ -9,7 +10,13 @@ warnings.filterwarnings("ignore")
 
 HUB_API_ROOT = "https://localhost/api/galaxy/"
 GW_ROOT_URL = "https://localhost"
-ADMIN_AUTH = ('admin', 'redhat1234')
+
+# 26 export AAP_GATEWAY_ADMIN_USERNAME=admin
+# 27 export AAP_GATEWAY_ADMIN_PASSWORD=admin
+ADMIN_AUTH = (
+    os.environ.get('AAP_GATEWAY_ADMIN_USERNAME', 'admin'),
+    os.environ.get('AAP_GATEWAY_ADMIN_PASSWORD', 'redhat1234')
+)
 
 NAMESPACES = ("autohubtest2", "autohubtest3", "signing")
 USERS = ("notifications_admin", "iqe_normal_user", "jdoe", "org-admin", "iqe_admin", "ee_admin")

@@ -8,6 +8,9 @@ x-common-env: &common-env
   POSTGRES_PASSWORD: galaxy_ng
   POSTGRES_DB: galaxy_ng
 
+  # no spying
+  PULP_ANALYTICS: 'false'
+
   # normally goes into settings.py ...
   PULP_DATABASES__default__ENGINE: django.db.backends.postgresql
   PULP_DATABASES__default__NAME: galaxy_ng
@@ -20,22 +23,23 @@ x-common-env: &common-env
   PULP_GALAXY_DEPLOYMENT_MODE: 'standalone'
 
   # Hostname and prefix has to be correct
-  PULP_GALAXY_API_PATH_PREFIX: '/api/galaxy'
-  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:5001'
-  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:5001/pulp/content"
+  PULP_GALAXY_API_PATH_PREFIX: '/api/galaxy/'
+  PULP_ANSIBLE_API_HOSTNAME: 'https://localhost'
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "https://localhost/pulp/content"
   PULP_CONTENT_ORIGIN: "https://localhost"
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
 
   # signing ...
-  ENABLE_SIGNING: 1
+  ENABLE_SIGNING: 0
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'true'
   PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
+  PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
   PULP_GALAXY_COLLECTION_SIGNING_SERVICE: 'ansible-default'
   PULP_GALAXY_CONTAINER_SIGNING_SERVICE: 'container-default'
 
   # pulp container ...
   PULP_TOKEN_AUTH_DISABLED: 'false'
-  PULP_TOKEN_SERVER: 'http://localhost:5001/token/'
+  PULP_TOKEN_SERVER: 'https://localhost/token/'
   PULP_TOKEN_SIGNATURE_ALGORITHM: 'ES256'
   PULP_PUBLIC_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_public_key.pem'
   PULP_PRIVATE_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_private_key.pem'
@@ -146,6 +150,8 @@ services:
       - ".:/src/galaxy_ng"
     environment:
       <<: *common-env
+    extra_hosts:
+      localhost: "host-gateway"
     command: |
       bash -c "
         while [[ ! -f /var/lib/pulp/.migrated ]]; do
@@ -167,6 +173,8 @@ services:
       - ".:/src/galaxy_ng"
     environment:
       <<: *common-env
+    extra_hosts:
+      localhost: "host-gateway"
     command: |
       bash -c "
         while [[ ! -f /var/lib/pulp/.migrated ]]; do
@@ -210,9 +218,13 @@ services:
     volumes:
       - './dev/nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
 
-
 volumes:
   var_lib_pulp:
     name: var_lib_pulp 
   etc_pulp_certs:
     name: etc_pulp_certs 
+
+#networks:
+#  dbnet:
+#  service-mesh:
+#    name: service-mesh
