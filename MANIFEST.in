@@ -24,3 +24,4 @@ include galaxy_ng/tests/integration/utils/gpg/qe-sign-priv.gpg
 include galaxy-operator/bin/readyz.py
 exclude .coveragerc
 exclude .sonarcloud.properties
+exclude aap_compose_dev.yaml
