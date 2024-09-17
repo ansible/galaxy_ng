@@ -232,7 +232,11 @@ func GetTeamByName(teamname string) Team {
 }
 
 func GetUserByUserName(username string) User {
+	//usersMutex.Lock()
+	//defer usersMutex.Unlock()
+
 	for _, user := range users {
+		log.Printf("getuserbyusername %d,%s == %s ?", user.Id, user.Username, username)
 		if user.Username == username {
 			return user
 		}

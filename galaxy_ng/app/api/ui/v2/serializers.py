@@ -58,7 +58,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return []
 
 
-class UserCreateUpdateSerializer(UserDetailSerializer):
+class UserCreateUpdateDeleteSerializer(UserDetailSerializer):
 
     groups = serializers.ListField(
         child=serializers.DictField(), required=False, default=[]
@@ -193,6 +193,7 @@ class UserCreateUpdateSerializer(UserDetailSerializer):
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.email = validated_data.get('email', instance.email)
+        instance.is_superuser = validated_data.get('is_superuser', instance.is_superuser)
 
         # If password is provided, update it securely
         password = validated_data.get('password', None)

@@ -11,3 +11,4 @@ importlib_resources
 galaxykit @ git+https://github.com/ansible/galaxykit
 pyyaml
 pytest-subtests
+ldap3

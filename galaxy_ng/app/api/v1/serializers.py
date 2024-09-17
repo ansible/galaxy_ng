@@ -756,7 +756,16 @@ class LegacyRoleImportDetailSerializer(serializers.Serializer):
 
         for message in obj.messages:
             msg_type = self.MSG_TYPE_MAP.get(message['level'], message['level'])
-            ts = datetime.datetime.utcfromtimestamp(message['time']).isoformat()
+            # FIXME(cutwater): The `datetime.utcfromtimestamp` method used here is a cause of
+            #  multiple problems (deprecated method, naive-datetime object result,
+            #  SonarCloud reliability issue). It returned a naive datetime object, which
+            #  should be avoided in general. The recommended fix is to build
+            #  a timezone-aware datetime object: `datetime.fromtimestamp(ts, timezone.utc)`.
+            #  However to preserve current behavior we will return a naive object for now
+            #  and revisit this code in future.
+            ts = datetime.datetime.fromtimestamp(
+                message['time'], tz=datetime.timezone.utc
+            ).replace(tzinfo=None).isoformat()
             msg_state = self.STATE_MAP.get(message['state'].upper(), message['state'].upper())
             msg = {
                 'id': ts,

@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework import mixins
 from rest_framework import views
 
 from ansible_base.rest_pagination.default_paginator import DefaultPaginator
@@ -12,11 +13,12 @@ from .filters import GroupViewFilter
 from .filters import OrganizationFilter
 from .filters import TeamFilter
 from .serializers import UserDetailSerializer
-from .serializers import UserCreateUpdateSerializer
+from .serializers import UserCreateUpdateDeleteSerializer
 from .serializers import GroupSerializer
 from .serializers import OrganizationSerializer
 from .serializers import TeamSerializer
 from .permissions import IsSuperUserOrReadOnly
+from .permissions import ComplexUserPermissions
 
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.auth import Group
@@ -45,17 +47,30 @@ class BaseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsSuperUserOrReadOnly]
 
 
+class CurrentUserViewSet(
+    BaseViewSet,
+    mixins.RetrieveModelMixin,
+):
+    serializer_class = UserDetailSerializer
+    model = User
+
+    def get_object(self):
+        return self.request.user
+
+
 class UserViewSet(BaseViewSet):
     queryset = User.objects.all().order_by('id')
     filterset_class = UserViewFilter
+    permission_classes = [ComplexUserPermissions]
+    # permission_classes = [IsSuperUserOrReadOnly]
 
     def get_serializer_class(self):
         # FIXME - a single serializer for this viewset
         #         seems painful to implement.
-        if self.action in ['list', 'retrieve', 'destroy']:
+        if self.action in ['list', 'retrieve']:
             return UserDetailSerializer
-        elif self.action in ['create', 'update', 'partial_update']:
-            return UserCreateUpdateSerializer
+        elif self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return UserCreateUpdateDeleteSerializer
         return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):
