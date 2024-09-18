@@ -157,8 +157,8 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
 
     def get_search_results(self, filter_params, sort):
         """Validates filter_params, builds each queryset and then unionize and apply filters."""
-        type = filter_params.get("type", "").lower()
-        if type not in ("role", "collection", ""):
+        type_ = filter_params.get("type", "").lower()
+        if type_ not in ("role", "collection", ""):
             raise ValidationError("'type' must be ['collection', 'role']")
 
         search_type = filter_params.get("search_type", DEFAULT_SEARCH_TYPE)
@@ -171,7 +171,14 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
 
         collections = self.get_collection_queryset(query=query)
         roles = self.get_role_queryset(query=query)
-        result_qs = self.filter_and_sort(collections, roles, filter_params, sort, type, query=query)
+        result_qs = self.filter_and_sort(
+            collections,
+            roles,
+            filter_params,
+            sort,
+            type_,
+            query=query
+        )
         return result_qs
 
     def get_filter_params(self, request):
@@ -268,7 +275,7 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
         ).values(*QUERYSET_VALUES)
         return qs
 
-    def filter_and_sort(self, collections, roles, filter_params, sort, type="", query=None):
+    def filter_and_sort(self, collections, roles, filter_params, sort, type_="", query=None):
         """Apply filters individually on each queryset and then combine to sort."""
         facets = {}
         if deprecated := filter_params.get("deprecated"):
@@ -297,7 +304,7 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
         if query:
             collections = collections.filter(search=query)
             roles = roles.filter(search=query)
-        elif keywords := filter_params.get("keywords"):  # search_type=sql
+        elif keywords := filter_params.get("keywords"):
             query = (
                 Q(name__icontains=keywords)
                 | Q(namespace_name__icontains=keywords)
@@ -308,9 +315,9 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
             collections = collections.filter(query)
             roles = roles.filter(query)
 
-        if type.lower() == "role":
+        if type_.lower() == "role":
             qs = roles.order_by(*sort)
-        elif type.lower() == "collection":
+        elif type_.lower() == "collection":
             qs = collections.order_by(*sort)
         else:
             qs = collections.union(roles, all=True).order_by(*sort)

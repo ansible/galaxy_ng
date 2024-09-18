@@ -95,9 +95,7 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
                         counter.save()
                     except DatabaseInternalError as e:
                         # Fail gracefully if the database is in read-only mode.
-                        if "read-only" in str(e):
-                            pass
-                        else:
+                        if "read-only" not in str(e):
                             raise e
 
         return super().list(request)

@@ -92,17 +92,19 @@ class ComplexUserPermissions(AnsibleBaseUserPermissions):
                 return False
 
         # we can't allow the last superuser to get demoted
-        if request.data.get('is_superuser') is False:
-            if User.objects.filter(is_superuser=True).count() == 1 and obj.is_superuser:
-                return False
+        if (
+            request.data.get('is_superuser') is False
+            and User.objects.filter(is_superuser=True).count() == 1
+            and obj.is_superuser
+        ):
+            return False
 
         # superuser can set the value to True or False
         if request.user.is_superuser:
             return True
 
         # user can set themself only to False
-        if request.user == obj:
-            if request.data.get('is_superuser') is False:
-                return True
+        if request.user == obj and request.data.get('is_superuser') is False:
+            return True
 
         return False

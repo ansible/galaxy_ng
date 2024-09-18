@@ -133,7 +133,6 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
             "SOCIAL_AUTH_LOGIN_REDIRECT_URL", default="/ui/"
         )
         data["SOCIAL_AUTH_JSONFIELD_ENABLED"] = True
-        # data["SOCIAL_AUTH_JSONFIELD_CUSTOM"] = "django.db.models.JSONField"
         data["SOCIAL_AUTH_URL_NAMESPACE"] = "social"
         data["SOCIAL_AUTH_KEYCLOAK_EXTRA_DATA"] = [
             ("refresh_token", "refresh_token"),
@@ -213,11 +212,6 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
     """
 
     data = {}
-
-    # SOCIAL_AUTH_GITHUB_BASE_URL = \
-    #   settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://github.com')
-    # SOCIAL_AUTH_GITHUB_API_URL = \
-    #   settings.get('SOCIAL_AUTH_GITHUB_BASE_URL', default='https://api.github.com')
 
     SOCIAL_AUTH_GITHUB_KEY = settings.get("SOCIAL_AUTH_GITHUB_KEY", default=None)
     SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
