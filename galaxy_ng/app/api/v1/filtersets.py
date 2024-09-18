@@ -19,7 +19,7 @@ class LegacyNamespaceFilter(filterset.FilterSet):
     sort = filters.OrderingFilter(
         fields=(
             ('created', 'created'),
-            ('name', 'name')
+            ('name', 'name'),
         )
     )
 
@@ -63,14 +63,12 @@ class LegacyUserFilter(filterset.FilterSet):
 
     sort = filters.OrderingFilter(
         fields=(
-            # ('created', 'created'),
-            ('username', 'username')
+            ('username', 'username'),
         )
     )
 
     class Meta:
         model = User
-        # fields = ['created', 'username']
         fields = ['username']
 
     def username_filter(self, queryset, name, value):

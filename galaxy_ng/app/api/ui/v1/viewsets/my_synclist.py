@@ -26,7 +26,6 @@ class MySyncListViewSet(SyncListViewSet):
         return get_objects_for_user(
             self.request.user,
             "galaxy.change_synclist",
-            # any_perm=True,
             qs=models.SyncList.objects.all(),
         )
 

@@ -117,7 +117,6 @@ class LegacyNamespaceOwnersViewSet(viewsets.GenericViewSet, mixins.ListModelMixi
     authentication_classes = GALAXY_AUTHENTICATION_CLASSES
 
     def get_queryset(self):
-        # return get_object_or_404(LegacyNamespace, pk=self.kwargs["pk"]).owners.all()
         ns = get_object_or_404(LegacyNamespace, pk=self.kwargs["pk"])
         if ns.namespace:
             return get_v3_namespace_owners(ns.namespace)

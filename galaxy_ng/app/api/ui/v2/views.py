@@ -62,7 +62,6 @@ class UserViewSet(BaseViewSet):
     queryset = User.objects.all().order_by('id')
     filterset_class = UserViewFilter
     permission_classes = [ComplexUserPermissions]
-    # permission_classes = [IsSuperUserOrReadOnly]
 
     def get_serializer_class(self):
         # FIXME - a single serializer for this viewset

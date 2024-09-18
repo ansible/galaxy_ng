@@ -46,9 +46,14 @@ def _download_avatar(url, namespace_name):
     try:
         downloader = HttpDownloader(url, session=session)
         img = downloader.fetch()
-    except:  # noqa
+    except Exception:  # noqa
+        # FIXME(cutwater): Handling base exception class is a bad practice, as well as ignoring it.
         return
     finally:
+        # FIXME(cutwater): The `asyncio.get_event_loop()` must not be used in the code.
+        #   It is deprecated and it's original behavior may change in future.
+        #   Users must not rely on the original behavior.
+        #   https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.get_event_loop
         asyncio.get_event_loop().run_until_complete(session.close())
 
     # Limit size of the avatar to avoid memory issues when validating it
