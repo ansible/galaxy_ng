@@ -3,7 +3,6 @@ from gettext import gettext as _
 import django_guid
 from django.core.management.base import BaseCommand
 
-# from galaxy_ng.app.api.v1.tasks import legacy_sync_from_upstream
 from galaxy_ng.app.api.v1.models import LegacyRole, LegacyRoleTag
 
 

@@ -24,16 +24,12 @@ class CollectionImport(LifecycleModel):
     Relations:
         namespace: Reference to a namespace.
     """
-    # task_id = models.UUIDField(primary_key=True)
     task_id = models.OneToOneField(PulpCollectionImport,
                                    primary_key=True,
                                    on_delete=models.CASCADE,
                                    db_column='task_id',
                                    related_name='galaxy_import')
-    # pulp_task = models.ForeignKey(Task, on_delete=models.CASCADE, default=task_id)
-
     created_at = models.DateTimeField()
-
     namespace = models.ForeignKey(Namespace, on_delete=models.CASCADE)
     name = models.CharField(max_length=64, editable=False)
     version = models.CharField(max_length=32, editable=False)
