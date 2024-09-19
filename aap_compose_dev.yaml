@@ -63,18 +63,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    #image: galaxy_base_image:latest
     image: "localhost/galaxy_ng/galaxy_ng:base"
 
   redis:
     image: "redis:5"
-    ports:
-      - "6379:6379"
 
   postgres:
     image: "postgres:13"
-    #ports:
-    #  - "5432:5432"
     environment:
       <<: *common-env
     healthcheck:
