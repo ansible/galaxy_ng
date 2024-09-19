@@ -466,7 +466,6 @@ def upstream_role_iterator(
             role_upstream_url = _baseurl + f'/api/v1/roles/{remote_id}/'
             logger.info(f'fetch {role_upstream_url}')
 
-            # role_page = requests.get(role_upstream_url)
             role_page = safe_fetch(role_upstream_url)
             if role_page.status_code == 404:
                 continue

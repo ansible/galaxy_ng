@@ -7,12 +7,12 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
 
     def convert_endpoint_path_params(self, path, view, schema):
         """Bypass variable-ization of paths if not a pulp route"""
-        if hasattr(self, '_input_request'):
-            if (
-                self._input_request.path.startswith(settings.GALAXY_API_PATH_PREFIX)
-                and not self._input_request.path.startswith(settings.API_ROOT)
-            ):
-                return path
+        if (
+            hasattr(self, '_input_request')
+            and self._input_request.path.startswith(settings.GALAXY_API_PATH_PREFIX)
+            and not self._input_request.path.startswith(settings.API_ROOT)
+        ):
+            return path
         return super().convert_endpoint_path_params(path, view, schema)
 
     def get_schema(self, request=None, public=False):

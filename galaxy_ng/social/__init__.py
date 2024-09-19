@@ -5,11 +5,9 @@ from django.conf import settings
 from django.db import transaction
 from social_core.backends.github import GithubOAuth2
 
-# from galaxy_ng.app.models.auth import Group, User
 from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.utils import rbac
-# from galaxy_ng.app.utils import namespaces as ns_utils
 
 from galaxy_importer.constants import NAME_REGEXP
 
@@ -42,7 +40,6 @@ class GalaxyNGOAuth2(GithubOAuth2):
     def do_auth(self, access_token, *args, **kwargs):
         """Finish the auth process once the access_token was retrieved"""
 
-        # userdata = id, login, access_token
         data = self.get_github_user(access_token)
 
         # extract the login now to prevent mutation
@@ -213,17 +210,6 @@ class GalaxyNGOAuth2(GithubOAuth2):
         """Convert namespace name to valid v3 name."""
         return name.replace('-', '_').lower()
 
-    '''
-    def _ensure_group(self, namespace_name, user):
-        """Create a group in the form of <namespace>:<namespace_name>"""
-        with transaction.atomic():
-            group, created = \
-                Group.objects.get_or_create_identity('namespace', namespace_name)
-            if created:
-                rbac.add_user_to_group(user, group)
-        return group, created
-    '''
-
     def _ensure_namespace(self, namespace_name, user):
         """Create an auto v3 namespace for the account"""
 
@@ -239,17 +225,9 @@ class GalaxyNGOAuth2(GithubOAuth2):
     def _ensure_legacynamespace(self, login, v3_namespace):
         """Create an auto legacynamespace for the account"""
 
-        '''
-        # userdata = id, login, access_token
-        user = User.objects.filter(username=login).first()
-        '''
-
         # make the namespace
         with transaction.atomic():
-            legacy_namespace, created = \
-                LegacyNamespace.objects.get_or_create(
-                    name=login
-                )
+            legacy_namespace, created = LegacyNamespace.objects.get_or_create(name=login)
 
             # bind the v3 namespace
             if created or not legacy_namespace.namespace:
