@@ -7,7 +7,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.ldap
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 def test_aap_renamed_ldap_user(
     ansible_config,
     settings,

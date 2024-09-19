@@ -27,7 +27,7 @@ def test_token_auth(profile, galaxy_client, ansible_config):
     """
     hub_version = get_hub_version(ansible_config)
     expected_status_code = 401
-    if parse_version(hub_version) < parse_version('4.10.0dev'):
+    if parse_version(hub_version) < parse_version('4.10.0'):
         expected_status_code = 403
 
     gc = galaxy_client(profile)
@@ -49,7 +49,7 @@ def test_auth_admin(galaxy_client, ansible_config):
     """Test whether admin can not access collections page using invalid token."""
     hub_version = get_hub_version(ansible_config)
     expected_status_code = 401
-    if parse_version(hub_version) < parse_version('4.10.0dev'):
+    if parse_version(hub_version) < parse_version('4.10.0'):
         expected_status_code = 403
 
     gc = galaxy_client("admin")
@@ -67,7 +67,7 @@ def test_auth_exception(galaxy_client, ansible_config):
     """Test whether an HTTP exception when using an invalid token."""
     hub_version = get_hub_version(ansible_config)
     expected_status_code = 401
-    if parse_version(hub_version) < parse_version('4.10.0dev'):
+    if parse_version(hub_version) < parse_version('4.10.0'):
         expected_status_code = 403
 
     gc = galaxy_client("basic_user")

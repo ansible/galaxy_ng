@@ -1,1 +1,0 @@
-adds IMPORTER_JOB_TIMEOUT to pulp-worker on crc, and increases the timeout to 1800 seconds
