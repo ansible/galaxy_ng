@@ -1,6 +1,6 @@
 # Execution Environments
 
-For information on how to use execution environments, please check out the [awx documentation](https://docs.ansible.com/automation-controller/latest/html/userguide/execution_environments.html).
+For information on how to use execution environments, please check out [Getting started with execution environments](https://docs.ansible.com/ansible/latest/getting_started_ee/index.html).
 
 Galaxy NG provides a container registry for pushing container images. It functions just like any other container registry and can be accessed with all the standardized container tools.
 

@@ -1,7 +1,8 @@
 # Galaxy V3 API 
 
 The following sections describe the API endpoints that are relevant to the Galaxy NG API.
-if you have questions or looking for help please post to the Matrix Channel `#galaxy:ansible.com` or IRC `#ansible-galaxy`
+if you have questions or looking for help please post to the [Ansible forum](https://forum.ansible.com/c/help/6)
+with the appropriate tags; for example, `ansible-galaxy` or `galaxy-ng`.
 
 ## Authentication
 
