@@ -227,10 +227,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
 
         # make the namespace
         with transaction.atomic():
-            legacy_namespace, created = \
-                LegacyNamespace.objects.get_or_create(
-                    name=login
-                )
+            legacy_namespace, created = LegacyNamespace.objects.get_or_create(name=login)
 
             # bind the v3 namespace
             if created or not legacy_namespace.namespace:

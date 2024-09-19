@@ -62,7 +62,7 @@ class Command(BaseCommand):
         if not options["yes"]:
             confirm = input(
                 f"This will set keyring to {keyring_path} for "
-                "{repository} repository, " "Proceed? (Y/n)"
+                f"{repository} repository, Proceed? (Y/n)"
             ).lower()
             while True:
                 if confirm not in ("y", "n", "yes", "no"):

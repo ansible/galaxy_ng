@@ -91,7 +91,6 @@ def add_namespace_metadata_to_published_repository(apps, schema_editor):
     RepositoryContent = apps.get_model('core', 'RepositoryContent')
     RepositoryVersion = apps.get_model('core', 'RepositoryVersion')
     RepositoryVersionContentDetails = apps.get_model('core', 'RepositoryVersionContentDetails')
-    RepositoryVersionContentDetails = apps.get_model('core', 'RepositoryVersionContentDetails')
     
     repo = AnsibleDistribution.objects.get(base_path="published").repository
     repo_v = RepositoryVersion.objects.filter(repository=repo).order_by("-number").first()
