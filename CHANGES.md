@@ -1,3 +1,25 @@
+## 4.10.0 (2024-09-19) {: #4.10.0 }
+
+#### Bugfixes
+
+- Support SVG avatar image on namespaces
+  [#2836](https://github.com/ansible/galaxy_ng/issues/2836)
+- Fixed issue where group members were also showing up as users in the Namespace owners list.
+  [#3121](https://github.com/ansible/galaxy_ng/issues/3121)
+- Parameterize ansible-test importer resource requirements
+  [#3190](https://github.com/ansible/galaxy_ng/issues/3190)
+
+#### Improved Documentation
+
+- echo "add skeleton for galaxy_collection docs"
+  [#2420](https://github.com/ansible/galaxy_ng/issues/2420)
+
+#### Misc
+
+- [#2822](https://github.com/ansible/galaxy_ng/issues/2822), [#3036](https://github.com/ansible/galaxy_ng/issues/3036), [#3064](https://github.com/ansible/galaxy_ng/issues/3064), [#3358](https://github.com/ansible/galaxy_ng/issues/3358), [#18825](https://github.com/ansible/galaxy_ng/issues/18825)
+
+---
+
 =========
 Changelog
 =========

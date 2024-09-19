@@ -2,23 +2,8 @@
 # to be looked at by PR author and reviewer to keep or remove
 # called by .github/workflows/labeler.yml
 
-backport-4.2:
-- galaxy_ng/app/**/*
-
-backport-4.4:
-- galaxy_ng/app/**/*
-
-backport-4.5:
-- galaxy_ng/app/**/*
-
-backport-4.6:
-- galaxy_ng/app/**/*
-
-backport-4.7:
-- galaxy_ng/app/**/*
-
-backport-4.8:
-- galaxy_ng/app/**/*
-
 backport-4.9:
+- galaxy_ng/app/**/*
+
+backport-4.10:
 - galaxy_ng/app/**/*
