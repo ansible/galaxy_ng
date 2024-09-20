@@ -23,6 +23,7 @@ class DependencySpec:
 @pytest.mark.all
 @pytest.mark.cli
 @pytest.mark.slow_in_cloud
+@pytest.mark.skip_in_gw
 @pytest.mark.parametrize(
     "params",
     (
