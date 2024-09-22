@@ -169,12 +169,34 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         ]
 
         # Replace AUTH CLASSES
+        """
         data["GALAXY_AUTHENTICATION_CLASSES"] = [
             "galaxy_ng.app.auth.session.SessionAuthentication",
             "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
             "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
             "dynaconf_merge_unique",
         ]
+        """
+
+        """
+        data["GALAXY_AUTHENTICATION_CLASSES"] = [
+            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
+            'rest_framework.authentication.BasicAuthentication',
+            'rest_framework.authentication.SessionAuthentication',
+            "galaxy_ng.app.auth.session.SessionAuthentication",
+            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+            #"galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
+        ]
+        """
+        """
+        data["GALAXY_AUTHENTICATION_CLASSES"] = [
+            "galaxy_ng.app.auth.session.SessionAuthentication",
+            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
+            #"dynaconf_merge_unique",
+        ] + settings.get("GALAXY_AUTHENTICATION_CLASSES", []) + ["dynaconf_merge_unique"]
+        print(data["GALAXY_AUTHENTICATION_CLASSES"])
+        """
 
         # Set default to one day expiration
         data["GALAXY_TOKEN_EXPIRATION"] = settings.get("GALAXY_TOKEN_EXPIRATION", 1440)
@@ -403,12 +425,71 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     # default rest framework auth classes to the galaxy auth classes. Ideally we should
     # switch everything to use the default DRF auth classes, but given how many
     # environments would have to be reconfigured, this is a lot easier.
+
+    all_classes = set()
+
+    # GALAXY_AUTHENTICATION_CLASSES
+    # ANSIBLE_AUTHENTICATION_CLASSES
+    for key in settings.keys():
+        #print(key)
+        if 'AUTHENTICATION_CLASS' in key:
+            print(key)
+            for x in settings.get(key, []):
+                print('\t' + x)
+                all_classes.add(x)
+    for key in data.keys():
+        if 'AUTHENTICATION_CLASS' in key:
+            print(key)
+            for x in data.get(key, []):
+                print('\t' + x)
+                all_classes.add(x)
+
+    print(f'ALL: {all_classes}')
+
     galaxy_auth_classes = data.get(
         "GALAXY_AUTHENTICATION_CLASSES",
         settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
     )
+
+    # print('AUTH_CLASSES 1: %s' % galaxy_auth_classes)
+
+    # add in keycloak classes if necessary ...
+    # Obtain values for Social Auth
+    SOCIAL_AUTH_KEYCLOAK_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_KEY", default=None)
+    SOCIAL_AUTH_KEYCLOAK_SECRET = settings.get("SOCIAL_AUTH_KEYCLOAK_SECRET", default=None)
+    SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY", default=None)
+    KEYCLOAK_PROTOCOL = settings.get("KEYCLOAK_PROTOCOL", default=None)
+    KEYCLOAK_HOST = settings.get("KEYCLOAK_HOST", default=None)
+    KEYCLOAK_PORT = settings.get("KEYCLOAK_PORT", default=None)
+    KEYCLOAK_REALM = settings.get("KEYCLOAK_REALM", default=None)
+
+    # Add settings if Social Auth values are provided
+    if all(
+        [
+            SOCIAL_AUTH_KEYCLOAK_KEY,
+            SOCIAL_AUTH_KEYCLOAK_SECRET,
+            SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY,
+            KEYCLOAK_HOST,
+            KEYCLOAK_PORT,
+            KEYCLOAK_REALM,
+        ]
+    ):
+        for class_name in [
+            "galaxy_ng.app.auth.session.SessionAuthentication",
+            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
+        ]:
+            if class_name not in galaxy_auth_classes:
+                galaxy_auth_classes.insert(0, class_name)
+    else:
+        print('DID NOT MEET KEYCLOAK CONDITIONS')
+
+    print('AUTH_CLASSES 2: %s' % galaxy_auth_classes)
+
     if galaxy_auth_classes:
         return {
+            "ANSIBLE_AUTHENTICATION_CLASSES": galaxy_auth_classes,
+            "GALAXY_AUTHENTICATION_CLASSES": galaxy_auth_classes,
             "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES": galaxy_auth_classes
         }
     else:
