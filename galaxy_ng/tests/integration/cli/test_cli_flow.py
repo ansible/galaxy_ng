@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.cli
 @pytest.mark.all
+@pytest.mark.skip_in_gw
 def test_publish_newer_version_collection(galaxy_client, cleanup_collections, uncertifiedv2):
     """Test whether a newer version of collection can be installed after being published.
 
@@ -43,6 +44,7 @@ def test_publish_newer_version_collection(galaxy_client, cleanup_collections, un
 
 @pytest.mark.all
 @pytest.mark.cli
+@pytest.mark.skip_in_gw
 def test_publish_newer_certified_collection_version(
     galaxy_client,
     cleanup_collections,
@@ -93,6 +95,7 @@ def test_publish_same_collection_version(ansible_config, galaxy_client):
 
 @pytest.mark.all
 @pytest.mark.cli
+@pytest.mark.skip_in_gw
 def test_publish_and_install_by_self(galaxy_client, published, cleanup_collections):
     """A publishing user has the permission to install an uncertified version of their
     own collection.
@@ -107,6 +110,7 @@ def test_publish_and_install_by_self(galaxy_client, published, cleanup_collectio
 @pytest.mark.all
 @pytest.mark.cli
 @pytest.mark.deployment_cloud
+@pytest.mark.skip_in_gw
 def test_publish_and_expect_uncertified_hidden(
     galaxy_client,
     published,
