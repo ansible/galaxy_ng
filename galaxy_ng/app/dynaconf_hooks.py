@@ -407,26 +407,6 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     # switch everything to use the default DRF auth classes, but given how many
     # environments would have to be reconfigured, this is a lot easier.
 
-    '''
-    all_classes = set()
-
-    # GALAXY_AUTHENTICATION_CLASSES
-    # ANSIBLE_AUTHENTICATION_CLASSES
-    for key in settings.keys():
-        #print(key)
-        if 'AUTHENTICATION_CLASS' in key:
-            #print(key)
-            for x in settings.get(key, []):
-                #print('\t' + x)
-                all_classes.add(x)
-    for key in data.keys():
-        if 'AUTHENTICATION_CLASS' in key:
-            #print(key)
-            for x in data.get(key, []):
-                #print('\t' + x)
-                all_classes.add(x)
-    '''
-
     galaxy_auth_classes = data.get(
         "GALAXY_AUTHENTICATION_CLASSES",
         settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
