@@ -3,8 +3,6 @@ import pytest
 
 from galaxy_ng.app.dynaconf_hooks import post as post_hook
 
-from pprint import pprint
-
 
 class SuperDict(dict):
 
@@ -310,7 +308,11 @@ BASE_SETTINGS = {
         ),
     ],
 )
-def test_dynaconf_hooks_authentication_backends_and_classes(do_stuff, extra_settings, expected_results):
+def test_dynaconf_hooks_authentication_backends_and_classes(
+    do_stuff,
+    extra_settings,
+    expected_results
+):
 
     # skip test this way ...
     if not do_stuff:
