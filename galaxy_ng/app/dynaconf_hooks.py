@@ -34,20 +34,19 @@ DAB_SERVICE_BACKED_REDIRECT = (
 )
 
 
-def post(settings: Dynaconf, run_dynamic=True, run_validate=True, testing=False) -> Dict[str, Any]:
+def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True) -> Dict[str, Any]:
     """The dynaconf post hook is called after all the settings are loaded and set.
 
     Post hook is necessary when a setting key depends conditionally on a previouslys et variable.
 
     settings: A read-only copy of the django.conf.settings
+    run_dynamic: update the final data with configure_dynamic_settings
+    run_validate: call the validate function on the final data
     returns: a dictionary to be merged to django.conf.settings
 
     NOTES:
         Feature flags must be loaded directly on `app/api/ui/views/feature_flags.py` view.
     """
-
-    #if testing:
-    #    import epdb; epdb.st()
 
     data = {"dynaconf_merge": False}
     # existing keys will be merged if dynaconf_merge is set to True
@@ -65,14 +64,13 @@ def post(settings: Dynaconf, run_dynamic=True, run_validate=True, testing=False)
     data.update(configure_legacy_roles(settings))
     data.update(configure_dab_required_settings(settings))
 
-    # This should go last, and it needs to receive the data from the previous configuration
+    # These should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
     # of the galaxy auth classes, and if galaxy auth classes are overridden by any of the
     # other dynaconf hooks (such as keycloak), those changes need to be applied to the
     # rest framework auth classes too.
     data.update(configure_authentication_backends(settings, data))
     data.update(configure_authentication_classes(settings, data))
-    # import epdb; epdb.st()
 
     # This must go last, so that all the default settings are loaded before dynamic and validation
     if run_dynamic:
@@ -81,9 +79,6 @@ def post(settings: Dynaconf, run_dynamic=True, run_validate=True, testing=False)
     if run_validate:
         validate(settings)
 
-    if testing:
-        # import epdb; epdb.st()
-        pass
     return data
 
 
@@ -440,6 +435,7 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     # switch everything to use the default DRF auth classes, but given how many
     # environments would have to be reconfigured, this is a lot easier.
 
+    '''
     all_classes = set()
 
     # GALAXY_AUTHENTICATION_CLASSES
@@ -457,8 +453,7 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
             for x in data.get(key, []):
                 #print('\t' + x)
                 all_classes.add(x)
-
-    #print(f'ALL: {all_classes}')
+    '''
 
     galaxy_auth_classes = data.get(
         "GALAXY_AUTHENTICATION_CLASSES",
@@ -467,32 +462,7 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     if galaxy_auth_classes is None:
         galaxy_auth_classes = []
 
-    # print('AUTH_CLASSES 1: %s' % galaxy_auth_classes)
-
-    '''
     # add in keycloak classes if necessary ...
-    # Obtain values for Social Auth
-    SOCIAL_AUTH_KEYCLOAK_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_KEY", default=None)
-    SOCIAL_AUTH_KEYCLOAK_SECRET = settings.get("SOCIAL_AUTH_KEYCLOAK_SECRET", default=None)
-    SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY", default=None)
-    KEYCLOAK_PROTOCOL = settings.get("KEYCLOAK_PROTOCOL", default=None)
-    KEYCLOAK_HOST = settings.get("KEYCLOAK_HOST", default=None)
-    KEYCLOAK_PORT = settings.get("KEYCLOAK_PORT", default=None)
-    KEYCLOAK_REALM = settings.get("KEYCLOAK_REALM", default=None)
-
-    # Add settings if Social Auth values are provided
-    if all(
-        [
-            SOCIAL_AUTH_KEYCLOAK_KEY,
-            SOCIAL_AUTH_KEYCLOAK_SECRET,
-            SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY,
-            KEYCLOAK_HOST,
-            KEYCLOAK_PORT,
-            KEYCLOAK_REALM,
-        ]
-    ):
-    '''
-
     if data.get('GALAXY_AUTH_KEYCLOAK_ENABLED') is True:
         for class_name in [
             "galaxy_ng.app.auth.session.SessionAuthentication",
@@ -501,14 +471,6 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
         ]:
             if class_name not in galaxy_auth_classes:
                 galaxy_auth_classes.insert(0, class_name)
-    else:
-        # print('DID NOT MEET KEYCLOAK CONDITIONS')
-        pass
-
-    # print('AUTH_CLASSES 2: %s' % galaxy_auth_classes)
-
-    # print(galaxy_auth_classes)
-    # import epdb; epdb.st()
 
     if galaxy_auth_classes:
         data["ANSIBLE_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
