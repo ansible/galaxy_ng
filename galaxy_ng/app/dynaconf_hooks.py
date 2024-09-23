@@ -584,9 +584,6 @@ def configure_authentication_backends(settings: Dynaconf, data: Dict[str, Any]) 
     if (preset_list := settings.AUTHENTICATION_BACKEND_PRESETS_DATA.get(preset_name)) is not None:
         backends.extend([item for item in preset_list if item not in backends])
 
-    # if 'Super' in str(type(settings)):
-    #     import epdb; epdb.st()
-
     # insert the AAP migrated user backend
     prefix_backend = "ansible_base.lib.backends.prefixed_user_auth.PrefixedUserAuthBackend"
     if prefix_backend not in backends:
