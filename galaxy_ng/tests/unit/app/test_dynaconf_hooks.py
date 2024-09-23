@@ -326,7 +326,7 @@ def test_dynaconf_hooks_authentication_backends_and_classes(
     # don't allow the downstream to edit this data ...
     xsettings.immutable = True
 
-    new_settings = post_hook(xsettings, run_dynamic=False, run_validate=False)
+    new_settings = post_hook(xsettings, run_dynamic=True, run_validate=True)
     for key, val in expected_results.items():
         """
         try:
