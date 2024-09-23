@@ -177,35 +177,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
             "dynaconf_merge",
         ]
 
-        # Replace AUTH CLASSES
-        """
-        data["GALAXY_AUTHENTICATION_CLASSES"] = [
-            "galaxy_ng.app.auth.session.SessionAuthentication",
-            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
-            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-            "dynaconf_merge_unique",
-        ]
-        """
-
-        """
-        data["GALAXY_AUTHENTICATION_CLASSES"] = [
-            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-            'rest_framework.authentication.BasicAuthentication',
-            'rest_framework.authentication.SessionAuthentication',
-            "galaxy_ng.app.auth.session.SessionAuthentication",
-            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
-            #"galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-        ]
-        """
-        """
-        data["GALAXY_AUTHENTICATION_CLASSES"] = [
-            "galaxy_ng.app.auth.session.SessionAuthentication",
-            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
-            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-            #"dynaconf_merge_unique",
-        ] + settings.get("GALAXY_AUTHENTICATION_CLASSES", []) + ["dynaconf_merge_unique"]
-        print(data["GALAXY_AUTHENTICATION_CLASSES"])
-        """
+        # Replace AUTH CLASSES [shifted to configure_authentication_classes]
 
         # Set default to one day expiration
         data["GALAXY_TOKEN_EXPIRATION"] = settings.get("GALAXY_TOKEN_EXPIRATION", 1440)
