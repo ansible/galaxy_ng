@@ -34,7 +34,7 @@ DAB_SERVICE_BACKED_REDIRECT = (
 )
 
 
-def post(settings: Dynaconf) -> Dict[str, Any]:
+def post(settings: Dynaconf, run_dynamic=True, run_validate=True, testing=False) -> Dict[str, Any]:
     """The dynaconf post hook is called after all the settings are loaded and set.
 
     Post hook is necessary when a setting key depends conditionally on a previouslys et variable.
@@ -45,6 +45,10 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     NOTES:
         Feature flags must be loaded directly on `app/api/ui/views/feature_flags.py` view.
     """
+
+    #if testing:
+    #    import epdb; epdb.st()
+
     data = {"dynaconf_merge": False}
     # existing keys will be merged if dynaconf_merge is set to True
     # here it is set to false, so it allows each value to be individually marked as a merge.
@@ -68,11 +72,18 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     # rest framework auth classes too.
     data.update(configure_authentication_backends(settings, data))
     data.update(configure_authentication_classes(settings, data))
+    # import epdb; epdb.st()
 
     # This must go last, so that all the default settings are loaded before dynamic and validation
-    data.update(configure_dynamic_settings(settings))
+    if run_dynamic:
+        data.update(configure_dynamic_settings(settings))
 
-    validate(settings)
+    if run_validate:
+        validate(settings)
+
+    if testing:
+        # import epdb; epdb.st()
+        pass
     return data
 
 
@@ -104,6 +115,9 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
             KEYCLOAK_REALM,
         ]
     ):
+
+        data["GALAXY_AUTH_KEYCLOAK_ENABLED"] = True
+
         data["KEYCLOAK_ADMIN_ROLE"] = settings.get("KEYCLOAK_ADMIN_ROLE", default="hubadmin")
         data["KEYCLOAK_GROUP_TOKEN_CLAIM"] = settings.get(
             "KEYCLOAK_GROUP_TOKEN_CLAIM", default="group"
@@ -433,26 +447,29 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     for key in settings.keys():
         #print(key)
         if 'AUTHENTICATION_CLASS' in key:
-            print(key)
+            #print(key)
             for x in settings.get(key, []):
-                print('\t' + x)
+                #print('\t' + x)
                 all_classes.add(x)
     for key in data.keys():
         if 'AUTHENTICATION_CLASS' in key:
-            print(key)
+            #print(key)
             for x in data.get(key, []):
-                print('\t' + x)
+                #print('\t' + x)
                 all_classes.add(x)
 
-    print(f'ALL: {all_classes}')
+    #print(f'ALL: {all_classes}')
 
     galaxy_auth_classes = data.get(
         "GALAXY_AUTHENTICATION_CLASSES",
         settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
     )
+    if galaxy_auth_classes is None:
+        galaxy_auth_classes = []
 
     # print('AUTH_CLASSES 1: %s' % galaxy_auth_classes)
 
+    '''
     # add in keycloak classes if necessary ...
     # Obtain values for Social Auth
     SOCIAL_AUTH_KEYCLOAK_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_KEY", default=None)
@@ -474,6 +491,9 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
             KEYCLOAK_REALM,
         ]
     ):
+    '''
+
+    if data.get('GALAXY_AUTH_KEYCLOAK_ENABLED') is True:
         for class_name in [
             "galaxy_ng.app.auth.session.SessionAuthentication",
             "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
@@ -482,18 +502,20 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
             if class_name not in galaxy_auth_classes:
                 galaxy_auth_classes.insert(0, class_name)
     else:
-        print('DID NOT MEET KEYCLOAK CONDITIONS')
+        # print('DID NOT MEET KEYCLOAK CONDITIONS')
+        pass
 
-    print('AUTH_CLASSES 2: %s' % galaxy_auth_classes)
+    # print('AUTH_CLASSES 2: %s' % galaxy_auth_classes)
+
+    # print(galaxy_auth_classes)
+    # import epdb; epdb.st()
 
     if galaxy_auth_classes:
-        return {
-            "ANSIBLE_AUTHENTICATION_CLASSES": galaxy_auth_classes,
-            "GALAXY_AUTHENTICATION_CLASSES": galaxy_auth_classes,
-            "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES": galaxy_auth_classes
-        }
-    else:
-        return {}
+        data["ANSIBLE_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
+        data["GALAXY_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
+        data["REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
+
+    return data
 
 
 def configure_password_validators(settings: Dynaconf) -> Dict[str, Any]:
@@ -647,6 +669,9 @@ def configure_authentication_backends(settings: Dynaconf, data: Dict[str, Any]) 
     preset_name = settings.get("AUTHENTICATION_BACKEND_PRESET")
     if (preset_list := settings.AUTHENTICATION_BACKEND_PRESETS_DATA.get(preset_name)) is not None:
         backends.extend([item for item in preset_list if item not in backends])
+
+    # if 'Super' in str(type(settings)):
+    #     import epdb; epdb.st()
 
     # insert the AAP migrated user backend
     prefix_backend = "ansible_base.lib.backends.prefixed_user_auth.PrefixedUserAuthBackend"
