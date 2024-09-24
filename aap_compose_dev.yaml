@@ -148,6 +148,9 @@ services:
       <<: *common-env
     extra_hosts:
       localhost: "host-gateway"
+    networks:
+      - default
+      - service-mesh
     command: |
       bash -c "
         while [[ ! -f /var/lib/pulp/.migrated ]]; do
@@ -171,6 +174,9 @@ services:
       <<: *common-env
     extra_hosts:
       localhost: "host-gateway"
+    networks:
+      - default
+      - service-mesh
     command: |
       bash -c "
         while [[ ! -f /var/lib/pulp/.migrated ]]; do
@@ -220,7 +226,6 @@ volumes:
   etc_pulp_certs:
     name: etc_pulp_certs 
 
-#networks:
-#  dbnet:
-#  service-mesh:
-#    name: service-mesh
+networks:
+  service-mesh:
+    name: service-mesh
