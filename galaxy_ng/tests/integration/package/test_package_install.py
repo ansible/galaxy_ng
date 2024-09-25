@@ -34,6 +34,15 @@ def test_package_install(env_vars):
         pid = subprocess.run(f'{basedir}/venv/bin/pip install --upgrade pip', shell=True)
         assert pid.returncode == 0
 
+        # Install DAB
+        cmd = (
+            'rm -rf django-ansible-base && '
+            'git clone https://github.com/ansible/django-ansible-base --depth 1 && '
+            f'{basedir}/venv/bin/pip install "django-ansible-base[jwt_consumer]"'
+        )
+        pid = subprocess.run(cmd)
+        assert pid.returncode == 0
+
         # install the package
         cmd = f'{basedir}/venv/bin/pip install .'
         if env_vars:
