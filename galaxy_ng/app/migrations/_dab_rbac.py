@@ -39,18 +39,28 @@ def split_pulp_roles(apps, schema_editor):
     GroupRole = apps.get_model('core', 'GroupRole')
 
     for corerole in Role.objects.all():
+        print(f'ROLE {corerole} {corerole.name}')
         split_roles = {}
         for assignment_cls in (UserRole, GroupRole):
+            print(f'\t{assignment_cls}')
             for pulp_assignment in assignment_cls.objects.filter(role=corerole, content_type__isnull=False):
+                print(f'\t\t{assignment_cls} {pulp_assignment}')
                 if pulp_assignment.content_type_id not in split_roles:
+                    print(f'\t\t\t{pulp_assignment.content_type_id}')
                     new_data = {
                         'description': corerole.description,
                         'name': f'{corerole.name}_{pulp_assignment.content_type.model}'
                     }
                     new_role = Role(**new_data)
                     new_role.save()
+
+                    # add the permission back? ...
+                    for perm in pulp_assignment.role.permissions.all():
+                        new_role.permissions.add(perm)
+
                     split_roles[pulp_assignment.content_type_id] = new_role
 
+                print(f"\t\tchange .role from {pulp_assignment.role.name} to {split_roles[pulp_assignment.content_type_id].name}")
                 pulp_assignment.role = split_roles[pulp_assignment.content_type_id]
                 pulp_assignment.save(update_fields=['role'])
 
