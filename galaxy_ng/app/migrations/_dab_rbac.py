@@ -2,6 +2,7 @@ import logging
 
 from django.apps import apps as global_apps
 from django.contrib.contenttypes.models import ContentType
+from rest_framework.exceptions import ValidationError
 
 from ansible_base.rbac.management import create_dab_permissions
 from ansible_base.rbac.migrations._utils import give_permissions
@@ -46,15 +47,19 @@ def split_pulp_roles(apps, schema_editor):
         for assignment_cls in (UserRole, GroupRole):
             for pulp_assignment in assignment_cls.objects.filter(role=corerole, content_type__isnull=False):
                 if pulp_assignment.content_type_id not in split_roles:
+ 
+                    cls = apps.get_model(pulp_assignment.content_type.app_label, pulp_assignment.content_type.model)
+                    try:
+                        ct_codenames = combine_values(permissions_allowed_for_role(cls))
+                    except ValidationError:
+                        continue
+
                     new_data = {
                         'description': corerole.description,
                         'name': f'{corerole.name}_{pulp_assignment.content_type.model}'
                     }
                     new_role = Role(**new_data)
                     new_role.save()
-
-                    cls = apps.get_model(pulp_assignment.content_type.app_label, pulp_assignment.content_type.model)
-                    ct_codenames = combine_values(permissions_allowed_for_role(cls))
 
                     for perm in pulp_assignment.role.permissions.all():
                         if ct_codenames and perm.codename not in ct_codenames:
