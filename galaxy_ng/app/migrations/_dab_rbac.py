@@ -1,9 +1,12 @@
 import logging
 
 from django.apps import apps as global_apps
+from django.contrib.contenttypes.models import ContentType
 
 from ansible_base.rbac.management import create_dab_permissions
 from ansible_base.rbac.migrations._utils import give_permissions
+from ansible_base.rbac.validators import permissions_allowed_for_role, combine_values
+
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +57,12 @@ def split_pulp_roles(apps, schema_editor):
                     new_role = Role(**new_data)
                     new_role.save()
 
-                    # add the permission back? ...
+                    cls = apps.get_model(pulp_assignment.content_type.app_label, pulp_assignment.content_type.model)
+                    ct_codenames = combine_values(permissions_allowed_for_role(cls))
+
                     for perm in pulp_assignment.role.permissions.all():
+                        if ct_codenames and perm.codename not in ct_codenames:
+                            continue
                         new_role.permissions.add(perm)
 
                     split_roles[pulp_assignment.content_type_id] = new_role
