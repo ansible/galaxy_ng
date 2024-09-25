@@ -27,7 +27,11 @@ def test_package_install(env_vars):
     with tempfile.TemporaryDirectory(prefix='galaxy_ng_testing_') as basedir:
 
         # make a venv
-        pid = subprocess.run(f'python3 -m venv {basedir}/venv', shell=True)
+        pid = subprocess.run(f'python3.11 -m venv {basedir}/venv', shell=True)
+        assert pid.returncode == 0
+
+        # upgrade pip
+        pid = subprocess.run(f'{basedir}/venv/bin/pip install --upgrade pip', shell=True)
         assert pid.returncode == 0
 
         # install the package
