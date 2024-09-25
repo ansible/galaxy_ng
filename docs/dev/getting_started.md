@@ -2,35 +2,15 @@
 
 ## Setting up the developer environment
 
-### Docker Compose environment
+### Docker Compose
 
-This is recommended for beginners. It's less error prone and easier to setup, however it offers less flexibility than vagrant. Use this if you're:
-
-- primarily developing the UI
-- primarily contributing to galaxy_ng and not pulpcore, pulp_ansible or pulp_container
-- need to develop a feature for console.redhat.com
-- need to test keycloak or LDAP authentication
-- are developing using a Mac
-- writing documentation
-
-[Docker environment developer setup guide](docker_environment.md).
+> **TO BE DEFINED**
 
 ### OCI Env
 
 This is the new preferred way to develop with pulp. It provides a flexible, containerized environment that's easy to set up. It supports running integration and functional tests as well as developing the UI. It supports all the features from the docker and vagrant environments, but isn't as heavily tested as the docker environment.
 
 [OCI Env developer setup guide](oci_env.md)
-
-### Vagrant Environment
-
-This uses the [Pulp developer environment](https://docs.pulpproject.org/pulpcore/contributing/index.html) which is based off of vagrant. It offers a developer environment that is much closer to a production installation of Galaxy NG. It allows users to run on a wide variety of operating systems with any set of pulp plugins installed. Use this if you're:
-
-- contributing to one of the pulp projects
-- need to debug an issue that's presenting itself in production installations
-- need to run pulpcore and pulp_ansible without the galaxy_ng plugin installed
-- need to debug an issue on an operating system other than RHEL/Centos
-
-[Vagrant environment developer setup guide](vagrant.md)
 
 ## Issue Tracker
 

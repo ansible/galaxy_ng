@@ -1,24 +1,7 @@
 .SILENT:
-DOCKER_IMAGE_NAME = localhost/galaxy_ng/galaxy_ng
-RUNNING = $(shell docker ps -q -f name=api)
-
-# if running is empty, then DJ_MANAGER = manage, else DJ_MANAGER = django-admin
-DJ_MANAGER = $(shell if [ "$(RUNNING)" = "" ]; then echo manage; else echo django-admin; fi)
 
 # set the OCI_ENV_PATH to be ../oci_env/ if this isn't set in the user's environment
 export OCI_ENV_PATH = $(shell if [ -n "$$OCI_ENV_PATH" ]; then echo "$$OCI_ENV_PATH"; else echo ${PWD}/../oci_env/; fi)
-
-define exec_or_run
-	# Tries to run on existing container if it exists, otherwise starts a new one.
-	@echo $(1)$(2)$(3)$(4)$(5)$(6)
-	@if [ "$(RUNNING)" != "" ]; then \
-		echo "Running on existing container $(RUNNING)" 1>&2; \
-		./compose exec $(1) $(2) $(3) $(4) $(5) $(6); \
-	else \
-		echo "Starting new container" 1>&2; \
-		./compose run --use-aliases --service-ports --rm $(1) $(2) $(3) $(4) $(5) $(6); \
-	fi
-endef
 
 
 .DEFAULT:
@@ -50,20 +33,7 @@ requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, an
 	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in --upgrade
 	pip-compile -o requirements/requirements.standalone.txt setup.py requirements/requirements.standalone.in --upgrade
 
-.PHONY: pulp/plugin-template-check
-pulp/plugin-template-check:
-	./dev/common/check_pulp_template.sh
-
-.PHONY: pulp/run-plugin-template-script
-pulp/run-plugin-template-script:
-	echo "Running plugin_template script in sibling directory"
-	cd ../plugin_template/ && ./plugin-template --github galaxy_ng
-
 # Repository management
-
-.PHONY: changelog
-changelog:        ## Build the changelog
-	towncrier build
 
 .PHONY: lint
 lint:             ## Lint the code
@@ -76,30 +46,6 @@ fmt:              ## Format the code using Darker
 	darker
 
 # Container environment management
-
-.PHONY: docker/prune
-docker/prune:     ## Clean all development images and volumes
-	@docker system prune --all --volumes
-
-.PHONY: docker/build
-docker/build:     ## Build all development images.
-	./compose build
-
-.PHONY: docker/test/unit
-docker/test/unit:      ## Run unit tests with option TEST param otherwise run all, ex: TEST=.api.test_api_ui_sync_config
-	$(call exec_or_run, api, $(DJ_MANAGER), test, galaxy_ng.tests.unit$(TEST))
-
-.PHONY: docker/test/integration
-docker/test/integration:      ## Run integration tests with optional MARK param otherwise run all, ex: MARK=galaxyapi_smoke
-	if [ "$(shell docker exec -it galaxy_ng_api_1 env | grep PULP_GALAXY_REQUIRE_CONTENT_APPROVAL)" != "PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true" ]; then\
-	  echo "The integration tests will not run correctly unless you set PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true";\
-		exit 1;\
-	fi
-	if [ "$(MARK)" ]; then\
-	  HUB_LOCAL=1 ./dev/standalone/RUN_INTEGRATION.sh "-m $(MARK)";\
-	else\
-		HUB_LOCAL=1 ./dev/standalone/RUN_INTEGRATION.sh;\
-	fi
 
 .PHONY: docker/test/integration/container
 docker/test/integration/container:      ## Run integration tests.
@@ -154,29 +100,6 @@ gh-action/dab_jwt:
 gh-action/certified-sync:
 	python3 dev/oci_env_integration/actions/certified-sync.py
 
-.PHONY: docker/loaddata
-docker/loaddata:  ## Load initial data from python script
-	$(call exec_or_run, api, "/bin/bash", "-c", "/entrypoint.sh manage shell < app/dev/common/setup_test_data.py")
-
-.PHONY: docker/makemigrations
-docker/makemigrations:   ## Run django migrations
-	$(call exec_or_run, api, $(DJ_MANAGER), makemigrations)
-
-.PHONY: docker/migrate
-docker/migrate:   ## Run django migrations
-	$(call exec_or_run, api, $(DJ_MANAGER), migrate)
-
-.PHONY: docker/add-signing-service
-docker/add-signing-service:    ## Add a Signing service using default GPG key
-	$(call exec_or_run, worker, $(DJ_MANAGER), add-signing-service, ansible-default, /var/lib/pulp/scripts/collection_sign.sh, galaxy3@ansible.com)
-
-.PHONY: docker/resetdb
-docker/resetdb:   ## Cleans database
-	# Databases must be stopped to be able to reset them.
-	./compose down
-	./compose stop
-	./compose run --rm api /bin/bash -c "yes yes | ./entrypoint.sh manage reset_db && django-admin migrate"
-
 .PHONY: docker/db_snapshot
 NAME ?= galaxy
 docker/db_snapshot:   ## Snapshot database with optional NAME param. Example: make docker/db_snapshot NAME=my_special_backup
@@ -190,68 +113,12 @@ docker/db_restore:   ## Restore database from a snapshot with optional NAME para
 	docker cp db_snapshots/$(NAME).backup galaxy_ng_postgres_1:/galaxy.backup
 	docker exec galaxy_ng_postgres_1 pg_restore --clean -U galaxy_ng -d galaxy_ng "/galaxy.backup"
 
-.PHONY: docker/translations
-docker/translations:   ## Generate the translation messages
-	$(call exec_or_run, api, "/bin/bash", "-c", "cd /app/galaxy_ng && /entrypoint.sh manage makemessages --all")
-
-.PHONY: docker/all
-docker/all: 	                                ## Build, migrate, loaddata, translate and add test collections.
-	make docker/build
-	make docker/migrate
-	make docker/loaddata
-	make docker/translations
-
 # Application management and debugging
-
-# e.g: make api/get URL=/content/community/v3/collections/
-.PHONY: api/get
-api/get:          ## Make an api get request using 'httpie'
-	# Makes 2 requests: One to get the token and another to request given URL
-	http --version && (http :8002/api/automation-hub/$(URL) "Authorization: Token $$(http --session DEV_SESSION --auth admin:admin -v POST 'http://localhost:5001/api/automation-hub/v3/auth/token/' username=admin password=admin -b | jq -r '.token')" || echo "http error, check if api is running.") || echo "!!! this command requires httpie - please run 'pip install httpie'"
-
-.PHONY: api/shell
-api/shell:        ## Opens django management shell in api container
-	$(call exec_or_run, api, $(DJ_MANAGER), shell_plus)
-
-.PHONY: api/bash
-api/bash:         ## Opens bash session in the api container
-	$(call exec_or_run, api, /bin/bash)
-
-.PHONY: api/runserver
-api/runserver:    ## Runs api using django webserver for debugging
-	# Stop all running containers if any
-	./compose stop
-	# Start only services if containers exists, else create the containers and start.
-	./compose start worker content-app ui || ./compose up -d worker content-app ui
-	# ensure API is not running
-	./compose stop api
-	# Run api using django runserver for debugging
-	./compose run --service-ports --use-aliases --name api --rm api manage runserver 0.0.0.0:8000
-
-.PHONY: api/routes
-api/routes:       ## Prints all available routes
-	$(call exec_or_run, api, $(DJ_MANAGER), show_urls)
-
-.EXPORT_ALL_VARIABLES:
-.ONESHELL:
-.PHONY: api/create-test-collections
-api/create-test-collections:   ## Creates a set of test collections
-	@read -p "How many namespaces to create? : " NS; \
-	read -p "Number of collections on each namespace? : " COLS; \
-	read -p "Add a prefix? : " PREFIX; \
-	ARGS="--prefix=$${PREFIX:-dev} --strategy=$${STRATEGY:-faux} --ns=$${NS:-6} --cols=$${COLS:-6}"; \
-	echo "Creating test collections with args: $${ARGS}"; \
-	export ARGS; \
-	./compose exec api django-admin create-test-collections $${ARGS}
 
 .PHONY: api/push-test-images
 api/push-test-images:   ## Pushes a set of test container images
 	docker login -u admin -p admin localhost:5001 || echo "!!! docker login failed, check if docker is running"
 	for foo in postgres treafik mongo mariadb redis node mysql busybox alpine docker python hhtpd nginx memcached golang; do  docker pull $$foo; docker image tag $$foo localhost:5001/$$foo:latest; docker push localhost:5001/$$foo:latest; done
-
-.PHONY: api/list-permissions
-api/list-permissions:   ## List all permissions - CONTAINS=str
-	$(call exec_or_run, api, $(DJ_MANAGER), shell -c 'from django.contrib.auth.models import Permission;from pprint import pprint;pprint([f"{perm.content_type.app_label}:{perm.codename}" for perm in Permission.objects.filter(name__icontains="$(CONTAINS)")])')
 
 # Version / bumpversion management
 
