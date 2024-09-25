@@ -104,6 +104,9 @@ def copy_roles_to_role_definitions(apps, schema_editor):
 
 
 def migrate_role_assignments(apps, schema_editor):
+
+    print('MIGRATE ROLE ASSIGNMENTS ...')
+
     UserRole = apps.get_model('core', 'UserRole')
     GroupRole = apps.get_model('core', 'GroupRole')
     Group = apps.get_model('auth', 'Group')
@@ -125,15 +128,15 @@ def migrate_role_assignments(apps, schema_editor):
 
     # Migrate team/group role assignments
     for group_role in GroupRole.objects.all():
+
         rd = RoleDefinition.objects.filter(name=group_role.role.name).first()
         if not rd:
             continue
 
-        # FIXME - why?
-        if not hasattr(group_role.group, 'team'):
+        actor = Team.objects.filter(group=group_role.group).first()
+        if actor is None:
             continue
 
-        actor = group_role.group.team
         if not group_role.object_id:
             RoleTeamAssignment.objects.create(role_definition=rd, team=actor)
         else:
