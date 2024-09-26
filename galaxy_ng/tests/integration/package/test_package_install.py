@@ -3,7 +3,7 @@
 See: https://issues.redhat.com/browse/AAH-1545
 
 """
-
+import os
 import pytest
 import subprocess
 import tempfile
@@ -21,13 +21,17 @@ pytestmark = pytest.mark.qa  # noqa: F821
         {'LOCK_REQUIREMENTS': '0'}
     ]
 )
+@pytest.mark.skipif(
+    os.environ.get('JWT_PROXY') is not None,
+    reason="django-ansible-base fails to install under dab profile"
+)
 def test_package_install(env_vars):
     """smoktest setup.py"""
 
     with tempfile.TemporaryDirectory(prefix='galaxy_ng_testing_') as basedir:
 
         # make a venv
-        pid = subprocess.run(f'python3.11 -m venv {basedir}/venv', shell=True)
+        pid = subprocess.run(f'python3 -m venv {basedir}/venv', shell=True)
         assert pid.returncode == 0
 
         # install the package

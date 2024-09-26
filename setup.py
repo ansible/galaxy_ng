@@ -90,8 +90,7 @@ class BuildPyCommand(_BuildPyCommand):
 django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', 'devel')
 django_ansible_base_dependency = (
     'django-ansible-base[jwt_consumer] @ '
-    'git+https://github.com/ansible/django-ansible-base@'
-    f'{django_ansible_base_branch}#egg=django-ansible-base'
+    f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
 )
 
 requirements = [
@@ -126,7 +125,6 @@ def strip_package_name(spec):
     return spec
 
 
-# next line can be replaced via sed in ci scripts/post_before_install.sh
 unpin_requirements = os.getenv("LOCK_REQUIREMENTS") == "0"
 if unpin_requirements:
     """
