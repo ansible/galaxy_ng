@@ -33,6 +33,8 @@ def test_package_install(env_vars):
         # upgrade pip
         pid = subprocess.run(f'{basedir}/venv/bin/pip install --upgrade pip', shell=True)
         assert pid.returncode == 0
+        pid = subprocess.run(f'{basedir}/venv/bin/pip install setuptools setuptools_scm wheel pyjwt requests', shell=True)
+        assert pid.returncode == 0
 
         # install the package
         cmd = f'{basedir}/venv/bin/pip install .'
