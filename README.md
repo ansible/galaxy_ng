@@ -8,8 +8,6 @@ This is a brand new take on Ansible Galaxy, so it will look and feel a bit diffe
 
 Our mission is to help organizations share Ansible automation and promote a culture of collaboration around Ansible automation development. We'll be providing features that make it easy to create, discover, use and distribute Ansible automation content.
 
-To see what we're currently working on, [view the Roadmap](/ROADMAP.rst).
-
 To learn more about Pulp, [view the Pulp project page](https://pulpproject.org/).
 
 ## Documentation

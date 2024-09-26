@@ -50,15 +50,6 @@ jobs:
           ansible-galaxy collection build -vvv
           ansible-galaxy collection install galaxy-galaxy-1.0.0.tar.gz -vvv
 
-      #- name: Spin up a standalone galaxy_ng installation
-      #  run: |
-      #    echo "COMPOSE_PROFILE=standalone" > .compose.env
-      #    echo "DEV_SOURCE_PATH=galaxy_ng" >> .compose.env
-      #    make docker/all
-      #    ./compose up -d
-      #    pip3 install --upgrade requests pyyaml
-      #    python3 dev/common/poll.py
-
       - name: set env vars
         run: |
           echo "OCI_ENV_PATH=${HOME}/work/galaxy_ng/oci_env" >> $GITHUB_ENV

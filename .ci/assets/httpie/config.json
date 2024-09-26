@@ -1,7 +1,0 @@
-{
-    "default_options": [
-      "--ignore-stdin",
-      "--pretty=format",
-      "--traceback"
-    ]
-}
