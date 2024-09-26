@@ -87,33 +87,11 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
-# FIXME: this currently works for CI and dev env, but pip-tools misses dependencies when
-# generating requirements.*.txt files. This needs to be fixed before use in the master branch.
-def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pulp"):
-    """
-    Formats the pulp plugin requirement.
-
-    The plugin template is VERY picky about the format we use for git refs. This will
-    help format git refs in a way that won't break CI when we need to pin to development
-    branches of pulp.
-
-    example:
-      _format_pulp_requirement("pulpcore", specifier=">=3.18.1,<3.19.0")
-      _format_pulp_requirement("pulpcore", ref="6e44fb2fe609f92dc1f502b19c67abd08879148f")
-    """
-    if specifier:
-        return plugin + specifier
-    else:
-        repo = plugin.replace("-", "_")
-        return (
-            f"{plugin}@git+https://git@github.com/" f"{gh_namespace}/{repo}.git@{ref}#egg={plugin}"
-        )
-
-
 django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', 'devel')
 django_ansible_base_dependency = (
     'django-ansible-base[jwt_consumer] @ '
-    f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
+    'git+https://github.com/ansible/django-ansible-base@'
+    f'{django_ansible_base_branch}#egg=django-ansible-base'
 )
 
 requirements = [
