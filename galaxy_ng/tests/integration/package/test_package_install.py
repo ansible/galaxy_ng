@@ -4,6 +4,7 @@ See: https://issues.redhat.com/browse/AAH-1545
 
 """
 
+import os
 import pytest
 import subprocess
 import tempfile
@@ -20,6 +21,10 @@ pytestmark = pytest.mark.qa  # noqa: F821
         {},
         {'LOCK_REQUIREMENTS': '0'}
     ]
+)
+@pytest.mark.skipif(
+    os.environ.get('JWT_PROXY') is not None,
+    reason="django-ansible-base fails to install under dab profile"
 )
 def test_package_install(env_vars):
     """smoktest setup.py"""
