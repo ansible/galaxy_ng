@@ -4,7 +4,7 @@
   connection: local
   gather_facts: false
   collections:
-    - galaxy.galaxy
+    - ansible.hub
 
   pre_tasks:
     - name: Include variables
@@ -12,80 +12,71 @@
         file: vars.yml
 
   tasks:
-    - name: Authenticate and retrieve API token
-      ah_token:
-        ah_host: "{{ ah_host }}"
-        ah_username: "{{ ah_username }}"
-        ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
-
     - name: Create the automate namespace
-      ah_namespace:
+      ansible.hub.ah_namespace:
         name: automate
         company: Automator Inc.
         email: automator@redhat.com
         description: The namespace for all things automation
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
     - name: Rename automate namespace to automator
-      ah_namespace:
+      ansible.hub.ah_namespace:
         name: automate
         new_name: automator
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
     - name: Delete the automator namespace
-      ah_namespace:
+      ansible.hub.ah_namespace:
         state: absent
         name: automator
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
-    - name: Ensure there is a galaxy namespace
-      ah_namespace:
-        name: galaxy
+    - name: Ensure there is a ansible namespace
+      ansible.hub.ah_namespace:
+        name: ansible
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"
+        state: present
 
-    - name: Upload the galaxy collection to the galaxy namespace
-      ah_collection:
-        namespace: galaxy
-        name: galaxy
+    - name: Upload the ansible hub collection to the ansible namespace
+      ansible.hub.ah_collection_upload:
         path: "{{ ah_artifact_runner_absolute_path }}"
-        version: "1.0.0"
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
-    - name: Approve the galaxy collection
-      ah_approval:
-        namespace: galaxy
-        name: galaxy
+    - name: Approve the ansible hub collection
+      ansible.hub.ah_approval:
+        namespace: ansible
+        name: hub
         version: "1.0.0"
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"
       async: 600
       poll: 10
 
-    - name: Delete the galaxy collection
-      ah_collection:
+    - name: Delete the ansible hub collection
+      ansible.hub.ah_collection:
         state: absent
-        namespace: galaxy
-        name: galaxy
+        namespace: ansible
+        name: hub
         version: "1.0.0"
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
-
-    - name: Deauthenticate
-      ah_token:
-        state: absent
-        ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"
