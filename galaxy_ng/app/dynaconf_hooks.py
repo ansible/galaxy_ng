@@ -417,12 +417,19 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     # add in keycloak classes if necessary ...
     if data.get('GALAXY_AUTH_KEYCLOAK_ENABLED') is True:
         for class_name in [
-            "galaxy_ng.app.auth.session.SessionAuthentication",
+            # "galaxy_ng.app.auth.session.SessionAuthentication",
             "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
             "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
         ]:
             if class_name not in galaxy_auth_classes:
                 galaxy_auth_classes.insert(0, class_name)
+
+    # galaxy sessionauth -must- always come first ...
+    galaxy_session = "galaxy_ng.app.auth.session.SessionAuthentication"
+    if galaxy_auth_classes:
+        if galaxy_auth_classes.count(galaxy_session) > 0:
+            galaxy_auth_classes.remove("galaxy_ng.app.auth.session.SessionAuthentication")
+        galaxy_auth_classes.insert(0, "galaxy_ng.app.auth.session.SessionAuthentication")
 
     if galaxy_auth_classes:
         data["ANSIBLE_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
