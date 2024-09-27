@@ -25,6 +25,7 @@ x-common-env: &common-env
 
   # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/galaxy/'
+  PULP_CONTENT_PATH_PREFIX: '/api/galaxy/v3/artifacts/collections/'
   PULP_ANSIBLE_API_HOSTNAME: 'https://localhost'
   PULP_ANSIBLE_CONTENT_HOSTNAME: "https://localhost/pulp/content"
   PULP_CONTENT_ORIGIN: "https://localhost"
