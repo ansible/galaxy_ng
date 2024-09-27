@@ -4,7 +4,7 @@
   connection: local
   gather_facts: false
   collections:
-    - galaxy.galaxy
+    - ansible.hub
 
   pre_tasks:
     - name: Include variables
@@ -13,13 +13,13 @@
 
   tasks:
     - name: Add redhat.io registry
-      ah_ee_registry:
+      ansible.hub.ah_ee_registry:
         name: redhat
         url: registry.redhat.io
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
         # Can be uncommented after AAH-2607 is resolved.
         #
@@ -53,10 +53,10 @@
         #        ah_path_prefix: "{{ ah_path_prefix }}"
 
     - name: Delete the redhat.io registry
-      ah_ee_registry:
+      ansible.hub.ah_ee_registry:
         name: redhat
         state: absent
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
