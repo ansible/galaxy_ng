@@ -427,9 +427,13 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     # galaxy sessionauth -must- always come first ...
     galaxy_session = "galaxy_ng.app.auth.session.SessionAuthentication"
     if galaxy_auth_classes:
-        if galaxy_auth_classes.count(galaxy_session) > 0:
-            galaxy_auth_classes.remove("galaxy_ng.app.auth.session.SessionAuthentication")
-        galaxy_auth_classes.insert(0, "galaxy_ng.app.auth.session.SessionAuthentication")
+        # Check if galaxy_session is already the first element
+        if galaxy_auth_classes[0] != galaxy_session:
+            # Remove galaxy_session if it exists in the list
+            if galaxy_session in galaxy_auth_classes:
+                galaxy_auth_classes.remove(galaxy_session)
+            # Insert galaxy_session at the beginning of the list
+            galaxy_auth_classes.insert(0, galaxy_session)
 
     if galaxy_auth_classes:
         data["ANSIBLE_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
