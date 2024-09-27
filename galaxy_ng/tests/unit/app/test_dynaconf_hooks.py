@@ -73,7 +73,7 @@ BASE_SETTINGS = {
 @pytest.mark.parametrize(
     "do_stuff, extra_settings, expected_results",
     [
-        #0 >=4.10 no external auth ...
+        # 0 >=4.10 no external auth ...
         (
             True,
             # False,
@@ -84,7 +84,7 @@ BASE_SETTINGS = {
                 ]
             },
         ),
-        #1 >=4.10 ldap ...
+        # 1 >=4.10 ldap ...
         (
             True,
             # False,
@@ -120,7 +120,7 @@ BASE_SETTINGS = {
                 "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES": None,
             },
         ),
-        #2 >=4.10 keycloak ...
+        # 2 >=4.10 keycloak ...
         (
             True,
             # False,
@@ -159,7 +159,7 @@ BASE_SETTINGS = {
                 ],
             },
         ),
-        #3 >=4.10 dab ..
+        # 3 >=4.10 dab ..
         (
             True,
             # False,
@@ -195,7 +195,7 @@ BASE_SETTINGS = {
                 ],
             },
         ),
-        #4 >=4.10 keycloak+dab ...
+        # 4 >=4.10 keycloak+dab ...
         (
             True,
             # False,
@@ -249,7 +249,7 @@ BASE_SETTINGS = {
                 ],
             },
         ),
-        #5 >=4.10 ldap+dab ...
+        # 5 >=4.10 ldap+dab ...
         (
             True,
             # False,
