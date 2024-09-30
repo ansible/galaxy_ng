@@ -56,7 +56,7 @@ def test_dab_rbac_repository_owner_by_user_or_team(
     random_username
 ):
 
-    if settings.get('allow_local_resource_management') is False:
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
@@ -169,7 +169,7 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
       to view a private repository that includes their collection.
     """
 
-    if settings.get('allow_local_resource_management') is False:
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
