@@ -409,8 +409,12 @@ def autohubtest2(galaxy_client):
 
 
 @pytest.fixture(scope="function")
-def random_namespace(galaxy_client):
+def random_namespace(galaxy_client, settings):
     """Make a randomized namespace."""
+
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip("this test relies on local resource creation")
+
     gc = galaxy_client("admin")
     ns_name = 'namespace_' + generate_namespace()
     if len(ns_name) > 60:
