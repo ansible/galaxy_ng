@@ -22,11 +22,13 @@ x-common-env: &common-env
   PULP_DEBUG: 1
   PULP_GALAXY_DEPLOYMENT_MODE: 'standalone'
   PULP_DEFAULT_FILE_STORAGE: "pulpcore.app.models.storage.FileSystem"
+  PULP_REDIRECT_TO_OBJECT_STORAGE: 'false'
 
   # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/galaxy/'
+  PULP_CONTENT_PATH_PREFIX: '/pulp/content/'
   PULP_ANSIBLE_API_HOSTNAME: 'https://localhost'
-  PULP_ANSIBLE_CONTENT_HOSTNAME: "https://localhost/pulp/content"
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "https://localhost"
   PULP_CONTENT_ORIGIN: "https://localhost"
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
 
