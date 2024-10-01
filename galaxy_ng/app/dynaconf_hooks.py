@@ -99,7 +99,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
     KEYCLOAK_PORT = settings.get("KEYCLOAK_PORT", default=None)
     KEYCLOAK_REALM = settings.get("KEYCLOAK_REALM", default=None)
 
-    KEYCLOAK_AUTH_PREFIX = settings.get("KEYCLOAK_AUTH_PREFIX", default="auth/")
+    KEYCLOAK_AUTH_PREFIX = settings.get("KEYCLOAK_AUTH_PREFIX", default="")
     SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = settings.get("SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL", default=None)
     SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = settings.get("SOCIAL_AUTH_ACCESS_TOKEN_URL", default=None)
 
