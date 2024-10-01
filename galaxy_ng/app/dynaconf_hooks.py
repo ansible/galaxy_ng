@@ -100,8 +100,10 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
     KEYCLOAK_REALM = settings.get("KEYCLOAK_REALM", default=None)
 
     KEYCLOAK_AUTH_PREFIX = settings.get("KEYCLOAK_AUTH_PREFIX", default="")
-    SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = settings.get("SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL", default=None)
-    SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = settings.get("SOCIAL_AUTH_ACCESS_TOKEN_URL", default=None)
+    SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = \
+        settings.get("SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL", default=None)
+    SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = \
+        settings.get("SOCIAL_AUTH_ACCESS_TOKEN_URL", default=None)
 
     # Add settings if Social Auth values are provided
     if all(
@@ -145,7 +147,10 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         if SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL is None:
             data[
                 "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"
-            ] = f"{data['KEYCLOAK_URL']}/{KEYCLOAK_AUTH_PREFIX}realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/"
+            ] = (
+                f"{data['KEYCLOAK_URL']}/{KEYCLOAK_AUTH_PREFIX}realms/"
+                f"{KEYCLOAK_REALM}/protocol/openid-connect/token/"
+            )
 
         data["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = settings.get(
             "SOCIAL_AUTH_LOGIN_REDIRECT_URL", default="/ui/"
