@@ -99,6 +99,10 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
     KEYCLOAK_PORT = settings.get("KEYCLOAK_PORT", default=None)
     KEYCLOAK_REALM = settings.get("KEYCLOAK_REALM", default=None)
 
+    KEYCLOAK_AUTH_PREFIX = settings.get("KEYCLOAK_AUTH_PREFIX", default="auth/")
+    SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = settings.get("SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL", default=None)
+    SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = settings.get("SOCIAL_AUTH_ACCESS_TOKEN_URL", default=None)
+
     # Add settings if Social Auth values are provided
     if all(
         [
@@ -122,21 +126,26 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         )
         data["KEYCLOAK_HOST_LOOPBACK"] = settings.get("KEYCLOAK_HOST_LOOPBACK", default=None)
         data["KEYCLOAK_URL"] = f"{KEYCLOAK_PROTOCOL}://{KEYCLOAK_HOST}:{KEYCLOAK_PORT}"
-        auth_url_str = "{keycloak}/auth/realms/{realm}/protocol/openid-connect/auth/"
-        data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
-            keycloak=data["KEYCLOAK_URL"], realm=KEYCLOAK_REALM
-        )
+
+        auth_url_str = "{keycloak}/{prefix}realms/{realm}/protocol/openid-connect/auth/"
+
+        if SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL is None:
+            data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
+                keycloak=data["KEYCLOAK_URL"], realm=KEYCLOAK_REALM, prefix=KEYCLOAK_AUTH_PREFIX
+            )
+
         if data["KEYCLOAK_HOST_LOOPBACK"]:
             loopback_url = "{protocol}://{host}:{port}".format(
                 protocol=KEYCLOAK_PROTOCOL, host=data["KEYCLOAK_HOST_LOOPBACK"], port=KEYCLOAK_PORT
             )
             data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
-                keycloak=loopback_url, realm=KEYCLOAK_REALM
+                keycloak=loopback_url, realm=KEYCLOAK_REALM, prefix=KEYCLOAK_AUTH_PREFIX
             )
 
-        data[
-            "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"
-        ] = f"{data['KEYCLOAK_URL']}/auth/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/"
+        if SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL is None:
+            data[
+                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"
+            ] = f"{data['KEYCLOAK_URL']}/{KEYCLOAK_AUTH_PREFIX}realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/"
 
         data["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = settings.get(
             "SOCIAL_AUTH_LOGIN_REDIRECT_URL", default="/ui/"
