@@ -92,7 +92,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         )
         data["KEYCLOAK_HOST_LOOPBACK"] = settings.get("KEYCLOAK_HOST_LOOPBACK", default=None)
         data["KEYCLOAK_URL"] = f"{KEYCLOAK_PROTOCOL}://{KEYCLOAK_HOST}:{KEYCLOAK_PORT}"
-        auth_url_str = "{keycloak}/auth/realms/{realm}/protocol/openid-connect/auth/"
+        auth_url_str = "{keycloak}/realms/{realm}/protocol/openid-connect/auth/"
         data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
             keycloak=data["KEYCLOAK_URL"], realm=KEYCLOAK_REALM
         )
@@ -106,7 +106,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
 
         data[
             "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"
-        ] = f"{data['KEYCLOAK_URL']}/auth/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/"
+        ] = f"{data['KEYCLOAK_URL']}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/"
 
         data["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = settings.get(
             "SOCIAL_AUTH_LOGIN_REDIRECT_URL", default="/ui/"
