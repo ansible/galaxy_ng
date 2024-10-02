@@ -94,7 +94,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
     SOCIAL_AUTH_KEYCLOAK_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_KEY", default=None)
     SOCIAL_AUTH_KEYCLOAK_SECRET = settings.get("SOCIAL_AUTH_KEYCLOAK_SECRET", default=None)
     SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY", default=None)
-    KEYCLOAK_PROTOCOL = settings.get("KEYCLOAK_PROTOCOL", default=None)
+    KEYCLOAK_PROTOCOL = settings.get("KEYCLOAK_PROTOCOL", default="https")
     KEYCLOAK_HOST = settings.get("KEYCLOAK_HOST", default=None)
     KEYCLOAK_PORT = settings.get("KEYCLOAK_PORT", default=None)
     KEYCLOAK_REALM = settings.get("KEYCLOAK_REALM", default=None)
