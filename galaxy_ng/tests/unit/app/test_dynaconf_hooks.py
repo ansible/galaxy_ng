@@ -385,6 +385,22 @@ def test_dynaconf_hooks_authentication_backends_and_classes(
                 "GALAXY_TOKEN_EXPIRATION": 0,
             },
         ),
+        (
+            True,
+            {
+                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
+                    "httpZ://mykeycloAk:1339/auth__/realms/aap/protocol/openid-connect/auth/",
+                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
+                    "httpZ://mykeycloAk:1339/auth__/realms/aap/protocol/openid-connect/token/",
+            },
+            {
+                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
+                    "httpZ://mykeycloAk:1339/auth__/realms/aap/protocol/openid-connect/auth/",
+                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
+                    "httpZ://mykeycloAk:1339/auth__/realms/aap/protocol/openid-connect/token/",
+            },
+        ),
+
     ],
 )
 def test_dynaconf_hook_configure_keycloak(do_stuff, extra_settings, expected_results):

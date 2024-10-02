@@ -103,7 +103,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
     SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = \
         settings.get("SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL", default=None)
     SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = \
-        settings.get("SOCIAL_AUTH_ACCESS_TOKEN_URL", default=None)
+        settings.get("SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL", default=None)
 
     # Add settings if Social Auth values are provided
     if all(
@@ -131,20 +131,26 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
 
         auth_url_str = "{keycloak}/{prefix}realms/{realm}/protocol/openid-connect/auth/"
 
-        if SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL is None:
+        if SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL is not None:
+            data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL
+        else:
             data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
                 keycloak=data["KEYCLOAK_URL"], realm=KEYCLOAK_REALM, prefix=KEYCLOAK_AUTH_PREFIX
             )
 
-        if data["KEYCLOAK_HOST_LOOPBACK"]:
-            loopback_url = "{protocol}://{host}:{port}".format(
-                protocol=KEYCLOAK_PROTOCOL, host=data["KEYCLOAK_HOST_LOOPBACK"], port=KEYCLOAK_PORT
-            )
-            data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
-                keycloak=loopback_url, realm=KEYCLOAK_REALM, prefix=KEYCLOAK_AUTH_PREFIX
-            )
+            if data["KEYCLOAK_HOST_LOOPBACK"]:
+                loopback_url = "{protocol}://{host}:{port}".format(
+                    protocol=KEYCLOAK_PROTOCOL,
+                    host=data["KEYCLOAK_HOST_LOOPBACK"],
+                    port=KEYCLOAK_PORT
+                )
+                data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
+                    keycloak=loopback_url, realm=KEYCLOAK_REALM, prefix=KEYCLOAK_AUTH_PREFIX
+                )
 
-        if SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL is None:
+        if SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL is not None:
+            data['SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL'] = SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL
+        else:
             data[
                 "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"
             ] = (
