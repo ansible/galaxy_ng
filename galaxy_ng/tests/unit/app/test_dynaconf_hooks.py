@@ -369,7 +369,7 @@ def test_dynaconf_hooks_authentication_backends_and_classes(
         (
             True,
             {
-                "KEYCLOAK_AUTH_PREFIX": "auth/",
+                "KEYCLOAK_KC_HTTP_RELATIVE_PATH": "/auth",
                 "KEYCLOAK_PROTOCOL": "http",
                 "GALAXY_TOKEN_EXPIRATION": 0,
             },
