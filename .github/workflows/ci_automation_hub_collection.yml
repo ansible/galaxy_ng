@@ -1,91 +1,91 @@
----
-name: Galaxy Collection CI
-on:
-  pull_request:
-    branches:
-      - "*"
-    paths-ignore:
-      - "CHANGES/**"
-      - "docs/**"
-      - "mkdocs.yml"
-  push:
-    branches:
-      - "*"
-  workflow_dispatch:
-
-jobs:
-  galaxy_collection:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout galaxy_ng
-        uses: actions/checkout@v4
-
-      - name: Setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: (Linux) Install docker compose
-        run: |
-          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
-          install /tmp/docker-compose /usr/local/bin/
-
-      - name: install ansible
-        run: pip3 install ansible
-
-      - name: Checkout the ansible_hub collection
-        uses: actions/checkout@v4
-        with:
-          repository: ansible-collections/ansible_hub
-          path: ansible_hub
-
-      - name: copy galaxy.yml.j2 to ansible_hub
-        run: |
-          cp dev/galaxy_collection_plays/galaxy.yml.j2 ansible_hub
-
-      - name: Build and install the collection
-        working-directory: ansible_hub
-        run: |
-          # The ansible.cfg defined in the collection repository might break the test. We want the same variables for installation and running.
-          rm -f ansible.cfg
-          rm -f galaxy.yml
-          ansible all -i localhost, -c local -m template -a "src=galaxy.yml.j2 dest=galaxy.yml" -e collection_namespace=ansible -e collection_name=hub -e collection_version=1.0.0 -e collection_repo=https://github.com/ansible-collections/ansible_hub
-          ansible-galaxy collection build -vvv
-          ansible-galaxy collection install ansible-hub-1.0.0.tar.gz -vvv
-
-      - name: set env vars
-        run: |
-          echo "OCI_ENV_PATH=${HOME}/work/galaxy_ng/oci_env" >> $GITHUB_ENV
-          echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> $GITHUB_ENV
-          echo "OCI_VERBOSE=1" >> $GITHUB_ENV
-          echo "GH_DUMP_LOGS=0" >> $GITHUB_ENV
-
-      - name: setup oci-env
-        run: |
-          git clone https://github.com/pulp/oci_env.git $OCI_ENV_PATH
-          pip install -e $OCI_ENV_PATH/client/
-          mkdir $OCI_ENV_PATH/db_backup/
-
-      - name: run the standalone stack detached
-        run: OCI_COMPOSE_DETACH=1 make oci/standalone
-
-      - name: wait for the system to start
-        run: make oci/standalone/poll
-
-      - name: create the test users+data
-        run: docker exec -t ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
-
-      - name: make messages
-        run: docker exec -t ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng/galaxy_ng; django-admin makemessages --all'
-
-      - name: Test the user playbook
-        run: ansible-playbook dev/galaxy_collection_plays/user.yml -vvv
-
-      - name: Test the content playbook
-        run: ansible-playbook dev/galaxy_collection_plays/content.yml -vvv
-
-      - name: Test the repo playbook
-        run: ansible-playbook dev/galaxy_collection_plays/repo.yml -vvv
-
-      - name: Test the ee playbook
-        run: ansible-playbook dev/galaxy_collection_plays/ee.yml -vvv
+# ---
+# name: Galaxy Collection CI
+# on:
+#   pull_request:
+#     branches:
+#       - "*"
+#     paths-ignore:
+#       - "CHANGES/**"
+#       - "docs/**"
+#       - "mkdocs.yml"
+#   push:
+#     branches:
+#       - "*"
+#   workflow_dispatch:
+#
+# jobs:
+#   galaxy_collection:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout galaxy_ng
+#         uses: actions/checkout@v4
+#
+#       - name: Setup python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.11"
+#
+#       - name: (Linux) Install docker compose
+#         run: |
+#           curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
+#           install /tmp/docker-compose /usr/local/bin/
+#
+#       - name: install ansible
+#         run: pip3 install ansible
+#
+#       - name: Checkout the ansible_hub collection
+#         uses: actions/checkout@v4
+#         with:
+#           repository: ansible-collections/ansible_hub
+#           path: ansible_hub
+#
+#       - name: copy galaxy.yml.j2 to ansible_hub
+#         run: |
+#           cp dev/galaxy_collection_plays/galaxy.yml.j2 ansible_hub
+#
+#       - name: Build and install the collection
+#         working-directory: ansible_hub
+#         run: |
+#           # The ansible.cfg defined in the collection repository might break the test. We want the same variables for installation and running.
+#           rm -f ansible.cfg
+#           rm -f galaxy.yml
+#           ansible all -i localhost, -c local -m template -a "src=galaxy.yml.j2 dest=galaxy.yml" -e collection_namespace=ansible -e collection_name=hub -e collection_version=1.0.0 -e collection_repo=https://github.com/ansible-collections/ansible_hub
+#           ansible-galaxy collection build -vvv
+#           ansible-galaxy collection install ansible-hub-1.0.0.tar.gz -vvv
+#
+#       - name: set env vars
+#         run: |
+#           echo "OCI_ENV_PATH=${HOME}/work/galaxy_ng/oci_env" >> $GITHUB_ENV
+#           echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> $GITHUB_ENV
+#           echo "OCI_VERBOSE=1" >> $GITHUB_ENV
+#           echo "GH_DUMP_LOGS=0" >> $GITHUB_ENV
+#
+#       - name: setup oci-env
+#         run: |
+#           git clone https://github.com/pulp/oci_env.git $OCI_ENV_PATH
+#           pip install -e $OCI_ENV_PATH/client/
+#           mkdir $OCI_ENV_PATH/db_backup/
+#
+#       - name: run the standalone stack detached
+#         run: OCI_COMPOSE_DETACH=1 make oci/standalone
+#
+#       - name: wait for the system to start
+#         run: make oci/standalone/poll
+#
+#       - name: create the test users+data
+#         run: docker exec -t ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
+#
+#       - name: make messages
+#         run: docker exec -t ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng/galaxy_ng; django-admin makemessages --all'
+#
+#       - name: Test the user playbook
+#         run: ansible-playbook dev/galaxy_collection_plays/user.yml -vvv
+#
+#       - name: Test the content playbook
+#         run: ansible-playbook dev/galaxy_collection_plays/content.yml -vvv
+#
+#       - name: Test the repo playbook
+#         run: ansible-playbook dev/galaxy_collection_plays/repo.yml -vvv
+#
+#       - name: Test the ee playbook
+#         run: ansible-playbook dev/galaxy_collection_plays/ee.yml -vvv

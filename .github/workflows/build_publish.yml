@@ -1,80 +1,80 @@
----
-name: "Build and publish galaxy_ng package"
-
-on:
-  release:
-    types: [published]
-    tags:
-      - '*'
-    branches:
-      - 'stable-*'
-
-jobs:
-
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-
-      - name: Get galaxy_ng package version
-        shell: bash
-        run: echo "galaxy_ng_version=$(python3 setup.py --version)" >> $GITHUB_ENV
-
-      - name: Validate tag and galaxy_ng version match
-        shell: bash
-        if: env.galaxy_ng_version != github.ref_name
-        run: |
-          echo "::error::Tag ${{ github.ref_name }} and galaxy_ng version ${{ env.galaxy_ng_version }} doesn't match."
-          exit 1
-
-      - name: Update apt
-        run: sudo apt -y update
-
-      - name: Install LDAP requirements
-        run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
-
-      - name: Upgrade pip
-        run: pip install pip --upgrade
-
-      - name: Install galaxy_ng editable
-        run: pip install -e .
-
-        # set variable for the next step, so only versions higher than 4.4 gets translated
-        # 4.2 and 4.3 don't support translations
-      - name: Check galaxy_ng version for translations
-        shell: bash
-        id: version_check
-        run: |
-          is_translatable=$(python -c 'from pkg_resources import parse_version; cmp_res = parse_version("${{ env.galaxy_ng_version }}") >= parse_version("4.4"); print(cmp_res)')
-          echo "is_translatable=$is_translatable" >> $GITHUB_OUTPUT
-
-      - name: Build API translations
-        shell: bash
-        run: "django-admin compilemessages"
-        if: steps.version_check.outputs.is_translatable == 'True'
-
-      - name: Check if UI has corresponding tag
-        shell: bash
-        run: |
-          status_code=$(curl -LI https://api.github.com/repos/ansible/ansible-hub-ui/releases/tags/${{ env.galaxy_ng_version }} -o /dev/null -w '%{http_code}\n' -s)
-          if [ $status_code == "404" ]
-          then
-            echo "::error::Corresponding tag ${{ env.galaxy_ng_version }} for ansible-hub-ui not found."
-            exit 1
-          fi
-
-      - name: Build galaxy_ng python packages
-        run: "python3 setup.py sdist bdist_wheel"
-
-      - name: Install twine
-        run: "pip install twine"
-
-      - name: Publish galaxy_ng to PyPI
-        run: "python3 -m twine upload dist/*"
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_RELEASE_TOKEN }}
+# ---
+# name: "Build and publish galaxy_ng package"
+#
+# on:
+#   release:
+#     types: [published]
+#     tags:
+#       - '*'
+#     branches:
+#       - 'stable-*'
+#
+# jobs:
+#
+#   build:
+#     runs-on: ubuntu-latest
+#
+#     steps:
+#       - uses: actions/checkout@v4
+#
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#
+#       - name: Get galaxy_ng package version
+#         shell: bash
+#         run: echo "galaxy_ng_version=$(python3 setup.py --version)" >> $GITHUB_ENV
+#
+#       - name: Validate tag and galaxy_ng version match
+#         shell: bash
+#         if: env.galaxy_ng_version != github.ref_name
+#         run: |
+#           echo "::error::Tag ${{ github.ref_name }} and galaxy_ng version ${{ env.galaxy_ng_version }} doesn't match."
+#           exit 1
+#
+#       - name: Update apt
+#         run: sudo apt -y update
+#
+#       - name: Install LDAP requirements
+#         run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
+#
+#       - name: Upgrade pip
+#         run: pip install pip --upgrade
+#
+#       - name: Install galaxy_ng editable
+#         run: pip install -e .
+#
+#         # set variable for the next step, so only versions higher than 4.4 gets translated
+#         # 4.2 and 4.3 don't support translations
+#       - name: Check galaxy_ng version for translations
+#         shell: bash
+#         id: version_check
+#         run: |
+#           is_translatable=$(python -c 'from pkg_resources import parse_version; cmp_res = parse_version("${{ env.galaxy_ng_version }}") >= parse_version("4.4"); print(cmp_res)')
+#           echo "is_translatable=$is_translatable" >> $GITHUB_OUTPUT
+#
+#       - name: Build API translations
+#         shell: bash
+#         run: "django-admin compilemessages"
+#         if: steps.version_check.outputs.is_translatable == 'True'
+#
+#       - name: Check if UI has corresponding tag
+#         shell: bash
+#         run: |
+#           status_code=$(curl -LI https://api.github.com/repos/ansible/ansible-hub-ui/releases/tags/${{ env.galaxy_ng_version }} -o /dev/null -w '%{http_code}\n' -s)
+#           if [ $status_code == "404" ]
+#           then
+#             echo "::error::Corresponding tag ${{ env.galaxy_ng_version }} for ansible-hub-ui not found."
+#             exit 1
+#           fi
+#
+#       - name: Build galaxy_ng python packages
+#         run: "python3 setup.py sdist bdist_wheel"
+#
+#       - name: Install twine
+#         run: "pip install twine"
+#
+#       - name: Publish galaxy_ng to PyPI
+#         run: "python3 -m twine upload dist/*"
+#         env:
+#           TWINE_USERNAME: __token__
+#           TWINE_PASSWORD: ${{ secrets.PYPI_RELEASE_TOKEN }}

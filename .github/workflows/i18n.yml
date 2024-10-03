@@ -1,83 +1,83 @@
----
-name: "[i18n] Update translations"
-
-on:
-  # allow running manually
-  workflow_dispatch:
-  # run weekly
-  schedule:
-    - cron: '30 5 1 * *'
-
-jobs:
-  i18n:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        branch:
-          - 'master'
-          - 'stable-4.9'
-          - 'stable-4.10'
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ matrix.branch }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-
-      - name: Update apt
-        run: sudo apt -y update
-
-      - name: Install LDAP requirements
-        run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
-
-      - name: Upgrade pip
-        run: pip install pip --upgrade
-
-      - name: Install galaxy_ng editable
-        run: pip install -e .
-
-      - name: Extract strings
-        run: |
-          cd galaxy_ng
-          django-admin makemessages --all
-
-      - name: Check if files were updated
-        run: |
-          filesChanged=$(git diff --ignore-matching-lines=POT-Creation-Date)
-          if [ -z "$filesChanged" ]
-          then
-              echo "openPR=false" >> $GITHUB_ENV
-          else
-              echo "openPR=true" >> $GITHUB_ENV
-          fi
-        shell: bash
-
-      - name: Clear fuzzy entries
-        run: bash .github/workflows/scripts/clear_fuzzy_entries.sh
-
-      - name: Compile strings
-        run: |
-          cd galaxy_ng
-          django-admin compilemessages
-
-      - name: Set current date as env variable
-        run: echo "NOW=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-
-      - name: Create a Pull Request (only if files were updated)
-        if: env.openPR == 'true'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          committer: ansible <ansible-infra@redhat.com>
-          author: ansible <ansible-infra@redhat.com>
-          commit-message: |
-            Automated updated of i18n strings on ${{ env.NOW }}
-            No-Issue
-          body: |
-            No-Issue
-          title: "[i18n] Update translations ${{ env.NOW }}"
-          branch: i18n/${{ matrix.branch }}/update-translations-${{ env.NOW }}
-          base: ${{ matrix.branch }}
+# ---
+# name: "[i18n] Update translations"
+#
+# on:
+#   # allow running manually
+#   workflow_dispatch:
+#   # run weekly
+#   schedule:
+#     - cron: '30 5 1 * *'
+#
+# jobs:
+#   i18n:
+#     runs-on: ubuntu-latest
+#
+#     strategy:
+#       matrix:
+#         branch:
+#           - 'master'
+#           - 'stable-4.9'
+#           - 'stable-4.10'
+#
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           ref: ${{ matrix.branch }}
+#
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#
+#       - name: Update apt
+#         run: sudo apt -y update
+#
+#       - name: Install LDAP requirements
+#         run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
+#
+#       - name: Upgrade pip
+#         run: pip install pip --upgrade
+#
+#       - name: Install galaxy_ng editable
+#         run: pip install -e .
+#
+#       - name: Extract strings
+#         run: |
+#           cd galaxy_ng
+#           django-admin makemessages --all
+#
+#       - name: Check if files were updated
+#         run: |
+#           filesChanged=$(git diff --ignore-matching-lines=POT-Creation-Date)
+#           if [ -z "$filesChanged" ]
+#           then
+#               echo "openPR=false" >> $GITHUB_ENV
+#           else
+#               echo "openPR=true" >> $GITHUB_ENV
+#           fi
+#         shell: bash
+#
+#       - name: Clear fuzzy entries
+#         run: bash .github/workflows/scripts/clear_fuzzy_entries.sh
+#
+#       - name: Compile strings
+#         run: |
+#           cd galaxy_ng
+#           django-admin compilemessages
+#
+#       - name: Set current date as env variable
+#         run: echo "NOW=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+#
+#       - name: Create a Pull Request (only if files were updated)
+#         if: env.openPR == 'true'
+#         uses: peter-evans/create-pull-request@v5
+#         with:
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#           committer: ansible <ansible-infra@redhat.com>
+#           author: ansible <ansible-infra@redhat.com>
+#           commit-message: |
+#             Automated updated of i18n strings on ${{ env.NOW }}
+#             No-Issue
+#           body: |
+#             No-Issue
+#           title: "[i18n] Update translations ${{ env.NOW }}"
+#           branch: i18n/${{ matrix.branch }}/update-translations-${{ env.NOW }}
+#           base: ${{ matrix.branch }}

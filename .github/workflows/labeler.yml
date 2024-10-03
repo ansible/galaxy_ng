@@ -1,21 +1,21 @@
-# Add labels to pull requests against master
-# uses logic in .github/labeler.yml
-
----
-name: "Add labels to pull request"
-
-on:
-  pull_request_target:
-    branches: [ "master" ]
-    types: [ "opened" ]
-
-jobs:
-  triage:
-    permissions:
-      contents: read
-      pull-requests: write
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/labeler@v4
-      with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+# # Add labels to pull requests against master
+# # uses logic in .github/labeler.yml
+#
+# ---
+# name: "Add labels to pull request"
+#
+# on:
+#   pull_request_target:
+#     branches: [ "master" ]
+#     types: [ "opened" ]
+#
+# jobs:
+#   triage:
+#     permissions:
+#       contents: read
+#       pull-requests: write
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/labeler@v4
+#       with:
+#         repo-token: "${{ secrets.GITHUB_TOKEN }}"
