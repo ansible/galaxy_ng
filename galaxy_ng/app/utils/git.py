@@ -23,12 +23,12 @@ def get_tag_commit_date(git_url, tag, checkout_path=None):
 def get_tag_commit_hash(git_url, tag, checkout_path=None):
     if checkout_path is None:
         checkout_path = tempfile.mkdtemp()
-        pid = subprocess.run(f'git clone {git_url} {checkout_path}', shell=True)
-    pid = subprocess.run(
+        subprocess.run(f'git clone {git_url} {checkout_path}', shell=True)
+    proc = subprocess.run(
         "git log -1 --format='%H'",
         shell=True,
         cwd=checkout_path,
         stdout=subprocess.PIPE
     )
-    commit_hash = pid.stdout.decode('utf-8').strip()
+    commit_hash = proc.stdout.decode('utf-8').strip()
     return commit_hash

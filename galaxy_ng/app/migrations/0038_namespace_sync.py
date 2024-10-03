@@ -34,12 +34,6 @@ def add_pulp_ansible_namespace_metadata_objects(apps, schema_editor):
     AnsibleNamespace = apps.get_model('ansible', 'AnsibleNamespace')
     Namespace = apps.get_model('galaxy', 'Namespace')
 
-    # ContentType = apps.get_model("contenttypes", "ContentType")
-    # GroupRole = apps.get_model("core", "GroupRole")
-    # old_ns_type = ContentType.objects.get(app_label="galaxy", model="namespace")
-    # new_ns_type = ContentType.objects.get(app_label="ansible", model="ansiblenamespace")
-
-
     for old_ns in Namespace.objects.all():
         new_ns = AnsibleNamespace.objects.create(name=old_ns.name)
         links = {l.name: l.url for l in old_ns.links.all()}
@@ -96,7 +90,6 @@ def add_namespace_metadata_to_published_repository(apps, schema_editor):
     AnsibleDistribution = apps.get_model('ansible', 'AnsibleDistribution')
     RepositoryContent = apps.get_model('core', 'RepositoryContent')
     RepositoryVersion = apps.get_model('core', 'RepositoryVersion')
-    RepositoryVersionContentDetails = apps.get_model('core', 'RepositoryVersionContentDetails')
     RepositoryVersionContentDetails = apps.get_model('core', 'RepositoryVersionContentDetails')
     
     repo = AnsibleDistribution.objects.get(base_path="published").repository
