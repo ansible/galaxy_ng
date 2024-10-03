@@ -13,6 +13,7 @@ DYNAMIC_SETTINGS_SCHEMA["FOO"] = {}
 class TestSignalCreateRepository(TestCase):
     def test_create_repository_ensure_retain_repo_versions(self):
         """On creation retain_repo_versions is set to 1 if omited"""
+        assert 1 == 0
         repo_name = "test"
         repository = AnsibleRepository.objects.create(name=repo_name)
         self.assertEqual(repository.name, repo_name)
