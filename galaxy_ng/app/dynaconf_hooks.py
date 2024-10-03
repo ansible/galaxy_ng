@@ -141,7 +141,9 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
             data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL
         else:
             data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
-                keycloak=data["KEYCLOAK_URL"], realm=KEYCLOAK_REALM, prefix=KEYCLOAK_KC_HTTP_RELATIVE_PATH
+                keycloak=data["KEYCLOAK_URL"],
+                realm=KEYCLOAK_REALM,
+                prefix=KEYCLOAK_KC_HTTP_RELATIVE_PATH
             )
 
             if data["KEYCLOAK_HOST_LOOPBACK"]:
@@ -151,7 +153,9 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
                     port=KEYCLOAK_PORT
                 )
                 data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
-                    keycloak=loopback_url, realm=KEYCLOAK_REALM, prefix=KEYCLOAK_KC_HTTP_RELATIVE_PATH
+                    keycloak=loopback_url,
+                    realm=KEYCLOAK_REALM,
+                    prefix=KEYCLOAK_KC_HTTP_RELATIVE_PATH
                 )
 
         if SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL is not None:
