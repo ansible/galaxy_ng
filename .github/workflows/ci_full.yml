@@ -48,17 +48,6 @@ jobs:
       - name: Check for gettext problems
         run: sh .ci/scripts/check_gettext.sh
 
-
-  event_file:
-    name: "Event File"
-    runs-on: ubuntu-latest
-    steps:
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: Event File
-        path: ${{ github.event_path }}
-
   test:
     runs-on: ubuntu-latest
     steps:
@@ -112,3 +101,13 @@ jobs:
       # FIXME: do we really care about these anymore ... ?
       #- name: run the functional test playbook
       #  run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_functional_tests.yaml
+
+  event_file:
+    name: "Event File"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Event File
+        path: ${{ github.event_path }}
