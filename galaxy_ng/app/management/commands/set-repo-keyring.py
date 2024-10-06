@@ -31,7 +31,10 @@ class Command(BaseCommand):
         self.stdout.write(style(message))
 
     def add_arguments(self, parser):
-        parser.add_argument("--keyring", type=str, help="Keyring", required=True)
+        parser.add_argument("--keyring", type=str, help="Keyring", required=False, default="")
+        parser.add_argument(
+            "--publickeypath", type=str, help="Path to Public Key File", required=False, default=""
+        )
         parser.add_argument("--repository", type=str, help="Repository name", required=True)
         parser.add_argument(
             "-y",
@@ -46,6 +49,14 @@ class Command(BaseCommand):
 
         repository = options["repository"].strip()
         keyring = options["keyring"].strip()
+        publickey = options["publickeypath"].strip()
+
+        if not keyring and not publickey:
+            self.echo("One of keyring or publickey is required")
+            exit(1)
+        if keyring and publickey:
+            self.echo("keyring or publickey are mutually exclusive")
+            exit(1)
 
         try:
             repo = AnsibleRepository.objects.get(name=repository)
@@ -53,33 +64,36 @@ class Command(BaseCommand):
             self.echo(f"Repository {repository} does not exist", self.style.ERROR)
             sys.exit(1)
 
-        certs_dir = settings.get("ANSIBLE_CERTS_DIR", "/etc/pulp/certs")
-        keyring_path = os.path.join(certs_dir, keyring)
-        if not os.path.exists(keyring_path):
-            self.echo(f"Keyring {keyring_path} does not exist", self.style.ERROR)
-            sys.exit(1)
+        if publickey:
+            with open(publickey) as pubkeyfile:
+                pubkey = pubkeyfile.read()
+        elif keyring:
+            certs_dir = settings.get("ANSIBLE_CERTS_DIR", "/etc/pulp/certs")
+            keyring_path = os.path.join(certs_dir, keyring)
+            if not os.path.exists(keyring_path):
+                self.echo(f"Keyring {keyring_path} does not exist", self.style.ERROR)
+                sys.exit(1)
 
-        if not options["yes"]:
-            confirm = input(
-                f"This will set keyring to {keyring_path} for "
-                "{repository} repository, " "Proceed? (Y/n)"
-            ).lower()
-            while True:
-                if confirm not in ("y", "n", "yes", "no"):
-                    confirm = input('Please enter either "y/yes" or "n/no": ')
-                    continue
-                if confirm in ("y", "yes"):
-                    break
-                else:
-                    self.echo("Process canceled.")
-                    return
+            if not options["yes"]:
+                confirm = input(
+                    f"This will set keyring to {keyring_path} for "
+                    f"{repository} repository, " "Proceed? (Y/n)"
+                ).lower()
+                while True:
+                    if confirm not in ("y", "n", "yes", "no"):
+                        confirm = input('Please enter either "y/yes" or "n/no": ')
+                        continue
+                    if confirm in ("y", "yes"):
+                        break
+                    else:
+                        self.echo("Process canceled.")
+                        return
 
-        tempdir_path = tempfile.mkdtemp()
-        proc = subprocess.run([
-            "gpg", "--homedir", tempdir_path, "--keyring", keyring_path, "--export", "-a"
-        ], capture_output=True)
-
-        pubkey = proc.stdout.decode().strip()
+            tempdir_path = tempfile.mkdtemp()
+            proc = subprocess.run([
+                "gpg", "--homedir", tempdir_path, "--keyring", keyring_path, "--export", "-a"
+            ], capture_output=True)
+            pubkey = proc.stdout.decode().strip()
 
         task = dispatch(
             set_repo_gpgkey,

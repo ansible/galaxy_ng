@@ -1,5 +1,8 @@
 x-common-env: &common-env
 
+  GNUPGHOME: /root/.gnupg/
+  KEYRING: /root/.gnupg/pubring.kbx
+
   DJANGO_SUPERUSER_USERNAME: admin
   DJANGO_SUPERUSER_EMAIL: admin@example.com
   DJANGO_SUPERUSER_PASSWORD: admin
@@ -78,7 +81,7 @@ services:
       test: ["CMD", "pg_isready", "-U", "galaxy_ng"]
       interval: 10s
       retries: 5
- 
+
   helper:
     image: quay.io/centos/centos:stream9
     environment:
@@ -88,24 +91,45 @@ services:
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
+      - ".:/src/galaxy_ng"
     command: |
       bash -c "
-        if [[ ! -e /etc/pulp/certs/database_fields.symmetric.key ]] || [[ -s /etc/pulp/certs/database_fields.symmetric.key ]]; then
-          mkdir -p /etc/pulp/certs/;
-          echo 'check openssl and install ...';
-          rpm -q openssl || dnf -y install openssl;
-          echo 'generate key ...';
-          openssl rand -base64 32 > /etc/pulp/certs/database_fields.symmetric.key;
-          echo 'chown key ...';
-          chmod 640 /etc/pulp/certs/database_fields.symmetric.key;
-        else
-          echo 'symmetric key exists'
-        fi;
+        echo '#> STEP: Database Symmetric Key';
+        echo 'WARNING: Symmetric key is hardcoded for development only.';
+        echo 'DNmNdwgyZugTax9S64J0FITTr9IHPxbuoF1F1CGPr68=' > /etc/pulp/certs/database_fields.symmetric.key;
         find /etc/pulp ;
         echo '# KEY >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>';
         cat /etc/pulp/certs/database_fields.symmetric.key;
         echo '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<';
-        echo "DONE!";
+        echo 'DONE! <#';
+
+        echo '#> STEP: Signing scripts';
+        base64 -d <<< 'IyEvdXNyL2Jpbi9lbnYgYmFzaApHTlVQR0hPTUU9L3Jvb3QvLmdudXBnLwpGSUxFX1BBVEg9JDEKU0lHTkFUVVJFX1BBVEg9IiQxLmFzYyIKQURNSU5fSUQ9IiRQVUxQX1NJR05JTkdfS0VZX0ZJTkdFUlBSSU5UIgpQQVNTV09SRD0iR2FsYXh5MjAyNCIKZ3BnIC0tbG9jay1uZXZlciAtLXF1aWV0IC0tYmF0Y2ggLS1waW5lbnRyeS1tb2RlIGxvb3BiYWNrIC0teWVzIFwKICAtLXBhc3NwaHJhc2UgJFBBU1NXT1JEIC0taG9tZWRpciAvcm9vdC8uZ251cGcvIC0tZGV0YWNoLXNpZ24gLS1hcm1vciBcCiAgLS1vdXRwdXQgJFNJR05BVFVSRV9QQVRIICRGSUxFX1BBVEgKU1RBVFVTPSQ/CmlmIFsgJFNUQVRVUyAtZXEgMCBdOyB0aGVuCiAgIGVjaG8ge1wiZmlsZVwiOiBcIiRGSUxFX1BBVEhcIiwgXCJzaWduYXR1cmVcIjogXCIkU0lHTkFUVVJFX1BBVEhcIn0KZWxzZQogICBleGl0ICRTVEFUVVMKZmk=' > /var/lib/pulp/scripts/collection_sign.sh;
+        base64 -d <<< 'IyEvdXNyL2Jpbi9lbnYgYmFzaAplY2hvICJHYWxheHkyMDI0IiA+IC90bXAva2V5X3Bhc3N3b3JkLnR4dApNQU5JRkVTVF9QQVRIPSQxCklNQUdFX1JFRkVSRU5DRT0iJFJFRkVSRU5DRSIKRklOR0VSUFJJTlQ9IiRQVUxQX1NJR05JTkdfS0VZX0ZJTkdFUlBSSU5UIgpTSUdOQVRVUkVfUEFUSD0iJFNJR19QQVRIIgojIElNUE9SVEFOVDogU2tvcGVvIGRvZXNudCBhbGxvdyB0byBzZXQgY3VzdG9tIGdudXBnaG9tZSBvciBrZXlyaW5nCiMgU28gaXQgd2lsbCB1c2UgdGhlIGN1cnJlbnQgdXNlciBIT01FLy5nbnVwZyBhbmQgZGVmYXVsdCBrZXlyaW5nCnNrb3BlbyBzdGFuZGFsb25lLXNpZ24gLS1wYXNzcGhyYXNlLWZpbGUgL3RtcC9rZXlfcGFzc3dvcmQudHh0IFwKICAkTUFOSUZFU1RfUEFUSCAkSU1BR0VfUkVGRVJFTkNFICRGSU5HRVJQUklOVCAtLW91dHB1dCAkU0lHTkFUVVJFX1BBVEgKU1RBVFVTPSQ/CmlmIFsgJFNUQVRVUyAtZXEgMCBdOyB0aGVuCiAgZWNobyB7XCJzaWduYXR1cmVfcGF0aFwiOiBcIiRTSUdOQVRVUkVfUEFUSFwifQplbHNlCiAgZXhpdCAkU1RBVFVTCmZp' > /var/lib/pulp/scripts/container_sign.sh;
+        chmod +x /var/lib/pulp/scripts/*_sign.sh;
+        ls -la /var/lib/pulp/scripts/collection_sign.sh;
+        cat /var/lib/pulp/scripts/collection_sign.sh;
+        echo '  ';
+        ls -la /var/lib/pulp/scripts/container_sign.sh;
+        cat /var/lib/pulp/scripts/container_sign.sh;
+        echo '  ';
+        echo 'DONE! <#';
+
+        echo '#> STEP: Signing keys';
+        echo 'WARNING: This key is for development only, passphrase:Galaxy2024';
+        base64 -d <<< 'LS0tLS1CRUdJTiBQR1AgUFJJVkFURSBLRVkgQkxPQ0stLS0tLQoKbFFQR0JHY0JrRE1CQ0FEY1h6TEZwSUhqbFBTTnROc1FCdnRuUkNjcUJVS1VrN1h6OGVaSUhWSU90NmxGM1RQTgpaTWZ5eVBoYWloTGxLekpRZGh6RG9jMy9oZFRLUnhmQmx0cmZmOW5ZeDVkSFdlZ29tVkwxaS9TMEhBQjdNT3FuClNqMWRFcmtRRVBoWWJubzFWSTVtbDcxTE1ldS9hbkRtRWtFaHR2a1ZjcVduWHM2RGlpdWRVMFRtYzRXLytsVkgKQ2x1aytJU2tnMS8zcHhMQVFqU2lQcFdnL1lCL2NORGN1dUh4dWVDMEtxSUhnR0lyeDBpREk4VHE3S2xOYmNPVgpDeWowWHBjdjY1M2REbEpaQUE5Ty9samZsZU5hMDhOeHNwUkJFb01YaElLdU9ML293Vlk2NVpEQ0JCZ2c1R0dICnVLR25GQklUbUtkOWRXVVZSZXpqN3NLdTVwNEVyQVRnUmk3bEFCRUJBQUgrQndNQ0hQSG9wTFhOeS9INXg5c3YKdytDYTNsQXFLanFGWDBNVEpFbGo1ZE9uZFJnZFVoM29VQW9ZZlNCNi9GM09IR0lsM3psS2hoNVFyUDhVVUZqYgpQRlpqSllWb0VVK3ltQk51Y1hNTEJBeW1SQWI4RnhzREQ5NEc3NVRZWnhnK1BYalFDblViQnhlZUZvWWw1dkEyCjM1S01acEdBSXpoaE5BalpseUZvWDdHaU1xZFd4YUt1VWtSK05BaTdjRVdqaHJnVEU4Z1R0UGZEbDhhV04waWYKMmIySmw4WVhYbEczMlArWU40cW4wUDkxWi9uUkFIUG5ybTB3R2JEdGNGQ1BHTEdsMndYdG9ZMmViLzJnd3J1VQpyMHVoM0xFWHEvMjdHNkVmZ1g1QURpa21YSTRXNlZkeUNra0lSamJBdjdqZm91M2pFc2VpeTFqSTJvR0N2V1ZuCmsweTc5ZzA0b1RTakRHYWRXMGd2WmJHQTg3SG5kblM3cDdTMG9WbVBWdWh6S290ODk0VkgzVENDcjFWM25PK1oKeTdGZmpkQ0RrTjliWjRpam9JMGFYZE9HWkQxbGJSSGxxMlVDYUNlOVpLeTI3eEZwcW5rcWxmdWs1OXdqbWNWSgp4dit3MTFrUGgxUVc1MXhZNXF1ditDWEtGZDNERjFMOWF1UnZSQkpQK1VaYTZRcS8ydzVZWlZQS0xqOVZGNW9TCjRpUU9OM2wvNGNhc29qVC9zM0Y3TjErSGZzU1pINnkzK1dGcjl1cDgwNkdVdGU4ZVFVaXFIeEFuS2ZLZG9VQzkKNml6RmVHV2k2QUw1N3ZFaUxwOTM5UldoNUFFUm5MSEhBcDRLcFI0ZkRid29CUkViZ3F0QmUyRkhDSkNuaHFWbAovRS8xWWRsZTFiWFYvc3dwUEk1bHNLcWpmMkVoS0syaEZVVG1CbERrUWpmTjR0VlUxQnZDNnM3SEdEL0YwT1F1CmxvWmdoVWlzTjY2dDljQTByWkhZenZkMHlJa25nbERYZmpnemorcmRYYU1vYXFPS1Y4SWdFYS9Td2ROakx3NUEKbS9kRlhDZnozQXVlempIcmRBdzh5MStGL3dSbGV6eVNGUm1kNlJFU3RNZ0h0V0plUmdKaXY0Mlpna3RCSnppTAphNjcxd3A2YzhiVjBBdGFhNDNXSUJ1N0taYnE2TnVpSm5rWkhOSTdCSUxwRU5BOTh5VjZXTmV0Q2I3U3NaNk9RCmxQZHpXMHdwOUJJTHRDWkhZV3hoZUhrZ1JHVjJJRXRsZVNBOFoyRnNZWGg1WkdWMlFHRnVjMmxpYkdVdVkyOXQKUG9rQlVRUVRBUWdBT3hZaEJQdUxQeTBrdks5Ky9mZVRxZk4xZGNVdFR4YnpCUUpuQVpBekFoc0RCUXNKQ0FjQwpBaUlDQmhVS0NRZ0xBZ1FXQWdNQkFoNEhBaGVBQUFvSkVQTjFkY1V0VHhienc1Z0lBTUNTZjB6dzYxdlhKUm16Cm14dW5kMFU4ek5QRWRSNzhkY1VZYVhsaGdkN2oyb1BzMGk1cG9FaDFMSkZsZ29VYTlabkhTSHgrdEI0SFlVZFQKeUpQYkl5ckUxcUs4MHRENkpZcmV3M2U2VXZudGJCWFJuakJSbDlKWXcyQmVlZk1tbCtUUWxRYkxTR3FzVTdoMwpQa2hqbUUvUCs4T1QrLzh1eTR2VGdUdUw2VDhlb0t2MFZTZGNlaHB3eEM2WVJuc3N3SlQ4M3IwY0ZhKzRkdTVICnlJblNQTHc5aTJMTjZsZTdISnpuRnZvUlhDZWJyUzNudU9JbXRRUXdtQTBZRG9NK0pES00vNnhrT0swZGVXazMKSllvWE5QcWJtU2E3N0ZFREQwdGZxdlY2Q1R5YlByUGhxNUdOdUdDQS93VFZGOHRJL3dVZWIwRUx3a2dtbG5RUQp4c2hiMWV3PQo9aHcxUQotLS0tLUVORCBQR1AgUFJJVkFURSBLRVkgQkxPQ0stLS0tLQ==' > /etc/pulp/certs/ansible-sign.key;
+        head -n 4 /etc/pulp/certs/ansible-sign.key;
+        echo '...';
+        tail -n 4 /etc/pulp/certs/ansible-sign.key;
+        echo '  ';
+        base64 -d <<< 'LS0tLS1CRUdJTiBQR1AgUFVCTElDIEtFWSBCTE9DSy0tLS0tCgptUUVOQkdjQmtETUJDQURjWHpMRnBJSGpsUFNOdE5zUUJ2dG5SQ2NxQlVLVWs3WHo4ZVpJSFZJT3Q2bEYzVFBOClpNZnl5UGhhaWhMbEt6SlFkaHpEb2MzL2hkVEtSeGZCbHRyZmY5bll4NWRIV2Vnb21WTDFpL1MwSEFCN01PcW4KU2oxZEVya1FFUGhZYm5vMVZJNW1sNzFMTWV1L2FuRG1Fa0VodHZrVmNxV25YczZEaWl1ZFUwVG1jNFcvK2xWSApDbHVrK0lTa2cxLzNweExBUWpTaVBwV2cvWUIvY05EY3V1SHh1ZUMwS3FJSGdHSXJ4MGlESThUcTdLbE5iY09WCkN5ajBYcGN2NjUzZERsSlpBQTlPL2xqZmxlTmEwOE54c3BSQkVvTVhoSUt1T0wvb3dWWTY1WkRDQkJnZzVHR0gKdUtHbkZCSVRtS2Q5ZFdVVlJlemo3c0t1NXA0RXJBVGdSaTdsQUJFQkFBRzBKa2RoYkdGNGVTQkVaWFlnUzJWNQpJRHhuWVd4aGVIbGtaWFpBWVc1emFXSnNaUzVqYjIwK2lRRlJCQk1CQ0FBN0ZpRUUrNHMvTFNTOHIzNzk5NU9wCjgzVjF4UzFQRnZNRkFtY0JrRE1DR3dNRkN3a0lCd0lDSWdJR0ZRb0pDQXNDQkJZQ0F3RUNIZ2NDRjRBQUNna1EKODNWMXhTMVBGdlBEbUFnQXdKSi9UUERyVzljbEdiT2JHNmQzUlR6TTA4UjFIdngxeFJocGVXR0IzdVBhZyt6UwpMbW1nU0hVc2tXV0NoUnIxbWNkSWZINjBIZ2RoUjFQSWs5c2pLc1RXb3J6UzBQb2xpdDdEZDdwUytlMXNGZEdlCk1GR1gwbGpEWUY1NTh5YVg1TkNWQnN0SWFxeFR1SGMrU0dPWVQ4Lzd3NVA3L3k3TGk5T0JPNHZwUHg2Z3EvUlYKSjF4NkduREVMcGhHZXl6QWxQemV2UndWcjdoMjdrZklpZEk4dkQyTFlzM3FWN3Njbk9jVytoRmNKNXV0TGVlNAo0aWExQkRDWURSZ09nejRrTW96L3JHUTRyUjE1YVRjbGloYzArcHVaSnJ2c1VRTVBTMStxOVhvSlBKcytzK0dyCmtZMjRZSUQvQk5VWHkwai9CUjV2UVF2Q1NDYVdkQkRHeUZ2VjdBPT0KPTBoWksKLS0tLS1FTkQgUEdQIFBVQkxJQyBLRVkgQkxPQ0stLS0tLQo=' > /etc/pulp/certs/ansible-sign-pub.gpg;
+        head -n 4 /etc/pulp/certs/ansible-sign-pub.gpg;
+        echo '...';
+        tail -n 4 /etc/pulp/certs/ansible-sign-pub.gpg;
+        find /etc/pulp/certs ;
+        echo '  ';
+        echo 'DONE! <#';
+
       "
 
   migrations:
@@ -124,6 +148,7 @@ services:
     command: |
       bash -c "
         set -e;
+        rm -rf /var/lib/pulp/.migrated;
         while [[ ! -f /etc/pulp/certs/database_fields.symmetric.key ]]; do
           echo 'Waiting for key';
           sleep 2;
@@ -153,6 +178,7 @@ services:
     networks:
       - default
       - service-mesh
+    user: root
     command: |
       bash -c "
         while [[ ! -f /var/lib/pulp/.migrated ]]; do
@@ -179,6 +205,7 @@ services:
     networks:
       - default
       - service-mesh
+    user: root
     command: |
       bash -c "
         while [[ ! -f /var/lib/pulp/.migrated ]]; do
@@ -200,12 +227,91 @@ services:
       - ".:/src/galaxy_ng"
     environment:
       <<: *common-env
+    user: root
     command: |
       bash -c "
         while [[ ! -f /var/lib/pulp/.migrated ]]; do
           echo 'Waiting for migrations ...';
           sleep 2;
-        done && exec pulpcore-worker;
+        done;
+        while [[ ! -f /etc/pulp/certs/ansible-sign.key ]]; do
+          echo 'Waiting for signing key';
+          sleep 2;
+        done;
+
+        echo '#> STEP: Import GPG Keys for content signing tasks';
+        gpgconf --kill gpg-agent && gpg --batch --no-default-keyring --import /etc/pulp/certs/ansible-sign.key;
+        (echo 5; echo y; echo save) | gpg --command-fd 0 --no-tty --no-greeting -q --edit-key 'FB8B3F2D24BCAF7EFDF793A9F37575C52D4F16F3' trust;
+        gpg --list-secret-keys;
+        echo 'DONE! <#';
+
+        exec pulpcore-worker;
+      "
+
+  manager:
+    image: "localhost/galaxy_ng/galaxy_ng:base"
+    depends_on:
+      - base_img
+      - postgres
+      - helper
+      - migrations
+      - worker
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - ".:/src/galaxy_ng"
+    environment:
+      <<: *common-env
+    user: root
+    command: |
+      bash -c "
+        while [[ ! -f /var/lib/pulp/.migrated ]]; do
+          echo 'Waiting for migrations ...';
+          sleep 2;
+        done;
+        while [[ ! -f /etc/pulp/certs/ansible-sign.key ]]; do
+          echo 'Waiting for signing key';
+          sleep 2;
+        done;
+
+        echo '#> STEP: Scheduling Resource Sync Task.';
+        pulpcore-manager task-scheduler --id dab_sync --interval 15 --path "galaxy_ng.app.tasks.resource_sync.run";
+        curl -s -u admin:admin http://api:24817/api/galaxy/pulp/api/v3/task-schedules/?name=dab_sync | python -m json.tool;
+        echo 'DONE! <#';
+
+        echo '#> STEP: Import GPG Keys for signing service creation.';
+        gpgconf --kill gpg-agent && gpg --batch --no-default-keyring --import /etc/pulp/certs/ansible-sign.key;
+        (echo 5; echo y; echo save) | gpg --command-fd 0 --no-tty --no-greeting -q --edit-key 'FB8B3F2D24BCAF7EFDF793A9F37575C52D4F16F3' trust;
+        gpg --list-secret-keys;
+        echo 'DONE! <#';
+        echo '#> STEP: Creating signing services';
+        pulpcore-manager add-signing-service ansible-default /var/lib/pulp/scripts/collection_sign.sh F37575C52D4F16F3;
+        pulpcore-manager add-signing-service container-default /var/lib/pulp/scripts/container_sign.sh F37575C52D4F16F3 --class container:ManifestSigningService;
+        # add-signing-service is not idempotent, so the note below.
+        echo 'NOTE!!! CommandError: duplicate key value, above is NOT A PROBLEM if 2 signing services are returned from API below:';
+        curl -s -u admin:admin http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
+        echo 'DONE! <#';
+        echo '#> STEP: Setting repository public key for signature upload verification'
+        pulpcore-manager set-repo-keyring --repository staging --publickeypath /etc/pulp/certs/ansible-sign-pub.gpg -y;
+        pulpcore-manager set-repo-keyring --repository published --publickeypath /etc/pulp/certs/ansible-sign-pub.gpg -y;
+        echo 'DONE! <#';
+
+        echo '#> STEP: Installing dev tools';
+        /venv/bin/pip3.11 install ipython ipdb django-extensions;
+        echo 'DONE! <#';
+        echo ' ';
+
+        echo '###################### API ROOT ##############################';
+        curl -s http://api:24817/api/galaxy/ | python -m json.tool;
+
+        echo '######################## READY ###############################';
+        echo ' ';
+        echo 'API: http://localhost:5001/api/galaxy/v3/swagger-ui/';
+        echo 'Django Admin CLI: docker compose -f aap_compose_dev.yaml exec manager pulpcore-manager';
+        echo 'Settings list: docker compose -f aap_compose_dev.yaml exec manager dynaconf list';
+
+        # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`
+        tail -f /dev/null
       "
 
   nginx:
@@ -224,9 +330,9 @@ services:
 
 volumes:
   var_lib_pulp:
-    name: var_lib_pulp 
+    name: var_lib_pulp
   etc_pulp_certs:
-    name: etc_pulp_certs 
+    name: etc_pulp_certs
 
 networks:
   service-mesh:
