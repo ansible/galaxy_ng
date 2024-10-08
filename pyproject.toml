@@ -114,6 +114,8 @@ legacy_tox_ini = """
         PULP_FILE_UPLOAD_TEMP_DIR=/tmp/pulp/artifact-tmp
     commands = 
         sh -c ' \
+            docker compose -f local_dev.yml up -d postgres && \
+            docker compose -f local_dev.yml exec postgres bash -c "while ! pg_isready -U galaxy_ng; do sleep 1; done" && \
             rm -rf /tmp/pulp && \
             mkdir -p /tmp/pulp && \
             mkdir -p /tmp/pulp/tmp && \
@@ -133,7 +135,6 @@ legacy_tox_ini = """
                 --capture=no -v \
                 -p 'no:pulpcore' \
                 -p 'no:pulp_ansible' \
-                -k 'test_me_get' \
                 --pyargs "galaxy_ng.tests.unit" \
         '
 """

@@ -188,13 +188,3 @@ oci/dab:
 .PHONY: oci/dab_jwt
 oci/dab_jwt:
 	dev/oci_start dab_jwt
-
-################################################
-# UNIT TESTING
-################################################
-
-postgres/up:
-	docker compose -f local_dev.yml up -d postgres
-
-postgres/down:
-	docker compose -f local_dev.yml down -v postgres

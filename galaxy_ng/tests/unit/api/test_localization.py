@@ -1,5 +1,7 @@
 import logging
 
+from django.core.management import call_command
+
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app.models import auth as auth_models
 
@@ -84,6 +86,9 @@ class TestLocalization(BaseTestCase):
             )
 
     def test_localization_files(self):
+
+        call_command('compilemessages')
+
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             self.client.force_authenticate(user=self.admin_user)
 

@@ -59,6 +59,11 @@ x-common-env: &common-env
   # role content workaround ..
   PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'
 
+  POSTGRES_LOGGING_COLLECTOR: 'true'
+  POSTGRES_LOG_DESTINATION: 'stderr'
+  POSTGRES_LOG_STATEMENT: 'all'
+  POSTGRES_LOG_MIN_DURATION_STATEMENT: '0' 
+
 
 services:
   postgres:
