@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# List all files in the DEV_SOURCE_PATH and watch for changes and use entr to SIGKILL + restart
+echo "Watching $DEV_SOURCE_PATH"
+
+find $(echo $DEV_SOURCE_PATH | tr ':' '\n' | while read item; do echo -n /src/$item\ ; done) \( -path /src/galaxy_ng/.venv -o -path /src/galaxy_ng/build -o -path /src/galaxy_ng/.eggs \) -prune -o -name '*.py' -o -name '*.yaml' | /src/galaxy_ng/dev/compose/bin/entr -n -r timeout -k 5 0 $1

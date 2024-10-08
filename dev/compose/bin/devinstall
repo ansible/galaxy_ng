@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+local src_path_list
+IFS=':' read -ra src_path_list <<< "$DEV_SOURCE_PATH"
+
+for item in "${src_path_list[@]}"; do
+    src_path="/src/${item}"
+    if [[ -d "$src_path" ]]; then
+        echo "Installing path ${item} in editable mode."
+
+        if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then
+            pip3.11 install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
+        else
+            pip3.11 install --no-cache-dir --editable "$src_path" >/dev/null
+        fi
+
+    else
+        echo "WARNING: Source path ${item} is not a directory."
+    fi
+done
+
