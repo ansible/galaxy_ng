@@ -102,7 +102,7 @@ legacy_tox_ini = """
         PULP_DATABASES__default__USER=galaxy_ng
         PULP_DATABASES__default__PASSWORD=galaxy_ng
         PULP_DATABASES__default__HOST=localhost
-        PULP_DATABASES__default__PORT=5432
+        PULP_DATABASES__default__PORT=5433
         #PULP_INSTALLED_APPS="[galaxy_ng]"
         PULP_DB_ENCRYPTION_KEY=/tmp/database_fields.symmetric.key
         PULP_RH_ENTITLEMENT_REQUIRED=insights
@@ -114,8 +114,8 @@ legacy_tox_ini = """
         PULP_FILE_UPLOAD_TEMP_DIR=/tmp/pulp/artifact-tmp
     commands = 
         sh -c ' \
-            docker compose -f local_dev.yml up -d postgres && \
-            docker compose -f local_dev.yml exec postgres bash -c "while ! pg_isready -U galaxy_ng; do sleep 1; done" && \
+            docker compose -f aap_compose_dev.yaml up --force-recreate -d postgres && \
+            docker compose -f aap_compose_dev.yaml exec postgres bash -c "while ! pg_isready -U galaxy_ng; do sleep 1; done" && \
             rm -rf /tmp/pulp && \
             mkdir -p /tmp/pulp && \
             mkdir -p /tmp/pulp/tmp && \
@@ -130,6 +130,9 @@ legacy_tox_ini = """
             if [ -d ../pulpcore ]; then pip install -e ../pulpcore; fi && \
             if [ -d ../pulp_ansible ]; then pip install -e ../pulp_ansible; fi && \
             if [ -d ../galaxy-importer ]; then pip install -e ../galaxy-importer; fi && \
+            if [ -d ../dynaconf ]; then pip install -e ../dynaconf; fi && \
+            if [ -d ../django ]; then pip install -e ../django; fi && \
+            if [ -d ../django-rest-framework ]; then pip install -e ../django-rest-framework; fi && \
             pytest \
                 --log-cli-level=DEBUG \
                 --capture=no -v \
