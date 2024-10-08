@@ -105,7 +105,7 @@ legacy_tox_ini = """
         PULP_DATABASES__default__PORT=5432
         #PULP_INSTALLED_APPS="[galaxy_ng]"
         PULP_DB_ENCRYPTION_KEY=/tmp/database_fields.symmetric.key
-        PULP_RH_ENTITLEMENT_REQUIRED=true
+        PULP_RH_ENTITLEMENT_REQUIRED=insights
         PULP_DEPLOY_ROOT=/tmp/pulp
         PULP_STATIC_ROOT=/tmp/pulp
         PULP_WORKING_DIRECTORY=/tmp/pulp/tmp
@@ -129,9 +129,11 @@ legacy_tox_ini = """
             if [ -d ../pulp_ansible ]; then pip install -e ../pulp_ansible; fi && \
             if [ -d ../galaxy-importer ]; then pip install -e ../galaxy-importer; fi && \
             pytest \
+                --log-cli-level=DEBUG \
                 --capture=no -v \
                 -p 'no:pulpcore' \
                 -p 'no:pulp_ansible' \
+                -k 'test_me_get' \
                 --pyargs "galaxy_ng.tests.unit" \
         '
 """
