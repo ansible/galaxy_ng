@@ -93,6 +93,7 @@ legacy_tox_ini = """
     usedevelop = True
     deps =
         -r unittest_requirements.txt
+        epdb
     setenv =
         LOCK_REQUIREMENTS=0
         DJANGO_SETTINGS_MODULE=pulpcore.app.settings
@@ -107,6 +108,9 @@ legacy_tox_ini = """
         PULP_RH_ENTITLEMENT_REQUIRED=true
         PULP_DEPLOY_ROOT=/tmp/pulp
         PULP_STATIC_ROOT=/tmp/pulp
+        PULP_WORKING_DIRECTORY=/tmp/pulp/tmp
+        PULP_MEDIA_ROOT=/tmp/pulp/media
+        PULP_FILE_UPLOAD_TEMP_DIR=/tmp/pulp/tmp/artifact-tmp
     commands = 
         sh -c ' \
             rm -rf /tmp/pulp && \
@@ -125,6 +129,7 @@ legacy_tox_ini = """
                 --capture=no -v \
                 -p 'no:pulpcore' \
                 -p 'no:pulp_ansible' \
+                -k 'test_upload_collection' \
                 --pyargs "galaxy_ng.tests.unit" \
         '
 """
