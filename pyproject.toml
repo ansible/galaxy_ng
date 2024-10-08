@@ -138,6 +138,9 @@ legacy_tox_ini = """
                 --capture=no -v \
                 -p 'no:pulpcore' \
                 -p 'no:pulp_ansible' \
+                --cov-report term-missing:skip-covered \
+                --cov=galaxy_ng \
+                --junit-xml=/tmp/galaxy_ng-test-results.xml \
                 --pyargs "galaxy_ng.tests.unit" \
         '
 """

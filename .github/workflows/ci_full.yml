@@ -62,20 +62,11 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: install ansible
-        run: pip3 install ansible
+      - name: install tox
+        run: pip3 install tox
 
-      - name: install python-requests
-        run: pip3 install requests
-
-      - name: run the build container playbook
-        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v build_container.yaml
-
-      - name: run the start container playbook
-        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v start_container.yaml
-
-      - name: run the unit test playbook
-        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_unit_tests.yaml
+      - name: run the unit tests
+        run: tox -e py311
 
       - name: copy coverage report
         run: |
