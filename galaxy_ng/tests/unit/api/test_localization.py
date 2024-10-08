@@ -87,9 +87,10 @@ class TestLocalization(BaseTestCase):
 
     def test_localization_files(self):
 
-        call_command('compilemessages')
+        call_command('compilemessages', ignore='cache')
 
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
+
             self.client.force_authenticate(user=self.admin_user)
 
             response = self.client.post(
