@@ -67,10 +67,10 @@ jobs:
           cd ..
           git clone https://github.com/ansible/django-ansible-base
 
-      - name: install ldap system dependencies
+      - name: install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y libsasl2-dev libldap2-dev libssl-dev
+          sudo apt install -y libsasl2-dev libldap2-dev libssl-dev gettext
 
       - name: install tox
         run: pip3 install tox
