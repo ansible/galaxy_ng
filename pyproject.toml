@@ -111,15 +111,18 @@ legacy_tox_ini = """
         PULP_WORKING_DIRECTORY=/tmp/pulp/tmp
         PULP_MEDIA_ROOT=/tmp/pulp/media
         PULP_FILE_UPLOAD_TEMP_DIR=/tmp/pulp/tmp/artifact-tmp
+        PULP_FILE_UPLOAD_TEMP_DIR=/tmp/pulp/artifact-tmp
     commands = 
         sh -c ' \
             rm -rf /tmp/pulp && \
             mkdir -p /tmp/pulp && \
             mkdir -p /tmp/pulp/tmp && \
-            mkdir -p /tmp/pulp/tmp/artifact-tmp && \
+            mkdir -p /tmp/pulp/artifact-tmp && \
             mkdir -p /tmp/pulp/media && \
             mkdir -p /tmp/pulp/assets && \
-            if [ ! -f /tmp/database_fields.symmetric.key ]; then openssl rand -base64 32 > /tmp/database_fields.symmetric.key; fi && \
+            if [ ! -f /tmp/database_fields.symmetric.key ]; then \
+                openssl rand -base64 32 > /tmp/database_fields.symmetric.key; \
+            fi && \
             if [ -d ../django-ansible-base ]; then pip install -e ../django-ansible-base; fi && \
             (pip show galaxy_ng || pip install -e .) && \
             if [ -d ../pulpcore ]; then pip install -e ../pulpcore; fi && \
@@ -129,7 +132,6 @@ legacy_tox_ini = """
                 --capture=no -v \
                 -p 'no:pulpcore' \
                 -p 'no:pulp_ansible' \
-                -k 'test_upload_collection' \
                 --pyargs "galaxy_ng.tests.unit" \
         '
 """
