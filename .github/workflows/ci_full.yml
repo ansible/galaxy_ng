@@ -65,6 +65,11 @@ jobs:
       - name: install tox
         run: pip3 install tox
 
+      - name: checkout django-ansible-base
+        run: |
+          cd ..
+          git clone https://github.com/ansible/django-ansible-base
+
       - name: run the unit tests
         run: tox -e py311
 
