@@ -62,13 +62,18 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: install tox
-        run: pip3 install tox
-
       - name: checkout django-ansible-base
         run: |
           cd ..
           git clone https://github.com/ansible/django-ansible-base
+
+      - name: install ldap system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libsasl2-dev libldap2-dev libssl-dev
+
+      - name: install tox
+        run: pip3 install tox
 
       - name: run the unit tests
         run: tox -e py311
