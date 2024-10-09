@@ -18,9 +18,13 @@ jobs:
           ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
           fetch-depth: 0  # include all history
 
-      - name: intsall and run lint-po
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: install and run lint-po
         run: |
-          pip install lint-po
+          pip3 install lint-po
           lint-po ./galaxy_ng/locale/*/LC_MESSAGES/*.po
 
   lint:
