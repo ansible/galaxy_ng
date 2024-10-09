@@ -104,7 +104,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
     #   with /auth. In newer versions, that substring no longer exists.
     #   There is a setting which can re-add that substring to make
     #   a newer system operate similar to the old.
-    KEYCLOAK_KC_HTTP_RELATIVE_PATH = settings.get("KEYCLOAK_KC_HTTP_RELATIVE_PATH", default="")
+    KEYCLOAK_KC_HTTP_RELATIVE_PATH = settings.get("KEYCLOAK_KC_HTTP_RELATIVE_PATH", default="/auth")
 
     SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = \
         settings.get("SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL", default=None)
