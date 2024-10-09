@@ -18,6 +18,8 @@ from ..utils.iqe_utils import is_ocp_env
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
+# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+@pytest.mark.skip_in_gw
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.certification
 @pytest.mark.collection_move

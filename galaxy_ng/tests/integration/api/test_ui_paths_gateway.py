@@ -78,6 +78,8 @@ def test_gw_api_ui_v1_collection_versions(galaxy_client, uncertifiedv2):
         validate_json(instance=cv_resp['metadata'], schema=schema_collectionversion_metadata)
 
 
+# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+@pytest.mark.skip_in_gw
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")

@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 # TODO Refactor get_client to provide access to bearer token
+# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+@pytest.mark.skip_in_gw
 @pytest.mark.deployment_standalone
 @pytest.mark.installer_smoke_test
 def test_download_artifact(ansible_config, galaxy_client):

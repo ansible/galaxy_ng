@@ -275,6 +275,8 @@ def test_long_field_values(galaxy_client, field):
     assert fieldname in resp["error"]["description"]
 
 
+# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+@pytest.mark.skip_in_gw
 @pytest.mark.parametrize(
     "spec",
     [
