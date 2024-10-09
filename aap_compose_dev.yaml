@@ -72,12 +72,15 @@ services:
 
   postgres:
     image: "postgres:13"
+    ports:
+      - '5433:5432'
     environment:
       <<: *common-env
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "galaxy_ng"]
       interval: 10s
       retries: 5
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
  
   helper:
     image: quay.io/centos/centos:stream9
