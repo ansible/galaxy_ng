@@ -29,3 +29,20 @@ RUN git clone https://github.com/eradman/entr && \
 
 Then copy the generated `entr` binary.
 
+## devinstall
+
+Install all paths listed on `DEV_SOURCE_PATH` as editable every time the compose starts.
+
+## wait
+
+Wait until a file is present on the shared volumes,
+
+```console
+$ wait /etc/pulp/certs/filename;
+Waiting for /etc/pulp/certs/filename ...
+# sleep 2 secs
+Waiting for /etc/pulp/certs/filename ...
+# sleep 2 secs
+Waiting for /etc/pulp/certs/filename ...
+...
+```

@@ -35,7 +35,6 @@ x-common-env: &common-env
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
 
   # signing ...
-  ENABLE_SIGNING: 0
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
   PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
   PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
@@ -80,14 +79,19 @@ services:
 
   postgres:
     image: "postgres:13"
+    ports:
+      - '5433:5432'
     environment:
       <<: *common-env
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "galaxy_ng"]
       interval: 10s
       retries: 5
+    # Uncomment below to spam out every DB statement to the service stderr
+    # WARNING: enabling log_statement=all makes database slower
+    # command: ["postgres", "-c", "log_statement=ddl", "-c", "log_destination=stderr"]
 
-  helper:  # should this be moved to a custom Dockerfile?
+  helper:  # should this be moved to a custom Dockerfile based on base_img?
     image: quay.io/centos/centos:stream9
     environment:
       <<: *common-env
@@ -108,9 +112,9 @@ services:
 
         # Keys;
         cp /src/galaxy_ng/dev/compose/database/database_fields.symmetric.key /etc/pulp/certs/database_fields.symmetric.key;
-        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-secret.key
-        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key.password.txt /etc/pulp/certs/signing-secret.key.password.txt
-        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-public.key
+        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-secret.key;
+        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key.password.txt /etc/pulp/certs/signing-secret.key.password.txt;
+        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-public.key;
         find /etc/pulp/certs;
 
         # Scripts;
@@ -139,15 +143,15 @@ services:
       bash -c "
         set -e;
         rm -rf /var/lib/pulp/.migrated;
-        while [[ ! -f /etc/pulp/certs/database_fields.symmetric.key ]]; do
-          echo 'Waiting for key';
-          sleep 2;
-        done;
+
+        /src/galaxy_ng/dev/compose/bin/wait /etc/pulp/certs/database_fields.symmetric.key;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+
         pulpcore-manager check --database default;
         pulpcore-manager migrate;
         pulpcore-manager shell < /src/galaxy_ng/dev/common/setup_test_data.py;
         pulpcore-manager createsuperuser --noinput || true;
+
         touch /var/lib/pulp/.migrated;
       "
 
@@ -172,12 +176,9 @@ services:
     user: root
     command: |
       bash -c "
-        while [[ ! -f /var/lib/pulp/.migrated ]]; do
-          echo 'Waiting for migrations ...';
-          sleep 2;
-        done;
-
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
       "
 
@@ -202,12 +203,9 @@ services:
     user: root
     command: |
       bash -c "
-        while [[ ! -f /var/lib/pulp/.migrated ]]; do
-          echo 'Waiting for migrations ...';
-          sleep 2;
-        done;
-
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
       "
 
@@ -227,20 +225,14 @@ services:
     user: root
     command: |
       bash -c "
-        while [[ ! -f /var/lib/pulp/.migrated ]]; do
-          echo 'Waiting for migrations ...';
-          sleep 2;
-        done;
-        while [[ ! -f /etc/pulp/certs/signing-secret.key ]]; do
-          echo 'Waiting for signing key';
-          sleep 2;
-        done;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+        /src/galaxy_ng/dev/compose/bin/wait /etc/pulp/certs/signing-secret.key;
+        /src/galaxy_ng/dev/compose/bin/devinstall;
 
         # Worker needs gpg in order to consume signing tasks;
         /src/galaxy_ng/dev/compose/signing/setup_gpg_keys.sh;
         gpg --list-secret-keys;
 
-        /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
       "
 
@@ -261,15 +253,8 @@ services:
     user: root
     command: |
       bash -c "
-        while [[ ! -f /var/lib/pulp/.migrated ]]; do
-          echo 'Waiting for migrations ...';
-          sleep 2;
-        done;
-        while [[ ! -f /etc/pulp/certs/signing-secret.key ]]; do
-          echo 'Waiting for signing key';
-          sleep 2;
-        done;
-
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+        /src/galaxy_ng/dev/compose/bin/wait /etc/pulp/certs/signing-secret.key;
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
         # Schedule resource sync;
@@ -285,9 +270,9 @@ services:
         curl -s -u admin:admin http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
 
         # Setup repository gpgkey for upload verification;
-        /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh
+        /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
 
-        # Dev tools; SHOULD THIS MOVE TO A CUSTOM Dockerfile?
+        # Dev tools; SHOULD THIS MOVE TO A CUSTOM Dockerfile?;
         /venv/bin/pip3.11 install ipython ipdb django-extensions;
 
         echo ' ';
@@ -300,7 +285,7 @@ services:
         echo 'Django Admin CLI: docker compose -f aap_compose_dev.yaml exec manager pulpcore-manager';
         echo 'Settings list: docker compose -f aap_compose_dev.yaml exec manager dynaconf list';
 
-        # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`
+        # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
         tail -f /dev/null
       "
 

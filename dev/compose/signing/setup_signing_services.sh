@@ -13,5 +13,5 @@ HAS_CONTAINER_SIGNING=$(pulpcore-manager shell -c 'from pulpcore.app.models impo
 if [[ "$HAS_CONTAINER_SIGNING" -eq "0" ]]; then
     pulpcore-manager add-signing-service container-default /var/lib/pulp/scripts/container_sign.sh F37575C52D4F16F3 --class container:ManifestSigningService
 else
-    echo "Collection Signing Service Already exists"
+    echo "Container Signing Service Already exists"
 fi
