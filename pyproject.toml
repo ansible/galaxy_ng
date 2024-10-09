@@ -110,12 +110,11 @@ legacy_tox_ini = """
         PULP_STATIC_ROOT=/tmp/pulp
         PULP_WORKING_DIRECTORY=/tmp/pulp/tmp
         PULP_MEDIA_ROOT=/tmp/pulp/media
-        PULP_FILE_UPLOAD_TEMP_DIR=/tmp/pulp/tmp/artifact-tmp
         PULP_FILE_UPLOAD_TEMP_DIR=/tmp/pulp/artifact-tmp
     commands = 
         sh -c ' \
-            docker compose -f aap_compose_dev.yaml up --force-recreate -d postgres && \
-            docker compose -f aap_compose_dev.yaml exec postgres bash -c "while ! pg_isready -U galaxy_ng; do sleep 1; done" && \
+            docker compose -f dev/compose/aap.yaml up --force-recreate -d postgres && \
+            docker compose -f dev/compose/aap.yaml exec postgres bash -c "while ! pg_isready -U galaxy_ng; do sleep 1; done" && \
             rm -rf /tmp/pulp && \
             mkdir -p /tmp/pulp && \
             mkdir -p /tmp/pulp/tmp && \
