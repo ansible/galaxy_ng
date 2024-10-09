@@ -70,6 +70,44 @@ ALLOWED_CONTENT_CHECKSUMS<list> ['sha224', 'sha256', 'sha384', 'sha512']
 ...
 ```
 
+Stopping
+```console
+$ docker compose -f dev/compose/aap.yaml down
+# add -v to stop and remove volumes
+```
+
+
+## API Access
+
+Galaxy API is available on:
+
+[http://localhost:5001/api/galaxy/v3/swagger-ui/](http://localhost:5001/api/galaxy/v3/swagger-ui/)
+
+AAP UI and API will be available only if started separately on:
+
+[https://localhost](https://localhost)
+
+Ansible Hub UI can be started separately as a standalone `npm` run.
+
+
+```console
+
+```
+
 ## Reload
 
 Changing `.py` and `.yaml` files on any of the `DEV_SOURCE_PATH` directories will trigger reload of `api`, `worker`, and `content` services.
+
+
+## Tips and Tricks.
+
+**TBD**
+
+
+### Debugging
+
+### Connecting to Database
+
+### Dumping and restoring the database
+
+### Populating testing data

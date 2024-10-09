@@ -70,7 +70,7 @@ x-common-env: &common-env
 services:
   base_img:
     build:
-      context: ..
+      context: ../../
       dockerfile: Dockerfile
     image: "localhost/galaxy_ng/galaxy_ng:base"
 
@@ -282,8 +282,8 @@ services:
         echo '######################## READY ###############################';
         echo ' ';
         echo 'API: http://localhost:5001/api/galaxy/v3/swagger-ui/';
-        echo 'Django Admin CLI: docker compose -f aap_compose_dev.yaml exec manager pulpcore-manager';
-        echo 'Settings list: docker compose -f aap_compose_dev.yaml exec manager dynaconf list';
+        echo 'Django Admin CLI: docker compose -f dev/compose/aap.yaml exec manager pulpcore-manager';
+        echo 'Settings list: docker compose -f ... exec manager dynaconf list';
 
         # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
         tail -f /dev/null
