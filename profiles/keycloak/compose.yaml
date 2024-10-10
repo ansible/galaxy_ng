@@ -25,6 +25,7 @@ services:
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
+      - KC_HTTP_RELATIVE_PATH=/auth
     ports:
       - 8080:8080
     depends_on:
