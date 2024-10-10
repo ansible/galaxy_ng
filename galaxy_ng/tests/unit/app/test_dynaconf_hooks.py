@@ -358,9 +358,9 @@ def test_dynaconf_hooks_authentication_backends_and_classes(
                 "INSTALLED_APPS": ["social_django", "dynaconf_merge_unique"],
                 "KEYCLOAK_URL": "https://mykeycloak:1337",
                 "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
-                    "https://mykeycloak:1337/realms/aap/protocol/openid-connect/auth/",
+                    "https://mykeycloak:1337/auth/realms/aap/protocol/openid-connect/auth/",
                 "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
-                    "https://mykeycloak:1337/realms/aap/protocol/openid-connect/token/",
+                    "https://mykeycloak:1337/auth/realms/aap/protocol/openid-connect/token/",
                 "GALAXY_AUTH_KEYCLOAK_ENABLED": True,
                 "GALAXY_FEATURE_FLAGS__external_authentication": True,
                 "GALAXY_TOKEN_EXPIRATION": 1440,
@@ -369,7 +369,7 @@ def test_dynaconf_hooks_authentication_backends_and_classes(
         (
             True,
             {
-                "KEYCLOAK_KC_HTTP_RELATIVE_PATH": "/auth",
+                "KEYCLOAK_KC_HTTP_RELATIVE_PATH": "",
                 "KEYCLOAK_PROTOCOL": "http",
                 "GALAXY_TOKEN_EXPIRATION": 0,
             },
@@ -377,9 +377,28 @@ def test_dynaconf_hooks_authentication_backends_and_classes(
                 "INSTALLED_APPS": ["social_django", "dynaconf_merge_unique"],
                 "KEYCLOAK_URL": "http://mykeycloak:1337",
                 "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
-                    "http://mykeycloak:1337/auth/realms/aap/protocol/openid-connect/auth/",
+                    "http://mykeycloak:1337/realms/aap/protocol/openid-connect/auth/",
                 "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
-                    "http://mykeycloak:1337/auth/realms/aap/protocol/openid-connect/token/",
+                    "http://mykeycloak:1337/realms/aap/protocol/openid-connect/token/",
+                "GALAXY_AUTH_KEYCLOAK_ENABLED": True,
+                "GALAXY_FEATURE_FLAGS__external_authentication": True,
+                "GALAXY_TOKEN_EXPIRATION": 0,
+            },
+        ),
+        (
+            True,
+            {
+                "KEYCLOAK_KC_HTTP_RELATIVE_PATH": "/mylittlepony",
+                "KEYCLOAK_PROTOCOL": "http",
+                "GALAXY_TOKEN_EXPIRATION": 0,
+            },
+            {
+                "INSTALLED_APPS": ["social_django", "dynaconf_merge_unique"],
+                "KEYCLOAK_URL": "http://mykeycloak:1337",
+                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
+                    "http://mykeycloak:1337/mylittlepony/realms/aap/protocol/openid-connect/auth/",
+                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
+                    "http://mykeycloak:1337/mylittlepony/realms/aap/protocol/openid-connect/token/",
                 "GALAXY_AUTH_KEYCLOAK_ENABLED": True,
                 "GALAXY_FEATURE_FLAGS__external_authentication": True,
                 "GALAXY_TOKEN_EXPIRATION": 0,
