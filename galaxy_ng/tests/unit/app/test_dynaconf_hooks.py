@@ -2,7 +2,6 @@ import copy
 import pytest
 
 from galaxy_ng.app.dynaconf_hooks import post as post_hook
-from galaxy_ng.app.dynaconf_hooks import configure_keycloak
 
 
 class SuperDict(dict):
@@ -68,16 +67,6 @@ BASE_SETTINGS = {
     "AUTHENTICATION_BACKEND_PRESETS_DATA": copy.deepcopy(AUTHENTICATION_BACKEND_PRESETS_DATA),
     "BASE_DIR": "templates",
     "validators": SuperValidator(),
-}
-
-BASE_KEYCLOAK_SETTINGS = {
-    "BASE_DIR": "templates",
-    "SOCIAL_AUTH_KEYCLOAK_KEY": "key123",
-    "SOCIAL_AUTH_KEYCLOAK_SECRET": "secret123",
-    "SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY": "pubkey123",
-    "KEYCLOAK_HOST": "mykeycloak",
-    "KEYCLOAK_PORT": 1337,
-    "KEYCLOAK_REALM": "aap",
 }
 
 
@@ -320,7 +309,9 @@ BASE_KEYCLOAK_SETTINGS = {
     ],
 )
 def test_dynaconf_hooks_authentication_backends_and_classes(
-    do_stuff, extra_settings, expected_results
+    do_stuff,
+    extra_settings,
+    expected_results
 ):
 
     # skip test this way ...
@@ -345,79 +336,4 @@ def test_dynaconf_hooks_authentication_backends_and_classes(
             import epdb; epdb.st()
             print(e)
         """
-        assert new_settings.get(key) == val
-
-
-@pytest.mark.parametrize(
-    "do_stuff, extra_settings, expected_results",
-    [
-        (
-            True,
-            {},
-            {
-                "INSTALLED_APPS": ["social_django", "dynaconf_merge_unique"],
-                "KEYCLOAK_URL": "https://mykeycloak:1337",
-                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
-                    "https://mykeycloak:1337/realms/aap/protocol/openid-connect/auth/",
-                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
-                    "https://mykeycloak:1337/realms/aap/protocol/openid-connect/token/",
-                "GALAXY_AUTH_KEYCLOAK_ENABLED": True,
-                "GALAXY_FEATURE_FLAGS__external_authentication": True,
-                "GALAXY_TOKEN_EXPIRATION": 1440,
-            },
-        ),
-        (
-            True,
-            {
-                "KEYCLOAK_KC_HTTP_RELATIVE_PATH": "/auth",
-                "KEYCLOAK_PROTOCOL": "http",
-                "GALAXY_TOKEN_EXPIRATION": 0,
-            },
-            {
-                "INSTALLED_APPS": ["social_django", "dynaconf_merge_unique"],
-                "KEYCLOAK_URL": "http://mykeycloak:1337",
-                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
-                    "http://mykeycloak:1337/auth/realms/aap/protocol/openid-connect/auth/",
-                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
-                    "http://mykeycloak:1337/auth/realms/aap/protocol/openid-connect/token/",
-                "GALAXY_AUTH_KEYCLOAK_ENABLED": True,
-                "GALAXY_FEATURE_FLAGS__external_authentication": True,
-                "GALAXY_TOKEN_EXPIRATION": 0,
-            },
-        ),
-        (
-            True,
-            {
-                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
-                    "httpZ://mykeycloAk:1339/auth__/realms/aap/protocol/openid-connect/auth/",
-                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
-                    "httpZ://mykeycloAk:1339/auth__/realms/aap/protocol/openid-connect/token/",
-            },
-            {
-                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL":
-                    "httpZ://mykeycloAk:1339/auth__/realms/aap/protocol/openid-connect/auth/",
-                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL":
-                    "httpZ://mykeycloAk:1339/auth__/realms/aap/protocol/openid-connect/token/",
-            },
-        ),
-
-    ],
-)
-def test_dynaconf_hook_configure_keycloak(do_stuff, extra_settings, expected_results):
-    # skip test this way ...
-    if not do_stuff:
-        return
-
-    xsettings = SuperDict()
-    xsettings.update(copy.deepcopy(BASE_KEYCLOAK_SETTINGS))
-    if extra_settings:
-        xsettings.update(copy.deepcopy(extra_settings))
-
-    # don't allow the downstream to edit this data ...
-    xsettings.immutable = True
-
-    # run the function and get the result ...
-    new_settings = configure_keycloak(xsettings)
-
-    for key, val in expected_results.items():
         assert new_settings.get(key) == val

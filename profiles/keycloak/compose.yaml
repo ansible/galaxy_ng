@@ -12,8 +12,7 @@ services:
   #     - "UI_EXTERNAL_LOGIN_URI={API_PROTOCOL}://{API_HOST}:{API_PORT}/login"
 
   keycloak:
-    #image: quay.io/keycloak/keycloak:legacy
-    image: quay.io/keycloak/keycloak:latest
+    image: quay.io/keycloak/keycloak:legacy
     environment:
       - DB_VENDOR=POSTGRES
       - DB_ADDR=kc-postgres
@@ -21,8 +20,6 @@ services:
       - DB_USER=keycloak
       - DB_SCHEMA=public
       - DB_PASSWORD=keycloak
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
     ports:
@@ -30,7 +27,6 @@ services:
     depends_on:
       - kc-postgres
       - ldap
-    command: ['start-dev']
 
   kc-postgres:
     image: "postgres:12"
