@@ -94,16 +94,10 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
     SOCIAL_AUTH_KEYCLOAK_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_KEY", default=None)
     SOCIAL_AUTH_KEYCLOAK_SECRET = settings.get("SOCIAL_AUTH_KEYCLOAK_SECRET", default=None)
     SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = settings.get("SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY", default=None)
-    KEYCLOAK_PROTOCOL = settings.get("KEYCLOAK_PROTOCOL", default="https")
+    KEYCLOAK_PROTOCOL = settings.get("KEYCLOAK_PROTOCOL", default=None)
     KEYCLOAK_HOST = settings.get("KEYCLOAK_HOST", default=None)
     KEYCLOAK_PORT = settings.get("KEYCLOAK_PORT", default=None)
     KEYCLOAK_REALM = settings.get("KEYCLOAK_REALM", default=None)
-
-    KEYCLOAK_AUTH_PREFIX = settings.get("KEYCLOAK_AUTH_PREFIX", default="")
-    SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = \
-        settings.get("SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL", default=None)
-    SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = \
-        settings.get("SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL", default=None)
 
     # Add settings if Social Auth values are provided
     if all(
@@ -128,35 +122,21 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
         )
         data["KEYCLOAK_HOST_LOOPBACK"] = settings.get("KEYCLOAK_HOST_LOOPBACK", default=None)
         data["KEYCLOAK_URL"] = f"{KEYCLOAK_PROTOCOL}://{KEYCLOAK_HOST}:{KEYCLOAK_PORT}"
-
-        auth_url_str = "{keycloak}/{prefix}realms/{realm}/protocol/openid-connect/auth/"
-
-        if SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL is not None:
-            data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL
-        else:
+        auth_url_str = "{keycloak}/auth/realms/{realm}/protocol/openid-connect/auth/"
+        data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
+            keycloak=data["KEYCLOAK_URL"], realm=KEYCLOAK_REALM
+        )
+        if data["KEYCLOAK_HOST_LOOPBACK"]:
+            loopback_url = "{protocol}://{host}:{port}".format(
+                protocol=KEYCLOAK_PROTOCOL, host=data["KEYCLOAK_HOST_LOOPBACK"], port=KEYCLOAK_PORT
+            )
             data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
-                keycloak=data["KEYCLOAK_URL"], realm=KEYCLOAK_REALM, prefix=KEYCLOAK_AUTH_PREFIX
+                keycloak=loopback_url, realm=KEYCLOAK_REALM
             )
 
-            if data["KEYCLOAK_HOST_LOOPBACK"]:
-                loopback_url = "{protocol}://{host}:{port}".format(
-                    protocol=KEYCLOAK_PROTOCOL,
-                    host=data["KEYCLOAK_HOST_LOOPBACK"],
-                    port=KEYCLOAK_PORT
-                )
-                data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] = auth_url_str.format(
-                    keycloak=loopback_url, realm=KEYCLOAK_REALM, prefix=KEYCLOAK_AUTH_PREFIX
-                )
-
-        if SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL is not None:
-            data['SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL'] = SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL
-        else:
-            data[
-                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"
-            ] = (
-                f"{data['KEYCLOAK_URL']}/{KEYCLOAK_AUTH_PREFIX}realms/"
-                f"{KEYCLOAK_REALM}/protocol/openid-connect/token/"
-            )
+        data[
+            "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"
+        ] = f"{data['KEYCLOAK_URL']}/auth/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/"
 
         data["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = settings.get(
             "SOCIAL_AUTH_LOGIN_REDIRECT_URL", default="/ui/"

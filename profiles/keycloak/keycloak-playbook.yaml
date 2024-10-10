@@ -17,9 +17,7 @@
     - name: Create or update AAP Keycloak realm
       community.general.keycloak_realm:
         auth_client_id: admin-cli
-        #auth_keycloak_url: http://keycloak:8080/auth
-        auth_keycloak_url: http://keycloak:8080
-        #auth_keycloak_url: http://localhost:8080
+        auth_keycloak_url: http://keycloak:8080/auth
         auth_realm: master
         auth_username: admin
         auth_password: admin
@@ -33,8 +31,7 @@
     - name: Create or update a Keycloak client
       community.general.keycloak_client:
         auth_client_id: admin-cli
-        #auth_keycloak_url: http://keycloak:8080/auth
-        auth_keycloak_url: http://keycloak:8080
+        auth_keycloak_url: http://keycloak:8080/auth
         auth_realm: master
         auth_username: admin
         auth_password: admin
@@ -161,8 +158,7 @@
 
     - name: Create Token for service Keycloak
       uri:
-        #url: "http://keycloak:8080/auth/realms/master/protocol/openid-connect/token"
-        url: "http://keycloak:8080/realms/master/protocol/openid-connect/token"
+        url: "http://keycloak:8080/auth/realms/master/protocol/openid-connect/token"
         method: POST
         body_format: form-urlencoded
         body:
@@ -240,8 +236,7 @@
 
     - name: Create LDAP configuration
       uri:
-        #url: "http://keycloak:8080/auth/admin/realms/aap/components"
-        url: "http://keycloak:8080/admin/realms/aap/components"
+        url: "http://keycloak:8080/auth/admin/realms/aap/components"
         method: POST
         body_format: json
         body: "{{ ldap_config | to_json }}"
@@ -256,8 +251,7 @@
 
     - name: Get components
       uri:
-        #url: "http://keycloak:8080/auth/admin/realms/aap/components?parent=aap&type=org.keycloak.storage.UserStorageProvider"
-        url: "http://keycloak:8080/admin/realms/aap/components?parent=aap&type=org.keycloak.storage.UserStorageProvider"
+        url: "http://keycloak:8080/auth/admin/realms/aap/components?parent=aap&type=org.keycloak.storage.UserStorageProvider"
         method: GET
         status_code:
         - 200
@@ -308,8 +302,7 @@
 
     - name: Create LDAP group mapping
       uri:
-        #url: "http://keycloak:8080/auth/admin/realms/aap/components"
-        url: "http://keycloak:8080/admin/realms/aap/components"
+        url: "http://keycloak:8080/auth/admin/realms/aap/components"
         method: POST
         body_format: json
         body: "{{ ldap_group_mapper | to_json }}"
@@ -324,8 +317,7 @@
 
     - name: Get group mapper identifier
       uri:
-        #url: "http://keycloak:8080/auth/admin/realms/aap/components?parent={{ ldap_id }}&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper&name=group"
-        url: "http://keycloak:8080/admin/realms/aap/components?parent={{ ldap_id }}&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper&name=group"
+        url: "http://keycloak:8080/auth/admin/realms/aap/components?parent={{ ldap_id }}&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper&name=group"
         method: GET
         status_code:
         - 200
@@ -341,8 +333,7 @@
 
     - name: Sync LDAP users
       uri:
-        #url: "http://keycloak:8080/auth/admin/realms/aap/user-storage/{{ ldap_id }}/sync?action=triggerFullSync"
-        url: "http://keycloak:8080/admin/realms/aap/user-storage/{{ ldap_id }}/sync?action=triggerFullSync"
+        url: "http://keycloak:8080/auth/admin/realms/aap/user-storage/{{ ldap_id }}/sync?action=triggerFullSync"
         method: POST
         status_code:
         - 200
@@ -354,8 +345,7 @@
 
     - name: Sync LDAP groups
       uri:
-        #url: "http://keycloak:8080/auth/admin/realms/aap/user-storage/{{ ldap_id }}/mappers/{{ keycloak_ldap_group_mapper_id }}/sync?direction=fedToKeycloak"
-        url: "http://keycloak:8080/admin/realms/aap/user-storage/{{ ldap_id }}/mappers/{{ keycloak_ldap_group_mapper_id }}/sync?direction=fedToKeycloak"
+        url: "http://keycloak:8080/auth/admin/realms/aap/user-storage/{{ ldap_id }}/mappers/{{ keycloak_ldap_group_mapper_id }}/sync?direction=fedToKeycloak"
         method: POST
         status_code:
         - 200
@@ -373,8 +363,7 @@
         client_id: automation-hub
         state: present
         auth_client_id: admin-cli
-        #auth_keycloak_url: http://keycloak:8080/auth
-        auth_keycloak_url: http://keycloak:8080
+        auth_keycloak_url: http://keycloak:8080/auth
         auth_realm: master
         auth_username: admin
         auth_password: admin
@@ -390,8 +379,7 @@
         client_id: automation-hub
         state: present
         auth_client_id: admin-cli
-        #auth_keycloak_url: http://keycloak:8080/auth
-        auth_keycloak_url: http://keycloak:8080
+        auth_keycloak_url: http://keycloak:8080/auth
         auth_realm: master
         auth_username: admin
         auth_password: admin
@@ -399,8 +387,7 @@
 
     - name: Get realm public key
       uri:
-        #url: "http://keycloak:8080/auth/realms/aap"
-        url: "http://keycloak:8080/realms/aap"
+        url: "http://keycloak:8080/auth/realms/aap"
         method: GET
         status_code:
         - 200
