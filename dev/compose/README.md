@@ -91,18 +91,77 @@ Ansible Hub UI can be started separately as a standalone `npm` run.
 
 
 ```console
+# Assuming galaxy_ng is running on community compose.
 
+$ git clone https://github.com/ansible/ansible-hub-ui ~/projects/ansible-hub-ui
+$ git clone https://github.com/ansible/galaxy_ng ~/projects/galaxy_ng
+```
+Open 2 terminals:
+
+On the first terminal:
+
+```console
+$ cd galaxy_ng
+$ docker compose -f dev/compose/community.yaml up
 ```
 
-## Reload
+On the second terminal:
 
-Changing `.py` and `.yaml` files on any of the `DEV_SOURCE_PATH` directories will trigger reload of `api`, `worker`, and `content` services.
+```console
+cd ansible-hub-ui
+npm install
+API_PROXY_PORT=5001 API_BASE_PATH=/api/galaxy/ npm run start-standalone
+```
 
+UI will be available on http://localhost:8002 and API on http://localhost:5001
+
+
+## Auto Reload and Local Checkouts
+
+To have the services `api`, `worker` and `content` to automatically reload when
+source code changes it is required to set which paths the `reloader` must watch for changes.
+
+Set the variable `DEV_SOURCE_PATH` with the packages you want to add to the reloader list.
+
+Those repositories must be local checkouts located on the same level of the `galaxy_ng` repository.
+
+Example:
+
+Get the repositories locally in the same root path.
+```console
+$ git clone https://github.com/dynaconf/dynaconf  ~/projects/dynaconf
+$ git clone https://github.com/pulp/pulp_ansible ~/projects/pulp_ansible
+$ git clone https://github.com/ansible/galaxy_ng ~/projects/galaxy_ng
+```
+
+> **IMPORTANT** Ensure all the repos are checked out to compatible branches.
+> for example. you may be on galaxy_ng:master and checking out `setup.py` you
+> see that it requires `pulp_ansible>2.10,<3` then ensure you checkout `pulp_ansible`
+> to a compatible branch.
+
+Start the compose setting the desired editable paths.
+
+```console
+$ cd ~/projects/galaxy_ng
+$ export DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng"
+$ docker compose -f dev/compose/app.yaml up --build
+```
+
+Optionally it can be informed in a single line:
+
+```console
+$ DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng" docker compose -f dev/compose/app.yaml up --build
+```
+
+> **NOTE** if passing on the call line, remember to repass the same variable every time you interact with
+>`docker compose` for exec, logs, down etc.
+
+Now when changes are detected on `.py` and `.yaml` files on any of the `DEV_SOURCE_PATH`
+directories it will trigger reload of `api`, `worker`, and `content` services.
 
 ## Tips and Tricks.
 
 **TBD**
-
 
 ### Debugging
 
