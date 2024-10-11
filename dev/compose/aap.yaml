@@ -60,11 +60,24 @@ x-common-env: &common-env
   # role content workaround ..
   PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'
 
-  # DEV EDITABLE STUFF
+  # Resource server
+  # This disables the attempt for resource syncing
+  PULP_RESOURCE_SERVER_SYNC_ENABLED: 'false'
+  # Set above to 'true' if/when RESOURCE_SERVER is configured
+  # The next variables must be configured to enable resource sync
+  # PULP_RESOURCE_SERVER__URL='https://localhost'
+  # PULP_RESOURCE_SERVER__SECRET_KEY='?'
+  # PULP_RESOURCE_SERVER__VALIDATE_HTTPS='false'
+
+  # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
-  DEV_SOURCE_PATH: "galaxy_ng"
-  # To enable editable installs of local checkouts change the variable above keeping the ordering as follows:
-  # DEV_SOURCE_PATH: "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
+
+  # DEV EDITABLE STUFF
+  # To enable editable installs of local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
+  # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
+  # This can be done as part of the `docker compose` call:
+  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/aap.yaml up
+  DEV_SOURCE_PATH: ${DEV_SOURCE_PATH:-""}
 
 
 services:
@@ -257,8 +270,12 @@ services:
         /src/galaxy_ng/dev/compose/bin/wait /etc/pulp/certs/signing-secret.key;
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
-        # Schedule resource sync;
-        pulpcore-manager task-scheduler --id dab_sync --interval 15 --path "galaxy_ng.app.tasks.resource_sync.run";
+        # Give some time for API to start;
+        sleep 5;
+
+        # Schedule resource sync if enabled;
+        /src/galaxy_ng/dev/compose/dab/schedule_resource_sync.sh;
+        echo 'Scheduled tasks';
         curl -s -u admin:admin http://api:24817/api/galaxy/pulp/api/v3/task-schedules/?name=dab_sync | python -m json.tool;
 
         # Keys are needed to register signing services;
@@ -267,6 +284,7 @@ services:
 
         # Setup signing services;
         /src/galaxy_ng/dev/compose/signing/setup_signing_services.sh;
+        echo 'Signing Services';
         curl -s -u admin:admin http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
 
         # Setup repository gpgkey for upload verification;

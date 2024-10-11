@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
+if [ -z "${DEV_SOURCE_PATH}" ]; then
+    echo "DEV_SOURCE_PATH is not defined, skipping editable installs."
+    exit 0
+fi
 
-local src_path_list
-IFS=':' read -ra src_path_list <<< "$DEV_SOURCE_PATH"
+IFS=':' read -ra SRC_PATH_LIST <<< "$DEV_SOURCE_PATH"
 
-for item in "${src_path_list[@]}"; do
+for item in "${SRC_PATH_LIST[@]}"; do
     src_path="/src/${item}"
     if [[ -d "$src_path" ]]; then
         echo "Installing path ${item} in editable mode."
