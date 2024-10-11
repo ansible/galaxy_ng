@@ -77,7 +77,7 @@ x-common-env: &common-env
   # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
   # This can be done as part of the `docker compose` call:
   # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/aap.yaml up
-  DEV_SOURCE_PATH: ${DEV_SOURCE_PATH:-""}
+  DEV_SOURCE_PATH:
 
 
 services:
@@ -114,6 +114,7 @@ services:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
+      - "../../:/app"
     command: |
       bash -c "
         echo 'Moving required files to the required places.';
@@ -149,6 +150,7 @@ services:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
+      - "../../:/app"
     environment:
       <<: *common-env
     user: root
@@ -179,6 +181,7 @@ services:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
+      - "../../:/app"
     environment:
       <<: *common-env
     extra_hosts:
@@ -206,6 +209,7 @@ services:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
+      - "../../:/app"
     environment:
       <<: *common-env
     extra_hosts:
@@ -233,6 +237,7 @@ services:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
+      - "../../:/app"
     environment:
       <<: *common-env
     user: root
@@ -261,6 +266,7 @@ services:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
+      - "../../:/app"
     environment:
       <<: *common-env
     user: root
@@ -276,7 +282,7 @@ services:
         # Schedule resource sync if enabled;
         /src/galaxy_ng/dev/compose/dab/schedule_resource_sync.sh;
         echo 'Scheduled tasks';
-        curl -s -u admin:admin http://api:24817/api/galaxy/pulp/api/v3/task-schedules/?name=dab_sync | python -m json.tool;
+        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/pulp/api/v3/task-schedules/?name=dab_sync | python -m json.tool;
 
         # Keys are needed to register signing services;
         /src/galaxy_ng/dev/compose/signing/setup_gpg_keys.sh;
@@ -285,7 +291,7 @@ services:
         # Setup signing services;
         /src/galaxy_ng/dev/compose/signing/setup_signing_services.sh;
         echo 'Signing Services';
-        curl -s -u admin:admin http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
+        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
 
         # Setup repository gpgkey for upload verification;
         /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
@@ -296,12 +302,17 @@ services:
         echo ' ';
         echo '###################### API ROOT ##############################';
         curl -s http://api:24817/api/galaxy/ | python -m json.tool;
-
+        echo '################### DEV_SOURCE_PATH ##########################';
+        echo $$DEV_SOURCE_PATH;
+        echo ' ';
         echo '######################## READY ###############################';
         echo ' ';
-        echo 'API: http://localhost:5001/api/galaxy/v3/swagger-ui/';
-        echo 'Django Admin CLI: docker compose -f dev/compose/aap.yaml exec manager pulpcore-manager';
-        echo 'Settings list: docker compose -f ... exec manager dynaconf list';
+        echo 'Credentials:  ' $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD;
+        echo 'API Spec:      http://localhost:5001/api/galaxy/v3/swagger-ui/';
+        echo 'Django Admin:  docker compose -f dev/compose/aap.yaml exec manager pulpcore-manager';
+        echo 'Settings list: docker compose -f dev/compose/aap.yaml exec manager dynaconf list';
+        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
+        echo '##############################################################';
 
         # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
         tail -f /dev/null
