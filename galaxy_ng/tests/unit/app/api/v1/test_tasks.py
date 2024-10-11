@@ -8,7 +8,6 @@ from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 
 from galaxy_ng.app.api.v1.tasks import legacy_role_import
-# from galaxy_ng.app.api.v1.tasks import legacy_sync_from_upstream
 
 
 @pytest.mark.django_db
