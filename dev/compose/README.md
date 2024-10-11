@@ -135,7 +135,7 @@ $ git clone https://github.com/ansible/galaxy_ng ~/projects/galaxy_ng
 ```
 
 > **IMPORTANT** Ensure all the repos are checked out to compatible branches.
-> for example. you may be on galaxy_ng:master and checking out `setup.py` you
+> for example. you may be on galaxy_ng:master and reading `setup.py` you
 > see that it requires `pulp_ansible>2.10,<3` then ensure you checkout `pulp_ansible`
 > to a compatible branch.
 
@@ -158,6 +158,33 @@ $ DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng" docker compose -f dev/compos
 
 Now when changes are detected on `.py` and `.yaml` files on any of the `DEV_SOURCE_PATH`
 directories it will trigger reload of `api`, `worker`, and `content` services.
+
+
+## Troubleshooting
+
+### VersionConflict error
+
+Example:
+```bash
+api-1         |    raise VersionConflict(dist, req).with_context(dependent_req)
+api-1         | pkg_resources.VersionConflict: (pkg_foo 3.2.6 (/venv/lib/python3.11/site-packages), Requirement.parse('pkg_foo<3.1.13,>=3.1.12'))
+```
+
+Solution 1:
+Clean up local build files:
+
+```bash
+cd ~/projects/galaxy_ng
+rm -rf .eggs
+rm -rf build
+rm -rf galaxy_ng.egg-info
+```
+
+Solution 2:
+
+- Ensure `LOCK_REQUIREMENTS` is set to `0`
+- Ensure all your local checkouts are checked out to compatible branches
+
 
 ## Tips and Tricks.
 
