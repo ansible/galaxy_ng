@@ -1,10 +1,4 @@
-import django.core.validators
 from django.db import migrations
-import hashlib
-import json
-
-from django.db import migrations, models
-import django.db.models.deletion
 
 
 def set_collection_remote_type(apps, schema_editor):

@@ -1,10 +1,8 @@
 ---
 name: galaxy_ng/ci
 on:
-  pull_request:
-    branches: ['**']
-  push:
-    branches: ['**']
+  - push
+  - pull_request
 
 jobs:
 
@@ -44,11 +42,8 @@ jobs:
       - name: Install requirements
         run: pip3 install -r lint_requirements.txt
 
-      - name: Run extra lint checks
-        run: "[ ! -x .ci/scripts/extra_linting.sh ] || .ci/scripts/extra_linting.sh"
-
-      - name: Check manifest
-        run: check-manifest
+      - name: Run linters
+        run: make lint
 
       - name: Check for pulpcore imports outside of pulpcore.plugin
         run: sh .ci/scripts/check_pulpcore_imports.sh

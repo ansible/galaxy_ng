@@ -1,7 +1,6 @@
 import logging
 
 from django.apps import apps as global_apps
-from django.contrib.contenttypes.models import ContentType
 from rest_framework.exceptions import ValidationError
 
 from ansible_base.rbac.management import create_dab_permissions
