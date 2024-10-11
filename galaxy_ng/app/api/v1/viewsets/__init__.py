@@ -15,10 +15,6 @@ from .roles import (
     LegacyRoleImportsViewSet
 )
 
-from .sync import (
-    LegacyRolesSyncViewSet,
-)
-
 
 __all__ = (
     "LegacyNamespacesViewSet",
@@ -26,7 +22,6 @@ __all__ = (
     "LegacyNamespaceProvidersViewSet",
     "LegacyUsersViewSet",
     "LegacyRolesViewSet",
-    "LegacyRolesSyncViewSet",
     "LegacyRoleContentViewSet",
     "LegacyRoleVersionsViewSet",
     "LegacyRoleImportsViewSet",

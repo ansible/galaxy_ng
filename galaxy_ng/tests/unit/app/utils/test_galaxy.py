@@ -3,37 +3,8 @@
 import uuid
 
 from django.test import TestCase
-from galaxy_ng.app.utils.galaxy import upstream_role_iterator
 from galaxy_ng.app.utils.galaxy import uuid_to_int
 from galaxy_ng.app.utils.galaxy import int_to_uuid
-
-
-class TestGalaxyUtils(TestCase):
-
-    def test_upstream_role_iterator_with_user(self):
-        roles = []
-        for namespace, role, versions in upstream_role_iterator(github_user="jctanner"):
-            roles.append(role)
-        assert sorted(set([x['github_user'] for x in roles])) == ['jctanner']
-
-    def test_upstream_role_iterator_with_user_and_name(self):
-        roles = []
-        iterator_kwargs = {
-            'github_user': 'geerlingguy',
-            'role_name': 'docker'
-        }
-        for namespace, role, versions in upstream_role_iterator(**iterator_kwargs):
-            roles.append(role)
-        assert len(roles) == 1
-        assert roles[0]['github_user'] == 'geerlingguy'
-        assert roles[0]['name'] == 'docker'
-
-    def test_upstream_role_iterator_with_limit(self):
-        limit = 10
-        count = 0
-        for namespace, role, versions in upstream_role_iterator(limit=limit):
-            count += 1
-        assert count == limit
 
 
 class UUIDConversionTestCase(TestCase):
