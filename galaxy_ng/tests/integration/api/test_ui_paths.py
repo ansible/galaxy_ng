@@ -875,6 +875,7 @@ def test_api_ui_v1_tags_collections(ansible_config, upload_artifact):
 
 
 # /api/automation-hub/_ui/v1/tags/roles/
+@pytest.mark.skip(reason="sync function has been removed")
 @pytest.mark.deployment_community
 def test_api_ui_v1_tags_roles(ansible_config):
     """Test endpoint's sorting and filtering"""
