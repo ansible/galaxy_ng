@@ -153,57 +153,6 @@ def test_me_social_with_precreated_user(ansible_config):
         assert uinfo['username'] == cfg.get('username')
 
 
-@pytest.mark.deployment_community
-def test_me_social_with_v1_synced_user(ansible_config):
-    """ Make sure social auth associates to the correct username """
-
-    username = 'geerlingguy'
-    real_email = 'geerlingguy@nohaxx.me'
-    unverified_email = '481677@GALAXY.GITHUB.UNVERIFIED.COM'
-    cleanup_social_user(username, ansible_config)
-    cleanup_social_user(unverified_email, ansible_config)
-
-    admin_config = ansible_config("admin")
-    admin_client = get_client(
-        config=admin_config,
-        request_token=False,
-        require_auth=True
-    )
-
-    # v1 sync the user's roles and namespace ...
-    pargs = json.dumps({
-        "github_user": username,
-        "limit": 1,
-        "baseurl": "https://old-galaxy.ansible.com"
-    }).encode('utf-8')
-    resp = admin_client('/api/v1/sync/', method='POST', args=pargs)
-    wait_for_v1_task(resp=resp, api_client=admin_client)
-
-    # should have an unverified user ...
-    unverified_user = admin_client(f'/api/_ui/v1/users/?username={username}')['data'][0]
-    assert unverified_user['email'] == unverified_email
-
-    # set the social config ...
-    cfg = ansible_config(username)
-
-    # login and verify matching username
-    with SocialGithubClient(config=cfg) as client:
-        resp = client.get('_ui/v1/me/')
-        assert resp.status_code == 200
-        uinfo = resp.json()
-        assert uinfo['username'] == cfg.get('username')
-
-        # should have the same ID ...
-        assert uinfo['id'] == unverified_user['id']
-
-        # should have the right email
-        assert uinfo['email'] == real_email
-
-    # the unverified email should not be a user ...
-    bad_users = admin_client(f'/api/_ui/v1/users/?username={unverified_email}')
-    assert bad_users['meta']['count'] == 0, bad_users
-
-
 @pytest.mark.skip(reason='no longer creating groups for social users')
 @pytest.mark.deployment_community
 def test_social_auth_creates_group(ansible_config):
@@ -447,98 +396,7 @@ def test_list_collections_social(ansible_config):
         validate_json(instance=resp.json(), schema=schema_objectlist)
 
 
-@pytest.mark.skip(reason='switchover is complete')
-@pytest.mark.deployment_community
-def test_v1_sync_with_user_and_limit(ansible_config):
-    """" Tests if v1 sync accepts a user&limit arg """
-
-    config = ansible_config("admin")
-    api_client = get_client(
-        config=config,
-        request_token=False,
-        require_auth=True
-    )
-
-    github_user = '030'
-    cleanup_social_user(github_user, ansible_config)
-
-    # start the sync
-    pargs = json.dumps({"github_user": "030", "limit": 1}).encode('utf-8')
-    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
-    assert isinstance(resp, dict)
-    assert resp.get('task') is not None
-    assert resp.get('pulp_id') is not None
-    wait_for_v1_task(resp=resp, api_client=api_client)
-
-    # verify filtering in the way that the CLI does it
-    resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
-    assert resp['count'] == 1
-    assert resp['results'][0]['username'] == github_user
-    roleid = resp['results'][0]['id']
-
-    # validate the download_count was synced
-    assert resp['results'][0]['download_count'] > 1
-
-    # validate the versions endpoint
-    versions_url = f'/api/v1/roles/{roleid}/versions/'
-    vresp = api_client(versions_url)
-    assert vresp['count'] > 0
-
-    # validate the content endpoint
-    content_url = f'/api/v1/roles/{roleid}/content/'
-    cresp = api_client(content_url)
-    assert 'readme' in cresp
-    assert 'readme_html' in cresp
-
-    # cleanup
-    cleanup_social_user(github_user, ansible_config)
-
-
-@pytest.mark.deployment_community
-def test_v1_autocomplete_search(ansible_config):
-    """" Tests if v1 sync accepts a user&limit arg """
-
-    config = ansible_config("admin")
-    api_client = get_client(
-        config=config,
-        request_token=False,
-        require_auth=True
-    )
-
-    github_user = 'geerlingguy'
-    github_user2 = '030'
-    cleanup_social_user(github_user, ansible_config)
-    cleanup_social_user(github_user2, ansible_config)
-
-    # start the sync
-    pargs = json.dumps({"github_user": github_user, "limit": 10}).encode('utf-8')
-    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
-    assert isinstance(resp, dict)
-    assert resp.get('task') is not None
-    wait_for_v1_task(resp=resp, api_client=api_client)
-
-    # start the second sync to ensure second user doesn't get found
-    pargs = json.dumps({"github_user": github_user2, "limit": 10}).encode('utf-8')
-    resp = api_client('/api/v1/sync/', method='POST', args=pargs)
-    assert isinstance(resp, dict)
-    assert resp.get('task') is not None
-    wait_for_v1_task(resp=resp, api_client=api_client)
-
-    # query by user
-    resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
-    assert resp['count'] > 0
-    usernames = sorted(set([x['github_user'] for x in resp['results']]))
-    assert usernames == [github_user]
-
-    # validate autocomplete search only finds the relevant roles
-    resp2 = api_client(f'/api/v1/roles/?autocomplete={github_user}')
-    assert resp2['count'] == resp['count']
-
-    # cleanup
-    cleanup_social_user(github_user, ansible_config)
-    cleanup_social_user(github_user2, ansible_config)
-
-
+@pytest.mark.skip(reason="sync function has been removed")
 @pytest.mark.deployment_community
 def test_v1_username_autocomplete_search(ansible_config):
     """"
@@ -607,6 +465,7 @@ def test_v1_username_autocomplete_search(ansible_config):
     cleanup_social_user(github_user, ansible_config)
 
 
+@pytest.mark.skip(reason="sync function has been removed")
 @pytest.mark.deployment_community
 def test_v1_role_pagination(ansible_config):
     """" Tests if v1 roles are auto-sorted by created """
@@ -672,6 +531,7 @@ def test_v1_role_pagination(ansible_config):
     clean_all_roles(ansible_config)
 
 
+@pytest.mark.skip(reason="sync function has been removed")
 @pytest.mark.deployment_community
 def test_v1_role_tag_filter(ansible_config):
     """" Tests if v1 roles are auto-sorted by created """
@@ -731,6 +591,7 @@ def test_v1_role_tag_filter(ansible_config):
     clean_all_roles(ansible_config)
 
 
+@pytest.mark.skip(reason="sync function has been removed")
 @pytest.mark.deployment_community
 def test_legacy_roles_ordering(ansible_config):
     """ Tests if sorting is working correctly on v1 roles """
@@ -783,6 +644,7 @@ def test_legacy_roles_ordering(ansible_config):
     assert sorted_names == sorted(names, reverse=True)
 
 
+@pytest.mark.skip(reason="sync function has been removed")
 @pytest.mark.deployment_community
 def test_v1_role_versions(ansible_config):
     """
