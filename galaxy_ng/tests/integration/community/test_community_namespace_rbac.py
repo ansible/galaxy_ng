@@ -339,6 +339,7 @@ def test_social_user_with_reclaimed_login(ansible_config):
     assert namespace_names_b == ['wilk42', 'sean_m_sullivan']
 
 
+@pytest.mark.skip(reason="sync function has been removed")
 @pytest.mark.deployment_community
 def test_social_user_sync_with_changed_login(ansible_config):
 
