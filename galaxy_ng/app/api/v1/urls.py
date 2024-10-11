@@ -2,12 +2,10 @@ from django.urls import path
 
 from galaxy_ng.app.api.v1.views import LegacyRootView
 from galaxy_ng.app.api.v1.viewsets import (
-    # LegacyRoleViewSet,
     LegacyRoleImportsViewSet,
     LegacyRoleContentViewSet,
     LegacyRoleVersionsViewSet,
     LegacyRolesViewSet,
-    LegacyRolesSyncViewSet,
     LegacyNamespacesViewSet,
     LegacyNamespaceOwnersViewSet,
     LegacyNamespaceProvidersViewSet,

@@ -7,8 +7,6 @@ import traceback
 import tempfile
 import uuid
 
-from django.db import transaction
-
 from ansible.module_utils.compat.version import LooseVersion
 
 from galaxy_importer.config import Config
@@ -16,14 +14,11 @@ from galaxy_importer.legacy_role import import_legacy_role
 
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models import Namespace
-from galaxy_ng.app.utils.galaxy import upstream_role_iterator
-from galaxy_ng.app.utils.legacy import process_namespace
 from galaxy_ng.app.utils.namespaces import generate_v3_namespace_from_attributes
 from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
-from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
 from galaxy_ng.app.api.v1.models import LegacyRoleImport
 from galaxy_ng.app.api.v1.utils import sort_versions
 from galaxy_ng.app.api.v1.utils import parse_version_tag
