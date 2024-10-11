@@ -4,5 +4,3 @@ from .publishing import import_and_auto_approve, import_to_staging  # noqa: F401
 from .registry_sync import launch_container_remote_sync, sync_all_repos_in_registry  # noqa: F401
 from .signing import call_sign_and_move_task, call_sign_task  # noqa: F401
 from .namespaces import dispatch_create_pulp_namespace_metadata  # noqa: F401
-
-# from .synchronizing import synchronize  # noqa

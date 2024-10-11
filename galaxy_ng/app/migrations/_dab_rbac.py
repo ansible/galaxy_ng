@@ -34,7 +34,7 @@ def create_permissions_as_operation(apps, schema_editor):
     for app_label in {'ansible', 'container', 'core', 'galaxy'}:
         create_dab_permissions(global_apps.get_app_config(app_label), apps=apps)
 
-    print(f'FINISHED CREATING PERMISSIONS')
+    print('FINISHED CREATING PERMISSIONS')
 
 
 def split_pulp_roles(apps, schema_editor):

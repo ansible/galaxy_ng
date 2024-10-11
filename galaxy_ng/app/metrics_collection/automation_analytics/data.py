@@ -78,21 +78,6 @@ def signing_services(since, full_path, **kwargs):
     return export_to_csv(full_path, "signing_services", query)
 
 
-# @register(
-#     "collection_imports",
-#     "1.0",
-#     format="csv",
-#     description="Data on ansible_collectionimport",
-# )
-# def collection_imports(since, full_path, until, **kwargs):
-#     # currently no rows in the table, so no objects to base a query off
-#     source_query = """COPY (
-#             SELECT * FROM ansible_collectionimport
-#         ) TO STDOUT WITH CSV HEADER
-#     """
-#     return _simple_csv(full_path, "ansible_collectionimport", source_query)
-#
-
 @register(
     "collection_download_logs",
     "1.0",
