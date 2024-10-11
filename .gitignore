@@ -111,3 +111,10 @@ db_snapshots/
 
 # oci-env profile files
 .compiled/
+
+
+# The compose containers runs with /app as home folder
+# So every command executed on container shell is saved to .bash_history
+# this is convenient to save history between container runs
+# but we don't want it on the repo
+.bash_history
