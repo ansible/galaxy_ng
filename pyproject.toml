@@ -137,9 +137,17 @@ legacy_tox_ini = """
                 --capture=no -v \
                 -p 'no:pulpcore' \
                 -p 'no:pulp_ansible' \
-                --cov-report term-missing:skip-covered \
+                --cov-report xml:coverage.xml \
                 --cov=galaxy_ng \
                 --junit-xml=/tmp/galaxy_ng-test-results.xml \
                 --pyargs "galaxy_ng.tests.unit" \
         '
 """
+
+[tool.coverage.run]
+relative_files = true
+data_file = "/tmp/.coverage"
+omit = [
+	"galaxy_ng/_vendor/*",
+	"galaxy_ng/tests/*",
+]

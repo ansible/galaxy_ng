@@ -77,16 +77,19 @@ jobs:
           sudo apt install -y libsasl2-dev libldap2-dev libssl-dev gettext
 
       - name: install tox & coverage
-        run: pip3 install tox coverage
+        run: pip3 install tox coverage[toml]
 
       - name: run the unit tests
         run: tox -e py311
+
+      - name: Inject PR number into coverage.xml
+        run: sed -i '2i <!-- PR ${{ github.event.number }} -->' coverage.xml
 
       - name: upload coverage as artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage
-          path: /tmp/galaxy_ng-test-results.xml
+          path: coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -99,7 +102,7 @@ jobs:
         continue-on-error: true
         run: |
           curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \
-            --form "xunit_xml=@coverage.xml" \
+            --form "xunit_xml=@/tmp/galaxy_ng-test-results.xml" \
             --form "component_name=hub" \
             --form "git_commit_sha=${{ github.sha }}" \
             --form "git_repository_url=https://github.com/${{ github.repository }}" \
