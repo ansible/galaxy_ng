@@ -25,4 +25,5 @@ include galaxy-operator/bin/readyz.py
 exclude .coveragerc
 exclude sonar-project.properties
 exclude aap_compose_dev.yaml
+exclude tox.ini
 prune .tekton
