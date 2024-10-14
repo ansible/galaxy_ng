@@ -64,22 +64,7 @@ def add_pulp_ansible_namespace_metadata_objects(apps, schema_editor):
             )
 
             old_ns.last_created_pulp_metadata = ns_metadata
-            old_ns.save
-
-        # we'll have to handle permissions separately when we move over to the pulp ansible
-        # namespaces
-        # roles = GroupRole.objects.filter(object_id=old_ns.pk, content_type=old_ns_type)
-
-        # # Migrate permissions
-        # group_roles = [
-        #     GroupRole(
-        #         group=r.group,
-        #         role=r.role,
-        #         content_type=new_ns_type,
-        #         object_id=new_ns.pk
-        #     ) for r in roles]
-        
-        # GroupRole.objects.bulk_create(group_roles)
+            old_ns.save()
 
 
 def add_namespace_metadata_to_published_repository(apps, schema_editor):
