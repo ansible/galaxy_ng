@@ -92,3 +92,9 @@ omit = [
 	"galaxy_ng/_vendor/*",
 	"galaxy_ng/tests/*",
 ]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = [
+    "galaxy_ng/_vendor/",
+]

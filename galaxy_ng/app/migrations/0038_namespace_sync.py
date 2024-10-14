@@ -1,5 +1,3 @@
-import django.core.validators
-from django.db import migrations
 import hashlib
 import json
 
@@ -36,7 +34,7 @@ def add_pulp_ansible_namespace_metadata_objects(apps, schema_editor):
 
     for old_ns in Namespace.objects.all():
         new_ns = AnsibleNamespace.objects.create(name=old_ns.name)
-        links = {l.name: l.url for l in old_ns.links.all()}
+        links = {link.name: link.url for link in old_ns.links.all()}
 
         metadata = {
             "company": old_ns.company,
