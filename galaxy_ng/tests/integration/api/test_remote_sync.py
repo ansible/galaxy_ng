@@ -1,4 +1,5 @@
 from datetime import datetime
+from http import HTTPStatus
 
 import pytest
 from jsonschema import validate as validate_json
@@ -85,12 +86,6 @@ def test_sync_community_with_no_requirements_file(galaxy_client):
     wait_for_task(gc, resp)
 
     repo = gc.get("pulp/api/v3/repositories/ansible/ansible/?name=community")["results"][0]
-    try:
+    with pytest.raises(GalaxyClientError) as exc_info:
         gc.post(f'{repo["pulp_href"]}sync/', body={})
-        # This API call should fail
-        assert False
-    except GalaxyClientError as ge:
-        assert ge.response.status_code == 400
-        # galaxy kit can't parse pulp error messages, so the contents of the error
-        # message can't be verified.
-        # assert "requirements_file" in ge.message
+    assert exc_info.value.response.status_code == HTTPStatus.BAD_REQUEST

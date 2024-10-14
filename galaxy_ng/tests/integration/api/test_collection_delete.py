@@ -1,6 +1,6 @@
 """test_collection_delete.py - Tests related to collection deletion.
 """
-
+from http import HTTPStatus
 
 import pytest
 
@@ -120,21 +120,16 @@ def test_delete_default_repos(galaxy_client, uncertifiedv2):
         distro = results["results"][0]
         assert distro["repository"] is not None
 
-        try:
+        with pytest.raises(GalaxyClientError) as exc_info:
             gc.delete(distro["pulp_href"])
-            # This API call should fail
-            assert False
-        except GalaxyClientError as ge:
-            assert ge.response.status_code == 403
+        assert exc_info.value.response.status_code == HTTPStatus.FORBIDDEN
 
-        try:
+        with pytest.raises(GalaxyClientError) as exc_info:
             gc.delete(distro["repository"])
             # This API call should fail
-            assert False
-        except GalaxyClientError as ge:
-            assert ge.response.status_code == 403
+        assert exc_info.value.response.status_code == HTTPStatus.FORBIDDEN
 
-        try:
+        with pytest.raises(GalaxyClientError) as exc_info:
             gc.put(
                 distro["pulp_href"],
                 body={
@@ -142,7 +137,4 @@ def test_delete_default_repos(galaxy_client, uncertifiedv2):
                     "repository": None
                 }
             )
-            # This API call should fail
-            assert False
-        except GalaxyClientError as ge:
-            assert ge.response.status_code == 403
+        assert exc_info.value.response.status_code == HTTPStatus.FORBIDDEN
