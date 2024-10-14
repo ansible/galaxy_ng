@@ -87,6 +87,16 @@ services:
       dockerfile: Dockerfile
     image: "localhost/galaxy_ng/galaxy_ng:base"
 
+  base_img_dev:  # Extends base_img with extra files and dev tools
+    depends_on:
+      - base_img
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        <<: *common-env
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+
   redis:
     image: "redis:5"
 
@@ -104,48 +114,11 @@ services:
     # WARNING: enabling log_statement=all makes database slower
     # command: ["postgres", "-c", "log_statement=ddl", "-c", "log_destination=stderr"]
 
-  helper:  # should this be moved to a custom Dockerfile based on base_img?
-    image: quay.io/centos/centos:stream9
-    environment:
-      <<: *common-env
-    depends_on:
-      - postgres
-    volumes:
-      - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
-      - "../../../:/src"
-      - "../../:/app"
-    command: |
-      bash -c "
-        echo 'Moving required files to the required places.';
-
-        # Workarounds - Pulp SigningService can't access envvars;
-        /src/galaxy_ng/dev/compose/signing/setup_gpg_workarounds.sh;
-        cat /etc/pulp/certs/GNUPGHOME.workaround.txt;
-        cat /etc/pulp/certs/HOME.workaround.txt;
-
-        # Keys;
-        cp /src/galaxy_ng/dev/compose/database/database_fields.symmetric.key /etc/pulp/certs/database_fields.symmetric.key;
-        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-secret.key;
-        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key.password.txt /etc/pulp/certs/signing-secret.key.password.txt;
-        cp /src/galaxy_ng/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-public.key;
-        find /etc/pulp/certs;
-
-        # Scripts;
-        cp /src/galaxy_ng/dev/compose/signing/collection_sign.sh /var/lib/pulp/scripts/collection_sign.sh;
-        cp /src/galaxy_ng/dev/compose/signing/container_sign.sh /var/lib/pulp/scripts/container_sign.sh;
-        chmod +x /var/lib/pulp/scripts/*_sign.sh;
-        find /var/lib/pulp/scripts;
-
-        echo 'DONE!';
-      "
-
   migrations:
-    image: "localhost/galaxy_ng/galaxy_ng:base"
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img
+      - base_img_dev
       - postgres
-      - helper
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp:/var/lib/pulp"
@@ -158,8 +131,6 @@ services:
       bash -c "
         set -e;
         rm -rf /var/lib/pulp/.migrated;
-
-        /src/galaxy_ng/dev/compose/bin/wait /etc/pulp/certs/database_fields.symmetric.key;
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
         pulpcore-manager check --database default;
@@ -171,11 +142,10 @@ services:
       "
 
   api:
-    image: "localhost/galaxy_ng/galaxy_ng:base"
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img
+      - base_img_dev
       - postgres
-      - helper
       - migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
@@ -199,11 +169,10 @@ services:
       "
 
   content:
-    image: "localhost/galaxy_ng/galaxy_ng:base"
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img
+      - base_img_dev
       - postgres
-      - helper
       - migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
@@ -227,11 +196,10 @@ services:
       "
 
   worker:
-    image: "localhost/galaxy_ng/galaxy_ng:base"
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img
+      - base_img_dev
       - postgres
-      - helper
       - migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
@@ -244,22 +212,19 @@ services:
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
-        /src/galaxy_ng/dev/compose/bin/wait /etc/pulp/certs/signing-secret.key;
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
         # Worker needs gpg in order to consume signing tasks;
-        /src/galaxy_ng/dev/compose/signing/setup_gpg_keys.sh;
         gpg --list-secret-keys;
 
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
       "
 
   manager:
-    image: "localhost/galaxy_ng/galaxy_ng:base"
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img
+      - base_img_dev
       - postgres
-      - helper
       - migrations
       - worker
     volumes:
@@ -273,7 +238,6 @@ services:
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
-        /src/galaxy_ng/dev/compose/bin/wait /etc/pulp/certs/signing-secret.key;
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
         # Give some time for API to start;
@@ -284,20 +248,14 @@ services:
         echo 'Scheduled tasks';
         curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/pulp/api/v3/task-schedules/?name=dab_sync | python -m json.tool;
 
-        # Keys are needed to register signing services;
-        /src/galaxy_ng/dev/compose/signing/setup_gpg_keys.sh;
-        gpg --list-secret-keys;
-
         # Setup signing services;
+        gpg --list-secret-keys;
         /src/galaxy_ng/dev/compose/signing/setup_signing_services.sh;
         echo 'Signing Services';
         curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
 
         # Setup repository gpgkey for upload verification;
         /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
-
-        # Dev tools; SHOULD THIS MOVE TO A CUSTOM Dockerfile?;
-        /venv/bin/pip3.11 install ipython ipdb django-extensions;
 
         echo ' ';
         echo '###################### API ROOT ##############################';
@@ -321,9 +279,7 @@ services:
   nginx:
     image: "nginx:latest"
     depends_on:
-      - base_img
       - postgres
-      - helper
       - migrations
       - api
       - content

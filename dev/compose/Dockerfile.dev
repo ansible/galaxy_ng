@@ -1,0 +1,24 @@
+# This Dockerfile is meant to extend the main Dockerfile.rhel8
+# Moving files to the required places
+# Installing extra development libraries and tools
+FROM localhost/galaxy_ng/galaxy_ng:base
+
+ARG GNUPGHOME
+ENV GNUPGHOME $GNUPGHOME
+
+USER root
+
+RUN /app/dev/compose/signing/setup_gpg_workarounds.sh
+
+RUN set -ex; \
+    install -Dm 0775 /app/dev/compose/database/database_fields.symmetric.key /etc/pulp/certs/database_fields.symmetric.key && \
+    install -Dm 0775 /app/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-secret.key && \
+    install -Dm 0775 /app/dev/compose/signing/signing-secret.key.password.txt /etc/pulp/certs/signing-secret.key.password.txt && \
+    install -Dm 0775 /app/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-public.key && \
+    install -Dm 0775 /app/dev/compose/signing/collection_sign.sh /var/lib/pulp/scripts/collection_sign.sh && \
+    install -Dm 0775 /app/dev/compose/signing/container_sign.sh /var/lib/pulp/scripts/container_sign.sh && \
+    chmod +x /var/lib/pulp/scripts/*_sign.sh
+
+RUN /app/dev/compose/signing/setup_gpg_keys.sh
+
+RUN ${VIRTUAL_ENV}/bin/python3 -m pip install ipython ipdb django-extensions
