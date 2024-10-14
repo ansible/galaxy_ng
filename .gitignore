@@ -118,3 +118,6 @@ db_snapshots/
 # this is convenient to save history between container runs
 # but we don't want it on the repo
 .bash_history
+
+# Shell plus from container run saves a session
+.ipython
