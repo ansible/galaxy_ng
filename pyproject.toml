@@ -98,3 +98,9 @@ line-length = 100
 extend-exclude = [
     "galaxy_ng/_vendor/",
 ]
+
+[tool.ruff.lint]
+# B - flake8-bugbear
+extend-select = [
+    "B",
+]
