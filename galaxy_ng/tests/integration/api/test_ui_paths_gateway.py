@@ -430,7 +430,7 @@ def test_gw_api_ui_v1_repo_distro_by_basepath(galaxy_client):
 
     gc = galaxy_client('basic_user')
     # get each repo by basepath? or is it get a distro by basepath?
-    for k, v in DEFAULT_DISTROS.items():
+    for v in DEFAULT_DISTROS.values():
         bp = v['basepath']
         ds = gc.get(f'_ui/v1/repo/{bp}/')
         validate_json(instance=ds, schema=schema_objectlist)

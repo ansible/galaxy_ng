@@ -77,15 +77,15 @@ def test_community_hijacking(ansible_config):
         usermap[username]['client'].login()
 
     # force logout
-    for username, udata in usermap.items():
+    for username in usermap.keys():
         usermap[username]['client'].logout()
 
     # force login
-    for username, udata in usermap.items():
+    for username in usermap.keys():
         usermap[username]['client'].login()
 
     # check me
-    for username, udata in usermap.items():
+    for username in usermap.keys():
         me_rr = usermap[username]['client'].get('_ui/v1/me/')
         usermap[username]['me'] = me_rr.json()['username']
 

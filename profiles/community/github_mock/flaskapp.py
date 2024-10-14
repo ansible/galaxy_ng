@@ -112,7 +112,7 @@ def create_tables():
     ''')
     conn.commit()
 
-    for uname, uinfo in USERS.items():
+    for uinfo in USERS.values():
         sql = "INSERT OR IGNORE INTO users (id, login, email, password) VALUES(?, ?, ?, ?)"
         print(sql)
         cursor.execute(sql, (uinfo['id'], uinfo['login'], uinfo['email'], uinfo['password'],))

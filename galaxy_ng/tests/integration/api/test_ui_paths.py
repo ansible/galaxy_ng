@@ -717,7 +717,7 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
         pulp_ids = [x['pk'] for x in ds['data']]
         for pulp_id in pulp_ids:
             with pytest.raises(HTTPError) as ctx:
-                uclient.get('_ui/v1/remotes/{pulp_id}/')
+                uclient.get(f'_ui/v1/remotes/{pulp_id}/')
             assert ctx.value.strerror.status_code == 404
 
 
@@ -731,7 +731,7 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
     with UIClient(config=cfg) as uclient:
 
         # get each repo by basepath? or is it get a distro by basepath?
-        for k, v in DEFAULT_DISTROS.items():
+        for v in DEFAULT_DISTROS.values():
             bp = v['basepath']
             resp = uclient.get(f'_ui/v1/repo/{bp}')
             ds = resp.json()

@@ -40,7 +40,7 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
                 operation_ids[operationId].append((pk, method))
 
         # make a new operationId for any duplicates
-        for k, v in operation_ids.items():
+        for v in operation_ids.values():
             if len(v) < 2:
                 continue
             for x in v:
