@@ -60,8 +60,8 @@ def build_collection(
     version=None,
     dependencies=None,
     requires_ansible='>=2.13.0',
-    roles=['docker_role'],
-    use_orionutils=False
+    roles=None,
+    use_orionutils=False,
 ) -> ArtifactFile:
 
     """Assemble a collection tarball from given parameters.
@@ -97,6 +97,9 @@ def build_collection(
             "version": None,
             "tags": []
         }
+
+    if roles is None:
+        roles = ["docker_role"]
 
     # use order of precedence to set the config ...
     for ckey in ['namespace', 'name', 'version', 'dependencies', 'tags']:
