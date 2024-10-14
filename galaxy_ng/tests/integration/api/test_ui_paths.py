@@ -716,9 +716,8 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
         # FIXME - there is no suitable pulp_id for a remote?
         pulp_ids = [x['pk'] for x in ds['data']]
         for pulp_id in pulp_ids:
-            with pytest.raises(HTTPError) as ctx:
-                uclient.get(f'_ui/v1/remotes/{pulp_id}/')
-            assert ctx.value.strerror.status_code == 404
+            response = uclient.get(f'_ui/v1/remotes/{pulp_id}/')
+            assert response.status_code == 200
 
 
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/
