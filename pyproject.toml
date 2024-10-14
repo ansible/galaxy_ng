@@ -100,7 +100,12 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-# B - flake8-bugbear
 extend-select = [
+    # flake8-bugbear
     "B",
+]
+extend-ignore = [
+    # B904 requires using `raise ... from ...` to explicitly tell what to do with "parent"
+    # exception. Would be nice to fix, but ignoring for now.
+    "B904",
 ]
