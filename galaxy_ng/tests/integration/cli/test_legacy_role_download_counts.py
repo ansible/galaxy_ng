@@ -78,7 +78,7 @@ def test_legacy_role_download_counter_via_cli(ansible_config):
     assert role['download_count'] == 0
 
     # validate install command
-    for x in range(0, 5):
+    for _ in range(0, 5):
         with tempfile.TemporaryDirectory() as roles_path:
             cfg = ansible_config(github_user)
             install_pid = ansible_galaxy(

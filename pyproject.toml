@@ -98,3 +98,14 @@ line-length = 100
 extend-exclude = [
     "galaxy_ng/_vendor/",
 ]
+
+[tool.ruff.lint]
+extend-select = [
+    # flake8-bugbear
+    "B",
+]
+extend-ignore = [
+    # B904 requires using `raise ... from ...` to explicitly tell what to do with "parent"
+    # exception. Would be nice to fix, but ignoring for now.
+    "B904",
+]

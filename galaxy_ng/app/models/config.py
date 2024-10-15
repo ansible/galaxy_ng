@@ -103,7 +103,7 @@ class SettingsManager(models.Manager):
         if existing:
             kwargs["version"] = existing.latest("version").version + 1
 
-        new = super().create(key=key, value=value, *args, **kwargs)
+        new = super().create(*args, key=key, value=value, **kwargs)
 
         release_lock(key, lock)
 

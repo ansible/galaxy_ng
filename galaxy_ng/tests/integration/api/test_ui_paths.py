@@ -3,6 +3,7 @@
 import random
 import json
 import subprocess
+from http import HTTPStatus
 
 import pytest
 
@@ -715,9 +716,8 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
         # FIXME - there is no suitable pulp_id for a remote?
         pulp_ids = [x['pk'] for x in ds['data']]
         for pulp_id in pulp_ids:
-            with pytest.raises(HTTPError) as ctx:
-                uclient.get('_ui/v1/remotes/{pulp_id}/')
-            assert ctx.value.strerror.status_code == 404
+            response = uclient.get(f'_ui/v1/remotes/{pulp_id}/')
+            assert response.status_code == 200
 
 
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/
@@ -730,7 +730,7 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
     with UIClient(config=cfg) as uclient:
 
         # get each repo by basepath? or is it get a distro by basepath?
-        for k, v in DEFAULT_DISTROS.items():
+        for v in DEFAULT_DISTROS.values():
             bp = v['basepath']
             resp = uclient.get(f'_ui/v1/repo/{bp}')
             ds = resp.json()
@@ -919,7 +919,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         _sync_role("geerlingguy", "docker")
 
         resp = uclient.get('_ui/v1/tags/roles')
-        resp.status_code == 200
+        assert resp.status_code == HTTPStatus.OK
         aggregate_total = sum([x['count'] for x in resp.json()['data']])
         assert aggregate_total == 0
 
@@ -927,7 +927,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         _populate_tags_cmd()
 
         resp = uclient.get('_ui/v1/tags/roles')
-        resp.status_code == 200
+        assert resp.status_code == HTTPStatus.OK
         aggregate_total = sum([x['count'] for x in resp.json()['data']])
         assert aggregate_total > 0
 
@@ -939,7 +939,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         _populate_tags_cmd()
 
         resp = uclient.get('_ui/v1/tags/roles?sort=-count')
-        resp.status_code == 200
+        assert resp.status_code == HTTPStatus.OK
         assert resp.json()["meta"]["count"] > 0
 
         # test correct count sorting

@@ -278,7 +278,7 @@ def test_social_auth_delete_collection(ansible_config):
             token=client.get_hub_token(),
         )
 
-        for x in range(0, 20):
+        for _ in range(0, 20):
             exists_resp = client.get(
                 f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
             )
@@ -335,7 +335,7 @@ def test_social_auth_deprecate_collection(ansible_config):
             token=client.get_hub_token(),
         )
 
-        for x in range(0, 20):
+        for _ in range(0, 20):
             exists_resp = client.get(
                 f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
             )

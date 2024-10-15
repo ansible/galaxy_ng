@@ -528,7 +528,7 @@ class LegacyRoleVersionsSerializer(serializers.ModelSerializer):
 
         results = []
 
-        for idv, version in enumerate(versions):
+        for version in versions:
             results.append(LegacyRoleVersionDetail(obj, version).to_json())
 
         return results
