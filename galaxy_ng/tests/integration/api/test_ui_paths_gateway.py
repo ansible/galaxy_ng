@@ -97,7 +97,7 @@ def test_gw_api_ui_v1_collection_versions_version_range(galaxy_client, uncertifi
     # test range
     ds = gc.get(f'{v_path}&version_range>={c1.version}')
     assert len(ds['data']) == 2
-    assert set([v["version"] for v in ds['data']]) == set([c1.version, c2.version])
+    assert {v["version"] for v in ds['data']} == {c1.version, c2.version}
 
     # test range exclusive
     ds = gc.get(f'{v_path}&version_range=>{c1.version}')

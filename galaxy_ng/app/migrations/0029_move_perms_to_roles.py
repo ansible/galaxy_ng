@@ -169,7 +169,7 @@ def get_roles_from_permissions(permission_iterable, translator, Role, Permission
         super_permissions = {}
 
     # Use set comparisons instead of querysets to avoid unnecesary trips to the DB
-    permissions = set(((p.content_type.app_label, p.codename) for p in permission_iterable))
+    permissions = {(p.content_type.app_label, p.codename) for p in permission_iterable}
     
     # Iterate through each locked role, apply any roles that match the group's permission
     # set and remove any permissions that are applied via roles

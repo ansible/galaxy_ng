@@ -87,11 +87,11 @@ def import_to_staging(username, **kwargs):
         dispatch(
             add_and_remove,
             exclusive_resources=[repo],
-            kwargs=dict(
-                add_content_units=add,
-                repository_pk=repo.pk,
-                remove_content_units=[],
-            ),
+            kwargs={
+                "add_content_units": add,
+                "repository_pk": repo.pk,
+                "remove_content_units": []
+            },
         )
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:

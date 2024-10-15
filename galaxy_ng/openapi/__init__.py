@@ -52,5 +52,5 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
 
     def flatten_path(self, path):
         """Assemble a new operationId prefix from a given path"""
-        paths = [x for x in path.split('/')]
+        paths = path.split('/')
         return '_'.join(paths[:-1])

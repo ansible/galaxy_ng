@@ -15,12 +15,12 @@ def set_synclist(api_client, collections):
 
 def clear_certified(api_client):
     """Clear the content in the certified repo"""
-    namespaces = set([
+    namespaces = {
         c["namespace"] for c in iterate_all(
             api_client,
             "v3/plugin/ansible/content/rh-certified/collections/index/"
         )
-    ])
+    }
 
     # We're deleting all the namespaces that correspond to collections in the
     # certified repo, because the tests need to verify that the namespaces are

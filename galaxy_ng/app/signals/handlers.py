@@ -171,7 +171,7 @@ def rbac_signal_in_progress():
 
 
 def pulp_role_to_single_content_type_or_none(pulprole):
-    content_types = set(perm.content_type for perm in pulprole.permissions.all())
+    content_types = {perm.content_type for perm in pulprole.permissions.all()}
     if len(list(content_types)) == 1:
         return list(content_types)[0]
     return None
@@ -189,8 +189,8 @@ def copy_permissions_role_to_role(roleA, roleB):
     """
     permissionsA = list(roleA.permissions.prefetch_related("content_type"))
     permissionsB = list(roleB.permissions.prefetch_related("content_type"))
-    fullnamesA = set(f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsA)
-    fullnamesB = set(f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsB)
+    fullnamesA = {f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsA}
+    fullnamesB = {f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsB}
     fullnames_to_add = fullnamesA - fullnamesB
     fullnames_to_remove = fullnamesB - fullnamesA
     concat_exp = Concat("content_type__app_label", Value("."), "codename", output_field=CharField())
@@ -572,16 +572,16 @@ def copy_dab_group_to_role(instance, action, model, pk_set, reverse, **kwargs):
     # are changed to match the users in the pulp group
     for group in groups:
         team = Team.objects.get(group_id=group.pk)
-        current_dab_members = set(
+        current_dab_members = {
             assignment.user for assignment in RoleUserAssignment.objects.filter(
                 role_definition=member_rd, object_id=team.pk
             )
-        )
-        current_dab_shared_members = set(
+        }
+        current_dab_shared_members = {
             assignment.user for assignment in RoleUserAssignment.objects.filter(
                 role_definition=shared_member_rd, object_id=team.pk
             )
-        )
+        }
         current_pulp_members = set(group.user_set.all())
         not_allowed = current_dab_shared_members - current_pulp_members
         if not_allowed:

@@ -527,7 +527,7 @@ def test_v1_autocomplete_search(ansible_config):
     # query by user
     resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
     assert resp['count'] > 0
-    usernames = sorted(set([x['github_user'] for x in resp['results']]))
+    usernames = sorted({x['github_user'] for x in resp['results']})
     assert usernames == [github_user]
 
     # validate autocomplete search only finds the relevant roles
@@ -655,7 +655,7 @@ def test_v1_role_pagination(ansible_config):
     assert len(roles) == total_count
 
     # make sure no duplicates found
-    assert [x[1] for x in roles] == sorted(set([x[1] for x in roles]))
+    assert [x[1] for x in roles] == sorted({x[1] for x in roles})
 
     # validate roles are ordered by created by default
     assert roles == sorted(roles)

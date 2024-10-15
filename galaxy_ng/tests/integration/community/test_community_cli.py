@@ -207,11 +207,11 @@ def test_import_role_fields_no_tags(ansible_config):
         assert field in result
 
     summary_fields = result["summary_fields"]
-    assert summary_fields["dependencies"] == list()
+    assert summary_fields["dependencies"] == []
     assert summary_fields["namespace"]["name"] == "jctannerTEST"
     assert summary_fields["provider_namespace"]["name"] == "jctannertest"
     assert summary_fields["repository"]["name"] == "role1"
-    assert summary_fields["tags"] == list()
+    assert summary_fields["tags"] == []
 
     assert len(summary_fields["versions"]) == 0
 

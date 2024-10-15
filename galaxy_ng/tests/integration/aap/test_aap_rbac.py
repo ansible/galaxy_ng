@@ -56,11 +56,12 @@ def test_aap_service_index_and_claims_processing(
 
     # get all of gateway's roledefs ...
     gateway_roledefs = ga.get('/api/gateway/v1/role_definitions/')
-    gateway_roledefs = dict((x['name'], x) for x in gateway_roledefs['results'])
+    gateway_roledefs = {x['name']: x for x in gateway_roledefs['results']}
 
     # get all of galaxy's roledefs ...
     galaxy_roledefs = ga.get('/api/galaxy/_ui/v2/role_definitions/')
-    galaxy_roledefs = dict((x['name'], x) for x in galaxy_roledefs['results'])
+    # REVIEW(cutwater): Unused variable
+    galaxy_roledefs = {x['name']: x for x in galaxy_roledefs['results']}
 
     # make the user a team member in the gateway ...
     team_assignment = ga.post(
@@ -165,11 +166,11 @@ def test_aap_platform_auditor_claims_processing(
 
     # get all of gateway's roledefs ...
     gateway_roledefs = ga.get('/api/gateway/v1/role_definitions/')
-    gateway_roledefs = dict((x['name'], x) for x in gateway_roledefs['results'])
+    gateway_roledefs = {x['name']: x for x in gateway_roledefs['results']}
 
     # get all of galaxy's roledefs ...
     galaxy_roledefs = ga.get('_ui/v2/role_definitions/')
-    galaxy_roledefs = dict((x['name'], x) for x in galaxy_roledefs['results'])
+    galaxy_roledefs = {x['name']: x for x in galaxy_roledefs['results']}
 
     #########################################################
     # ASSIGN

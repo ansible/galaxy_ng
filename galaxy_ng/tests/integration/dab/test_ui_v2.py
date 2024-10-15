@@ -291,7 +291,7 @@ def test_ui_v2_teams_membership_local_and_nonlocal(
 
     # get all the roledefs ...
     roledefs = client.get('_ui/v2/role_definitions/')
-    roledefs = dict((x['name'], x) for x in roledefs['results'])
+    roledefs = {x['name']: x for x in roledefs['results']}
 
     # assign "local" membership on team1
     client.post(

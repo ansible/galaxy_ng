@@ -49,35 +49,35 @@ def _assert_sync(manifest, client):
             deprecated_collections.add(collection)
 
     # test that all the expected namespaces are created
-    all_namespaces = set([x["name"] for x in iterate_all(client, "v3/namespaces/")])
+    all_namespaces = {x["name"] for x in iterate_all(client, "v3/namespaces/")}
     assert namespaces.issubset(all_namespaces)
 
     # test that all the synced collections are on the v3 API
-    synced_collections = set([(x["namespace"], x["name"]) for x in iterate_all(
+    synced_collections = {(x["namespace"], x["name"]) for x in iterate_all(
         client,
         "v3/plugin/ansible/content/rh-certified/collections/index/"
-    )])
+    )}
     assert synced_collections == collections
 
     # Test that the _ui/v1/repo/ api returns all the synced collections
-    synced_collections = set([(x["namespace"]["name"], x["name"]) for x in iterate_all(
+    synced_collections = {(x["namespace"]["name"], x["name"]) for x in iterate_all(
         client,
         "_ui/v1/repo/rh-certified/"
-    )])
+    )}
     assert synced_collections == collections
 
     # Test that the _ui/v1/repo/ api returns all the synced signed collections
-    synced_collections = set([(x["namespace"]["name"], x["name"]) for x in iterate_all(
+    synced_collections = {(x["namespace"]["name"], x["name"]) for x in iterate_all(
         client,
         "_ui/v1/repo/rh-certified/?sign_state=signed"
-    )])
+    )}
     assert synced_collections == signed_collections
 
     # Test that the deprecated status syncs correctly
-    synced_collections = set([(x["namespace"]["name"], x["name"]) for x in iterate_all(
+    synced_collections = {(x["namespace"]["name"], x["name"]) for x in iterate_all(
         client,
         "_ui/v1/repo/rh-certified/?deprecated=false"
-    )])
+    )}
     assert synced_collections == collections.difference(deprecated_collections)
 
     # Test that the _ui/v1/collection-versions/ API shows the correct collections
@@ -92,8 +92,8 @@ def _assert_sync(manifest, client):
 
         if version in signed_versions:
             assert c["sign_state"] == "signed"
-            local_sigs = set([x["signature"] for x in c["metadata"]["signatures"]])
-            manifest_sigs = set([x["signature"] for x in signatures[version]])
+            local_sigs = {x["signature"] for x in c["metadata"]["signatures"]}
+            manifest_sigs = {x["signature"] for x in signatures[version]}
             assert local_sigs == manifest_sigs
         else:
             assert c["sign_state"] == "unsigned"

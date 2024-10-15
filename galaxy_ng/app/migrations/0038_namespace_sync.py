@@ -48,7 +48,7 @@ def add_pulp_ansible_namespace_metadata_objects(apps, schema_editor):
         # skip metadata creation for namespaces with no data.
         create_metadata = False
         for f in metadata:
-            if metadata[f] not in ('', dict(), None):
+            if metadata[f] not in ('', {}, None):
                 create_metadata = True
                 break
 

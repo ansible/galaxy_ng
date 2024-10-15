@@ -22,7 +22,7 @@ def test_dab_roledefs_match_pulp_roles(galaxy_client):
     roles = gc.get('pulp/api/v3/roles/?name__startswith=galaxy')
     roledefs = gc.get('_ui/v2/role_definitions/')
 
-    roledefmap = dict((x['name'], x) for x in roledefs['results'])
+    roledefmap = {x['name']: x for x in roledefs['results']}
 
     missing = []
     for role in roles['results']:
@@ -675,7 +675,7 @@ def test_dab_rbac_ee_ownership_with_user_or_team(
 
     # is the user now listed in the namespace's list_roles endpoint?
     ns_roles = gc.get(namespace_data['pulp_href'] + 'list_roles/')
-    ns_role_map = dict((x['role'], x) for x in ns_roles['roles'])
+    ns_role_map = {x['role']: x for x in ns_roles['roles']}
     if not use_team:
         assert random_username in ns_role_map[ROLE_NAME]['users']
     else:
@@ -687,7 +687,7 @@ def test_dab_rbac_ee_ownership_with_user_or_team(
     except Exception:
         pass
     ns_roles = gc.get(namespace_data['pulp_href'] + 'list_roles/')
-    ns_role_map = dict((x['role'], x) for x in ns_roles['roles'])
+    ns_role_map = {x['role']: x for x in ns_roles['roles']}
     if not use_team:
         assert random_username not in ns_role_map[ROLE_NAME]['users']
     else:

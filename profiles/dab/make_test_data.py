@@ -32,7 +32,7 @@ rr = requests.get(
     verify=False,
     auth=ADMIN_AUTH
 )
-ROLEDEFS = dict((x['name'], x) for x in rr.json()['results'])
+ROLEDEFS = {x['name']: x for x in rr.json()['results']}
 
 # MAP OUT THE PULP ROLES ...
 rr = requests.get(
@@ -40,7 +40,7 @@ rr = requests.get(
     verify=False,
     auth=ADMIN_AUTH
 )
-PULP_ROLEDEFS = dict((x['name'], x) for x in rr.json()['results'])
+PULP_ROLEDEFS = {x['name']: x for x in rr.json()['results']}
 
 
 # MAP OUT THE REPOS ...
@@ -49,7 +49,7 @@ rr = requests.get(
     verify=False,
     auth=ADMIN_AUTH
 )
-REPOS = dict((x['name'], x) for x in rr.json()['results'])
+REPOS = {x['name']: x for x in rr.json()['results']}
 
 
 # MAKE AND MAP THE USERS ...

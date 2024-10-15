@@ -160,7 +160,9 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
                 logger.error(f'{cmd} failed: {error}')
                 raise Exception(f'{cmd} failed')
 
-        last_commit = [x for x in gitrepo.iter_commits()][0]
+        # REVIEW(cutwater): Why this iterates over all commits to get first one and doesn't use
+        #   gitrepo.head.commit as the code below?
+        last_commit = list(gitrepo.iter_commits())[0]
 
     else:
         # use the default branch ...

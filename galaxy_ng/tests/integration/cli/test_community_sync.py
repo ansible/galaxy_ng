@@ -55,7 +55,7 @@ def test_community_collection_download_count_sync(ansible_config):
 
     # configure the remote
     resp = api_client.request('/api/pulp/api/v3/remotes/ansible/collection/')
-    remotes = dict((x['name'], x) for x in resp['results'])
+    remotes = {x['name']: x for x in resp['results']}
     community_remote_config = {
         'name': 'community',
         'url': 'https://old-galaxy.ansible.com/',
@@ -71,7 +71,7 @@ def test_community_collection_download_count_sync(ansible_config):
 
     # start the sync
     resp = api_client.request('/api/pulp/api/v3/repositories/ansible/ansible/')
-    repos = dict((x['name'], x) for x in resp['results'])
+    repos = {x['name']: x for x in resp['results']}
     sync_payload = {'mirror': False, 'optimize': False, 'remote': remotes['community']['pulp_href']}
     sync_task = api_client.request(
         repos['community']['pulp_href'] + 'sync/',

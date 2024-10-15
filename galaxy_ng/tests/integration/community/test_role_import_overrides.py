@@ -59,7 +59,7 @@ def test_role_import_overrides(ansible_config, spec):
         spec['alternate_namespace_name'],
         spec['meta_namespace']
     ]
-    ns_names = sorted(set([x for x in ns_names if x]))
+    ns_names = sorted({x for x in ns_names if x})
 
     # cleanup
     for ns_name in ns_names:
