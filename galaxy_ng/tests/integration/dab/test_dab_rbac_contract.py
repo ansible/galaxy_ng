@@ -63,7 +63,7 @@ def test_role_definition_options(galaxy_client):
         "shared.change_team",
         "shared.delete_team",
         "shared.view_team",
-    }.issubset(set(item["value"] for item in field_data["child"]["choices"]))
+    }.issubset({item["value"] for item in field_data["child"]["choices"]})
 
     assert "content_type" in post_data
     field_data = post_data["content_type"]
@@ -73,7 +73,7 @@ def test_role_definition_options(galaxy_client):
         "galaxy.collectionimport",
         "galaxy.namespace",
         "shared.team",
-    }.issubset(set(item["value"] for item in field_data["choices"]))
+    }.issubset({item["value"] for item in field_data["choices"]})
 
 
 # This is role data that works in both DAB and pulp roles.

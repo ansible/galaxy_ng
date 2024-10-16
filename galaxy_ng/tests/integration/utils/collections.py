@@ -589,13 +589,10 @@ def get_all_repository_collection_versions(gc):
                 collection_versions.append(cv)
             next_page = resp.get('links', {}).get('next')
 
-    rcv = dict(
-        (
-            (x['repository'], x['namespace'], x['name'], x['version']),
-            x
-        )
+    rcv = {
+        (x['repository'], x['namespace'], x['name'], x['version']): x
         for x in collection_versions
-    )
+    }
     return rcv
 
 
@@ -667,12 +664,12 @@ def recursive_delete(api_client, namespace_name, cname, crepo):
     """Recursively delete a collection along with every other collection that depends on it."""
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
 
-    dependants = set([
+    dependants = {
         (cv["namespace"], cv["name"]) for cv in iterate_all(
             api_client,
             f"_ui/v1/collection-versions/?dependency={namespace_name}.{cname}"
         )
-    ])
+    }
 
     if dependants:
         for ns, name in dependants:
@@ -772,12 +769,12 @@ def delete_all_collections_in_namespace_gk(gc_admin, namespace_name):
 
 def recursive_delete_gk(gc_admin, namespace_name, cname, crepo="published"):
     """Recursively delete a collection along with every other collection that depends on it."""
-    dependants = set([
+    dependants = {
         (cv["namespace"], cv["name"]) for cv in iterate_all_gk(
             gc_admin,
             f"_ui/v1/collection-versions/?dependency={namespace_name}.{cname}"
         )
-    ])
+    }
 
     if dependants:
         for ns, name in dependants:

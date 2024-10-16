@@ -44,7 +44,7 @@ def flags(galaxy_client):
 def namespace(galaxy_client):
     # ensure namespace exists
     gc = galaxy_client("admin")
-    existing = dict((x["name"], x) for x in get_all_namespaces(gc))
+    existing = {x["name"]: x for x in get_all_namespaces(gc)}
     if NAMESPACE not in existing:
         payload = {"name": NAMESPACE, "groups": []}
         gc.post("v3/namespaces/", body=payload)

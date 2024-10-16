@@ -232,7 +232,7 @@ def generate_unused_legacy_namespace(api_client=None):
 
     assert api_client is not None, "api_client is a required param"
     existing = get_all_legacy_namespaces(api_client=api_client)
-    existing = dict((x['name'], x) for x in existing)
+    existing = {x['name']: x for x in existing}
     return generate_legacy_namespace(exclude=list(existing.keys()))
 
 

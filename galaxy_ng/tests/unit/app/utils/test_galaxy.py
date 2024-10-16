@@ -14,7 +14,7 @@ class TestGalaxyUtils(TestCase):
         roles = []
         for _namespace, role, _versions in upstream_role_iterator(github_user="jctanner"):
             roles.append(role)
-        assert sorted(set([x['github_user'] for x in roles])) == ['jctanner']
+        assert sorted({x['github_user'] for x in roles}) == ['jctanner']
 
     def test_upstream_role_iterator_with_user_and_name(self):
         roles = []

@@ -171,7 +171,7 @@ def _process_permissions(role, roles):
 
 
 def _process_locked_roles(roles):
-    locked = dict()
+    locked = {}
     for role in roles:
         locked[role] = {"permissions": list(_process_permissions(role, roles))}
     return locked

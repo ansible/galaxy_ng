@@ -31,10 +31,10 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         logger.info(f'create_user(2): returning user-kwarg {user}:{user.id}')
         return {'is_new': False}
 
-    fields = dict(
-        (name, kwargs.get(name, details.get(name)))
+    fields = {
+        name: kwargs.get(name, details.get(name))
         for name in backend.setting('USER_FIELDS', USER_FIELDS)
-    )
+    }
 
     if not fields:
         logger.info(f'create_user(3): no fields for {user}:{user.id}')

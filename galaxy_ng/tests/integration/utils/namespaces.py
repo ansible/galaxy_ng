@@ -73,7 +73,7 @@ def generate_unused_namespace(gc=None, api_version='v3'):
 
     assert gc is not None, "api_client is a required param"
     existing = get_all_namespaces(gc=gc, api_version=api_version)
-    existing = dict((x['name'], x) for x in existing)
+    existing = {x['name']: x for x in existing}
     return generate_namespace(exclude=list(existing.keys()))
 
 

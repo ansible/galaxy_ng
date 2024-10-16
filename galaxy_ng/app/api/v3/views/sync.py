@@ -41,7 +41,7 @@ class SyncRemoteView(api_base.APIView):
         remote = distro.repository.remote.ansible_collectionremote
 
         if not remote.requirements_file and any(
-            [domain in remote.url for domain in COMMUNITY_DOMAINS]
+            domain in remote.url for domain in COMMUNITY_DOMAINS
         ):
             raise ValidationError(
                 detail={

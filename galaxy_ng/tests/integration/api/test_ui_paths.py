@@ -155,7 +155,7 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
         ds = resp.json()
 
         assert len(ds['data']) == 2
-        assert set([v["version"] for v in ds['data']]) == set([c1.version, c2.version])
+        assert {v["version"] for v in ds['data']} == {c1.version, c2.version}
 
         # test range exclusive
         resp = uclient.get(f'{v_path}&version_range=>{c1.version}')
@@ -943,7 +943,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         assert resp.json()["meta"]["count"] > 0
 
         # test correct count sorting
-        tags = [tag for tag in uclient.get('_ui/v1/tags/roles').json()["data"]]
+        tags = uclient.get('_ui/v1/tags/roles').json()["data"]
 
         assert sorted(tags, key=lambda r: r["count"], reverse=True)[:2] == resp.json()["data"][:2]
         assert resp.json()["data"][0]["name"] == "docker"

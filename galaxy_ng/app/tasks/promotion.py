@@ -70,11 +70,11 @@ def call_auto_approve_task(collection_version, repo, ns_pk):
         auto_approve,
         exclusive_resources=[repo],
         task_group=task_group,
-        kwargs=dict(
-            cv_pk=collection_version.pk,
-            src_repo_pk=repo.pk,
-            ns_pk=ns_pk,
-        ),
+        kwargs={
+            'cv_pk': collection_version.pk,
+            'src_repo_pk': repo.pk,
+            'ns_pk': ns_pk,
+        },
     )
 
     task_group.finish()
@@ -90,9 +90,9 @@ def call_move_content_task(collection_version, source_repo, dest_repo):
     return dispatch(
         move_collection,
         exclusive_resources=[source_repo, dest_repo],
-        kwargs=dict(
-            cv_pk_list=[collection_version.pk],
-            src_repo_pk=source_repo.pk,
-            dest_repo_list=[dest_repo.pk],
-        ),
+        kwargs={
+            'cv_pk_list': [collection_version.pk],
+            'src_repo_pk': source_repo.pk,
+            'dest_repo_list': [dest_repo.pk],
+        },
     )
