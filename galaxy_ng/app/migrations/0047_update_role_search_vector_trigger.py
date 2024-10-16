@@ -18,8 +18,8 @@ BEGIN
     _search_vector := ((((
         setweight(to_tsvector(COALESCE(_namespace, '')), 'A')
         || setweight(to_tsvector(COALESCE(NEW."name", '')), 'A'))
-        || setweight(to_tsvector(COALESCE(((NEW."full_metadata"->'tags'))::text, '')), 'B')) 
-        || setweight(to_tsvector(COALESCE(((NEW."full_metadata"->'platforms'))::text, '')), 'C')) 
+        || setweight(to_tsvector(COALESCE(((NEW."full_metadata"->'tags'))::text, '')), 'B'))
+        || setweight(to_tsvector(COALESCE(((NEW."full_metadata"->'platforms'))::text, '')), 'C'))
         || setweight(to_tsvector(COALESCE((NEW."full_metadata"->>'description'), '')), 'D'));
 
     INSERT INTO galaxy_legacyrolesearchvector(role_id,search_vector,modified)

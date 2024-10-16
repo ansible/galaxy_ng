@@ -8,7 +8,7 @@ def calculate_metadata_sha256(metadata):
     """Calculates the metadata_sha256 from the other metadata fields."""
     metadata_json = json.dumps(metadata, sort_keys=True).encode("utf-8")
     hasher = hashlib.sha256(metadata_json)
-    
+
     return hasher.hexdigest()
 
 
@@ -74,7 +74,7 @@ def add_namespace_metadata_to_published_repository(apps, schema_editor):
     RepositoryContent = apps.get_model('core', 'RepositoryContent')
     RepositoryVersion = apps.get_model('core', 'RepositoryVersion')
     RepositoryVersionContentDetails = apps.get_model('core', 'RepositoryVersionContentDetails')
-    
+
     repo = AnsibleDistribution.objects.get(base_path="published").repository
     repo_v = RepositoryVersion.objects.filter(repository=repo).order_by("-number").first()
 
