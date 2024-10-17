@@ -101,6 +101,8 @@ extend-exclude = [
 
 [tool.ruff.lint]
 extend-select = [
+    # pycodestyle warnings
+    "W",
     # flake8-bugbear
     "B",
     # flake8-comprehensions

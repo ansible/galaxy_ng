@@ -52,7 +52,7 @@ def split_pulp_roles(apps, schema_editor):
         for assignment_cls in (UserRole, GroupRole):
             for pulp_assignment in assignment_cls.objects.filter(role=corerole, content_type__isnull=False):
                 if pulp_assignment.content_type_id not in split_roles:
- 
+
                     # Get all permissions relevant to this content model.
                     # If any model (like synclist) hasn't been registered in the permission
                     # system, it should not be split/recreated ...

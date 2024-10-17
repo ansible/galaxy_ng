@@ -170,7 +170,7 @@ def get_roles_from_permissions(permission_iterable, translator, Role, Permission
 
     # Use set comparisons instead of querysets to avoid unnecesary trips to the DB
     permissions = {(p.content_type.app_label, p.codename) for p in permission_iterable}
-    
+
     # Iterate through each locked role, apply any roles that match the group's permission
     # set and remove any permissions that are applied via roles
     for locked_perm_names, locked_rolename in translator:
@@ -186,9 +186,9 @@ def get_roles_from_permissions(permission_iterable, translator, Role, Permission
             # don't bother setting the permissions on the locked roles. They'll get applied in
             # the post migration hook.
             role, _ = Role.objects.get_or_create(name=locked_rolename, locked=True)
-            roles_to_add.append(role)            
+            roles_to_add.append(role)
             permissions = permissions - role_perms
-    
+
     for label, perm in permissions:
         # prefix permission roles with _permission: instead of galaxy. so that they are hidden
         # by default in the roles UI.
@@ -223,7 +223,7 @@ def get_global_group_permissions(group, Role, GroupRole, Permission):
     # Add locked roles that match the group's permission set
     for role in roles:
         group_roles.append(GroupRole(group=group, role=role))
-    
+
     return group_roles
 
 
@@ -250,7 +250,7 @@ def get_object_group_permissions(group, Role, GroupRole, ContentType, Permission
                 objects_with_perms[key].append(permission_id)
             else:
                 objects_with_perms[key] = [permission_id,]
-    
+
     # for each object permission that this group has, map it to a role.
     for k in objects_with_perms:
         perm_list = objects_with_perms[k]
@@ -327,14 +327,14 @@ def migrate_group_permissions_to_roles(apps, schema_editor):
         - galaxy.delete_collection
         - galaxy.view_group
         - galaxy.view_user
-        
+
     The following roles would get applied:
         - galaxy.collection_namespace_owner
         - _permission:galaxy.view_group
         - _permission:galaxy.view_user
 
     galaxy.collection_namespace_owner is applied because the user has all the permissions that match it.
-    After applying galaxy.collection_namespace_owner, the view_group and view_group permissions are left 
+    After applying galaxy.collection_namespace_owner, the view_group and view_group permissions are left
     over so _permission:galaxy.view_group and _permission:galaxy.view_user are created for each
     missing permission and added to the group. _permision:<perm_name> roles will only have the
     a single permission in them for <perm_name>.
@@ -431,7 +431,7 @@ def edit_guardian_tables(apps, schema_editor):
             for name in fk_constraints:
                 cursor.execute(
                     f"ALTER TABLE {table} DROP CONSTRAINT {name};"
-                )                
+                )
 
 
 def clear_model_permissions(apps, schema_editor):
