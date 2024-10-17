@@ -663,7 +663,7 @@ def has_old_credentials():
     return parse_version(hub_version) < parse_version('4.7')
 
 
-@lru_cache()
+@lru_cache
 def get_hub_version(ansible_config):
     if aap_gateway():
         cfg = ansible_config("admin")
@@ -705,7 +705,7 @@ def get_hub_version(ansible_config):
         return gc.get(gc.galaxy_root)["galaxy_ng_version"]
 
 
-@lru_cache()
+@lru_cache
 def get_vault_loader():
     from .vault_loading import VaultSecretFetcher
     vault_settings = {

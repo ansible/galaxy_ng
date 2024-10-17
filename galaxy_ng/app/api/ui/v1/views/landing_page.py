@@ -32,8 +32,8 @@ class LandingPageView(api_base.APIView):
                         "id": "ansible-partner",
                         "icon": "bulb",
                         "action": {
-                            "title": "Check out our partner %s" % namespace.company,
-                            "href": "./ansible/automation-hub/partners/%s" % namespace.name,
+                            "title": f"Check out our partner {namespace.company}",
+                            "href": f"./ansible/automation-hub/partners/{namespace.name}",
                         },
                         "description": "Discover automation from our partners.",
                     }

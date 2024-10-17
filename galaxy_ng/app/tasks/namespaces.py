@@ -1,7 +1,7 @@
 import aiohttp
 import asyncio
 import contextlib
-import xml.etree.cElementTree as et
+import xml.etree.ElementTree as ET
 
 from django.db import transaction
 from django.forms.fields import ImageField
@@ -72,9 +72,9 @@ def _download_avatar(url, namespace_name):
         except ValidationError:
             # Not a PIL valid image lets handle SVG case
             tag = None
-            with contextlib.suppress(et.ParseError):
+            with contextlib.suppress(ET.ParseError):
                 f.seek(0)
-                tag = et.parse(f).find(".").tag
+                tag = ET.parse(f).find(".").tag
             if tag != '{http://www.w3.org/2000/svg}svg':
                 raise ValidationError(
                     f"Provided avatar_url for {namespace_name} on {url} is not a valid image"

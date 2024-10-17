@@ -890,7 +890,8 @@ def test_api_ui_v1_tags_roles(ansible_config):
     def _populate_tags_cmd():
         proc = subprocess.run(
             "django-admin populate-role-tags",
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+            shell=True,
+            capture_output=True,
         )
         assert proc.returncode == 0
 
