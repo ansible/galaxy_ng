@@ -90,12 +90,7 @@ def test_openapi_bindings_generation(ansible_config, galaxy_client):
     pulp_spec = gc.get('pulp/api/v3/docs/api.json')
     status = gc.get('pulp/api/v3/status/')
     version = [x['version'] for x in status['versions'] if x['component'] == 'galaxy'][0]
-    my_id = subprocess.run(
-        'id -u',
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    ).stdout.decode('utf-8').strip()
+    my_id = subprocess.run('id -u', shell=True, capture_output=True).stdout.decode('utf-8').strip()
     volume_name = '/local'
     generator_repo = 'https://github.com/pulp/pulp-openapi-generator'
 
@@ -105,8 +100,7 @@ def test_openapi_bindings_generation(ansible_config, galaxy_client):
         clone_pid = subprocess.run(
             f'git clone {generator_repo} {generator_checkout}',
             shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            capture_output=True,
         )
         assert clone_pid.returncode == 0, clone_pid.stderr.decode('utf-8')
 
@@ -137,12 +131,7 @@ def test_openapi_bindings_generation(ansible_config, galaxy_client):
             '--strict-spec=false'
         ]
 
-        docker_pid = subprocess.run(
-            ' '.join(cmd),
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+        docker_pid = subprocess.run(' '.join(cmd), shell=True, capture_output=True)
         try:
             assert docker_pid.returncode == 0, docker_pid.stderr.decode('utf-8')
         except AssertionError as e:

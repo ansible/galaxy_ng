@@ -26,16 +26,11 @@ class CollectionInspector:
         if self.tarball:
             self._extract_path = tempfile.mkdtemp(prefix='collection-extract-')
             cmd = f'cd {self._extract_path}; tar xzvf {self.tarball}'
-            subprocess.run(
-                cmd,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
+            subprocess.run(cmd, shell=True, capture_output=True)
         else:
             self._extract_path = self.directory
 
-        with open(os.path.join(self._extract_path, 'MANIFEST.json'), 'r') as f:
+        with open(os.path.join(self._extract_path, 'MANIFEST.json')) as f:
             self.manifest = json.loads(f.read())
 
         if self.tarball:

@@ -109,11 +109,16 @@ extend-select = [
     "C4",
     # flake8-no-pep420
     "INP",
+    # pyupgrade
+    "UP",
 ]
 extend-ignore = [
     # B904 requires using `raise ... from ...` to explicitly tell what to do with "parent"
     # exception. Would be nice to fix, but ignoring for now.
     "B904",
+    # UP032 Use f-string instead of `format` call.
+    # No need to replace all str.format usage with f-strings in entire codebase.
+    "UP032",
 ]
 
 [tool.ruff.lint.per-file-ignores]

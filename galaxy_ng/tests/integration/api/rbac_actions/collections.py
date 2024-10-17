@@ -112,7 +112,7 @@ def _upload_collection_common(user, password, expect_pass, extra, base_path=None
         server,
         artifact.filename
     ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.run(cmd, capture_output=True)
 
     del_collection(name, extra['collection'].get_namespace()["name"], repo=base_path)
 

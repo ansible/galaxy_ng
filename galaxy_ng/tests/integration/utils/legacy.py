@@ -274,7 +274,7 @@ class LegacyRoleGitRepoBuilder:
         if self.meta_namespace or self.meta_name:
 
             meta_file = os.path.join(self.role_dir, 'meta', 'main.yml')
-            with open(meta_file, 'r') as f:
+            with open(meta_file) as f:
                 meta = yaml.safe_load(f.read())
 
             if self.meta_namespace:

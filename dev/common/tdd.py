@@ -27,7 +27,7 @@ def get_changed_files(pr_branch, target_branch="master"):
         cmd = f'curl -s -o /tmp/pr.diff {url}'
         pid = subprocess.run(cmd, shell=True)
         assert pid.returncode == 0
-        with open('/tmp/pr.diff', 'r') as f:
+        with open('/tmp/pr.diff') as f:
             raw = f.read()
         filenames = raw.split('\n')
         filenames = [x for x in filenames if x.startswith('---') or x.startswith('+++')]

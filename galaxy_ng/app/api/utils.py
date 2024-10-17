@@ -169,6 +169,6 @@ class GetObjectByIdMixin:
 
 def get_aap_version():
     if os.path.isfile(AAP_VERSION_FILE_PATH):
-        with open(AAP_VERSION_FILE_PATH, "r") as f:
+        with open(AAP_VERSION_FILE_PATH) as f:
             return f.read().strip('\n')
     return None

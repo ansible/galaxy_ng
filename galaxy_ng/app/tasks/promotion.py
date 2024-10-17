@@ -34,7 +34,7 @@ def auto_approve(src_repo_pk, cv_pk, ns_pk=None):
     try:
         signing_service = AUTO_SIGN and SigningService.objects.get(name=SIGNING_SERVICE_NAME)
     except SigningService.DoesNotExist:
-        raise RuntimeError('Signing %s service not found' % SIGNING_SERVICE_NAME)
+        raise RuntimeError(f'Signing {SIGNING_SERVICE_NAME} service not found')
 
     # Sign the collection if auto sign is enabled
     if AUTO_SIGN:
