@@ -56,7 +56,7 @@ OR
 /usr/bin/python3.9/usr/bin/gunicorn--bind[::]:2481{6,7}pulpcore.app.wsgi:application--namepulp-{api,content}--timeout90--workers2
 ```
 """
-with open("/proc/1/cmdline", "r") as f:
+with open("/proc/1/cmdline") as f:
     cmdline = f.readline()
 
 if "pulp-api" in cmdline:

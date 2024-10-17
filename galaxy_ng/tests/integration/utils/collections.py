@@ -149,8 +149,7 @@ def build_collection(
             cmd,
             shell=True,
             cwd=tdir,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            capture_output=True,
         )
         assert pid.returncode == 0, str(pid.stdout.decode('utf-8')) \
             + str(pid.stderr.decode('utf-8'))
@@ -163,15 +162,14 @@ def build_collection(
                     cmd,
                     shell=True,
                     cwd=rolesdir,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
+                    capture_output=True,
                 )
                 assert pid2.returncode == 0, str(pid2.stdout.decode('utf-8')) \
                     + str(pid2.stderr.decode('utf-8'))
 
         # fix galaxy.yml
         galaxy_file = os.path.join(basedir, 'galaxy.yml')
-        with open(galaxy_file, 'r') as f:
+        with open(galaxy_file) as f:
             meta = yaml.safe_load(f.read())
         meta.update(config)
         with open(galaxy_file, 'w') as f:
@@ -213,8 +211,7 @@ def build_collection(
             cmd,
             shell=True,
             cwd=basedir,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE
+            capture_output=True,
         )
         assert pid3.returncode == 0, str(pid3.stdout.decode('utf-8')) \
             + str(pid3.stderr.decode('utf-8'))
@@ -258,7 +255,7 @@ def upload_artifact(
     def to_bytes(s, errors=None):
         return s.encode("utf8")
 
-    boundary = "--------------------------%s" % uuid.uuid4().hex
+    boundary = "--------------------------" + uuid.uuid4().hex
     file_name = os.path.basename(collection_path)
     part_boundary = b"--" + to_bytes(boundary, errors="surrogate_or_strict")
 
@@ -301,7 +298,7 @@ def upload_artifact(
     data = b"\r\n".join(form)
 
     headers = {
-        "Content-Type": "multipart/form-data; boundary=%s" % boundary,
+        "Content-Type": f"multipart/form-data; boundary={boundary}",
         "Content-length": len(data),
     }
 
@@ -721,8 +718,9 @@ def setup_multipart(path: str, data: dict) -> dict:
 
     data = b"\r\n".join(buffer)
     headers = {
-        "Content-Type": "multipart/form-data; boundary=%s"
-        % boundary[2:].decode("ascii"),  # strip --
+        "Content-Type": "multipart/form-data; boundary={}".format(
+            boundary[2:].decode("ascii")  # strip --
+        ),
         "Content-length": len(data),
     }
 

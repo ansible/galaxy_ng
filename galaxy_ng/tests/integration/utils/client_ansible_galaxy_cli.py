@@ -4,8 +4,7 @@ import re
 import shutil
 import tempfile
 import time
-
-from subprocess import run, PIPE
+import subprocess
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 
@@ -77,7 +76,13 @@ def ansible_galaxy(
 
     for x in range(0, retries + 1):
         try:
-            p = run(command_string, cwd=tdir, shell=True, stdout=PIPE, stderr=PIPE, env=os.environ)
+            p = subprocess.run(
+                command_string,
+                cwd=tdir,
+                shell=True,
+                capture_output=True,
+                env=os.environ,
+            )
             logger.debug(f"RUN [retry #{x}] {command_string}")
             logger.debug("STDOUT---")
             for line in p.stdout.decode("utf8").split("\n"):

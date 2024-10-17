@@ -41,8 +41,7 @@ def iterate_all(api_client, url, gc=None):
         # pulp uses "results"
         if "data" not in r:
             key = "results"
-        for x in r[key]:
-            yield x
+        yield from r[key]
         if "next" in r:
             next = r["next"]
         else:
@@ -67,8 +66,7 @@ def iterate_all_gk(gc_admin, url):
         # pulp uses "results"
         if "data" not in r:
             key = "results"
-        for x in r[key]:
-            yield x
+        yield from r[key]
         if "next" in r:
             next = r["next"]
         else:

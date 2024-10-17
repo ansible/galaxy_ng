@@ -271,7 +271,7 @@ def test_long_field_values(galaxy_client, field):
     resp = wait_for_task(gc, resp)
     assert resp["state"] == "failed"
     # Should END with an error
-    assert "must not be greater than %s characters" % fieldmax in resp["error"]["description"]
+    assert f"must not be greater than {fieldmax} characters" in resp["error"]["description"]
     assert fieldname in resp["error"]["description"]
 
 

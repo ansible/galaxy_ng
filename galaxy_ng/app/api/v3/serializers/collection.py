@@ -19,7 +19,7 @@ class CollectionUploadSerializer(Serializer):
 
     sha256 = serializers.CharField(required=False, default=None)
 
-    class Meta():
+    class Meta:
         ref_name = "CollectionUploadWithDownloadUrlSerializer"
 
     def to_internal_value(self, data):

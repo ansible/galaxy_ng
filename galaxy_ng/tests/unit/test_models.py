@@ -62,7 +62,7 @@ class TestSignalCreateNamespace(TestCase):
             namespace=self.namespace_name,
         )
         namespace = Namespace.objects.get(name=self.namespace_name)
-        self.assertEquals(namespace.description, description)
+        self.assertEqual(namespace.description, description)
 
 
 class TestSetting(TestCase):

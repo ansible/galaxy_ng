@@ -86,8 +86,7 @@ def test_community_collection_download_count_sync(ansible_config):
     pid = subprocess.run(
         'pulpcore-manager sync-collection-download-counts',
         shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        capture_output=True,
     )
     assert pid.returncode == 0
 

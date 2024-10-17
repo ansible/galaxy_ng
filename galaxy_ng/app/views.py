@@ -19,7 +19,7 @@ class PulpAPIRedirectView(api_base.APIView):
 
         args = request.META.get("QUERY_STRING", "")
         if args:
-            url = "%s?%s" % (url, args)
+            url = f"{url}?{args}"
 
         # Returning 308 instead of 302 since 308 requires that clients maintain the
         # same method as the original request.

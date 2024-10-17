@@ -534,7 +534,7 @@ class LegacyRoleVersionsSerializer(serializers.ModelSerializer):
         return results
 
 
-class LegacyTaskSerializer():
+class LegacyTaskSerializer:
 
     @property
     def data(self):

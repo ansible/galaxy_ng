@@ -142,10 +142,10 @@ def wait_for_all_tasks():
 def ensure_test_container_is_pulled():
     container_engine = CLIENT_CONFIG["container_engine"]
     cmd = [container_engine, "image", "exists", TEST_CONTAINER]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.run(cmd, capture_output=True)
     if proc.returncode == 1:
         cmd = [container_engine, "image", "pull", TEST_CONTAINER]
-        rc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        rc = subprocess.run(cmd, capture_output=True)
         assert rc.returncode == 0
 
 
@@ -459,7 +459,7 @@ class ReusableAnsibleRepository(AnsibleDistroAndRepo):
             server,
             artifact.filename
         ]
-        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.run(cmd, capture_output=True)
         assert proc.returncode == 0
         wait_for_all_tasks()
 

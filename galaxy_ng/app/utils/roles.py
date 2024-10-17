@@ -34,7 +34,7 @@ def get_path_role_repository(path):
 def get_path_role_meta(path):
     """ Retrive the meta/main.yml from a role """
     metaf = os.path.join(path, 'meta', 'main.yml')
-    with open(metaf, 'r') as f:
+    with open(metaf) as f:
         meta = yaml.safe_load(f.read())
     return meta
 
@@ -48,7 +48,7 @@ def get_path_role_name(path):
     metaf = os.path.join(path, 'meta', 'main.yml')
     meta = None
     if os.path.exists(metaf):
-        with open(metaf, 'r') as f:
+        with open(metaf) as f:
             meta = yaml.safe_load(f.read())
 
     if meta and 'role_name' in meta['galaxy_info']:
@@ -162,7 +162,7 @@ def get_path_galaxy_key(path, key):
     if not os.path.exists(gfn):
         return None
 
-    with open(gfn, 'r') as f:
+    with open(gfn) as f:
         ds = yaml.safe_load(f.read())
 
     return ds.get(key)
@@ -171,7 +171,7 @@ def get_path_galaxy_key(path, key):
 def set_path_galaxy_key(path, key, value):
     """ Set a specific key in a galaxy.yml """
     gfn = os.path.join(path, 'galaxy.yml')
-    with open(gfn, 'r') as f:
+    with open(gfn) as f:
         ds = yaml.safe_load(f.read())
 
     ds[key] = value

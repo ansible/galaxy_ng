@@ -587,7 +587,7 @@ def test_v1_username_autocomplete_search(ansible_config):
         + " --server "
         + server
     ]
-    proc = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.run(cmd, shell=True, capture_output=True)
     assert b"Found 5 roles matching your search" in proc.stdout
 
     cmd = [
@@ -599,7 +599,7 @@ def test_v1_username_autocomplete_search(ansible_config):
         + " --server "
         + server
     ]
-    proc = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.run(cmd, shell=True, capture_output=True)
     assert b"Found 1 roles matching your search" in proc.stdout
     assert b"geerlingguy.adminer" in proc.stdout
 
