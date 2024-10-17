@@ -34,17 +34,20 @@ DAB_SERVICE_BACKED_REDIRECT = (
 )
 
 
-def post(settings: Dynaconf) -> Dict[str, Any]:
+def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True) -> Dict[str, Any]:
     """The dynaconf post hook is called after all the settings are loaded and set.
 
     Post hook is necessary when a setting key depends conditionally on a previouslys et variable.
 
     settings: A read-only copy of the django.conf.settings
+    run_dynamic: update the final data with configure_dynamic_settings
+    run_validate: call the validate function on the final data
     returns: a dictionary to be merged to django.conf.settings
 
     NOTES:
         Feature flags must be loaded directly on `app/api/ui/views/feature_flags.py` view.
     """
+
     data = {"dynaconf_merge": False}
     # existing keys will be merged if dynaconf_merge is set to True
     # here it is set to false, so it allows each value to be individually marked as a merge.
@@ -61,7 +64,7 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_legacy_roles(settings))
     data.update(configure_dab_required_settings(settings))
 
-    # This should go last, and it needs to receive the data from the previous configuration
+    # These should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
     # of the galaxy auth classes, and if galaxy auth classes are overridden by any of the
     # other dynaconf hooks (such as keycloak), those changes need to be applied to the
@@ -70,9 +73,12 @@ def post(settings: Dynaconf) -> Dict[str, Any]:
     data.update(configure_authentication_classes(settings, data))
 
     # This must go last, so that all the default settings are loaded before dynamic and validation
-    data.update(configure_dynamic_settings(settings))
+    if run_dynamic:
+        data.update(configure_dynamic_settings(settings))
 
-    validate(settings)
+    if run_validate:
+        validate(settings)
+
     return data
 
 
@@ -104,6 +110,9 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
             KEYCLOAK_REALM,
         ]
     ):
+
+        data["GALAXY_AUTH_KEYCLOAK_ENABLED"] = True
+
         data["KEYCLOAK_ADMIN_ROLE"] = settings.get("KEYCLOAK_ADMIN_ROLE", default="hubadmin")
         data["KEYCLOAK_GROUP_TOKEN_CLAIM"] = settings.get(
             "KEYCLOAK_GROUP_TOKEN_CLAIM", default="group"
@@ -168,12 +177,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
             "dynaconf_merge",
         ]
 
-        # Replace AUTH CLASSES
-        data["GALAXY_AUTHENTICATION_CLASSES"] = [
-            "galaxy_ng.app.auth.session.SessionAuthentication",
-            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
-            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
-        ]
+        # Replace AUTH CLASSES [shifted to configure_authentication_classes]
 
         # Set default to one day expiration
         data["GALAXY_TOKEN_EXPIRATION"] = settings.get("GALAXY_TOKEN_EXPIRATION", 1440)
@@ -402,16 +406,30 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     # default rest framework auth classes to the galaxy auth classes. Ideally we should
     # switch everything to use the default DRF auth classes, but given how many
     # environments would have to be reconfigured, this is a lot easier.
+
     galaxy_auth_classes = data.get(
         "GALAXY_AUTHENTICATION_CLASSES",
         settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
     )
+    if galaxy_auth_classes is None:
+        galaxy_auth_classes = []
+
+    # add in keycloak classes if necessary ...
+    if data.get('GALAXY_AUTH_KEYCLOAK_ENABLED') is True:
+        for class_name in [
+            "galaxy_ng.app.auth.session.SessionAuthentication",
+            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
+        ]:
+            if class_name not in galaxy_auth_classes:
+                galaxy_auth_classes.insert(0, class_name)
+
     if galaxy_auth_classes:
-        return {
-            "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES": galaxy_auth_classes
-        }
-    else:
-        return {}
+        data["ANSIBLE_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
+        data["GALAXY_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
+        data["REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
+
+    return data
 
 
 def configure_password_validators(settings: Dynaconf) -> Dict[str, Any]:
