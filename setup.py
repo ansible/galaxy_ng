@@ -87,7 +87,7 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
-django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', 'devel')
+django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', '2024.10.17')
 django_ansible_base_dependency = (
     'django-ansible-base[jwt_consumer] @ '
     f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
