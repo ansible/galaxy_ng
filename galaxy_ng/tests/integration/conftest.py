@@ -617,7 +617,7 @@ def keep_generated_test_artifact(ansible_config):
 @pytest.fixture(scope="session")
 def data():
     path = 'galaxy_ng/tests/integration/load_data.yaml'
-    with open(path, 'r') as yaml_file:
+    with open(path) as yaml_file:
         data = yaml.safe_load(yaml_file)
     return data
 

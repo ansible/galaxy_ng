@@ -245,7 +245,7 @@ class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
         """
         if request.query_params.get('id'):
             return self.get_task(request, id=int(request.query_params['id']))
-        return super(LegacyRoleImportsViewSet, self).list(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         """

@@ -120,7 +120,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         self.check_object_permissions(request, namespace)
 
         try:
-            response = super(CollectionUploadViewSet, self).create(request, path)
+            response = super().create(request, path)
         except ValidationError:
             log.exception('Failed to publish artifact %s (namespace=%s, sha256=%s)',  # noqa
                           data['file'].name, namespace, data.get('sha256'))

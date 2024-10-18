@@ -15,7 +15,7 @@ def _set_settings(text):
 
 
 def _get_settings():
-    with open("/etc/pulp/settings.py", "r") as f:
+    with open("/etc/pulp/settings.py") as f:
         return f.read().splt("\n")
 
 

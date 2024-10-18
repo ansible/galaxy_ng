@@ -29,6 +29,4 @@ class AnsibleGalaxy29MultiPartParser(MultiPartParser):
 
         new_stream.seek(0)
 
-        return super(AnsibleGalaxy29MultiPartParser, self).parse(new_stream,
-                                                                 media_type=media_type,
-                                                                 parser_context=parser_context)
+        return super().parse(new_stream, media_type=media_type, parser_context=parser_context)
