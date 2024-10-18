@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework import fields
 
-from pulpcore.plugin.serializers import IdentityField
+from pulpcore.plugin.serializers import IdentityField, ModelSerializer
 
 from galaxy_ng.app import models
 from galaxy_ng.app.tasks import dispatch_create_pulp_namespace_metadata
@@ -75,7 +75,7 @@ class NamespaceLinkSerializer(serializers.ModelSerializer):
         return url
 
 
-class NamespaceSerializer(serializers.ModelSerializer):
+class NamespaceSerializer(ModelSerializer):
     links = NamespaceLinkSerializer(many=True, required=False)
     groups = GroupPermissionField(required=False)
     users = UserPermissionField(required=False)
