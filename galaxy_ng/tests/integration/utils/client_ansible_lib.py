@@ -167,18 +167,10 @@ class AnsibeGalaxyHttpClient:
         )
 
         # construct a helpful error message ...
-        msg = (
-            self.config.get('auth_url')
-            + '\n'
-            + str(payload)
-            + '\n'
-            + str(rr.status_code)
-            + '\n'
-            + rr.text
-        )
+        msg = "{}\n{}\n{}\n{}".format(self.config.get('auth_url'), payload, rr.status_code, rr.text)
 
         # bail out early if auth failed ...
-        assert rr.status_code >= 200 and rr.status_code < 300, msg
+        assert 200 <= rr.status_code < 300, msg
         assert rr.headers.get('Content-Type') == 'application/json', msg
         assert 'access_token' in rr.json(), msg
 

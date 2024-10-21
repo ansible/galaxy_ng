@@ -71,7 +71,7 @@ BASE_SETTINGS = {
 
 
 @pytest.mark.parametrize(
-    "do_stuff, extra_settings, expected_results",
+    ("do_stuff", "extra_settings", "expected_results"),
     [
         # 0 >=4.10 no external auth ...
         (

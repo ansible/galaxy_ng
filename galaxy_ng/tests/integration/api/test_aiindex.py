@@ -12,7 +12,7 @@ from ..utils.repo_management_utils import create_test_namespace
 from ..utils.legacy import cleanup_social_user
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def flags(ansible_config):
     config = ansible_config("admin")
     api_client = get_client(config, request_token=True, require_auth=True)
@@ -20,14 +20,14 @@ def flags(ansible_config):
     return api_client(f"{api_prefix}/_ui/v1/feature-flags/")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def namespace(ansible_config, galaxy_client) -> str:
     """create a new namespace."""
     gc = galaxy_client("partner_engineer")
     return create_test_namespace(gc)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def pe_namespace(ansible_config, galaxy_client) -> str:
     """create a new namespace owned by PE user."""
     config = ansible_config("partner_engineer")
@@ -53,7 +53,7 @@ def pe_namespace(ansible_config, galaxy_client) -> str:
     return new_namespace
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def legacy_namespace(ansible_config):
     """Creates a new legacy namespace owned by gh01 user"""
 

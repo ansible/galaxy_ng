@@ -15,7 +15,7 @@ from galaxykit.container_images import get_container
 from galaxykit.utils import wait_for_task
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def flags(galaxy_client):
     gc = galaxy_client("admin")
     return gc.get("_ui/v1/feature-flags/")

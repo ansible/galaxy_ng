@@ -402,7 +402,7 @@ class TestXRepoSearch:
 
     # FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
     @pytest.mark.skip_in_gw
-    @pytest.mark.parametrize("is_highest,cv_version", [(True, "4.0.2"), (False, "4.0.1")])
+    @pytest.mark.parametrize(("is_highest", "cv_version"), [(True, "4.0.2"), (False, "4.0.1")])
     @pytest.mark.x_repo_search
     def test_search_is_highest_true_false(self, galaxy_client, is_highest, cv_version):
         """

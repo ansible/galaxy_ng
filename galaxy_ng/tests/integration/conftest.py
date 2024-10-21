@@ -106,7 +106,7 @@ def ansible_config():
     return get_ansible_config()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def published(ansible_config, artifact, galaxy_client):
     # make sure the expected namespace exists ...
     gc = galaxy_client("partner_engineer")
@@ -125,7 +125,7 @@ def published(ansible_config, artifact, galaxy_client):
     return artifact
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def certifiedv2(ansible_config, artifact, galaxy_client):
     """ Create and publish+certify collection version N and N+1 """
 
@@ -164,7 +164,7 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     return (artifact, artifact2)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     """ Create and publish collection version N and N+1 but only certify N"""
 
@@ -204,7 +204,7 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     return artifact, artifact2
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
     """ Create and publish collection version N and N+1"""
 
@@ -249,7 +249,7 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
     return artifact, artifact2
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def artifact():
     """Generate a randomized collection for testing."""
 
@@ -269,17 +269,14 @@ def upload_artifact():
 
 
 @pytest.fixture
-def cleanup_collections(request):
+def cleanup_collections():
     """Clean created resources during test executions."""
 
-    def cleanup():
-        path = os.path.expanduser(
-            f"~/.ansible/collections/ansible_collections/{USERNAME_PUBLISHER}/"
-        )
-        if os.path.exists(path):
-            shutil.rmtree(path)
+    yield
 
-    request.addfinalizer(cleanup)
+    path = os.path.expanduser(f"~/.ansible/collections/ansible_collections/{USERNAME_PUBLISHER}/")
+    if os.path.exists(path):
+        shutil.rmtree(path)
 
 
 @pytest.fixture(scope="session")
@@ -384,13 +381,13 @@ def sync_instance_crc():
     return (manifest, config)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def settings(galaxy_client):
     gc = galaxy_client("admin")
     return gc.get("_ui/v1/settings/")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def use_collection_signatures(settings):
     """A shortcut to know if a test should attempt to work with signatures."""
     service = settings["GALAXY_COLLECTION_SIGNING_SERVICE"]
@@ -400,7 +397,7 @@ def use_collection_signatures(settings):
     return False
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def autohubtest2(galaxy_client):
     """A carry over pre-created namespace from the original IQE tests."""
     gc = galaxy_client("admin")
@@ -408,7 +405,7 @@ def autohubtest2(galaxy_client):
     return {"name": "autohubtest2"}
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def random_namespace(galaxy_client, settings):
     """Make a randomized namespace."""
 
@@ -423,7 +420,7 @@ def random_namespace(galaxy_client, settings):
     return get_namespace(ns_name, gc=gc)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def random_username(galaxy_client):
     """Make a random username."""
     return 'user_' + generate_namespace()
@@ -531,7 +528,7 @@ def hub_version(ansible_config):
     return get_hub_version(ansible_config)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gh_user_1_post(ansible_config):
     """
     Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
@@ -544,7 +541,7 @@ def gh_user_1_post(ansible_config):
     remove_from_cache("github_user")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gh_user_1(ansible_config):
     """
     Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
@@ -553,7 +550,7 @@ def gh_user_1(ansible_config):
     return gc("github_user", github_social_auth=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gh_user_2(ansible_config):
     """
     Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
@@ -562,7 +559,7 @@ def gh_user_2(ansible_config):
     return gc("github_user_alt", github_social_auth=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gh_user_1_pre(ansible_config):
     """
     Removes everything related to the GitHub user and the user itself and
@@ -573,7 +570,7 @@ def gh_user_1_pre(ansible_config):
     return gc("github_user", github_social_auth=True, ignore_cache=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gw_user_1(ansible_config):
     """
     Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
@@ -582,7 +579,7 @@ def gw_user_1(ansible_config):
     return gc("github_user", github_social_auth=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def generate_test_artifact(ansible_config):
     """
     Generates a test artifact and deletes it after the test
@@ -600,7 +597,7 @@ def generate_test_artifact(ansible_config):
     delete_collection(gc_admin, namespace=artifact.namespace, collection=artifact.name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def keep_generated_test_artifact(ansible_config):
     """
     Generates a test artifact
