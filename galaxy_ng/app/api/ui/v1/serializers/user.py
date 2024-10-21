@@ -166,7 +166,7 @@ class CurrentUserSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         model = auth_models.User
-        fields = UserSerializer.Meta.fields + ('model_permissions', 'is_anonymous',)
+        fields = (*UserSerializer.Meta.fields, 'model_permissions', 'is_anonymous')
         extra_kwargs = dict(
             groups={'read_only': True},
             **UserSerializer.Meta.extra_kwargs

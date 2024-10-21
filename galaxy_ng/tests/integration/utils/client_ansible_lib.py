@@ -2,6 +2,7 @@
 
 import json
 import logging
+from typing import Optional
 
 import requests
 
@@ -178,11 +179,11 @@ class AnsibeGalaxyHttpClient:
 
     def request(
         self,
-        url: str = None,
+        url: Optional[str] = None,
         args=None,
-        headers: dict = None,
+        headers: Optional[dict] = None,
         method: str = 'GET',
-        auth_required: bool = None,
+        auth_required: Optional[bool] = None,
     ) -> dict:
 
         """

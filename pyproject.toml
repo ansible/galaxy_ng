@@ -115,6 +115,8 @@ select = [
     "UP",
     # flake8-pytest-style
     "PT",
+    # ruff specific rules
+    "RUF",
 ]
 extend-ignore = [
     # B904 requires using `raise ... from ...` to explicitly tell what to do with "parent"
@@ -129,6 +131,12 @@ extend-ignore = [
     # PT009 Use a regular `assert` instead of unittest-style
     # Ignoring, since we have mixed pytest and legacy unittest styled tests
     "PT009",
+    # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
+    # We don't enforce type annotations at the moment.
+    "RUF012",
+    # RUF100 Unused `noqa` directive
+    # False positives on rules not enabled in ruff, but enabled in flake8.
+    "RUF100",
 ]
 
 [tool.ruff.lint.per-file-ignores]

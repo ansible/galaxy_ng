@@ -172,8 +172,8 @@ def rbac_signal_in_progress():
 
 def pulp_role_to_single_content_type_or_none(pulprole):
     content_types = {perm.content_type for perm in pulprole.permissions.all()}
-    if len(list(content_types)) == 1:
-        return list(content_types)[0]
+    if len(content_types) == 1:
+        return next(iter(content_types))
     return None
 
 
@@ -352,7 +352,7 @@ def lazy_content_type_correction(rd, obj):
         except ValidationError as exc:
             logger.warning(
                 f'Assignment to {rd.name} for {type(obj)}'
-                + f' violates a DAB role validation rule: {str(exc)}'
+                + f' violates a DAB role validation rule: {exc}'
             )
             return
         rd.content_type = ct

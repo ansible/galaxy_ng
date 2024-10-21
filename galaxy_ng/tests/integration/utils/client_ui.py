@@ -1,6 +1,8 @@
 """Utility functions for AH tests."""
 
 import logging
+from typing import Optional
+
 import requests
 import re
 import html
@@ -145,7 +147,11 @@ class UIClient:
             if res.status_code != expected_code:
                 raise Exception(f'logout status code was not {expected_code}')
 
-    def get(self, relative_url: str = None, absolute_url: str = None) -> requests.models.Response:
+    def get(
+        self,
+        relative_url: Optional[str] = None,
+        absolute_url: Optional[str] = None
+    ) -> requests.models.Response:
 
         pheaders = {
             'Accept': 'application/json',
@@ -172,7 +178,11 @@ class UIClient:
         raise_for_status(resp)
         return resp
 
-    def get_paginated(self, relative_url: str = None, absolute_url: str = None) -> list:
+    def get_paginated(
+        self,
+        relative_url: Optional[str] = None,
+        absolute_url: Optional[str] = None
+    ) -> list:
         """Iterate through all results in a paginated queryset"""
         if absolute_url:
             resp = self.get(absolute_url=absolute_url)

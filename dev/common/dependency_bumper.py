@@ -31,8 +31,8 @@ import os
 import shutil
 import subprocess
 import tempfile
-
 from types import SimpleNamespace
+from typing import Optional
 from threading import Thread
 
 
@@ -121,7 +121,11 @@ def make_image() -> None:
     shutil.rmtree(tdir)
 
 
-def construct_checkout(checkout: str, base_branch: str = None, new_branch: str = None) -> None:
+def construct_checkout(
+    checkout: str,
+    base_branch: Optional[str] = None,
+    new_branch: Optional[str] = None,
+) -> None:
     """
     construct_checkout makes a ready-to-go clone and branch of $REPO
 

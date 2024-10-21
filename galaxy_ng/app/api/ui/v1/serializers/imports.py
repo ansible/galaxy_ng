@@ -30,5 +30,4 @@ class ImportTaskDetailSerializer(ImportTaskListSerializer):
     messages = serializers.JSONField()
 
     class Meta(ImportTaskListSerializer.Meta):
-        fields = ImportTaskListSerializer.Meta.fields + \
-            ('error', 'messages')
+        fields = (*ImportTaskListSerializer.Meta.fields, 'error', 'messages')

@@ -3,6 +3,7 @@
 import atexit
 import base64
 import hashlib
+from typing import Optional
 
 from ldap3 import Server, Connection, ALL
 
@@ -29,7 +30,7 @@ class LDAPAdminClient:
         sha1_hash = hashlib.sha1(password.encode('utf-8')).digest()
         return '{SHA}' + base64.b64encode(sha1_hash).decode('utf-8')
 
-    def create_user(self, username: str = None, password: str = None) -> bool:
+    def create_user(self, username: Optional[str] = None, password: Optional[str] = None) -> bool:
         dn = f'cn={username},ou=people,dc=planetexpress,dc=com'
         crypted_password = self.crypt_password(password)
         user_ldif = {

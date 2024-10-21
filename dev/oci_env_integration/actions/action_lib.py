@@ -104,7 +104,7 @@ class OCIEnvIntegrationTest:
 
     def exec_cmd(self, env, cmd):
         path = f"dev/oci_env_integration/oci_env_configs/{env}"
-        exec_cmd = ["oci-env", "-e", path] + shlex.split(cmd)
+        exec_cmd = ["oci-env", "-e", path, *shlex.split(cmd)]
         print(" ".join(exec_cmd))
         rc = subprocess.call(exec_cmd)
 
