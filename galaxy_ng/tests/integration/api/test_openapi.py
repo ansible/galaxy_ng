@@ -89,7 +89,7 @@ def test_openapi_bindings_generation(ansible_config, galaxy_client):
 
     pulp_spec = gc.get('pulp/api/v3/docs/api.json')
     status = gc.get('pulp/api/v3/status/')
-    version = [x['version'] for x in status['versions'] if x['component'] == 'galaxy'][0]
+    version = next(x['version'] for x in status['versions'] if x['component'] == 'galaxy')
     my_id = subprocess.run('id -u', shell=True, capture_output=True).stdout.decode('utf-8').strip()
     volume_name = '/local'
     generator_repo = 'https://github.com/pulp/pulp-openapi-generator'

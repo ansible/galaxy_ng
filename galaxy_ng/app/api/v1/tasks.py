@@ -162,7 +162,7 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
 
         # REVIEW(cutwater): Why this iterates over all commits to get first one and doesn't use
         #   gitrepo.head.commit as the code below?
-        last_commit = list(gitrepo.iter_commits())[0]
+        last_commit = next(iter(gitrepo.iter_commits()))
 
     else:
         # use the default branch ...
@@ -428,7 +428,7 @@ def legacy_role_import(
             result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
         except Exception as e:
             logger.info('')
-            logger.error(f'Role loading failed! {str(e)}')
+            logger.error(f'Role loading failed! {e}')
             logger.info('')
             tb_str = traceback.format_exc()
             logger.error(tb_str)

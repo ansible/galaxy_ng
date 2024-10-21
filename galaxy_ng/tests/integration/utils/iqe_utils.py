@@ -4,6 +4,7 @@ import subprocess
 import time
 from functools import lru_cache
 from json import JSONDecodeError
+from typing import Optional
 from unittest.mock import patch
 
 from pkg_resources import parse_version
@@ -757,7 +758,7 @@ def galaxy_auto_sign_collections():
     return settings.get("GALAXY_AUTO_SIGN_COLLECTIONS")
 
 
-def get_paginated(client, relative_url: str = None) -> list:
+def get_paginated(client, relative_url: Optional[str] = None) -> list:
     """Iterate through all results in a paginated queryset"""
     ds = client.get(relative_url)
 

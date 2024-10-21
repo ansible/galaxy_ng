@@ -108,7 +108,8 @@ _group_role_statements = [
     },
 ]
 
-_group_statements = _group_role_statements + [
+_group_statements = [
+    *_group_role_statements,
     {
         "action": ["create", "destroy", "update", "partial_update"],
         "principal": "*",

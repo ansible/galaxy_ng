@@ -447,7 +447,7 @@ def set_certification(config, gc, collection, level="published", hub_4_5=False):
         repository_pulp_href = gc.get(rep_obj_url)["results"][0]["pulp_href"]
         artifact_obj_url = f"_ui/v1/repo/staging/{collection.namespace}/" f"{collection.name}/"
         all_versions = gc.get(artifact_obj_url)["all_versions"]
-        one_version = [v for v in all_versions if v["version"] == collection.version][0]
+        one_version = next(v for v in all_versions if v["version"] == collection.version)
         artifact_pulp_id = one_version["id"]
         artifact_pulp_href = (
             "/"

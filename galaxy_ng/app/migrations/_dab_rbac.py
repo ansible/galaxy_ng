@@ -23,8 +23,8 @@ ROLEDEF_TO_PULP = {
 
 def pulp_role_to_single_content_type_or_none(pulprole):
     content_types = {perm.content_type for perm in pulprole.permissions.all()}
-    if len(list(content_types)) == 1:
-        return list(content_types)[0]
+    if len(content_types) == 1:
+        return next(iter(content_types))
     return None
 
 

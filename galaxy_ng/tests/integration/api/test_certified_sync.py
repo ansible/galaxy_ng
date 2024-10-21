@@ -33,7 +33,7 @@ def _assert_sync(manifest, client):
     for cv in manifest:
         ns = cv["namespace"]
         collection = (ns, cv["name"])
-        version = collection + (cv["version"], )
+        version = (*collection, cv["version"])
 
         namespaces.add(ns)
         versions.add(version)

@@ -1,11 +1,11 @@
-import requests
-
+from typing import Optional
 from urllib.parse import urlparse
+
+import requests
 
 
 class SocialGithubClient:
-
-    """ An HTTP client to mimic github social auth"""
+    """ An HTTP client to mimic GitHub social auth"""
 
     _rs = None
     _github_cookies = None
@@ -138,7 +138,11 @@ class SocialGithubClient:
         rr = self.post(absolute_url='/api/_ui/v1/auth/logout/', data={})
         assert rr.status_code == 204, rr.text
 
-    def get(self, relative_url: str = None, absolute_url: str = None) -> requests.models.Response:
+    def get(
+        self,
+        relative_url: Optional[str] = None,
+        absolute_url: Optional[str] = None
+    ) -> requests.models.Response:
 
         pheaders = {
             'Accept': 'application/json',
@@ -159,8 +163,8 @@ class SocialGithubClient:
 
     def delete(
         self,
-        relative_url: str = None,
-        absolute_url: str = None
+        relative_url: Optional[str] = None,
+        absolute_url: Optional[str] = None,
     ) -> requests.models.Response:
 
         pheaders = {
@@ -182,9 +186,9 @@ class SocialGithubClient:
 
     def put(
         self,
-        relative_url: str = None,
-        absolute_url: str = None,
-        data=None
+        relative_url: Optional[str] = None,
+        absolute_url: Optional[str] = None,
+        data=None,
     ) -> requests.models.Response:
 
         pheaders = {
@@ -206,8 +210,8 @@ class SocialGithubClient:
 
     def patch(
         self,
-        relative_url: str = None,
-        absolute_url: str = None,
+        relative_url: Optional[str] = None,
+        absolute_url: Optional[str] = None,
         data=None
     ) -> requests.models.Response:
 
@@ -230,8 +234,8 @@ class SocialGithubClient:
 
     def post(
         self,
-        relative_url: str = None,
-        absolute_url: str = None,
+        relative_url: Optional[str] = None,
+        absolute_url: Optional[str] = None,
         data=None
     ) -> requests.models.Response:
 

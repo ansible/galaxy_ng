@@ -136,5 +136,5 @@ class Command(BaseCommand):
                 self.stdout.write(json.dumps(data))
 
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f"An error occurred: {str(e)}"))
+            self.stdout.write(self.style.ERROR(f"An error occurred: {e}"))
             sys.exit(1)
