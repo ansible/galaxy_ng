@@ -131,7 +131,9 @@ class AnsibeGalaxyHttpClient:
 
     def get_bearer_token(self, grant_type='password'):
         # payload
-        #   grant_type=refresh_token&client_id=cloud-services&refresh_token=abcdefghijklmnopqrstuvwxyz1234567894
+        #   grant_type=refresh_token
+        #   &client_id=cloud-services
+        #   &refresh_token=abcdefghijklmnopqrstuvwxyz1234567894
         # POST
         # auth_url
         #   'https://mocks-keycloak-ephemeral-ydabku.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com

@@ -116,8 +116,8 @@ def test_me_social(ansible_config):
 def test_social_redirect(ansible_config):
     """ Tests a social auth is redirected to / so the UI doesn't load some incorrect repo path."""
 
-    # Github authorization redirects the client to ...
-    #   <galaxy_ng>/complete/github/?code=d9e30acd653247152bf1&state=vdt3CD6wOtpFDX4PnLsBfi25v1o0f89E
+    # GitHub authorization redirects the client to ...
+    #   <galaxy_ng>/complete/github/?code=<code>&state=<state>
     # Django responds with 302 redirect to /
 
     cleanup_social_user('gh01', ansible_config)
