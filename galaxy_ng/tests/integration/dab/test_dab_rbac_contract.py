@@ -601,8 +601,8 @@ def assert_user_in_group(galaxy_client):
 
 
 @pytest.fixture
-def user_and_group(request, galaxy_client):
-    "Return a tuple of a user and group where the user is not in the group"
+def user_and_group(galaxy_client):
+    """Return a tuple of a user and group where the user is not in the group."""
     gc = galaxy_client("admin")
     user_r = gc.get("_ui/v2/users/", params={"username": "jdoe"})
     assert user_r["count"] > 0
@@ -620,9 +620,9 @@ def user_and_group(request, galaxy_client):
 
     assure_user_not_in_group()
 
-    request.addfinalizer(assure_user_not_in_group)
+    yield user, group
 
-    return (user, group)
+    assure_user_not_in_group()
 
 
 @pytest.mark.min_hub_version("4.10dev")

@@ -16,7 +16,7 @@ from ..utils.tools import generate_random_string
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-@pytest.mark.parametrize("profile", ("basic_user", "partner_engineer", "org_admin", "admin"))
+@pytest.mark.parametrize("profile", ["basic_user", "partner_engineer", "org_admin", "admin"])
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.skip_in_gw

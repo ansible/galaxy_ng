@@ -34,13 +34,13 @@ log = logging.getLogger(__name__)
 NAMESPACE = "signing"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def flags(galaxy_client):
     gc = galaxy_client("admin")
     return gc.get("_ui/v1/feature-flags/")
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def namespace(galaxy_client):
     # ensure namespace exists
     gc = galaxy_client("admin")

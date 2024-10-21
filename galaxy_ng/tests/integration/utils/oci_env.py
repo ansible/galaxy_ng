@@ -1,6 +1,6 @@
 import subprocess
 import os
-from pytest import skip
+import pytest
 
 
 def _set_settings(text):
@@ -23,7 +23,7 @@ def with_oci_env_setting(settings):
     def decorator(function):
         def wrapper(*args, **kwargs):
             if not os.path.isdir('/opt/oci-env/'):
-                skip(reason="@with_oci_env_setting tests only work when run in oci-env")
+                pytest.skip(reason="@with_oci_env_setting tests only work when run in oci-env")
 
             current_settings = _get_settings()
             new_settings = current_settings + [f"{x}={settings[x]}" for x in settings]

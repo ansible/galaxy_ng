@@ -62,7 +62,7 @@ def my_setup_module(ansible_config):
         },
     )
     resp = upload_artifact(admin_config, admin_client, artifact)
-    resp = wait_for_task(admin_client, resp)
+    wait_for_task(admin_client, resp)
     """
     {'name': 'galaxy_fake_collection', 'namespace': 'ansible', 'description':
     'A collection to pretend to manage galaxy with infinidash support', 'type': 'collection',

@@ -1,6 +1,8 @@
 import random
 import string
 
+import pytest
+
 from .client_ui import UIClient
 
 
@@ -28,11 +30,8 @@ def delete_group(groupname, api_client=None):
         assert rr.status_code == 204
         return
 
-    try:
-        resp = api_client(api_prefix + f'/_ui/v1/groups/{gid}/', method='DELETE')
-    except Exception as e:
-        error = str(e)
-        assert 'as JSON' in error, e
+    with pytest.raises(Exception, match="as JSON"):
+        api_client(api_prefix + f'/_ui/v1/groups/{gid}/', method='DELETE')
 
 
 def create_user(username, password, api_client=None):
@@ -84,11 +83,8 @@ def delete_user(username, api_client=None):
         assert rr.status_code == 204
         return
 
-    try:
-        resp = api_client(api_prefix + f'/_ui/v1/users/{uid}/', method='DELETE')
-    except Exception as e:
-        error = str(e)
-        assert 'as JSON' in error, e
+    with pytest.raises(Exception, match="as JSON"):
+        api_client(api_prefix + f'/_ui/v1/users/{uid}/', method='DELETE')
 
 
 def delete_group_gk(groupname, gc_admin):
@@ -100,8 +96,5 @@ def delete_group_gk(groupname, gc_admin):
     ginfo = resp['data'][0]
     gid = ginfo['id']
 
-    try:
-        resp = gc_admin.delete(f'_ui/v1/groups/{gid}/')
-    except Exception as e:
-        error = str(e)
-        assert 'as JSON' in error, e
+    with pytest.raises(Exception, match="as JSON"):
+        gc_admin.delete(f'_ui/v1/groups/{gid}/')
