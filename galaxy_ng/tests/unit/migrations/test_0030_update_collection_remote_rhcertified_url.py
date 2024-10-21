@@ -10,7 +10,9 @@ from pulp_ansible.app.models import CollectionRemote
 class TestRemoteRHCertifiedCollectionURL(TestCase):
 
     def _run_migration(self):
-        migration = import_module("galaxy_ng.app.migrations.0030_update_collection_remote_rhcertified_url")
+        migration = import_module(
+            "galaxy_ng.app.migrations.0030_update_collection_remote_rhcertified_url"
+        )
         migration.update_collection_remote_rhcertified_url(apps, connection.schema_editor())
 
     def test_correct_url_update_after_migration(self):

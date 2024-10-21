@@ -340,7 +340,10 @@ class TestMigratingPermissionsToRoles(TestCase):
 
         _, container_namespace_super_group = self._create_user_and_group_with_permissions(
             "cns_super_owner",
-            ["container.change_containernamespace", "container.namespace_push_containerdistribution"],
+            [
+                "container.change_containernamespace",
+                "container.namespace_push_containerdistribution",
+            ],
             obj=container_namespace
         )
 
@@ -386,7 +389,13 @@ class TestMigratingPermissionsToRoles(TestCase):
             self.assertTrue(self._has_role(group, role, obj=container_namespace))
 
         # Verify super permissions work
-        self.assertTrue(self._has_role(namespace_super_group, "galaxy.collection_namespace_owner", namespace))
+        self.assertTrue(
+            self._has_role(
+                namespace_super_group,
+                "galaxy.collection_namespace_owner",
+                namespace,
+            )
+        )
         self.assertTrue(
             self._has_role(
                 container_namespace_super_group,
