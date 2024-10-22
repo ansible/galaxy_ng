@@ -60,7 +60,7 @@ x-common-env: &common-env
   # disable user/group modifications
   PULP_ALLOW_LOCAL_RESOURCE_MANAGEMENT: 'false'
 
-  # role content workaround ..
+  # role content workaround
   PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'
 
   # Resource server
@@ -72,11 +72,15 @@ x-common-env: &common-env
   # PULP_RESOURCE_SERVER__SECRET_KEY='?'
   # PULP_RESOURCE_SERVER__VALIDATE_HTTPS='false'
 
+  # Integration test settings
+  HUB_TEST_AUTHENTICATION_BACKEND: "community"
+  HUB_TEST_MARKS: "deployment_community"
+
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
 
   # DEV EDITABLE STUFF
-  # To enable editable installs of local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
+  # To enable editable to install local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
   # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
   # This can be done as part of the `docker compose` call:
   # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/aap.yaml up
@@ -229,8 +233,7 @@ services:
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
-        # Worker needs gpg in order to consume signing tasks;
-        gpg --list-secret-keys;
+        cp -r /src/galaxy_ng/profiles/community/galaxy-importer /etc/galaxy-importer;
 
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
       "
