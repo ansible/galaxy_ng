@@ -31,21 +31,21 @@ def random_name(prefix: str, *, length: int = 8, sep: str = '-'):
 
 def iterate_all(api_client, url, gc=None):
     """Iterate through all of the items on every page in a paginated list view."""
-    next = url
+    next_ = url
     key = "data"
-    while next is not None:
+    while next_ is not None:
         if gc:
-            r = gc.get(next)
+            r = gc.get(next_)
         else:
-            r = api_client(next)
+            r = api_client(next_)
         # pulp uses "results"
         if "data" not in r:
             key = "results"
         yield from r[key]
         if "next" in r:
-            next = r["next"]
+            next_ = r["next"]
         else:
-            next = r["links"]["next"]
+            next_ = r["links"]["next"]
 
 
 def generate_random_artifact_version():
@@ -59,15 +59,15 @@ def gen_string(size=10, chars=string.ascii_lowercase):
 
 def iterate_all_gk(gc_admin, url):
     """Iterate through all of the items on every page in a paginated list view."""
-    next = url
+    next_ = url
     key = "data"
-    while next is not None:
-        r = gc_admin.get(next)
+    while next_ is not None:
+        r = gc_admin.get(next_)
         # pulp uses "results"
         if "data" not in r:
             key = "results"
         yield from r[key]
         if "next" in r:
-            next = r["next"]
+            next_ = r["next"]
         else:
-            next = r["links"]["next"]
+            next_ = r["links"]["next"]

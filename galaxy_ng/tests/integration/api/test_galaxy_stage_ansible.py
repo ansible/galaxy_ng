@@ -175,10 +175,10 @@ def test_social_download_artifact(gh_user_1, generate_test_artifact):
     resp = wait_for_task(gh_user_1, resp)
     assert resp["state"] == "completed"
 
-    with tempfile.TemporaryDirectory() as dir:
+    with tempfile.TemporaryDirectory() as dir_:
         filename = f"{expected_ns}-{generate_test_artifact.name}-" \
                    f"{generate_test_artifact.version}.tar.gz"
-        tarball_path = f"{dir}/{filename}"
+        tarball_path = f"{dir_}/{filename}"
         url = f"{gh_user_1.galaxy_root}v3/plugin/" \
               f"ansible/content/published/collections/artifacts/{filename}"
 

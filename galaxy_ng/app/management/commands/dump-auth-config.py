@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
         return post_config
 
-    def format_config_data(self, type, keys, prefix):
+    def format_config_data(self, type, keys, prefix):  # noqa: A002
         config = {
             "type": f"galaxy.authentication.authenticator_plugins.{type}",
             "enabled": self.is_enabled(keys),
