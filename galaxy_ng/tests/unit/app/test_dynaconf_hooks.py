@@ -15,7 +15,7 @@ class SuperDict(dict):
 
     # REVIEW(cutwater): Why this method is needed?
     def get(self, key, default=None):
-        return self[key] if key in self else default
+        return self[key] if key in self else default  # noqa: SIM401
 
     def __getattr__(self, key):
         try:
