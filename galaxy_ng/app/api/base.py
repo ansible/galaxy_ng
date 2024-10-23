@@ -99,7 +99,8 @@ class RelatedFieldsBaseSerializer(serializers.Serializer):
         request = self.context.get('request', None)
         if request:
 
-            # TODO: Figure out how to make `include_related` show up in the open API spec
+            # TODO(newswangerd): Figure out how to make `include_related` show up
+            #       in the open API spec
             include_fields = request.GET.getlist('include_related')
 
             if len(include_fields) > 0:

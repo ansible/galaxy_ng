@@ -601,7 +601,7 @@ def test_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
         ds = resp.json()
 
         # create ns with group
-        # TODO: Add user's roles to the me endpoint
+        # TODO(bmclaughlin): Add user's roles to the me endpoint
         payload = {
             'name': new_namespace,
             'groups': [{
@@ -713,7 +713,7 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
         for remote in ds['data']:
             validate_json(instance=remote, schema=schema_remote)
 
-        # FIXME - there is no suitable pulp_id for a remote?
+        # FIXME(jctanner): there is no suitable pulp_id for a remote?
         pulp_ids = [x['pk'] for x in ds['data']]
         for pulp_id in pulp_ids:
             response = uclient.get(f'_ui/v1/remotes/{pulp_id}/')
@@ -779,7 +779,7 @@ def test_api_ui_v1_settings(ansible_config):
         ds = resp.json()
         validate_json(instance=ds, schema=schema_settings)
 
-        # FIXME - password length and token expiration are None?
+        # FIXME(jctanner): password length and token expiration are None?
         assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'] is False
         assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is False
         assert ds['GALAXY_REQUIRE_CONTENT_APPROVAL'] is True
@@ -814,7 +814,7 @@ def test_api_ui_v1_tags(ansible_config):
         ds = resp.json()
         validate_json(instance=ds, schema=schema_objectlist)
 
-        # FIXME - ui tags api does not support POST?
+        # FIXME(jctanner): ui tags api does not support POST?
 
 
 # /api/automation-hub/_ui/v1/tags/collections/

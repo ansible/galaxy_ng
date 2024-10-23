@@ -5,7 +5,7 @@ from ansible_base.lib.dynamic_config import dynamic_settings
 
 DAB_REQUIRED_SETTINGS = [key for key in dir(dynamic_settings) if key.isupper()]
 
-# FIXME ...
+# FIXME(jctanner): No description provided
 SKIP = [
     'ANSIBLE_BASE_OVERRIDABLE_SETTINGS',
     'ANSIBLE_BASE_OVERRIDDEN_SETTINGS',

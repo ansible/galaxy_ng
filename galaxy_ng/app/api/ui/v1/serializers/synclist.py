@@ -53,7 +53,7 @@ class SyncListSerializer(serializers.ModelSerializer):
         namespaces_data = validated_data.pop("namespaces")
 
         # Match repository to upstream_repository
-        # TODO: remove after SyncList no longer has FK to repositories
+        # TODO(awcrosby): remove after SyncList no longer has FK to repositories
         repository = validated_data.pop("upstream_repository")
 
         try:

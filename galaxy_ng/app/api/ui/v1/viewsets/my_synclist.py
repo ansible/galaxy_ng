@@ -29,7 +29,7 @@ class MySyncListViewSet(SyncListViewSet):
             qs=models.SyncList.objects.all(),
         )
 
-    # TODO: on UI click of synclist toggle the UI makes 2 calls
+    # TODO(awcrosby): on UI click of synclist toggle the UI makes 2 calls
     # PUT /api/automation-hub/_ui/v1/my-synclists/1/
     # POST /api/automation-hub/_ui/v1/my-synclists/1/curate/
     # remove this method after UI stops calling curate action

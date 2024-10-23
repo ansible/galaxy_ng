@@ -273,7 +273,7 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
             "tag_name": None,
         }
 
-        # TODO: Figure out if there is a way to prefetch Manifest and Tag objects
+        # TODO(jerabekjiri): Figure out if there is a way to prefetch Manifest and Tag objects
         if content.pulp_type == "container.manifest":
             manifest = container_models.Manifest.objects.get(pk=content.pk)
             return_data["manifest_digest"] = manifest.digest

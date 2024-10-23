@@ -135,7 +135,7 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
                 role.full_metadata[key] = newval
                 changed[key] = newval
 
-            # TODO - get rid of github_reference?
+            # TODO(jctanner): get rid of github_reference?
             if key == 'github_branch':
                 key = 'github_reference'
                 if role.full_metadata.get(key) != newval:

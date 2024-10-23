@@ -36,7 +36,7 @@ def test_list_namespace_permissions(galaxy_client):
 @pytest.mark.min_hub_version("4.10dev")
 def test_role_definition_options(galaxy_client):
     gc = galaxy_client("admin")
-    # TODO: add support for options in GalaxyClient in galaxykit
+    # TODO(jctanner): add support for options in GalaxyClient in galaxykit
     galaxy_root = gc.galaxy_root
     api_prefix = galaxy_root[gc.galaxy_root.index('/api/'):]
     options_r = gc._http("options", api_prefix + "_ui/v2/role_definitions/")
@@ -232,7 +232,7 @@ def test_give_user_custom_role_system(settings, galaxy_client, custom_role_facto
     if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT', True) is not True:
         pytest.skip("this test relies on local resource creation")
 
-    # TODO: verify that assignment is seen in pulp API (HOW?)
+    # TODO(cutwater): verify that assignment is seen in pulp API (HOW?)
     # Step 0: Setup test.
 
     system_ns_role = custom_role_factory(NS_FIXTURE_DATA)
@@ -365,7 +365,7 @@ def test_give_team_custom_role_system(
     assert ctx.value.response.status_code == HTTPStatus.FORBIDDEN
 
 
-# TODO: We need another version of it for a team
+# TODO(cutwater): We need another version of it for a team
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.parametrize("by_role_api", ["dab", "pulp"])
@@ -433,7 +433,7 @@ def test_give_user_custom_role_object(
         }
         admin_client.put(f"_ui/v1/my-namespaces/{namespace['name']}/", body=payload)
 
-    # TODO: make a request as the user and see that it works
+    # TODO(cutwater): make a request as the user and see that it works
     # NOTE: Check if user can have a minimal permission to modify namespace attributes
     #   (e.g. description, company, etc.)
     # NOTE: Check after permission is revoked, user cannot perform same operations

@@ -18,7 +18,7 @@ from ..utils.iqe_utils import is_ocp_env
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.certification
@@ -187,7 +187,7 @@ def test_copy_associated_content(
 ):
     """Tests whether a collection and associated content is copied from repo to repo"""
 
-    # TODO: add check for ansible namespace metadata
+    # TODO(jerabekjiri): add check for ansible namespace metadata
 
     artifact = build_collection(
         "skeleton",
