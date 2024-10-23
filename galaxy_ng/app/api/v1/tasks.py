@@ -238,7 +238,7 @@ def compute_all_versions(this_role, gitrepo):
         if str(tag.name) in current_tags:
             continue
 
-        ts = datetime.datetime.now().isoformat()
+        ts = datetime.datetime.now().isoformat()  # noqa: DTZ005
         vdata = {
             'id': str(uuid.uuid4()),
             'tag': tag.name,
@@ -497,7 +497,7 @@ def legacy_role_import(
 
         galaxy_info = result["metadata"]["galaxy_info"]
         new_full_metadata = {
-            'imported': datetime.datetime.now().isoformat(),
+            'imported': datetime.datetime.now().isoformat(),  # noqa: DTZ005
             'clone_url': clone_url,
             'tags': galaxy_info.get("galaxy_tags", []),
             'github_user': real_github_user,
@@ -642,9 +642,9 @@ def legacy_sync_from_upstream(
         role_dependencies = sfields.get('dependencies', [])
         role_min_ansible = rdata.get('min_ansible_version')
         role_company = rdata.get('company')
-        role_imported = rdata.get('imported', datetime.datetime.now().isoformat())
-        role_created = rdata.get('created', datetime.datetime.now().isoformat())
-        role_modified = rdata.get('modified', datetime.datetime.now().isoformat())
+        role_imported = rdata.get('imported', datetime.datetime.now().isoformat())  # noqa: DTZ005
+        role_created = rdata.get('created', datetime.datetime.now().isoformat())  # noqa: DTZ005
+        role_modified = rdata.get('modified', datetime.datetime.now().isoformat())  # noqa: DTZ005
         role_type = rdata.get('role_type', 'ANS')
         role_download_count = rdata.get('download_count', 0)
 
