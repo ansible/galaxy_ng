@@ -58,9 +58,8 @@ def ansible_galaxy(
             f.write(f"url={url}\n")
         else:
             f.write(f"url={server_url}\n")
-        if ansible_config:
-            if ansible_config.get('auth_url'):
-                f.write(f"auth_url={auth_url}\n")
+        if ansible_config and ansible_config.get('auth_url'):
+            f.write(f"auth_url={auth_url}\n")
         f.write('validate_certs=False\n')
 
         # if force_token we can't set a user&pass or core will always

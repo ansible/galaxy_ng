@@ -143,9 +143,8 @@ class UIClient:
         res = self._rs.post(self.logout_url, json={}, headers=pheaders)
         raise_for_status(res)
 
-        if expected_code is not None:
-            if res.status_code != expected_code:
-                raise Exception(f'logout status code was not {expected_code}')
+        if expected_code is not None and res.status_code != expected_code:
+            raise Exception(f'logout status code was not {expected_code}')
 
     def get(
         self,

@@ -225,14 +225,12 @@ class AccessPolicyBase(AccessPolicyFromDB):
         Scope the queryset based on the access policy `scope_queryset` method if present.
         """
         access_policy = self.get_access_policy(view)
-        if view.action == "list" and access_policy:
-            # if access_policy := self.get_access_policy(view):
-            if access_policy.queryset_scoping:
-                scope = access_policy.queryset_scoping["function"]
-                if scope == "scope_queryset" or not (func := getattr(self, scope, None)):
-                    return qs
-                kwargs = access_policy.queryset_scoping.get("parameters") or {}
-                qs = func(view, qs, **kwargs)
+        if view.action == "list" and access_policy and access_policy.queryset_scoping:
+            scope = access_policy.queryset_scoping["function"]
+            if scope == "scope_queryset" or not (func := getattr(self, scope, None)):
+                return qs
+            kwargs = access_policy.queryset_scoping.get("parameters") or {}
+            qs = func(view, qs, **kwargs)
         return qs
 
     # Define global conditions here
@@ -551,9 +549,8 @@ class AccessPolicyBase(AccessPolicyFromDB):
                 base_path__in=PROTECTED_BASE_PATHS,
             ).exists():
                 return False
-        elif isinstance(obj, core_models.Distribution):
-            if obj.base_path in PROTECTED_BASE_PATHS:
-                return False
+        elif isinstance(obj, core_models.Distribution) and obj.base_path in PROTECTED_BASE_PATHS:
+            return False
 
         return True
 

@@ -129,7 +129,8 @@ extend-ignore = [
     "UP032",
     # PT004,PT005 are incorrect and deprecated
     # See https://github.com/astral-sh/ruff/issues/8796
-    "PT004", "PT005",
+    "PT004",
+    "PT005",
     # PT009 Use a regular `assert` instead of unittest-style
     # Ignoring, since we have mixed pytest and legacy unittest styled tests
     "PT009",

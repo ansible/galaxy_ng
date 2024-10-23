@@ -359,19 +359,18 @@ def set_certification(config, gc, collection, level="published", hub_4_5=False):
     do not have auto-certification enabled.
     """
 
-    if hub_4_5:
-        if config["use_move_endpoint"]:
-            url = (
-                f"v3/collections/{collection.namespace}/{collection.name}/versions/"
-                f"{collection.version}/move/staging/published/"
-            )
+    if hub_4_5 and config["use_move_endpoint"]:
+        url = (
+            f"v3/collections/{collection.namespace}/{collection.name}/versions/"
+            f"{collection.version}/move/staging/published/"
+        )
 
-            gc.post(url, b"{}")
-            dest_url = (
-                f"v3/collections/{collection.namespace}/"
-                f"{collection.name}/versions/{collection.version}/"
-            )
-            return wait_for_url(gc, dest_url)
+        gc.post(url, b"{}")
+        dest_url = (
+            f"v3/collections/{collection.namespace}/"
+            f"{collection.name}/versions/{collection.version}/"
+        )
+        return wait_for_url(gc, dest_url)
 
     # exit early if config is set to auto approve
     if not config["use_move_endpoint"]:
