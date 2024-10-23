@@ -529,7 +529,7 @@ def get_all_collections_by_repo(gc):
         'community': {},
         'rh-certified': {},
     }
-    for repo in collections.keys():
+    for repo in collections:
         next_page = f'{gc.galaxy_root}_ui/v1/collection-versions/?repository={repo}'
         while next_page:
             resp = gc.get(next_page)
@@ -641,7 +641,7 @@ def delete_all_collections_in_namespace(api_client, namespace_name):
     gc = galaxy_client("admin")
     cmap = get_all_collections_by_repo(gc)
     for repo, cvs in cmap.items():
-        for cv_spec in cvs.keys():
+        for cv_spec in cvs:
             if cv_spec[0] == namespace_name:
                 ctuples.add((repo, cv_spec[0], cv_spec[1]))
 

@@ -266,7 +266,7 @@ def test_social_user_with_reclaimed_login(ansible_config):
         resp = admin_client(next_url)
         nsmap.update({x['name']: x for x in resp['data']})
         next_url = resp['links']['next']
-    for nsname in nsmap.keys():
+    for nsname in nsmap:
         if not nsname.lower().startswith('sean_m') and not nsname.lower().startswith('wilk42'):
             continue
         cleanup_social_user(nsname, ansible_config)
@@ -377,7 +377,7 @@ def test_social_user_sync_with_changed_login(ansible_config):
     # find all the wilk* namespaces and clean them up ...
     resp = admin_client('/api/v3/namespaces/')
     nsmap = {x['name']: x for x in resp['data']}
-    for nsname in nsmap.keys():
+    for nsname in nsmap:
         if not nsname.startswith('wilk'):
             continue
         cleanup_namespace(nsname, api_client=admin_client)
@@ -533,7 +533,7 @@ def test_social_auth_no_duplicated_namespaces(ansible_config):
         resp = admin_client(next_url)
         nsmap.update({x['name']: x for x in resp['data']})
         next_url = resp['links']['next']
-    for nsname in nsmap.keys():
+    for nsname in nsmap:
         if not nsname.startswith('sean_m') and not nsname.startswith('wilk42'):
             continue
         cleanup_social_user(nsname, ansible_config)
@@ -562,7 +562,7 @@ def test_social_auth_no_duplicated_namespaces(ansible_config):
         resp = admin_client(next_url)
         nsmap.update({x['name']: x for x in resp['data']})
         next_url = resp['links']['next']
-    sean_namespaces = sorted([x for x in nsmap.keys() if x.startswith('sean_m')])
+    sean_namespaces = sorted(x for x in nsmap if x.startswith('sean_m'))
     assert sean_namespaces == ['sean_m_sullivan', 'sean_m_sullivan0']
 
 

@@ -68,7 +68,7 @@ def test_delete_collection_version(galaxy_client, uncertifiedv2):
         ckey = (cv.namespace, cv.name, cv.version)
         ckeys.append(ckey)
         matches = []
-        for k in cv_before.keys():
+        for k in cv_before:
             if k[1:] == ckey:
                 matches.append(k)
         for rcv in matches:
@@ -80,7 +80,7 @@ def test_delete_collection_version(galaxy_client, uncertifiedv2):
     cv_after = get_all_repository_collection_versions(gc)
     for ckey in ckeys:
         matches = []
-        for k in cv_after.keys():
+        for k in cv_after:
             if k[1:] == ckey:
                 matches.append(k)
         assert len(matches) == 0

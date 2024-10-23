@@ -35,7 +35,7 @@ def test_move_collection_version(ansible_config, galaxy_client):
             'staging': {},
             'published': {}
         }
-        for repo in collections.keys():
+        for repo in collections:
             next_page = f'_ui/v1/collection-versions/?repository={repo}'
             while next_page:
                 resp = gc_admin.get(next_page)
@@ -117,7 +117,7 @@ def test_copy_collection_version(ansible_config, galaxy_client):
             'staging': {},
             'community': {}
         }
-        for repo in collections.keys():
+        for repo in collections:
             next_page = f'_ui/v1/collection-versions/?repository={repo}'
             while next_page:
                 resp = gc_admin.get(next_page)
