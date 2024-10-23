@@ -51,10 +51,6 @@ bindep==2.11.0
     # via ansible-builder
 black==24.4.2
     # via ansible-lint
-bleach==3.3.1
-    # via galaxy-importer
-bleach-allowlist==1.0.3
-    # via galaxy-importer
 boto3==1.34.149
     # via
     #   -r requirements/requirements.insights.in
@@ -178,7 +174,7 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-galaxy-importer==0.4.24
+galaxy-importer==0.4.26
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -257,6 +253,8 @@ multidict==6.0.5
     #   yarl
 mypy-extensions==1.0.0
     # via black
+nh3==0.2.18
+    # via galaxy-importer
 oauthlib==3.2.2
     # via
     #   requests-oauthlib
@@ -326,7 +324,6 @@ packaging==23.2
     #   ansible-lint
     #   bindep
     #   black
-    #   bleach
     #   gunicorn
     #   marshmallow
     #   pulp-glue
@@ -453,7 +450,6 @@ semantic-version==2.10.0
 six==1.16.0
     # via
     #   azure-core
-    #   bleach
     #   isodate
     #   python-dateutil
     #   url-normalize
@@ -495,8 +491,6 @@ watchtower==3.2.0
     # via -r requirements/requirements.insights.in
 wcmatch==8.5.2
     # via ansible-lint
-webencodings==0.5.1
-    # via bleach
 whitenoise==6.6.0
     # via pulpcore
 wrapt==1.16.0
