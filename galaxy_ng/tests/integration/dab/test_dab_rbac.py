@@ -1,7 +1,7 @@
 import contextlib
 import json
 import os
-from collections import namedtuple
+from typing import NamedTuple
 
 import pytest
 
@@ -14,6 +14,13 @@ from ..utils.teams import add_user_to_team
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
+
+
+class Artifact(NamedTuple):
+    name: str
+    namespace: str
+    published: bool
+    version: str
 
 
 @pytest.mark.skip(reason="we are not aiming for 1:1 anymore")
@@ -247,9 +254,6 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
             "company": "foobar",
         })
     )
-
-    # we need an artifact-like object for the set_certification function ..
-    Artifact = namedtuple('Artifact', ['name', 'namespace', 'published', 'version'])
 
     # try to upload a collection as the user...
     import_result = upload_test_collection(

@@ -125,6 +125,8 @@ select = [
     "PIE",
     # flake8-pytest-style
     "PT",
+    # flake8-pyi
+    "PYI",
     # ruff specific rules
     "RUF",
     # flake8-simplify
