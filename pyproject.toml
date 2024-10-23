@@ -119,6 +119,8 @@ select = [
     "INP",
     # flake8-gettext
     "INT",
+    # flake8-logging
+    "LOG",
     # pyupgrade
     "UP",
     # flake8-pie
