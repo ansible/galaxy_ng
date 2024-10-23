@@ -1,5 +1,6 @@
 """test_community.py - Tests related to the community featureset.
 """
+import contextlib
 
 import pytest
 
@@ -39,12 +40,10 @@ def test_role_import_exceptions(ansible_config):
     user_cfg['username'] = github_user
     user_cfg['password'] = 'redhat'
 
-    # delete and recreate the github user ...
+    # Delete and recreate the GitHub user...
     ga = GithubAdminClient()
-    try:
+    with contextlib.suppress(Exception):
         ga.delete_user(login=github_user)
-    except Exception:
-        pass
     ga.create_user(login=github_user, password='redhat', email='jctanner.foo@bar.com')
 
     # Login with the user first to create the v1+v3 namespaces

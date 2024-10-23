@@ -1,5 +1,6 @@
 """test_community.py - Tests related to the community featureset.
 """
+import contextlib
 
 import pytest
 
@@ -64,10 +65,8 @@ def test_role_import_overrides(ansible_config, spec):
     # cleanup
     for ns_name in ns_names:
         cleanup_social_user(ns_name, ansible_config)
-        try:
+        with contextlib.suppress(Exception):
             admin_client(f'/api/v3/namespaces/{ns_name}/', method='DELETE')
-        except Exception:
-            pass
 
     # make the namespace(s)
     for ns_name in ns_names:

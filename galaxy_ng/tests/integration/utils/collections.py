@@ -1,5 +1,5 @@
 """Utility functions for AH tests."""
-
+import contextlib
 import logging
 import os
 import shutil
@@ -617,14 +617,12 @@ def delete_all_collections(api_client):
 
             # if other collections require this one, the delete will fail
             resp = None
-            try:
+            with contextlib.suppress(GalaxyError):
                 resp = api_client(
                     (f'{api_prefix}/v3/plugin/ansible/content'
                         f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
                     method='DELETE'
                 )
-            except GalaxyError:
-                pass
 
             if resp is not None:
                 wait_for_task(api_client, resp, timeout=10000)

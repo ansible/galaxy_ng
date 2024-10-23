@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 
@@ -559,12 +560,8 @@ class AccessPolicyBase(AccessPolicyFromDB):
     def require_requirements_yaml(self, request, view, action):
 
         if remote := request.data.get("remote"):
-            try:
+            with contextlib.suppress(ansible_models.CollectionRemote.DoesNotExist):
                 remote = ansible_models.CollectionRemote.objects.get(pk=extract_pk(remote))
-
-            except ansible_models.CollectionRemote.DoesNotExist:
-                pass
-
         if not remote:
             obj = view.get_object()
             remote = obj.remote.cast()

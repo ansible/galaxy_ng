@@ -1,4 +1,5 @@
 """Utility functions for AH tests."""
+import contextlib
 import os
 import subprocess
 import time
@@ -360,22 +361,18 @@ def galaxy_stage_ansible_user_cleanup(gc, u):
     gc_admin = gc("admin")
     github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES[u]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_user(gc_admin, github_user_username)
-    except ValueError:
-        pass
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_group(gc_admin, group)
-    except ValueError:
-        pass
-    try:
+
+    with contextlib.suppress(GalaxyClientError):
         delete_namespace(gc_admin, github_user_username.replace("-", "_"))
-    except GalaxyClientError:
-        pass
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_v1_namespace(gc_admin, github_user_username)
-    except ValueError:
-        pass
 
 
 def get_ansible_config():

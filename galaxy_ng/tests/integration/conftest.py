@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 import shutil
@@ -470,11 +471,9 @@ def set_test_data(ansible_config, hub_version):
             gc.set_permissions("system:partner-engineers", pe_permissions)
         else:
             for rbac_role in pe_roles:
-                try:
+                # role already assigned to group. It's ok.
+                with contextlib.suppress(GalaxyClientError):
                     gc.add_role_to_group(rbac_role, pe_group_id)
-                except GalaxyClientError:
-                    # role already assigned to group. It's ok.
-                    pass
 
         gc.add_user_to_group(username="jdoe", group_id=pe_group_id)
         gc.create_namespace(name="autohubtest2", group="ns_group_for_tests",
@@ -491,11 +490,9 @@ def set_test_data(ansible_config, hub_version):
                               "galaxy.delete_containerregistryremote"]
             gc.set_permissions("ee_group_for_tests", ee_permissions)
         else:
-            try:
+            # Role already assigned to group. It's ok.
+            with contextlib.suppress(GalaxyClientError):
                 gc.add_role_to_group(ee_role, ee_group_id)
-            except GalaxyClientError:
-                # role already assigned to group. It's ok.
-                pass
         gc.add_user_to_group(username="ee_admin", group_id=ee_group_id)
     else:
         gc.create_namespace(name="autohubtest2", group=None,
