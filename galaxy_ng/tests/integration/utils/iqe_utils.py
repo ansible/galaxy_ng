@@ -92,7 +92,7 @@ def remove_from_cache(role):
 
 class GalaxyKitClient:
     def __init__(self, ansible_config, custom_config=None, basic_token=None):
-        self.config = ansible_config if not custom_config else custom_config
+        self.config = custom_config if custom_config else ansible_config
         self._basic_token = basic_token
 
     def gen_authorized_client(
