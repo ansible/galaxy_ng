@@ -29,7 +29,7 @@ def generate_namespace(exclude=None):
             return False
         if len(namespace) > 64:
             return False
-        for char in namespace:
+        for char in namespace:  # noqa: SIM110
             if char not in string.ascii_lowercase + string.digits:
                 return False
 
