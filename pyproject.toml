@@ -119,6 +119,8 @@ select = [
     "INT",
     # pyupgrade
     "UP",
+    # flake8-pie
+    "PIE",
     # flake8-pytest-style
     "PT",
     # ruff specific rules

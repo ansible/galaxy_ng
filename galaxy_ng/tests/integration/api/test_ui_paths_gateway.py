@@ -184,7 +184,7 @@ def test_gw_api_ui_v1_execution_environments_registries(galaxy_client):
     validate_json(instance=ds, schema=schema_objectlist)
 
     # try to create one
-    suffix = random.choice(range(0, 1000))
+    suffix = random.choice(range(1000))
     rname = f'redhat.io.{suffix}'
     payload = {
         'name': rname,

@@ -30,7 +30,7 @@ def get_changed_files(pr_branch, target_branch="master"):
         with open('/tmp/pr.diff') as f:
             raw = f.read()
         filenames = raw.split('\n')
-        filenames = [x for x in filenames if x.startswith('---') or x.startswith('+++')]
+        filenames = [x for x in filenames if x.startswith(('---', '+++'))]
         filenames = [x.split(None, 1)[1] for x in filenames if len(x.split(None, 1)) > 1]
         filenames = [x for x in filenames if not x.startswith('/dev/null')]
         filenames = [x.lstrip('a/') for x in filenames]

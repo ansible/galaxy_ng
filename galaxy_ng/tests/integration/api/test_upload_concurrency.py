@@ -29,7 +29,7 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
     create_repo_and_dist(gc, repo_name)  # publishing fails 504 gateway error
 
     # make 10 namespaces
-    namespaces = [create_test_namespace(gc) for x in range(0, total)]
+    namespaces = [create_test_namespace(gc) for x in range(total)]
 
     # make a collection for each namespace
     artifacts = []
@@ -59,7 +59,7 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
             else:
                 print(f"Function returned: {result}")
 
-    for _ in range(0, 10):
+    for _ in range(10):
         matches, _ = search_collection_endpoint(
             gc, repository_name=repo_name
         )
