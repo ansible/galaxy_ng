@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def raise_for_status(response):
-    if 400 <= response.status_code:
+    if response.status_code >= 400:
         http_error_msg = f'{response.status_code} Error: {response.text}'
         logging.debug(http_error_msg)
         raise requests.exceptions.HTTPError(http_error_msg, response)

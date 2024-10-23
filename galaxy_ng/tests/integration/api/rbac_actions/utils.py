@@ -48,7 +48,7 @@ PASSWORD = "p@ssword!"
 TLS_VERIFY = "--tls-verify=false"
 CONTAINER_IMAGE = ["foo/ubi9-minimal", "foo/ubi8-minimal"]
 
-REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n"  # noqa: 501
+REQUIREMENTS_FILE = "collections:\n  - name: newswangerd.collection_demo\n"
 
 TEST_CONTAINER = "quay.io/libpod/alpine"
 

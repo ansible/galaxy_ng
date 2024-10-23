@@ -182,7 +182,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
         if settings.get("ANSIBLE_COLLECT_DOWNLOAD_COUNT", False):
             pulp_ansible_views.CollectionArtifactDownloadView.count_download(filename)
 
-        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
+        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:  # noqa: SIM300
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
                 host=settings.X_PULP_CONTENT_HOST,
                 port=settings.X_PULP_CONTENT_PORT,
@@ -211,7 +211,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
             raise APIException(
                 _('Unexpected response from content app. Code: %s.') % response.status_code
             )
-        elif settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:
+        elif settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:  # noqa: SIM300
             url = '{host}/{prefix}/{distro_base_path}/{filename}'.format(
                 host=settings.CONTENT_ORIGIN.strip("/"),
                 prefix=prefix,
@@ -339,7 +339,7 @@ class CollectionVersionMoveViewSet(api_base.ViewSet, CollectionRepositoryMixing)
 
         response_data['copy_task_id'] = response_data['remove_task_id'] = move_task.pk
 
-        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:
+        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:  # noqa: SIM300
             golden_repo = AnsibleDistribution.objects.get(
                 base_path=settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
             ).repository
