@@ -54,7 +54,7 @@ class Command(BaseCommand):
                 limit=options['limit'],
             ):
 
-                count += 1
+                count += 1  # noqa: SIM113
                 namespace_name = namespace_info['name']
 
                 self.echo(
