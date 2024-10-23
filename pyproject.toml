@@ -115,6 +115,8 @@ select = [
     "COM",
     # flake8-datetime
     "DTZ",
+    # flake8-import-conventions
+    "ICN",
     # flake8-no-pep420
     "INP",
     # flake8-gettext
