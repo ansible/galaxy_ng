@@ -393,9 +393,7 @@ def use_collection_signatures(settings):
     """A shortcut to know if a test should attempt to work with signatures."""
     service = settings["GALAXY_COLLECTION_SIGNING_SERVICE"]
     required = settings["GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"]
-    if service is not None and required:
-        return True
-    return False
+    return bool(service is not None and required)
 
 
 @pytest.fixture

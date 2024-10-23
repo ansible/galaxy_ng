@@ -287,7 +287,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
             return True
 
         # check collection object level permissions ...
-        if user.has_perm("ansible.delete_collection", collection):
+        if user.has_perm("ansible.delete_collection", collection):  # noqa: SIM103
             return True
 
         return False
@@ -304,7 +304,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
         if is_github_social_auth:
             return True
 
-        if request.user.has_perm('galaxy.view_user'):
+        if request.user.has_perm('galaxy.view_user'):  # noqa: SIM103
             return True
 
         return False
@@ -825,7 +825,7 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
         # use the helper to get the list of owners
         owners = get_v3_namespace_owners(v3_namespace)
-        if owners and user in owners:
+        if owners and user in owners:  # noqa: SIM103
             return True
 
         return False

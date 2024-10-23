@@ -16,7 +16,7 @@ class IsSuperUserOrReadOnly(BasePermission):
         if request.user and request.user.is_superuser:
             return True
         # Allow read-only access (GET, HEAD, OPTIONS) for other users
-        if request.method in SAFE_METHODS:
+        if request.method in SAFE_METHODS:  # noqa: SIM103
             return True
         # Otherwise, deny access
         return False
@@ -104,7 +104,7 @@ class ComplexUserPermissions(AnsibleBaseUserPermissions):
             return True
 
         # user can set themself only to False
-        if request.user == obj and request.data.get('is_superuser') is False:
+        if request.user == obj and request.data.get('is_superuser') is False:  # noqa: SIM103
             return True
 
         return False
