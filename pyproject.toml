@@ -139,6 +139,9 @@ extend-ignore = [
     # RUF100 Unused `noqa` directive
     # False positives on rules not enabled in ruff, but enabled in flake8.
     "RUF100",
+    # SIM108 Use ternary operator instead of `if`-`else`-block
+    # Opinionated, ternary operators may reduce readability.
+    "SIM108",
 ]
 
 [tool.ruff.lint.per-file-ignores]
