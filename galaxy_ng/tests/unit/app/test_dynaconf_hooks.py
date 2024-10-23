@@ -13,6 +13,7 @@ class SuperDict(dict):
             raise Exception("not mutable!")
         self[key] = value
 
+    # REVIEW(cutwater): Why this method is needed?
     def get(self, key, default=None):
         return self[key] if key in self else default
 
