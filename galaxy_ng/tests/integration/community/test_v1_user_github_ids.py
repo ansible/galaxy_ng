@@ -30,7 +30,7 @@ def extract_default_config(ansible_config):
 def test_v1_user_github_ids(ansible_config):
     """" The github_id should show up in the v1 user serializer """
 
-    for x in range(0, 10):
+    for x in range(10):
 
         github_user = 'deleteme' + str(x)
         cleanup_social_user(github_user, ansible_config)

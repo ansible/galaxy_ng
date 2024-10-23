@@ -40,7 +40,7 @@ class UUIDConversionTestCase(TestCase):
 
     def test_uuid_to_int_and_back(self):
         """Make sure uuids can become ints and then back to uuids"""
-        for _i in range(0, 1000):
+        for _i in range(1000):
             test_uuid = str(uuid.uuid4())
             test_int = uuid_to_int(test_uuid)
             reversed_uuid = int_to_uuid(test_int)

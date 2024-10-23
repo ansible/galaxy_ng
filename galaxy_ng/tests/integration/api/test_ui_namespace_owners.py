@@ -26,7 +26,7 @@ def test_api_ui_v1_namespace_owners_users_and_group_separation(ansible_config):
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
-        suffix = random.choice(range(0, 1000))
+        suffix = random.choice(range(1000))
         group_name = f'group{suffix}'
         user_name = f'user{suffix}'
         namespace_name = f'namespace{suffix}'

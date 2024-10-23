@@ -261,11 +261,11 @@ def get_new_uid():
 
 
 def get_new_login():
-    return ''.join([random.choice(string.ascii_lowercase) for x in range(0, 5)])
+    return ''.join([random.choice(string.ascii_lowercase) for x in range(5)])
 
 
 def get_new_password():
-    return ''.join([random.choice(string.ascii_lowercase) for x in range(0, 12)])
+    return ''.join([random.choice(string.ascii_lowercase) for x in range(12)])
 
 
 # ----------------------------------------------------

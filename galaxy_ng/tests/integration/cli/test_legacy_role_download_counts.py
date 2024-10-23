@@ -78,7 +78,7 @@ def test_legacy_role_download_counter_via_cli(ansible_config):
     assert role['download_count'] == 0
 
     # validate install command
-    for _ in range(0, 5):
+    for _ in range(5):
         with tempfile.TemporaryDirectory() as roles_path:
             cfg = ansible_config(github_user)
             install_pid = ansible_galaxy(
@@ -146,8 +146,8 @@ def test_legacy_role_download_counter_concurrency(ansible_config):
     # fetch the correct url N times at once validate no race conditions ...
     total = 20
     total_threads = total
-    args_list = [[x] for x in range(0, total)]
-    kwargs_list = [{} for x in range(0, total)]
+    args_list = [[x] for x in range(total)]
+    kwargs_list = [{} for x in range(total)]
     with concurrent.futures.ThreadPoolExecutor(max_workers=total_threads) as executor:
 
         future_to_args_kwargs = {

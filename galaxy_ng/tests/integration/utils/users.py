@@ -38,7 +38,7 @@ def create_user(username, password, api_client=None):
     assert api_client is not None, "api_client is a required param"
 
     if password is None:
-        password = ''.join([random.choice(string.printable) for x in range(0, 12)])
+        password = ''.join([random.choice(string.printable) for x in range(12)])
 
     payload = {
         "username": username,

@@ -73,7 +73,7 @@ def ansible_galaxy(
 
     command_string = f"ansible-galaxy {command} -vvv --server={server} --ignore-certs"
 
-    for x in range(0, retries + 1):
+    for x in range(retries + 1):
         try:
             p = subprocess.run(
                 command_string,

@@ -198,7 +198,7 @@ def generate_legacy_namespace(exclude=None):
     while not is_valid(namespace):
         namespace = ''
         namespace += random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits)
-        for _ in range(0, random.choice(range(3, 63))):
+        for _ in range(random.choice(range(3, 63))):
             namespace += random.choice(string.ascii_lowercase + string.digits + '_')
 
     return namespace
