@@ -1,3 +1,12 @@
+## 4.10.1 (2024-10-23) {: #4.10.1 }
+
+#### Bugfixes
+
+- Merge unique auth classes in the keycloak dynaconf hook
+  [#2271](https://github.com/ansible/galaxy_ng/pull/2271)
+- Force galaxy session auth as the first auth class.
+  [#2279](https://github.com/ansible/galaxy_ng/pull/2279)
+
 ## 4.10.0 (2024-09-19) {: #4.10.0 }
 
 #### Bugfixes
