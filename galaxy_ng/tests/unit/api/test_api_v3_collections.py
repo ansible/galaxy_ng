@@ -155,9 +155,8 @@ class TestCollectionViewsets(BaseTestCase):
         for config in collection_configs:
             config["namespace"] = namespace
             collection = build_collection("skeleton", config=config)
-            response = self.client.post(
-                self.collection_upload_url, {"file": open(collection.filename, "rb")}
-            )
+            with open(collection.filename, "rb") as fp:
+                response = self.client.post(self.collection_upload_url, {"file": fp})
             collections.append((collection, response))
         return collections
 

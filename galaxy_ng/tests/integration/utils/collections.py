@@ -328,18 +328,17 @@ def modify_artifact(artifact):
     filename = artifact.filename
     with tempfile.TemporaryDirectory() as dirpath:
         # unpack
-        tf = tarfile.open(filename)
-        tf.extractall(dirpath)
+        with tarfile.open(filename) as tf:
+            tf.extractall(dirpath)
 
         try:
             yield dirpath
 
         finally:
             # re-pack
-            tf = tarfile.open(filename, "w:gz")
-            for name in os.listdir(dirpath):
-                tf.add(os.path.join(dirpath, name), name)
-            tf.close()
+            with tarfile.open(filename, "w:gz") as tf:
+                for name in os.listdir(dirpath):
+                    tf.add(os.path.join(dirpath, name), name)
 
 
 def get_collections_namespace_path(namespace):
@@ -385,10 +384,10 @@ def set_certification(config, gc, collection, level="published", hub_4_5=False):
 
     if config["upload_signatures"]:
         # Write manifest to temp file
-        tf = tarfile.open(collection.filename, mode="r:gz")
         tdir = tempfile.TemporaryDirectory()
-        keyring = tempfile.NamedTemporaryFile("w")
-        tf.extract("MANIFEST.json", tdir.name)
+        keyring = tempfile.NamedTemporaryFile("w")  # noqa: SIM115
+        with tarfile.open(collection.filename, mode="r:gz") as tf:
+            tf.extract("MANIFEST.json", tdir.name)
 
         # Setup local keystore
         # gpg --no-default-keyring --keyring trustedkeys.gpg
@@ -701,10 +700,8 @@ def setup_multipart(path: str, data: dict) -> dict:
         b'Content-Disposition: file; name="file"; filename="%s"' % filename.encode("ascii"),
         b"Content-Type: application/octet-stream",
     ]
-    buffer += [
-        b"",
-        open(path, "rb").read(),
-    ]
+    with open(path, "rb") as fp:
+        buffer += [b"", fp.read()]
 
     for name, value in data.items():
         add_multipart_field(boundary, buffer, name, value)
