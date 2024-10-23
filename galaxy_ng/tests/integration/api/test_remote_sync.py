@@ -30,8 +30,8 @@ def test_api_ui_v1_remote_sync(galaxy_client):
         'token': None,
         'policy': 'immediate',
         'requirements_file': REQUIREMENTS_FILE,
-        'created_at': str(datetime.now()),
-        'updated_at': str(datetime.now()),
+        'created_at': str(datetime.now()),  # noqa: DTZ005
+        'updated_at': str(datetime.now()),  # noqa: DTZ005
         'username': None,
         'password': None,
         'tls_validation': False,

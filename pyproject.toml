@@ -113,6 +113,8 @@ select = [
     "C4",
     # flake8-commas
     "COM",
+    # flake8-datetime
+    "DTZ",
     # flake8-no-pep420
     "INP",
     # flake8-gettext
