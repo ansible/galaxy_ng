@@ -503,24 +503,61 @@ def set_test_data(ansible_config, hub_version):
         gc.create_namespace(name="autohubtest3", group=None,
                             object_roles=["galaxy.collection_namespace_owner"])
 
+        # get the authenticators ...
+        resp = gc.get(f"{gc.gw_root_url}api/gateway/v1/authenticators/?name__icontains=local")
+        local_authenticator_id = resp['results'][0]['id']
+
         users = ["iqe_normal_user", "jdoe", "ee_admin", "org-admin"]
         for user in users:
-            body = {"username": user, "password": "Th1sP4ssd", "is_superuser": True}
+
+            body = {
+                "username": user,
+                "password": "Th1sP4ssd",
+                "is_superuser": True,
+                "authenticator": local_authenticator_id,
+                "authenticator_uid": local_authenticator_id,
+            }
             if user == "iqe_normal_user":
                 body["is_superuser"] = False
-            gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
-            gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
-            try:
+
+            # first check if the user exists ..
+            filtered_users = gc.get(f"{gc.gw_root_url}api/gateway/v1/users/?username={user}")
+            if filtered_users['count'] == 0:
+
+                # make the user from scratch
+                gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
+                gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
                 gc.post(f"{gc.gw_root_url}api/gateway/v1/users/", body=body)
-            except GalaxyClientError as e:
-                if "already exists" in e.response.text:
-                    _user = gc.get(
-                        f"{gc.gw_root_url}api/gateway/v1/users/?username={user}")
-                    user_id = _user["results"][0]["id"]
-                    gc.patch(f"{gc.gw_root_url}api/gateway/v1/users/{user_id}/", body=body)
+                del gc.headers["Referer"]
+
+            else:
+                this_user = filtered_users['results'][0]
+                user_id = this_user['id']
+
+                # it must have the local authenticator id ...
+                if local_authenticator_id not in this_user.get('authenticators', []):
+
+                    # we can't really modify the authenticators after the fact
+                    # so lets just delete the user and recreate it ...
+
+                    # delete
+                    gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/{user_id}/"})
+                    gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
+                    gc.delete(f"{gc.gw_root_url}api/gateway/v1/users/{user_id}/", parse_json=False)
+                    del gc.headers["Referer"]
+
+                    # create
+                    gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
+                    gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
+                    gc.post(f"{gc.gw_root_url}api/gateway/v1/users/", body=body)
+                    del gc.headers["Referer"]
+
                 else:
-                    raise e
-            del gc.headers["Referer"]
+                    # just change the password and superuser? ...
+                    gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/{user_id}/"})
+                    gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
+                    gc.patch(f"{gc.gw_root_url}api/gateway/v1/users/{user_id}/", body=body)
+                    del gc.headers["Referer"]
 
 
 @pytest.fixture(scope="session")
