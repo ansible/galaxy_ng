@@ -24,11 +24,9 @@ CATALOG_API = "https://catalog.redhat.com/api/containers/v1/repositories"
 
 class CouldNotCreateContainerError(Exception):
     def __init__(self, remote_name, error=""):
-        self.message = _(
-            "Failed to create container {remote_name}. {error}".format(
-                remote_name=remote_name, error=error)
+        self.message = _("Failed to create container {remote_name}. {error}").format(
+            remote_name=remote_name, error=error
         )
-
         super().__init__(self.message)
 
 

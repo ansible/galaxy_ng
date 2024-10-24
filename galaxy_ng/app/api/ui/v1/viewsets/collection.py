@@ -194,10 +194,7 @@ class CollectionVersionFilter(filterset.FilterSet):
 
             return queryset.filter(version__in=version_list)
         except ValueError:
-            # FIXME(cutwater): String interpolation must be applied AFTER localization
-            raise ValidationError(
-                _('%s must be a valid semantic version range.' % name)  # noqa: UP031
-            )
+            raise ValidationError(_('{} must be a valid semantic version range.').format(name))
 
     sort = OrderingFilter(
         fields=(
