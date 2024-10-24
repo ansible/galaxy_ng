@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import logging
 
 from galaxy_ng.app.models.auth import User

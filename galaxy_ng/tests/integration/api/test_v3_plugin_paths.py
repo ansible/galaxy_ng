@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import pytest
 from jsonschema import validate as validate_json
 

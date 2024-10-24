@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-
 import datetime
 import logging
 import requests
