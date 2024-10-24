@@ -121,7 +121,7 @@ class TestRepositories:
         # read tcp 172.18.0.2:47338->172.18.0.3:55001: read: connection reset by peer
         repo_pulp_href_2 = None
         retries = 10
-        for _ in range(0, retries):
+        for _ in range(retries):
             try:
                 repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
                 break
@@ -141,7 +141,7 @@ class TestRepositories:
         # readfrom tcp 172.18.0.3:37490->172.18.0.2:55001:
         #   write tcp 172.18.0.3:37490->172.18.0.2:55001: use of closed network connection
         retries = 10
-        for _ in range(0, retries):
+        for _ in range(retries):
             try:
                 move_content_between_repos(
                     gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2]

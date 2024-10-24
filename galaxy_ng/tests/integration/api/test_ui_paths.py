@@ -274,7 +274,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=ds, schema=schema_objectlist)
 
         # try to create one
-        suffix = random.choice(range(0, 1000))
+        suffix = random.choice(range(1000))
         rname = f'redhat.io.{suffix}'
         payload = {
             'name': rname,
@@ -395,7 +395,7 @@ def test_api_ui_v1_groups(ansible_config):
             validate_json(instance=grp, schema=schema_group)
 
         # try to make a group
-        suffix = random.choice(range(0, 1000))
+        suffix = random.choice(range(1000))
         payload = {'name': f'foobar{suffix}'}
         resp = uclient.post('_ui/v1/groups/', payload=payload)
         assert resp.status_code == 201
@@ -448,7 +448,7 @@ def test_api_ui_v1_groups_users_add_delete(ansible_config):
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
-        suffix = random.choice(range(0, 1000))
+        suffix = random.choice(range(1000))
         group_name = f'group{suffix}'
         user_name = f'user{suffix}'
 
@@ -972,7 +972,7 @@ def test_api_ui_v1_users(ansible_config):
             validate_json(instance=user, schema=schema_user)
 
         # try creating a user
-        suffix = random.choice(range(0, 9999))
+        suffix = random.choice(range(9999))
         payload = {
             'username': f'foobar{suffix}',
             'first_name': 'foobar',
