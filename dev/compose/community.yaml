@@ -1,6 +1,7 @@
 x-common-env: &common-env
 
   GNUPGHOME: /root/.gnupg/
+  GALAXY_IMPORTER_CONFIG: /src/galaxy_ng/profiles/community/galaxy-importer/galaxy-importer.cfg
 
   DJANGO_SUPERUSER_USERNAME: admin
   DJANGO_SUPERUSER_EMAIL: admin@example.com
@@ -183,7 +184,6 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
-
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
       "
 
@@ -210,7 +210,6 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
-
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
       "
 
@@ -232,9 +231,6 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
-
-        cp -r /src/galaxy_ng/profiles/community/galaxy-importer /etc/galaxy-importer;
-
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
       "
 
@@ -259,7 +255,7 @@ services:
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
         # Give some time for API to start;
-        sleep 5;
+        sleep 3;
 
         echo ' ';
         echo '###################### API ROOT ##############################';
