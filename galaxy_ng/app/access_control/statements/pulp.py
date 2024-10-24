@@ -312,7 +312,7 @@ PULP_ANSIBLE_VIEWSETS = {
                 "condition": "has_ansible_repo_perms:ansible.modify_ansible_repo_content"
             },
             {
-                "action": ["sync", ],
+                "action": ["sync"],
                 "principal": "authenticated",
                 "effect": "allow",
                 "condition": [

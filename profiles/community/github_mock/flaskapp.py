@@ -115,7 +115,7 @@ def create_tables():
     for uinfo in USERS.values():
         sql = "INSERT OR IGNORE INTO users (id, login, email, password) VALUES(?, ?, ?, ?)"
         print(sql)
-        cursor.execute(sql, (uinfo['id'], uinfo['login'], uinfo['email'], uinfo['password'],))
+        cursor.execute(sql, (uinfo['id'], uinfo['login'], uinfo['email'], uinfo['password']))
         conn.commit()
 
     cursor.execute('''
@@ -430,7 +430,7 @@ def admin_add_user():
     print(f'CREATING USER {login} with {password}')
     sql = "INSERT OR IGNORE INTO users (id, login, email, password) VALUES(?, ?, ?, ?)"
     print(sql)
-    cursor.execute(sql, (userid, login, email, password,))
+    cursor.execute(sql, (userid, login, email, password))
     conn.commit()
 
     conn.close()
@@ -502,7 +502,7 @@ def admin_modify_user(userid=None, login=None):
         conn.commit()
         cursor.execute(
             'INSERT INTO users (id, login, password) VALUES (?,?,?)',
-            (new_userid, new_login, new_password,)
+            (new_userid, new_login, new_password)
         )
         conn.commit()
         conn.close()
@@ -512,7 +512,7 @@ def admin_modify_user(userid=None, login=None):
         cursor = conn.cursor()
         cursor.execute(
             'UPDATE users SET login=?, password=? WHERE id=?',
-            (new_login, new_password, udata['id'],)
+            (new_login, new_password, udata['id'])
         )
         conn.commit()
         conn.close()

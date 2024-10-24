@@ -249,7 +249,7 @@ def get_object_group_permissions(group, Role, GroupRole, ContentType, Permission
             if key in objects_with_perms:
                 objects_with_perms[key].append(permission_id)
             else:
-                objects_with_perms[key] = [permission_id,]
+                objects_with_perms[key] = [permission_id]
 
     # for each object permission that this group has, map it to a role.
     for k in objects_with_perms:
@@ -302,7 +302,7 @@ def add_object_role_for_users_with_permission(role, permission, UserRole, Conten
                 user=User.objects.get(pk=user_id),
                 content_type=ContentType.objects.get(pk=content_type_id),
                 object_id=object_pk
-            )),
+            ))
             batch_create(UserRole, user_roles)
 
     # Create any remaining roles
