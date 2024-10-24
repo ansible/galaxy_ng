@@ -27,7 +27,7 @@ class ContentSummarySerializer(Serializer):
     @staticmethod
     def _get_content_type_key(content_type: str) -> str:
         # FIXME(cutwater): Replace with galaxy-importer constants usage
-        if content_type == "role":  # ContentType.ROLE (from galaxy-importer)
+        if content_type == "role":  # ContentType.ROLE (from galaxy-importer)  # noqa: SIM116
             return "role"
         elif content_type == "module":  # ContentType.MODULE (from galaxy-importer)
             return "module"

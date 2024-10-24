@@ -202,7 +202,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
             return False
         if len(name) < 2:
             return False
-        if name.startswith('_'):
+        if name.startswith('_'):  # noqa: SIM103
             return False
         return True
 

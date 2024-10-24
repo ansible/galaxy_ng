@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 
@@ -224,14 +225,12 @@ class AccessPolicyBase(AccessPolicyFromDB):
         Scope the queryset based on the access policy `scope_queryset` method if present.
         """
         access_policy = self.get_access_policy(view)
-        if view.action == "list" and access_policy:
-            # if access_policy := self.get_access_policy(view):
-            if access_policy.queryset_scoping:
-                scope = access_policy.queryset_scoping["function"]
-                if scope == "scope_queryset" or not (func := getattr(self, scope, None)):
-                    return qs
-                kwargs = access_policy.queryset_scoping.get("parameters") or {}
-                qs = func(view, qs, **kwargs)
+        if view.action == "list" and access_policy and access_policy.queryset_scoping:
+            scope = access_policy.queryset_scoping["function"]
+            if scope == "scope_queryset" or not (func := getattr(self, scope, None)):
+                return qs
+            kwargs = access_policy.queryset_scoping.get("parameters") or {}
+            qs = func(view, qs, **kwargs)
         return qs
 
     # Define global conditions here
@@ -286,7 +285,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
             return True
 
         # check collection object level permissions ...
-        if user.has_perm("ansible.delete_collection", collection):
+        if user.has_perm("ansible.delete_collection", collection):  # noqa: SIM103
             return True
 
         return False
@@ -303,7 +302,7 @@ class AccessPolicyBase(AccessPolicyFromDB):
         if is_github_social_auth:
             return True
 
-        if request.user.has_perm('galaxy.view_user'):
+        if request.user.has_perm('galaxy.view_user'):  # noqa: SIM103
             return True
 
         return False
@@ -550,21 +549,16 @@ class AccessPolicyBase(AccessPolicyFromDB):
                 base_path__in=PROTECTED_BASE_PATHS,
             ).exists():
                 return False
-        elif isinstance(obj, core_models.Distribution):
-            if obj.base_path in PROTECTED_BASE_PATHS:
-                return False
+        elif isinstance(obj, core_models.Distribution) and obj.base_path in PROTECTED_BASE_PATHS:
+            return False
 
         return True
 
     def require_requirements_yaml(self, request, view, action):
 
         if remote := request.data.get("remote"):
-            try:
+            with contextlib.suppress(ansible_models.CollectionRemote.DoesNotExist):
                 remote = ansible_models.CollectionRemote.objects.get(pk=extract_pk(remote))
-
-            except ansible_models.CollectionRemote.DoesNotExist:
-                pass
-
         if not remote:
             obj = view.get_object()
             remote = obj.remote.cast()
@@ -828,7 +822,7 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
         # use the helper to get the list of owners
         owners = get_v3_namespace_owners(v3_namespace)
-        if owners and user in owners:
+        if owners and user in owners:  # noqa: SIM103
             return True
 
         return False

@@ -1,5 +1,5 @@
 """Utility functions for AH tests."""
-
+import contextlib
 import logging
 import os
 import shutil
@@ -328,18 +328,17 @@ def modify_artifact(artifact):
     filename = artifact.filename
     with tempfile.TemporaryDirectory() as dirpath:
         # unpack
-        tf = tarfile.open(filename)
-        tf.extractall(dirpath)
+        with tarfile.open(filename) as tf:
+            tf.extractall(dirpath)
 
         try:
             yield dirpath
 
         finally:
             # re-pack
-            tf = tarfile.open(filename, "w:gz")
-            for name in os.listdir(dirpath):
-                tf.add(os.path.join(dirpath, name), name)
-            tf.close()
+            with tarfile.open(filename, "w:gz") as tf:
+                for name in os.listdir(dirpath):
+                    tf.add(os.path.join(dirpath, name), name)
 
 
 def get_collections_namespace_path(namespace):
@@ -359,19 +358,18 @@ def set_certification(config, gc, collection, level="published", hub_4_5=False):
     do not have auto-certification enabled.
     """
 
-    if hub_4_5:
-        if config["use_move_endpoint"]:
-            url = (
-                f"v3/collections/{collection.namespace}/{collection.name}/versions/"
-                f"{collection.version}/move/staging/published/"
-            )
+    if hub_4_5 and config["use_move_endpoint"]:
+        url = (
+            f"v3/collections/{collection.namespace}/{collection.name}/versions/"
+            f"{collection.version}/move/staging/published/"
+        )
 
-            gc.post(url, b"{}")
-            dest_url = (
-                f"v3/collections/{collection.namespace}/"
-                f"{collection.name}/versions/{collection.version}/"
-            )
-            return wait_for_url(gc, dest_url)
+        gc.post(url, b"{}")
+        dest_url = (
+            f"v3/collections/{collection.namespace}/"
+            f"{collection.name}/versions/{collection.version}/"
+        )
+        return wait_for_url(gc, dest_url)
 
     # exit early if config is set to auto approve
     if not config["use_move_endpoint"]:
@@ -386,10 +384,10 @@ def set_certification(config, gc, collection, level="published", hub_4_5=False):
 
     if config["upload_signatures"]:
         # Write manifest to temp file
-        tf = tarfile.open(collection.filename, mode="r:gz")
         tdir = tempfile.TemporaryDirectory()
-        keyring = tempfile.NamedTemporaryFile("w")
-        tf.extract("MANIFEST.json", tdir.name)
+        keyring = tempfile.NamedTemporaryFile("w")  # noqa: SIM115
+        with tarfile.open(collection.filename, mode="r:gz") as tf:
+            tf.extract("MANIFEST.json", tdir.name)
 
         # Setup local keystore
         # gpg --no-default-keyring --keyring trustedkeys.gpg
@@ -529,7 +527,7 @@ def get_all_collections_by_repo(gc):
         'community': {},
         'rh-certified': {},
     }
-    for repo in collections.keys():
+    for repo in collections:
         next_page = f'{gc.galaxy_root}_ui/v1/collection-versions/?repository={repo}'
         while next_page:
             resp = gc.get(next_page)
@@ -617,14 +615,12 @@ def delete_all_collections(api_client):
 
             # if other collections require this one, the delete will fail
             resp = None
-            try:
+            with contextlib.suppress(GalaxyError):
                 resp = api_client(
                     (f'{api_prefix}/v3/plugin/ansible/content'
                         f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
                     method='DELETE'
                 )
-            except GalaxyError:
-                pass
 
             if resp is not None:
                 wait_for_task(api_client, resp, timeout=10000)
@@ -641,7 +637,7 @@ def delete_all_collections_in_namespace(api_client, namespace_name):
     gc = galaxy_client("admin")
     cmap = get_all_collections_by_repo(gc)
     for repo, cvs in cmap.items():
-        for cv_spec in cvs.keys():
+        for cv_spec in cvs:
             if cv_spec[0] == namespace_name:
                 ctuples.add((repo, cv_spec[0], cv_spec[1]))
 
@@ -704,10 +700,8 @@ def setup_multipart(path: str, data: dict) -> dict:
         b'Content-Disposition: file; name="file"; filename="%s"' % filename.encode("ascii"),
         b"Content-Type: application/octet-stream",
     ]
-    buffer += [
-        b"",
-        open(path, "rb").read(),
-    ]
+    with open(path, "rb") as fp:
+        buffer += [b"", fp.read()]
 
     for name, value in data.items():
         add_multipart_field(boundary, buffer, name, value)

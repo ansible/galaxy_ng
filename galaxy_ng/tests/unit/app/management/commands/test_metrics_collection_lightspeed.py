@@ -29,10 +29,10 @@ class TestMetricsCollectionLightspeedCommand(TestCase):
     @patch("boto3.client")
     @patch.dict(os.environ, s3_details, clear=True)
     def test_write_file_to_s3_success(self, boto3, mock_file, simple_csv_helper):
-        assert os.getenv("aws_access_key_id") == "blah"
-        assert os.getenv("aws_secret_access_key") == "blah"
-        assert os.getenv("aws_region") == "blah"
-        assert os.getenv("aws_bucket") == "blah"
+        assert os.getenv("aws_access_key_id") == "blah"  # noqa: SIM112
+        assert os.getenv("aws_secret_access_key") == "blah"  # noqa: SIM112
+        assert os.getenv("aws_region") == "blah"  # noqa: SIM112
+        assert os.getenv("aws_bucket") == "blah"  # noqa: SIM112
 
         csv_splitter = MagicMock()
         csv_splitter.write = MagicMock(name="write")

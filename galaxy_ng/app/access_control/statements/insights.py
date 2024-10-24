@@ -149,7 +149,7 @@ def _entitelify(policy):
             # don't set conditions on deny statements. Otherwise, that will make it so
             # that users will only get denied if they have entitleements.
             if new_statement["effect"] == "allow":
-                condition = new_statement.get("condition", None)
+                condition = new_statement.get("condition")
 
                 if condition is None:
                     new_statement["condition"] = ["has_rh_entitlements"]

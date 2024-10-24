@@ -65,7 +65,7 @@ class Namespace(
     def avatar_url(self):
         # TODO: remove this once we can fix the content app on CRC
         # the content app in crc doesn't work
-        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:
+        if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.STANDALONE.value:  # noqa: SIM300
             data = self.last_created_pulp_metadata
             if data and data.avatar_sha256:
                 return settings.ANSIBLE_API_HOSTNAME + get_url(data) + "avatar/"

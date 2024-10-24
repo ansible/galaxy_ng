@@ -1,3 +1,4 @@
+import contextlib
 import random
 import string
 import os
@@ -65,10 +66,8 @@ def clean_all_roles(ansible_config):
     # are associated to a user but we can't rely on that
     for role_data in pre_existing:
         role_url = f'/api/v1/roles/{role_data["id"]}/'
-        try:
+        with contextlib.suppress(Exception):
             admin_client(role_url, method='DELETE')
-        except Exception:
-            pass
 
     usernames = [x['github_user'] for x in pre_existing]
     usernames = sorted(set(usernames))
@@ -99,20 +98,16 @@ def cleanup_social_user(username, ansible_config):
         for pe in pre_existing:
             role_id = pe['id']
             role_url = f'/api/v1/roles/{role_id}/'
-            try:
-                resp = admin_client(role_url, method='DELETE')
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):
+                admin_client(role_url, method='DELETE')
 
     # cleanup the v1 namespace
     resp = admin_client(f'/api/v1/namespaces/?name={username}', method='GET')
     if resp['count'] > 0:
         for result in resp['results']:
             ns_url = f"/api/v1/namespaces/{result['id']}/"
-            try:
+            with contextlib.suppress(Exception):
                 admin_client(ns_url, method='DELETE')
-            except Exception:
-                pass
     resp = admin_client(f'/api/v1/namespaces/?name={username}', method='GET')
     assert resp['count'] == 0
 
@@ -150,20 +145,16 @@ def cleanup_social_user_gk(username, galaxy_client):
         for pe in pre_existing:
             role_id = pe['id']
             role_url = f'/api/v1/roles/{role_id}/'
-            try:
-                resp = gc_admin.delete(role_url)
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):
+                gc_admin.delete(role_url)
 
     # cleanup the v1 namespace
     resp = gc_admin.get(f'/api/v1/namespaces/?name={username}')
     if resp['count'] > 0:
         for result in resp['results']:
             ns_url = f"/api/v1/namespaces/{result['id']}/"
-            try:
+            with contextlib.suppress(Exception):
                 gc_admin.delete(ns_url)
-            except Exception:
-                pass
     resp = gc_admin.get(f'/api/v1/namespaces/?name={username}')
     assert resp['count'] == 0
 

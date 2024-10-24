@@ -60,16 +60,10 @@ def verify_test_files_changed(changed_files):
     ]
 
     def is_app_path(fn):
-        for ap in app_paths:
-            if fn.startswith(ap):
-                return True
-        return False
+        return any(fn.startswith(ap) for ap in app_paths)
 
     def is_test_path(fn):
-        for tp in test_paths:
-            if fn.startswith(tp):
-                return True
-        return False
+        return any(fn.startswith(tp) for tp in test_paths)
 
     # exit early if no non-test changed in the api code
     app_changed = False

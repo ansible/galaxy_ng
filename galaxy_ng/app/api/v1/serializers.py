@@ -351,9 +351,8 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
 
         # prefer the provider avatar url
         avatar_url = f'https://github.com/{obj.namespace.name}.png'
-        if obj.namespace and obj.namespace.namespace:
-            if obj.namespace.namespace.avatar_url:
-                avatar_url = obj.namespace.namespace.avatar_url
+        if obj.namespace and obj.namespace.namespace and obj.namespace.namespace.avatar_url:
+            avatar_url = obj.namespace.namespace.avatar_url
 
         return {
             'dependencies': dependencies,

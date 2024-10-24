@@ -122,7 +122,7 @@ def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
     config = ansible_config("admin")
     api_client = get_client(config)
 
-    with pytest.raises(CapturingGalaxyError) as excinfo:
+    with pytest.raises(CapturingGalaxyError) as excinfo:  # noqa: SIM117
         with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
             upload_artifact(config, api_client, artifact, hash=b"000000000000000")
     resp = json.loads(excinfo.value.http_error.read())
@@ -153,7 +153,7 @@ def test_api_publish_missing_filename(galaxy_client, artifact):
     """Test handling of uploads missing the filename parameter."""
     gc = galaxy_client("admin")
 
-    with pytest.raises(GalaxyClientError) as excinfo:
+    with pytest.raises(GalaxyClientError) as excinfo:  # noqa: SIM117
         with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
             upload_artifact(None, gc, artifact, no_filename=True)
 
@@ -208,7 +208,7 @@ def test_api_publish_invalid_filename(galaxy_client, artifact, wrong_name):
     artifact.filename = filename
 
     # Ensure an excepton is thrown by the client lib ...
-    with pytest.raises(GalaxyClientError) as excinfo:
+    with pytest.raises(GalaxyClientError) as excinfo:  # noqa: SIM117
         with patch("ansible.galaxy.api.GalaxyError", GalaxyClientError):
             upload_artifact(None, gc, artifact)
 
@@ -222,7 +222,7 @@ def test_api_publish_invalid_filename(galaxy_client, artifact, wrong_name):
 def test_api_publish_missing_file(galaxy_client, artifact):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
     gc = galaxy_client("admin")
-    with pytest.raises(GalaxyClientError) as excinfo:
+    with pytest.raises(GalaxyClientError) as excinfo:  # noqa: SIM117
         with patch("ansible.galaxy.api.GalaxyError", GalaxyClientError):
             upload_artifact(None, gc, artifact, no_file=True)
 

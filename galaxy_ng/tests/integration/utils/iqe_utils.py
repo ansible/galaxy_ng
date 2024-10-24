@@ -1,4 +1,5 @@
 """Utility functions for AH tests."""
+import contextlib
 import os
 import subprocess
 import time
@@ -91,7 +92,7 @@ def remove_from_cache(role):
 
 class GalaxyKitClient:
     def __init__(self, ansible_config, custom_config=None, basic_token=None):
-        self.config = ansible_config if not custom_config else custom_config
+        self.config = custom_config if custom_config else ansible_config
         self._basic_token = basic_token
 
     def gen_authorized_client(
@@ -360,22 +361,18 @@ def galaxy_stage_ansible_user_cleanup(gc, u):
     gc_admin = gc("admin")
     github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES[u]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_user(gc_admin, github_user_username)
-    except ValueError:
-        pass
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_group(gc_admin, group)
-    except ValueError:
-        pass
-    try:
+
+    with contextlib.suppress(GalaxyClientError):
         delete_namespace(gc_admin, github_user_username.replace("-", "_"))
-    except GalaxyClientError:
-        pass
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_v1_namespace(gc_admin, github_user_username)
-    except ValueError:
-        pass
 
 
 def get_ansible_config():

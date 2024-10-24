@@ -1,3 +1,4 @@
+import contextlib
 import copy
 import datetime
 import logging
@@ -314,10 +315,8 @@ def legacy_role_import(
     v1_task_id = None
     task_id = None
     import_model = None
-    try:
+    with contextlib.suppress(Exception):
         task = Task.current()
-    except Exception:
-        pass
     if task:
         v1_task_id = uuid_to_int(str(task.pulp_id))
         task_id = task.pulp_id

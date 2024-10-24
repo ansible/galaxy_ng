@@ -67,7 +67,7 @@ class Command(BaseCommand):
             collection_name=options['name'],
             limit=options['limit'],
         ):
-            counter += 1
+            counter += 1  # noqa: SIM113
             logger.info(
                 f"{counter}. {collection_info['namespace']['name']}.{collection_info['name']}"
                 + f" versions:{len(collection_versions)}"

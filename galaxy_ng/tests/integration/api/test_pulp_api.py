@@ -98,7 +98,7 @@ def test_pulp_roles_endpoint(galaxy_client):
         "pulp/api/v3/roles/",
         body=payload
     )
-    assert TEST_ROLE_NAME == create_resp["name"]
+    assert create_resp["name"] == TEST_ROLE_NAME
     assert permission in create_resp["permissions"]
     pulp_href = f"{create_resp['pulp_href']}"
 

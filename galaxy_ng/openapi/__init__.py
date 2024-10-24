@@ -32,7 +32,7 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
 
         # group paths+methods by operationId
         operation_ids = {}
-        for pk in schema['paths'].keys():
+        for pk in schema['paths']:
             for method, method_info in schema['paths'][pk].items():
                 operationId = method_info['operationId']
                 if operationId not in operation_ids:

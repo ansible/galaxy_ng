@@ -136,7 +136,7 @@ def path_is_role(path):
     if 'handlers' in paths:
         return True
 
-    if 'defaults' in paths:
+    if 'defaults' in paths:  # noqa: SIM103
         return True
 
     return False

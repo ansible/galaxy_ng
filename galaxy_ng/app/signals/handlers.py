@@ -112,10 +112,7 @@ def associate_namespace_metadata(sender, instance, created, **kwargs):
         ns.set_links([{"name": x, "url": instance.links[x]} for x in instance.links])
         ns.save()
 
-    if created or ns_metadata is None:
-        _update_metadata()
-
-    elif ns.metadata_sha256 != instance.metadata_sha256:
+    if created or ns_metadata is None or ns.metadata_sha256 != instance.metadata_sha256:
         _update_metadata()
 
 

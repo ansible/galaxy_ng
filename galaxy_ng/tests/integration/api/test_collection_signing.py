@@ -477,20 +477,20 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
 
         collection_version_pk = collections["staging"][ckey]["id"]
         repo_href = get_repository_href(gc, "staging")
-        signature_file = open(signature_filename, "rb")
-        response = requests.post(
-            gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
-            verify=False,
-            files={"file": signature_file},
-            data={
-                "repository": repo_href,
-                "signed_collection": (
-                    f"{gc.galaxy_root}pulp/api/v3/"
-                    f"content/ansible/collection_versions/{collection_version_pk}/"
-                ),
-            },
-            auth=("admin", "admin"),
-        )
+        with open(signature_filename, "rb") as signature_file:
+            response = requests.post(
+                gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
+                verify=False,
+                files={"file": signature_file},
+                data={
+                    "repository": repo_href,
+                    "signed_collection": (
+                        f"{gc.galaxy_root}pulp/api/v3/"
+                        f"content/ansible/collection_versions/{collection_version_pk}/"
+                    ),
+                },
+                auth=("admin", "admin"),
+            )
         assert "task" in response.json()
 
     time.sleep(SLEEP_SECONDS_ONETIME)  # wait for the task to finish

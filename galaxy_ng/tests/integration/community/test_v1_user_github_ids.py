@@ -1,5 +1,6 @@
 """test_community.py - Tests related to the community featureset.
 """
+import contextlib
 
 import pytest
 
@@ -40,10 +41,8 @@ def test_v1_user_github_ids(ansible_config):
 
         # delete and recreate the github user ...
         ga = GithubAdminClient()
-        try:
+        with contextlib.suppress(Exception):
             ga.delete_user(login=github_user)
-        except Exception:
-            pass
         gdata = ga.create_user(
             login=github_user,
             password='redhat',

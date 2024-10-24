@@ -1041,7 +1041,7 @@ def test_users_list_insights_access(ansible_config):
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = api_client(url, method="GET")
-    assert "data" in resp.keys()
+    assert "data" in resp
 
     with pytest.raises(GalaxyError, match=REGEX_403):
         api_client(url, method="POST", args=b"{}")

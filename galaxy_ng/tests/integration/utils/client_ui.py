@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def raise_for_status(response):
-    if 400 <= response.status_code:
+    if response.status_code >= 400:
         http_error_msg = f'{response.status_code} Error: {response.text}'
         logging.debug(http_error_msg)
         raise requests.exceptions.HTTPError(http_error_msg, response)
@@ -143,9 +143,8 @@ class UIClient:
         res = self._rs.post(self.logout_url, json={}, headers=pheaders)
         raise_for_status(res)
 
-        if expected_code is not None:
-            if res.status_code != expected_code:
-                raise Exception(f'logout status code was not {expected_code}')
+        if expected_code is not None and res.status_code != expected_code:
+            raise Exception(f'logout status code was not {expected_code}')
 
     def get(
         self,
