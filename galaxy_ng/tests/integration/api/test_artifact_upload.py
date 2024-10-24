@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class ErrorTestMode:
     """Represents a test scenario for publishing a collection."""
 
-    def __init__(self, name, file, status, resp, no_filename=False, hash=True):
+    def __init__(self, name, file, status, resp, no_filename=False, hash=True):  # noqa: A002
         """Configure the test scenario.
 
         :param name: Name for use in the test ID.

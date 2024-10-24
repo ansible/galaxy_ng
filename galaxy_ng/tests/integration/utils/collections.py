@@ -234,7 +234,13 @@ def build_collection(
 
 
 def upload_artifact(
-    config, client, artifact, hash=True, no_filename=False, no_file=False, use_distribution=False
+    config,
+    client,
+    artifact,
+    hash=True,  # noqa: A002
+    no_filename=False,
+    no_file=False,
+    use_distribution=False
 ):
     """
     Publishes a collection to a Galaxy server and returns the import task URI.

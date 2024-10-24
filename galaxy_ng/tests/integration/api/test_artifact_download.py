@@ -41,9 +41,9 @@ def test_download_artifact(ansible_config, galaxy_client):
     hub_4_5 = is_hub_4_5(ansible_config)
     set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
-    with tempfile.TemporaryDirectory() as dir:
+    with tempfile.TemporaryDirectory() as dir_:
         filename = f"{namespace}-{name}-{version}.tar.gz"
-        tarball_path = f"{dir}/{filename}"
+        tarball_path = f"{dir_}/{filename}"
         url = (f"{gc.galaxy_root}v3/plugin/ansible/content/"
                f"published/collections/artifacts/{filename}")
 
@@ -94,9 +94,9 @@ def test_download_artifact_validated(ansible_config, galaxy_client):
     assert resp["state"] == "completed"
     set_certification(ansible_config(), gc, artifact, level="validated")
 
-    with tempfile.TemporaryDirectory() as dir:
+    with tempfile.TemporaryDirectory() as dir_:
         filename = f"{artifact.namespace}-{artifact.name}-{artifact.version}.tar.gz"
-        tarball_path = f"{dir}/{filename}"
+        tarball_path = f"{dir_}/{filename}"
         url = (f"{gc.galaxy_root}v3/plugin/ansible/content/"
                f"validated/collections/artifacts/{filename}")
 
