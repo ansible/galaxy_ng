@@ -111,6 +111,8 @@ select = [
     "B",
     # flake8-comprehensions
     "C4",
+    # flake8-import-conventions
+    "ICN",
     # flake8-no-pep420
     "INP",
     # pyupgrade
