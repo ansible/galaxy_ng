@@ -4,7 +4,7 @@ Profiles:
 
 - `aap` - Run galaxy_ng for integration with Ansible Automation Platform and Resource Server
 - `community` - Run galaxy_ng for galaxy.ansible.com development
-- `cloud` - Run galaxy_ng for console.redhat.com development
+- `insights` - Run galaxy_ng for console.redhat.com development
 
 ## Requirements
 
@@ -76,6 +76,8 @@ $ docker compose -f dev/compose/aap.yaml down
 # add -v to stop and remove volumes
 ```
 
+> [!TIP]
+> Stop with Ctrl + C if running without `-d` and then execute the `down` command.
 
 ## API Access
 
@@ -87,8 +89,10 @@ AAP UI and API will be available only if started separately on:
 
 [https://localhost](https://localhost)
 
-Ansible Hub UI can be started separately as a standalone `npm` run.
 
+## Running UI for community development
+
+Ansible Hub UI can be started separately as a standalone `npm` run.
 
 ```console
 # Assuming galaxy_ng is running on community compose.
@@ -110,7 +114,7 @@ On the second terminal:
 ```console
 cd ansible-hub-ui
 npm install
-API_PROXY_PORT=5001 API_BASE_PATH=/api/galaxy/ npm run start-standalone
+npm run start-community
 ```
 
 UI will be available on http://localhost:8002 and API on http://localhost:5001
@@ -153,8 +157,10 @@ Optionally it can be informed in a single line:
 $ DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng" docker compose -f dev/compose/app.yaml up --build
 ```
 
-> **NOTE** if passing on the call line, remember to repass the same variable every time you interact with
->`docker compose` for exec, logs, down etc.
+> [!NOTE]
+> if passing on the call line, remember to repass the same variable every time you interact with
+>`docker compose` using the `run` command, usually `exec,logs,stats` doesn't require, but commands
+> that starts the service container from scratch needs the variables.
 
 Now when changes are detected on `.py` and `.yaml` files on any of the `DEV_SOURCE_PATH`
 directories it will trigger reload of `api`, `worker`, and `content` services.
@@ -185,6 +191,18 @@ Solution 2:
 - Ensure `LOCK_REQUIREMENTS` is set to `0`
 - Ensure all your local checkouts are checked out to compatible branches
 
+### LLB definition error
+
+```bash
+failed to solve: rpc error: code = Unknown desc = failed to solve with frontend dockerfile.v0: failed to create LLB definition: failed to do request: Head "http://localhost/v2/galaxy_ng/galaxy_ng/manifests/base": dial tcp [::1]:80: connect: connection refused
+```
+
+Solution
+
+```bash
+export DOCKER_BUILDKIT=0
+export COMPOSE_DOCKER_CLI_BUILD=0
+```
 
 ## Tips and Tricks.
 

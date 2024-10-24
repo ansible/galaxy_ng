@@ -255,7 +255,7 @@ services:
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
         # Give some time for API to start;
-        sleep 3;
+        sleep 5;
 
         echo ' ';
         echo '###################### API ROOT ##############################';
