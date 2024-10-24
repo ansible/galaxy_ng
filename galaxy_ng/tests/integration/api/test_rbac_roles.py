@@ -235,7 +235,7 @@ GLOBAL_ACTIONS = {
     collection_remote_remove_role,
 }
 
-# TODO: Update object tests to include delete actions
+# TODO(newswangerd): Update object tests to include delete actions
 OBJECT_ACTIONS = {
     # ansible
     change_collection_namespace,

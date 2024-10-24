@@ -81,7 +81,7 @@ class GroupPermissionField(serializers.Field):
 class UserPermissionField(serializers.Field):
 
     def _validate_user(self, user_data):
-        # FIXME - fill this in ...
+        # FIXME(jctanner): fill this in ...
         pass
 
     def to_representation(self, value):

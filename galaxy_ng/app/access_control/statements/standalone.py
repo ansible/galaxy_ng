@@ -331,7 +331,7 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
     ],
-    # TODO: More specific permissions will be required here when pulp_container
+    # TODO(newswangerd): More specific permissions will be required here when pulp_container
     # RBAC is added
     'ContainerRepositoryViewSet': [
         {

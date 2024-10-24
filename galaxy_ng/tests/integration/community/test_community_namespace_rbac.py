@@ -213,9 +213,9 @@ def test_social_auth_v3_rbac_workflow(ansible_config):
 
         # the new login should be able to upload to BOTH v3 namespaces
 
-    # TODO ... what happens with the other owners of a v1 namespace when
+    # TODO(jctanner): ... what happens with the other owners of a v1 namespace when
     #   the original owner changes their login?
-    # TODO ... what happens with the other owners of a v3 namespace when
+    # TODO(jctanner): ... what happens with the other owners of a v3 namespace when
     #   the original owner changes their login?
 
 

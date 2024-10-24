@@ -70,7 +70,7 @@ class TestVerifyData:
             assert actual_col["name"] == expected_name
             assert actual_col["namespace"]["name"] == expected_col["namespace"]
             if not is_ocp_env():
-                # FIXME: remove the above conditional when content signing is enabled
+                # FIXME(chr-stian): remove the above conditional when content signing is enabled
                 if not galaxy_auto_sign_collections():
                     if expected_col["signed"]:
                         assert len(actual_col["signatures"]) > 0
@@ -82,7 +82,8 @@ class TestVerifyData:
                 _, actual_col = search_collection_endpoint(gc, name=expected_name)
                 assert actual_col[0]["is_deprecated"] == expected_col["deprecated"]
                 if not is_ocp_env():
-                    # FIXME: remove the above conditional when content signing is enabled
+                    # FIXME(chr-stian): remove the above conditional when content signing
+                    #       is enabled
                     if galaxy_auto_sign_collections():
                         assert actual_col[0]["is_signed"] is True
                     else:

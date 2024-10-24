@@ -64,12 +64,13 @@ def sign_on_demand(gc, signing_service, sign_url=None, **payload):
     '''
     resp = gc.post(sign_url, body=sign_payload)
     log.info("Sign Task: %s", resp)
-    # FIXME - pulp tasks do not seem to accept token auth, so no way to check task progress
+    # FIXME(rochacbruno): pulp tasks do not seem to accept token auth, so no way
+    #       to check task progress
     time.sleep(SLEEP_SECONDS_ONETIME)
     return resp
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
@@ -143,7 +144,7 @@ def test_collection_auto_sign_on_approval(ansible_config, flags, galaxy_client, 
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.collection_signing
 @pytest.mark.deployment_standalone
@@ -332,7 +333,7 @@ def test_collection_move_with_signatures(ansible_config, flags, galaxy_client, s
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.collection_signing
 @pytest.mark.collection_move

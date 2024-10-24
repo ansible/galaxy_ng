@@ -165,7 +165,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
     def get_summary_fields(self, obj):
         return {}
 
-    # TODO: What does this actually mean?
+    # TODO(jctanner): What does this actually mean?
     # def get_active(self, obj):
     #    return True
 
@@ -324,7 +324,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
 
         versions = obj.full_metadata.get('versions', [])
         if versions:
-            # FIXME - we can't assume they're all sorted yet
+            # FIXME(jctanner): we can't assume they're all sorted yet
             versions = sort_versions(versions)
             versions = versions[::-1]
             if len(versions) > 10:
@@ -340,7 +340,7 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
                 'pulp_href': pulp_href
             }
 
-        # FIXME - repository is a bit hacky atm
+        # FIXME(jctanner): repository is a bit hacky atm
         repository = {}
         if obj.full_metadata.get('repository'):
             repository = obj.full_metadata.get('repository')

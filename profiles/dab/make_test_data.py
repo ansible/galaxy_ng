@@ -21,7 +21,7 @@ ADMIN_AUTH = (
 NAMESPACES = ("autohubtest2", "autohubtest3", "signing")
 USERS = ("notifications_admin", "iqe_normal_user", "jdoe", "org-admin", "iqe_admin", "ee_admin")
 
-# FIXME - this seems to be dependant on not having a gateway
+# FIXME(jctanner): This seems to be dependant on not having a gateway
 GROUP = "ns_group_for_tests"
 NS_OWNER_DEF = "galaxy.collection_namespace_owner"
 

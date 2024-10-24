@@ -275,12 +275,12 @@ def test_long_field_values(galaxy_client, field):
     assert fieldname in resp["error"]["description"]
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.parametrize(
     "spec",
     [
-        # TODO: move most these to galaxy-importer unit tests
+        # TODO(awcrosby): move most these to galaxy-importer unit tests
         ("2eq", "==2.10", "completed"),
         # ("gt", ">2.10.0", "completed"),
         # ("gteq", ">=2.10", "completed"),

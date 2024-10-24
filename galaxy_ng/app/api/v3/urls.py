@@ -153,7 +153,7 @@ urlpatterns = [
 
     # >>>> END OVERRIDDEN PULP ANSIBLE ENDPOINTS <<<<<
 
-    # TODO: Endpoints that have not been moved to pulp ansible yet
+    # TODO(newswangerd): Endpoints that have not been moved to pulp ansible yet
     path(
         "collections/<str:namespace>/<str:name>/versions/<str:version>/move/"
         "<str:source_path>/<str:dest_path>/",

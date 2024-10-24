@@ -205,8 +205,8 @@ class CollectionDetailSerializer(_CollectionSerializer):
     all_versions = serializers.SerializerMethodField()
     sign_state = serializers.CharField()
 
-    # TODO: rename field to "version_details" since with
-    # "version" query param this won't always be the latest version
+    # TODO(awcrosby): rename field to "version_details" since with
+    #       "version" query param this won't always be the latest version
     @extend_schema_field(CollectionVersionDetailSerializer)
     def get_latest_version(self, obj):
         return CollectionVersionDetailSerializer(obj, context=self.context).data

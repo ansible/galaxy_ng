@@ -143,8 +143,8 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
             version=data['filename'].version,
         )
 
-        # TODO: CollectionImport.get_absolute_url() should be able to generate this, but
-        #       it needs the  repo/distro base_path for the <path> part of url
+        # TODO(alikins): CollectionImport.get_absolute_url() should be able to generate this, but
+        #       it needs the repo/distro base_path for the <path> part of url
         import_obj_url = reverse("galaxy:api:v3:collection-imports-detail",
                                  kwargs={'pk': str(task_detail.pk),
                                          'path': path})

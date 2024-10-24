@@ -104,7 +104,7 @@ class TestLoadData:
                         gc, "ansible-default", collection["repository"],
                         artifact.namespace, artifact.name, artifact.version)
                 if collection["signed"] and is_ocp_env():
-                    # FIXME
+                    # FIXME(chr-stian): No description provided.
                     logger.debug("Not Signing collection, collection signing not enabled"
                                  "on ocp environment")
                 if collection["deprecated"]:

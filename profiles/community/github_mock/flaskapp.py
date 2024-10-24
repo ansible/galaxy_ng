@@ -294,7 +294,7 @@ def do_authorization():
     set_access_token(token, this_session['uid'])
     url += f'?code={token}'
 
-    # FIXME
+    # FIXME(jerabekjiri): No description provided
     # print(f'REDIRECT_URL: {url}')
     resp = redirect(url, code=302)
     return resp

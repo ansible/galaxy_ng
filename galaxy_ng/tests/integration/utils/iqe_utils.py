@@ -655,7 +655,7 @@ class AnsibleConfigFixture(dict):
 
 
 def has_old_credentials():
-    # FIXME: Old versions have admin/admin. This needs to be fixed
+    # FIXME(chr-stian): Old versions have admin/admin. This needs to be fixed.
     ansible_config = get_ansible_config()
     hub_version = get_hub_version(ansible_config)
     return parse_version(hub_version) < parse_version('4.7')
@@ -690,7 +690,8 @@ def get_hub_version(ansible_config):
         try:
             gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
         except GalaxyError:
-            # FIXME: versions prior to 4.7 have different credentials. This needs to be fixed.
+            # FIXME(chr-stian): Versions prior to 4.7 have different credentials.
+            #       This needs to be fixed.
             if is_sync_testing():
                 api_root = "http://localhost:5001/api/automation-hub/"
             else:

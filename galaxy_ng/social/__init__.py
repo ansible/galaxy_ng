@@ -124,7 +124,7 @@ class GalaxyNGOAuth2(GithubOAuth2):
                     + f' is NOT owner of {found_namespace}'
                 )
 
-        # FIXME - make one from the transformed name?
+        # FIXME(jctanner): make one from the transformed name?
         if not found_namespace:
             namespace, namespace_created = self._ensure_namespace(namespace_name, session_user)
             logger.info(

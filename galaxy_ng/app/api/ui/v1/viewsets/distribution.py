@@ -33,6 +33,6 @@ class MyDistributionViewSet(DistributionViewSet):
             qs=models.SyncList.objects.all()
         )
 
-        # TODO: find a better way query this data
+        # TODO(newswangerd): find a better way query this data
         return pulp_models.AnsibleDistribution.objects.filter(
             name__in=synclists.values_list('name', flat=True)).order_by('name')
