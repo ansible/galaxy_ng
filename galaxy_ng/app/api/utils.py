@@ -1,6 +1,7 @@
 import os
 import re
 import socket
+from typing import NamedTuple
 
 from django.utils.translation import gettext_lazy as _
 from django.http import Http404
@@ -9,7 +10,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from rest_framework import serializers
 from pulpcore.plugin import models as pulp_models
 
-from collections import namedtuple
 from requests.adapters import HTTPAdapter
 from urllib3.connection import HTTPConnection
 from urllib3.connectionpool import HTTPConnectionPool
@@ -17,7 +17,12 @@ from urllib3.connectionpool import HTTPConnectionPool
 from galaxy_importer.schema import MAX_LENGTH_NAME, MAX_LENGTH_VERSION
 from galaxy_ng.app.constants import AAP_VERSION_FILE_PATH
 
-CollectionFilename = namedtuple("CollectionFilename", ["namespace", "name", "version"])
+
+class CollectionFilename(NamedTuple):
+    namespace: str
+    name: str
+    version: str
+
 
 LOCALHOST = "localhost"
 FILENAME_REGEXP = re.compile(

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import uuid
 
 from django.test import TestCase

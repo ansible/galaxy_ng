@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-
 schema_objectlist = {
     'type': 'object',
     'additional_properties': False,
