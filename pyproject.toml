@@ -115,6 +115,8 @@ select = [
     "COM",
     # flake8-no-pep420
     "INP",
+    # flake8-gettext
+    "INT",
     # pyupgrade
     "UP",
     # flake8-pytest-style
