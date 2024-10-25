@@ -27,7 +27,7 @@ def test_repository_labels(galaxy_client):
         # to take them into account in this test case
         repos_to_remove = []
         for repo in repos:
-            if repo.startswith("repo-test-") or repo.startswith("repo_ansible-"):
+            if repo.startswith(("repo-test-", "repo_ansible-")):
                 repos_to_remove.append(repo)
         for repo in repos_to_remove:
             repos.remove(repo)

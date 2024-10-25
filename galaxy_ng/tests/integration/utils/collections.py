@@ -783,7 +783,6 @@ def recursive_delete_gk(gc_admin, namespace_name, cname, crepo="published"):
         resp = delete_collection(gc_admin, namespace=namespace_name, collection=cname)
     except GalaxyClientError as ge:
         print(ge)
-        pass
     # wait for the orphan_cleanup job to finish ...
     try:
         wait_for_task(gc_admin, resp, timeout=10000)

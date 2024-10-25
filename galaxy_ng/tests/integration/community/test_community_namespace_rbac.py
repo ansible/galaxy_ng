@@ -105,7 +105,7 @@ def test_social_auth_v3_rbac_workflow(ansible_config):
     base_cfg = ansible_config('github_user_1')
 
     ga = GithubAdminClient()
-    suffix = ''.join([random.choice(string.ascii_lowercase) for x in range(0, 5)])
+    suffix = ''.join([random.choice(string.ascii_lowercase) for x in range(5)])
     user_a = ga.create_user(login='0xEEE-32i-' + suffix)
     user_a['username'] = user_a['login']
     user_a['token'] = None
@@ -551,7 +551,7 @@ def test_social_auth_no_duplicated_namespaces(ansible_config):
     sean.update(default_cfg)
 
     # login 10 times ...
-    for _ in range(0, 10):
+    for _ in range(10):
         with SocialGithubClient(config=sean) as client:
             client.get('_ui/v1/me/')
 

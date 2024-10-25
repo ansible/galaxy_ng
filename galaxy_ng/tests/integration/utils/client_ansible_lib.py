@@ -202,7 +202,7 @@ class AnsibeGalaxyHttpClient:
         if isinstance(args, (dict, list)):
             args = json.dumps(args)
             is_json = True
-        elif args and (args.startswith(b'{') or args.startswith(b'[')):
+        elif args and args.startswith((b'{', b'[')):
             args = json.dumps(json.loads(args))
             is_json = True
 
