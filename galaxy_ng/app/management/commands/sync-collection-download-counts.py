@@ -39,7 +39,7 @@ class Command(BaseCommand):
         upstream = options['upstream']
         limit = options['limit']
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now()  # noqa: DTZ005
 
         collection_count = 0
         collection_total = Collection.objects.count()
