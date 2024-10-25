@@ -169,6 +169,6 @@ def _add_namespace_metadata_to_repos(namespace_pk, repo_list):
     for pk in repo_list:
         add_and_remove(
             pk,
-            add_content_units=[namespace_pk, ],
+            add_content_units=[namespace_pk],
             remove_content_units=[]
         )

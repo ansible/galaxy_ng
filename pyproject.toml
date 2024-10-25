@@ -111,6 +111,8 @@ select = [
     "B",
     # flake8-comprehensions
     "C4",
+    # flake8-commas
+    "COM",
     # flake8-no-pep420
     "INP",
     # pyupgrade
@@ -128,6 +130,9 @@ extend-ignore = [
     # B904 requires using `raise ... from ...` to explicitly tell what to do with "parent"
     # exception. Would be nice to fix, but ignoring for now.
     "B904",
+    # COM812 Trailing comma missing
+    # Too many changes to enforce
+    "COM812",
     # UP032 Use f-string instead of `format` call.
     # No need to replace all str.format usage with f-strings in entire codebase.
     "UP032",

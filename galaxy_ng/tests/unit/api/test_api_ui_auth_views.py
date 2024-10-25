@@ -53,7 +53,7 @@ class TestLoginViewsStandalone(APITestCase):
 
     def test_login_invalid_password(self):
         response: Response = self.client.post(
-            self.login_url, data={"username": "test1", "password": "invalid", }
+            self.login_url, data={"username": "test1", "password": "invalid"}
         )
         self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
@@ -62,7 +62,7 @@ class TestLoginViewsStandalone(APITestCase):
 
     def test_login_wrong_password(self):
         response: Response = self.client.post(
-            self.login_url, data={"username": "test2", "password": "test1-secret", }
+            self.login_url, data={"username": "test2", "password": "test1-secret"}
         )
         self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
 
@@ -104,7 +104,7 @@ class TestLoginViewsStandalone(APITestCase):
 
     def test_logout(self):
         response: Response = self.client.post(
-            self.login_url, data={"username": "test1", "password": "test1-secret", }
+            self.login_url, data={"username": "test1", "password": "test1-secret"}
         )
         self.assertEqual(response.status_code, http_code.HTTP_204_NO_CONTENT)
 

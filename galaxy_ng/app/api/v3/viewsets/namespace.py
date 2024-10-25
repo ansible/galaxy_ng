@@ -29,7 +29,7 @@ class NamespaceFilter(filterset.FilterSet):
 
     class Meta:
         model = models.Namespace
-        fields = ('name', 'company',)
+        fields = ('name', 'company')
 
     def keywords_filter(self, queryset, name, value):
 

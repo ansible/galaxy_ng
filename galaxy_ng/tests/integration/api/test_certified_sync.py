@@ -171,7 +171,7 @@ def test_synclist_sync(sync_instance_crc, ansible_config):
         [{
             "namespace": synclist_collection["namespace"],
             "name": synclist_collection["name"],
-        }, ]
+        }]
     )["name"]
 
     perform_sync(pah_client, crc_config, repo=repo)
