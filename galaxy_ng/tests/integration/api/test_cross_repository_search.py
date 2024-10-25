@@ -4,7 +4,7 @@ from galaxykit.repositories import search_collection
 from ..utils import get_client, SocialGithubClient
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.min_hub_version("4.7dev")
 @pytest.mark.all

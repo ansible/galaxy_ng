@@ -400,7 +400,7 @@ class TestXRepoSearch:
         expected = [{"repo_name": test_repo_name, "cv_name": artifact.name, "cv_version": version}]
         assert verify_repo_data(expected, results)
 
-    # FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+    # FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
     @pytest.mark.skip_in_gw
     @pytest.mark.parametrize(("is_highest", "cv_version"), [(True, "4.0.2"), (False, "4.0.1")])
     @pytest.mark.x_repo_search

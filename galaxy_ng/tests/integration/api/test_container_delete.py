@@ -64,7 +64,7 @@ def test_delete_ee_and_content(ansible_config, galaxy_client):
 
     # Ensure content list is empty by checking each content href
     content_hrefs = [item["pulp_href"] for item in content_list["results"]]
-    # FIXME: all items are found. Check it.
+    # FIXME(chr-stian): all items are found. Check it.
     for item in content_hrefs:
         failed = None
         try:
@@ -89,7 +89,7 @@ def test_shared_content_is_not_deleted(ansible_config, galaxy_client):
     username = config['username']
     password = config['password']
 
-    # FIXME - these settings are wrong for dab_jwt ...
+    # FIXME(jctanner): These settings are wrong for dab_jwt ...
     if 'jwtproxy' in gc.galaxy_root:
         container_registry = gc.galaxy_root.split('/')[2]
         password = 'redhat'

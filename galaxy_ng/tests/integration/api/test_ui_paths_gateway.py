@@ -78,7 +78,7 @@ def test_gw_api_ui_v1_collection_versions(galaxy_client, uncertifiedv2):
         validate_json(instance=cv_resp['metadata'], schema=schema_collectionversion_metadata)
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
@@ -341,7 +341,7 @@ def test_gw_api_ui_v1_my_namespaces(galaxy_client):
     ds = gc.get('_ui/v1/me/')
 
     # create ns with group
-    # TODO: Add user's roles to the me endpoint
+    # TODO(chr-stian): Add user's roles to the me endpoint
     payload = {
         'name': new_namespace,
         'groups': [{
@@ -417,7 +417,7 @@ def test_gw_api_ui_v1_remotes_by_id(galaxy_client):
     for remote in ds['data']:
         validate_json(instance=remote, schema=schema_remote)
 
-    # FIXME - there is no suitable pulp_id for a remote?
+    # FIXME(chr-stian): there is no suitable pulp_id for a remote?
     pulp_ids = [x['pk'] for x in ds['data']]
     for pulp_id in pulp_ids:
         gc.get(f'_ui/v1/remotes/{pulp_id}/')
@@ -467,7 +467,7 @@ def test_gw_api_ui_v1_settings(galaxy_client):
     ds = gc.get('_ui/v1/settings/')
     validate_json(instance=ds, schema=schema_settings)
 
-    # FIXME - password length and token expiration are None?
+    # FIXME(chr-stian): password length and token expiration are None?
     assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'] is False
     assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is False
     assert ds['GALAXY_REQUIRE_CONTENT_APPROVAL'] is True
@@ -484,7 +484,7 @@ def test_gw_api_ui_v1_tags(galaxy_client):
     ds = gc.get('_ui/v1/tags/')
     validate_json(instance=ds, schema=schema_objectlist)
 
-    # FIXME - ui tags api does not support POST?
+    # FIXME(chr-stian): ui tags api does not support POST?
 
 
 @pytest.mark.deployment_standalone

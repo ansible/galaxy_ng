@@ -688,7 +688,7 @@ def recursive_delete(api_client, namespace_name, cname, crepo):
     try:
         gng_wait_for_task(api_client, resp, timeout=10000)
     except GalaxyError as ge:
-        # FIXME - pulp tasks do not seem to accept token auth
+        # FIXME(jctanner): pulp tasks do not seem to accept token auth
         if ge.http_code in [403, 404]:
             time.sleep(SLEEP_SECONDS_ONETIME)
         else:
@@ -788,7 +788,7 @@ def recursive_delete_gk(gc_admin, namespace_name, cname, crepo="published"):
     try:
         wait_for_task(gc_admin, resp, timeout=10000)
     except GalaxyError as ge:
-        # FIXME - pulp tasks do not seem to accept token auth
+        # FIXME(chr-stian): pulp tasks do not seem to accept token auth
         if ge.http_code in [403, 404]:
             time.sleep(SLEEP_SECONDS_ONETIME)
         else:

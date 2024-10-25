@@ -64,8 +64,7 @@ class UserViewSet(BaseViewSet):
     permission_classes = [ComplexUserPermissions]
 
     def get_serializer_class(self):
-        # FIXME - a single serializer for this viewset
-        #         seems painful to implement.
+        # FIXME(jctanner): a single serializer for this viewset seems painful to implement.
         if self.action in ['list', 'retrieve']:
             return UserDetailSerializer
         elif self.action in ['create', 'update', 'partial_update', 'destroy']:

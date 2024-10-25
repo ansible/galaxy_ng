@@ -234,7 +234,7 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
                 content_type=content_type,
                 description=instance.description or instance.name,
             )
-        # TODO: other fields? like description
+        # TODO(jctanner): other fields? like description
 
 
 @receiver(post_delete, sender=Role)
@@ -285,7 +285,7 @@ def copy_role_definition_to_role(sender, instance, created, **kwargs):
         role = Role.objects.filter(name=role_name).first()
         if not role:
             Role.objects.create(name=role_name)
-        # TODO: other fields? like description
+        # TODO(jctanner): other fields? like description
 
 
 @receiver(post_delete, sender=RoleDefinition)
@@ -365,7 +365,7 @@ def lazy_content_type_correction(rd, obj):
 def copy_pulp_user_role(sender, instance, created, **kwargs):
     """When a pulp role is granted to a user, grant the equivalent dab role."""
 
-    # FIXME - this is a temporary workaround to allow on-demand
+    # FIXME(jctanner): this is a temporary workaround to allow on-demand
     #   assigment of task roles to users from pulpcore's AFTER_CREATE
     #   hook on the Task model which calls ...
     #   self.add_roles_for_object_creator("core.task_user_dispatcher")
@@ -416,7 +416,7 @@ def copy_pulp_group_role(sender, instance, created, **kwargs):
         team = Team.objects.filter(group=instance.group)
         if rd and team.exists():
             team = team.first()
-            # FIXME - multi-type roledefs
+            # FIXME(jctanner): multi-type roledefs
             try:
                 if instance.content_object:
                     rd.give_permission(team, instance.content_object)
@@ -436,7 +436,7 @@ def delete_pulp_group_role(sender, instance, **kwargs):
         team = Team.objects.filter(group=instance.group)
         if rd and team.exists():
             team = team.first()
-            # FIXME - multi-type roledefs
+            # FIXME(jctanner): multi-type roledefs
             try:
                 if instance.content_object:
                     rd.remove_permission(team, instance.content_object)

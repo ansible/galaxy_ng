@@ -39,7 +39,7 @@ class LegacyNamespaceFilter(filterset.FilterSet):
     def owner_filter(self, queryset, name, value):
         # find the owner on the linked v3 namespace
 
-        # FIXME - this is terribly slow
+        # FIXME(jctanner): this is terribly slow
         pks = []
         for ns1 in LegacyNamespace.objects.all():
             if not ns1.namespace:

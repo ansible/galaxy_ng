@@ -43,7 +43,7 @@ def test_delete_collection(galaxy_client, uncertifiedv2):
             get_collection(gc, cnamespace, cname, ckey[2])
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.delete
@@ -90,7 +90,7 @@ def test_delete_collection_version(galaxy_client, uncertifiedv2):
             get_collection(gc, cnamespace, cname, ckey[2])
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.delete
 @pytest.mark.min_hub_version("4.7dev")

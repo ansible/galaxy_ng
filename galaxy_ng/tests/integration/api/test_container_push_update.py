@@ -14,7 +14,7 @@ from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
 from galaxykit.utils import wait_for_task
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7.1")

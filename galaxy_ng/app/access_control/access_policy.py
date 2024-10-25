@@ -31,7 +31,7 @@ from galaxy_ng.app.access_control.statements import PULP_VIEWSETS
 log = logging.getLogger(__name__)
 
 
-# TODO this is a function in pulpcore that needs to get moved ot the plugin api.
+# TODO(newswangerd): This is a function in pulpcore that needs to get moved ot the plugin api.
 # from pulpcore.plugin.util import get_view_urlpattern
 def get_view_urlpattern(view):
     """

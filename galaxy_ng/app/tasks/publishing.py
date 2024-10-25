@@ -24,7 +24,7 @@ def get_created_collection_versions():
     created_resources = current_task.created_resources.filter(
         content_type_id=ContentType.objects.get_for_model(CollectionVersion))
 
-    # TODO: replace with values_list
+    # TODO(alikins): replace with values_list
     created_collection_versions = []
     for created_resource in created_resources:
         collection_version = created_resource.content_object

@@ -125,11 +125,13 @@ schema_settings = {
         'GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS': {'type': 'boolean'},
         'GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD': {'type': 'boolean'},
         'GALAXY_FEATURE_FLAGS': {'type': 'object'},
-        'GALAXY_MINIMUM_PASSWORD_LENGTH': {'type': ['number', 'null']},  # FIXME
+        # FIXME(jctanner): No description provided.
+        'GALAXY_MINIMUM_PASSWORD_LENGTH': {'type': ['number', 'null']},
         'GALAXY_REQUIRE_CONTENT_APPROVAL': {'type': 'boolean'},
         'GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL': {'type': 'boolean'},
         'GALAXY_SIGNATURE_UPLOAD_ENABLED': {'type': 'boolean'},
-        'GALAXY_TOKEN_EXPIRATION': {'type': ['number', 'null']},  # FIXME
+        # FIXME(jctanner): No description provided.
+        'GALAXY_TOKEN_EXPIRATION': {'type': ['number', 'null']},
         'GALAXY_CONTAINER_SIGNING_SERVICE': {'type': ['string', 'null']},
     }
 }

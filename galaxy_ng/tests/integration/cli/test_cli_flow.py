@@ -22,7 +22,7 @@ def test_publish_newer_version_collection(galaxy_client, uncertifiedv2):
     If the collection version was not certified the version to be installed
     has to be specified during installation.
     """
-    # FIXME - ^^^ is that really possible?
+    # FIXME(jctanner): ^^^ is that really possible?
     v1 = uncertifiedv2[0]
     v2 = uncertifiedv2[1]
     gc = galaxy_client("basic_user")

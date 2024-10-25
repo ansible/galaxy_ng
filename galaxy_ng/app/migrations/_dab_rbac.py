@@ -29,7 +29,7 @@ def pulp_role_to_single_content_type_or_none(pulprole):
 
 
 def create_permissions_as_operation(apps, schema_editor):
-    # TODO: possibly create permissions for more apps here
+    # TODO(jctanner): possibly create permissions for more apps here
     for app_label in {'ansible', 'container', 'core', 'galaxy'}:
         create_dab_permissions(global_apps.get_app_config(app_label), apps=apps)
 

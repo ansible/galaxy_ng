@@ -114,7 +114,7 @@ class TestRepositories:
 
         test_repo_name_2 = f"repo-test-{generate_random_string()}"
 
-        # FIXME - the POST call will often result in an error with the oci+insights profile ...
+        # FIXME(jctanner): the POST call will often result in an error with the oci+insights profile
         # root:client.py:216 Cannot parse expected JSON response
         # (http://localhost:38080/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/):
         # Post "http://pulp:55001/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/":
@@ -132,7 +132,7 @@ class TestRepositories:
         if repo_pulp_href_2 is None:
             raise Exception("failed to create repo and dist")
 
-        # FIXME - the POST call will often result in an error with the oci+insights profile ...
+        # FIXME(jctanner): The POST call will often result in an error with the oci+insights profile
         # root:client.py:216 Cannot parse expected JSON response
         # (http://localhost:38080/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/
         #   <uuid>/move_collection_version/):

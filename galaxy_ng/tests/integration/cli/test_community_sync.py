@@ -18,7 +18,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 def test_community_collection_download_count_sync(ansible_config):
     """ Test collection download count sync command """
 
-    # FIXME - once beta switches over, this test is no longer needed.
+    # FIXME(jctanner): once beta switches over, this test is no longer needed.
 
     config = ansible_config("admin")
     api_client = get_client(config, require_auth=True)

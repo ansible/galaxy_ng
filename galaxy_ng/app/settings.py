@@ -434,7 +434,7 @@ ANSIBLE_BASE_MANAGED_ROLE_REGISTRY = {
     'galaxy_only_team_member': {'name': 'Galaxy Team Member', 'shortname': 'team_member'},
     'team_member': {},
     'team_admin': {},
-    # TODO: add organization to the registry later
+    # TODO(jctanner): add organization to the registry later
     # 'org_admin': {},
     # 'org_member': {},
 }
