@@ -1,12 +1,16 @@
 namespaces:
   - name: ns_test_1
     group: group_1
+    team: team_1
   - name: ns_test_2
     group: group_1
+    team: team_1
   - name: ns_test_3
     group: group_2
+    team: team_2
   - name: ns_test_4
     group: group_2
+    team: team_2
 
 collections:
   # name is the suffix, collection_dep_a_{name}
@@ -40,22 +44,31 @@ groups:
   - name: group_1
   - name: group_2
 
+teams:
+  - name: team_1
+  - name: team_2
+
+organization: hub_org
+
 users:
   - username: user_1
     password: P@ssword!
     email: email11@email.com
     is_superuser: true
     group: group_1
+    team: team_1
   - username: user_2
     password: P@ssword!
     email: email2@email.com
     is_superuser: true
     group: group_2
+    team: team_2
   - username: user_3
     password: P@ssword!
     email: email3@email.com
     is_superuser: false
     group: group_2
+    team: team_2
 
 repositories:
   - name: repo-test-1

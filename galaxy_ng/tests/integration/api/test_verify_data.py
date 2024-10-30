@@ -1,9 +1,10 @@
 import logging
 import pytest
+from galaxykit.client import BasicAuthClient
 
 from galaxy_ng.tests.integration.conftest import is_hub_4_7_or_higher
 from galaxy_ng.tests.integration.utils.iqe_utils import is_upgrade_from_aap23_hub46, \
-    galaxy_auto_sign_collections, is_upgrade_from_aap22_hub45, is_ocp_env
+    galaxy_auto_sign_collections, is_upgrade_from_aap22_hub45, is_ocp_env, aap_gateway
 from galaxy_ng.tests.integration.utils.repo_management_utils import search_collection_endpoint
 from galaxykit.collections import collection_info
 from galaxykit.groups import get_group_id
@@ -30,12 +31,29 @@ class TestVerifyData:
         Test that verifies the data previously loaded by test_load_data
         """
         gc = galaxy_client("admin")
+        gw_client = None
+        if aap_gateway():
+            gw_client = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
+
         for expected_user in data["users"]:
-            actual_user = get_user(gc, expected_user["username"])
+            if aap_gateway():
+                actual_user = gw_client.get(
+                    f'/api/gateway/v1/users/?username={expected_user["username"]}'
+                )['results'][0]
+            else:
+                actual_user = get_user(gc, expected_user["username"])
+
             assert expected_user["username"] == actual_user["username"]
             assert expected_user["email"] == actual_user["email"]
             assert expected_user["is_superuser"] == actual_user["is_superuser"]
-            assert expected_user["group"] in str(actual_user["groups"])
+
+            if aap_gateway():
+                user_teams = gw_client.get(
+                    f'/api/gateway/v1/users/{actual_user["id"]}/teams/'
+                )['results']
+                assert expected_user["team"] in [team['name'] for team in user_teams]
+            else:
+                assert expected_user["group"] in str(actual_user["groups"])
 
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.verify_data
@@ -43,11 +61,17 @@ class TestVerifyData:
         """
         Test that verifies the data previously loaded by test_load_data
         """
+        org = data.get('organization')
         gc = galaxy_client("admin")
         for expected_ns in data["namespaces"]:
             actual_ns = get_namespace(gc, expected_ns["name"])
             assert expected_ns["name"] == actual_ns["name"]
-            assert expected_ns["group"] in str(actual_ns["groups"])
+
+            if aap_gateway():
+                user_groups = [g['name'] for g in actual_ns['groups']]
+                assert f'{org}::{expected_ns["team"]}' in user_groups
+            else:
+                assert expected_ns["group"] in str(actual_ns["groups"])
 
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.verify_data
@@ -94,13 +118,24 @@ class TestVerifyData:
 
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.verify_data
-    def test_verify_data_groups(self, galaxy_client, data):
+    def test_verify_data_groups(self, galaxy_client, settings, data):
         """
         Test that verifies the data previously loaded by test_load_data
         """
+        org = data.get('organization')
         gc = galaxy_client("admin")
-        for expected_group in data["groups"]:
-            get_group_id(gc, expected_group["name"])
+        if aap_gateway():
+            # in gateway, group is replaced with team
+            data_key = 'teams'
+        else:
+            data_key = 'groups'
+
+        for expected_value in data[data_key]:
+            if aap_gateway():
+                # in gateway, groups are '<organization>::<team>
+                get_group_id(gc, f'{org}::{expected_value["name"]}')
+            else:
+                get_group_id(gc, expected_value["name"])
 
     @pytest.mark.min_hub_version("4.7dev")
     @pytest.mark.skipif(is_upgrade_from_aap23_hub46(), reason=SKIP_MESSAGE_23)
