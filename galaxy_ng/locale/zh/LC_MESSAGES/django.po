@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 13:30+0000\n"
+"POT-Creation-Date: 2024-11-01 05:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,25 +19,25 @@ msgstr ""
 msgid "Back to list"
 msgstr ""
 
-#: app/access_control/access_policy.py:402
+#: app/access_control/access_policy.py:410
 msgid "Namespace in filename not found."
 msgstr "未找到文件名中的命名空间。"
 
-#: app/access_control/access_policy.py:435
+#: app/access_control/access_policy.py:443
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:449
+#: app/access_control/access_policy.py:457
 msgid "Namespace not found."
 msgstr "未找到命名空间。"
 
-#: app/access_control/access_policy.py:518
+#: app/access_control/access_policy.py:526
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:571 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:574 app/api/v3/views/sync.py:49
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
@@ -68,17 +68,16 @@ msgstr "组必须是一个组对象的列表"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "组名=%s, id=%s 不存在"
 
-#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/v1/serializers/user.py:159
+#: app/api/ui/v2/serializers.py:132
 msgid "Invalid group name or ID"
 msgstr "无效的组名称或 ID"
 
 #: app/access_control/fields.py:100
-#| msgid "Groups must be a list of group objects"
 msgid "Users must be a list of user objects"
 msgstr ""
 
 #: app/access_control/fields.py:113
-#| msgid "Invalid group name or ID"
 msgid "Invalid user username or ID"
 msgstr ""
 
@@ -89,68 +88,68 @@ msgid ""
 "object."
 msgstr "角色 {role} 不存在或没有与此对象相关的任何权限。"
 
-#: app/api/ui/serializers/execution_environment.py:64
+#: app/api/ui/v1/serializers/execution_environment.py:64
 msgid "Selected registry does not exist."
 msgstr "所选注册表不存在。"
 
-#: app/api/ui/serializers/execution_environment.py:73
+#: app/api/ui/v1/serializers/execution_environment.py:73
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
 msgstr "容器名称只能包含字母数字，\".\"、\"_\"、\"-\"，以及最多一个 \"/\"。"
 
-#: app/api/ui/serializers/execution_environment.py:91
+#: app/api/ui/v1/serializers/execution_environment.py:91
 msgid "Name cannot be changed."
 msgstr "名称不能更改。"
 
-#: app/api/ui/serializers/synclist.py:38
+#: app/api/ui/v1/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr "创建同步列表时未找到存储库 \"{pulp_id}\""
 
-#: app/api/ui/serializers/synclist.py:65
+#: app/api/ui/v1/serializers/synclist.py:65
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "同步列表已存在：%s"
 
-#: app/api/ui/serializers/synclist.py:73
+#: app/api/ui/v1/serializers/synclist.py:73
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
 "{synclist}"
 msgstr "创建同步列表 {synclist} 时未找到集合 \"{namespace}.{name}\""
 
-#: app/api/ui/serializers/synclist.py:112
+#: app/api/ui/v1/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
 "{synclist}"
 msgstr "更新同步列表 {synclist} 时未找到集合 \"{namespace}.{name}\""
 
-#: app/api/ui/serializers/user.py:75
+#: app/api/ui/v1/serializers/user.py:77
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
 msgstr "更改请求用户不在的用户组需要具有 'galaxy.change_group' 权限。"
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/v1/serializers/user.py:92 app/api/ui/v1/serializers/user.py:98
 msgid "Must be a super user to grant super user permissions."
 msgstr "必须是超级用户才能授予超级用户权限。"
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/v1/serializers/user.py:112
 msgid "Must be a super user to change another user's password."
 msgstr "必须是超级用户才能更改其他用户的密码。"
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/v1/serializers/user.py:128
 msgid "You do not have permissions to modify super users."
 msgstr "您没有修改超级用户的权限。"
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/v1/serializers/user.py:155 app/api/ui/v2/serializers.py:128
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "组名=%(name)s, id=%(id)s 不存在"
 
-#: app/api/ui/views/feature_flags.py:50
+#: app/api/ui/v1/views/feature_flags.py:50
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
@@ -158,7 +157,7 @@ msgstr ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE 设置为 '{}'，但对应的 "
 "SigningService 不数据库中不存在。"
 
-#: app/api/ui/views/feature_flags.py:65
+#: app/api/ui/v1/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
@@ -166,14 +165,14 @@ msgstr ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS 设置为 True，但系统没有配置为使用 "
 "SigningService 来创建签名。"
 
-#: app/api/ui/views/feature_flags.py:76
+#: app/api/ui/v1/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
 msgstr ""
 "INFO:System 配置为显示签名（来自远程同步），但没有配置为创建或接受签名上传。"
 
-#: app/api/ui/views/feature_flags.py:93
+#: app/api/ui/v1/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
@@ -181,7 +180,7 @@ msgstr ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE 设置为 '{}'，但对应的 "
 "SigningService 不数据库中不存在。"
 
-#: app/api/ui/views/feature_flags.py:106
+#: app/api/ui/v1/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
@@ -189,87 +188,108 @@ msgstr ""
 "WARNING: container_signing 通过 '{}' SigningService 启用，但执行环境在系统中"
 "被禁用。"
 
-#: app/api/ui/views/index_execution_environments.py:36
+#: app/api/ui/v1/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
 msgstr "此注册表不支持索引执行环境。"
 
-#: app/api/ui/views/signing.py:71
+#: app/api/ui/v1/views/signing.py:71
 msgid "Missing required field: namespace"
 msgstr "缺少所需字段：namespace"
 
-#: app/api/ui/views/signing.py:88
+#: app/api/ui/v1/views/signing.py:88
 #, python-format
 msgid "No content units found for: %s"
 msgstr "没有找到内容单元： %s"
 
-#: app/api/ui/views/signing.py:103
+#: app/api/ui/v1/views/signing.py:103
 msgid "distro_base_path field is required."
 msgstr "distro_base_path 字段是必需的。"
 
-#: app/api/ui/views/signing.py:108
+#: app/api/ui/v1/views/signing.py:108
 #, python-format
 msgid "Distribution %s does not exist."
 msgstr "发布 %s 不存在。"
 
-#: app/api/ui/views/signing.py:114
+#: app/api/ui/v1/views/signing.py:114
 msgid "signing_service field is required."
 msgstr "signing_service 字段是必需的。"
 
-#: app/api/ui/views/signing.py:117
+#: app/api/ui/v1/views/signing.py:117
 #, python-format
 msgid "Signing service \"%s\" does not exist."
 msgstr "签名服务 \"%s\" 不存在。"
 
-#: app/api/ui/viewsets/collection.py:77
+#: app/api/ui/v1/viewsets/collection.py:77
 msgid "Distribution base path is required"
 msgstr "发布基础路径是必需的"
 
-#: app/api/ui/viewsets/collection.py:197
-#, python-format
-msgid "%s must be a valid semantic version range."
+#: app/api/ui/v1/viewsets/collection.py:197
+msgid "{} must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/viewsets/collection.py:233
+#: app/api/ui/v1/viewsets/collection.py:233
 msgid "Retrieve collection version"
 msgstr "检索集合版本"
 
-#: app/api/ui/viewsets/collection.py:244
+#: app/api/ui/v1/viewsets/collection.py:244
 msgid "Collection version not found for: {}"
 msgstr "未找到集合版本：{}"
 
-#: app/api/ui/viewsets/collection.py:300
+#: app/api/ui/v1/viewsets/collection.py:300
 msgid "Retrieve collection import"
 msgstr "检索集合导入"
 
-#: app/api/ui/viewsets/group.py:45
+#: app/api/ui/v1/viewsets/group.py:45
 #, python-format
 msgid "A group named %s already exists."
 msgstr "名为 %s 的组已存在。"
 
-#: app/api/utils.py:53
+#: app/api/ui/v2/serializers.py:146
+#, python-format
+#| msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgid "Team name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: app/api/ui/v2/serializers.py:150
+#| msgid "Invalid group name or ID"
+msgid "Invalid team name or ID"
+msgstr ""
+
+#: app/api/ui/v2/serializers.py:164
+#, python-format
+#| msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgid "Org name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: app/api/ui/v2/serializers.py:168
+#| msgid "Invalid group name or ID"
+msgid "Invalid org name or ID"
+msgstr ""
+
+#: app/api/utils.py:58
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
 msgstr "无效的文件名 {filename}。预期的格式：namespace-name-version.tar.gz"
 
-#: app/api/utils.py:60
+#: app/api/utils.py:65
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
 "version format."
 msgstr "来自文件名 {filename} 中的无效版本字符串 {version}。预期语义版本格式。"
 
-#: app/api/utils.py:64
+#: app/api/utils.py:69
 #, python-format
 msgid "Expected namespace to be max length of %s"
 msgstr "预期命名空间最大长度为 %s"
 
-#: app/api/utils.py:66
+#: app/api/utils.py:71
 #, python-format
 msgid "Expected name to be max length of %s"
 msgstr "预期名称最大长度为 %s"
 
-#: app/api/utils.py:68
+#: app/api/utils.py:73
 #, python-format
 msgid "Expected version to be max length of %s"
 msgstr "预期版本的最大长度为 %s"
@@ -362,7 +382,7 @@ msgstr "目标仓库中已找到集合 %s"
 msgid "Signing %s service not found"
 msgstr "未找到签名 %s 服务"
 
-#: app/api/v3/viewsets/collection.py:329
+#: app/api/v3/viewsets/collection.py:332
 #, python-brace-format
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
@@ -890,24 +910,24 @@ msgstr ""
 msgid "Data conflicts with existing entity."
 msgstr "数据与现有实体冲突。"
 
-#: app/management/commands/populate-role-tags.py:20
+#: app/management/commands/populate-role-tags.py:19
 msgid ""
 "Populate the 'LegacyRoleTag' model with tags from LegacyRole "
 "'full_metadata__tags'."
 msgstr ""
 
-#: app/tasks/index_registry.py:28
+#: app/tasks/index_registry.py:27
 #, python-brace-format
 msgid "Failed to create container {remote_name}. {error}"
 msgstr "创建容器失败 {remote_name}. {error}"
 
-#: app/tasks/index_registry.py:92
+#: app/tasks/index_registry.py:90
 msgid ""
 "A remote container with this name already exists, but is not associated with "
 "any registry."
 msgstr "具有此名称的远程容器已存在，但不与任何注册表关联。"
 
-#: app/tasks/index_registry.py:99
+#: app/tasks/index_registry.py:97
 msgid "A local container with this name already exists."
 msgstr "具有此名称的本地容器已经存在。"
 
