@@ -113,6 +113,7 @@ requirements = [
     "marshmallow<4.0.0,>=3.6.1",
     "django-picklefield<4.0.0,>=3.0.1",
     "django-ipware<4.0.0,>=3.0.0",
+    "django-flags",
 ]
 
 

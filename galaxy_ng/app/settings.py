@@ -111,6 +111,7 @@ INSTALLED_APPS = [
     'ansible_base.rbac',
     'social_django',
     'dynaconf_merge_unique',
+    'flags',
 ]
 
 LOGGING = {
@@ -130,6 +131,21 @@ LOGGING = {
     },
     "dynaconf_merge": True,
 }
+
+FLAGS = {}
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+            ],
+        },
+    },
+]
 
 
 AUTH_USER_MODEL = 'galaxy.User'
