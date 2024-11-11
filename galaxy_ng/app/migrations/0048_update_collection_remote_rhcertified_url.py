@@ -2,12 +2,12 @@ from django.db import migrations
 
 def update_collection_remote_rhcertified_url(apps, schema_editor):
     """
-    Updates the existing collection remote `rh-certified` url field  
+    Updates the existing collection remote `rh-certified` url field
     to add `content/published/`.
     """
-    
+
     CollectionRemote = apps.get_model('ansible', 'CollectionRemote')
-    
+
     rh_remote = CollectionRemote.objects.filter(name='rh-certified').first()
 
     if rh_remote and rh_remote.url == 'https://console.redhat.com/api/automation-hub/':

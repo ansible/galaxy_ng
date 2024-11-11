@@ -135,7 +135,7 @@ class LegacyRolesViewSet(viewsets.ModelViewSet):
                 role.full_metadata[key] = newval
                 changed[key] = newval
 
-            # TODO - get rid of github_reference?
+            # TODO(jctanner): get rid of github_reference?
             if key == 'github_branch':
                 key = 'github_reference'
                 if role.full_metadata.get(key) != newval:
@@ -245,7 +245,7 @@ class LegacyRoleImportsViewSet(viewsets.ModelViewSet, LegacyTasksMixin):
         """
         if request.query_params.get('id'):
             return self.get_task(request, id=int(request.query_params['id']))
-        return super(LegacyRoleImportsViewSet, self).list(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         """

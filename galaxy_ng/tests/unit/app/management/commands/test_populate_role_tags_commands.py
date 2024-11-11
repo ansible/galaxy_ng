@@ -7,7 +7,7 @@ from galaxy_ng.app.api.v1.models import LegacyNamespace, LegacyRole, LegacyRoleT
 class TestPopulateRoleTagsCommand(TestCase):
 
     def _load_role(self, namespace, role, tags):
-        full_metadata = dict(tags=tags)
+        full_metadata = {"tags": tags}
         ln = LegacyNamespace.objects.get_or_create(name=namespace)
         LegacyRole.objects.get_or_create(name=role, namespace=ln[0], full_metadata=full_metadata)
 

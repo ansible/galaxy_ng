@@ -6,7 +6,6 @@ def remove_inbound_repos(apps, schema_editor):
 
     AnsibleDistribution = apps.get_model('ansible', 'AnsibleDistribution')
     AnsibleRepository = apps.get_model('ansible', 'AnsibleRepository')
-    RepositoryContent = apps.get_model('core', 'RepositoryContent')
 
     repos = AnsibleRepository.objects.filter(name__startswith="inbound-")
 

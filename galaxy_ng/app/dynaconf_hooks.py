@@ -426,14 +426,13 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
 
     # galaxy sessionauth -must- always come first ...
     galaxy_session = "galaxy_ng.app.auth.session.SessionAuthentication"
-    if galaxy_auth_classes:
-        # Check if galaxy_session is already the first element
-        if galaxy_auth_classes[0] != galaxy_session:
-            # Remove galaxy_session if it exists in the list
-            if galaxy_session in galaxy_auth_classes:
-                galaxy_auth_classes.remove(galaxy_session)
-            # Insert galaxy_session at the beginning of the list
-            galaxy_auth_classes.insert(0, galaxy_session)
+    # Check if galaxy_session is already the first element
+    if galaxy_auth_classes and galaxy_auth_classes[0] != galaxy_session:
+        # Remove galaxy_session if it exists in the list
+        if galaxy_session in galaxy_auth_classes:
+            galaxy_auth_classes.remove(galaxy_session)
+        # Insert galaxy_session at the beginning of the list
+        galaxy_auth_classes.insert(0, galaxy_session)
 
     if galaxy_auth_classes:
         data["ANSIBLE_AUTHENTICATION_CLASSES"] = list(galaxy_auth_classes)
@@ -654,7 +653,7 @@ def validate(settings: Dynaconf) -> None:
     settings.validators.register(
         Validator(
             "AUTHENTICATION_BACKEND_PRESET",
-            is_in=["local", "custom"] + list(presets.keys()),
+            is_in=["local", "custom", *presets.keys()],
         )
     )
 
@@ -788,7 +787,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
 
 def configure_dab_required_settings(settings: Dynaconf) -> Dict[str, Any]:
     dab_settings = get_dab_settings(
-        installed_apps=settings.INSTALLED_APPS + ['ansible_base.jwt_consumer'],
+        installed_apps=[*settings.INSTALLED_APPS, 'ansible_base.jwt_consumer'],
         rest_framework=settings.REST_FRAMEWORK,
         spectacular_settings=settings.SPECTACULAR_SETTINGS,
         authentication_backends=settings.AUTHENTICATION_BACKENDS,

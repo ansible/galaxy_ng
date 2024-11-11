@@ -95,17 +95,17 @@ class TestAutomationAnalyticsCollector(TestCase):
                 files[member.name] = archive.extractfile(member)
 
             # files added automatically
-            assert './manifest.json' in files.keys()
-            assert './data_collection_status.csv' in files.keys()
+            assert './manifest.json' in files
+            assert './data_collection_status.csv' in files
 
             # required files
-            assert './config.json' in files.keys()  # required file
+            assert './config.json' in files  # required file
 
             # Wrong data are not part of the tarball
-            assert './bad_json.json' not in files.keys()
-            assert './json_exception.json' not in files.keys()
-            assert './bad_csv.csv' not in files.keys()
-            assert './csv_exception.csv' not in files.keys()
+            assert './bad_json.json' not in files
+            assert './json_exception.json' not in files
+            assert './bad_csv.csv' not in files
+            assert './csv_exception.csv' not in files
 
     def test_correct_gather(self):
         collector = Collector(
@@ -123,17 +123,17 @@ class TestAutomationAnalyticsCollector(TestCase):
                 files[member.name] = archive.extractfile(member)
 
             # files added automatically
-            assert './manifest.json' in files.keys()
-            assert './data_collection_status.csv' in files.keys()
+            assert './manifest.json' in files
+            assert './data_collection_status.csv' in files
 
             # files/data collected by @register decorator
-            assert './config.json' in files.keys()  # required file
-            assert './example1.json' in files.keys()
+            assert './config.json' in files  # required file
+            assert './example1.json' in files
             assert json.loads(files['./example1.json'].read()) == {'galaxy': 123}
-            assert './example2.json' in files.keys()
+            assert './example2.json' in files
 
             # not in chosen subset
-            assert './example3.json' not in files.keys()
+            assert './example3.json' not in files
 
         try:
             for tgz in tgzfiles:

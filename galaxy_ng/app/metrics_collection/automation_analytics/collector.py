@@ -41,13 +41,13 @@ class Collector(BaseCollector):
         return auth_valid
 
     def _last_gathering(self):
-        # TODO: Waiting for persistent DB storage in Hub
+        # TODO(slemrmartin): Waiting for persistent DB storage in Hub
         # https://issues.redhat.com/browse/AAH-2009
         # return settings.AUTOMATION_ANALYTICS_LAST_GATHER
         return None
 
     def _load_last_gathered_entries(self):
-        # TODO: Waiting for persistent DB storage in Hub
+        # TODO(slemrmartin): Waiting for persistent DB storage in Hub
         # https://issues.redhat.com/browse/AAH-2009
         # from awx.conf.models import Setting
         #
@@ -59,11 +59,11 @@ class Collector(BaseCollector):
         return last_gathered_entries
 
     def _save_last_gathered_entries(self, last_gathered_entries):
-        # TODO: Waiting for persistent DB storage in Hub
+        # TODO(slemrmartin): Waiting for persistent DB storage in Hub
         # https://issues.redhat.com/browse/AAH-2009
         pass
 
     def _save_last_gather(self):
-        # TODO: Waiting for persistent DB storage in Hub
+        # TODO(slemrmartin): Waiting for persistent DB storage in Hub
         # https://issues.redhat.com/browse/AAH-2009
         pass

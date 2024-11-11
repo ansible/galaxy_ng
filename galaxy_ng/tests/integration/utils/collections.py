@@ -1,5 +1,5 @@
 """Utility functions for AH tests."""
-
+import contextlib
 import logging
 import os
 import shutil
@@ -60,8 +60,8 @@ def build_collection(
     version=None,
     dependencies=None,
     requires_ansible='>=2.13.0',
-    roles=['docker_role'],
-    use_orionutils=False
+    roles=None,
+    use_orionutils=False,
 ) -> ArtifactFile:
 
     """Assemble a collection tarball from given parameters.
@@ -97,6 +97,9 @@ def build_collection(
             "version": None,
             "tags": []
         }
+
+    if roles is None:
+        roles = ["docker_role"]
 
     # use order of precedence to set the config ...
     for ckey in ['namespace', 'name', 'version', 'dependencies', 'tags']:
@@ -146,8 +149,7 @@ def build_collection(
             cmd,
             shell=True,
             cwd=tdir,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            capture_output=True,
         )
         assert pid.returncode == 0, str(pid.stdout.decode('utf-8')) \
             + str(pid.stderr.decode('utf-8'))
@@ -160,15 +162,14 @@ def build_collection(
                     cmd,
                     shell=True,
                     cwd=rolesdir,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
+                    capture_output=True,
                 )
                 assert pid2.returncode == 0, str(pid2.stdout.decode('utf-8')) \
                     + str(pid2.stderr.decode('utf-8'))
 
         # fix galaxy.yml
         galaxy_file = os.path.join(basedir, 'galaxy.yml')
-        with open(galaxy_file, 'r') as f:
+        with open(galaxy_file) as f:
             meta = yaml.safe_load(f.read())
         meta.update(config)
         with open(galaxy_file, 'w') as f:
@@ -210,8 +211,7 @@ def build_collection(
             cmd,
             shell=True,
             cwd=basedir,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE
+            capture_output=True,
         )
         assert pid3.returncode == 0, str(pid3.stdout.decode('utf-8')) \
             + str(pid3.stderr.decode('utf-8'))
@@ -234,7 +234,13 @@ def build_collection(
 
 
 def upload_artifact(
-    config, client, artifact, hash=True, no_filename=False, no_file=False, use_distribution=False
+    config,
+    client,
+    artifact,
+    hash=True,  # noqa: A002
+    no_filename=False,
+    no_file=False,
+    use_distribution=False
 ):
     """
     Publishes a collection to a Galaxy server and returns the import task URI.
@@ -255,7 +261,7 @@ def upload_artifact(
     def to_bytes(s, errors=None):
         return s.encode("utf8")
 
-    boundary = "--------------------------%s" % uuid.uuid4().hex
+    boundary = "--------------------------" + uuid.uuid4().hex
     file_name = os.path.basename(collection_path)
     part_boundary = b"--" + to_bytes(boundary, errors="surrogate_or_strict")
 
@@ -298,7 +304,7 @@ def upload_artifact(
     data = b"\r\n".join(form)
 
     headers = {
-        "Content-Type": "multipart/form-data; boundary=%s" % boundary,
+        "Content-Type": f"multipart/form-data; boundary={boundary}",
         "Content-length": len(data),
     }
 
@@ -328,18 +334,17 @@ def modify_artifact(artifact):
     filename = artifact.filename
     with tempfile.TemporaryDirectory() as dirpath:
         # unpack
-        tf = tarfile.open(filename)
-        tf.extractall(dirpath)
+        with tarfile.open(filename) as tf:
+            tf.extractall(dirpath)
 
         try:
             yield dirpath
 
         finally:
             # re-pack
-            tf = tarfile.open(filename, "w:gz")
-            for name in os.listdir(dirpath):
-                tf.add(os.path.join(dirpath, name), name)
-            tf.close()
+            with tarfile.open(filename, "w:gz") as tf:
+                for name in os.listdir(dirpath):
+                    tf.add(os.path.join(dirpath, name), name)
 
 
 def get_collections_namespace_path(namespace):
@@ -359,19 +364,18 @@ def set_certification(config, gc, collection, level="published", hub_4_5=False):
     do not have auto-certification enabled.
     """
 
-    if hub_4_5:
-        if config["use_move_endpoint"]:
-            url = (
-                f"v3/collections/{collection.namespace}/{collection.name}/versions/"
-                f"{collection.version}/move/staging/published/"
-            )
+    if hub_4_5 and config["use_move_endpoint"]:
+        url = (
+            f"v3/collections/{collection.namespace}/{collection.name}/versions/"
+            f"{collection.version}/move/staging/published/"
+        )
 
-            gc.post(url, b"{}")
-            dest_url = (
-                f"v3/collections/{collection.namespace}/"
-                f"{collection.name}/versions/{collection.version}/"
-            )
-            return wait_for_url(gc, dest_url)
+        gc.post(url, b"{}")
+        dest_url = (
+            f"v3/collections/{collection.namespace}/"
+            f"{collection.name}/versions/{collection.version}/"
+        )
+        return wait_for_url(gc, dest_url)
 
     # exit early if config is set to auto approve
     if not config["use_move_endpoint"]:
@@ -386,10 +390,10 @@ def set_certification(config, gc, collection, level="published", hub_4_5=False):
 
     if config["upload_signatures"]:
         # Write manifest to temp file
-        tf = tarfile.open(collection.filename, mode="r:gz")
         tdir = tempfile.TemporaryDirectory()
-        keyring = tempfile.NamedTemporaryFile("w")
-        tf.extract("MANIFEST.json", tdir.name)
+        keyring = tempfile.NamedTemporaryFile("w")  # noqa: SIM115
+        with tarfile.open(collection.filename, mode="r:gz") as tf:
+            tf.extract("MANIFEST.json", tdir.name)
 
         # Setup local keystore
         # gpg --no-default-keyring --keyring trustedkeys.gpg
@@ -447,7 +451,7 @@ def set_certification(config, gc, collection, level="published", hub_4_5=False):
         repository_pulp_href = gc.get(rep_obj_url)["results"][0]["pulp_href"]
         artifact_obj_url = f"_ui/v1/repo/staging/{collection.namespace}/" f"{collection.name}/"
         all_versions = gc.get(artifact_obj_url)["all_versions"]
-        one_version = [v for v in all_versions if v["version"] == collection.version][0]
+        one_version = next(v for v in all_versions if v["version"] == collection.version)
         artifact_pulp_id = one_version["id"]
         artifact_pulp_href = (
             "/"
@@ -529,7 +533,7 @@ def get_all_collections_by_repo(gc):
         'community': {},
         'rh-certified': {},
     }
-    for repo in collections.keys():
+    for repo in collections:
         next_page = f'{gc.galaxy_root}_ui/v1/collection-versions/?repository={repo}'
         while next_page:
             resp = gc.get(next_page)
@@ -586,13 +590,10 @@ def get_all_repository_collection_versions(gc):
                 collection_versions.append(cv)
             next_page = resp.get('links', {}).get('next')
 
-    rcv = dict(
-        (
-            (x['repository'], x['namespace'], x['name'], x['version']),
-            x
-        )
+    rcv = {
+        (x['repository'], x['namespace'], x['name'], x['version']): x
         for x in collection_versions
-    )
+    }
     return rcv
 
 
@@ -620,14 +621,12 @@ def delete_all_collections(api_client):
 
             # if other collections require this one, the delete will fail
             resp = None
-            try:
+            with contextlib.suppress(GalaxyError):
                 resp = api_client(
                     (f'{api_prefix}/v3/plugin/ansible/content'
                         f'/{crepo}/collections/index/{namespace_name}/{cname}/'),
                     method='DELETE'
                 )
-            except GalaxyError:
-                pass
 
             if resp is not None:
                 wait_for_task(api_client, resp, timeout=10000)
@@ -644,7 +643,7 @@ def delete_all_collections_in_namespace(api_client, namespace_name):
     gc = galaxy_client("admin")
     cmap = get_all_collections_by_repo(gc)
     for repo, cvs in cmap.items():
-        for cv_spec in cvs.keys():
+        for cv_spec in cvs:
             if cv_spec[0] == namespace_name:
                 ctuples.add((repo, cv_spec[0], cv_spec[1]))
 
@@ -664,12 +663,12 @@ def recursive_delete(api_client, namespace_name, cname, crepo):
     """Recursively delete a collection along with every other collection that depends on it."""
     api_prefix = api_client.config.get("api_prefix").rstrip("/")
 
-    dependants = set([
+    dependants = {
         (cv["namespace"], cv["name"]) for cv in iterate_all(
             api_client,
             f"_ui/v1/collection-versions/?dependency={namespace_name}.{cname}"
         )
-    ])
+    }
 
     if dependants:
         for ns, name in dependants:
@@ -689,7 +688,7 @@ def recursive_delete(api_client, namespace_name, cname, crepo):
     try:
         gng_wait_for_task(api_client, resp, timeout=10000)
     except GalaxyError as ge:
-        # FIXME - pulp tasks do not seem to accept token auth
+        # FIXME(jctanner): pulp tasks do not seem to accept token auth
         if ge.http_code in [403, 404]:
             time.sleep(SLEEP_SECONDS_ONETIME)
         else:
@@ -707,10 +706,8 @@ def setup_multipart(path: str, data: dict) -> dict:
         b'Content-Disposition: file; name="file"; filename="%s"' % filename.encode("ascii"),
         b"Content-Type: application/octet-stream",
     ]
-    buffer += [
-        b"",
-        open(path, "rb").read(),
-    ]
+    with open(path, "rb") as fp:
+        buffer += [b"", fp.read()]
 
     for name, value in data.items():
         add_multipart_field(boundary, buffer, name, value)
@@ -721,8 +718,9 @@ def setup_multipart(path: str, data: dict) -> dict:
 
     data = b"\r\n".join(buffer)
     headers = {
-        "Content-Type": "multipart/form-data; boundary=%s"
-        % boundary[2:].decode("ascii"),  # strip --
+        "Content-Type": "multipart/form-data; boundary={}".format(
+            boundary[2:].decode("ascii")  # strip --
+        ),
         "Content-length": len(data),
     }
 
@@ -769,12 +767,12 @@ def delete_all_collections_in_namespace_gk(gc_admin, namespace_name):
 
 def recursive_delete_gk(gc_admin, namespace_name, cname, crepo="published"):
     """Recursively delete a collection along with every other collection that depends on it."""
-    dependants = set([
+    dependants = {
         (cv["namespace"], cv["name"]) for cv in iterate_all_gk(
             gc_admin,
             f"_ui/v1/collection-versions/?dependency={namespace_name}.{cname}"
         )
-    ])
+    }
 
     if dependants:
         for ns, name in dependants:
@@ -785,12 +783,11 @@ def recursive_delete_gk(gc_admin, namespace_name, cname, crepo="published"):
         resp = delete_collection(gc_admin, namespace=namespace_name, collection=cname)
     except GalaxyClientError as ge:
         print(ge)
-        pass
     # wait for the orphan_cleanup job to finish ...
     try:
         wait_for_task(gc_admin, resp, timeout=10000)
     except GalaxyError as ge:
-        # FIXME - pulp tasks do not seem to accept token auth
+        # FIXME(chr-stian): pulp tasks do not seem to accept token auth
         if ge.http_code in [403, 404]:
             time.sleep(SLEEP_SECONDS_ONETIME)
         else:

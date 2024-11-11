@@ -12,7 +12,7 @@ def create_inbound_repo_per_namespace(apps, schema_editor):
             name=name,
             pulp_type='ansible.ansible',
         )
-        distro = AnsibleDistribution.objects.using(db_alias).create(
+        AnsibleDistribution.objects.using(db_alias).create(
             name=name,
             base_path=name,
             repository=repo,

@@ -65,7 +65,7 @@ class UserSerializer(serializers.ModelSerializer):
         group_set = set(groups)
         instance_group_set = set()
         if self.instance:
-            instance_group_set = set(list(self.instance.groups.all()))
+            instance_group_set = set(self.instance.groups.all())
 
         group_difference = instance_group_set.symmetric_difference(group_set)
 
@@ -166,7 +166,7 @@ class CurrentUserSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         model = auth_models.User
-        fields = UserSerializer.Meta.fields + ('model_permissions', 'is_anonymous',)
+        fields = (*UserSerializer.Meta.fields, 'model_permissions', 'is_anonymous')
         extra_kwargs = dict(
             groups={'read_only': True},
             **UserSerializer.Meta.extra_kwargs

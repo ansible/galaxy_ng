@@ -1,5 +1,3 @@
-import django.core.validators
-from django.db import migrations
 import hashlib
 import json
 
@@ -10,7 +8,7 @@ def calculate_metadata_sha256(metadata):
     """Calculates the metadata_sha256 from the other metadata fields."""
     metadata_json = json.dumps(metadata, sort_keys=True).encode("utf-8")
     hasher = hashlib.sha256(metadata_json)
-    
+
     return hasher.hexdigest()
 
 
@@ -36,7 +34,7 @@ def add_pulp_ansible_namespace_metadata_objects(apps, schema_editor):
 
     for old_ns in Namespace.objects.all():
         new_ns = AnsibleNamespace.objects.create(name=old_ns.name)
-        links = {l.name: l.url for l in old_ns.links.all()}
+        links = {link.name: link.url for link in old_ns.links.all()}
 
         metadata = {
             "company": old_ns.company,
@@ -50,7 +48,7 @@ def add_pulp_ansible_namespace_metadata_objects(apps, schema_editor):
         # skip metadata creation for namespaces with no data.
         create_metadata = False
         for f in metadata:
-            if metadata[f] not in ('', dict(), None):
+            if metadata[f] not in ('', {}, None):
                 create_metadata = True
                 break
 
@@ -66,22 +64,7 @@ def add_pulp_ansible_namespace_metadata_objects(apps, schema_editor):
             )
 
             old_ns.last_created_pulp_metadata = ns_metadata
-            old_ns.save
-
-        # we'll have to handle permissions separately when we move over to the pulp ansible
-        # namespaces
-        # roles = GroupRole.objects.filter(object_id=old_ns.pk, content_type=old_ns_type)
-
-        # # Migrate permissions
-        # group_roles = [
-        #     GroupRole(
-        #         group=r.group,
-        #         role=r.role,
-        #         content_type=new_ns_type,
-        #         object_id=new_ns.pk
-        #     ) for r in roles]
-        
-        # GroupRole.objects.bulk_create(group_roles)
+            old_ns.save()
 
 
 def add_namespace_metadata_to_published_repository(apps, schema_editor):
@@ -91,7 +74,7 @@ def add_namespace_metadata_to_published_repository(apps, schema_editor):
     RepositoryContent = apps.get_model('core', 'RepositoryContent')
     RepositoryVersion = apps.get_model('core', 'RepositoryVersion')
     RepositoryVersionContentDetails = apps.get_model('core', 'RepositoryVersionContentDetails')
-    
+
     repo = AnsibleDistribution.objects.get(base_path="published").repository
     repo_v = RepositoryVersion.objects.filter(repository=repo).order_by("-number").first()
 

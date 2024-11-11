@@ -37,7 +37,7 @@ DECLARE
     to_version   UUID;
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM ansible_collectionversion cv WHERE cv.certification = filter) THEN
-        RAISE NOTICE 'Nothing to migrate from %, to %, filter %', 
+        RAISE NOTICE 'Nothing to migrate from %, to %, filter %',
             from_repo_name, to_repo_name, filter;
         RETURN;
     END IF;
@@ -70,11 +70,11 @@ LOCK TABLE
     core_repositorycontent,
     ansible_collectionversion
 IN ACCESS EXCLUSIVE MODE;
-    
+
 SELECT _move_collection_versions_by_certification(
     'published', 'rejected', 'not_certified'
 );
-               
+
 SELECT _move_collection_versions_by_certification(
     'published', 'staging', 'needs_review'
 );

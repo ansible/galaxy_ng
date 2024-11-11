@@ -24,12 +24,12 @@ def call_sign_and_move_task(signing_service, collection_version, source_repo, de
     return dispatch(
         sign_and_move,
         exclusive_resources=[source_repo, dest_repo],
-        kwargs=dict(
-            signing_service_pk=signing_service.pk,
-            collection_version_pk=collection_version.pk,
-            source_repo_pk=source_repo.pk,
-            dest_repo_pk=dest_repo.pk,
-        )
+        kwargs={
+            "signing_service_pk": signing_service.pk,
+            "collection_version_pk": collection_version.pk,
+            "source_repo_pk": source_repo.pk,
+            "dest_repo_pk": dest_repo.pk,
+        }
     )
 
 
@@ -45,7 +45,7 @@ def sign_and_move(signing_service_pk, collection_version_pk, source_repo_pk, des
 
     # Move content from source to destination
     move_collection(
-        cv_pk_list=[collection_version_pk, ],
+        cv_pk_list=[collection_version_pk],
         src_repo_pk=source_repo_pk,
         dest_repo_list=[dest_repo_pk],
     )
@@ -68,9 +68,9 @@ def call_sign_task(signing_service, repository, content_units):
     return dispatch(
         sign,
         exclusive_resources=[repository],
-        kwargs=dict(
-            repository_href=repository.pk,
-            content_hrefs=content_units,
-            signing_service_href=signing_service.pk
-        )
+        kwargs={
+            "repository_href": repository.pk,
+            "content_hrefs": content_units,
+            "signing_service_href": signing_service.pk,
+        }
     )

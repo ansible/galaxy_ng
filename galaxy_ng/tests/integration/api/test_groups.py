@@ -70,7 +70,8 @@ def test_gw_group_role_listing(galaxy_client, settings, test_data):
     assert f'/groups/{group_response["id"]}/' in group_roles_response["results"][0]["pulp_href"]
 
     delete_group_v3(gc, group_name)
-    with pytest.raises(ValueError):
+
+    with pytest.raises(ValueError, match=fr"^No group '{group_name}' found\.$"):
         get_group_v3(gc, group_name)
 
 

@@ -18,16 +18,16 @@ class Package(InsightsAnalyticsPackage):
         return False
 
     def _get_rh_user(self):
-        return os.environ["aws_access_key_id"]
+        return os.environ["aws_access_key_id"]  # noqa: SIM112
 
     def _get_rh_password(self):
-        return os.environ["aws_secret_access_key"]
+        return os.environ["aws_secret_access_key"]  # noqa: SIM112
 
     def _get_rh_region(self):
-        return os.environ["aws_region"]
+        return os.environ["aws_region"]  # noqa: SIM112
 
     def _get_rh_bucket(self):
-        return os.environ["aws_bucket"]
+        return os.environ["aws_bucket"]  # noqa: SIM112
 
     def get_s3_configured(self):
         return True

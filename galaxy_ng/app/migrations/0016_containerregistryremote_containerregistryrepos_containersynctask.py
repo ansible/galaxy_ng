@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import django_lifecycle.mixins
 import galaxy_ng.app.access_control.mixins
 
 

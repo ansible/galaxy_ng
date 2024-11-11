@@ -74,7 +74,7 @@ def get_v3_namespace_owners(namespace: Namespace) -> list:
     """
     Return a list of users that own a v3 namespace.
     """
-    owners = list()
+    owners = []
     current_groups = get_groups_with_perms_attached_roles(
         namespace,
         include_model_permissions=False

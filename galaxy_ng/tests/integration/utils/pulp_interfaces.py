@@ -1,3 +1,5 @@
+import contextlib
+
 from galaxy_ng.tests.integration.utils import (
     wait_for_task, wait_for_all_tasks
 )
@@ -15,10 +17,8 @@ class PulpObjectBase:
 
     def cleanup(self):
         for href in self.cleanup_hrefs:
-            try:
+            with contextlib.suppress(Exception):
                 self.client(href, method="DELETE")
-            except:  # noqa
-                pass
 
         wait_for_all_tasks(self.client)
 

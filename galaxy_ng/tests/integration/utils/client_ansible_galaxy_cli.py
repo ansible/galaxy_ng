@@ -4,8 +4,7 @@ import re
 import shutil
 import tempfile
 import time
-
-from subprocess import run, PIPE
+import subprocess
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 
@@ -59,9 +58,8 @@ def ansible_galaxy(
             f.write(f"url={url}\n")
         else:
             f.write(f"url={server_url}\n")
-        if ansible_config:
-            if ansible_config.get('auth_url'):
-                f.write(f"auth_url={auth_url}\n")
+        if ansible_config and ansible_config.get('auth_url'):
+            f.write(f"auth_url={auth_url}\n")
         f.write('validate_certs=False\n')
 
         # if force_token we can't set a user&pass or core will always
@@ -75,9 +73,15 @@ def ansible_galaxy(
 
     command_string = f"ansible-galaxy {command} -vvv --server={server} --ignore-certs"
 
-    for x in range(0, retries + 1):
+    for x in range(retries + 1):
         try:
-            p = run(command_string, cwd=tdir, shell=True, stdout=PIPE, stderr=PIPE, env=os.environ)
+            p = subprocess.run(
+                command_string,
+                cwd=tdir,
+                shell=True,
+                capture_output=True,
+                env=os.environ,
+            )
             logger.debug(f"RUN [retry #{x}] {command_string}")
             logger.debug("STDOUT---")
             for line in p.stdout.decode("utf8").split("\n"):

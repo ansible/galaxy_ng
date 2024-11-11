@@ -14,7 +14,7 @@ class TestPermissions(BaseTestCase):
             for perm in LOCKED_ROLES[role]["permissions"]:
                 role_permissions.add(perm)
 
-        constant_permissions = {x for x in PERMISSIONS}
+        constant_permissions = set(PERMISSIONS)
 
         # Synclist permissions shouldn't be exposed to the end user
         ignored_permissions = {

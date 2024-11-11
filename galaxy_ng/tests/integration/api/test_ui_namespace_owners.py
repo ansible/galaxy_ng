@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import copy
 import random
 
@@ -21,12 +19,12 @@ def test_api_ui_v1_namespace_owners_users_and_group_separation(ansible_config):
     # Namespace owners should have a list of users that are directly added as owners.
     # That list of users should -not- include users of groups that have been
     # added as owners.
-    # TODO: make this test compatible with GW
+    # TODO(chr-stian): make this test compatible with GW
 
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
-        suffix = random.choice(range(0, 1000))
+        suffix = random.choice(range(1000))
         group_name = f'group{suffix}'
         user_name = f'user{suffix}'
         namespace_name = f'namespace{suffix}'

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import pytest
 from jsonschema import validate as validate_json
 
@@ -37,7 +35,7 @@ def test_api_v3_plugin_execution_environments_repositories_content_history(
 
 
 # /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/images/
-# /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/images/{manifest_ref}/
+# /api/automation-hub/v3/plugin/execution-environments/repositories/{base_path}/_content/images/{manifest_ref}/  # noqa: E501
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.7dev")
 def test_api_v3_plugin_execution_environments_repositories_content_images(

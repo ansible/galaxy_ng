@@ -82,11 +82,11 @@ def add_required_dab_attributes_to_models():
             "reverse_name": "content-ansible/collection_signatures-detail"
         },
         pulp_ansible_models.CollectionVersion: {
-            "summary_fields": common_summary_fields + ("version",),
+            "summary_fields": (*common_summary_fields, "version"),
             "reverse_name": "content-ansible/collection_versions-detail"
         },
         pulp_ansible_models.Collection: {
-            "summary_fields": common_summary_fields + ("namespace",),
+            "summary_fields": (*common_summary_fields, "namespace"),
             "reverse_name": "ansible/collections-detail"
         },
         pulp_ansible_models.CollectionRemote: {
@@ -98,7 +98,7 @@ def add_required_dab_attributes_to_models():
             "reverse_name": "repositories-ansible/ansible-detail"
         },
         galaxy_collectionimport_models.CollectionImport: {
-            "summary_fields": common_summary_fields + ("version",),
+            "summary_fields": (*common_summary_fields, "version"),
             "reverse_name": "galaxy:api:v3:collection-imports-detail"
         },
         galaxy_namespace_models.NamespaceLink: {

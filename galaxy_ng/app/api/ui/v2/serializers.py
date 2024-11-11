@@ -117,7 +117,7 @@ class UserCreateUpdateDeleteSerializer(UserDetailSerializer):
         if groups is not None:
             for group_dict in groups:
                 group_filter = {}
-                for field in group_dict.keys():
+                for field in group_dict:
                     if field in ('id', 'name'):
                         group_filter[field] = group_dict[field]
 
@@ -136,7 +136,7 @@ class UserCreateUpdateDeleteSerializer(UserDetailSerializer):
         if teams is not None:
             for team_dict in teams:
                 team_filter = {}
-                for field in team_dict.keys():
+                for field in team_dict:
                     if field in ('id', 'name'):
                         team_filter[field] = team_dict[field]
                 try:
@@ -154,7 +154,7 @@ class UserCreateUpdateDeleteSerializer(UserDetailSerializer):
         if organizations is not None:
             for org_dict in organizations:
                 org_filter = {}
-                for field in org_dict.keys():
+                for field in org_dict:
                     if field in ('id', 'name'):
                         org_filter[field] = org_dict[field]
                 try:

@@ -1,7 +1,6 @@
 import logging
 
 from django.apps import apps as global_apps
-from django.contrib.contenttypes.models import ContentType
 from rest_framework.exceptions import ValidationError
 
 from ansible_base.rbac.management import create_dab_permissions
@@ -23,14 +22,14 @@ ROLEDEF_TO_PULP = {
 
 
 def pulp_role_to_single_content_type_or_none(pulprole):
-    content_types = set(perm.content_type for perm in pulprole.permissions.all())
-    if len(list(content_types)) == 1:
-        return list(content_types)[0]
+    content_types = {perm.content_type for perm in pulprole.permissions.all()}
+    if len(content_types) == 1:
+        return next(iter(content_types))
     return None
 
 
 def create_permissions_as_operation(apps, schema_editor):
-    # TODO: possibly create permissions for more apps here
+    # TODO(jctanner): possibly create permissions for more apps here
     for app_label in {'ansible', 'container', 'core', 'galaxy'}:
         create_dab_permissions(global_apps.get_app_config(app_label), apps=apps)
 
@@ -53,7 +52,7 @@ def split_pulp_roles(apps, schema_editor):
         for assignment_cls in (UserRole, GroupRole):
             for pulp_assignment in assignment_cls.objects.filter(role=corerole, content_type__isnull=False):
                 if pulp_assignment.content_type_id not in split_roles:
- 
+
                     # Get all permissions relevant to this content model.
                     # If any model (like synclist) hasn't been registered in the permission
                     # system, it should not be split/recreated ...

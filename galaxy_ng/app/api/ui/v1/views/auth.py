@@ -88,7 +88,7 @@ class LogoutView(api_base.APIView):
             log.warning(msg)
             return
 
-        # FIXME - workaround for custom json type from dynaconf
+        # FIXME(newswangerd): workaround for custom json type from dynaconf
         if isinstance(social.extra_data, dict):
             extra_data = social.extra_data
         else:

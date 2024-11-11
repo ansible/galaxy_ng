@@ -27,10 +27,10 @@ def get_changed_files(pr_branch, target_branch="master"):
         cmd = f'curl -s -o /tmp/pr.diff {url}'
         pid = subprocess.run(cmd, shell=True)
         assert pid.returncode == 0
-        with open('/tmp/pr.diff', 'r') as f:
+        with open('/tmp/pr.diff') as f:
             raw = f.read()
         filenames = raw.split('\n')
-        filenames = [x for x in filenames if x.startswith('---') or x.startswith('+++')]
+        filenames = [x for x in filenames if x.startswith(('---', '+++'))]
         filenames = [x.split(None, 1)[1] for x in filenames if len(x.split(None, 1)) > 1]
         filenames = [x for x in filenames if not x.startswith('/dev/null')]
         filenames = [x.lstrip('a/') for x in filenames]
@@ -60,16 +60,10 @@ def verify_test_files_changed(changed_files):
     ]
 
     def is_app_path(fn):
-        for ap in app_paths:
-            if fn.startswith(ap):
-                return True
-        return False
+        return any(fn.startswith(ap) for ap in app_paths)
 
     def is_test_path(fn):
-        for tp in test_paths:
-            if fn.startswith(tp):
-                return True
-        return False
+        return any(fn.startswith(tp) for tp in test_paths)
 
     # exit early if no non-test changed in the api code
     app_changed = False

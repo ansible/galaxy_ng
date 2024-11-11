@@ -103,7 +103,7 @@ django==4.2.14
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base@devel
+django-ansible-base[jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@2024.10.17
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -158,7 +158,7 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-galaxy-importer==0.4.25
+galaxy-importer==0.4.26
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -331,7 +331,7 @@ psycopg[binary]==3.1.18
     # via pulpcore
 psycopg-binary==3.1.18
     # via psycopg
-pulp-ansible==0.21.7
+pulp-ansible==0.22.2
     # via galaxy-ng (setup.py)
 pulp-container==2.19.3
     # via galaxy-ng (setup.py)

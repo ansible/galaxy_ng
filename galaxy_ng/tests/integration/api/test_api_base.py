@@ -23,7 +23,7 @@ def test_galaxy_api_root_standalone_no_auth_access(galaxy_client):
 def test_galaxy_api_root(galaxy_client, artifact):
     """Test galaxy API root."""
 
-    # TODO: change to `basic_user` profile when can access pulp-v3 api root
+    # TODO(chr-stian): change to `basic_user` profile when can access pulp-v3 api root
     gc = galaxy_client("admin")
     # verify api root works
     response = gc.get(gc.galaxy_root)
@@ -43,7 +43,7 @@ def test_galaxy_api_root(galaxy_client, artifact):
 def test_galaxy_api_root_v_4_5(galaxy_client, artifact):
     """Test galaxy API root."""
 
-    # TODO: change to `basic_user` profile when can access pulp-v3 api root
+    # TODO(chr-stian): change to `basic_user` profile when can access pulp-v3 api root
     gc = galaxy_client("admin")
 
     # verify api root works

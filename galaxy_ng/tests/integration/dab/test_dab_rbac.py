@@ -1,6 +1,7 @@
+import contextlib
 import json
 import os
-from collections import namedtuple
+from typing import NamedTuple
 
 import pytest
 
@@ -15,6 +16,13 @@ from ..utils.teams import add_user_to_team
 pytestmark = pytest.mark.qa  # noqa: F821
 
 
+class Artifact(NamedTuple):
+    name: str
+    namespace: str
+    published: bool
+    version: str
+
+
 @pytest.mark.skip(reason="we are not aiming for 1:1 anymore")
 @pytest.mark.deployment_standalone
 def test_dab_roledefs_match_pulp_roles(galaxy_client):
@@ -22,7 +30,7 @@ def test_dab_roledefs_match_pulp_roles(galaxy_client):
     roles = gc.get('pulp/api/v3/roles/?name__startswith=galaxy')
     roledefs = gc.get('_ui/v2/role_definitions/')
 
-    roledefmap = dict((x['name'], x) for x in roledefs['results'])
+    roledefmap = {x['name']: x for x in roledefs['results']}
 
     missing = []
     for role in roles['results']:
@@ -140,7 +148,7 @@ def test_dab_rbac_repository_owner_by_user_or_team(
     assert result['state'] == 'completed'
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
@@ -247,9 +255,6 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
         })
     )
 
-    # we need an artifact-like object for the set_certification function ..
-    Artifact = namedtuple('Artifact', ['name', 'namespace', 'published', 'version'])
-
     # try to upload a collection as the user...
     import_result = upload_test_collection(
         ugc,
@@ -348,11 +353,9 @@ def test_dab_user_platform_auditor_bidirectional_sync(
     assert urds['count'] == 1
     assert urds['results'][0]['role_definition'] == pa_def['id']
 
-    # now remove the pulp role ..
-    try:
+    # now remove the pulp role...
+    with contextlib.suppress(Exception):
         gc.delete(pulp_assignment['pulp_href'])
-    except Exception:
-        pass
 
     # ensure the user no longer has the roledef assignment
     urds = gc.get(f'_ui/v2/role_user_assignments/?user__id={uid}')
@@ -377,10 +380,8 @@ def test_dab_user_platform_auditor_bidirectional_sync(
     assert pulp_assignments['results'][0]['role'] == 'galaxy.auditor'
 
     # remove the roledef ...
-    try:
+    with contextlib.suppress(Exception):
         gc.delete(roledef_assignment['url'])
-    except Exception:
-        pass
 
     pulp_assignments = gc.get(f"pulp/api/v3/users/{uid}/roles/")
     assert pulp_assignments['count'] == 0
@@ -451,10 +452,8 @@ def test_dab_team_platform_auditor_bidirectional_sync(
     assert trds['results'][0]['role_definition'] == pa_def['id']
 
     # now remove the pulp role ..
-    try:
+    with contextlib.suppress(Exception):
         gc.delete(pulp_assignment['pulp_href'])
-    except Exception:
-        pass
 
     # ensure the team no longer has the roledef assignment
     trds = gc.get(f'_ui/v2/role_team_assignments/?team__id={teamid}')
@@ -479,10 +478,8 @@ def test_dab_team_platform_auditor_bidirectional_sync(
     assert pulp_assignments['results'][0]['role'] == 'galaxy.auditor'
 
     # remove the roledef ...
-    try:
+    with contextlib.suppress(Exception):
         gc.delete(roledef_assignment['url'])
-    except Exception:
-        pass
 
     # ensure the role was removed
     pulp_assignments = gc.get(f"pulp/api/v3/groups/{guid}/roles/")
@@ -675,19 +672,18 @@ def test_dab_rbac_ee_ownership_with_user_or_team(
 
     # is the user now listed in the namespace's list_roles endpoint?
     ns_roles = gc.get(namespace_data['pulp_href'] + 'list_roles/')
-    ns_role_map = dict((x['role'], x) for x in ns_roles['roles'])
+    ns_role_map = {x['role']: x for x in ns_roles['roles']}
     if not use_team:
         assert random_username in ns_role_map[ROLE_NAME]['users']
     else:
         assert group_name in ns_role_map[ROLE_NAME]['groups']
 
     # delete the assignment
-    try:
+    with contextlib.suppress(Exception):
         gc.delete(assignment['url'])
-    except Exception:
-        pass
+
     ns_roles = gc.get(namespace_data['pulp_href'] + 'list_roles/')
-    ns_role_map = dict((x['role'], x) for x in ns_roles['roles'])
+    ns_role_map = {x['role']: x for x in ns_roles['roles']}
     if not use_team:
         assert random_username not in ns_role_map[ROLE_NAME]['users']
     else:

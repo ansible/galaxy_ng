@@ -18,7 +18,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 def test_community_collection_download_count_sync(ansible_config):
     """ Test collection download count sync command """
 
-    # FIXME - once beta switches over, this test is no longer needed.
+    # FIXME(jctanner): once beta switches over, this test is no longer needed.
 
     config = ansible_config("admin")
     api_client = get_client(config, require_auth=True)
@@ -55,7 +55,7 @@ def test_community_collection_download_count_sync(ansible_config):
 
     # configure the remote
     resp = api_client.request('/api/pulp/api/v3/remotes/ansible/collection/')
-    remotes = dict((x['name'], x) for x in resp['results'])
+    remotes = {x['name']: x for x in resp['results']}
     community_remote_config = {
         'name': 'community',
         'url': 'https://old-galaxy.ansible.com/',
@@ -71,7 +71,7 @@ def test_community_collection_download_count_sync(ansible_config):
 
     # start the sync
     resp = api_client.request('/api/pulp/api/v3/repositories/ansible/ansible/')
-    repos = dict((x['name'], x) for x in resp['results'])
+    repos = {x['name']: x for x in resp['results']}
     sync_payload = {'mirror': False, 'optimize': False, 'remote': remotes['community']['pulp_href']}
     sync_task = api_client.request(
         repos['community']['pulp_href'] + 'sync/',
@@ -86,8 +86,7 @@ def test_community_collection_download_count_sync(ansible_config):
     pid = subprocess.run(
         'pulpcore-manager sync-collection-download-counts',
         shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        capture_output=True,
     )
     assert pid.returncode == 0
 

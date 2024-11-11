@@ -112,7 +112,7 @@ def _upload_collection_common(user, password, expect_pass, extra, base_path=None
         server,
         artifact.filename
     ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.run(cmd, capture_output=True)
 
     del_collection(name, extra['collection'].get_namespace()["name"], repo=base_path)
 
@@ -605,7 +605,7 @@ def private_repo_v3(user, password, expect_pass, extra):
     assert_pass(expect_pass, response.status_code, 200, 403)
 
 
-# TODO move logic to ReusableCollection._reset_collection()
+# TODO(bmclaughlin): move logic to ReusableCollection._reset_collection()
 def _reset_collection_repo(cv_pulp_href, repo, staging_repo):
     requests.post(
         f"{SERVER}{repo['pulp_href']}move_collection_version/",

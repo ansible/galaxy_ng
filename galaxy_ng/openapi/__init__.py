@@ -32,7 +32,7 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
 
         # group paths+methods by operationId
         operation_ids = {}
-        for pk in schema['paths'].keys():
+        for pk in schema['paths']:
             for method, method_info in schema['paths'][pk].items():
                 operationId = method_info['operationId']
                 if operationId not in operation_ids:
@@ -40,7 +40,7 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
                 operation_ids[operationId].append((pk, method))
 
         # make a new operationId for any duplicates
-        for k, v in operation_ids.items():
+        for v in operation_ids.values():
             if len(v) < 2:
                 continue
             for x in v:
@@ -52,5 +52,5 @@ class GalaxySchemaGenerator(PulpSchemaGenerator):
 
     def flatten_path(self, path):
         """Assemble a new operationId prefix from a given path"""
-        paths = [x for x in path.split('/')]
+        paths = path.split('/')
         return '_'.join(paths[:-1])

@@ -16,10 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def repo_exists(name, repo_list):
-    for repo in repo_list:
-        if repo["name"] == name:
-            return True
-    return False
+    return any(repo["name"] == name for repo in repo_list)
 
 
 def create_repo_and_dist(
@@ -105,7 +102,7 @@ def remove_content_units(gc, content_units, repo_pulp_href):
 def verify_repo_data(expected_repos, actual_repos):
     def is_dict_included(dict1, dict2):
         # Check if all key-value pairs in dict1 are present in dict2
-        for key, value in dict1.items():
+        for key, value in dict1.items():  # noqa: SIM110
             if key not in dict2 or dict2[key] != value:
                 return False
         return True

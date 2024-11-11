@@ -307,10 +307,10 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
         - Remove all tags that point to the selected manifest from the latest version of the repo.
         - Remove the selected image manifest from the selected repository using the pulp container
           remove_image function: This function will remove the manifest from the latest version
-          of the repository and any blobs associated with the manifest that aren’t used by
+          of the repository and any blobs associated with the manifest that aren't used by
           other manifests.
         - Call the reclaim disk space function on the selected repository, with the latest version
-          of the repository preserved. This will clear out artifacts for content that isn’t in the
+          of the repository preserved. This will clear out artifacts for content that isn't in the
           latest version of the repository.
         """
         # Looks up the image via a sha
@@ -324,7 +324,8 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
         ).values_list("pk", flat=True)
 
         # Remove the selected image manifest from the selected repository using the pulp container
-        content_unit_pks = [str(pk) for pk in list(tags_pks) + [manifest.pk]]
+        content_unit_pks = [str(pk) for pk in tags_pks]
+        content_unit_pks.append(str(manifest.pk))
 
         # Call the recursive_remove_content from pulp_container + reclaim disk space
         async_result = dispatch(

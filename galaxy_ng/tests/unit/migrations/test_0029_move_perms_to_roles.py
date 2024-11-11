@@ -187,7 +187,7 @@ class TestMigratingPermissionsToRoles(TestCase):
             content_type__app_label=app_label,
             codename=codename
         )
-    
+
     def _run_migrations(self):
         migration = importlib.import_module("galaxy_ng.app.migrations.0029_move_perms_to_roles")
         migration.migrate_group_permissions_to_roles(apps, None)
@@ -231,7 +231,7 @@ class TestMigratingPermissionsToRoles(TestCase):
         if self._assign_perm is None:
             from guardian.shortcuts import assign_perm as guardian_assign_perm
             self._assign_perm = guardian_assign_perm
-        
+
         return self._assign_perm
 
 
@@ -243,7 +243,7 @@ class TestMigratingPermissionsToRoles(TestCase):
                 name=role,
                 permissions=LOCKED_ROLES[role]["permissions"]
             )
-        
+
         self._run_migrations()
 
         for role in roles:
@@ -284,7 +284,7 @@ class TestMigratingPermissionsToRoles(TestCase):
         ]
 
         self.assertEqual(GroupRole.objects.filter(group=group).count(), len(expected_roles))
-        
+
         for role in expected_roles:
             role_obj = Role.objects.get(name=role)
             self.assertEqual(GroupRole.objects.filter(group=group, role=role_obj).count(), 1)
@@ -340,7 +340,10 @@ class TestMigratingPermissionsToRoles(TestCase):
 
         _, container_namespace_super_group = self._create_user_and_group_with_permissions(
             "cns_super_owner",
-            ["container.change_containernamespace", "container.namespace_push_containerdistribution"],
+            [
+                "container.change_containernamespace",
+                "container.namespace_push_containerdistribution",
+            ],
             obj=container_namespace
         )
 
@@ -366,27 +369,33 @@ class TestMigratingPermissionsToRoles(TestCase):
         for role in ns_users:
             permissions = LOCKED_ROLES[role]["permissions"]
             user, group = ns_users[role]
-            
+
             for perm in permissions:
                 self.assertTrue(user.has_perm(perm, obj=namespace))
                 self.assertFalse(user.has_perm(perm))
-            
+
             self.assertEqual(GroupRole.objects.filter(group=group).count(), 1)
             self.assertTrue(self._has_role(group, role, obj=namespace))
 
         for role in c_ns_users:
             permissions = LOCKED_ROLES[role]["permissions"]
             user, group = c_ns_users[role]
-            
+
             for perm in permissions:
                 self.assertTrue(user.has_perm(perm, obj=container_namespace))
                 self.assertFalse(user.has_perm(perm))
-            
+
             self.assertEqual(GroupRole.objects.filter(group=group).count(), 1)
             self.assertTrue(self._has_role(group, role, obj=container_namespace))
-    
+
         # Verify super permissions work
-        self.assertTrue(self._has_role(namespace_super_group, "galaxy.collection_namespace_owner", namespace))
+        self.assertTrue(
+            self._has_role(
+                namespace_super_group,
+                "galaxy.collection_namespace_owner",
+                namespace,
+            )
+        )
         self.assertTrue(
             self._has_role(
                 container_namespace_super_group,
@@ -423,6 +432,6 @@ class TestMigratingPermissionsToRoles(TestCase):
         user, group = self._create_user_and_group_with_permissions("test", [])
 
         self._run_migrations()
-        
+
         self.assertEqual(UserRole.objects.filter(user=user).count(), 0)
         self.assertEqual(GroupRole.objects.filter(group=group).count(), 0)

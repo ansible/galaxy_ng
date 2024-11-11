@@ -185,6 +185,4 @@ class ContainerRegistryRemoteSerializer(
         return utils.get_write_only_fields(self, obj)
 
     def get_is_indexable(self, obj) -> bool:
-        if obj.get_registry_backend():
-            return True
-        return False
+        return bool(obj.get_registry_backend())

@@ -51,10 +51,6 @@ bindep==2.11.0
     # via ansible-builder
 black==24.4.2
     # via ansible-lint
-bleach==3.3.1
-    # via galaxy-importer
-bleach-allowlist==1.0.3
-    # via galaxy-importer
 boto3==1.34.149
     # via
     #   -r requirements/requirements.insights.in
@@ -121,7 +117,7 @@ django==4.2.14
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[jwt_consumer] @ git+https://github.com/ansible/django-ansible-base@devel
+django-ansible-base[jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@2024.10.17
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -178,7 +174,7 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-galaxy-importer==0.4.24
+galaxy-importer==0.4.26
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -257,6 +253,8 @@ multidict==6.0.5
     #   yarl
 mypy-extensions==1.0.0
     # via black
+nh3==0.2.18
+    # via galaxy-importer
 oauthlib==3.2.2
     # via
     #   requests-oauthlib
@@ -326,7 +324,6 @@ packaging==23.2
     #   ansible-lint
     #   bindep
     #   black
-    #   bleach
     #   gunicorn
     #   marshmallow
     #   pulp-glue
@@ -354,7 +351,7 @@ psycopg[binary]==3.1.18
     # via pulpcore
 psycopg-binary==3.1.18
     # via psycopg
-pulp-ansible==0.21.7
+pulp-ansible==0.22.2
     # via galaxy-ng (setup.py)
 pulp-container==2.19.3
     # via galaxy-ng (setup.py)
@@ -453,7 +450,6 @@ semantic-version==2.10.0
 six==1.16.0
     # via
     #   azure-core
-    #   bleach
     #   isodate
     #   python-dateutil
     #   url-normalize
@@ -495,8 +491,6 @@ watchtower==3.2.0
     # via -r requirements/requirements.insights.in
 wcmatch==8.5.2
     # via ansible-lint
-webencodings==0.5.1
-    # via bleach
 whitenoise==6.6.0
     # via pulpcore
 wrapt==1.16.0

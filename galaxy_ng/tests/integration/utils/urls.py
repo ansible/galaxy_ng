@@ -61,7 +61,7 @@ def test_url_safe_join():
         ]
     ]
 
-    for idt, tc in enumerate(testcases):
+    for tc in testcases:
         server = tc[0]
         url = tc[1]
         expected = tc[2]

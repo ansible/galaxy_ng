@@ -105,7 +105,7 @@ def test_social_auth_v3_rbac_workflow(ansible_config):
     base_cfg = ansible_config('github_user_1')
 
     ga = GithubAdminClient()
-    suffix = ''.join([random.choice(string.ascii_lowercase) for x in range(0, 5)])
+    suffix = ''.join([random.choice(string.ascii_lowercase) for x in range(5)])
     user_a = ga.create_user(login='0xEEE-32i-' + suffix)
     user_a['username'] = user_a['login']
     user_a['token'] = None
@@ -213,9 +213,9 @@ def test_social_auth_v3_rbac_workflow(ansible_config):
 
         # the new login should be able to upload to BOTH v3 namespaces
 
-    # TODO ... what happens with the other owners of a v1 namespace when
+    # TODO(jctanner): ... what happens with the other owners of a v1 namespace when
     #   the original owner changes their login?
-    # TODO ... what happens with the other owners of a v3 namespace when
+    # TODO(jctanner): ... what happens with the other owners of a v3 namespace when
     #   the original owner changes their login?
 
 
@@ -264,9 +264,9 @@ def test_social_user_with_reclaimed_login(ansible_config):
     next_url = '/api/v3/namespaces/'
     while next_url:
         resp = admin_client(next_url)
-        nsmap.update(dict((x['name'], x) for x in resp['data']))
+        nsmap.update({x['name']: x for x in resp['data']})
         next_url = resp['links']['next']
-    for nsname, nsdata in nsmap.items():
+    for nsname in nsmap:
         if not nsname.lower().startswith('sean_m') and not nsname.lower().startswith('wilk42'):
             continue
         cleanup_social_user(nsname, ansible_config)
@@ -376,8 +376,8 @@ def test_social_user_sync_with_changed_login(ansible_config):
 
     # find all the wilk* namespaces and clean them up ...
     resp = admin_client('/api/v3/namespaces/')
-    nsmap = dict((x['name'], x) for x in resp['data'])
-    for nsname, nsdata in nsmap.items():
+    nsmap = {x['name']: x for x in resp['data']}
+    for nsname in nsmap:
         if not nsname.startswith('wilk'):
             continue
         cleanup_namespace(nsname, api_client=admin_client)
@@ -531,9 +531,9 @@ def test_social_auth_no_duplicated_namespaces(ansible_config):
     next_url = '/api/v3/namespaces/'
     while next_url:
         resp = admin_client(next_url)
-        nsmap.update(dict((x['name'], x) for x in resp['data']))
+        nsmap.update({x['name']: x for x in resp['data']})
         next_url = resp['links']['next']
-    for nsname, nsdata in nsmap.items():
+    for nsname in nsmap:
         if not nsname.startswith('sean_m') and not nsname.startswith('wilk42'):
             continue
         cleanup_social_user(nsname, ansible_config)
@@ -551,7 +551,7 @@ def test_social_auth_no_duplicated_namespaces(ansible_config):
     sean.update(default_cfg)
 
     # login 10 times ...
-    for x in range(0, 10):
+    for _ in range(10):
         with SocialGithubClient(config=sean) as client:
             client.get('_ui/v1/me/')
 
@@ -560,9 +560,9 @@ def test_social_auth_no_duplicated_namespaces(ansible_config):
     next_url = '/api/v3/namespaces/'
     while next_url:
         resp = admin_client(next_url)
-        nsmap.update(dict((x['name'], x) for x in resp['data']))
+        nsmap.update({x['name']: x for x in resp['data']})
         next_url = resp['links']['next']
-    sean_namespaces = sorted([x for x in nsmap.keys() if x.startswith('sean_m')])
+    sean_namespaces = sorted(x for x in nsmap if x.startswith('sean_m'))
     assert sean_namespaces == ['sean_m_sullivan', 'sean_m_sullivan0']
 
 

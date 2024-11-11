@@ -21,7 +21,7 @@ ADMIN_AUTH = (
 NAMESPACES = ("autohubtest2", "autohubtest3", "signing")
 USERS = ("notifications_admin", "iqe_normal_user", "jdoe", "org-admin", "iqe_admin", "ee_admin")
 
-# FIXME - this seems to be dependant on not having a gateway
+# FIXME(jctanner): This seems to be dependant on not having a gateway
 GROUP = "ns_group_for_tests"
 NS_OWNER_DEF = "galaxy.collection_namespace_owner"
 
@@ -32,7 +32,7 @@ rr = requests.get(
     verify=False,
     auth=ADMIN_AUTH
 )
-ROLEDEFS = dict((x['name'], x) for x in rr.json()['results'])
+ROLEDEFS = {x['name']: x for x in rr.json()['results']}
 
 # MAP OUT THE PULP ROLES ...
 rr = requests.get(
@@ -40,7 +40,7 @@ rr = requests.get(
     verify=False,
     auth=ADMIN_AUTH
 )
-PULP_ROLEDEFS = dict((x['name'], x) for x in rr.json()['results'])
+PULP_ROLEDEFS = {x['name']: x for x in rr.json()['results']}
 
 
 # MAP OUT THE REPOS ...
@@ -49,7 +49,7 @@ rr = requests.get(
     verify=False,
     auth=ADMIN_AUTH
 )
-REPOS = dict((x['name'], x) for x in rr.json()['results'])
+REPOS = {x['name']: x for x in rr.json()['results']}
 
 
 # MAKE AND MAP THE USERS ...

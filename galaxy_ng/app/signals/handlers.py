@@ -112,10 +112,7 @@ def associate_namespace_metadata(sender, instance, created, **kwargs):
         ns.set_links([{"name": x, "url": instance.links[x]} for x in instance.links])
         ns.save()
 
-    if created or ns_metadata is None:
-        _update_metadata()
-
-    elif ns.metadata_sha256 != instance.metadata_sha256:
+    if created or ns_metadata is None or ns.metadata_sha256 != instance.metadata_sha256:
         _update_metadata()
 
 
@@ -171,9 +168,9 @@ def rbac_signal_in_progress():
 
 
 def pulp_role_to_single_content_type_or_none(pulprole):
-    content_types = set(perm.content_type for perm in pulprole.permissions.all())
-    if len(list(content_types)) == 1:
-        return list(content_types)[0]
+    content_types = {perm.content_type for perm in pulprole.permissions.all()}
+    if len(content_types) == 1:
+        return next(iter(content_types))
     return None
 
 
@@ -189,8 +186,8 @@ def copy_permissions_role_to_role(roleA, roleB):
     """
     permissionsA = list(roleA.permissions.prefetch_related("content_type"))
     permissionsB = list(roleB.permissions.prefetch_related("content_type"))
-    fullnamesA = set(f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsA)
-    fullnamesB = set(f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsB)
+    fullnamesA = {f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsA}
+    fullnamesB = {f"{perm.content_type.app_label}.{perm.codename}" for perm in permissionsB}
     fullnames_to_add = fullnamesA - fullnamesB
     fullnames_to_remove = fullnamesB - fullnamesA
     concat_exp = Concat("content_type__app_label", Value("."), "codename", output_field=CharField())
@@ -237,7 +234,7 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
                 content_type=content_type,
                 description=instance.description or instance.name,
             )
-        # TODO: other fields? like description
+        # TODO(jctanner): other fields? like description
 
 
 @receiver(post_delete, sender=Role)
@@ -288,7 +285,7 @@ def copy_role_definition_to_role(sender, instance, created, **kwargs):
         role = Role.objects.filter(name=role_name).first()
         if not role:
             Role.objects.create(name=role_name)
-        # TODO: other fields? like description
+        # TODO(jctanner): other fields? like description
 
 
 @receiver(post_delete, sender=RoleDefinition)
@@ -352,7 +349,7 @@ def lazy_content_type_correction(rd, obj):
         except ValidationError as exc:
             logger.warning(
                 f'Assignment to {rd.name} for {type(obj)}'
-                + f' violates a DAB role validation rule: {str(exc)}'
+                + f' violates a DAB role validation rule: {exc}'
             )
             return
         rd.content_type = ct
@@ -368,7 +365,7 @@ def lazy_content_type_correction(rd, obj):
 def copy_pulp_user_role(sender, instance, created, **kwargs):
     """When a pulp role is granted to a user, grant the equivalent dab role."""
 
-    # FIXME - this is a temporary workaround to allow on-demand
+    # FIXME(jctanner): this is a temporary workaround to allow on-demand
     #   assigment of task roles to users from pulpcore's AFTER_CREATE
     #   hook on the Task model which calls ...
     #   self.add_roles_for_object_creator("core.task_user_dispatcher")
@@ -419,7 +416,7 @@ def copy_pulp_group_role(sender, instance, created, **kwargs):
         team = Team.objects.filter(group=instance.group)
         if rd and team.exists():
             team = team.first()
-            # FIXME - multi-type roledefs
+            # FIXME(jctanner): multi-type roledefs
             try:
                 if instance.content_object:
                     rd.give_permission(team, instance.content_object)
@@ -439,7 +436,7 @@ def delete_pulp_group_role(sender, instance, **kwargs):
         team = Team.objects.filter(group=instance.group)
         if rd and team.exists():
             team = team.first()
-            # FIXME - multi-type roledefs
+            # FIXME(jctanner): multi-type roledefs
             try:
                 if instance.content_object:
                     rd.remove_permission(team, instance.content_object)
@@ -572,16 +569,16 @@ def copy_dab_group_to_role(instance, action, model, pk_set, reverse, **kwargs):
     # are changed to match the users in the pulp group
     for group in groups:
         team = Team.objects.get(group_id=group.pk)
-        current_dab_members = set(
+        current_dab_members = {
             assignment.user for assignment in RoleUserAssignment.objects.filter(
                 role_definition=member_rd, object_id=team.pk
             )
-        )
-        current_dab_shared_members = set(
+        }
+        current_dab_shared_members = {
             assignment.user for assignment in RoleUserAssignment.objects.filter(
                 role_definition=shared_member_rd, object_id=team.pk
             )
-        )
+        }
         current_pulp_members = set(group.user_set.all())
         not_allowed = current_dab_shared_members - current_pulp_members
         if not_allowed:

@@ -2,6 +2,7 @@
 
 import json
 import logging
+from typing import Optional
 
 import requests
 
@@ -131,7 +132,9 @@ class AnsibeGalaxyHttpClient:
 
     def get_bearer_token(self, grant_type='password'):
         # payload
-        #   grant_type=refresh_token&client_id=cloud-services&refresh_token=abcdefghijklmnopqrstuvwxyz1234567894
+        #   grant_type=refresh_token
+        #   &client_id=cloud-services
+        #   &refresh_token=abcdefghijklmnopqrstuvwxyz1234567894
         # POST
         # auth_url
         #   'https://mocks-keycloak-ephemeral-ydabku.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com
@@ -165,18 +168,10 @@ class AnsibeGalaxyHttpClient:
         )
 
         # construct a helpful error message ...
-        msg = (
-            self.config.get('auth_url')
-            + '\n'
-            + str(payload)
-            + '\n'
-            + str(rr.status_code)
-            + '\n'
-            + rr.text
-        )
+        msg = "{}\n{}\n{}\n{}".format(self.config.get('auth_url'), payload, rr.status_code, rr.text)
 
         # bail out early if auth failed ...
-        assert rr.status_code >= 200 and rr.status_code < 300, msg
+        assert 200 <= rr.status_code < 300, msg
         assert rr.headers.get('Content-Type') == 'application/json', msg
         assert 'access_token' in rr.json(), msg
 
@@ -184,11 +179,11 @@ class AnsibeGalaxyHttpClient:
 
     def request(
         self,
-        url: str = None,
+        url: Optional[str] = None,
         args=None,
-        headers: dict = None,
+        headers: Optional[dict] = None,
         method: str = 'GET',
-        auth_required: bool = None,
+        auth_required: Optional[bool] = None,
     ) -> dict:
 
         """
@@ -207,7 +202,7 @@ class AnsibeGalaxyHttpClient:
         if isinstance(args, (dict, list)):
             args = json.dumps(args)
             is_json = True
-        elif args and (args.startswith(b'{') or args.startswith(b'[')):
+        elif args and args.startswith((b'{', b'[')):
             args = json.dumps(json.loads(args))
             is_json = True
 

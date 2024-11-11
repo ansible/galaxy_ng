@@ -1,5 +1,5 @@
 """Utility functions for AH tests."""
-
+import contextlib
 import logging
 import random
 import string
@@ -29,7 +29,7 @@ def generate_namespace(exclude=None):
             return False
         if len(namespace) > 64:
             return False
-        for char in namespace:
+        for char in namespace:  # noqa: SIM110
             if char not in string.ascii_lowercase + string.digits:
                 return False
 
@@ -39,7 +39,7 @@ def generate_namespace(exclude=None):
     while not is_valid(namespace):
         namespace = ''
         namespace += random.choice(string.ascii_lowercase)
-        for x in range(0, random.choice(range(3, 63))):
+        for _ in range(random.choice(range(3, 63))):
             namespace += random.choice(string.ascii_lowercase + string.digits + '_')
 
     return namespace
@@ -73,7 +73,7 @@ def generate_unused_namespace(gc=None, api_version='v3'):
 
     assert gc is not None, "api_client is a required param"
     existing = get_all_namespaces(gc=gc, api_version=api_version)
-    existing = dict((x['name'], x) for x in existing)
+    existing = {x['name']: x for x in existing}
     return generate_namespace(exclude=list(existing.keys()))
 
 
@@ -100,10 +100,8 @@ def cleanup_namespace(name, api_client=None):
             ns_url = f"{api_prefix}/v3/namespaces/{ns_name}/"
 
             # exception on json parsing expected ...
-            try:
+            with contextlib.suppress(Exception):
                 api_client(ns_url, method='DELETE')
-            except Exception:
-                pass
 
         resp = api_client(f'{api_prefix}/v3/namespaces/?name={name}', method='GET')
         assert resp['meta']['count'] == 0
@@ -120,10 +118,8 @@ def cleanup_namespace_gk(name, gc_admin):
             ns_url = f"v3/namespaces/{ns_name}/"
 
             # exception on json parsing expected ...
-            try:
+            with contextlib.suppress(Exception):
                 gc_admin.delete(ns_url)
-            except Exception:
-                pass
 
         resp = gc_admin.get(f'v3/namespaces/?name={name}')
         assert resp['meta']['count'] == 0

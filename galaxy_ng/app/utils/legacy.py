@@ -17,11 +17,11 @@ User = get_user_model()
 
 
 def sanitize_avatar_url(url):
-    '''Remove all the non-url characters people have put in their avatar urls'''
+    """Remove all the non-url characters people have put in their avatar urls."""
     regex = (
         r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)"
         + r"(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|"
-        + r"(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+        + r"(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"  # noqa: RUF001
     )
 
     for match in re.findall(regex, url):
@@ -32,7 +32,7 @@ def sanitize_avatar_url(url):
 
 
 def process_namespace(namespace_name, namespace_info, force=False):
-    '''Do all the work to sync a legacy namespace and build it's v3 counterpart'''
+    """Do all the work to sync a legacy namespace and build it's v3 counterpart."""
 
     logger.info(f'process legacy namespace ({namespace_info["id"]}) {namespace_name}')
 

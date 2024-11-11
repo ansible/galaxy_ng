@@ -62,35 +62,32 @@ def populate_initial_repos(apps, schema_editor):
     db_alias = schema_editor.connection.alias
 
     AnsibleRepository = apps.get_model('ansible', 'AnsibleRepository')
-
     AnsibleDistribution = apps.get_model('ansible', 'AnsibleDistribution')
-
     CollectionRemote = apps.get_model('ansible', 'CollectionRemote')
-
     RepositoryVersion = apps.get_model('core', 'RepositoryVersion')
 
     for repo_data in REPOSITORIES:
 
         remote = repo_data.pop("remote", None)
         if remote is not None:
-            remote, _ = CollectionRemote.objects.get_or_create(
+            remote, _ = CollectionRemote.objects.using(db_alias).get_or_create(
                 name=remote["name"], defaults=remote
             )
         repo_data["remote"] = remote
 
-        repository, _ = AnsibleRepository.objects.get_or_create(
+        repository, _ = AnsibleRepository.objects.using(db_alias).get_or_create(
             name=repo_data["name"],
             defaults=repo_data
         )
 
         if not RepositoryVersion.objects.filter(repository__name=repository.name):
-            RepositoryVersion.objects.create(
+            RepositoryVersion.objects.using(db_alias).create(
                 repository=repository,
                 number=0,
                 complete=True
             )
 
-        AnsibleDistribution.objects.get_or_create(
+        AnsibleDistribution.objects.using(db_alias).get_or_create(
             base_path=repository.name,
             defaults={
                 "name": repository.name,

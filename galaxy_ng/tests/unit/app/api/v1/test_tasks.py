@@ -185,5 +185,5 @@ def test_legacy_role_import_with_tag_name():
     assert len(role.full_metadata['versions']) >= 1
 
     # the tag should be in the versions ...
-    vmap = dict((x['version'], x) for x in role.full_metadata['versions'])
+    vmap = {x['version']: x for x in role.full_metadata['versions']}
     assert github_reference in vmap

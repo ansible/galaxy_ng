@@ -24,9 +24,10 @@ class DependencySpec:
 @pytest.mark.cli
 @pytest.mark.slow_in_cloud
 @pytest.mark.skip_in_gw
+@pytest.mark.usefixtures("cleanup_collections")
 @pytest.mark.parametrize(
     "params",
-    (
+    [
         DependencySpec("normal", "1.0.0", 0),
         DependencySpec("exact", "=1.0.0", 0),
         DependencySpec("lt", "<2.0.0", 0),
@@ -40,11 +41,10 @@ class DependencySpec:
         # DependencySpec("exception", ">0.0.0,!=1.0.0", 1, xfail="galaxy-dev#104"),
         # DependencySpec("missing1", "2.0.0", 1, xfail="galaxy-dev#104"),
         # DependencySpec("missing2", ">1.0.0", 1, xfail="galaxy-dev#104"),
-    ),
+    ],
     ids=lambda s: s.name,
 )
-def test_collection_dependency_install(ansible_config, published, cleanup_collections,
-                                       params, galaxy_client):
+def test_collection_dependency_install(ansible_config, published, params, galaxy_client):
     """Collections defining dependencies can be installed and their dependencies are installed
     as well.
 

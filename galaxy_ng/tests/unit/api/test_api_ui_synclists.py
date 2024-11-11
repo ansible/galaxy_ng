@@ -20,7 +20,7 @@ class BaseUiSynclistViewSet:
 
     def setUp(self):
         super().setUp()
-        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:
+        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:  # noqa: SIM300
             raise unittest.SkipTest("Skipping insights mode tests since we are in standalone mode.")
 
         self.account_number = "987654"
@@ -158,7 +158,7 @@ class BaseUiSynclistViewSet:
 class TestUiSynclistViewSetWithGroupPerms(BaseUiSynclistViewSet, BaseSyncListViewSet):
     def setUp(self):
         super().setUp()
-        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:
+        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:  # noqa: SIM300
             raise unittest.SkipTest("Skipping insights mode tests since we are in standalone mode.")
 
         self.user = auth_models.User.objects.create_user(username="test1", password="test1-secret")
@@ -258,7 +258,7 @@ class DeniedSynclistViewSet(BaseUiSynclistViewSet):
 class TestUiSynclistViewSetWithDefaultGroupPerms(DeniedSynclistViewSet, BaseSyncListViewSet):
     def setUp(self):
         super().setUp()
-        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:
+        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:  # noqa: SIM300
             raise unittest.SkipTest("Skipping insights mode tests since we are in standalone mode.")
 
         self.user = auth_models.User.objects.create_user(username="test1", password="test1-secret")
@@ -335,7 +335,7 @@ class TestUiSynclistViewSetWithDefaultGroupPerms(DeniedSynclistViewSet, BaseSync
 class TestUiSynclistViewSetNoGroupPerms(DeniedSynclistViewSet, BaseSyncListViewSet):
     def setUp(self):
         super().setUp()
-        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:
+        if settings.GALAXY_DEPLOYMENT_MODE != DeploymentMode.INSIGHTS.value:  # noqa: SIM300
             raise unittest.SkipTest("Skipping insights mode tests since we are in standalone mode.")
         self.user = auth_models.User.objects.create_user(
             username="test_user_noperms", password="test1-secret"

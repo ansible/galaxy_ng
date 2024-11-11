@@ -114,14 +114,14 @@ class TestRepositories:
 
         test_repo_name_2 = f"repo-test-{generate_random_string()}"
 
-        # FIXME - the POST call will often result in an error with the oci+insights profile ...
+        # FIXME(jctanner): the POST call will often result in an error with the oci+insights profile
         # root:client.py:216 Cannot parse expected JSON response
         # (http://localhost:38080/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/):
         # Post "http://pulp:55001/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/":
         # read tcp 172.18.0.2:47338->172.18.0.3:55001: read: connection reset by peer
         repo_pulp_href_2 = None
         retries = 10
-        for x in range(0, retries):
+        for _ in range(retries):
             try:
                 repo_pulp_href_2 = create_repo_and_dist(gc_admin, test_repo_name_2)
                 break
@@ -132,7 +132,7 @@ class TestRepositories:
         if repo_pulp_href_2 is None:
             raise Exception("failed to create repo and dist")
 
-        # FIXME - the POST call will often result in an error with the oci+insights profile ...
+        # FIXME(jctanner): The POST call will often result in an error with the oci+insights profile
         # root:client.py:216 Cannot parse expected JSON response
         # (http://localhost:38080/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/
         #   <uuid>/move_collection_version/):
@@ -141,7 +141,7 @@ class TestRepositories:
         # readfrom tcp 172.18.0.3:37490->172.18.0.2:55001:
         #   write tcp 172.18.0.3:37490->172.18.0.2:55001: use of closed network connection
         retries = 10
-        for x in range(0, retries):
+        for _ in range(retries):
             try:
                 move_content_between_repos(
                     gc_admin, content_units, repo_pulp_href_1, [repo_pulp_href_2]

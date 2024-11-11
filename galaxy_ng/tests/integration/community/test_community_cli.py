@@ -207,11 +207,11 @@ def test_import_role_fields_no_tags(ansible_config):
         assert field in result
 
     summary_fields = result["summary_fields"]
-    assert summary_fields["dependencies"] == list()
+    assert summary_fields["dependencies"] == []
     assert summary_fields["namespace"]["name"] == "jctannerTEST"
     assert summary_fields["provider_namespace"]["name"] == "jctannertest"
     assert summary_fields["repository"]["name"] == "role1"
-    assert summary_fields["tags"] == list()
+    assert summary_fields["tags"] == []
 
     assert len(summary_fields["versions"]) == 0
 
@@ -385,9 +385,10 @@ def test_delete_role_with_cli(ansible_config):
         + f' {github_user}'
         + f' {role_name}'
     )
-    delete_pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    delete_pid = subprocess.run(cmd, shell=True, capture_output=True)
 
-    # FIXME: for some reason, returncode is 1 even if it runs correctly and role is deleted
+    # FIXME(jerabekjiri): for some reason, returncode is 1 even if it runs correctly
+    #   and role is deleted
     # assert delete_pid.returncode == 0 #, delete_pid.stderr.decode('utf-8')
     assert "Role jctannerTEST.role1 deleted" in delete_pid.stdout.decode('utf-8')
 
@@ -419,8 +420,8 @@ def test_delete_missing_role_with_cli(ansible_config):
         + f' {github_user}'
         + f' {github_repo}'
     )
-    delete_pid = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # FIXME: should return 1?
+    delete_pid = subprocess.run(cmd, shell=True, capture_output=True)
+    # FIXME(jerabekjiri): should return 1?
     # assert delete_pid.returncode == 0 # , delete_pid.stderr.decode('utf-8')
 
     stdout = delete_pid.stdout.decode('utf-8')

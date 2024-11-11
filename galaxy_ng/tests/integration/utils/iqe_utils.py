@@ -1,9 +1,11 @@
 """Utility functions for AH tests."""
+import contextlib
 import os
 import subprocess
 import time
 from functools import lru_cache
 from json import JSONDecodeError
+from typing import Optional
 from unittest.mock import patch
 
 from pkg_resources import parse_version
@@ -90,7 +92,7 @@ def remove_from_cache(role):
 
 class GalaxyKitClient:
     def __init__(self, ansible_config, custom_config=None, basic_token=None):
-        self.config = ansible_config if not custom_config else custom_config
+        self.config = custom_config if custom_config else ansible_config
         self._basic_token = basic_token
 
     def gen_authorized_client(
@@ -359,22 +361,18 @@ def galaxy_stage_ansible_user_cleanup(gc, u):
     gc_admin = gc("admin")
     github_user_username = GALAXY_STAGE_ANSIBLE_PROFILES[u]["username"]
     group = f"namespace:{github_user_username}".replace("-", "_")
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_user(gc_admin, github_user_username)
-    except ValueError:
-        pass
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_group(gc_admin, group)
-    except ValueError:
-        pass
-    try:
+
+    with contextlib.suppress(GalaxyClientError):
         delete_namespace(gc_admin, github_user_username.replace("-", "_"))
-    except GalaxyClientError:
-        pass
-    try:
+
+    with contextlib.suppress(ValueError):
         delete_v1_namespace(gc_admin, github_user_username)
-    except ValueError:
-        pass
 
 
 def get_ansible_config():
@@ -657,13 +655,13 @@ class AnsibleConfigFixture(dict):
 
 
 def has_old_credentials():
-    # FIXME: Old versions have admin/admin. This needs to be fixed
+    # FIXME(chr-stian): Old versions have admin/admin. This needs to be fixed.
     ansible_config = get_ansible_config()
     hub_version = get_hub_version(ansible_config)
     return parse_version(hub_version) < parse_version('4.7')
 
 
-@lru_cache()
+@lru_cache
 def get_hub_version(ansible_config):
     if aap_gateway():
         cfg = ansible_config("admin")
@@ -692,7 +690,8 @@ def get_hub_version(ansible_config):
         try:
             gc = GalaxyKitClient(ansible_config).gen_authorized_client(role)
         except GalaxyError:
-            # FIXME: versions prior to 4.7 have different credentials. This needs to be fixed.
+            # FIXME(chr-stian): Versions prior to 4.7 have different credentials.
+            #       This needs to be fixed.
             if is_sync_testing():
                 api_root = "http://localhost:5001/api/automation-hub/"
             else:
@@ -705,7 +704,7 @@ def get_hub_version(ansible_config):
         return gc.get(gc.galaxy_root)["galaxy_ng_version"]
 
 
-@lru_cache()
+@lru_cache
 def get_vault_loader():
     from .vault_loading import VaultSecretFetcher
     vault_settings = {
@@ -757,7 +756,7 @@ def galaxy_auto_sign_collections():
     return settings.get("GALAXY_AUTO_SIGN_COLLECTIONS")
 
 
-def get_paginated(client, relative_url: str = None) -> list:
+def get_paginated(client, relative_url: Optional[str] = None) -> list:
     """Iterate through all results in a paginated queryset"""
     ds = client.get(relative_url)
 

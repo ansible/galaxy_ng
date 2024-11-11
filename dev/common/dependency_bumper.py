@@ -31,8 +31,8 @@ import os
 import shutil
 import subprocess
 import tempfile
-
 from types import SimpleNamespace
+from typing import Optional
 from threading import Thread
 
 
@@ -121,7 +121,11 @@ def make_image() -> None:
     shutil.rmtree(tdir)
 
 
-def construct_checkout(checkout: str, base_branch: str = None, new_branch: str = None) -> None:
+def construct_checkout(
+    checkout: str,
+    base_branch: Optional[str] = None,
+    new_branch: Optional[str] = None,
+) -> None:
     """
     construct_checkout makes a ready-to-go clone and branch of $REPO
 
@@ -188,15 +192,16 @@ def main():
 
         # make a unique checkout for this new patch
         branch_checkout = os.path.join(workdir, f'galaxy_ng.{cfg.branch}')
-        ts = datetime.datetime.now().isoformat().split('.')[0].replace('-', '_').replace(':', '_')
+        ts = datetime.datetime.now().strftime("%Y_%m_%dT%H_%M_%S")  # noqa: DTZ005
         new_branch = f'BUMP_DEPS_{ts}_{cfg.branch}'.replace('-', '_').replace('.', '_')
         construct_checkout(branch_checkout, base_branch=cfg.branch, new_branch=new_branch)
 
         # assemble the container internal script
-        commands = []
-        commands.append(f'source /venv-{cfg.python}/bin/activate')
-        commands.append(f'/venv-{cfg.python}/bin/pip install --upgrade pip=={cfg.pip}')
-        commands.append(f'/venv-{cfg.python}/bin/pip install pip-tools=={cfg.pip_tools}')
+        commands = [
+            f'source /venv-{cfg.python}/bin/activate',
+            f'/venv-{cfg.python}/bin/pip install --upgrade pip=={cfg.pip}',
+            f'/venv-{cfg.python}/bin/pip install pip-tools=={cfg.pip_tools}',
+        ]
 
         # be smarter than the makefile
         for RF in REQUIREMENTS_FILES:

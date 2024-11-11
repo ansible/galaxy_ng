@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class ErrorTestMode:
     """Represents a test scenario for publishing a collection."""
 
-    def __init__(self, name, file, status, resp, no_filename=False, hash=True):
+    def __init__(self, name, file, status, resp, no_filename=False, hash=True):  # noqa: A002
         """Configure the test scenario.
 
         :param name: Name for use in the test ID.
@@ -122,7 +122,7 @@ def test_api_publish_bad_hash(ansible_config, artifact, upload_artifact):
     config = ansible_config("admin")
     api_client = get_client(config)
 
-    with pytest.raises(CapturingGalaxyError) as excinfo:
+    with pytest.raises(CapturingGalaxyError) as excinfo:  # noqa: SIM117
         with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
             upload_artifact(config, api_client, artifact, hash=b"000000000000000")
     resp = json.loads(excinfo.value.http_error.read())
@@ -153,7 +153,7 @@ def test_api_publish_missing_filename(galaxy_client, artifact):
     """Test handling of uploads missing the filename parameter."""
     gc = galaxy_client("admin")
 
-    with pytest.raises(GalaxyClientError) as excinfo:
+    with pytest.raises(GalaxyClientError) as excinfo:  # noqa: SIM117
         with patch("ansible.galaxy.api.GalaxyError", CapturingGalaxyError):
             upload_artifact(None, gc, artifact, no_filename=True)
 
@@ -208,7 +208,7 @@ def test_api_publish_invalid_filename(galaxy_client, artifact, wrong_name):
     artifact.filename = filename
 
     # Ensure an excepton is thrown by the client lib ...
-    with pytest.raises(GalaxyClientError) as excinfo:
+    with pytest.raises(GalaxyClientError) as excinfo:  # noqa: SIM117
         with patch("ansible.galaxy.api.GalaxyError", GalaxyClientError):
             upload_artifact(None, gc, artifact)
 
@@ -222,7 +222,7 @@ def test_api_publish_invalid_filename(galaxy_client, artifact, wrong_name):
 def test_api_publish_missing_file(galaxy_client, artifact):
     """Test handling of POSTs to the artifact endpoint neglecting to submit a file."""
     gc = galaxy_client("admin")
-    with pytest.raises(GalaxyClientError) as excinfo:
+    with pytest.raises(GalaxyClientError) as excinfo:  # noqa: SIM117
         with patch("ansible.galaxy.api.GalaxyError", GalaxyClientError):
             upload_artifact(None, gc, artifact, no_file=True)
 
@@ -271,16 +271,16 @@ def test_long_field_values(galaxy_client, field):
     resp = wait_for_task(gc, resp)
     assert resp["state"] == "failed"
     # Should END with an error
-    assert "must not be greater than %s characters" % fieldmax in resp["error"]["description"]
+    assert f"must not be greater than {fieldmax} characters" in resp["error"]["description"]
     assert fieldname in resp["error"]["description"]
 
 
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.parametrize(
     "spec",
     [
-        # TODO: move most these to galaxy-importer unit tests
+        # TODO(awcrosby): move most these to galaxy-importer unit tests
         ("2eq", "==2.10", "completed"),
         # ("gt", ">2.10.0", "completed"),
         # ("gteq", ">=2.10", "completed"),

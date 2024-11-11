@@ -1,3 +1,4 @@
+import contextlib
 import copy
 import datetime
 import logging
@@ -160,7 +161,9 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
                 logger.error(f'{cmd} failed: {error}')
                 raise Exception(f'{cmd} failed')
 
-        last_commit = [x for x in gitrepo.iter_commits()][0]
+        # REVIEW(cutwater): Why this iterates over all commits to get first one and doesn't use
+        #   gitrepo.head.commit as the code below?
+        last_commit = next(iter(gitrepo.iter_commits()))
 
     else:
         # use the default branch ...
@@ -235,7 +238,7 @@ def compute_all_versions(this_role, gitrepo):
         if str(tag.name) in current_tags:
             continue
 
-        ts = datetime.datetime.now().isoformat()
+        ts = datetime.datetime.now().isoformat()  # noqa: DTZ005
         vdata = {
             'id': str(uuid.uuid4()),
             'tag': tag.name,
@@ -312,10 +315,8 @@ def legacy_role_import(
     v1_task_id = None
     task_id = None
     import_model = None
-    try:
+    with contextlib.suppress(Exception):
         task = Task.current()
-    except Exception:
-        pass
     if task:
         v1_task_id = uuid_to_int(str(task.pulp_id))
         task_id = task.pulp_id
@@ -426,7 +427,7 @@ def legacy_role_import(
             result = import_legacy_role(checkout_path, namespace.name, importer_config, logger)
         except Exception as e:
             logger.info('')
-            logger.error(f'Role loading failed! {str(e)}')
+            logger.error(f'Role loading failed! {e}')
             logger.info('')
             tb_str = traceback.format_exc()
             logger.error(tb_str)
@@ -496,7 +497,7 @@ def legacy_role_import(
 
         galaxy_info = result["metadata"]["galaxy_info"]
         new_full_metadata = {
-            'imported': datetime.datetime.now().isoformat(),
+            'imported': datetime.datetime.now().isoformat(),  # noqa: DTZ005
             'clone_url': clone_url,
             'tags': galaxy_info.get("galaxy_tags", []),
             'github_user': real_github_user,
@@ -641,9 +642,9 @@ def legacy_sync_from_upstream(
         role_dependencies = sfields.get('dependencies', [])
         role_min_ansible = rdata.get('min_ansible_version')
         role_company = rdata.get('company')
-        role_imported = rdata.get('imported', datetime.datetime.now().isoformat())
-        role_created = rdata.get('created', datetime.datetime.now().isoformat())
-        role_modified = rdata.get('modified', datetime.datetime.now().isoformat())
+        role_imported = rdata.get('imported', datetime.datetime.now().isoformat())  # noqa: DTZ005
+        role_created = rdata.get('created', datetime.datetime.now().isoformat())  # noqa: DTZ005
+        role_modified = rdata.get('modified', datetime.datetime.now().isoformat())  # noqa: DTZ005
         role_type = rdata.get('role_type', 'ANS')
         role_download_count = rdata.get('download_count', 0)
 

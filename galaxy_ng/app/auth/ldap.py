@@ -53,11 +53,9 @@ class PrefixedLDAPBackend(GalaxyLDAPBackend):
         When a prefixed user authenticates, remove the prefix from their
         username kwarg and treat them as the non-prefixed user.
         """
-        if username := kwargs.get("username"):
-            if username.startswith(self.prefix):
-                kwargs["username"] = username.removeprefix(self.prefix)
-                return super().authenticate(*args, **kwargs)
-
+        username = kwargs.get("username")
+        if username and username.startswith(self.prefix):
+            kwargs["username"] = username.removeprefix(self.prefix)
         return super().authenticate(*args, **kwargs)
 
     def get_or_build_user(self, username, ldap_user):

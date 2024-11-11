@@ -76,7 +76,8 @@ class BaseTestCase(APITestCase):
         return auth_models.User.objects.create(username=username)
 
     @staticmethod
-    def _create_group(scope, name, users=None, roles=[]):
+    def _create_group(scope, name, users=None, roles=None):
+        roles = roles or []
         group, _ = auth_models.Group.objects.get_or_create_identity(scope, name)
         if isinstance(users, auth_models.User):
             users = [users]

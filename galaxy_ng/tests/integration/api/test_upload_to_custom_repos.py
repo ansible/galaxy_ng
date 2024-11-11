@@ -40,13 +40,13 @@ def _upload_test_common(config, client, artifact, base_path, dest_base_path=None
         assert collection_resp["name"] == artifact.name
 
     # test download
-    with tempfile.TemporaryDirectory() as dir:
+    with tempfile.TemporaryDirectory() as dir_:
         if gc:
             api_root = gc.galaxy_root
         else:
             api_root = config["url"]
         filename = f"{artifact.namespace}-{artifact.name}-{artifact.version}.tar.gz"
-        tarball_path = f"{dir}/{filename}"
+        tarball_path = f"{dir_}/{filename}"
         url = (
             f"{api_root}v3/plugin/ansible/content/"
             f"{dest_base_path}/collections/artifacts/{filename}"

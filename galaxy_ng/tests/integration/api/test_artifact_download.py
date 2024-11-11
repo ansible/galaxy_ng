@@ -17,8 +17,8 @@ from ..utils import (
 logger = logging.getLogger(__name__)
 
 
-# TODO Refactor get_client to provide access to bearer token
-# FIXME: unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+# TODO(bmclaughlin): Refactor get_client to provide access to bearer token
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.deployment_standalone
 @pytest.mark.installer_smoke_test
@@ -41,9 +41,9 @@ def test_download_artifact(ansible_config, galaxy_client):
     hub_4_5 = is_hub_4_5(ansible_config)
     set_certification(ansible_config(), gc, artifact, hub_4_5=hub_4_5)
 
-    with tempfile.TemporaryDirectory() as dir:
+    with tempfile.TemporaryDirectory() as dir_:
         filename = f"{namespace}-{name}-{version}.tar.gz"
-        tarball_path = f"{dir}/{filename}"
+        tarball_path = f"{dir_}/{filename}"
         url = (f"{gc.galaxy_root}v3/plugin/ansible/content/"
                f"published/collections/artifacts/{filename}")
 
@@ -72,7 +72,7 @@ def test_download_artifact(ansible_config, galaxy_client):
         assert ci.version == version
 
 
-# TODO: make download logic more DRY in these tests
+# TODO(awcrosby): make download logic more DRY in these tests
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
 def test_download_artifact_validated(ansible_config, galaxy_client):
@@ -94,9 +94,9 @@ def test_download_artifact_validated(ansible_config, galaxy_client):
     assert resp["state"] == "completed"
     set_certification(ansible_config(), gc, artifact, level="validated")
 
-    with tempfile.TemporaryDirectory() as dir:
+    with tempfile.TemporaryDirectory() as dir_:
         filename = f"{artifact.namespace}-{artifact.name}-{artifact.version}.tar.gz"
-        tarball_path = f"{dir}/{filename}"
+        tarball_path = f"{dir_}/{filename}"
         url = (f"{gc.galaxy_root}v3/plugin/ansible/content/"
                f"validated/collections/artifacts/{filename}")
 

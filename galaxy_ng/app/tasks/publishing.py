@@ -24,7 +24,7 @@ def get_created_collection_versions():
     created_resources = current_task.created_resources.filter(
         content_type_id=ContentType.objects.get_for_model(CollectionVersion))
 
-    # TODO: replace with values_list
+    # TODO(alikins): replace with values_list
     created_collection_versions = []
     for created_resource in created_resources:
         collection_version = created_resource.content_object
@@ -87,11 +87,11 @@ def import_to_staging(username, **kwargs):
         dispatch(
             add_and_remove,
             exclusive_resources=[repo],
-            kwargs=dict(
-                add_content_units=add,
-                repository_pk=repo.pk,
-                remove_content_units=[],
-            ),
+            kwargs={
+                "add_content_units": add,
+                "repository_pk": repo.pk,
+                "remove_content_units": []
+            },
         )
 
         if settings.GALAXY_ENABLE_API_ACCESS_LOG:

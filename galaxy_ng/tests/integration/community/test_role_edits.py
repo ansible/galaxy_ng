@@ -1,3 +1,5 @@
+import contextlib
+
 import pytest
 
 # from ..utils import ansible_galaxy, get_client, SocialGithubClient
@@ -127,7 +129,5 @@ def test_community_legacy_role_edit(ansible_config):
     assert newds['summary_fields']['repository']['original_name'] == 'foorepo_old'
 
     # cleanup the role ...
-    try:
+    with contextlib.suppress(Exception):
         admin_client(f'/api/v1/roles/{role_id}/', method='DELETE')
-    except Exception:
-        pass

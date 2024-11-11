@@ -199,10 +199,9 @@ def _simple_csv(full_path, file_name, query, max_data_size=209715200):
     file_path = _get_file_path(full_path, file_name)
     tfile = _get_csv_splitter(file_path, max_data_size)
 
-    with connection.cursor() as cursor:
-        with cursor.copy(query) as copy:
-            while data := copy.read():
-                tfile.write(str(data, 'utf8'))
+    with connection.cursor() as cursor, cursor.copy(query) as copy:
+        while data := copy.read():
+            tfile.write(str(data, 'utf8'))
 
     return tfile.file_list()
 

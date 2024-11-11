@@ -108,7 +108,8 @@ _group_role_statements = [
     },
 ]
 
-_group_statements = _group_role_statements + [
+_group_statements = [
+    *_group_role_statements,
     {
         "action": ["create", "destroy", "update", "partial_update"],
         "principal": "*",
@@ -330,7 +331,7 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
     ],
-    # TODO: More specific permissions will be required here when pulp_container
+    # TODO(newswangerd): More specific permissions will be required here when pulp_container
     # RBAC is added
     'ContainerRepositoryViewSet': [
         {

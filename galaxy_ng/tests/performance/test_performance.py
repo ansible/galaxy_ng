@@ -4,11 +4,11 @@ import pytest
 from galaxy_ng.tests.performance.constants import URLS
 from ..integration.utils import (
     UIClient,
-    get_client
+    get_client,
 )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def api_client(ansible_config):
     config = ansible_config("admin")
     api_client = get_client(
@@ -20,7 +20,7 @@ def api_client(ansible_config):
 
 
 @pytest.mark.deployment_community
-@pytest.mark.parametrize("url,info", URLS.items())
+@pytest.mark.parametrize(("url", "info"), URLS.items())
 def test_api_performance(ansible_config, api_client, url, info):
     threshold = 0.25
     results = []

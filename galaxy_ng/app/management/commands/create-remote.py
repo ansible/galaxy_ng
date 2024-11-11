@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
     def validate(self, data):
         if not data["requirements_file"] and any(
-            [domain in data["url"] for domain in COMMUNITY_DOMAINS]
+            domain in data["url"] for domain in COMMUNITY_DOMAINS
         ):
             raise CommandError(
                 'Syncing content from community domains without specifying a '

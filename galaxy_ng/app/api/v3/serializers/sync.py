@@ -140,7 +140,7 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
 
     def validate(self, data):
         if not data.get('requirements_file') and any(
-            [domain in data['url'] for domain in COMMUNITY_DOMAINS]
+            domain in data['url'] for domain in COMMUNITY_DOMAINS
         ):
             raise serializers.ValidationError(
                 detail={

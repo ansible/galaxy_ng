@@ -39,6 +39,7 @@ requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, an
 lint:             ## Lint the code
 	check-manifest
 	flake8 --config flake8.cfg
+	ruff check .
 
 .PHONY: fmt
 fmt:              ## Format the code using Darker

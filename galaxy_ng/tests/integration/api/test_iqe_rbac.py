@@ -759,13 +759,11 @@ class TestRBAC:
         ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         user, _ = add_new_user_to_new_group(gc)
         gc_user = galaxy_client(user)
-        try:
+        # We expect the underlying podman command to fail, but we don't
+        # want to accidentally catch any other error, so we check that
+        # the error is the podman return code.
+        with pytest.raises(GalaxyClientError, match="retcode"):
             gc_user.push_image(ee_name + ":latest")
-        except GalaxyClientError as e:
-            # We expect the underlying podman command to fail, but we don't
-            # want to accidentally catch any other error, so we check that
-            # the error is the podman return code.
-            assert "retcode" in str(e)
 
     @pytest.mark.iqe_rbac_test
     def test_object_role_push_image_to_ee(self, galaxy_client, ansible_config):
@@ -816,13 +814,11 @@ class TestRBAC:
         gc.add_role_to_group(role_user, group["id"])
         ee_name = create_emtpy_local_image_container(ansible_config("admin"), gc)
         gc_user = galaxy_client(user)
-        try:
+        # We expect the underlying podman command to fail, but we don't
+        # want to accidentally catch any other error, so we check that
+        # the error is the podman return code.
+        with pytest.raises(GalaxyClientError, match="retcode"):
             gc_user.push_image(ee_name + ":latest")
-        except GalaxyClientError as e:
-            # We expect the underlying podman command to fail, but we don't
-            # want to accidentally catch any other error, so we check that
-            # the error is the podman return code.
-            assert "retcode" in str(e)
 
     @pytest.mark.iqe_rbac_test
     def test_missing_object_role_delete_image_from_ee(self, galaxy_client, ansible_config):
