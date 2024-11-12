@@ -16,7 +16,7 @@ ansible-builder==3.1.0
     # via galaxy-importer
 ansible-compat==24.7.0
     # via ansible-lint
-ansible-core==2.17.2
+ansible-core==2.18.0
     # via
     #   ansible-compat
     #   ansible-lint
