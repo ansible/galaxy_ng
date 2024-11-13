@@ -484,7 +484,7 @@ func main() {
 		data, _ := ioutil.ReadAll(upstreamServerResponse.Body)
 		modified := downloadUrlReg.ReplaceAll(data, replacementURL)
 
-		//fmt.Printf("MODIFIED DATA: %s\n", modified)
+		fmt.Printf("MODIFIED DATA: %s\n", modified)
 
 		// Write the response
 		rw.WriteHeader(upstreamServerResponse.StatusCode)
