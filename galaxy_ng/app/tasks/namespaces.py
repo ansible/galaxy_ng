@@ -38,7 +38,7 @@ def _download_avatar(url, namespace_name):
         ' Gecko/20100101 Firefox/71.0'
     }
     timeout = aiohttp.ClientTimeout(total=None, sock_connect=600, sock_read=600)
-    conn = aiohttp.TCPConnector(force_close=True)
+    conn = aiohttp.TCPConnector(loop=asyncio.get_event_loop(), force_close=True)
     session = aiohttp.ClientSession(
         connector=conn, timeout=timeout, headers=headers, requote_redirect_url=False
     )
