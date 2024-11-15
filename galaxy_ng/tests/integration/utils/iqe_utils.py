@@ -369,7 +369,7 @@ def galaxy_stage_ansible_user_cleanup(gc, u):
         delete_group(gc_admin, group)
 
     with contextlib.suppress(GalaxyClientError):
-        delete_namespace(gc_admin, github_user_username.replace("-", "_"))
+        delete_namespace(gc_admin, github_user_username.replace("-", "_"), cascade=True)
 
     with contextlib.suppress(ValueError):
         delete_v1_namespace(gc_admin, github_user_username)
