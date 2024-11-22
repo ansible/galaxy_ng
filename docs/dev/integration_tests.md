@@ -1,4 +1,5 @@
 # Integration tests
+(*To run integration tests with docker compose stack, check the [Running integration tests](../galaxy_ng/tests/integration/README.md)*) 
 
 ## GitHub Actions
 

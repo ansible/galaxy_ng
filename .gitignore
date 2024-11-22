@@ -87,6 +87,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+gng_int_testing/
+gng_unit_testing/
 .compose.env
 
 # Spyder project settings

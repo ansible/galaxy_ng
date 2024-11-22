@@ -204,6 +204,16 @@ export DOCKER_BUILDKIT=0
 export COMPOSE_DOCKER_CLI_BUILD=0
 ```
 
+## Tests
+
+### Unit tests
+Run unit tests with docker compose [Running unit tests](../../galaxy_ng//tests/unit/README.md)
+
+### Integration tests
+Run integration tests with docker compose, check the [Running integration tests](../../galaxy_ng/tests/integration/README.md)
+
+Run with legacy oci-env, check the [Running oci-env integration tests](../../docs/dev/integration_tests.md)
+
 ## Tips and Tricks.
 
 **TBD**
