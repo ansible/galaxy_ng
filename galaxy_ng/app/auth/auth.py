@@ -43,14 +43,32 @@ class RHIdentityAuthentication(BaseAuthentication):
             return None
 
         header = self._decode_header(request.META[self.header])
+        identity = header.get("identity")
+        if identity is None:
+            raise AuthenticationFailed
 
-        try:
-            identity = header['identity']
-            account = identity['account_number']
+        identity_type = identity.get("type", "User")
+        if identity_type == "User":
+            try:
+                identity = header['identity']
+                account = identity['account_number']
 
-            user = identity['user']
-            username = user['username']
-        except KeyError:
+                user = identity['user']
+                username = user['username']
+            except KeyError:
+                raise AuthenticationFailed
+        elif identity_type == "ServiceAccount":
+            try:
+                service_account = identity['service_account']
+                # service-account-<uuid4> is too long for the username field
+                username = service_account['username'].replace('service-account-', '')
+                # make this the same?
+                account = username
+                # all other attributes for service accounts is null
+                user = {}
+            except KeyError:
+                raise AuthenticationFailed
+        else:
             raise AuthenticationFailed
 
         email = user.get('email', '')

@@ -88,7 +88,7 @@ def wait_for_task_ui_client(gc, task):
         if state == 'completed':
             break
         time.sleep(SLEEP_SECONDS_POLLING)
-    assert state == 'completed'
+    assert state == 'completed', ds
 
 
 def wait_for_namespace_tasks_gk(gc, timeout=300):
