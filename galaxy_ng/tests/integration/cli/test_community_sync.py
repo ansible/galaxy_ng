@@ -4,7 +4,6 @@
 import json
 import pytest
 import requests
-import subprocess
 
 from ansible.galaxy.api import GalaxyError
 
@@ -15,7 +14,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.deployment_community
-def test_community_collection_download_count_sync(ansible_config):
+def test_community_collection_download_count_sync(ansible_config, docker_compose_exec):
     """ Test collection download count sync command """
 
     # FIXME(jctanner): once beta switches over, this test is no longer needed.
@@ -83,11 +82,7 @@ def test_community_collection_download_count_sync(ansible_config):
     wait_for_task(api_client, sync_task)
 
     # run the django command
-    pid = subprocess.run(
-        'pulpcore-manager sync-collection-download-counts',
-        shell=True,
-        capture_output=True,
-    )
+    pid = docker_compose_exec('pulpcore-manager sync-collection-download-counts')
     assert pid.returncode == 0
 
     # check the counter in the api
