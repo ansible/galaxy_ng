@@ -12,3 +12,4 @@ galaxykit @ git+https://github.com/ansible/galaxykit
 pyyaml
 pytest-subtests
 ldap3
+setuptools

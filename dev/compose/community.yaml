@@ -30,9 +30,9 @@ x-common-env: &common-env
   # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/'
   PULP_CONTENT_PATH_PREFIX: '/pulp/content/'
-  PULP_ANSIBLE_API_HOSTNAME: 'https://localhost'
-  PULP_ANSIBLE_CONTENT_HOSTNAME: "https://localhost"
-  PULP_CONTENT_ORIGIN: "https://localhost"
+  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:5001'
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:5001"
+  PULP_CONTENT_ORIGIN: "http://localhost:5001"
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
 
   # auth ...
@@ -59,7 +59,7 @@ x-common-env: &common-env
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
 
   # disable user/group modifications
-  PULP_ALLOW_LOCAL_RESOURCE_MANAGEMENT: 'false'
+  PULP_ALLOW_LOCAL_RESOURCE_MANAGEMENT: 'true'
 
   # role content workaround
   PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'
@@ -74,8 +74,9 @@ x-common-env: &common-env
   # PULP_RESOURCE_SERVER__VALIDATE_HTTPS='false'
 
   # Integration test settings
-  HUB_TEST_AUTHENTICATION_BACKEND: "community"
-  HUB_TEST_MARKS: "deployment_community"
+  HUB_TEST_AUTHENTICATION_BACKEND: 'community'
+  HUB_TEST_MARKS: 'deployment_community'
+  HUB_API_ROOT: 'http://localhost:5001/api/'
 
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
