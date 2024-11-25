@@ -170,14 +170,6 @@ extend-ignore = [
     # TD003 Missing issue link on the line following this TODO
     # We don't create issues for TODOs
     "TD003",
-
-    # related to changes in https://github.com/astral-sh/ruff/releases/tag/0.8.0
-    "A004",
-    "UP006",
-    "UP031",
-    "UP035",
-    "RUF021",
-    "RUF022",
 ]
 
 [tool.ruff.lint.per-file-ignores]

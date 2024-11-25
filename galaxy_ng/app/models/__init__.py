@@ -24,27 +24,27 @@ from ansible_base.rbac import permission_registry
 __all__ = (
     # aiindex
     "AIIndexDenyList",
-    # auth
-    "Group",
-    "User",
     # collectionimport
     "CollectionImport",
-    # config
-    "Setting",
     # container
     "ContainerDistribution",
     "ContainerDistroReadme",
     "ContainerNamespace",
     "ContainerRegistryRemote",
     "ContainerRegistryRepos",
+    # auth
+    "Group",
     # namespace
     "Namespace",
     "NamespaceLink",
     # organization
     "Organization",
-    "Team",
+    # config
+    "Setting",
     # synclist
     "SyncList",
+    "Team",
+    "User",
 )
 
 permission_registry.register(

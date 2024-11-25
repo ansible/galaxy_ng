@@ -5,4 +5,4 @@ from .not_found import NotFoundView
 from .sync import ContainerSyncRemoteView
 
 
-__all__ = ("TokenView", "SyncRemoteView", "ExcludesView", "NotFoundView", "ContainerSyncRemoteView")
+__all__ = ("ContainerSyncRemoteView", "ExcludesView", "NotFoundView", "SyncRemoteView", "TokenView")

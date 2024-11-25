@@ -21,13 +21,13 @@ from .sync import (
 
 
 __all__ = (
-    "LegacyNamespacesViewSet",
     "LegacyNamespaceOwnersViewSet",
     "LegacyNamespaceProvidersViewSet",
-    "LegacyUsersViewSet",
-    "LegacyRolesViewSet",
-    "LegacyRolesSyncViewSet",
+    "LegacyNamespacesViewSet",
     "LegacyRoleContentViewSet",
-    "LegacyRoleVersionsViewSet",
     "LegacyRoleImportsViewSet",
+    "LegacyRoleVersionsViewSet",
+    "LegacyRolesSyncViewSet",
+    "LegacyRolesViewSet",
+    "LegacyUsersViewSet",
 )
