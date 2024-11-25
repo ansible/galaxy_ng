@@ -152,10 +152,6 @@ extend-ignore = [
     # UP032 Use f-string instead of `format` call.
     # No need to replace all str.format usage with f-strings in entire codebase.
     "UP032",
-    # PT004,PT005 are incorrect and deprecated
-    # See https://github.com/astral-sh/ruff/issues/8796
-    "PT004",
-    "PT005",
     # PT009 Use a regular `assert` instead of unittest-style
     # Ignoring, since we have mixed pytest and legacy unittest styled tests
     "PT009",
@@ -174,6 +170,14 @@ extend-ignore = [
     # TD003 Missing issue link on the line following this TODO
     # We don't create issues for TODOs
     "TD003",
+
+    # related to changes in https://github.com/astral-sh/ruff/releases/tag/0.8.0
+    "A004",
+    "UP006",
+    "UP031",
+    "UP035",
+    "RUF021",
+    "RUF022",
 ]
 
 [tool.ruff.lint.per-file-ignores]
