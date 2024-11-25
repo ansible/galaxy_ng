@@ -4,8 +4,8 @@
 name: SonarCloud
 on:
   workflow_run:
-    workflows:
-      - galaxy_ng/ci
+#    workflows:
+#      - galaxy_ng/ci
     types:
       - completed
 jobs:
