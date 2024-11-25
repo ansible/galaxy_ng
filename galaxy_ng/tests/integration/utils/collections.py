@@ -9,7 +9,7 @@ import tempfile
 import json
 import time
 import uuid
-from typing import List, Union
+from typing import Union
 from ansible.galaxy.api import _urljoin
 
 import yaml
@@ -731,7 +731,7 @@ def setup_multipart(path: str, data: dict) -> dict:
 
 
 def add_multipart_field(
-    boundary: bytes, buffer: List[bytes], name: Union[str, bytes], value: Union[str, bytes]
+    boundary: bytes, buffer: list[bytes], name: Union[str, bytes], value: Union[str, bytes]
 ):
     if isinstance(name, str):
         name = name.encode("utf8")

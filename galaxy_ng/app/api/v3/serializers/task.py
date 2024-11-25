@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from drf_spectacular.utils import extend_schema_field
@@ -21,7 +21,7 @@ class TaskSerializer(serializers.ModelSerializer):
     started_at = serializers.DateTimeField()
     finished_at = serializers.DateTimeField()
 
-    @extend_schema_field(Optional[Dict[str, Any]])
+    @extend_schema_field(Optional[dict[str, Any]])
     def get_worker(self, obj):
         if obj.worker:
             return {

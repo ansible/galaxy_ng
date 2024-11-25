@@ -5,7 +5,7 @@ import logging
 import redis
 
 from functools import wraps
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 from uuid import uuid4
 
 from django.conf import settings
@@ -106,7 +106,7 @@ def release_lock(lock_name: str, token: str):
 
 
 @connection_error_wrapper
-def update_setting_cache(data: Dict[str, Any]) -> int:
+def update_setting_cache(data: dict[str, Any]) -> int:
     """Takes a python dictionary and write to Redis
     as a hashmap using Redis connection"""
     if conn is None:
@@ -121,7 +121,7 @@ def update_setting_cache(data: Dict[str, Any]) -> int:
 
 
 @connection_error_wrapper(default=dict)
-def get_settings_from_cache() -> Dict[str, Any]:
+def get_settings_from_cache() -> dict[str, Any]:
     """Reads settings from Redis cache and returns a python dictionary"""
     if conn is None:
         return {}
