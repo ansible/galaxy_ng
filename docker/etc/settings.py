@@ -11,10 +11,7 @@ CONTENT_PATH_PREFIX = "/api/automation-hub/v3/artifacts/collections/"
 ANSIBLE_API_HOSTNAME = os.environ.get('PULP_CONTENT_ORIGIN')
 
 GALAXY_API_PATH_PREFIX = "/api/automation-hub"
-GALAXY_AUTHENTICATION_CLASSES = [
-    'galaxy_ng.app.auth.auth.RHIdentityAuthentication',
-    'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
-]
+GALAXY_AUTHENTICATION_CLASSES = ['galaxy_ng.app.auth.auth.RHIdentityAuthentication']
 
 # GALAXY_AUTO_SIGN_COLLECTIONS = True
 # GALAXY_COLLECTION_SIGNING_SERVICE = "ansible-default"
@@ -42,7 +39,10 @@ DATABASES = {
 REDIS_HOST = os.environ.get('PULP_REDIS_HOST')
 REDIS_PORT = os.environ.get('PULP_REDIS_PORT')
 
-REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = ['rest_framework.renderers.JSONRenderer']
+REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = [
+    'rest_framework.renderers.JSONRenderer',
+    'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
+]
 
 _enabled_handlers = ['console']
 _extra_handlers = {}
