@@ -1,9 +1,58 @@
 # Running integration tests
-Integration tests are expected to be called via [galaxy_ng/dev/common/RUN_INTEGRATION.sh](https://github.com/ansible/galaxy_ng/blob/master/dev/common/RUN_INTEGRATION.sh)
-  - `make docker/test/integration`
-  - `make docker/test/integration/container`
-- Run in PR via GitHub Actions ci_standalone.yml for `DEPLOYMENT_MODE=standalone`
-- Run in PR via pr_check.sh in an ephemeral environment for `DEPLOYMENT_MODE=insights`
+Based on running docker compose stack deployment mode (standalone, community, insights), install requirements, set environment variables and markers on the host:
+
+
+Install `integration_requirements.txt` in your virtual env
+```
+python3 -m venv gng_int_testing
+source gng_testing/bin/activate
+pip install -r integration_requirements.txt
+```
+
+## Standalone
+```
+export HUB_API_ROOT='http://localhost:5001/api/galaxy/'
+export HUB_LOCAL=1
+```
+
+```python
+pytest -v -r sx --color=yes -m 'deployment_standalone' galaxy_ng/tests/integration
+```
+
+## Community
+```
+export HUB_API_ROOT='http://localhost:5001/api/'
+export HUB_LOCAL=1
+```
+
+run tests:
+```python
+pytest -v -r sx --color=yes -m 'deployment_community' galaxy_ng/tests/integration
+```
+
+## Insights (cloud)
+```
+export HUB_API_ROOT="http://localhost:8080/api/automation-hub/"
+export HUB_AUTH_URL="http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
+export HUB_USE_MOVE_ENDPOINT="true"
+export HUB_UPLOAD_SIGNATURES="true"
+```
+
+run tests:
+```python
+pytest -v -r sx --color=yes -m 'deployment_cloud or all' galaxy_ng/tests/integration
+```
+
+or specify test you would like to run: 
+```python
+pytest -v -r sx --color=yes -k ' test_delete_collection' galaxy_ng/tests/integration
+```
+
+Tests that are intended to pass on any deployment mode should be marked with `all`. By default unmarked tests will receive the `all` mark`.
+All `deployment_standalone` tests are also expected to pass when running with ldap or keycloak authentication. If a test is meant to test a specific authentication backend, use the `ldap` or `keycloak` marks, and remove `deployment_standalone`.
+List of all marks in [conftest.py](conftest.py)
+
+
 
 # Test Data
 * Test data is defined in [galaxy_ng/dev/common/setup_test_data.py](https://github.com/ansible/galaxy_ng/blob/master/dev/common/setup_test_data.py) and includes namespaces, users, tokens, and groups
