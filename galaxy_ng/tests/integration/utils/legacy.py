@@ -28,7 +28,7 @@ def wait_for_v1_task(task_id=None, resp=None, api_client=None, check=True):
 
     state = None
     counter = 0
-    while state is None or state == 'RUNNING' and counter <= 500:
+    while state is None or (state == 'RUNNING' and counter <= 500):
         counter += 1
         task_resp = api_client(poll_url, method='GET')
         state = task_resp['results'][0]['state']

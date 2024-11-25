@@ -119,9 +119,9 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             remote = ui_serializers.ContainerRemoteSerializer(
                 repo.remote.cast(), context=self.context).data
 
-        sign_state = repo.content.filter(
+        sign_state = (repo.content.filter(
             pulp_type="container.signature"
-        ).count() > 0 and "signed" or "unsigned"
+        ).count() > 0 and "signed") or "unsigned"
 
         return {
             "repository": {
