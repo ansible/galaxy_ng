@@ -38,7 +38,7 @@ def _load_conditional_signing_flags(flags):
     # Is the system enabled to accept signature uploads?
     can_upload = flags.setdefault(
         "can_upload_signatures",
-        enabled and require_upload or bool(settings.get("GALAXY_SIGNATURE_UPLOAD_ENABLED"))
+        (enabled and require_upload) or bool(settings.get("GALAXY_SIGNATURE_UPLOAD_ENABLED"))
     )
 
     # Is the system configured with a Signing Service to create signatures?

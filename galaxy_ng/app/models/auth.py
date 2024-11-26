@@ -9,10 +9,10 @@ from ansible_base.resource_registry.fields import AnsibleResourceField
 log = logging.getLogger(__name__)
 
 __all__ = (
-    "SYSTEM_SCOPE",
     "RH_PARTNER_ENGINEER_GROUP",
-    "User",
+    "SYSTEM_SCOPE",
     "Group",
+    "User",
 )
 
 

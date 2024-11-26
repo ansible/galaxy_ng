@@ -2,12 +2,13 @@
 Tasks related to the settings cache management.
 """
 import logging
+import redis
+
 from functools import wraps
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 from uuid import uuid4
 
 from django.conf import settings
-from redis import ConnectionError, Redis
 
 from galaxy_ng.app.models.config import Setting
 from django.db.utils import OperationalError
@@ -23,9 +24,9 @@ def get_redis_connection():
     redis_url = settings.get("REDIS_URL")
     if _conn is None:
         if redis_url is not None:
-            _conn = Redis.from_url(redis_url, decode_responses=True)
+            _conn = redis.Redis.from_url(redis_url, decode_responses=True)
         elif redis_host is not None:
-            _conn = Redis(
+            _conn = redis.Redis(
                 host=redis_host,
                 port=settings.get("REDIS_PORT") or 6379,
                 db=settings.get("REDIS_DB", 0),
@@ -41,7 +42,7 @@ def get_redis_connection():
     return _conn
 
 
-conn: Optional[Redis] = get_redis_connection()
+conn: Optional[redis.Redis] = get_redis_connection()
 
 
 def connection_error_wrapper(
@@ -55,7 +56,7 @@ def connection_error_wrapper(
             return default()
         try:
             return func(*args, **kwargs)
-        except (ConnectionError, TypeError) as e:
+        except (redis.ConnectionError, TypeError) as e:
             # TypeError is raised when an invalid port number for the Redis connection is configured
             logging.error(f"Redis connection error: {e}")
             return default()
@@ -105,7 +106,7 @@ def release_lock(lock_name: str, token: str):
 
 
 @connection_error_wrapper
-def update_setting_cache(data: Dict[str, Any]) -> int:
+def update_setting_cache(data: dict[str, Any]) -> int:
     """Takes a python dictionary and write to Redis
     as a hashmap using Redis connection"""
     if conn is None:
@@ -120,7 +121,7 @@ def update_setting_cache(data: Dict[str, Any]) -> int:
 
 
 @connection_error_wrapper(default=dict)
-def get_settings_from_cache() -> Dict[str, Any]:
+def get_settings_from_cache() -> dict[str, Any]:
     """Reads settings from Redis cache and returns a python dictionary"""
     if conn is None:
         return {}

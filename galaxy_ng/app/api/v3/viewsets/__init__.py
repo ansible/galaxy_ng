@@ -19,18 +19,18 @@ __all__ = (
     # collection
     "CollectionArtifactDownloadView",
     "CollectionUploadViewSet",
-    "CollectionVersionMoveViewSet",
     "CollectionVersionCopyViewSet",
-    # namespace
-    "NamespaceViewSet",
-    # task
-    "TaskViewSet",
-    # sync
-    "SyncConfigViewSet",
+    "CollectionVersionMoveViewSet",
+    "ContainerReadmeViewSet",
+    "ContainerRepositoryHistoryViewSet",
+    "ContainerRepositoryManifestViewSet",
     # execution_environments
     "ContainerRepositoryViewSet",
-    "ContainerRepositoryManifestViewSet",
-    "ContainerRepositoryHistoryViewSet",
-    "ContainerReadmeViewSet",
     "ContainerTagViewset",
+    # namespace
+    "NamespaceViewSet",
+    # sync
+    "SyncConfigViewSet",
+    # task
+    "TaskViewSet",
 )

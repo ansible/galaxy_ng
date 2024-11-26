@@ -15,7 +15,7 @@ import json
 import logging
 import os
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 import ldap
 import pkg_resources
@@ -34,7 +34,7 @@ DAB_SERVICE_BACKED_REDIRECT = (
 )
 
 
-def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True) -> Dict[str, Any]:
+def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True) -> dict[str, Any]:
     """The dynaconf post hook is called after all the settings are loaded and set.
 
     Post hook is necessary when a setting key depends conditionally on a previouslys et variable.
@@ -82,7 +82,7 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
     return data
 
 
-def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
+def configure_keycloak(settings: Dynaconf) -> dict[str, Any]:
     """Configure keycloak settings for galaxy.
 
     This function returns a dictionary that will be merged to the settings.
@@ -209,7 +209,7 @@ def configure_keycloak(settings: Dynaconf) -> Dict[str, Any]:
     return data
 
 
-def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
+def configure_socialauth(settings: Dynaconf) -> dict[str, Any]:
     """Configure social auth settings for galaxy.
 
     This function returns a dictionary that will be merged to the settings.
@@ -272,7 +272,7 @@ def configure_socialauth(settings: Dynaconf) -> Dict[str, Any]:
     return data
 
 
-def configure_logging(settings: Dynaconf) -> Dict[str, Any]:
+def configure_logging(settings: Dynaconf) -> dict[str, Any]:
     data = {
         "GALAXY_ENABLE_API_ACCESS_LOG": settings.get(
             "GALAXY_ENABLE_API_ACCESS_LOG",
@@ -370,7 +370,7 @@ def configure_logging(settings: Dynaconf) -> Dict[str, Any]:
     return data
 
 
-def configure_cors(settings: Dynaconf) -> Dict[str, Any]:
+def configure_cors(settings: Dynaconf) -> dict[str, Any]:
     """This adds CORS Middleware, useful to access swagger UI on dev environment"""
 
     if os.getenv("DEV_SOURCE_PATH", None) is None:
@@ -384,7 +384,7 @@ def configure_cors(settings: Dynaconf) -> Dict[str, Any]:
     return data
 
 
-def configure_pulp_ansible(settings: Dynaconf) -> Dict[str, Any]:
+def configure_pulp_ansible(settings: Dynaconf) -> dict[str, Any]:
     # Translate the galaxy default base path to the pulp ansible default base path.
     distro_path = settings.get("GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH", "published")
 
@@ -397,7 +397,7 @@ def configure_pulp_ansible(settings: Dynaconf) -> Dict[str, Any]:
     }
 
 
-def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -> Dict[str, Any]:
+def configure_authentication_classes(settings: Dynaconf, data: dict[str, Any]) -> dict[str, Any]:
     # GALAXY_AUTHENTICATION_CLASSES is used to configure the galaxy api authentication
     # pretty much everywhere (on prem, cloud, dev environments, CI environments etc).
     # We need to set the REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES variable so that
@@ -442,10 +442,10 @@ def configure_authentication_classes(settings: Dynaconf, data: Dict[str, Any]) -
     return data
 
 
-def configure_password_validators(settings: Dynaconf) -> Dict[str, Any]:
+def configure_password_validators(settings: Dynaconf) -> dict[str, Any]:
     """Configure the password validators"""
     GALAXY_MINIMUM_PASSWORD_LENGTH: int = settings.get("GALAXY_MINIMUM_PASSWORD_LENGTH", 9)
-    AUTH_PASSWORD_VALIDATORS: List[Dict[str, Any]] = settings.AUTH_PASSWORD_VALIDATORS
+    AUTH_PASSWORD_VALIDATORS: list[dict[str, Any]] = settings.AUTH_PASSWORD_VALIDATORS
     # NOTE: Dynaconf can't add or merge on dicts inside lists.
     # So we need to traverse the list to change it until the RFC is implemented
     # https://github.com/rochacbruno/dynaconf/issues/299#issuecomment-900616706
@@ -455,7 +455,7 @@ def configure_password_validators(settings: Dynaconf) -> Dict[str, Any]:
     return {"AUTH_PASSWORD_VALIDATORS": AUTH_PASSWORD_VALIDATORS}
 
 
-def configure_api_base_path(settings: Dynaconf) -> Dict[str, Any]:
+def configure_api_base_path(settings: Dynaconf) -> dict[str, Any]:
     """Set the pulp api root under the galaxy api root."""
 
     galaxy_api_root = settings.get("GALAXY_API_PATH_PREFIX")
@@ -463,7 +463,7 @@ def configure_api_base_path(settings: Dynaconf) -> Dict[str, Any]:
     return {"API_ROOT": pulp_api_root}
 
 
-def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
+def configure_ldap(settings: Dynaconf) -> dict[str, Any]:
     """Configure ldap settings for galaxy.
     This function returns a dictionary that will be merged to the settings.
     """
@@ -571,7 +571,7 @@ def configure_ldap(settings: Dynaconf) -> Dict[str, Any]:
     return data
 
 
-def configure_authentication_backends(settings: Dynaconf, data: Dict[str, Any]) -> Dict[str, Any]:
+def configure_authentication_backends(settings: Dynaconf, data: dict[str, Any]) -> dict[str, Any]:
     """Configure authentication backends for galaxy.
 
     This adds backends in the following order:
@@ -611,7 +611,7 @@ def configure_authentication_backends(settings: Dynaconf, data: Dict[str, Any]) 
     return data
 
 
-def configure_renderers(settings) -> Dict[str, Any]:
+def configure_renderers(settings) -> dict[str, Any]:
     """
         Add CustomBrowsableAPI only for community (galaxy.ansible.com, galaxy-stage, galaxy-dev)"
     """
@@ -625,7 +625,7 @@ def configure_renderers(settings) -> Dict[str, Any]:
     return {}
 
 
-def configure_legacy_roles(settings: Dynaconf) -> Dict[str, Any]:
+def configure_legacy_roles(settings: Dynaconf) -> dict[str, Any]:
     """Set the feature flag for legacy roles from the setting"""
     data = {}
     legacy_roles = settings.get("GALAXY_ENABLE_LEGACY_ROLES", False)
@@ -660,7 +660,7 @@ def validate(settings: Dynaconf) -> None:
     settings.validators.validate()
 
 
-def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
+def configure_dynamic_settings(settings: Dynaconf) -> dict[str, Any]:
     """Dynaconf 3.2.2 allows registration of hooks on methods `get` and `as_dict`
 
     For galaxy this enables the Dynamic Settings feature, which triggers a
@@ -785,7 +785,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     }
 
 
-def configure_dab_required_settings(settings: Dynaconf) -> Dict[str, Any]:
+def configure_dab_required_settings(settings: Dynaconf) -> dict[str, Any]:
     dab_settings = get_dab_settings(
         installed_apps=[*settings.INSTALLED_APPS, 'ansible_base.jwt_consumer'],
         rest_framework=settings.REST_FRAMEWORK,

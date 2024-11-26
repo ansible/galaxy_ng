@@ -37,29 +37,29 @@ from .search import (
 )
 
 __all__ = (
-    # auth
-    'LoginSerializer',
     # collection
     'CollectionDetailSerializer',
     'CollectionListSerializer',
-    'CollectionVersionSerializer',
-    'CollectionVersionDetailSerializer',
     'CollectionVersionBaseSerializer',
-    # imports
-    'ImportTaskDetailSerializer',
-    'ImportTaskListSerializer',
-    # current_user
-    'CurrentUserSerializer',
-    # user
-    'UserSerializer',
-    # synclist
-    'SyncListSerializer',
-    'SyncListCollectionSummarySerializer',
-    # distribution
-    'DistributionSerializer',
+    'CollectionVersionDetailSerializer',
+    'CollectionVersionSerializer',
     # container
     'ContainerRegistryRemoteSerializer',
     'ContainerRemoteSerializer',
+    # current_user
+    'CurrentUserSerializer',
+    # distribution
+    'DistributionSerializer',
+    # imports
+    'ImportTaskDetailSerializer',
+    'ImportTaskListSerializer',
+    # auth
+    'LoginSerializer',
     # Search
     'SearchResultsSerializer',
+    'SyncListCollectionSummarySerializer',
+    # synclist
+    'SyncListSerializer',
+    # user
+    'UserSerializer',
 )

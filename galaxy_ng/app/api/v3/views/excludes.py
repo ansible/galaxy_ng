@@ -26,12 +26,12 @@ def get_synclist_excludes(base_path):
 
 def serialize_collection_queryset(queryset):
     """Serialize a Queryset in to a JSONable format."""
-    return queryset is not None and [
+    return (queryset is not None and [
         {
             "name": "{collection.namespace}.{collection.name}".format(collection=collection)
         }
         for collection in queryset.all()
-    ] or []
+    ]) or []
 
 
 class RequirementsFileRenderer(BaseRenderer):

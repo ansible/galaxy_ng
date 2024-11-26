@@ -33,7 +33,7 @@ def _handle_drf_api_exception(exc):
     if getattr(exc, 'auth_header', None):
         headers['WWW-Authenticate'] = exc.auth_header
     if getattr(exc, 'wait', None):
-        headers['Retry-After'] = '%d' % exc.wait
+        headers['Retry-After'] = str(exc.wait)
 
     title = exc.__class__.default_detail
     errors = _get_errors(exc.detail, status=exc.status_code, title=title)

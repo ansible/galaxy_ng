@@ -25,37 +25,28 @@ from .search import (
 
 
 __all__ = (
+    # AI/Wisdom
+    "AIDenyIndexAddView",
+    "AIDenyIndexDetailView",
+    "AIDenyIndexListView",
+    # Signing
+    "CollectionSignView",
+    # sync
+    "ContainerSyncRegistryView",
+    # controller
+    "ControllerListView",
+    # feature_flags
+    "FeatureFlagsView",
+    # index_execution_environments
+    "IndexRegistryEEView",
+    # landing_page
+    "LandingPageView",
     # auth
     "LoginView",
     "LogoutView",
-
-    # feature_flags
-    "FeatureFlagsView",
-
-    # controller
-    "ControllerListView",
-
-    # settings
-    "SettingsView",
-
-    # landing_page
-    "LandingPageView",
-
-    # sync
-    "ContainerSyncRegistryView",
-
-    # index_execution_environments
-    "IndexRegistryEEView",
-
-    # Signing
-    "CollectionSignView",
-
-    # AI/Wisdom
-    "AIDenyIndexAddView",
-    "AIDenyIndexListView",
-    "AIDenyIndexDetailView",
-
     # Search
     "SearchListView",
+    # settings
+    "SettingsView",
 
 )

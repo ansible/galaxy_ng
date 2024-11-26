@@ -1,5 +1,4 @@
 import logging
-from typing import Dict
 
 from hvac import Client
 from hvac.exceptions import InvalidPath
@@ -46,7 +45,7 @@ class VaultSecretFetcher:
             client = None
         return cls(mountpoint=mountpoint, client=client, settings=settings)
 
-    loaded_secrets: Dict[str, Dict[str, object]]
+    loaded_secrets: dict[str, dict[str, object]]
 
     def __init__(self, mountpoint: str, client: Client, settings):
         self._client = client
