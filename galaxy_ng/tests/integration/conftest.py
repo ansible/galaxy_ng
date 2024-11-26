@@ -733,7 +733,6 @@ def skip_if_not_require_signature_for_approval():
 def docker_compose_exec():
     def _exec(cmd: str):
         proc = subprocess.run(
-            # "django-admin populate-role-tags",
             f"docker compose -f dev/compose/community.yaml exec manager /bin/bash -c '{cmd}'",
             shell=True,
             capture_output=True,
