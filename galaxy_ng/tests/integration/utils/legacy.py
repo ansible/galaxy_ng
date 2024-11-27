@@ -245,12 +245,13 @@ class LegacyRoleGitRepoBuilder:
         self.docker_compose_exec = docker_compose_exec
 
         # local tmp dir for roles
-        temp_roles = 'temp_roles/'
-        if not os.path.exists(temp_roles):
-            os.makedirs(temp_roles)
+        self.temp_roles = 'temp_roles/'
+        self.local_roles_cleanup()
+        if not os.path.exists(self.temp_roles):
+            os.makedirs(self.temp_roles)
 
-        self.workdir = tempfile.mkdtemp(prefix='gitrepo_', dir=temp_roles)
-        path_parts = self.workdir.partition(temp_roles)
+        self.workdir = tempfile.mkdtemp(prefix='gitrepo_', dir=self.temp_roles)
+        path_parts = self.workdir.partition(self.temp_roles)
 
         # should be equal to HOME=/app
         # TODO: better way to get env var from container?
@@ -294,7 +295,7 @@ class LegacyRoleGitRepoBuilder:
                 f.write(yaml.dump(meta))
 
     def git_init(self):
-        pid1 =self.docker_compose_exec('git init', cwd=self.role_cont_dir)
+        self.docker_compose_exec('git init', cwd=self.role_cont_dir)
 
         # hack to make git inside git dir work
         self.docker_compose_exec(f'git config --global --add safe.directory {self.role_cont_dir}')
@@ -305,3 +306,6 @@ class LegacyRoleGitRepoBuilder:
 
         self.docker_compose_exec('git add *', cwd=self.role_cont_dir)
         self.docker_compose_exec('git commit -m "first checkin"',  cwd=self.role_cont_dir)
+
+    def local_roles_cleanup(self):
+        self.docker_compose_exec(f'rm -rf {self.temp_roles}')

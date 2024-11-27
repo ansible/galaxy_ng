@@ -103,3 +103,6 @@ def test_role_import_overrides(ansible_config, spec, docker_compose_exec):
     assert roles_search['results'][0]['name'] == spec['name']
     assert roles_search['results'][0]['github_user'] == spec['github_user']
     assert roles_search['results'][0]['github_repo'] == spec['github_repo']
+
+    # cleanup
+    lr.local_roles_cleanup()
