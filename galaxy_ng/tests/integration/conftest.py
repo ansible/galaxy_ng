@@ -731,9 +731,13 @@ def skip_if_not_require_signature_for_approval():
 
 @pytest.fixture
 def docker_compose_exec():
-    def _exec(cmd: str):
+    def _exec(cmd: str, cwd=None):
+        cd = ''
+        if cwd is not None:
+            cd = f'cd {cwd};'
+
         proc = subprocess.run(
-            f"docker compose -f dev/compose/community.yaml exec manager /bin/bash -c '{cmd}'",
+            f"docker exec compose-manager-1 /bin/bash -c '{cd}{cmd}'",
             shell=True,
             capture_output=True,
         )
