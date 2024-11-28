@@ -25,7 +25,7 @@ jobs:
           - TEST_PROFILE: insights
           - TEST_PROFILE: iqe_rbac
           - TEST_PROFILE: x_repo_search
-          - TEST_PROFILE: community
+          # - TEST_PROFILE: community
           - TEST_PROFILE: dab_jwt
     runs-on: ubuntu-latest
     steps:

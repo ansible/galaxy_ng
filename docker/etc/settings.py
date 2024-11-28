@@ -39,7 +39,10 @@ DATABASES = {
 REDIS_HOST = os.environ.get('PULP_REDIS_HOST')
 REDIS_PORT = os.environ.get('PULP_REDIS_PORT')
 
-REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = ['rest_framework.renderers.JSONRenderer']
+REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = [
+    'rest_framework.renderers.JSONRenderer',
+    'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
+]
 
 _enabled_handlers = ['console']
 _extra_handlers = {}

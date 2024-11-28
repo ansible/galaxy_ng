@@ -234,32 +234,51 @@ class LegacyRoleGitRepoBuilder:
         namespace=None,
         name=None,
         meta_namespace=None,
-        meta_name=None
+        meta_name=None,
+        docker_compose_exec=None
     ):
         self.namespace = namespace
         self.name = name
         self.meta_namespace = meta_namespace
         self.meta_name = meta_name
 
-        self.workdir = tempfile.mkdtemp(prefix='gitrepo_')
+        self.docker_compose_exec = docker_compose_exec
+
+        # local tmp dir for roles
+        self.temp_roles = 'temp_roles/'
+        self.local_roles_cleanup()
+        if not os.path.exists(self.temp_roles):
+            os.makedirs(self.temp_roles)
+
+        self.workdir = tempfile.mkdtemp(prefix='gitrepo_', dir=self.temp_roles)
+        path_parts = self.workdir.partition(self.temp_roles)
+
+        # should be equal to HOME=/app
+        # TODO(jjerabek): better way to get env var from container?
+        pid = self.docker_compose_exec('printenv HOME')
+        home = pid.stdout.decode('utf-8').strip() or '/app'
+
+        self.workdir_cont = os.path.join(home, path_parts[1], path_parts[2])
+
         self.role_dir = None
+        self.role_cont_dir = None
 
         self.role_init()
         self.role_edit()
         self.git_init()
         self.git_commit()
 
-        self.fix_perms()
-
-    def fix_perms(self):
-        subprocess.run(f'chown -R pulp:pulp {self.workdir}', shell=True)
-
     def role_init(self):
         cmd = f'ansible-galaxy role init {self.namespace}.{self.name}'
         self.role_dir = os.path.join(self.workdir, self.namespace + '.' + self.name)
-        pid = subprocess.run(cmd, shell=True, cwd=self.workdir)
+        self.role_cont_dir = os.path.join(self.workdir_cont, self.namespace + '.' + self.name)
+
+        pid = subprocess.run(cmd, shell=True, cwd=self.workdir, capture_output=True)
+
         assert pid.returncode == 0
         assert os.path.exists(self.role_dir)
+        ag_init_stdout = f'- Role {self.namespace}.{self.name} was created successfully'
+        assert pid.stdout.decode('utf-8').strip() == ag_init_stdout
 
     def role_edit(self):
         if self.meta_namespace or self.meta_name:
@@ -277,12 +296,17 @@ class LegacyRoleGitRepoBuilder:
                 f.write(yaml.dump(meta))
 
     def git_init(self):
-        subprocess.run('git init', shell=True, cwd=self.role_dir)
+        self.docker_compose_exec('git init', cwd=self.role_cont_dir)
+
+        # hack to make git inside git dir work
+        self.docker_compose_exec(f'git config --global --add safe.directory {self.role_cont_dir}')
 
     def git_commit(self):
+        self.docker_compose_exec('git config --global user.email "root@localhost"')
+        self.docker_compose_exec('git config --global user.name "root at localhost"')
 
-        subprocess.run('git config --global user.email "root@localhost"', shell=True)
-        subprocess.run('git config --global user.name "root at localhost"', shell=True)
+        self.docker_compose_exec('git add *', cwd=self.role_cont_dir)
+        self.docker_compose_exec('git commit -m "first checkin"', cwd=self.role_cont_dir)
 
-        subprocess.run('git add *', shell=True, cwd=self.role_dir)
-        subprocess.run('git commit -m "first checkin"', shell=True, cwd=self.role_dir)
+    def local_roles_cleanup(self):
+        self.docker_compose_exec(f'rm -rf {self.temp_roles}')

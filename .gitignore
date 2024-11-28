@@ -110,6 +110,8 @@ gng_unit_testing/
 
 # Galaxy NG
 db_snapshots/
+temp_roles/*
+.gitconfig
 
 # oci-env profile files
 .compiled/

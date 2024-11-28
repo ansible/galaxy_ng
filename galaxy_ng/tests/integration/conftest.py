@@ -3,6 +3,7 @@ import logging
 import os
 import shutil
 import yaml
+import subprocess
 
 import pytest
 from orionutils.utils import increment_version
@@ -726,3 +727,20 @@ def skip_if_require_signature_for_approval():
 def skip_if_not_require_signature_for_approval():
     if not require_signature_for_approval():
         pytest.skip("This test needs refactoring to work with signatures required on move.")
+
+
+@pytest.fixture
+def docker_compose_exec():
+    def _exec(cmd: str, cwd=None):
+        cd = ''
+        if cwd is not None:
+            cd = f'cd {cwd};'
+
+        proc = subprocess.run(
+            f"docker exec compose-manager-1 /bin/bash -c '{cd}{cmd}'",
+            shell=True,
+            capture_output=True,
+        )
+        return proc
+
+    return _exec

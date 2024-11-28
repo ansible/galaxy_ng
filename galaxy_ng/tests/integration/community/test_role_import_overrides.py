@@ -39,11 +39,10 @@ pytestmark = pytest.mark.qa  # noqa: F821
             'alternate_namespace_name': None,
             'alternate_role_name': None,
         }
-
     ]
 )
 @pytest.mark.deployment_community
-def test_role_import_overrides(ansible_config, spec):
+def test_role_import_overrides(ansible_config, spec, docker_compose_exec):
     """" Validate setting namespace in meta/main.yml does the right thing """
 
     admin_config = ansible_config("admin")
@@ -83,10 +82,12 @@ def test_role_import_overrides(ansible_config, spec):
         'meta_namespace': spec['meta_namespace'],
         'meta_name': spec['meta_name'],
     }
-    lr = LegacyRoleGitRepoBuilder(**builder_kwargs)
+    lr = LegacyRoleGitRepoBuilder(**builder_kwargs, docker_compose_exec=docker_compose_exec)
+
+    local_tmp_dir = lr.role_cont_dir
 
     # run the import
-    payload = {'alternate_clone_url': lr.role_dir}
+    payload = {'alternate_clone_url': local_tmp_dir}
     for key in ['github_user', 'github_repo', 'alternate_namespace_name', 'alternate_role_name']:
         if spec.get(key):
             payload[key] = spec[key]
@@ -102,3 +103,6 @@ def test_role_import_overrides(ansible_config, spec):
     assert roles_search['results'][0]['name'] == spec['name']
     assert roles_search['results'][0]['github_user'] == spec['github_user']
     assert roles_search['results'][0]['github_repo'] == spec['github_repo']
+
+    # cleanup
+    lr.local_roles_cleanup()
