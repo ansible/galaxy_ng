@@ -109,6 +109,7 @@ INSTALLED_APPS = [
     'crum',
     'ansible_base.resource_registry',
     'ansible_base.rbac',
+    'flags',
     'social_django',
     'dynaconf_merge_unique',
 ]
@@ -447,3 +448,18 @@ ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
 
 # https://github.com/ansible/django-ansible-base/pull/611
 RENAMED_USERNAME_PREFIX = "galaxy_"
+
+# required by django-flags
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+            ],
+        },
+    },
+]
+
+# feature flags
+FLAGS = {}
