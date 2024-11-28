@@ -254,7 +254,7 @@ class LegacyRoleGitRepoBuilder:
         path_parts = self.workdir.partition(self.temp_roles)
 
         # should be equal to HOME=/app
-        # TODO: better way to get env var from container?
+        # TODO(jjerabek): better way to get env var from container?
         pid = self.docker_compose_exec('printenv HOME')
         home = pid.stdout.decode('utf-8').strip() or '/app'
 
@@ -277,7 +277,8 @@ class LegacyRoleGitRepoBuilder:
 
         assert pid.returncode == 0
         assert os.path.exists(self.role_dir)
-        assert pid.stdout.decode('utf-8').strip() == f'- Role {self.namespace}.{self.name} was created successfully'
+        ag_init_stdout = f'- Role {self.namespace}.{self.name} was created successfully'
+        assert pid.stdout.decode('utf-8').strip() == ag_init_stdout
 
     def role_edit(self):
         if self.meta_namespace or self.meta_name:
@@ -305,7 +306,7 @@ class LegacyRoleGitRepoBuilder:
         self.docker_compose_exec('git config --global user.name "root at localhost"')
 
         self.docker_compose_exec('git add *', cwd=self.role_cont_dir)
-        self.docker_compose_exec('git commit -m "first checkin"',  cwd=self.role_cont_dir)
+        self.docker_compose_exec('git commit -m "first checkin"', cwd=self.role_cont_dir)
 
     def local_roles_cleanup(self):
         self.docker_compose_exec(f'rm -rf {self.temp_roles}')
