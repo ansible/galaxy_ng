@@ -4,9 +4,9 @@ on:
   pull_request:
     branches:
       - '**'
-#  push:
-#    branches:
-#      - '**'
+  push:
+    branches:
+      - '**'
   workflow_dispatch:
 
 jobs:
