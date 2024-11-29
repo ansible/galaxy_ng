@@ -68,7 +68,11 @@ x-common-env: &common-env
   # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/aap.yaml up
   DEV_SOURCE_PATH:
 
-
+# allow attaching to the running container
+x-debugging: &debugging
+  stdin_open: true
+  tty: true
+  
 services:
   base_img:
     build:
@@ -127,6 +131,7 @@ services:
     environment:
       <<: *common-env
     user: root
+    <<: *debugging
     command: |
       bash -c "
         set -e;
@@ -140,9 +145,6 @@ services:
 
         touch /var/lib/pulp/.migrated;
       "
-    # uncomment below when debugging
-    # stdin_open: true
-    # tty: true
 
   api:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -163,15 +165,13 @@ services:
       - default
       - service-mesh
     user: root
+    <<: *debugging
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
       "
-    # uncomment below when debugging
-    # stdin_open: true
-    # tty: true
 
   content:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -192,15 +192,13 @@ services:
       - default
       - service-mesh
     user: root
+    <<: *debugging
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
       "
-    # uncomment below when debugging
-    # stdin_open: true
-    # tty: true
 
   worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -216,6 +214,7 @@ services:
     environment:
       <<: *common-env
     user: root
+    <<: *debugging
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
@@ -226,9 +225,6 @@ services:
 
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
       "
-    # uncomment below when debugging
-    # stdin_open: true
-    # tty: true
 
   manager:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -245,6 +241,7 @@ services:
     environment:
       <<: *common-env
     user: root
+    <<: *debugging
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
@@ -275,9 +272,6 @@ services:
         # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
         tail -f /dev/null
       "
-    # uncomment below when debugging
-    # stdin_open: true
-    # tty: true
 
   nginx:
     image: "nginx:latest"

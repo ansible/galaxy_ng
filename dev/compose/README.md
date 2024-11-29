@@ -220,25 +220,7 @@ Run with legacy oci-env, check the [Running oci-env integration tests](../../doc
 
 ### Debugging
 
-#### Step 1 - Enable tty and stdin on the container you want to debug
-
-For example, if you are debugging the `migrations` container, edit the migrations: service 
-on `aap.yaml` and find the lines.
-
-```yaml
-# uncomment below when debugging
-# stdin_open: true
-# tty: true
-```
-
-and remove the comment
-
-```yaml
-stdin_open: true
-tty: true
-```
-
-#### Step 2 - Add the breakpoint
+#### Step 1 - Add the breakpoint
 
 Edit the file you want to debug and add a breakpoint
 
@@ -249,9 +231,9 @@ __import__("ipdb").set_trace()
 > [!TIP]  
 > Replace if you are using a different debugger, however the images has only **pdb** and **ipdb** installed.
 
-If you discover other ways of debugging, likle connecting dab protocol or vscode debugger, please update this file!
+If you discover other ways of debugging, like connecting dap protocol or vscode debugger, please update this file!
 
-#### Step 3- Now execute your stack or just the container you are trying to debug.
+#### Step 2 - Now execute your stack or just the container you are trying to debug.
 
 Example:
 
@@ -261,12 +243,16 @@ $ docker compose -f dev/compose/aap.yaml up migrations
 # The container will keep running stopped on the breakpoint.
 ```
 
-#### Step 4- Attach
+#### Step 3 - Attach
 
 ```bash
-$ docker compose -f dev/compose/insights.yaml attach migrations
+$ docker compose -f dev/compose/aap.yaml attach migrations
 ipdb>
 ```
+
+> [!IMPORTANT] 
+> To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,  
+> instead, use <kbd>Ctrl-p Ctrl-q</kbd>
 
 ---
 
