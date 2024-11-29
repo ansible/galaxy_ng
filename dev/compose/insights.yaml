@@ -140,6 +140,9 @@ services:
 
         touch /var/lib/pulp/.migrated;
       "
+    # uncomment below when debugging
+    # stdin_open: true
+    # tty: true
 
   api:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -162,10 +165,13 @@ services:
     user: root
     command: |
       bash -c "
-        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
       "
+    # uncomment below when debugging
+    # stdin_open: true
+    # tty: true
 
   content:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -188,10 +194,13 @@ services:
     user: root
     command: |
       bash -c "
-        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
       "
+    # uncomment below when debugging
+    # stdin_open: true
+    # tty: true
 
   worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -209,14 +218,17 @@ services:
     user: root
     command: |
       bash -c "
-        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
 
         # Worker needs gpg in order to consume signing tasks;
         gpg --list-secret-keys;
 
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
       "
+    # uncomment below when debugging
+    # stdin_open: true
+    # tty: true
 
   manager:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -235,8 +247,8 @@ services:
     user: root
     command: |
       bash -c "
-        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
 
         # Give some time for API to start;
         sleep 5;
@@ -263,6 +275,9 @@ services:
         # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
         tail -f /dev/null
       "
+    # uncomment below when debugging
+    # stdin_open: true
+    # tty: true
 
   nginx:
     image: "nginx:latest"

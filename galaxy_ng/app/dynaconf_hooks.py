@@ -15,10 +15,10 @@ import json
 import logging
 import os
 import re
+import sys
 from typing import Any
 
 import ldap
-import pkg_resources
 from ansible_base.lib.dynamic_config.settings_logic import get_dab_settings
 from crum import get_current_request
 from django.apps import apps
@@ -26,6 +26,13 @@ from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
 
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
+
+if sys.version_info < (3, 10):
+    # Python 3.9 has a rather different interface for `entry_points`.
+    # Let's use a compatibility version.
+    from importlib_metadata import EntryPoint
+else:
+    from importlib.metadata import EntryPoint
 
 logger = logging.getLogger(__name__)
 
@@ -535,9 +542,10 @@ def configure_ldap(settings: Dynaconf) -> dict[str, Any]:
             "AUTH_LDAP_GROUP_TYPE_CLASS",
             default="django_auth_ldap.config:GroupOfNamesType"
         ):
-            group_type_class = pkg_resources.EntryPoint.parse(
-                f"__name = {classpath}"
-            ).resolve()
+            entry_point = EntryPoint(
+                name=None, group=None, value=classpath
+            )
+            group_type_class = entry_point.load()
             group_type_params = settings.get(
                 "AUTH_LDAP_GROUP_TYPE_PARAMS",
                 default={"name_attr": "cn"}
