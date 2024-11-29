@@ -1,16 +1,16 @@
 ---
 name: Galaxy Collection CI
 on:
-  pull_request:
-    branches:
-      - "*"
-    paths-ignore:
-      - "CHANGES/**"
-      - "docs/**"
-      - "mkdocs.yml"
-  push:
-    branches:
-      - "*"
+#  pull_request:
+#    branches:
+#      - "*"
+#    paths-ignore:
+#      - "CHANGES/**"
+#      - "docs/**"
+#      - "mkdocs.yml"
+#  push:
+#    branches:
+#      - "*"
   workflow_dispatch:
 
 jobs:

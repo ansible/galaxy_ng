@@ -1,8 +1,9 @@
 ---
 name: galaxy_ng/ci
 on:
-  - push
-  - pull_request
+  workflow_dispatch:
+#  - push
+#  - pull_request
 
 jobs:
 
