@@ -31,9 +31,9 @@ x-common-env: &common-env
   # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/automation-hub/'
   PULP_CONTENT_PATH_PREFIX: '/pulp/content/'
-  PULP_ANSIBLE_API_HOSTNAME: 'https://localhost'
-  PULP_ANSIBLE_CONTENT_HOSTNAME: "https://localhost"
-  PULP_CONTENT_ORIGIN: "https://localhost"
+  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:5001'
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:5001"
+  PULP_CONTENT_ORIGIN: "http://localhost:5001"
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
 
   # auth ...
@@ -53,8 +53,8 @@ x-common-env: &common-env
   # PULP_RESOURCE_SERVER__VALIDATE_HTTPS='false'
 
   # Integration test settings
-  HUB_AUTH_URL: "{API_PROTOCOL}://{API_HOST}:{INSIGHTS_PROXY_PORT}/auth/realms/redhat-external/protocol/openid-connect/token"
-  HUB_API_ROOT: "{API_PROTOCOL}://{API_HOST}:{INSIGHTS_PROXY_PORT}{PULP_GALAXY_API_PATH_PREFIX}"
+  HUB_AUTH_URL: 'http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token'
+  HUB_API_ROOT: 'http://localhost:8080/api/automatin-hub/'
   HUB_LOCAL: 0
   HUB_TEST_MARKS: deployment_cloud or all
 
