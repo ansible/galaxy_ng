@@ -4,9 +4,9 @@ on:
   pull_request:
     branches:
       - '**'
-  push:
-    branches:
-      - '**'
+#  push:
+#    branches:
+#      - '**'
   workflow_dispatch:
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
 
       - name: Spin up dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml
         run: |
-          docker compose -f dev/compose/community.yaml up --detach
+          docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml up --detach
 
       - name: Export environment variables to host
         run: |
