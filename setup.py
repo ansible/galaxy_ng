@@ -130,6 +130,7 @@ requirements = [
     "insights_analytics_collector>=0.3.0",
     "boto3",
     "distro",
+    "django-flags>=5.0.13",
     django_ansible_base_dependency,  # noqa 501
     "django-crum==0.7.9",
     # From vendored automated_logging
