@@ -30,11 +30,13 @@ x-common-env: &common-env
 
   # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/automation-hub/'
-  PULP_CONTENT_PATH_PREFIX: '/pulp/content/'
-  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:5001'
-  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:5001"
-  PULP_CONTENT_ORIGIN: "http://localhost:5001"
+  PULP_CONTENT_PATH_PREFIX: '/api/automation-hub/pulp/content/'
+  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:8080'
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:8080"
+  PULP_CONTENT_ORIGIN: "http://localhost:8080"
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
+
+
 
   # auth ...
   PULP_GALAXY_AUTHENTICATION_CLASSES: "['galaxy_ng.app.auth.auth.RHIdentityAuthentication']"
@@ -42,6 +44,7 @@ x-common-env: &common-env
   PULP_GALAXY_FEATURE_FLAGS__dab_resource_registry: 'false'
   PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
+  PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'true'
 
   # Resource server
   # This disables the attempt for resource syncing
@@ -54,19 +57,25 @@ x-common-env: &common-env
 
   # Integration test settings
   HUB_AUTH_URL: 'http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token'
-  HUB_API_ROOT: 'http://localhost:8080/api/automatin-hub/'
+  HUB_API_ROOT: 'http://localhost:8080/api/automation-hub/'
+#  HUB_USE_MOVE_ENDPOINT: "true"
+#  HUB_UPLOAD_SIGNATURES: "true"
+
   HUB_LOCAL: 0
   HUB_TEST_MARKS: deployment_cloud or all
 
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
 
+  PULP_X_PULP_CONTENT_HOST: localhost
+  PULP_X_PULP_CONTENT_PORT: 8080
+
   # DEV EDITABLE STUFF
   # To enable editable to install local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
   # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
   # This can be done as part of the `docker compose` call:
-  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/aap.yaml up
-  DEV_SOURCE_PATH:
+  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/insights.yaml up
+  DEV_SOURCE_PATH: 'galaxy_ng'
 
 # allow attaching to the running container
 x-debugging: &debugging
@@ -100,6 +109,7 @@ services:
       PROXY_PORT: "8080"
     volumes:
       - "../../profiles/insights/proxy:/app:ro"
+#      - '/tmp:/tmp:rw'
 
   redis:
     image: "redis:5"
@@ -128,6 +138,7 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     user: root
@@ -157,6 +168,7 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     extra_hosts:
@@ -184,6 +196,7 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     extra_hosts:
@@ -211,6 +224,7 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     user: root
@@ -238,6 +252,7 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     user: root
@@ -284,6 +299,7 @@ services:
       - '5001:5001'
     volumes:
       - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
+#      - '/tmp:/tmp:rw'
 
 volumes:
   var_lib_pulp:

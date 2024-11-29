@@ -45,6 +45,18 @@ jobs:
         run: |
           docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml up --detach
 
+      - name: ls /tmp, whoami, id
+        run: |
+          ls -la /tmp;
+          whoami;
+          id
+
+      - run: docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml exec manager /bin/bash -c 'ls -la /tmp'
+
+      - run: docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml exec manager /bin/bash -c 'whoami'
+
+      - run: docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml exec manager /bin/bash -c 'id'
+
       - name: Export environment variables to host
         run: |
           docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml exec manager /bin/bash -c 'env | grep -v -w "HOME"' >> $GITHUB_ENV
