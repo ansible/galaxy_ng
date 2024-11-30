@@ -236,7 +236,7 @@ multidict==6.0.5
     #   yarl
 mypy-extensions==1.0.0
     # via black
-nh3==0.2.18
+nh3==0.2.19
     # via galaxy-importer
 oauthlib==3.2.2
     # via
