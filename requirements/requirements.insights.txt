@@ -89,7 +89,7 @@ defusedxml==0.8.0rc2
     #   odfpy
     #   python3-openid
     #   social-auth-core
-deprecated==1.2.14
+deprecated==1.2.15
     # via
     #   opentelemetry-api
     #   opentelemetry-exporter-otlp-proto-grpc
