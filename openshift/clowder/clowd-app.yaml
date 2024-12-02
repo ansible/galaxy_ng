@@ -110,6 +110,75 @@ objects:
             enabled: true
             apiPath: automation-hub
 
+    - name: "migration${SUFFIX}"
+      minReplicas: ${{MIGRATION_REPLICAS}}
+      podSpec:
+        name: migration
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
+        args: ['bash', '-c', 'while true; do sleep 86400; done']
+        initContainers:
+          - args: ['manage', 'migrate']
+            inheritEnv: true
+        resources:
+          limits:
+            cpu: ${{MIGRATION_CPU_LIMIT}}
+            memory: ${{MIGRATION_MEMORY_LIMIT}}
+          requests:
+            cpu: ${{MIGRATION_CPU_REQUEST}}
+            memory: ${{MIGRATION_MEMORY_REQUEST}}
+        livenessProbe:
+          exec:
+            command: 
+              - date
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 6
+        readinessProbe:
+          exec:
+            command: 
+              - date
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
+        env:
+          - name: PULP_GALAXY_DEPLOYMENT_MODE
+            value: 'insights'
+          - name: PULP_CONTENT_ORIGIN
+            value: ${{CONTENT_ORIGIN}}
+          - name: PULP_CONTENT_PATH_PREFIX
+            value: /api/automation-hub/pulp/content/
+          - name: ENABLE_SIGNING
+            value: ${ENABLE_SIGNING}
+          - name: GNUPGHOME
+            value: ${GNUPGHOME}
+        volumeMounts:
+          - name: pulp-key
+            mountPath: /etc/pulp/certs/database_fields.symmetric.key
+            subPath: database_fields.symmetric.key
+            readOnly: true
+          - name: signing-gpg-key
+            mountPath: /tmp/ansible-sign.key
+            subPath: ansible-sign.key
+            readOnly: true
+          - name: signing-script
+            mountPath: /var/lib/pulp/scripts
+            readOnly: true
+        volumes:
+          - name: pulp-key
+            secret:
+              secretName: pulp-key
+          - name: signing-gpg-key
+            secret:
+              secretName: signing-gpg-key
+          - name: signing-script
+            secret:
+              defaultMode: 0555
+              secretName: signing-script
+
     - name: "galaxy-api${SUFFIX}"
       minReplicas: ${{GALAXY_API_REPLICAS}}
       podSpec:
@@ -117,7 +186,7 @@ objects:
         image: ${IMAGE_NAME}:${IMAGE_TAG}
         args: ['run', 'api']
         initContainers:
-          - args: ['manage', 'migrate']
+          - args: ['wait-for-migrations']
             inheritEnv: true
         resources:
           limits:
@@ -435,6 +504,18 @@ parameters:
   value: 50m
 - name: NGINX_CPU_LIMIT
   value: 200m
+
+# migration resource requirements
+- name: MIGRATION_REPLICAS
+  value: '1'
+- name: MIGRATION_MEMORY_REQUEST
+  value: 1Gi
+- name: MIGRATION_MEMORY_LIMIT
+  value: 2Gi
+- name: MIGRATION_CPU_REQUEST
+  value: 200m
+- name: MIGRATION_CPU_LIMIT
+  value: '1'
 
 # galaxy-api resource requirements
 - name: GALAXY_API_REPLICAS
