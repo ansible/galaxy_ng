@@ -216,9 +216,47 @@ Run with legacy oci-env, check the [Running oci-env integration tests](../../doc
 
 ## Tips and Tricks.
 
-**TBD**
+---
 
 ### Debugging
+
+#### Step 1 - Add the breakpoint
+
+Edit the file you want to debug and add a breakpoint
+
+```python
+__import__("ipdb").set_trace()
+```
+
+> [!TIP]  
+> Replace if you are using a different debugger, however the images has only **pdb** and **ipdb** installed.
+
+If you discover other ways of debugging, like connecting dap protocol or vscode debugger, please update this file!
+
+#### Step 2 - Now execute your stack or just the container you are trying to debug.
+
+Example:
+
+```bash
+$ export DEV_SOURCE_PATH=galaxy_ng 
+$ docker compose -f dev/compose/aap.yaml up migrations
+# The container will keep running stopped on the breakpoint.
+```
+
+#### Step 3 - Attach
+
+```bash
+$ docker compose -f dev/compose/aap.yaml attach migrations
+ipdb>
+```
+
+> [!IMPORTANT] 
+> To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,  
+> instead, use <kbd>Ctrl-p Ctrl-q</kbd>
+
+---
+
+**TBD**
 
 ### Connecting to Database
 

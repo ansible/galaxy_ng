@@ -79,6 +79,10 @@ x-common-env: &common-env
   # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/aap.yaml up
   DEV_SOURCE_PATH:
 
+# allow attaching to the running container
+x-debugging: &debugging
+  stdin_open: true
+  tty: true
 
 services:
   base_img:
@@ -127,6 +131,7 @@ services:
     environment:
       <<: *common-env
     user: root
+    <<: *debugging
     command: |
       bash -c "
         set -e;
@@ -160,10 +165,11 @@ services:
       - default
       - service-mesh
     user: root
+    <<: *debugging
     command: |
       bash -c "
-        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
 
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
       "
@@ -187,10 +193,11 @@ services:
       - default
       - service-mesh
     user: root
+    <<: *debugging
     command: |
       bash -c "
-        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
 
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
       "
@@ -209,10 +216,11 @@ services:
     environment:
       <<: *common-env
     user: root
+    <<: *debugging
     command: |
       bash -c "
-        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
 
         # Worker needs gpg in order to consume signing tasks;
         gpg --list-secret-keys;
@@ -235,10 +243,11 @@ services:
     environment:
       <<: *common-env
     user: root
+    <<: *debugging
     command: |
       bash -c "
-        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
 
         # Give some time for API to start;
         sleep 5;
