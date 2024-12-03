@@ -44,7 +44,9 @@ x-common-env: &common-env
   PULP_GALAXY_FEATURE_FLAGS__dab_resource_registry: 'false'
   PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
-  PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'true'
+  PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+  GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+  ENABLE_COLLECTION_SIGNING: 0
 
   # Resource server
   # This disables the attempt for resource syncing
@@ -58,8 +60,9 @@ x-common-env: &common-env
   # Integration test settings
   HUB_AUTH_URL: 'http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token'
   HUB_API_ROOT: 'http://localhost:8080/api/automation-hub/'
-#  HUB_USE_MOVE_ENDPOINT: "true"
 #  HUB_UPLOAD_SIGNATURES: "true"
+  HUB_USE_MOVE_ENDPOINT: "true"
+
 
   HUB_LOCAL: 0
   HUB_TEST_MARKS: deployment_cloud or all
