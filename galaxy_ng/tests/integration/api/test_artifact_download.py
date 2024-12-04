@@ -75,7 +75,6 @@ def test_download_artifact(ansible_config, galaxy_client):
 # TODO(awcrosby): make download logic more DRY in these tests
 @pytest.mark.min_hub_version("4.6dev")
 @pytest.mark.all
-@pytest.mark.skip
 def test_download_artifact_validated(ansible_config, galaxy_client, docker_compose_exec):
     # gc = galaxy_client("partner_engineer")
     gc = galaxy_client("admin")

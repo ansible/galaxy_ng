@@ -28,6 +28,10 @@ x-common-env: &common-env
   PULP_DEFAULT_FILE_STORAGE: "pulpcore.app.models.storage.FileSystem"
   PULP_REDIRECT_TO_OBJECT_STORAGE: 'false'
 
+  # required for collection download
+  PULP_X_PULP_CONTENT_HOST: content
+  PULP_X_PULP_CONTENT_PORT: 24816
+
   # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/automation-hub/'
   PULP_CONTENT_PATH_PREFIX: '/api/automation-hub/pulp/content/'
@@ -70,8 +74,6 @@ x-common-env: &common-env
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
 
-  PULP_X_PULP_CONTENT_HOST: localhost
-  PULP_X_PULP_CONTENT_PORT: 8080
 
   # DEV EDITABLE STUFF
   # To enable editable to install local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
