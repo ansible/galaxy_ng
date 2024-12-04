@@ -354,7 +354,7 @@ psycopg[binary]==3.1.18
     # via pulpcore
 psycopg-binary==3.1.18
     # via psycopg
-pulp-ansible==0.22.2
+pulp-ansible==0.23.1
     # via galaxy-ng (setup.py)
 pulp-container==2.19.3
     # via galaxy-ng (setup.py)
