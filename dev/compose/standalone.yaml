@@ -71,7 +71,8 @@ x-common-env: &common-env
 
   # Integration test settings
   HUB_API_ROOT: 'http://localhost:5001/api/galaxy/'
-  HUB_TEST_MARKS: deployment_standalone or all
+  HUB_TEST_MARKS: deployment_standalone or all\
+  JWT_PROXY: 'false'
 
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
