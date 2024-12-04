@@ -28,7 +28,7 @@ x-common-env: &common-env
   PULP_DEFAULT_FILE_STORAGE: "pulpcore.app.models.storage.FileSystem"
   PULP_REDIRECT_TO_OBJECT_STORAGE: 'false'
 
-  # required for collection download
+  # collection download
   PULP_X_PULP_CONTENT_HOST: content
   PULP_X_PULP_CONTENT_PORT: 24816
 
@@ -64,7 +64,6 @@ x-common-env: &common-env
   # Integration test settings
   HUB_AUTH_URL: 'http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token'
   HUB_API_ROOT: 'http://localhost:8080/api/automation-hub/'
-#  HUB_UPLOAD_SIGNATURES: "true"
   HUB_USE_MOVE_ENDPOINT: "true"
 
 
@@ -74,19 +73,18 @@ x-common-env: &common-env
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
 
-
   # DEV EDITABLE STUFF
   # To enable editable to install local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
   # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
   # This can be done as part of the `docker compose` call:
   # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/insights.yaml up
-  DEV_SOURCE_PATH: 'galaxy_ng'
+  DEV_SOURCE_PATH:
 
 # allow attaching to the running container
 x-debugging: &debugging
   stdin_open: true
   tty: true
-  
+
 services:
   base_img:
     build:
@@ -114,7 +112,6 @@ services:
       PROXY_PORT: "8080"
     volumes:
       - "../../profiles/insights/proxy:/app:ro"
-#      - '/tmp:/tmp:rw'
 
   redis:
     image: "redis:5"
@@ -143,7 +140,6 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
-#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     user: root
@@ -173,7 +169,6 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
-#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     extra_hosts:
@@ -201,7 +196,6 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
-#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     extra_hosts:
@@ -229,7 +223,6 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
-#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     user: root
@@ -257,7 +250,6 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
-#      - '/tmp:/tmp:rw'
     environment:
       <<: *common-env
     user: root
@@ -304,7 +296,6 @@ services:
       - '5001:5001'
     volumes:
       - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
-#      - '/tmp:/tmp:rw'
 
 volumes:
   var_lib_pulp:

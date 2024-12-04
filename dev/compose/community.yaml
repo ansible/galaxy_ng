@@ -85,7 +85,7 @@ x-common-env: &common-env
   # To enable editable to install local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
   # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
   # This can be done as part of the `docker compose` call:
-  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/aap.yaml up
+  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/community.yaml up
   DEV_SOURCE_PATH:
 
 
