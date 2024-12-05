@@ -345,7 +345,7 @@ platformdirs==4.2.2
     # via black
 prometheus-client==0.20.0
     # via django-prometheus
-protobuf==4.25.3
+protobuf==4.25.5
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
