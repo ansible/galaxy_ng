@@ -28,13 +28,19 @@ x-common-env: &common-env
   PULP_DEFAULT_FILE_STORAGE: "pulpcore.app.models.storage.FileSystem"
   PULP_REDIRECT_TO_OBJECT_STORAGE: 'false'
 
+  # collection download
+  PULP_X_PULP_CONTENT_HOST: content
+  PULP_X_PULP_CONTENT_PORT: 24816
+
   # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/automation-hub/'
-  PULP_CONTENT_PATH_PREFIX: '/pulp/content/'
-  PULP_ANSIBLE_API_HOSTNAME: 'https://localhost'
-  PULP_ANSIBLE_CONTENT_HOSTNAME: "https://localhost"
-  PULP_CONTENT_ORIGIN: "https://localhost"
+  PULP_CONTENT_PATH_PREFIX: '/api/automation-hub/pulp/content/'
+  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:8080'
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:8080"
+  PULP_CONTENT_ORIGIN: "http://localhost:8080"
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
+
+
 
   # auth ...
   PULP_GALAXY_AUTHENTICATION_CLASSES: "['galaxy_ng.app.auth.auth.RHIdentityAuthentication']"
@@ -42,6 +48,9 @@ x-common-env: &common-env
   PULP_GALAXY_FEATURE_FLAGS__dab_resource_registry: 'false'
   PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
+  PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+  GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+  ENABLE_COLLECTION_SIGNING: 0
 
   # Resource server
   # This disables the attempt for resource syncing
@@ -53,8 +62,11 @@ x-common-env: &common-env
   # PULP_RESOURCE_SERVER__VALIDATE_HTTPS='false'
 
   # Integration test settings
-  HUB_AUTH_URL: "{API_PROTOCOL}://{API_HOST}:{INSIGHTS_PROXY_PORT}/auth/realms/redhat-external/protocol/openid-connect/token"
-  HUB_API_ROOT: "{API_PROTOCOL}://{API_HOST}:{INSIGHTS_PROXY_PORT}{PULP_GALAXY_API_PATH_PREFIX}"
+  HUB_AUTH_URL: 'http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token'
+  HUB_API_ROOT: 'http://localhost:8080/api/automation-hub/'
+  HUB_USE_MOVE_ENDPOINT: "true"
+
+
   HUB_LOCAL: 0
   HUB_TEST_MARKS: deployment_cloud or all
 
@@ -65,14 +77,14 @@ x-common-env: &common-env
   # To enable editable to install local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
   # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
   # This can be done as part of the `docker compose` call:
-  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/aap.yaml up
+  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/insights.yaml up
   DEV_SOURCE_PATH:
 
 # allow attaching to the running container
 x-debugging: &debugging
   stdin_open: true
   tty: true
-  
+
 services:
   base_img:
     build:

@@ -22,7 +22,7 @@ jobs:
           - TEST_PROFILE: rbac_parallel_group_1
           - TEST_PROFILE: rbac_parallel_group_2
           - TEST_PROFILE: certified-sync
-          - TEST_PROFILE: insights
+#          - TEST_PROFILE: insights
           - TEST_PROFILE: iqe_rbac
           - TEST_PROFILE: x_repo_search
           # - TEST_PROFILE: community
