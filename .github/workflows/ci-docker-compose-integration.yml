@@ -4,9 +4,9 @@ on:
   pull_request:
     branches:
       - '**'
-#  push:
-#    branches:
-#      - '**'
+  push:
+    branches:
+      - '**'
   workflow_dispatch:
 
 jobs:
@@ -49,14 +49,6 @@ jobs:
         run: |
           sudo apt-get install -y libsasl2-dev python-dev-is-python3 libldap2-dev libssl-dev podman
 
-#      - name: verify podman
-#        run: |
-#          podman --version
-
-#      - run: podman --help
-#
-#      - run: podman pull alpine
-
       - name: Spin up dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml
         run: |
           docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml up --detach
@@ -81,12 +73,10 @@ jobs:
             fi
           done
 
-      - run: podman login localhost:5001 -u admin -p admin --tls-verify=False
+      - name: Install integration requirements
+        run: |
+          pip install -r integration_requirements.txt
 
-#      - name: Install integration requirements
-#        run: |
-#          pip install -r integration_requirements.txt
-#
-#      - name: Run integration tests
-#        run: |
-#          pytest -v -r sx --color=yes -m '${{ env.HUB_TEST_MARKS }}' galaxy_ng/tests/integration
+      - name: Run integration tests
+        run: |
+          pytest -v -r sx --color=yes -m '${{ env.HUB_TEST_MARKS }}' galaxy_ng/tests/integration

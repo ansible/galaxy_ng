@@ -32,7 +32,7 @@ x-common-env: &common-env
   PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:5001'
   PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:5001"
   PULP_CONTENT_ORIGIN: "http://localhost:5001"
-  PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
+  PULP_CSRF_TRUSTED_ORIGINS: "['http://localhost']"
 
   # signing ...
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
@@ -73,6 +73,7 @@ x-common-env: &common-env
   HUB_API_ROOT: 'http://localhost:5001/api/galaxy/'
   HUB_TEST_MARKS: deployment_standalone or all
   HUB_USE_MOVE_ENDPOINT: 'true'
+  CONTAINER_REGISTRY: 'localhost:5001'
 
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
@@ -82,7 +83,7 @@ x-common-env: &common-env
   # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
   # This can be done as part of the `docker compose` call:
   # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/standalone.yaml up
-  DEV_SOURCE_PATH: 'galaxy_ng'
+  DEV_SOURCE_PATH:
 
 # allow attaching to the running container
 x-debugging: &debugging

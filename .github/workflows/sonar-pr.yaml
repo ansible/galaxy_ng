@@ -4,10 +4,10 @@
 name: SonarCloud
 on:
   workflow_run:
-#    workflows:
-#      - galaxy_ng/ci
-#    types:
-#      - completed
+    workflows:
+      - galaxy_ng/ci
+    types:
+      - completed
 jobs:
   sonar:
     name: Upload to SonarCloud
