@@ -43,7 +43,7 @@ x-common-env: &common-env
 
   # pulp container ...
   PULP_TOKEN_AUTH_DISABLED: 'false'
-  PULP_TOKEN_SERVER: 'https://localhost/token/'
+  PULP_TOKEN_SERVER: 'http:token///localhost:5001/token/'
   PULP_TOKEN_SIGNATURE_ALGORITHM: 'ES256'
   PULP_PUBLIC_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_public_key.pem'
   PULP_PRIVATE_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_private_key.pem'
