@@ -79,4 +79,4 @@ jobs:
 
       - name: Run integration tests
         run: |
-          pytest -v -r sx --color=yes -m '${{ env.HUB_TEST_MARKS }}' -k 'test_package_install' galaxy_ng/tests/integration
+          pytest -v -r sx --color=yes -m '${{ env.HUB_TEST_MARKS }}' galaxy_ng/tests/integration
