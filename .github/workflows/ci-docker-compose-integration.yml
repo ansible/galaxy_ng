@@ -53,7 +53,9 @@ jobs:
         run: |
           podman --version
 
-      - run: podman
+      - run: podman --help
+
+      - run: podman pull alpine
 
 #      - name: Spin up dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml
 #        run: |
