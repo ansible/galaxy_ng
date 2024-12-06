@@ -4,7 +4,6 @@ See: https://issues.redhat.com/browse/AAH-2327
 """
 import subprocess
 import time
-from urllib.parse import urlparse
 
 import pytest
 
