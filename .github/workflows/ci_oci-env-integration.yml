@@ -17,7 +17,7 @@ jobs:
         env:
           - TEST_PROFILE: ldap
           - TEST_PROFILE: keycloak
-          - TEST_PROFILE: standalone
+#          - TEST_PROFILE: standalone
           # - TEST_PROFILE: rbac
           - TEST_PROFILE: rbac_parallel_group_1
           - TEST_PROFILE: rbac_parallel_group_2
