@@ -161,7 +161,6 @@ Here is a [diagram explaining](https://www.xmind.net/m/VPSF59/#) the loading ord
 | `GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS`      | Enabled anonymous browsing, Default: `False` |
 | `GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD`      | Enabled anonymous download, Default: `False` |
 | `GALAXY_ENABLE_API_ACCESS_LOG`      | Enable gathering of logs, Default: `False` |
-| `GALAXY_ENABLE_API_ACCESS_LOG`      | Enable gathering of logs, Default: `False` |
 | `CONNECTED_ANSIBLE_CONTROLLERS`      | List of controllers connected , Default: `[]` |
 | `CONTENT_PATH_PREFIX`      | URL prefix for content serving , Default: `"/api/automation-hub/v3/artifacts/collections/"` |
 | `GALAXY_AUTHENTICATION_CLASSES`      | List of auth classes for DRF , Default: `[Session, Token, Basic]` |
