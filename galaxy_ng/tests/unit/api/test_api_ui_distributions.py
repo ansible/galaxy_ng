@@ -1,7 +1,7 @@
 import logging
 # from django.contrib.auth import default_app_config
 
-from rest_framework import status as http_code
+# from rest_framework import status as http_code
 
 from pulpcore.plugin.util import assign_role
 from pulp_ansible.app import models as pulp_ansible_models
@@ -90,7 +90,7 @@ class TestUIDistributions(BaseTestCase):
             # and one extra distro created for testing
             self.assertEqual(len(data['data']), 7)
 
-        # FIXME - broken by dab 2024.12.13
+        # FIXME(jtanner): broken by dab 2024.12.13
         '''
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
             self.client.force_authenticate(user=self.user)

@@ -227,5 +227,7 @@ class TestAutomationAnalyticsCollector(TestCase):
         # self.log.assert_called_with(logging.ERROR,
         #                            "No metrics collection, configuration is invalid. "
         #                            "Use --dry-run to gather locally without sending.")
-        self.log.assert_called_with(logging.ERROR,
-                                    "Metrics Collection for Ansible Automation Platform not enabled.")
+        self.log.assert_called_with(
+            logging.ERROR,
+            "Metrics Collection for Ansible Automation Platform not enabled."
+        )
