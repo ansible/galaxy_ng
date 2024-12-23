@@ -173,7 +173,6 @@ class TestUiUserViewSet(BaseTestCase):
             self.client.force_authenticate(user=self.user)
             url = "{}{}/".format(self.user_url, self.user.id)
 
-            # HERE ... /api/galaxy/_ui/v1/users/1/
             response = self.client.get(url)
             self.assertEqual(response.status_code, expected)
 
