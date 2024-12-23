@@ -201,3 +201,19 @@ Collections can be uploaded either by the ansible galaxy CLI or in the GalaxyNG 
 4. Click "view collections" on one of the namespaces listed.
 5. If the collection has no previous versions, click on the blue "Upload Collection" button and follow the prompts.
 6. If the collection has previous versions, click the vertical 3 dot hamburger menu on the upper right and choose "upload new version" and then follow the prompts.
+
+## Deleting a Namespace
+
+To delete a namespace, you must first delete any role namespace associated with this namespace.
+
+1. Navigate to the namespace and select **Role namespaces**
+2. Copy the URL.
+3. Use ``curl`` to delete the role namespace.
+
+```shell
+curl -H 'Authorization: token <yourtoken>' -X DELETE https://galaxy.ansible.com/ui/standalone/namespaces/<number>/
+```
+Once all role namespaces associated with this namespace are deleted, you can delete the overall namespace.
+1. Navigate to the namespace.
+2. Select the triple-dot menu to the right of the namespace and select **delete namespace**.
+

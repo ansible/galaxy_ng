@@ -94,7 +94,7 @@ django_ansible_base_dependency = (
 )
 
 requirements = [
-    "galaxy-importer>=0.4.26,<0.5.0",
+    "galaxy-importer>=0.4.27,<0.5.0",
     "pulpcore>=3.49.0,<3.50.0",
     "pulp_ansible==0.23.1",
     "pulp-container>=2.19.2,<2.20.0",
