@@ -151,7 +151,7 @@ def test_collection_auto_sign_on_approval(ansible_config, flags, galaxy_client, 
 @pytest.mark.parametrize(
     "sign_url",
     [
-         "_ui/v1/collection_signing/",
+        "_ui/v1/collection_signing/",
         "_ui/v1/collection_signing/{distro_base_path}/",
         "_ui/v1/collection_signing/{distro_base_path}/{namespace}/",
         (
