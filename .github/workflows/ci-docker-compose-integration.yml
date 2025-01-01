@@ -80,3 +80,10 @@ jobs:
       - name: Run integration tests
         run: |
           pytest -v -r sx --color=yes -m '${{ env.HUB_TEST_MARKS }}' galaxy_ng/tests/integration
+        env:
+          GALAXYKIT_SLEEP_SECONDS_POLLING: ".5"
+          GALAXYKIT_SLEEP_SECONDS_ONETIME: ".5"
+          GALAXYKIT_POLLING_MAX_ATTEMPTS: "50"
+          GALAXY_SLEEP_SECONDS_POLLING: ".5"
+          GALAXY_SLEEP_SECONDS_ONETIME: ".5"
+          GALAXY_POLLING_MAX_ATTEMPTS: "50"
