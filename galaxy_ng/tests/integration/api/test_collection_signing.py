@@ -151,8 +151,7 @@ def test_collection_auto_sign_on_approval(ansible_config, flags, galaxy_client, 
 @pytest.mark.parametrize(
     "sign_url",
     [
-        # FIXME(jctanner): flakey test with low timeout values
-        # "_ui/v1/collection_signing/",
+         "_ui/v1/collection_signing/",
         "_ui/v1/collection_signing/{distro_base_path}/",
         "_ui/v1/collection_signing/{distro_base_path}/{namespace}/",
         (
@@ -208,6 +207,10 @@ def test_collection_sign_on_demand(flags, galaxy_client, settings, sign_url):
         "version": artifact.version,
     }
     sign_on_demand(gc, signing_service, sign_url.format(**sign_payload), **sign_payload)
+
+    # wait for async jobs to settle ...
+    time.sleep(30)
+
     # Assert that the collection is signed on v3 api
     collection = get_collection_from_repo(gc, "staging",
                                           artifact.namespace, artifact.name, artifact.version)
