@@ -15,18 +15,18 @@ jobs:
       fail-fast: false
       matrix:
         env:
-#          - TEST_PROFILE: ldap
-#          - TEST_PROFILE: keycloak
+          # - TEST_PROFILE: ldap
+          # - TEST_PROFILE: keycloak
           - TEST_PROFILE: standalone
-#          # - TEST_PROFILE: rbac
-#          - TEST_PROFILE: rbac_parallel_group_1
-#          - TEST_PROFILE: rbac_parallel_group_2
-#          - TEST_PROFILE: certified-sync
+          # - TEST_PROFILE: rbac
+          # - TEST_PROFILE: rbac_parallel_group_1
+          # - TEST_PROFILE: rbac_parallel_group_2
+          # - TEST_PROFILE: certified-sync
           - TEST_PROFILE: insights
-#          - TEST_PROFILE: iqe_rbac
-#          - TEST_PROFILE: x_repo_search
+          # - TEST_PROFILE: iqe_rbac
+          # - TEST_PROFILE: x_repo_search
           - TEST_PROFILE: community
-#          - TEST_PROFILE: dab_jwt
+          # - TEST_PROFILE: dab_jwt
 
     runs-on: ubuntu-latest
     steps:
@@ -80,3 +80,10 @@ jobs:
       - name: Run integration tests
         run: |
           pytest -v -r sx --color=yes -m '${{ env.HUB_TEST_MARKS }}' galaxy_ng/tests/integration
+        env:
+          GALAXYKIT_SLEEP_SECONDS_POLLING: ".5"
+          GALAXYKIT_SLEEP_SECONDS_ONETIME: ".5"
+          GALAXYKIT_POLLING_MAX_ATTEMPTS: "50"
+          GALAXY_SLEEP_SECONDS_POLLING: ".5"
+          GALAXY_SLEEP_SECONDS_ONETIME: ".5"
+          GALAXY_POLLING_MAX_ATTEMPTS: "50"

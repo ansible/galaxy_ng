@@ -207,6 +207,10 @@ def test_collection_sign_on_demand(flags, galaxy_client, settings, sign_url):
         "version": artifact.version,
     }
     sign_on_demand(gc, signing_service, sign_url.format(**sign_payload), **sign_payload)
+
+    # wait for async jobs to settle ...
+    time.sleep(30)
+
     # Assert that the collection is signed on v3 api
     collection = get_collection_from_repo(gc, "staging",
                                           artifact.namespace, artifact.name, artifact.version)
