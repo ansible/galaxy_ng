@@ -1,5 +1,4 @@
 import logging
-import os
 # from django.contrib.auth import default_app_config
 
 from unittest.mock import patch
