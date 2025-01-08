@@ -1,7 +1,9 @@
 import logging
 # from django.contrib.auth import default_app_config
 
-# from rest_framework import status as http_code
+from unittest.mock import patch
+
+from rest_framework import status as http_code
 
 from pulpcore.plugin.util import assign_role
 from pulp_ansible.app import models as pulp_ansible_models
@@ -75,8 +77,14 @@ class TestUIDistributions(BaseTestCase):
             synclist.groups = groups_to_add
         return synclist
 
-    def test_distribution_list(self):
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
+    def test_distribution_list_standalone(self):
+
+        class MockSettings:
+            @property
+            def GALAXY_DEPLOYMENT_MODE(self):
+                return DeploymentMode.STANDALONE.value
+
+        with patch('galaxy_ng.app.access_control.access_policy.settings', MockSettings()):
             self.client.force_authenticate(user=self.user)
             data = self.client.get(self.distro_url).data
 
@@ -90,13 +98,17 @@ class TestUIDistributions(BaseTestCase):
             # and one extra distro created for testing
             self.assertEqual(len(data['data']), 7)
 
-        # FIXME(jtanner): broken by dab 2024.12.13
-        '''
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
+    def test_distribution_list_insights(self):
+
+        class MockSettings:
+            @property
+            def GALAXY_DEPLOYMENT_MODE(self):
+                return DeploymentMode.INSIGHTS.value
+
+        with patch('galaxy_ng.app.access_control.access_policy.settings', MockSettings()):
             self.client.force_authenticate(user=self.user)
             response = self.client.get(self.distro_url)
             self.assertEqual(response.status_code, http_code.HTTP_403_FORBIDDEN)
-        '''
 
     def test_my_distribution_list(self):
         self.client.force_authenticate(user=self.user)
