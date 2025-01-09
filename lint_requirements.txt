@@ -1,4 +1,4 @@
 check-manifest
 flake8
 yamllint
-ruff
+ruff==0.8.6
