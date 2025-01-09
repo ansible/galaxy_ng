@@ -1,9 +1,8 @@
-import unittest
-
 from django.urls.base import reverse
 from django.test.utils import override_settings
 
 from rest_framework.test import APIClient
+from unittest.mock import patch
 
 from pulp_ansible.app.models import (
     AnsibleDistribution,
@@ -15,6 +14,18 @@ from galaxy_ng.app import models
 from galaxy_ng.app.constants import DeploymentMode
 
 from .base import BaseTestCase
+
+
+class MockSettings:
+    """A dictionary like shim that serves as a dynaconf provided settings mock."""
+    def __init__(self, kwargs):
+        self.kwargs = kwargs
+        # every setting should be evaluatable as a property ...
+        for k, v in self.kwargs.items():
+            setattr(self, k, v)
+
+    def get(self, key, default=None):
+        return self.kwargs.get(key, default)
 
 
 def _create_repo(name, **kwargs):
@@ -80,11 +91,14 @@ class ViewOnlyTestCase(BaseTestCase):
             }
         )
 
-    @unittest.skip("FIXME - broken by dab 2024.12.13")
     def test_unauthenticated_access_to_collections(self):
         response = self.client.get(self.collections_detail_url)
         self.assertEqual(response.data['errors'][0]['status'], '401')
-        with self.settings(GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=True):
+        kwargs = {
+            'GALAXY_DEPLOYMENT_MODE': 'standalone',
+            'GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS': True
+        }
+        with patch('galaxy_ng.app.access_control.access_policy.settings', MockSettings(kwargs)):
             response = self.client.get(self.collections_detail_url)
             self.assertEqual(response.data['name'], self.collection.name)
             self.assertEqual(response.data['namespace'], self.collection.namespace.name)
@@ -93,10 +107,13 @@ class ViewOnlyTestCase(BaseTestCase):
                 response.data['highest_version']['version'], '1.1.2'
             )
 
-    @unittest.skip("FIXME - broken by dab 2024.12.13")
     def test_unauthenticated_access_to_namespace(self):
         response = self.client.get(self.ns_detail_url)
         self.assertEqual(response.data['errors'][0]['status'], '401')
-        with self.settings(GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=True):
+        kwargs = {
+            'GALAXY_DEPLOYMENT_MODE': 'standalone',
+            'GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS': True
+        }
+        with patch('galaxy_ng.app.access_control.access_policy.settings', MockSettings(kwargs)):
             response = self.client.get(self.ns_detail_url)
             self.assertEqual(response.data['name'], self.namespace.name)
