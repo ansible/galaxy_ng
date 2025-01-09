@@ -4,6 +4,7 @@ import pytest
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
+from unittest.mock import patch
 
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app.models import auth as auth_models
@@ -11,6 +12,18 @@ from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES
 from .base import BaseTestCase, get_current_ui_url
 
 log = logging.getLogger(__name__)
+
+
+class MockSettings:
+    """A dictionary like shim that serves as a dynaconf provided settings mock."""
+    def __init__(self, kwargs):
+        self.kwargs = kwargs
+        # every setting should be evaluatable as a property ...
+        for k, v in self.kwargs.items():
+            setattr(self, k, v)
+
+    def get(self, key, default=None):
+        return self.kwargs.get(key, default)
 
 
 class TestUiUserViewSet(BaseTestCase):
@@ -130,42 +143,44 @@ class TestUiUserViewSet(BaseTestCase):
         response = self.client.post(self.user_url, new_user_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_user_list(self):
-        def _test_user_list(expected=None):
-            # Check test user can[not] view other users
-            self.client.force_authenticate(user=self.user)
-            log.debug("self.client: %s", self.client)
-            log.debug("self.client.__dict__: %s", self.client.__dict__)
-            response = self.client.get(self.user_url)
-            self.assertEqual(response.status_code, expected)
+    def _test_user_list(self, expected=None):
+        # Check test user can[not] view other users
+        self.client.force_authenticate(user=self.user)
+        log.debug("self.client: %s", self.client)
+        log.debug("self.client.__dict__: %s", self.client.__dict__)
+        response = self.client.get(self.user_url)
+        self.assertEqual(response.status_code, expected)
 
-            # Check admin user can -always- view others
-            self.client.force_authenticate(user=self.admin_user)
-            response = self.client.get(self.user_url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            data = response.data["data"]
-            self.assertEqual(len(data), auth_models.User.objects.all().count())
+        # Check admin user can -always- view others
+        self.client.force_authenticate(user=self.admin_user)
+        response = self.client.get(self.user_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data["data"]
+        self.assertEqual(len(data), auth_models.User.objects.all().count())
 
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
-            _test_user_list(expected=status.HTTP_403_FORBIDDEN)
+    def test_user_list_standalone(self):
+        kwargs = {
+            'GALAXY_DEPLOYMENT_MODE': DeploymentMode.STANDALONE.value,
+        }
+        with patch('galaxy_ng.app.access_control.access_policy.settings', MockSettings(kwargs)):
+            self._test_user_list(expected=status.HTTP_403_FORBIDDEN)
 
-        # FIXME(jtanner): not sure why broken
-        '''
-        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.INSIGHTS.value):
-            _test_user_list(expected=status.HTTP_403_FORBIDDEN)
-        '''
+    def test_user_list_insights(self):
+        kwargs = {
+            'GALAXY_DEPLOYMENT_MODE': DeploymentMode.INSIGHTS.value,
+            'RH_ENTITLEMENT_REQUIRED': 'insights',
+        }
+        with patch('galaxy_ng.app.access_control.access_policy.settings', MockSettings(kwargs)):
+            self._test_user_list(expected=status.HTTP_403_FORBIDDEN)
 
-        # FIXME(jtanner): broken by dab 2024.12.13
-        '''
-        # community
+    def test_user_list_community(self):
         kwargs = {
             'GALAXY_DEPLOYMENT_MODE': DeploymentMode.STANDALONE.value,
             'SOCIAL_AUTH_GITHUB_KEY': '1234',
             'SOCIAL_AUTH_GITHUB_SECRET': '1234'
         }
-        with self.settings(**kwargs):
-            _test_user_list(expected=status.HTTP_200_OK)
-        '''
+        with patch('galaxy_ng.app.access_control.access_policy.settings', MockSettings(kwargs)):
+            self._test_user_list(expected=status.HTTP_200_OK)
 
     def test_user_get(self):
         def _test_user_get(expected=None):
