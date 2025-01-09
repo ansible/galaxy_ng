@@ -140,13 +140,27 @@ class TestVerifyData:
     @pytest.mark.min_hub_version("4.7dev")
     @pytest.mark.skipif(is_upgrade_from_aap23_hub46(), reason=SKIP_MESSAGE_23)
     @pytest.mark.verify_data
-    def test_verify_data_repos(self, galaxy_client, data):
+    def test_verify_data_repositories(self, galaxy_client, data):
         """
         Test that verifies the data previously loaded by test_load_data
         """
         gc = galaxy_client("admin")
         for expected_repo in data["repositories"]:
             get_repository_href(gc, expected_repo["name"])
+
+    @pytest.mark.min_hub_version("4.6dev")
+    @pytest.mark.verify_data
+    def test_verify_data_remotes(self, galaxy_client, data):
+        """
+        Test that verifies the data previously loaded by test_load_data
+        """
+        gc = galaxy_client("admin")
+        for remote in data["remotes"]:
+            actual_remote = view_remotes(gc, remote["name"])
+            assert actual_remote["results"][0]["url"] == remote["url"]
+            assert actual_remote["results"][0]["name"] == remote["name"]
+            assert actual_remote["results"][0]["signed_only"] == remote["signed_only"]
+            assert actual_remote["results"][0]["tls_validation"] == remote["tls_validation"]
 
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.verify_data
@@ -192,17 +206,3 @@ class TestVerifyData:
                                f"?name={remote_registry['name']}")
             assert actual_rr["data"][0]["name"] == remote_registry["name"]
             assert actual_rr["data"][0]["url"] == remote_registry["url"]
-
-    @pytest.mark.min_hub_version("4.6dev")
-    @pytest.mark.verify_data
-    def test_verify_data_remotes(self, galaxy_client, data):
-        """
-        Test that verifies the data previously loaded by test_load_data
-        """
-        gc = galaxy_client("admin")
-        for remote in data["remotes"]:
-            actual_remote = view_remotes(gc, remote["name"])
-            assert actual_remote["results"][0]["url"] == remote["url"]
-            assert actual_remote["results"][0]["name"] == remote["name"]
-            assert actual_remote["results"][0]["signed_only"] == remote["signed_only"]
-            assert actual_remote["results"][0]["tls_validation"] == remote["tls_validation"]

@@ -163,9 +163,9 @@ class TestLoadData:
                 add_group(gc, ns["name"], ns["group"],
                           object_roles=["galaxy.collection_namespace_owner"])
 
-    @pytest.mark.min_hub_version("4.6")
+    @pytest.mark.min_hub_version("4.7")
     @pytest.mark.load_data
-    def test_load_repositories_and_remotes(self, galaxy_client, data):
+    def test_load_repositories(self, galaxy_client, data):
         gc = galaxy_client("admin")
 
         for repo in data["repositories"]:
@@ -179,6 +179,10 @@ class TestLoadData:
                 else:
                     raise e
 
+    @pytest.mark.min_hub_version("4.6")
+    @pytest.mark.load_data
+    def test_load_remotes(self, galaxy_client, data):
+        gc = galaxy_client("admin")
         for remote in data["remotes"]:
             try:
                 logger.debug(f"Creating remote {remote['name']}")
