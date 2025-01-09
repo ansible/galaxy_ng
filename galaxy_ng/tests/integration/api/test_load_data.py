@@ -179,7 +179,6 @@ class TestLoadData:
                 else:
                     raise e
 
-
     @pytest.mark.min_hub_version("4.6")
     @pytest.mark.load_data
     def test_load_remotes(self, galaxy_client, data):

@@ -148,7 +148,6 @@ class TestVerifyData:
         for expected_repo in data["repositories"]:
             get_repository_href(gc, expected_repo["name"])
 
-
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.verify_data
     def test_verify_data_remotes(self, galaxy_client, data):
@@ -162,7 +161,6 @@ class TestVerifyData:
             assert actual_remote["results"][0]["name"] == remote["name"]
             assert actual_remote["results"][0]["signed_only"] == remote["signed_only"]
             assert actual_remote["results"][0]["tls_validation"] == remote["tls_validation"]
-
 
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.verify_data
