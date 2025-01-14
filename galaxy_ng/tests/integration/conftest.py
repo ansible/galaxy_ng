@@ -333,10 +333,10 @@ def sync_instance_crc():
     dev/data/insights-fixture.tar.gz
     """
 
-    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:38080/api/automation-hub/")
+    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
     auth_url = os.getenv(
         "TEST_CRC_AUTH_URL",
-        "http://localhost:38080/auth/realms/redhat-external/protocol/openid-connect/token"
+        "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
     )
 
     config = AnsibleConfigFixture(url=url, auth_url=auth_url, profile="org_admin")
@@ -344,7 +344,7 @@ def sync_instance_crc():
 
     client = get_client(
         config=config,
-        request_token=True,
+        request_token=False,
         require_auth=True
     )
 
