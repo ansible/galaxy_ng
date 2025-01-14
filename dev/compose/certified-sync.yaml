@@ -1,0 +1,545 @@
+x-common-env: &common-env
+
+  GNUPGHOME: /root/.gnupg/
+
+  DJANGO_SUPERUSER_USERNAME: admin
+  DJANGO_SUPERUSER_EMAIL: admin@example.com
+  DJANGO_SUPERUSER_PASSWORD: admin
+
+  POSTGRES_USER: galaxy_ng
+  POSTGRES_PASSWORD: galaxy_ng
+  POSTGRES_DB: galaxy_ng
+
+  # no spying
+  PULP_ANALYTICS: 'false'
+
+  # normally goes into settings.py ...
+  PULP_DATABASES__default__ENGINE: django.db.backends.postgresql
+  PULP_DATABASES__default__NAME: galaxy_ng
+  PULP_DATABASES__default__USER: galaxy_ng
+  PULP_DATABASES__default__PASSWORD: galaxy_ng
+  PULP_DATABASES__default__PORT: 5432
+
+  PULP_DEBUG: 1
+  PULP_DEFAULT_FILE_STORAGE: "pulpcore.app.models.storage.FileSystem"
+  PULP_REDIRECT_TO_OBJECT_STORAGE: 'false'
+  PULP_X_PULP_CONTENT_PORT: 24816
+
+  PULP_CSRF_TRUSTED_ORIGINS: "['http://localhost']"
+
+  # signing ...
+  PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
+  PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
+  PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+
+  # disable user/group modifications
+  PULP_ALLOW_LOCAL_RESOURCE_MANAGEMENT: 'true'
+
+  # role content workaround ..
+  PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'
+
+  # Resource server
+  # This disables the attempt for resource syncing
+  PULP_RESOURCE_SERVER_SYNC_ENABLED: 'false'
+
+  # Integration test settings
+  HUB_TEST_MARKS: sync
+  HUB_USE_MOVE_ENDPOINT: 'true'
+
+  # Unpin dependencies on setup.py if set to 0
+  LOCK_REQUIREMENTS: 0
+
+  # DEV EDITABLE STUFF
+  # To enable editable installs of local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
+  # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
+  # This can be done as part of the `docker compose` call:
+  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/certified-sync.yaml up
+  DEV_SOURCE_PATH:
+
+
+x-standalone-env: &standalone-env
+  <<: *common-env
+  PULP_DATABASES__default__HOST: standalone-postgres
+  PULP_GALAXY_DEPLOYMENT_MODE: 'standalone'
+  PULP_GALAXY_API_PATH_PREFIX: '/api/galaxy/'
+  PULP_CONTENT_PATH_PREFIX: '/pulp/content/'
+  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:5001'
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:5001"
+  PULP_CONTENT_ORIGIN: "http://localhost:5001"
+  PULP_GALAXY_AUTHENTICATION_CLASSES: "['galaxy_ng.app.auth.session.SessionAuthentication', 'rest_framework.authentication.TokenAuthentication', 'rest_framework.authentication.BasicAuthentication']"
+  PULP_ANSIBLE_BASE_JWT_VALIDATE_CERT: 'false'
+  PULP_TOKEN_AUTH_DISABLED: 'false'
+  PULP_GALAXY_COLLECTION_SIGNING_SERVICE: 'ansible-default'
+  PULP_GALAXY_CONTAINER_SIGNING_SERVICE: 'container-default'
+  PULP_TOKEN_SIGNATURE_ALGORITHM: 'ES256'
+  PULP_PUBLIC_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_public_key.pem'
+  PULP_PRIVATE_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_private_key.pem'
+  PULP_ANSIBLE_BASE_JWT_KEY: 'https://localhost'
+  PULP_GALAXY_FEATURE_FLAGS__external_authentication: 'true'
+  HUB_API_ROOT: 'http://localhost:5001/api/galaxy/'
+  CONTAINER_REGISTRY: 'localhost:5001'
+  PULP_X_PULP_CONTENT_HOST: 'standalone-content'
+
+
+x-insights-env: &insights-env
+  <<: *common-env
+  PULP_DATABASES__default__HOST: insights-postgres
+  PULP_GALAXY_DEPLOYMENT_MODE: 'insights'
+  PULP_RH_ENTITLEMENT_REQUIRED: 'insights'
+  PULP_GALAXY_API_PATH_PREFIX: '/api/automation-hub/'
+  PULP_CONTENT_PATH_PREFIX: '/api/automation-hub/pulp/content/'
+  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:1234'
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:1234"
+  PULP_CONTENT_ORIGIN: "http://localhost:1234"
+  PULP_GALAXY_AUTHENTICATION_CLASSES: "['galaxy_ng.app.auth.auth.RHIdentityAuthentication']"
+  HUB_AUTH_URL: 'http://localhost:1234/auth/realms/redhat-external/protocol/openid-connect/token'
+  HUB_API_ROOT: 'http://localhost:1234/api/automation-hub/'
+  ENABLE_COLLECTION_SIGNING: 0
+  PULP_GALAXY_FEATURE_FLAGS__dab_resource_registry: 'false'
+  PULP_X_PULP_CONTENT_HOST: 'insights-content'
+
+
+# allow attaching to the running container
+x-debugging: &debugging
+  stdin_open: true
+  tty: true
+
+
+services:
+  base_img:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    image: "localhost/galaxy_ng/galaxy_ng:base"
+
+  base_img_dev:  # Extends base_img with extra files and dev tools
+    depends_on:
+      - base_img
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        <<: *common-env
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+
+  redis:
+    image: "redis:5"
+
+
+  # standalone
+  standalone-postgres:
+    image: "postgres:13"
+    ports:
+      - '5433:5432'
+    environment:
+      <<: *standalone-env
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "galaxy_ng" ]
+      interval: 10s
+      retries: 5
+    # Uncomment below to spam out every DB statement to the service stderr
+    # WARNING: enabling log_statement=all makes database slower
+    # command: ["postgres", "-c", "log_statement=ddl", "-c", "log_destination=stderr"]
+
+  standalone-migrations:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - standalone-postgres
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *standalone-env
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        set -e;
+        rm -rf /var/lib/pulp/.migrated;
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+
+        pulpcore-manager check --database default;
+        pulpcore-manager migrate;
+        pulpcore-manager shell < /src/galaxy_ng/dev/common/setup_test_data.py;
+        pulpcore-manager createsuperuser --noinput || true;
+
+        touch /var/lib/pulp/.migrated;
+      "
+
+  standalone-api:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - standalone-postgres
+      - standalone-migrations
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *standalone-env
+    extra_hosts:
+      localhost: "host-gateway"
+    networks:
+      - default
+      - service-mesh
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
+      "
+
+  standalone-content:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - standalone-postgres
+      - standalone-migrations
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *standalone-env
+    extra_hosts:
+      localhost: "host-gateway"
+    networks:
+      - default
+      - service-mesh
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
+      "
+
+  standalone-worker:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - standalone-postgres
+      - standalone-migrations
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *standalone-env
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+
+        # Worker needs gpg in order to consume signing tasks;
+        gpg --list-secret-keys;
+
+        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
+      "
+
+  standalone-manager:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - standalone-postgres
+      - standalone-migrations
+      - standalone-worker
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *standalone-env
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+
+        # Give some time for API to start;
+        sleep 5;
+
+        echo 'Scheduled tasks';
+        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://standalone-api:24817/api/galaxy/pulp/api/v3/task-schedules/?name=dab_sync | python -m json.tool;
+
+        # Setup signing services;
+        gpg --list-secret-keys;
+        /src/galaxy_ng/dev/compose/signing/setup_signing_services.sh;
+        echo 'Signing Services';
+        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://standalone-api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
+
+        # Setup repository gpgkey for upload verification;
+        /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
+
+        echo ' ';
+        echo '###################### API ROOT ##############################';
+        curl -s http://standalone-api:24817/api/galaxy/ | python -m json.tool;
+        echo '################### DEV_SOURCE_PATH ##########################';
+        echo $$DEV_SOURCE_PATH;
+        echo ' ';
+        echo '######################## READY ###############################';
+        echo ' ';
+        echo 'Credentials:  ' $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD;
+        echo 'API Spec:      http://localhost:5001/api/galaxy/v3/swagger-ui/';
+        echo 'Django Admin:  docker compose -f dev/compose/certified-sync.yaml exec standalone-manager pulpcore-manager';
+        echo 'Settings list: docker compose -f dev/compose/certified-sync.yaml exec standalone-manager dynaconf list';
+        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
+        echo '##############################################################';
+
+        # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
+        tail -f /dev/null
+      "
+
+  standalone-nginx:
+    image: "nginx:latest"
+    depends_on:
+      - standalone-postgres
+      - standalone-migrations
+      - standalone-api
+      - standalone-content
+    ports:
+      - '5001:5001'
+    volumes:
+      - '../nginx/certified-sync/standalone.conf:/etc/nginx/nginx.conf:ro'
+
+
+  # insights
+  insights-postgres:
+    image: "postgres:13"
+    ports:
+      - '8432:5432'
+    environment:
+      <<: *insights-env
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "galaxy_ng" ]
+      interval: 10s
+      retries: 5
+    volumes:
+      - "./data:/db_data"
+    # Uncomment below to spam out every DB statement to the service stderr
+    # WARNING: enabling log_statement=all makes database slower
+    # command: ["postgres", "-c", "log_statement=ddl", "-c", "log_destination=stderr"]
+
+  load-sync-data:
+    image: "postgres:13"
+    depends_on:
+      - insights-postgres
+    environment:
+      <<: *insights-env
+    entrypoint: >
+      bash -c "
+      until pg_isready -h insights-postgres -p 5432; do
+        sleep 2;
+      done;
+      PGPASSWORD="galaxy_ng" pg_restore -h insights-postgres -U galaxy_ng -d galaxy_ng --no-owner /var/lib/pulp/pulp_db.backup;
+      "
+    volumes:
+      - "./data:/db_data"
+      - "var_lib_pulp:/var/lib/pulp"
+
+  insights-migrations:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - insights-postgres
+      - load-sync-data
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *insights-env
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        set -e;
+        rm -rf /var/lib/pulp/.migrated;
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+
+        pulpcore-manager check --database default;
+
+        tar --overwrite -xzf dev/compose/data/insights-fixture.tar.gz -C /var/lib/pulp/;
+
+        pulpcore-manager migrate;
+
+        pulpcore-manager shell < /src/galaxy_ng/dev/common/setup_test_data.py;
+        pulpcore-manager createsuperuser --noinput || true;
+
+        touch /var/lib/pulp/.migrated;
+      "
+
+  insights-proxy:
+    build:
+      context: "../../profiles/insights/proxy"
+    ports:
+      - "8080:8080"
+    environment:
+      UPSTREAM_URL: "http://insights-api:24817"
+      PROXY_PORT: "8080"
+    volumes:
+      - "../../profiles/insights/proxy:/app:ro"
+
+  insights-api:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - insights-postgres
+      - insights-migrations
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *insights-env
+    extra_hosts:
+      localhost: "host-gateway"
+    networks:
+      - default
+      - service-mesh
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
+      "
+
+  insights-content:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - insights-postgres
+      - insights-migrations
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *insights-env
+    extra_hosts:
+      localhost: "host-gateway"
+    networks:
+      - default
+      - service-mesh
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
+      "
+
+  insights-worker:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - insights-postgres
+      - insights-migrations
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *insights-env
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+
+        # Worker needs gpg in order to consume signing tasks;
+        gpg --list-secret-keys;
+
+        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
+      "
+
+  insights-manager:
+    image: "localhost/galaxy_ng/galaxy_ng:dev"
+    depends_on:
+      - base_img_dev
+      - insights-postgres
+      - insights-migrations
+      - insights-worker
+    volumes:
+      - "etc_pulp_certs:/etc/pulp/certs"
+      - "var_lib_pulp:/var/lib/pulp"
+      - "../../../:/src"
+      - "../../:/app"
+    environment:
+      <<: *insights-env
+    user: root
+    <<: *debugging
+    command: |
+      bash -c "
+        /src/galaxy_ng/dev/compose/bin/devinstall;
+        /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+
+        # Give some time for API to start;
+        sleep 5;
+
+        # Setup repository gpgkey for upload verification;
+        /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
+
+        echo ' ';
+        echo '###################### API ROOT ##############################';
+        curl -s -k -u org-admin:redhat http://insights-proxy:8080/api/automation-hub/ | python -m json.tool;
+        echo '################### DEV_SOURCE_PATH ##########################';
+        echo $$DEV_SOURCE_PATH;
+        echo ' ';
+        echo '######################## READY ###############################';
+        echo ' ';
+        echo 'Credentials:  org-admin:redhat OR jdoe:redhat';
+        echo 'API Spec:      http://localhost:8001/api/automation-hub/v3/swagger-ui/';
+        echo 'API Spec proxy:http://localhost:8080/api/automation-hub/v3/swagger-ui/';
+        echo 'Django Admin:  docker compose -f dev/compose/certified-sync.yaml exec insights-manager pulpcore-manager';
+        echo 'Settings list: docker compose -f dev/compose/certified-sync.yaml exec insights-manager dynaconf list';
+        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
+        echo '##############################################################';
+
+        # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
+        tail -f /dev/null
+      "
+
+  insights-nginx:
+    image: "nginx:latest"
+    depends_on:
+      - insights-postgres
+      - insights-migrations
+      - insights-api
+      - insights-content
+    ports:
+      - '8001:5001'
+    volumes:
+      - '../nginx/certified-sync/insights.conf:/etc/nginx/nginx.conf:ro'
+
+volumes:
+  var_lib_pulp:
+    name: var_lib_pulp
+  etc_pulp_certs:
+    name: etc_pulp_certs
+
+networks:
+  service-mesh:
+    name: service-mesh

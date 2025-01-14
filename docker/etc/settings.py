@@ -21,8 +21,8 @@ if one want to enable signing, then set the following variables
 on the per environment basis. e.g: export PULP_GALAXY_....
 """
 
-X_PULP_CONTENT_HOST = "pulp-content-app"
-X_PULP_CONTENT_PORT = 24816
+X_PULP_CONTENT_HOST = os.environ.get('X_PULP_CONTENT_HOST', 'pulp-content-app')
+X_PULP_CONTENT_PORT = os.environ.get('X_PULP_CONTENT_HOST', 24816)
 
 DATABASES = {
     'default': {
