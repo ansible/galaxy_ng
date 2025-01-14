@@ -405,13 +405,14 @@ func main() {
 
 	// define origin server URL
 	urlToProxyTo, err := url.Parse(getEnv("UPSTREAM_URL", "http://localhost:5001"))
+	proxyHost := getEnv("PROXY_HOST", "insights-proxy")
 	proxyPort := getEnv("PROXY_PORT", "8080")
 
 	fmt.Printf("Listening on: %s\n", proxyPort)
 	fmt.Printf("Proxying to: %s\n", urlToProxyTo)
 
 	downloadUrlReg := regexp.MustCompile("\"download_url\":\"(http|https)://[^/]+")
-	replacementURL := []byte(fmt.Sprintf("\"download_url\":\"http://localhost:%s", proxyPort))
+	replacementURL := []byte(fmt.Sprintf("\"download_url\":\"http://%s:%s", proxyHost, proxyPort))
 
 	if err != nil {
 		log.Fatal("invalid origin server URL")
