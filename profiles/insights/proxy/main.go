@@ -405,7 +405,7 @@ func main() {
 
 	// define origin server URL
 	urlToProxyTo, err := url.Parse(getEnv("UPSTREAM_URL", "http://localhost:5001"))
-	proxyHost := getEnv("PROXY_HOST", "insights-proxy")
+	proxyHost := getEnv("PROXY_HOST", "localhost")
 	proxyPort := getEnv("PROXY_PORT", "8080")
 
 	fmt.Printf("Listening on: %s\n", proxyPort)
