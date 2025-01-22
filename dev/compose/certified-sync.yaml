@@ -148,7 +148,7 @@ services:
       - standalone-postgres
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_standalone:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -177,7 +177,7 @@ services:
       - standalone-migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_standalone:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -204,7 +204,7 @@ services:
       - standalone-migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_standalone:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -231,7 +231,7 @@ services:
       - standalone-migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_standalone:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -258,7 +258,7 @@ services:
       - standalone-worker
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_standalone:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -345,11 +345,13 @@ services:
       until pg_isready -h insights-postgres -p 5432; do
         sleep 2;
       done;
+
+      tar --overwrite -xzf /db_data/insights-fixture.tar.gz -C /var/lib/pulp/;
       PGPASSWORD="galaxy_ng" pg_restore -h insights-postgres -U galaxy_ng -d galaxy_ng --no-owner /var/lib/pulp/pulp_db.backup;
       "
     volumes:
       - "./data:/db_data"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_insights:/var/lib/pulp"
 
   insights-migrations:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -359,7 +361,7 @@ services:
       - load-sync-data
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_insights:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -373,8 +375,6 @@ services:
         /src/galaxy_ng/dev/compose/bin/devinstall;
 
         pulpcore-manager check --database default;
-
-        tar --overwrite -xzf dev/compose/data/insights-fixture.tar.gz -C /var/lib/pulp/;
 
         pulpcore-manager migrate;
 
@@ -404,7 +404,7 @@ services:
       - insights-migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_insights:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -431,7 +431,7 @@ services:
       - insights-migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_insights:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -458,7 +458,7 @@ services:
       - insights-migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_insights:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -485,7 +485,7 @@ services:
       - insights-worker
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp:/var/lib/pulp"
+      - "var_lib_pulp_insights:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -536,8 +536,10 @@ services:
       - '../nginx/certified-sync/insights.conf:/etc/nginx/nginx.conf:ro'
 
 volumes:
-  var_lib_pulp:
-    name: var_lib_pulp
+  var_lib_pulp_standalone:
+    name: var_lib_pulp_standalone
+  var_lib_pulp_insights:
+    name: var_lib_pulp_insights
   etc_pulp_certs:
     name: etc_pulp_certs
 

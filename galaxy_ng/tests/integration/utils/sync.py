@@ -1,3 +1,4 @@
+import os
 from ..utils import wait_for_task, cleanup_namespace, iterate_all
 
 
@@ -31,10 +32,18 @@ def clear_certified(api_client):
 
 def perform_sync(api_client, crc_config, repo=None, remote_params=None):
     """Perform a sync against the crc_client defined by crc_config. """
+    remote_url = os.getenv(
+        "TEST_CRC_API_ROOT_SERVICE",
+        "http://insights-proxy:8080/api/automation-hub/"
+    )
+    remote_auth_url = os.getenv(
+        "TEST_CRC_AUTH_URL_SERVICE",
+        "http://insights-proxy:8080/auth/realms/redhat-external/protocol/openid-connect/token"
+    )
     remote_params = remote_params or {}
-    url = crc_config["url"]
+
     if repo:
-        url = url + f"/content/{repo}/"
+        remote_url = remote_url + f"content/{repo}/"
 
     # pulp_ansible will only perform a sync if the remote source is updated
     # or if the remote itself is modified. Since the remote source doesn't
@@ -55,8 +64,8 @@ def perform_sync(api_client, crc_config, repo=None, remote_params=None):
         "content/rh-certified/v3/sync/config/",
         method="PUT",
         args={
-            "url": url,
-            "auth_url": crc_config["auth_url"],
+            "url": remote_url,
+            "auth_url": remote_auth_url,
             "token": crc_config["token"],
             **remote_params,
         }
@@ -65,7 +74,11 @@ def perform_sync(api_client, crc_config, repo=None, remote_params=None):
     # Launch sync
     r = api_client(
         "content/rh-certified/v3/sync/",
-        method="POST"
+        method="POST",
+        args={
+            "mirror": True,
+            "optimize": False,
+        }
     )
 
     resp = {

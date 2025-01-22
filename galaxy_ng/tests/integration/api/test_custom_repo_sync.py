@@ -1,5 +1,5 @@
 import logging
-
+import os
 import pytest
 
 from galaxykit.namespaces import create_namespace
@@ -21,6 +21,15 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.min_hub_version("4.7dev")
 class TestCustomReposSync:
+    remote_url = os.getenv(
+        "TEST_CRC_API_ROOT_SERVICE",
+        "http://insights-proxy:8080/api/automation-hub/"
+    )
+    remote_auth_url = os.getenv(
+        "TEST_CRC_AUTH_URL_SERVICE",
+        "http://insights-proxy:8080/auth/realms/redhat-external/protocol/openid-connect/token"
+    )
+
     @pytest.mark.sync
     def test_basic_sync_custom_repo_with_req_file(self, sync_instance_crc, galaxy_client):
         """
@@ -29,7 +38,6 @@ class TestCustomReposSync:
         """
         # this is the insights mode instance (source hub)
         _, custom_config = sync_instance_crc
-        url = custom_config["url"]
         galaxy_kit_client = GalaxyKitClient(custom_config)
         source_client = galaxy_kit_client.gen_authorized_client(
             {"username": "notifications_admin", "password": "redhat"}, basic_token=True
@@ -65,12 +73,12 @@ class TestCustomReposSync:
         gc = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
         params = {
-            "auth_url": custom_config["auth_url"],
+            "auth_url": self.remote_auth_url,
             "token": custom_config["token"],
             "requirements_file": f"---\ncollections:\n- {artifact.namespace}.{artifact.name}",
         }
         create_remote(
-            gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params
+            gc, test_remote_name, f"{self.remote_url}content/{test_repo_name_1}/", params=params
         )
         create_repo_and_dist(gc, test_repo_name_1, remote=test_remote_name)
 
@@ -102,7 +110,6 @@ class TestCustomReposSync:
         it's removed from the local repo
         """
         _, custom_config = sync_instance_crc
-        url = custom_config["url"]
         galaxy_kit_client = GalaxyKitClient(custom_config)
         source_client = galaxy_kit_client.gen_authorized_client(
             {"username": "notifications_admin", "password": "redhat"}, basic_token=True
@@ -126,11 +133,11 @@ class TestCustomReposSync:
         gc = galaxy_client("iqe_admin")
         test_remote_name = f"remote-test-{generate_random_string()}"
         params = {
-            "auth_url": custom_config["auth_url"],
+            "auth_url": self.remote_auth_url,
             "token": custom_config["token"],
         }
         create_remote(
-            gc, test_remote_name, f"{url}content/{test_repo_name_1}/", params=params
+            gc, test_remote_name, f"{self.remote_url}content/{test_repo_name_1}/", params=params
         )
         pulp_href = create_repo_and_dist(gc, test_repo_name_1, remote=test_remote_name)
 

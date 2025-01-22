@@ -104,7 +104,7 @@ def _assert_sync(manifest, client):
 
 def _assert_namespace_sync(pah_client, crc_client, namespace):
     crc_ns = crc_client(f"v3/namespaces/{namespace['name']}/")
-    pah_ns = pah_client(f"v3/plugin/ansible/content/rh-certified/namespaces/{namespace['name']}")
+    pah_ns = pah_client(f"v3/plugin/ansible/content/rh-certified/namespaces/{namespace['name']}/")
     pah_galaxy_ns = pah_client(f"v3/namespaces/{namespace['name']}/")
 
     # test the fields
@@ -134,7 +134,8 @@ def test_basic_sync(sync_instance_crc, ansible_config):
     manifest, crc_config = sync_instance_crc
 
     pah_client = get_client(
-        config=config
+        config=config,
+        request_token=False,
     )
 
     clear_certified(pah_client)
@@ -156,7 +157,7 @@ def test_synclist_sync(sync_instance_crc, ansible_config):
 
     crc_client = get_client(
         config=crc_config,
-        request_token=True,
+        request_token=False,
         require_auth=True
     )
 
@@ -203,7 +204,6 @@ def test_signed_only_sync(sync_instance_crc, ansible_config):
     _assert_sync(expected_manifest, pah_client)
 
 
-# @pytest.mark.skip("broken by python 3.11 ... ?")
 @pytest.mark.sync
 def test_namespace_sync(sync_instance_crc, ansible_config):
     pah_config = ansible_config(profile="admin")
@@ -211,8 +211,8 @@ def test_namespace_sync(sync_instance_crc, ansible_config):
 
     crc_config.profile = "admin"
 
-    pah_client = get_client(pah_config)
-    crc_client = get_client(crc_config)
+    pah_client = get_client(pah_config, request_token=False)
+    crc_client = get_client(crc_config, request_token=False)
 
     ns_data = {
         "name": "ansible",
@@ -272,8 +272,6 @@ def test_namespace_sync(sync_instance_crc, ansible_config):
         args=ns_data,
         method="PUT",
     )
-
-    clear_certified(pah_client)
 
     perform_sync(pah_client, crc_config)
     _assert_namespace_sync(pah_client, crc_client, ns)

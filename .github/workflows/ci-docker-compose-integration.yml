@@ -15,18 +15,14 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          # - TEST_PROFILE: ldap
-          # - TEST_PROFILE: keycloak
-          - TEST_PROFILE: standalone
-          # - TEST_PROFILE: rbac
-          # - TEST_PROFILE: rbac_parallel_group_1
-          # - TEST_PROFILE: rbac_parallel_group_2
-          # - TEST_PROFILE: certified-sync
-          - TEST_PROFILE: insights
-          # - TEST_PROFILE: iqe_rbac
-          # - TEST_PROFILE: x_repo_search
-          - TEST_PROFILE: community
-          # - TEST_PROFILE: dab_jwt
+          - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "deployment_standalone or all" }
+          - { TEST_PROFILE: insights, HUB_TEST_MARKS: "deployment_cloud or all" }
+          - { TEST_PROFILE: community, HUB_TEST_MARKS: "deployment_community" }
+          - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "x_repo_search" }
+          - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "iqe_rbac_test" }
+          - { TEST_PROFILE: certified-sync, HUB_TEST_MARKS: "sync" }
+          - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "rbac_parallel_group_1" }
+          - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "rbac_parallel_group_2" }
 
     runs-on: ubuntu-latest
     steps:
@@ -54,9 +50,16 @@ jobs:
           docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml up --detach
 
       - name: Export environment variables to host
+        if: ${{ matrix.env.TEST_PROFILE != 'certified-sync' }}
         run: |
           docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml exec manager /bin/bash -c 'env | grep -v -w "HOME"' >> $GITHUB_ENV
-          cat $GITHUB_ENV
+
+      - name: Export environment variables to host (certified-sync)
+        if: ${{ matrix.env.TEST_PROFILE == 'certified-sync' }}
+        run: |
+          docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml exec standalone-manager /bin/bash -c 'env | grep -v -w "HOME"' >> $GITHUB_ENV
+
+      - run: cat $GITHUB_ENV
 
       - name: Wait for API online status
         run: |
@@ -79,7 +82,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          pytest -v -r sx --color=yes -m '${{ env.HUB_TEST_MARKS }}' galaxy_ng/tests/integration
+          pytest -v -r sx --color=yes -m '${{ matrix.env.HUB_TEST_MARKS }}' galaxy_ng/tests/integration
         env:
           GALAXYKIT_SLEEP_SECONDS_POLLING: ".5"
           GALAXYKIT_SLEEP_SECONDS_ONETIME: ".5"
