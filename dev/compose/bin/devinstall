@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+if [ -z "${DEV_SOURCE_PATH}" ]; then
+    echo "DEV_SOURCE_PATH is not defined, skipping editable installs."
+    exit 0
+fi
+
+IFS=':' read -ra SRC_PATH_LIST <<< "$DEV_SOURCE_PATH"
+
+for item in "${SRC_PATH_LIST[@]}"; do
+    src_path="/src/${item}"
+    if [[ -d "$src_path" ]]; then
+        echo "Installing path ${item} in editable mode."
+
+        if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then
+            pip3.11 install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
+        else
+            pip3.11 install --no-cache-dir --editable "$src_path" >/dev/null
+        fi
+
+    else
+        echo "WARNING: Source path ${item} is not a directory."
+    fi
+done
+
