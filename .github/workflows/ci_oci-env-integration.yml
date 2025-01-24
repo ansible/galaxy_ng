@@ -24,6 +24,7 @@ jobs:
           - TEST_PROFILE: iqe_rbac
           - TEST_PROFILE: x_repo_search
           - TEST_PROFILE: community
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
