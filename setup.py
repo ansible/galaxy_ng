@@ -87,10 +87,10 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
-django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', '2024.12.13')
+django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', 'zk/feature-flag/api')
 django_ansible_base_dependency = (
-    'django-ansible-base[jwt-consumer] @ '
-    f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
+    'django-ansible-base[jwt-consumer,feature-flags] @ '
+    f'git+https://github.com/zkayyali812/django-ansible-base@{django_ansible_base_branch}'
 )
 
 requirements = [

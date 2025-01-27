@@ -795,10 +795,11 @@ def configure_dynamic_settings(settings: Dynaconf) -> dict[str, Any]:
 
 def configure_dab_required_settings(settings: Dynaconf) -> dict[str, Any]:
     dab_settings = get_dab_settings(
-        installed_apps=[*settings.INSTALLED_APPS, 'ansible_base.jwt_consumer'],
+        installed_apps=[*settings.INSTALLED_APPS, 'ansible_base.jwt_consumer', 'ansible_base.feature_flags' ],
         rest_framework=settings.REST_FRAMEWORK,
         spectacular_settings=settings.SPECTACULAR_SETTINGS,
         authentication_backends=settings.AUTHENTICATION_BACKENDS,
         middleware=settings.MIDDLEWARE,
+        templates=settings.TEMPLATES
     )
     return {k: v for k, v in dab_settings.items() if k not in settings}
