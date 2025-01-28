@@ -268,7 +268,7 @@ services:
         /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
 
         echo ' ';
-        echo '###################### API ROOT ##############################';
+        echo '###################### API ROOT ###############################';
         curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/ | python -m json.tool;
         echo '################### DEV_SOURCE_PATH ##########################';
         echo $$DEV_SOURCE_PATH;
