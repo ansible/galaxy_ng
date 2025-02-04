@@ -109,7 +109,8 @@ INSTALLED_APPS = [
     'crum',
     'ansible_base.resource_registry',
     'ansible_base.rbac',
-    'flags',
+    'ansible_base.jwt_consumer',
+    'ansible_base.feature_flags',
     'social_django',
     'dynaconf_merge_unique',
 ]
