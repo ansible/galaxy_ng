@@ -24,6 +24,7 @@ from crum import get_current_request
 from django.apps import apps
 from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
+from dynaconf.utils.functional import empty
 
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 
@@ -70,6 +71,7 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
     data.update(configure_dab_required_settings(settings))
+    data.update(toggle_feature_flags(settings))
 
     # These should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
@@ -795,10 +797,41 @@ def configure_dynamic_settings(settings: Dynaconf) -> dict[str, Any]:
 
 def configure_dab_required_settings(settings: Dynaconf) -> dict[str, Any]:
     dab_settings = get_dab_settings(
-        installed_apps=[*settings.INSTALLED_APPS, 'ansible_base.jwt_consumer'],
+        installed_apps=[
+            *settings.INSTALLED_APPS,
+            # jwt_consumer will not be part of the final INSTALLED_APPS
+            # but passed here to get the required jwt settings from DAB.
+            'ansible_base.jwt_consumer',
+        ],
         rest_framework=settings.REST_FRAMEWORK,
         spectacular_settings=settings.SPECTACULAR_SETTINGS,
         authentication_backends=settings.AUTHENTICATION_BACKENDS,
         middleware=settings.MIDDLEWARE,
+        templates=settings.TEMPLATES
     )
+    # This doesn't perform any merging, it sets only keys that are not already set
+    # NOTE: this needs refactoring when integrating with new Dynaconf factory from DAB
     return {k: v for k, v in dab_settings.items() if k not in settings}
+
+
+def toggle_feature_flags(settings: Dynaconf) -> dict[str, Any]:
+    """Toggle FLAGS based on installer settings.
+
+    FLAGS is a django-flags formatted dictionary.
+
+        FLAGS={
+            "FEATURE_SOME_PLATFORM_FLAG_ENABLED": [
+                {"condition": "boolean", "value": False, "required": True},
+                {"condition": "before date", "value": "2022-06-01T12:00Z"},
+            ]
+        }
+
+    Installers will place `FEATURE_SOME_PLATFORM_FLAG_ENABLED=True/False` in the settings file.
+    This function will update the value in the index 0 in FLAGS with the installer value.
+    """
+    data = {}
+    for feature_name, feature_content in settings.get("FLAGS", {}).items():
+        if (installer_value := settings.get(feature_name, empty)) is not empty:
+            feature_content[0]["value"] = installer_value
+            data[f"FLAGS__{feature_name}"] = feature_content
+    return data

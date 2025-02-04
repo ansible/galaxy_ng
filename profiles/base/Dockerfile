@@ -1,7 +1,7 @@
 FROM localhost/oci_env/pulp:base
 
 # Define the build argument
-ARG DJANGO_ANSIBLE_BASE_BRANCH=2024.12.13
+ARG DJANGO_ANSIBLE_BASE_BRANCH=2025.1.31
 
 # Set the environment variable based on the build argument
 ENV DJANGO_ANSIBLE_BASE_BRANCH=${DJANGO_ANSIBLE_BASE_BRANCH}

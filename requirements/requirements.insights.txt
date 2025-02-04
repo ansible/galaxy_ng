@@ -120,7 +120,7 @@ django==4.2.17
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@2024.12.13
+django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@2025.1.31
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -131,7 +131,9 @@ django-crum==0.7.9
 django-filter==23.5
     # via pulpcore
 django-flags==5.0.13
-    # via galaxy-ng (setup.py)
+    # via
+    #   django-ansible-base
+    #   galaxy-ng (setup.py)
 django-guid==3.4.0
     # via pulpcore
 django-import-export==3.3.9
