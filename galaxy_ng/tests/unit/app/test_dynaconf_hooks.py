@@ -340,3 +340,30 @@ def test_dynaconf_hooks_authentication_backends_and_classes(
             print(e)
         """
         assert new_settings.get(key) == val
+
+
+def test_dynaconf_hooks_toggle_feature_flags():
+    """
+    FLAGS is a django-flags formatted dictionary.
+    Installers will place `FEATURE_****=True/False` in the settings file.
+    This function will update the value in the index 0 in FLAGS with the installer value.
+    """
+    xsettings = SuperDict()
+    xsettings.update(copy.deepcopy(BASE_SETTINGS))
+
+    # Start with a feature flag that is disabled `value: False`
+    xsettings["FLAGS"] = {
+        "FEATURE_SOME_PLATFORM_FLAG_ENABLED": [
+            {"condition": "boolean", "value": False, "required": True},
+            {"condition": "before date", "value": "2022-06-01T12:00Z"},
+        ]
+    }
+
+    # assume installer has enabled the feature flag on settings file
+    xsettings["FEATURE_SOME_PLATFORM_FLAG_ENABLED"] = True
+
+    # Run the post hook
+    new_settings = post_hook(xsettings, run_dynamic=True, run_validate=True)
+
+    # Check that the feature flag under FLAGS is now enabled
+    assert new_settings["FLAGS"]["FEATURE_SOME_PLATFORM_FLAG_ENABLED"][0]["value"] is True
