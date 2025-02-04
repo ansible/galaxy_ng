@@ -7,14 +7,14 @@ services:
   _galaxy_base:
     build:
       args:
-        DJANGO_ANSIBLE_BASE_BRANCH: "2024.12.13"
+        DJANGO_ANSIBLE_BASE_BRANCH: "2025.1.31"
     environment:
-      DJANGO_ANSIBLE_BASE_BRANCH: "2024.12.13"
+      DJANGO_ANSIBLE_BASE_BRANCH: "2025.1.31"
 
   pulp:
     environment:
       PULP_WORKERS: "1"
-      DJANGO_ANSIBLE_BASE_BRANCH: "2024.12.13"
+      DJANGO_ANSIBLE_BASE_BRANCH: "2025.1.31"
 
   jwtproxy:
     build:
