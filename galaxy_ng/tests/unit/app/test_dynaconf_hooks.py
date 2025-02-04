@@ -366,4 +366,5 @@ def test_dynaconf_hooks_toggle_feature_flags():
     new_settings = post_hook(xsettings, run_dynamic=True, run_validate=True)
 
     # Check that the feature flag under FLAGS is now enabled
-    assert new_settings["FLAGS"]["FEATURE_SOME_PLATFORM_FLAG_ENABLED"][0]["value"] is True
+    # the hook will return Dynaconf merging syntax.
+    assert new_settings["FLAGS__FEATURE_SOME_PLATFORM_FLAG_ENABLED"][0]["value"] is True
