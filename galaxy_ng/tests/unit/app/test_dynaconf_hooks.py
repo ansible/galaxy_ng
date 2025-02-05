@@ -67,6 +67,8 @@ BASE_SETTINGS = {
     "AUTHENTICATION_BACKEND_PRESETS_DATA": copy.deepcopy(AUTHENTICATION_BACKEND_PRESETS_DATA),
     "BASE_DIR": "templates",
     "validators": SuperValidator(),
+    "TEMPLATES": [],
+    "FLAGS": {},
 }
 
 

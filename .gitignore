@@ -111,3 +111,7 @@ db_snapshots/
 
 # oci-env profile files
 .compiled/
+
+# docker compose stuff
+.bash_history
+.ipython
