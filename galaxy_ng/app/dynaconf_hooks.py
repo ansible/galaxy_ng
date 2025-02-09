@@ -788,14 +788,22 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     }
 
 
-def configure_dab_required_settings(settings: Dynaconf) -> Dict[str, Any]:
+def configure_dab_required_settings(settings: Dynaconf) -> dict[str, Any]:
     dab_settings = get_dab_settings(
-        installed_apps=settings.INSTALLED_APPS + ['ansible_base.jwt_consumer'],
+        installed_apps=[
+            *settings.INSTALLED_APPS,
+            # jwt_consumer will not be part of the final INSTALLED_APPS
+            # but passed here to get the required jwt settings from DAB.
+            'ansible_base.jwt_consumer',
+        ],
         rest_framework=settings.REST_FRAMEWORK,
         spectacular_settings=settings.SPECTACULAR_SETTINGS,
         authentication_backends=settings.AUTHENTICATION_BACKENDS,
         middleware=settings.MIDDLEWARE,
+        templates=settings.TEMPLATES
     )
+    # This doesn't perform any merging, it sets only keys that are not already set
+    # NOTE: this needs refactoring when integrating with new Dynaconf factory from DAB
     return {k: v for k, v in dab_settings.items() if k not in settings}
 
 
