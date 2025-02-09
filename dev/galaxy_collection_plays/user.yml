@@ -4,7 +4,7 @@
   connection: local
   gather_facts: false
   collections:
-    - galaxy.galaxy
+    - ansible.hub
 
   pre_tasks:
     - name: Include variables
@@ -13,15 +13,15 @@
 
   tasks:
     - name: Create a developers group
-      ah_group:
+      ansible.hub.ah_group:
         name: developers
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
     - name: Add 3 new users who are developers
-      ah_user:
+      ansible.hub.ah_user:
         username: "dev_{{ item }}"
         password: password!@3w6$%
         first_name: Developer
@@ -31,35 +31,35 @@
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
       loop:
         - red
         - green
         - blue
 
     - name: Create an executives group
-      ah_group:
+      ansible.hub.ah_group:
         name: executives
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
     - name: Create an omnipotent role with all permissions
-      ah_role:
+      ansible.hub.ah_role:
         name: galaxy.omnipotent
         description: Manage anything and everything
         perms: all
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
 # TODO: Add a test that permissions/roles can be added to a group after
 # https://github.com/ansible/galaxy_collection/issues/179 is resolved.
 
     - name: Create new executive users
-      ah_user:
+      ansible.hub.ah_user:
         username: "{{ item }}"
         password: executive!@3w6$%
         is_superuser: true
@@ -70,38 +70,38 @@
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
       loop:
         - ceo
         - cfo
         - cto
 
     - name: Delete the red developer
-      ah_user:
+      ansible.hub.ah_user:
         state: absent
         username: dev_red
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
     - name: Delete the developers and executives groups
-      ah_group:
+      ansible.hub.ah_group:
         state: absent
         name: "{{ item }}"
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
       loop:
         - developers
         - executives
 
     - name: Delete the omnipotent role
-      ah_role:
+      ansible.hub.ah_role:
         state: absent
         name: galaxy.omnipotent
         ah_host: "{{ ah_host }}"
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        validate_certs: "{{ ah_validate_certs }}"
