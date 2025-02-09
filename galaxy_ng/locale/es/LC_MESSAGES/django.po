@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 13:30+0000\n"
+"POT-Creation-Date: 2024-11-01 05:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,25 +19,25 @@ msgstr ""
 msgid "Back to list"
 msgstr ""
 
-#: app/access_control/access_policy.py:402
+#: app/access_control/access_policy.py:411
 msgid "Namespace in filename not found."
 msgstr "No se ha encontrado el espacio de nombres en el nombre del archivo."
 
-#: app/access_control/access_policy.py:435
+#: app/access_control/access_policy.py:444
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:449
+#: app/access_control/access_policy.py:458
 msgid "Namespace not found."
 msgstr "No se encontró el nombre del espacio."
 
-#: app/access_control/access_policy.py:518
+#: app/access_control/access_policy.py:527
 msgid ""
 "Signatures are required in order to add collections into any "
 "'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:571 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:580 app/api/v3/views/sync.py:49
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
@@ -70,17 +70,16 @@ msgstr "Los grupos deben ser una lista de objetos de grupo"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "El grupo name=%s, id=%s no existe"
 
-#: app/access_control/fields.py:76 app/api/ui/serializers/user.py:157
+#: app/access_control/fields.py:76 app/api/ui/v1/serializers/user.py:159
+#: app/api/ui/v2/serializers.py:132
 msgid "Invalid group name or ID"
 msgstr "Nombre o ID de grupo no válido"
 
 #: app/access_control/fields.py:100
-#| msgid "Groups must be a list of group objects"
 msgid "Users must be a list of user objects"
 msgstr ""
 
 #: app/access_control/fields.py:113
-#| msgid "Invalid group name or ID"
 msgid "Invalid user username or ID"
 msgstr ""
 
@@ -93,11 +92,11 @@ msgstr ""
 "El rol {role} no existe o no tiene ningún permiso relacionado con este "
 "objeto."
 
-#: app/api/ui/serializers/execution_environment.py:64
+#: app/api/ui/v1/serializers/execution_environment.py:64
 msgid "Selected registry does not exist."
 msgstr "El registro seleccionado no existe."
 
-#: app/api/ui/serializers/execution_environment.py:73
+#: app/api/ui/v1/serializers/execution_environment.py:73
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
@@ -105,23 +104,23 @@ msgstr ""
 "Los nombres de los contenedores sólo pueden contener números alfanuméricos, "
 "\".\", \"_\", \"-\" y un máximo de un \"/\"."
 
-#: app/api/ui/serializers/execution_environment.py:91
+#: app/api/ui/v1/serializers/execution_environment.py:91
 msgid "Name cannot be changed."
 msgstr "El nombre no se puede cambiar."
 
-#: app/api/ui/serializers/synclist.py:38
+#: app/api/ui/v1/serializers/synclist.py:38
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr ""
 "No se encontró el repositorio \"{pulp_id}\" al crear la lista de "
 "sincronización"
 
-#: app/api/ui/serializers/synclist.py:65
+#: app/api/ui/v1/serializers/synclist.py:65
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "La lista de sincronización ya existe: %s"
 
-#: app/api/ui/serializers/synclist.py:73
+#: app/api/ui/v1/serializers/synclist.py:73
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
@@ -130,7 +129,7 @@ msgstr ""
 "No se encontró la colección \"{namespace}.{name}\" al crear la lista de "
 "sincronización {synclist}"
 
-#: app/api/ui/serializers/synclist.py:112
+#: app/api/ui/v1/serializers/synclist.py:112
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -139,7 +138,7 @@ msgstr ""
 "No se encontró la colección \"{namespace}.{name}\" al actualizar la lista de "
 "sincronización {synclist}"
 
-#: app/api/ui/serializers/user.py:75
+#: app/api/ui/v1/serializers/user.py:77
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
@@ -147,24 +146,24 @@ msgstr ""
 "El permiso 'galaxy.change_group' es necesario para cambiar un grupo de "
 "usuarios en el que el usuario solicitante no está."
 
-#: app/api/ui/serializers/user.py:90 app/api/ui/serializers/user.py:96
+#: app/api/ui/v1/serializers/user.py:92 app/api/ui/v1/serializers/user.py:98
 msgid "Must be a super user to grant super user permissions."
 msgstr "Debe ser un superusuario para conceder permisos de superusuario."
 
-#: app/api/ui/serializers/user.py:110
+#: app/api/ui/v1/serializers/user.py:112
 msgid "Must be a super user to change another user's password."
 msgstr "Debe ser un superusuario para cambiar la contraseña de otro usuario."
 
-#: app/api/ui/serializers/user.py:126
+#: app/api/ui/v1/serializers/user.py:128
 msgid "You do not have permissions to modify super users."
 msgstr "No tienes permisos para modificar los superusuarios."
 
-#: app/api/ui/serializers/user.py:153
+#: app/api/ui/v1/serializers/user.py:155 app/api/ui/v2/serializers.py:128
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "El grupo name=%(name)s, id=%(id)s no existe"
 
-#: app/api/ui/views/feature_flags.py:50
+#: app/api/ui/v1/views/feature_flags.py:50
 msgid ""
 "WARNING:GALAXY_COLLECTION_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
@@ -172,7 +171,7 @@ msgstr ""
 "ADVERTENCIA: GALAXY_COLLECTION_SIGNING_SERVICE está establecido en '{}', "
 "pero el SigningService correspondiente no existe en la base de datos."
 
-#: app/api/ui/views/feature_flags.py:65
+#: app/api/ui/v1/views/feature_flags.py:65
 msgid ""
 "WARNING:GALAXY_AUTO_SIGN_COLLECTIONS is set to True, however the system is "
 "not configured with a SigningService to create signatures."
@@ -180,7 +179,7 @@ msgstr ""
 "ADVERTENCIA:GALAXY_AUTO_SIGN_COLLECTIONS está establecido en True, pero el "
 "sistema no está configurado con un SigningService para crear firmas."
 
-#: app/api/ui/views/feature_flags.py:76
+#: app/api/ui/v1/views/feature_flags.py:76
 msgid ""
 "INFO:System is configured to display signatures (coming from remote syncs) "
 "but is not configured to create or accept upload of signatures."
@@ -189,7 +188,7 @@ msgstr ""
 "sincronizaciones remotas) pero no está configurado para crear o aceptar la "
 "carga de firmas."
 
-#: app/api/ui/views/feature_flags.py:93
+#: app/api/ui/v1/views/feature_flags.py:93
 msgid ""
 "WARNING:GALAXY_CONTAINER_SIGNING_SERVICE is set to '{}', however the "
 "respective SigningService does not exist in the database."
@@ -197,7 +196,7 @@ msgstr ""
 "ADVERTENCIA: GALAXY_CONTAINER_SIGNING_SERVICE está establecido en '{}', pero "
 "el SigningService correspondiente no existe en la base de datos."
 
-#: app/api/ui/views/feature_flags.py:106
+#: app/api/ui/v1/views/feature_flags.py:106
 msgid ""
 "WARNING: container_signing is enabled via '{}' SigningService, however "
 "execution environments are disabled on the system."
@@ -206,63 +205,85 @@ msgstr ""
 "SigningService, sin embargo los entornos de ejecución están deshabilitados "
 "en el sistema."
 
-#: app/api/ui/views/index_execution_environments.py:36
+#: app/api/ui/v1/views/index_execution_environments.py:36
 msgid "Indexing execution environments is not supported on this registry."
 msgstr ""
 "La indexación de entornos de ejecución no es compatible con este registro."
 
-#: app/api/ui/views/signing.py:71
+#: app/api/ui/v1/views/signing.py:71
 msgid "Missing required field: namespace"
 msgstr "Campo obligatorio no encontrado: namespace"
 
-#: app/api/ui/views/signing.py:88
+#: app/api/ui/v1/views/signing.py:88
 #, python-format
 msgid "No content units found for: %s"
 msgstr "No se encontraron unidades de contenido para: %s"
 
-#: app/api/ui/views/signing.py:103
+#: app/api/ui/v1/views/signing.py:103
 msgid "distro_base_path field is required."
 msgstr "El campo distro_base_path es obligatorio."
 
-#: app/api/ui/views/signing.py:108
+#: app/api/ui/v1/views/signing.py:108
 #, python-format
 msgid "Distribution %s does not exist."
 msgstr "La distribución %s no existe."
 
-#: app/api/ui/views/signing.py:114
+#: app/api/ui/v1/views/signing.py:114
 msgid "signing_service field is required."
 msgstr "El campo signing_service es obligatorio."
 
-#: app/api/ui/views/signing.py:117
+#: app/api/ui/v1/views/signing.py:117
 #, python-format
 msgid "Signing service \"%s\" does not exist."
 msgstr "El servicio de firmas \"%s\" no existe."
 
-#: app/api/ui/viewsets/collection.py:77
+#: app/api/ui/v1/viewsets/collection.py:77
 msgid "Distribution base path is required"
 msgstr "Se requiere una ruta base de distribución"
 
-#: app/api/ui/viewsets/collection.py:197
+#: app/api/ui/v1/viewsets/collection.py:197
 #, python-format
 msgid "%s must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/viewsets/collection.py:233
+#: app/api/ui/v1/viewsets/collection.py:233
 msgid "Retrieve collection version"
 msgstr "Recuperar la versión de la colección"
 
-#: app/api/ui/viewsets/collection.py:244
+#: app/api/ui/v1/viewsets/collection.py:244
 msgid "Collection version not found for: {}"
 msgstr "No se ha encontrado la versión de la colección para: {}"
 
-#: app/api/ui/viewsets/collection.py:300
+#: app/api/ui/v1/viewsets/collection.py:300
 msgid "Retrieve collection import"
 msgstr "Recuperación de la colección de importación"
 
-#: app/api/ui/viewsets/group.py:45
+#: app/api/ui/v1/viewsets/group.py:45
 #, python-format
 msgid "A group named %s already exists."
 msgstr "Ya existe un grupo llamado %s."
+
+#: app/api/ui/v2/serializers.py:146
+#, python-format
+#| msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgid "Team name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: app/api/ui/v2/serializers.py:150
+#| msgid "Invalid group name or ID"
+msgid "Invalid team name or ID"
+msgstr ""
+
+#: app/api/ui/v2/serializers.py:164
+#, python-format
+#| msgid "Group name=%(name)s, id=%(id)s does not exist"
+msgid "Org name=%(name)s, id=%(id)s does not exist"
+msgstr ""
+
+#: app/api/ui/v2/serializers.py:168
+#| msgid "Invalid group name or ID"
+msgid "Invalid org name or ID"
+msgstr ""
 
 #: app/api/utils.py:53
 #, python-brace-format
