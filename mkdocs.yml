@@ -13,7 +13,7 @@ nav:
         - Managing user access: config/user_access.md
         - Enabling collection signing: config/collection_signing.md
         - Enabling Container signing: config/container_signing.md
-        - Feature Flags: config/featureflags.md  
+        - Feature Flags: config/featureflags.md
     - User Guides:
         - Installation: usage_guide/installation.md
         - Collections: usage_guide/collections.md
@@ -25,7 +25,7 @@ nav:
         # - Using Keycloak SSO: integration/keycloak.md
         # - Using S3: integration/s3.md
         # - Using Azure: integration/azure.md
-        
+
     - Contributing:
         - Getting Started: dev/getting_started.md
         - GalaxyNG Basics:
@@ -36,7 +36,6 @@ nav:
             - RBAC: dev/developer_guide/rbac.md
         - Docker compose environment: dev/docker_environment.md
         - OCI Env Environment: dev/oci_env.md
-        - Vagrant environment: dev/vagrant.md
         - Writing documentation: dev/writing_docs.md
         - Keyword searches: dev/keyword_searching_explanation.md
         - Integration Tests: dev/integration_tests.md

@@ -4,7 +4,7 @@
 
 ### Docker Compose
 
-> **TO BE DEFINED**
+[Docker Compose Env developer setup guide](docker_environment.md)
 
 ### OCI Env
 
@@ -22,7 +22,7 @@ UI PRs should be submitted at [github.com/ansible/ansible-hub-ui](https://github
 
 When submitting a PR to either the UI or backend:
 
-- All PRs must include either `Issue: AAH-XXXX` or `No-Issue` in the commit message. 
+- All PRs must include either `Issue: AAH-XXXX` or `No-Issue` in the commit message.
 
     - `No-Issue` should be used infrequently and the reviewers may ask you to create a Jira ticket and attach it to your PR.
     - `Issue: AAH-XXXX` should must include a Jira ticket number (such as AAH-123). This also requires a changelog entry in `CHANGES/`. Changelog entries follow the `<issue_number>.type` format. For example if I submit a fix for AAH-123, it must also come with a `CHANGES/123.bugfix` entry. Changelog file extensions include:
