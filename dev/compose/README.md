@@ -254,7 +254,7 @@ ipdb>
 > To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,  
 > instead, use <kbd>Ctrl-p Ctrl-q</kbd>
 
-###  Vagrant-Based Development Environment Setup
+###  Running containers inside a vagrant box
 
 Since Fedora uses Podman by default, a Vagrant VM is used instead of running Docker directly. This approach provides a consistent development environment and prevents conflicts with the host machine's package management system.
 
