@@ -5,9 +5,9 @@
 
 # Galaxy NG
 
-[![Build Status](https://github.com/ansible/galaxy_ng/actions/workflows/ci.yml/badge.svg)](https://github.com/ansible/galaxy_ng/actions/workflows/ci.yml)
+[![Build Status](https://github.com/ansible/galaxy_ng/actions/workflows/ci-docker-compose-integration.yml/badge.svg)](https://github.com/ansible/galaxy_ng/actions/workflows/ci-docker-compose-integration.yml)
 
-**Source Code**: [https://github.com/ansible/galaxy_ng](https://github.com/ansible/galaxy_ng) 
+**Source Code**: [https://github.com/ansible/galaxy_ng](https://github.com/ansible/galaxy_ng)
 
 A [Pulp](https://pulpproject.org) plugin to support hosting your very own Ansible Galaxy server.
 
