@@ -254,6 +254,87 @@ ipdb>
 > To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,  
 > instead, use <kbd>Ctrl-p Ctrl-q</kbd>
 
+###  Running containers inside a vagrant box
+
+Since Fedora uses Podman by default, a Vagrant VM is used instead of running Docker directly. This approach provides a consistent development environment and prevents conflicts with the host machine's package management system.
+
+#### Prerequisites
+Ensure that in the same level as the `Vagrantfile`, there is a directory named `source`. This directory is used to make the cloned repository available inside the VM. 
+
+Clone your fork of the repository inside `local-env/source` so it will be accessible in `/home/vagrant/source` within the VM:
+
+```sh
+cd local-env/source
+git clone git@github.com:<youruser>/galaxy_ng.git
+```
+
+#### Running the Setup
+To set up the VM and start Docker:
+
+```sh
+cd local-env
+QUAY_TOKEN="your_token_here" vagrant up
+```
+
+Once the VM is up, SSH into it:
+
+```sh
+vagrant ssh
+```
+
+Verify Docker is running inside the VM:
+
+```sh
+docker --version
+docker ps
+```
+
+#### The Vagrantfile Configuration
+
+The Vagrantfile used:
+
+```ruby
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+  config.ssh.forward_agent = true
+  config.vm.network "public_network", bridge: "<your-network-device>"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "<your-memory-value>"
+    vb.cpus = <your-cpu-value>
+  end
+
+  config.vm.synced_folder "./source", "/home/vagrant/source"
+
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common git make
+
+    sudo apt-get remove -y docker docker-engine docker.io containerd runc
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    sudo apt-get install -y python3 python3-pip docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    sudo apt install nodejs -y
+
+    sudo usermod -aG docker vagrant
+
+    docker login -u='mmagnani' -p="$QUAY_TOKEN" quay.io
+    
+    sudo apt-add-repository --yes --update ppa:ansible/ansible
+    sudo apt-get install -y ansible
+  SHELL
+end
+```
+
+#### Final Notes
+- Update the "bridge" value to match the name of your network device.
+- Adjust the memory and CPU values in the Vagrantfile according to your needs.
+- The VM includes Docker, Node.js, and Ansible for development.
+- Code is stored in `local-env/source`.
+
 ---
 
 **TBD**
