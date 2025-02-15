@@ -45,7 +45,7 @@ bindep==2.11.0
     # via ansible-builder
 black==24.10.0
     # via ansible-lint
-boto3==1.35.76
+boto3==1.36.21
     # via galaxy-ng (setup.py)
 botocore==1.35.76
     # via
