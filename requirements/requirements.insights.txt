@@ -59,7 +59,7 @@ boto3==1.35.76
     #   django-storages
     #   galaxy-ng (setup.py)
     #   watchtower
-botocore==1.35.76
+botocore==1.36.21
     # via
     #   boto3
     #   s3transfer
