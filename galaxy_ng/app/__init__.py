@@ -10,7 +10,7 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
 
     name = "galaxy_ng.app"
     label = "galaxy"
-    version = "4.10.1"
+    version = "4.10.2"
     python_package_name = "galaxy-ng"
 
     def ready(self):
