@@ -1,5 +1,5 @@
 # galaxy_ng/insights
-
+# nothing
 ## Usage
 
 **NOTE**: This will not work with the galaxy_ng/ui profile. To run the UI follow the instructions here: https://github.com/ansible/ansible-hub-ui#develop-in-insights-mode.
