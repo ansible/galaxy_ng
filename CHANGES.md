@@ -1,3 +1,14 @@
+## 4.10.2 (2025-02-17) {: #4.10.2 }
+
+#### Bugfixes
+
+- [PR #2374/f4faf422 backport][stable-4.10] Init django-flags
+  [#2383](https://github.com/ansible/galaxy_ng/pull/2383)
+- [backport][4.10] Add component install-time feature-flag toggle part …
+  [#2414](https://github.com/ansible/galaxy_ng/pull/2414)
+- backport(4.10): #2411 - [AAP-39137] - Add DAB feature-flags endpoint
+  [#2413](https://github.com/ansible/galaxy_ng/pull/2413)
+
 ## 4.10.1 (2024-10-23) {: #4.10.1 }
 
 #### Bugfixes
