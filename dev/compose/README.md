@@ -163,6 +163,56 @@ $ DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng" docker compose -f dev/compos
 Now when changes are detected on `.py` and `.yaml` files on any of the `DEV_SOURCE_PATH`
 directories it will trigger reload of `api`, `worker`, and `content` services.
 
+Below is an example of how to add the new sections for the LDAP Profile and for changing the password of the user "fry" in your README:
+
+---
+
+## LDAP Profile
+
+To run the stack with API authentication via LDAP, use the following compose file:
+
+```bash
+docker compose -f dev/compose/ldap.yaml up
+```
+
+This configuration starts the stack with the LDAP backend enabled, allowing API authentication via LDAP.
+
+---
+
+### Changing the LDAP User Password
+
+The steps below illustrate how to change the password for a user—in this case, **fry**:
+
+1. **Verify that the user exists:**
+
+   ```bash
+   username=fry
+   ldapsearch -x -H ldap://localhost:10389 -D "cn=admin,dc=planetexpress,dc=com" -w GoodNewsEveryone -b "ou=people,dc=planetexpress,dc=com" "(cn=$username)" | grep -q "dn: cn=$username"
+   ```
+
+2. **Generate a password hash:**
+
+   ```bash
+   password="your_new_password"
+   password_hash=$(docker exec -i compose-ldap-1 slappasswd -s "$password")
+   ```
+
+3. **Create an LDIF file (e.g., `modify_password.ldif`) with the following content:**
+
+   ```ldif
+   dn: cn=$username,ou=people,dc=planetexpress,dc=com
+   changetype: modify
+   replace: userPassword
+   userPassword: $password_hash
+   ```
+
+4. **Apply the modification to the LDAP server:**
+
+   ```bash
+   ldapmodify -x -H ldap://localhost:10389 -D "cn=admin,dc=planetexpress,dc=com" -w GoodNewsEveryone -f modify_password.ldif
+   ```
+
+After executing these steps, the password for the user **fry** will be updated using the newly generated hash.
 
 ## Troubleshooting
 
