@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Get Keycloak Admin Token
+      uri:
+        url: "http://localhost:8080/auth/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          username: admin
+          password: admin
+          grant_type: password
+          client_id: admin-cli
+      register: keycloak_token
+
+    - name: Get Automation Hub Client Details
+      uri:
+        url: "http://localhost:8080/auth/admin/realms/aap/clients?clientId=automation-hub"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+          Content-Type: application/json
+      register: client_details
+
+    - name: Debug Client Configuration
+      debug:
+        var: client_details.json[0]

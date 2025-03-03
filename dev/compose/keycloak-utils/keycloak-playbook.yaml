@@ -1,0 +1,383 @@
+---
+
+- name: Keycloak Setup Playbook
+  connection: local
+  gather_facts: false
+  hosts: localhost
+  tasks:
+
+    - name: Get started
+      debug:
+        msg: "Preparing Keycloak setup ..."
+
+    - name: Create or update AAP Keycloak realm
+      community.general.keycloak_realm:
+        auth_client_id: admin-cli
+        auth_keycloak_url: http://localhost:8080/auth
+        auth_realm: master
+        auth_username: admin
+        auth_password: admin
+        id: aap
+        realm: aap
+        display_name: Ansible Automation Platform
+        state: present
+        validate_certs: yes
+        enabled: yes
+
+    - name: Create or update a Keycloak client
+      community.general.keycloak_client:
+        auth_client_id: admin-cli
+        auth_keycloak_url: http://localhost:8080/auth
+        auth_realm: master
+        auth_username: admin
+        auth_password: admin
+        state: present
+        realm: aap
+        client_id: automation-hub
+        id: d8b127a3-31f6-44c8-a7e4-4ab9a3e78d95
+        name: Automation Hub
+        description: Client ID for Ansible Automation Hub
+        root_url: http://localhost:5001/
+        enabled: yes
+        client_authenticator_type: client-secret
+        secret: REALLYWELLKEPTSECRET
+        redirect_uris:
+          - http://localhost:5001/*
+        web_origins:
+          - http://localhost:5001/*
+        bearer_only: no
+        consent_required: no
+        standard_flow_enabled: yes
+        implicit_flow_enabled: no
+        direct_access_grants_enabled: yes
+        service_accounts_enabled: yes
+        authorization_services_enabled: no
+        public_client: no
+        frontchannel_logout: no
+        protocol: openid-connect
+        protocol_mappers:
+          - config:
+              access.token.claim: "true"
+              claim.name: "family_name"
+              id.token.claim: "true"
+              jsonType.label: String
+              user.attribute: lastName
+              userinfo.token.claim: "true"
+            consentRequired: false
+            name: family name
+            protocol: openid-connect
+            protocolMapper: oidc-usermodel-property-mapper
+          - config:
+              userinfo.token.claim: "true"
+              user.attribute: email
+              id.token.claim: true
+              access.token.claim: "true"
+              claim.name: email
+              jsonType.label: String
+            name: email
+            protocol: openid-connect
+            protocolMapper: oidc-usermodel-property-mapper
+            consentRequired: false
+          - config:
+              multivalued: "true"
+              user.attribute": foo
+              access.token.claim: "true"
+              claim.name: "resource_access.${client_id}.roles"
+              jsonType.label: String
+            name: client roles
+            protocol: openid-connect
+            protocolMapper: oidc-usermodel-client-role-mapper
+            consentRequired: false
+          - config:
+              userinfo.token.claim: "true"
+              user.attribute: firstName
+              id.token.claim: "true"
+              access.token.claim: "true"
+              claim.name: given_name
+              jsonType.label: String
+            name: given name
+            protocol: openid-connect
+            protocolMapper: oidc-usermodel-property-mapper
+            consentRequired: false
+          - config:
+              id.token.claim: "true"
+              access.token.claim: "true"
+              userinfo.token.claim: "true"
+            name: full name
+            protocol: openid-connect
+            protocolMapper: oidc-full-name-mapper
+            consentRequired: false
+          - config:
+              userinfo.token.claim: "true"
+              user.attribute: username
+              id.token.claim: "true"
+              access.token.claim: "true"
+              claim.name: preferred_username
+              jsonType.label: String
+            name: username
+            protocol: openid-connect
+            protocolMapper: oidc-usermodel-property-mapper
+            consentRequired: false
+          - config:
+              access.token.claim: "true"
+              claim.name: "group"
+              full.path: "true"
+              id.token.claim: "true"
+              userinfo.token.claim: "true"
+            consentRequired: false
+            name: group
+            protocol: openid-connect
+            protocolMapper: oidc-group-membership-mapper
+          - config:
+              multivalued: 'true'
+              id.token.claim: 'true'
+              access.token.claim: 'true'
+              userinfo.token.claim: 'true'
+              usermodel.clientRoleMapping.clientId: automation-hub
+              claim.name: client_roles
+              jsonType.label: String
+            name: client_roles
+            protocolMapper: oidc-usermodel-client-role-mapper
+            protocol: openid-connect
+          - config:
+              id.token.claim: true
+              access.token.claim: true
+              included.client.audience: automation-hub
+            protocol: openid-connect
+            name: audience mapper
+            protocolMapper: oidc-audience-mapper
+        attributes:
+          user.info.response.signature.alg: RS256
+          request.object.signature.alg: RS256
+
+    - name: Create Token for service Keycloak
+      uri:
+        url: "http://localhost:8080/auth/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          username: "admin"
+          password: "admin"
+          grant_type: "password"
+          client_id: "admin-cli"
+      register: keycloak_token
+
+    - name: Define ldap_config
+      set_fact:
+        ldap_config:
+          name: ldap
+          providerId: ldap
+          providerType: org.keycloak.storage.UserStorageProvider
+          parentId: aap
+          config:
+            enabled:
+            - 'true'
+            priority:
+            - '0'
+            fullSyncPeriod:
+            - "-1"
+            changedSyncPeriod:
+            - "-1"
+            cachePolicy:
+            - DEFAULT
+            batchSizeForSync:
+            - '1000'
+            editMode:
+            - READ_ONLY
+            importEnabled:
+            - 'true'
+            syncRegistrations:
+            - 'false'
+            vendor:
+            - other
+            usernameLDAPAttribute:
+            - uid
+            rdnLDAPAttribute:
+            - uid
+            uuidLDAPAttribute:
+            - entryUUID
+            userObjectClasses:
+            - inetOrgPerson, organizationalPerson
+            connectionUrl:
+            - ldap://ldap:10389
+            usersDn:
+            - ou=people,dc=planetexpress,dc=com
+            authType:
+            - simple
+            bindDn:
+            - cn=admin,dc=planetexpress,dc=com
+            bindCredential:
+            - GoodNewsEveryone
+            customUserSearchFilter: []
+            searchScope:
+            - '2'
+            validatePasswordPolicy:
+            - 'false'
+            trustEmail:
+            - 'false'
+            useTruststoreSpi:
+            - ldapsOnly
+            connectionPooling:
+            - 'true'
+            pagination:
+            - 'true'
+            allowKerberosAuthentication:
+            - 'false'
+            debug:
+            - 'false'
+            useKerberosForPasswordAuthentication:
+            - 'false'
+
+    - name: Create LDAP configuration
+      uri:
+        url: "http://localhost:8080/auth/admin/realms/aap/components"
+        method: POST
+        body_format: json
+        body: "{{ ldap_config | to_json }}"
+        status_code:
+        - 201
+        - 409
+        headers:
+          Content-type: "application/json"
+          Accept: "application/json"
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+      register: create_ldap_config
+
+    - name: Get components
+      uri:
+        url: "http://localhost:8080/auth/admin/realms/aap/components?parent=aap&type=org.keycloak.storage.UserStorageProvider"
+        method: GET
+        status_code:
+        - 200
+        headers:
+          Content-type: "application/json"
+          Accept: "application/json"
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+      register: keycloak_components
+
+    - name: Save ldap id
+      set_fact:
+        ldap_id: "{{ keycloak_components['json'][0]['id'] }}"
+
+    - name: Define ldap_group_mapper
+      set_fact:
+        ldap_group_mapper:
+          config:
+            groups.dn:
+            - ou=people,dc=planetexpress,dc=com
+            group.name.ldap.attribute:
+            - cn
+            group.object.classes:
+            - Group
+            preserve.group.inheritance:
+            - 'false'
+            ignore.missing.groups:
+            - 'false'
+            membership.ldap.attribute:
+            - member
+            membership.attribute.type:
+            - DN
+            membership.user.ldap.attribute:
+            - uid
+            mode:
+            - READ_ONLY
+            user.roles.retrieve.strategy:
+            - LOAD_GROUPS_BY_MEMBER_ATTRIBUTE
+            memberof.ldap.attribute:
+            - memberOf
+            drop.non.existing.groups.during.sync:
+            - 'false'
+            groups.path:
+            - "/"
+          name: group
+          providerId: group-ldap-mapper
+          providerType: org.keycloak.storage.ldap.mappers.LDAPStorageMapper
+          parentId: "{{ ldap_id }}"
+
+    - name: Create LDAP group mapping
+      uri:
+        url: "http://localhost:8080/auth/admin/realms/aap/components"
+        method: POST
+        body_format: json
+        body: "{{ ldap_group_mapper | to_json }}"
+        status_code:
+        - 201
+        - 409
+        headers:
+          Content-type: "application/json"
+          Accept: "application/json"
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+      register: create_ldap_group_mapper
+
+    - name: Get group mapper identifier
+      uri:
+        url: "http://localhost:8080/auth/admin/realms/aap/components?parent={{ ldap_id }}&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper&name=group"
+        method: GET
+        status_code:
+        - 200
+        headers:
+          Content-type: "application/json"
+          Accept: "application/json"
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+      register: keycloak_storage_mapper
+
+    - name: Save group mapper id
+      set_fact:
+        keycloak_ldap_group_mapper_id: "{{ keycloak_storage_mapper['json'][0]['id']  }}"
+
+    - name: Sync LDAP users
+      uri:
+        url: "http://localhost:8080/auth/admin/realms/aap/user-storage/{{ ldap_id }}/sync?action=triggerFullSync"
+        method: POST
+        status_code:
+        - 200
+        headers:
+          Content-type: "application/json"
+          Accept: "application/json"
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+      register: sync_ldap_users
+
+    - name: Sync LDAP groups
+      uri:
+        url: "http://localhost:8080/auth/admin/realms/aap/user-storage/{{ ldap_id }}/mappers/{{ keycloak_ldap_group_mapper_id }}/sync?direction=fedToKeycloak"
+        method: POST
+        status_code:
+        - 200
+        headers:
+          Content-type: "application/json"
+          Accept: "application/json"
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+      register: sync_ldap_groups
+
+    - name: Create a Keycloak client role for Hub Administrator
+      community.general.keycloak_role:
+        name: hubadmin
+        description: An administrator role for Automation Hub
+        realm: aap
+        client_id: automation-hub
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: http://localhost:8080/auth
+        auth_realm: master
+        auth_username: admin
+        auth_password: admin
+      register: hub_admin_create
+
+    - name: Get realm public key
+      uri:
+        url: "http://localhost:8080/auth/realms/aap"
+        method: GET
+        status_code:
+        - 200
+        headers:
+          Content-type: "application/json"
+          Accept: "application/json"
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+      register: keycloak_realm
+
+    - name: Save public key
+      set_fact:
+        keycloak_realm_public_key: "{{ keycloak_realm['json']['public_key']  }}"
+
+    - debug:
+        var: keycloak_realm_public_key
