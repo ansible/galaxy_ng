@@ -222,6 +222,141 @@ ldapmodify -x -H ldap://localhost:10389 -D "cn=admin,dc=planetexpress,dc=com" -w
 
 After running this command, the password for the user **fry** will be updated with the new hash.
 
+## Keycloak Profile
+
+This guide explains how to set up and use the Keycloak authentication integration with the Galaxy NG development environment.
+
+### Starting the Stack with Keycloak
+
+To run the stack with API authentication via Keycloak, use the following compose file:
+
+```bash
+docker compose -f dev/compose/keycloak.yaml up
+```
+
+This configuration starts the Galaxy NG stack with Keycloak authentication backend enabled, allowing API authentication through Keycloak with LDAP user federation.
+
+### Configuration Steps
+
+#### 1. Initialize and Configure Keycloak
+
+Once the Docker Compose stack is running, you need to configure Keycloak with the proper realm, client, and LDAP integration by running the provided Ansible playbook:
+
+```bash
+ansible-playbook keycloak-playbook.yaml
+```
+
+This playbook performs the following tasks:
+- Creates the "aap" realm
+- Sets up the "automation-hub" client
+- Configures LDAP integration for user federation
+- Creates necessary roles and mappers
+- Gets the realm's public key
+
+#### 2. Update the Galaxy NG Configuration
+
+After running the playbook, copy the Keycloak realm public key from the output of the playbook and update the `PULP_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY` environment variable in your configuration.
+
+Example:
+```bash
+# Update the PULP_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY in your environment
+export PULP_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA..."
+
+# Restart the API service to apply the changes
+docker compose -f dev/compose/keycloak.yaml restart api
+```
+
+### Managing LDAP Users
+
+#### Modifying User Passwords in LDAP via Keycloak
+
+To modify passwords for LDAP users:
+
+1. Log in to the Keycloak admin console at http://localhost:8080/auth/ with:
+   - Username: `admin`
+   - Password: `admin`
+
+2. Navigate to the "aap" realm.
+
+3. Go to User Federation → LDAP.
+
+4. Change the **Edit Mode** to "WRITABLE".
+
+5. Click "Save".
+
+6. Now you can edit LDAP users and their passwords directly from the Keycloak interface.
+
+7. Alternatively, you can use the provided playbook in the `keycloak-utils` directory to change user passwords:
+   ```bash
+   ansible-playbook keycloak-utils/keycloak-change-user-password.yaml
+   ```
+
+### Testing the Authentication
+
+To verify that the Keycloak authentication is working correctly, you can use either of the following methods:
+
+#### Browser Authentication
+
+You can navigate to http://localhost:5001/login/keycloak in your web browser. You will be redirected to the Keycloak login page where you can authenticate with your LDAP-federated user credentials.
+
+#### API Testing with curl
+
+Alternatively, you can verify the authentication flow programmatically using the following commands:
+
+#### 1. Obtain an Access Token
+
+```bash
+TOKEN=$(curl -s -d 'client_id=automation-hub' \
+        -d 'username=fry' \
+        -d 'password=PlanetExpress2025!' \
+        -d 'client_secret=REALLYWELLKEPTSECRET' \
+        -d 'scope=openid' \
+        -d 'grant_type=password' \
+        "http://localhost:8080/auth/realms/aap/protocol/openid-connect/token" | jq -r '.access_token')
+```
+
+#### 2. Use the Token to Access a Protected API Endpoint
+
+```bash
+curl -v -L -X GET \
+        -H "Authorization: Bearer $TOKEN" \
+        "http://localhost:5001/api/_ui/v1/feature-flags/"
+```
+
+If the authentication is successful, you will receive the feature flags data from the API endpoint.
+
+### Troubleshooting
+
+#### User Authentication Issues
+
+If users are unable to authenticate, check the following:
+
+1. Verify the Keycloak client settings:
+   - Ensure the client secret matches the one in the Galaxy NG configuration
+   - Check that the redirect URIs are configured correctly
+
+#### API Connection Issues
+
+If the API cannot connect to Keycloak:
+
+1. Verify the Keycloak public key is correctly set in the Galaxy NG environment.
+2. Check the logs for the Galaxy NG API container:
+   ```bash
+   docker compose -f dev/compose/keycloak.yaml logs api
+   ```
+3. Ensure the Keycloak service is accessible from the API container.
+
+### Reference LDAP Users
+
+The following LDAP users are available in the default configuration:
+
+- **fry** (Philip J. Fry)
+- **leela** (Turanga Leela)
+- **bender** (Bender Bending Rodriguez)
+- **zoidberg** (Dr. John Zoidberg)
+
+The password can be changed as described in the "Modifying User Passwords" section.
+
 
 ## Troubleshooting
 
