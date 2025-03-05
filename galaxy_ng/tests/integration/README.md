@@ -43,14 +43,14 @@ run tests:
 pytest -v -r sx --color=yes -m 'deployment_cloud or all' galaxy_ng/tests/integration
 ```
 
-or specify test you would like to run: 
+or specify test you would like to run:
 ```python
 pytest -v -r sx --color=yes -k ' test_delete_collection' galaxy_ng/tests/integration
 ```
 
 Tests that are intended to pass on any deployment mode should be marked with `all`. By default unmarked tests will receive the `all` mark`.
 All `deployment_standalone` tests are also expected to pass when running with ldap or keycloak authentication. If a test is meant to test a specific authentication backend, use the `ldap` or `keycloak` marks, and remove `deployment_standalone`.
-List of all marks in [conftest.py](conftest.py)
+List of all marks in [conftest.py](https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/conftest.py)
 
 
 

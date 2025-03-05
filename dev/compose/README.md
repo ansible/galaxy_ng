@@ -207,12 +207,12 @@ export COMPOSE_DOCKER_CLI_BUILD=0
 ## Tests
 
 ### Unit tests
-Run unit tests with docker compose [Running unit tests](../../galaxy_ng//tests/unit/README.md)
+Run unit tests with docker compose [Running unit tests](https://ansible.readthedocs.io/projects/galaxy-ng/en/latest/dev/tests/unit/)
 
 ### Integration tests
-Run integration tests with docker compose, check the [Running integration tests](../../galaxy_ng/tests/integration/README.md)
+Run integration tests with docker compose, check the [Running integration tests](https://ansible.readthedocs.io/projects/galaxy-ng/en/latest/dev/tests/ntegration/)
 
-Run with legacy oci-env, check the [Running oci-env integration tests](../../docs/dev/integration_tests.md)
+Run with legacy oci-env, check the [Running oci-env integration tests](https://ansible.readthedocs.io/projects/galaxy-ng/en/latest/dev/integration_tests/)
 
 ## Tips and Tricks.
 
@@ -228,7 +228,7 @@ Edit the file you want to debug and add a breakpoint
 __import__("ipdb").set_trace()
 ```
 
-> [!TIP]  
+> [!TIP]
 > Replace if you are using a different debugger, however the images has only **pdb** and **ipdb** installed.
 
 If you discover other ways of debugging, like connecting dap protocol or vscode debugger, please update this file!
@@ -238,7 +238,7 @@ If you discover other ways of debugging, like connecting dap protocol or vscode 
 Example:
 
 ```bash
-$ export DEV_SOURCE_PATH=galaxy_ng 
+$ export DEV_SOURCE_PATH=galaxy_ng
 $ docker compose -f dev/compose/aap.yaml up migrations
 # The container will keep running stopped on the breakpoint.
 ```
@@ -250,8 +250,8 @@ $ docker compose -f dev/compose/aap.yaml attach migrations
 ipdb>
 ```
 
-> [!IMPORTANT] 
-> To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,  
+> [!IMPORTANT]
+> To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,
 > instead, use <kbd>Ctrl-p Ctrl-q</kbd>
 
 ###  Running containers inside a vagrant box
@@ -259,7 +259,7 @@ ipdb>
 Since Fedora uses Podman by default, a Vagrant VM is used instead of running Docker directly. This approach provides a consistent development environment and prevents conflicts with the host machine's package management system.
 
 #### Prerequisites
-Ensure that in the same level as the `Vagrantfile`, there is a directory named `source`. This directory is used to make the cloned repository available inside the VM. 
+Ensure that in the same level as the `Vagrantfile`, there is a directory named `source`. This directory is used to make the cloned repository available inside the VM.
 
 Clone your fork of the repository inside `local-env/source` so it will be accessible in `/home/vagrant/source` within the VM:
 
@@ -322,7 +322,7 @@ Vagrant.configure("2") do |config|
     sudo usermod -aG docker vagrant
 
     docker login -u='mmagnani' -p="$QUAY_TOKEN" quay.io
-    
+
     sudo apt-add-repository --yes --update ppa:ansible/ansible
     sudo apt-get install -y ansible
   SHELL

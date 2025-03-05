@@ -1,5 +1,5 @@
 # Integration tests
-(*To run integration tests with docker compose stack, check the [Running integration tests](../galaxy_ng/tests/integration/README.md)*) 
+(*To run integration tests with docker compose stack, check the [Running integration tests](tests/integration.md)*)
 
 ## GitHub Actions
 
@@ -49,7 +49,7 @@ definitions accept the following args:
         number of seconds before running integration tests after the stack has spun up.
 ```
 
-To set up a new GitHub Action: 
+To set up a new GitHub Action:
 
 1. create a new script in the `actions/` directory
 
