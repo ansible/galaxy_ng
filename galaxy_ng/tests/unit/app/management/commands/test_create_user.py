@@ -20,6 +20,7 @@ class TestCreateUserCommand(TestCase):
         out = StringIO()
         call_command('create-user', '--user', 'system:foo', stdout=out)
         self.assertIn("Created user 'system:foo'", out.getvalue())
+        self.assertNotIn("User 'system:foo' already exists", out.getvalue())
 
     def test_user_already_exists(self):
         out = StringIO()
