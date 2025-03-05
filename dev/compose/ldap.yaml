@@ -295,7 +295,7 @@ services:
     ports:
       - '5001:5001'
     volumes:
-      - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
+      - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z'
 
   ldap:
     image: "rroemhild/test-openldap"
