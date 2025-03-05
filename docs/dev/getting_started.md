@@ -1,16 +1,12 @@
 # Getting Started
 
-## Setting up the developer environment
+## GalaxyNG Basics
 
-### Docker Compose
-
-[Docker Compose Env developer setup guide](docker_environment.md)
-
-### OCI Env
-
-This is the new preferred way to develop with pulp. It provides a flexible, containerized environment that's easy to set up. It supports running integration and functional tests as well as developing the UI. It supports all the features from the docker and vagrant environments, but isn't as heavily tested as the docker environment.
-
-[OCI Env developer setup guide](oci_env.md)
+- [Overview](developer_guide/overview.md)
+- [Data Models](developer_guide/data_models.md)
+- [REST API](developer_guide/rest_api.md)
+- [Services](developer_guide/services.md)
+- [RBAC](developer_guide/rbac.md)
 
 ## Issue Tracker
 
@@ -36,3 +32,15 @@ PRs for the backend also require:
 - All commits must be signed. [How to set up commit signing](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
 - Any changes to the app require updates to the tests in `galaxy_ng/tests/`. This can include adding new tests or updating existing tests to cover changes. See [dev/writing_tests] for more information.
 PRs will be reviewed by two members of the team.
+
+## Setting up the developer environment
+
+### Docker Compose
+
+[Docker Compose Env developer setup guide](docker_environment.md)
+
+### OCI Env
+
+This is the new preferred way to develop with pulp. It provides a flexible, containerized environment that's easy to set up. It supports running integration and functional tests as well as developing the UI. It supports all the features from the docker and vagrant environments, but isn't as heavily tested as the docker environment.
+
+[OCI Env developer setup guide](oci_env.md)

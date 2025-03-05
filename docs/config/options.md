@@ -48,7 +48,7 @@ X_PULP_CONTENT_HOST = "localhost"
 
 ### Environment variables
 
-As Galaxy NG is a pulp plugin it assumes the envvar prefix as `PULP_` so any variable can be 
+As Galaxy NG is a pulp plugin it assumes the envvar prefix as `PULP_` so any variable can be
 customized by export `PULP_<followed_with_the_variable>`, example:
 
 ```bash title="environment"
@@ -57,7 +57,7 @@ export PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true
 
 !!! tip
     Pulp uses [dynaconf](https://dynaconf.com) to manage its settings, so environment variables have its
-    data types inferred, for example: `PULP_NUMBER=4.2` will be available under `django.conf.settings.NUMBER` 
+    data types inferred, for example: `PULP_NUMBER=4.2` will be available under `django.conf.settings.NUMBER`
     as a value of type `float`, if you need to force a string enclose on quotes. `PULP_TEXT='4.2'`
 
 
@@ -124,7 +124,7 @@ If you need to add a new custom value:
 ```py title="/etc/pulp/settings.py"
 GALAXY_AUTHENTICATION_CLASSES = [
     "my.new.AuthClass",
-    "dynaconf_merge" #(1)  
+    "dynaconf_merge" #(1)
 ]
 ```
 
@@ -174,7 +174,6 @@ Here is a [diagram explaining](https://www.xmind.net/m/VPSF59/#) the loading ord
 | `GALAXY_MINIMUM_PASSWORD_LENGTH` |  Minimum password lenght for validation, Default: 9 |
 | `GALAXY_DYNAMIC_SETTINGS`  | Enables dynamic settings feature, Default `False` |
 
-For SSO Keycloak configuration see [keycloak](../dev/docker_environment.md#keycloak)
 
 ### Pulp, Django and other plugins
 

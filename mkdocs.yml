@@ -6,6 +6,11 @@ repo_url: "https://github.com/ansible/galaxy_ng"
 edit_uri: edit/master/docs/
 nav:
     - Home: index.md
+    - User Guides:
+        - Installation: usage_guide/installation.md
+        - Collections: usage_guide/collections.md
+        - Execution Environments: usage_guide/execution_environments.md
+        - RBAC and User Management: usage_guide/rbac.md
     - Configuration:
         - Configuration options: config/options.md
         # - Enabling auto approval: config/collection_auto_approval.md
@@ -14,11 +19,6 @@ nav:
         - Enabling collection signing: config/collection_signing.md
         - Enabling Container signing: config/container_signing.md
         - Feature Flags: config/featureflags.md
-    - User Guides:
-        - Installation: usage_guide/installation.md
-        - Collections: usage_guide/collections.md
-        - Execution Environments: usage_guide/execution_environments.md
-        - RBAC and User Management: usage_guide/rbac.md
     - Integration:
         # - Connecting Ansible Controllers: integration/controller.md
         - Using LDAP: integration/ldap.md
@@ -35,10 +35,13 @@ nav:
             - Services: dev/developer_guide/services.md
             - RBAC: dev/developer_guide/rbac.md
         - Docker compose environment: dev/docker_environment.md
-        - OCI Env Environment: dev/oci_env.md
         - Writing documentation: dev/writing_docs.md
         - Keyword searches: dev/keyword_searching_explanation.md
-        - Integration Tests: dev/integration_tests.md
+        - Tests:
+            - dev/tests/unit.md
+            - dev/tests/integration.md
+        - OCI Env Environment: dev/oci_env.md
+        - OCI Env Integration Tests: dev/integration_tests.md
     - Tags: tags.md
     - Community:
         - Overview: community/overview.md
@@ -68,8 +71,7 @@ theme:
         name: Switch to light mode
 plugins:
   - git-revision-date
-  - tags:
-        tags_file: tags.md
+  - tags
   - search:
       lang: en
 markdown_extensions:
@@ -79,7 +81,7 @@ markdown_extensions:
   - def_list
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.inlinehilite
   - abbr
