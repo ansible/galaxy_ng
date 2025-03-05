@@ -16,7 +16,7 @@ jobs:
       matrix:
         env:
           - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "deployment_standalone or all" }
-          - { TEST_PROFILE: ldap, HUB_TEST_MARKS: "deployment_standalone or all" }
+          - { TEST_PROFILE: ldap, HUB_TEST_MARKS: "deployment_standalone or ldap" }
 
     runs-on: ubuntu-latest
     steps:
