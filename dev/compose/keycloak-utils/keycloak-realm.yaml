@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Get Keycloak Admin Token
+      uri:
+        url: "http://localhost:8080/auth/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          username: admin
+          password: admin
+          grant_type: password
+          client_id: admin-cli
+      register: keycloak_token
+
+    - name: Get Realm Public Key
+      uri:
+        url: "http://localhost:8080/auth/realms/aap"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ keycloak_token.json.access_token }}"
+          Content-Type: application/json
+      register: realm_details
+
+    - name: Debug Realm Public Key
+      debug:
+        var: realm_details.json.public_key
