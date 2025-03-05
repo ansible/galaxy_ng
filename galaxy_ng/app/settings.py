@@ -138,6 +138,11 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Automation Hub API",
     "DESCRIPTION": "Fetch, Upload, Organize, and Distribute Ansible Collections",
     "VERSION": "v3",
+    "CONTACT": {
+        "name": "Automation Hub Team",
+        "email": "ansible-galaxy-team@redhat.com",
+        "url": "https://www.ansible.com/products/automation-hub",
+    },
     "LICENSE": {
         "name": "GPLv2+",
         "url": "https://raw.githubusercontent.com/ansible/galaxy_ng/master/LICENSE",
