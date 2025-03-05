@@ -111,7 +111,7 @@ services:
       UPSTREAM_URL: "http://api:24817"
       PROXY_PORT: "8080"
     volumes:
-      - "../../profiles/insights/proxy:/app:ro"
+      - "../../profiles/insights/proxy:/app:ro,Z"
 
   redis:
     image: "redis:5"
@@ -295,7 +295,7 @@ services:
     ports:
       - '5001:5001'
     volumes:
-      - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
+      - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z'
 
 volumes:
   var_lib_pulp:

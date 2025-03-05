@@ -314,7 +314,7 @@ services:
     ports:
       - '5001:5001'
     volumes:
-      - '../nginx/certified-sync/standalone.conf:/etc/nginx/nginx.conf:ro'
+      - '../nginx/certified-sync/standalone.conf:/etc/nginx/nginx.conf:ro,Z'
 
 
   # insights
@@ -394,7 +394,7 @@ services:
       PROXY_PORT: "8080"
       PROXY_HOST: "insights-proxy"
     volumes:
-      - "../../profiles/insights/proxy:/app:ro"
+      - "../../profiles/insights/proxy:/app:ro,Z"
 
   insights-api:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -533,7 +533,7 @@ services:
     ports:
       - '8001:5001'
     volumes:
-      - '../nginx/certified-sync/insights.conf:/etc/nginx/nginx.conf:ro'
+      - '../nginx/certified-sync/insights.conf:/etc/nginx/nginx.conf:ro,Z'
 
 volumes:
   var_lib_pulp_standalone:
