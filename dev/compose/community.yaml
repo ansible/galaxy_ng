@@ -93,7 +93,7 @@ x-common-env: &common-env
 x-debugging: &debugging
   stdin_open: true
   tty: true
-  
+
 services:
   base_img:
     build:
@@ -121,7 +121,7 @@ services:
       UPSTREAM_HOST: api
       UPSTREAM_PORT: 8000
     volumes:
-      - '../../profiles/community/github_mock:/app:ro'
+      - '../../profiles/community/github_mock:/app:ro,Z'
 
   redis:
     image: "redis:5"
@@ -297,7 +297,7 @@ services:
     ports:
       - '5001:5001'
     volumes:
-      - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
+      - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z'
 
 volumes:
   var_lib_pulp:
