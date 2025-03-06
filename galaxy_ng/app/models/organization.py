@@ -6,7 +6,14 @@ from django.contrib.auth.models import Group as BaseGroup
 from django.db import models
 from django.db.models import signals
 from django.dispatch import receiver
-from django_lifecycle import AFTER_UPDATE, AFTER_DELETE, BEFORE_CREATE, LifecycleModelMixin, hook
+from django_lifecycle import (
+    AFTER_UPDATE,
+    AFTER_DELETE,
+    BEFORE_CREATE,
+    BEFORE_DELETE,
+    LifecycleModelMixin,
+    hook,
+)
 from pulpcore.plugin.models import Group as PulpGroup
 
 from galaxy_ng.app.models.auth import Group
@@ -36,6 +43,11 @@ class Organization(LifecycleModelMixin, AbstractOrganization):
                 group = team.group
                 group.name = team.group_name()
                 group.save()
+
+    @hook(BEFORE_DELETE)
+    def _before_delete(self):
+        for team in self.teams.all():
+            team.delete()
 
 
 class Team(LifecycleModelMixin, AbstractTeam):
