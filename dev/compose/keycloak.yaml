@@ -287,7 +287,7 @@ services:
     ports:
       - '5001:5001'
     volumes:
-      - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
+      - '../nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z'
 
   ldap:
     image: "rroemhild/test-openldap"
@@ -317,7 +317,7 @@ services:
     depends_on:
       - kc-postgres
     volumes:
-      - "./standalone-keycloak/keycloak.conf:/opt/jboss/keycloak/standalone/configuration/keycloak.conf:ro"
+      - "./standalone-keycloak/keycloak.conf:/opt/jboss/keycloak/standalone/configuration/keycloak.conf:ro,Z"
 
   kc-postgres:
     image: "postgres:13"
