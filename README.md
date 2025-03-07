@@ -1,6 +1,8 @@
 # Galaxy NG
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ansible_galaxy_ng&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ansible_galaxy_ng)
 [![Build Status](https://github.com/ansible/galaxy_ng/actions/workflows/ci-docker-compose-integration.yml/badge.svg)](https://github.com/ansible/galaxy_ng/actions/workflows/ci-docker-compose-integration.yml)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ansible_galaxy_ng&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ansible_galaxy_ng)
 
 A Pulp plugin to support hosting your very own Ansible Galaxy server.
 
