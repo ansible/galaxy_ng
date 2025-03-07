@@ -1,10 +1,9 @@
 ---
+# Opens a PR with newly marked translation strings on the first day of each month.
 name: "[i18n] Update translations"
 
 on:
-  # allow running manually
   workflow_dispatch:
-  # run weekly
   schedule:
     - cron: '30 5 1 * *'
 
@@ -25,24 +24,27 @@ jobs:
           ref: ${{ matrix.branch }}
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
 
       - name: Update apt
         run: sudo apt -y update
 
       - name: Install LDAP requirements
-        run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python-setuptools
+        run: sudo apt-get install -y libsasl2-dev libldap2-dev libssl-dev build-essential gettext python3-setuptools
 
       - name: Upgrade pip
-        run: pip install pip --upgrade
+        run: pip3 install pip --upgrade
 
       - name: Install galaxy_ng editable
-        run: pip install -e .
+        run: pip3 install -e .
 
       - name: Extract strings
         run: |
           cd galaxy_ng
           django-admin makemessages --all
+
+      - name: Clear fuzzy entries
+        run: bash .github/workflows/scripts/clear_fuzzy_entries.sh
 
       - name: Check if files were updated
         run: |
@@ -54,9 +56,6 @@ jobs:
               echo "openPR=true" >> $GITHUB_ENV
           fi
         shell: bash
-
-      - name: Clear fuzzy entries
-        run: bash .github/workflows/scripts/clear_fuzzy_entries.sh
 
       - name: Compile strings
         run: |
@@ -78,6 +77,6 @@ jobs:
             No-Issue
           body: |
             No-Issue
-          title: "[i18n] Update translations ${{ env.NOW }}"
+          title: "[i18n][${{ matrix.branch }}] Update translations ${{ env.NOW }}"
           branch: i18n/${{ matrix.branch }}/update-translations-${{ env.NOW }}
           base: ${{ matrix.branch }}
