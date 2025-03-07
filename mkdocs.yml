@@ -40,8 +40,6 @@ nav:
         - Tests:
             - dev/tests/unit.md
             - dev/tests/integration.md
-        - OCI Env Environment: dev/oci_env.md
-        - OCI Env Integration Tests: dev/integration_tests.md
     - Tags: tags.md
     - Community:
         - Overview: community/overview.md

@@ -1,7 +1,5 @@
 .SILENT:
 
-# set the OCI_ENV_PATH to be ../oci_env/ if this isn't set in the user's environment
-export OCI_ENV_PATH = $(shell if [ -n "$$OCI_ENV_PATH" ]; then echo "$$OCI_ENV_PATH"; else echo ${PWD}/../oci_env/; fi)
 
 
 .DEFAULT:
@@ -52,54 +50,6 @@ fmt:              ## Format the code using Darker
 docker/test/integration/container:      ## Run integration tests.
 	docker build . -f dev/standalone/integration-test-dockerfile -t galaxy-integration-runner
 	docker run -it --rm --add-host=localhost:host-gateway galaxy-integration-runner $(FLAGS)
-
-.PHONY: oci-env/integration
-oci-env/integration:
-	oci-env exec bash /src/galaxy_ng/profiles/base/run_integration.sh $(FLAGS)
-
-.PHONY: gh-action/ldap
-gh-action/ldap:
-	python3 dev/oci_env_integration/actions/ldap.py
-
-.PHONY: gh-action/x_repo_search
-gh-action/x_repo_search:
-	python3 dev/oci_env_integration/actions/x_repo_search.py
-
-.PHONY: gh-action/iqe_rbac
-gh-action/iqe_rbac:
-	python3 dev/oci_env_integration/actions/iqe_rbac.py
-
-.PHONY: gh-action/keycloak
-gh-action/keycloak:
-	python3 dev/oci_env_integration/actions/keycloak.py
-
-.PHONY: gh-action/rbac
-gh-action/rbac:
-	python3 dev/oci_env_integration/actions/rbac.py
-
-.PHONY: gh-action/rbac-parallel
-gh-action/rbac-parallel:
-	python3 dev/oci_env_integration/actions/rbac-parallel.py $${RBAC_PARALLEL_GROUP}
-
-.PHONY: gh-action/insights
-gh-action/insights:
-	python3 dev/oci_env_integration/actions/insights.py
-
-.PHONY: gh-action/standalone
-gh-action/standalone:
-	python3 dev/oci_env_integration/actions/standalone.py
-
-.PHONY: gh-action/community
-gh-action/community:
-	python3 dev/oci_env_integration/actions/community.py
-
-.PHONY: gh-action/dab_jwt
-gh-action/dab_jwt:
-	python3 dev/oci_env_integration/actions/dab_jwt.py
-
-.PHONY: gh-action/certified-sync
-gh-action/certified-sync:
-	python3 dev/oci_env_integration/actions/certified-sync.py
 
 .PHONY: docker/db_snapshot
 NAME ?= galaxy
@@ -158,34 +108,22 @@ docs/serve:
 # Simple stack spinup ... please don't overengineer this
 #########################################################
 
-.PHONY: oci/standalone
-oci/standalone:
-	dev/oci_start standalone
+.PHONY: compose/standalone
+compose/standalone:
+	docker compose -f dev/compose/standalone.yaml up
 
-.PHONY: oci/standalone/poll
-oci/standalone/poll:
-	dev/oci_poll standalone
+.PHONY: compose/insights
+compose/insights:
+	docker compose -f dev/compose/insights.yaml up
 
-.PHONY: oci/insights
-oci/insights:
-	dev/oci_start insights
+.PHONY: compose/aap
+compose/aap:
+	docker compose -f dev/compose/aap.yaml up
 
-.PHONY: oci/keycloak
-oci/keycloak:
-	dev/oci_start keycloak
+.PHONY: compose/community
+compose/community:
+	docker compose -f dev/compose/community.yaml up
 
-.PHONY: oci/ldap
-oci/ldap:
-	dev/oci_start ldap
-
-.PHONY: oci/community
-oci/community:
-	dev/oci_start community
-
-.PHONY: oci/dab
-oci/dab:
-	dev/oci_start dab
-
-.PHONY: oci/dab_jwt
-oci/dab_jwt:
-	dev/oci_start dab_jwt
+.PHONY: compose/certified
+compose/certified:
+	docker compose -f dev/compose/certified-sync.yaml up
