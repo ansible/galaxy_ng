@@ -1,5 +1,3 @@
 # List any profiles here that are required for this profile to run correctly.
-# If a profile listed here is not in COMPOSE_PROFILE when this profile is loaded
-# oci-env will exit.
 
 galaxy_ng/base

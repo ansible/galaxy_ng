@@ -6,17 +6,7 @@ tags:
 
 # How to install Galaxy NG
 
-Galaxy NG is a [Pulp plugin](https://pulpproject.org/content-plugins/). As a plugin, Galaxy_NG has multiple installation methods available. Historically the galaxy team advocated for the [pulp_installer](https://github.com/pulp/pulp_installer) project as the best path for installation. Unfortunately the pulp-installer project is no longer being released or updated for newer pulp versions and we have to drop support for it.
-
-We currently support 2 methods to spin up galaxy_ng
-
-1. Pulp OCI Images with docker
-2. Pulp OCI Images with [oci_env](https://github.com/pulp/oci_env) + docker
-
-
-If you'd like to learn more about the oci-env path, please check the [community devstack](https://ansible.readthedocs.io/projects/galaxy-ng/en/latest/community/devstack/#oci-env) page.
-
-The rest of this document covers using the OCI images directly with docker.
+Galaxy NG is a [Pulp plugin](https://pulpproject.org/content-plugins/). As a plugin, Galaxy_NG has multiple installation methods available.
 
 ## Installing with docker and oci images
 

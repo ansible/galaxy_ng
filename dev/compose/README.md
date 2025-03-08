@@ -212,7 +212,6 @@ Run unit tests with docker compose [Running unit tests](https://ansible.readthed
 ### Integration tests
 Run integration tests with docker compose, check the [Running integration tests](https://ansible.readthedocs.io/projects/galaxy-ng/en/latest/dev/tests/integration/)
 
-Run with legacy oci-env, check the [Running oci-env integration tests](https://ansible.readthedocs.io/projects/galaxy-ng/en/latest/dev/integration_tests/)
 
 ## Tips and Tricks.
 

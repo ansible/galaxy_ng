@@ -38,9 +38,3 @@ PRs will be reviewed by two members of the team.
 ### Docker Compose
 
 [Docker Compose Env developer setup guide](docker_environment.md)
-
-### OCI Env
-
-This is the new preferred way to develop with pulp. It provides a flexible, containerized environment that's easy to set up. It supports running integration and functional tests as well as developing the UI. It supports all the features from the docker and vagrant environments, but isn't as heavily tested as the docker environment.
-
-[OCI Env developer setup guide](oci_env.md)
