@@ -5,5 +5,8 @@
     "openshift/clowder/clowd-app.yaml",
     "dev/Dockerfile.base",
     "dev/standalone-ldap/galaxy_ng.env",
-    "galaxy_ng/tests"
+    "galaxy_ng/tests",
+    "dev/compose/signing/signing-secret.key",
+    "dev/compose/signing/signing-secret.key.password.txt",
+    "dev/compose/"
   ]

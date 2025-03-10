@@ -1,7 +1,9 @@
+import contextlib
 import logging
 import os
 import shutil
 import yaml
+import subprocess
 
 import pytest
 from orionutils.utils import increment_version
@@ -106,7 +108,7 @@ def ansible_config():
     return get_ansible_config()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def published(ansible_config, artifact, galaxy_client):
     # make sure the expected namespace exists ...
     gc = galaxy_client("partner_engineer")
@@ -125,7 +127,7 @@ def published(ansible_config, artifact, galaxy_client):
     return artifact
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def certifiedv2(ansible_config, artifact, galaxy_client):
     """ Create and publish+certify collection version N and N+1 """
 
@@ -164,7 +166,7 @@ def certifiedv2(ansible_config, artifact, galaxy_client):
     return (artifact, artifact2)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     """ Create and publish collection version N and N+1 but only certify N"""
 
@@ -204,7 +206,7 @@ def uncertifiedv2(ansible_config, artifact, settings, galaxy_client):
     return artifact, artifact2
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
     """ Create and publish collection version N and N+1"""
 
@@ -249,7 +251,7 @@ def auto_approved_artifacts(ansible_config, artifact, galaxy_client):
     return artifact, artifact2
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def artifact():
     """Generate a randomized collection for testing."""
 
@@ -269,17 +271,14 @@ def upload_artifact():
 
 
 @pytest.fixture
-def cleanup_collections(request):
+def cleanup_collections():
     """Clean created resources during test executions."""
 
-    def cleanup():
-        path = os.path.expanduser(
-            f"~/.ansible/collections/ansible_collections/{USERNAME_PUBLISHER}/"
-        )
-        if os.path.exists(path):
-            shutil.rmtree(path)
+    yield
 
-    request.addfinalizer(cleanup)
+    path = os.path.expanduser(f"~/.ansible/collections/ansible_collections/{USERNAME_PUBLISHER}/")
+    if os.path.exists(path):
+        shutil.rmtree(path)
 
 
 @pytest.fixture(scope="session")
@@ -334,10 +333,10 @@ def sync_instance_crc():
     dev/data/insights-fixture.tar.gz
     """
 
-    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:38080/api/automation-hub/")
+    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
     auth_url = os.getenv(
         "TEST_CRC_AUTH_URL",
-        "http://localhost:38080/auth/realms/redhat-external/protocol/openid-connect/token"
+        "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
     )
 
     config = AnsibleConfigFixture(url=url, auth_url=auth_url, profile="org_admin")
@@ -345,7 +344,7 @@ def sync_instance_crc():
 
     client = get_client(
         config=config,
-        request_token=True,
+        request_token=False,
         require_auth=True
     )
 
@@ -384,23 +383,21 @@ def sync_instance_crc():
     return (manifest, config)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def settings(galaxy_client):
     gc = galaxy_client("admin")
     return gc.get("_ui/v1/settings/")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def use_collection_signatures(settings):
     """A shortcut to know if a test should attempt to work with signatures."""
     service = settings["GALAXY_COLLECTION_SIGNING_SERVICE"]
     required = settings["GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL"]
-    if service is not None and required:
-        return True
-    return False
+    return bool(service is not None and required)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def autohubtest2(galaxy_client):
     """A carry over pre-created namespace from the original IQE tests."""
     gc = galaxy_client("admin")
@@ -408,9 +405,13 @@ def autohubtest2(galaxy_client):
     return {"name": "autohubtest2"}
 
 
-@pytest.fixture(scope="function")
-def random_namespace(galaxy_client):
+@pytest.fixture
+def random_namespace(galaxy_client, settings):
     """Make a randomized namespace."""
+
+    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        pytest.skip("this test relies on local resource creation")
+
     gc = galaxy_client("admin")
     ns_name = 'namespace_' + generate_namespace()
     if len(ns_name) > 60:
@@ -419,7 +420,7 @@ def random_namespace(galaxy_client):
     return get_namespace(ns_name, gc=gc)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def random_username(galaxy_client):
     """Make a random username."""
     return 'user_' + generate_namespace()
@@ -469,11 +470,9 @@ def set_test_data(ansible_config, hub_version):
             gc.set_permissions("system:partner-engineers", pe_permissions)
         else:
             for rbac_role in pe_roles:
-                try:
+                # role already assigned to group. It's ok.
+                with contextlib.suppress(GalaxyClientError):
                     gc.add_role_to_group(rbac_role, pe_group_id)
-                except GalaxyClientError:
-                    # role already assigned to group. It's ok.
-                    pass
 
         gc.add_user_to_group(username="jdoe", group_id=pe_group_id)
         gc.create_namespace(name="autohubtest2", group="ns_group_for_tests",
@@ -490,11 +489,9 @@ def set_test_data(ansible_config, hub_version):
                               "galaxy.delete_containerregistryremote"]
             gc.set_permissions("ee_group_for_tests", ee_permissions)
         else:
-            try:
+            # Role already assigned to group. It's ok.
+            with contextlib.suppress(GalaxyClientError):
                 gc.add_role_to_group(ee_role, ee_group_id)
-            except GalaxyClientError:
-                # role already assigned to group. It's ok.
-                pass
         gc.add_user_to_group(username="ee_admin", group_id=ee_group_id)
     else:
         gc.create_namespace(name="autohubtest2", group=None,
@@ -502,24 +499,61 @@ def set_test_data(ansible_config, hub_version):
         gc.create_namespace(name="autohubtest3", group=None,
                             object_roles=["galaxy.collection_namespace_owner"])
 
+        # get the authenticators ...
+        resp = gc.get(f"{gc.gw_root_url}api/gateway/v1/authenticators/?name__icontains=local")
+        local_authenticator_id = resp['results'][0]['id']
+
         users = ["iqe_normal_user", "jdoe", "ee_admin", "org-admin"]
         for user in users:
-            body = {"username": user, "password": "Th1sP4ssd", "is_superuser": True}
+
+            body = {
+                "username": user,
+                "password": "Th1sP4ssd",
+                "is_superuser": True,
+                "authenticator": local_authenticator_id,
+                "authenticator_uid": local_authenticator_id,
+            }
             if user == "iqe_normal_user":
                 body["is_superuser"] = False
-            gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
-            gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
-            try:
+
+            # first check if the user exists ..
+            filtered_users = gc.get(f"{gc.gw_root_url}api/gateway/v1/users/?username={user}")
+            if filtered_users['count'] == 0:
+
+                # make the user from scratch
+                gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
+                gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
                 gc.post(f"{gc.gw_root_url}api/gateway/v1/users/", body=body)
-            except GalaxyClientError as e:
-                if "already exists" in e.response.text:
-                    _user = gc.get(
-                        f"{gc.gw_root_url}api/gateway/v1/users/?username={user}")
-                    user_id = _user["results"][0]["id"]
-                    gc.patch(f"{gc.gw_root_url}api/gateway/v1/users/{user_id}/", body=body)
+                del gc.headers["Referer"]
+
+            else:
+                this_user = filtered_users['results'][0]
+                user_id = this_user['id']
+
+                # it must have the local authenticator id ...
+                if local_authenticator_id not in this_user.get('authenticators', []):
+
+                    # we can't really modify the authenticators after the fact
+                    # so lets just delete the user and recreate it ...
+
+                    # delete
+                    gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/{user_id}/"})
+                    gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
+                    gc.delete(f"{gc.gw_root_url}api/gateway/v1/users/{user_id}/", parse_json=False)
+                    del gc.headers["Referer"]
+
+                    # create
+                    gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/create"})
+                    gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
+                    gc.post(f"{gc.gw_root_url}api/gateway/v1/users/", body=body)
+                    del gc.headers["Referer"]
+
                 else:
-                    raise e
-            del gc.headers["Referer"]
+                    # just change the password and superuser? ...
+                    gc.headers.update({"Referer" : f"{gc.gw_root_url}access/users/{user_id}/"})
+                    gc.headers.update({"X-Csrftoken" : gc.gw_client.csrftoken})
+                    gc.patch(f"{gc.gw_root_url}api/gateway/v1/users/{user_id}/", body=body)
+                    del gc.headers["Referer"]
 
 
 @pytest.fixture(scope="session")
@@ -527,7 +561,7 @@ def hub_version(ansible_config):
     return get_hub_version(ansible_config)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gh_user_1_post(ansible_config):
     """
     Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
@@ -540,7 +574,7 @@ def gh_user_1_post(ansible_config):
     remove_from_cache("github_user")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gh_user_1(ansible_config):
     """
     Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
@@ -549,7 +583,7 @@ def gh_user_1(ansible_config):
     return gc("github_user", github_social_auth=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gh_user_2(ansible_config):
     """
     Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
@@ -558,7 +592,7 @@ def gh_user_2(ansible_config):
     return gc("github_user_alt", github_social_auth=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gh_user_1_pre(ansible_config):
     """
     Removes everything related to the GitHub user and the user itself and
@@ -569,7 +603,7 @@ def gh_user_1_pre(ansible_config):
     return gc("github_user", github_social_auth=True, ignore_cache=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def gw_user_1(ansible_config):
     """
     Returns a galaxy kit client with a GitHub user logged into beta galaxy stage
@@ -578,7 +612,7 @@ def gw_user_1(ansible_config):
     return gc("github_user", github_social_auth=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def generate_test_artifact(ansible_config):
     """
     Generates a test artifact and deletes it after the test
@@ -596,7 +630,7 @@ def generate_test_artifact(ansible_config):
     delete_collection(gc_admin, namespace=artifact.namespace, collection=artifact.name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def keep_generated_test_artifact(ansible_config):
     """
     Generates a test artifact
@@ -613,7 +647,7 @@ def keep_generated_test_artifact(ansible_config):
 @pytest.fixture(scope="session")
 def data():
     path = 'galaxy_ng/tests/integration/load_data.yaml'
-    with open(path, 'r') as yaml_file:
+    with open(path) as yaml_file:
         data = yaml.safe_load(yaml_file)
     return data
 
@@ -693,3 +727,20 @@ def skip_if_require_signature_for_approval():
 def skip_if_not_require_signature_for_approval():
     if not require_signature_for_approval():
         pytest.skip("This test needs refactoring to work with signatures required on move.")
+
+
+@pytest.fixture
+def docker_compose_exec():
+    def _exec(cmd: str, cwd=None):
+        cd = ''
+        if cwd is not None:
+            cd = f'cd {cwd};'
+
+        proc = subprocess.run(
+            f"docker exec compose-manager-1 /bin/bash -c '{cd}{cmd}'",
+            shell=True,
+            capture_output=True,
+        )
+        return proc
+
+    return _exec

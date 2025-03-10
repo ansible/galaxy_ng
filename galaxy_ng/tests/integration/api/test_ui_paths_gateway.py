@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import random
 import pytest
@@ -78,6 +76,8 @@ def test_gw_api_ui_v1_collection_versions(galaxy_client, uncertifiedv2):
         validate_json(instance=cv_resp['metadata'], schema=schema_collectionversion_metadata)
 
 
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+@pytest.mark.skip_in_gw
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
@@ -95,7 +95,7 @@ def test_gw_api_ui_v1_collection_versions_version_range(galaxy_client, uncertifi
     # test range
     ds = gc.get(f'{v_path}&version_range>={c1.version}')
     assert len(ds['data']) == 2
-    assert set([v["version"] for v in ds['data']]) == set([c1.version, c2.version])
+    assert {v["version"] for v in ds['data']} == {c1.version, c2.version}
 
     # test range exclusive
     ds = gc.get(f'{v_path}&version_range=>{c1.version}')
@@ -182,7 +182,7 @@ def test_gw_api_ui_v1_execution_environments_registries(galaxy_client):
     validate_json(instance=ds, schema=schema_objectlist)
 
     # try to create one
-    suffix = random.choice(range(0, 1000))
+    suffix = random.choice(range(1000))
     rname = f'redhat.io.{suffix}'
     payload = {
         'name': rname,
@@ -339,7 +339,7 @@ def test_gw_api_ui_v1_my_namespaces(galaxy_client):
     ds = gc.get('_ui/v1/me/')
 
     # create ns with group
-    # TODO: Add user's roles to the me endpoint
+    # TODO(chr-stian): Add user's roles to the me endpoint
     payload = {
         'name': new_namespace,
         'groups': [{
@@ -415,7 +415,7 @@ def test_gw_api_ui_v1_remotes_by_id(galaxy_client):
     for remote in ds['data']:
         validate_json(instance=remote, schema=schema_remote)
 
-    # FIXME - there is no suitable pulp_id for a remote?
+    # FIXME(chr-stian): there is no suitable pulp_id for a remote?
     pulp_ids = [x['pk'] for x in ds['data']]
     for pulp_id in pulp_ids:
         gc.get(f'_ui/v1/remotes/{pulp_id}/')
@@ -428,7 +428,7 @@ def test_gw_api_ui_v1_repo_distro_by_basepath(galaxy_client):
 
     gc = galaxy_client('basic_user')
     # get each repo by basepath? or is it get a distro by basepath?
-    for k, v in DEFAULT_DISTROS.items():
+    for v in DEFAULT_DISTROS.values():
         bp = v['basepath']
         ds = gc.get(f'_ui/v1/repo/{bp}/')
         validate_json(instance=ds, schema=schema_objectlist)
@@ -465,7 +465,7 @@ def test_gw_api_ui_v1_settings(galaxy_client):
     ds = gc.get('_ui/v1/settings/')
     validate_json(instance=ds, schema=schema_settings)
 
-    # FIXME - password length and token expiration are None?
+    # FIXME(chr-stian): password length and token expiration are None?
     assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'] is False
     assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is False
     assert ds['GALAXY_REQUIRE_CONTENT_APPROVAL'] is True
@@ -482,7 +482,7 @@ def test_gw_api_ui_v1_tags(galaxy_client):
     ds = gc.get('_ui/v1/tags/')
     validate_json(instance=ds, schema=schema_objectlist)
 
-    # FIXME - ui tags api does not support POST?
+    # FIXME(chr-stian): ui tags api does not support POST?
 
 
 @pytest.mark.deployment_standalone

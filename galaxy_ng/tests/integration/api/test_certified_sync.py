@@ -33,7 +33,7 @@ def _assert_sync(manifest, client):
     for cv in manifest:
         ns = cv["namespace"]
         collection = (ns, cv["name"])
-        version = collection + (cv["version"], )
+        version = (*collection, cv["version"])
 
         namespaces.add(ns)
         versions.add(version)
@@ -49,35 +49,35 @@ def _assert_sync(manifest, client):
             deprecated_collections.add(collection)
 
     # test that all the expected namespaces are created
-    all_namespaces = set([x["name"] for x in iterate_all(client, "v3/namespaces/")])
+    all_namespaces = {x["name"] for x in iterate_all(client, "v3/namespaces/")}
     assert namespaces.issubset(all_namespaces)
 
     # test that all the synced collections are on the v3 API
-    synced_collections = set([(x["namespace"], x["name"]) for x in iterate_all(
+    synced_collections = {(x["namespace"], x["name"]) for x in iterate_all(
         client,
         "v3/plugin/ansible/content/rh-certified/collections/index/"
-    )])
+    )}
     assert synced_collections == collections
 
     # Test that the _ui/v1/repo/ api returns all the synced collections
-    synced_collections = set([(x["namespace"]["name"], x["name"]) for x in iterate_all(
+    synced_collections = {(x["namespace"]["name"], x["name"]) for x in iterate_all(
         client,
         "_ui/v1/repo/rh-certified/"
-    )])
+    )}
     assert synced_collections == collections
 
     # Test that the _ui/v1/repo/ api returns all the synced signed collections
-    synced_collections = set([(x["namespace"]["name"], x["name"]) for x in iterate_all(
+    synced_collections = {(x["namespace"]["name"], x["name"]) for x in iterate_all(
         client,
         "_ui/v1/repo/rh-certified/?sign_state=signed"
-    )])
+    )}
     assert synced_collections == signed_collections
 
     # Test that the deprecated status syncs correctly
-    synced_collections = set([(x["namespace"]["name"], x["name"]) for x in iterate_all(
+    synced_collections = {(x["namespace"]["name"], x["name"]) for x in iterate_all(
         client,
         "_ui/v1/repo/rh-certified/?deprecated=false"
-    )])
+    )}
     assert synced_collections == collections.difference(deprecated_collections)
 
     # Test that the _ui/v1/collection-versions/ API shows the correct collections
@@ -92,8 +92,8 @@ def _assert_sync(manifest, client):
 
         if version in signed_versions:
             assert c["sign_state"] == "signed"
-            local_sigs = set([x["signature"] for x in c["metadata"]["signatures"]])
-            manifest_sigs = set([x["signature"] for x in signatures[version]])
+            local_sigs = {x["signature"] for x in c["metadata"]["signatures"]}
+            manifest_sigs = {x["signature"] for x in signatures[version]}
             assert local_sigs == manifest_sigs
         else:
             assert c["sign_state"] == "unsigned"
@@ -104,7 +104,7 @@ def _assert_sync(manifest, client):
 
 def _assert_namespace_sync(pah_client, crc_client, namespace):
     crc_ns = crc_client(f"v3/namespaces/{namespace['name']}/")
-    pah_ns = pah_client(f"v3/plugin/ansible/content/rh-certified/namespaces/{namespace['name']}")
+    pah_ns = pah_client(f"v3/plugin/ansible/content/rh-certified/namespaces/{namespace['name']}/")
     pah_galaxy_ns = pah_client(f"v3/namespaces/{namespace['name']}/")
 
     # test the fields
@@ -134,7 +134,8 @@ def test_basic_sync(sync_instance_crc, ansible_config):
     manifest, crc_config = sync_instance_crc
 
     pah_client = get_client(
-        config=config
+        config=config,
+        request_token=False,
     )
 
     clear_certified(pah_client)
@@ -156,7 +157,7 @@ def test_synclist_sync(sync_instance_crc, ansible_config):
 
     crc_client = get_client(
         config=crc_config,
-        request_token=True,
+        request_token=False,
         require_auth=True
     )
 
@@ -171,7 +172,7 @@ def test_synclist_sync(sync_instance_crc, ansible_config):
         [{
             "namespace": synclist_collection["namespace"],
             "name": synclist_collection["name"],
-        }, ]
+        }]
     )["name"]
 
     perform_sync(pah_client, crc_config, repo=repo)
@@ -203,7 +204,6 @@ def test_signed_only_sync(sync_instance_crc, ansible_config):
     _assert_sync(expected_manifest, pah_client)
 
 
-# @pytest.mark.skip("broken by python 3.11 ... ?")
 @pytest.mark.sync
 def test_namespace_sync(sync_instance_crc, ansible_config):
     pah_config = ansible_config(profile="admin")
@@ -211,8 +211,8 @@ def test_namespace_sync(sync_instance_crc, ansible_config):
 
     crc_config.profile = "admin"
 
-    pah_client = get_client(pah_config)
-    crc_client = get_client(crc_config)
+    pah_client = get_client(pah_config, request_token=False)
+    crc_client = get_client(crc_config, request_token=False)
 
     ns_data = {
         "name": "ansible",
@@ -272,8 +272,6 @@ def test_namespace_sync(sync_instance_crc, ansible_config):
         args=ns_data,
         method="PUT",
     )
-
-    clear_certified(pah_client)
 
     perform_sync(pah_client, crc_config)
     _assert_namespace_sync(pah_client, crc_client, ns)

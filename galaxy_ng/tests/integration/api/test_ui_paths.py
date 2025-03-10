@@ -1,8 +1,6 @@
-#!/usr/bin/env python3
-
 import random
 import json
-import subprocess
+from http import HTTPStatus
 
 import pytest
 
@@ -154,7 +152,7 @@ def test_api_ui_v1_collection_versions_version_range(ansible_config, uncertified
         ds = resp.json()
 
         assert len(ds['data']) == 2
-        assert set([v["version"] for v in ds['data']]) == set([c1.version, c2.version])
+        assert {v["version"] for v in ds['data']} == {c1.version, c2.version}
 
         # test range exclusive
         resp = uclient.get(f'{v_path}&version_range=>{c1.version}')
@@ -273,7 +271,7 @@ def test_api_ui_v1_execution_environments_registries(ansible_config):
         validate_json(instance=ds, schema=schema_objectlist)
 
         # try to create one
-        suffix = random.choice(range(0, 1000))
+        suffix = random.choice(range(1000))
         rname = f'redhat.io.{suffix}'
         payload = {
             'name': rname,
@@ -394,7 +392,7 @@ def test_api_ui_v1_groups(ansible_config):
             validate_json(instance=grp, schema=schema_group)
 
         # try to make a group
-        suffix = random.choice(range(0, 1000))
+        suffix = random.choice(range(1000))
         payload = {'name': f'foobar{suffix}'}
         resp = uclient.post('_ui/v1/groups/', payload=payload)
         assert resp.status_code == 201
@@ -447,7 +445,7 @@ def test_api_ui_v1_groups_users_add_delete(ansible_config):
     cfg = ansible_config('partner_engineer')
     with UIClient(config=cfg) as uclient:
 
-        suffix = random.choice(range(0, 1000))
+        suffix = random.choice(range(1000))
         group_name = f'group{suffix}'
         user_name = f'user{suffix}'
 
@@ -600,7 +598,7 @@ def test_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
         ds = resp.json()
 
         # create ns with group
-        # TODO: Add user's roles to the me endpoint
+        # TODO(bmclaughlin): Add user's roles to the me endpoint
         payload = {
             'name': new_namespace,
             'groups': [{
@@ -712,12 +710,11 @@ def test_api_ui_v1_remotes_by_id(ansible_config):
         for remote in ds['data']:
             validate_json(instance=remote, schema=schema_remote)
 
-        # FIXME - there is no suitable pulp_id for a remote?
+        # FIXME(jctanner): there is no suitable pulp_id for a remote?
         pulp_ids = [x['pk'] for x in ds['data']]
         for pulp_id in pulp_ids:
-            with pytest.raises(HTTPError) as ctx:
-                uclient.get('_ui/v1/remotes/{pulp_id}/')
-            assert ctx.value.strerror.status_code == 404
+            response = uclient.get(f'_ui/v1/remotes/{pulp_id}/')
+            assert response.status_code == 200
 
 
 # /api/automation-hub/_ui/v1/repo/{distro_base_path}/
@@ -730,7 +727,7 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
     with UIClient(config=cfg) as uclient:
 
         # get each repo by basepath? or is it get a distro by basepath?
-        for k, v in DEFAULT_DISTROS.items():
+        for v in DEFAULT_DISTROS.values():
             bp = v['basepath']
             resp = uclient.get(f'_ui/v1/repo/{bp}')
             ds = resp.json()
@@ -765,7 +762,7 @@ def test_api_ui_v1_collection_detail_view(ansible_config, published):
 # /api/automation-hub/_ui/v1/settings/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.min_hub_version("4.10")
+@pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.skip_in_gw
 def test_api_ui_v1_settings(ansible_config):
 
@@ -779,7 +776,7 @@ def test_api_ui_v1_settings(ansible_config):
         ds = resp.json()
         validate_json(instance=ds, schema=schema_settings)
 
-        # FIXME - password length and token expiration are None?
+        # FIXME(jctanner): password length and token expiration are None?
         assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS'] is False
         assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is False
         assert ds['GALAXY_REQUIRE_CONTENT_APPROVAL'] is True
@@ -814,7 +811,7 @@ def test_api_ui_v1_tags(ansible_config):
         ds = resp.json()
         validate_json(instance=ds, schema=schema_objectlist)
 
-        # FIXME - ui tags api does not support POST?
+        # FIXME(jctanner): ui tags api does not support POST?
 
 
 # /api/automation-hub/_ui/v1/tags/collections/
@@ -876,7 +873,7 @@ def test_api_ui_v1_tags_collections(ansible_config, upload_artifact):
 
 # /api/automation-hub/_ui/v1/tags/roles/
 @pytest.mark.deployment_community
-def test_api_ui_v1_tags_roles(ansible_config):
+def test_api_ui_v1_tags_roles(ansible_config, docker_compose_exec):
     """Test endpoint's sorting and filtering"""
 
     def _sync_role(github_user, role_name):
@@ -888,10 +885,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         wait_for_v1_task(resp=resp, api_client=api_admin_client)
 
     def _populate_tags_cmd():
-        proc = subprocess.run(
-            "django-admin populate-role-tags",
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
+        proc = docker_compose_exec('django-admin populate-role-tags')
         assert proc.returncode == 0
 
     config = ansible_config("basic_user")
@@ -919,7 +913,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         _sync_role("geerlingguy", "docker")
 
         resp = uclient.get('_ui/v1/tags/roles')
-        resp.status_code == 200
+        assert resp.status_code == HTTPStatus.OK
         aggregate_total = sum([x['count'] for x in resp.json()['data']])
         assert aggregate_total == 0
 
@@ -927,7 +921,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         _populate_tags_cmd()
 
         resp = uclient.get('_ui/v1/tags/roles')
-        resp.status_code == 200
+        assert resp.status_code == HTTPStatus.OK
         aggregate_total = sum([x['count'] for x in resp.json()['data']])
         assert aggregate_total > 0
 
@@ -939,11 +933,11 @@ def test_api_ui_v1_tags_roles(ansible_config):
         _populate_tags_cmd()
 
         resp = uclient.get('_ui/v1/tags/roles?sort=-count')
-        resp.status_code == 200
+        assert resp.status_code == HTTPStatus.OK
         assert resp.json()["meta"]["count"] > 0
 
         # test correct count sorting
-        tags = [tag for tag in uclient.get('_ui/v1/tags/roles').json()["data"]]
+        tags = uclient.get('_ui/v1/tags/roles').json()["data"]
 
         assert sorted(tags, key=lambda r: r["count"], reverse=True)[:2] == resp.json()["data"][:2]
         assert resp.json()["data"][0]["name"] == "docker"
@@ -971,7 +965,7 @@ def test_api_ui_v1_users(ansible_config):
             validate_json(instance=user, schema=schema_user)
 
         # try creating a user
-        suffix = random.choice(range(0, 9999))
+        suffix = random.choice(range(9999))
         payload = {
             'username': f'foobar{suffix}',
             'first_name': 'foobar',
@@ -1040,7 +1034,7 @@ def test_users_list_insights_access(ansible_config):
     api_client = get_client(config, request_token=True, require_auth=True)
 
     resp = api_client(url, method="GET")
-    assert "data" in resp.keys()
+    assert "data" in resp
 
     with pytest.raises(GalaxyError, match=REGEX_403):
         api_client(url, method="POST", args=b"{}")
