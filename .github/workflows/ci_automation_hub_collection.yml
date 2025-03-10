@@ -112,3 +112,24 @@ jobs:
 
       - name: Test the ee playbook
         run: ansible-playbook dev/galaxy_collection_plays/ee.yml -vvv
+
+      - name: Logs
+        if: always()
+        run: |
+          set +e
+          docker ps -a
+          echo ::group::MANAGER_LOGS
+          docker logs --tail=10000 compose-manager-1
+          echo ::endgroup::
+          echo ::group::WORKER_LOGS
+          docker logs --tail=10000 compose-worker-1
+          echo ::endgroup::
+          echo ::group::CONTENT_LOGS
+          docker logs --tail=10000 compose-content-1
+          echo ::endgroup::
+          echo ::group::API_LOGS
+          docker logs --tail=10000 compose-api-1
+          echo ::endgroup::
+          echo ::group::DEPENDENCIES
+          docker exec compose-manager-1 bash -c "pip list && pip install pipdeptree && pipdeptree"
+          echo ::endgroup::
