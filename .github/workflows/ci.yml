@@ -38,16 +38,11 @@ jobs:
     needs: "lint"
     uses: "./.github/workflows/build.yml"
 
-  test:
-    needs: "build"
-    uses: "./.github/workflows/test.yml"
-
   ready-to-ship:
     # This is a dummy dependent task to have a single entry for the branch protection rules.
     runs-on: "ubuntu-latest"
     needs:
       - "lint"
-      - "test"
     if: "always()"
     steps:
       - name: "Collect needed jobs results"

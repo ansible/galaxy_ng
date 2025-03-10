@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+while [[ ! -f $1 ]]; do
+    echo "Waiting for $1 ...";
+    sleep 2;
+done;

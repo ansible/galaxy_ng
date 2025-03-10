@@ -34,17 +34,17 @@ log = logging.getLogger(__name__)
 NAMESPACE = "signing"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def flags(galaxy_client):
     gc = galaxy_client("admin")
     return gc.get("_ui/v1/feature-flags/")
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def namespace(galaxy_client):
     # ensure namespace exists
     gc = galaxy_client("admin")
-    existing = dict((x["name"], x) for x in get_all_namespaces(gc))
+    existing = {x["name"]: x for x in get_all_namespaces(gc)}
     if NAMESPACE not in existing:
         payload = {"name": NAMESPACE, "groups": []}
         gc.post("v3/namespaces/", body=payload)
@@ -64,11 +64,14 @@ def sign_on_demand(gc, signing_service, sign_url=None, **payload):
     '''
     resp = gc.post(sign_url, body=sign_payload)
     log.info("Sign Task: %s", resp)
-    # FIXME - pulp tasks do not seem to accept token auth, so no way to check task progress
+    # FIXME(rochacbruno): pulp tasks do not seem to accept token auth, so no way
+    #       to check task progress
     time.sleep(SLEEP_SECONDS_ONETIME)
     return resp
 
 
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+@pytest.mark.skip_in_gw
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.deployment_standalone
@@ -141,6 +144,8 @@ def test_collection_auto_sign_on_approval(ansible_config, flags, galaxy_client, 
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+@pytest.mark.skip_in_gw
 @pytest.mark.collection_signing
 @pytest.mark.deployment_standalone
 @pytest.mark.parametrize(
@@ -202,6 +207,10 @@ def test_collection_sign_on_demand(flags, galaxy_client, settings, sign_url):
         "version": artifact.version,
     }
     sign_on_demand(gc, signing_service, sign_url.format(**sign_payload), **sign_payload)
+
+    # wait for async jobs to settle ...
+    time.sleep(30)
+
     # Assert that the collection is signed on v3 api
     collection = get_collection_from_repo(gc, "staging",
                                           artifact.namespace, artifact.name, artifact.version)
@@ -328,6 +337,8 @@ def test_collection_move_with_signatures(ansible_config, flags, galaxy_client, s
     assert metadata["signatures"][0]["pubkey_fingerprint"] is not None
 
 
+# FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
+@pytest.mark.skip_in_gw
 @pytest.mark.collection_signing
 @pytest.mark.collection_move
 @pytest.mark.deployment_standalone
@@ -471,20 +482,20 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
 
         collection_version_pk = collections["staging"][ckey]["id"]
         repo_href = get_repository_href(gc, "staging")
-        signature_file = open(signature_filename, "rb")
-        response = requests.post(
-            gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
-            verify=False,
-            files={"file": signature_file},
-            data={
-                "repository": repo_href,
-                "signed_collection": (
-                    f"{gc.galaxy_root}pulp/api/v3/"
-                    f"content/ansible/collection_versions/{collection_version_pk}/"
-                ),
-            },
-            auth=("admin", "admin"),
-        )
+        with open(signature_filename, "rb") as signature_file:
+            response = requests.post(
+                gc.galaxy_root + "pulp/api/v3/content/ansible/collection_signatures/",
+                verify=False,
+                files={"file": signature_file},
+                data={
+                    "repository": repo_href,
+                    "signed_collection": (
+                        f"{gc.galaxy_root}pulp/api/v3/"
+                        f"content/ansible/collection_versions/{collection_version_pk}/"
+                    ),
+                },
+                auth=("admin", "admin"),
+            )
         assert "task" in response.json()
 
     time.sleep(SLEEP_SECONDS_ONETIME)  # wait for the task to finish

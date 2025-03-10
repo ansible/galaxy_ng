@@ -46,6 +46,11 @@ type User struct {
 	IsOrgAdmin bool   `json:"is_org_admin"`
 }
 
+type ServiceAccount struct {
+	ClientId string `json:"client_id"`
+	Username string `json:"username"`
+}
+
 type Account struct {
 	AccountNumber int  `json:"account_number"`
 	User          User `json:"user"`
@@ -58,6 +63,24 @@ type Entitlement struct {
 type XRHItentity struct {
 	Identity     Account     `json:"identity"`
 	Entitlements Entitlement `json:"entitlements"`
+}
+
+type XRHSVCItentity struct {
+	Entitlements Entitlement `json:"entitlements"`
+	Identity     struct {
+		AuthType       string `json:"auth_type"`
+		Internal       struct {
+			AuthTime    int    `json:"auth_time"`
+			CrossAccess bool   `json:"cross_access"`
+			OrgID       string `json:"org_id"`
+		} `json:"internal"`
+		OrgID          string `json:"org_id"`
+		Type           string `json:"type"`
+		ServiceAccount struct {
+			ClientID string `json:"client_id"`
+			Username string `json:"username"`
+		} `json:"service_account"`
+	} `json:"identity"`
 }
 
 var accounts = map[string]Account{
@@ -100,6 +123,13 @@ var accounts = map[string]Account{
 			LastName:   "admin",
 			IsOrgAdmin: false,
 		},
+	},
+}
+
+var serviceAccounts = map[string]ServiceAccount {
+	"service-account-b69eaf9e-e6a6-4f9e-805e-02987daddfbd": {
+		Username:   "service-account-b69eaf9e-e6a6-4f9e-805e-02987daddfbd",
+		ClientId:	"b69eaf9e-e6a6-4f9e-805e-02987daddfbd",
 	},
 }
 
@@ -149,19 +179,95 @@ func userToIentityHeader(account Account) string {
 	return base64.StdEncoding.EncodeToString([]byte(data))
 }
 
+func serviceAccountToIentityHeader(svc_account ServiceAccount) string {
+	/*
+	{
+	  "entitlements": {},
+	  "identity": {
+		"auth_type": "jwt-auth",
+		"internal": {
+		  "auth_time": 500,
+		  "cross_access": false,
+		  "org_id": "456"
+		},
+		"org_id": "456",
+		"type": "ServiceAccount",
+		"service_account": {
+		  "client_id": "b69eaf9e-e6a6-4f9e-805e-02987daddfbd",
+		  "username": "service-account-b69eaf9e-e6a6-4f9e-805e-02987daddfbd"
+		}
+	  }
+	}
+	*/
+
+	data := XRHSVCItentity{
+		Entitlements: Entitlement{
+			Insights: map[string]bool{
+				"is_entitled": true,
+				"is_trial":    false,
+			},
+		},
+		Identity: struct {
+			AuthType string `json:"auth_type"`
+			Internal struct {
+				AuthTime    int    `json:"auth_time"`
+				CrossAccess bool   `json:"cross_access"`
+				OrgID       string `json:"org_id"`
+			} `json:"internal"`
+			OrgID          string `json:"org_id"`
+			Type           string `json:"type"`
+			ServiceAccount struct {
+				ClientID string `json:"client_id"`
+				Username string `json:"username"`
+			} `json:"service_account"`
+		}{
+			AuthType: "jwt-auth",
+			Internal: struct {
+				AuthTime    int    `json:"auth_time"`
+				CrossAccess bool   `json:"cross_access"`
+				OrgID       string `json:"org_id"`
+			}{
+				AuthTime:    500,
+				CrossAccess: false,
+				OrgID:       "456",
+			},
+			OrgID: "456",
+			Type:  "ServiceAccount",
+			ServiceAccount: struct {
+				ClientID string `json:"client_id"`
+				Username string `json:"username"`
+			}{
+				ClientID: svc_account.ClientId,
+				Username: svc_account.Username,
+			},
+		},
+	}
+	jsonData, _ := json.MarshalIndent(data, "", "  ")
+
+	fmt.Printf("Setting X-RH-IDENTITY: %s\n", string(jsonData))
+	return base64.StdEncoding.EncodeToString([]byte(jsonData))
+
+}
+
 func setRHIdentityHeader(req *http.Request) {
 	auth_header := req.Header.Get("Authorization")
 
 	if auth_header != "" {
 		if strings.Contains(auth_header, "Basic") {
+
 			user, pass, _ := req.BasicAuth()
 
 			fmt.Printf("Authenticating with basic auth: %s:%s\n", user, pass)
 
-			if account, ok := accounts[user]; ok {
-				req.Header.Set("X-RH-IDENTITY", userToIentityHeader(account))
-			} else {
-				fmt.Printf("User not found: %s", user)
+			if svc_account, ok := serviceAccounts[user]; ok {
+				req.Header.Set("X-RH-IDENTITY", serviceAccountToIentityHeader(svc_account))
+			} else {	
+
+				if account, ok := accounts[user]; ok {
+					req.Header.Set("X-RH-IDENTITY", userToIentityHeader(account))
+				} else {
+					fmt.Printf("User not found: %s", user)
+				}
 			}
 
 		} else if strings.Contains(auth_header, "Bearer") {
@@ -299,13 +405,14 @@ func main() {
 
 	// define origin server URL
 	urlToProxyTo, err := url.Parse(getEnv("UPSTREAM_URL", "http://localhost:5001"))
+	proxyHost := getEnv("PROXY_HOST", "localhost")
 	proxyPort := getEnv("PROXY_PORT", "8080")
 
 	fmt.Printf("Listening on: %s\n", proxyPort)
 	fmt.Printf("Proxying to: %s\n", urlToProxyTo)
 
 	downloadUrlReg := regexp.MustCompile("\"download_url\":\"(http|https)://[^/]+")
-	replacementURL := []byte(fmt.Sprintf("\"download_url\":\"http://localhost:%s", proxyPort))
+	replacementURL := []byte(fmt.Sprintf("\"download_url\":\"http://%s:%s", proxyHost, proxyPort))
 
 	if err != nil {
 		log.Fatal("invalid origin server URL")

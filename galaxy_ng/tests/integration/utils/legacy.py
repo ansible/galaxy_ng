@@ -1,3 +1,4 @@
+import contextlib
 import random
 import string
 import os
@@ -27,7 +28,7 @@ def wait_for_v1_task(task_id=None, resp=None, api_client=None, check=True):
 
     state = None
     counter = 0
-    while state is None or state == 'RUNNING' and counter <= 500:
+    while state is None or (state == 'RUNNING' and counter <= 500):
         counter += 1
         task_resp = api_client(poll_url, method='GET')
         state = task_resp['results'][0]['state']
@@ -65,10 +66,8 @@ def clean_all_roles(ansible_config):
     # are associated to a user but we can't rely on that
     for role_data in pre_existing:
         role_url = f'/api/v1/roles/{role_data["id"]}/'
-        try:
+        with contextlib.suppress(Exception):
             admin_client(role_url, method='DELETE')
-        except Exception:
-            pass
 
     usernames = [x['github_user'] for x in pre_existing]
     usernames = sorted(set(usernames))
@@ -99,20 +98,16 @@ def cleanup_social_user(username, ansible_config):
         for pe in pre_existing:
             role_id = pe['id']
             role_url = f'/api/v1/roles/{role_id}/'
-            try:
-                resp = admin_client(role_url, method='DELETE')
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):
+                admin_client(role_url, method='DELETE')
 
     # cleanup the v1 namespace
     resp = admin_client(f'/api/v1/namespaces/?name={username}', method='GET')
     if resp['count'] > 0:
         for result in resp['results']:
             ns_url = f"/api/v1/namespaces/{result['id']}/"
-            try:
+            with contextlib.suppress(Exception):
                 admin_client(ns_url, method='DELETE')
-            except Exception:
-                pass
     resp = admin_client(f'/api/v1/namespaces/?name={username}', method='GET')
     assert resp['count'] == 0
 
@@ -150,20 +145,16 @@ def cleanup_social_user_gk(username, galaxy_client):
         for pe in pre_existing:
             role_id = pe['id']
             role_url = f'/api/v1/roles/{role_id}/'
-            try:
-                resp = gc_admin.delete(role_url)
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):
+                gc_admin.delete(role_url)
 
     # cleanup the v1 namespace
     resp = gc_admin.get(f'/api/v1/namespaces/?name={username}')
     if resp['count'] > 0:
         for result in resp['results']:
             ns_url = f"/api/v1/namespaces/{result['id']}/"
-            try:
+            with contextlib.suppress(Exception):
                 gc_admin.delete(ns_url)
-            except Exception:
-                pass
     resp = gc_admin.get(f'/api/v1/namespaces/?name={username}')
     assert resp['count'] == 0
 
@@ -207,7 +198,7 @@ def generate_legacy_namespace(exclude=None):
     while not is_valid(namespace):
         namespace = ''
         namespace += random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits)
-        for x in range(0, random.choice(range(3, 63))):
+        for _ in range(random.choice(range(3, 63))):
             namespace += random.choice(string.ascii_lowercase + string.digits + '_')
 
     return namespace
@@ -232,7 +223,7 @@ def generate_unused_legacy_namespace(api_client=None):
 
     assert api_client is not None, "api_client is a required param"
     existing = get_all_legacy_namespaces(api_client=api_client)
-    existing = dict((x['name'], x) for x in existing)
+    existing = {x['name']: x for x in existing}
     return generate_legacy_namespace(exclude=list(existing.keys()))
 
 
@@ -243,38 +234,57 @@ class LegacyRoleGitRepoBuilder:
         namespace=None,
         name=None,
         meta_namespace=None,
-        meta_name=None
+        meta_name=None,
+        docker_compose_exec=None
     ):
         self.namespace = namespace
         self.name = name
         self.meta_namespace = meta_namespace
         self.meta_name = meta_name
 
-        self.workdir = tempfile.mkdtemp(prefix='gitrepo_')
+        self.docker_compose_exec = docker_compose_exec
+
+        # local tmp dir for roles
+        self.temp_roles = 'temp_roles/'
+        self.local_roles_cleanup()
+        if not os.path.exists(self.temp_roles):
+            os.makedirs(self.temp_roles)
+
+        self.workdir = tempfile.mkdtemp(prefix='gitrepo_', dir=self.temp_roles)
+        path_parts = self.workdir.partition(self.temp_roles)
+
+        # should be equal to HOME=/app
+        # TODO(jjerabek): better way to get env var from container?
+        pid = self.docker_compose_exec('printenv HOME')
+        home = pid.stdout.decode('utf-8').strip() or '/app'
+
+        self.workdir_cont = os.path.join(home, path_parts[1], path_parts[2])
+
         self.role_dir = None
+        self.role_cont_dir = None
 
         self.role_init()
         self.role_edit()
         self.git_init()
         self.git_commit()
 
-        self.fix_perms()
-
-    def fix_perms(self):
-        subprocess.run(f'chown -R pulp:pulp {self.workdir}', shell=True)
-
     def role_init(self):
         cmd = f'ansible-galaxy role init {self.namespace}.{self.name}'
         self.role_dir = os.path.join(self.workdir, self.namespace + '.' + self.name)
-        pid = subprocess.run(cmd, shell=True, cwd=self.workdir)
+        self.role_cont_dir = os.path.join(self.workdir_cont, self.namespace + '.' + self.name)
+
+        pid = subprocess.run(cmd, shell=True, cwd=self.workdir, capture_output=True)
+
         assert pid.returncode == 0
         assert os.path.exists(self.role_dir)
+        ag_init_stdout = f'- Role {self.namespace}.{self.name} was created successfully'
+        assert pid.stdout.decode('utf-8').strip() == ag_init_stdout
 
     def role_edit(self):
         if self.meta_namespace or self.meta_name:
 
             meta_file = os.path.join(self.role_dir, 'meta', 'main.yml')
-            with open(meta_file, 'r') as f:
+            with open(meta_file) as f:
                 meta = yaml.safe_load(f.read())
 
             if self.meta_namespace:
@@ -286,12 +296,17 @@ class LegacyRoleGitRepoBuilder:
                 f.write(yaml.dump(meta))
 
     def git_init(self):
-        subprocess.run('git init', shell=True, cwd=self.role_dir)
+        self.docker_compose_exec('git init', cwd=self.role_cont_dir)
+
+        # hack to make git inside git dir work
+        self.docker_compose_exec(f'git config --global --add safe.directory {self.role_cont_dir}')
 
     def git_commit(self):
+        self.docker_compose_exec('git config --global user.email "root@localhost"')
+        self.docker_compose_exec('git config --global user.name "root at localhost"')
 
-        subprocess.run('git config --global user.email "root@localhost"', shell=True)
-        subprocess.run('git config --global user.name "root at localhost"', shell=True)
+        self.docker_compose_exec('git add *', cwd=self.role_cont_dir)
+        self.docker_compose_exec('git commit -m "first checkin"', cwd=self.role_cont_dir)
 
-        subprocess.run('git add *', shell=True, cwd=self.role_dir)
-        subprocess.run('git commit -m "first checkin"', shell=True, cwd=self.role_dir)
+    def local_roles_cleanup(self):
+        self.docker_compose_exec(f'rm -rf {self.temp_roles}')

@@ -133,7 +133,7 @@ def test_custom_browsable_format(ansible_config):
         require_auth=True,
     )
 
-    resp = api_client("v1/namespaces")
+    resp = api_client("v1/namespaces/")
     assert isinstance(resp, dict)
     assert "results" in resp
 
@@ -142,7 +142,7 @@ def test_custom_browsable_format(ansible_config):
     assert "results" in resp
 
     with pytest.raises(AnsibleError) as html:
-        api_client("v1/namespaces", headers={"Accept": "text/html"})
+        api_client("v1/namespaces/", headers={"Accept": "text/html"})
     assert not isinstance(html.value, dict)
     assert "results" in str(html.value)
 
@@ -154,7 +154,7 @@ def test_custom_browsable_format(ansible_config):
         require_auth=True,
     )
 
-    resp = api_client("v1/namespaces")
+    resp = api_client("v1/namespaces/")
     assert isinstance(resp, dict)
     assert "results" in resp
 
@@ -163,6 +163,6 @@ def test_custom_browsable_format(ansible_config):
     assert "results" in resp
 
     with pytest.raises(AnsibleError) as html:
-        api_client("v1/namespaces", headers={"Accept": "text/html"})
+        api_client("v1/namespaces/", headers={"Accept": "text/html"})
     assert not isinstance(html.value, dict)
     assert "results" in str(html.value)

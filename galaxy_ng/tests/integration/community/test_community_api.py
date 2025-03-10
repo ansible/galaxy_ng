@@ -116,8 +116,8 @@ def test_me_social(ansible_config):
 def test_social_redirect(ansible_config):
     """ Tests a social auth is redirected to / so the UI doesn't load some incorrect repo path."""
 
-    # Github authorization redirects the client to ...
-    #   <galaxy_ng>/complete/github/?code=d9e30acd653247152bf1&state=vdt3CD6wOtpFDX4PnLsBfi25v1o0f89E
+    # GitHub authorization redirects the client to ...
+    #   <galaxy_ng>/complete/github/?code=<code>&state=<state>
     # Django responds with 302 redirect to /
 
     cleanup_social_user('gh01', ansible_config)
@@ -278,7 +278,7 @@ def test_social_auth_delete_collection(ansible_config):
             token=client.get_hub_token(),
         )
 
-        for x in range(0, 20):
+        for _ in range(20):
             exists_resp = client.get(
                 f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
             )
@@ -335,7 +335,7 @@ def test_social_auth_deprecate_collection(ansible_config):
             token=client.get_hub_token(),
         )
 
-        for x in range(0, 20):
+        for _ in range(20):
             exists_resp = client.get(
                 f"v3/plugin/ansible/content/published/collections/index/{namespace}/{name}/"
             )
@@ -527,7 +527,7 @@ def test_v1_autocomplete_search(ansible_config):
     # query by user
     resp = api_client(f'/api/v1/roles/?owner__username={github_user}')
     assert resp['count'] > 0
-    usernames = sorted(set([x['github_user'] for x in resp['results']]))
+    usernames = sorted({x['github_user'] for x in resp['results']})
     assert usernames == [github_user]
 
     # validate autocomplete search only finds the relevant roles
@@ -587,7 +587,7 @@ def test_v1_username_autocomplete_search(ansible_config):
         + " --server "
         + server
     ]
-    proc = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.run(cmd, shell=True, capture_output=True)
     assert b"Found 5 roles matching your search" in proc.stdout
 
     cmd = [
@@ -599,7 +599,7 @@ def test_v1_username_autocomplete_search(ansible_config):
         + " --server "
         + server
     ]
-    proc = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.run(cmd, shell=True, capture_output=True)
     assert b"Found 1 roles matching your search" in proc.stdout
     assert b"geerlingguy.adminer" in proc.stdout
 
@@ -655,7 +655,7 @@ def test_v1_role_pagination(ansible_config):
     assert len(roles) == total_count
 
     # make sure no duplicates found
-    assert [x[1] for x in roles] == sorted(set([x[1] for x in roles]))
+    assert [x[1] for x in roles] == sorted({x[1] for x in roles})
 
     # validate roles are ordered by created by default
     assert roles == sorted(roles)
@@ -813,10 +813,10 @@ def test_v1_role_versions(ansible_config):
     id = resp["results"][0]["id"]
     versions = resp["results"][0]["summary_fields"]["versions"]
 
-    resp = api_client(f'/api/v1/roles/{id}/versions')
+    resp = api_client(f'/api/v1/roles/{id}/versions/')
     assert resp["count"] >= len(versions)
 
     with pytest.raises(AnsibleError) as html:
-        api_client(f"v1/roles/{id}/versions", headers={"Accept": "text/html"})
+        api_client(f"v1/roles/{id}/versions/", headers={"Accept": "text/html"})
     assert not isinstance(html.value, dict)
     assert "results" in str(html.value)
