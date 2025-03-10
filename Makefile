@@ -110,20 +110,20 @@ docs/serve:
 
 .PHONY: compose/standalone
 compose/standalone:
-	docker compose -f dev/compose/standalone.yaml up
+	USER_ID="$(id -u)" docker compose -f dev/compose/standalone.yaml up
 
 .PHONY: compose/insights
 compose/insights:
-	docker compose -f dev/compose/insights.yaml up
+	USER_ID="$(id -u)" docker compose -f dev/compose/insights.yaml up
 
 .PHONY: compose/aap
 compose/aap:
-	docker compose -f dev/compose/aap.yaml up
+	USER_ID="$(id -u)" docker compose -f dev/compose/aap.yaml up
 
 .PHONY: compose/community
 compose/community:
-	docker compose -f dev/compose/community.yaml up
+	USER_ID="$(id -u)" docker compose -f dev/compose/community.yaml up
 
 .PHONY: compose/certified
 compose/certified:
-	docker compose -f dev/compose/certified-sync.yaml up
+	USER_ID="$(id -u)" docker compose -f dev/compose/certified-sync.yaml up
