@@ -265,6 +265,9 @@ services:
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
 
+        # Set pulp CLI
+        pulp config create --overwrite --base-url http://api:24817 --api-root $${PULP_GALAXY_API_PATH_PREFIX}pulp/ --username $$DJANGO_SUPERUSER_USERNAME --password $$DJANGO_SUPERUSER_PASSWORD --no-verify-ssl
+
         # Give some time for API to start;
         sleep 5;
 

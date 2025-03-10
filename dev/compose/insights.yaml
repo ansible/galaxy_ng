@@ -262,6 +262,9 @@ services:
         # Give some time for API to start;
         sleep 5;
 
+        # Set pulp CLI
+        pulp config create --overwrite --base-url http://api:24817 --api-root $${PULP_GALAXY_API_PATH_PREFIX}pulp/ --username $$DJANGO_SUPERUSER_USERNAME --password $$DJANGO_SUPERUSER_PASSWORD --no-verify-ssl
+
         # Setup repository gpgkey for upload verification;
         /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
 
