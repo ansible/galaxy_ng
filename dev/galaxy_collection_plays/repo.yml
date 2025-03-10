@@ -4,7 +4,7 @@
   connection: local
   gather_facts: false
   collections:
-    - galaxy.galaxy
+    - ansible.hub
 
   pre_tasks:
     - name: Include variables
@@ -12,33 +12,23 @@
         file: vars.yml
 
   tasks:
-    - name: Authenticate and retrieve API token
-      ah_token:
-        ah_host: "{{ ah_host }}"
-        ah_username: "{{ ah_username }}"
-        ah_password: "{{ ah_password }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
-
     - name: Configure community repository
-      ah_repository:
+      ansible.hub.collection_remote:
         name: community
         url: https://galaxy.ansible.com/api/
         requirements:
           - community.docker
           - geerlingguy.k8s
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"
 
     - name: Sync community repository
-      ah_repository_sync:
+      ansible.hub.collection_repository_sync:
         name: community
+        wait: false
         ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
-
-    - name: Deauthenticate
-      ah_token:
-        ah_host: "{{ ah_host }}"
-        ah_token: "{{ ah_token }}"
-        ah_path_prefix: "{{ ah_path_prefix }}"
+        ah_username: "{{ ah_username }}"
+        ah_password: "{{ ah_password }}"
+        validate_certs: "{{ ah_validate_certs }}"

@@ -404,7 +404,6 @@ Run unit tests with docker compose [Running unit tests](../../galaxy_ng//tests/u
 ### Integration tests
 Run integration tests with docker compose, check the [Running integration tests](../../galaxy_ng/tests/integration/README.md)
 
-Run with legacy oci-env, check the [Running oci-env integration tests](../../docs/dev/integration_tests.md)
 
 ## Tips and Tricks.
 
@@ -420,7 +419,7 @@ Edit the file you want to debug and add a breakpoint
 __import__("ipdb").set_trace()
 ```
 
-> [!TIP]  
+> [!TIP]
 > Replace if you are using a different debugger, however the images has only **pdb** and **ipdb** installed.
 
 If you discover other ways of debugging, like connecting dap protocol or vscode debugger, please update this file!
@@ -430,7 +429,7 @@ If you discover other ways of debugging, like connecting dap protocol or vscode 
 Example:
 
 ```bash
-$ export DEV_SOURCE_PATH=galaxy_ng 
+$ export DEV_SOURCE_PATH=galaxy_ng
 $ docker compose -f dev/compose/standalone.yaml up migrations
 # The container will keep running stopped on the breakpoint.
 ```
@@ -442,8 +441,8 @@ $ docker compose -f dev/compose/standalone.yaml attach migrations
 ipdb>
 ```
 
-> [!IMPORTANT] 
-> To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,  
+> [!IMPORTANT]
+> To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,
 > instead, use <kbd>Ctrl-p Ctrl-q</kbd>
 
 ---
