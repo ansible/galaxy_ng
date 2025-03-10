@@ -21,4 +21,4 @@ RUN set -ex; \
 
 RUN /app/dev/compose/signing/setup_gpg_keys.sh
 
-RUN ${VIRTUAL_ENV}/bin/python3 -m pip install ipython ipdb django-extensions
+RUN ${VIRTUAL_ENV}/bin/python3 -m pip install ipython ipdb django-extensions pulp-cli

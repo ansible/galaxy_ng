@@ -115,6 +115,7 @@ temp_roles/*
 
 # oci-env profile files
 .compiled/
+.config/pulp/cli.toml
 
 
 # The compose containers runs with /app as home folder
