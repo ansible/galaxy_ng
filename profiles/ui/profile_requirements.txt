@@ -1,3 +1,0 @@
-# List any profiles here that are required for this profile to run correctly.
-
-galaxy_ng/base
