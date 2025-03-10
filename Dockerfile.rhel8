@@ -1,6 +1,9 @@
 FROM registry.access.redhat.com/ubi8
 
 ARG GIT_COMMIT
+ARG USER_ID=1000
+ARG USER_NAME=galaxy
+ARG USER_GROUP=galaxy
 
 ENV LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
@@ -11,7 +14,11 @@ ENV LANG=en_US.UTF-8 \
     GIT_COMMIT=${GIT_COMMIT:-} \
     VIRTUAL_ENV="/venv"
 
-RUN adduser --uid 1000 --gid 0 --home-dir /app --no-create-home galaxy
+RUN set -ex; \
+    id --group "${USER_GROUP}" &>/dev/null \
+    || groupadd --gid "${USER_ID}" "${USER_GROUP}"; \
+    \
+    useradd --uid ${USER_ID} --gid "${USER_GROUP}" "${USER_NAME}" --home-dir /app --no-create-home
 
 # https://access.redhat.com/security/cve/CVE-2021-3872
 RUN rpm -qa | egrep ^vim | xargs rpm -e --nodeps
@@ -29,10 +36,11 @@ RUN set -ex; \
     PYTHON="${VIRTUAL_ENV}/bin/python3" && \
     ${PYTHON} -m pip install -U pip wheel && \
     ${PYTHON} -m pip install -r /tmp/requirements.txt && \
+    chown ${USER_NAME}:${USER_GROUP} -R "${VIRTUAL_ENV}" && \
     ${DNF} autoremove ${INSTALL_PKGS_BUILD} && \
     ${DNF} clean all --enablerepo='*'
 
-COPY . /app
+COPY --chown=${USER_NAME}:${USER_GROUP} . /app
 
 # We need to force a consistent homedir for openshift, or it will
 # default to the unwritable root directory.
@@ -44,21 +52,21 @@ RUN chgrp -R 0 $HOME && \
     chmod -R g=u $HOME
 
 RUN set -ex; \
-    install -dm 0775 -o galaxy \
+    install -dm 0775 -o ${USER_NAME} -g ${USER_GROUP} \
                                /var/lib/pulp/{artifact,assets,media,scripts,tmp} \
-                               /etc/pulp/{certs,keys} \
+                               /etc/pulp/{certs,keys,gnupg} \
                                /tmp/ansible && \
     pip3.11 install --no-deps --editable /app && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
-    install -Dm 0644 /app/ansible.cfg /etc/ansible/ansible.cfg && \
-    install -Dm 0644 /app/docker/etc/settings.py /etc/pulp/settings.py && \
-    install -Dm 0755 /app/docker/entrypoint.sh /entrypoint.sh && \
-    install -Dm 0755 /app/docker/bin/* /usr/local/bin/ && \
-    install -Dm 0775 /app/galaxy-operator/bin/* /usr/bin/
+    install -Dm 0644 -o ${USER_NAME} -g ${USER_GROUP} /app/ansible.cfg /etc/ansible/ansible.cfg && \
+    install -Dm 0644 -o ${USER_NAME} -g ${USER_GROUP} /app/docker/etc/settings.py /etc/pulp/settings.py && \
+    install -Dm 0755 -o ${USER_NAME} -g ${USER_GROUP} /app/docker/entrypoint.sh /entrypoint.sh && \
+    install -Dm 0755 -o ${USER_NAME} -g ${USER_GROUP} /app/docker/bin/* /usr/local/bin/ && \
+    install -Dm 0775 -o ${USER_NAME} -g ${USER_GROUP} /app/galaxy-operator/bin/* /usr/bin/
 
-USER galaxy
+USER ${USER_NAME}:${USER_GROUP}
 WORKDIR /app
-VOLUME [ "/var/lib/pulp/artifact", \
-         "/var/lib/pulp/tmp", \
+VOLUME [ "/var/lib/pulp", \
+         "/etc/pulp", \
          "/tmp/ansible" ]
 ENTRYPOINT [ "/entrypoint.sh" ]

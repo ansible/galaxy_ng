@@ -6,8 +6,6 @@ FROM localhost/galaxy_ng/galaxy_ng:base
 ARG GNUPGHOME
 ENV GNUPGHOME $GNUPGHOME
 
-USER root
-
 RUN /app/dev/compose/signing/setup_gpg_workarounds.sh
 
 RUN set -ex; \

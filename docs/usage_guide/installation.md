@@ -21,7 +21,7 @@ The images contain all of the software necessary to run the galaxy_ng backend, b
 Create a galaxy-importer.cfg with the following content ...
 ```
 [galaxy-importer]
-ansible_local_tmp=~/.ansible/tmp
+ansible_local_tmp=/tmp/ansible
 ansible_test_local_image=false
 check_required_tags=false
 check_runtime_yaml=false
