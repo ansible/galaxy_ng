@@ -15,7 +15,7 @@ else
 fi
 oc patch clowdapp automation-hub --type=json \
     -p '[{"op": "replace",
-            "path": "/spec/deployments/1/podSpec/env/1/value",
+            "path": "/spec/deployments/2/podSpec/env/1/value",
             "value": "'"${CONTENT_ORIGIN}"'"
         }]'
 sleep 5
@@ -26,7 +26,7 @@ oc create route edge minio --service=env-${NAMESPACE}-minio --insecure-policy=Re
 MINIO_ROUTE=$(oc get route minio -o jsonpath='https://{.spec.host}{"\n"}')
 oc patch clowdapp automation-hub \
     --type=json \
-    -p '[{"op": "add", "path": "/spec/deployments/2/podSpec/env/-", "value": {
+    -p '[{"op": "add", "path": "/spec/deployments/3/podSpec/env/-", "value": {
                 "name": "PULP_AWS_S3_ENDPOINT_URL",
                 "value": "'"${MINIO_ROUTE}"'"
             }
