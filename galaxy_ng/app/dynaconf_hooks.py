@@ -19,7 +19,6 @@ from typing import Any, Dict, List
 
 import ldap
 import pkg_resources
-from ansible_base.lib.dynamic_config.settings_logic import get_dab_settings
 from ansible_base.lib.dynamic_config import (
     factory,
     load_dab_settings,
@@ -869,3 +868,5 @@ def configure_dynaconf_cli(pulp_settings: Dynaconf, data: dict) -> dict[str, Any
 
     # assign to the CLI can discover it
     data["CLI_DYNACONF"] = cli_dynaconf
+
+    return data

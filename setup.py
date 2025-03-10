@@ -110,7 +110,7 @@ def _format_pulp_requirement(plugin, specifier=None, ref=None, gh_namespace="pul
         )
 
 
-django_ansible_base_branch = os.getenv("DJANGO_ANSIBLE_BASE_BRANCH", "2025.1.31")
+django_ansible_base_branch = os.getenv("DJANGO_ANSIBLE_BASE_BRANCH", "2025.3.7")
 django_ansible_base_dependency = (
     "django-ansible-base[jwt-consumer,feature-flags] @ "
     f"git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}"
@@ -127,7 +127,7 @@ requirements = [
     "social-auth-app-django>=5.2.0",
     "django-auth-ldap==4.0.0",
     "drf-spectacular",
-    "dynaconf>=3.2.6",
+    "dynaconf>=3.2.10",
     "insights_analytics_collector>=0.3.0",
     "boto3",
     "distro",
