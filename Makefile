@@ -5,8 +5,6 @@ RUNNING = $(shell docker ps -q -f name=api)
 # if running is empty, then DJ_MANAGER = manage, else DJ_MANAGER = django-admin
 DJ_MANAGER = $(shell if [ "$(RUNNING)" = "" ]; then echo manage; else echo django-admin; fi)
 
-# set the OCI_ENV_PATH to be ../oci_env/ if this isn't set in the user's environment
-export OCI_ENV_PATH = $(shell if [ -n "$$OCI_ENV_PATH" ]; then echo "$$OCI_ENV_PATH"; else echo ${PWD}/../oci_env/; fi)
 
 define exec_or_run
 	# Tries to run on existing container if it exists, otherwise starts a new one.
@@ -105,69 +103,6 @@ docker/test/integration:      ## Run integration tests with optional MARK param 
 docker/test/integration/container:      ## Run integration tests.
 	docker build . -f dev/standalone/integration-test-dockerfile -t galaxy-integration-runner
 	docker run -it --rm --add-host=localhost:host-gateway galaxy-integration-runner $(FLAGS)
-
-.PHONY: oci-env/integration
-oci-env/integration:
-	oci-env exec bash /src/galaxy_ng/profiles/base/run_integration.sh $(FLAGS)
-
-.PHONY: gh-action/ldap
-gh-action/ldap:
-	python3 dev/oci_env_integration/actions/ldap.py
-
-.PHONY: gh-action/x_repo_search
-gh-action/x_repo_search:
-	python3 dev/oci_env_integration/actions/x_repo_search.py
-
-.PHONY: gh-action/iqe_rbac
-gh-action/iqe_rbac:
-	python3 dev/oci_env_integration/actions/iqe_rbac.py
-
-.PHONY: gh-action/keycloak
-gh-action/keycloak:
-	python3 dev/oci_env_integration/actions/keycloak.py
-
-.PHONY: gh-action/rbac
-gh-action/rbac:
-	python3 dev/oci_env_integration/actions/rbac.py
-
-.PHONY: gh-action/insights
-gh-action/insights:
-	python3 dev/oci_env_integration/actions/insights.py
-
-.PHONY: gh-action/standalone
-gh-action/standalone:
-	python3 dev/oci_env_integration/actions/standalone.py
-
-.PHONY: gh-action/community
-gh-action/community:
-	python3 dev/oci_env_integration/actions/community.py
-
-.PHONY: gh-action/certified-sync
-gh-action/certified-sync:
-	python3 dev/oci_env_integration/actions/certified-sync.py
-
-.PHONY: docker/loaddata
-docker/loaddata:  ## Load initial data from python script
-	$(call exec_or_run, api, "/bin/bash", "-c", "/entrypoint.sh manage shell < app/dev/common/setup_test_data.py")
-
-.PHONY: docker/makemigrations
-docker/makemigrations:   ## Run django migrations
-	$(call exec_or_run, api, $(DJ_MANAGER), makemigrations)
-
-.PHONY: docker/migrate
-docker/migrate:   ## Run django migrations
-	$(call exec_or_run, api, $(DJ_MANAGER), migrate)
-
-.PHONY: docker/add-signing-service
-docker/add-signing-service:    ## Add a Signing service using default GPG key
-	$(call exec_or_run, worker, $(DJ_MANAGER), add-signing-service, ansible-default, /var/lib/pulp/scripts/collection_sign.sh, galaxy3@ansible.com)
-
-.PHONY: docker/resetdb
-docker/resetdb:   ## Cleans database
-	# Databases must be stopped to be able to reset them.
-	./compose down
-	./compose stop
-	./compose run --rm api /bin/bash -c "yes yes | ./entrypoint.sh manage reset_db && django-admin migrate"
 
 .PHONY: docker/db_snapshot
 NAME ?= galaxy
@@ -282,22 +217,30 @@ docs/serve:
 # Simple stack spinup ... please don't overengineer this
 #########################################################
 
-.PHONY: oci/standalone
-oci/standalone:
-	dev/oci_start standalone
+.PHONY: compose/standalone
+compose/standalone:
+	docker compose -f dev/compose/standalone.yaml up
 
-.PHONY: oci/insights
-oci/insights:
-	dev/oci_start insights
+.PHONY: compose/insights
+compose/insights:
+	docker compose -f dev/compose/insights.yaml up
 
-.PHONY: oci/keycloak
-oci/keycloak:
-	dev/oci_start keycloak
+.PHONY: compose/aap
+compose/aap:
+	docker compose -f dev/compose/aap.yaml up
 
-.PHONY: oci/ldap
-oci/ldap:
-	dev/oci_start ldap
+.PHONY: compose/community
+compose/community:
+	docker compose -f dev/compose/community.yaml up
 
-.PHONY: oci/community
-oci/community:
-	dev/oci_start community
+.PHONY: compose/certified
+compose/certified:
+	docker compose -f dev/compose/certified-sync.yaml up
+
+.PHONY: compose/ldap
+compose/ldap:
+	docker compose -f dev/compose/ldap.yaml up
+
+.PHONY: compose/keycloak
+compose/keycloak:
+	docker compose -f dev/compose/keycloak.yaml up

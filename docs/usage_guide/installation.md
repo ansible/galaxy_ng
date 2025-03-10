@@ -6,30 +6,7 @@ tags:
 
 # How to install Galaxy NG
 
-Galaxy NG is a Pulp plugin and can be installed just like any other Pulp plugin, the recommendation
-is to install using the [pulp installer](https://docs.pulpproject.org/pulp_installer/) however if
-for any reason an installation from scratch is needed, all the details can be found on 
-[installing pulpcore](https://docs.pulpproject.org/pulpcore/installation/instructions.html#pypi-installation)
-
-## Installing from source using pulp-installer
-
-!!! info
-    This is the recommended installation process for a production ready system. If you are looking
-    for information on how to install on a development environment see [development setup page](../dev/getting_started.md)
-
-The following provides instructions for installing GalaxyNG on a virtual machine, with an example playbook that installs Pulp and Galaxy NG from PyPi packages.
-
-Future iterations will include support for installing from RPMs and installing to Kubernetes and OpenShift. 
-
-### Requirements
-Requires ansible-core 2.10+
-
-You will be using the Pulp Installer to complete the installation, so please review the requirements at [the Pulp Installer project](https://github.com/pulp/pulp_installer#system-requirements).
-
-
-### Installation steps
-
-1. Install the Pulp Installer:
+Galaxy NG is a [Pulp plugin](https://pulpproject.org/content-plugins/). As a plugin, Galaxy_NG has multiple installation methods available.
 
     ```bash
     ansible-galaxy collection install pulp.pulp_installer
@@ -61,7 +38,7 @@ Finally, you will run the `enduser-install.yml` playbook. The following sections
 
     ```bash
     ansible-playbook enduser-install.yml -i hosts --extra-vars "@enduser-install-vars.yml"
-    ``` 
+    ```
 
 ??? "Install using upstream RPMs"
 
@@ -69,7 +46,7 @@ Finally, you will run the `enduser-install.yml` playbook. The following sections
 
     ```bash
     ansible-playbook enduser-install.yml -i hosts --extra-vars "@upstream-rpm-install-vars.yml"
-    ``` 
+    ```
 
 !!! tip
     For more information about inventory files, view [Intro to Ansible Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html)
@@ -93,7 +70,7 @@ To publish a collection to the server, you will first need a namespace. Create a
 
 1. Click on the *Namespaces* menu.
 2. Click the *Create* button at the top of the page.
-3. In the resulting dialog, enter a value for the *Name*. The value you enter must match the namespace value in the collection archive metadata that you will be publishing. 
+3. In the resulting dialog, enter a value for the *Name*. The value you enter must match the namespace value in the collection archive metadata that you will be publishing.
 4. Leave the *Namespace Owners* field blank.
 5. Click the *Create* button.
 
@@ -143,7 +120,7 @@ If you need to run Django admin commands, use `pulpcore-manager` by doing the fo
     ```bash
     sudo su - pulp --shell /bin/bash
     ```
-2. Set the `PULP_SETTINGS` variable: 
+2. Set the `PULP_SETTINGS` variable:
 
     ```bash
     export PULP_SETTINGS=/etc/pulp/settings.py
@@ -233,4 +210,4 @@ And since the Pulp task system user the `docker` command to interact with the do
 
 ```bash
 usermod -a -G docker pulp
-``` 
+```
