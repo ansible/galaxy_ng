@@ -39,50 +39,13 @@ Access control in api/v1 is controlled by a model we have termed a "Legacy Names
 
 Found in https://github.com/ansible/galaxy_ng/tree/master/galaxy_ng/app/api/v3
 
-The v3 api is 100% focused on collections and collection namespaces. As time progresses, the v3 api becomes more and more a redirect to endpoints provided by pulp_ansible. 
+The v3 api is 100% focused on collections and collection namespaces. As time progresses, the v3 api becomes more and more a redirect to endpoints provided by pulp_ansible.
 
 Access control over collections is controlled by the v3 collection namespaces and pulp object level RBAC. Users are added to a group and the group is bound to the namespace with a permission. For the community instances, the group and permission bindings are handled automatically by the social auth handler.
 
-### OCI Env
+### Docker Compose Env
 
-The community profile is only supported via the [oci-env](https://github.com/pulp/oci_env) project. The "old" dev stack that utilizes the "compose" script in the project root is no longer supported and will be removed in the near future.
-
-To get started, it's recommended to a create a new top level directory to store your various checkouts.
-
-```bash
-/src
-`- oci_env
-`- galaxy_ng
-`- ansible-hub-ui
-```
-
-Clone the three projects into the src dir.
-```bash
-cd src
-git clone https://github.com/pulp/oci_env
-git clone https://github.com/ansible/galaxy_ng
-git clone https://github.com/ansible/ansible-hub-ui
-```
-
-Create a virtual env in the src dir
-```bash
-cd src
-python -m venv venv
-```
-
-Install the oci-env client
-```bash
-cd src
-source venv/bin/activate
-cd oci_env
-pip install -e client
-```
-
-Start the stack build and spinup
-```bash
-cd src/galaxy_ng
-make oci/community
-```
+...
 
 You can now reach the api at http://localhost:5001. The makefile targets created a couple test users, namely admin:admin for the primary superuser. This is purely an API stack with no UI. That makes it difficult to test and use github users, so see the next section about adding the UI.
 

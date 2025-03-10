@@ -13,6 +13,10 @@ on:
       - "*"
   workflow_dispatch:
 
+env:
+  PY_COLORS: '1'
+  ANSIBLE_FORCE_COLOR: '1'
+
 jobs:
   galaxy_collection:
     runs-on: ubuntu-latest
@@ -53,39 +57,49 @@ jobs:
           ansible-galaxy collection build -vvv
           ansible-galaxy collection install ansible-hub-1.0.0.tar.gz -vvv
 
-      #- name: Spin up a standalone galaxy_ng installation
-      #  run: |
-      #    echo "COMPOSE_PROFILE=standalone" > .compose.env
-      #    echo "DEV_SOURCE_PATH=galaxy_ng" >> .compose.env
-      #    make docker/all
-      #    ./compose up -d
-      #    pip3 install --upgrade requests pyyaml
-      #    python3 dev/common/poll.py
-
-      - name: set env vars
+      - name: (Linux) Install docker compose
         run: |
-          echo "OCI_ENV_PATH=${HOME}/work/galaxy_ng/oci_env" >> $GITHUB_ENV
-          echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> $GITHUB_ENV
-          echo "OCI_VERBOSE=1" >> $GITHUB_ENV
-          echo "GH_DUMP_LOGS=0" >> $GITHUB_ENV
+          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
+          install /tmp/docker-compose /usr/local/bin/
 
-      - name: setup oci-env
+      - name: sudo apt update
         run: |
-          git clone https://github.com/pulp/oci_env.git $OCI_ENV_PATH
-          pip install -e $OCI_ENV_PATH/client/
-          mkdir $OCI_ENV_PATH/db_backup/
+          sudo apt update
 
-      - name: run the standalone stack detached
-        run: OCI_COMPOSE_DETACH=1 make oci/standalone
+      - name: Install python requirements and podman
+        run: |
+          sudo apt-get install -y libsasl2-dev python-dev-is-python3 libldap2-dev libssl-dev podman
 
-      - name: wait for the system to start
-        run: make oci/standalone/poll
+      - name: Spin up dev/compose/standalone.yaml
+        run: |
+          docker compose -f dev/compose/standalone.yaml up --detach
+
+      - name: Export environment variables to host
+        run: |
+          docker compose -f dev/compose/standalone.yaml exec manager /bin/bash -c 'env | grep -v -w "HOME"' >> $GITHUB_ENV
+
+      - run: cat $GITHUB_ENV
+
+      - name: Wait for API online status
+        run: |
+          max_runs=10
+          for i in $(seq 1 $max_runs); do
+            echo "$i: checking api status..."
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -LI http://localhost:5001/api/galaxy/pulp/api/v3/status/)
+            if [ "$RESPONSE" -ne 200 ]; then
+              echo "API is down. Retrying in 10 seconds..."
+              sleep 10
+            else
+              echo "API online."
+              exit 0
+            fi
+          done
 
       - name: create the test users+data
-        run: docker exec -t ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
+        run: docker exec -t compose-manager-1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
 
       - name: make messages
-        run: docker exec -t ci-standalone-pulp-1 bash -c 'cd /src/galaxy_ng/galaxy_ng; django-admin makemessages --all'
+        run: docker exec -t compose-manager-1 bash -c 'cd /src/galaxy_ng/galaxy_ng; django-admin makemessages --all'
 
       - name: Test the user playbook
         run: ansible-playbook dev/galaxy_collection_plays/user.yml -vvv
@@ -98,3 +112,24 @@ jobs:
 
       - name: Test the ee playbook
         run: ansible-playbook dev/galaxy_collection_plays/ee.yml -vvv
+
+      - name: Logs
+        if: always()
+        run: |
+          set +e
+          docker ps -a
+          echo ::group::MANAGER_LOGS
+          docker logs --tail=10000 compose-manager-1
+          echo ::endgroup::
+          echo ::group::WORKER_LOGS
+          docker logs --tail=10000 compose-worker-1
+          echo ::endgroup::
+          echo ::group::CONTENT_LOGS
+          docker logs --tail=10000 compose-content-1
+          echo ::endgroup::
+          echo ::group::API_LOGS
+          docker logs --tail=10000 compose-api-1
+          echo ::endgroup::
+          echo ::group::DEPENDENCIES
+          docker exec compose-manager-1 bash -c "pip list && pip install pipdeptree && pipdeptree"
+          echo ::endgroup::
