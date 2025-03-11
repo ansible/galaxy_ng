@@ -54,7 +54,7 @@ x-common-env: &common-env
   PULP_KEYCLOAK_REALM: aap
   PULP_RH_ENTITLEMENT_REQUIRED: insights
 
-  HUB_API_ROOT: 'http://localhost:5001/api/'
+  HUB_API_ROOT: 'http://localhost:5001/api/galaxy'
   HUB_USE_MOVE_ENDPOINT: 'true'
   CONTAINER_REGISTRY: 'localhost:5001'
 
