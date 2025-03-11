@@ -8,13 +8,26 @@ class SuperDict(dict):
 
     immutable = False
 
+    _loaded_files = []
+    _loaded_envs = []
+    _loaded_hooks = {}
+    _loaded_by_loaders = {}
+
+    @property
+    def _store(self):
+        return self
+
+    def as_dict(self):
+        return self
+
     def set(self, key, value):
         if self.immutable:
             raise Exception("not mutable!")
         self[key] = value
 
+    # REVIEW(cutwater): Why this method is needed?
     def get(self, key, default=None):
-        return self[key] if key in self else default
+        return self[key] if key in self else default  # noqa: SIM401
 
     def __getattr__(self, key):
         try:
@@ -73,7 +86,7 @@ BASE_SETTINGS = {
 
 
 @pytest.mark.parametrize(
-    "do_stuff, extra_settings, expected_results",
+    ("do_stuff", "extra_settings", "expected_results"),
     [
         # 0 >=4.10 no external auth ...
         (
@@ -349,6 +362,7 @@ def test_dynaconf_hooks_toggle_feature_flags():
     """
     xsettings = SuperDict()
     xsettings.update(copy.deepcopy(BASE_SETTINGS))
+
     # Start with a feature flag that is disabled `value: False`
     xsettings["FLAGS"] = {
         "FEATURE_SOME_PLATFORM_FLAG_ENABLED": [
@@ -356,10 +370,13 @@ def test_dynaconf_hooks_toggle_feature_flags():
             {"condition": "before date", "value": "2022-06-01T12:00Z"},
         ]
     }
+
     # assume installer has enabled the feature flag on settings file
     xsettings["FEATURE_SOME_PLATFORM_FLAG_ENABLED"] = True
+
     # Run the post hook
     new_settings = post_hook(xsettings, run_dynamic=True, run_validate=True)
+
     # Check that the feature flag under FLAGS is now enabled
     # the hook will return Dynaconf merging syntax.
     assert new_settings["FLAGS__FEATURE_SOME_PLATFORM_FLAG_ENABLED"][0]["value"] is True

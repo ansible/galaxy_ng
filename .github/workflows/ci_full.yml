@@ -1,6 +1,8 @@
 ---
 name: galaxy_ng/ci
-on: {pull_request: {branches: ['**']}, push: {branches: ['**']}}
+on:
+  - push
+  - pull_request
 
 jobs:
 
@@ -9,14 +11,18 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
           fetch-depth: 0  # include all history
 
-      - name: intsall and run lint-po
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: install and run lint-po
         run: |
-          pip install lint-po
+          pip3 install lint-po
           lint-po ./galaxy_ng/locale/*/LC_MESSAGES/*.po
 
   lint:
@@ -24,7 +30,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
           fetch-depth: 0  # include all history
@@ -36,11 +42,8 @@ jobs:
       - name: Install requirements
         run: pip3 install -r lint_requirements.txt
 
-      - name: Run extra lint checks
-        run: "[ ! -x .ci/scripts/extra_linting.sh ] || .ci/scripts/extra_linting.sh"
-
-      - name: Check manifest
-        run: check-manifest
+      - name: Run linters
+        run: make lint
 
       - name: Check for pulpcore imports outside of pulpcore.plugin
         run: sh .ci/scripts/check_pulpcore_imports.sh
@@ -57,34 +60,49 @@ jobs:
           python-version: "3.11"
 
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: install ansible
-        run: pip3 install ansible
+      - name: checkout dab
+        run: |
+          cd ..
+          git clone https://github.com/ansible/django-ansible-base
 
-      - name: install python-requests
-        run: pip3 install requests
+      - name: install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libsasl2-dev libldap2-dev libssl-dev gettext
 
-      - name: run the build container playbook
-        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v build_container.yaml
+      - name: install tox & coverage
+        run: pip3 install tox coverage[toml]
 
-      - name: run the start container playbook
-        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v start_container.yaml
+      - name: run the unit tests
+        run: tox --colored yes -e py311
+        env:
+          PY_COLORS: 1
 
-      - name: run the unit test playbook
-        run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_unit_tests.yaml
+      - name: Inject PR number into coverage.xml
+        run: sed -i '2i <!-- PR ${{ github.event.number }} -->' coverage.xml
+
+      - name: upload coverage as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'master'
+        env:
+          SONAR_TOKEN: ${{ secrets.CICD_ORG_SONAR_TOKEN_CICD_BOT }}
 
       - name: upload jUnit XML test results
         if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'master'
         continue-on-error: true
-        run: >-
-          docker exec pulp /bin/bash -c 'curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}"
-          --form "xunit_xml=@/tmp/galaxy_ng-test-results.xml"
-          --form "component_name=hub"
-          --form "git_commit_sha=${{ github.sha }}"
-          --form "git_repository_url=https://github.com/${{ github.repository }}"
-          "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}/api/results/upload/"'
-
-
-      # FIXME: do we really care about these anymore ... ?
-      #- name: run the functional test playbook
-      #  run: cd dev/playbooks; ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i 'localhost,' --forks=1 -v run_functional_tests.yaml
+        run: |
+          curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \
+            --form "xunit_xml=@/tmp/galaxy_ng-test-results.xml" \
+            --form "component_name=hub" \
+            --form "git_commit_sha=${{ github.sha }}" \
+            --form "git_repository_url=https://github.com/${{ github.repository }}" \
+            "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}/api/results/upload/"

@@ -37,7 +37,7 @@ class TestContainerRemote(BaseTestCase):
         self.container_group = self._create_group(
             "",
             "container_group",
-            users=[self.container_user, ],
+            users=[self.container_user],
             roles=roles
         )
 

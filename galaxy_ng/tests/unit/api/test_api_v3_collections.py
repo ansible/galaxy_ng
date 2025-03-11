@@ -76,7 +76,7 @@ class TestCollectionViewsets(BaseTestCase):
             version="1.1.2",
         )
 
-        # TODO: Upload pulp_ansible/tests/assets collection
+        # TODO(rochacbruno): Upload pulp_ansible/tests/assets collection
         #       or create dummy ContentArtifacts directly
 
         self.collections_url = reverse(
@@ -155,9 +155,8 @@ class TestCollectionViewsets(BaseTestCase):
         for config in collection_configs:
             config["namespace"] = namespace
             collection = build_collection("skeleton", config=config)
-            response = self.client.post(
-                self.collection_upload_url, {"file": open(collection.filename, "rb")}
-            )
+            with open(collection.filename, "rb") as fp:
+                response = self.client.post(self.collection_upload_url, {"file": fp})
             collections.append((collection, response))
         return collections
 
@@ -290,7 +289,7 @@ class TestCollectionViewsets(BaseTestCase):
         # Ensure hrefs are overwritten
         self.assertNotIn(self.pulp_href_fragment, response.data["data"][0]["href"])
 
-        # TODO: implement subtests for each version after the
+        # TODO(rochacbruno): Implement subtests for each version after the
         # upload of artifacts has been implemented in `self.setUp`
         # for version in response.data['data']:
         #     with self.subTest(version=version['version):
