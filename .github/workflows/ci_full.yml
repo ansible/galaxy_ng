@@ -77,7 +77,7 @@ jobs:
         run: pip3 install tox coverage[toml]
 
       - name: run the unit tests
-        run: tox -e py311
+        run: tox --colored yes -e py311
 
       - name: Inject PR number into coverage.xml
         run: sed -i '2i <!-- PR ${{ github.event.number }} -->' coverage.xml
