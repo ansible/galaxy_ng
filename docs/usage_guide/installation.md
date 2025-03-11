@@ -6,17 +6,7 @@ tags:
 
 # How to install Galaxy NG
 
-Galaxy NG is a [Pulp plugin](https://pulpproject.org/content-plugins/). As a plugin, Galaxy_NG has multiple installation methods available. Historically the galaxy team advocated for the [pulp_installer](https://github.com/pulp/pulp_installer) project as the best path for installation. Unfortunately the pulp-installer project is no longer being released or updated for newer pulp versions and we have to drop support for it.
-
-We currently support 2 methods to spin up galaxy_ng
-
-1. Pulp OCI Images with docker
-2. Pulp OCI Images with [oci_env](https://github.com/pulp/oci_env) + docker
-
-
-If you'd like to learn more about the oci-env path, please check the [community devstack](/galaxy_ng/community/devstack/#oci-env) page. 
-
-The rest of this document covers using the OCI images directly with docker.
+Galaxy NG is a [Pulp plugin](https://pulpproject.org/content-plugins/). As a plugin, Galaxy_NG has multiple installation methods available.
 
 ## Installing with docker and oci images
 
@@ -29,21 +19,21 @@ The images contain all of the software necessary to run the galaxy_ng backend, b
 ### Defining the galaxy-importer.cfg
 
 Create a galaxy-importer.cfg with the following content ...
-```                                                                 
-[galaxy-importer]                                                                                                                        
-ansible_local_tmp=~/.ansible/tmp                                                                                                         
-ansible_test_local_image=false                                      
-check_required_tags=false                                                                                                                
-check_runtime_yaml=false                                                                                                                 
-check_changelog=false                                               
-infra_osd=false                                                                                                                          
-local_image_docker=false                                            
-log_level_main=INFO                                                 
-require_v1_or_greater=false                                         
-run_ansible_doc=false                                               
-run_ansible_lint=false                                              
-run_ansible_test=false                                              
-run_flake8=false                                                    
+```
+[galaxy-importer]
+ansible_local_tmp=~/.ansible/tmp
+ansible_test_local_image=false
+check_required_tags=false
+check_runtime_yaml=false
+check_changelog=false
+infra_osd=false
+local_image_docker=false
+log_level_main=INFO
+require_v1_or_greater=false
+run_ansible_doc=false
+run_ansible_lint=false
+run_ansible_test=false
+run_flake8=false
 ```
 
 The galaxy-importer settings are version specific. If you plan to run an older version of galaxy-importer, you should check the source repo for the definitive list of settings available.
@@ -59,22 +49,22 @@ Create a pulp_settings.env file with the following content ...
 ```
 PULP_CONTENT_ORIGIN=http://localhost:8080
 PULP_ANSIBLE_API_HOSTNAME=http://localhost:8080
-PULP_GALAXY_API_PATH_PREFIX=/api/galaxy/                            
+PULP_GALAXY_API_PATH_PREFIX=/api/galaxy/
 PULP_ANSIBLE_CONTENT_HOSTNAME=http://localhost:8080/pulp/content/api/galaxy/v3/artifacts/collections/
 PULP_CONTENT_PATH_PREFIX=/pulp/content/api/galaxy/v3/artifacts/collections/
 PULP_GALAXY_AUTHENTICATION_CLASSES=['galaxy_ng.app.auth.session.SessionAuthentication', 'rest_framework.authentication.TokenAuthentication', 'rest_framework.authentication.BasicAuthentication', 'django.contrib.auth.backends.ModelBackend']
 PULP_GALAXY_REQUIRE_CONTENT_APPROVAL=true
-PULP_GALAXY_DEPLOYMENT_MODE=standalone                              
-PULP_GALAXY_AUTO_SIGN_COLLECTIONS=false                             
-PULP_GALAXY_COLLECTION_SIGNING_SERVICE=ansible-default              
+PULP_GALAXY_DEPLOYMENT_MODE=standalone
+PULP_GALAXY_AUTO_SIGN_COLLECTIONS=false
+PULP_GALAXY_COLLECTION_SIGNING_SERVICE=ansible-default
 PULP_RH_ENTITLEMENT_REQUIRED=insights
 PULP_TOKEN_AUTH_DISABLED=false
-PULP_TOKEN_SERVER=http://localhost:8080/token/                      
+PULP_TOKEN_SERVER=http://localhost:8080/token/
 PULP_TOKEN_SIGNATURE_ALGORITHM=ES256
-PULP_PUBLIC_KEY_PATH=/src/galaxy_ng/dev/common/container_auth_public_key.pem                
+PULP_PUBLIC_KEY_PATH=/src/galaxy_ng/dev/common/container_auth_public_key.pem
 PULP_PRIVATE_KEY_PATH=/src/galaxy_ng/dev/common/container_auth_private_key.pem
 PULP_ANALYTICS=false
-PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=true     
+PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS=true
 PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD=true
 PULP_GALAXY_ENABLE_LEGACY_ROLES=true
 PULP_GALAXY_FEATURE_FLAGS__execution_environments=false
@@ -103,12 +93,12 @@ Understanding every setting in the file is beyond the scope of this document, bu
 
 Start the container with these docker args ...
 ```
-docker run \                                                        
+docker run \
     --name=galaxy_ng \
     -v $(pwd)/galaxy-importer.cfg:/etc/galaxy-importer/galaxy-importer.cfg
     --env-file=pulp_settings.env \
-    -p 8080:80 \                                                    
-    quay.io/pulp/galaxy:4.9.0 
+    -p 8080:80 \
+    quay.io/pulp/galaxy:4.9.0
 ```
 
 The container uses the s6 init system to spin up postgresql, gunicorn, nginx and various pulp services all in the same container. Once migrations have finished and the log entries settle and end with a "New worker XXXXXX discovered", the system is ready to use.
@@ -117,7 +107,7 @@ The container uses the s6 init system to spin up postgresql, gunicorn, nginx and
 
 ##### API basics
 
-The container should come up with a default "admin" account with a password of "password". Pass "-u admin:password" with any curl command that interacts with an endpoint that requires authentication. Many endpoints in galaxy_ng are redirects so it's best to pass "-L" to all curl commands. 
+The container should come up with a default "admin" account with a password of "password". Pass "-u admin:password" with any curl command that interacts with an endpoint that requires authentication. Many endpoints in galaxy_ng are redirects so it's best to pass "-L" to all curl commands.
 
 To check access to the system run this curl command ...
 ```

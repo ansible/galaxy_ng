@@ -15,12 +15,6 @@ This is recommended for beginners. It's less error prone and easier to setup, ho
 
 [Docker environment developer setup guide](docker_environment.md).
 
-### OCI Env
-
-This is the new preferred way to develop with pulp. It provides a flexible, containerized environment that's easy to set up. It supports running integration and functional tests as well as developing the UI. It supports all the features from the docker and vagrant environments, but isn't as heavily tested as the docker environment.
-
-[OCI Env developer setup guide](oci_env.md)
-
 ### Vagrant Environment
 
 This uses the [Pulp developer environment](https://docs.pulpproject.org/pulpcore/contributing/index.html) which is based off of vagrant. It offers a developer environment that is much closer to a production installation of Galaxy NG. It allows users to run on a wide variety of operating systems with any set of pulp plugins installed. Use this if you're:
@@ -42,7 +36,7 @@ UI PRs should be submitted at [github.com/ansible/ansible-hub-ui](https://github
 
 When submitting a PR to either the UI or backend:
 
-- All PRs must include either `Issue: AAH-XXXX` or `No-Issue` in the commit message. 
+- All PRs must include either `Issue: AAH-XXXX` or `No-Issue` in the commit message.
 
     - `No-Issue` should be used infrequently and the reviewers may ask you to create a Jira ticket and attach it to your PR.
     - `Issue: AAH-XXXX` should must include a Jira ticket number (such as AAH-123). This also requires a changelog entry in `CHANGES/`. Changelog entries follow the `<issue_number>.type` format. For example if I submit a fix for AAH-123, it must also come with a `CHANGES/123.bugfix` entry. Changelog file extensions include:
