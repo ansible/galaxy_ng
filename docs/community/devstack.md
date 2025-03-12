@@ -45,7 +45,26 @@ Access control over collections is controlled by the v3 collection namespaces an
 
 ### Docker Compose Env
 
-...
+To get started, it's recommended to a create a new top level directory to store your various checkouts.
+
+```bash
+/src
+`- galaxy_ng
+`- ansible-hub-ui
+```
+
+Clone the projects into the src dir.
+```bash
+cd src
+git clone https://github.com/ansible/galaxy_ng
+git clone https://github.com/ansible/ansible-hub-ui
+```
+
+Start the stack build and spinup
+```bash
+cd src/galaxy_ng
+make compose/community
+```
 
 You can now reach the api at http://localhost:5001. The makefile targets created a couple test users, namely admin:admin for the primary superuser. This is purely an API stack with no UI. That makes it difficult to test and use github users, so see the next section about adding the UI.
 
