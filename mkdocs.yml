@@ -54,6 +54,7 @@ theme:
       - search.share
       - content.code.annotate
   name: material
+  logo: imgs/galaxy.svg
   palette:
     - scheme: default
       media: "(prefers-color-scheme: light)"
