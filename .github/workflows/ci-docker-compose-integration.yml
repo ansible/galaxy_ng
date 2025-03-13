@@ -74,6 +74,11 @@ jobs:
               echo "API online."
               exit 0
             fi
+
+            if [ $i -eq $max_runs ]; then
+              echo "Failed to start API after $max_runs retries."
+              exit 1
+            fi
           done
 
       - name: Install integration requirements
