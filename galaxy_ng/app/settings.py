@@ -99,6 +99,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'django_guid.middleware.guid_middleware',
     'pulpcore.middleware.DomainMiddleware',
+    'ansible_base.lib.middleware.logging.log_request.LogTracebackMiddleware',
     # END: Pulp standard middleware
     'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
