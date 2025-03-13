@@ -1,5 +1,8 @@
 .SILENT:
 
+# set the USER_ID to the current user uid
+export USER_ID = $(shell id --user)
+
 .DEFAULT:
 .PHONY: help
 help:             ## Show the help.
@@ -172,7 +175,7 @@ test/unit:  ## Run unit tests
 	@which tox || (echo "tox not found, installing it now" && pip install tox)
 	tox -e py311
 
-.PHONY: test/integration/standalone 
+.PHONY: test/integration/standalone
 test/integration/standalone:  ## Run integration tests
 	# if pytest is not found raise a warning and install it
 	@which pytest || (echo "pytest not found, installing it now" && pip install -r integration_requirements.txt)

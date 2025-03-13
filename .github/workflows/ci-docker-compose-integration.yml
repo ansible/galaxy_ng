@@ -47,7 +47,7 @@ jobs:
 
       - name: Spin up dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml
         run: |
-          docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml up --detach
+          USER_ID=$(id --user) docker compose -f dev/compose/${{ matrix.env.TEST_PROFILE }}.yaml up --detach
 
       - name: Export environment variables to host
         if: ${{ matrix.env.TEST_PROFILE != 'certified-sync' }}
