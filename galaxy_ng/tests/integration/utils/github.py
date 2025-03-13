@@ -4,7 +4,7 @@ import requests
 
 class GithubAdminClient:
 
-    baseurl = os.environ.get('SOCIAL_AUTH_GITHUB_BASE_URL')
+    baseurl = os.environ.get("SOCIAL_AUTH_GITHUB_BASE_URL", "http://localhost:8082")
 
     def list_users(self):
         url = self.baseurl + '/admin/users/list'
