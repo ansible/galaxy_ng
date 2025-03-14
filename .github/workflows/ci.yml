@@ -14,32 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check_commit:
-
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
-          fetch-depth: 0  # include all history
-
-      - name: Run script to validate commits for both pull request and a push
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          GITHUB_PULL_REQUEST: ${{ github.event.number }}
-          GITHUB_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
-          GITHUB_BRANCH: ${{ github.head_ref }}
-          GITHUB_REPO_SLUG: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
-          GITHUB_USER: ${{ github.event.pull_request.user.login }}
-          GITHUB_PR_COMMITS_URL: ${{ github.event.pull_request.commits_url }}
-          START_COMMIT: ${{ github.event.before }}
-          END_COMMIT: ${{ github.event.after }}
-        run: |
-          python .ci/scripts/validate_commit_message_custom.py
 
   lint_po:
     runs-on: ubuntu-latest
@@ -53,7 +27,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    needs: check_commit
 
     steps:
       - uses: actions/checkout@v4
