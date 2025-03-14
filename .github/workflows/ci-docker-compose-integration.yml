@@ -66,7 +66,8 @@ jobs:
           max_runs=10
           for i in $(seq 1 $max_runs); do
             echo "$i: checking api status..."
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -LI ${{ env.HUB_API_ROOT }}pulp/api/v3/status/)
+            RESPONSE=$(curl -s -v -o /dev/null -w "%{http_code}" -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -LI ${{ env.HUB_API_ROOT }}pulp/api/v3/status/)
+            echo "$RESPONSE"
             if [ "$RESPONSE" -ne 200 ]; then
               echo "API is down. Retrying in 10 seconds..."
               sleep 10
