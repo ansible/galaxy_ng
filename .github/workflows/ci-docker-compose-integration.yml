@@ -66,13 +66,19 @@ jobs:
           max_runs=10
           for i in $(seq 1 $max_runs); do
             echo "$i: checking api status..."
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -LI http://localhost:5001/api/galaxy/pulp/api/v3/status/)
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -LI http://localhost:5001${{ env.PULP_GALAXY_API_PATH_PREFIX }}pulp/api/v3/status/)
+            echo "$RESPONSE"
             if [ "$RESPONSE" -ne 200 ]; then
               echo "API is down. Retrying in 10 seconds..."
               sleep 10
             else
               echo "API online."
               exit 0
+            fi
+
+            if [ $i -eq $max_runs ]; then
+              echo "Failed to start API after $max_runs retries."
+              exit 1
             fi
           done
 
