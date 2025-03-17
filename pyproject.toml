@@ -1,3 +1,13 @@
+[tool.towncrier]
+package = "galaxy_ng"
+filename = "CHANGES.md"
+directory = "CHANGES/"
+title_format = "## {version} ({project_date})"
+template = "CHANGES/.TEMPLATE.md"
+issue_format = "[#{issue}](https://github.com/ansible/galaxy_ng/issues/{issue})"
+start_string = "[//]: # (towncrier release notes start)\n"
+underlines = ["", "", ""]
+
 [tool.black]
 line-length = 100
 target-version = ["py36", "py37"]
