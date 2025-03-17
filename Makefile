@@ -184,24 +184,24 @@ api/list-permissions:   ## List all permissions - CONTAINS=str
 
 # 'bumpversion path' to go from 4.1.0 -> 4.1.1
 dev/bumpversion-patch:
-	bump2version --verbose patch
+	bump-my-version bump --verbose patch
 
 # 'bumpversion minor' to go from 4.1.1 -> 4.2.0
 dev/bumpversion-minor:
-	bump2version --verbose minor
+	bump-my-version bump --verbose minor
 
 # 'bumpversion major' to go from 4.2.9 -> 5.0.0
 dev/bumpversion-major:
-	bump2version --verbose major
+	bump-my-version bump --verbose major
 
 # 'bumpversion build' to go from 5.3.7.a1 -> 5.3.7.a2
 dev/bumpversion-build:
-	bump2version --verbose build
+	bump-my-version bump --verbose build
 
 # 'bumpversion release' to from 5.3.7.a1 -> 5.3.7.b1
 # another 'bumpversion release' to from from 5.3.7.b1 -> 5.3.7
 dev/bumpversion-release:
-	bump2version --verbose release
+	bump-my-version bump --verbose release
 
 docs/install:
 	@pip install -r doc_requirements.txt
