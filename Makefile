@@ -45,24 +45,24 @@ fmt:              ## Format the code using Darker
 
 .PHONY: dev/bumpversion-patch
 dev/bumpversion-patch:  ## 'bumpversion path' to go from 4.1.0 -> 4.1.1
-	bump2version --verbose patch
+	bump-my-version bump --verbose patch
 
 .PHONY: bumpversion-minor
 dev/bumpversion-minor:  ## 'bumpversion minor' to go from 4.1.1 -> 4.2.0
-	bump2version --verbose minor
+	bump-my-version bump --verbose minor
 
 .PHONY: bumpversion-major
 dev/bumpversion-major:  ## 'bumpversion major' to go from 4.2.9 -> 5.0.0
-	bump2version --verbose major
+	bump-my-version bump --verbose major
 
 .PHONY: dev/bumpversion-build
 dev/bumpversion-build:  ## 'bumpversion build' to go from 5.3.7.a1 -> 5.3.7.a2
-	bump2version --verbose build
+	bump-my-version bump --verbose build
 
 # another 'bumpversion release' to from from 5.3.7.b1 -> 5.3.7
 .PHONY: dev/bumpversion-release
 dev/bumpversion-release:  ## 'bumpversion release' to from 5.3.7.a1 -> 5.3.7.b1
-	bump2version --verbose release
+	bump-my-version bump --verbose release
 
 # Documentation Management
 
@@ -172,7 +172,7 @@ test/unit:  ## Run unit tests
 	@which tox || (echo "tox not found, installing it now" && pip install tox)
 	tox -e py311
 
-.PHONY: test/integration/standalone 
+.PHONY: test/integration/standalone
 test/integration/standalone:  ## Run integration tests
 	# if pytest is not found raise a warning and install it
 	@which pytest || (echo "pytest not found, installing it now" && pip install -r integration_requirements.txt)
