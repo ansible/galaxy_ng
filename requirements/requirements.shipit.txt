@@ -1,2 +1,2 @@
-bump2version
+bump-my-version
 wheel
