@@ -13,6 +13,7 @@ pip install -r integration_requirements.txt
 ```
 export HUB_API_ROOT='http://localhost:5001/api/galaxy/'
 export HUB_LOCAL=1
+export HUB_USE_MOVE_ENDPOINT="true"
 ```
 
 ```python
@@ -23,6 +24,7 @@ pytest -v -r sx --color=yes -m 'deployment_standalone' galaxy_ng/tests/integrati
 ```
 export HUB_API_ROOT='http://localhost:5001/api/'
 export HUB_LOCAL=1
+export HUB_TEST_AUTHENTICATION_BACKEND=community
 ```
 
 run tests:

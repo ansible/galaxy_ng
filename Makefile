@@ -1,5 +1,8 @@
 .SILENT:
 
+# set the USER_ID to the current user uid
+export USER_ID = $(shell id --user)
+
 .DEFAULT:
 .PHONY: help
 help:             ## Show the help.
@@ -173,11 +176,12 @@ test/unit:  ## Run unit tests
 	tox -e py311
 
 .PHONY: test/integration/standalone
-test/integration/standalone:  ## Run integration tests
+test/integration/standalone:  ## Run standalone integration tests
 	# if pytest is not found raise a warning and install it
 	@which pytest || (echo "pytest not found, installing it now" && pip install -r integration_requirements.txt)
-	@echo "Running integration tests"
-	HUB_ADMIN_PASS=admin \
+	@echo "Running standalone integration tests"
+	HUB_LOCAL=1 \
+	HUB_USE_MOVE_ENDPOINT="true" \
 	HUB_API_ROOT=http://localhost:5001/api/galaxy/ \
 	GALAXYKIT_SLEEP_SECONDS_POLLING=.5 \
     GALAXYKIT_SLEEP_SECONDS_ONETIME=.5 \
@@ -188,3 +192,59 @@ test/integration/standalone:  ## Run integration tests
 	pytest  galaxy_ng/tests/integration \
 	-p 'no:pulpcore' -p 'no:pulp_ansible' \
 	-v -r sx --color=yes -m 'deployment_standalone or all'
+
+.PHONY: test/integration/community
+test/integration/community:  ## Run community integration tests
+	# if pytest is not found raise a warning and install it
+	@which pytest || (echo "pytest not found, installing it now" && pip install -r integration_requirements.txt)
+	@echo "Running community integration tests"
+	HUB_LOCAL=1 \
+	HUB_TEST_AUTHENTICATION_BACKEND=community \
+	HUB_API_ROOT=http://localhost:5001/api/ \
+	GALAXYKIT_SLEEP_SECONDS_POLLING=.5 \
+    GALAXYKIT_SLEEP_SECONDS_ONETIME=.5 \
+    GALAXYKIT_POLLING_MAX_ATTEMPTS=50 \
+    GALAXY_SLEEP_SECONDS_POLLING=.5 \
+    GALAXY_SLEEP_SECONDS_ONETIME=.5 \
+    GALAXY_POLLING_MAX_ATTEMPTS=50 \
+	pytest  galaxy_ng/tests/integration \
+	-p 'no:pulpcore' -p 'no:pulp_ansible' \
+	-v -r sx --color=yes -m 'deployment_community'
+
+.PHONY: test/integration/certified
+test/integration/certified:  ## Run certified-sync integration tests
+	# if pytest is not found raise a warning and install it
+	@which pytest || (echo "pytest not found, installing it now" && pip install -r integration_requirements.txt)
+	@echo "Running certified-sync integration tests"
+	HUB_LOCAL=1 \
+	HUB_API_ROOT=http://localhost:5001/api/galaxy/ \
+	HUB_USE_MOVE_ENDPOINT="true" \
+	GALAXYKIT_SLEEP_SECONDS_POLLING=.5 \
+    GALAXYKIT_SLEEP_SECONDS_ONETIME=.5 \
+    GALAXYKIT_POLLING_MAX_ATTEMPTS=50 \
+    GALAXY_SLEEP_SECONDS_POLLING=.5 \
+    GALAXY_SLEEP_SECONDS_ONETIME=.5 \
+    GALAXY_POLLING_MAX_ATTEMPTS=50 \
+	pytest  galaxy_ng/tests/integration \
+	-p 'no:pulpcore' -p 'no:pulp_ansible' \
+	-v -r sx --color=yes -m 'sync'
+
+.PHONY: test/integration/insights
+test/integration/insights:  ## Run insights integration tests
+	# if pytest is not found raise a warning and install it
+	@which pytest || (echo "pytest not found, installing it now" && pip install -r integration_requirements.txt)
+	@echo "Running insights integration tests"
+	HUB_LOCAL=1 \
+	HUB_API_ROOT=http://localhost:8080/api/automation-hub/ \
+	HUB_AUTH_URL=http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token \
+    HUB_USE_MOVE_ENDPOINT="true" \
+    HUB_UPLOAD_SIGNATURES="true" \
+	GALAXYKIT_SLEEP_SECONDS_POLLING=.5 \
+    GALAXYKIT_SLEEP_SECONDS_ONETIME=.5 \
+    GALAXYKIT_POLLING_MAX_ATTEMPTS=50 \
+    GALAXY_SLEEP_SECONDS_POLLING=.5 \
+    GALAXY_SLEEP_SECONDS_ONETIME=.5 \
+    GALAXY_POLLING_MAX_ATTEMPTS=50 \
+	pytest  galaxy_ng/tests/integration \
+	-p 'no:pulpcore' -p 'no:pulp_ansible' \
+	-v -r sx --color=yes -m 'deployment_cloud or all'
