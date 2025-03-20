@@ -21,8 +21,8 @@ if one want to enable signing, then set the following variables
 on the per environment basis. e.g: export PULP_GALAXY_....
 """
 
-X_PULP_CONTENT_HOST = "pulp-content-app"
-X_PULP_CONTENT_PORT = 24816
+X_PULP_CONTENT_HOST = os.environ.get('PULP_X_PULP_CONTENT_HOST', 'pulp-content-app')
+X_PULP_CONTENT_PORT = os.environ.get('PULP_X_PULP_CONTENT_HOST', 24816)
 
 DATABASES = {
     'default': {
@@ -39,7 +39,10 @@ DATABASES = {
 REDIS_HOST = os.environ.get('PULP_REDIS_HOST')
 REDIS_PORT = os.environ.get('PULP_REDIS_PORT')
 
-REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = ['rest_framework.renderers.JSONRenderer']
+REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = [
+    'rest_framework.renderers.JSONRenderer',
+    'galaxy_ng.app.renderers.CustomBrowsableAPIRenderer'
+]
 
 _enabled_handlers = ['console']
 _extra_handlers = {}

@@ -114,7 +114,7 @@ class TestRepositories:
 
         # FIXME - the POST call will often result in an error with the oci+insights profile ...
         # root:client.py:216 Cannot parse expected JSON response
-        # (http://localhost:38080/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/):
+        # (http://localhost:8080/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/):
         # Post "http://pulp:55001/api/automation-hub/pulp/api/v3/repositories/ansible/ansible/":
         # read tcp 172.18.0.2:47338->172.18.0.3:55001: read: connection reset by peer
         repo_pulp_href_2 = None
@@ -132,7 +132,7 @@ class TestRepositories:
 
         # FIXME - the POST call will often result in an error with the oci+insights profile ...
         # root:client.py:216 Cannot parse expected JSON response
-        # (http://localhost:38080/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/
+        # (http://localhost:8080/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/
         #   <uuid>/move_collection_version/):
         # Post "http://pulp:55001/api/<prefix>/pulp/api/v3/repositories/ansible/ansible/
         #   <uuid>/move_collection_version/":

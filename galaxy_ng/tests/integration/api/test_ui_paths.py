@@ -2,7 +2,6 @@
 
 import random
 import json
-import subprocess
 
 import pytest
 
@@ -842,7 +841,7 @@ def test_api_ui_v1_tags_collections(ansible_config, upload_artifact):
 
 # /api/automation-hub/_ui/v1/tags/roles/
 @pytest.mark.deployment_community
-def test_api_ui_v1_tags_roles(ansible_config):
+def test_api_ui_v1_tags_roles(ansible_config, docker_compose_exec):
     """Test endpoint's sorting and filtering"""
 
     def _sync_role(github_user, role_name):
@@ -853,10 +852,7 @@ def test_api_ui_v1_tags_roles(ansible_config):
         wait_for_v1_task(resp=resp, api_client=api_admin_client)
 
     def _populate_tags_cmd():
-        proc = subprocess.run(
-            "django-admin populate-role-tags",
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
+        proc = docker_compose_exec("django-admin populate-role-tags")
         assert proc.returncode == 0
 
     config = ansible_config("basic_user")
