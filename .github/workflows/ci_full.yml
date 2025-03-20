@@ -1,0 +1,108 @@
+---
+name: galaxy_ng/ci
+on:
+  - push
+  - pull_request
+
+jobs:
+
+  lint_po:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
+          fetch-depth: 0  # include all history
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: install and run lint-po
+        run: |
+          pip3 install lint-po
+          lint-po ./galaxy_ng/locale/*/LC_MESSAGES/*.po
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
+          fetch-depth: 0  # include all history
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip3 install -r lint_requirements.txt
+
+      - name: Run linters
+        run: make lint
+
+      - name: Check for pulpcore imports outside of pulpcore.plugin
+        run: sh .ci/scripts/check_pulpcore_imports.sh
+
+      - name: Check for gettext problems
+        run: sh .ci/scripts/check_gettext.sh
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: checkout dab
+        run: |
+          cd ..
+          git clone https://github.com/ansible/django-ansible-base
+
+      - name: install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libsasl2-dev libldap2-dev libssl-dev gettext
+
+      - name: install tox & coverage
+        run: pip3 install tox coverage[toml]
+
+      - name: run the unit tests
+        run: tox --colored yes -e py311
+        env:
+          PY_COLORS: 1
+
+      - name: Inject PR number into coverage.xml
+        run: sed -i '2i <!-- PR ${{ github.event.number }} -->' coverage.xml
+
+      - name: upload coverage as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'master'
+        env:
+          SONAR_TOKEN: ${{ secrets.CICD_ORG_SONAR_TOKEN_CICD_BOT }}
+
+      - name: upload jUnit XML test results
+        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'master'
+        continue-on-error: true
+        run: |
+          curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \
+            --form "xunit_xml=@/tmp/galaxy_ng-test-results.xml" \
+            --form "component_name=hub" \
+            --form "git_commit_sha=${{ github.sha }}" \
+            --form "git_repository_url=https://github.com/${{ github.repository }}" \
+            "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}/api/results/upload/"
