@@ -1,28 +1,23 @@
 import base64
+import json
 
 
-def user_x_rh_identity(username, account_number=None):
-    account_number = account_number or "12345"
+def user_x_rh_identity(username: str, account_number: str = "12345") -> bytes:
     title_username = username.title()
-    token_json = """{
-        "entitlements":
-            {"insights":
-                {"is_entitled": true}
+
+    token = {
+        "entitlements": {"insights": {"is_entitled": True}},
+        "identity": {
+            "account_number": account_number,
+            "user": {
+                "username": username,
+                "email": username,
+                "first_name": f"{title_username}s",
+                "last_name": f"{title_username}sington",
+                "is_org_admin": True,
             },
-        "identity":
-            {"account_number": "%(account_number)s",
-            "user":
-                {"username": "%(username)s",
-                "email": "%(username)s",
-                "first_name": "%(title_username)s",
-                "last_name": "%(title_username)sington",
-                "is_org_admin": true
-                },
-            "internal": {"org_id": "54321"}
-            }
-            }""" % {'username': username, 'title_username': title_username,
-                    'account_number': account_number}
+            "internal": {"org_id": "54321"},
+        },
+    }
 
-    token_b64 = base64.b64encode(token_json.encode())
-
-    return token_b64
+    return base64.b64encode(json.dumps(token).encode())
