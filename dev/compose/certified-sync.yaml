@@ -122,6 +122,14 @@ services:
         <<: *common-env
     image: "localhost/galaxy_ng/galaxy_ng:dev"
 
+  base_img_nginx:  # Extracts nginx files from base_img
+    depends_on:
+      - base_img
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    image: "localhost/galaxy_ng/galaxy_ng:nginx"
+
   redis:
     image: "redis:5"
 
@@ -305,8 +313,9 @@ services:
       "
 
   standalone-nginx:
-    image: "nginx:latest"
+    image: "localhost/galaxy_ng/galaxy_ng:nginx"
     depends_on:
+      - base_img_nginx
       - standalone-postgres
       - standalone-migrations
       - standalone-api
@@ -524,8 +533,9 @@ services:
       "
 
   insights-nginx:
-    image: "nginx:latest"
+    image: "localhost/galaxy_ng/galaxy_ng:nginx"
     depends_on:
+      - base_img_nginx
       - insights-postgres
       - insights-migrations
       - insights-api

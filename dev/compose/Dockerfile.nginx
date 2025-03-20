@@ -1,0 +1,16 @@
+# This Dockerfile is meant to extract the nginx snippets from Dockerfile.rhel8
+FROM localhost/galaxy_ng/galaxy_ng:base as builder
+
+USER root
+RUN mkdir -p /etc/nginx/pulp \
+    && ln $(pip show pulp_ansible | sed -n -e 's/Location: //p')/pulp_ansible/app/webserver_snippets/nginx.conf /etc/nginx/pulp/pulp_ansible.conf \
+    && ln $(pip show pulp_container | sed -n -e 's/Location: //p')/pulp_container/app/webserver_snippets/nginx.conf /etc/nginx/pulp/pulp_container.conf \
+    && cp /app/galaxy_ng/app/webserver_snippets/nginx.conf /etc/nginx/pulp/galaxy.conf
+
+FROM docker.io/nginx:latest
+
+RUN mkdir -p /etc/nginx/pulp
+COPY --from=builder /etc/nginx/pulp/*.conf /etc/nginx/pulp
+
+# Run script uses standard ways to run the application
+CMD nginx -g "daemon off;"
