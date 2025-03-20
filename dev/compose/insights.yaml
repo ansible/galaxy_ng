@@ -102,6 +102,14 @@ services:
         <<: *common-env
     image: "localhost/galaxy_ng/galaxy_ng:dev"
 
+  base_img_nginx:  # Extracts nginx files from base_img
+    depends_on:
+      - base_img
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    image: "localhost/galaxy_ng/galaxy_ng:nginx"
+
   proxy:
     build:
       context: "../../profiles/insights/proxy"
@@ -286,8 +294,9 @@ services:
       "
 
   nginx:
-    image: "nginx:latest"
+    image: "localhost/galaxy_ng/galaxy_ng:nginx"
     depends_on:
+      - base_img_nginx
       - postgres
       - migrations
       - api
