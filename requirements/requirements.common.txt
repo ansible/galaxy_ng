@@ -163,7 +163,7 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-galaxy-importer==0.4.25
+galaxy-importer==0.4.29
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -309,6 +309,7 @@ packaging==23.2
     #   ansible-lint
     #   bindep
     #   black
+    #   galaxy-importer
     #   gunicorn
     #   marshmallow
     #   pulp-glue
