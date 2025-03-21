@@ -1,6 +1,7 @@
 FROM registry.access.redhat.com/ubi8
 
 ARG GIT_COMMIT
+ARG USER_ID=1000
 
 ENV LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
@@ -11,7 +12,7 @@ ENV LANG=en_US.UTF-8 \
     GIT_COMMIT=${GIT_COMMIT:-} \
     VIRTUAL_ENV="/venv"
 
-RUN adduser --uid 1000 --gid 0 --home-dir /app --no-create-home galaxy
+RUN adduser --uid "${USER_ID}" -G 0 --home-dir /app --no-create-home galaxy
 
 # https://access.redhat.com/security/cve/CVE-2021-3872
 RUN rpm -qa | egrep ^vim | xargs rpm -e --nodeps
@@ -44,20 +45,20 @@ RUN chgrp -R 0 $HOME && \
     chmod -R g=u $HOME
 
 RUN set -ex; \
-    install -dm 0775 -o galaxy /var/lib/pulp/artifact \
-                               /var/lib/pulp/tmp \
-                               /etc/pulp/certs \
+    install -dm 0775 -o galaxy \
+                               /var/lib/pulp/{artifact,assets,media,scripts,tmp} \
+                               /etc/pulp/{certs,keys,gnupg} \
                                /tmp/ansible && \
     pip3.11 install --no-deps --editable /app && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
-    install -Dm 0644 /app/ansible.cfg /etc/ansible/ansible.cfg && \
-    install -Dm 0644 /app/docker/etc/settings.py /etc/pulp/settings.py && \
-    install -Dm 0755 /app/docker/entrypoint.sh /entrypoint.sh && \
-    install -Dm 0755 /app/docker/bin/* /usr/local/bin/
+    install -Dm 0644 -o galaxy /app/ansible.cfg /etc/ansible/ansible.cfg && \
+    install -Dm 0644 -o galaxy /app/docker/etc/settings.py /etc/pulp/settings.py && \
+    install -Dm 0755 -o galaxy /app/docker/entrypoint.sh /entrypoint.sh && \
+    install -Dm 0755 -o galaxy /app/docker/bin/* /usr/local/bin/
 
 USER galaxy
 WORKDIR /app
-VOLUME [ "/var/lib/pulp/artifact", \
-         "/var/lib/pulp/tmp", \
+VOLUME [ "/var/lib/pulp", \
+         "/etc/pulp", \
          "/tmp/ansible" ]
 ENTRYPOINT [ "/entrypoint.sh" ]

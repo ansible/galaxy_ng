@@ -1,5 +1,6 @@
 x-common-env: &common-env
-  GNUPGHOME: /root/.gnupg/
+
+  GNUPGHOME: /etc/pulp/gnupg/
 
   DJANGO_SUPERUSER_USERNAME: admin
   DJANGO_SUPERUSER_EMAIL: admin@example.com
@@ -9,8 +10,10 @@ x-common-env: &common-env
   POSTGRES_PASSWORD: galaxy_ng
   POSTGRES_DB: galaxy_ng
 
+  # no spying
   PULP_ANALYTICS: 'false'
 
+  # normally goes into settings.py ...
   PULP_DATABASES__default__ENGINE: django.db.backends.postgresql
   PULP_DATABASES__default__NAME: galaxy_ng
   PULP_DATABASES__default__USER: galaxy_ng
@@ -23,6 +26,7 @@ x-common-env: &common-env
   PULP_DEFAULT_FILE_STORAGE: "pulpcore.app.models.storage.FileSystem"
   PULP_REDIRECT_TO_OBJECT_STORAGE: 'false'
 
+  # Hostname and prefix has to be correct
   PULP_GALAXY_API_PATH_PREFIX: '/api/'
   PULP_CONTENT_PATH_PREFIX: '/pulp/content/'
   PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:5001'
@@ -30,12 +34,14 @@ x-common-env: &common-env
   PULP_CONTENT_ORIGIN: "http://localhost:5001"
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
 
+  # signing ...
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
   PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'false'
   PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
   PULP_GALAXY_COLLECTION_SIGNING_SERVICE: 'ansible-default'
   PULP_GALAXY_CONTAINER_SIGNING_SERVICE: 'container-default'
 
+  # pulp container ...
   PULP_TOKEN_AUTH_DISABLED: false
   PULP_TOKEN_SERVER: 'http://localhost:5001/token/'
   PULP_TOKEN_SIGNATURE_ALGORITHM: ES256
@@ -58,7 +64,14 @@ x-common-env: &common-env
   HUB_USE_MOVE_ENDPOINT: 'true'
   CONTAINER_REGISTRY: 'localhost:5001'
 
+  # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
+
+  # DEV EDITABLE STUFF
+  # To enable editable installs of local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
+  # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
+  # This can be done as part of the `docker compose` call:
+  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/standalone.yaml up
   DEV_SOURCE_PATH:
 
   PULP_AUTHENTICATION_BACKEND_PRESET: keycloak
@@ -104,9 +117,11 @@ services:
     build:
       context: ../../
       dockerfile: Dockerfile
+      args:
+        USER_ID: "${USER_ID:-1000}"
     image: "localhost/galaxy_ng/galaxy_ng:base"
 
-  base_img_dev:
+  base_img_dev:  # Extends base_img with extra files and dev tools
     depends_on:
       - base_img
     build:
@@ -115,6 +130,14 @@ services:
       args:
         <<: *common-env
     image: "localhost/galaxy_ng/galaxy_ng:dev"
+
+  base_img_nginx:  # Extracts nginx files from base_img
+    depends_on:
+      - base_img
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    image: "localhost/galaxy_ng/galaxy_ng:nginx"
 
   redis:
     image: "redis:5"
@@ -129,6 +152,9 @@ services:
       test: ["CMD", "pg_isready", "-U", "galaxy_ng"]
       interval: 10s
       retries: 5
+    # Uncomment below to spam out every DB statement to the service stderr
+    # WARNING: enabling log_statement=all makes database slower
+    # command: ["postgres", "-c", "log_statement=ddl", "-c", "log_destination=stderr"]
 
   migrations:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
@@ -137,7 +163,7 @@ services:
       - postgres
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp_ldap:/var/lib/pulp"
+      - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -149,11 +175,14 @@ services:
         set -e;
         rm -rf /var/lib/pulp/.migrated;
         /src/galaxy_ng/dev/compose/bin/devinstall;
+
         pulpcore-manager check --database default;
         pulpcore-manager migrate;
         pulpcore-manager shell < /src/galaxy_ng/dev/common/setup_test_data.py;
         pulpcore-manager createsuperuser --noinput || true;
+
         touch /var/lib/pulp/.migrated;
+        chown -R galaxy:galaxy /etc/pulp /var/lib/pulp;
       "
 
   api:
@@ -164,7 +193,7 @@ services:
       - migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp_ldap:/var/lib/pulp"
+      - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -174,12 +203,13 @@ services:
     networks:
       - default
       - service-mesh
-    user: root
+    user: galaxy
     <<: *debugging
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+
         /src/galaxy_ng/dev/compose/bin/reloader /src/galaxy_ng/dev/compose/bin/pulpcore-api
       "
 
@@ -191,7 +221,7 @@ services:
       - migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp_ldap:/var/lib/pulp"
+      - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
@@ -201,12 +231,13 @@ services:
     networks:
       - default
       - service-mesh
-    user: root
+    user: galaxy
     <<: *debugging
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+
         /src/galaxy_ng/dev/compose/bin/reloader /src/galaxy_ng/dev/compose/bin/pulpcore-content
       "
 
@@ -218,18 +249,21 @@ services:
       - migrations
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp_ldap:/var/lib/pulp"
+      - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
       <<: *common-env
-    user: root
+    user: galaxy
     <<: *debugging
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+
+        # Worker needs gpg in order to consume signing tasks;
         gpg --list-secret-keys;
+
         /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
       "
 
@@ -242,43 +276,53 @@ services:
       - worker
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
-      - "var_lib_pulp_ldap:/var/lib/pulp"
+      - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
     environment:
       <<: *common-env
-    user: root
+    user: galaxy
     <<: *debugging
     command: |
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
+
+        # Give some time for API to start;
         sleep 5;
+
+        # Setup signing services;
         gpg --list-secret-keys;
         /src/galaxy_ng/dev/compose/signing/setup_signing_services.sh;
         echo 'Signing Services';
-        curl -s -u $DJANGO_SUPERUSER_USERNAME:$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
+        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
+
+        # Setup repository gpgkey for upload verification;
         /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
+
         echo ' ';
         echo '###################### API ROOT ##############################';
-        curl -s -u $DJANGO_SUPERUSER_USERNAME:$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/ | python -m json.tool;
+        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/ | python -m json.tool;
         echo '################### DEV_SOURCE_PATH ##########################';
-        echo $DEV_SOURCE_PATH;
+        echo $$DEV_SOURCE_PATH;
         echo ' ';
         echo '######################## READY ###############################';
         echo ' ';
-        echo 'Credentials:  ' $DJANGO_SUPERUSER_USERNAME:$DJANGO_SUPERUSER_PASSWORD;
+        echo 'Credentials:  ' $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD;
         echo 'API Spec:      http://localhost:5001/api/galaxy/v3/swagger-ui/';
         echo 'Django Admin:  docker compose -f dev/compose/ldap.yaml exec manager pulpcore-manager';
         echo 'Settings list: docker compose -f dev/compose/ldap.yaml exec manager dynaconf list';
         echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
         echo '##############################################################';
+
+        # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
         tail -f /dev/null
       "
 
   nginx:
-    image: "nginx:latest"
+    image: "localhost/galaxy_ng/galaxy_ng:nginx"
     depends_on:
+      - base_img_nginx
       - postgres
       - migrations
       - api
@@ -329,8 +373,8 @@ services:
       POSTGRES_DB: keycloak
 
 volumes:
-  var_lib_pulp_ldap:
-    name: var_lib_pulp_ldap
+  var_lib_pulp:
+    name: var_lib_pulp
   etc_pulp_certs:
     name: etc_pulp_certs
   kc_pg_data:
