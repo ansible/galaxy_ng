@@ -1,6 +1,6 @@
 x-common-env: &common-env
 
-  GNUPGHOME: /root/.gnupg/
+  GNUPGHOME: /etc/pulp/gnupg/
 
   DJANGO_SUPERUSER_USERNAME: admin
   DJANGO_SUPERUSER_EMAIL: admin@example.com
@@ -89,6 +89,8 @@ services:
     build:
       context: ../../
       dockerfile: Dockerfile
+      args:
+        USER_ID: "${USER_ID:-1000}"
     image: "localhost/galaxy_ng/galaxy_ng:base"
 
   base_img_dev:  # Extends base_img with extra files and dev tools
@@ -152,6 +154,7 @@ services:
         pulpcore-manager createsuperuser --noinput || true;
 
         touch /var/lib/pulp/.migrated;
+        chown -R galaxy:galaxy /etc/pulp /var/lib/pulp;
       "
 
   api:
@@ -172,7 +175,7 @@ services:
     networks:
       - default
       - service-mesh
-    user: root
+    user: galaxy
     <<: *debugging
     command: |
       bash -c "
@@ -200,7 +203,7 @@ services:
     networks:
       - default
       - service-mesh
-    user: root
+    user: galaxy
     <<: *debugging
     command: |
       bash -c "
@@ -223,7 +226,7 @@ services:
       - "../../:/app"
     environment:
       <<: *common-env
-    user: root
+    user: galaxy
     <<: *debugging
     command: |
       bash -c "
@@ -250,7 +253,7 @@ services:
       - "../../:/app"
     environment:
       <<: *common-env
-    user: root
+    user: galaxy
     <<: *debugging
     command: |
       bash -c "

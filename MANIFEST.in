@@ -25,3 +25,4 @@ include galaxy-operator/bin/readyz.py
 exclude .coveragerc
 exclude .sonarcloud.properties
 exclude aap_compose_dev.yaml
+exclude tox.ini
