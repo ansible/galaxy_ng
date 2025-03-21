@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import subprocess
 
 import pytest
 from orionutils.utils import increment_version
@@ -338,10 +339,10 @@ def sync_instance_crc():
     dev/data/insights-fixture.tar.gz
     """
 
-    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:38080/api/automation-hub/")
+    url = os.getenv("TEST_CRC_API_ROOT", "http://localhost:8080/api/automation-hub/")
     auth_url = os.getenv(
         "TEST_CRC_AUTH_URL",
-        "http://localhost:38080/auth/realms/redhat-external/protocol/openid-connect/token"
+        "http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token"
     )
 
     config = AnsibleConfigFixture(url=url, auth_url=auth_url, profile="org_admin")
@@ -566,3 +567,20 @@ def pytest_collection_modifyitems(items, config):
     for item in items:
         if not any(item.iter_markers()):
             item.add_marker("all")
+
+
+@pytest.fixture
+def docker_compose_exec():
+    def _exec(cmd: str, cwd=None):
+        cd = ""
+        if cwd is not None:
+            cd = f"cd {cwd};"
+
+        proc = subprocess.run(
+            f"docker exec compose-manager-1 /bin/bash -c '{cd}{cmd}'",
+            shell=True,
+            capture_output=True,
+        )
+        return proc
+
+    return _exec

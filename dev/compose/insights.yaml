@@ -1,6 +1,7 @@
 x-common-env: &common-env
 
   GNUPGHOME: /root/.gnupg/
+  GALAXY_IMPORTER_CONFIG: /src/galaxy_ng/profiles/insights/galaxy-importer/galaxy-importer.cfg
 
   DJANGO_SUPERUSER_USERNAME: admin
   DJANGO_SUPERUSER_EMAIL: admin@example.com
@@ -22,43 +23,34 @@ x-common-env: &common-env
   PULP_DATABASES__default__PORT: 5432
 
   PULP_DEBUG: 1
-  PULP_GALAXY_DEPLOYMENT_MODE: 'standalone'
+  PULP_GALAXY_DEPLOYMENT_MODE: 'insights'
+  PULP_RH_ENTITLEMENT_REQUIRED: 'insights'
   PULP_DEFAULT_FILE_STORAGE: "pulpcore.app.models.storage.FileSystem"
   PULP_REDIRECT_TO_OBJECT_STORAGE: 'false'
 
+  # collection download
+  PULP_X_PULP_CONTENT_HOST: content
+  PULP_X_PULP_CONTENT_PORT: 24816
+
   # Hostname and prefix has to be correct
-  PULP_GALAXY_API_PATH_PREFIX: '/api/galaxy/'
-  PULP_CONTENT_PATH_PREFIX: '/pulp/content/'
-  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:5001'
-  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:5001"
-  PULP_CONTENT_ORIGIN: "http://localhost:5001"
-  PULP_CSRF_TRUSTED_ORIGINS: "['http://localhost']"
+  PULP_GALAXY_API_PATH_PREFIX: '/api/automation-hub/'
+  PULP_CONTENT_PATH_PREFIX: '/api/automation-hub/pulp/content/'
+  PULP_ANSIBLE_API_HOSTNAME: 'http://localhost:8080'
+  PULP_ANSIBLE_CONTENT_HOSTNAME: "http://localhost:8080"
+  PULP_CONTENT_ORIGIN: "http://localhost:8080"
+  PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
 
-  # signing ...
-  PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
-  PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
-  PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
-  PULP_GALAXY_COLLECTION_SIGNING_SERVICE: 'ansible-default'
-  PULP_GALAXY_CONTAINER_SIGNING_SERVICE: 'container-default'
 
-  # pulp container ...
-  PULP_TOKEN_AUTH_DISABLED: 'false'
-  PULP_TOKEN_SERVER: 'http://localhost:5001/token/'
-  PULP_TOKEN_SIGNATURE_ALGORITHM: 'ES256'
-  PULP_PUBLIC_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_public_key.pem'
-  PULP_PRIVATE_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_private_key.pem'
 
   # auth ...
-  PULP_GALAXY_AUTHENTICATION_CLASSES: "['rest_framework.authentication.SessionAuthentication', 'rest_framework.authentication.TokenAuthentication', 'rest_framework.authentication.BasicAuthentication']"
-  PULP_ANSIBLE_BASE_JWT_VALIDATE_CERT: 'false'
-  PULP_ANSIBLE_BASE_JWT_KEY: 'https://localhost'
-  PULP_GALAXY_FEATURE_FLAGS__external_authentication: 'true'
+  PULP_GALAXY_AUTHENTICATION_CLASSES: "['galaxy_ng.app.auth.auth.RHIdentityAuthentication']"
 
-  # disable user/group modifications
-  PULP_ALLOW_LOCAL_RESOURCE_MANAGEMENT: 'true'
-
-  # role content workaround ..
-  PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'
+  PULP_GALAXY_FEATURE_FLAGS__dab_resource_registry: 'false'
+  PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
+  PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
+  PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+  GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+  ENABLE_COLLECTION_SIGNING: 0
 
   # Resource server
   # This disables the attempt for resource syncing
@@ -70,19 +62,22 @@ x-common-env: &common-env
   # PULP_RESOURCE_SERVER__VALIDATE_HTTPS='false'
 
   # Integration test settings
-  HUB_API_ROOT: 'http://localhost:5001/api/galaxy/'
-  HUB_TEST_MARKS: deployment_standalone or all
-  HUB_USE_MOVE_ENDPOINT: 'true'
-  CONTAINER_REGISTRY: 'localhost:5001'
+  HUB_AUTH_URL: 'http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token'
+  HUB_API_ROOT: 'http://localhost:8080/api/automation-hub/'
+  HUB_USE_MOVE_ENDPOINT: "true"
+
+
+  HUB_LOCAL: 0
+  HUB_TEST_MARKS: deployment_cloud or all
 
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
 
   # DEV EDITABLE STUFF
-  # To enable editable installs of local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
+  # To enable editable to install local checkouts set DEV_SOURCE_PATH keeping the ordering as follows:
   # "dynaconf:pulpcore:galaxy_importer:pulp_ansible:pulp_container:galaxy_ng:django-ansible-base"
   # This can be done as part of the `docker compose` call:
-  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/standalone.yaml up
+  # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/insights.yaml up
   DEV_SOURCE_PATH:
 
 # allow attaching to the running container
@@ -106,6 +101,17 @@ services:
       args:
         <<: *common-env
     image: "localhost/galaxy_ng/galaxy_ng:dev"
+
+  proxy:
+    build:
+      context: "../../profiles/insights/proxy"
+    ports:
+      - "8080:8080"
+    environment:
+      UPSTREAM_URL: "http://api:24817"
+      PROXY_PORT: "8080"
+    volumes:
+      - "../../profiles/insights/proxy:/app:ro,Z"
 
   redis:
     image: "redis:5"
@@ -176,7 +182,6 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
-
         /src/galaxy_ng/dev/compose/bin/reloader /src/galaxy_ng/dev/compose/bin/pulpcore-api
       "
 
@@ -204,7 +209,6 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
-
         /src/galaxy_ng/dev/compose/bin/reloader /src/galaxy_ng/dev/compose/bin/pulpcore-content
       "
 
@@ -258,27 +262,22 @@ services:
         # Give some time for API to start;
         sleep 5;
 
-        # Setup signing services;
-        gpg --list-secret-keys;
-        /src/galaxy_ng/dev/compose/signing/setup_signing_services.sh;
-        echo 'Signing Services';
-        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
-
         # Setup repository gpgkey for upload verification;
         /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
 
         echo ' ';
         echo '###################### API ROOT ##############################';
-        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:24817/api/galaxy/ | python -m json.tool;
+        curl -s -k -u org-admin:redhat http://proxy:8080/api/automation-hub/ | python -m json.tool;
         echo '################### DEV_SOURCE_PATH ##########################';
         echo $$DEV_SOURCE_PATH;
         echo ' ';
         echo '######################## READY ###############################';
         echo ' ';
-        echo 'Credentials:  ' $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD;
-        echo 'API Spec:      http://localhost:5001/api/galaxy/v3/swagger-ui/';
-        echo 'Django Admin:  docker compose -f dev/compose/standalone.yaml exec manager pulpcore-manager';
-        echo 'Settings list: docker compose -f dev/compose/standalone.yaml exec manager dynaconf list';
+        echo 'Credentials:  org-admin:redhat OR jdoe:redhat';
+        echo 'API Spec:      http://localhost:5001/api/automation-hub/v3/swagger-ui/';
+        echo 'API Spec proxy:http://localhost:8080/api/automation-hub/v3/swagger-ui/';
+        echo 'Django Admin:  docker compose -f dev/compose/aap.yaml exec manager pulpcore-manager';
+        echo 'Settings list: docker compose -f dev/compose/aap.yaml exec manager dynaconf list';
         echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
         echo '##############################################################';
 

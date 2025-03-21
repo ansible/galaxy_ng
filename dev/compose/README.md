@@ -3,6 +3,9 @@
 Profiles:
 
 - `standalone` - Run galaxy_ng for integration with Ansible Automation Platform
+- `aap` - Run galaxy_ng for integration with Ansible Automation Platform and Resource Server
+- `community` - Run galaxy_ng for galaxy.ansible.com development
+- `insights` - Run galaxy_ng for console.redhat.com development
 
 ## Requirements
 
