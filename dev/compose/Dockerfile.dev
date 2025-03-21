@@ -7,7 +7,9 @@ ARG GNUPGHOME
 ENV GNUPGHOME $GNUPGHOME
 
 USER root
+RUN ${VIRTUAL_ENV}/bin/python3 -m pip install ipython ipdb django-extensions
 
+USER galaxy
 RUN /app/dev/compose/signing/setup_gpg_workarounds.sh
 
 RUN set -ex; \
@@ -20,5 +22,3 @@ RUN set -ex; \
     chmod +x /var/lib/pulp/scripts/*_sign.sh
 
 RUN /app/dev/compose/signing/setup_gpg_keys.sh
-
-RUN ${VIRTUAL_ENV}/bin/python3 -m pip install ipython ipdb django-extensions
