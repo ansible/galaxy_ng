@@ -47,8 +47,10 @@ RUN chgrp -R 0 $HOME && \
 RUN set -ex; \
     install -dm 0775 -o galaxy \
                                /var/lib/pulp/{artifact,assets,media,scripts,tmp} \
-                               /etc/pulp/{certs,keys,gnupg} \
+                               /etc/pulp/{certs,keys} \
                                /tmp/ansible && \
+    install -dm 0700 -o galaxy /etc/pulp/gnupg && \
+    chown -R galaxy ${VIRTUAL_ENV} && \
     pip3.11 install --no-deps --editable /app && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
     install -Dm 0644 -o galaxy /app/ansible.cfg /etc/ansible/ansible.cfg && \
