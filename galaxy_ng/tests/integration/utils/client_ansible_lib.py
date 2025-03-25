@@ -226,7 +226,7 @@ class AnsibeGalaxyHttpClient:
             headers["Content-Type"] = "application/text"
 
         # ephemeral workaround ...
-        if self._auth_url and 'localhost' not in self._auth_url and auth_required:
+        if self._auth_url and 'crc-eph' in self._auth_url and auth_required:
             btoken = self.get_bearer_token(grant_type='password')
             # btoken = self.get_bearer_token(grant_type='refresh_token')
             headers['Authorization'] = f'Bearer {btoken}'
