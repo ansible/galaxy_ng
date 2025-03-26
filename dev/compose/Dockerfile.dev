@@ -6,10 +6,8 @@ FROM localhost/galaxy_ng/galaxy_ng:base
 ARG GNUPGHOME
 ENV GNUPGHOME $GNUPGHOME
 
-USER root
 RUN ${VIRTUAL_ENV}/bin/python3 -m pip install ipython ipdb django-extensions pulp-cli
 
-USER galaxy
 RUN /app/dev/compose/signing/setup_gpg_workarounds.sh
 
 RUN set -ex; \

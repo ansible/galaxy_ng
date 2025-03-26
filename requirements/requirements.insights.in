@@ -1,5 +1,23 @@
-boto3
-logstash-formatter
-watchtower
-django-storages[azure,boto3,s3]
 app-common-python
+boto3
+distro
+django-ansible-base[jwt-consumer,feature-flags] @ git+https://github.com/ansible/django-ansible-base@2025.3.7
+django-auth-ldap==4.0.0
+django-crum==0.7.9
+django-flags>=5.0.13
+django-ipware<4.0.0,>=3.0.0
+django-picklefield<4.0.0,>=3.0.1
+django-prometheus>=2.0.0
+django-storages[azure,boto3,s3]
+drf-spectacular
+dynaconf>=3.2.10
+galaxy-importer>=0.4.29,<0.5.0
+insights_analytics_collector>=0.3.0
+logstash-formatter
+marshmallow<4.0.0,>=3.6.1
+pulp-container>=2.19.2,<2.20.0
+pulp_ansible==0.23.1
+pulpcore>=3.49.0,<3.50.0
+social-auth-app-django>=5.2.0
+social-auth-core>=4.4.2
+watchtower

@@ -22,3 +22,7 @@ for item in "${SRC_PATH_LIST[@]}"; do
     fi
 done
 
+if [ -n "${DJANGO_ANSIBLE_BASE_BRANCH}" ]; then
+    echo "Installing DJANGO_ANSIBLE_BASE_BRANCH=${DJANGO_ANSIBLE_BASE_BRANCH}"
+    pip3.11 install --no-cache-dir django-ansible-base[jwt-consumer,feature-flags] @ git+https://github.com/ansible/django-ansible-base@${DJANGO_ANSIBLE_BASE_BRANCH} || true
+fi

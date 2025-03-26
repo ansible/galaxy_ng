@@ -1,6 +1,61 @@
+[build-system]
+requires = [
+    "setuptools >= 40.8.0",
+    "wheel >= 0.29.0",
+]
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = "galaxy-ng"
+description = "Galaxy NG plugin for the Pulp Project"
+readme = "README.md"
+license = "GPL-2.0-or-later"
+requires-python = ">=3.9"
+authors = [
+    { name = "Red Hat, Inc.", email = "info@ansible.com" },
+]
+keywords = ["ansible", "galaxy", "collection", "role"]
+classifiers = [
+    "Framework :: Django",
+    "Operating System :: POSIX :: Linux",
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Django",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dynamic = ["version", "dependencies"]
+
+[project.entry-points."pulpcore.plugin"]
+galaxy_ng = "galaxy_ng:default_app_config"
+
+[project.urls]
+Homepage = "https://galaxy.ansible.com/"
+Documentation = "https://galaxy-ng.readthedocs.io/"
+Repository = "https://github.com/ansible/galaxy_ng/"
+Changelog = "https://github.com/ansible/galaxy_ng/blob/master/CHANGES.md"
+
+[tool.setuptools.cmdclass]
+build_py = "galaxy_ng.ui.build.BuildPyCommand"
+sdist = "galaxy_ng.ui.build.SDistCommand"
+
+[tool.setuptools.dynamic]
+version = { attr = "galaxy_ng.__version__" }
+dependencies = { file = [
+  "requirements/requirements.insights.in",
+  "requirements/requirements.insights.txt",
+] }
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests", "tests.*"]
+
 [tool.black]
 line-length = 100
-target-version = ["py36", "py37"]
+target-version = ["py311", "py312"]
 exclude = '''
 /(
     \.eggs
@@ -212,6 +267,6 @@ replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
 
-filename = "./setup.py"
+filename = "./galaxy_ng/ui/build.py"
 search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""

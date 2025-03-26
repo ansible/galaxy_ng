@@ -14,22 +14,22 @@ help:             ## Show the help.
 # Update python dependencies lock files (i.e. requirements.*.txt)
 
 .PHONY: requirements/no-pip-upgrade
-requirements/no-pip-upgrade:     ## Update based on setup.py and *.in files without asking pip for latest version
-	pip-compile -o requirements/requirements.common.txt setup.py
-	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py
-	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py
+requirements/no-pip-upgrade:     ## Update based on pyproject.toml and *.in files without asking pip for latest version
+	pip-compile -o requirements/requirements.common.txt pyproject.toml
+	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in pyproject.toml
+	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in pyproject.toml
 
 .PHONY: requirements/pip-upgrade-single-package
-requirements/pip-upgrade-single-package:     ## Update based on setup.py and *.in files, and parameter via pip, i.e. package=djangorestframework
-	pip-compile -o requirements/requirements.common.txt setup.py --upgrade-package $(package)
-	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py --upgrade-package $(package)
-	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py --upgrade-package $(package)
+requirements/pip-upgrade-single-package:     ## Update based on pyproject.toml and *.in files, and parameter via pip, i.e. package=djangorestframework
+	pip-compile -o requirements/requirements.common.txt pyproject.toml --upgrade-package $(package)
+	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in pyproject.toml --upgrade-package $(package)
+	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in pyproject.toml --upgrade-package $(package)
 
 .PHONY: requirements/pip-upgrade-all
-requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, and all packages via pip
-	pip-compile -o requirements/requirements.common.txt setup.py --upgrade
-	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in --upgrade
-	pip-compile -o requirements/requirements.standalone.txt setup.py requirements/requirements.standalone.in --upgrade
+requirements/pip-upgrade-all:     ## Update based on pyproject.toml and *.in files, and all packages via pip
+	pip-compile -o requirements/requirements.common.txt pyproject.toml --upgrade
+	pip-compile -o requirements/requirements.insights.txt pyproject.toml requirements/requirements.insights.in --upgrade
+	pip-compile -o requirements/requirements.standalone.txt pyproject.toml requirements/requirements.standalone.in --upgrade
 
 # Repository management
 
