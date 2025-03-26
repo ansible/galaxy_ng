@@ -10,7 +10,7 @@ RUN mkdir -p /etc/nginx/pulp \
 FROM docker.io/nginx:latest
 
 RUN mkdir -p /etc/nginx/pulp
-COPY --from=builder /etc/nginx/pulp/*.conf /etc/nginx/pulp
+COPY --from=builder /etc/nginx/pulp/*.conf /etc/nginx/pulp/
 
 # Run script uses standard ways to run the application
 CMD nginx -g "daemon off;"

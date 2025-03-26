@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -o errexit
+set -o pipefail
 
 # ensure agent is running
 gpgconf --kill gpg-agent
