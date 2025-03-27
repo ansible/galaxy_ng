@@ -37,10 +37,11 @@ pipeline {
 
                         List provisionFlags = []
 
+                        installerFlags.add('aapqa_private/input/install/ee_registry.yml')
                         installerFlags.add('input/install/flags/automationhub_content_signing.yml')
-                        installerFlags.add('input/install/flags/automationhub_routable_hostname.yml')
                         installerFlags.add('input/install/flags/automationhub_from_git.yml')
-                        installerFlags.add('input/install/ee/unreleased.yml')
+                        installerFlags.add('input/install/flags/automationhub_routable_hostname.yml')
+                        // installerFlags.add('input/install/ee/unreleased.yml')
 
                         provisionFlags.add('input/provisioner/flags/domain.yml')
                         provisionFlags.add("input/provisioner/architecture/x86_64.yml")
@@ -110,7 +111,7 @@ pipeline {
                             provisionInfo = [
                                     provisionerPrefix: validateInfo.provisionPrefix,
                                     cloudVarFile     : "input/provisioner/cloud/aws.yml",
-                                    scenarioVarFile  : "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                    scenarioVarFile  : "input/aap_scenarios/1inst_1hybr_1ahub_1gw.yml",
                             ]
                             provisionInfo = stepsFactory.aapqaOnPremProvisionerSteps.provision(provisionInfo + [
                                     provisionerVarFiles: validateInfo.get("provisionFlags") + [
@@ -175,7 +176,7 @@ pipeline {
                             installInfo = stepsFactory.aapqaAapInstallerSteps.install(provisionInfo + [
                                 aapVersionVarFile: "input/install/devel.yml",
                                 installerVarFiles: installerFlags + [
-                                    "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                    "input/aap_scenarios/1inst_1hybr_1ahub_1gw.yml",
                                     "input/platform/rhel88.yml"
                                 ],
                                 installerVars: installerVars
@@ -201,6 +202,18 @@ pipeline {
                                     """
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            stage('Hub Load Data') {
+                steps {
+                    container('aapqa-ansible') {
+                        script {
+                            stepsFactory.aapqaAutomationHubSteps.setup(installInfo)
+                            stepsFactory.aapqaAutomationHubSteps.runAutomationHubLoadDataTests(installInfo)
+                            stepsFactory.commonSteps.saveXUnitResultsToJenkins(xunitFile: 'ah-results-load.xml')
                         }
                     }
                 }

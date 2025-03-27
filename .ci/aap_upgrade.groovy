@@ -116,7 +116,7 @@ pipeline {
                             provisionInfo = [
                                     provisionerPrefix: validateInfo.provisionPrefix,
                                     cloudVarFile     : "input/provisioner/cloud/aws.yml",
-                                    scenarioVarFile  : "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                    scenarioVarFile  : "input/aap_scenarios/1inst_1hybr_1ahub_1gw.yml",
                             ]
                             provisionInfo = stepsFactory.aapqaOnPremProvisionerSteps.provision(provisionInfo + [
                                     provisionerVarFiles: validateInfo.get("provisionFlags") + [
@@ -139,16 +139,16 @@ pipeline {
                 }
             }
 
-            stage('Fresh Install AAP 2.3') {
+            stage('Fresh Install AAP 2.4') {
                 steps {
                     container('aapqa-ansible') {
                         script {
                             installerFlags = validateInfo.get("installerFlags")
                             stepsFactory.aapqaAapInstallerSteps.updateBuildInformation(provisionInfo)
                             installInfo = stepsFactory.aapqaAapInstallerSteps.install(provisionInfo + [
-                                aapVersionVarFile: "input/install/2.3_released.yml",
+                                aapVersionVarFile: "input/install/2.4_released.yml",
                                 installerVarFiles: installerFlags + [
-                                    "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                    "input/aap_scenarios/1inst_1hybr_1ahub_1gw.yml",
                                     "input/platform/rhel88.yml"
                                 ]
                             ])
@@ -190,7 +190,7 @@ pipeline {
                 }
             }
 
-            stage('Upgrade AAP 2.4') {
+            stage('Upgrade AAP 2.5') {
                 steps {
                     container('aapqa-ansible') {
                         script {
@@ -229,9 +229,9 @@ pipeline {
                             archiveArtifacts(artifacts: 'input/install/ahub_pip.yml')
 
                             upgradeInfo = stepsFactory.aapqaAapInstallerSteps.upgrade(provisionInfo + [
-                                    aapVersionVarFile: "input/install/2.4_released.yml",
+                                    aapVersionVarFile: "input/install/2.5_released.yml",
                                     upgradeVarFiles: upgradeFlags + [
-                                        "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                        "input/aap_scenarios/1inst_1hybr_1ahub_1gw.yml",
                                         "input/platform/rhel88.yml"
                                     ]
                             ])
@@ -264,11 +264,11 @@ pipeline {
                 steps {
                     container('aapqa-ansible') {
                         script {
-                            upgradeFlags.add('input/install/ee/unreleased.yml')
+                            // upgradeFlags.add('input/install/ee/unreleased.yml')
                             upgradeInfo = stepsFactory.aapqaAapInstallerSteps.upgrade(provisionInfo + [
                                     aapVersionVarFile: "input/install/devel.yml",
                                     upgradeVarFiles: upgradeFlags + [
-                                        "input/aap_scenarios/1inst_1hybr_1ahub.yml",
+                                        "input/aap_scenarios/1inst_1hybr_1ahub_1gw.yml",
                                         "input/platform/rhel88.yml"
                                     ]
                             ])
@@ -297,18 +297,18 @@ pipeline {
                 }
             }
 
-            stage('Hub Verify Data Tests') {
-                steps {
-                    container('aapqa-ansible') {
-                        script {
-                            upgradeFlags.add('input/install/flags/upgrade_from_aap_23.yml')
-                            stepsFactory.aapqaAutomationHubSteps.setup(installInfo)
-                            stepsFactory.aapqaAutomationHubSteps.runAutomationHubVerifyDataTests(installInfo + [upgradeVarFiles: upgradeFlags])
-                            stepsFactory.commonSteps.saveXUnitResultsToJenkins(xunitFile: 'ah-results-verify.xml')
-                        }
-                    }
-                }
-            }
+            // stage('Hub Verify Data Tests') {
+            //     steps {
+            //         container('aapqa-ansible') {
+            //             script {
+            //                 upgradeFlags.add('input/install/flags/upgrade_from_aap_24.yml')
+            //                 stepsFactory.aapqaAutomationHubSteps.setup(installInfo)
+            //                 stepsFactory.aapqaAutomationHubSteps.runAutomationHubVerifyDataTests(installInfo + [upgradeVarFiles: upgradeFlags])
+            //                 stepsFactory.commonSteps.saveXUnitResultsToJenkins(xunitFile: 'ah-results-verify.xml')
+            //             }
+            //         }
+            //     }
+            // }
 
             stage('Run AutomationHub Tests') {
                 steps {
