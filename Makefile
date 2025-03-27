@@ -76,7 +76,7 @@ docs/clean:  ## Clean the documentation
 .PHONY: docs/install
 docs/install:   ## Install the documentation dependencies
 	@pip install -r doc_requirements.txt
-	@pip install -U 'Jinja2==3.0.1'
+	@pip install -U 'Jinja2==3.1.6'
 
 .PHONY: docs/build
 docs/build:  ## Build the documentation
