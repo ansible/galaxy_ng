@@ -52,11 +52,11 @@ pipeline {
                 }
             }
 
-            stage('Get pulpcore, pulp_ansible, pulp-container versions from setup.py') {
+            stage('Get pulpcore, pulp_ansible, pulp-container versions from requirements/requirements.insights.in') {
                 steps {
                     container('aapqa-ansible') {
                         script {
-                            def setupPyContent = readFile('setup.py').trim()
+                            def setupPyContent = readFile('requirements/requirements.insights.in').trim()
                             def lines = setupPyContent.split('\n')
                             def dependenciesToExtract = ["pulpcore", "pulp_ansible", "pulp-container"]
                             def minimumVersions = [:]
@@ -75,7 +75,7 @@ pipeline {
                                 if (minimumVersions.containsKey(dependency)) {
                                     println("Using $dependency version: ${minimumVersions[dependency]}")
                                 } else {
-                                    println("$dependency not found in setup.py. Using version defined in the installer")
+                                    println("$dependency not found in requirements/requirements.insights.in. Using version defined in the installer")
                                 }
                             }
                             if (minimumVersions.containsKey("pulpcore")){
