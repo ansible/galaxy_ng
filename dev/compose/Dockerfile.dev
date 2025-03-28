@@ -10,12 +10,10 @@ RUN ${VIRTUAL_ENV}/bin/python3 -m pip install ipython ipdb django-extensions pul
 
 RUN /app/dev/compose/signing/setup_gpg_workarounds.sh
 
+COPY --chown=galaxy:galaxy database/database_fields.symmetric.key /etc/pulp/certs/database_fields.symmetric.key
+COPY --chown=galaxy:galaxy signing/keys /etc/pulp/certs/
+COPY --chown=galaxy:galaxy signing/scripts /var/lib/pulp/scripts/
+
 RUN set -ex; \
-    install -Dm 0775 /app/dev/compose/database/database_fields.symmetric.key /etc/pulp/certs/database_fields.symmetric.key && \
-    install -Dm 0775 /app/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-secret.key && \
-    install -Dm 0775 /app/dev/compose/signing/signing-secret.key.password.txt /etc/pulp/certs/signing-secret.key.password.txt && \
-    install -Dm 0775 /app/dev/compose/signing/signing-secret.key /etc/pulp/certs/signing-public.key && \
-    install -Dm 0775 /app/dev/compose/signing/collection_sign.sh /var/lib/pulp/scripts/collection_sign.sh && \
-    install -Dm 0775 /app/dev/compose/signing/container_sign.sh /var/lib/pulp/scripts/container_sign.sh && \
-    chmod +x /var/lib/pulp/scripts/*_sign.sh && \
+    chmod -R 0775 /etc/pulp/certs /var/lib/pulp/scripts && \
     /app/dev/compose/signing/setup_gpg_keys.sh
