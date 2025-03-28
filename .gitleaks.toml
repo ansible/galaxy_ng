@@ -5,7 +5,7 @@
     "dev/Dockerfile.base",
     "dev/standalone-ldap/galaxy_ng.env",
     "galaxy_ng/tests",
-    "/dev/compose/signing/signing-secret.key",
-    "/dev/compose/signing/signing-secret.key.password.txt",
+    "dev/compose/signing/keys/signing-secret.key",
+    "dev/compose/signing/keys/signing-secret.key.password.txt",
     "/dev/compose/"
   ]
