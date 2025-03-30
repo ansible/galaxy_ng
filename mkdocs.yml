@@ -1,9 +1,10 @@
 site_name: Galaxy NG
-site_url: "https://ansible.github.io/galaxy_ng"
+site_url: "https://galaxy-ng.readthedocs.io/"
 site_description: Galaxy NG
 repo_name: ansible/galaxy_ng
 repo_url: "https://github.com/ansible/galaxy_ng"
 edit_uri: edit/master/docs/
+copyright: Copyright © Red Hat, Inc.
 nav:
     - Home: index.md
     - User Guides:
@@ -49,33 +50,76 @@ nav:
         - Administration: community/administration.md
 theme:
   features:
-      - search.suggest
-      - search.highlight
-      - search.share
-      - content.code.annotate
-  name: material
-  logo: imgs/galaxy.svg
-  palette:
-    - scheme: default
-      media: "(prefers-color-scheme: light)"
-      primary: teal
-      toggle:
-        icon: material/toggle-switch-off-outline
-        name: Switch to dark mode
-    - scheme: slate
-      media: "(prefers-color-scheme: dark)"
-      primary: teal
-      toggle:
-        icon: material/toggle-switch
-        name: Switch to light mode
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.path
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.integrate
+  name: ansible
+extra:
+  social:
+    - icon: fontawesome/brands/discourse
+      link: https://forum.ansible.com/c/project/7
+      name: Ansible forum
+    - icon: fontawesome/solid/scroll
+      link: https://github.com/ansible/galaxy_ng/releases
+      name: Releases
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/ansible/ansible-lint
+      name: GitHub
 plugins:
+  - autorefs
   - git-revision-date
-  - tags
-  - search:
+  - macros:
+      modules: [mkdocs-ansible:mkdocs_ansible]
+  - markdown-exec
+  - material/search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
       lang: en
+  - material/social
+  - material/tags
+  - material/offline
+  - mkdocstrings:
+      enable_inventory: true
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            # Sphinx is for historical reasons, but we could consider switching if needed
+            # https://mkdocstrings.github.io/griffe/docstrings/
+            docstring_style: sphinx
+            merge_init_into_class: yes
+            show_submodules: yes
+          import:
+            - url: https://docs.ansible.com/ansible/latest/objects.inv
+              domains: [py, std, "std:doc", "std:label"]
+            - url: https://pip.pypa.io/en/latest/objects.inv
+              domains: [py, std]
+  - minify:
+      minify_html: true
 markdown_extensions:
   - tables
   - attr_list
+  - footnotes
   - md_in_html
   - def_list
   - pymdownx.details
@@ -84,11 +128,29 @@ markdown_extensions:
       emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.inlinehilite
   - abbr
-  - pymdownx.snippets
-  - pymdownx.magiclink
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
   - pymdownx.mark
   - pymdownx.smartsymbols
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: python
+          class: python
+          validator: !!python/name:markdown_exec.validator
+          format: !!python/name:markdown_exec.formatter
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tabbed:

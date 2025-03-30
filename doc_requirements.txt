@@ -1,4 +1,4 @@
 mkdocs
-mkdocs-material
+mkdocs-ansible
 mkdocs-git-revision-date-plugin
 Jinja2>=3.1.6
