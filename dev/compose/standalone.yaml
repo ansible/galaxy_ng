@@ -10,6 +10,11 @@ x-common-env: &common-env
   POSTGRES_PASSWORD: galaxy_ng
   POSTGRES_DB: galaxy_ng
 
+  PULP_CACHE_ENABLED: 'true'
+  PULP_REDIS_HOST: redis
+  PULP_REDIS_PORT: 6379
+  PULP_REDIS_PASSWORD: ""
+
   # no spying
   PULP_ANALYTICS: 'false'
 
@@ -119,6 +124,12 @@ services:
 
   redis:
     image: "redis:5"
+    environment:
+      <<: *common-env
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis_data:/data"
 
   postgres:
     image: "postgres:13"
@@ -130,6 +141,8 @@ services:
       test: ["CMD", "pg_isready", "-U", "galaxy_ng"]
       interval: 10s
       retries: 5
+    volumes:
+      - "pg_data:/var/lib/postgresql/data"
     # Uncomment below to spam out every DB statement to the service stderr
     # WARNING: enabling log_statement=all makes database slower
     # command: ["postgres", "-c", "log_statement=ddl", "-c", "log_destination=stderr"]
@@ -321,6 +334,10 @@ volumes:
     name: var_lib_pulp
   etc_pulp_certs:
     name: etc_pulp_certs
+  redis_data:
+    name: redis_data
+  pg_data:
+    name: pg_data
 
 networks:
   service-mesh:
