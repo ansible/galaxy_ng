@@ -5,7 +5,9 @@
 
 # Galaxy NG
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ansible_galaxy_ng&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ansible_galaxy_ng)
+<img align="left" width="150" src="https://raw.githubusercontent.com/ansible/logos/be211ebccc316652eb725db688e75d932f8fa073/galaxy/galaxy-logo.svg">
+
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ansible_galaxy_ng&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ansible_galaxy_ng)
 [![Build Status](https://github.com/ansible/galaxy_ng/actions/workflows/ci-docker-compose-integration.yml/badge.svg)](https://github.com/ansible/galaxy_ng/actions/workflows/ci-docker-compose-integration.yml)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ansible_galaxy_ng&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ansible_galaxy_ng)
 
