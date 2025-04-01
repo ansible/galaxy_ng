@@ -1,4 +1,4 @@
-# This Dockerfile is meant to extend the main Dockerfile.rhel8
+# This Dockerfile is meant to extend the main Dockerfile
 # Moving files to the required places
 # Installing extra development libraries and tools
 FROM localhost/galaxy_ng/galaxy_ng:base
