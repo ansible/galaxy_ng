@@ -83,7 +83,7 @@ extra:
       link: https://github.com/ansible/galaxy_ng/releases
       name: Releases
     - icon: fontawesome/brands/github-alt
-      link: https://github.com/ansible/ansible-lint
+      link: https://github.com/ansible/galaxy_ng
       name: GitHub
 plugins:
   - autorefs
