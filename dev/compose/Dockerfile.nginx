@@ -1,4 +1,4 @@
-# This Dockerfile is meant to extract the nginx snippets from Dockerfile.rhel8
+# This Dockerfile is meant to extract the nginx snippets from Dockerfile
 FROM localhost/galaxy_ng/galaxy_ng:base as builder
 
 USER root
