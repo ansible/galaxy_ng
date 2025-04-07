@@ -228,6 +228,7 @@ CONTENT_BIND = None
 # SPECTACULAR_SETTINGS__TITLE = "Automation Hub API __TITLE"
 
 SPECTACULAR_SETTINGS = {
+    "SERVE_URLCONF": "galaxy_ng.app.urls",
     "TITLE": "Automation Hub API",
     "DESCRIPTION": "Fetch, Upload, Organize, and Distribute Ansible Collections",
     "VERSION": "v3",
