@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-17 12:10+0000\n"
+"POT-Creation-Date: 2025-04-01 05:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -247,23 +247,19 @@ msgstr "名为 %s 的组已存在。"
 
 #: app/api/ui/v2/serializers.py:146
 #, python-format
-#| msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgid "Team name=%(name)s, id=%(id)s does not exist"
 msgstr ""
 
 #: app/api/ui/v2/serializers.py:150
-#| msgid "Invalid group name or ID"
 msgid "Invalid team name or ID"
 msgstr ""
 
 #: app/api/ui/v2/serializers.py:164
 #, python-format
-#| msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgid "Org name=%(name)s, id=%(id)s does not exist"
 msgstr ""
 
 #: app/api/ui/v2/serializers.py:168
-#| msgid "Invalid group name or ID"
 msgid "Invalid org name or ID"
 msgstr ""
 
