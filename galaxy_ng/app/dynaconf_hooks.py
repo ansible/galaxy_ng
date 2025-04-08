@@ -187,7 +187,7 @@ def configure_keycloak(settings: Dynaconf) -> dict[str, Any]:
         data["GALAXY_FEATURE_FLAGS__external_authentication"] = True
 
         # Add to installed apps
-        data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge_unique"]
+        data["INSTALLED_APPS"] = ["automated_logging", "social_django", "dynaconf_merge_unique"]
 
         # Add to authentication backends
         data["AUTHENTICATION_BACKENDS"] = [

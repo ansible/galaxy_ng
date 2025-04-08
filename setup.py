@@ -111,10 +111,7 @@ requirements = [
     "django-flags>=5.0.13",
     django_ansible_base_dependency,  # noqa 501
     "django-crum==0.7.9",
-    # From vendored automated_logging
-    "marshmallow<4.0.0,>=3.6.1",
-    "django-picklefield<4.0.0,>=3.0.1",
-    "django-ipware<4.0.0,>=3.0.0",
+    "django-automated-logging~=6.2",
 ]
 
 
