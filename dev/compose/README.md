@@ -253,6 +253,40 @@ ipdb>
 > To detach from the container DO NOT use <kbd>Ctrl+c</kbd>,
 > instead, use <kbd>Ctrl-p Ctrl-q</kbd>
 
+### Debugging async code
+
+#### Step 1 - Add the breakpoint
+
+Edit the file you want to debug and add a breakpoint
+
+```python
+__import__("rpdb").set_trace()
+```
+
+#### Step 2 - Now execute your stack or just the container you are trying to debug.
+
+Example:
+
+```bash
+$ export DEV_SOURCE_PATH="galaxy_ng:pulp_ansible"
+$ docker compose -f dev/compose/aap.yaml up worker
+```
+
+#### Step 3 - Connect to the remote pdb
+
+Pay attention to the logs:
+```
+worker-1          | [rpdb] attempting to bind 127.0.0.1:4444
+worker-1          | [rpdb] running on 127.0.0.1:4444
+```
+
+Once you see `[rpdb]` running:
+
+```bash
+$ docker exec -it compose-worker-1 bash
+bash-4.4$ nc 127.0.0.1 4444
+```
+
 ###  Running containers inside a vagrant box
 
 Since Fedora uses Podman by default, a Vagrant VM is used instead of running Docker directly. This approach provides a consistent development environment and prevents conflicts with the host machine's package management system.
