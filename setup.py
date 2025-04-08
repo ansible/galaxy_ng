@@ -114,6 +114,7 @@ requirements = [
     "galaxy-importer>=0.4.16,<=0.4.19",
     "pulpcore>=3.28.21,<3.29.0",
     "pulp_ansible>=0.20.3,<0.21.0",
+    "django>=4.2.20,<4.3",
     "django-prometheus>=2.0.0",
     "drf-spectacular",
     "pulp-container>=2.15.0,<2.16.0",
@@ -131,6 +132,8 @@ requirements = [
     # to fix a compatibility issue
     'backports.zoneinfo==0.2.1;python_version<"3.9"',
     "setuptools<66",
+    "aiohttp>=3.9,<3.10",
+    "yarl<1.13",
 ]
 
 
