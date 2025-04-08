@@ -121,6 +121,7 @@ requirements = [
     "pulpcore>=3.49.0,<3.50.0",
     "pulp_ansible>=0.21.0,<0.22.0",
     "pulp-container>=2.19.2,<2.20.0",
+    "django>=4.2.20,<4.3",
     "django-prometheus>=2.0.0",
     "social-auth-core>=4.4.2",
     "social-auth-app-django>=5.2.0",
@@ -137,6 +138,8 @@ requirements = [
     "marshmallow<4.0.0,>=3.6.1",
     "django-picklefield<4.0.0,>=3.0.1",
     "django-ipware<4.0.0,>=3.0.0",
+    "aiohttp>=3.9,<3.10",
+    "yarl<1.13",
 ]
 
 
