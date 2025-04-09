@@ -106,6 +106,7 @@ django==4.2.20
     # via
     #   django-ansible-base
     #   django-auth-ldap
+    #   django-automated-logging
     #   django-crum
     #   django-filter
     #   django-flags
@@ -125,6 +126,8 @@ django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
+django-automated-logging==6.2.2
+    # via galaxy-ng (setup.py)
 django-crum==0.7.9
     # via
     #   django-ansible-base
@@ -139,12 +142,12 @@ django-guid==3.4.0
     # via pulpcore
 django-import-export==3.3.9
     # via pulpcore
-django-ipware==3.0.7
-    # via galaxy-ng (setup.py)
+django-ipware==6.0.5
+    # via django-automated-logging
 django-lifecycle==1.1.2
     # via pulpcore
 django-picklefield==3.3
-    # via galaxy-ng (setup.py)
+    # via django-automated-logging
 django-prometheus==2.3.1
     # via galaxy-ng (setup.py)
 django-storages[azure,boto3,s3]==1.14.6
@@ -247,7 +250,7 @@ markuppy==1.18
 markupsafe==3.0.2
     # via jinja2
 marshmallow==3.26.1
-    # via galaxy-ng (setup.py)
+    # via django-automated-logging
 mccabe==0.7.0
     # via flake8
 multidict==6.3.2
@@ -363,7 +366,7 @@ pulp-container==2.19.5
     # via galaxy-ng (setup.py)
 pulp-glue==0.29.3
     # via pulpcore
-pulpcore==3.49.35
+pulpcore==3.49.36
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -399,6 +402,8 @@ python-dateutil==2.9.0.post0
     # via botocore
 python-gnupg==0.5.2
     # via pulpcore
+python-ipware==3.0.0
+    # via django-ipware
 python-ldap==3.4.4
     # via django-auth-ldap
 python3-openid==3.2.0
