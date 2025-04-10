@@ -268,6 +268,8 @@ services:
 
   standalone-worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
+    deploy:
+      replicas: 2
     depends_on:
       base_img_dev:
         condition: service_completed_successfully
@@ -559,6 +561,8 @@ services:
 
   insights-worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
+    deploy:
+      replicas: 2
     depends_on:
       base_img_dev:
         condition: service_completed_successfully
