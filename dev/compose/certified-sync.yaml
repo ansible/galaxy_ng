@@ -129,22 +129,20 @@ services:
         <<: *common-env
     image: "localhost/galaxy_ng/galaxy_ng:dev"
 
-  base_img_nginx:  # Extracts nginx files from base_img
-    depends_on:
-      - base_img
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    image: "localhost/galaxy_ng/galaxy_ng:nginx"
-
-  redis:
+  standalone-redis:
     image: "redis:5"
     environment:
       <<: *common-env
+    hostname: redis
     ports:
       - "6379:6379"
     volumes:
       - "redis_data:/data"
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # standalone
   standalone-postgres:
@@ -166,8 +164,10 @@ services:
   standalone-migrations:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - standalone-postgres
+      base_img_dev:
+        condition: service_completed_successfully
+      standalone-postgres:
+        condition: service_healthy
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_standalone:/var/lib/pulp"
@@ -195,9 +195,14 @@ services:
   standalone-api:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - standalone-postgres
-      - standalone-migrations
+      base_img_dev:
+        condition: service_completed_successfully
+      standalone-redis:
+        condition: service_healthy
+      standalone-postgres:
+        condition: service_healthy
+      standalone-migrations:
+        condition: service_completed_successfully
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_standalone:/var/lib/pulp"
@@ -216,15 +221,25 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
-        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
+        /src/galaxy_ng/dev/compose/bin/reloader start-api
       "
+    healthcheck:
+      test: readyz.py $${PULP_GALAXY_API_PATH_PREFIX}pulp/api/v3/status/
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   standalone-content:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - standalone-postgres
-      - standalone-migrations
+      base_img_dev:
+        condition: service_completed_successfully
+      standalone-redis:
+        condition: service_healthy
+      standalone-postgres:
+        condition: service_healthy
+      standalone-migrations:
+        condition: service_completed_successfully
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_standalone:/var/lib/pulp"
@@ -243,15 +258,25 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
-        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
+        /src/galaxy_ng/dev/compose/bin/reloader start-content-app
       "
+    healthcheck:
+      test: readyz.py $${PULP_CONTENT_PATH_PREFIX}
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   standalone-worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - standalone-postgres
-      - standalone-migrations
+      base_img_dev:
+        condition: service_completed_successfully
+      standalone-redis:
+        condition: service_healthy
+      standalone-postgres:
+        condition: service_healthy
+      standalone-migrations:
+        condition: service_completed_successfully
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_standalone:/var/lib/pulp"
@@ -275,10 +300,18 @@ services:
   standalone-manager:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - standalone-postgres
-      - standalone-migrations
-      - standalone-worker
+      base_img_dev:
+        condition: service_completed_successfully
+      standalone-postgres:
+        condition: service_healthy
+      standalone-migrations:
+        condition: service_completed_successfully
+      standalone-api:
+        condition: service_healthy
+      standalone-content:
+        condition: service_healthy
+      standalone-worker:
+        condition: service_started
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_standalone:/var/lib/pulp"
@@ -297,20 +330,20 @@ services:
         sleep 5;
 
         echo 'Scheduled tasks';
-        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://standalone-api:24817/api/galaxy/pulp/api/v3/task-schedules/?name=dab_sync | python -m json.tool;
+        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://standalone-api:8000/api/galaxy/pulp/api/v3/task-schedules/?name=dab_sync | python -m json.tool;
 
         # Setup signing services;
         gpg --list-secret-keys;
         /src/galaxy_ng/dev/compose/signing/setup_signing_services.sh;
         echo 'Signing Services';
-        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://standalone-api:24817/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
+        curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://standalone-api:8000/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
 
         # Setup repository gpgkey for upload verification;
         /src/galaxy_ng/dev/compose/signing/setup_repo_keyring.sh;
 
         echo ' ';
         echo '###################### API ROOT ##############################';
-        curl -s http://standalone-api:24817/api/galaxy/ | python -m json.tool;
+        curl -s http://standalone-api:8000/api/galaxy/ | python -m json.tool;
         echo '################### DEV_SOURCE_PATH ##########################';
         echo $$DEV_SOURCE_PATH;
         echo ' ';
@@ -328,13 +361,20 @@ services:
       "
 
   standalone-nginx:
-    image: "localhost/galaxy_ng/galaxy_ng:nginx"
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     depends_on:
-      - base_img_nginx
-      - standalone-postgres
-      - standalone-migrations
-      - standalone-api
-      - standalone-content
+      base_img:
+        condition: service_completed_successfully
+      standalone-postgres:
+        condition: service_healthy
+      standalone-migrations:
+        condition: service_completed_successfully
+      standalone-api:
+        condition: service_healthy
+      standalone-content:
+        condition: service_healthy
     ports:
       - '5001:5001'
     volumes:
@@ -342,6 +382,21 @@ services:
 
 
   # insights
+  insights-redis:
+    image: "redis:5"
+    environment:
+      <<: *common-env
+    hostname: redis
+    ports:
+      - "8379:6379"
+    volumes:
+      - "redis_data:/data"
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   insights-postgres:
     image: "postgres:13"
     ports:
@@ -361,7 +416,8 @@ services:
   load-sync-data:
     image: "postgres:13"
     depends_on:
-      - insights-postgres
+      insights-postgres:
+        condition: service_healthy
     environment:
       <<: *insights-env
     entrypoint: >
@@ -380,9 +436,12 @@ services:
   insights-migrations:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - insights-postgres
-      - load-sync-data
+      base_img_dev:
+        condition: service_completed_successfully
+      insights-postgres:
+        condition: service_healthy
+      load-sync-data:
+        condition: service_completed_successfully
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_insights:/var/lib/pulp"
@@ -415,7 +474,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      UPSTREAM_URL: "http://insights-api:24817"
+      UPSTREAM_URL: "http://insights-api:8000"
       PROXY_PORT: "8080"
       PROXY_HOST: "insights-proxy"
     volumes:
@@ -424,9 +483,14 @@ services:
   insights-api:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - insights-postgres
-      - insights-migrations
+      base_img_dev:
+        condition: service_completed_successfully
+      insights-redis:
+        condition: service_healthy
+      insights-postgres:
+        condition: service_healthy
+      insights-migrations:
+        condition: service_completed_successfully
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_insights:/var/lib/pulp"
@@ -445,15 +509,25 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
-        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-api
+        /src/galaxy_ng/dev/compose/bin/reloader start-api
       "
+    healthcheck:
+      test: readyz.py $${PULP_GALAXY_API_PATH_PREFIX}pulp/api/v3/status/
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   insights-content:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - insights-postgres
-      - insights-migrations
+      base_img_dev:
+        condition: service_completed_successfully
+      insights-redis:
+        condition: service_healthy
+      insights-postgres:
+        condition: service_healthy
+      insights-migrations:
+        condition: service_completed_successfully
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_insights:/var/lib/pulp"
@@ -472,15 +546,25 @@ services:
       bash -c "
         /src/galaxy_ng/dev/compose/bin/devinstall;
         /src/galaxy_ng/dev/compose/bin/wait /var/lib/pulp/.migrated;
-        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-content
+        /src/galaxy_ng/dev/compose/bin/reloader start-content-app
       "
+    healthcheck:
+      test: readyz.py $${PULP_CONTENT_PATH_PREFIX}
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   insights-worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - insights-postgres
-      - insights-migrations
+      base_img_dev:
+        condition: service_completed_successfully
+      insights-redis:
+        condition: service_healthy
+      insights-postgres:
+        condition: service_healthy
+      insights-migrations:
+        condition: service_completed_successfully
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_insights:/var/lib/pulp"
@@ -504,10 +588,18 @@ services:
   insights-manager:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     depends_on:
-      - base_img_dev
-      - insights-postgres
-      - insights-migrations
-      - insights-worker
+      base_img_dev:
+        condition: service_completed_successfully
+      insights-postgres:
+        condition: service_healthy
+      insights-migrations:
+        condition: service_completed_successfully
+      insights-api:
+        condition: service_healthy
+      insights-content:
+        condition: service_healthy
+      insights-worker:
+        condition: service_started
     volumes:
       - "etc_pulp_certs:/etc/pulp/certs"
       - "var_lib_pulp_insights:/var/lib/pulp"
@@ -549,13 +641,20 @@ services:
       "
 
   insights-nginx:
-    image: "localhost/galaxy_ng/galaxy_ng:nginx"
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     depends_on:
-      - base_img_nginx
-      - insights-postgres
-      - insights-migrations
-      - insights-api
-      - insights-content
+      base_img:
+        condition: service_completed_successfully
+      insights-postgres:
+        condition: service_healthy
+      insights-migrations:
+        condition: service_completed_successfully
+      insights-api:
+        condition: service_healthy
+      insights-content:
+        condition: service_healthy
     ports:
       - '8001:5001'
     volumes:
