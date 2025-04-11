@@ -19,12 +19,17 @@ from typing import Any, Dict, List
 
 import ldap
 import pkg_resources
-from ansible_base.lib.dynamic_config.settings_logic import get_dab_settings
+from ansible_base.lib.dynamic_config import (
+    factory,
+    load_dab_settings,
+    load_standard_settings_files,
+    toggle_feature_flags,
+    validate as dab_validate,
+)
 from crum import get_current_request
 from django.apps import apps
 from django_auth_ldap.config import LDAPSearch
 from dynaconf import Dynaconf, Validator
-from dynaconf.utils.functional import empty
 
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 
@@ -63,7 +68,8 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
     data.update(configure_password_validators(settings))
     data.update(configure_api_base_path(settings))
     data.update(configure_legacy_roles(settings))
-    data.update(configure_dab_required_settings(settings))
+    # these must get the current state of data to make decisions
+    data.update(configure_dab_required_settings(settings, data))
     data.update(toggle_feature_flags(settings))
 
     # These should go last, and it needs to receive the data from the previous configuration
@@ -80,6 +86,9 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
 
     if run_validate:
         validate(settings)
+
+    # must go right before returning the data
+    data.update(configure_dynaconf_cli(settings, data))
 
     return data
 
@@ -788,40 +797,76 @@ def configure_dynamic_settings(settings: Dynaconf) -> Dict[str, Any]:
     }
 
 
-def configure_dab_required_settings(settings: Dynaconf) -> dict[str, Any]:
-    dab_settings = get_dab_settings(
-        installed_apps=[
-            *settings.INSTALLED_APPS,
-            # jwt_consumer will not be part of the final INSTALLED_APPS
-            # but passed here to get the required jwt settings from DAB.
-            'ansible_base.jwt_consumer',
-        ],
-        rest_framework=settings.REST_FRAMEWORK,
-        spectacular_settings=settings.SPECTACULAR_SETTINGS,
-        authentication_backends=settings.AUTHENTICATION_BACKENDS,
-        middleware=settings.MIDDLEWARE,
-        templates=settings.TEMPLATES
+def configure_dab_required_settings(settings: Dynaconf, data: dict) -> dict[str, Any]:
+    # Create a Dynaconf object from DAB
+    dab_dynaconf = factory("", "HUB", add_dab_settings=False)
+    # update it with raw pulp settings
+    dab_dynaconf.update(settings.as_dict())
+    # Add overrides from the previous hooks
+    dab_dynaconf.update(data)
+    # Temporary add jwt_consumer to the installed apps because it is required by DAB
+    dab_dynaconf.set("INSTALLED_APPS", "@merge_unique ansible_base.jwt_consumer")
+    # Load the DAB settings that are conditionally added based on INSTALLED_APPS
+    load_dab_settings(dab_dynaconf)
+    # Remove jwt_consumer from the installed apps because galaxy uses Pulp implementation
+    dab_dynaconf.set(
+        "INSTALLED_APPS",
+        [app for app in dab_dynaconf.INSTALLED_APPS if app != 'ansible_base.jwt_consumer']
     )
-    # This doesn't perform any merging, it sets only keys that are not already set
-    # NOTE: this needs refactoring when integrating with new Dynaconf factory from DAB
-    return {k: v for k, v in dab_settings.items() if k not in settings}
+    # Load the standard AAP settings files
+    load_standard_settings_files(dab_dynaconf)  # /etc/ansible-automation-platform/*.yaml
+
+    # Load of the envvars prefixed with HUB_ is currently disabled
+    # because galaxy right now uses PULP_ as prefix and we want to avoid confusion
+    # Also some CI environments are already using HUB_ prefix to set unrelated variables
+    # load_envvars(dab_dynaconf)
+
+    # Validate the settings
+    dab_validate(dab_dynaconf)
+    # Get raw dict to return
+    data = dab_dynaconf.as_dict()
+    # to use with `dynaconf -i pulpcore.app.settings.DAB_DYNACONF [command]`
+    data["DAB_DYNACONF"] = dab_dynaconf
+    return data
 
 
-def toggle_feature_flags(settings: Dynaconf) -> dict[str, Any]:
-    """Toggle FLAGS based on installer settings.
-    FLAGS is a django-flags formatted dictionary.
-        FLAGS={
-            "FEATURE_SOME_PLATFORM_FLAG_ENABLED": [
-                {"condition": "boolean", "value": False, "required": True},
-                {"condition": "before date", "value": "2022-06-01T12:00Z"},
-            ]
-        }
-    Installers will place `FEATURE_SOME_PLATFORM_FLAG_ENABLED=True/False` in the settings file.
-    This function will update the value in the index 0 in FLAGS with the installer value.
+def configure_dynaconf_cli(pulp_settings: Dynaconf, data: dict) -> dict[str, Any]:
+    """Add an instance of Dynaconf to be used by the CLI.
+    This instance merges metadata from the PULP and DAB dynaconf instances.
+
+    This doesn't affect the running application, it only affects the `dynaconf` CLI.
     """
-    data = {}
-    for feature_name, feature_content in settings.get("FLAGS", {}).items():
-        if (installer_value := settings.get(feature_name, empty)) is not empty:
-            feature_content[0]["value"] = installer_value
-            data[f"FLAGS__{feature_name}"] = feature_content
+    # This is the instance that will be discovered by dynaconf CLI
+    try:
+        dab_dynaconf = data["DAB_DYNACONF"]
+    except KeyError:
+        raise AttributeError(
+            "DAB_DYNACONF not found in settings "
+            "configure_dab_required_settings "
+            "must be called before configure_dynaconf_cli"
+        )
+
+    # Load data from both instances
+    cli_dynaconf = Dynaconf(core_loaders=[], envvar_prefix=None)
+    cli_dynaconf._store.update(pulp_settings._store)
+    cli_dynaconf._store.update(data)
+
+    # Merge metadata from both instances
+    # first pulp
+    cli_dynaconf._loaded_files = pulp_settings._loaded_files
+    cli_dynaconf._loaded_hooks = pulp_settings._loaded_hooks
+    cli_dynaconf._loaded_by_loaders = pulp_settings._loaded_by_loaders
+    cli_dynaconf._loaded_envs = pulp_settings._loaded_envs
+    # then dab
+    cli_dynaconf._loaded_files.extend(dab_dynaconf._loaded_files)
+    cli_dynaconf._loaded_hooks.update(dab_dynaconf._loaded_hooks)
+    cli_dynaconf._loaded_by_loaders.update(dab_dynaconf._loaded_by_loaders)
+    cli_dynaconf._loaded_envs.extend(dab_dynaconf._loaded_envs)
+
+    # Add the hook to the history
+    cli_dynaconf._loaded_hooks[__name__] = {"post": data}
+
+    # assign to the CLI can discover it
+    data["CLI_DYNACONF"] = cli_dynaconf
+
     return data

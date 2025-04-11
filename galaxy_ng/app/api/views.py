@@ -43,6 +43,8 @@ VERSIONS = {
     "pulp_ansible_version": apps.get_app_config('ansible').version,
     "pulp_container_version": apps.get_app_config('container').version,
     "ansible_base_version": get_version_from_metadata("django-ansible-base"),
+    "dynaconf_version": get_version_from_metadata("dynaconf"),
+    "django_version": get_version_from_metadata("django"),
 }
 
 # Add in v1 support if configured
