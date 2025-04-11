@@ -59,8 +59,8 @@ OR
 with open("/proc/1/cmdline") as f:
     cmdline = f.readline()
 
-if "pulp-api" in cmdline:
+if "start-api" in cmdline:
     is_api_healthy(sys.argv[1])
 
-elif "pulp-content" in cmdline:
+elif "start-content-app" in cmdline:
     is_content_healthy(sys.argv[1])
