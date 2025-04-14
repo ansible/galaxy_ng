@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -o errexit
+set -o pipefail
 
 # Collection
 HAS_COLLECTION_SIGNING=$(pulpcore-manager shell -c 'from pulpcore.app.models import SigningService;print(SigningService.objects.filter(name="ansible-default").count())' 2>/dev/null || true)
