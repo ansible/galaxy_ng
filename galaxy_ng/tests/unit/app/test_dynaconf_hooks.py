@@ -380,3 +380,25 @@ def test_dynaconf_hooks_toggle_feature_flags():
     # Check that the feature flag under FLAGS is now enabled
     # the hook will return Dynaconf merging syntax.
     assert new_settings["FLAGS__FEATURE_SOME_PLATFORM_FLAG_ENABLED"][0]["value"] is True
+
+
+def test_dab_dynaconf():
+    """Ensure that the DAB settings are correctly set."""
+
+    xsettings = SuperDict()
+    xsettings.update(copy.deepcopy(BASE_SETTINGS))
+
+    # Run the post hook
+    new_settings = post_hook(xsettings, run_dynamic=True, run_validate=True)
+
+    # Check that DAB injected settings are correctly set
+    expected_keys = [
+        "ANSIBLE_BASE_OVERRIDDEN_SETTINGS",
+        "ANSIBLE_STANDARD_SETTINGS_FILES",
+        "ANSIBLE_BASE_OVERRIDABLE_SETTINGS",
+        "IS_DEVELOPMENT_MODE",
+        "CLI_DYNACONF",
+        "DAB_DYNACONF",
+    ]
+    for key in expected_keys:
+        assert key in new_settings
