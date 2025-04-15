@@ -13,6 +13,7 @@ x-common-env: &common-env
 
   PULP_CACHE_ENABLED: 'true'
   PULP_REDIS_HOST: redis
+  REDIS_SERVICE_HOST: redis
   PULP_REDIS_PORT: 6379
   PULP_REDIS_PASSWORD: ""
 
