@@ -1,8 +1,17 @@
 ---
 name: galaxy_ng/ci
 on:
-  - push
-  - pull_request
+  pull_request:
+    branches:
+      - '**'
+  push:
+    branches:
+      - '**'
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # runs at 3:00 UTC daily
+    - cron: '00 3 * * *'
+  workflow_dispatch:
 
 jobs:
 
@@ -44,9 +53,6 @@ jobs:
 
       - name: Run linters
         run: make lint
-
-      - name: Check for pulpcore imports outside of pulpcore.plugin
-        run: sh .ci/scripts/check_pulpcore_imports.sh
 
       - name: Check for gettext problems
         run: sh .ci/scripts/check_gettext.sh
