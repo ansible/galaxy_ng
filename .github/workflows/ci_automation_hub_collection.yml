@@ -11,6 +11,10 @@ on:
   push:
     branches:
       - "*"
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # runs at 3:00 UTC daily
+    - cron: '00 3 * * *'
   workflow_dispatch:
 
 env:
@@ -142,4 +146,3 @@ jobs:
           docker exec compose-manager-1 bash -c "pip list && pip install pipdeptree && pipdeptree"
           echo ::endgroup::
           curl -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -L http://localhost:5001${{ env.PULP_GALAXY_API_PATH_PREFIX }}pulp/api/v3/status/ | jq || true
-          curl -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -L http://localhost:5001${{ env.PULP_GALAXY_API_PATH_PREFIX }} | jq || true
