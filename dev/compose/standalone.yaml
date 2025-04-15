@@ -12,6 +12,7 @@ x-common-env: &common-env
 
   PULP_CACHE_ENABLED: 'true'
   PULP_REDIS_HOST: redis
+  REDIS_SERVICE_HOST: redis
   PULP_REDIS_PORT: 6379
   PULP_REDIS_PASSWORD: ""
 
@@ -57,7 +58,6 @@ x-common-env: &common-env
   PULP_GALAXY_AUTHENTICATION_CLASSES: "['galaxy_ng.app.auth.session.SessionAuthentication', 'rest_framework.authentication.TokenAuthentication', 'rest_framework.authentication.BasicAuthentication']"
   PULP_ANSIBLE_BASE_JWT_VALIDATE_CERT: 'false'
   PULP_ANSIBLE_BASE_JWT_KEY: 'https://localhost'
-  PULP_GALAXY_FEATURE_FLAGS__external_authentication: 'true'
 
   # disable user/group modifications
   PULP_ALLOW_LOCAL_RESOURCE_MANAGEMENT: 'true'
@@ -341,6 +341,7 @@ services:
         echo ' ';
         echo 'Credentials:  ' $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD;
         echo 'API Spec:      http://localhost:5001/api/galaxy/v3/swagger-ui/';
+        echo 'UI:            http://localhost:5001/ui/login';
         echo 'Django Admin:  docker compose -f dev/compose/standalone.yaml exec manager pulpcore-manager';
         echo 'Settings list: docker compose -f dev/compose/standalone.yaml exec manager dynaconf list';
         echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
