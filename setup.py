@@ -13,7 +13,7 @@ from setuptools.command.build_py import build_py as _BuildPyCommand
 from setuptools.command.sdist import sdist as _SDistCommand
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
-version = "4.10.3"
+version = "4.10.4"
 
 
 class PrepareStaticCommand(Command):
