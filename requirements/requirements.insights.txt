@@ -169,7 +169,7 @@ drf-spectacular==0.26.5
     # via
     #   galaxy-ng (setup.py)
     #   pulpcore
-dynaconf==3.2.10
+dynaconf==3.2.11
     # via
     #   django-ansible-base
     #   galaxy-ng (setup.py)
