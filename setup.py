@@ -127,7 +127,7 @@ requirements = [
     "social-auth-app-django>=5.2.0",
     "django-auth-ldap==4.0.0",
     "drf-spectacular",
-    "dynaconf>=3.2.10",
+    "dynaconf>=3.2.11",
     "insights_analytics_collector>=0.3.0",
     "boto3",
     "distro",
