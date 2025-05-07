@@ -367,7 +367,7 @@ def test_ansible_lint_exception(galaxy_client, hub_version):
 
     log_messages = [item["message"] for item in resp["messages"]]
 
-    pattern = "Linting .* via ansible-lint"
+    pattern = "Linting collection via ansible-lint"
     linting_re = re.compile(pattern)
     linting = [item for item in log_messages if linting_re.match(item)]
     assert len(linting) == 1  # linting occurred
