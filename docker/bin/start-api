@@ -9,6 +9,7 @@ readonly GUNICORN_FORWARDED_ALLOW_IPS="${GUNICORN_FORWARDED_ALLOW_IPS:-}"
 readonly GUNICORN_WORKERS="${GUNICORN_WORKERS:-4}"
 readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
 readonly GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-90}"
+readonly RELOAD_ENABLED="${RELOAD_ENABLED:-no}"
 
 readonly BIND_HOST='[::]'
 readonly BIND_PORT=${GUNICORN_PORT:-8000}
@@ -30,6 +31,10 @@ fi
 
 if [[ -n "${GUNICORN_LOGGER_CLASS}" ]]; then
     GUNICORN_OPTIONS+=(--logger-class "${GUNICORN_LOGGER_CLASS}")
+fi
+
+if [[ "${RELOAD_ENABLED}" == 'yes' ]]; then
+    GUNICORN_OPTIONS+=(--reload)
 fi
 
 exec "${ENTRYPOINT}" "${GUNICORN_OPTIONS[@]}"
