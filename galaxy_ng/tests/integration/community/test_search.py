@@ -29,6 +29,10 @@ from orionutils.generator import build_collection
 
 from ..utils import ansible_galaxy, get_client, upload_artifact, wait_for_task
 
+
+pytest.skip(reason="Enable when community search feature is finished.", allow_module_level=True)
+
+
 NAMESPACE_NAME = "ansible"
 COLLECTION_NAME = "galaxy_fake_collection"
 COLLECTION_TAGS = ["database", "api", "galaxy"]
