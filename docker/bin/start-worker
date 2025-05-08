@@ -3,4 +3,10 @@
 set -o errexit
 set -o nounset
 
-exec pulpcore-worker
+readonly RELOAD_ENABLED="${RELOAD_ENABLED:-no}"
+
+if [[ "${RELOAD_ENABLED}" == 'yes' ]]; then
+    exec pulpcore-worker --reload
+else
+    exec pulpcore-worker
+fi
