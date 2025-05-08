@@ -5,6 +5,7 @@ import sys
 import requests
 
 from requests.packages.urllib3.util.connection import HAS_IPV6
+from django.conf import settings
 
 
 def is_api_healthy(path):
@@ -43,24 +44,7 @@ def is_content_healthy(path):
     sys.exit(0)
 
 
-"""
-PID 1 value (/proc/1/cmdline) may vary based on the gunicorn install method (RPM vs pip)
-The cmdline value for this PID looks like:
-```
-# pip installation
-gunicorn: master [pulp-{content,api}]
-```
-OR
-```
-# RPM installation
-/usr/bin/python3.9/usr/bin/gunicorn--bind[::]:2481{6,7}pulpcore.app.wsgi:application--namepulp-{api,content}--timeout90--workers2
-```
-"""
-with open("/proc/1/cmdline", "r") as f:
-    cmdline = f.readline()
-
-if "start-api" in cmdline:
-    is_api_healthy(sys.argv[1])
-
-elif "start-content-app" in cmdline:
+if sys.argv[1] == settings.CONTENT_PATH_PREFIX:
     is_content_healthy(sys.argv[1])
+else:
+    is_api_healthy(sys.argv[1])
