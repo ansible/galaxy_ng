@@ -6,7 +6,7 @@ FROM localhost/galaxy_ng/galaxy_ng:base
 ARG GNUPGHOME
 ENV GNUPGHOME $GNUPGHOME
 
-RUN ${VIRTUAL_ENV}/bin/python3 -m pip install ipython ipdb django-extensions
+RUN ${VIRTUAL_ENV}/bin/python3 -m pip install hupper ipython ipdb django-extensions
 
 RUN /app/dev/compose/signing/setup_gpg_workarounds.sh
 
