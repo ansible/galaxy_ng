@@ -129,7 +129,12 @@ class ContainerRemoteSerializer(
 
         # Create the container distribution with the new repository
         dist_serializer = container_serializers.ContainerDistributionSerializer(
-            data={"base_path": remote.name, "name": remote.name, "repository": repo_href}
+            data={
+                "base_path": remote.name,
+                "name": remote.name,
+                "repository": repo_href,
+                "private": True,
+            }
         )
         dist_serializer.is_valid(raise_exception=True)
         dist_serializer.create(dist_serializer.validated_data)
