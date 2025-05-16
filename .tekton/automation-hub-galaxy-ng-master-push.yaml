@@ -357,7 +357,7 @@ spec:
         - name: name
           value: ecosystem-cert-preflight-checks
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-ecosystem-cert-preflight-checks:0.2@sha256:dea8d9b4bec3e99d612d799798acf132df48276164b5193ea68f9f3c25ae425b
+          value: quay.io/konflux-ci/tekton-catalog/task-ecosystem-cert-preflight-checks:0.2@sha256:1157c6ac9805af8b8874e4b8d68d2403d99e1c007f63623566b5d848b27c1826
         - name: kind
           value: task
         resolver: bundles
@@ -495,7 +495,7 @@ spec:
         - name: name
           value: push-dockerfile
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-push-dockerfile:0.1@sha256:6124587dffebd15b2123f73ca25807c5e69ff349489b31d4af6ff46a5d0228d6
+          value: quay.io/konflux-ci/tekton-catalog/task-push-dockerfile:0.1@sha256:c82189e5d331e489cff99f0399f133fd3fad08921bea86747dfa379d1b5c748d
         - name: kind
           value: task
         resolver: bundles
