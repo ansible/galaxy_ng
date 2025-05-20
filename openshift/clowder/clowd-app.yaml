@@ -99,6 +99,8 @@ objects:
             value: "automation-hub-pulp-content-app${SUFFIX}"
           - name: CONTENT_APP_PORT
             value: '10000'
+          - name: TRIGGER_RESTART
+            value: ${TRIGGER_RESTART}
         volumeMounts:
           - name: cache
             mountPath: /var/cache/nginx
@@ -252,6 +254,8 @@ objects:
             value: ${ANSIBLE_COLLECT_DOWNLOAD_LOG}
           - name: PULP_ANSIBLE_COLLECT_DOWNLOAD_COUNT
             value: ${ANSIBLE_COLLECT_DOWNLOAD_COUNT}
+          - name: TRIGGER_RESTART
+            value: ${TRIGGER_RESTART}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs/database_fields.symmetric.key
@@ -329,6 +333,8 @@ objects:
             value: ${ENABLE_SIGNING}
           - name: GNUPGHOME
             value: ${GNUPGHOME}
+          - name: TRIGGER_RESTART
+            value: ${TRIGGER_RESTART}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs/database_fields.symmetric.key
@@ -401,6 +407,8 @@ objects:
             value: ${ENABLE_SIGNING}
           - name: GNUPGHOME
             value: ${GNUPGHOME}
+          - name: TRIGGER_RESTART
+            value: ${TRIGGER_RESTART}
         volumeMounts:
           - name: importer-config
             mountPath: /etc/galaxy-importer
@@ -476,6 +484,8 @@ parameters:
   value: "true"
 - name: ANSIBLE_COLLECT_DOWNLOAD_COUNT
   value: "true"
+- name: TRIGGER_RESTART
+  value: "0"
 
 # signing requirements
 - name: ENABLE_SIGNING
