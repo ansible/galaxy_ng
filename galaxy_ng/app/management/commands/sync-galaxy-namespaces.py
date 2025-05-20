@@ -19,10 +19,10 @@ class Command(BaseCommand):
     Iterates through every upstream namespace and syncs it.
     """
 
-    help = 'Sync upstream namespaces+owners from [old-]galaxy.ansible.com'
+    help = 'Sync upstream namespaces+owners from galaxy.ansible.com'
 
     def add_arguments(self, parser):
-        parser.add_argument("--baseurl", default="https://old-galaxy.ansible.com")
+        parser.add_argument("--baseurl", default="https://galaxy.ansible.com")
         parser.add_argument("--name", help="find and sync only this namespace name")
         parser.add_argument("--id", help="find and sync only this namespace id")
         parser.add_argument("--force", action="store_true")
