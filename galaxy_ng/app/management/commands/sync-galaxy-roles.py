@@ -12,10 +12,10 @@ class Command(BaseCommand):
     Iterates through api/v1/roles and sync all roles found.
     """
 
-    help = 'Sync upstream roles from [old-]galaxy.ansible.com'
+    help = 'Sync upstream roles from galaxy.ansible.com'
 
     def add_arguments(self, parser):
-        parser.add_argument("--baseurl", default="https://old-galaxy.ansible.com")
+        parser.add_argument("--baseurl", default="https://galaxy.ansible.com")
         parser.add_argument("--github_user", help="find and sync only this namespace name")
         parser.add_argument("--role_name", help="find and sync only this role name")
         parser.add_argument("--limit", type=int)
