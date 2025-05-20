@@ -174,7 +174,7 @@ def test_me_social_with_v1_synced_user(ansible_config):
     pargs = json.dumps({
         "github_user": username,
         "limit": 1,
-        "baseurl": "https://old-galaxy.ansible.com"
+        "baseurl": "https://galaxy.ansible.com"
     }).encode('utf-8')
     resp = admin_client('/api/v1/sync/', method='POST', args=pargs)
     wait_for_v1_task(resp=resp, api_client=admin_client)
