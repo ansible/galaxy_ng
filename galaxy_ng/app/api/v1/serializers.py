@@ -545,7 +545,7 @@ class LegacySyncSerializer(serializers.Serializer):
 
     baseurl = serializers.CharField(
         required=False,
-        default='https://old-galaxy.ansible.com/api/v1/roles/'
+        default='https://galaxy.ansible.com/api/v1/roles/'
     )
     github_user = serializers.CharField(required=False)
     role_name = serializers.CharField(required=False)
