@@ -61,6 +61,9 @@ x-common-env: &common-env
   # This can be done as part of the `docker compose` call:
   # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/certified-sync.yaml up
   DEV_SOURCE_PATH:
+  # To enable vscode debug
+  # $ ENABLE_DEBUGPY=1
+  ENABLE_DEBUGPY:
 
 
 x-standalone-env: &standalone-env
@@ -208,6 +211,8 @@ services:
       - "var_lib_pulp_standalone:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+    ports:
+      - '5677:5677'
     environment:
       <<: *standalone-env
     extra_hosts:
@@ -245,6 +250,8 @@ services:
       - "var_lib_pulp_standalone:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+    ports:
+      - '5678:5678'
     environment:
       <<: *standalone-env
     extra_hosts:
@@ -269,7 +276,7 @@ services:
   standalone-worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     deploy:
-      replicas: 2
+      replicas: 1
     depends_on:
       base_img_dev:
         condition: service_completed_successfully
@@ -284,6 +291,8 @@ services:
       - "var_lib_pulp_standalone:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+    ports:
+      - '5679:5679'
     environment:
       <<: *standalone-env
     user: galaxy
@@ -296,7 +305,7 @@ services:
         # Worker needs gpg in order to consume signing tasks;
         gpg --list-secret-keys;
 
-        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
+        ENTRYPOINT=/venv/bin/pulpcore-worker /src/galaxy_ng/dev/compose/bin/reloader start-worker
       "
 
   standalone-manager:
@@ -563,7 +572,7 @@ services:
   insights-worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     deploy:
-      replicas: 2
+      replicas: 1
     depends_on:
       base_img_dev:
         condition: service_completed_successfully

@@ -131,10 +131,8 @@ jobs:
           echo ::group::MANAGER_LOGS
           docker logs --tail=10000 compose-manager-1
           echo ::endgroup::
-          echo ::group::FIRST_WORKER_LOGS
+          echo ::group::WORKER_LOGS
           docker logs --tail=10000 compose-worker-1
-          echo ::group::SECOND_WORKER_LOGS
-          docker logs --tail=10000 compose-worker-2
           echo ::endgroup::
           echo ::group::CONTENT_LOGS
           docker logs --tail=10000 compose-content-1
