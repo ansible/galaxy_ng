@@ -230,8 +230,6 @@ __import__("ipdb").set_trace()
 > [!TIP]
 > Replace if you are using a different debugger, however the images has only **pdb** and **ipdb** installed.
 
-If you discover other ways of debugging, like connecting dap protocol or vscode debugger, please update this file!
-
 #### Step 2 - Now execute your stack or just the container you are trying to debug.
 
 Example:
@@ -286,6 +284,135 @@ Once you see `[rpdb]` running:
 $ docker exec -it compose-worker-1 bash
 bash-4.4$ nc 127.0.0.1 4444
 ```
+
+### Debugging with vscode
+
+Make sure you have the [python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python) installed.
+
+Set the `ENABLE_DEBUGPY` variable to start [debugpy](https://github.com/microsoft/debugpy).
+```console
+$ cd ~/projects/galaxy_ng
+$ export DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng"
+$ export ENABLE_DEBUGPY="yes"
+$ make compose/standalone
+```
+
+In your galaxy_ng repo, **create `launch.json` for the debugger**
+A `.vscode/launch.json` needs to be created which instructs vscode how to start
+the debugger.
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+          "name": "API Remote Attach",
+          "type": "debugpy",
+          "request": "attach",
+          "connect": {
+            "host": "localhost",
+            "port": 5677
+          },
+          "pathMappings": [
+            {
+              "localRoot": "${workspaceFolder}",
+              "remoteRoot": "."
+            }
+          ]
+        },
+        {
+          "name": "Content Remote Attach",
+          "type": "debugpy",
+          "request": "attach",
+          "connect": {
+            "host": "localhost",
+            "port": 5678
+          },
+          "pathMappings": [
+            {
+              "localRoot": "${workspaceFolder}",
+              "remoteRoot": "."
+            }
+          ]
+        },
+        {
+            "name": "Worker Remote Attach",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5679
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ]
+        },
+    ]
+}
+```
+
+The `.vscode/launch.json` for the other packages, will be very similar,
+but you need to update the `remoteRoot` with the right path.
+Note: make sure the package is in your `DEV_SOURCE_PATH`.
+
+Pulpcore example:
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+          "name": "API Remote Attach",
+          "type": "debugpy",
+          "request": "attach",
+          "connect": {
+            "host": "localhost",
+            "port": 5677
+          },
+          "pathMappings": [
+            {
+              "localRoot": "${workspaceFolder}",
+              "remoteRoot": "/src/pulpcore/"
+            }
+          ]
+        },
+        {
+          "name": "Content Remote Attach",
+          "type": "debugpy",
+          "request": "attach",
+          "connect": {
+            "host": "localhost",
+            "port": 5678
+          },
+          "pathMappings": [
+            {
+              "localRoot": "${workspaceFolder}",
+              "remoteRoot": "/src/pulpcore/"
+            }
+          ]
+        },
+        {
+            "name": "Worker Remote Attach",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5679
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/src/pulpcore/"
+                }
+            ]
+        },
+    ]
+}
+```
+
+After that, you can click on `Run and Debug` on the sidebar, and select the service to debug:
+![Debugging](../imgs/debug.png "Attaching service debug")
 
 ###  Running containers inside a vagrant box
 

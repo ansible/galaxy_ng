@@ -3,10 +3,20 @@
 set -o errexit
 set -o nounset
 
+readonly ENTRYPOINT=${ENTRYPOINT:-'pulpcore-worker'}
 readonly RELOAD_ENABLED="${RELOAD_ENABLED:-no}"
+readonly ENABLE_DEBUGPY="${ENABLE_DEBUGPY:-}"
 
-if [[ "${RELOAD_ENABLED}" == 'yes' ]]; then
-    exec pulpcore-worker --reload
-else
-    exec pulpcore-worker
+FINAL_ENTRYPOINT=()
+if [[ -n "${ENABLE_DEBUGPY}" ]]; then
+    FINAL_ENTRYPOINT+=(/venv/bin/debugpy)
+    FINAL_ENTRYPOINT+=(--listen 0.0.0.0:5679)
+    FINAL_ENTRYPOINT+=(--wait-for-client)
 fi
+
+FINAL_ENTRYPOINT+=("${ENTRYPOINT}")
+if [[ "${RELOAD_ENABLED}" == 'yes' ]]; then
+    FINAL_ENTRYPOINT+=(--reload)
+fi
+
+exec "${FINAL_ENTRYPOINT[@]}"

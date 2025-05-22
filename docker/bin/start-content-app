@@ -7,6 +7,7 @@ readonly ENTRYPOINT=${ENTRYPOINT:-'/venv/bin/pulpcore-content'}
 readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 readonly GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-90}"
 readonly RELOAD_ENABLED="${RELOAD_ENABLED:-no}"
+readonly ENABLE_DEBUGPY="${ENABLE_DEBUGPY:-}"
 
 readonly BIND_HOST='[::]'
 readonly BIND_PORT="${GUNICORN_PORT:-24816}"
@@ -22,4 +23,11 @@ if [[ "${RELOAD_ENABLED}" == 'yes' ]]; then
     GUNICORN_OPTIONS+=(--reload)
 fi
 
-exec "${ENTRYPOINT}" "${GUNICORN_OPTIONS[@]}"
+FINAL_ENTRYPOINT=()
+if [[ -n "${ENABLE_DEBUGPY}" ]]; then
+    FINAL_ENTRYPOINT+=(/venv/bin/debugpy)
+    FINAL_ENTRYPOINT+=(--listen 0.0.0.0:5678)
+fi
+
+FINAL_ENTRYPOINT+=("${ENTRYPOINT}")
+exec "${FINAL_ENTRYPOINT[@]}" "${GUNICORN_OPTIONS[@]}"

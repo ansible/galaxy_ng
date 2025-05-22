@@ -10,7 +10,7 @@ USER root
 RUN LANG=C dnf -y --disableplugin=subscription-manager install nc
 
 USER galaxy
-RUN ${VIRTUAL_ENV}/bin/python3 -m pip install hupper ipython ipdb rpdb django-extensions pulp-cli
+RUN ${VIRTUAL_ENV}/bin/python3 -m pip install debugpy hupper ipython ipdb rpdb django-extensions pulp-cli
 
 RUN /app/dev/compose/signing/setup_gpg_workarounds.sh
 

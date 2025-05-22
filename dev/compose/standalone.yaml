@@ -89,6 +89,9 @@ x-common-env: &common-env
   # This can be done as part of the `docker compose` call:
   # $ DEV_SOURCE_PATH="pulp_container:galaxy_ng" docker compose -f dev/compose/standalone.yaml up
   DEV_SOURCE_PATH:
+  # To enable vscode debug
+  # $ ENABLE_DEBUGPY=1
+  ENABLE_DEBUGPY:
 
 # allow attaching to the running container
 x-debugging: &debugging
@@ -191,6 +194,8 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+    ports:
+      - '5677:5677'
     environment:
       <<: *common-env
     extra_hosts:
@@ -229,6 +234,8 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+    ports:
+      - '5678:5678'
     environment:
       <<: *common-env
     extra_hosts:
@@ -254,7 +261,7 @@ services:
   worker:
     image: "localhost/galaxy_ng/galaxy_ng:dev"
     deploy:
-      replicas: 2
+      replicas: 1
     depends_on:
       base_img_dev:
         condition: service_completed_successfully
@@ -269,6 +276,8 @@ services:
       - "var_lib_pulp:/var/lib/pulp"
       - "../../../:/src"
       - "../../:/app"
+    ports:
+      - '5679:5679'
     environment:
       <<: *common-env
     user: galaxy
@@ -281,7 +290,7 @@ services:
         # Worker needs gpg in order to consume signing tasks;
         gpg --list-secret-keys;
 
-        /src/galaxy_ng/dev/compose/bin/reloader /venv/bin/pulpcore-worker
+        ENTRYPOINT=/venv/bin/pulpcore-worker /src/galaxy_ng/dev/compose/bin/reloader start-worker
       "
 
   manager:
