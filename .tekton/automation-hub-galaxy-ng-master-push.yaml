@@ -266,7 +266,7 @@ spec:
         - name: name
           value: build-image-index
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-build-image-index:0.1@sha256:462ecbf94ec44a8b770d6ef8838955f91f57ee79795e5c18bdc0fcb0df593742
+          value: quay.io/konflux-ci/tekton-catalog/task-build-image-index:0.1@sha256:1b357f2ed430d18a009740a1783dd15af70ce1e23dc6254da1a83e9ec595d5be
         - name: kind
           value: task
         resolver: bundles
@@ -379,7 +379,7 @@ spec:
         - name: name
           value: sast-snyk-check
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-sast-snyk-check:0.4@sha256:0d22dbaa528c8edf59aafab3600a0537b5408b80a4f69dd9cb616620795ecdc8
+          value: quay.io/konflux-ci/tekton-catalog/task-sast-snyk-check:0.4@sha256:15a945b054b245f6713845dd6ae813d373c9f9cbac386d7382964f1b70ae3076
         - name: kind
           value: task
         resolver: bundles
