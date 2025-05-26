@@ -104,7 +104,7 @@ def _assert_sync(manifest, client):
 
 def _assert_namespace_sync(pah_client, crc_client, namespace):
     crc_ns = crc_client(f"v3/namespaces/{namespace['name']}/")
-    pah_ns = pah_client(f"v3/plugin/ansible/content/rh-certified/namespaces/{namespace['name']}")
+    pah_ns = pah_client(f"v3/plugin/ansible/content/rh-certified/namespaces/{namespace['name']}/")
     pah_galaxy_ns = pah_client(f"v3/namespaces/{namespace['name']}/")
 
     # test the fields
