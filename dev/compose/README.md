@@ -300,6 +300,7 @@ $ make compose/standalone
 In your galaxy_ng repo, **create `launch.json` for the debugger**
 A `.vscode/launch.json` needs to be created which instructs vscode how to start
 the debugger.
+Note: make sure to add `.vscode` to your [global gitignore](https://docs.github.com/en/get-started/git-basics/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer).
 ```json
 {
     "version": "0.2.0",
