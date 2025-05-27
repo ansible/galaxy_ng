@@ -3,6 +3,6 @@ from ._vendor import automated_logging
 
 sys.modules.setdefault("automated_logging", automated_logging)
 
-__version__ = "4.9.3"
+__version__ = "4.9.4"
 
 default_app_config = "galaxy_ng.app.PulpGalaxyPluginAppConfig"
