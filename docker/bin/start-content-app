@@ -8,6 +8,8 @@ readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 readonly GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-90}"
 readonly RELOAD_ENABLED="${RELOAD_ENABLED:-no}"
 readonly ENABLE_DEBUGPY="${ENABLE_DEBUGPY:-}"
+readonly DEBUGPY_PATH=${DEBUGPY_PATH:-'/venv/bin/debugpy'}
+readonly DEBUGPY_PORT=${DEBUGPY_PORT:-5678}
 
 readonly BIND_HOST='[::]'
 readonly BIND_PORT="${GUNICORN_PORT:-24816}"
@@ -25,8 +27,8 @@ fi
 
 FINAL_ENTRYPOINT=()
 if [[ -n "${ENABLE_DEBUGPY}" ]]; then
-    FINAL_ENTRYPOINT+=(/venv/bin/debugpy)
-    FINAL_ENTRYPOINT+=(--listen 0.0.0.0:5678)
+    FINAL_ENTRYPOINT+=(${DEBUGPY_PATH})
+    FINAL_ENTRYPOINT+=(--listen 0.0.0.0:${DEBUGPY_PORT})
 fi
 
 FINAL_ENTRYPOINT+=("${ENTRYPOINT}")
