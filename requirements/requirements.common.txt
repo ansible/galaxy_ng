@@ -165,7 +165,7 @@ frozenlist==1.6.0
     # via
     #   aiohttp
     #   aiosignal
-galaxy-importer==0.4.29
+galaxy-importer==0.4.30
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
