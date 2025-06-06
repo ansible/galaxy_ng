@@ -1,4 +1,6 @@
+import uuid
 import logging
+
 from unittest.case import skip
 from uuid import uuid4
 
@@ -38,6 +40,7 @@ def _get_create_version_in_repo(namespace, collection, repo, **kwargs):
         namespace=namespace,
         name=collection.name,
         collection=collection,
+        sha256=uuid.uuid4().hex,
         **kwargs,
     )
     qs = CollectionVersion.objects.filter(pk=collection_version.pk)
