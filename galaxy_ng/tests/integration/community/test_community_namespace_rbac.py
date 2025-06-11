@@ -451,12 +451,12 @@ def test_social_user_sync_with_changed_login(ansible_config):
     # he should own the old and a new v3 namespaces
     assert sean_ns_names == ['wilk42', 'sean_m_sullivan']
     # his uid should have remained the same
-    assert me_ds['id'] == ns1_owners_ids[-1]
+    assert me_ds['id'] == ns1_owners_ids[0]
 
     # he should own the original v1 namespaces
     ns1_owners_resp_after = admin_client.request(f'/api/v1/namespaces/{v1_namespace_id}/owners/')
     ns1_owner_names_after = [x['username'] for x in ns1_owners_resp_after]
-    assert ns1_owner_names_after[-1] == 'sean-m-sullivan'
+    assert ns1_owner_names_after[0] == 'sean-m-sullivan'
 
     # he should own a new v1 namespace too ...
     ns_resp = admin_client('/api/v1/namespaces/?owner=sean-m-sullivan')
