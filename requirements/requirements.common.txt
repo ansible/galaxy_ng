@@ -406,7 +406,7 @@ referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
+requests==2.32.4
     # via
     #   django-ansible-base
     #   galaxy-importer
