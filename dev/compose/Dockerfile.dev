@@ -1,10 +1,10 @@
 # This Dockerfile is meant to extend the main Dockerfile
 # Moving files to the required places
 # Installing extra development libraries and tools
-FROM localhost/galaxy_ng/galaxy_ng:base
+FROM base_img
 
 ARG GNUPGHOME
-ENV GNUPGHOME $GNUPGHOME
+ENV GNUPGHOME="${GNUPGHOME}"
 
 USER root
 RUN LANG=C dnf -y --disableplugin=subscription-manager install nc

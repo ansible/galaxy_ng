@@ -130,6 +130,8 @@ services:
       dockerfile: Dockerfile.dev
       args:
         <<: *common-env
+      additional_contexts:
+        base_img: service:base_img
     image: "localhost/galaxy_ng/galaxy_ng:dev"
 
   standalone-redis:
@@ -379,6 +381,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
+      additional_contexts:
+        base_img: service:base_img
     depends_on:
       base_img:
         condition: service_completed_successfully
@@ -661,6 +665,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
+      additional_contexts:
+        base_img: service:base_img
     depends_on:
       base_img:
         condition: service_completed_successfully
