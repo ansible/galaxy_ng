@@ -13,6 +13,10 @@ on:
     - cron: '00 3 * * *'
   workflow_dispatch:
 
+# env:
+#   DOCKER_BUILDKIT: 0
+#   COMPOSE_DOCKER_CLI_BUILD: 0
+
 jobs:
   integration:
     strategy:
@@ -38,7 +42,7 @@ jobs:
 
       - name: (Linux) Install docker compose
         run: |
-          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
+          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.37.0/docker-compose-linux-x86_64
           install /tmp/docker-compose /usr/local/bin/
 
       - name: sudo apt update
