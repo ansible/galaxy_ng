@@ -1,3 +1,5 @@
+import uuid
+
 from django.urls.base import reverse
 from django.test.utils import override_settings
 
@@ -42,6 +44,7 @@ def _get_create_version_in_repo(namespace, collection, version, repo):
         name=collection.name,
         collection=collection,
         version=version,
+        sha256=uuid.uuid4().hex,
     )
     qs = CollectionVersion.objects.filter(pk=collection_version.pk)
     with repo.new_version() as new_version:
