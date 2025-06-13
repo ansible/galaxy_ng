@@ -43,6 +43,7 @@ VERSIONS = {
     "pulp_ansible_version": apps.get_app_config('ansible').version,
     "pulp_container_version": apps.get_app_config('container').version,
     "ansible_base_version": get_version_from_metadata("django-ansible-base"),
+    "ansible_lint_version": get_version_from_metadata("ansible-lint"),
     "dynaconf_version": get_version_from_metadata("dynaconf"),
     "django_version": get_version_from_metadata("django"),
 }
