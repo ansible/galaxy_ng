@@ -6,6 +6,6 @@
   "tekton": {
     "enabled": true,
     "automerge": false,
-    "schedule": ["at any time"]
+    "schedule": ["* 0-5 * * 5"]
   }
 }
