@@ -8,7 +8,7 @@ Profiles:
 
 ## Requirements
 
-- `docker compose` version `>=2`
+- `docker compose` version `>=v2.34.0`
 
 ## Usage
 
