@@ -357,7 +357,7 @@ pyasn1==0.6.1
     #   python-ldap
 pyasn1-modules==0.4.2
     # via python-ldap
-pycares==4.6.0
+pycares==4.9.0
     # via aiodns
 pycodestyle==2.11.1
     # via flake8
