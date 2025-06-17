@@ -36,15 +36,19 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: (Linux) Install docker compose
-        run: |
-          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
-          install /tmp/docker-compose /usr/local/bin/
-
       - name: sudo apt update
         run: |
           sudo apt update
 
+      - name: (Linux) Install docker compose
+        run: |
+          COMPOSE_VERSION=v2.34.0
+          DOCKER_CONFIG=${DOCKER_CONFIG:-${HOME}/.docker}
+          mkdir -p $DOCKER_CONFIG/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+          chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+          docker version
+          docker compose version
       - name: Install python requirements and podman
         run: |
           sudo apt-get install -y libsasl2-dev python-dev-is-python3 libldap2-dev libssl-dev podman
