@@ -1,9 +1,0 @@
-version: "3.7"
-
-services:
-  ui:
-    environment:
-      - "API_PROXY_HOST=api"
-      - "API_PROXY_PORT=8000"
-      - "DEPLOYMENT_MODE=${COMPOSE_PROFILE}"
-      - "UI_EXTERNAL_LOGIN_URI=http://localhost:5001/login"

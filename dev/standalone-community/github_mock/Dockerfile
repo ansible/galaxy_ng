@@ -1,1 +1,0 @@
-../../../profiles/community/github_mock/Dockerfile
