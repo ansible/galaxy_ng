@@ -589,7 +589,7 @@ def assert_user_in_group(galaxy_client):
             params={
                 "user": user['id'],
                 "content_type__model": "team",
-                "role_definition__name": "Galaxy Team Member"
+                "role_definition__name": "Team Member"
             },
         )
         group_ids = [assignment["object_id"] for assignment in assignment_r["results"]]
@@ -649,7 +649,7 @@ def test_team_member_sync_from_dab_to_pulp(galaxy_client, assert_user_in_group, 
     assert_user_in_group(user["id"], group["id"], expected=False)
 
     # Get the DAB team member role
-    rd_list = gc.get("_ui/v2/role_definitions/", params={"name": "Galaxy Team Member"})
+    rd_list = gc.get("_ui/v2/role_definitions/", params={"name": "Team Member"})
     assert rd_list["count"] == 1
     rd = rd_list["results"][0]
 
@@ -676,7 +676,7 @@ def test_team_members_are_migrated(galaxy_client, assert_user_in_group):
     gc = galaxy_client("admin")
 
     team_assignments = gc.get("_ui/v2/role_user_assignments/", params={
-        "role_definition__name": "Galaxy Team Member"
+        "role_definition__name": "Team Member"
     })
     for assignment in team_assignments["results"]:
         assert_user_in_group(assignment["user"], int(assignment["object_id"]))
