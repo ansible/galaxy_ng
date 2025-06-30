@@ -90,6 +90,14 @@ jobs:
             fi
           done
 
+      - name: Checking for uncommitted migrations...
+        if: ${{ matrix.env.TEST_PROFILE != 'certified-sync' }}
+        run: docker exec -t compose-manager-1 bash -c "django-admin makemigrations galaxy --check --dry-run"
+
+      - name: Checking for uncommitted migrations... (certified-sync)
+        if: ${{ matrix.env.TEST_PROFILE == 'certified-sync' }}
+        run: docker exec -t compose-standalone-manager-1 bash -c "django-admin makemigrations galaxy --check --dry-run"
+
       - name: Install integration requirements
         run: |
           pip install -r integration_requirements.txt

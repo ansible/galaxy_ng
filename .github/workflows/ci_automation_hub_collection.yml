@@ -104,6 +104,9 @@ jobs:
             fi
           done
 
+      - name: Checking for uncommitted migrations...
+        run: docker exec -t compose-manager-1 bash -c "django-admin makemigrations galaxy --check --dry-run"
+
       - name: create the test users+data
         run: docker exec -t compose-manager-1 bash -c 'cd /src/galaxy_ng; django-admin shell < ./dev/common/setup_test_data.py'
 
