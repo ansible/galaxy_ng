@@ -175,7 +175,7 @@ class CurrentUserSerializer(UserSerializer):
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_model_permissions(self, obj):
         permissions = {}
-        allow_group_user_edits = settings.get("ALLOW_LOCAL_RESOURCE_MANAGEMENT", True)
+        allow_group_user_edits = not settings.get("IS_CONNECTED_TO_RESOURCE_SERVER")
         for i, j in PERMISSIONS.items():
             permissions[i] = j
             permissions[i]["has_model_permission"] = obj.has_perm(i)

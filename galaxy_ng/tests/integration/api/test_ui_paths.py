@@ -781,7 +781,7 @@ def test_api_ui_v1_settings(ansible_config):
         assert ds['GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD'] is False
         assert ds['GALAXY_REQUIRE_CONTENT_APPROVAL'] is True
 
-        assert ds["ALLOW_LOCAL_RESOURCE_MANAGEMENT"] in [True, False]
+        assert ds["IS_CONNECTED_TO_RESOURCE_SERVER"] in [True, False]
         assert ds["ANSIBLE_BASE_ROLES_REQUIRE_VIEW"] in [True, False]
         assert ds["TOKEN_AUTH_DISABLED"] in [True, False]
         assert "ANSIBLE_API_HOSTNAME" in ds

@@ -59,8 +59,6 @@ x-common-env: &common-env
   PULP_ANSIBLE_BASE_JWT_VALIDATE_CERT: 'false'
   PULP_ANSIBLE_BASE_JWT_KEY: 'https://localhost'
 
-  # disable user/group modifications
-  PULP_ALLOW_LOCAL_RESOURCE_MANAGEMENT: 'false'
 
   # role content workaround ..
   PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'

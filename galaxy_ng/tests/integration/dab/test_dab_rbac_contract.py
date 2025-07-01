@@ -229,7 +229,7 @@ def test_create_custom_namespace_system_admin_role(custom_role_factory, galaxy_c
 @pytest.mark.min_hub_version("4.10dev")
 def test_give_user_custom_role_system(settings, galaxy_client, custom_role_factory, namespace):
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT', True) is not True:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     # TODO(cutwater): verify that assignment is seen in pulp API (HOW?)
@@ -303,7 +303,7 @@ def test_give_team_custom_role_system(
     team,
     namespace,
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT', True) is not True:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("galaxykit uses drf tokens, which bypass JWT auth and claims processing")
 
     # Step 0: Setup test.
@@ -466,7 +466,7 @@ def test_give_team_custom_role_object(
     namespace,
     team,
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT', True) is not True:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("galaxykit uses drf tokens, which bypass JWT auth and claims processing")
 
     # Step 0: Setup test.

@@ -32,7 +32,7 @@ class TestLoadData:
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.load_data
     def test_load_users_and_groups(self, galaxy_client, settings, data):
-        if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+        if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
             pytest.skip("this test relies on local resource creation")
 
         gc = galaxy_client("admin")

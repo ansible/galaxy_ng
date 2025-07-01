@@ -28,7 +28,6 @@ class SettingsView(api_base.APIView):
             "KEYCLOAK_URL",
             "ANSIBLE_BASE_JWT_VALIDATE_CERT",
             "ANSIBLE_BASE_JWT_KEY",
-            "ALLOW_LOCAL_RESOURCE_MANAGEMENT",
             "ANSIBLE_BASE_ROLES_REQUIRE_VIEW",
             "DYNACONF_AFTER_GET_HOOKS",
             "ANSIBLE_API_HOSTNAME",
@@ -36,6 +35,7 @@ class SettingsView(api_base.APIView):
             "CONTENT_ORIGIN",
             "TOKEN_SERVER",
             "TOKEN_AUTH_DISABLED",
+            "IS_CONNECTED_TO_RESOURCE_SERVER",
         ]
         settings_dict = settings.as_dict()
         data = {key: settings_dict.get(key, None) for key in keyset}

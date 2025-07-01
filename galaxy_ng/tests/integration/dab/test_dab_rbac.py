@@ -64,7 +64,7 @@ def test_dab_rbac_repository_owner_by_user_or_team(
     random_username
 ):
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
@@ -179,7 +179,7 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
       to view a private repository that includes their collection.
     """
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
@@ -319,7 +319,7 @@ def test_dab_user_platform_auditor_bidirectional_sync(
     * when revoking the "Platform Auditor" roledef the galaxy.auditor role
       should also be revoked automatically,
     """
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
@@ -408,7 +408,7 @@ def test_dab_team_platform_auditor_bidirectional_sync(
     * when revoking the "Platform Auditor" roledef the galaxy.auditor role
       should also be revoked automatically,
     """
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
@@ -505,7 +505,7 @@ def test_dab_user_assignment_filtering_as_user(
     * The role_user_assignments endpoint behaves differently for
       evaluating a superuser vs a user for access.
     """
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
@@ -571,7 +571,7 @@ def test_dab_rbac_ee_ownership_with_user_or_team(
     * This does not check for functionality of the roledef.
     * This only validates the assignments.
     """
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     ROLE_NAME = 'galaxy.execution_environment_namespace_owner'
