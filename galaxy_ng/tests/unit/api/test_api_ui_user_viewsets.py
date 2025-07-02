@@ -26,6 +26,368 @@ class MockSettings:
         return self.kwargs.get(key, default)
 
 
+class TestUiV2UserViewSet(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.client = APIClient()
+        self.admin_user = auth_models.User.objects.create(username="admin", is_superuser=True)
+        self.pe_group = self._create_partner_engineer_group()
+        self.admin_user.groups.add(self.pe_group)
+        self.admin_user.save()
+        self.user_url = "/api/galaxy/_ui/v2/users/"
+
+    def test_user_create_blocked_when_connected_to_resource_server(self):
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        new_user_data = {
+            "username": "haxor_test3",
+            "password": "cantTouchThis123",
+            "groups": [{"id": self.pe_group.id, "name": self.pe_group.name}],
+        }
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.post(self.user_url, new_user_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(
+            "Request should be made to '/api/gateway/v1/users/'",
+            response.content.decode()
+        )
+
+    def test_user_create_success_when_not_connected_to_resource_server(self):
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        new_user_data = {
+            "username": "haxor_test3",
+            "password": "cantTouchThis123",
+            "email": "test@example.com",
+            "groups": [{"id": self.pe_group.id, "name": self.pe_group.name}],
+        }
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.post(self.user_url, new_user_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["username"], "haxor_test3")
+        self.assertEqual(response.data["email"], "test@example.com")
+        self.assertTrue("id" in response.data)
+
+    def test_user_update_blocked_when_connected_to_resource_server(self):
+        """Test that user update is blocked when connected to resource server"""
+        # First create a user
+        user = auth_models.User.objects.create(
+            username="test_user",
+            email="original@example.com"
+        )
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        update_data = {"email": "updated@example.com"}
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.patch(f"{self.user_url}{user.id}/", update_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(
+            "Request should be made to '/api/gateway/v1/users/'",
+            response.content.decode()
+        )
+
+    def test_user_update_success_when_not_connected_to_resource_server(self):
+        """Test that user update works when not connected to resource server"""
+        # First create a user
+        user = auth_models.User.objects.create(
+            username="test_user",
+            email="original@example.com"
+        )
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        update_data = {"email": "updated@example.com", "username": "test_user"}
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.patch(f"{self.user_url}{user.id}/", update_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["email"], "updated@example.com")
+        self.assertEqual(response.data["username"], "test_user")
+
+    def test_user_put_update_blocked_when_connected_to_resource_server(self):
+        """Test that user PUT update is blocked when connected to resource server"""
+        # First create a user
+        user = auth_models.User.objects.create(
+            username="test_user",
+            email="original@example.com"
+        )
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        update_data = {
+            "username": "test_user",
+            "email": "updated@example.com",
+            "first_name": "Test",
+            "last_name": "User"
+        }
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.put(f"{self.user_url}{user.id}/", update_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(
+            "Request should be made to '/api/gateway/v1/users/'",
+            response.content.decode()
+        )
+
+    def test_user_delete_blocked_when_connected_to_resource_server(self):
+        """Test that user deletion is blocked when connected to resource server"""
+        # First create a user
+        user = auth_models.User.objects.create(username="test_user")
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.delete(f"{self.user_url}{user.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(
+            "Request should be made to '/api/gateway/v1/users/'",
+            response.content.decode()
+        )
+
+    def test_user_delete_success_when_not_connected_to_resource_server(self):
+        """Test that user deletion works when not connected to resource server"""
+        # First create a user
+        user = auth_models.User.objects.create(username="test_user")
+
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.delete(f"{self.user_url}{user.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_user_list_allowed_when_connected_to_resource_server(self):
+        """Test that user listing is allowed when connected to resource server"""
+        # Create some users
+        auth_models.User.objects.create(username="test_user1")
+        auth_models.User.objects.create(username="test_user2")
+
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.get(self.user_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue("results" in response.data)
+
+    def test_user_retrieve_allowed_when_connected_to_resource_server(self):
+        """Test that user retrieval is allowed when connected to resource server"""
+        # Create a user
+        user = auth_models.User.objects.create(
+            username="test_user",
+            email="test@example.com"
+        )
+
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.get(f"{self.user_url}{user.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["username"], "test_user")
+        self.assertEqual(response.data["email"], "test@example.com")
+
+    def test_user_serializer_fields_for_list_retrieve(self):
+        """Test that user detail serializer returns expected fields for list/retrieve"""
+        user = auth_models.User.objects.create(
+            username="test_user",
+            email="test@example.com",
+            first_name="Test",
+            last_name="User"
+        )
+
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.get(f"{self.user_url}{user.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected_fields = {
+            "id", "username", "first_name", "last_name", "email",
+            "groups", "teams", "organizations", "date_joined", "is_superuser", "resource"
+        }
+        self.assertEqual(set(response.data.keys()), expected_fields)
+
+    def test_user_filtering_works_with_resource_server(self):
+        """Test that filtering still works when connected to resource server"""
+        # Create some users
+        auth_models.User.objects.create(username="test_user1", email="test1@example.com")
+        auth_models.User.objects.create(username="another_user", email="test2@example.com")
+
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            # Filter by username
+            response = self.client.get(f"{self.user_url}?username=test_user1")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["username"], "test_user1")
+
+    def test_user_ordering_by_id(self):
+        """Test that users are ordered by ID"""
+        # Create test users
+        users = []
+        for i in range(3):
+            user = auth_models.User.objects.create(
+                username=f"test_user_{i}",
+                email=f"test{i}@example.com"
+            )
+            users.append(user)
+
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.get(self.user_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Extract our test users from the results
+        test_users = [u for u in response.data["results"] if u["username"].startswith("test_user_")]
+
+        # Verify ordering by ID (ascending)
+        user_ids = [u["id"] for u in test_users]
+        self.assertEqual(user_ids, sorted(user_ids))
+
+    def test_user_pagination(self):
+        """Test pagination of users"""
+        # Create multiple test users
+        created_users = []
+        for i in range(3):
+            user = auth_models.User.objects.create(
+                username=f"paginate_user_{i}",
+                email=f"paginate{i}@example.com"
+            )
+            created_users.append(user)
+
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            # Test pagination with page_size=2
+            response = self.client.get(f"{self.user_url}?page_size=2")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue("results" in response.data)
+        self.assertTrue("next" in response.data)
+        self.assertTrue("previous" in response.data)
+
+    def test_user_validation_errors(self):
+        """Test that proper validation errors are returned"""
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Test empty username
+        user_data = {"username": "", "email": "test@example.com"}
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.post(self.user_url, user_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Test missing username
+        user_data = {"email": "test@example.com"}
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.post(self.user_url, user_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Test duplicate username
+        auth_models.User.objects.create(username="existing_user")
+        user_data = {"username": "existing_user", "email": "test@example.com"}
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.post(self.user_url, user_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_user_password_handling(self):
+        """Test password handling in user creation and updates"""
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Test user creation with password
+        user_data = {
+            "username": "password_user",
+            "email": "password@example.com",
+            "password": "secure_password123"
+        }
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.post(self.user_url, user_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # Password should not be returned in response
+        self.assertNotIn("password", response.data)
+
+        # Verify user can login with the password
+        created_user = auth_models.User.objects.get(username="password_user")
+        self.assertTrue(created_user.check_password("secure_password123"))
+
+    def test_user_groups_validation(self):
+        """Test validation of groups field in user data"""
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Test with valid group
+        user_data = {
+            "username": "group_test_user",
+            "email": "group@example.com",
+            "groups": [{"id": self.pe_group.id, "name": self.pe_group.name}]
+        }
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.post(self.user_url, user_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Test with non-existent group
+        user_data = {
+            "username": "invalid_group_user",
+            "email": "invalid@example.com",
+            "groups": [{"id": 99999, "name": "non_existent_group"}]
+        }
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.post(self.user_url, user_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_user_non_existent_user_error(self):
+        """Test that accessing a non-existent user raises a 404 error"""
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            # Try to retrieve a non-existent user
+            response = self.client.get(f"{self.user_url}999999/")
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+            # Try to update a non-existent user
+            response = self.client.patch(
+                f"{self.user_url}999999/",
+                {"email": "test@example.com"},
+                format="json"
+            )
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+            # Try to delete a non-existent user
+            response = self.client.delete(f"{self.user_url}999999/")
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
 class TestUiUserViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
