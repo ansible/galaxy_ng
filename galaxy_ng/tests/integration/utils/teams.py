@@ -2,11 +2,11 @@ import json
 
 
 def add_user_to_team(client, userid=None, teamid=None):
-    # find the "Galaxy Team Member" roledef ..
+    # find the "Team Member" roledef ..
     roledefs = client.get(
         "_ui/v2/role_definitions/",
         params={
-            'name': 'Galaxy Team Member'
+            'name': 'Team Member'
         }
     )
     roledef = roledefs['results'][0]
@@ -37,11 +37,11 @@ def add_user_to_team(client, userid=None, teamid=None):
 
 
 def remove_user_from_team(client, userid=None, teamid=None):
-    # find the "Galaxy Team Member" roledef ..
+    # find the "Team Member" roledef ..
     roledefs = client.get(
         "_ui/v2/role_definitions/",
         params={
-            'name': 'Galaxy Team Member'
+            'name': 'Team Member'
         }
     )
     roledef = roledefs['results'][0]

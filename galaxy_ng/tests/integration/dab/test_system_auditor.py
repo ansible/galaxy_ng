@@ -34,7 +34,7 @@ def test_system_auditor_role_permissions_without_gateway(galaxy_client):
         body=json.dumps({'content_object': None, 'role': 'galaxy.auditor'})
     )
 
-    # check that all the permssions are view_* only ...
+    # check that all the permissions are view_* only ...
     for perm_code in rinfo["permissions"]:
         perm_name = perm_code.split(".", 1)[1]
         assert "view_" in perm_name, f"{perm_code} is not a view-only permission"

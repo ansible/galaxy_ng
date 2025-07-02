@@ -154,7 +154,7 @@ def migrate_role_assignments(apps, schema_editor):
     from ansible_base.rbac.permission_registry import permission_registry
 
     # galaxy_ng/app/settings.py - ANSIBLE_BASE_MANAGED_ROLE_REGISTRY
-    rd_template = permission_registry.get_managed_role_constructor('galaxy_only_team_member')
+    rd_template = permission_registry.get_managed_role_constructor('team_member')
     member_rd, created = rd_template.get_or_create(apps)
     if created:
         logger.info(f'Created role definition {member_rd.name}')
