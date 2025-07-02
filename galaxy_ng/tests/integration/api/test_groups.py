@@ -42,7 +42,7 @@ API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
 def test_gw_group_role_listing(galaxy_client, settings, test_data):
     """Tests ability to list roles assigned to a namespace."""
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)

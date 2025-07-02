@@ -576,8 +576,11 @@ class AccessPolicyBase(AccessPolicyFromDB):
                 })
         return True
 
-    def is_local_resource_management_disabled(self, request, view, action):
-        return not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT
+    def is_local_resource_management_disabled(self, request, view, action) -> bool:
+        """
+        If the resource server is configured, then local resource management is disabled.
+        """
+        return settings.get("IS_CONNECTED_TO_RESOURCE_SERVER")
 
     def user_is_superuser(self, request, view, action):
         if getattr(self, "swagger_fake_view", False):

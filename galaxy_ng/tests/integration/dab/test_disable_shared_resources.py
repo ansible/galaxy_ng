@@ -5,8 +5,8 @@ import uuid
 
 @pytest.fixture
 def test_group(settings, galaxy_client):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=false")
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="This test relies on local resource management")
 
     gc = galaxy_client("admin")
 
@@ -15,8 +15,8 @@ def test_group(settings, galaxy_client):
 
 @pytest.fixture
 def test_user(settings, galaxy_client):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=false")
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="This test relies on local resource management")
 
     gc = galaxy_client("admin")
 
@@ -33,8 +33,8 @@ def test_user(settings, galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.skip(reason="FIXME - skip until resource management is decided")
 def test_dab_groups_are_read_only(settings, galaxy_client, url, test_group):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') in [None, True]:
-        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="This test relies on being connected to a resource server")
 
     gc = galaxy_client("admin")
 
@@ -75,8 +75,8 @@ def test_dab_groups_are_read_only(settings, galaxy_client, url, test_group):
 )
 @pytest.mark.deployment_standalone
 def test_dab_users_are_read_only(settings, galaxy_client, url, test_user):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') in [None, True]:
-        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="This test relies on being connected to a resource server")
 
     gc = galaxy_client("admin")
 
@@ -109,8 +109,8 @@ def test_dab_users_are_read_only(settings, galaxy_client, url, test_user):
 @pytest.mark.deployment_standalone
 @pytest.mark.skip(reason="FIXME - skip until resource management is decided")
 def test_dab_cant_modify_group_memberships(settings, galaxy_client, test_user, test_group):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') in [None, True]:
-        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="This test relies on being connected to a resource server")
 
     gc = galaxy_client("admin")
 
@@ -136,8 +136,8 @@ def test_dab_cant_modify_group_memberships(settings, galaxy_client, test_user, t
 @pytest.mark.deployment_standalone
 @pytest.mark.skip(reason="FIXME - skip until resource management is decided")
 def test_dab_can_modify_roles(settings, galaxy_client, test_user, test_group):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') in [None, True]:
-        pytest.skip(reason="ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="This test relies on being connected to a resource server")
 
     gc = galaxy_client("admin")
 

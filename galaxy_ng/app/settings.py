@@ -450,9 +450,6 @@ ANSIBLE_BASE_MANAGED_ROLE_REGISTRY = {
 # WARNING: This setting is used in database migrations to create a default organization.
 DEFAULT_ORGANIZATION_NAME = "Default"
 
-# If False it disables editing and managing users and groups.
-ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
-
 # https://github.com/ansible/django-ansible-base/pull/611
 RENAMED_USERNAME_PREFIX = "galaxy_"
 

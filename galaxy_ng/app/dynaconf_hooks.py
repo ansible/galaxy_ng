@@ -87,6 +87,9 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
     data.update(configure_authentication_backends(settings, data))
     data.update(configure_authentication_classes(settings, data))
 
+    # When the resource server is configured, local resource management is disabled.
+    data["IS_CONNECTED_TO_RESOURCE_SERVER"] = settings.get("RESOURCE_SERVER__URL") is not None
+
     # This must go last, so that all the default settings are loaded before dynamic and validation
     if run_dynamic:
         data.update(configure_dynamic_settings(settings))

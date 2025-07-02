@@ -104,8 +104,8 @@ def test_aap_galaxy_normal_user_can_not_demote_superuser(
     gateway_admin_client,
     gateway_user_factory,
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is not False:
-        pytest.skip("ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip("This test relies on being connected to a resource server")
 
     u1 = gateway_user_factory()
     u2 = gateway_user_factory()
@@ -145,8 +145,8 @@ def test_aap_galaxy_local_resource_management_setting_gates_user_creation(
     gateway_admin_client,
     random_username
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is not False:
-        pytest.skip("ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip("This test relies on being connected to a resource server")
 
     # make sure the user can't be created directly in galaxy ...
     resp = gateway_admin_client.post(
@@ -180,8 +180,8 @@ def test_aap_galaxy_local_resource_management_setting_gates_field_modification(
     gateway_admin_client,
     random_gateway_user,
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is not False:
-        pytest.skip("ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip("This test relies on being connected to a resource server")
 
     uid = random_gateway_user.galaxy_v2_me['id']
     user_url = f'{users_endpoint}/{uid}/'
@@ -210,8 +210,8 @@ def test_aap_galaxy_local_resource_management_setting_gates_deletion(
     gateway_admin_client,
     random_gateway_user,
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is not False:
-        pytest.skip("ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip("This test relies on being connected to a resource server")
 
     uid = random_gateway_user.galaxy_v2_me['id']
     user_url = f'{users_endpoint}/{uid}/'
@@ -230,8 +230,8 @@ def test_aap_galaxy_superuser_management(
     gateway_admin_client,
     random_gateway_user
 ):
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is not False:
-        pytest.skip("ALLOW_LOCAL_RESOURCE_MANAGEMENT=true")
+    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip("This test relies on being connected to a resource server")
 
     ga = gateway_admin_client
     uc = random_gateway_user.user_client

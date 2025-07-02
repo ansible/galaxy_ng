@@ -64,9 +64,6 @@ x-common-env: &common-env
   PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'false'
   PULP_GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
 
-  # disable user/group modifications
-  PULP_ALLOW_LOCAL_RESOURCE_MANAGEMENT: 'true'
-
   # role content workaround
   PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'
 

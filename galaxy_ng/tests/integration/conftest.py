@@ -409,7 +409,7 @@ def autohubtest2(galaxy_client):
 def random_namespace(galaxy_client, settings):
     """Make a randomized namespace."""
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin")

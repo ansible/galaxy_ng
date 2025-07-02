@@ -28,8 +28,8 @@ def test_ui_v2_user_create(
 ):
     """Test user creation in ui/v2/users/."""
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip(reason="this only works local resource management enabled")
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="this test relies on local resource management")
 
     gc = galaxy_client("admin", ignore_cache=True)
 
@@ -81,8 +81,8 @@ def test_ui_v2_user_create_invalid_data(
 ):
     """Test user edits in ui/v2/users/ with invalid data."""
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip(reason="this only works local resource management enabled")
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="this test relies on local resource management")
 
     gc = galaxy_client("admin", ignore_cache=True)
 
@@ -115,8 +115,8 @@ def test_ui_v2_user_edit(
 ):
     """Test user edit in ui/v2/users/."""
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip(reason="this only works local resource management enabled")
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="this test relies on local resource management")
 
     gc = galaxy_client("admin", ignore_cache=True)
 
@@ -169,8 +169,8 @@ def test_ui_v2_user_edit_invalid_data(
 ):
     """Test user edits in ui/v2/users/ with invalid data."""
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip(reason="this only works local resource management enabled")
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="this test relies on local resource management")
 
     gc = galaxy_client("admin", ignore_cache=True)
 
@@ -213,8 +213,8 @@ def test_ui_v2_teams(
 ):
     """Test teams creation and deletion."""
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip(reason="this only works local resource management enabled")
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="this test relies on local resource management")
 
     client = galaxy_client("admin", ignore_cache=True)
 
@@ -256,8 +256,8 @@ def test_ui_v2_teams_membership_local_and_nonlocal(
 ):
     """Test teams creation and deletion."""
 
-    if settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False:
-        pytest.skip(reason="this only works local resource management enabled")
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip(reason="this test relies on local resource management")
 
     org_name = random_username.replace('user_', 'org_')
     team1_name = random_username.replace('user_', 'team1_')

@@ -27,10 +27,9 @@ class ComplexUserPermissions(AnsibleBaseUserPermissions):
     ComplexUserPermissions complies with the "complex" requirements
     of a system where there is a resource server that syncs users
     and a jwt that creates users and a confusing mix of how is_superuser
-    can get populated on galaxy when ALLOW_LOCAL_RESOURCE_MANAGEMENT
-    is False,
+    can get populated on galaxy when the resource server is configured,
 
-    To try to break down the logic when ALLOW_LOCAL_RESOURCE_MANAGEMENT=False:
+    To try to break down the logic when the resource server is configured:
         - users CAN NOT be created/edited/deleted directly in galaxy, except ...
         - if the request is a PATCH or a PUT that is only modifying the value
           of is_superuser, then it can be allowed
@@ -46,13 +45,13 @@ class ComplexUserPermissions(AnsibleBaseUserPermissions):
     def has_permission(self, request, view):
         if (
             request.user.is_superuser
-            and settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is not False
+            and not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER')
         ):
             return True
 
         if (
             request.method not in ('GET', 'HEAD', 'PUT', 'PATCH')
-            and settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is False
+            and settings.get('IS_CONNECTED_TO_RESOURCE_SERVER')
         ):
             return False
 
@@ -61,7 +60,7 @@ class ComplexUserPermissions(AnsibleBaseUserPermissions):
     def has_object_permission(self, request, view, obj):
         if (
             request.user.is_superuser
-            and settings.get('ALLOW_LOCAL_RESOURCE_MANAGEMENT') is not False
+            and not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER')
         ):
             return True
 
