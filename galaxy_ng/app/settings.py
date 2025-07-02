@@ -438,8 +438,6 @@ ALLOW_LOCAL_ASSIGNING_JWT_ROLES = False
 ANSIBLE_BASE_MANAGED_ROLE_REGISTRY = {
     'platform_auditor': {'name': 'Platform Auditor', 'shortname': 'sys_auditor'},
     'sys_auditor': {'shortname': 'sys_auditor'},
-    # member role is duplicated, either should work, but we have 2 for latter ownership issues
-    'galaxy_only_team_member': {'name': 'Galaxy Team Member', 'shortname': 'team_member'},
     'team_member': {},
     'team_admin': {},
     # TODO(jctanner): add organization to the registry later

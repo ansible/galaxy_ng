@@ -298,7 +298,7 @@ def test_ui_v2_teams_membership_local_and_nonlocal(
         '_ui/v2/role_user_assignments/',
         body={
             'user': user_data['id'],
-            'role_definition': roledefs['Galaxy Team Member']['id'],
+            'role_definition': roledefs['Team Member']['id'],
             'object_id': team1_data['id'],
         }
     )
