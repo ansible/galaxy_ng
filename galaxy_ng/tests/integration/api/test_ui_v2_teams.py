@@ -38,6 +38,4 @@ def test_ui_v2_teams(galaxy_client):
             f"/api/galaxy/_ui/v2/teams/{team_update_data['id']}/"
         )
 
-    print(f"exc_info:\n{str(exc_info)}")
-
     assert "204" in str(exc_info)
