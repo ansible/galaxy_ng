@@ -1,4 +1,6 @@
 from rest_framework import viewsets
+from django.conf import settings
+from django.http import HttpResponseBadRequest
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework import status
@@ -72,6 +74,8 @@ class UserViewSet(BaseViewSet):
         return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):
+        if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
+            return HttpResponseBadRequest("Request should be made to '/api/gateway/v1/users/'.")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -82,12 +86,19 @@ class UserViewSet(BaseViewSet):
         return Response(UserDetailSerializer(user).data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
+        if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
+            return HttpResponseBadRequest("Request should be made to '/api/gateway/v1/users/'.")
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(UserDetailSerializer(user).data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
+            return HttpResponseBadRequest("Request should be made to '/api/gateway/v1/users/'.")
+        return super().destroy(request, *args, **kwargs)
 
     def perform_update(self, serializer):
         password = serializer.validated_data.get('password')
@@ -131,6 +142,8 @@ class TeamViewSet(BaseViewSet):
 
     def create(self, request, *args, **kwargs):
 
+        if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
+            return HttpResponseBadRequest("Request should be made to '/api/gateway/v1/teams/'.")
         # make the organization ...
         org_name = request.data.get('organization', 'Default')
         organization, _ = Organization.objects.get_or_create(
@@ -152,3 +165,13 @@ class TeamViewSet(BaseViewSet):
 
         serializer = self.serializer_class(team)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
+            return HttpResponseBadRequest("Request should be made to '/api/gateway/v1/teams/'.")
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
+            return HttpResponseBadRequest("Request should be made to '/api/gateway/v1/teams/'.")
+        return super().destroy(request, *args, **kwargs)
