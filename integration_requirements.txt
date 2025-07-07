@@ -8,7 +8,7 @@ openapi-spec-validator
 jsonschema<=4.19.0
 hvac
 importlib_resources
-galaxykit @ git+https://github.com/ansible/galaxykit
+galaxykit @ git+https://github.com/jerabekjiri/galaxykit@make-sure-referer-is-set
 pyyaml
 pytest-subtests
 ldap3
