@@ -167,7 +167,16 @@ def copy_roles_to_role_definitions(apps, schema_editor):
     for corerole in Role.objects.all():
         dab_perms = []
         for perm in corerole.permissions.prefetch_related('content_type').all():
-            dabct = DABContentType.objects.get(model=perm.content_type.model, app_label=perm.content_type.app_label)
+            ct = perm.content_type
+            model_cls = ct.model_class()
+            if not permission_registry.is_registered(model_cls):
+                continue
+            dabct = DABContentType.objects.filter(model=ct.model, app_label=ct.app_label).first()
+            if dabct is None:
+                raise dabct.DoesNotExist(
+                    f'Content type ({ct.app_label}, {ct.model}) for registered model {model_cls} not found as DABContentType'
+                    f'\nexisting: {list(DABContentType.objects.values_list("model", flat=True))}'
+                )
             dabperm = DABPermission.objects.filter(
                 codename=perm.codename,
                 content_type=dabct
