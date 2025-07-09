@@ -87,10 +87,10 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
-django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', '2025.7.1')
+django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', 'remote_rbac')
 django_ansible_base_dependency = (
     'django-ansible-base[jwt-consumer,feature-flags] @ '
-    f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
+    f'git+https://github.com/alancoding/django-ansible-base@{django_ansible_base_branch}'
 )
 
 requirements = [
