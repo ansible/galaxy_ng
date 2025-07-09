@@ -11,6 +11,7 @@ from galaxykit.utils import wait_for_task
 
 from ..utils import set_certification
 from ..utils.teams import add_user_to_team
+from ..utils.iqe_utils import is_disabled_local_management
 
 
 pytestmark = pytest.mark.qa  # noqa: F821
@@ -56,6 +57,10 @@ def test_dab_roledefs_match_pulp_roles(galaxy_client):
     reason="Skipped because jwt proxy is in use"
 )
 @pytest.mark.parametrize("use_team", [False, True])
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_dab_rbac_repository_owner_by_user_or_team(
     use_team,
     settings,
@@ -63,10 +68,6 @@ def test_dab_rbac_repository_owner_by_user_or_team(
     galaxy_client,
     random_username
 ):
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("this test relies on local resource creation")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     # create the user in ui/v2 ...
@@ -153,6 +154,10 @@ def test_dab_rbac_repository_owner_by_user_or_team(
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
+@pytest.mark.skipif(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
 )
@@ -178,10 +183,6 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
     * Assumes deletion is permissible even if the namespace owner may not be able
       to view a private repository that includes their collection.
     """
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("this test relies on local resource creation")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     # create the user in ui/v2 ...
@@ -296,6 +297,10 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
 
 @pytest.mark.deployment_standalone
 @pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
+@pytest.mark.skipif(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
 )
@@ -319,9 +324,6 @@ def test_dab_user_platform_auditor_bidirectional_sync(
     * when revoking the "Platform Auditor" roledef the galaxy.auditor role
       should also be revoked automatically,
     """
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("this test relies on local resource creation")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     # find the "platform auditor" roledef ...
@@ -389,6 +391,10 @@ def test_dab_user_platform_auditor_bidirectional_sync(
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_dab_team_platform_auditor_bidirectional_sync(
     settings,
     galaxy_client,
@@ -408,9 +414,6 @@ def test_dab_team_platform_auditor_bidirectional_sync(
     * when revoking the "Platform Auditor" roledef the galaxy.auditor role
       should also be revoked automatically,
     """
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("this test relies on local resource creation")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     # find the "platform auditor" roledef ...
@@ -488,6 +491,10 @@ def test_dab_team_platform_auditor_bidirectional_sync(
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_dab_user_assignment_filtering_as_user(
     settings,
     galaxy_client,
@@ -505,9 +512,6 @@ def test_dab_user_assignment_filtering_as_user(
     * The role_user_assignments endpoint behaves differently for
       evaluating a superuser vs a user for access.
     """
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("this test relies on local resource creation")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     # find the namespace owner roledef ...
@@ -552,6 +556,10 @@ def test_dab_user_assignment_filtering_as_user(
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
+@pytest.mark.skipif(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
 )
@@ -571,8 +579,6 @@ def test_dab_rbac_ee_ownership_with_user_or_team(
     * This does not check for functionality of the roledef.
     * This only validates the assignments.
     """
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("this test relies on local resource creation")
 
     ROLE_NAME = 'galaxy.execution_environment_namespace_owner'
     registry_name = random_username.replace('user_', 'registry_')

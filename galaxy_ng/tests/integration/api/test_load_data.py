@@ -4,7 +4,7 @@ import pytest
 
 from galaxy_ng.tests.integration.conftest import is_hub_4_7_or_higher
 from galaxy_ng.tests.integration.utils.iqe_utils import sign_collection_on_demand, is_ocp_env, \
-    aap_gateway
+    aap_gateway, is_disabled_local_management
 from galaxy_ng.tests.integration.utils.repo_management_utils import create_repo_and_dist, \
     upload_new_artifact
 from galaxykit.collections import deprecate_collection, \
@@ -31,10 +31,11 @@ class TestLoadData:
 
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.load_data
+    @pytest.mark.skipif(
+        is_disabled_local_management,
+        reason="this test relies on local resource management"
+    )
     def test_load_users_and_groups(self, galaxy_client, settings, data):
-        if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-            pytest.skip("this test relies on local resource creation")
-
         gc = galaxy_client("admin")
 
         for group in data["groups"]:

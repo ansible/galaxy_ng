@@ -6,6 +6,7 @@ from galaxykit.utils import GalaxyClientError
 
 from galaxy_ng.tests.integration.utils.tools import random_name
 from galaxy_ng.tests.integration.utils.teams import add_user_to_team
+from galaxy_ng.tests.integration.utils.iqe_utils import is_disabled_local_management
 
 
 GALAXY_API_PATH_PREFIX = "/api/galaxy"  # cant import from settings on integration tests
@@ -227,11 +228,11 @@ def test_create_custom_namespace_system_admin_role(custom_role_factory, galaxy_c
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_give_user_custom_role_system(settings, galaxy_client, custom_role_factory, namespace):
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("this test relies on local resource creation")
-
     # TODO(cutwater): verify that assignment is seen in pulp API (HOW?)
     # Step 0: Setup test.
 
@@ -296,6 +297,10 @@ def test_give_user_custom_role_system(settings, galaxy_client, custom_role_facto
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="galaxykit uses drf tokens, which bypass JWT auth and claims processing"
+)
 def test_give_team_custom_role_system(
     settings,
     galaxy_client,
@@ -303,9 +308,6 @@ def test_give_team_custom_role_system(
     team,
     namespace,
 ):
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("galaxykit uses drf tokens, which bypass JWT auth and claims processing")
-
     # Step 0: Setup test.
 
     system_ns_role = custom_role_factory(NS_FIXTURE_DATA)
@@ -459,6 +461,10 @@ def test_give_user_custom_role_object(
 
 @pytest.mark.min_hub_version("4.10dev")
 @pytest.mark.deployment_standalone
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="galaxykit uses drf tokens, which bypass JWT auth and claims processing"
+)
 def test_give_team_custom_role_object(
     settings,
     galaxy_client,
@@ -466,9 +472,6 @@ def test_give_team_custom_role_object(
     namespace,
     team,
 ):
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("galaxykit uses drf tokens, which bypass JWT auth and claims processing")
-
     # Step 0: Setup test.
 
     admin_client = galaxy_client("admin")
