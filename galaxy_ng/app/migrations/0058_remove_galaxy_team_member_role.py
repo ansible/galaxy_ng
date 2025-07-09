@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         ("dab_rbac", "0003_alter_dabpermission_codename_and_more"),
     ]
     run_before = [
-        ("dab_rbac", "0006_remote_permissions_cleanup")
+        ("dab_rbac", "0007_remote_permissions_cleanup")
     ]
 
     operations = [
