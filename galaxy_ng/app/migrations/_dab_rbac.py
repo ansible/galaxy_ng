@@ -29,8 +29,10 @@ def pulp_role_to_single_content_type_or_none(pulprole):
 
 
 def create_permissions_as_operation(apps, schema_editor):
-    # TODO(jctanner): possibly create permissions for more apps here
-    for app_label in {'ansible', 'container', 'core', 'galaxy'}:
+    # NOTE: for migration coherency, behavior of create_dab_permissions has changed
+    # this is why 'dab_rbac' is added to the list, and calling for that might
+    # create all permissions and all types needed for DAB RBAC
+    for app_label in {'ansible', 'container', 'core', 'galaxy', 'dab_rbac'}:
         create_dab_permissions(global_apps.get_app_config(app_label), apps=apps)
 
     print('FINISHED CREATING PERMISSIONS')
