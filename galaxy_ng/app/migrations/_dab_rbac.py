@@ -187,7 +187,9 @@ def copy_roles_to_role_definitions(apps, schema_editor):
         if dab_perms:
             roledef_name = PULP_TO_ROLEDEF.get(corerole.name, corerole.name)
             content_type = pulp_role_to_single_content_type_or_none(corerole)
-            dabct = DABContentType.objects.filter(model=content_type.model, app_label=content_type.app_label).first()
+            dabct = None
+            if content_type:
+                dabct = DABContentType.objects.filter(model=content_type.model, app_label=content_type.app_label).first()
             if dabct is None:
                 raise dabct.DoesNotExist(
                     f'Content type ({content_type.app_label}, {content_type.model}) not found as DABContentType'
