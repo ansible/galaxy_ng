@@ -159,13 +159,18 @@ def copy_roles_to_role_definitions(apps, schema_editor):
     Role = apps.get_model('core', 'Role')
     DABPermission = apps.get_model('dab_rbac', 'DABPermission')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
+    try:
+        DABContentType = apps.get_model('dab_rbac', 'DABContentType')
+    except LookupError:
+        DABContentType = apps.get_model('contenttypes', 'ContentType')
 
     for corerole in Role.objects.all():
         dab_perms = []
         for perm in corerole.permissions.prefetch_related('content_type').all():
+            dabct = DABContentType.objects.get(model=perm.content_type.model, app_label=perm.content_type.app_label)
             dabperm = DABPermission.objects.filter(
                 codename=perm.codename,
-                content_type=perm.content_type
+                content_type=dabct
             ).first()
             if dabperm:
                 dab_perms.append(dabperm)
