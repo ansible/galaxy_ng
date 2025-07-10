@@ -9,6 +9,7 @@ from ..utils.namespaces import generate_namespace
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_user_creation(galaxy_client):
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)

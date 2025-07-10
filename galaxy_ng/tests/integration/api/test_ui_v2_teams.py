@@ -10,10 +10,11 @@ from ..utils.namespaces import generate_namespace
 
 @pytest.mark.parametrize("endpoint", ["groups", "teams"])
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_teams(galaxy_client, endpoint):
 
     gc = galaxy_client("admin", ignore_cache=True)
-    ga = BasicAuthClient(gc.galaxy_root, "admin", "admin")
+    ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
 
     # make the team via the _ui/v2/teams/ endpoint
     random_name = generate_namespace()

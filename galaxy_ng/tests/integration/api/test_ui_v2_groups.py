@@ -7,6 +7,7 @@ from ..utils.namespaces import generate_namespace
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_create(galaxy_client, settings):
     """Test creating a group via the UI v2 groups endpoint"""
 
@@ -36,6 +37,7 @@ def test_ui_v2_groups_create(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_list(galaxy_client, settings):
     """Test listing groups via the UI v2 groups endpoint"""
 
@@ -67,6 +69,7 @@ def test_ui_v2_groups_list(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_retrieve(galaxy_client, settings):
     """Test retrieving a specific group via the UI v2 groups endpoint"""
 
@@ -94,6 +97,7 @@ def test_ui_v2_groups_retrieve(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_update(galaxy_client, settings):
     """Test updating a group via the UI v2 groups endpoint"""
 
@@ -129,6 +133,7 @@ def test_ui_v2_groups_update(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_delete(galaxy_client, settings):
     """Test deleting a group via the UI v2 groups endpoint"""
 
@@ -152,6 +157,7 @@ def test_ui_v2_groups_delete(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_filter_by_name(galaxy_client, settings):
     """Test filtering groups by name via the UI v2 groups endpoint"""
 
@@ -187,6 +193,7 @@ def test_ui_v2_groups_filter_by_name(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_ordering(galaxy_client, settings):
     """Test ordering groups by ID via the UI v2 groups endpoint"""
 
@@ -222,6 +229,7 @@ def test_ui_v2_groups_ordering(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_pagination(galaxy_client, settings):
     """Test pagination of groups via the UI v2 groups endpoint"""
 
@@ -254,6 +262,7 @@ def test_ui_v2_groups_pagination(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_serializer_fields(galaxy_client, settings):
     """Test that the group serializer returns the expected fields"""
 
@@ -281,6 +290,7 @@ def test_ui_v2_groups_serializer_fields(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_put_update(galaxy_client, settings):
     """Test updating a group via PUT method"""
 
@@ -316,6 +326,7 @@ def test_ui_v2_groups_put_update(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
+@pytest.mark.min_hub_version("4.11.0dev")
 def test_ui_v2_groups_empty_filter_result(galaxy_client):
     """Test filtering groups with no matching results"""
 
