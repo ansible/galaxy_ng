@@ -10,7 +10,11 @@ from ..utils.namespaces import generate_namespace
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
-def test_ui_v2_user_creation(galaxy_client):
+def test_ui_v2_user_creation(galaxy_client, settings):
+    """Test user creation, update, and deletion via the _ui/v2/users/ endpoint."""
+    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+        pytest.skip("This test relies on being connected to a resource server")
+
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
 
