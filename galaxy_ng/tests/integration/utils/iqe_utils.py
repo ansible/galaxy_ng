@@ -299,9 +299,8 @@ def is_disabled_local_management():
     gc = galaxy_client("admin")
     settings = gc.get_settings()
 
-    # IS_CONNECTED_TO_RESOURCE_SERVER is True -> local management disabled
-    # ALLOW_LOCAL_RESOURCE_MANAGEMENT is False -> local management disabled 
-    return settings.get("IS_CONNECTED_TO_RESOURCE_SERVER") or not settings.get("ALLOW_LOCAL_RESOURCE_MANAGEMENT")
+    return settings.get("IS_CONNECTED_TO_RESOURCE_SERVER") or \
+        not settings.get("ALLOW_LOCAL_RESOURCE_MANAGEMENT")
 
 
 def avoid_docker_limit_rate():
