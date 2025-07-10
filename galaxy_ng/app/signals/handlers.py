@@ -37,6 +37,7 @@ from ansible_base.rbac.models import (
 )
 from ansible_base.rbac.triggers import dab_post_migrate
 from ansible_base.rbac import permission_registry
+from ansible_base.resource_registry.signals.handlers import no_reverse_sync
 
 from pulpcore.plugin.util import assign_role
 from pulpcore.plugin.util import remove_role
@@ -124,10 +125,12 @@ SHARED_TEAM_ROLE = 'Team Member'
 def create_managed_roles(*args, **kwargs) -> None:
     # do not create corresponding roles for these RoleDefinitions
     with dab_rbac_signals():
-        # Create the DAB-only roles
-        permission_registry.create_managed_roles(apps)
-        # Create any roles created by pulp post_migrate signals
-        copy_roles_to_role_definitions(apps, None)
+        # Roles are migrated to resource server in migration script, post_migrate too early
+        with no_reverse_sync():
+            # Create the DAB-only roles
+            permission_registry.create_managed_roles(apps)
+            # Create any roles created by pulp post_migrate signals
+            copy_roles_to_role_definitions(apps, None)
 
 
 dab_post_migrate.connect(create_managed_roles, dispatch_uid="create_managed_roles")
