@@ -292,6 +292,17 @@ def aap_gateway():
     return dev_env_standalone in ('true', 'True', 1, '1', True)
 
 
+@property
+def is_disabled_local_management():
+    ansible_config = get_ansible_config()
+    galaxy_client = get_galaxy_client(ansible_config)
+    gc = galaxy_client("admin")
+    settings = gc.get_settings()
+
+    return settings.get("IS_CONNECTED_TO_RESOURCE_SERVER") or \
+        not settings.get("ALLOW_LOCAL_RESOURCE_MANAGEMENT")
+
+
 def avoid_docker_limit_rate():
     avoid_limit_rate = os.getenv("AVOID_DOCKER_LIMIT_RATE", False)
     return avoid_limit_rate in ('true', 'True', 1, '1', True)

@@ -2,10 +2,12 @@ import pytest
 from galaxykit.utils import GalaxyClientError
 import uuid
 
+from ..utils.iqe_utils import is_disabled_local_management
+
 
 @pytest.fixture
 def test_group(settings, galaxy_client):
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+    if is_disabled_local_management:
         pytest.skip(reason="This test relies on local resource management")
 
     gc = galaxy_client("admin")
@@ -15,7 +17,7 @@ def test_group(settings, galaxy_client):
 
 @pytest.fixture
 def test_user(settings, galaxy_client):
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+    if is_disabled_local_management:
         pytest.skip(reason="This test relies on local resource management")
 
     gc = galaxy_client("admin")
@@ -31,11 +33,12 @@ def test_user(settings, galaxy_client):
     ]
 )
 @pytest.mark.deployment_standalone
-@pytest.mark.skip(reason="FIXME - skip until resource management is decided")
+# @pytest.mark.skip(reason="FIXME - skip until resource management is decided")
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 def test_dab_groups_are_read_only(settings, galaxy_client, url, test_group):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="This test relies on being connected to a resource server")
-
     gc = galaxy_client("admin")
 
     group_pk = test_group["id"]
@@ -73,11 +76,12 @@ def test_dab_groups_are_read_only(settings, galaxy_client, url, test_group):
         "pulp/api/v3/users/",
     ]
 )
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 @pytest.mark.deployment_standalone
 def test_dab_users_are_read_only(settings, galaxy_client, url, test_user):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="This test relies on being connected to a resource server")
-
     gc = galaxy_client("admin")
 
     user_pk = test_user["id"]
@@ -107,11 +111,12 @@ def test_dab_users_are_read_only(settings, galaxy_client, url, test_user):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.skip(reason="FIXME - skip until resource management is decided")
+# @pytest.mark.skip(reason="FIXME - skip until resource management is decided")
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 def test_dab_cant_modify_group_memberships(settings, galaxy_client, test_user, test_group):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="This test relies on being connected to a resource server")
-
     gc = galaxy_client("admin")
 
     hub_user_detail = f"_ui/v1/users/{test_user['id']}/"
@@ -134,11 +139,12 @@ def test_dab_cant_modify_group_memberships(settings, galaxy_client, test_user, t
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.skip(reason="FIXME - skip until resource management is decided")
+# @pytest.mark.skip(reason="FIXME - skip until resource management is decided")
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 def test_dab_can_modify_roles(settings, galaxy_client, test_user, test_group):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="This test relies on being connected to a resource server")
-
     gc = galaxy_client("admin")
 
     gc.post(f"pulp/api/v3/groups/{test_group['id']}/roles/", body={

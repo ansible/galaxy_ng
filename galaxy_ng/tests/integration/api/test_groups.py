@@ -16,7 +16,7 @@ from galaxykit.groups import create_group_v3, create_group, get_roles, \
 from galaxykit.namespaces import create_namespace
 from ..utils import UIClient, get_client
 
-from ..utils.iqe_utils import AnsibleConfigFixture
+from ..utils.iqe_utils import AnsibleConfigFixture, is_disabled_local_management
 
 pytestmark = pytest.mark.qa  # noqa: F821
 CLIENT_CONFIG = AnsibleConfigFixture("admin")
@@ -39,11 +39,12 @@ API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
     os.getenv("ENABLE_DAB_TESTS"),
     reason="Group creation is disabled in the DAB test profile."
 )
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_gw_group_role_listing(galaxy_client, settings, test_data):
     """Tests ability to list roles assigned to a namespace."""
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
     # Create Group

@@ -32,7 +32,8 @@ from .utils.iqe_utils import (
     is_ephemeral_env,
     galaxy_stage_ansible_user_cleanup, remove_from_cache,
     get_ansible_config, get_galaxy_client, AnsibleConfigFixture, get_hub_version, aap_gateway,
-    require_signature_for_approval
+    require_signature_for_approval,
+    is_disabled_local_management
 )
 from .utils.tools import generate_random_artifact_version
 from .utils.namespaces import generate_namespace
@@ -409,7 +410,7 @@ def autohubtest2(galaxy_client):
 def random_namespace(galaxy_client, settings):
     """Make a randomized namespace."""
 
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
+    if is_disabled_local_management:
         pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin")

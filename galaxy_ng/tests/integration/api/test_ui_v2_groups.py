@@ -4,16 +4,17 @@ import pytest
 from galaxykit.client import BasicAuthClient
 
 from ..utils.namespaces import generate_namespace
+from ..utils.iqe_utils import is_disabled_local_management
 
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_create(galaxy_client, settings):
     """Test creating a group via the UI v2 groups endpoint"""
-
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
-
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
 
@@ -38,6 +39,10 @@ def test_ui_v2_groups_create(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_list(galaxy_client, settings):
     """Test listing groups via the UI v2 groups endpoint"""
 
@@ -47,10 +52,6 @@ def test_ui_v2_groups_list(galaxy_client, settings):
     # Always test read operations as they should work regardless of resource server setting
     groups_list = ga.get("/api/galaxy/_ui/v2/groups/")
     assert "results" in groups_list
-
-    # If connected to resource server, skip the create/test part
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     # Create a test group
     random_name = generate_namespace()
@@ -70,15 +71,15 @@ def test_ui_v2_groups_list(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_retrieve(galaxy_client, settings):
     """Test retrieving a specific group via the UI v2 groups endpoint"""
 
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
-
-    # If connected to resource server, skip the create/test part
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     # Create a test group
     random_name = generate_namespace()
@@ -98,11 +99,12 @@ def test_ui_v2_groups_retrieve(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_update(galaxy_client, settings):
     """Test updating a group via the UI v2 groups endpoint"""
-
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
@@ -134,11 +136,12 @@ def test_ui_v2_groups_update(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_delete(galaxy_client, settings):
     """Test deleting a group via the UI v2 groups endpoint"""
-
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
@@ -158,14 +161,15 @@ def test_ui_v2_groups_delete(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_filter_by_name(galaxy_client, settings):
     """Test filtering groups by name via the UI v2 groups endpoint"""
 
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
-
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     # Create test groups
     test_name1 = generate_namespace()
@@ -194,14 +198,15 @@ def test_ui_v2_groups_filter_by_name(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_ordering(galaxy_client, settings):
     """Test ordering groups by ID via the UI v2 groups endpoint"""
 
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
-
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     # Create test groups
     groups = []
@@ -230,14 +235,15 @@ def test_ui_v2_groups_ordering(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_pagination(galaxy_client, settings):
     """Test pagination of groups via the UI v2 groups endpoint"""
 
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
-
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     # Create multiple test groups
     created_groups = []
@@ -263,14 +269,15 @@ def test_ui_v2_groups_pagination(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_serializer_fields(galaxy_client, settings):
     """Test that the group serializer returns the expected fields"""
 
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
-
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     # Create a test group
     random_name = generate_namespace()
@@ -291,11 +298,12 @@ def test_ui_v2_groups_serializer_fields(galaxy_client, settings):
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_groups_put_update(galaxy_client, settings):
     """Test updating a group via PUT method"""
-
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
 
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)

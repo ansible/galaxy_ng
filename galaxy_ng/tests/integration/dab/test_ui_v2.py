@@ -9,6 +9,7 @@ from galaxykit.utils import GalaxyClientError
 
 from galaxy_ng.tests.integration.utils.tools import random_name
 
+from ..utils.iqe_utils import is_disabled_local_management
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -20,6 +21,10 @@ pytestmark = pytest.mark.qa  # noqa: F821
     {"email": "foobar@foobar.com"},
     {"password": None},
 ])
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_user_create(
     settings,
     galaxy_client,
@@ -27,10 +32,6 @@ def test_ui_v2_user_create(
     user_payload,
 ):
     """Test user creation in ui/v2/users/."""
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="this test relies on local resource management")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     user_payload.update({
@@ -73,6 +74,10 @@ def test_ui_v2_user_create(
     ({"password": "short"}, "This password is too short"),
     ({"password": ""}, "This field may not be blank"),
 ])
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_user_create_invalid_data(
     settings,
     galaxy_client,
@@ -80,10 +85,6 @@ def test_ui_v2_user_create_invalid_data(
     random_username,
 ):
     """Test user edits in ui/v2/users/ with invalid data."""
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="this test relies on local resource management")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     invalid_payload[0].update({
@@ -108,16 +109,16 @@ def test_ui_v2_user_create_invalid_data(
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_user_edit(
     settings,
     galaxy_client,
     random_username,
 ):
     """Test user edit in ui/v2/users/."""
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="this test relies on local resource management")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     user_payload = {
@@ -161,6 +162,10 @@ def test_ui_v2_user_edit(
     ({"teams": [{"name": "HITHERE"}]}, "does not exist"),
     ({"organizations": [{"name": "HITHERE"}]}, "does not exist"),
 ])
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_user_edit_invalid_data(
     settings,
     galaxy_client,
@@ -168,10 +173,6 @@ def test_ui_v2_user_edit_invalid_data(
     random_username,
 ):
     """Test user edits in ui/v2/users/ with invalid data."""
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="this test relies on local resource management")
-
     gc = galaxy_client("admin", ignore_cache=True)
 
     user_payload = {
@@ -206,16 +207,16 @@ def test_ui_v2_user_edit_invalid_data(
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_teams(
     settings,
     galaxy_client,
     random_username,
 ):
     """Test teams creation and deletion."""
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="this test relies on local resource management")
-
     client = galaxy_client("admin", ignore_cache=True)
 
     # Create a team
@@ -249,16 +250,16 @@ def test_ui_v2_teams(
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_teams_membership_local_and_nonlocal(
     settings,
     galaxy_client,
     random_username,
 ):
     """Test teams creation and deletion."""
-
-    if settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip(reason="this test relies on local resource management")
-
     org_name = random_username.replace('user_', 'org_')
     team1_name = random_username.replace('user_', 'team1_')
     team2_name = random_username.replace('user_', 'team2_')

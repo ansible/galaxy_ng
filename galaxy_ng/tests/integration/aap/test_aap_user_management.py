@@ -7,7 +7,7 @@ import pytest
 from galaxykit.client import BasicAuthClient
 
 from galaxy_ng.tests.integration.utils.namespaces import generate_namespace
-
+from galaxy_ng.tests.integration.utils.iqe_utils import is_disabled_local_management
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -97,6 +97,10 @@ def gateway_user_factory(gateway_admin_client, galaxy_client):
         'PATCH'
     ]
 )
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 def test_aap_galaxy_normal_user_can_not_demote_superuser(
     users_endpoint,
     verb,
@@ -104,9 +108,6 @@ def test_aap_galaxy_normal_user_can_not_demote_superuser(
     gateway_admin_client,
     gateway_user_factory,
 ):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("This test relies on being connected to a resource server")
-
     u1 = gateway_user_factory()
     u2 = gateway_user_factory()
 
@@ -139,15 +140,16 @@ def test_aap_galaxy_normal_user_can_not_demote_superuser(
         "/api/galaxy/_ui/v2/users/",
     ]
 )
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 def test_aap_galaxy_local_resource_management_setting_gates_user_creation(
     users_endpoint,
     settings,
     gateway_admin_client,
     random_username
 ):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("This test relies on being connected to a resource server")
-
     # make sure the user can't be created directly in galaxy ...
     resp = gateway_admin_client.post(
         users_endpoint,
@@ -172,6 +174,10 @@ def test_aap_galaxy_local_resource_management_setting_gates_user_creation(
     'field',
     ['id', 'username', 'password', 'first_name', 'last_name']
 )
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 def test_aap_galaxy_local_resource_management_setting_gates_field_modification(
     users_endpoint,
     verb,
@@ -180,9 +186,6 @@ def test_aap_galaxy_local_resource_management_setting_gates_field_modification(
     gateway_admin_client,
     random_gateway_user,
 ):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("This test relies on being connected to a resource server")
-
     uid = random_gateway_user.galaxy_v2_me['id']
     user_url = f'{users_endpoint}/{uid}/'
     admin_func = getattr(gateway_admin_client, verb.lower())
@@ -204,15 +207,16 @@ def test_aap_galaxy_local_resource_management_setting_gates_field_modification(
         "/api/galaxy/_ui/v2/users",
     ]
 )
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 def test_aap_galaxy_local_resource_management_setting_gates_deletion(
     users_endpoint,
     settings,
     gateway_admin_client,
     random_gateway_user,
 ):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("This test relies on being connected to a resource server")
-
     uid = random_gateway_user.galaxy_v2_me['id']
     user_url = f'{users_endpoint}/{uid}/'
     resp = gateway_admin_client.delete(user_url)
@@ -224,15 +228,16 @@ def test_aap_galaxy_local_resource_management_setting_gates_deletion(
     'verb',
     ['PUT', 'PATCH']
 )
+@pytest.mark.skipif(
+    not is_disabled_local_management,
+    reason="This test relies on being connected to a resource server"
+)
 def test_aap_galaxy_superuser_management(
     verb,
     settings,
     gateway_admin_client,
     random_gateway_user
 ):
-    if not settings.get('IS_CONNECTED_TO_RESOURCE_SERVER'):
-        pytest.skip("This test relies on being connected to a resource server")
-
     ga = gateway_admin_client
     uc = random_gateway_user.user_client
     galaxy_user_data = random_gateway_user.galaxy_v2_me
