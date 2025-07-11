@@ -6,15 +6,17 @@ from galaxykit.client import BasicAuthClient
 from galaxykit.utils import GalaxyClientError
 
 from ..utils.namespaces import generate_namespace
+from ..utils.iqe_utils import is_disabled_local_management
 
 
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.skipif(
+    is_disabled_local_management,
+    reason="this test relies on local resource management"
+)
 def test_ui_v2_user_creation(galaxy_client, settings):
     """Test user creation, update, and deletion via the _ui/v2/users/ endpoint."""
-    if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-        pytest.skip("this test relies on local resource creation")
-
     gc = galaxy_client("admin", ignore_cache=True)
     ga = BasicAuthClient(gc.galaxy_root, gc.username, gc.password)
 
