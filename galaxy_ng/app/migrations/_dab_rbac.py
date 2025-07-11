@@ -1,11 +1,14 @@
 import logging
 
 from django.apps import apps as global_apps
+from django.contrib.contenttypes.management import create_contenttypes
+from django.db import DEFAULT_DB_ALIAS, router
+
 from rest_framework.exceptions import ValidationError
 
-from ansible_base.rbac.management import create_dab_permissions
 from ansible_base.rbac.migrations._utils import give_permissions
 from ansible_base.rbac.validators import permissions_allowed_for_role, combine_values
+from ansible_base.rbac import permission_registry
 
 
 logger = logging.getLogger(__name__)
@@ -29,9 +32,77 @@ def pulp_role_to_single_content_type_or_none(pulprole):
 
 
 def create_permissions_as_operation(apps, schema_editor):
-    # TODO(jctanner): possibly create permissions for more apps here
+    # NOTE: this is a snapshot version of the DAB RBAC permission creation logic
+    # normally this runs post_migrate, but this exists to keep old logic
     for app_label in {'ansible', 'container', 'core', 'galaxy'}:
-        create_dab_permissions(global_apps.get_app_config(app_label), apps=apps)
+        app_config = global_apps.get_app_config(app_label)
+        using = DEFAULT_DB_ALIAS
+
+        # Ensure that contenttypes are created for this app. Needed if
+        # 'ansible_base.rbac' is in INSTALLED_APPS before
+        # 'django.contrib.contenttypes'.
+        create_contenttypes(
+            app_config,
+            verbosity=2,
+            interactive=True,
+            using=using,
+            apps=apps
+        )
+
+        try:
+            app_config = apps.get_app_config(app_label)
+            ContentType = apps.get_model("contenttypes", "ContentType")
+            Permission = apps.get_model("dab_rbac", "DABPermission")
+        except LookupError:
+            return
+
+        if not router.allow_migrate_model(using, Permission):
+            return
+
+        # This will hold the permissions we're looking for as (content_type, (codename, name))
+        searched_perms = []
+        # The codenames and ctypes that should exist.
+        ctypes = set()
+        for klass in app_config.get_models():
+            if not permission_registry.is_registered(klass):
+                continue
+            # Force looking up the content types in the current database
+            # before creating foreign keys to them.
+            ctype = ContentType.objects.db_manager(using).get_for_model(klass, for_concrete_model=False)
+
+            ctypes.add(ctype)
+
+            for action in klass._meta.default_permissions:
+                searched_perms.append(
+                    (
+                        ctype,
+                        (
+                            f"{action}_{klass._meta.model_name}",
+                            f"Can {action} {klass._meta.verbose_name_raw}",
+                        ),
+                    )
+                )
+            for codename, name in klass._meta.permissions:
+                searched_perms.append((ctype, (codename, name)))
+
+        # Find all the Permissions that have a content_type for a model we're
+        # looking for.  We don't need to check for codenames since we already have
+        # a list of the ones we're going to create.
+        all_perms = set(Permission.objects.using(using).filter(content_type__in=ctypes).values_list("content_type", "codename"))
+
+        perms = []
+        for ct, (codename, name) in searched_perms:
+            if (ct.pk, codename) not in all_perms:
+                permission = Permission()
+                permission._state.db = using
+                permission.codename = codename
+                permission.name = name
+                permission.content_type = ct
+                perms.append(permission)
+
+        Permission.objects.using(using).bulk_create(perms)
+        for perm in perms:
+            logger.debug("Adding permission '%s'" % perm)
 
     print('FINISHED CREATING PERMISSIONS')
 
@@ -88,13 +159,27 @@ def copy_roles_to_role_definitions(apps, schema_editor):
     Role = apps.get_model('core', 'Role')
     DABPermission = apps.get_model('dab_rbac', 'DABPermission')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
+    try:
+        DABContentType = apps.get_model('dab_rbac', 'DABContentType')
+    except LookupError:
+        DABContentType = apps.get_model('contenttypes', 'ContentType')
 
     for corerole in Role.objects.all():
         dab_perms = []
         for perm in corerole.permissions.prefetch_related('content_type').all():
+            ct = perm.content_type
+            model_cls = ct.model_class()
+            if not permission_registry.is_registered(model_cls):
+                continue
+            dabct = DABContentType.objects.filter(model=ct.model, app_label=ct.app_label).first()
+            if dabct is None:
+                raise dabct.DoesNotExist(
+                    f'Content type ({ct.app_label}, {ct.model}) for registered model {model_cls} not found as DABContentType'
+                    f'\nexisting: {list(DABContentType.objects.values_list("model", flat=True))}'
+                )
             dabperm = DABPermission.objects.filter(
                 codename=perm.codename,
-                content_type=perm.content_type
+                content_type=dabct
             ).first()
             if dabperm:
                 dab_perms.append(dabperm)
@@ -102,12 +187,20 @@ def copy_roles_to_role_definitions(apps, schema_editor):
         if dab_perms:
             roledef_name = PULP_TO_ROLEDEF.get(corerole.name, corerole.name)
             content_type = pulp_role_to_single_content_type_or_none(corerole)
+            dabct = None
+            if content_type:
+                dabct = DABContentType.objects.filter(model=content_type.model, app_label=content_type.app_label).first()
+                if dabct is None:
+                    raise dabct.DoesNotExist(
+                        f'Content type ({content_type.app_label}, {content_type.model}) not found as DABContentType'
+                        f'\nexisting: {list(DABContentType.objects.values_list("model", flat=True))}'
+                    )
             roledef, created = RoleDefinition.objects.get_or_create(
                 name=roledef_name,
                 defaults={
                     'description': corerole.description or corerole.name,
                     'managed': corerole.locked,
-                    'content_type': content_type,
+                    'content_type': dabct,
                 }
             )
             if created:
