@@ -87,7 +87,7 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
-django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', '2025.4.9')
+django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', '2025.7.1')
 django_ansible_base_dependency = (
     'django-ansible-base[jwt-consumer,feature-flags] @ '
     f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
@@ -98,7 +98,7 @@ requirements = [
     "pulpcore>=3.49.40,<3.50.0",
     "pulp_ansible>=0.25.1,<0.26",
     "pulp-container>=2.19.2,<2.20.0",
-    "django>=4.2.20,<4.3",
+    "django>=4.2.21,<4.3",
     "django-prometheus>=2.0.0",
     "social-auth-core>=4.4.2",
     "social-auth-app-django>=5.2.0",

@@ -89,7 +89,7 @@ distro==1.9.0
     # via
     #   bindep
     #   galaxy-ng (setup.py)
-django==4.2.22
+django==4.2.23
     # via
     #   django-ansible-base
     #   django-auth-ldap
@@ -108,7 +108,7 @@ django==4.2.22
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@2025.4.9
+django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@2025.7.1
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -331,7 +331,7 @@ prometheus-client==0.21.1
     # via django-prometheus
 propcache==0.3.1
     # via yarl
-protobuf==4.25.8
+protobuf==4.25.3
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
