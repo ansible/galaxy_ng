@@ -7,13 +7,13 @@ metadata:
     build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: '3'
-    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch == "master"
+    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch == "main"
   creationTimestamp:
   labels:
-    appstudio.openshift.io/application: automation-hub-master
-    appstudio.openshift.io/component: automation-hub-galaxy-ng-master
+    appstudio.openshift.io/application: automation-hub-main
+    appstudio.openshift.io/component: automation-hub-galaxy-ng-main
     pipelines.appstudio.openshift.io/type: build
-  name: automation-hub-galaxy-ng-master-on-pull-request
+  name: automation-hub-galaxy-ng-main-on-pull-request
   namespace: ansible-automationhu-tenant
 spec:
   params:
@@ -22,7 +22,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/ansible-automationhu-tenant/automation-hub-master/automation-hub-galaxy-ng-master:on-pr-{{revision}}
+    value: quay.io/redhat-user-workloads/ansible-automationhu-tenant/automation-hub-main/automation-hub-galaxy-ng-main:on-pr-{{revision}}
   - name: image-expires-after
     value: 5d
   - name: dockerfile
@@ -534,7 +534,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-automation-hub-galaxy-ng-master
+    serviceAccountName: build-pipeline-automation-hub-galaxy-ng-main
   workspaces:
   - name: workspace
     volumeClaimTemplate:

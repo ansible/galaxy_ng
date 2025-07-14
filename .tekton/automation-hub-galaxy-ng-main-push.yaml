@@ -6,13 +6,13 @@ metadata:
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: '3'
-    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "master"
+    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "main"
   creationTimestamp:
   labels:
-    appstudio.openshift.io/application: automation-hub-master
-    appstudio.openshift.io/component: automation-hub-galaxy-ng-master
+    appstudio.openshift.io/application: automation-hub-main
+    appstudio.openshift.io/component: automation-hub-galaxy-ng-main
     pipelines.appstudio.openshift.io/type: build
-  name: automation-hub-galaxy-ng-master-on-push
+  name: automation-hub-galaxy-ng-main-on-push
   namespace: ansible-automationhu-tenant
 spec:
   params:
@@ -21,7 +21,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/ansible-automationhu-tenant/automation-hub-master/automation-hub-galaxy-ng-master:{{revision}}
+    value: quay.io/redhat-user-workloads/ansible-automationhu-tenant/automation-hub-main/automation-hub-galaxy-ng-main:{{revision}}
   - name: dockerfile
     value: Dockerfile
   - name: path-context
@@ -531,7 +531,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-automation-hub-galaxy-ng-master
+    serviceAccountName: build-pipeline-automation-hub-galaxy-ng-main
   workspaces:
   - name: workspace
     volumeClaimTemplate:
