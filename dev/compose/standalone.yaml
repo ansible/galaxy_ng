@@ -352,7 +352,7 @@ services:
         echo 'UI:            http://localhost:5001/ui/login';
         echo 'Django Admin:  docker compose -f dev/compose/standalone.yaml exec manager pulpcore-manager';
         echo 'Settings list: docker compose -f dev/compose/standalone.yaml exec manager dynaconf list';
-        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
+        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/main/dev/compose/README.md';
         echo '##############################################################';
 
         # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;

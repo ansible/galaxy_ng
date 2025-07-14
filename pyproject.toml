@@ -18,7 +18,7 @@ exclude = '''
 src = [
     "galaxy_ng",
 ]
-revision = "master"
+revision = "origin/main..."
 isort = true
 lint = [
     "flake8 --config flake8.cfg",

@@ -3,7 +3,7 @@ site_url: "https://galaxy-ng.readthedocs.io/"
 site_description: Galaxy NG
 repo_name: ansible/galaxy_ng
 repo_url: "https://github.com/ansible/galaxy_ng"
-edit_uri: edit/master/docs/
+edit_uri: edit/main/docs/
 copyright: Copyright © Red Hat, Inc.
 nav:
     - Home: index.md

@@ -96,12 +96,12 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
-        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'master'
+        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'main'
         env:
           SONAR_TOKEN: ${{ secrets.CICD_ORG_SONAR_TOKEN_CICD_BOT }}
 
       - name: upload jUnit XML test results
-        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'master'
+        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'main'
         continue-on-error: true
         run: |
           curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \

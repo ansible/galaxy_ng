@@ -1,0 +1,22 @@
+name: Block PRs to master
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  block-pr-to-master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail PR to master
+        run: |
+          echo "🚫 Pull requests to 'master' are not allowed."
+          echo ""
+          echo "This repository uses 'main' as the default branch."
+          echo "The 'master' branch is automatically synced from 'main'."
+          echo ""
+          echo "Please close this PR and create a new one targeting 'main'."
+          echo ""
+          echo "::error::Direct PRs to 'master' branch are blocked. Please target 'main' branch instead."
+          exit 1

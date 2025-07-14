@@ -1,4 +1,4 @@
-# Add labels to pull requests against master
+# Add labels to pull requests against main
 # uses logic in .github/labeler.yml
 
 ---
@@ -6,7 +6,7 @@ name: "Add labels to pull request"
 
 on:
   pull_request_target:
-    branches: [ "master" ]
+    branches: [ "main" ]
     types: [ "opened" ]
 
 jobs:

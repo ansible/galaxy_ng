@@ -367,7 +367,7 @@ services:
         echo 'UI:            http://localhost:5001/ui/login';
         echo 'Django Admin:  docker compose -f dev/compose/certified-sync.yaml exec standalone-manager pulpcore-manager';
         echo 'Settings list: docker compose -f dev/compose/certified-sync.yaml exec standalone-manager dynaconf list';
-        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
+        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/main/dev/compose/README.md';
         echo '##############################################################';
 
         # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;
@@ -651,7 +651,7 @@ services:
         echo 'API Spec proxy:http://localhost:8080/api/automation-hub/v3/swagger-ui/';
         echo 'Django Admin:  docker compose -f dev/compose/certified-sync.yaml exec insights-manager pulpcore-manager';
         echo 'Settings list: docker compose -f dev/compose/certified-sync.yaml exec insights-manager dynaconf list';
-        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md';
+        echo 'Docs:          https://github.com/ansible/galaxy_ng/blob/main/dev/compose/README.md';
         echo '##############################################################';
 
         # Keep it running indefinitely to enable `docker compose -f ... exec manager /bin/bash`;

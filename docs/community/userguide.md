@@ -12,7 +12,7 @@ We have multiple instances of the beta site running to cover the dev, staging an
 2. https://beta-galaxy-stage.ansible.com/
 3. https://beta-galaxy-dev.ansible.com/
 
-The "dev" instance is auto-deployed from new commits to the master branch of https://github.com/ansible/galaxy_ng. Staging and Production deployments are triggered manually or via new tags on the git repository.
+The "dev" instance is auto-deployed from new commits to the main branch of https://github.com/ansible/galaxy_ng. Staging and Production deployments are triggered manually or via new tags on the git repository.
 
 All instances are wired up for github social auth, so you can log into any of them with your github account.
 

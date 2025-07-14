@@ -52,17 +52,17 @@ pytest -v -r sx --color=yes -k ' test_delete_collection' galaxy_ng/tests/integra
 
 Tests that are intended to pass on any deployment mode should be marked with `all`. By default unmarked tests will receive the `all` mark`.
 All `deployment_standalone` tests are also expected to pass when running with ldap or keycloak authentication. If a test is meant to test a specific authentication backend, use the `ldap` or `keycloak` marks, and remove `deployment_standalone`.
-List of all marks in [conftest.py](https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/conftest.py)
+List of all marks in [conftest.py](https://github.com/ansible/galaxy_ng/blob/main/galaxy_ng/tests/integration/conftest.py)
 
 
 
 # Test Data
-* Test data is defined in [galaxy_ng/dev/common/setup_test_data.py](https://github.com/ansible/galaxy_ng/blob/master/dev/common/setup_test_data.py) and includes namespaces, users, tokens, and groups
+* Test data is defined in [galaxy_ng/dev/common/setup_test_data.py](https://github.com/ansible/galaxy_ng/blob/main/dev/common/setup_test_data.py) and includes namespaces, users, tokens, and groups
 * This data is used for all ways the integration tests are run
 * Note: this script is also called by default when manual ephemeral environments are spun up, via `ahub.sh`
 
 # User Profiles
-* User profiles are defined in [galaxy_ng/tests/integration/conftest.py](https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/conftest.py)
+* User profiles are defined in [galaxy_ng/tests/integration/conftest.py](https://github.com/ansible/galaxy_ng/blob/main/galaxy_ng/tests/integration/conftest.py)
 * Usernames are different than the profile name, check `conftest.py` for usernames and passwords
 * Usernames and passwords match the ephemeral enviornment Keycloak SSO, so the same test data is used for `DEPLOYMENT_MODE=standalone` and `DEPLOYMENT_MODE=insights`
 

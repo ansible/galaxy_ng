@@ -28,7 +28,7 @@ As a hopeful contributor, you may need to first figure out where to write code f
 
 ### api/v1
 
-Found in https://github.com/ansible/galaxy_ng/tree/master/galaxy_ng/app/api/v1
+Found in https://github.com/ansible/galaxy_ng/tree/main/galaxy_ng/app/api/v1
 
 The v1 api was re-implemented in GalaxyNG from scratch as simple django models, views, serializers and filtersets. This api version allows for role imports and indexing from [github](https://github.com) in the same conceptual way that roles were handled in [galaxy](https://galaxy.ansible.com). Two models comprise most of how api/v1 works under the covers: "LegacyRole" and "LegacyNamespace".
 
@@ -37,7 +37,7 @@ Access control in api/v1 is controlled by a model we have termed a "Legacy Names
 
 ### api/v3
 
-Found in https://github.com/ansible/galaxy_ng/tree/master/galaxy_ng/app/api/v3
+Found in https://github.com/ansible/galaxy_ng/tree/main/galaxy_ng/app/api/v3
 
 The v3 api is 100% focused on collections and collection namespaces. As time progresses, the v3 api becomes more and more a redirect to endpoints provided by pulp_ansible.
 
@@ -96,7 +96,7 @@ The github key and secret are provided by configuring an oauth account on github
 
 ## Testing
 
-The GalaxyNG project is a "test driven development" (TDD) project. Our interpretation of TDD is that -every- PR to the master branch -must- have some sort of test or test changes. It can be unit, functional or integration, but something must be written. It doesn't matter if the PR is a bugfix or a feature, tests must be written. This is how we avoid regressions and keep track of how new code is meant to work inside a very complex and spread out architecture with many different configurable behaviors.
+The GalaxyNG project is a "test driven development" (TDD) project. Our interpretation of TDD is that -every- PR to the main branch -must- have some sort of test or test changes. It can be unit, functional or integration, but something must be written. It doesn't matter if the PR is a bugfix or a feature, tests must be written. This is how we avoid regressions and keep track of how new code is meant to work inside a very complex and spread out architecture with many different configurable behaviors.
 
 ### Unit
 
@@ -115,7 +115,7 @@ The GalaxyNG project backs the Red Hat product named "Automation HUB". As it is 
 
 Each docker-compose profile has it's own `RUN_INTEGRATION.sh` file in the `dev/<profile>/` directory that sets necessary variables and pytest marks suitable for that environment. The community script `dev/standalone-community/RUN_INTEGRATION.sh` is mostly just setting the `-m community` argument for pytest so that it only runs the tests that have been [marked](https://docs.pytest.org/en/7.1.x/how-to/mark.html) as such. Once you have the stack running with the appropriate config, you can execute ./dev/standalone-community/RUN_INTEGRATION.sh to launch the tests. Specific test are easiest to call by appending -k "<testname>" to the command.
 
-If you write a new test specific to the community profile, please add a `@pytest.mark.community` decorator to the test function. Currently, all community related test are in https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/api/test_community.py and https://github.com/ansible/galaxy_ng/blob/master/galaxy_ng/tests/integration/cli/test_community.py. Other files can be added as needed as long as they have a suitable filename and the relevant pytest marks.
+If you write a new test specific to the community profile, please add a `@pytest.mark.community` decorator to the test function. Currently, all community related test are in https://github.com/ansible/galaxy_ng/blob/main/galaxy_ng/tests/integration/api/test_community.py and https://github.com/ansible/galaxy_ng/blob/main/galaxy_ng/tests/integration/cli/test_community.py. Other files can be added as needed as long as they have a suitable filename and the relevant pytest marks.
 
 
 ## Commits
@@ -138,4 +138,4 @@ Issue: AAH-XXX
 Signed-off-by: First Last <email@domain>
 ```
 
-If you are working on a bug or feature not tracked in a jira ticket, it's fine to use "No-Issue" instead of "Issue: AAH-XXX". If you are working on a jira ticket, you will need to create a suitable changelog file in [CHANGES](https://github.com/ansible/galaxy_ng/tree/master/CHANGES) folder.
+If you are working on a bug or feature not tracked in a jira ticket, it's fine to use "No-Issue" instead of "Issue: AAH-XXX". If you are working on a jira ticket, you will need to create a suitable changelog file in [CHANGES](https://github.com/ansible/galaxy_ng/tree/main/CHANGES) folder.
