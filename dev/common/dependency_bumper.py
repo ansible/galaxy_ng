@@ -62,7 +62,7 @@ MATRIX = [
         'pip_tools': '6.6.2',
     },
     {
-        'branch': 'master',
+        'branch': 'main',
         'python': '3.9',
         'pip': '22.1.2',
         'pip_tools': '6.6.2',
@@ -148,7 +148,7 @@ def construct_checkout(
     assert pid.returncode == 0
 
     # rebase
-    pid = subprocess.run('git pull --rebase upstream master', shell=True, cwd=checkout)
+    pid = subprocess.run('git pull --rebase upstream main', shell=True, cwd=checkout)
     assert pid.returncode == 0
 
     # set the starting branch

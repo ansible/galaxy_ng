@@ -139,7 +139,7 @@ $ git clone https://github.com/ansible/galaxy_ng ~/projects/galaxy_ng
 ```
 
 > **IMPORTANT** Ensure all the repos are checked out to compatible branches.
-> for example. you may be on galaxy_ng:master and reading `setup.py` you
+> for example. you may be on galaxy_ng:main and reading `setup.py` you
 > see that it requires `pulp_ansible>2.10,<3` then ensure you checkout `pulp_ansible`
 > to a compatible branch.
 

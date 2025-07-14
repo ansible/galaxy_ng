@@ -5,7 +5,7 @@
 # and if all do then skip running remainder of script
 # Example ignored prefixes: "docs/", "CHANGES/"
 # --------------------------------------------
-FILES_CHANGED=$(git diff origin/master --name-only)
+FILES_CHANGED=$(git diff origin/main --name-only)
 echo FILES_CHANGED=$FILES_CHANGED
 skip_pr_check="true"
 for line in $FILES_CHANGED; do

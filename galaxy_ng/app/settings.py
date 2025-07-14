@@ -238,7 +238,7 @@ SPECTACULAR_SETTINGS = {
     },
     "LICENSE": {
         "name": "GPLv2+",
-        "url": "https://raw.githubusercontent.com/ansible/galaxy_ng/master/LICENSE",
+        "url": "https://raw.githubusercontent.com/ansible/galaxy_ng/main/LICENSE",
     },
     "COMPONENT_SPLIT_REQUEST": True,
     "dynaconf_merge": True,

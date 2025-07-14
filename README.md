@@ -40,7 +40,7 @@ You can also find more information in the
 $ docker compose -f dev/compose/standalone.yaml up
 ```
 
-[more details](https://github.com/ansible/galaxy_ng/blob/master/dev/compose/README.md)
+[more details](https://github.com/ansible/galaxy_ng/blob/main/dev/compose/README.md)
 
 ## Code of Conduct
 
