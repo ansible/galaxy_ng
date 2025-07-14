@@ -23,7 +23,6 @@ from ansible_base.lib.dynamic_config import (
     factory,
     load_dab_settings,
     load_standard_settings_files,
-    toggle_feature_flags,
     validate as dab_validate,
 )
 from crum import get_current_request
@@ -77,7 +76,6 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
     data.update(configure_legacy_roles(settings))
     # these must get the current state of data to make decisions
     data.update(configure_dab_required_settings(settings, data))
-    data.update(toggle_feature_flags(settings))
 
     # These should go last, and it needs to receive the data from the previous configuration
     # functions because this function configures the rest framework auth classes based off
