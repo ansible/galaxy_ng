@@ -331,7 +331,7 @@ prometheus-client==0.21.1
     # via django-prometheus
 propcache==0.3.1
     # via yarl
-protobuf==4.25.3
+protobuf==4.25.8
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
