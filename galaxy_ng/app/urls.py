@@ -17,6 +17,7 @@ from drf_spectacular.views import (
 from ansible_base.resource_registry.urls import (
     urlpatterns as resource_api_urls,
 )
+from ansible_base.rbac.service_api.urls import rbac_service_urls
 from ansible_base.feature_flags.urls import api_version_urls as feature_flags_urls
 
 API_PATH_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
@@ -53,6 +54,7 @@ urlpatterns = [
 ]
 
 urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(resource_api_urls)))
+urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(rbac_service_urls)))
 urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(feature_flags_urls)))
 # urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(dab_rbac_urls)))
 
