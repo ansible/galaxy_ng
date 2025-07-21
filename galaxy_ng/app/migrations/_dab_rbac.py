@@ -51,10 +51,11 @@ def create_permissions_as_operation(apps, schema_editor):
 
         try:
             app_config = apps.get_app_config(app_label)
-            ContentType = apps.get_model("contenttypes", "ContentType")
             Permission = apps.get_model("dab_rbac", "DABPermission")
         except LookupError:
             return
+
+        ContentType = Permission._meta.get_field('content_type').related_model
 
         if not router.allow_migrate_model(using, Permission):
             return
