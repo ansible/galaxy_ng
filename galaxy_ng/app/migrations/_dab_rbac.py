@@ -1,8 +1,6 @@
 import logging
 
 from django.apps import apps as global_apps
-from django.contrib.contenttypes.management import create_contenttypes
-from django.db import DEFAULT_DB_ALIAS, router
 
 from rest_framework.exceptions import ValidationError
 
