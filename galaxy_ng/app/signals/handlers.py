@@ -14,7 +14,6 @@ from django.db.models.signals import post_delete
 from django.db.models.signals import m2m_changed
 from django.db.models import CharField, Value
 from django.db.models.functions import Concat
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Group
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
@@ -343,7 +342,7 @@ def lazy_content_type_correction(rd, obj):
             (rd.content_type_id and obj._meta.model_name == rd.content_type.model):
         return  # type already matches with intent, so nothing to do here, do not even log
     if not rd.user_assignments.exists():
-        ct = ContentType.objects.get_for_model(obj)
+        ct = permission_registry.content_type_model.objects.get_for_model(obj)
         try:
             # If permissions will not pass the validator, then we do not want to do this
             validate_permissions_for_model(list(rd.permissions.all()), ct)
