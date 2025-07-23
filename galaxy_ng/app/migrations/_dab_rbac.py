@@ -5,7 +5,7 @@ from django.apps import apps as global_apps
 from rest_framework.exceptions import ValidationError
 
 from ansible_base.rbac.migrations._utils import give_permissions
-from ansible_base.rbac.validators import permissions_allowed_for_role, combine_values
+from ansible_base.rbac.validators import LocalValidators, combine_values
 from ansible_base.rbac.management._old import create_dab_permissions as old_create_dab_permissions
 from ansible_base.rbac import permission_registry
 
@@ -62,7 +62,7 @@ def split_pulp_roles(apps, schema_editor):
                     # system, it should not be split/recreated ...
                     cls = apps.get_model(pulp_assignment.content_type.app_label, pulp_assignment.content_type.model)
                     try:
-                        ct_codenames = combine_values(permissions_allowed_for_role(cls))
+                        ct_codenames = combine_values(LocalValidators.permissions_allowed_for_role(cls))
                     except ValidationError:
                         continue
 
