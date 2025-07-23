@@ -88,6 +88,11 @@ def split_pulp_roles(apps, schema_editor):
                 pulp_assignment.save(update_fields=['role'])
 
 
+def model_class(apps, ct):
+    "Utility method because we can not count on method being available in migrations"
+    return apps.get_model(ct.app_label, ct.model)
+
+
 def copy_roles_to_role_definitions(apps, schema_editor):
     Role = apps.get_model('core', 'Role')
     DABPermission = apps.get_model('dab_rbac', 'DABPermission')
@@ -101,7 +106,7 @@ def copy_roles_to_role_definitions(apps, schema_editor):
         dab_perms = []
         for perm in corerole.permissions.prefetch_related('content_type').all():
             ct = perm.content_type
-            model_cls = ct.model_class()
+            model_cls = model_class(apps, ct)
             if not permission_registry.is_registered(model_cls):
                 continue
             dabct = DABContentType.objects.filter(model=ct.model, app_label=ct.app_label).first()
