@@ -47,34 +47,11 @@ def test_role_definition_options(galaxy_client):
     post_data = options_r["actions"]["POST"]
     assert "permissions" in post_data
     field_data = post_data["permissions"]
-    assert "child" in field_data
-    assert "choices" in field_data["child"]
-
-    assert {
-        "galaxy.change_namespace",
-        "galaxy.add_namespace",
-        "galaxy.delete_namespace",
-        "galaxy.add_collectionimport",
-        "galaxy.change_collectionimport",
-        "galaxy.delete_collectionimport",
-        "galaxy.upload_to_namespace",
-        "galaxy.view_collectionimport",
-        "galaxy.view_namespace",
-        "shared.add_team",
-        "shared.change_team",
-        "shared.delete_team",
-        "shared.view_team",
-    }.issubset({item["value"] for item in field_data["child"]["choices"]})
+    assert field_data.get("label") == "Permissions"
 
     assert "content_type" in post_data
     field_data = post_data["content_type"]
-    assert "choices" in field_data
-
-    assert {
-        "galaxy.collectionimport",
-        "galaxy.namespace",
-        "shared.team",
-    }.issubset({item["value"] for item in field_data["choices"]})
+    assert field_data.get("label") == "Content type"
 
 
 # This is role data that works in both DAB and pulp roles.

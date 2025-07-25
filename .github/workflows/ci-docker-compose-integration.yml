@@ -118,6 +118,10 @@ jobs:
         run: |
           set +e
           docker ps -a
+          echo ::group::MIGRATION_LOGS
+          docker logs --tail=10000 compose-standalone-migrations-1
+          docker logs --tail=10000 compose-insights-migrations-1
+          echo ::endgroup::
           echo ::group::MANAGER_LOGS
           docker logs --tail=10000 compose-manager-1
           docker logs --tail=10000 compose-standalone-manager-1

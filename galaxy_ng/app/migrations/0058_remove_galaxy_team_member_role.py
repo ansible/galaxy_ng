@@ -23,6 +23,9 @@ class Migration(migrations.Migration):
         ("galaxy", "0057_alter_organization_created_and_more"),
         ("dab_rbac", "0003_alter_dabpermission_codename_and_more"),
     ]
+    run_before = [
+        ("dab_rbac", "0004_remote_permissions_additions")
+    ]
 
     operations = [
         migrations.RunPython(remove_galaxy_team_member_role, migrations.RunPython.noop),

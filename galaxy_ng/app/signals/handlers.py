@@ -14,7 +14,6 @@ from django.db.models.signals import post_delete
 from django.db.models.signals import m2m_changed
 from django.db.models import CharField, Value
 from django.db.models.functions import Concat
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Group
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
@@ -37,6 +36,7 @@ from ansible_base.rbac.models import (
 )
 from ansible_base.rbac.triggers import dab_post_migrate
 from ansible_base.rbac import permission_registry
+from ansible_base.resource_registry.signals.handlers import no_reverse_sync
 
 from pulpcore.plugin.util import assign_role
 from pulpcore.plugin.util import remove_role
@@ -123,7 +123,8 @@ SHARED_TEAM_ROLE = 'Team Member'
 
 def create_managed_roles(*args, **kwargs) -> None:
     # do not create corresponding roles for these RoleDefinitions
-    with dab_rbac_signals():
+    with dab_rbac_signals(), no_reverse_sync():
+        # Roles are migrated to resource server in migration script, post_migrate too early
         # Create the DAB-only roles
         permission_registry.create_managed_roles(apps)
         # Create any roles created by pulp post_migrate signals
@@ -341,7 +342,7 @@ def lazy_content_type_correction(rd, obj):
             (rd.content_type_id and obj._meta.model_name == rd.content_type.model):
         return  # type already matches with intent, so nothing to do here, do not even log
     if not rd.user_assignments.exists():
-        ct = ContentType.objects.get_for_model(obj)
+        ct = permission_registry.content_type_model.objects.get_for_model(obj)
         try:
             # If permissions will not pass the validator, then we do not want to do this
             validate_permissions_for_model(list(rd.permissions.all()), ct)
