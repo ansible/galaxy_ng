@@ -22,14 +22,14 @@ def strip_package_name(spec):
 
 def get_dependencies():
     """Generate dependencies list with LOCK_REQUIREMENTS and DAB branch support"""
-    
+
     # DAB branch logic
     django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', '2025.7.1')
     django_ansible_base_dependency = (
         'django-ansible-base[jwt-consumer,feature-flags] @ '
         f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
     )
-    
+
     # Base requirements
     requirements = [
         "galaxy-importer>=0.4.31,<0.5.0",
@@ -51,7 +51,7 @@ def get_dependencies():
         "django-crum==0.7.9",
         "django-automated-logging>=6.0.0,<6.1.0",
     ]
-    
+
     # LOCK_REQUIREMENTS logic
     unpin_requirements = os.getenv("LOCK_REQUIREMENTS") == "0"
     if unpin_requirements:
@@ -73,7 +73,7 @@ def get_dependencies():
             for req in requirements
         ]
         print("Installing with unpinned DEV_SOURCE_PATH requirements", requirements)
-    
+
     return requirements
 
 

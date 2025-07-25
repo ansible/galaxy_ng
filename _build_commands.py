@@ -92,5 +92,3 @@ class BuildPyCommand(_BuildPyCommand):
     def run(self):
         self.run_command("prepare_static")
         return super().run()
-
-
