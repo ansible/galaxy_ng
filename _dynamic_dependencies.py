@@ -49,7 +49,7 @@ def get_dependencies():
         "django-flags>=5.0.13",
         django_ansible_base_dependency,
         "django-crum==0.7.9",
-        "django-automated-logging>=6.0.0,<6.1.0",
+        "django-automated-logging~=6.2",
     ]
 
     # LOCK_REQUIREMENTS logic
