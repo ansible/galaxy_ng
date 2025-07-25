@@ -20,6 +20,8 @@ Roles are groups of permissions that can be assigned to groups. There are a set 
 
 Roles can be assigned at two levels: model (global) and object.
 
+This is different from other AAP components which allow organization-level and object-level permissions. Right now, organization level permissions are not possible because a related `organization` field does not exist on galaxy-specific resources like collections and namespaces. This might be added in the future to support organization-level roles.
+
 Model roles are global, and grant the permission to all objects of the given class in the system. For example, granting model level namespace_owner role will allow a user to update all namespaces in the system.
 
 Object level roles are for specific objects. They allow for a user in the system to be granted permissions for a specific object. For example, granting a user the namespace_owner role on namespace `foo` will allow a user to update namespace `foo`, but no other namespaces.
@@ -28,7 +30,28 @@ Roles can be assigned in one of two ways: on a per user level or on a per group 
 
 ### Unused Permissions
 
-Not all permissions are enforced. Content types such as collections and execution environments don't require any special permissions to view, so the view permissions for collections and EEs aren't enforced.
+In the pulp `Role` model, the standard permission model from `django.contrib.auth` app is used. This creates permissions for all models, even if they are unused.
+
+Content types such as collections and execution environments don't require any special permissions to view, so the view permissions for collections and EEs aren't enforced.
+
+### DAB RBAC
+
+A unified RBAC system has been introduced, the DAB RBAC system.
+
+#### Synchronization to pulp Role models
+
+This is synchronized by Django signals with the pulp `Role` model to support existing APIs. The DAB RBAC system has its own permission model, which only includes permissions for models registered with DAB RBAC, so this model should not have unused permission entries.
+
+#### Synchronization to Resource Server
+
+Changes to role assignments may be synchronized with a connected "resource server" as a new feature.
+This makes requests to the "resource server" using a client from the [DAB resource_registry](https://github.com/ansible/django-ansible-base/tree/devel/ansible_base/resource_registry) app. These requests are made from DAB code so the logic will not be found within galaxy_ng.
+
+To support synchronization, DAB RBAC uses a custom `DABContentType` model which resembles the Django contrib `ContentType` model.
+This adds an additional `service` field on the model, but for all resources owned by galaxy_ng will just have "galaxy" for that field.
+Models that are managed by the resource server, right now organization and team, will have "shared" for the service field.
+The point of the custom DAB RBAC content type model is to save permissions for models in other systems, but that is not done here,
+only the shared and local models are tracked by RBAC in galaxy_ng.
 
 ### Super users
 
