@@ -10,7 +10,8 @@ from unittest.mock import patch
 
 from django.test import TestCase
 from django.apps import apps
-from django.contrib.contenttypes.models import ContentType
+
+from ansible_base.rbac import permission_registry
 
 from galaxy_ng.app.models import User, Team
 from galaxy_ng.app.models.organization import Organization
@@ -55,20 +56,20 @@ class TestGalaxyTeamMemberRoleTransition(TestCase):
             role_definition=galaxy_role,
             user=self.user1,
             object_id=self.team.id,
-            content_type=ContentType.objects.get_for_model(Team),
+            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
         )
 
         RoleTeamAssignment.objects.create(
             role_definition=galaxy_role,
             team=self.team,
             object_id=self.team.id,
-            content_type=ContentType.objects.get_for_model(Team),
+            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
         )
 
         ObjectRole.objects.create(
             role_definition=galaxy_role,
             object_id=self.team.id,
-            content_type=ContentType.objects.get_for_model(Team),
+            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
         )
 
         # Step 3: Verify pre-migration state
@@ -139,7 +140,7 @@ class TestGalaxyTeamMemberRoleTransition(TestCase):
             role_definition=team_role,
             user=self.user1,
             object_id=self.team.id,
-            content_type=ContentType.objects.get_for_model(Team),
+            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
         )
 
         # Run migration (should be no-op since Galaxy Team Member doesn't exist)

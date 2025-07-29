@@ -1,11 +1,13 @@
 import logging
 
 from django.apps import apps as global_apps
+
 from rest_framework.exceptions import ValidationError
 
-from ansible_base.rbac.management import create_dab_permissions
 from ansible_base.rbac.migrations._utils import give_permissions
-from ansible_base.rbac.validators import permissions_allowed_for_role, combine_values
+from ansible_base.rbac.validators import LocalValidators, combine_values
+from ansible_base.rbac.management._old import create_dab_permissions as old_create_dab_permissions
+from ansible_base.rbac import permission_registry
 
 
 logger = logging.getLogger(__name__)
@@ -29,9 +31,11 @@ def pulp_role_to_single_content_type_or_none(pulprole):
 
 
 def create_permissions_as_operation(apps, schema_editor):
-    # TODO(jctanner): possibly create permissions for more apps here
+    # NOTE: this is a snapshot version of the DAB RBAC permission creation logic
+    # normally this runs post_migrate, but this exists to keep old logic
     for app_label in {'ansible', 'container', 'core', 'galaxy'}:
-        create_dab_permissions(global_apps.get_app_config(app_label), apps=apps)
+        app_config = global_apps.get_app_config(app_label)
+        old_create_dab_permissions(app_config, apps=apps)
 
     print('FINISHED CREATING PERMISSIONS')
 
@@ -58,7 +62,7 @@ def split_pulp_roles(apps, schema_editor):
                     # system, it should not be split/recreated ...
                     cls = apps.get_model(pulp_assignment.content_type.app_label, pulp_assignment.content_type.model)
                     try:
-                        ct_codenames = combine_values(permissions_allowed_for_role(cls))
+                        ct_codenames = combine_values(LocalValidators.permissions_allowed_for_role(cls))
                     except ValidationError:
                         continue
 
@@ -84,17 +88,38 @@ def split_pulp_roles(apps, schema_editor):
                 pulp_assignment.save(update_fields=['role'])
 
 
+def model_class(apps, ct):
+    "Utility method because we can not count on method being available in migrations"
+    return apps.get_model(ct.app_label, ct.model)
+
+
 def copy_roles_to_role_definitions(apps, schema_editor):
     Role = apps.get_model('core', 'Role')
     DABPermission = apps.get_model('dab_rbac', 'DABPermission')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
+    try:
+        DABContentType = apps.get_model('dab_rbac', 'DABContentType')
+        logger.info('Running copy_roles_to_role_definitions with DAB RBAC post-remote-permission models')
+    except LookupError:
+        DABContentType = apps.get_model('contenttypes', 'ContentType')
+        logger.info('Running copy_roles_to_role_definitions with DAB RBAC original model state')
 
     for corerole in Role.objects.all():
         dab_perms = []
         for perm in corerole.permissions.prefetch_related('content_type').all():
+            ct = perm.content_type
+            model_cls = model_class(apps, ct)
+            if not permission_registry.is_registered(model_cls):
+                continue
+            dabct = DABContentType.objects.filter(model=ct.model, app_label=ct.app_label).first()
+            if dabct is None:
+                raise dabct.DoesNotExist(
+                    f'Content type ({ct.app_label}, {ct.model}) for registered model {model_cls} not found as DABContentType'
+                    f'\nexisting: {list(DABContentType.objects.values_list("model", flat=True))}'
+                )
             dabperm = DABPermission.objects.filter(
                 codename=perm.codename,
-                content_type=perm.content_type
+                content_type=dabct
             ).first()
             if dabperm:
                 dab_perms.append(dabperm)
@@ -102,12 +127,20 @@ def copy_roles_to_role_definitions(apps, schema_editor):
         if dab_perms:
             roledef_name = PULP_TO_ROLEDEF.get(corerole.name, corerole.name)
             content_type = pulp_role_to_single_content_type_or_none(corerole)
+            dabct = None
+            if content_type:
+                dabct = DABContentType.objects.filter(model=content_type.model, app_label=content_type.app_label).first()
+                if dabct is None:
+                    raise dabct.DoesNotExist(
+                        f'Content type ({content_type.app_label}, {content_type.model}) not found as DABContentType'
+                        f'\nexisting: {list(DABContentType.objects.values_list("model", flat=True))}'
+                    )
             roledef, created = RoleDefinition.objects.get_or_create(
                 name=roledef_name,
                 defaults={
                     'description': corerole.description or corerole.name,
                     'managed': corerole.locked,
-                    'content_type': content_type,
+                    'content_type': dabct,
                 }
             )
             if created:
