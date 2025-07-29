@@ -4,12 +4,15 @@ if [ -z "${DEV_SOURCE_PATH}" ]; then
     exit 0
 fi
 
+echo "DEV_SOURCE_PATH is set to: ${DEV_SOURCE_PATH}"
+echo "Starting editable installations..."
+
 IFS=':' read -ra SRC_PATH_LIST <<< "$DEV_SOURCE_PATH"
 
 for item in "${SRC_PATH_LIST[@]}"; do
     src_path="/src/${item}"
     if [[ -d "$src_path" ]]; then
-        echo "Installing path ${item} in editable mode."
+        echo "📦 Installing ${item} in editable mode from ${src_path}"
 
         # NOTE: `--config-settings editable_mode=compat` was added to allow editable install of
         # projects still using `setup.py`, in the case it was dynaconf 3.2.x, once all relevant deps migrate
