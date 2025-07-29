@@ -26,6 +26,8 @@ spec:
     value: Dockerfile
   - name: path-context
     value: .
+  - name: build-args
+    value: ["GIT_COMMIT={{target_branch}}:{{revision}}"]
   pipelineSpec:
     finally:
     - name: show-sbom
