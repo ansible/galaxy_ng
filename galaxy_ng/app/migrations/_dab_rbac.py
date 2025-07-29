@@ -99,8 +99,10 @@ def copy_roles_to_role_definitions(apps, schema_editor):
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
     try:
         DABContentType = apps.get_model('dab_rbac', 'DABContentType')
+        logger.info('Running copy_roles_to_role_definitions with DAB RBAC post-remote-permission models')
     except LookupError:
         DABContentType = apps.get_model('contenttypes', 'ContentType')
+        logger.info('Running copy_roles_to_role_definitions with DAB RBAC original model state')
 
     for corerole in Role.objects.all():
         dab_perms = []
