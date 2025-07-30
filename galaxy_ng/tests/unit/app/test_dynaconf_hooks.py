@@ -1,7 +1,17 @@
 import copy
+import os
+from unittest.mock import Mock, patch
 import pytest
 
-from galaxy_ng.app.dynaconf_hooks import post as post_hook
+from galaxy_ng.app.dynaconf_hooks import (
+    post as post_hook,
+    configure_cors,
+    configure_logging,
+    configure_socialauth,
+    configure_renderers,
+    configure_legacy_roles,
+    configure_dynamic_settings,
+)
 
 
 class SuperDict(dict):
@@ -402,3 +412,328 @@ def test_dab_dynaconf():
     ]
     for key in expected_keys:
         assert key in new_settings
+
+
+class TestConfigureCors:
+
+    @patch.dict(os.environ, {"DEV_SOURCE_PATH": "/dev/path"})
+    def test_configure_cors_enabled_in_dev(self):
+        mock_settings = Mock()
+        mock_settings.get.side_effect = lambda key, default=False: {
+            "GALAXY_ENABLE_CORS": True,
+            "MIDDLEWARE": ["existing.middleware"]
+        }.get(key, default)
+
+        result = configure_cors(mock_settings)
+
+        assert "MIDDLEWARE" in result
+        assert "galaxy_ng.app.common.openapi.AllowCorsMiddleware" in result["MIDDLEWARE"]
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_configure_cors_disabled_not_dev(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = True
+
+        result = configure_cors(mock_settings)
+
+        assert result == {}
+
+    @patch.dict(os.environ, {"DEV_SOURCE_PATH": "/dev/path"})
+    def test_configure_cors_disabled_in_dev(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = False
+
+        result = configure_cors(mock_settings)
+
+        assert result == {}
+
+
+class TestConfigureLogging:
+
+    def test_configure_logging_enabled_via_settings(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = True
+
+        result = configure_logging(mock_settings)
+
+        assert result["GALAXY_ENABLE_API_ACCESS_LOG"] is True
+        assert "galaxy_ng._vendor.automated_logging" in result["INSTALLED_APPS"]
+        assert "MIDDLEWARE" in result
+        assert "LOGGING" in result
+        assert "AUTOMATED_LOGGING" in result
+        assert result["LOGGING"]["dynaconf_merge"] is True
+
+    @patch.dict(os.environ, {"GALAXY_ENABLE_API_ACCESS_LOG": "True"})
+    def test_configure_logging_enabled_via_env(self):
+        mock_settings = Mock()
+        mock_settings.get.side_effect = lambda key, default=None: {
+            "GALAXY_ENABLE_API_ACCESS_LOG": True
+        }.get(key, default)
+
+        result = configure_logging(mock_settings)
+
+        assert result["GALAXY_ENABLE_API_ACCESS_LOG"] is True
+
+    def test_configure_logging_disabled(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = False
+
+        result = configure_logging(mock_settings)
+
+        assert result["GALAXY_ENABLE_API_ACCESS_LOG"] is False
+        assert "INSTALLED_APPS" not in result
+
+
+class TestConfigureSocialAuth:
+
+    def test_configure_socialauth_enabled(self):
+        mock_settings = Mock()
+        mock_settings.get.side_effect = lambda key, default=None: {
+            "SOCIAL_AUTH_GITHUB_KEY": "github_key",
+            "SOCIAL_AUTH_GITHUB_SECRET": "github_secret",
+            "AUTHENTICATION_BACKENDS": []
+        }.get(key, default)
+
+        result = configure_socialauth(mock_settings)
+
+        assert result["GALAXY_FEATURE_FLAGS__external_authentication"] is True
+        assert "social_django" in result["INSTALLED_APPS"]
+        assert "galaxy_ng.social.GalaxyNGOAuth2" in result["AUTHENTICATION_BACKENDS"]
+        assert "SOCIAL_AUTH_PIPELINE" in result
+        assert "DEFAULT_AUTHENTICATION_CLASSES" in result
+        assert "GALAXY_AUTHENTICATION_CLASSES" in result
+        assert "REST_FRAMEWORK_AUTHENTICATION_CLASSES" in result
+
+    def test_configure_socialauth_missing_key(self):
+        mock_settings = Mock()
+        mock_settings.get.side_effect = lambda key, default=None: {
+            "SOCIAL_AUTH_GITHUB_SECRET": "github_secret"
+        }.get(key, default)
+
+        result = configure_socialauth(mock_settings)
+
+        assert result == {}
+
+    def test_configure_socialauth_missing_secret(self):
+        mock_settings = Mock()
+        mock_settings.get.side_effect = lambda key, default=None: {
+            "SOCIAL_AUTH_GITHUB_KEY": "github_key"
+        }.get(key, default)
+
+        result = configure_socialauth(mock_settings)
+
+        assert result == {}
+
+    def test_configure_socialauth_disabled(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = None
+
+        result = configure_socialauth(mock_settings)
+
+        assert result == {}
+
+
+class TestConfigureRenderers:
+
+    def test_configure_renderers_galaxy_community(self):
+        mock_settings = Mock()
+        mock_settings.get.side_effect = lambda key, default="": {
+            "CONTENT_ORIGIN": "https://galaxy.ansible.com",
+            "REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES": ["existing.renderer"]
+        }.get(key, default)
+
+        result = configure_renderers(mock_settings)
+
+        assert (
+            "galaxy_ng.app.renderers.CustomBrowsableAPIRenderer"
+            in result["REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES"]
+        )
+
+    def test_configure_renderers_galaxy_dev(self):
+        mock_settings = Mock()
+        mock_settings.get.side_effect = lambda key, default="": {
+            "CONTENT_ORIGIN": "https://galaxy-dev.ansible.com",
+            "REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES": []
+        }.get(key, default)
+
+        result = configure_renderers(mock_settings)
+
+        assert (
+            "galaxy_ng.app.renderers.CustomBrowsableAPIRenderer"
+            in result["REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES"]
+        )
+
+    def test_configure_renderers_galaxy_stage(self):
+        mock_settings = Mock()
+        mock_settings.get.side_effect = lambda key, default="": {
+            "CONTENT_ORIGIN": "https://galaxy-stage.ansible.com",
+            "REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES": []
+        }.get(key, default)
+
+        result = configure_renderers(mock_settings)
+
+        assert (
+            "galaxy_ng.app.renderers.CustomBrowsableAPIRenderer"
+            in result["REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES"]
+        )
+
+    def test_configure_renderers_not_community(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = "https://other.example.com"
+
+        result = configure_renderers(mock_settings)
+
+        assert result == {}
+
+    def test_configure_renderers_empty_content_origin(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = ""
+
+        result = configure_renderers(mock_settings)
+
+        assert result == {}
+
+
+class TestConfigureLegacyRoles:
+
+    def test_configure_legacy_roles_enabled(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = True
+
+        result = configure_legacy_roles(mock_settings)
+
+        assert result["GALAXY_FEATURE_FLAGS__legacy_roles"] is True
+
+    def test_configure_legacy_roles_disabled(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = False
+
+        result = configure_legacy_roles(mock_settings)
+
+        assert result["GALAXY_FEATURE_FLAGS__legacy_roles"] is False
+
+    def test_configure_legacy_roles_default_false(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = False  # default value
+
+        result = configure_legacy_roles(mock_settings)
+
+        assert result["GALAXY_FEATURE_FLAGS__legacy_roles"] is False
+
+
+class TestConfigureDynamicSettings:
+
+    def test_configure_dynamic_settings_disabled(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = None
+
+        result = configure_dynamic_settings(mock_settings)
+
+        assert result == {}
+
+    def test_configure_dynamic_settings_empty_list(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = []
+
+        result = configure_dynamic_settings(mock_settings)
+
+        assert result == {}
+
+    @patch('galaxy_ng.app.dynaconf_hooks.apps')
+    def test_configure_dynamic_settings_enabled(self, mock_apps):
+        mock_apps.ready = True
+        mock_settings = Mock()
+        mock_settings.get.return_value = ["read_settings_from_cache_or_db"]
+
+        # Mock the dynamic imports that happen inside configure_dynamic_settings
+        mock_hook = Mock()
+        mock_action = Mock()
+        mock_action.AFTER_GET = 'after_get'
+
+        with patch.dict('sys.modules', {
+            'dynaconf.hooking': Mock(Hook=mock_hook, Action=mock_action, HookValue=Mock()),
+            'dynaconf': Mock(DynaconfFormatError=Exception, DynaconfParseError=Exception),
+            'dynaconf.base': Mock(Settings=Mock()),
+            'dynaconf.loaders.base': Mock(SourceMetadata=Mock())
+        }):
+            result = configure_dynamic_settings(mock_settings)
+
+        assert "_registered_hooks" in result
+        mock_hook.assert_called_once()
+
+    @patch('galaxy_ng.app.dynaconf_hooks.apps')
+    def test_configure_dynamic_settings_multiple_hooks(self, mock_apps):
+        mock_apps.ready = True
+        mock_settings = Mock()
+        mock_settings.get.return_value = [
+            "read_settings_from_cache_or_db", "alter_hostname_settings"
+        ]
+
+        # Mock the dynamic imports that happen inside configure_dynamic_settings
+        mock_hook = Mock()
+        mock_action = Mock()
+        mock_action.AFTER_GET = 'after_get'
+
+        with patch.dict('sys.modules', {
+            'dynaconf.hooking': Mock(Hook=mock_hook, Action=mock_action, HookValue=Mock()),
+            'dynaconf': Mock(DynaconfFormatError=Exception, DynaconfParseError=Exception),
+            'dynaconf.base': Mock(Settings=Mock()),
+            'dynaconf.loaders.base': Mock(SourceMetadata=Mock())
+        }):
+            result = configure_dynamic_settings(mock_settings)
+
+        assert "_registered_hooks" in result
+        assert mock_hook.call_count == 2
+
+    def test_configure_dynamic_settings_import_error(self):
+        mock_settings = Mock()
+        mock_settings.get.return_value = ["read_settings_from_cache_or_db"]
+
+        # Simulate ImportError by making the specific imports fail
+        def failing_import(name, *args, **kwargs):
+            if 'dynaconf' in name:
+                raise ImportError("test error")
+            return __import__(name, *args, **kwargs)
+
+        with patch('builtins.__import__', side_effect=failing_import):
+            result = configure_dynamic_settings(mock_settings)
+
+        assert result == {}
+
+    @patch('galaxy_ng.app.dynaconf_hooks.logger')
+    def test_configure_dynamic_settings_logs_error_on_import(self, mock_logger):
+        mock_settings = Mock()
+        mock_settings.get.return_value = ["read_settings_from_cache_or_db"]
+
+        # Simulate ImportError by making the specific imports fail
+        def failing_import(name, *args, **kwargs):
+            if 'dynaconf' in name:
+                raise ImportError("test error")
+            return __import__(name, *args, **kwargs)
+
+        with patch('builtins.__import__', side_effect=failing_import):
+            configure_dynamic_settings(mock_settings)
+
+        mock_logger.error.assert_called_once()
+
+    @patch('galaxy_ng.app.dynaconf_hooks.logger')
+    @patch('galaxy_ng.app.dynaconf_hooks.apps')
+    def test_configure_dynamic_settings_logs_info(self, mock_apps, mock_logger):
+        mock_apps.ready = True
+        mock_settings = Mock()
+        mock_settings.get.return_value = ["read_settings_from_cache_or_db"]
+
+        # Mock the dynamic imports that happen inside configure_dynamic_settings
+        mock_hook = Mock()
+        mock_action = Mock()
+        mock_action.AFTER_GET = 'after_get'
+
+        with patch.dict('sys.modules', {
+            'dynaconf.hooking': Mock(Hook=mock_hook, Action=mock_action, HookValue=Mock()),
+            'dynaconf': Mock(DynaconfFormatError=Exception, DynaconfParseError=Exception),
+            'dynaconf.base': Mock(Settings=Mock()),
+            'dynaconf.loaders.base': Mock(SourceMetadata=Mock())
+        }):
+            configure_dynamic_settings(mock_settings)
+
+        mock_logger.info.assert_called_with("Enabling Dynamic Settings Feature")
