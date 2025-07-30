@@ -453,3 +453,5 @@ RENAMED_USERNAME_PREFIX = "galaxy_"
 
 # feature flags
 FLAGS = {}
+
+SESSION_COOKIE_SECURE = True
