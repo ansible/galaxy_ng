@@ -39,6 +39,24 @@ def get_path_role_meta(path):
     return meta
 
 
+def _clean_role_name(name):
+    """ Clean up role name by removing ansible prefixes/suffixes and normalizing separators """
+    if name.endswith(".git"):
+        name = name[:-4]
+    if 'ansible-role-' in name:
+        name = name.replace('ansible-role-', '')
+    if name.startswith('ansible-'):
+        name = name.replace('ansible-', '')
+    if name.endswith('-ansible'):
+        name = name.replace('-ansible', '')
+    if name.startswith('ansible.'):
+        name = name.replace('ansible.', '')
+
+    # Normalize separators to underscores
+    name = name.replace('.', '_').replace('-', '_')
+    return name
+
+
 def get_path_role_name(path):
     """ Enumerate the name of a role from a checkout """
     name = get_path_galaxy_key(path, 'name')
@@ -59,24 +77,7 @@ def get_path_role_name(path):
         origin = pid.stdout.decode('utf-8').strip()
         name = origin.replace('https://github.com/', '').split('/')[1]
 
-        if 'ansible-role-' in name:
-            name = name.replace('ansible-role-', '')
-        if name.startswith('ansible-'):
-            name = name.replace('ansible-', '')
-        if name.endswith('-ansible'):
-            name = name.replace('-ansible', '')
-        if name.startswith('ansible.'):
-            name = name.replace('ansible.', '')
-
-    # https://github.com/angstwad/docker.ubuntu -> docker_ubuntu
-    if '.' in name:
-        name = name.replace('.', '_')
-
-    #  https://github.com/sbaerlocher/ansible.update-management -> update_management
-    if '-' in name:
-        name = name.replace('-', '_')
-
-    return name
+    return _clean_role_name(name)
 
 
 def get_path_role_namespace(path):
