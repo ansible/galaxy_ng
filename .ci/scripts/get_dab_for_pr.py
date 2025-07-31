@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+"""
+CI script to handle Django Ansible Base (DAB) dependency management for PRs.
+
+This script performs two main functions:
+1. Checks out a specific DAB branch/PR when referenced in galaxy_ng PRs
+2. Updates requirements.insights.txt to use the checked out DAB version
+
+The script has two checkout strategies:
+- Primary: Scan PR body for "requires" links to specific DAB PRs
+- Secondary (fallback): Look for matching branch names in the DAB repository
+"""
+
 import os
 import re
 import sys
@@ -30,7 +42,10 @@ print(f'Scanning body: "{pr_body[:100]}..."')
 requires_re = re.compile(f"requires.*{DAB_REPO}(?:#|/pull/)([0-9]+)", re.IGNORECASE)
 matches = requires_re.search(pr_body)
 
+# Initialize variables to track checkout status and branch info
 dab_checked_out = False
+branch = None
+repo_url = None
 
 if matches:
     required_pr = matches.group(1)
@@ -74,6 +89,7 @@ if not dab_checked_out:
     if current_branch:
         print(f"Current branch detected as '{current_branch}'.")
         print(f"Checking for a matching branch in '{DAB_REPO}'...")
+        branch = current_branch
 
         branch_url = f"{GITHUB_API_URL}/repos/{DAB_REPO}/branches/{current_branch}"
         response = requests.get(branch_url, headers=headers)
@@ -100,9 +116,53 @@ if not dab_checked_out:
 if dab_checked_out:
     print("\n🔧 Configuring environment for DAB editable install...")
 
-    # Set environment variable to indicate DAB is available
+    # Set environment variable to indicate DAB is available for compose
     with open(os.environ.get("GITHUB_ENV", "/dev/null"), "a") as env_file:
         env_file.write("DEV_SOURCE_PATH=django-ansible-base\n")
+
+    # Update requirements file to use the specific DAB branch we checked out
+    requirements_file = "requirements/requirements.insights.txt"
+    print(f"📝 Updating {requirements_file} to use local django-ansible-base checkout...")
+
+    try:
+        # Read the current requirements file
+        with open(requirements_file) as f:
+            lines = f.readlines()
+
+        # Find and replace the django-ansible-base line
+        # Expected format: django-ansible-base[extras] @ git+https://github.com/repo@branch
+        modified = False
+        for i, line in enumerate(lines):
+            if line.strip().startswith("django-ansible-base"):
+                # Parse the existing line: django-ansible-base[extras] @ git+url@old_branch
+                if " @ git+" in line:
+                    package_part, url_part = line.strip().split(" @ git+", 1)
+                    # Construct new line with the checked out branch
+                    new_line = f"{package_part} @ git+{repo_url.strip('.git')}@{branch}\n"
+
+                    if lines[i] != new_line:
+                        lines[i] = new_line
+                        modified = True
+                        print(f"📝 Updated DAB line from: {line.strip()}")
+                        print(f"📝                    to: {new_line.strip()}")
+                    break
+                else:
+                    print(
+                        f"⚠️ Warning: Unexpected format in django-ansible-base line: {line.strip()}"
+                    )
+
+        if modified:
+            # Write the modified requirements file
+            with open(requirements_file, "w") as f:
+                f.writelines(lines)
+            print(f"✅ Updated {requirements_file} for local DAB checkout")
+        else:
+            print(f"No changes needed in {requirements_file}")
+
+    except FileNotFoundError:
+        print(f"⚠️ Warning: {requirements_file} not found")
+    except Exception as e:
+        print(f"❌ Error updating {requirements_file}: {e}")
 
     print("✅ Environment configured for DAB checkout")
 else:
