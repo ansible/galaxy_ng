@@ -87,7 +87,10 @@ class BuildPyCommand(_BuildPyCommand):
         return super().run()
 
 
-django_ansible_base_branch = os.getenv('DJANGO_ANSIBLE_BASE_BRANCH', '2025.7.29')
+# use full commit hash in place of DAB tag i.e. 2025.7.29 = 894af11435d5a203255d81fbb15085f8b8feacc2
+django_ansible_base_branch = os.getenv(
+    'DJANGO_ANSIBLE_BASE_BRANCH', '894af11435d5a203255d81fbb15085f8b8feacc2'
+)
 django_ansible_base_dependency = (
     'django-ansible-base[jwt-consumer,feature-flags] @ '
     f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
