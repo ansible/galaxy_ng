@@ -171,6 +171,76 @@ class TestV3NamespaceViewSet(BaseTestCase):
 
             self.assertEqual(len(data['groups']), self.admin_user.groups.all().count())
 
+    def test_namespace_get_excluding_fields(self):
+        ns_name = "unittestnamespace"
+        ns1 = self._create_namespace(ns_name, groups=[self.pe_group])
+
+        ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1.name})
+
+        self.client.force_authenticate(user=self.admin_user)
+
+        with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
+            query_params = {"exclude_fields": "avatar_url"}
+            response = self.client.get(ns_detail_url, data=query_params)
+            log.debug('response: %s', response)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.data
+            log.debug('data: %s', data)
+
+            namespace = NamespaceSerializer(data=data)
+            log.debug('repr namespace serializer: %r', namespace)
+
+            namespace.is_valid()
+            log.debug('namespace.errors: %s', namespace.errors)
+
+            log.debug('namespace.validated_data: %s', namespace.validated_data)
+
+            self.assertEqual(data['name'], ns_name)
+            self.assertEqual(data['name'], ns1.name)
+
+            self.assertEqual(data["links"], [])
+            self.assertNotIn("avatar_url", data)
+            self.assertIn("company", data)
+            self.assertIn("description", data)
+
+            self.assertEqual(len(data['groups']), self.admin_user.groups.all().count())
+
+    def test_namespace_get_only_specific_fields(self):
+        ns_name = "unittestnamespace"
+        ns1 = self._create_namespace(ns_name, groups=[self.pe_group])
+
+        ns_detail_url = reverse('galaxy:api:v3:namespaces-detail', kwargs={"name": ns1.name})
+
+        self.client.force_authenticate(user=self.admin_user)
+
+        with self.settings(GALAXY_DEPLOYMENT_MODE=self.deployment_mode):
+            query_params = {"fields": "name,avatar_url"}
+            response = self.client.get(ns_detail_url, data=query_params)
+            log.debug('response: %s', response)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.data
+            log.debug('data: %s', data)
+
+            namespace = NamespaceSerializer(data=data)
+            log.debug('repr namespace serializer: %r', namespace)
+
+            namespace.is_valid()
+            log.debug('namespace.errors: %s', namespace.errors)
+
+            log.debug('namespace.validated_data: %s', namespace.validated_data)
+
+            self.assertEqual(data['name'], ns_name)
+            self.assertEqual(data['name'], ns1.name)
+
+            self.assertIn("avatar_url", data)
+            self.assertNotIn("company", data)
+            self.assertNotIn("description", data)
+            self.assertNotIn("groups", data)
+
     def test_namespace_api_doesnt_create_delete_repo(self):
         self.client.force_authenticate(user=self.admin_user)
         ns1_name = "unittestnamespace1"
