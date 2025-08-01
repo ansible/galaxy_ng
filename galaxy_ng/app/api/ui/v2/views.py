@@ -168,7 +168,7 @@ class TeamViewSet(BaseViewSet):
             return HttpResponseBadRequest(self.bad_request_msg)
         # make the organization ...
         org_name = request.data.get('organization', 'Default')
-        organization, _ = Organization.objects.get_or_create(
+        organization, _created = Organization.objects.get_or_create(
             name=org_name
         )
 
