@@ -183,7 +183,7 @@ def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespa
         )
 
         # 5. Remove namespace from AIIndex
-        response = client.delete(f"_ui/v1/ai_deny_index/namespace/{namespace}")
+        response = client.delete(f"_ui/v1/ai_deny_index/namespace/{namespace}/")
         assert response.status_code == 204
 
         # 6. Assert namespace is not listed on _ui/v1/ai_deny_index/
@@ -217,5 +217,5 @@ def test_namespace_add_list_remove_aiindex(ansible_config, namespace, pe_namespa
         assert expected in response.json()["results"]
 
         # 5. Remove namespace from AIIndex
-        response = uclient.delete(f"_ui/v1/ai_deny_index/namespace/{pe_namespace}")
+        response = uclient.delete(f"_ui/v1/ai_deny_index/namespace/{pe_namespace}/")
         assert response.status_code == 204
