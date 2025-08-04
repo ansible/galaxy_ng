@@ -1,9 +1,10 @@
 #!/bin/bash
+
 set -o errexit
 set -o nounset
 
 
-readonly GUNICORN=${GUNICORN:-'/venv/bin/gunicorn'}
+readonly ENTRYPOINT=${ENTRYPOINT:-'/venv/bin/pulpcore-api'}
 readonly GUNICORN_FORWARDED_ALLOW_IPS="${GUNICORN_FORWARDED_ALLOW_IPS:-}"
 readonly GUNICORN_WORKERS="${GUNICORN_WORKERS:-4}"
 readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
@@ -11,22 +12,24 @@ readonly GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-60}"
 
 readonly BIND_HOST='0.0.0.0'
 readonly BIND_PORT=${GUNICORN_PORT:-24817}
-readonly APP_MODULE='pulpcore.app.wsgi:application'
 
 
 GUNICORN_OPTIONS=(
   --bind "${BIND_HOST}:${BIND_PORT}"
   --workers "${GUNICORN_WORKERS}"
   --access-logfile -
-  --limit-request-field_size 32768
   --timeout "${GUNICORN_TIMEOUT}"
 )
+
+# Note: add back the following option as soon as there is a fix for the pulpcore issue
+#   --limit-request-field-size 32768
 
 if [[ -n "${GUNICORN_FORWARDED_ALLOW_IPS}" ]]; then
     GUNICORN_OPTIONS+=(--forwarded-allow-ips "${GUNICORN_FORWARDED_ALLOW_IPS}")
 fi
+
 if [[ -n "${GUNICORN_LOGGER_CLASS}" ]]; then
     GUNICORN_OPTIONS+=(--logger-class "${GUNICORN_LOGGER_CLASS}")
 fi
 
-exec "${GUNICORN}" "${GUNICORN_OPTIONS[@]}" "${APP_MODULE}"
+exec "${ENTRYPOINT}" "${GUNICORN_OPTIONS[@]}"
