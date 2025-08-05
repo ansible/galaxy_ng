@@ -245,7 +245,7 @@ def test_api_ui_v1_distributions_by_id(ansible_config):
         # check the endpoint for each distro by pulp id ...
         distro_ids = [x['pulp_id'] for x in ds['data']]
         for distro_id in distro_ids:
-            resp = uclient.get(f'_ui/v1/distributions/{distro_id}')
+            resp = uclient.get(f'_ui/v1/distributions/{distro_id}/')
             assert resp.status_code == 200
             _ds = resp.json()
             validate_json(instance=_ds, schema=schema_distro)
@@ -563,7 +563,7 @@ def test_api_ui_v1_me(ansible_config, settings):
     with UIClient(config=cfg) as uclient:
 
         # get the response
-        resp = uclient.get('_ui/v1/me')
+        resp = uclient.get('_ui/v1/me/')
         assert resp.status_code == 200
 
         ds = resp.json()
@@ -627,7 +627,7 @@ def test_api_ui_v1_my_namespaces(ansible_config, galaxy_client):
             assert expected_ns_name in namespace_names
 
         # delete
-        resp = uclient.delete(f'_ui/v1/my-namespaces/{new_namespace}')
+        resp = uclient.delete(f'_ui/v1/my-namespaces/{new_namespace}/')
         assert resp.status_code == 204
 
         # get the response
@@ -729,7 +729,7 @@ def test_api_ui_v1_repo_distro_by_basepath(ansible_config):
         # get each repo by basepath? or is it get a distro by basepath?
         for v in DEFAULT_DISTROS.values():
             bp = v['basepath']
-            resp = uclient.get(f'_ui/v1/repo/{bp}')
+            resp = uclient.get(f'_ui/v1/repo/{bp}/')
             ds = resp.json()
             validate_json(instance=ds, schema=schema_objectlist)
 
@@ -840,27 +840,27 @@ def test_api_ui_v1_tags_collections(ansible_config, upload_artifact):
     with UIClient(config=config) as uclient:
 
         # get the response
-        resp = uclient.get('_ui/v1/tags/collections')
+        resp = uclient.get('_ui/v1/tags/collections/')
         assert resp.status_code == 200
 
         ds = resp.json()
         validate_json(instance=ds, schema=schema_objectlist)
 
-        resp = uclient.get('_ui/v1/tags/collections?name=tools')
+        resp = uclient.get('_ui/v1/tags/collections/?name=tools')
         ds = resp.json()
         assert len(ds["data"]) == 1
 
         # result count should be 2 (mysql, postgresql)
-        resp = uclient.get('_ui/v1/tags/collections?name__icontains=sql')
+        resp = uclient.get('_ui/v1/tags/collections/?name__icontains=sql')
         ds = resp.json()
         assert len(ds["data"]) == 2
 
-        resp = uclient.get('_ui/v1/tags/collections?name=test123')
+        resp = uclient.get('_ui/v1/tags/collections/?name=test123')
         ds = resp.json()
         assert len(ds["data"]) == 0
 
         # verify sort by name is correct
-        resp = uclient.get('_ui/v1/tags/collections?sort=name')
+        resp = uclient.get('_ui/v1/tags/collections/?sort=name')
         tags = [tag["name"] for tag in resp.json()["data"]]
         assert tags == sorted(tags)
 
@@ -900,7 +900,7 @@ def test_api_ui_v1_tags_roles(ansible_config, docker_compose_exec):
     with UIClient(config=config) as uclient:
 
         # get the response
-        resp = uclient.get('_ui/v1/tags/roles')
+        resp = uclient.get('_ui/v1/tags/roles/')
         assert resp.status_code == 200
 
         ds = resp.json()
@@ -912,7 +912,7 @@ def test_api_ui_v1_tags_roles(ansible_config, docker_compose_exec):
         # start the sync
         _sync_role("geerlingguy", "docker")
 
-        resp = uclient.get('_ui/v1/tags/roles')
+        resp = uclient.get('_ui/v1/tags/roles/')
         assert resp.status_code == HTTPStatus.OK
         aggregate_total = sum([x['count'] for x in resp.json()['data']])
         assert aggregate_total == 0
@@ -920,7 +920,7 @@ def test_api_ui_v1_tags_roles(ansible_config, docker_compose_exec):
         # run command to populate role tags table
         _populate_tags_cmd()
 
-        resp = uclient.get('_ui/v1/tags/roles')
+        resp = uclient.get('_ui/v1/tags/roles/')
         assert resp.status_code == HTTPStatus.OK
         aggregate_total = sum([x['count'] for x in resp.json()['data']])
         assert aggregate_total > 0
@@ -932,12 +932,12 @@ def test_api_ui_v1_tags_roles(ansible_config, docker_compose_exec):
         _sync_role("0x28d", "docker_ce")
         _populate_tags_cmd()
 
-        resp = uclient.get('_ui/v1/tags/roles?sort=-count')
+        resp = uclient.get('_ui/v1/tags/roles/?sort=-count')
         assert resp.status_code == HTTPStatus.OK
         assert resp.json()["meta"]["count"] > 0
 
         # test correct count sorting
-        tags = uclient.get('_ui/v1/tags/roles').json()["data"]
+        tags = uclient.get('_ui/v1/tags/roles/').json()["data"]
 
         assert sorted(tags, key=lambda r: r["count"], reverse=True)[:2] == resp.json()["data"][:2]
         assert resp.json()["data"][0]["name"] == "docker"
@@ -1001,7 +1001,7 @@ def test_api_ui_v1_users_by_id(ansible_config):
         group_id = resp.json()["data"][0]["id"]
 
         # get the response
-        resp = uclient.get(f'_ui/v1/users/{id}')
+        resp = uclient.get(f'_ui/v1/users/{id}/')
         assert resp.status_code == 200
 
         ds = resp.json()
