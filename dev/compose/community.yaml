@@ -41,6 +41,10 @@ x-common-env: &common-env
   PULP_CONTENT_ORIGIN: "http://localhost:5001"
   PULP_CSRF_TRUSTED_ORIGINS: "['https://localhost']"
 
+  # import/export
+  PULP_ALLOWED_EXPORT_PATHS: /app/tmp
+  PULP_ALLOWED_IMPORT_PATHS: /app/tmp
+
   # auth ...
   PULP_GALAXY_AUTHENTICATION_CLASSES: "['galaxy_ng.app.auth.session.SessionAuthentication', 'rest_framework.authentication.TokenAuthentication', 'rest_framework.authentication.BasicAuthentication', 'django.contrib.auth.backends.ModelBackend']"
   PULP_GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS: 'true'

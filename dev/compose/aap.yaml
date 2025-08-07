@@ -54,6 +54,10 @@ x-common-env: &common-env
   PULP_PUBLIC_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_public_key.pem'
   PULP_PRIVATE_KEY_PATH: '/src/galaxy_ng/dev/common/container_auth_private_key.pem'
 
+  # import/export
+  PULP_ALLOWED_EXPORT_PATHS: /app/tmp
+  PULP_ALLOWED_IMPORT_PATHS: /app/tmp
+
   # auth ...
   PULP_GALAXY_AUTHENTICATION_CLASSES: "['galaxy_ng.app.auth.session.SessionAuthentication', 'ansible_base.jwt_consumer.hub.auth.HubJWTAuth', 'rest_framework.authentication.TokenAuthentication', 'rest_framework.authentication.BasicAuthentication']"
   PULP_ANSIBLE_BASE_JWT_VALIDATE_CERT: 'false'
