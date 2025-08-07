@@ -38,6 +38,10 @@ x-common-env: &common-env
   PULP_GALAXY_REQUIRE_CONTENT_APPROVAL: 'true'
   PULP_GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
 
+  # import/export
+  PULP_ALLOWED_EXPORT_PATHS: /app/tmp
+  PULP_ALLOWED_IMPORT_PATHS: /app/tmp
+
   # role content workaround ..
   PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW: 'false'
 
