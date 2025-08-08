@@ -7,17 +7,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-01 05:38+0000\n"
+"POT-Creation-Date: 2025-08-01 05:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-
-#: _vendor/automated_logging/templates/dal/admin/view.html:6
-msgid "Back to list"
-msgstr ""
 
 #: app/access_control/access_policy.py:410
 msgid "Namespace in filename not found."
@@ -266,24 +262,33 @@ msgstr "Een groep met de naam %s bestaat al."
 
 #: app/api/ui/v2/serializers.py:146
 #, python-format
-#| msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgid "Team name=%(name)s, id=%(id)s does not exist"
 msgstr ""
 
 #: app/api/ui/v2/serializers.py:150
-#| msgid "Invalid group name or ID"
 msgid "Invalid team name or ID"
 msgstr ""
 
 #: app/api/ui/v2/serializers.py:164
 #, python-format
-#| msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgid "Org name=%(name)s, id=%(id)s does not exist"
 msgstr ""
 
 #: app/api/ui/v2/serializers.py:168
-#| msgid "Invalid group name or ID"
 msgid "Invalid org name or ID"
+msgstr ""
+
+#: app/api/ui/v2/views.py:69
+msgid "Request should be made to '/api/gateway/v1/users/'."
+msgstr ""
+
+#: app/api/ui/v2/views.py:119 app/api/ui/v2/views.py:163
+msgid "Request should be made to '/api/gateway/v1/teams/'."
+msgstr ""
+
+#: app/api/ui/v2/views.py:181
+#| msgid "A local container with this name already exists."
+msgid "A team with this name already exists."
 msgstr ""
 
 #: app/api/utils.py:58
