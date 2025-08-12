@@ -15,8 +15,9 @@ jobs:
       matrix:
         branch:
           - 'main'
-          - 'stable-4.9'
-          - 'stable-4.10'
+          - 'stable-2.4'
+          - 'stable-2.5'
+          - 'stable-2.6'
 
     steps:
       - uses: actions/checkout@v4
