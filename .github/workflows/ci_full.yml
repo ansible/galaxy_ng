@@ -94,14 +94,29 @@ jobs:
           name: coverage
           path: coverage.xml
 
+      - name: 'Extract and export repo owner/name'
+        shell: bash
+        run: |
+          # 1. Read the full slug (owner/repo)
+          REPO_SLUG="${GITHUB_REPOSITORY}"
+          # 2. Split into owner and repo
+          IFS="/" read -r REPO_OWNER REPO_NAME <<< "$REPO_SLUG"
+          # 3. Export to the workflow environment
+          echo "REPO_OWNER=$REPO_OWNER" >> $GITHUB_ENV
+          echo "REPO_NAME=$REPO_NAME"   >> $GITHUB_ENV
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
-        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'main'
+        if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main'
         env:
-          SONAR_TOKEN: ${{ secrets.CICD_ORG_SONAR_TOKEN_CICD_BOT }}
+          SONAR_TOKEN: ${{ secrets.CICD_ORG_SONAR_TOKEN_CICD_BOT || secrets.AAP_ORG_SONAR_TOKEN_ANSIBLE_CICD_BOT }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ env.REPO_OWNER }}_${{ env.REPO_NAME }}
+            -Dsonar.organization=${{ env.REPO_OWNER }}
 
       - name: upload jUnit XML test results
-        if: github.event_name == 'push' && github.repository == 'ansible/galaxy_ng' && github.ref_name == 'main'
+        if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main'
         continue-on-error: true
         run: |
           curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \
