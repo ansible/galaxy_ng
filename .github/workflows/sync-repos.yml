@@ -1,9 +1,9 @@
 name: Sync to Ansible Galaxy NG
 
 on:
-#   push:
-#     branches:
-#       - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       source_branch:
@@ -22,17 +22,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.source_branch || 'main' }}
-          token: ${{ secrets.ROCHACBRUNO_TOKEN }}
-          fetch-depth: 0
-
       - name: Force push to Ansible repository
         run: |
           SOURCE_BRANCH="${{ github.event.inputs.source_branch || 'main' }}"
           TARGET_BRANCH="${{ github.event.inputs.target_branch || 'main' }}"
-          git config --global user.name "Bruno Rocha"
-          git config --global user.email "rochacbruno@gmail.com"
-          git push https://rochacbruno:${{ secrets.ROCHACBRUNO_TOKEN }}@github.com/ansible/galaxy_ng.git ${SOURCE_BRANCH}:${TARGET_BRANCH} --force
+
+          export GH_TOKEN=${{ secrets.AAP_ORG_FG_SCHMIDTD_RW_ACTIONS }}
+          gh repo clone ansible-automation-platform/galaxy_ng
+          cd galaxy_ng
+          git checkout $SOURCE_BRANCH
+          git status
+
+          git push https://${{ secrets.FAO_TOKEN }}@github.com/ansible/galaxy_ng.git ${SOURCE_BRANCH}:${TARGET_BRANCH} --force
