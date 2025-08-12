@@ -20,14 +20,15 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.source_branch || 'main' }}
+          token: ${{ secrets.ROCHACBRUNO_TOKEN }}
           fetch-depth: 0
-          
+
       - name: Force push to Ansible repository
         run: |
           SOURCE_BRANCH="${{ github.event.inputs.source_branch || 'main' }}"
