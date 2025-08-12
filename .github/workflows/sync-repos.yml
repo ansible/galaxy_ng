@@ -1,0 +1,37 @@
+name: Sync to Ansible Galaxy NG
+
+on:
+#   push:
+#     branches:
+#       - main
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source branch to sync from'
+        required: false
+        default: 'main'
+        type: string
+      target_branch:
+        description: 'Target branch to sync to'
+        required: false
+        default: 'main'
+        type: string
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.source_branch || 'main' }}
+          fetch-depth: 0
+          
+      - name: Force push to Ansible repository
+        run: |
+          SOURCE_BRANCH="${{ github.event.inputs.source_branch || 'main' }}"
+          TARGET_BRANCH="${{ github.event.inputs.target_branch || 'main' }}"
+          git config --global user.name "Bruno Rocha"
+          git config --global user.email "rochacbruno@gmail.com"
+          git push https://rochacbruno:${{ secrets.ROCHACBRUNO_TOKEN }}@github.com/ansible/galaxy_ng.git ${SOURCE_BRANCH}:${TARGET_BRANCH} --force
