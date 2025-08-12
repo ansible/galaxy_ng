@@ -3,10 +3,13 @@
 # called by .github/workflows/labeler.yml
 
 backport-2.4:
-- galaxy_ng/app/**/*
+- changed-files:
+  - any-glob-to-any-file: 'galaxy_ng/app/**/*'
 
 backport-2.5:
-- galaxy_ng/app/**/*
+- changed-files:
+  - any-glob-to-any-file: 'galaxy_ng/app/**/*'
 
 backport-2.6:
-- galaxy_ng/app/**/*
+- changed-files:
+  - any-glob-to-any-file: 'galaxy_ng/app/**/*'
