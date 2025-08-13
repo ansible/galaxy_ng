@@ -10,6 +10,10 @@ on:
       - completed
 jobs:
   sonar:
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
     name: Upload to SonarCloud
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
