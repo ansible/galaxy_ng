@@ -20,7 +20,7 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
-
+    if: contains(github.repository, 'ansible-automation-platform')
     steps:
       - name: Force push to Ansible repository
         run: |
