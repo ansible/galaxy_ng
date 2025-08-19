@@ -440,9 +440,8 @@ ANSIBLE_BASE_MANAGED_ROLE_REGISTRY = {
     'sys_auditor': {'shortname': 'sys_auditor'},
     'team_member': {},
     'team_admin': {},
-    # TODO(jctanner): add organization to the registry later
-    # 'org_admin': {},
-    # 'org_member': {},
+    'org_admin': {},
+    'org_member': {},
 }
 
 # WARNING: This setting is used in database migrations to create a default organization.
