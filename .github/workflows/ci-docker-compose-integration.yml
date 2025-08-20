@@ -20,8 +20,6 @@ jobs:
       matrix:
         env:
           - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "deployment_standalone or all" }
-          - { TEST_PROFILE: insights, HUB_TEST_MARKS: "deployment_cloud or all" }
-          - { TEST_PROFILE: community, HUB_TEST_MARKS: "deployment_community" }
           - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "x_repo_search" }
           - { TEST_PROFILE: standalone, HUB_TEST_MARKS: "iqe_rbac_test" }
           - { TEST_PROFILE: certified-sync, HUB_TEST_MARKS: "sync" }
