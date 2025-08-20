@@ -8,6 +8,9 @@ on:
 
 jobs:
   labels:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
     - name: 'Set $LABEL from branch name'
