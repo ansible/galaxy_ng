@@ -494,6 +494,8 @@ def copy_dab_user_role_assignment(sender, instance, created, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
+        if instance.role_definition.name in ('Organization Admin', 'Organization Member'):
+            return  # exception to not synchronize these roles to any old roles
         if instance.role_definition.name == SHARED_TEAM_ROLE and \
                 isinstance(instance, RoleUserAssignment):
             instance.content_object.group.user_set.add(instance.user)
@@ -507,6 +509,8 @@ def delete_dab_user_role_assignment(sender, instance, **kwargs):
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
+        if instance.role_definition.name in ('Organization Admin', 'Organization Member'):
+            return  # exception to not synchronize these roles to any old roles
         if instance.role_definition.name == SHARED_TEAM_ROLE and \
                 isinstance(instance, RoleUserAssignment) and \
                 instance.content_object:
