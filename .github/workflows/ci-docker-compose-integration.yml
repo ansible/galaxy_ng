@@ -5,7 +5,7 @@ on:
     branches:
       - '**'
   push:
-    branches:
+    tags:
       - '**'
   workflow_dispatch:
 
