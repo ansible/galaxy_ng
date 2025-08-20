@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - '**'
-  push:
-    branches:
-      - '**'
   schedule:
     # * is a special character in YAML so you have to quote this string
     # runs at 3:00 UTC daily
