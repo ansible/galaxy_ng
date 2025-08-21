@@ -444,6 +444,21 @@ ANSIBLE_BASE_MANAGED_ROLE_REGISTRY = {
     'org_member': {},
 }
 
+# The actual model registrations for RBAC
+ANSIBLE_BASE_RBAC_MODEL_REGISTRY = {
+    'galaxy.namespace': {'parent_field_name': None},
+    'core.task': {'parent_field_name': None},
+    'ansible.collection': {'parent_field_name': None},
+    'ansible.ansiblerepository': {'parent_field_name': None},
+    'galaxy.team': {'parent_field_name': 'organization'},
+    'container.containerrepository': {'parent_field_name': None},
+    'ansible.collectionremote': {'parent_field_name': None},
+    'galaxy.organization': {'parent_field_name': None},
+    'galaxy.collectionimport': {'parent_field_name': 'namespace'},
+    'galaxy.containerregistryremote': {'parent_field_name': None},
+    'container.containernamespace': {'parent_field_name': None}
+}
+
 # WARNING: This setting is used in database migrations to create a default organization.
 DEFAULT_ORGANIZATION_NAME = "Default"
 
