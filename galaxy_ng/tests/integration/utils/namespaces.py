@@ -6,7 +6,7 @@ import string
 
 from galaxykit.utils import GalaxyClientError
 
-from .collections import delete_all_collections_in_namespace, \
+from .collection_utils import delete_all_collections_in_namespace, \
     delete_all_collections_in_namespace_gk
 
 logger = logging.getLogger(__name__)

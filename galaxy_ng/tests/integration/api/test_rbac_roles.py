@@ -42,7 +42,7 @@ from .rbac_actions.auth import (
     change_role,
 )
 from .rbac_actions.misc import view_tasks
-from .rbac_actions.collections import (
+from .rbac_actions.collection_rbac import (
     create_collection_namespace,
     change_collection_namespace,
     delete_collection_namespace,

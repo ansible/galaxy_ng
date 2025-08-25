@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 def run():  # pragma: no cover
     """Start DAB Resource Sync"""
-    if not settings.get("RESOURCE_SERVER"):
+    if not getattr(settings, "RESOURCE_SERVER", None):
         logger.debug(
             "Skipping periodic resource_sync, RESOURCE_SERVER not configured"
         )

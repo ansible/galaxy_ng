@@ -170,17 +170,17 @@ BASE_SETTINGS = {
                 "ANSIBLE_AUTHENTICATION_CLASSES": [
                     "galaxy_ng.app.auth.session.SessionAuthentication",
                     "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-                    "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+                    "galaxy_ng.app.auth.token_auth.ExpiringTokenAuthentication",
                 ],
                 "GALAXY_AUTHENTICATION_CLASSES": [
                     "galaxy_ng.app.auth.session.SessionAuthentication",
                     "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-                    "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+                    "galaxy_ng.app.auth.token_auth.ExpiringTokenAuthentication",
                 ],
                 "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES": [
                     "galaxy_ng.app.auth.session.SessionAuthentication",
                     "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-                    "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+                    "galaxy_ng.app.auth.token_auth.ExpiringTokenAuthentication",
                 ],
             },
         ),
@@ -251,7 +251,7 @@ BASE_SETTINGS = {
                 "ANSIBLE_AUTHENTICATION_CLASSES": [
                     "galaxy_ng.app.auth.session.SessionAuthentication",
                     "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-                    "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+                    "galaxy_ng.app.auth.token_auth.ExpiringTokenAuthentication",
                     "ansible_base.jwt_consumer.hub.auth.HubJWTAuth",
                     "rest_framework.authentication.TokenAuthentication",
                     "rest_framework.authentication.BasicAuthentication",
@@ -259,7 +259,7 @@ BASE_SETTINGS = {
                 "GALAXY_AUTHENTICATION_CLASSES": [
                     "galaxy_ng.app.auth.session.SessionAuthentication",
                     "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-                    "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+                    "galaxy_ng.app.auth.token_auth.ExpiringTokenAuthentication",
                     "ansible_base.jwt_consumer.hub.auth.HubJWTAuth",
                     "rest_framework.authentication.TokenAuthentication",
                     "rest_framework.authentication.BasicAuthentication",
@@ -267,7 +267,7 @@ BASE_SETTINGS = {
                 "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES": [
                     "galaxy_ng.app.auth.session.SessionAuthentication",
                     "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
-                    "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+                    "galaxy_ng.app.auth.token_auth.ExpiringTokenAuthentication",
                     "ansible_base.jwt_consumer.hub.auth.HubJWTAuth",
                     "rest_framework.authentication.TokenAuthentication",
                     "rest_framework.authentication.BasicAuthentication",

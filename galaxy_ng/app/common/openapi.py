@@ -42,8 +42,12 @@ class AllowCorsMiddleware:
         # the view (and later middleware) are called.
 
         response = self.get_response(request)
-        response["Access-Control-Allow-Origin"] = settings.get("GALAXY_CORS_ALLOWED_ORIGINS", "")
-        response["Access-Control-Allow-Headers"] = settings.get("GALAXY_CORS_ALLOWED_HEADERS", "")
+        response["Access-Control-Allow-Origin"] = getattr(
+            settings, "GALAXY_CORS_ALLOWED_ORIGINS", ""
+        )
+        response["Access-Control-Allow-Headers"] = getattr(
+            settings, "GALAXY_CORS_ALLOWED_HEADERS", ""
+        )
 
         # Code to be executed for each request/response after
         # the view is called.

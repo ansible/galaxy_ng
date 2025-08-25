@@ -5,7 +5,7 @@ from .client_ansible_galaxy_cli import ansible_galaxy
 from .client_social_github import SocialGithubClient
 from .client_ui import UIClient
 from .collection_inspector import CollectionInspector
-from .collections import (
+from .collection_utils import (
     build_collection,
     copy_collection_version,
     delete_all_collections,

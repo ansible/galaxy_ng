@@ -439,7 +439,7 @@ def configure_authentication_classes(settings: Dynaconf, data: dict[str, Any]) -
     if data.get('GALAXY_AUTH_KEYCLOAK_ENABLED') is True:
         for class_name in [
             # "galaxy_ng.app.auth.session.SessionAuthentication",
-            "galaxy_ng.app.auth.token.ExpiringTokenAuthentication",
+            "galaxy_ng.app.auth.token_auth.ExpiringTokenAuthentication",
             "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
         ]:
             if class_name not in galaxy_auth_classes:

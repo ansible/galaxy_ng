@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 from rest_framework import exceptions
 
-from galaxy_ng.app.auth.token import ExpiringTokenAuthentication
+from galaxy_ng.app.auth.token_auth import ExpiringTokenAuthentication
 
 
 class TestExpiringTokenAuthentication(TestCase):
@@ -12,7 +12,7 @@ class TestExpiringTokenAuthentication(TestCase):
     def setUp(self):
         self.auth = ExpiringTokenAuthentication()
 
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_invalid_token(self, mock_token):
         # Create a proper exception class for DoesNotExist
         mock_token.DoesNotExist = Exception
@@ -24,7 +24,7 @@ class TestExpiringTokenAuthentication(TestCase):
         assert str(cm.exception) == 'Invalid token'
         mock_token.objects.get.assert_called_once_with(key='invalid_key')
 
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_inactive_user(self, mock_token):
         mock_user = Mock()
         mock_user.is_active = False
@@ -37,7 +37,7 @@ class TestExpiringTokenAuthentication(TestCase):
 
         assert str(cm.exception) == 'User inactive or deleted'
 
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_active_user_no_social_auth(self, mock_token):
         mock_user = Mock()
         mock_user.is_active = True
@@ -50,9 +50,9 @@ class TestExpiringTokenAuthentication(TestCase):
 
         assert result == (mock_user, mock_token_obj)
 
-    @patch('galaxy_ng.app.auth.token.timezone')
-    @patch('galaxy_ng.app.auth.token.settings')
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.timezone')
+    @patch('galaxy_ng.app.auth.token_auth.settings')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_social_auth_user_no_keycloak(
         self, mock_token, mock_settings, mock_timezone
     ):
@@ -71,9 +71,9 @@ class TestExpiringTokenAuthentication(TestCase):
         assert result == (mock_user, mock_token_obj)
         mock_user.social_auth.get.assert_called_once_with(provider="keycloak")
 
-    @patch('galaxy_ng.app.auth.token.timezone')
-    @patch('galaxy_ng.app.auth.token.settings')
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.timezone')
+    @patch('galaxy_ng.app.auth.token_auth.settings')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_keycloak_user_token_not_expired(
         self, mock_token, mock_settings, mock_timezone
     ):
@@ -94,9 +94,9 @@ class TestExpiringTokenAuthentication(TestCase):
 
         assert result == (mock_user, mock_token_obj)
 
-    @patch('galaxy_ng.app.auth.token.timezone')
-    @patch('galaxy_ng.app.auth.token.settings')
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.timezone')
+    @patch('galaxy_ng.app.auth.token_auth.settings')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_keycloak_user_token_expired(
         self, mock_token, mock_settings, mock_timezone
     ):
@@ -118,9 +118,9 @@ class TestExpiringTokenAuthentication(TestCase):
 
         assert str(cm.exception) == 'Token has expired'
 
-    @patch('galaxy_ng.app.auth.token.timezone')
-    @patch('galaxy_ng.app.auth.token.settings')
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.timezone')
+    @patch('galaxy_ng.app.auth.token_auth.settings')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_keycloak_user_invalid_expiration_setting(
         self, mock_token, mock_settings, mock_timezone
     ):
@@ -142,9 +142,9 @@ class TestExpiringTokenAuthentication(TestCase):
 
         assert result == (mock_user, mock_token_obj)
 
-    @patch('galaxy_ng.app.auth.token.timezone')
-    @patch('galaxy_ng.app.auth.token.settings')
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.timezone')
+    @patch('galaxy_ng.app.auth.token_auth.settings')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_keycloak_user_none_expiration_setting(
         self, mock_token, mock_settings, mock_timezone
     ):
@@ -166,9 +166,9 @@ class TestExpiringTokenAuthentication(TestCase):
 
         assert result == (mock_user, mock_token_obj)
 
-    @patch('galaxy_ng.app.auth.token.timezone')
-    @patch('galaxy_ng.app.auth.token.settings')
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.timezone')
+    @patch('galaxy_ng.app.auth.token_auth.settings')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_keycloak_user_zero_expiration(
         self, mock_token, mock_settings, mock_timezone
     ):
@@ -190,9 +190,9 @@ class TestExpiringTokenAuthentication(TestCase):
 
         assert str(cm.exception) == 'Token has expired'
 
-    @patch('galaxy_ng.app.auth.token.timezone')
-    @patch('galaxy_ng.app.auth.token.settings')
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.timezone')
+    @patch('galaxy_ng.app.auth.token_auth.settings')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_keycloak_user_exact_expiration_time(
         self, mock_token, mock_settings, mock_timezone
     ):
@@ -214,9 +214,9 @@ class TestExpiringTokenAuthentication(TestCase):
 
         assert result == (mock_user, mock_token_obj)
 
-    @patch('galaxy_ng.app.auth.token.timezone')
-    @patch('galaxy_ng.app.auth.token.settings')
-    @patch('galaxy_ng.app.auth.token.Token')
+    @patch('galaxy_ng.app.auth.token_auth.timezone')
+    @patch('galaxy_ng.app.auth.token_auth.settings')
+    @patch('galaxy_ng.app.auth.token_auth.Token')
     def test_authenticate_credentials_keycloak_user_future_created_time(
         self, mock_token, mock_settings, mock_timezone
     ):
