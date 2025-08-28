@@ -10,16 +10,29 @@ def mock_django_imports():
         "sys.modules",
         {
             "django.db.models": Mock(),
-            "django.db.models.signals": Mock(),
+            "django.db.models.signals": Mock(
+                post_save=Mock(), post_delete=Mock(), m2m_changed=Mock()
+            ),
             "django.contrib.auth.models": Mock(),
             "django.contrib.contenttypes.models": Mock(),
+            "django.dispatch": Mock(receiver=lambda *args, **kwargs: lambda func: func),
+            "django.db.models.functions": Mock(),
+            "django.conf": Mock(),
+            "django.conf.locale": Mock(),
+            "django.apps": Mock(),
+            "django.urls.exceptions": Mock(),
             "rest_framework.exceptions": Mock(),
             "pulp_ansible.app.models": Mock(),
             "pulpcore.plugin.models": Mock(),
+            "pulpcore.plugin.models.role": Mock(),
             "pulpcore.plugin.util": Mock(),
             "ansible_base.rbac.models": Mock(),
             "ansible_base.rbac.validators": Mock(),
             "ansible_base.rbac": Mock(),
+            "ansible_base.rbac.triggers": Mock(),
+            "ansible_base.resource_registry.signals.handlers": Mock(),
+            "galaxy_ng.app.models": Mock(),
+            "galaxy_ng.app.migrations._dab_rbac": Mock(),
         },
     ):
         yield
@@ -214,25 +227,186 @@ class TestRoleDefinitionSignals:
     @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
     @patch("galaxy_ng.app.signals.handlers.RoleDefinition")
     @patch("galaxy_ng.app.signals.handlers.pulp_role_to_single_content_type_or_none")
-    def test_copy_role_to_role_definition(
-        self, mock_content_type_func, mock_roledef_model, mock_signal_check
+    @patch("galaxy_ng.app.signals.handlers.logger")
+    def test_copy_role_to_role_definition_create_new(
+        self, mock_logger, mock_content_type_func, mock_roledef_model, mock_signal_check
     ):
-        """Test copying Pulp Role to DAB RoleDefinition."""
+        """Test copying Pulp Role to DAB RoleDefinition when creating new."""
         from galaxy_ng.app.signals.handlers import copy_role_to_role_definition
 
         mock_signal_check.return_value = False
-        mock_content_type_func.return_value = Mock()
+        mock_content_type = Mock()
+        mock_content_type_func.return_value = mock_content_type
 
         mock_instance = Mock()
         mock_instance.name = "test.role"
         mock_instance.locked = True
         mock_instance.description = "Test Role"
 
-        mock_roledef_model.objects.filter.return_value.first.return_value = None
+        mock_rd = Mock()
+        mock_roledef_model.objects.get_or_create.return_value = (mock_rd, True)
 
         copy_role_to_role_definition(sender=Mock(), instance=mock_instance, created=True)
 
-        mock_roledef_model.objects.create.assert_called_once()
+        mock_roledef_model.objects.get_or_create.assert_called_once_with(
+            name="test.role",
+            defaults={
+                'managed': True,
+                'content_type': mock_content_type,
+                'description': "Test Role",
+            }
+        )
+        mock_logger.info.assert_called_once_with(
+            f'CREATE ROLEDEF name:test.role managed:True ctype:{mock_content_type}'
+        )
+
+    def test_copy_role_to_role_definition_update_existing(self):
+        """Test updating existing RoleDefinition when values have changed."""
+        from galaxy_ng.app.signals.handlers import copy_role_to_role_definition
+
+        with (
+            patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress") as mock_signal_check,
+            patch("galaxy_ng.app.signals.handlers.RoleDefinition") as mock_roledef_model,
+            patch(
+                "galaxy_ng.app.signals.handlers.pulp_role_to_single_content_type_or_none"
+            ) as mock_content_type_func,
+            patch("galaxy_ng.app.signals.handlers.logger") as mock_logger,
+            patch("galaxy_ng.app.signals.handlers.pulp_rbac_signals") as mock_pulp_signals,
+        ):
+
+            mock_signal_check.return_value = False
+            mock_content_type = Mock()
+            mock_content_type_func.return_value = mock_content_type
+            mock_pulp_signals.return_value.__enter__ = Mock()
+            mock_pulp_signals.return_value.__exit__ = Mock()
+
+            mock_instance = Mock()
+            mock_instance.name = "test.role"
+            mock_instance.locked = False
+            mock_instance.description = "Updated Description"
+
+            mock_rd = Mock()
+            mock_rd.managed = True  # Different from instance.locked
+            mock_rd.content_type = None  # Different from mock_content_type
+            mock_rd.description = "Old Description"  # Different from instance.description
+            mock_roledef_model.objects.get_or_create.return_value = (mock_rd, False)
+
+            with patch("galaxy_ng.app.signals.handlers.isinstance") as mock_isinstance:
+                # Make isinstance(mock_content_type, DABContentType) return True
+                original_isinstance = isinstance
+
+                def isinstance_side_effect(obj, cls):
+                    if (
+                        obj is mock_content_type
+                        and hasattr(cls, '__name__')
+                        and cls.__name__ == "DABContentType"
+                    ):
+                        return True
+                    # Handle mock objects as classes
+                    try:
+                        return original_isinstance(obj, cls)
+                    except TypeError:
+                        # If cls is a mock, just return False
+                        return False
+                mock_isinstance.side_effect = isinstance_side_effect
+                copy_role_to_role_definition(sender=Mock(), instance=mock_instance, created=True)
+
+            mock_roledef_model.objects.get_or_create.assert_called_once_with(
+                name="test.role",
+                defaults={
+                    'managed': False,
+                    'content_type': mock_content_type,
+                    'description': "Updated Description",
+                }
+            )
+
+            # Check that fields were updated
+            assert mock_rd.managed is False
+            assert mock_rd.content_type == mock_content_type
+            assert mock_rd.description == "Updated Description"
+
+            mock_rd.save.assert_called_once_with(
+                update_fields=['managed', 'content_type', 'description']
+            )
+            mock_logger.info.assert_called_once_with(
+                "UPDATE ROLEDEF name:test.role fields:['managed', 'content_type', 'description']"
+            )
+
+    @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
+    @patch("galaxy_ng.app.signals.handlers.RoleDefinition")
+    @patch("galaxy_ng.app.signals.handlers.pulp_role_to_single_content_type_or_none")
+    @patch("galaxy_ng.app.signals.handlers.logger")
+    def test_copy_role_to_role_definition_no_updates_needed(
+        self, mock_logger, mock_content_type_func, mock_roledef_model, mock_signal_check
+    ):
+        """Test that no updates are made when existing RoleDefinition is up to date."""
+        from galaxy_ng.app.signals.handlers import copy_role_to_role_definition
+
+        mock_signal_check.return_value = False
+        mock_content_type = Mock()
+        mock_content_type_func.return_value = mock_content_type
+
+        mock_instance = Mock()
+        mock_instance.name = "test.role"
+        mock_instance.locked = True
+        mock_instance.description = "Test Description"
+
+        mock_rd = Mock()
+        mock_rd.managed = True  # Same as instance.locked
+        mock_rd.content_type = mock_content_type  # Same as computed content_type
+        mock_rd.description = "Test Description"  # Same as instance.description
+        mock_roledef_model.objects.get_or_create.return_value = (mock_rd, False)
+
+        copy_role_to_role_definition(sender=Mock(), instance=mock_instance, created=True)
+
+        mock_roledef_model.objects.get_or_create.assert_called_once_with(
+            name="test.role",
+            defaults={
+                'managed': True,
+                'content_type': mock_content_type,
+                'description': "Test Description",
+            }
+        )
+
+        # No save should be called since no fields changed
+        mock_rd.save.assert_not_called()
+        # Only get_or_create call, no update log
+        mock_logger.info.assert_not_called()
+
+    @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
+    @patch("galaxy_ng.app.signals.handlers.RoleDefinition")
+    @patch("galaxy_ng.app.signals.handlers.pulp_role_to_single_content_type_or_none")
+    def test_copy_role_to_role_definition_with_pulp_mapping(
+        self, mock_content_type_func, mock_roledef_model, mock_signal_check
+    ):
+        """Test that PULP_TO_ROLEDEF mapping is applied correctly."""
+        from galaxy_ng.app.signals.handlers import copy_role_to_role_definition
+
+        mock_signal_check.return_value = False
+        mock_content_type = Mock()
+        mock_content_type_func.return_value = mock_content_type
+
+        mock_instance = Mock()
+        mock_instance.name = "core.some_mapped_role"
+        mock_instance.locked = True
+        mock_instance.description = "Mapped Role"
+
+        mock_rd = Mock()
+        mock_roledef_model.objects.get_or_create.return_value = (mock_rd, True)
+
+        # Mock the PULP_TO_ROLEDEF mapping
+        mapping = {"core.some_mapped_role": "mapped_role"}
+        with patch("galaxy_ng.app.signals.handlers.PULP_TO_ROLEDEF", mapping):
+            copy_role_to_role_definition(sender=Mock(), instance=mock_instance, created=True)
+
+        mock_roledef_model.objects.get_or_create.assert_called_once_with(
+            name="mapped_role",  # Should use mapped name, not original
+            defaults={
+                'managed': True,
+                'content_type': mock_content_type,
+                'description': "Mapped Role",
+            }
+        )
 
     def test_constants_and_mappings(self):
         """Test that constants and role mappings are defined correctly."""

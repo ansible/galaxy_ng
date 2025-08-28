@@ -30,6 +30,7 @@ from pulpcore.plugin.models import ContentRedirectContentGuard
 
 from ansible_base.rbac.validators import validate_permissions_for_model
 from ansible_base.rbac.models import (
+    DABContentType,
     RoleDefinition,
     RoleUserAssignment,
     RoleTeamAssignment,
@@ -221,20 +222,38 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
         return
     with pulp_rbac_signals():
         roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
-        rd = RoleDefinition.objects.filter(name=roledef_name).first()
-        if not rd:
-            content_type = pulp_role_to_single_content_type_or_none(instance)
+        content_type = pulp_role_to_single_content_type_or_none(instance)
+        rd, rd_created = RoleDefinition.objects.get_or_create(
+            name=roledef_name,
+            defaults={
+                'managed': instance.locked,
+                'content_type': content_type,
+                'description': instance.description or instance.name,
+            }
+        )
+        if rd_created:
             logger.info(
                 f'CREATE ROLEDEF name:{roledef_name}'
                 + f' managed:{instance.locked} ctype:{content_type}'
             )
-            RoleDefinition.objects.create(
-                name=roledef_name,
-                managed=instance.locked,
-                content_type=content_type,
-                description=instance.description or instance.name,
-            )
-        # TODO(jctanner): other fields? like description
+        else:
+            # Update existing RoleDefinition if values have changed
+            updated_fields = []
+            if rd.managed != instance.locked:
+                rd.managed = instance.locked
+                updated_fields.append('managed')
+            if rd.content_type != content_type and isinstance(content_type, DABContentType):
+                rd.content_type = content_type
+                updated_fields.append('content_type')
+            if rd.description != (instance.description or instance.name):
+                rd.description = instance.description or instance.name
+                updated_fields.append('description')
+
+            if updated_fields:
+                rd.save(update_fields=updated_fields)
+                logger.info(
+                    f'UPDATE ROLEDEF name:{roledef_name} fields:{updated_fields}'
+                )
 
 
 @receiver(post_delete, sender=Role)
