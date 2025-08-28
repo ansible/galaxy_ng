@@ -9,7 +9,7 @@ readonly GUNICORN_WORKERS="${GUNICORN_WORKERS:-4}"
 readonly GUNICORN_LOGGER_CLASS="${GUNICORN_LOGGER_CLASS:-}"
 readonly GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-60}"
 
-readonly BIND_HOST='0.0.0.0'
+readonly BIND_HOST='[::]'
 readonly BIND_PORT=${GUNICORN_PORT:-24817}
 readonly APP_MODULE='pulpcore.app.wsgi:application'
 
