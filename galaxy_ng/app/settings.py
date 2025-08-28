@@ -437,7 +437,6 @@ ALLOW_LOCAL_ASSIGNING_JWT_ROLES = False
 # Set up managed role definitions
 ANSIBLE_BASE_MANAGED_ROLE_REGISTRY = {
     'platform_auditor': {'name': 'Platform Auditor', 'shortname': 'sys_auditor'},
-    'sys_auditor': {'shortname': 'sys_auditor'},
     'team_member': {},
     'team_admin': {},
     'org_admin': {},
