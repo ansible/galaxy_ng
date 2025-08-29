@@ -9,6 +9,7 @@ import os
 import pytest
 import subprocess
 import tempfile
+import requests
 
 from openapi_spec_validator import validate_spec
 
@@ -141,3 +142,48 @@ def test_openapi_bindings_generation(ansible_config, galaxy_client):
             else:
                 raise e
         assert os.path.exists(os.path.join(generator_checkout, 'galaxy_ng-client'))
+
+
+@pytest.mark.deployment_standalone
+@pytest.mark.openapi
+@pytest.mark.all
+@pytest.mark.parametrize("endpoint", [
+    # galaxy_ng endpoints
+    "v3/openapi.json",
+    "v3/openapi.yaml",
+    "v3/redoc/",
+    "v3/swagger-ui/",
+
+    # pulp endpoints
+    "pulp/api/v3/docs/api.json",
+    "pulp/api/v3/docs/api.yaml",
+    "pulp/api/v3/docs/",
+    "pulp/api/v3/swagger/",
+])
+def test_openapi_authentication(ansible_config, endpoint, settings):
+    """Verify galaxy and pulp openapi specs are gated behind authentication
+    and a variable setting GALAXY_API_SPEC_REQUIRE_AUTHENTICATION"""
+    admin_config = ansible_config("admin")
+    api_root = admin_config.get("url")
+
+    endpoint_path = api_root + endpoint
+
+    # anonymous user
+    resp = requests.get(
+        endpoint_path,
+        auth=None,
+    )
+
+    if settings.get("GALAXY_API_SPEC_REQUIRE_AUTHENTICATION"):
+        assert resp.status_code == 401
+        assert "Authentication credentials were not provided." in str(resp.content) \
+            or "401 Unauthorized" in str(resp.content)
+    else:
+        assert resp.status_code == 200
+
+    # authenticated user
+    resp = requests.get(
+        endpoint_path,
+        auth=(admin_config.get("username"), admin_config.get("password"))
+    )
+    assert resp.status_code == 200
