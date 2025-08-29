@@ -76,6 +76,9 @@ x-common-env: &common-env
   # PULP_RESOURCE_SERVER__SECRET_KEY='?'
   # PULP_RESOURCE_SERVER__VALIDATE_HTTPS='false'
 
+  # When enabled, restricts access to OpenAPI spec, Swagger UI and redoc docs
+  PULP_GALAXY_API_SPEC_REQUIRE_AUTHENTICATION: 'false'
+
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
 

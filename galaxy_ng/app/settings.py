@@ -186,6 +186,9 @@ REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = [
 # set to 'insights' for cloud.redhat.com deployments
 GALAXY_DEPLOYMENT_MODE = 'standalone'
 
+# When enabled, restricts access to OpenAPI spec, Swagger UI and redoc docs
+GALAXY_API_SPEC_REQUIRE_AUTHENTICATION = False
+
 # Dictionary with True|False values for the application to turn on/off features
 GALAXY_FEATURE_FLAGS = {
     'display_repositories': True,

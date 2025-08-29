@@ -7,13 +7,6 @@ from . import views
 from galaxy_ng.app.api import urls as api_urls
 from galaxy_ng.ui import urls as ui_urls
 
-from drf_spectacular.views import (
-    SpectacularJSONAPIView,
-    SpectacularYAMLAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
-
 from ansible_base.resource_registry.urls import (
     urlpatterns as resource_api_urls,
 )
@@ -32,22 +25,22 @@ urlpatterns = [
     path("", include("django_prometheus.urls")),
     path(
         f"{API_PATH_PREFIX}/v3/openapi.json",
-        SpectacularJSONAPIView.as_view(),
+        views.ProtectedSpectacularJSONAPIView.as_view(),
         name="schema",
     ),
     path(
         f"{API_PATH_PREFIX}/v3/openapi.yaml",
-        SpectacularYAMLAPIView.as_view(),
+        views.ProtectedSpectacularYAMLAPIView.as_view(),
         name="schema-yaml",
     ),
     path(
         f"{API_PATH_PREFIX}/v3/redoc/",
-        SpectacularRedocView.as_view(),
+        views.ProtectedSpectacularRedocView.as_view(),
         name="schema-redoc",
     ),
     path(
         f"{API_PATH_PREFIX}/v3/swagger-ui/",
-        SpectacularSwaggerView.as_view(url_name="schema"),
+        views.ProtectedSpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
     path("healthz", views.health_view),
