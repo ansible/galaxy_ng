@@ -20,7 +20,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
           fetch-depth: 0  # include all history
@@ -39,7 +39,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
           fetch-depth: 0  # include all history
@@ -65,7 +65,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 

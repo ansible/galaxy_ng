@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout galaxy_ng
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup python
         uses: actions/setup-python@v5
@@ -37,7 +37,7 @@ jobs:
         run: pip3 install ansible
 
       - name: Checkout the ansible_hub collection
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ansible-collections/ansible_hub
           path: ansible_hub
