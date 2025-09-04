@@ -1,16 +1,18 @@
 _LOCKED_ROLES = {
-    # Manage all content types.
     "galaxy.content_admin": {
+        "description": "Manage all content types.",
         "permissions": {},
         "inherit_from": ["galaxy.collection_admin", "galaxy.execution_environment_admin"],
     },
 
     # COLLECTIONS
 
-    # Create, delete and change collection namespaces.
-    # Upload and delete collections. Sync collections from remotes.
-    # Approve and reject collections.
     "galaxy.collection_admin": {
+        "description": (
+            "Create, delete and change collection namespaces. "
+            "Upload and delete collections. Sync collections from remotes. "
+            "Approve and reject collections."
+        ),
         "permissions": {
             "ansible.delete_collection",
             "ansible.repair_ansiblerepository",
@@ -18,20 +20,20 @@ _LOCKED_ROLES = {
         },
         "inherit_from": ["galaxy.collection_publisher", "galaxy.collection_curator"],
     },
-    # Upload and modify collections.
     "galaxy.collection_publisher": {
+        "description": "Upload and modify collections.",
         "permissions": {
             "galaxy.add_namespace",
         },
         "inherit_from": ["galaxy.collection_namespace_owner"],
     },
-    # Approve, reject and sync collections from remotes.
     "galaxy.collection_curator": {
+        "description": "Approve, reject and sync collections from remotes.",
         "permissions": {},
         "inherit_from": ["galaxy.ansible_repository_owner", "galaxy.collection_remote_owner"],
     },
-    # Create and managing collection remotes
     "galaxy.collection_remote_owner": {
+        "description": "Create and manage collection remotes.",
         "permissions": {
             "ansible.view_collectionremote",
             "ansible.add_collectionremote",
@@ -41,8 +43,8 @@ _LOCKED_ROLES = {
         },
         "inherit_from": []
     },
-    # Manager ansible collection repositories
     "galaxy.ansible_repository_owner": {
+        "description": "Manage ansible collection repositories.",
         "permissions": {
             "ansible.modify_ansible_repo_content",
             "ansible.view_ansiblerepository",
@@ -55,8 +57,8 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
-    # Change and upload collections to namespaces.
     "galaxy.collection_namespace_owner": {
+        "description": "Change and upload collections to namespaces.",
         "permissions": {
             "galaxy.change_namespace",
             "galaxy.upload_to_namespace",
@@ -66,9 +68,11 @@ _LOCKED_ROLES = {
 
     # EXECUTION ENVIRONMENTS
 
-    # Push, delete and change execution environments.
-    # Create, delete and change remote registries.
     "galaxy.execution_environment_admin": {
+        "description": (
+            "Push, delete and change execution environments. "
+            "Create, delete and change remote registries."
+        ),
         "permissions": {
             "container.delete_containerrepository",
             "galaxy.add_containerregistryremote",
@@ -78,15 +82,17 @@ _LOCKED_ROLES = {
         },
         "inherit_from": ["galaxy.execution_environment_publisher"],
     },
-    # Push and change execution environments.
     "galaxy.execution_environment_publisher": {
+        "description": "Push and change execution environments.",
         "permissions": {
             "container.add_containernamespace",
         },
         "inherit_from": ["galaxy.execution_environment_namespace_owner"],
     },
-    # Create and update execution environments under existing container namespaces.
     "galaxy.execution_environment_namespace_owner": {
+        "description": (
+            "Create and update execution environments under existing container namespaces."
+        ),
         "permissions": {
             "container.change_containernamespace",
             "container.namespace_add_containerdistribution",
@@ -95,8 +101,8 @@ _LOCKED_ROLES = {
         },
         "inherit_from": ["galaxy.execution_environment_collaborator"],
     },
-    # Change existing execution environments.
     "galaxy.execution_environment_collaborator": {
+        "description": "Change existing execution environments.",
         "permissions": {
             "container.namespace_push_containerdistribution",
             "container.namespace_change_containerdistribution",
@@ -107,8 +113,8 @@ _LOCKED_ROLES = {
 
     # ADMIN STUFF
 
-    # View, add, remove and change groups.
     "galaxy.group_admin": {
+        "description": "View, add, remove and change groups.",
         "permissions": {
             "galaxy.view_group",
             "galaxy.delete_group",
@@ -117,8 +123,8 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
-    # View, add, remove and change users.
     "galaxy.user_admin": {
+        "description": "View, add, remove and change users.",
         "permissions": {
             "galaxy.view_user",
             "galaxy.delete_user",
@@ -127,8 +133,8 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
-    # View, add, remove and change synclists.
     "galaxy.synclist_owner": {
+        "description": "View, add, remove and change synclists.",
         "permissions": {
             "galaxy.add_synclist",
             "galaxy.change_synclist",
@@ -137,8 +143,8 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
-    # View and cancel any task.
     "galaxy.task_admin": {
+        "description": "View and cancel any task.",
         "permissions": {
             "core.change_task",
             "core.delete_task",
@@ -146,8 +152,10 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
-    # View and cancel any task.
     "galaxy.auditor": {
+        "description": (
+            "View repositories, remotes, tasks, groups, and users for auditing purposes."
+        ),
         "permissions": {
             "ansible.view_ansiblerepository",
             "ansible.view_collectionremote",
