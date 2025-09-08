@@ -165,6 +165,7 @@ def test_openapi_authentication(ansible_config, endpoint, settings):
     and a variable setting GALAXY_API_SPEC_REQUIRE_AUTHENTICATION"""
     admin_config = ansible_config("admin")
     api_root = admin_config.get("url")
+    ssl_verify = admin_config.get("ssl_verify")
 
     endpoint_path = api_root + endpoint
 
@@ -172,6 +173,7 @@ def test_openapi_authentication(ansible_config, endpoint, settings):
     resp = requests.get(
         endpoint_path,
         auth=None,
+        verify=ssl_verify,
     )
 
     if settings.get("GALAXY_API_SPEC_REQUIRE_AUTHENTICATION"):
@@ -184,6 +186,7 @@ def test_openapi_authentication(ansible_config, endpoint, settings):
     # authenticated user
     resp = requests.get(
         endpoint_path,
-        auth=(admin_config.get("username"), admin_config.get("password"))
+        auth=(admin_config.get("username"), admin_config.get("password")),
+        verify=ssl_verify,
     )
     assert resp.status_code == 200
