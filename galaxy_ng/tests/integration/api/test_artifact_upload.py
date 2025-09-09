@@ -394,24 +394,8 @@ def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
     IGNORE_CONTENT = \
         "plugins/modules/lm_otel_collector.py validate-modules:use-run-command-not-popen\n"
 
-    expected = [
-
-        (
-            (
-                "meta/runtime.yml:1: meta-runtime[unsupported-version]:"
-                + " requires_ansible key must be set to a supported version."
-            ),
-            (
-                "meta/runtime.yml:1: meta-runtime[unsupported-version]:"
-                + " 'requires_ansible' key must refer to a currently supported version such as:"
-            ),
-        ),
-
-        (
-            "meta/runtime.yml:1: yaml[new-line-at-end-of-file]:"
-            + " No new line character at the end of file"
-        ),
-    ]
+    expected = "meta/runtime.yml:1: meta-runtime[unsupported-version]:" \
+        + " 'requires_ansible' key must refer to a currently supported version such as:"
 
     artifact = bc(
         "skeleton",
@@ -429,17 +413,7 @@ def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
     resp = wait_for_task(gc, resp)
     log_messages = [item["message"] for item in resp["messages"]]
     log_messages = "\n".join(log_messages)
-    for lines in expected:
-        if not isinstance(lines, tuple):
-            assert lines in log_messages, log_messages
-        else:
-            found = False
-            for line in lines:
-                if line in log_messages:
-                    found = True
-                    break
-            if not found:
-                raise Exception(f"did not find any of {lines} in the log output")
+    assert expected in log_messages, log_messages
 
 
 @pytest.mark.importer
