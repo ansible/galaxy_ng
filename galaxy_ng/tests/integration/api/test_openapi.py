@@ -160,14 +160,14 @@ def test_openapi_bindings_generation(ansible_config, galaxy_client):
     "pulp/api/v3/docs/",
     "pulp/api/v3/swagger/",
 ])
-def test_openapi_authentication(ansible_config, endpoint, settings):
+def test_openapi_authentication(ansible_config, endpoint, settings, galaxy_client):
     """Verify galaxy and pulp openapi specs are gated behind authentication
     and a variable setting GALAXY_API_SPEC_REQUIRE_AUTHENTICATION"""
     admin_config = ansible_config("admin")
-    api_root = admin_config.get("url")
     ssl_verify = admin_config.get("ssl_verify")
 
-    endpoint_path = api_root + endpoint
+    gc = galaxy_client("admin")
+    endpoint_path = gc.galaxy_root + endpoint
 
     # anonymous user
     resp = requests.get(
