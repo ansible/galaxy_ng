@@ -8,7 +8,7 @@ from ..utils.iqe_utils import is_disabled_local_management
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -38,7 +38,7 @@ def test_ui_v2_groups_create(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -70,7 +70,7 @@ def test_ui_v2_groups_list(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -98,7 +98,7 @@ def test_ui_v2_groups_retrieve(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -135,7 +135,7 @@ def test_ui_v2_groups_update(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -160,7 +160,7 @@ def test_ui_v2_groups_delete(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -197,7 +197,7 @@ def test_ui_v2_groups_filter_by_name(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -234,7 +234,7 @@ def test_ui_v2_groups_ordering(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -268,7 +268,7 @@ def test_ui_v2_groups_pagination(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -297,7 +297,7 @@ def test_ui_v2_groups_serializer_fields(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
@@ -334,7 +334,7 @@ def test_ui_v2_groups_put_update(galaxy_client, settings):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 def test_ui_v2_groups_empty_filter_result(galaxy_client):
     """Test filtering groups with no matching results"""
 
