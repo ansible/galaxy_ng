@@ -115,6 +115,7 @@ requirements = [
     django_ansible_base_dependency,  # noqa 501
     "django-crum==0.7.9",
     "django-automated-logging~=6.2",
+    "django-storages[azure,boto3,s3]",
 ]
 
 

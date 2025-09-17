@@ -151,7 +151,7 @@ django-picklefield==3.3
 django-prometheus==2.3.1
     # via galaxy-ng (setup.py)
 django-storages[azure,boto3,s3]==1.14.6
-    # via -r requirements/requirements.insights.in
+    # via galaxy-ng (setup.py)
 djangorestframework==3.15.2
     # via
     #   django-ansible-base

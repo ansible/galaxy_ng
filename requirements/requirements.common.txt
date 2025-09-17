@@ -39,6 +39,12 @@ attrs==22.2.0
     #   galaxy-importer
     #   jsonschema
     #   referencing
+azure-core==1.35.1
+    # via
+    #   azure-storage-blob
+    #   django-storages
+azure-storage-blob==12.26.0
+    # via django-storages
 backoff==2.2.1
     # via pulpcore
 bindep==2.13.0
@@ -46,7 +52,9 @@ bindep==2.13.0
 black==25.1.0
     # via ansible-lint
 boto3==1.37.29
-    # via galaxy-ng (setup.py)
+    # via
+    #   django-storages
+    #   galaxy-ng (setup.py)
 botocore==1.37.29
     # via
     #   boto3
@@ -68,6 +76,7 @@ click==8.1.7
 cryptography==42.0.8
     # via
     #   ansible-core
+    #   azure-storage-blob
     #   django-ansible-base
     #   pulpcore
     #   pyjwt
@@ -101,6 +110,7 @@ django==4.2.24
     #   django-import-export
     #   django-lifecycle
     #   django-picklefield
+    #   django-storages
     #   djangorestframework
     #   drf-nested-routers
     #   drf-spectacular
@@ -135,6 +145,8 @@ django-lifecycle==1.1.2
 django-picklefield==3.3
     # via django-automated-logging
 django-prometheus==2.3.1
+    # via galaxy-ng (setup.py)
+django-storages[azure,boto3,s3]==1.14.6
     # via galaxy-ng (setup.py)
 djangorestframework==3.15.2
     # via
@@ -199,6 +211,8 @@ inflection==0.5.1
     #   drf-spectacular
 insights-analytics-collector==0.3.2
     # via galaxy-ng (setup.py)
+isodate==0.7.2
+    # via azure-storage-blob
 jinja2==3.1.6
     # via
     #   ansible-core
@@ -408,6 +422,7 @@ referencing==0.36.2
     #   jsonschema-specifications
 requests==2.32.4
     # via
+    #   azure-core
     #   django-ansible-base
     #   galaxy-importer
     #   insights-analytics-collector
@@ -433,6 +448,7 @@ semantic-version==2.10.0
     #   pulp-ansible
 six==1.17.0
     # via
+    #   azure-core
     #   python-dateutil
     #   url-normalize
 smmap==5.0.2
@@ -456,7 +472,10 @@ tablib[html,ods,xls,xlsx,yaml]==3.5.0
     #   django-import-export
     #   pulpcore
 typing-extensions==4.13.1
-    # via opentelemetry-sdk
+    # via
+    #   azure-core
+    #   azure-storage-blob
+    #   opentelemetry-sdk
 uritemplate==4.1.1
     # via drf-spectacular
 url-normalize==1.4.3

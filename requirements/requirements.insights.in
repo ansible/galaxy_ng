@@ -1,5 +1,4 @@
 boto3
 logstash-formatter
 watchtower
-django-storages[azure,boto3,s3]
 app-common-python
