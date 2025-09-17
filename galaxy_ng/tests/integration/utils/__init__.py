@@ -41,7 +41,6 @@ from .users import (
     delete_user
 )
 from .sync import (
-    set_synclist,
     clear_certified,
     perform_sync,
 )
@@ -84,7 +83,6 @@ __all__ = (
     "modify_artifact",
     "perform_sync",
     "set_certification",
-    "set_synclist",
     "upload_artifact",
     "url_safe_join",
     "uuid4",

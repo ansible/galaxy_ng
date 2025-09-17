@@ -20,7 +20,6 @@ from .utils import (
     build_collection,
     get_client,
     set_certification,
-    set_synclist,
     iterate_all,
 )
 
@@ -377,9 +376,6 @@ def sync_instance_crc():
     # ensure that the target as at least one signed and deprecated collection
     assert signed_count >= 1
     assert deprecated_count >= 1
-
-    # reset the user's synclist
-    set_synclist(client, [])
 
     return (manifest, config)
 

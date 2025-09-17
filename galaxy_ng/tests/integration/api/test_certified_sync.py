@@ -2,7 +2,7 @@ import pytest
 import requests
 import hashlib
 
-from ..utils import get_client, clear_certified, perform_sync, iterate_all, set_synclist
+from ..utils import get_client, clear_certified, perform_sync, iterate_all
 
 
 def _assert_sync(manifest, client):
@@ -141,47 +141,6 @@ def test_basic_sync(sync_instance_crc, ansible_config):
     clear_certified(pah_client)
     perform_sync(pah_client, crc_config)
 
-    _assert_sync(manifest, pah_client)
-
-
-@pytest.mark.sync
-def test_synclist_sync(sync_instance_crc, ansible_config):
-    """Test syncing from a customer's synclist repo."""
-
-    config = ansible_config(profile="admin")
-    manifest, crc_config = sync_instance_crc
-
-    pah_client = get_client(
-        config=config
-    )
-
-    crc_client = get_client(
-        config=crc_config,
-        request_token=False,
-        require_auth=True
-    )
-
-    clear_certified(pah_client)
-
-    synclist_collection = manifest[0]
-    synclist_manifest = manifest[1:]
-
-    # Test exclude single collection
-    repo = set_synclist(
-        crc_client,
-        [{
-            "namespace": synclist_collection["namespace"],
-            "name": synclist_collection["name"],
-        }]
-    )["name"]
-
-    perform_sync(pah_client, crc_config, repo=repo)
-    _assert_sync(synclist_manifest, pah_client)
-
-    # update synclist
-    repo = set_synclist(crc_client, [])["name"]
-
-    perform_sync(pah_client, crc_config, repo=repo)
     _assert_sync(manifest, pah_client)
 
 

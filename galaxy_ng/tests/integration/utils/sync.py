@@ -2,18 +2,6 @@ import os
 from ..utils import wait_for_task, cleanup_namespace, iterate_all
 
 
-def set_synclist(api_client, collections):
-    """Set the list of collections on the user's synclist and return the synclist object"""
-    r = api_client("_ui/v1/my-synclists/")
-    synclist_id = r["data"][0]["id"]
-    synclist = api_client(f"_ui/v1/my-synclists/{synclist_id}/")
-
-    synclist["collections"] = collections
-    api_client(f"_ui/v1/my-synclists/{synclist_id}/", method="PUT", args=synclist)
-
-    return r["data"][0]
-
-
 def clear_certified(api_client):
     """Clear the content in the certified repo"""
     namespaces = {
