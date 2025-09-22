@@ -11,7 +11,7 @@ from ..utils.iqe_utils import is_disabled_local_management
 
 @pytest.mark.parametrize("endpoint", ["groups", "teams"])
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.11.0dev")
+@pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
     is_disabled_local_management,
     reason="this test relies on local resource management"
