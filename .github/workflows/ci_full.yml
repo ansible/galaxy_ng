@@ -106,7 +106,7 @@ jobs:
           echo "REPO_NAME=$REPO_NAME"   >> $GITHUB_ENV
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v6
         if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main'
         env:
           SONAR_TOKEN: ${{ secrets.CICD_ORG_SONAR_TOKEN_CICD_BOT || secrets.AAP_ORG_SONAR_TOKEN_ANSIBLE_CICD_BOT }}
