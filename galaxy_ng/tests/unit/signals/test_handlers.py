@@ -272,6 +272,7 @@ class TestRoleDefinitionSignals:
             ) as mock_content_type_func,
             patch("galaxy_ng.app.signals.handlers.logger") as mock_logger,
             patch("galaxy_ng.app.signals.handlers.pulp_rbac_signals") as mock_pulp_signals,
+            patch("galaxy_ng.app.signals.handlers.DABContentType") as mock_dab_content_type,
         ):
 
             mock_signal_check.return_value = False
@@ -291,23 +292,14 @@ class TestRoleDefinitionSignals:
             mock_rd.description = "Old Description"  # Different from instance.description
             mock_roledef_model.objects.get_or_create.return_value = (mock_rd, False)
 
+            # Mock isinstance to return True for DABContentType check
             with patch("galaxy_ng.app.signals.handlers.isinstance") as mock_isinstance:
-                # Make isinstance(mock_content_type, DABContentType) return True
-                original_isinstance = isinstance
-
                 def isinstance_side_effect(obj, cls):
-                    if (
-                        obj is mock_content_type
-                        and hasattr(cls, '__name__')
-                        and cls.__name__ == "DABContentType"
-                    ):
+                    if obj is mock_content_type and cls is mock_dab_content_type:
                         return True
-                    # Handle mock objects as classes
-                    try:
-                        return original_isinstance(obj, cls)
-                    except TypeError:
-                        # If cls is a mock, just return False
-                        return False
+                    wrapped = getattr(isinstance, '__wrapped__', None)
+                    return wrapped(obj, cls) if wrapped else False
+
                 mock_isinstance.side_effect = isinstance_side_effect
                 copy_role_to_role_definition(sender=Mock(), instance=mock_instance, created=True)
 
@@ -524,19 +516,35 @@ class TestDABAssignmentSignals:
 
         mock_signal_check.return_value = False
 
-        mock_instance = Mock(spec=RoleUserAssignment)
+        mock_instance = Mock()
         mock_instance.role_definition.name = SHARED_TEAM_ROLE
         mock_instance.user = Mock()
         mock_instance.content_object.group.user_set = Mock()
 
-        copy_dab_user_role_assignment(sender=Mock(), instance=mock_instance, created=True)
+        with patch("galaxy_ng.app.signals.handlers.isinstance") as mock_isinstance:
+            # Make isinstance(mock_instance, RoleUserAssignment) return True
+            def isinstance_side_effect(obj, cls):
+                return obj is mock_instance and cls is RoleUserAssignment
 
-        mock_instance.content_object.group.user_set.add.assert_called_once_with(mock_instance.user)
-        mock_apply_assignment.assert_not_called()
+            mock_isinstance.side_effect = isinstance_side_effect
+            copy_dab_user_role_assignment(sender=Mock(), instance=mock_instance, created=True)
+
+            mock_instance.content_object.group.user_set.add.assert_called_once_with(
+                mock_instance.user
+            )
+            mock_apply_assignment.assert_not_called()
 
     @patch("galaxy_ng.app.signals.handlers.Role")
     @patch("galaxy_ng.app.signals.handlers.assign_role")
-    def test_apply_dab_assignment(self, mock_assign_role, mock_role_model):
+    @patch("galaxy_ng.app.signals.handlers.RoleUserAssignment")
+    @patch("galaxy_ng.app.signals.handlers.RoleTeamAssignment")
+    def test_apply_dab_assignment(
+        self,
+        mock_role_team_assignment,
+        mock_role_user_assignment,
+        mock_assign_role,
+        mock_role_model,
+    ):
         """Test _apply_dab_assignment helper function."""
         from galaxy_ng.app.signals.handlers import _apply_dab_assignment
 
@@ -549,7 +557,11 @@ class TestDABAssignmentSignals:
         mock_assignment.content_object = Mock()
 
         with patch("galaxy_ng.app.signals.handlers.isinstance") as mock_isinstance:
-            mock_isinstance.side_effect = lambda obj, cls: cls.__name__ == "RoleUserAssignment"
+            def isinstance_side_effect(obj, cls):
+                # For this test, treat mock_assignment as a RoleUserAssignment
+                return obj is mock_assignment and cls is mock_role_user_assignment
+
+            mock_isinstance.side_effect = isinstance_side_effect
 
             _apply_dab_assignment(mock_assignment)
 
@@ -566,9 +578,14 @@ class TestCreateManagedRoles:
         """Test create_managed_roles function."""
         from galaxy_ng.app.signals.handlers import create_managed_roles
 
-        with patch("galaxy_ng.app.signals.handlers.dab_rbac_signals") as mock_context:
-            mock_context.return_value.__enter__ = Mock()
-            mock_context.return_value.__exit__ = Mock()
+        with (
+            patch("galaxy_ng.app.signals.handlers.dab_rbac_signals") as mock_dab_context,
+            patch("galaxy_ng.app.signals.handlers.no_reverse_sync") as mock_no_reverse_sync,
+        ):
+            mock_dab_context.return_value.__enter__ = Mock()
+            mock_dab_context.return_value.__exit__ = Mock()
+            mock_no_reverse_sync.return_value.__enter__ = Mock()
+            mock_no_reverse_sync.return_value.__exit__ = Mock()
 
             create_managed_roles()
 

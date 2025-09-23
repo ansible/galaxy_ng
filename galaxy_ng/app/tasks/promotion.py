@@ -8,8 +8,8 @@ from pulp_ansible.app.tasks.copy import move_collection
 from pulpcore.plugin.models import TaskGroup, SigningService
 
 
-SIGNING_SERVICE_NAME = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
-AUTO_SIGN = settings.get("GALAXY_AUTO_SIGN_COLLECTIONS", False)
+SIGNING_SERVICE_NAME = getattr(settings, "GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
+AUTO_SIGN = getattr(settings, "GALAXY_AUTO_SIGN_COLLECTIONS", False)
 
 
 def auto_approve(src_repo_pk, cv_pk, ns_pk=None):
