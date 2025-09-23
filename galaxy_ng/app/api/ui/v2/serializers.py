@@ -60,15 +60,15 @@ class UserDetailSerializer(serializers.ModelSerializer):
 class UserCreateUpdateDeleteSerializer(UserDetailSerializer):
 
     groups = serializers.ListField(
-        child=serializers.DictField(), required=False, default=[]
+        child=serializers.DictField(), required=False, default=[], write_only=True,
     )
 
     teams = serializers.ListField(
-        child=serializers.DictField(), required=False, default=[]
+        child=serializers.DictField(), required=False, default=[], write_only=True,
     )
 
     organizations = serializers.ListField(
-        child=serializers.DictField(), required=False, default=[]
+        child=serializers.DictField(), required=False, default=[], write_only=True,
     )
 
     class Meta:
