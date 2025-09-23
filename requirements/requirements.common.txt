@@ -73,7 +73,7 @@ click==8.1.7
     # via
     #   black
     #   pulpcore
-cryptography==42.0.8
+cryptography==44.0.1
     # via
     #   ansible-core
     #   azure-storage-blob
