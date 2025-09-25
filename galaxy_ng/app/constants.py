@@ -269,3 +269,145 @@ PERMISSIONS = {
 }
 
 AAP_VERSION_FILE_PATH = '/etc/ansible-automation-platform/VERSION'
+
+ROLE_DESCRIPTION = {
+    # Core roles from pulpcore
+    "core.compositecontentguard_creator": "Create composite content guards.",
+    "core.compositecontentguard_owner": "Manage composite content guards with full access.",
+    "core.compositecontentguard_viewer": "View composite content guards.",
+    "core.contentredirectcontentguard_creator": "Create content redirect content guards.",
+    "core.contentredirectcontentguard_owner": (
+        "Manage content redirect content guards with full access."
+    ),
+    "core.contentredirectcontentguard_viewer": "View content redirect content guards.",
+    "core.domain_creator": "Create domains.",
+    "core.domain_owner": "Manage domains with full access.",
+    "core.domain_viewer": "View domains.",
+    "core.group_creator": "Create user groups.",
+    "core.group_owner": "Manage user groups with full access.",
+    "core.group_viewer": "View user groups.",
+    "core.headercontentguard_creator": "Create header content guards.",
+    "core.headercontentguard_owner": "Manage header content guards with full access.",
+    "core.headercontentguard_viewer": "View header content guards.",
+    "core.rbaccontentguard_creator": "Create RBAC content guards.",
+    "core.rbaccontentguard_owner": "Manage RBAC content guards with full access.",
+    "core.rbaccontentguard_viewer": "View RBAC content guards.",
+    "core.rbaccontentguard_downloader": "Download content through RBAC content guards.",
+    "core.taskschedule_viewer": "View task schedule details.",
+    "core.task_viewer": "View task details and status.",
+    "core.task_user_dispatcher": "Dispatch and create new tasks.",
+    "core.upload_creator": "Create file uploads.",
+    "core.upload_owner": "Manage file uploads with full access.",
+    "core.upload_viewer": "View file uploads.",
+    "core.upstreampulp_creator": "Create upstream Galaxy servers for replication.",
+    "core.upstreampulp_owner": (
+        "Manage upstream Galaxy servers with full access including replication."
+    ),
+    "core.upstreampulp_viewer": "View upstream Galaxy server configurations.",
+    "core.upstreampulp_user": "Use upstream Galaxy servers for replication tasks.",
+    # Container roles from pulp_container
+    "container.containerdistribution_creator": "Create new container distributions.",
+    "container.containerdistribution_owner": (
+        "Manage all aspects of container distributions including viewing, pulling, "
+        "pushing, deleting, modifying configurations, and managing user roles."
+    ),
+    "container.containerdistribution_collaborator": (
+        "Collaborate on container distributions with permissions to view, pull, and push content."
+    ),
+    "container.containerdistribution_consumer": (
+        "Consume container distributions with read-only access to view and pull content."
+    ),
+    "container.containernamespace_creator": "Create new container namespaces.",
+    "container.containernamespace_owner": (
+        "Manage all aspects of container namespaces including viewing, deleting, managing "
+        "distributions and repositories within the namespace, modifying content, "
+        "and managing user roles."
+    ),
+    "container.containernamespace_collaborator": (
+        "Collaborate on container namespaces with permissions to view, manage distributions "
+        "and repositories, modify content, and perform push/pull operations."
+    ),
+    "container.containernamespace_consumer": (
+        "Consume container namespaces with read-only access to view and pull content."
+    ),
+    "container.containerpullthroughdistribution_creator": (
+        "Create new pull-through container distributions for caching external content."
+    ),
+    "container.containerpullthroughdistribution_owner": (
+        "Manage all aspects of pull-through container distributions including viewing, deleting, "
+        "modifying configurations, managing user roles, and pulling new content."
+    ),
+    "container.containerpullthroughdistribution_collaborator": (
+        "Collaborate on pull-through container distributions with permissions "
+        "to view and pull new content."
+    ),
+    "container.containerpullthroughdistribution_consumer": (
+        "Consume pull-through container distributions with read-only access "
+        "to view and pull new content."
+    ),
+    "container.containerpullthroughremote_creator": (
+        "Create new pull-through container remotes for caching external registries."
+    ),
+    "container.containerpullthroughremote_owner": (
+        "Manage all aspects of pull-through container remotes including viewing, "
+        "modifying, deleting, and managing user roles."
+    ),
+    "container.containerpullthroughremote_viewer": (
+        "View pull-through container remote configurations and details."
+    ),
+    "container.containerremote_creator": "Create new container remotes.",
+    "container.containerremote_owner": (
+        "Manage all aspects of container remotes including viewing, modifying, "
+        "deleting, and managing user roles."
+    ),
+    "container.containerremote_viewer": "View container remote configurations and details.",
+    "container.containerrepository_creator": "Create new container repositories.",
+    "container.containerrepository_owner": (
+        "Manage all aspects of container repositories including viewing, modifying, deleting, "
+        "syncing, content management, image building, and user role management."
+    ),
+    "container.containerrepository_content_manager": (
+        "Manage container repository content including viewing, syncing, modifying content, "
+        "building images, and deleting repository versions."
+    ),
+    "container.containerrepository_viewer": "View container repository details and configurations.",
+    # Ansible roles from pulp_ansible
+    "ansible.ansibledistribution_creator": (
+        "Allows you to create new Ansible distributions for serving collections "
+        "and roles to clients."
+    ),
+    "ansible.ansibledistribution_owner": (
+        "Allows you to view, edit, delete, and manage roles for Ansible distributions."
+    ),
+    "ansible.ansibledistribution_viewer": "Allows you to view Ansible distribution.",
+    "ansible.ansiblerepository_creator": (
+        "Allows you to create new Ansible repositories for storing collections and roles."
+    ),
+    "ansible.ansiblerepository_owner": (
+        "Allows you to view, edit, delete, and manage all aspects of Ansible repositories "
+        "including content modification, syncing, signing, and metadata operations."
+    ),
+    "ansible.ansiblerepository_viewer": (
+        "Allows you to view Ansible repository information and contents."
+    ),
+    "ansible.collectionremote_creator": (
+        "Allows you to create new collection remotes for syncing Ansible collections "
+        "from external sources."
+    ),
+    "ansible.collectionremote_owner": (
+        "Allows you to view, edit, delete, and manage roles for collection remotes."
+    ),
+    "ansible.collectionremote_viewer": "Allows you to view collection remote.",
+    "ansible.gitremote_creator": (
+        "Allows you to create new git remote for syncing Ansible content from git repository."
+    ),
+    "ansible.gitremote_owner": (
+        "Allows you to view, edit, delete, and manage roles for git remote."
+    ),
+    "ansible.gitremote_viewer": "Allows you to view git remote.",
+    "ansible.roleremote_creator": "Allows you to create new role remote for syncing Ansible roles.",
+    "ansible.roleremote_owner": (
+        "Allows you to view, edit, delete, and manage roles for role remote."
+    ),
+    "ansible.roleremote_viewer": "Allows you to view role remote.",
+}

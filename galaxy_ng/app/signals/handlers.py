@@ -18,12 +18,14 @@ from django.contrib.auth.models import Group
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
+from django.utils.translation import gettext_lazy as _
 from pulp_ansible.app.models import (
     AnsibleDistribution,
     AnsibleRepository,
     Collection,
     AnsibleNamespaceMetadata,
 )
+from galaxy_ng.app.constants import ROLE_DESCRIPTION
 from galaxy_ng.app.models import Namespace, User, Team
 from galaxy_ng.app.migrations._dab_rbac import copy_roles_to_role_definitions
 from pulpcore.plugin.models import ContentRedirectContentGuard
@@ -223,12 +225,13 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
     with pulp_rbac_signals():
         roledef_name = PULP_TO_ROLEDEF.get(instance.name, instance.name)
         content_type = pulp_role_to_single_content_type_or_none(instance)
+        description = _(instance.description or ROLE_DESCRIPTION.get(instance.name, instance.name))
         rd, rd_created = RoleDefinition.objects.get_or_create(
             name=roledef_name,
             defaults={
                 'managed': instance.locked,
                 'content_type': content_type,
-                'description': instance.description or instance.name,
+                'description': description,
             }
         )
         if rd_created:
@@ -239,14 +242,17 @@ def copy_role_to_role_definition(sender, instance, created, **kwargs):
         else:
             # Update existing RoleDefinition if values have changed
             updated_fields = []
+            description = _(
+                instance.description or ROLE_DESCRIPTION.get(instance.name, instance.name)
+            )
             if rd.managed != instance.locked:
                 rd.managed = instance.locked
                 updated_fields.append('managed')
             if rd.content_type != content_type and isinstance(content_type, DABContentType):
                 rd.content_type = content_type
                 updated_fields.append('content_type')
-            if rd.description != (instance.description or instance.name):
-                rd.description = instance.description or instance.name
+            if rd.description != description:
+                rd.description = description
                 updated_fields.append('description')
 
             if updated_fields:
