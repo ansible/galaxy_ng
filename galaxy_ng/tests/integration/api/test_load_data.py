@@ -32,7 +32,7 @@ class TestLoadData:
     @pytest.mark.min_hub_version("4.6dev")
     @pytest.mark.load_data
     @pytest.mark.skipif(
-        is_disabled_local_management,
+        is_disabled_local_management(),
         reason="this test relies on local resource management"
     )
     def test_load_users_and_groups(self, galaxy_client, settings, data):

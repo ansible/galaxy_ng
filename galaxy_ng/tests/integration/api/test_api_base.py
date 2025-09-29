@@ -3,7 +3,7 @@ import pytest
 from ..utils.iqe_utils import remove_from_cache
 
 
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.deployment_standalone
 @pytest.mark.skip_in_gw
 def test_galaxy_api_root_standalone_no_auth_access(galaxy_client):

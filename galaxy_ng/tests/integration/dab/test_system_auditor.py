@@ -9,7 +9,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
     os.getenv("ENABLE_DAB_TESTS"),
     reason="Skipping test because ENABLE_DAB_TESTS is set"

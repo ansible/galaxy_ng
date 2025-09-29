@@ -13,7 +13,7 @@ from ..utils.iqe_utils import is_disabled_local_management
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.11.0")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_ui_v2_teams(galaxy_client, endpoint, settings):

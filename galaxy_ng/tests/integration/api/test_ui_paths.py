@@ -762,7 +762,7 @@ def test_api_ui_v1_collection_detail_view(ansible_config, published):
 # /api/automation-hub/_ui/v1/settings/
 @pytest.mark.deployment_standalone
 @pytest.mark.api_ui
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skip_in_gw
 def test_api_ui_v1_settings(ansible_config):
 

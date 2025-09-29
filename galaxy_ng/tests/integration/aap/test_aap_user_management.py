@@ -98,7 +98,7 @@ def gateway_user_factory(gateway_admin_client, galaxy_client):
     ]
 )
 @pytest.mark.skipif(
-    not is_disabled_local_management,
+    not is_disabled_local_management(),
     reason="This test relies on being connected to a resource server"
 )
 def test_aap_galaxy_normal_user_can_not_demote_superuser(
@@ -141,7 +141,7 @@ def test_aap_galaxy_normal_user_can_not_demote_superuser(
     ]
 )
 @pytest.mark.skipif(
-    not is_disabled_local_management,
+    not is_disabled_local_management(),
     reason="This test relies on being connected to a resource server"
 )
 def test_aap_galaxy_local_resource_management_setting_gates_user_creation(
@@ -175,7 +175,7 @@ def test_aap_galaxy_local_resource_management_setting_gates_user_creation(
     ['id', 'username', 'password', 'first_name', 'last_name']
 )
 @pytest.mark.skipif(
-    not is_disabled_local_management,
+    not is_disabled_local_management(),
     reason="This test relies on being connected to a resource server"
 )
 def test_aap_galaxy_local_resource_management_setting_gates_field_modification(
@@ -208,7 +208,7 @@ def test_aap_galaxy_local_resource_management_setting_gates_field_modification(
     ]
 )
 @pytest.mark.skipif(
-    not is_disabled_local_management,
+    not is_disabled_local_management(),
     reason="This test relies on being connected to a resource server"
 )
 def test_aap_galaxy_local_resource_management_setting_gates_deletion(
@@ -229,7 +229,7 @@ def test_aap_galaxy_local_resource_management_setting_gates_deletion(
     ['PUT', 'PATCH']
 )
 @pytest.mark.skipif(
-    not is_disabled_local_management,
+    not is_disabled_local_management(),
     reason="This test relies on being connected to a resource server"
 )
 def test_aap_galaxy_superuser_management(

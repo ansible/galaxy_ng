@@ -40,7 +40,7 @@ API_PREFIX = CLIENT_CONFIG.get("api_prefix").rstrip("/")
     reason="Group creation is disabled in the DAB test profile."
 )
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_gw_group_role_listing(galaxy_client, settings, test_data):

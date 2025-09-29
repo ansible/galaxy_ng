@@ -14,7 +14,7 @@ GALAXY_API_PATH_PREFIX = "/api/galaxy"  # cant import from settings on integrati
 
 # This tests the basic DAB RBAC contract using custom roles to do things.
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 def test_list_namespace_permissions(galaxy_client):
     gc = galaxy_client("admin")
     r = gc.get("_ui/v2/role_metadata/")
@@ -34,7 +34,7 @@ def test_list_namespace_permissions(galaxy_client):
 
 # look for the content_type choices
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 def test_role_definition_options(galaxy_client):
     gc = galaxy_client("admin")
     # TODO(jctanner): add support for options in GalaxyClient in galaxykit
@@ -181,7 +181,7 @@ def check_system_role_user_assignments(client: GalaxyClient, user: dict, role: d
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.parametrize("by_api", ["dab", "pulp"])
 def test_create_custom_namespace_system_admin_role(custom_role_factory, galaxy_client, by_api):
     if by_api == "dab":
@@ -204,9 +204,9 @@ def test_create_custom_namespace_system_admin_role(custom_role_factory, galaxy_c
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_give_user_custom_role_system(settings, galaxy_client, custom_role_factory, namespace):
@@ -273,9 +273,9 @@ def test_give_user_custom_role_system(settings, galaxy_client, custom_role_facto
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="galaxykit uses drf tokens, which bypass JWT auth and claims processing"
 )
 def test_give_team_custom_role_system(
@@ -346,7 +346,7 @@ def test_give_team_custom_role_system(
 
 # TODO(cutwater): We need another version of it for a team
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.parametrize("by_role_api", ["dab", "pulp"])
 @pytest.mark.parametrize("by_assignment_api", ["dab", "pulp"])
 def test_give_user_custom_role_object(
@@ -436,10 +436,10 @@ def test_give_user_custom_role_object(
     assert_object_role_assignments(admin_client, user, namespace, 0)
 
 
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.deployment_standalone
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="galaxykit uses drf tokens, which bypass JWT auth and claims processing"
 )
 def test_give_team_custom_role_object(
@@ -525,7 +525,7 @@ def test_give_team_custom_role_object(
     assert ctx.value.response.status_code == HTTPStatus.FORBIDDEN
 
 
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 def test_object_role_permission_validation(galaxy_client, custom_role_factory, namespace):
     gc = galaxy_client("admin")
 
@@ -605,7 +605,7 @@ def user_and_group(galaxy_client):
     assure_user_not_in_group()
 
 
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 def test_group_sync_from_pulp_to_dab(galaxy_client, assert_user_in_group, user_and_group):
     gc = galaxy_client("admin")
     user, group = user_and_group
@@ -650,7 +650,7 @@ def test_team_member_sync_from_dab_to_pulp(galaxy_client, assert_user_in_group, 
     assert_user_in_group(user["id"], group["id"], expected=True)
 
 
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 def test_team_members_are_migrated(galaxy_client, assert_user_in_group):
     "Make sure any existing team memberships are correct"
     gc = galaxy_client("admin")

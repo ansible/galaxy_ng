@@ -51,14 +51,14 @@ def test_dab_roledefs_match_pulp_roles(galaxy_client):
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
 )
 @pytest.mark.parametrize("use_team", [False, True])
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_dab_rbac_repository_owner_by_user_or_team(
@@ -152,9 +152,9 @@ def test_dab_rbac_repository_owner_by_user_or_team(
 # FIXME(jerabekjiri): unskip when https://issues.redhat.com/browse/AAP-32675 is merged
 @pytest.mark.skip_in_gw
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 @pytest.mark.skipif(
@@ -297,14 +297,14 @@ def test_dab_rbac_namespace_owner_by_user_or_team(
 
 @pytest.mark.deployment_standalone
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 @pytest.mark.skipif(
     os.environ.get('JWT_PROXY') is not None,
     reason="Skipped because jwt proxy is in use"
 )
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 def test_dab_user_platform_auditor_bidirectional_sync(
     settings,
     galaxy_client,
@@ -390,9 +390,9 @@ def test_dab_user_platform_auditor_bidirectional_sync(
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_dab_team_platform_auditor_bidirectional_sync(
@@ -490,9 +490,9 @@ def test_dab_team_platform_auditor_bidirectional_sync(
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_dab_user_assignment_filtering_as_user(
@@ -554,9 +554,9 @@ def test_dab_user_assignment_filtering_as_user(
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 @pytest.mark.skipif(

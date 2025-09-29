@@ -31,6 +31,7 @@ from galaxykit.namespaces import delete_namespace, delete_v1_namespace
 from galaxykit.users import delete_user
 from galaxykit.utils import GalaxyClientError
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -292,15 +293,21 @@ def aap_gateway():
     return dev_env_standalone in ('true', 'True', 1, '1', True)
 
 
-@property
 def is_disabled_local_management():
     ansible_config = get_ansible_config()
     galaxy_client = get_galaxy_client(ansible_config)
     gc = galaxy_client("admin")
     settings = gc.get_settings()
 
-    return settings.get("IS_CONNECTED_TO_RESOURCE_SERVER") or \
-        not settings.get("ALLOW_LOCAL_RESOURCE_MANAGEMENT")
+    version = parse_version(get_hub_version(ansible_config))
+
+    if version < parse_version("4.10"):  # 2.4
+        return False
+
+    if version < parse_version("4.11"):  # 2.5
+        return not settings.get("ALLOW_LOCAL_RESOURCE_MANAGEMENT", False)
+
+    return settings.get("IS_CONNECTED_TO_RESOURCE_SERVER", False)  # 2.6
 
 
 def avoid_docker_limit_rate():

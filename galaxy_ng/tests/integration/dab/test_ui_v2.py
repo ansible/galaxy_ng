@@ -15,14 +15,14 @@ pytestmark = pytest.mark.qa  # noqa: F821
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.parametrize("user_payload", [
     {},
     {"email": "foobar@foobar.com"},
     {"password": None},
 ])
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_ui_v2_user_create(
@@ -66,7 +66,7 @@ def test_ui_v2_user_create(
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.parametrize("invalid_payload", [
     ({"email": "invalidemail"}, "Enter a valid email address."),
     ({"email": "@whoops"}, "Enter a valid email address."),
@@ -75,7 +75,7 @@ def test_ui_v2_user_create(
     ({"password": ""}, "This field may not be blank"),
 ])
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_ui_v2_user_create_invalid_data(
@@ -108,9 +108,9 @@ def test_ui_v2_user_create_invalid_data(
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_ui_v2_user_edit(
@@ -151,7 +151,7 @@ def test_ui_v2_user_edit(
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.parametrize("invalid_payload", [
     ({"email": "invalidemail"}, "Enter a valid email address."),
     ({"email": "@whoops"}, "Enter a valid email address."),
@@ -163,7 +163,7 @@ def test_ui_v2_user_edit(
     ({"organizations": [{"name": "HITHERE"}]}, "does not exist"),
 ])
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_ui_v2_user_edit_invalid_data(
@@ -206,9 +206,9 @@ def test_ui_v2_user_edit_invalid_data(
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_ui_v2_teams(
@@ -249,9 +249,9 @@ def test_ui_v2_teams(
 
 
 @pytest.mark.deployment_standalone
-@pytest.mark.min_hub_version("4.10dev")
+@pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management,
+    is_disabled_local_management(),
     reason="this test relies on local resource management"
 )
 def test_ui_v2_teams_membership_local_and_nonlocal(
