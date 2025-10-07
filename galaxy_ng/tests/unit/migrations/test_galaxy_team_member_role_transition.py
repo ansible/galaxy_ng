@@ -12,6 +12,7 @@ from django.test import TestCase
 from django.apps import apps
 
 from ansible_base.rbac import permission_registry
+from ansible_base.rbac.migrations._utils import give_permissions
 
 from galaxy_ng.app.models import User, Team
 from galaxy_ng.app.models.organization import Organization
@@ -143,40 +144,36 @@ class TestGalaxyTeamMemberRoleTransition(TestCase):
             name="Team Member",
         )
 
-        # Create object roles for both definitions
-        galaxy_obj_role = ObjectRole.objects.create(
-            role_definition=galaxy_role,
-            object_id=self.team.id,
-            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
-        )
-
-        team_obj_role = ObjectRole.objects.create(
-            role_definition=team_role,
-            object_id=self.team.id,
-            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
-        )
+        # Create object roles and assignments using give_permissions
+        content_type = permission_registry.content_type_model.objects.get_for_model(Team)
 
         # user1 has BOTH Galaxy Team Member AND Team Member roles (duplicate scenario)
-        RoleUserAssignment.objects.create(
-            role_definition=galaxy_role,
-            user=self.user1,
+        give_permissions(
+            apps,
+            galaxy_role,
+            users=[self.user1],
+            teams=[],
             object_id=self.team.id,
-            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
+            content_type_id=content_type.id,
         )
 
-        RoleUserAssignment.objects.create(
-            role_definition=team_role,
-            user=self.user1,
+        give_permissions(
+            apps,
+            team_role,
+            users=[self.user1],
+            teams=[],
             object_id=self.team.id,
-            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
+            content_type_id=content_type.id,
         )
 
         # user2 has ONLY Galaxy Team Member role
-        RoleUserAssignment.objects.create(
-            role_definition=galaxy_role,
-            user=self.user2,
+        give_permissions(
+            apps,
+            galaxy_role,
+            users=[self.user2],
+            teams=[],
             object_id=self.team.id,
-            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
+            content_type_id=content_type.id,
         )
 
         # Verify pre-migration state
