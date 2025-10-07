@@ -19,8 +19,8 @@ def remove_galaxy_team_member_role(apps, schema_editor):
             galaxy_users = set(galaxy_obj_role.users.all())
             if not galaxy_users:
                 continue
-            new_team_role = team_member_role.object_roles.get(object_id=galaxy_obj_role.object_id)
-            current_users = set(new_team_role.users.all())
+            team_member_role_obj_role = team_member_role.object_roles.get(object_id=galaxy_obj_role.object_id)
+            current_users = set(team_member_role_obj_role.users.all())
             new_users = galaxy_users - current_users
             if not new_users:
                 continue
@@ -29,7 +29,7 @@ def remove_galaxy_team_member_role(apps, schema_editor):
             )
             give_permissions(
                 apps,
-                new_team_role,
+                team_member_role,
                 users=new_users,
                 teams=[],
                 object_id=galaxy_obj_role.object_id,
