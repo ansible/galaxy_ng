@@ -1,20 +1,48 @@
+import logging
+
 from django.db import migrations
+from ansible_base.rbac.migrations._utils import give_permissions
+
+
+logger = logging.getLogger(__name__)
 
 
 def remove_galaxy_team_member_role(apps, schema_editor):
     RoleDefinition = apps.get_model("dab_rbac", "RoleDefinition")
-    RoleUserAssignment = apps.get_model("dab_rbac", "RoleUserAssignment")
-    RoleTeamAssignment = apps.get_model("dab_rbac", "RoleTeamAssignment")
-    ObjectRole = apps.get_model("dab_rbac", "ObjectRole")
 
     galaxy_team_member_role = RoleDefinition.objects.filter(name="Galaxy Team Member").first()
     team_member_role = RoleDefinition.objects.filter(name="Team Member").first()
 
     if galaxy_team_member_role:
-        RoleUserAssignment.objects.filter(role_definition_id=galaxy_team_member_role.id).update(role_definition_id=team_member_role.id)
-        RoleTeamAssignment.objects.filter(role_definition_id=galaxy_team_member_role.id).update(role_definition_id=team_member_role.id)
-        ObjectRole.objects.filter(role_definition_id=galaxy_team_member_role.id).update(role_definition_id=team_member_role.id)
+        # Copy any extra permissions from the galaxy version of the role to the shared role
+        for galaxy_obj_role in galaxy_team_member_role.object_roles.all():
+            galaxy_users = set(galaxy_obj_role.users.all())
+            if not galaxy_users:
+                continue
+            new_team_role = team_member_role.object_roles.get(object_id=galaxy_obj_role.object_id)
+            current_users = set(new_team_role.users.all())
+            new_users = galaxy_users - current_users
+            if not new_users:
+                continue
+            logger.info(
+                f"Copying permissions from old member role for users: {new_users}, team_id={galaxy_obj_role.object_id}"
+            )
+            give_permissions(
+                apps,
+                new_team_role,
+                users=new_users,
+                teams=[],
+                object_id=galaxy_obj_role.object_id,
+                content_type_id=galaxy_obj_role.content_type_id,
+            )
 
+        # Delete any permissions related to the galaxy team member role
+        for galaxy_obj_role in galaxy_team_member_role.object_roles.all():
+            logger.info(f"Deleting old object member-role {galaxy_obj_role.id}")
+            galaxy_obj_role.delete()
+
+        # Delete the galaxy team member role
+        logger.info(f"Deleting Galaxy Team Member role id={galaxy_team_member_role.id}")
         galaxy_team_member_role.delete()
 
 
@@ -23,9 +51,7 @@ class Migration(migrations.Migration):
         ("galaxy", "0057_alter_organization_created_and_more"),
         ("dab_rbac", "0003_alter_dabpermission_codename_and_more"),
     ]
-    run_before = [
-        ("dab_rbac", "0004_remote_permissions_additions")
-    ]
+    run_before = [("dab_rbac", "0004_remote_permissions_additions")]
 
     operations = [
         migrations.RunPython(remove_galaxy_team_member_role, migrations.RunPython.noop),
