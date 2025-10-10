@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.12
 RUN mkdir -p /app
 COPY requirements.txt /app/.
 COPY flaskapp.py /app/.

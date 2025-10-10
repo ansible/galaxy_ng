@@ -12,6 +12,7 @@ from django.test import TestCase
 from django.apps import apps
 
 from ansible_base.rbac import permission_registry
+from ansible_base.rbac.migrations._utils import give_permissions
 
 from galaxy_ng.app.models import User, Team
 from galaxy_ng.app.models.organization import Organization
@@ -35,44 +36,33 @@ class TestGalaxyTeamMemberRoleTransition(TestCase):
 
     def test_complete_migration_workflow(self):
         """Test the complete migration workflow from Galaxy Team Member to Team Member."""
+        # Get the RBAC model classes from django-ansible-base
         RoleDefinition = apps.get_model("dab_rbac", "RoleDefinition")
         RoleUserAssignment = apps.get_model("dab_rbac", "RoleUserAssignment")
         RoleTeamAssignment = apps.get_model("dab_rbac", "RoleTeamAssignment")
         ObjectRole = apps.get_model("dab_rbac", "ObjectRole")
 
-        # Step 1: Create initial state with Galaxy Team Member role
+        content_type = permission_registry.content_type_model.objects.get_for_model(Team)
+
+        # Step 1: Create the old "Galaxy Team Member" role that needs migration
         galaxy_role = RoleDefinition.objects.create_from_permissions(
             name="Galaxy Team Member",
             permissions=["view_team"],
             managed=True,
+            content_type=content_type,
         )
 
+        # Step 2: Get the target "Team Member" role (should already exist)
         team_role = RoleDefinition.objects.get(
             name="Team Member",
+            content_type=content_type,
         )
 
-        # Step 2: Create various types of assignments
-        RoleUserAssignment.objects.create(
-            role_definition=galaxy_role,
-            user=self.user1,
-            object_id=self.team.id,
-            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
-        )
+        # Step 3: Assign the Galaxy Team Member role to user1 for the test team
+        # This simulates an existing user with the old role name
+        galaxy_role.give_permission(self.user1, self.team)
 
-        RoleTeamAssignment.objects.create(
-            role_definition=galaxy_role,
-            team=self.team,
-            object_id=self.team.id,
-            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
-        )
-
-        ObjectRole.objects.create(
-            role_definition=galaxy_role,
-            object_id=self.team.id,
-            content_type=permission_registry.content_type_model.objects.get_for_model(Team),
-        )
-
-        # Step 3: Verify pre-migration state
+        # Step 4: Verify pre-migration state
         pre_migration_counts = {
             "user_assignments": RoleUserAssignment.objects.filter(
                 role_definition=galaxy_role
@@ -85,16 +75,17 @@ class TestGalaxyTeamMemberRoleTransition(TestCase):
             "team_role_exists": RoleDefinition.objects.filter(name="Team Member").exists(),
         }
 
+        # Verify test setup is correct
         self.assertEqual(pre_migration_counts["user_assignments"], 1)
-        self.assertEqual(pre_migration_counts["team_assignments"], 1)
+        self.assertEqual(pre_migration_counts["team_assignments"], 0)
         self.assertEqual(pre_migration_counts["object_roles"], 1)
         self.assertTrue(pre_migration_counts["galaxy_role_exists"])
         self.assertTrue(pre_migration_counts["team_role_exists"])
 
-        # Step 4: Run migration
+        # Step 5: Run the migration
         self._run_migration()
 
-        # Step 5: Verify post-migration state
+        # Step 6: Verify post-migration state
         post_migration_counts = {
             "user_assignments": RoleUserAssignment.objects.filter(
                 role_definition=team_role
@@ -112,19 +103,115 @@ class TestGalaxyTeamMemberRoleTransition(TestCase):
             ),
         }
 
-        # All assignments should be migrated to Team Member role
+        # Verify all assignments were migrated to Team Member role
         self.assertEqual(post_migration_counts["user_assignments"], 1)
-        self.assertEqual(post_migration_counts["team_assignments"], 1)
+        self.assertEqual(post_migration_counts["team_assignments"], 0)
         self.assertEqual(post_migration_counts["object_roles"], 1)
 
-        # Galaxy Team Member role should be deleted
+        # Verify the Galaxy Team Member role was deleted
         self.assertFalse(post_migration_counts["galaxy_role_exists"])
 
-        # Team Member role should still exist
+        # Verify Team Member role still exists
         self.assertTrue(post_migration_counts["team_role_exists"])
 
-        # No orphaned assignments should remain
+        # Verify no orphaned assignments remain
         self.assertEqual(post_migration_counts["orphaned_assignments"], 0)
+
+    def test_migration_with_duplicate_role_assignments(self):
+        """Test migration when a user has both Galaxy Team Member and Team Member roles."""
+        RoleDefinition = apps.get_model("dab_rbac", "RoleDefinition")
+        RoleUserAssignment = apps.get_model("dab_rbac", "RoleUserAssignment")
+        ObjectRole = apps.get_model("dab_rbac", "ObjectRole")
+
+        # Create both role definitions
+        galaxy_role = RoleDefinition.objects.create_from_permissions(
+            name="Galaxy Team Member",
+            permissions=["view_team"],
+            managed=True,
+        )
+
+        team_role = RoleDefinition.objects.get(
+            name="Team Member",
+        )
+
+        # Create object roles and assignments using give_permissions
+        content_type = permission_registry.content_type_model.objects.get_for_model(Team)
+
+        # user1 has BOTH Galaxy Team Member AND Team Member roles (duplicate scenario)
+        give_permissions(
+            apps,
+            galaxy_role,
+            users=[self.user1],
+            teams=[],
+            object_id=self.team.id,
+            content_type_id=content_type.id,
+        )
+
+        give_permissions(
+            apps,
+            team_role,
+            users=[self.user1],
+            teams=[],
+            object_id=self.team.id,
+            content_type_id=content_type.id,
+        )
+
+        # user2 has ONLY Galaxy Team Member role
+        give_permissions(
+            apps,
+            galaxy_role,
+            users=[self.user2],
+            teams=[],
+            object_id=self.team.id,
+            content_type_id=content_type.id,
+        )
+
+        # Verify pre-migration state
+        galaxy_user_assignments = RoleUserAssignment.objects.filter(
+            role_definition=galaxy_role
+        ).count()
+        team_user_assignments = RoleUserAssignment.objects.filter(
+            role_definition=team_role
+        ).count()
+
+        self.assertEqual(galaxy_user_assignments, 2)  # user1 and user2
+        self.assertEqual(team_user_assignments, 1)  # only user1
+
+        # Run migration
+        self._run_migration()
+
+        # Verify post-migration state
+        # Galaxy Team Member role should be deleted
+        self.assertFalse(RoleDefinition.objects.filter(name="Galaxy Team Member").exists())
+
+        # Team Member role should still exist
+        self.assertTrue(RoleDefinition.objects.filter(name="Team Member").exists())
+
+        # Both users should have Team Member role now
+        team_assignments = RoleUserAssignment.objects.filter(
+            role_definition=team_role,
+            object_id=self.team.id
+        )
+        self.assertEqual(team_assignments.count(), 2)
+
+        # Verify both users are in the assignments
+        assigned_users = set(team_assignments.values_list('user_id', flat=True))
+        self.assertEqual(assigned_users, {self.user1.id, self.user2.id})
+
+        # user1 should NOT have duplicate Team Member assignments
+        user1_team_assignments = RoleUserAssignment.objects.filter(
+            role_definition=team_role,
+            user=self.user1,
+            object_id=self.team.id
+        ).count()
+        self.assertEqual(user1_team_assignments, 1)
+
+        # No orphaned assignments should remain
+        orphaned_count = (
+            RoleUserAssignment.objects.filter(role_definition_id=galaxy_role.id).count()
+            + ObjectRole.objects.filter(role_definition_id=galaxy_role.id).count()
+        )
+        self.assertEqual(orphaned_count, 0)
 
     def test_migration_idempotency(self):
         """Test that running the migration multiple times is safe."""

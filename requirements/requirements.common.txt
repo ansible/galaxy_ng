@@ -10,7 +10,7 @@ aiofiles==23.2.1
     # via pulpcore
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.12.14
+aiohttp==3.10.11
     # via pulpcore
 aiosignal==1.3.2
     # via aiohttp
@@ -73,7 +73,7 @@ click==8.1.7
     # via
     #   black
     #   pulpcore
-cryptography==44.0.1
+cryptography==42.0.8
     # via
     #   ansible-core
     #   azure-storage-blob
@@ -118,7 +118,7 @@ django==4.2.25
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@894af11435d5a203255d81fbb15085f8b8feacc2
+django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@f3549ff17d8eb0de66670b1c3dc10d4ce44969b2
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -345,7 +345,7 @@ prometheus-client==0.21.1
     # via django-prometheus
 propcache==0.3.1
     # via yarl
-protobuf==4.25.8
+protobuf==4.25.3
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
