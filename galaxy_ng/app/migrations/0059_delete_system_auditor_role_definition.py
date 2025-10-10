@@ -1,4 +1,5 @@
 from django.db import migrations
+from galaxy_ng.app.migrations._dab_rbac import repair_mismatched_role_assignments
 
 
 def delete_system_auditor_role_definition(apps, schema_editor):
@@ -19,4 +20,5 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(delete_system_auditor_role_definition, migrations.RunPython.noop),
+        migrations.RunPython(repair_mismatched_role_assignments, migrations.RunPython.noop),
     ]

@@ -1,4 +1,5 @@
 import logging
+from itertools import chain
 
 from django.apps import apps as global_apps
 
@@ -53,23 +54,45 @@ def split_pulp_roles(apps, schema_editor):
 
     for corerole in Role.objects.all():
         split_roles = {}
+
+        # Compute the inferred content type of the role
+        inferred_content_type = pulp_role_to_single_content_type_or_none(corerole)
+
         for assignment_cls in (UserRole, GroupRole):
-            for pulp_assignment in assignment_cls.objects.filter(role=corerole, content_type__isnull=False):
-                if pulp_assignment.content_type_id not in split_roles:
+            # Filter assignments where content_type doesn't match the inferred content type
+            # This handles both cases: assignments with a different content type than inferred,
+            # and global assignments (content_type=None) when the role has an inferred type
+            assignments_to_split = assignment_cls.objects.filter(role=corerole)
+            if inferred_content_type:
+                # If the role has an inferred content type, only split assignments
+                # that don't match it (excluding None/global assignments)
+                assignments_to_split = assignments_to_split.exclude(content_type=inferred_content_type)
+            else:
+                # If the role has no inferred content type, split all object-level assignments
+                assignments_to_split = assignments_to_split.filter(content_type__isnull=False)
+
+            for pulp_assignment in assignments_to_split:
+                role_suffix = pulp_assignment.content_type.model if pulp_assignment.content_type else "global"
+                ct_id = pulp_assignment.content_type_id
+                if ct_id not in split_roles:
 
                     # Get all permissions relevant to this content model.
                     # If any model (like synclist) hasn't been registered in the permission
                     # system, it should not be split/recreated ...
-                    cls = apps.get_model(pulp_assignment.content_type.app_label, pulp_assignment.content_type.model)
-                    try:
-                        ct_codenames = combine_values(LocalValidators.permissions_allowed_for_role(cls))
-                    except ValidationError:
-                        continue
+                    if pulp_assignment.content_type:
+                        cls = apps.get_model(pulp_assignment.content_type.app_label, pulp_assignment.content_type.model)
+                        try:
+                            ct_codenames = combine_values(LocalValidators.permissions_allowed_for_role(cls))
+                        except ValidationError:
+                            continue
+                    else:
+                        # Global assignment
+                        ct_codenames = None
 
-                    # Make a new role for this special content model
+                    # Make a new role for this content model
                     new_data = {
                         'description': corerole.description,
-                        'name': f'{corerole.name}_{pulp_assignment.content_type.model}'
+                        'name': f'{corerole.name}_{role_suffix}'
                     }
                     new_role = Role(**new_data)
                     new_role.save()
@@ -82,9 +105,9 @@ def split_pulp_roles(apps, schema_editor):
                             continue
                         new_role.permissions.add(perm)
 
-                    split_roles[pulp_assignment.content_type_id] = new_role
+                    split_roles[ct_id] = new_role
 
-                pulp_assignment.role = split_roles[pulp_assignment.content_type_id]
+                pulp_assignment.role = split_roles[ct_id]
                 pulp_assignment.save(update_fields=['role'])
 
 
@@ -162,11 +185,26 @@ def migrate_role_assignments(apps, schema_editor):
         rd = RoleDefinition.objects.filter(name=user_role.role.name).first()
         if not rd:
             continue
-        if not user_role.object_id:
-            # system role
-            RoleUserAssignment.objects.create(role_definition=rd, user=user_role.user)
-        else:
+
+        # Validate content_type matches
+        if user_role.object_id:
+            # Object-level assignment: role should have matching content_type
+            if rd.content_type_id != user_role.content_type_id:
+                raise ValueError(
+                    f"Content type mismatch for user role assignment {user_role.id}: "
+                    f"role '{rd.name}' has content_type_id={rd.content_type_id}, "
+                    f"but assignment has content_type_id={user_role.content_type_id}"
+                )
             give_permissions(apps, rd, users=[user_role.user], object_id=user_role.object_id, content_type_id=user_role.content_type_id)
+        else:
+            # Global assignment: role should have no content_type
+            if rd.content_type is not None:
+                raise ValueError(
+                    f"Content type mismatch for global user role assignment {user_role.id}: "
+                    f"role '{rd.name}' has content_type={rd.content_type}, "
+                    f"but assignment is global (content_type=None)"
+                )
+            RoleUserAssignment.objects.create(role_definition=rd, user=user_role.user)
 
     # Migrate team/group role assignments
     for group_role in GroupRole.objects.all():
@@ -178,10 +216,25 @@ def migrate_role_assignments(apps, schema_editor):
         if actor is None:
             continue
 
-        if not group_role.object_id:
-            RoleTeamAssignment.objects.create(role_definition=rd, team=actor)
-        else:
+        # Validate content_type matches
+        if group_role.object_id:
+            # Object-level assignment: role should have matching content_type
+            if rd.content_type_id != group_role.content_type_id:
+                raise ValueError(
+                    f"Content type mismatch for team role assignment {group_role.id}: "
+                    f"role '{rd.name}' has content_type_id={rd.content_type_id}, "
+                    f"but assignment has content_type_id={group_role.content_type_id}"
+                )
             give_permissions(apps, rd, teams=[actor], object_id=group_role.object_id, content_type_id=group_role.content_type_id)
+        else:
+            # Global assignment: role should have no content_type
+            if rd.content_type is not None:
+                raise ValueError(
+                    f"Content type mismatch for global team role assignment {group_role.id}: "
+                    f"role '{rd.name}' has content_type={rd.content_type}, "
+                    f"but assignment is global (content_type=None)"
+                )
+            RoleTeamAssignment.objects.create(role_definition=rd, team=actor)
 
     # Create the local member role if it does not yet exist
     from ansible_base.rbac.permission_registry import permission_registry
@@ -203,3 +256,136 @@ def migrate_role_assignments(apps, schema_editor):
 
         if user_list:
             give_permissions(apps, member_rd, users=user_list, object_id=team.id, content_type_id=member_rd.content_type_id)
+
+
+def filter_mismatched_assignments(assignment_qs):
+    """
+    Filter assignment queryset to find mismatched assignments.
+    Works with either RoleUserAssignment or RoleTeamAssignment queryset.
+
+    Only finds: Role has content_type (specific), assignment doesn't (global)
+    This is the only mismatch case we repair - creates a global version of the role.
+    """
+    return assignment_qs.select_related('role_definition').filter(
+        role_definition__content_type__isnull=False,
+        content_type__isnull=True
+    )
+
+
+def get_all_mismatched_assignments(apps):
+    """
+    Get all mismatched role assignments (both user and team).
+    Returns an iterable chain of all mismatched assignments.
+    """
+    RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
+    RoleTeamAssignment = apps.get_model('dab_rbac', 'RoleTeamAssignment')
+
+    mismatched_user = filter_mismatched_assignments(RoleUserAssignment.objects.all())
+    mismatched_team = filter_mismatched_assignments(RoleTeamAssignment.objects.all())
+
+    return chain(mismatched_user, mismatched_team)
+
+
+def repair_mismatched_role_assignments(apps, schema_editor):
+    """
+    Repair RoleUserAssignment and RoleTeamAssignment objects where
+    the assignment's content_type differs from the role_definition's content_type.
+
+    This can happen when roles are migrated incorrectly, resulting in:
+    - Global assignments (content_type=None) on roles with a specific content_type
+    - Object-level assignments with a different content_type than the role_definition
+
+    The repair strategy:
+    - Find all mismatched assignments using proper NULL-aware queries
+    - Create new global role definitions as needed
+    - Move the assignments to the new role definitions
+    """
+    RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
+
+    logger.debug("Finding and repairing mismatched role assignments...")
+
+    # Track newly created global roles by original role ID
+    new_global_roles = {}
+
+    # Process all mismatched assignments
+    for assignment in get_all_mismatched_assignments(apps):
+        rd = assignment.role_definition
+
+        # Skip if assignment has non-null object_id (unexpected)
+        if assignment.object_id is not None:
+            assignment_type = "user" if hasattr(assignment, 'user') else "team"
+            logger.warning(f"Skipping {assignment_type} assignment {assignment.id}: unexpected non-null object_id")
+            continue
+
+        # Get or create the global version of this role
+        if rd.id not in new_global_roles:
+            permissions = list(rd.permissions.all())
+            if not permissions:
+                logger.warning(f"Skipping role '{rd.name}': no permissions found")
+                continue
+
+            # Validate that shared permissions are view-only
+            invalid_shared_perms = []
+            for perm in permissions:
+                api_slug = perm.api_slug if hasattr(perm, 'api_slug') else None
+                if api_slug and api_slug.startswith("shared.") and not api_slug.startswith("shared.view_"):
+                    invalid_shared_perms.append(api_slug)
+
+            if invalid_shared_perms:
+                all_api_slugs = [perm.api_slug if hasattr(perm, 'api_slug') else perm.codename for perm in permissions]
+                raise ValueError(
+                    f"Role '{rd.name}' contains invalid shared permissions. "
+                    f"Shared permissions must be view-only (start with 'shared.view_'). "
+                    f"Invalid permissions: {invalid_shared_perms}. "
+                    f"All permissions in role: {all_api_slugs}"
+                )
+
+            new_role_name = f"{rd.name}_global"
+
+            # Check if a role with this name already exists
+            existing_rd = RoleDefinition.objects.filter(name=new_role_name).first()
+            if existing_rd:
+                # Verify the existing role has the correct content_type (should be None for global)
+                if existing_rd.content_type is not None:
+                    raise ValueError(
+                        f"Role '{new_role_name}' already exists but has content_type={existing_rd.content_type}, "
+                        f"expected content_type=None for global role"
+                    )
+                logger.info(f"Using existing global role '{new_role_name}'")
+                new_rd = existing_rd
+            else:
+                permission_codenames = [perm.codename for perm in permissions]
+                logger.info(f"Creating new global role '{new_role_name}' with permissions: {permission_codenames}")
+                new_rd = RoleDefinition.objects.create(
+                    name=new_role_name,
+                    content_type=None,
+                    managed=False,
+                    description=f"{rd.description} (Auto-fixed from {rd.name})"
+                )
+                new_rd.permissions.set(permissions)
+
+            new_global_roles[rd.id] = new_rd
+
+        # Move assignment to new role
+        new_rd = new_global_roles[rd.id]
+
+        # Determine actor (user or team)
+        if hasattr(assignment, 'user'):
+            actor = assignment.user
+            actor_name = actor.username
+            assignment_type = "user"
+        else:
+            actor = assignment.team
+            actor_name = actor.name
+            assignment_type = "team"
+
+        logger.info(f"Moving {assignment_type} assignment {assignment.id} ({assignment_type}={actor_name}) to role '{new_rd.name}'")
+        assignment.delete()
+        new_rd.give_global_permission(actor)
+
+    if new_global_roles:
+        logger.info(f"Successfully created {len(new_global_roles)} global roles and remediated assignments")
+    else:
+        logger.info("No mismatched assignments found.")
+
+    logger.info("Role assignment remediation completed")
