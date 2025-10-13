@@ -453,7 +453,7 @@ six==1.17.0
     #   url-normalize
 smmap==5.0.2
     # via gitdb
-social-auth-app-django==5.4.3
+social-auth-app-django==5.6.0
     # via galaxy-ng (setup.py)
 social-auth-core==4.5.6
     # via
