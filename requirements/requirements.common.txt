@@ -398,7 +398,7 @@ python-gnupg==0.5.2
     # via pulpcore
 python-ipware==3.0.0
     # via django-ipware
-python-ldap==3.4.4
+python-ldap==3.4.5
     # via django-auth-ldap
 python3-openid==3.2.0
     # via social-auth-core
