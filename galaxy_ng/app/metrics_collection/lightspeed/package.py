@@ -29,6 +29,9 @@ class Package(InsightsAnalyticsPackage):
     def _get_rh_bucket(self):
         return os.environ["aws_bucket"]  # noqa: SIM112
 
+    def _get_rh_bucket_owner(self):
+        return os.environ.get("aws_bucket_owner")  # noqa: SIM112
+
     def get_s3_configured(self):
         return True
 
@@ -52,6 +55,14 @@ class Package(InsightsAnalyticsPackage):
                 region_name=self._get_rh_region(),
             )
 
+            extra_args = {}
+            bucket_owner = self._get_rh_bucket_owner()
+            if bucket_owner:
+                extra_args['ExpectedBucketOwner'] = bucket_owner
+
             return s3_client.upload_file(
-                self.tar_path, self._get_rh_bucket(), os.path.basename(self.tar_path).split("/")[-1]
+                self.tar_path,
+                self._get_rh_bucket(),
+                os.path.basename(self.tar_path).split("/")[-1],
+                ExtraArgs=extra_args if extra_args else None
             )
