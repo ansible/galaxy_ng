@@ -35,6 +35,8 @@ RUN set -ex; \
 
 COPY . /app
 
+WORKDIR /app
+
 # We need to force a consistent homedir for openshift, or it will
 # default to the unwritable root directory.
 ENV HOME="/app"
@@ -53,6 +55,10 @@ RUN set -ex; \
     pip3.11 install --config-settings editable_mode=compat --no-deps --editable /app && \
     chown -R galaxy ${VIRTUAL_ENV} && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
+    python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > /tmp/database_fields.symmetric.key && \
+    cd galaxy_ng && \
+    PULP_DB_ENCRYPTION_KEY=/tmp/database_fields.symmetric.key PULP_SETTINGS=/etc/pulp/setings.py django-admin compilemessages && \
+    rm -f /tmp/database_fields.symmetric.key && \
     install -Dm 0644 -o galaxy /app/ansible.cfg /etc/ansible/ansible.cfg && \
     install -Dm 0644 -o galaxy /app/docker/etc/settings.py /etc/pulp/settings.py && \
     install -Dm 0755 -o galaxy /app/docker/entrypoint.sh /entrypoint.sh && \
@@ -60,7 +66,6 @@ RUN set -ex; \
     install -Dm 0775 -o galaxy /app/galaxy-operator/bin/* /usr/bin/
 
 USER galaxy
-WORKDIR /app
 VOLUME [ "/var/lib/pulp", \
          "/etc/pulp", \
          "/tmp/ansible" ]
