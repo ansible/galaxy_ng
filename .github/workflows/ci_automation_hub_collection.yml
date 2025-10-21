@@ -9,6 +9,9 @@ on:
       - "docs/**"
       - "mkdocs.yml"
   push:
+    branches:
+      - "main"
+      - "stable-*"
     tags:
       - '**'
   schedule:
