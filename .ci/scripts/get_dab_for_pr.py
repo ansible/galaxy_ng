@@ -6,9 +6,10 @@ This script performs two main functions:
 1. Checks out a specific DAB branch/PR when referenced in galaxy_ng PRs
 2. Updates requirements.insights.txt to use the checked out DAB version
 
-The script has two checkout strategies:
+The script has three checkout strategies:
 - Primary: Scan PR body for "requires" links to specific DAB PRs
 - Secondary (fallback): Look for matching branch names in the DAB repository
+- Tertiary (default): Clone the devel branch when no specific requirements found
 """
 
 import os
@@ -166,4 +167,22 @@ if dab_checked_out:
 
     print("✅ Environment configured for DAB checkout")
 else:
-    print("\nNo DAB checkout performed. Using default django-ansible-base dependency.")
+    # --- (Default): Clone devel branch ---
+    print("\nCloning default devel branch...")
+    branch = "devel"
+    repo_url = f"https://github.com/{DAB_REPO}.git"
+
+    print(f"No specific DAB requirements found. Cloning default '{branch}' branch...")
+    print(f"Checking out '{branch}' from '{repo_url}'...")
+
+    exit_code = os.system(
+        f"cd .. && git clone {repo_url} -b {branch} --depth=1 django-ansible-base"
+    )
+
+    if exit_code == 0:
+        dab_checked_out = True
+        print(f"✅ Successfully checked out DAB branch '{branch}'")
+    else:
+        print(f"❌ Failed to checkout DAB branch '{branch}'")
+        print("⚠️ Continuing with default django-ansible-base dependency from PyPI")
+        dab_checked_out = False

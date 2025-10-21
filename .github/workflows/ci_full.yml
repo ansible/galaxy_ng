@@ -5,7 +5,7 @@ on:
     branches:
       - '**'
   push:
-    branches:
+    tags:
       - '**'
   schedule:
     # * is a special character in YAML so you have to quote this string
@@ -69,10 +69,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: checkout dab
+      - name: Checkout DAB branch if needed
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd ..
-          git clone https://github.com/ansible/django-ansible-base
+          pip install requests
+          .ci/scripts/get_dab_for_pr.py
 
       - name: install system dependencies
         run: |
