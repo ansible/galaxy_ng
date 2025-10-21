@@ -24,6 +24,59 @@ ROLEDEF_TO_PULP = {
 }
 
 
+def give_global_permission_to_actor(role_definition, actor, apps):
+    """
+    Migration-safe utility function to give global permission to an actor (user or team).
+
+    This function replicates the logic from RoleDefinition.give_global_permission()
+    but works with migration fake models that don't have custom methods.
+
+    Args:
+        role_definition: RoleDefinition instance (can be fake model from migration)
+        actor: User or Team instance to grant permission to
+        apps: Django apps registry from migration context
+    """
+    from django.conf import settings
+    from rest_framework.exceptions import ValidationError
+
+    if role_definition.content_type is not None:
+        raise ValidationError("Role definition content type must be null to assign globally")
+
+    # Get the assignment classes through apps registry (migration-safe)
+    RoleUserAssignment = apps.get_model("dab_rbac", "RoleUserAssignment")
+    RoleTeamAssignment = apps.get_model("dab_rbac", "RoleTeamAssignment")
+
+    if actor._meta.model_name == "user":
+        if not settings.ANSIBLE_BASE_ALLOW_SINGLETON_USER_ROLES:
+            raise ValidationError("Global roles are not enabled for users")
+        kwargs = {"object_role": None, "user": actor, "role_definition": role_definition}
+        cls = RoleUserAssignment
+    elif hasattr(actor, "_meta") and actor._meta.model_name == "team":
+        # In migration context, check by model name since isinstance checks might fail
+        if not settings.ANSIBLE_BASE_ALLOW_SINGLETON_TEAM_ROLES:
+            raise ValidationError("Global roles are not enabled for teams")
+        kwargs = {"object_role": None, "team": actor, "role_definition": role_definition}
+        cls = RoleTeamAssignment
+    else:
+        raise RuntimeError(
+            f'Cannot give permission for {actor} (type: {type(actor)}, model_name: {getattr(actor._meta, "model_name", "unknown")}), must be a user or team'
+        )
+
+    assignment, _ = cls.objects.get_or_create(**kwargs)
+
+    # Clear any cached permissions
+    if actor._meta.model_name == "user":
+        if hasattr(actor, "_singleton_permissions"):
+            delattr(actor, "_singleton_permissions")
+    else:
+        # when team permissions change, users in memory may be affected by this
+        # but there is no way to know what users, so we use a global flag
+        from ansible_base.rbac.evaluations import bound_singleton_permissions
+
+        bound_singleton_permissions._team_clear_signal = True
+
+    return assignment
+
 def pulp_role_to_single_content_type_or_none(pulprole):
     content_types = {perm.content_type for perm in pulprole.permissions.all()}
     if len(content_types) == 1:
@@ -381,7 +434,9 @@ def repair_mismatched_role_assignments(apps, schema_editor):
 
         logger.info(f"Moving {assignment_type} assignment {assignment.id} ({assignment_type}={actor_name}) to role '{new_rd.name}'")
         assignment.delete()
-        new_rd.give_global_permission(actor)
+
+        # Use migration-safe utility function instead of calling method on fake model
+        give_global_permission_to_actor(new_rd, actor, apps)
 
     if new_global_roles:
         logger.info(f"Successfully created {len(new_global_roles)} global roles and remediated assignments")
