@@ -22,7 +22,7 @@ pytestmark = pytest.mark.qa  # noqa: F821
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management(),
+    is_disabled_local_management,
     reason="this test relies on local resource management"
 )
 @pytest.mark.skipif(
@@ -113,7 +113,7 @@ def test_migration_fake_model_fix_user_assignment(
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management(),
+    is_disabled_local_management,
     reason="this test relies on local resource management"
 )
 @pytest.mark.skipif(
@@ -206,7 +206,7 @@ def test_migration_fake_model_fix_team_assignment(
 @pytest.mark.deployment_standalone
 @pytest.mark.min_hub_version("4.10")
 @pytest.mark.skipif(
-    is_disabled_local_management(),
+    is_disabled_local_management,
     reason="this test relies on local resource management"
 )
 @pytest.mark.skipif(
