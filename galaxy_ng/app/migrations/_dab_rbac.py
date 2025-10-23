@@ -78,6 +78,11 @@ def give_global_permission_to_actor(role_definition, actor, apps):
     return assignment
 
 def pulp_role_to_single_content_type_or_none(pulprole):
+    if pulprole.name.startswith('galaxy.') and pulprole.name.endswith('_global'):
+        # Special case for roles which were intentionally split out with the intent to be global
+        # These are created specifically to accomidate global assignments with roles that "look"
+        # like they should be object-based
+        return None
     content_types = {perm.content_type for perm in pulprole.permissions.all()}
     if len(content_types) == 1:
         return next(iter(content_types))
@@ -283,7 +288,7 @@ def migrate_role_assignments(apps, schema_editor):
             # Global assignment: role should have no content_type
             if rd.content_type is not None:
                 raise ValueError(
-                    f"Content type mismatch for global team role assignment {group_role.id}: "
+                    f"Content type mismatch for global team role assignment {group_role.pk}: "
                     f"role '{rd.name}' has content_type={rd.content_type}, "
                     f"but assignment is global (content_type=None)"
                 )
