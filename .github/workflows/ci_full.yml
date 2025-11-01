@@ -95,7 +95,7 @@ jobs:
         run: sed -i '2i <!-- PR ${{ github.event.number }} -->' coverage.xml
 
       - name: upload coverage as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage
           path: coverage.xml
