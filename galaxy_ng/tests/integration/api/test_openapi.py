@@ -14,7 +14,7 @@ import requests
 from openapi_spec_validator import validate_spec
 
 from ..utils import is_docker_installed
-from ..utils.iqe_utils import is_dev_env_standalone
+from ..utils.iqe_utils import is_dev_env_standalone, is_stage_environment
 
 pytestmark = pytest.mark.qa  # noqa: F821
 
@@ -147,6 +147,11 @@ def test_openapi_bindings_generation(ansible_config, galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.openapi
 @pytest.mark.all
+@pytest.mark.skipif(
+    is_stage_environment(),
+    reason="GALAXY_API_SPEC_REQUIRE_AUTHENTICATION is not configured in the CRC stage. "
+           "SSO already enforces authentication in CRC."
+)
 @pytest.mark.parametrize("endpoint", [
     # galaxy_ng endpoints
     "v3/openapi.json",

@@ -276,7 +276,8 @@ def is_ocp_env():
 
 
 def is_stage_environment():
-    return os.getenv("TESTS_AGAINST_STAGE", False)
+    test_against_stage = os.getenv("TESTS_AGAINST_STAGE", False)
+    return test_against_stage in ('true', 'True', 1, '1', True)
 
 
 def is_sync_testing():
