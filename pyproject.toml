@@ -171,7 +171,7 @@ builtins-ignorelist = ["id"]
 
 [tool.bumpversion]
 
-current_version = "4.11.2"
+current_version = "4.11.3"
 commit = false
 tag = false
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)((?P<release>[a-z]+))?((?P<build>\\d+))?"
