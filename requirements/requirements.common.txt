@@ -98,7 +98,7 @@ distro==1.9.0
     # via
     #   bindep
     #   galaxy-ng (setup.py)
-django==4.2.25
+django==4.2.26
     # via
     #   django-ansible-base
     #   django-auth-ldap
