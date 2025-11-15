@@ -457,7 +457,7 @@ class TestConfigureLogging:
         result = configure_logging(mock_settings)
 
         assert result["GALAXY_ENABLE_API_ACCESS_LOG"] is True
-        assert "galaxy_ng._vendor.automated_logging" in result["INSTALLED_APPS"]
+        assert "automated_logging" in result["INSTALLED_APPS"]
         assert "MIDDLEWARE" in result
         assert "LOGGING" in result
         assert "AUTOMATED_LOGGING" in result
