@@ -121,7 +121,10 @@ def associate_namespace_metadata(sender, instance, created, **kwargs):
 
 # ___ DAB RBAC ___
 
-SHARED_TEAM_ROLE = 'Team Member'
+# These roles should NOT sync to Pulp
+TEAM_ROLES = ['Team Member', 'Team Admin']
+# TODO (aoladele): keeping this variable for compatibility, but should replace its usage later
+SHARED_TEAM_ROLE = TEAM_ROLES[0]
 
 
 def create_managed_roles(*args, **kwargs) -> None:
@@ -521,8 +524,8 @@ def copy_dab_user_role_assignment(sender, instance, created, **kwargs):
     with dab_rbac_signals():
         if instance.role_definition.name in ('Organization Admin', 'Organization Member'):
             return  # exception to not synchronize these roles to any old roles
-        if instance.role_definition.name == SHARED_TEAM_ROLE and \
-                isinstance(instance, RoleUserAssignment):
+        if instance.role_definition.name in TEAM_ROLES and isinstance(instance, RoleUserAssignment):
+            # Add user to the team's Django Group to inherit all permissions assigned to the team
             instance.content_object.group.user_set.add(instance.user)
             return
         _apply_dab_assignment(instance)
@@ -536,12 +539,13 @@ def delete_dab_user_role_assignment(sender, instance, **kwargs):
     with dab_rbac_signals():
         if instance.role_definition.name in ('Organization Admin', 'Organization Member'):
             return  # exception to not synchronize these roles to any old roles
-        if instance.role_definition.name == SHARED_TEAM_ROLE and \
+        # Team roles grant inheritance via Django Group membership, not Pulp sync
+        if instance.role_definition.name in TEAM_ROLES and \
                 isinstance(instance, RoleUserAssignment) and \
                 instance.content_object:
-            # Only remove assignment if other role does not grant this, otherwise leave it
+            # Only remove from group if no other team roles grant membership
             other_assignment_qs = RoleUserAssignment.objects.filter(
-                role_definition__name=SHARED_TEAM_ROLE,
+                role_definition__name__in=TEAM_ROLES,
                 user=instance.user,
                 object_id=instance.object_id,
             )
