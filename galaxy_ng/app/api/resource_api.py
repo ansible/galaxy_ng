@@ -3,12 +3,17 @@ from ansible_base.resource_registry.registry import (
     ServiceAPIConfig,
     SharedResource,
 )
-from ansible_base.resource_registry.shared_types import OrganizationType, TeamType, UserType
-
+from ansible_base.resource_registry.shared_types import (
+    FeatureFlagType,
+    OrganizationType,
+    TeamType,
+    UserType,
+)
 # RBAC models
 from ansible_base.rbac.models import RoleDefinition
 from ansible_base.resource_registry.shared_types import RoleDefinitionType
 
+from ansible_base.feature_flags.models import AAPFlag
 from galaxy_ng.app import models
 
 
@@ -35,5 +40,9 @@ RESOURCE_LIST = (
     ResourceConfig(
         RoleDefinition,
         shared_resource=SharedResource(serializer=RoleDefinitionType, is_provider=True),
+    ),
+    ResourceConfig(
+        AAPFlag,
+        shared_resource=SharedResource(serializer=FeatureFlagType, is_provider=False),
     ),
 )
