@@ -88,9 +88,9 @@ class BuildPyCommand(_BuildPyCommand):
 
 
 # use full commit hash in place of DAB tag
-# i.e. 2.6.20251016 = f3549ff17d8eb0de66670b1c3dc10d4ce44969b2
+# i.e. 2.6.20251016 = 9db7237883e071724eb927b4dc56966d0ec28106
 django_ansible_base_branch = os.getenv(
-    'DJANGO_ANSIBLE_BASE_BRANCH', 'f3549ff17d8eb0de66670b1c3dc10d4ce44969b2'
+    'DJANGO_ANSIBLE_BASE_BRANCH', '9db7237883e071724eb927b4dc56966d0ec28106'
 )
 django_ansible_base_dependency = (
     'django-ansible-base[jwt-consumer,feature-flags] @ '
