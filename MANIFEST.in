@@ -8,6 +8,7 @@ include requirements/requirements.common.txt
 recursive-include galaxy_ng *.md
 graft galaxy_ng/app/webserver_snippets
 graft galaxy_ng/app/static
+graft galaxy_ng/app/templates
 graft galaxy_ng/locale
 exclude mkdocs.yml
 exclude netlify.toml

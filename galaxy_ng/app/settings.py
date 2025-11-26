@@ -105,6 +105,25 @@ MIDDLEWARE = [
 ]
 MIDDLEWARE += ('crum.CurrentRequestUserMiddleware',)
 
+# Template configuration for DRF login page override
+# Adds galaxy_ng templates directory to DIRS so templates/rest_framework/login_base.html
+# is found before DRF's default (rest_framework comes before galaxy_ng in INSTALLED_APPS)
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(os.path.dirname(__file__), "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    }
+]
+
 INSTALLED_APPS = [
     'rest_framework.authtoken',
     'crum',
