@@ -76,7 +76,7 @@ class Command(BaseCommand):
             )
 
         states = ("completed", "failed", "skipped", "canceled")
-        candidate_qs = Task.objects.filter(finished_at__lt=finished_before_dt, state__in=states)
+        candidate_qs = Task.objects.filter(pulp_created__lt=finished_before_dt, state__in=states)
 
         self.expected_total = candidate_qs.count()
         self.stdout.write(f"--- TOTAL TASKS {self.expected_total} ---")

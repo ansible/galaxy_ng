@@ -31,11 +31,13 @@ class TestPurgeTasksCommand(TestCase):
 
         rand_str = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
         for i in range(tasks):
-            Task.objects.create(
+            task = Task.objects.create(
                 name=f"custom.task.{i}.{rand_str}",
-                finished_at=_datetime,
+                pulp_created=_datetime,
                 state=state,
             )
+            task.pulp_created = _datetime
+            task.save()
 
     def _assert_tasks(self, num_tasks: int):
         self.assertEqual(Task.objects.count(), num_tasks)
@@ -71,7 +73,6 @@ class TestPurgeTasksCommand(TestCase):
         self._create_tasks(10, days=14)  # should persist
 
         self._assert_tasks(110)
-
         call_command("purge-tasks", "--days-before", "15")
 
         self._assert_tasks(10)
