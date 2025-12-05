@@ -84,6 +84,9 @@ x-common-env: &common-env
   HUB_USE_MOVE_ENDPOINT: 'true'
   CONTAINER_REGISTRY: 'localhost:5001'
 
+  # Galaxy Importer configuration
+  GALAXY_IMPORTER_ANSIBLE_LOCAL_TMP: '/tmp/ansible'
+
   # Unpin dependencies on setup.py if set to 0
   LOCK_REQUIREMENTS: 0
 

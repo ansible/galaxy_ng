@@ -77,6 +77,9 @@ x-common-env: &common-env
   HUB_API_ROOT: 'http://localhost:8080/api/automation-hub/'
   HUB_USE_MOVE_ENDPOINT: "true"
 
+  # Galaxy Importer configuration
+  GALAXY_IMPORTER_ANSIBLE_LOCAL_TMP: '/tmp/ansible'
+
 
   HUB_LOCAL: 0
   HUB_TEST_MARKS: deployment_cloud or all

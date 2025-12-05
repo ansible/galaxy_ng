@@ -404,7 +404,7 @@ def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
             "tags": ["database"],
         },
         extra_files={
-            "meta/runtime.yml": "requires_ansible: \">=2.10\"",
+            "meta/runtime.yml": "requires_ansible: \">=2.19\"",
             "tests/sanity/ignore-2.10.txt": IGNORE_CONTENT,
         },
     )

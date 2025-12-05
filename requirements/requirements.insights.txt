@@ -12,22 +12,22 @@ aiohappyeyeballs==2.6.1
     # via aiohttp
 aiohttp==3.10.11
     # via pulpcore
-aiosignal==1.3.2
+aiosignal==1.4.0
     # via aiohttp
-ansible-builder==3.1.0
+ansible-builder==3.1.1
     # via galaxy-importer
-ansible-compat==25.1.5
+ansible-compat==25.12.0
     # via ansible-lint
-ansible-core==2.18.4
+ansible-core==2.19.4
     # via
     #   ansible-compat
     #   ansible-lint
     #   galaxy-importer
-ansible-lint==24.12.2
+ansible-lint==25.12.0
     # via galaxy-importer
-app-common-python==0.2.7
+app-common-python==0.2.9
     # via -r requirements/requirements.insights.in
-asgiref==3.8.1
+asgiref==3.11.0
     # via django
 async-lru==2.0.5
     # via pulp-ansible
@@ -41,37 +41,38 @@ attrs==22.2.0
     #   galaxy-importer
     #   jsonschema
     #   referencing
-azure-core==1.33.0
+azure-core==1.36.0
     # via
     #   azure-storage-blob
     #   django-storages
-azure-storage-blob==12.25.1
+azure-storage-blob==12.27.1
     # via django-storages
 backoff==2.2.1
     # via pulpcore
 bindep==2.13.0
     # via ansible-builder
-black==25.1.0
+black==25.11.0
     # via ansible-lint
-boto3==1.37.29
+boto3==1.42.1
     # via
     #   -r requirements/requirements.insights.in
     #   django-storages
     #   galaxy-ng (setup.py)
     #   watchtower
-botocore==1.37.29
+botocore==1.42.1
     # via
     #   boto3
     #   s3transfer
-bracex==2.5.post1
+bracex==2.6
     # via wcmatch
-certifi==2025.1.31
+certifi==2025.11.12
     # via requests
-cffi==1.17.1
+cffi==2.0.0
     # via
+    #   ansible-lint
     #   cryptography
     #   pycares
-charset-normalizer==3.4.1
+charset-normalizer==3.4.4
     # via requests
 click==8.1.7
     # via
@@ -80,6 +81,7 @@ click==8.1.7
 cryptography==42.0.8
     # via
     #   ansible-core
+    #   ansible-lint
     #   azure-storage-blob
     #   django-ansible-base
     #   pulpcore
@@ -91,7 +93,7 @@ defusedxml==0.7.1
     #   odfpy
     #   python3-openid
     #   social-auth-core
-deprecated==1.2.18
+deprecated==1.3.1
     # via
     #   opentelemetry-api
     #   opentelemetry-exporter-otlp-proto-grpc
@@ -100,9 +102,10 @@ diff-match-patch==20241021
     # via django-import-export
 distro==1.9.0
     # via
+    #   ansible-lint
     #   bindep
     #   galaxy-ng (setup.py)
-django==4.2.26
+django==4.2.27
     # via
     #   django-ansible-base
     #   django-auth-ldap
@@ -114,6 +117,7 @@ django==4.2.26
     #   django-import-export
     #   django-lifecycle
     #   django-picklefield
+    #   django-prometheus
     #   django-storages
     #   djangorestframework
     #   drf-nested-routers
@@ -134,7 +138,7 @@ django-crum==0.7.9
     #   galaxy-ng (setup.py)
 django-filter==23.5
     # via pulpcore
-django-flags==5.0.13
+django-flags==5.1.0
     # via
     #   django-ansible-base
     #   galaxy-ng (setup.py)
@@ -146,9 +150,9 @@ django-ipware==6.0.5
     # via django-automated-logging
 django-lifecycle==1.1.2
     # via pulpcore
-django-picklefield==3.3
+django-picklefield==3.4.0
     # via django-automated-logging
-django-prometheus==2.3.1
+django-prometheus==2.4.1
     # via galaxy-ng (setup.py)
 django-storages[azure,boto3,s3]==1.14.6
     # via galaxy-ng (setup.py)
@@ -169,44 +173,43 @@ drf-spectacular==0.26.5
     # via
     #   galaxy-ng (setup.py)
     #   pulpcore
-dynaconf==3.2.11
+dynaconf==3.2.12
     # via
     #   django-ansible-base
     #   galaxy-ng (setup.py)
     #   pulpcore
 et-xmlfile==2.0.0
     # via openpyxl
-filelock==3.18.0
+filelock==3.20.0
     # via ansible-lint
 flake8==6.1.0
     # via galaxy-importer
-frozenlist==1.5.0
+frozenlist==1.8.0
     # via
     #   aiohttp
     #   aiosignal
-galaxy-importer==0.4.31
+galaxy-importer==0.4.36
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
 gitdb==4.0.12
     # via gitpython
-gitpython==3.1.44
+gitpython==3.1.45
     # via pulp-ansible
-googleapis-common-protos==1.69.2
+googleapis-common-protos==1.72.0
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-grpcio==1.71.0
+grpcio==1.76.0
     # via opentelemetry-exporter-otlp-proto-grpc
 gunicorn==23.0.0
     # via pulpcore
-idna==3.10
+idna==3.11
     # via
     #   requests
     #   yarl
 importlib-metadata==6.0.1
     # via
-    #   ansible-lint
     #   opentelemetry-api
     #   pulpcore
 inflection==0.5.1
@@ -227,9 +230,9 @@ jmespath==1.0.1
     #   botocore
 jq==1.6.0
     # via pulpcore
-json-stream==2.3.3
+json-stream==2.3.4
     # via pulpcore
-json-stream-rs-tokenizer==0.4.29
+json-stream-rs-tokenizer==0.4.32
     # via json-stream
 jsonschema==4.21.1
     # via
@@ -239,29 +242,29 @@ jsonschema==4.21.1
     #   drf-spectacular
     #   pulp-ansible
     #   pulp-container
-jsonschema-specifications==2024.10.1
+jsonschema-specifications==2025.9.1
     # via jsonschema
 logstash-formatter==0.5.17
     # via -r requirements/requirements.insights.in
-markdown==3.7
+markdown==3.10
     # via galaxy-importer
 markuppy==1.18
     # via tablib
-markupsafe==3.0.2
+markupsafe==3.0.3
     # via jinja2
 marshmallow==3.26.1
     # via django-automated-logging
 mccabe==0.7.0
     # via flake8
-multidict==6.3.2
+multidict==6.7.0
     # via
     #   aiohttp
     #   yarl
-mypy-extensions==1.0.0
+mypy-extensions==1.1.0
     # via black
-nh3==0.2.21
+nh3==0.3.2
     # via galaxy-importer
-oauthlib==3.2.2
+oauthlib==3.3.1
     # via
     #   requests-oauthlib
     #   social-auth-core
@@ -341,32 +344,32 @@ pathspec==0.12.1
     #   ansible-lint
     #   black
     #   yamllint
-pbr==6.1.1
+pbr==7.0.3
     # via bindep
-pillow==11.0.0
+pillow==11.1.0
     # via pulp-ansible
-platformdirs==4.3.7
+platformdirs==4.5.0
     # via black
-prometheus-client==0.21.1
+prometheus-client==0.23.1
     # via django-prometheus
-propcache==0.3.1
+propcache==0.4.1
     # via yarl
 protobuf==4.25.3
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
     #   pulpcore
-psycopg[binary]==3.2.3
+psycopg[binary]==3.2.13
     # via pulpcore
-psycopg-binary==3.2.3
+psycopg-binary==3.2.13
     # via psycopg
 pulp-ansible==0.25.1
     # via galaxy-ng (setup.py)
 pulp-container==2.19.5
     # via galaxy-ng (setup.py)
-pulp-glue==0.29.3
+pulp-glue==0.29.4
     # via pulpcore
-pulpcore==3.49.40
+pulpcore==3.49.46
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -377,11 +380,13 @@ pyasn1==0.6.1
     #   python-ldap
 pyasn1-modules==0.4.2
     # via python-ldap
-pycares==4.6.0
-    # via aiodns
+pycares==4.8.0
+    # via
+    #   aiodns
+    #   pulpcore
 pycodestyle==2.11.1
     # via flake8
-pycparser==2.22
+pycparser==2.23
     # via cffi
 pyflakes==3.1.0
     # via flake8
@@ -404,10 +409,12 @@ python-gnupg==0.5.2
     # via pulpcore
 python-ipware==3.0.0
     # via django-ipware
-python-ldap==3.4.4
+python-ldap==3.4.5
     # via django-auth-ldap
 python3-openid==3.2.0
     # via social-auth-core
+pytokens==0.3.0
+    # via black
 pyyaml==6.0.1
     # via
     #   ansible-builder
@@ -422,11 +429,12 @@ pyyaml==6.0.1
     #   yamllint
 redis==5.0.2
     # via pulpcore
-referencing==0.36.2
+referencing==0.37.0
     # via
+    #   ansible-lint
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
+requests==2.32.5
     # via
     #   azure-core
     #   django-ansible-base
@@ -438,17 +446,19 @@ requests==2.32.3
     #   social-auth-core
 requests-oauthlib==2.0.0
     # via social-auth-core
-resolvelib==1.0.1
+resolvelib==1.2.1
     # via ansible-core
-rpds-py==0.24.0
+rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.10
+ruamel-yaml==0.18.16
     # via ansible-lint
 ruamel-yaml-clib==0.2.15
-    # via ruamel-yaml
-s3transfer==0.11.4
+    # via
+    #   ansible-lint
+    #   ruamel-yaml
+s3transfer==0.16.0
     # via boto3
 semantic-version==2.10.0
     # via
@@ -456,18 +466,17 @@ semantic-version==2.10.0
     #   pulp-ansible
 six==1.17.0
     # via
-    #   azure-core
     #   python-dateutil
     #   url-normalize
 smmap==5.0.2
     # via gitdb
 social-auth-app-django==5.4.3
     # via galaxy-ng (setup.py)
-social-auth-core==4.5.6
+social-auth-core==4.7.0
     # via
     #   galaxy-ng (setup.py)
     #   social-auth-app-django
-sqlparse==0.5.3
+sqlparse==0.5.4
     # via
     #   django
     #   django-ansible-base
@@ -479,18 +488,21 @@ tablib[html,ods,xls,xlsx,yaml]==3.5.0
     # via
     #   django-import-export
     #   pulpcore
-typing-extensions==4.13.1
+typing-extensions==4.15.0
     # via
+    #   aiosignal
     #   azure-core
     #   azure-storage-blob
+    #   grpcio
+    #   opentelemetry-api
     #   opentelemetry-sdk
     #   psycopg
     #   referencing
-uritemplate==4.1.1
+uritemplate==4.2.0
     # via drf-spectacular
 url-normalize==1.4.3
     # via pulpcore
-urllib3==2.3.0
+urllib3==2.5.0
     # via
     #   botocore
     #   requests
@@ -498,25 +510,25 @@ uuid6==2024.1.12
     # via pulpcore
 watchtower==3.4.0
     # via -r requirements/requirements.insights.in
-wcmatch==10.0
+wcmatch==10.1
     # via ansible-lint
 whitenoise==6.6.0
     # via pulpcore
-wrapt==1.17.2
+wrapt==1.17.3
     # via
     #   deprecated
     #   opentelemetry-instrumentation
-xlrd==2.0.1
+xlrd==2.0.2
     # via tablib
 xlwt==1.3.0
     # via tablib
-yamllint==1.37.0
+yamllint==1.37.1
     # via ansible-lint
 yarl==1.15.2
     # via
     #   aiohttp
     #   pulpcore
-zipp==3.21.0
+zipp==3.23.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
