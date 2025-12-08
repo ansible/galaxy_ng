@@ -23,10 +23,10 @@ COPY requirements/requirements.insights.txt /tmp/requirements.txt
 # NOTE: en_US.UTF-8 locale is provided by glibc-langpack-en
 RUN set -ex; \
     DNF="dnf -y --disableplugin=subscription-manager" && \
-    INSTALL_PKGS="glibc-langpack-en git-core libpq python3.11 python3.11-pip gettext skopeo" && \
-    INSTALL_PKGS_BUILD="gcc libpq-devel python3.11-devel openldap-devel" && \
+    INSTALL_PKGS="glibc-langpack-en git-core libpq python3.12 python3.12-pip gettext skopeo" && \
+    INSTALL_PKGS_BUILD="gcc libpq-devel python3.12-devel openldap-devel" && \
     LANG=C ${DNF} install ${INSTALL_PKGS} ${INSTALL_PKGS_BUILD} && \
-    python3.11 -m venv "${VIRTUAL_ENV}" && \
+    python3.12 -m venv "${VIRTUAL_ENV}" && \
     PYTHON="${VIRTUAL_ENV}/bin/python3" && \
     ${PYTHON} -m pip install -U pip wheel && \
     ${PYTHON} -m pip install -r /tmp/requirements.txt && \
@@ -52,7 +52,7 @@ RUN set -ex; \
                                /etc/pulp/{certs,keys} \
                                /tmp/ansible && \
     install -dm 0700 -o galaxy /etc/pulp/gnupg && \
-    pip3.11 install --config-settings editable_mode=compat --no-deps --editable /app && \
+    pip3.12 install --config-settings editable_mode=compat --no-deps --editable /app && \
     chown -R galaxy ${VIRTUAL_ENV} && \
     PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
     python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > /tmp/database_fields.symmetric.key && \

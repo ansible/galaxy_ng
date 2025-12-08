@@ -30,7 +30,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: install and run lint-po
         run: |
@@ -49,7 +49,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install requirements
         run: pip3 install -r lint_requirements.txt
@@ -66,7 +66,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - uses: actions/checkout@v5
         with:
@@ -89,7 +89,7 @@ jobs:
         run: pip3 install tox coverage[toml]
 
       - name: run the unit tests
-        run: tox --colored yes -e py311
+        run: tox --colored yes -e py312
 
       - name: Inject PR number into coverage.xml
         run: sed -i '2i <!-- PR ${{ github.event.number }} -->' coverage.xml

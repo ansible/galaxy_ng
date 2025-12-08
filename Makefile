@@ -173,7 +173,7 @@ push-test-images:   ## Pushes a set of test container images
 test/unit:  ## Run unit tests
 	# if tox is not found raise a warning and install it
 	@which tox || (echo "tox not found, installing it now" && pip install tox)
-	tox -e py311
+	tox -e py312
 
 .PHONY: test/integration/standalone
 test/integration/standalone:  ## Run standalone integration tests
