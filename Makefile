@@ -234,7 +234,7 @@ test/integration/insights:  ## Run insights integration tests
 	# if pytest is not found raise a warning and install it
 	@which pytest || (echo "pytest not found, installing it now" && pip install -r integration_requirements.txt)
 	@echo "Running insights integration tests"
-	HUB_LOCAL=1 \
+	HUB_LOCAL=0 \
 	HUB_API_ROOT=http://localhost:8080/api/automation-hub/ \
 	HUB_AUTH_URL=http://localhost:8080/auth/realms/redhat-external/protocol/openid-connect/token \
     HUB_USE_MOVE_ENDPOINT="true" \
