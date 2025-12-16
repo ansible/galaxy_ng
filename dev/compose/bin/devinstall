@@ -18,9 +18,9 @@ for item in "${SRC_PATH_LIST[@]}"; do
         # projects still using `setup.py`, in the case it was dynaconf 3.2.x, once all relevant deps migrate
         # to pyproject.toml that parameter can be removed.
         if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then
-            pip3.11 install --config-settings editable_mode=compat --no-cache-dir --no-deps --editable "$src_path" >/dev/null
+            pip3.12 install --config-settings editable_mode=compat --no-cache-dir --no-deps --editable "$src_path" >/dev/null
         else
-            pip3.11 install --config-settings editable_mode=compat --no-cache-dir --editable "$src_path" >/dev/null
+            pip3.12 install --config-settings editable_mode=compat --no-cache-dir --editable "$src_path" >/dev/null
         fi
 
         # if running as root user, set permissions on /src/${item} to be owned by user named galaxy

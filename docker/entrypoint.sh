@@ -28,9 +28,9 @@ install_local_deps() {
             log_message "Installing path ${item} in editable mode."
 
             if [[ "${LOCK_REQUIREMENTS}" -eq "1" ]]; then
-                pip3.11 install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
+                pip3.12 install --no-cache-dir --no-deps --editable "$src_path" >/dev/null
             else
-                pip3.11 install --no-cache-dir --editable "$src_path" >/dev/null
+                pip3.12 install --no-cache-dir --editable "$src_path" >/dev/null
             fi
 
         else
