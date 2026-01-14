@@ -99,10 +99,10 @@ django_ansible_base_dependency = (
 
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
-    "pulpcore>=3.49.40,<3.50.0",
-    "pulp_ansible>=0.25.1,<0.26",
-    "pulp-container>=2.19.2,<2.20.0",
-    "django>=4.2.26,<4.3",
+    "pulpcore>=3.73.15,<3.74",
+    "pulp_ansible>=0.28.1,<0.29",
+    "pulp-container>=2.26.0,<2.27",
+    "django>=4.2.27,<4.3",
     "django-prometheus>=2.0.0",
     "social-auth-core>=4.4.2",
     "social-auth-app-django>=5.2.0",
@@ -117,6 +117,7 @@ requirements = [
     "django-crum==0.7.9",
     "django-automated-logging~=6.2",
     "django-storages[azure,boto3,s3]",
+    "aiodns<3.2.0",  # 3.2.0 has a breaking API change that's incompatible with aiohttp 3.10.11
 ]
 
 

@@ -81,6 +81,9 @@ def collections_query():
 
 
 def collection_versions_query():
+    # Note: is_highest was moved from CollectionVersion to CrossRepositoryCollectionVersionIndex
+    # in pulp_ansible. We join to that table to get the is_highest value.
+    # Note: tags is now an ArrayField on CollectionVersion (no longer a separate Tag model/table)
     return """
         SELECT "ansible_collectionversion"."content_ptr_id" AS uuid,
                "core_content"."pulp_created",
@@ -92,31 +95,44 @@ def collection_versions_query():
                "ansible_collectionversion"."license",
                "ansible_collectionversion"."version",
                "ansible_collectionversion"."requires_ansible",
-               "ansible_collectionversion"."is_highest",
-               "ansible_collectionversion"."repository"
+               "ansible_crossrepositorycollectionversionindex"."is_highest",
+               "ansible_collectionversion"."repository",
+               "ansible_collectionversion"."tags"
         FROM "ansible_collectionversion"
         INNER JOIN "core_content" ON (
             "ansible_collectionversion"."content_ptr_id" = "core_content"."pulp_id"
+            )
+        LEFT OUTER JOIN "ansible_crossrepositorycollectionversionindex" ON (
+            "ansible_collectionversion"."content_ptr_id" =
+            "ansible_crossrepositorycollectionversionindex"."collection_version_id"
             )
     """
 
 
 def collection_version_tags_query():
+    # DEPRECATED: Tags are now stored as an ArrayField on CollectionVersion.
+    # The ansible_collectionversion_tags through table no longer exists.
+    # This function is kept for backward compatibility but returns no data.
+    # Use collection_versions_query() which includes the tags array field.
     return """
-        SELECT id,
-               collectionversion_id AS collection_version_id,
-               tag_id
-        FROM ansible_collectionversion_tags
+        SELECT NULL::bigint AS id,
+               NULL::uuid AS collection_version_id,
+               NULL::text AS tag_id
+        WHERE false
     """
 
 
 def collection_tags_query():
+    # DEPRECATED: The ansible_tag table no longer exists.
+    # Tags are now stored as an ArrayField on CollectionVersion.
+    # This function is kept for backward compatibility but returns no data.
+    # Use collection_versions_query() which includes the tags array field.
     return """
-            SELECT pulp_id AS uuid,
-                   pulp_created,
-                   pulp_last_updated,
-                   name
-            FROM ansible_tag
+        SELECT NULL::uuid AS uuid,
+               NULL::timestamp AS pulp_created,
+               NULL::timestamp AS pulp_last_updated,
+               NULL::text AS name
+        WHERE false
     """
 
 

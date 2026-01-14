@@ -2,6 +2,7 @@ import logging
 import yaml
 import sys
 import time
+import uuid
 
 import django_guid
 from django.contrib.auth import get_user_model
@@ -21,7 +22,7 @@ from pulpcore.plugin.constants import TASK_FINAL_STATES, TASK_STATES
 
 
 # Set logging_uid, this does not seem to get generated when task called via management command
-django_guid.set_guid(django_guid.utils.generate_guid())
+django_guid.set_guid(str(uuid.uuid4()))
 
 
 logger = logging.getLogger(__name__)

@@ -1,10 +1,12 @@
+import uuid
+
 import django_guid
 from django.core.management.base import BaseCommand
 from galaxy_ng.app.api.v1.tasks import legacy_sync_from_upstream
 
 
 # Set logging_uid, this does not seem to get generated when task called via management command
-django_guid.set_guid(django_guid.utils.generate_guid())
+django_guid.set_guid(str(uuid.uuid4()))
 
 
 class Command(BaseCommand):

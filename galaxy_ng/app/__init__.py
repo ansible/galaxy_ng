@@ -28,6 +28,7 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
         )
 
         add_required_dab_attributes_to_models()
+        fix_charfield_max_length_for_dab_check()
 
 
 def add_required_dab_attributes_to_models():
@@ -68,9 +69,6 @@ def add_required_dab_attributes_to_models():
             "reverse_name": "content-ansible/collection_deprecations-detail"
         },
         pulp_ansible_models.AnsibleNamespaceMetadata: {
-            "summary_fields": common_summary_fields,
-        },
-        pulp_ansible_models.Tag: {
             "summary_fields": common_summary_fields,
         },
         pulp_ansible_models.AnsibleNamespace: {
@@ -176,3 +174,37 @@ def add_required_dab_attributes_to_models():
 
         if "reverse_name" in data and getattr(model_class, "get_absolute_url", None) is None:
             model_class.add_to_class("get_absolute_url", get_absolute_url)
+
+
+def fix_charfield_max_length_for_dab_check():
+    """Fix CharField fields without max_length to pass DAB's ansible_base.E001 check.
+
+    django-ansible-base has a system check that requires all CharField fields to have
+    max_length set. Some pulpcore models have CharField fields without max_length
+    (using TextField-like behavior). This patches those fields to satisfy the check.
+    """
+    import django.apps
+    from django.db import models
+
+    # Map of (model_name, field_name) -> max_length to patch
+    # These are pulpcore models with CharField fields that don't have max_length
+    fields_to_patch = {
+        ('OpenPGPSignature', 'signers_user_id'): 1024,
+        ('Manifest', 'type'): 255,
+        ('OpenPGPUserID', 'user_id'): 1024,
+    }
+
+    for model in django.apps.apps.get_models():
+        model_name = model.__name__
+        for field in model._meta.fields:
+            key = (model_name, field.name)
+            if (
+                key in fields_to_patch
+                and isinstance(field, models.CharField)
+                and field.max_length is None
+            ):
+                field.max_length = fields_to_patch[key]
+                logger.debug(
+                    f"Patched {model_name}.{field.name} CharField max_length "
+                    f"to {field.max_length} for DAB compatibility"
+                )

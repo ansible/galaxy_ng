@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, ValidationError
 
 from pulpcore.plugin.util import extract_pk
-from pulpcore.plugin.access_policy import AccessPolicyFromDB
+from pulpcore.plugin.access_policy import AccessPolicyFromSettings
 from pulpcore.plugin.models.role import GroupRole, UserRole
 from pulpcore.plugin import models as core_models
 from pulpcore.plugin.util import get_objects_for_user
@@ -18,7 +18,6 @@ from pulpcore.plugin.util import get_objects_for_user
 from pulp_ansible.app import models as ansible_models
 
 from pulp_container.app import models as container_models
-from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
 
 from galaxy_ng.app import models
 from galaxy_ng.app.api.v1.models import LegacyNamespace
@@ -60,8 +59,15 @@ class MockPulpAccessPolicy:
     queryset_scoping = None
 
     def __init__(self, access_policy):
+        self._access_policy = access_policy
         for x in access_policy:
             setattr(self, x, access_policy[x])
+
+    def __getitem__(self, key):
+        return self._access_policy[key]
+
+    def get(self, key, default=None):
+        return self._access_policy.get(key, default)
 
 
 class GalaxyStatements:
@@ -102,14 +108,14 @@ class GalaxyStatements:
 GALAXY_STATEMENTS = GalaxyStatements()
 
 
-class AccessPolicyBase(AccessPolicyFromDB):
+class AccessPolicyBase(AccessPolicyFromSettings):
     """
     This class is capable of loading access policy statements from galaxy_ng's hardcoded list of
-    statements as well as from pulp's access policy database table. Priority is given to statements
+    statements as well as from pulp viewsets' DEFAULT_ACCESS_POLICY. Priority is given to statements
     that are found in the hardcoded list of statements, so if a view name for a pulp viewset is
-    found there, it will be loaded over whatever is in the database. If no viewset is found that
-    matches the pulp viewset name, the statements will be loaded from the database as they would
-    normally be loaded in pulp ansible.
+    found there, it will be loaded over whatever is on the viewset. If no viewset is found that
+    matches the pulp viewset name, the statements will be loaded from the viewset's
+    DEFAULT_ACCESS_POLICY as they would normally be loaded in pulp ansible.
 
     This class has two main functions.
     1. It is configured as the default permission class in settings.py. This means it will be used
@@ -342,6 +348,8 @@ class AccessPolicyBase(AccessPolicyFromDB):
         Check if the user has model or object-level permissions
         on the source and destination repositories.
         """
+        from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
+
         if request.user.has_perm(permission):
             return True
 
@@ -490,6 +498,8 @@ class AccessPolicyBase(AccessPolicyFromDB):
         Validate that collections are being added with signatures to approved repos
         when signatures are required.
         """
+        from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
+
         repo = view.get_object()
         repo_version = repo.latest_version()
 

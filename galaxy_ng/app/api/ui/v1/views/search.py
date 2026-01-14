@@ -1,4 +1,3 @@
-from django.contrib.postgres.aggregates import JSONBAgg
 from django.contrib.postgres.search import SearchQuery
 from django.db.models import (
     Exists,
@@ -228,7 +227,7 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
                 namespace_name=F("namespace"),
                 description_text=F("description"),
                 platform_names=Value([], JSONField()),  # There is no platforms for collections
-                tag_names=JSONBAgg("tags__name"),
+                tag_names=F("tags"),
                 content_type=Value("collection"),
                 last_updated=F("timestamp_of_interest"),
                 deprecated=Exists(deprecated_qs),
@@ -242,7 +241,7 @@ class SearchListView(api_base.GenericViewSet, mixins.ListModelMixin):
                 relevance=relevance,
             )
             .values(*QUERYSET_VALUES)
-            .filter(is_highest=True)
+            .filter(ansible_crossrepositorycollectionversionindex__is_highest=True)
         )
         return qs
 

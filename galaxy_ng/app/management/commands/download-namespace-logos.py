@@ -1,5 +1,7 @@
 import sys
 import time
+import uuid
+
 import django_guid
 
 from django.core.management.base import BaseCommand
@@ -11,7 +13,7 @@ from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.tasks.namespaces import _create_pulp_namespace
 
 # Set logging_uid, this does not seem to get generated when task called via management command
-django_guid.set_guid(django_guid.utils.generate_guid())
+django_guid.set_guid(str(uuid.uuid4()))
 
 
 class Command(BaseCommand):

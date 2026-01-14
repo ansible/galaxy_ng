@@ -636,7 +636,7 @@ def configure_renderers(settings) -> dict[str, Any]:
         Add CustomBrowsableAPI only for community (galaxy.ansible.com, galaxy-stage, galaxy-dev)"
     """
     if re.search(
-        r'galaxy(-dev|-stage)*.ansible.com', settings.get('CONTENT_ORIGIN', "")
+        r'galaxy(-dev|-stage)*.ansible.com', settings.get('CONTENT_ORIGIN') or ""
     ):
         value = settings.get("REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES", [])
         value.append('galaxy_ng.app.renderers.CustomBrowsableAPIRenderer')

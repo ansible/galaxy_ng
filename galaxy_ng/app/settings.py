@@ -156,6 +156,66 @@ LOGGING = {
 
 AUTH_USER_MODEL = 'galaxy.User'
 
+# =============================================================================
+# SILENCED SYSTEM CHECKS
+# =============================================================================
+# Django and django-ansible-base perform system checks at startup. Some checks
+# report errors for conditions that are benign in our specific configuration.
+# We silence these specific checks rather than modifying models, which would
+# require database migrations.
+#
+# IMPORTANT: Only silence checks that have been verified to be false positives
+# in the Galaxy NG context. Each silenced check should be documented here.
+# =============================================================================
+SILENCED_SYSTEM_CHECKS = [
+    # -------------------------------------------------------------------------
+    # ansible_base.E001 - CharField max_length validation
+    # -------------------------------------------------------------------------
+    # django-ansible-base validates that all CharField fields have max_length
+    # set. Some pulpcore models (OpenPGPSignature, Manifest, OpenPGPUserID)
+    # use CharField without max_length (TextField-like behavior). These are
+    # third-party models we cannot modify directly.
+    #
+    # Instead of silencing, we patch these fields at runtime in:
+    # galaxy_ng/app/__init__.py::fix_charfield_max_length_for_dab_check()
+    #
+    # Keeping this comment for documentation - the fix is applied at runtime.
+    # 'ansible_base.E001',
+
+    # -------------------------------------------------------------------------
+    # fields.E304 - Reverse accessor clash between auth.User and galaxy.User
+    # -------------------------------------------------------------------------
+    # Error message:
+    #   auth.User.groups: (fields.E304) Reverse accessor 'Group.user_set' for
+    #   'auth.User.groups' clashes with reverse accessor for 'galaxy.User.groups'
+    #
+    # Why this occurs:
+    #   - Django's django.contrib.auth app registers auth.User model
+    #   - Galaxy NG defines a custom User model (galaxy.User) via AUTH_USER_MODEL
+    #   - Both models inherit from AbstractUser which defines:
+    #       groups = ManyToManyField(Group, related_name='user_set', ...)
+    #   - This creates two 'user_set' reverse accessors on auth.Group
+    #
+    # Why it's safe to silence:
+    #   - AUTH_USER_MODEL = 'galaxy.User' ensures all Django auth operations
+    #     use Galaxy's User model exclusively
+    #   - The auth.User model is registered but never instantiated or queried
+    #   - At runtime, Group.user_set correctly refers to galaxy.User instances
+    #   - This is a known Django pattern when using custom User models
+    #     (see: https://docs.djangoproject.com/en/4.2/topics/auth/customizing/)
+    #
+    # Alternative approach (not taken):
+    #   We could override the groups/user_permissions fields in galaxy.User with
+    #   a custom related_name (e.g., 'galaxy_user_set'), but this would:
+    #   1. Require a database migration to alter the ManyToMany through tables
+    #   2. Require updating all code that accesses group.user_set
+    #   3. Break compatibility with code expecting the standard 'user_set' name
+    #
+    # By silencing this check, we maintain Django's standard behavior and avoid
+    # unnecessary migrations and code changes.
+    'fields.E304',
+]
+
 # FIXME(cutwater): 1. Rename GALAXY_API_ROOT in pulp-ansible to ANSIBLE_API_ROOT
 #                  2. Rename API_PATH_PREFIX to GALAXY_API_ROOT
 GALAXY_API_PATH_PREFIX = "/api/galaxy"
@@ -505,3 +565,5 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # Referer
 SECURE_REFERRER_POLICY = "same-origin"
+
+ENABLED_PLUGINS = ['pulp_ansible', 'pulp_file', 'pulp_container', 'galaxy_ng']

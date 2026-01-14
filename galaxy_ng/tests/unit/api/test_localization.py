@@ -82,10 +82,11 @@ class TestLocalization(BaseTestCase):
                 '未找到。'
             )
 
+            # Czech translation is now available in DRF 3.15+
             response = self._switch_lang_get('cs')
             self.assertEqual(
                 response,
-                'Not found.'
+                'Nenalezeno.'
             )
 
     @unittest.skip("FIXME - broken in github action")

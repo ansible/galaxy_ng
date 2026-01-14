@@ -1,5 +1,6 @@
 from gettext import gettext as _
 from datetime import datetime, timedelta, timezone
+import uuid
 
 import django_guid
 from django.core.management.base import BaseCommand, CommandError
@@ -11,7 +12,7 @@ from pulpcore.plugin.models import Task
 
 
 # Set logging_uid, this does not seem to get generated when task called via management command
-django_guid.set_guid(django_guid.utils.generate_guid())
+django_guid.set_guid(str(uuid.uuid4()))
 
 DELETE_LIMIT = 1000
 

@@ -1,6 +1,6 @@
 from unittest.mock import patch, mock_open, MagicMock
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TransactionTestCase
 import os
 
 s3_details = {
@@ -11,7 +11,17 @@ s3_details = {
 }
 
 
-class TestMetricsCollectionLightspeedCommand(TestCase):
+class TestMetricsCollectionLightspeedCommand(TransactionTestCase):
+    """Tests for the metrics-collection-lightspeed management command.
+
+    Uses TransactionTestCase because the command runs raw SQL COPY queries
+    against database tables (ansible_collection, core_content, etc.) that
+    require actual database access outside of a transaction wrapper.
+    """
+
+    # Avoid reset_sequences which can cause issues with signal handlers
+    reset_sequences = False
+
     def setUp(self):
         super().setUp()
         self.api_status_patch = patch('galaxy_ng.app.metrics_collection.common_data.api_status')
@@ -20,6 +30,12 @@ class TestMetricsCollectionLightspeedCommand(TestCase):
 
     def tearDown(self):
         self.api_status_patch.stop()
+
+    def _fixture_teardown(self):
+        # Override to avoid calling flush which triggers post_migrate signals
+        # that fail with _populate_access_policies() missing 'apps' argument.
+        # Since we're not creating test data, we don't need to flush.
+        pass
 
     def test_command_output(self):
         call_command("metrics-collection-lightspeed")

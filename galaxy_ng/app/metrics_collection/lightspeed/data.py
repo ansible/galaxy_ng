@@ -53,6 +53,9 @@ def ansible_collection_table(since, full_path, until, **kwargs):
     description="Data on ansible_collectionversion",
 )
 def ansible_collectionversion_table(since, full_path, until, **kwargs):
+    # Note: is_highest was moved from CollectionVersion to CrossRepositoryCollectionVersionIndex
+    # in pulp_ansible. We join to that table to get the is_highest value.
+    # Note: tags is now an ArrayField on CollectionVersion (no longer a separate through table)
     source_query = """COPY (
             SELECT "ansible_collectionversion"."content_ptr_id",
                    "core_content"."pulp_created",
@@ -64,15 +67,15 @@ def ansible_collectionversion_table(since, full_path, until, **kwargs):
                    "ansible_collectionversion"."license",
                    "ansible_collectionversion"."version",
                    "ansible_collectionversion"."requires_ansible",
-                   "ansible_collectionversion"."is_highest",
-                   "ansible_collectionversion_tags"."tag_id"
+                   "ansible_crossrepositorycollectionversionindex"."is_highest",
+                   "ansible_collectionversion"."tags"
             FROM "ansible_collectionversion"
             INNER JOIN "core_content" ON (
                 "ansible_collectionversion"."content_ptr_id" = "core_content"."pulp_id"
                 )
-            LEFT OUTER JOIN "ansible_collectionversion_tags" ON (
+            LEFT OUTER JOIN "ansible_crossrepositorycollectionversionindex" ON (
                 "ansible_collectionversion"."content_ptr_id" =
-                "ansible_collectionversion_tags"."collectionversion_id"
+                "ansible_crossrepositorycollectionversionindex"."collection_version_id"
                 )
         ) TO STDOUT WITH CSV HEADER
     """

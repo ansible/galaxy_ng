@@ -17,7 +17,8 @@ class LandingPageView(api_base.APIView):
         distro = AnsibleDistribution.objects.get(base_path=golden_name)
         repository_version = distro.repository.latest_version()
         collection_count = CollectionVersion.objects.filter(
-            pk__in=repository_version.content, is_highest=True
+            pk__in=repository_version.content,
+            ansible_crossrepositorycollectionversionindex__is_highest=True
         ).count()
 
         partner_count = Namespace.objects.count()

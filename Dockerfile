@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8
+FROM registry.access.redhat.com/ubi9
 
 ARG GIT_COMMIT
 ARG USER_ID=1000

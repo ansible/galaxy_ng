@@ -1,13 +1,10 @@
 from gettext import gettext as _
+import uuid
 
 import django_guid
 from django.core.management.base import BaseCommand
 
 from galaxy_ng.app.api.v1.models import LegacyRole, LegacyRoleTag
-
-
-# Set logging_uid, this does not seem to get generated when task called via management command
-django_guid.set_guid(django_guid.utils.generate_guid())
 
 
 class Command(BaseCommand):
@@ -19,6 +16,9 @@ class Command(BaseCommand):
     help = _("Populate the 'LegacyRoleTag' model with tags from LegacyRole 'full_metadata__tags'.")
 
     def handle(self, *args, **options):
+        # Set logging correlation ID for this management command
+        # (not auto-generated like in HTTP requests)
+        django_guid.set_guid(str(uuid.uuid4()))
         created_tags = []
         roles = LegacyRole.objects.all()
         for role in roles:

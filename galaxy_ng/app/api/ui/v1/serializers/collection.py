@@ -108,11 +108,10 @@ class CollectionMetadataSerializer(RequestDistroMixin, Serializer):
 
     @extend_schema_field(serializers.ListField)
     def get_tags(self, collection_version):
-        # TODO(awcrosby): remove when galaxy_pulp no longer used in _ui
+        # Tags are now an ArrayField of strings on CollectionVersion
         if isinstance(collection_version, dict):
-            return [tag['name'] for tag in collection_version['tags']]
-
-        return [tag.name for tag in collection_version.tags.all()]
+            return collection_version.get('tags', [])
+        return collection_version.tags or []
 
 
 class CollectionVersionSignStateMixin(RequestDistroMixin):

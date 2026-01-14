@@ -224,10 +224,8 @@ class TestAutomationAnalyticsCollector(TestCase):
         tgzfiles = collector.gather(subset=['config', 'example1'])
         assert tgzfiles is None
 
-        # self.log.assert_called_with(logging.ERROR,
-        #                            "No metrics collection, configuration is invalid. "
-        #                            "Use --dry-run to gather locally without sending.")
         self.log.assert_called_with(
             logging.ERROR,
-            "Metrics Collection for Ansible Automation Platform not enabled."
+            "No metrics collection, configuration is invalid. "
+            "Use --dry-run to gather locally without sending."
         )
