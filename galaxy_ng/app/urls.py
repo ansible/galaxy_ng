@@ -23,10 +23,25 @@ urlpatterns = [
     path("", include((galaxy_urls, "api"), namespace="galaxy")),
     path("", include(ui_urls)),
     path("", include("django_prometheus.urls")),
+    # Static OpenAPI spec for Galaxy NG (user-facing endpoints only)
+    path(
+        f"{API_PATH_PREFIX}/v3/galaxy.json",
+        views.StaticOpenAPIView.as_view(),
+        name="schema",
+    ),
+    # Backward compatible alias for /v3/openapi.json
+    # Keeping this endpoint to avoid breaking existing clients that may be using the old URL.
+    # Tests (test_auth_openapi.py) and Swagger UI reference the "schema" name for reverse lookups.
     path(
         f"{API_PATH_PREFIX}/v3/openapi.json",
+        views.StaticOpenAPIView.as_view(),
+        name="openapi-schema",
+    ),
+    # Full Pulp OpenAPI spec (all endpoints including Pulp-internal)
+    path(
+        f"{API_PATH_PREFIX}/v3/galaxy-pulp.json",
         views.ProtectedSpectacularJSONAPIView.as_view(),
-        name="schema",
+        name="pulp-schema",
     ),
     path(
         f"{API_PATH_PREFIX}/v3/openapi.yaml",

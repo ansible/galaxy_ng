@@ -4,6 +4,8 @@ from galaxy_ng.app.api import base as api_base
 
 from rest_framework.settings import api_settings
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.exceptions import NotFound, APIException
 
 import drf_spectacular.views
 from drf_spectacular.views import (
@@ -12,6 +14,9 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+
+import json
+import os
 
 
 def health_view(request):
@@ -66,6 +71,32 @@ class ProtectedSpectacularRedocView(ApiSpecRequireAuthMixin, SpectacularRedocVie
 
 class ProtectedSpectacularSwaggerView(ApiSpecRequireAuthMixin, SpectacularSwaggerView):
     pass
+
+
+class StaticOpenAPIView(ApiSpecRequireAuthMixin, api_base.APIView):
+    """
+    Serves the static OpenAPI specification from galaxy_ng/app/static/galaxy.json
+    Uses ApiSpecRequireAuthMixin to respect GALAXY_API_SPEC_REQUIRE_AUTHENTICATION setting
+    """
+    def get(self, request, *args, **kwargs):
+        # Path to the static galaxy.json file
+        static_file_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            'app',
+            'static',
+            'galaxy.json'
+        )
+
+        if not os.path.exists(static_file_path):
+            raise NotFound("OpenAPI specification file not found")
+
+        try:
+            with open(static_file_path) as f:
+                openapi_spec = json.load(f)
+        except json.JSONDecodeError:
+            raise APIException("Invalid JSON in OpenAPI specification file")
+
+        return Response(openapi_spec)
 
 
 drf_spectacular.views.SpectacularJSONAPIView = ProtectedSpectacularJSONAPIView

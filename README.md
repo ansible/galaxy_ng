@@ -20,6 +20,15 @@ Project documentation is hosted on [Read The Docs](https://ansible.readthedocs.i
 
 View the latest version of the spec at <https://galaxy.ansible.com/api/v3/swagger-ui/>. *(Directlink to [JSON](https://galaxy.ansible.com/api/v3/openapi.json) or [YAML](https://galaxy.ansible.com/api/v3/openapi.yaml))*
 
+### Static OpenAPI Spec for AAP
+
+This repository provides a **static, curated OpenAPI specification** (`galaxy.json`) that contains user-facing endpoints with AI-friendly metadata.
+
+The static spec differs from the dynamically generated spec above in that it:
+- Includes only user-facing endpoints (87 paths vs. 559 in the full spec)
+- Contains `x-ai-description` fields for AI/MCP tool integration
+- Serves as the source of truth for Hub's API specification in AAP
+
 ## Communication
 
 Refer to the [Communication](https://ansible.readthedocs.io/projects/galaxy-ng/en/latest/community/overview/#communication)
