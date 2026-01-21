@@ -2,14 +2,16 @@
 
 See: https://issues.redhat.com/browse/AAH-1358
 """
-import subprocess
 import time
 
 import pytest
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import get_client
-from galaxy_ng.tests.integration.utils.iqe_utils import pull_and_tag_test_image
+from galaxy_ng.tests.integration.utils.iqe_utils import (
+    pull_and_tag_test_image,
+    run_container_command,
+)
 from galaxykit.container_images import get_container
 from galaxykit.utils import wait_for_task
 
@@ -38,13 +40,13 @@ def test_gw_push_and_sign_a_container(ansible_config, flags, galaxy_client):
            f"{config['password']}", container_registry]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    run_container_command(cmd, "Login", timeout=60)
 
     # Push image to local registry
     cmd = [container_engine, "push", f"{container_registry}/alpine:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    run_container_command(cmd, "Push", timeout=300)
 
     # Get an API client running with admin user credentials
     gc = galaxy_client("admin")
@@ -100,13 +102,13 @@ def test_push_and_sign_a_container(ansible_config, flags, require_auth, galaxy_c
            f"{config['password']}", container_registry]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    run_container_command(cmd, "Login", timeout=60)
 
     # Push image to local registry
     cmd = [container_engine, "push", f"{container_registry}/alpine:latest"]
     if container_engine == 'podman':
         cmd.append("--tls-verify=false")
-    subprocess.check_call(cmd)
+    run_container_command(cmd, "Push", timeout=300)
 
     # Get an API client running with admin user credentials
     client = get_client(

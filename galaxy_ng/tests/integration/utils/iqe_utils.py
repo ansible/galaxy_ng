@@ -331,15 +331,51 @@ def is_upgrade_from_aap22_hub45():
     return upgrade in ('true', 'True', 1, '1', True)
 
 
+def run_container_command(cmd, operation, timeout=300):
+    """Run a container command with detailed error capture for CI/CD visibility.
+
+    This helper replaces subprocess.check_call() to capture stdout/stderr when
+    commands fail. Without this, pipeline logs only show generic exit codes,
+    making it difficult to diagnose issues without SSH access.
+
+    Args:
+        cmd: Command and arguments to execute as a list.
+        operation: Description of the operation (for error messages).
+        timeout: Timeout in seconds (default 300s / 5 min).
+
+    Raises:
+        RuntimeError: If the command fails or times out, with captured output.
+    """
+    try:
+        subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=timeout)
+    except subprocess.TimeoutExpired as e:
+        raise RuntimeError(
+            f"{operation} timed out after {e.timeout}s\n"
+            f"stdout: {e.stdout}\nstderr: {e.stderr}"
+        ) from e
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(
+            f"{operation} failed with exit code {e.returncode}\n"
+            f"stdout: {e.stdout}\nstderr: {e.stderr}"
+        ) from e
+
+
 def pull_and_tag_test_image(container_engine, registry, tag=None):
     image = "alpine"
     tag = "alpine:latest" if tag is None else tag
     if avoid_docker_limit_rate():
         image = "quay.io/libpod/alpine"
-    subprocess.check_call([container_engine, "pull", image])
-    subprocess.check_call(
-        [container_engine, "tag", image,
-         f"{registry}/{tag}"])
+
+    run_container_command(
+        [container_engine, "pull", image],
+        f"Pull image '{image}'"
+    )
+    target_tag = f"{registry}/{tag}"
+    run_container_command(
+        [container_engine, "tag", image, target_tag],
+        f"Tag '{image}' -> '{target_tag}'",
+        timeout=60
+    )
     return image
 
 
