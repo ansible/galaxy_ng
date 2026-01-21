@@ -389,6 +389,8 @@ objects:
             value: ${{API_DOMAIN}}
           - name: IMPORTER_JOB_NAMESPACE
             value: ${{IMPORTER_JOB_NAMESPACE}}
+          - name: IMPORTER_IMAGE
+            value: ${IMPORTER_IMAGE}
           - name: IMPORTER_IMAGE_TAG
             value: ${IMPORTER_IMAGE_TAG}
           - name: IMPORTER_MEMORY_REQUEST
@@ -458,18 +460,20 @@ parameters:
 
 - descripton: Automation Hub image name
   name: IMAGE_NAME
-  value: "quay.io/cloudservices/automation-hub-galaxy-ng"
+  value: "quay.io/redhat-user-workloads/ansible-automationhu-tenant/automation-hub-main/automation-hub-galaxy-ng"
 - description: Automation Hub image tag
   name: IMAGE_TAG
   required: true
 
 - name: NGINX_IMAGE
-  value: "quay.io/cloudservices/automation-hub-nginx"
+  value: "quay.io/redhat-user-workloads/ansible-automationhu-tenant/automation-hub-main/automation-hub-nginx"
 - name: NGINX_IMAGE_TAG
   value: latest
 
 - name: IMPORTER_JOB_NAMESPACE
   required: true
+- name: IMPORTER_IMAGE
+  value: "quay.io/redhat-user-workloads/ansible-automationhu-tenant/automation-hub-main/automation-hub-galaxy-importer"
 - name: IMPORTER_IMAGE_TAG
   value: 'latest'
 - name: CONTENT_ORIGIN
