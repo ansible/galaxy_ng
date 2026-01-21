@@ -1,7 +1,7 @@
 .SILENT:
 
 # set the USER_ID to the current user uid
-export USER_ID = $(shell id --user)
+export USER_ID = $(shell id -u)
 
 .DEFAULT:
 .PHONY: help
