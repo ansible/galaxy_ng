@@ -1,5 +1,11 @@
 ---
 name: galaxy_ng/ci
+
+env:
+  # Version used for coverage/SonarCloud/jUnit reporting
+  # Note: When changing versions, you must also update the matrix in the test job
+  PRIMARY_PYTHON_VERSION: "3.12"
+
 on:
   pull_request:
     branches:
@@ -62,11 +68,17 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Note: GitHub Actions doesn't support env vars in matrix definitions
+        # PRIMARY_PYTHON_VERSION is used for coverage/SonarCloud reporting
+        python-version: ["3.11", "3.12"]
     steps:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - uses: actions/checkout@v5
         with:
@@ -89,12 +101,16 @@ jobs:
         run: pip3 install tox coverage[toml]
 
       - name: run the unit tests
-        run: tox --colored yes -e py312
+        run: |
+          TOX_ENV="py$(echo ${{ matrix.python-version }} | tr -d '.')"
+          tox --colored yes -e $TOX_ENV
 
       - name: Inject PR number into coverage.xml
+        if: matrix.python-version == env.PRIMARY_PYTHON_VERSION
         run: sed -i '2i <!-- PR ${{ github.event.number }} -->' coverage.xml
 
       - name: upload coverage as artifact
+        if: matrix.python-version == env.PRIMARY_PYTHON_VERSION
         uses: actions/upload-artifact@v5
         with:
           name: coverage
@@ -113,7 +129,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
-        if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main'
+        if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main' && matrix.python-version == env.PRIMARY_PYTHON_VERSION
         env:
           SONAR_TOKEN: ${{ secrets.CICD_ORG_SONAR_TOKEN_CICD_BOT || secrets.AAP_ORG_SONAR_TOKEN_ANSIBLE_CICD_BOT }}
         with:
@@ -122,7 +138,7 @@ jobs:
             -Dsonar.organization=${{ env.REPO_OWNER }}
 
       - name: upload jUnit XML test results
-        if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main'
+        if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main' && matrix.python-version == env.PRIMARY_PYTHON_VERSION
         continue-on-error: true
         run: |
           curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \

@@ -7,6 +7,7 @@
 - [REST API](developer_guide/rest_api.md)
 - [Services](developer_guide/services.md)
 - [RBAC](developer_guide/rbac.md)
+- [Continuous Integration](ci.md)
 
 ## Issue Tracker
 
