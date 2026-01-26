@@ -39,6 +39,10 @@ lint:             ## Lint the code
 	flake8 --config flake8.cfg
 	ruff check .
 
+.PHONY: validate-openapi
+validate-openapi:  ## Validate the static OpenAPI specification
+	openapi-spec-validator galaxy_ng/app/static/galaxy.json
+
 .PHONY: fmt
 fmt:              ## Format the code using Darker
 	@echo "Formatting code using darker, just like black, but only on changed regions of files."

@@ -24,6 +24,28 @@ on:
 
 jobs:
 
+  validate_openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
+          fetch-depth: 0  # include all history
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PRIMARY_PYTHON_VERSION }}
+
+      - name: Install openapi-spec-validator
+        run: pip3 install openapi-spec-validator
+
+      - name: Validate OpenAPI Specification
+        run: |
+          echo "Validating galaxy_ng/app/static/galaxy.json..."
+          openapi-spec-validator galaxy_ng/app/static/galaxy.json
+          echo "OpenAPI specification is valid!"
+
   lint_po:
     runs-on: ubuntu-latest
     steps:

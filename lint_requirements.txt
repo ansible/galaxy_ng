@@ -2,3 +2,4 @@ check-manifest
 flake8
 yamllint
 ruff==0.8.6
+openapi-spec-validator>=0.7.0

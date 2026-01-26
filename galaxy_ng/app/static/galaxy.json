@@ -19287,7 +19287,6 @@
           "finished_before": {
             "type": "string",
             "format": "date-time",
-            "default": "2025-12-13",
             "description": "Purge tasks completed earlier than this timestamp. Format '%Y-%m-%d[T%H:%M:%S]'"
           },
           "states": {
