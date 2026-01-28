@@ -65,7 +65,7 @@ parameters:
     value: localhost
 
   - name: IMAGE_NAME
-    value: quay.io/cloudservices/automation-hub-galaxy-ng
+    value: quay.io/redhat-user-workloads/ansible-automationhu-tenant/automation-hub-main/automation-hub-galaxy-ng
   - name: IMAGE_TAG
     required: true
 
