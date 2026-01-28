@@ -22,7 +22,10 @@ def get_redis_connection():
     global _conn
     redis_host = settings.get("REDIS_HOST")
     redis_url = settings.get("REDIS_URL")
+    cache_enabled = settings.get("CACHE_ENABLED", True)
     if _conn is None:
+        if not cache_enabled:
+            return None
         if redis_url is not None:
             _conn = redis.Redis.from_url(redis_url, decode_responses=True)
         elif redis_host is not None:
