@@ -18,7 +18,7 @@
     "/ansible/collections/": {
       "post": {
         "operationId": "upload_collection",
-        "description": "Create an artifact and trigger an asynchronous task to create Collection content from it.",
+        "description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "tags": [
           "Ansible: Collections"
@@ -59,7 +59,7 @@
             "description": ""
           }
         },
-        "x-ai-description": "Upload collection artifact"
+        "x-ai-description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact."
       }
     },
     "/api/galaxy/": {
@@ -6532,7 +6532,7 @@
     "/api/galaxy/v3/": {
       "get": {
         "operationId": "api_galaxy_v3_read",
-        "description": "Legacy v3 endpoint.",
+        "description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/published/collections/`. Returns 302 redirect. Legacy v3 endpoint.",
         "tags": [
           "Api: V3"
         ],
@@ -6560,7 +6560,7 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Discover available API versions and endpoints"
+        "x-ai-description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/published/collections/`. Returns 302 redirect. Discover available API versions and endpoints."
       }
     },
     "/api/galaxy/v3/artifacts/collections/": {
@@ -6656,7 +6656,7 @@
     "/api/galaxy/v3/imports/collections/{task}/": {
       "get": {
         "operationId": "api_galaxy_v3_imports_collections_read",
-        "description": "Legacy v3 endpoint.",
+        "description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/imports/collections/{task}/`. Returns 302 redirect. Legacy v3 endpoint.",
         "summary": "Inspect a collection import",
         "parameters": [
           {
@@ -6719,7 +6719,7 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Get async task status"
+        "x-ai-description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/imports/collections/{task}/`. Returns 302 redirect. Get async task status."
       }
     },
     "/api/galaxy/v3/namespaces/": {
@@ -10067,7 +10067,7 @@
     "/pulp_ansible/galaxy/{path}/api/v3/artifacts/collections/": {
       "post": {
         "operationId": "pulp_ansible_galaxy_api_v3_artifacts_collections_create",
-        "description": "Create an artifact and trigger an asynchronous task to create Collection content from it.",
+        "description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "parameters": [
           {
@@ -10118,13 +10118,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Upload collection artifact"
+        "x-ai-description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact."
       }
     },
     "/pulp_ansible/galaxy/{path}/api/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}": {
       "get": {
         "operationId": "pulp_ansible_galaxy_api_v3_plugin_ansible_content_collections_artifacts_download",
-        "description": "Collection download endpoint.",
+        "description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`. Collection download endpoint.",
         "parameters": [
           {
             "in": "path",
@@ -10184,18 +10184,19 @@
             "basicAuth": []
           }
         ],
+        "deprecated": true,
         "responses": {
           "200": {
             "description": "No response body"
           }
         },
-        "x-ai-description": "Download collection artifact"
+        "x-ai-description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`. Download collection artifact."
       }
     },
     "/pulp_ansible/galaxy/default/api/v3/artifacts/collections/": {
       "post": {
         "operationId": "pulp_ansible_galaxy_default_api_v3_artifacts_collections_create",
-        "description": "Create an artifact and trigger an asynchronous task to create Collection content from it.",
+        "description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "tags": [
           "Pulp_Ansible: Artifacts Collections V3"
@@ -10236,13 +10237,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Upload collection artifact"
+        "x-ai-description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact."
       }
     },
     "/pulp_ansible/galaxy/default/api/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}": {
       "get": {
         "operationId": "pulp_ansible_galaxy_default_api_v3_plugin_ansible_content_collections_artifacts_download",
-        "description": "Collection download endpoint.",
+        "description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`. Collection download endpoint.",
         "parameters": [
           {
             "in": "path",
@@ -10294,12 +10295,13 @@
             "basicAuth": []
           }
         ],
+        "deprecated": true,
         "responses": {
           "200": {
             "description": "No response body"
           }
         },
-        "x-ai-description": "Download collection artifact"
+        "x-ai-description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`. Download collection artifact."
       }
     },
     "/token/": {
