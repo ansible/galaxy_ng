@@ -15,19 +15,7 @@ from pulp_ansible.app.models import (
 from galaxy_ng.app import models
 from galaxy_ng.app.constants import DeploymentMode
 
-from .base import BaseTestCase
-
-
-class MockSettings:
-    """A dictionary like shim that serves as a dynaconf provided settings mock."""
-    def __init__(self, kwargs):
-        self.kwargs = kwargs
-        # every setting should be evaluatable as a property ...
-        for k, v in self.kwargs.items():
-            setattr(self, k, v)
-
-    def get(self, key, default=None):
-        return self.kwargs.get(key, default)
+from .base import BaseTestCase, MockSettings
 
 
 def _create_repo(name, **kwargs):

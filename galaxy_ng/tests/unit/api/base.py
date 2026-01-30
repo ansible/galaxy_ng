@@ -14,6 +14,19 @@ from galaxy_ng.app import constants
 
 API_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
 
+
+class MockSettings:
+    """A dictionary like shim that serves as a dynaconf provided settings mock."""
+    def __init__(self, kwargs):
+        self.kwargs = kwargs
+        # every setting should be evaluatable as a property ...
+        for k, v in self.kwargs.items():
+            setattr(self, k, v)
+
+    def get(self, key, default=None):
+        return self.kwargs.get(key, default)
+
+
 MOCKED_RH_IDENTITY = {
     'entitlements': {
         'insights': {

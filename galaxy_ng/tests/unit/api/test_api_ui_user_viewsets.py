@@ -9,21 +9,9 @@ from unittest.mock import patch
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.access_control.statements.roles import LOCKED_ROLES
-from .base import BaseTestCase, get_current_ui_url
+from .base import BaseTestCase, get_current_ui_url, MockSettings
 
 log = logging.getLogger(__name__)
-
-
-class MockSettings:
-    """A dictionary like shim that serves as a dynaconf provided settings mock."""
-    def __init__(self, kwargs):
-        self.kwargs = kwargs
-        # every setting should be evaluatable as a property ...
-        for k, v in self.kwargs.items():
-            setattr(self, k, v)
-
-    def get(self, key, default=None):
-        return self.kwargs.get(key, default)
 
 
 class TestUiV2UserViewSet(BaseTestCase):

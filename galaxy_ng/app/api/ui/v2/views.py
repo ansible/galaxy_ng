@@ -10,6 +10,8 @@ from rest_framework import mixins
 from rest_framework import views
 
 from ansible_base.rest_pagination.default_paginator import DefaultPaginator
+from ansible_base.rbac import permission_registry
+from ansible_base.rbac.api.permissions import AnsibleBaseObjectPermissions
 
 from .filters import UserViewFilter
 from .filters import GroupViewFilter
@@ -47,7 +49,16 @@ class BaseView(views.APIView):
 class BaseViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     pagination_class = DefaultPaginator
-    permission_classes = [IsSuperUserOrReadOnly]
+    permission_classes = [AnsibleBaseObjectPermissions, IsSuperUserOrReadOnly]
+
+    def filter_queryset(self, qs):
+        """Apply RBAC filtering to limit access to those the user has access to. Borrowed from
+            https://github.com/ansible/django-ansible-base/blob/devel/test_app/views.py#L35
+        """
+        cls = qs.model
+        if permission_registry.is_registered(cls):
+            qs = cls.access_qs(self.request.user, queryset=qs)
+        return super().filter_queryset(qs)
 
 
 class CurrentUserViewSet(

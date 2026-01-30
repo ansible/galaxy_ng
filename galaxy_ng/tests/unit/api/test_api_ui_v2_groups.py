@@ -5,21 +5,9 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from galaxy_ng.app.models import auth as auth_models
-from .base import BaseTestCase
+from .base import BaseTestCase, MockSettings
 
 log = logging.getLogger(__name__)
-
-
-class MockSettings:
-    """A dictionary like shim that serves as a dynaconf provided settings mock."""
-    def __init__(self, kwargs):
-        self.kwargs = kwargs
-        # every setting should be evaluatable as a property ...
-        for k, v in self.kwargs.items():
-            setattr(self, k, v)
-
-    def get(self, key, default=None):
-        return self.kwargs.get(key, default)
 
 
 class TestUiV2GroupViewSet(BaseTestCase):
