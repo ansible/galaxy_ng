@@ -4757,6 +4757,7 @@
       "get": {
         "operationId": "api_galaxy_feature_flags_state_get",
         "description": "A view class for displaying feature flags",
+        "deprecated": true,
         "tags": [
           "Api: Feature_Flags_State"
         ],
@@ -4780,7 +4781,110 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get client configuration"
+        "x-ai-description": "DEPRECATED: Use /api/galaxy/feature_flags/states/ instead. Get client configuration"
+      }
+    },
+    "/api/galaxy/feature_flags/states/": {
+      "get": {
+        "operationId": "api_galaxy_feature_flags_states_list",
+        "description": "A view class for displaying feature flags states.",
+        "summary": "List feature flags",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "A search term.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Api: Feature_Flags"
+        ],
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedFeatureFlagStatesResponseList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Get list of feature flags and their states. Use this instead of the deprecated /api/galaxy/feature_flags_state/ endpoint"
+      }
+    },
+    "/api/galaxy/feature_flags/states/{id}/": {
+      "get": {
+        "operationId": "api_galaxy_feature_flags_states_read",
+        "description": "A view class for displaying feature flags states.",
+        "summary": "Inspect a feature flag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "A unique integer value identifying this feature flag.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "Api: Feature_Flags"
+        ],
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagStatesResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Get details of a specific feature flag by ID"
       }
     },
     "/api/galaxy/pulp/api/v3/content/ansible/collection_signatures/": {
