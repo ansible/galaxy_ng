@@ -46,6 +46,205 @@ DAB_SERVICE_BACKED_REDIRECT = (
 )
 
 
+def _parse_forwarded_header(forwarded_header: str) -> tuple[str | None, str | None]:
+    """Parse RFC 7239 Forwarded header to extract proto and host.
+
+    Examples of Forwarded header formats:
+    - Forwarded: for=192.0.2.60;proto=http;by=203.0.113.43
+    - Forwarded: for=192.0.2.60;proto=https;by=203.0.113.43;host=example.com
+    - Forwarded: proto=https;host=example.com
+
+    Returns:
+        tuple: (protocol, host) where either can be None if not found
+    """
+    proto = None
+    host = None
+
+    # Handle multiple forwarded entries separated by commas
+    for entry in forwarded_header.split(','):
+        entry = entry.strip()
+        # Split by semicolons to get individual parameters
+        for param in entry.split(';'):
+            param = param.strip()
+            if '=' in param:
+                key, value = param.split('=', 1)
+                key = key.strip().lower()
+                value = value.strip().strip('"')  # Remove quotes if present
+
+                if key == 'proto' and not proto:
+                    proto = value
+                elif key == 'host' and not host:
+                    host = value
+
+    return proto, host
+
+
+def alter_hostname_settings(
+    temp_settings,
+    value,
+    key: str,
+    *args,
+    **kwargs
+):
+    """Use the request headers to dynamically alter the content origin and api hostname.
+
+    This is useful in scenarios where the hub is accessible directly and through a
+    reverse proxy.
+
+    Supports RFC 7239 Forwarded header as fallback when X-Forwarded-* headers are not present.
+    When connected to a resource server, headers are required and validated strictly.
+
+    Args:
+        temp_settings: Dynaconf Settings object
+        value: HookValue containing the original value
+        key: The settings key being accessed
+        *args: Additional positional arguments
+        **kwargs: Additional keyword arguments
+
+    Returns:
+        The modified URL based on request headers, or the original value if no modification needed
+    """
+    # we only want to modify these settings based on request headers
+    ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME', 'TOKEN_SERVER']
+
+    # If app is starting up or key is not on allowed list bypass and just return the value
+    if not apps.ready or key.upper() not in ALLOWED_KEYS:
+        return value.value
+
+    req = get_current_request()
+    if req is None:
+        # No request context available (e.g., during script execution)
+        # Always return the original value when no request context
+        return value.value
+
+    headers = dict(req.headers)
+    is_resource_server_connected = temp_settings.get("IS_CONNECTED_TO_RESOURCE_SERVER", False)
+
+    # Extract protocol and host from headers
+    proto = None
+    host = None
+
+    # Try X-Forwarded-* headers first
+    x_forwarded_proto = headers.get("X-Forwarded-Proto")
+    x_forwarded_host = headers.get("X-Forwarded-Host")
+    host_header = headers.get("Host")
+
+    if x_forwarded_proto:
+        proto = x_forwarded_proto
+    if x_forwarded_host:
+        host = x_forwarded_host
+    elif host_header:
+        host = host_header
+
+    # If X-Forwarded-* headers not available, try RFC 7239 Forwarded header
+    if not proto or not host:
+        forwarded_header = headers.get("Forwarded")
+        if forwarded_header:
+            forwarded_proto, forwarded_host = _parse_forwarded_header(forwarded_header)
+            if not proto and forwarded_proto:
+                proto = forwarded_proto
+            if not host and forwarded_host:
+                host = forwarded_host
+
+    # When connected to resource server, headers are mandatory
+    if is_resource_server_connected:
+        if not proto or not host:
+            # Use Django's SuspiciousOperation for 400 Bad Request
+            from django.core.exceptions import SuspiciousOperation
+            error_msg = (
+                "alter_hostname_settings: When connected to resource server, proto and host "
+                f"must be provided in headers. Found proto='{proto}', host='{host}'. "
+                "Required headers: X-Forwarded-Proto + (X-Forwarded-Host or Host), "
+                "or RFC 7239 Forwarded header with proto and host parameters."
+            )
+            raise SuspiciousOperation(error_msg)
+    else:
+        # Fallback behavior when not connected to resource server
+        if not proto:
+            # Use current request protocol if no forwarded protocol header
+            proto = 'https' if req.is_secure() else 'http'
+        if not host:
+            # Fallback to Host header or default
+            host = host_header or "localhost:5001"
+
+    baseurl = proto + "://" + host
+    if key.upper() == 'TOKEN_SERVER':
+        baseurl += '/token/'
+    return baseurl
+
+
+def read_settings_from_cache_or_db(
+    temp_settings,
+    value,
+    key: str,
+    *args,
+    **kwargs
+):
+    """A function to be attached on Dynaconf Afterget hook.
+
+    Load everything from settings cache or db, process parsing and mergings,
+    returns the desired key value.
+
+    This hook enables the Dynamic Settings feature, which allows settings to be
+    overridden from database or cache without restarting the application.
+
+    Args:
+        temp_settings: Dynaconf Settings object (temporary copy for this request)
+        value: HookValue containing the original value
+        key: The settings key being accessed
+        *args: Additional positional arguments
+        **kwargs: Additional keyword arguments
+
+    Returns:
+        The value from cache/db if available, otherwise the original value
+    """
+    if not apps.ready or key.upper() not in DYNAMIC_SETTINGS_SCHEMA:
+        # If app is starting up or key is not on allowed list bypass and just return the value
+        return value.value
+
+    # Lazy imports for dynaconf types - these may not be available in older versions
+    try:
+        from dynaconf import DynaconfFormatError, DynaconfParseError
+        from dynaconf.loaders.base import SourceMetadata
+    except ImportError:
+        # Graceful degradation for older dynaconf versions
+        return value.value
+
+    # Lazy import because it can't happen before apps are ready
+    from galaxy_ng.app.tasks.settings_cache import (
+        get_settings_from_cache,
+        get_settings_from_db,
+    )
+
+    metadata = None
+    if data := get_settings_from_cache():
+        metadata = SourceMetadata(loader="hooking", identifier="cache")
+    else:
+        data = get_settings_from_db()
+        if data:
+            metadata = SourceMetadata(loader="hooking", identifier="db")
+
+    # This is the main part, it will update temp_settings with data coming from settings db
+    # and by calling update it will process dynaconf parsing and merging.
+    try:
+        if data:
+            temp_settings.update(data, loader_identifier=metadata, tomlfy=True)
+    except (DynaconfFormatError, DynaconfParseError) as exc:
+        logger.error("Error loading dynamic settings: %s", str(exc))
+
+    if not data:
+        logger.debug("Dynamic settings are empty, reading key %s from default sources", key)
+    elif key in [_k.split("__")[0] for _k in data]:
+        logger.debug("Dynamic setting for key: %s loaded from %s", key, metadata.identifier)
+    else:
+        logger.debug(
+            "Key %s not on db/cache, %s other keys loaded from %s",
+            key, len(data), metadata.identifier
+        )
+
+    return temp_settings.get(key, value.value)
+
+
 def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True) -> dict[str, Any]:
     """The dynaconf post hook is called after all the settings are loaded and set.
 
@@ -699,12 +898,9 @@ def configure_dynamic_settings(settings: Dynaconf) -> dict[str, Any]:
     # Perform lazy imports here to avoid breaking when system runs with older
     # dynaconf versions
     try:
-        from dynaconf import DynaconfFormatError, DynaconfParseError
-        from dynaconf.base import Settings
-        from dynaconf.hooking import Action, Hook, HookValue
-        from dynaconf.loaders.base import SourceMetadata
+        from dynaconf.hooking import Action, Hook
     except ImportError as exc:
-        # Graceful degradation for dynaconf < 3.2.3 where  method hooking is not available
+        # Graceful degradation for dynaconf < 3.2.3 where method hooking is not available
         logger.error(
             "Galaxy Dynamic Settings requires Dynaconf >=3.2.3, "
             "system will work normally but dynamic settings from database will be ignored: %s",
@@ -714,89 +910,16 @@ def configure_dynamic_settings(settings: Dynaconf) -> dict[str, Any]:
 
     logger.info("Enabling Dynamic Settings Feature")
 
-    def read_settings_from_cache_or_db(
-        temp_settings: Settings,
-        value: HookValue,
-        key: str,
-        *args,
-        **kwargs
-    ) -> Any:
-        """A function to be attached on Dynaconf Afterget hook.
-        Load everything from settings cache or db, process parsing and mergings,
-        returns the desired key value
-        """
-        if not apps.ready or key.upper() not in DYNAMIC_SETTINGS_SCHEMA:
-            # If app is starting up or key is not on allowed list bypass and just return the value
-            return value.value
-
-        # lazy import because it can't happen before apps are ready
-        from galaxy_ng.app.tasks.settings_cache import (
-            get_settings_from_cache,
-            get_settings_from_db,
-        )
-        if data := get_settings_from_cache():
-            metadata = SourceMetadata(loader="hooking", identifier="cache")
-        else:
-            data = get_settings_from_db()
-            if data:
-                metadata = SourceMetadata(loader="hooking", identifier="db")
-
-        # This is the main part, it will update temp_settings with data coming from settings db
-        # and by calling update it will process dynaconf parsing and merging.
-        try:
-            if data:
-                temp_settings.update(data, loader_identifier=metadata, tomlfy=True)
-        except (DynaconfFormatError, DynaconfParseError) as exc:
-            logger.error("Error loading dynamic settings: %s", str(exc))
-
-        if not data:
-            logger.debug("Dynamic settings are empty, reading key %s from default sources", key)
-        elif key in [_k.split("__")[0] for _k in data]:
-            logger.debug("Dynamic setting for key: %s loaded from %s", key, metadata.identifier)
-        else:
-            logger.debug(
-                "Key %s not on db/cache, %s other keys loaded from %s",
-                key, len(data), metadata.identifier
-            )
-
-        return temp_settings.get(key, value.value)
-
-    def alter_hostname_settings(
-        temp_settings: Settings,
-        value: HookValue,
-        key: str,
-        *args,
-        **kwargs
-    ) -> Any:
-        """Use the request headers to dynamically alter the content origin and api hostname.
-        This is useful in scenarios where the hub is accessible directly and through a
-        reverse proxy.
-        """
-
-        # we only want to modify these settings base on request headers
-        ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME', 'TOKEN_SERVER']
-
-        # If app is starting up or key is not on allowed list bypass and just return the value
-        if not apps.ready or key.upper() not in ALLOWED_KEYS:
-            return value.value
-
-        # we have to assume the proxy or the edge device(s) set these headers correctly
-        req = get_current_request()
-        if req is not None:
-            headers = dict(req.headers)
-            proto = headers.get("X-Forwarded-Proto", "http")
-            host = headers.get("Host", "localhost:5001")
-            baseurl = proto + "://" + host
-            if key.upper() == 'TOKEN_SERVER':
-                baseurl += '/token/'
-            return baseurl
-
-        return value.value
-
-    # avoid scope errors by not using a list comprehension
+    # Build hook functions list from module-level functions
+    # Hook functions like read_settings_from_cache_or_db and alter_hostname_settings
+    # are defined at module level for testability
     hook_functions = []
+    module_scope = globals()
     for func_name in enabled_hooks:
-        hook_functions.append(Hook(locals()[func_name]))
+        if func_name in module_scope:
+            hook_functions.append(Hook(module_scope[func_name]))
+        else:
+            logger.error("Hook function '%s' not found in module scope", func_name)
 
     return {
         "_registered_hooks": {

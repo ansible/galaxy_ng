@@ -19,6 +19,7 @@ nav:
         - Managing user access: config/user_access.md
         - Enabling collection signing: config/collection_signing.md
         - Enabling Container signing: config/container_signing.md
+        - Dynamic Hostname Settings: config/dynamic_hostname_settings.md
         - Feature Flags: config/featureflags.md
     - Integration:
         # - Connecting Ansible Controllers: integration/controller.md
