@@ -17,11 +17,11 @@
   "paths": {
     "/ansible/collections/": {
       "post": {
-        "operationId": "upload_collection",
+        "operationId": "deprecated_ansible_collections_post_upload",
         "description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "tags": [
-          "Ansible: Collections"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -64,9 +64,9 @@
     },
     "/api/galaxy/": {
       "get": {
-        "operationId": "api_galaxy_read",
+        "operationId": "root_get_galaxy",
         "tags": [
-          "Api: Galaxy"
+          "Info"
         ],
         "security": [
           {
@@ -81,14 +81,15 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Discover available API versions and endpoints"
+        "x-ai-description": "Get Galaxy API root endpoints",
+        "description": "Get Galaxy API root endpoints"
       }
     },
     "/api/galaxy/_ui/v1/auth/login/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_auth_login_get",
+        "operationId": "v1_ui_auth_login_get",
         "tags": [
-          "Api: _Ui V1 Auth Login"
+          "Access"
         ],
         "responses": {
           "200": {
@@ -102,12 +103,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Authenticate and manage tokens"
+        "x-ai-description": "Get login page",
+        "description": "Get login page"
       },
       "post": {
-        "operationId": "api_galaxy__ui_v1_auth_login_post",
+        "operationId": "v1_ui_auth_login_post",
         "tags": [
-          "Api: _Ui V1 Auth Login"
+          "Access"
         ],
         "requestBody": {
           "content": {
@@ -141,14 +143,15 @@
             "description": ""
           }
         },
-        "x-ai-description": "Authenticate and manage tokens"
+        "x-ai-description": "Login with credentials",
+        "description": "Login with credentials"
       }
     },
     "/api/galaxy/_ui/v1/auth/logout/": {
       "post": {
-        "operationId": "api_galaxy__ui_v1_auth_logout_post",
+        "operationId": "v1_ui_auth_logout_post",
         "tags": [
-          "Api: _Ui V1 Auth Logout"
+          "Access"
         ],
         "security": [
           {
@@ -163,14 +166,16 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Authenticate and manage tokens"
+        "x-ai-description": "Logout current session",
+        "description": "Logout current session"
       }
     },
     "/api/galaxy/_ui/v1/collection_signing/": {
       "post": {
-        "operationId": "_api_galaxy__ui_v1_collection_signing_api_galaxy__ui_v1_collection_signing_sign",
+        "operationId": "v1_ui_collection_signing_post_collection_signing",
         "tags": [
-          "Api: _Ui V1 Collection_Signing"
+          "Signing",
+          "Collections"
         ],
         "security": [
           {
@@ -185,12 +190,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Sign collections in repository",
+        "description": "Sign collections in repository"
       }
     },
     "/api/galaxy/_ui/v1/collection_signing/{path}/": {
       "post": {
-        "operationId": "_api_galaxy__ui_v1_collection_signing_{path}_api_galaxy__ui_v1_collection_signing_sign",
+        "operationId": "v1_ui_collection_signing_post_path",
         "parameters": [
           {
             "in": "path",
@@ -202,7 +208,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Collection_Signing"
+          "Signing",
+          "Collections"
         ],
         "security": [
           {
@@ -217,12 +224,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Sign collections in distribution path",
+        "description": "Sign collections in distribution path"
       }
     },
     "/api/galaxy/_ui/v1/collection_signing/{path}/{namespace}/": {
       "post": {
-        "operationId": "_api_galaxy__ui_v1_collection_signing_{path}_{namespace}_api_galaxy__ui_v1_collection_signing_sign",
+        "operationId": "v1_ui_collection_signing_post_path_namespace",
         "parameters": [
           {
             "in": "path",
@@ -242,7 +250,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Collection_Signing"
+          "Signing",
+          "Collections"
         ],
         "security": [
           {
@@ -257,12 +266,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Sign collections in namespace",
+        "description": "Sign collections in namespace"
       }
     },
     "/api/galaxy/_ui/v1/collection_signing/{path}/{namespace}/{collection}/": {
       "post": {
-        "operationId": "_api_galaxy__ui_v1_collection_signing_{path}_{namespace}_{collection}_api_galaxy__ui_v1_collection_signing_sign",
+        "operationId": "v1_ui_collection_signing_post_path_namespace_collection",
         "parameters": [
           {
             "in": "path",
@@ -290,7 +300,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Collection_Signing"
+          "Signing",
+          "Collections"
         ],
         "security": [
           {
@@ -305,12 +316,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Sign specific collection",
+        "description": "Sign specific collection"
       }
     },
     "/api/galaxy/_ui/v1/collection_signing/{path}/{namespace}/{collection}/{version}/": {
       "post": {
-        "operationId": "_api_galaxy__ui_v1_collection_signing_{path}_{namespace}_{collection}_{version}_api_galaxy__ui_v1_collection_signing_sign",
+        "operationId": "v1_ui_collection_signing_post_path_namespace_collection_version",
         "parameters": [
           {
             "in": "path",
@@ -346,7 +358,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Collection_Signing"
+          "Signing",
+          "Collections"
         ],
         "security": [
           {
@@ -361,13 +374,14 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Sign specific collection version",
+        "description": "Sign specific collection version"
       }
     },
     "/api/galaxy/_ui/v1/execution-environments/registries/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_registries_list",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_registries_get_registries",
+        "description": "List execution environment registries",
         "summary": "List container registry remotes",
         "parameters": [
           {
@@ -505,7 +519,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Registries"
+          "Container/Execution Environments",
+          "Resource Registry"
         ],
         "security": [
           {
@@ -527,14 +542,15 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get container execution environments"
+        "x-ai-description": "List execution environment registries"
       },
       "post": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_registries_create",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_registries_post",
+        "description": "Create execution environment registry",
         "summary": "Create a container registry remote",
         "tags": [
-          "Api: _Ui V1 Execution-Environments Registries"
+          "Container/Execution Environments",
+          "Resource Registry"
         ],
         "requestBody": {
           "content": {
@@ -576,13 +592,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create container execution environments"
+        "x-ai-description": "Create execution environment registry"
       }
     },
     "/api/galaxy/_ui/v1/execution-environments/registries/{id}/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_registries_read",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_registries_get_id",
+        "description": "Get execution environment registry by id",
         "summary": "Inspect a container registry remote",
         "parameters": [
           {
@@ -617,7 +633,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Registries"
+          "Container/Execution Environments",
+          "Resource Registry"
         ],
         "security": [
           {
@@ -639,11 +656,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get container execution environments"
+        "x-ai-description": "Get execution environment registry by id"
       },
       "put": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_registries_update",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_registries_put",
+        "description": "Update execution environment registry",
         "summary": "Update a container registry remote",
         "parameters": [
           {
@@ -656,7 +673,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Registries"
+          "Container/Execution Environments",
+          "Resource Registry"
         ],
         "requestBody": {
           "content": {
@@ -698,11 +716,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update container execution environments"
+        "x-ai-description": "Update execution environment registry"
       },
       "delete": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_registries_delete",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_registries_delete",
+        "description": "Delete execution environment registry",
         "summary": "Delete a container registry remote",
         "parameters": [
           {
@@ -715,7 +733,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Registries"
+          "Container/Execution Environments",
+          "Resource Registry"
         ],
         "security": [
           {
@@ -730,12 +749,12 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Delete container execution environments"
+        "x-ai-description": "Delete execution environment registry"
       }
     },
     "/api/galaxy/_ui/v1/execution-environments/registries/{id}/index/": {
       "post": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_registries_index_index_execution_environments",
+        "operationId": "v1_ui_execution_environments_registries_index",
         "description": "Trigger an asynchronous indexing task",
         "parameters": [
           {
@@ -748,7 +767,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Registries Index"
+          "Container/Execution Environments",
+          "Resource Registry"
         ],
         "security": [
           {
@@ -770,12 +790,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create container execution environments"
+        "x-ai-description": "Index execution environment registry"
       }
     },
     "/api/galaxy/_ui/v1/execution-environments/registries/{id}/sync/": {
       "post": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_registries_sync_sync",
+        "operationId": "v1_ui_execution_environments_registries_sync",
         "description": "Trigger an asynchronous sync task",
         "parameters": [
           {
@@ -788,7 +808,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Registries Sync"
+          "Container/Execution Environments",
+          "Content Sync"
         ],
         "security": [
           {
@@ -810,13 +831,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Sync execution environment registry"
       }
     },
     "/api/galaxy/_ui/v1/execution-environments/remotes/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_remotes_list",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_remotes_get_remotes",
+        "description": "List execution environment remotes",
         "summary": "List container remotes",
         "parameters": [
           {
@@ -861,7 +882,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Remotes"
+          "Container/Execution Environments",
+          "Remotes"
         ],
         "security": [
           {
@@ -883,14 +905,15 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "List execution environment remotes"
       },
       "post": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_remotes_create",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_remotes_post",
+        "description": "Create execution environment remote",
         "summary": "Create a container remote",
         "tags": [
-          "Api: _Ui V1 Execution-Environments Remotes"
+          "Container/Execution Environments",
+          "Remotes"
         ],
         "requestBody": {
           "content": {
@@ -932,13 +955,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Create execution environment remote"
       }
     },
     "/api/galaxy/_ui/v1/execution-environments/remotes/{id}/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_remotes_read",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_remotes_get_id",
+        "description": "Get execution environment remote by id",
         "summary": "Inspect a container remote",
         "parameters": [
           {
@@ -973,7 +996,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Remotes"
+          "Container/Execution Environments",
+          "Remotes"
         ],
         "security": [
           {
@@ -995,11 +1019,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Get execution environment remote by id"
       },
       "put": {
-        "operationId": "api_galaxy__ui_v1_execution_environments_remotes_update",
-        "description": "Replace pulp_id (pk) with id, so Swagger UI shows {id} in browsable API",
+        "operationId": "v1_ui_execution_environments_remotes_put",
+        "description": "Update execution environment remote",
         "summary": "Update a container remote",
         "parameters": [
           {
@@ -1012,7 +1036,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Execution-Environments Remotes"
+          "Container/Execution Environments",
+          "Remotes"
         ],
         "requestBody": {
           "content": {
@@ -1054,14 +1079,14 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Update execution environment remote"
       }
     },
     "/api/galaxy/_ui/v1/feature-flags/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_feature_flags_get",
+        "operationId": "v1_ui_feature_flags_get",
         "tags": [
-          "Api: _Ui V1 Feature-Flags"
+          "Feature Flags"
         ],
         "security": [
           {
@@ -1077,12 +1102,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Get client configuration"
+        "x-ai-description": "Get feature flags",
+        "description": "Get feature flags"
       }
     },
     "/api/galaxy/_ui/v1/imports/collections/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_imports_collections_list",
+        "operationId": "v1_ui_imports_collections_get_collections",
         "description": "ViewSet for CollectionImports.",
         "summary": "List collection imports",
         "parameters": [
@@ -1188,7 +1214,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Imports Collections"
+          "Tasks",
+          "Collections"
         ],
         "security": [
           {
@@ -1210,12 +1237,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get async task status"
+        "x-ai-description": "List collection import tasks"
       }
     },
     "/api/galaxy/_ui/v1/imports/collections/{task_id}/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_imports_collections_read",
+        "operationId": "v1_ui_imports_collections_get_task_id",
         "description": "Returns a CollectionImport object.",
         "summary": "Retrieve collection import",
         "parameters": [
@@ -1253,7 +1280,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Imports Collections"
+          "Tasks",
+          "Collections"
         ],
         "security": [
           {
@@ -1275,12 +1303,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get async task status"
+        "x-ai-description": "Get collection import task by id"
       }
     },
     "/api/galaxy/_ui/v1/my-namespaces/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_my_namespaces_list",
+        "operationId": "v1_ui_my_namespaces_get_my_namespaces",
         "summary": "List namespaces",
         "parameters": [
           {
@@ -1367,7 +1395,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 My-Namespaces"
+          "Namespaces",
+          "Access"
         ],
         "security": [
           {
@@ -1389,14 +1418,16 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "List owned namespaces",
+        "description": "List owned namespaces"
       },
       "post": {
-        "operationId": "api_galaxy__ui_v1_my_namespaces_create",
+        "operationId": "v1_ui_my_namespaces_post",
         "description": "Override to validate for name duplication before serializer validation.",
         "summary": "Create a namespace",
         "tags": [
-          "Api: _Ui V1 My-Namespaces"
+          "Namespaces",
+          "Access"
         ],
         "requestBody": {
           "content": {
@@ -1438,12 +1469,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create collection namespaces"
+        "x-ai-description": "Create owned namespace"
       }
     },
     "/api/galaxy/_ui/v1/my-namespaces/{name}/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_my_namespaces_read",
+        "operationId": "v1_ui_my_namespaces_get_name",
         "summary": "Inspect a namespace",
         "parameters": [
           {
@@ -1478,7 +1509,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 My-Namespaces"
+          "Namespaces",
+          "Access"
         ],
         "security": [
           {
@@ -1500,10 +1532,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "Get owned namespace by name",
+        "description": "Get owned namespace by name"
       },
       "put": {
-        "operationId": "api_galaxy__ui_v1_my_namespaces_update",
+        "operationId": "v1_ui_my_namespaces_put",
         "summary": "Update a namespace",
         "parameters": [
           {
@@ -1516,7 +1549,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 My-Namespaces"
+          "Namespaces",
+          "Access"
         ],
         "requestBody": {
           "content": {
@@ -1558,10 +1592,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update collection namespaces"
+        "x-ai-description": "Update owned namespace",
+        "description": "Update owned namespace"
       },
       "patch": {
-        "operationId": "api_galaxy__ui_v1_my_namespaces_partial_update",
+        "operationId": "v1_ui_my_namespaces_patch",
         "summary": "Update a namespace",
         "parameters": [
           {
@@ -1574,7 +1609,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 My-Namespaces"
+          "Namespaces",
+          "Access"
         ],
         "requestBody": {
           "content": {
@@ -1616,10 +1652,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update collection namespaces"
+        "x-ai-description": "Partially update owned namespace",
+        "description": "Partially update owned namespace"
       },
       "delete": {
-        "operationId": "api_galaxy__ui_v1_my_namespaces_delete",
+        "operationId": "v1_ui_my_namespaces_delete",
         "description": "Delete a namespace.\n\n1. Perform a check to see if there are any collections in the namespace.\n   If there are, return a failure.\n2. Delete the pulp distro and repository\n3. Delete the namespace object.\n\nreturn: Response(status=204)",
         "summary": "Delete a namespace",
         "parameters": [
@@ -1633,7 +1670,8 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 My-Namespaces"
+          "Namespaces",
+          "Access"
         ],
         "security": [
           {
@@ -1648,12 +1686,12 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Delete collection namespaces"
+        "x-ai-description": "Delete owned namespace"
       }
     },
     "/api/galaxy/_ui/v1/my-synclists/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_my_synclists_list",
+        "operationId": "v1_ui_my_synclists_get",
         "summary": "List sync lists",
         "parameters": [
           {
@@ -1698,7 +1736,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 My-Synclists"
+          "Content Sync"
         ],
         "security": [
           {
@@ -1720,13 +1758,14 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection sync lists"
+        "x-ai-description": "Get owned synclists",
+        "description": "Get owned synclists"
       },
       "post": {
-        "operationId": "api_galaxy__ui_v1_my_synclists_create",
+        "operationId": "v1_ui_my_synclists_post",
         "summary": "Create a sync list",
         "tags": [
-          "Api: _Ui V1 My-Synclists"
+          "Content Sync"
         ],
         "requestBody": {
           "content": {
@@ -1768,12 +1807,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create collection sync lists"
+        "x-ai-description": "Create owned synclist",
+        "description": "Create owned synclist"
       }
     },
     "/api/galaxy/_ui/v1/my-synclists/{id}/curate/": {
       "post": {
-        "operationId": "api_galaxy__ui_v1_my_synclists_curate_curate",
+        "operationId": "v1_ui_my_synclists_curate",
         "parameters": [
           {
             "in": "path",
@@ -1787,7 +1827,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 My-Synclists Curate"
+          "Content Sync"
         ],
         "requestBody": {
           "content": {
@@ -1829,12 +1869,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create collection sync lists"
+        "x-ai-description": "Curate owned synclist",
+        "description": "Curate owned synclist"
       }
     },
     "/api/galaxy/_ui/v1/namespaces/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_namespaces_list",
+        "operationId": "v1_ui_namespaces_get_namespaces",
         "summary": "List namespaces",
         "parameters": [
           {
@@ -1921,7 +1962,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -1943,14 +1984,15 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "List namespaces",
+        "description": "List namespaces"
       },
       "post": {
-        "operationId": "api_galaxy__ui_v1_namespaces_create",
+        "operationId": "v1_ui_namespaces_post",
         "description": "Override to validate for name duplication before serializer validation.",
         "summary": "Create a namespace",
         "tags": [
-          "Api: _Ui V1 Namespaces"
+          "Namespaces"
         ],
         "requestBody": {
           "content": {
@@ -1992,12 +2034,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create collection namespaces"
+        "x-ai-description": "Create namespace"
       }
     },
     "/api/galaxy/_ui/v1/namespaces/{name}/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_namespaces_read",
+        "operationId": "v1_ui_namespaces_get_name",
         "summary": "Inspect a namespace",
         "parameters": [
           {
@@ -2032,7 +2074,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -2054,10 +2096,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "Get namespace by name",
+        "description": "Get namespace by name"
       },
       "put": {
-        "operationId": "api_galaxy__ui_v1_namespaces_update",
+        "operationId": "v1_ui_namespaces_put",
         "summary": "Update a namespace",
         "parameters": [
           {
@@ -2070,7 +2113,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Namespaces"
+          "Namespaces"
         ],
         "requestBody": {
           "content": {
@@ -2112,10 +2155,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update collection namespaces"
+        "x-ai-description": "Update namespace",
+        "description": "Update namespace"
       },
       "patch": {
-        "operationId": "api_galaxy__ui_v1_namespaces_partial_update",
+        "operationId": "v1_ui_namespaces_patch",
         "summary": "Update a namespace",
         "parameters": [
           {
@@ -2128,7 +2172,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Namespaces"
+          "Namespaces"
         ],
         "requestBody": {
           "content": {
@@ -2170,10 +2214,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update collection namespaces"
+        "x-ai-description": "Partially update namespace",
+        "description": "Partially update namespace"
       },
       "delete": {
-        "operationId": "api_galaxy__ui_v1_namespaces_delete",
+        "operationId": "v1_ui_namespaces_delete",
         "description": "Delete a namespace.\n\n1. Perform a check to see if there are any collections in the namespace.\n   If there are, return a failure.\n2. Delete the pulp distro and repository\n3. Delete the namespace object.\n\nreturn: Response(status=204)",
         "summary": "Delete a namespace",
         "parameters": [
@@ -2187,7 +2232,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -2202,12 +2247,12 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Delete collection namespaces"
+        "x-ai-description": "Delete namespace"
       }
     },
     "/api/galaxy/_ui/v1/remotes/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_remotes_list",
+        "operationId": "v1_ui_remotes_get_remotes",
         "summary": "List collection remotes",
         "parameters": [
           {
@@ -2252,7 +2297,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Remotes"
+          "Remotes"
         ],
         "security": [
           {
@@ -2274,13 +2319,14 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "List collection remotes",
+        "description": "List collection remotes"
       },
       "post": {
-        "operationId": "api_galaxy__ui_v1_remotes_create",
+        "operationId": "v1_ui_remotes_post",
         "summary": "Create a collection remote",
         "tags": [
-          "Api: _Ui V1 Remotes"
+          "Remotes"
         ],
         "requestBody": {
           "content": {
@@ -2322,12 +2368,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Create collection remote",
+        "description": "Create collection remote"
       }
     },
     "/api/galaxy/_ui/v1/remotes/{pulp_id}/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_remotes_read",
+        "operationId": "v1_ui_remotes_get_pulp_id",
         "summary": "Inspect a collection remote",
         "parameters": [
           {
@@ -2364,7 +2411,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Remotes"
+          "Remotes"
         ],
         "security": [
           {
@@ -2386,10 +2433,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Get collection remote by pulp_id",
+        "description": "Get collection remote by pulp_id"
       },
       "put": {
-        "operationId": "api_galaxy__ui_v1_remotes_update",
+        "operationId": "v1_ui_remotes_put",
         "summary": "Update a collection remote",
         "parameters": [
           {
@@ -2404,7 +2452,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Remotes"
+          "Remotes"
         ],
         "requestBody": {
           "content": {
@@ -2446,10 +2494,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Update collection remote",
+        "description": "Update collection remote"
       },
       "patch": {
-        "operationId": "api_galaxy__ui_v1_remotes_partial_update",
+        "operationId": "v1_ui_remotes_patch",
         "summary": "Update a collection remote",
         "parameters": [
           {
@@ -2464,7 +2513,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Remotes"
+          "Remotes"
         ],
         "requestBody": {
           "content": {
@@ -2506,10 +2555,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Partially update collection remote",
+        "description": "Partially update collection remote"
       },
       "delete": {
-        "operationId": "api_galaxy__ui_v1_remotes_delete",
+        "operationId": "v1_ui_remotes_delete",
         "summary": "Delete a collection remote",
         "parameters": [
           {
@@ -2524,7 +2574,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Remotes"
+          "Remotes"
         ],
         "security": [
           {
@@ -2539,12 +2589,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Delete collection remote",
+        "description": "Delete collection remote"
       }
     },
     "/api/galaxy/_ui/v1/repo/{distro_base_path}/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_repo_list",
+        "operationId": "v1_ui_repo_get_distro_base_path",
         "description": "Viewset that uses CollectionVersion's within distribution to display data for Collection's.\n\nCollection list is filterable by FilterSet and includes latest CollectionVersion.\n\nCollection detail includes CollectionVersion that is latest or via query param 'version'.",
         "parameters": [
           {
@@ -2796,7 +2847,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Repo"
+          "Collections"
         ],
         "security": [
           {
@@ -2818,12 +2869,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "List collections in distribution"
       }
     },
     "/api/galaxy/_ui/v1/repo/{distro_base_path}/{namespace}/{name}/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_repo_read",
+        "operationId": "v1_ui_repo_get_distro_base_path_namespace_name",
         "description": "Viewset that uses CollectionVersion's within distribution to display data for Collection's.\n\nCollection list is filterable by FilterSet and includes latest CollectionVersion.\n\nCollection detail includes CollectionVersion that is latest or via query param 'version'.",
         "parameters": [
           {
@@ -2874,7 +2925,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Repo"
+          "Collections"
         ],
         "security": [
           {
@@ -2896,12 +2947,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "Get collection by namespace and name in distribution"
       }
     },
     "/api/galaxy/_ui/v1/search/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_search_list",
+        "operationId": "v1_ui_search_get",
         "description": "Lists Search results for Collections + Roles.\nAggregates search from Collections and Roles in the same results set.\n\n\n## filtering\n\n- **search_type:** [\"sql\", \"websearch\"]\n- **keywords:** string\n    - queried against name,namespace,description,tags,platform\n    - when search_type is websearch allows operators e.g: \"this OR that AND (A OR B) -C\"\n    - when search_type is sql performs a SQL ilike on the same fields\n- **type:** [\"collection\", \"role\"]\n- **deprecated:** boolean\n- **name:** string (iexact query)\n- **namespace:** string (iexact query)\n- **tags:** string[] (allows multiple &tags=..&tags=..)\n- **platform:** string\n\n## Sorting\n\nSorting is performed by passing `order_by` parameter, optionally prefixed with `-` for DESC,\nthe allowed fields are:\n\n- name\n- namespace_name\n- download_count\n- last_updated\n- relevance (only when search_type is websearch)\n\n## Pagination\n\nPagination is based on `limit` and `offset` parameters.\n\n## Results\n\nResults are embedded in the pagination serializer including\n`meta:count` and `links:first,previous,next,last`.\n\nThe `data` key contains the results in the format::\n\n```python\n{\n  \"name\": \"brunogphmzthghu\",\n  \"namespace\": \"brunovrhvjkdh\",\n  \"description\": \"Lorem ipsum dolor sit amet, consectetur adipisicing elit.\",\n  \"type\": \"role\",\n  \"latest_version\": \"1.4.9\",\n  \"avatar_url\": \"https://github.com/brunogphmzthghu.png,\n  \"contents\": [],\n  \"download_count\": 9999,\n  \"last_updated\": \"2023-11-09T15:17:01.235457Z\",\n  \"deprecated\": false,\n  \"tags\": [\"development\", \"java\", \"python\"],\n  \"platforms\": [{\"name\": \"Ubuntu\", \"versions\": [\"jammy\", \"focal\"]}]\n}\n```",
         "parameters": [
           {
@@ -3036,7 +3087,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Search"
+          "Collections"
         ],
         "security": [
           {
@@ -3059,14 +3110,14 @@
             "description": ""
           }
         },
-        "x-ai-description": "Search collections and content"
+        "x-ai-description": "Search collections"
       }
     },
     "/api/galaxy/_ui/v1/settings/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_settings_get",
+        "operationId": "v1_ui_settings_get",
         "tags": [
-          "Api: _Ui V1 Settings"
+          "Config"
         ],
         "security": [
           {
@@ -3082,12 +3133,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Get client configuration"
+        "x-ai-description": "Get UI settings",
+        "description": "Get UI settings"
       }
     },
     "/api/galaxy/_ui/v1/synclists/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_synclists_list",
+        "operationId": "v1_ui_synclists_get",
         "summary": "List sync lists",
         "parameters": [
           {
@@ -3132,7 +3184,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Synclists"
+          "Content Sync"
         ],
         "security": [
           {
@@ -3154,13 +3206,14 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "List synclists",
+        "description": "List synclists"
       },
       "post": {
-        "operationId": "api_galaxy__ui_v1_synclists_create",
+        "operationId": "v1_ui_synclists_post",
         "summary": "Create a sync list",
         "tags": [
-          "Api: _Ui V1 Synclists"
+          "Content Sync"
         ],
         "requestBody": {
           "content": {
@@ -3202,12 +3255,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Create synclist",
+        "description": "Create synclist"
       }
     },
     "/api/galaxy/_ui/v1/tags/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_tags_list",
+        "operationId": "v1_ui_tags_get",
         "summary": "List tags",
         "parameters": [
           {
@@ -3252,7 +3306,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Tags"
+          "Collections"
         ],
         "security": [
           {
@@ -3274,12 +3328,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Search collections and content"
+        "x-ai-description": "List collection tags",
+        "description": "List collection tags"
       }
     },
     "/api/galaxy/_ui/v1/tags/collections/": {
       "get": {
-        "operationId": "api_galaxy__ui_v1_tags_collections_list",
+        "operationId": "v1_ui_tags_collections_get",
         "description": "ViewSet for collections' tags within the system.",
         "summary": "List tags",
         "parameters": [
@@ -3372,7 +3427,7 @@
           }
         ],
         "tags": [
-          "Api: _Ui V1 Tags Collections"
+          "Collections"
         ],
         "security": [
           {
@@ -3394,14 +3449,14 @@
             "description": ""
           }
         },
-        "x-ai-description": "Search collections and content"
+        "x-ai-description": "Get collections by tag"
       }
     },
     "/api/galaxy/api/": {
       "get": {
-        "operationId": "api_galaxy_api_read",
+        "operationId": "root_get_api",
         "tags": [
-          "Api: Api"
+          "Info"
         ],
         "security": [
           {
@@ -3416,12 +3471,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Discover available API versions and endpoints"
+        "x-ai-description": "Get API root endpoints",
+        "description": "Get API root endpoints"
       }
     },
     "/api/galaxy/content/{path}/v3/artifacts/collections/": {
       "post": {
-        "operationId": "api_galaxy_content_v3_artifacts_collections_create",
+        "operationId": "v3_collections_post",
         "description": "Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "parameters": [
@@ -3435,7 +3491,7 @@
           }
         ],
         "tags": [
-          "Pulp_Ansible: Artifacts Collections V3"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -3472,12 +3528,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Upload collection artifact"
+        "x-ai-description": "Upload collection"
       }
     },
     "/api/galaxy/content/{path}/v3/plugin/ansible/client-configuration/": {
       "get": {
-        "operationId": "api_galaxy_content_v3_plugin_ansible_client_configuration_read",
+        "operationId": "v3_client_configuration_get",
         "description": "Return configurations for the ansible-galaxy client.",
         "parameters": [
           {
@@ -3512,7 +3568,7 @@
           }
         ],
         "tags": [
-          "Api: Content V3 Plugin Ansible Client-Configuration"
+          "Config"
         ],
         "security": [
           {
@@ -3539,7 +3595,7 @@
     },
     "/api/galaxy/content/{path}/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}": {
       "get": {
-        "operationId": "api_galaxy_content_v3_plugin_ansible_content_collections_artifacts_download",
+        "operationId": "v3_content_collections_artifacts_get_download",
         "parameters": [
           {
             "in": "path",
@@ -3589,7 +3645,7 @@
           }
         ],
         "tags": [
-          "Api: Content V3 Plugin Ansible Content Collections Artifacts"
+          "Collections"
         ],
         "security": [
           {
@@ -3609,7 +3665,7 @@
     },
     "/api/galaxy/content/{path}/v3/plugin/ansible/imports/collections/{task}/": {
       "get": {
-        "operationId": "api_galaxy_content_v3_plugin_ansible_imports_collections_read",
+        "operationId": "v3_imports_collections_get",
         "description": "Returns a CollectionImport object.",
         "summary": "Inspect a collection import",
         "parameters": [
@@ -3663,7 +3719,8 @@
           }
         ],
         "tags": [
-          "Api: Content V3 Plugin Ansible Imports Collections"
+          "Tasks",
+          "Collections"
         ],
         "security": [
           {
@@ -3685,12 +3742,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get async task status"
+        "x-ai-description": "Get collection import status"
       }
     },
     "/api/galaxy/content/{path}/v3/plugin/ansible/search/collection-versions/": {
       "get": {
-        "operationId": "api_galaxy_content_v3_plugin_ansible_search_collection_versions_list",
+        "operationId": "v3_search_collection_versions_get",
         "description": "A viewset for cross-repo searches.",
         "summary": "List cross repository collection version indexs",
         "parameters": [
@@ -3933,7 +3990,7 @@
           }
         ],
         "tags": [
-          "Api: Content V3 Plugin Ansible Search Collection-Versions"
+          "Collections"
         ],
         "security": [
           {
@@ -3955,10 +4012,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "Search collections and content"
+        "x-ai-description": "Search collection versions"
       },
       "post": {
-        "operationId": "api_galaxy_content_v3_plugin_ansible_search_collection_versions_rebuild",
+        "operationId": "v3_search_collection_versions_post",
         "description": "A viewset for cross-repo searches.",
         "parameters": [
           {
@@ -3971,7 +4028,7 @@
           }
         ],
         "tags": [
-          "Api: Content V3 Plugin Ansible Search Collection-Versions"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -4013,12 +4070,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Search collections and content"
+        "x-ai-description": "Search collection versions with body filters"
       }
     },
     "/api/galaxy/content/{path}/v3/sync/": {
       "post": {
-        "operationId": "api_galaxy_content_v3_sync_sync",
+        "operationId": "v3_sync",
         "description": "Trigger an asynchronous sync task",
         "parameters": [
           {
@@ -4031,7 +4088,7 @@
           }
         ],
         "tags": [
-          "Api: Content V3 Sync"
+          "Content Sync"
         ],
         "security": [
           {
@@ -4053,12 +4110,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Sync repository from remote"
       }
     },
     "/api/galaxy/content/{path}/v3/sync/config/": {
       "get": {
-        "operationId": "api_galaxy_content_v3_sync_config_read",
+        "operationId": "v3_config_get",
         "parameters": [
           {
             "in": "path",
@@ -4092,7 +4149,7 @@
           }
         ],
         "tags": [
-          "Api: Content V3 Sync Config"
+          "Config"
         ],
         "security": [
           {
@@ -4114,10 +4171,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Get repository configuration",
+        "description": "Get repository configuration"
       },
       "put": {
-        "operationId": "api_galaxy_content_v3_sync_config_update",
+        "operationId": "v3_config_put",
         "parameters": [
           {
             "in": "path",
@@ -4129,7 +4187,7 @@
           }
         ],
         "tags": [
-          "Api: Content V3 Sync Config"
+          "Config"
         ],
         "requestBody": {
           "content": {
@@ -4171,12 +4229,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Update repository configuration",
+        "description": "Update repository configuration"
       }
     },
     "/api/galaxy/content/{path}/v3/tasks/": {
       "get": {
-        "operationId": "_api_galaxy_content_{path}_v3_tasks_tasks_list",
+        "operationId": "v3_tasks_get_path",
         "description": "A customized named ModelViewSet that knows how to register itself with the Pulp API router.\n\nThis viewset is discoverable by its name.\n\"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.\n\nAttributes:\n    lookup_field (str): The name of the field by which an object should be looked up, in\n        addition to any parent lookups if this ViewSet is nested. Defaults to 'pk'\n    endpoint_name (str): The name of the final path segment that should identify the ViewSet's\n        collection endpoint.\n    nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must\n        correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.\n        None indicates this ViewSet should not be nested.\n    parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs\n        to django model filter expressions that can be used with the corresponding value from\n        self.kwargs, used only by a nested ViewSet to filter based on the parent object's\n        identity.\n    schema (DefaultSchema): The schema class to use by default in a viewset.",
         "summary": "List tasks",
         "parameters": [
@@ -4677,12 +4736,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get async task status"
+        "x-ai-description": "List tasks in distribution"
       }
     },
     "/api/galaxy/content/{path}/v3/tasks/{pulp_id}/": {
       "get": {
-        "operationId": "_api_galaxy_content_{path}_v3_tasks_{pulp_id}_tasks_read",
+        "operationId": "v3_tasks_get_path_pulp_id",
         "description": "A customized named ModelViewSet that knows how to register itself with the Pulp API router.\n\nThis viewset is discoverable by its name.\n\"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.\n\nAttributes:\n    lookup_field (str): The name of the field by which an object should be looked up, in\n        addition to any parent lookups if this ViewSet is nested. Defaults to 'pk'\n    endpoint_name (str): The name of the final path segment that should identify the ViewSet's\n        collection endpoint.\n    nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must\n        correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.\n        None indicates this ViewSet should not be nested.\n    parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs\n        to django model filter expressions that can be used with the corresponding value from\n        self.kwargs, used only by a nested ViewSet to filter based on the parent object's\n        identity.\n    schema (DefaultSchema): The schema class to use by default in a viewset.",
         "summary": "Inspect a task",
         "parameters": [
@@ -4750,16 +4809,16 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get async task status"
+        "x-ai-description": "Get task by pulp_id in distribution"
       }
     },
     "/api/galaxy/feature_flags_state/": {
       "get": {
-        "operationId": "api_galaxy_feature_flags_state_get",
+        "operationId": "deprecated_feature_flags_state_get",
         "description": "A view class for displaying feature flags",
         "deprecated": true,
         "tags": [
-          "Api: Feature_Flags_State"
+          "Feature Flags"
         ],
         "security": [
           {
@@ -4786,7 +4845,7 @@
     },
     "/api/galaxy/feature_flags/states/": {
       "get": {
-        "operationId": "api_galaxy_feature_flags_states_list",
+        "operationId": "feature_flags_states_get_states",
         "description": "A view class for displaying feature flags states.",
         "summary": "List feature flags",
         "parameters": [
@@ -4819,7 +4878,7 @@
           }
         ],
         "tags": [
-          "Api: Feature_Flags"
+          "Feature Flags"
         ],
         "security": [
           {
@@ -4846,7 +4905,7 @@
     },
     "/api/galaxy/feature_flags/states/{id}/": {
       "get": {
-        "operationId": "api_galaxy_feature_flags_states_read",
+        "operationId": "feature_flags_states_get_id",
         "description": "A view class for displaying feature flags states.",
         "summary": "Inspect a feature flag",
         "parameters": [
@@ -4862,7 +4921,7 @@
           }
         ],
         "tags": [
-          "Api: Feature_Flags"
+          "Feature Flags"
         ],
         "security": [
           {
@@ -4889,7 +4948,7 @@
     },
     "/api/galaxy/pulp/api/v3/content/ansible/collection_signatures/": {
       "get": {
-        "operationId": "content_ansible_collection_signatures_list",
+        "operationId": "pulp_v3_content_ansible_collection_signatures_get_collection_sig",
         "description": "ViewSet for looking at signature objects for CollectionVersion content.",
         "summary": "List collection version signatures",
         "parameters": [
@@ -5075,7 +5134,8 @@
           }
         ],
         "tags": [
-          "Content: Collection_Signatures"
+          "Signing",
+          "Collections"
         ],
         "security": [
           {
@@ -5097,14 +5157,15 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "List collection signatures"
       },
       "post": {
-        "operationId": "content_ansible_collection_signatures_create",
+        "operationId": "pulp_v3_content_ansible_collection_signatures_post",
         "description": "Trigger an asynchronous task to create content,optionally create new repository version.",
         "summary": "Create a collection version signature",
         "tags": [
-          "Content: Collection_Signatures"
+          "Signing",
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -5141,12 +5202,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Create collection signature"
       }
     },
     "/api/galaxy/pulp/api/v3/content/ansible/collection_signatures/{pulp_id}/": {
       "get": {
-        "operationId": "content_ansible_collection_signatures_read",
+        "operationId": "pulp_v3_content_ansible_collection_signatures_get_pulp_id",
         "description": "ViewSet for looking at signature objects for CollectionVersion content.",
         "summary": "Inspect a collection version signature",
         "parameters": [
@@ -5184,7 +5245,8 @@
           }
         ],
         "tags": [
-          "Content: Collection_Signatures"
+          "Signing",
+          "Collections"
         ],
         "security": [
           {
@@ -5206,12 +5268,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Get collection signature by pulp_id"
       }
     },
     "/api/galaxy/pulp/api/v3/content/ansible/namespaces/": {
       "get": {
-        "operationId": "content_ansible_namespaces_list",
+        "operationId": "pulp_v3_content_ansible_namespaces_get",
         "description": "ViewSet for AnsibleNamespace.",
         "summary": "List ansible namespace metadatas",
         "parameters": [
@@ -5543,7 +5605,7 @@
           }
         ],
         "tags": [
-          "Content: Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -5565,12 +5627,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "List namespaces content"
       }
     },
     "/api/galaxy/pulp/api/v3/content/ansible/namespaces/{pulp_id}/avatar/": {
       "get": {
-        "operationId": "content_ansible_namespaces_avatar",
+        "operationId": "pulp_v3_content_ansible_namespaces_avatar",
         "description": "Get the logo for the this namespace.",
         "parameters": [
           {
@@ -5607,7 +5669,7 @@
           }
         ],
         "tags": [
-          "Content: Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -5630,12 +5692,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "Get namespace avatar"
       }
     },
     "/api/galaxy/pulp/api/v3/remotes/ansible/collection/": {
       "get": {
-        "operationId": "remotes_ansible_collection_list",
+        "operationId": "pulp_v3_remotes_ansible_collection_get_collection",
         "description": "ViewSet for Collection Remotes.",
         "summary": "List collection remotes",
         "parameters": [
@@ -5973,7 +6035,7 @@
           }
         ],
         "tags": [
-          "Remotes: Collection"
+          "Remotes"
         ],
         "security": [
           {
@@ -5995,14 +6057,14 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "List collection remotes"
       },
       "post": {
-        "operationId": "remotes_ansible_collection_create",
+        "operationId": "pulp_v3_remotes_ansible_collection_post",
         "description": "ViewSet for Collection Remotes.",
         "summary": "Create a collection remote",
         "tags": [
-          "Remotes: Collection"
+          "Remotes"
         ],
         "requestBody": {
           "content": {
@@ -6044,12 +6106,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Create collection remote"
       }
     },
     "/api/galaxy/pulp/api/v3/remotes/ansible/collection/{pulp_id}/": {
       "get": {
-        "operationId": "remotes_ansible_collection_read",
+        "operationId": "pulp_v3_remotes_ansible_collection_get_pulp_id",
         "description": "ViewSet for Collection Remotes.",
         "summary": "Inspect a collection remote",
         "parameters": [
@@ -6087,7 +6149,7 @@
           }
         ],
         "tags": [
-          "Remotes: Collection"
+          "Remotes"
         ],
         "security": [
           {
@@ -6109,10 +6171,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Get collection remote by pulp_id"
       },
       "put": {
-        "operationId": "remotes_ansible_collection_update",
+        "operationId": "pulp_v3_remotes_ansible_collection_put",
         "description": "Trigger an asynchronous update task",
         "summary": "Update a collection remote",
         "parameters": [
@@ -6128,7 +6190,7 @@
           }
         ],
         "tags": [
-          "Remotes: Collection"
+          "Remotes"
         ],
         "requestBody": {
           "content": {
@@ -6170,10 +6232,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Update collection remote"
       },
       "patch": {
-        "operationId": "remotes_ansible_collection_partial_update",
+        "operationId": "pulp_v3_remotes_ansible_collection_patch",
         "description": "Trigger an asynchronous partial update task",
         "summary": "Update a collection remote",
         "parameters": [
@@ -6189,7 +6251,7 @@
           }
         ],
         "tags": [
-          "Remotes: Collection"
+          "Remotes"
         ],
         "requestBody": {
           "content": {
@@ -6231,10 +6293,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Partially update collection remote"
       },
       "delete": {
-        "operationId": "remotes_ansible_collection_delete",
+        "operationId": "pulp_v3_remotes_ansible_collection_delete",
         "description": "Trigger an asynchronous delete task",
         "summary": "Delete a collection remote",
         "parameters": [
@@ -6250,7 +6312,7 @@
           }
         ],
         "tags": [
-          "Remotes: Collection"
+          "Remotes"
         ],
         "security": [
           {
@@ -6272,12 +6334,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Delete collection remote"
       }
     },
     "/api/galaxy/pulp/api/v3/repositories/ansible/ansible/{pulp_id}/sign/": {
       "post": {
-        "operationId": "repositories_ansible_ansible_sign",
+        "operationId": "pulp_v3_repositories_ansible_sign",
         "description": "Trigger an asynchronous task to sign Ansible content.",
         "parameters": [
           {
@@ -6292,7 +6354,8 @@
           }
         ],
         "tags": [
-          "Repositories: Ansible"
+          "Signing",
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -6334,12 +6397,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Sign ansible repository collections"
       }
     },
     "/api/galaxy/pulp/api/v3/repositories/ansible/ansible/{pulp_id}/sync/": {
       "post": {
-        "operationId": "repositories_ansible_ansible_sync",
+        "operationId": "pulp_v3_repositories_ansible_sync",
         "description": "Trigger an asynchronous task to sync Ansible content.",
         "parameters": [
           {
@@ -6354,7 +6417,7 @@
           }
         ],
         "tags": [
-          "Repositories: Ansible"
+          "Content Sync"
         ],
         "requestBody": {
           "content": {
@@ -6396,12 +6459,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Sync ansible repository from remote"
       }
     },
     "/api/galaxy/pulp/api/v3/signing-services/": {
       "get": {
-        "operationId": "signing_services_list",
+        "operationId": "pulp_v3_signing_services_get_signing_services",
         "description": "A ViewSet that supports browsing of existing signing services.",
         "summary": "List signing services",
         "parameters": [
@@ -6520,7 +6583,7 @@
           }
         ],
         "tags": [
-          "Signing-Services"
+          "Signing"
         ],
         "security": [
           {
@@ -6542,12 +6605,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "List signing services"
       }
     },
     "/api/galaxy/pulp/api/v3/signing-services/{pulp_id}/": {
       "get": {
-        "operationId": "signing_services_read",
+        "operationId": "pulp_v3_signing_services_get_pulp_id",
         "description": "A ViewSet that supports browsing of existing signing services.",
         "summary": "Inspect a signing service",
         "parameters": [
@@ -6585,7 +6648,7 @@
           }
         ],
         "tags": [
-          "Signing-Services"
+          "Signing"
         ],
         "security": [
           {
@@ -6607,16 +6670,16 @@
             "description": ""
           }
         },
-        "x-ai-description": "Sign or verify collection signatures"
+        "x-ai-description": "Get signing service by pulp_id"
       }
     },
     "/api/galaxy/pulp/api/v3/status/": {
       "get": {
-        "operationId": "status_read",
+        "operationId": "pulp_v3_status_get",
         "description": "Returns status and app information about Pulp.\n\nInformation includes:\n * version of pulpcore and loaded pulp plugins\n * known workers\n * known content apps\n * database connection status\n * redis connection status\n * disk usage information",
         "summary": "Inspect status of Pulp",
         "tags": [
-          "Status"
+          "Info"
         ],
         "responses": {
           "200": {
@@ -6635,10 +6698,10 @@
     },
     "/api/galaxy/v3/": {
       "get": {
-        "operationId": "api_galaxy_v3_read",
+        "operationId": "deprecated_v3_get",
         "description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/published/collections/`. Returns 302 redirect. Legacy v3 endpoint.",
         "tags": [
-          "Api: V3"
+          "Info"
         ],
         "security": [
           {
@@ -6669,11 +6732,11 @@
     },
     "/api/galaxy/v3/artifacts/collections/": {
       "post": {
-        "operationId": "api_galaxy_v3_artifacts_collections_create",
+        "operationId": "v3_artifacts_collections_post",
         "description": "Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "tags": [
-          "Pulp_Ansible: Artifacts Collections V3"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -6715,10 +6778,10 @@
     },
     "/api/galaxy/v3/auth/token/": {
       "post": {
-        "operationId": "api_galaxy_v3_auth_token_post",
+        "operationId": "v3_auth_token_post",
         "description": "Create or refresh user token.",
         "tags": [
-          "Api: V3 Auth Token"
+          "Access"
         ],
         "security": [
           {
@@ -6733,13 +6796,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Authenticate and manage tokens"
+        "x-ai-description": "Create authentication token"
       },
       "delete": {
-        "operationId": "api_galaxy_v3_auth_token_delete",
+        "operationId": "v3_auth_token_delete",
         "description": "Invalidate user token.",
         "tags": [
-          "Api: V3 Auth Token"
+          "Access"
         ],
         "security": [
           {
@@ -6754,12 +6817,12 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Authenticate and manage tokens"
+        "x-ai-description": "Delete authentication token"
       }
     },
     "/api/galaxy/v3/imports/collections/{task}/": {
       "get": {
-        "operationId": "api_galaxy_v3_imports_collections_read",
+        "operationId": "deprecated_v3_imports_collections_get",
         "description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/imports/collections/{task}/`. Returns 302 redirect. Legacy v3 endpoint.",
         "summary": "Inspect a collection import",
         "parameters": [
@@ -6797,7 +6860,8 @@
           }
         ],
         "tags": [
-          "Api: V3 Imports Collections"
+          "Tasks",
+          "Collections"
         ],
         "security": [
           {
@@ -6828,7 +6892,7 @@
     },
     "/api/galaxy/v3/namespaces/": {
       "get": {
-        "operationId": "api_galaxy_v3_namespaces_list",
+        "operationId": "v3_namespaces_get_namespaces",
         "summary": "List namespaces",
         "parameters": [
           {
@@ -6915,7 +6979,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -6937,14 +7001,15 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "List namespaces",
+        "description": "List namespaces"
       },
       "post": {
-        "operationId": "api_galaxy_v3_namespaces_create",
+        "operationId": "v3_namespaces_post",
         "description": "Override to validate for name duplication before serializer validation.",
         "summary": "Create a namespace",
         "tags": [
-          "Api: V3 Namespaces"
+          "Namespaces"
         ],
         "requestBody": {
           "content": {
@@ -6986,12 +7051,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create collection namespaces"
+        "x-ai-description": "Create namespace"
       }
     },
     "/api/galaxy/v3/namespaces/{name}/": {
       "get": {
-        "operationId": "api_galaxy_v3_namespaces_read",
+        "operationId": "v3_namespaces_get_name",
         "summary": "Inspect a namespace",
         "parameters": [
           {
@@ -7026,7 +7091,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -7048,10 +7113,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "Get namespace by name",
+        "description": "Get namespace by name"
       },
       "put": {
-        "operationId": "api_galaxy_v3_namespaces_update",
+        "operationId": "v3_namespaces_put",
         "summary": "Update a namespace",
         "parameters": [
           {
@@ -7064,7 +7130,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Namespaces"
+          "Namespaces"
         ],
         "requestBody": {
           "content": {
@@ -7106,10 +7172,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update collection namespaces"
+        "x-ai-description": "Update namespace",
+        "description": "Update namespace"
       },
       "patch": {
-        "operationId": "api_galaxy_v3_namespaces_partial_update",
+        "operationId": "v3_namespaces_patch",
         "summary": "Update a namespace",
         "parameters": [
           {
@@ -7122,7 +7189,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Namespaces"
+          "Namespaces"
         ],
         "requestBody": {
           "content": {
@@ -7164,10 +7231,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update collection namespaces"
+        "x-ai-description": "Partially update namespace",
+        "description": "Partially update namespace"
       },
       "delete": {
-        "operationId": "api_galaxy_v3_namespaces_delete",
+        "operationId": "v3_namespaces_delete",
         "description": "Delete a namespace.\n\n1. Perform a check to see if there are any collections in the namespace.\n   If there are, return a failure.\n2. Delete the pulp distro and repository\n3. Delete the namespace object.\n\nreturn: Response(status=204)",
         "summary": "Delete a namespace",
         "parameters": [
@@ -7181,7 +7249,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -7196,15 +7264,15 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Delete collection namespaces"
+        "x-ai-description": "Delete namespace"
       }
     },
     "/api/galaxy/v3/plugin/ansible/client-configuration/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_client_configuration_read",
+        "operationId": "v3_ansible_client_configuration_get",
         "description": "Return configurations for the ansible-galaxy client.",
         "tags": [
-          "Api: V3 Plugin Ansible Client-Configuration"
+          "Config"
         ],
         "security": [
           {
@@ -7226,12 +7294,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get client configuration"
+        "x-ai-description": "Get ansible client configuration"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_read",
+        "operationId": "v3_ansible_content_collections_get",
         "description": "ViewSet for Repository Metadata.",
         "parameters": [
           {
@@ -7266,7 +7334,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections"
+          "Collections"
         ],
         "security": [
           {
@@ -7288,12 +7356,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "List collections in distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/all-collections/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_all_collections_list",
+        "operationId": "v3_ansible_content_collections_all_collections_get",
         "description": "Unpaginated ViewSet for Collections.",
         "parameters": [
           {
@@ -7410,7 +7478,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections All-Collections"
+          "Collections"
         ],
         "security": [
           {
@@ -7435,12 +7503,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "List all collections across distributions"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/all-versions/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_all_versions_list",
+        "operationId": "v3_ansible_content_collections_all_versions_get",
         "description": "Returns paginated CollectionVersions list.",
         "parameters": [
           {
@@ -7475,7 +7543,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections All-Versions"
+          "Collections"
         ],
         "security": [
           {
@@ -7500,12 +7568,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "List all collection versions across distributions"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/": {
       "post": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_artifacts_create",
+        "operationId": "v3_ansible_content_collections_artifacts_post",
         "description": "Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "parameters": [
@@ -7519,7 +7587,7 @@
           }
         ],
         "tags": [
-          "Pulp_Ansible: Artifacts Collections V3"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -7556,12 +7624,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create collection metadata"
+        "x-ai-description": "Upload collection artifact to distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_artifacts_download",
+        "operationId": "v3_ansible_content_collections_artifacts_get_download",
         "parameters": [
           {
             "in": "path",
@@ -7603,7 +7671,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Artifacts"
+          "Collections"
         ],
         "security": [
           {
@@ -7618,12 +7686,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Download collection artifact"
+        "x-ai-description": "Download collection artifact from distribution",
+        "description": "Download collection artifact from distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/index/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_index_list",
+        "operationId": "v3_ansible_content_collections_index",
         "description": "ViewSet for Collections.",
         "parameters": [
           {
@@ -7758,7 +7827,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Index"
+          "Collections"
         ],
         "security": [
           {
@@ -7780,12 +7849,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "Get collection index in distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/index/{namespace}/{name}/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_index_read",
+        "operationId": "v3_ansible_content_collections_index_get",
         "description": "ViewSet for Collections.",
         "parameters": [
           {
@@ -7836,7 +7905,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Index"
+          "Collections"
         ],
         "security": [
           {
@@ -7858,10 +7927,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "Get collection details in distribution"
       },
       "patch": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_index_update",
+        "operationId": "v3_ansible_content_collections_index_patch",
         "description": "Trigger an asynchronous update task",
         "parameters": [
           {
@@ -7890,7 +7959,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Index"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -7932,10 +8001,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "Update collection in distribution"
       },
       "delete": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_index_delete",
+        "operationId": "v3_ansible_content_collections_index_delete",
         "description": "Trigger an asynchronous delete task",
         "parameters": [
           {
@@ -7964,7 +8033,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Index"
+          "Collections"
         ],
         "security": [
           {
@@ -7986,12 +8055,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "Delete collection from distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/index/{namespace}/{name}/versions/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_index_versions_list",
+        "operationId": "v3_ansible_content_collections_index_versions_get_distro_base_pa",
         "description": "Returns paginated CollectionVersions list.",
         "parameters": [
           {
@@ -8231,7 +8300,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Index Versions"
+          "Collections"
         ],
         "security": [
           {
@@ -8253,12 +8322,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "List collection versions in distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/index/{namespace}/{name}/versions/{version}/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_index_versions_read",
+        "operationId": "v3_ansible_content_collections_index_versions_get_distro_base_pa_2",
         "description": "Returns a CollectionVersion object.",
         "parameters": [
           {
@@ -8317,7 +8386,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Index Versions"
+          "Collections"
         ],
         "security": [
           {
@@ -8339,10 +8408,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "Get collection version details in distribution"
       },
       "delete": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_index_versions_delete",
+        "operationId": "v3_ansible_content_collections_index_versions_delete",
         "description": "Trigger an asynchronous delete task",
         "parameters": [
           {
@@ -8379,7 +8448,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Index Versions"
+          "Collections"
         ],
         "security": [
           {
@@ -8401,12 +8470,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "Delete collection version from distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/index/{namespace}/{name}/versions/{version}/docs-blob/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_collections_index_versions_docs_blob_read",
+        "operationId": "v3_ansible_content_collections_index_versions_docs_blob_get",
         "description": "Returns a CollectionVersion object.",
         "parameters": [
           {
@@ -8465,7 +8534,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Collections Index Versions Docs-Blob"
+          "Collections"
         ],
         "security": [
           {
@@ -8487,12 +8556,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "List or retrieve collection metadata"
+        "x-ai-description": "Get collection version documentation"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/namespaces/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_namespaces_list",
+        "operationId": "v3_ansible_content_namespaces_get_distro_base_path",
         "description": "Provides the authentication and permission classes from settings.",
         "parameters": [
           {
@@ -8799,7 +8868,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -8821,10 +8890,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "List namespaces in distribution"
       },
       "post": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_namespaces_create",
+        "operationId": "v3_ansible_content_namespaces_post",
         "description": "Provides the authentication and permission classes from settings.",
         "parameters": [
           {
@@ -8837,7 +8906,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Namespaces"
+          "Namespaces"
         ],
         "requestBody": {
           "content": {
@@ -8874,12 +8943,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Create collection namespaces"
+        "x-ai-description": "Create namespace in distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/namespaces/{name}/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_namespaces_read",
+        "operationId": "v3_ansible_content_namespaces_get_distro_base_path_name",
         "description": "Provides the authentication and permission classes from settings.",
         "parameters": [
           {
@@ -8922,7 +8991,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -8944,10 +9013,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection namespaces"
+        "x-ai-description": "Get namespace by name in distribution"
       },
       "patch": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_namespaces_partial_update",
+        "operationId": "v3_ansible_content_namespaces_patch",
         "description": "Provides the authentication and permission classes from settings.",
         "parameters": [
           {
@@ -8968,7 +9037,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Namespaces"
+          "Namespaces"
         ],
         "requestBody": {
           "content": {
@@ -9005,10 +9074,10 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update collection namespaces"
+        "x-ai-description": "Partially update namespace in distribution"
       },
       "delete": {
-        "operationId": "api_galaxy_v3_plugin_ansible_content_namespaces_delete",
+        "operationId": "v3_ansible_content_namespaces_delete",
         "description": "Try to remove the Namespace if no Collections under Namespace are present.",
         "parameters": [
           {
@@ -9029,7 +9098,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Content Namespaces"
+          "Namespaces"
         ],
         "security": [
           {
@@ -9051,12 +9120,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Delete collection namespaces"
+        "x-ai-description": "Delete namespace from distribution"
       }
     },
     "/api/galaxy/v3/plugin/ansible/search/collection-versions/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_ansible_search_collection_versions_list",
+        "operationId": "v3_ansible_search_collection_versions_get",
         "description": "A viewset for cross-repo searches.",
         "summary": "List cross repository collection version indexs",
         "parameters": [
@@ -9291,7 +9360,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Ansible Search Collection-Versions"
+          "Collections"
         ],
         "security": [
           {
@@ -9313,13 +9382,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Search collections and content"
+        "x-ai-description": "Search collection versions"
       },
       "post": {
-        "operationId": "api_galaxy_v3_plugin_ansible_search_collection_versions_rebuild",
+        "operationId": "v3_ansible_search_collection_versions_post",
         "description": "A viewset for cross-repo searches.",
         "tags": [
-          "Api: V3 Plugin Ansible Search Collection-Versions"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -9361,12 +9430,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Search collections and content"
+        "x-ai-description": "Search collection versions with filters"
       }
     },
     "/api/galaxy/v3/plugin/execution-environments/repositories/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories_list",
+        "operationId": "v3_execution_environments_repositories_get_repositories",
         "summary": "List container distributions",
         "parameters": [
           {
@@ -9497,7 +9566,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories"
+          "Container/Execution Environments"
         ],
         "security": [
           {
@@ -9519,12 +9588,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get container execution environments"
+        "x-ai-description": "List execution environment repositories",
+        "description": "List execution environment repositories"
       }
     },
     "/api/galaxy/v3/plugin/execution-environments/repositories/{base_path}/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories_read",
+        "operationId": "v3_execution_environments_repositories_get_base_path",
         "summary": "Inspect a container distribution",
         "parameters": [
           {
@@ -9560,7 +9630,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories"
+          "Container/Execution Environments"
         ],
         "security": [
           {
@@ -9582,10 +9652,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get container execution environments"
+        "x-ai-description": "Get execution environment repository by base_path",
+        "description": "Get execution environment repository by base_path"
       },
       "delete": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories_delete",
+        "operationId": "v3_execution_environments_repositories_delete",
         "description": "Trigger an asynchronous delete task",
         "summary": "Delete a container distribution",
         "parameters": [
@@ -9600,7 +9671,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories"
+          "Container/Execution Environments"
         ],
         "security": [
           {
@@ -9622,12 +9693,12 @@
             "description": ""
           }
         },
-        "x-ai-description": "Delete container execution environments"
+        "x-ai-description": "Delete execution environment repository"
       }
     },
     "/api/galaxy/v3/plugin/execution-environments/repositories/{base_path}/_content/history/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories__content_history_list",
+        "operationId": "v3_execution_environments_repositories_content_history_get",
         "parameters": [
           {
             "in": "path",
@@ -9699,7 +9770,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories _Content History"
+          "Container/Execution Environments"
         ],
         "security": [
           {
@@ -9721,12 +9792,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get container execution environments"
+        "x-ai-description": "Get execution environment repository history",
+        "description": "Get execution environment repository history"
       }
     },
     "/api/galaxy/v3/plugin/execution-environments/repositories/{base_path}/_content/images/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories__content_images_list",
+        "operationId": "v3_execution_environments_repositories_content_images_get",
         "parameters": [
           {
             "in": "path",
@@ -9831,7 +9903,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories _Content Images"
+          "Container/Execution Environments"
         ],
         "security": [
           {
@@ -9853,12 +9925,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get container execution environments"
+        "x-ai-description": "List execution environment images",
+        "description": "List execution environment images"
       }
     },
     "/api/galaxy/v3/plugin/execution-environments/repositories/{base_path}/_content/readme/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories__content_readme_read",
+        "operationId": "v3_execution_environments_repositories_content_readme_get",
         "summary": "Inspect a container distro readme",
         "parameters": [
           {
@@ -9894,7 +9967,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories _Content Readme"
+          "Container/Execution Environments"
         ],
         "security": [
           {
@@ -9916,10 +9989,11 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get container execution environments"
+        "x-ai-description": "Get execution environment readme",
+        "description": "Get execution environment readme"
       },
       "put": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories__content_readme_update",
+        "operationId": "v3_execution_environments_repositories_content_readme_put",
         "summary": "Update a container distro readme",
         "parameters": [
           {
@@ -9933,7 +10007,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories _Content Readme"
+          "Container/Execution Environments"
         ],
         "requestBody": {
           "content": {
@@ -9975,12 +10049,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Update container execution environments"
+        "x-ai-description": "Update execution environment readme",
+        "description": "Update execution environment readme"
       }
     },
     "/api/galaxy/v3/plugin/execution-environments/repositories/{base_path}/_content/sync/": {
       "post": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories__content_sync_sync",
+        "operationId": "v3_execution_environments_repositories_content_sync",
         "parameters": [
           {
             "in": "path",
@@ -9993,7 +10068,8 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories _Content Sync"
+          "Container/Execution Environments",
+          "Content Sync"
         ],
         "security": [
           {
@@ -10008,12 +10084,13 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Sync collections from remote repository"
+        "x-ai-description": "Sync execution environment repository",
+        "description": "Sync execution environment repository"
       }
     },
     "/api/galaxy/v3/plugin/execution-environments/repositories/{base_path}/_content/tags/": {
       "get": {
-        "operationId": "api_galaxy_v3_plugin_execution_environments_repositories__content_tags_list",
+        "operationId": "v3_execution_environments_repositories_content_tags_get",
         "parameters": [
           {
             "in": "path",
@@ -10143,7 +10220,7 @@
           }
         ],
         "tags": [
-          "Api: V3 Plugin Execution-Environments Repositories _Content Tags"
+          "Container/Execution Environments"
         ],
         "security": [
           {
@@ -10165,12 +10242,13 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get container execution environments"
+        "x-ai-description": "List execution environment tags",
+        "description": "List execution environment tags"
       }
     },
     "/pulp_ansible/galaxy/{path}/api/v3/artifacts/collections/": {
       "post": {
-        "operationId": "pulp_ansible_galaxy_api_v3_artifacts_collections_create",
+        "operationId": "deprecated_v3_collections_post",
         "description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "parameters": [
@@ -10184,7 +10262,7 @@
           }
         ],
         "tags": [
-          "Pulp_Ansible: Artifacts Collections V3"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -10227,7 +10305,7 @@
     },
     "/pulp_ansible/galaxy/{path}/api/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}": {
       "get": {
-        "operationId": "pulp_ansible_galaxy_api_v3_plugin_ansible_content_collections_artifacts_download",
+        "operationId": "deprecated_v3_content_collections_artifacts_get_download",
         "description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`. Collection download endpoint.",
         "parameters": [
           {
@@ -10278,7 +10356,7 @@
           }
         ],
         "tags": [
-          "Pulp_Ansible: Api V3 Plugin Ansible Content Collections Artifacts"
+          "Collections"
         ],
         "security": [
           {
@@ -10299,11 +10377,11 @@
     },
     "/pulp_ansible/galaxy/default/api/v3/artifacts/collections/": {
       "post": {
-        "operationId": "pulp_ansible_galaxy_default_api_v3_artifacts_collections_create",
+        "operationId": "deprecated_v3_artifacts_collections_post",
         "description": "Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Create an artifact and trigger an asynchronous task to create Collection content from it.",
         "summary": "Upload a collection",
         "tags": [
-          "Pulp_Ansible: Artifacts Collections V3"
+          "Collections"
         ],
         "requestBody": {
           "content": {
@@ -10346,7 +10424,7 @@
     },
     "/pulp_ansible/galaxy/default/api/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}": {
       "get": {
-        "operationId": "pulp_ansible_galaxy_default_api_v3_plugin_ansible_content_collections_artifacts_download",
+        "operationId": "deprecated_v3_ansible_content_collections_artifacts_get_download",
         "description": "Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`. Collection download endpoint.",
         "parameters": [
           {
@@ -10389,7 +10467,7 @@
           }
         ],
         "tags": [
-          "Pulp_Ansible: Default Api V3 Plugin Ansible Content Collections Artifacts"
+          "Collections"
         ],
         "security": [
           {
@@ -10413,7 +10491,7 @@
         "operationId": "token_get",
         "description": "Handles GET requests for the /token/ endpoint.",
         "tags": [
-          "Token"
+          "Access"
         ],
         "security": [
           {
@@ -10428,7 +10506,7 @@
             "description": "No response body"
           }
         },
-        "x-ai-description": "Authenticate and manage tokens"
+        "x-ai-description": "Get authentication token"
       }
     }
   },

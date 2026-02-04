@@ -1,0 +1,353 @@
+# Mapping of operationId to tags
+# Tags: Info, Access, Namespaces, Collections, Content Sync,
+#       Container/Execution Environments, Tasks, Remotes, Config,
+#       Feature Flags, Resource Registry, Signing
+
+# Deprecated endpoints
+"deprecated_ansible_collections_post_upload":
+  - Collections
+"deprecated_feature_flags_state_get":
+  - Feature Flags
+"deprecated_v3_ansible_content_collections_artifacts_get_download":
+  - Collections
+"deprecated_v3_artifacts_collections_post":
+  - Collections
+"deprecated_v3_collections_post":
+  - Collections
+"deprecated_v3_content_collections_artifacts_get_download":
+  - Collections
+"deprecated_v3_get":
+  - Info
+"deprecated_v3_imports_collections_get":
+  - Tasks
+  - Collections
+
+# Feature Flags
+"feature_flags_states_get_id":
+  - Feature Flags
+"feature_flags_states_get_states":
+  - Feature Flags
+
+# Signing
+"pulp_v3_content_ansible_collection_signatures_get_collection_sig":
+  - Signing
+  - Collections
+"pulp_v3_content_ansible_collection_signatures_get_pulp_id":
+  - Signing
+  - Collections
+"pulp_v3_content_ansible_collection_signatures_post":
+  - Signing
+  - Collections
+"pulp_v3_repositories_ansible_sign":
+  - Signing
+  - Collections
+"pulp_v3_signing_services_get_pulp_id":
+  - Signing
+"pulp_v3_signing_services_get_signing_services":
+  - Signing
+
+# Namespaces (Pulp)
+"pulp_v3_content_ansible_namespaces_avatar":
+  - Namespaces
+"pulp_v3_content_ansible_namespaces_get":
+  - Namespaces
+
+# Remotes (Pulp)
+"pulp_v3_remotes_ansible_collection_delete":
+  - Remotes
+"pulp_v3_remotes_ansible_collection_get_collection":
+  - Remotes
+"pulp_v3_remotes_ansible_collection_get_pulp_id":
+  - Remotes
+"pulp_v3_remotes_ansible_collection_patch":
+  - Remotes
+"pulp_v3_remotes_ansible_collection_post":
+  - Remotes
+"pulp_v3_remotes_ansible_collection_put":
+  - Remotes
+
+# Content Sync (Pulp)
+"pulp_v3_repositories_ansible_sync":
+  - Content Sync
+
+# Info
+"pulp_v3_status_get":
+  - Info
+"root_get_api":
+  - Info
+"root_get_galaxy":
+  - Info
+
+# Access / Authentication
+"token_get":
+  - Access
+"v1_ui_auth_login_get":
+  - Access
+"v1_ui_auth_login_post":
+  - Access
+"v1_ui_auth_logout_post":
+  - Access
+"v3_auth_token_delete":
+  - Access
+"v3_auth_token_post":
+  - Access
+
+# Collection Signing (UI)
+"v1_ui_collection_signing_post_collection_signing":
+  - Signing
+  - Collections
+"v1_ui_collection_signing_post_path":
+  - Signing
+  - Collections
+"v1_ui_collection_signing_post_path_namespace":
+  - Signing
+  - Collections
+"v1_ui_collection_signing_post_path_namespace_collection":
+  - Signing
+  - Collections
+"v1_ui_collection_signing_post_path_namespace_collection_version":
+  - Signing
+  - Collections
+
+# Execution Environments Registries (UI)
+"v1_ui_execution_environments_registries_delete":
+  - Container/Execution Environments
+  - Resource Registry
+"v1_ui_execution_environments_registries_get_id":
+  - Container/Execution Environments
+  - Resource Registry
+"v1_ui_execution_environments_registries_get_registries":
+  - Container/Execution Environments
+  - Resource Registry
+"v1_ui_execution_environments_registries_index":
+  - Container/Execution Environments
+  - Resource Registry
+"v1_ui_execution_environments_registries_post":
+  - Container/Execution Environments
+  - Resource Registry
+"v1_ui_execution_environments_registries_put":
+  - Container/Execution Environments
+  - Resource Registry
+"v1_ui_execution_environments_registries_sync":
+  - Container/Execution Environments
+  - Content Sync
+
+# Execution Environments Remotes (UI)
+"v1_ui_execution_environments_remotes_get_id":
+  - Container/Execution Environments
+  - Remotes
+"v1_ui_execution_environments_remotes_get_remotes":
+  - Container/Execution Environments
+  - Remotes
+"v1_ui_execution_environments_remotes_post":
+  - Container/Execution Environments
+  - Remotes
+"v1_ui_execution_environments_remotes_put":
+  - Container/Execution Environments
+  - Remotes
+
+# Feature Flags (UI)
+"v1_ui_feature_flags_get":
+  - Feature Flags
+
+# Imports / Tasks (UI)
+"v1_ui_imports_collections_get_collections":
+  - Tasks
+  - Collections
+"v1_ui_imports_collections_get_task_id":
+  - Tasks
+  - Collections
+
+# My Namespaces (UI)
+"v1_ui_my_namespaces_delete":
+  - Namespaces
+  - Access
+"v1_ui_my_namespaces_get_my_namespaces":
+  - Namespaces
+  - Access
+"v1_ui_my_namespaces_get_name":
+  - Namespaces
+  - Access
+"v1_ui_my_namespaces_patch":
+  - Namespaces
+  - Access
+"v1_ui_my_namespaces_post":
+  - Namespaces
+  - Access
+"v1_ui_my_namespaces_put":
+  - Namespaces
+  - Access
+
+# Synclists (UI)
+"v1_ui_my_synclists_curate":
+  - Content Sync
+"v1_ui_my_synclists_get":
+  - Content Sync
+"v1_ui_my_synclists_post":
+  - Content Sync
+"v1_ui_synclists_get":
+  - Content Sync
+"v1_ui_synclists_post":
+  - Content Sync
+
+# Namespaces (UI)
+"v1_ui_namespaces_delete":
+  - Namespaces
+"v1_ui_namespaces_get_name":
+  - Namespaces
+"v1_ui_namespaces_get_namespaces":
+  - Namespaces
+"v1_ui_namespaces_patch":
+  - Namespaces
+"v1_ui_namespaces_post":
+  - Namespaces
+"v1_ui_namespaces_put":
+  - Namespaces
+
+# Remotes (UI)
+"v1_ui_remotes_delete":
+  - Remotes
+"v1_ui_remotes_get_pulp_id":
+  - Remotes
+"v1_ui_remotes_get_remotes":
+  - Remotes
+"v1_ui_remotes_patch":
+  - Remotes
+"v1_ui_remotes_post":
+  - Remotes
+"v1_ui_remotes_put":
+  - Remotes
+
+# Repository / Collections (UI)
+"v1_ui_repo_get_distro_base_path":
+  - Collections
+"v1_ui_repo_get_distro_base_path_namespace_name":
+  - Collections
+
+# Search (UI)
+"v1_ui_search_get":
+  - Collections
+
+# Settings / Config (UI)
+"v1_ui_settings_get":
+  - Config
+
+# Tags (UI)
+"v1_ui_tags_collections_get":
+  - Collections
+"v1_ui_tags_get":
+  - Collections
+
+# Config (v3)
+"v3_ansible_client_configuration_get":
+  - Config
+"v3_client_configuration_get":
+  - Config
+"v3_config_get":
+  - Config
+"v3_config_put":
+  - Config
+
+# Collections (v3)
+"v3_ansible_content_collections_all_collections_get":
+  - Collections
+"v3_ansible_content_collections_all_versions_get":
+  - Collections
+"v3_ansible_content_collections_artifacts_get_download":
+  - Collections
+"v3_ansible_content_collections_artifacts_post":
+  - Collections
+"v3_ansible_content_collections_get":
+  - Collections
+"v3_ansible_content_collections_index":
+  - Collections
+"v3_ansible_content_collections_index_delete":
+  - Collections
+"v3_ansible_content_collections_index_get":
+  - Collections
+"v3_ansible_content_collections_index_patch":
+  - Collections
+"v3_ansible_content_collections_index_versions_delete":
+  - Collections
+"v3_ansible_content_collections_index_versions_docs_blob_get":
+  - Collections
+"v3_ansible_content_collections_index_versions_get_distro_base_pa":
+  - Collections
+"v3_ansible_content_collections_index_versions_get_distro_base_pa_2":
+  - Collections
+"v3_artifacts_collections_post":
+  - Collections
+"v3_collections_post":
+  - Collections
+"v3_content_collections_artifacts_get_download":
+  - Collections
+
+# Namespaces (v3)
+"v3_ansible_content_namespaces_delete":
+  - Namespaces
+"v3_ansible_content_namespaces_get_distro_base_path":
+  - Namespaces
+"v3_ansible_content_namespaces_get_distro_base_path_name":
+  - Namespaces
+"v3_ansible_content_namespaces_patch":
+  - Namespaces
+"v3_ansible_content_namespaces_post":
+  - Namespaces
+"v3_namespaces_delete":
+  - Namespaces
+"v3_namespaces_get_name":
+  - Namespaces
+"v3_namespaces_get_namespaces":
+  - Namespaces
+"v3_namespaces_patch":
+  - Namespaces
+"v3_namespaces_post":
+  - Namespaces
+"v3_namespaces_put":
+  - Namespaces
+
+# Search (v3)
+"v3_ansible_search_collection_versions_get":
+  - Collections
+"v3_ansible_search_collection_versions_post":
+  - Collections
+"v3_search_collection_versions_get":
+  - Collections
+"v3_search_collection_versions_post":
+  - Collections
+
+# Execution Environments (v3)
+"v3_execution_environments_repositories_content_history_get":
+  - Container/Execution Environments
+"v3_execution_environments_repositories_content_images_get":
+  - Container/Execution Environments
+"v3_execution_environments_repositories_content_readme_get":
+  - Container/Execution Environments
+"v3_execution_environments_repositories_content_readme_put":
+  - Container/Execution Environments
+"v3_execution_environments_repositories_content_sync":
+  - Container/Execution Environments
+  - Content Sync
+"v3_execution_environments_repositories_content_tags_get":
+  - Container/Execution Environments
+"v3_execution_environments_repositories_delete":
+  - Container/Execution Environments
+"v3_execution_environments_repositories_get_base_path":
+  - Container/Execution Environments
+"v3_execution_environments_repositories_get_repositories":
+  - Container/Execution Environments
+
+# Imports / Tasks (v3)
+"v3_imports_collections_get":
+  - Tasks
+  - Collections
+
+# Sync (v3)
+"v3_sync":
+  - Content Sync
+
+# Tasks (v3)
+"v3_tasks_get_path":
+  - Tasks
+"v3_tasks_get_path_pulp_id":
+  - Tasks

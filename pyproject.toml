@@ -10,6 +10,7 @@ exclude = '''
   | build
   | dist
   | migrations
+  | galaxy_ng/app/utils/apispec
 )/
 '''
 
@@ -73,6 +74,7 @@ data_file = "/tmp/.coverage"
 omit = [
 	"galaxy_ng/_vendor/*",
 	"galaxy_ng/tests/*",
+	"galaxy_ng/app/utils/apispec/*",
 ]
 
 # ---------------------------------------------------------
@@ -82,6 +84,7 @@ omit = [
 line-length = 100
 extend-exclude = [
     "galaxy_ng/_vendor/",
+    "galaxy_ng/app/utils/apispec/",
 ]
 
 [tool.ruff.lint]

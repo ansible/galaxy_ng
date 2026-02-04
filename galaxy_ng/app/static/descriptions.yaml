@@ -1,0 +1,266 @@
+"deprecated_ansible_collections_post_upload": >-
+  Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact.
+"deprecated_feature_flags_state_get": >-
+  DEPRECATED: Use /api/galaxy/feature_flags/states/ instead. Get client configuration
+"deprecated_v3_ansible_content_collections_artifacts_get_download": >-
+  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`.
+  Download collection artifact.
+"deprecated_v3_artifacts_collections_post": >-
+  Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact.
+"deprecated_v3_collections_post": >-
+  Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact.
+"deprecated_v3_content_collections_artifacts_get_download": >-
+  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`.
+  Download collection artifact.
+"deprecated_v3_get": >-
+  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/published/collections/`. Returns 302
+  redirect. Discover available API versions and endpoints.
+"deprecated_v3_imports_collections_get": >-
+  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/imports/collections/{task}/`. Returns 302 redirect.
+  Get async task status.
+"feature_flags_states_get_id": >-
+  Get details of a specific feature flag by ID
+"feature_flags_states_get_states": >-
+  Get list of feature flags and their states. Use this instead of the deprecated /api/galaxy/feature_flags_state/
+  endpoint
+"pulp_v3_content_ansible_collection_signatures_get_collection_sig": >-
+  List collection signatures
+"pulp_v3_content_ansible_collection_signatures_get_pulp_id": >-
+  Get collection signature by pulp_id
+"pulp_v3_content_ansible_collection_signatures_post": >-
+  Create collection signature
+"pulp_v3_content_ansible_namespaces_avatar": >-
+  Get namespace avatar
+"pulp_v3_content_ansible_namespaces_get": >-
+  List namespaces content
+"pulp_v3_remotes_ansible_collection_delete": >-
+  Delete collection remote
+"pulp_v3_remotes_ansible_collection_get_collection": >-
+  List collection remotes
+"pulp_v3_remotes_ansible_collection_get_pulp_id": >-
+  Get collection remote by pulp_id
+"pulp_v3_remotes_ansible_collection_patch": >-
+  Partially update collection remote
+"pulp_v3_remotes_ansible_collection_post": >-
+  Create collection remote
+"pulp_v3_remotes_ansible_collection_put": >-
+  Update collection remote
+"pulp_v3_repositories_ansible_sign": >-
+  Sign ansible repository collections
+"pulp_v3_repositories_ansible_sync": >-
+  Sync ansible repository from remote
+"pulp_v3_signing_services_get_pulp_id": >-
+  Get signing service by pulp_id
+"pulp_v3_signing_services_get_signing_services": >-
+  List signing services
+"pulp_v3_status_get": >-
+  Check system health
+"root_get_api": >-
+  Get API root endpoints
+"root_get_galaxy": >-
+  Get Galaxy API root endpoints
+"token_get": >-
+  Get authentication token
+"v1_ui_auth_login_get": >-
+  Get login page
+"v1_ui_auth_login_post": >-
+  Login with credentials
+"v1_ui_auth_logout_post": >-
+  Logout current session
+"v1_ui_collection_signing_post_collection_signing": >-
+  Sign collections in repository
+"v1_ui_collection_signing_post_path": >-
+  Sign collections in distribution path
+"v1_ui_collection_signing_post_path_namespace": >-
+  Sign collections in namespace
+"v1_ui_collection_signing_post_path_namespace_collection": >-
+  Sign specific collection
+"v1_ui_collection_signing_post_path_namespace_collection_version": >-
+  Sign specific collection version
+"v1_ui_execution_environments_registries_delete": >-
+  Delete execution environment registry
+"v1_ui_execution_environments_registries_get_id": >-
+  Get execution environment registry by id
+"v1_ui_execution_environments_registries_get_registries": >-
+  List execution environment registries
+"v1_ui_execution_environments_registries_index": >-
+  Index execution environment registry
+"v1_ui_execution_environments_registries_post": >-
+  Create execution environment registry
+"v1_ui_execution_environments_registries_put": >-
+  Update execution environment registry
+"v1_ui_execution_environments_registries_sync": >-
+  Sync execution environment registry
+"v1_ui_execution_environments_remotes_get_id": >-
+  Get execution environment remote by id
+"v1_ui_execution_environments_remotes_get_remotes": >-
+  List execution environment remotes
+"v1_ui_execution_environments_remotes_post": >-
+  Create execution environment remote
+"v1_ui_execution_environments_remotes_put": >-
+  Update execution environment remote
+"v1_ui_feature_flags_get": >-
+  Get feature flags
+"v1_ui_imports_collections_get_collections": >-
+  List collection import tasks
+"v1_ui_imports_collections_get_task_id": >-
+  Get collection import task by id
+"v1_ui_my_namespaces_delete": >-
+  Delete owned namespace
+"v1_ui_my_namespaces_get_my_namespaces": >-
+  List owned namespaces
+"v1_ui_my_namespaces_get_name": >-
+  Get owned namespace by name
+"v1_ui_my_namespaces_patch": >-
+  Partially update owned namespace
+"v1_ui_my_namespaces_post": >-
+  Create owned namespace
+"v1_ui_my_namespaces_put": >-
+  Update owned namespace
+"v1_ui_my_synclists_curate": >-
+  Curate owned synclist
+"v1_ui_my_synclists_get": >-
+  Get owned synclists
+"v1_ui_my_synclists_post": >-
+  Create owned synclist
+"v1_ui_namespaces_delete": >-
+  Delete namespace
+"v1_ui_namespaces_get_name": >-
+  Get namespace by name
+"v1_ui_namespaces_get_namespaces": >-
+  List namespaces
+"v1_ui_namespaces_patch": >-
+  Partially update namespace
+"v1_ui_namespaces_post": >-
+  Create namespace
+"v1_ui_namespaces_put": >-
+  Update namespace
+"v1_ui_remotes_delete": >-
+  Delete collection remote
+"v1_ui_remotes_get_pulp_id": >-
+  Get collection remote by pulp_id
+"v1_ui_remotes_get_remotes": >-
+  List collection remotes
+"v1_ui_remotes_patch": >-
+  Partially update collection remote
+"v1_ui_remotes_post": >-
+  Create collection remote
+"v1_ui_remotes_put": >-
+  Update collection remote
+"v1_ui_repo_get_distro_base_path": >-
+  List collections in distribution
+"v1_ui_repo_get_distro_base_path_namespace_name": >-
+  Get collection by namespace and name in distribution
+"v1_ui_search_get": >-
+  Search collections
+"v1_ui_settings_get": >-
+  Get UI settings
+"v1_ui_synclists_get": >-
+  List synclists
+"v1_ui_synclists_post": >-
+  Create synclist
+"v1_ui_tags_collections_get": >-
+  Get collections by tag
+"v1_ui_tags_get": >-
+  List collection tags
+"v3_ansible_client_configuration_get": >-
+  Get ansible client configuration
+"v3_ansible_content_collections_all_collections_get": >-
+  List all collections across distributions
+"v3_ansible_content_collections_all_versions_get": >-
+  List all collection versions across distributions
+"v3_ansible_content_collections_artifacts_get_download": >-
+  Download collection artifact from distribution
+"v3_ansible_content_collections_artifacts_post": >-
+  Upload collection artifact to distribution
+"v3_ansible_content_collections_get": >-
+  List collections in distribution
+"v3_ansible_content_collections_index": >-
+  Get collection index in distribution
+"v3_ansible_content_collections_index_delete": >-
+  Delete collection from distribution
+"v3_ansible_content_collections_index_get": >-
+  Get collection details in distribution
+"v3_ansible_content_collections_index_patch": >-
+  Update collection in distribution
+"v3_ansible_content_collections_index_versions_delete": >-
+  Delete collection version from distribution
+"v3_ansible_content_collections_index_versions_docs_blob_get": >-
+  Get collection version documentation
+"v3_ansible_content_collections_index_versions_get_distro_base_pa": >-
+  List collection versions in distribution
+"v3_ansible_content_collections_index_versions_get_distro_base_pa_2": >-
+  Get collection version details in distribution
+"v3_ansible_content_namespaces_delete": >-
+  Delete namespace from distribution
+"v3_ansible_content_namespaces_get_distro_base_path": >-
+  List namespaces in distribution
+"v3_ansible_content_namespaces_get_distro_base_path_name": >-
+  Get namespace by name in distribution
+"v3_ansible_content_namespaces_patch": >-
+  Partially update namespace in distribution
+"v3_ansible_content_namespaces_post": >-
+  Create namespace in distribution
+"v3_ansible_search_collection_versions_get": >-
+  Search collection versions
+"v3_ansible_search_collection_versions_post": >-
+  Search collection versions with filters
+"v3_artifacts_collections_post": >-
+  Upload collection artifact
+"v3_auth_token_delete": >-
+  Delete authentication token
+"v3_auth_token_post": >-
+  Create authentication token
+"v3_client_configuration_get": >-
+  Get client configuration
+"v3_collections_post": >-
+  Upload collection
+"v3_config_get": >-
+  Get repository configuration
+"v3_config_put": >-
+  Update repository configuration
+"v3_content_collections_artifacts_get_download": >-
+  Download collection artifact
+"v3_execution_environments_repositories_content_history_get": >-
+  Get execution environment repository history
+"v3_execution_environments_repositories_content_images_get": >-
+  List execution environment images
+"v3_execution_environments_repositories_content_readme_get": >-
+  Get execution environment readme
+"v3_execution_environments_repositories_content_readme_put": >-
+  Update execution environment readme
+"v3_execution_environments_repositories_content_sync": >-
+  Sync execution environment repository
+"v3_execution_environments_repositories_content_tags_get": >-
+  List execution environment tags
+"v3_execution_environments_repositories_delete": >-
+  Delete execution environment repository
+"v3_execution_environments_repositories_get_base_path": >-
+  Get execution environment repository by base_path
+"v3_execution_environments_repositories_get_repositories": >-
+  List execution environment repositories
+"v3_imports_collections_get": >-
+  Get collection import status
+"v3_namespaces_delete": >-
+  Delete namespace
+"v3_namespaces_get_name": >-
+  Get namespace by name
+"v3_namespaces_get_namespaces": >-
+  List namespaces
+"v3_namespaces_patch": >-
+  Partially update namespace
+"v3_namespaces_post": >-
+  Create namespace
+"v3_namespaces_put": >-
+  Update namespace
+"v3_search_collection_versions_get": >-
+  Search collection versions
+"v3_search_collection_versions_post": >-
+  Search collection versions with body filters
+"v3_sync": >-
+  Sync repository from remote
+"v3_tasks_get_path": >-
+  List tasks in distribution
+"v3_tasks_get_path_pulp_id": >-
+  Get task by pulp_id in distribution
+
