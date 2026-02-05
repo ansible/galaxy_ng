@@ -1,0 +1,122 @@
+---
+name: OpenAPI Schema Change Detection
+
+on:
+  pull_request:
+    branches-ignore:
+      - 'stable-2.4'
+      - 'stable-2.5'
+    # Currently we only watch the static spec file since all API changes
+    # must be manually reflected there.
+    # TODO: Once the SHIM-layer work is complete, update this to include
+    # paths that could affect dynamic spec generation.
+    paths:
+      - 'galaxy_ng/app/static/galaxy.json'
+
+jobs:
+  check_api_schema:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout PR branch (source)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: source
+
+      - name: Check if source spec exists
+        id: source_spec
+        run: |
+          if [ -f "source/galaxy_ng/app/static/galaxy.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout target branch (base)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Check if base spec exists
+        id: base_spec
+        run: |
+          if [ -f "base/galaxy_ng/app/static/galaxy.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip if specs don't exist
+        if: steps.source_spec.outputs.exists == 'false' || steps.base_spec.outputs.exists == 'false'
+        run: |
+          echo "::warning::OpenAPI spec file not found in one or both branches. Skipping comparison."
+          echo "Source spec exists: ${{ steps.source_spec.outputs.exists }}"
+          echo "Base spec exists: ${{ steps.base_spec.outputs.exists }}"
+
+      - name: Install oasdiff
+        if: steps.source_spec.outputs.exists == 'true' && steps.base_spec.outputs.exists == 'true'
+        env:
+          INSTALL_DIR: /usr/local/bin
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
+
+      - name: Generate diff
+        if: steps.source_spec.outputs.exists == 'true' && steps.base_spec.outputs.exists == 'true'
+        id: diff
+        run: |
+          # Use the compare script to generate formatted diff
+          # Exit code 0 = no changes, 1 = changes detected, 2 = error
+          source/.github/scripts/compare_openapi_specs.sh \
+            --structured \
+            base/galaxy_ng/app/static/galaxy.json \
+            source/galaxy_ng/app/static/galaxy.json \
+            /tmp/diff_output.md || EXIT_CODE=$?
+
+          # Script sets GITHUB_OUTPUT directly, but handle error case
+          if [ "${EXIT_CODE:-0}" = "2" ]; then
+            echo "::error::Failed to compare OpenAPI specs"
+            exit 1
+          fi
+
+      - name: Check for breaking changes
+        if: steps.diff.outputs.has_changes == 'true'
+        id: breaking
+        run: |
+          BREAKING_OUTPUT=$(oasdiff breaking \
+            base/galaxy_ng/app/static/galaxy.json \
+            source/galaxy_ng/app/static/galaxy.json \
+            --format markdown 2>&1) || true
+
+          # oasdiff breaking outputs a changelog header even when empty
+          # Check if output contains actual breaking change markers (:warning: or :x:)
+          if echo "$BREAKING_OUTPUT" | grep -qE ':(warning|x):'; then
+            echo "has_breaking=true" >> $GITHUB_OUTPUT
+            echo "$BREAKING_OUTPUT" > /tmp/breaking_output.md
+          else
+            echo "has_breaking=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Prepare PR comment
+        if: steps.diff.outputs.has_changes == 'true'
+        id: comment
+        run: |
+          # Use the prepare script to generate PR comment body
+          {
+            echo 'body<<EOF'
+            source/.github/scripts/prepare_schema_change_comment.sh \
+              "${{ steps.breaking.outputs.has_breaking }}" \
+              /tmp/diff_output.md \
+              /tmp/breaking_output.md
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Post PR comment
+        if: steps.diff.outputs.has_changes == 'true'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ steps.comment.outputs.body }}
