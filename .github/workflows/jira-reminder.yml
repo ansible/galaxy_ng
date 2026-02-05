@@ -1,0 +1,95 @@
+name: 'Jira Ticket Reminder'
+
+on:
+  pull_request:
+    branches: [ 'main', 'stable-*' ]
+    types: [ 'closed' ]
+
+jobs:
+  remind:
+    if: github.event.pull_request.merged == true
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Extract Jira tickets from PR'
+        id: extract
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Combine title and body for searching
+          COMBINED="${PR_TITLE}
+          ${PR_BODY}"
+
+          # Extract AAP and ANSTRAT ticket IDs (case insensitive)
+          TICKETS=$(echo "$COMBINED" | grep -oEi '(AAP|ANSTRAT)-[0-9]+' | tr '[:lower:]' '[:upper:]' | sort -u | tr '\n' ' ')
+
+          # Also extract Jira URLs and get ticket IDs from them
+          URL_TICKETS=$(echo "$COMBINED" | grep -oEi 'https?://[^/]*atlassian\.net/browse/(AAP|ANSTRAT)-[0-9]+' | grep -oEi '(AAP|ANSTRAT)-[0-9]+' | tr '[:lower:]' '[:upper:]' | sort -u | tr '\n' ' ')
+
+          # Combine and deduplicate
+          ALL_TICKETS=$(echo "$TICKETS $URL_TICKETS" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | xargs)
+
+          echo "tickets=$ALL_TICKETS" >> $GITHUB_OUTPUT
+
+          # Check if any are AAP tickets (for backport reminder)
+          if echo "$ALL_TICKETS" | grep -qi 'AAP-'; then
+            echo "has_aap=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_aap=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Found tickets: $ALL_TICKETS"
+
+      - name: 'Post reminder comment'
+        uses: actions/github-script@v7
+        env:
+          TICKETS: ${{ steps.extract.outputs.tickets }}
+          HAS_AAP: ${{ steps.extract.outputs.has_aap }}
+        with:
+          script: |
+            const tickets = process.env.TICKETS.trim();
+            const hasAap = process.env.HAS_AAP === 'true';
+            const prAuthor = context.payload.pull_request.user.login;
+
+            let ticketSection = '';
+            if (tickets) {
+              const ticketList = tickets.split(' ').filter(t => t);
+              const ticketLinks = ticketList.map(t =>
+                `- [${t}](https://issues.redhat.com/browse/${t})`
+              ).join('\n');
+              ticketSection = `
+
+            **Associated Jira ticket(s):**
+            ${ticketLinks}`;
+            } else {
+              ticketSection = `
+
+            **Note:** No Jira ticket was detected in this PR. If this change is associated with a Jira ticket, please update the ticket status manually.`;
+            }
+
+            let backportSection = '';
+            if (hasAap) {
+              backportSection = `
+
+            **Backport Reminder:** If this AAP ticket requires backporting to stable branches, please create the appropriate backport issue(s) from the parent Jira issue using the **"Create backport issue"** automation (found under **More → Create backport issue** in Jira).`;
+            }
+
+            const body = `> [!NOTE]
+            > **Jira Ticket Reminder**
+
+            👋 @${prAuthor}, this PR has been merged! 🎉
+
+            **Reminder:** Please ensure the associated Jira ticket is moved to the appropriate status (e.g., "Release Pending" or "Closed").${ticketSection}${backportSection}
+
+            ---
+            <sub>This is an automated reminder. Please update Jira to keep our tracking accurate.</sub>`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
