@@ -1,0 +1,192 @@
+# OpenAPI Spec Drift Detection from Central Repo
+#
+# Detects drift between Hub's local static OpenAPI spec (galaxy.json) and
+# the centralized specification in ansible-automation-platform/aap-openapi-specs.
+#
+# Why this matters:
+# - aap-openapi-specs is the single source of truth for AAP API specifications
+# - Drift indicates the local spec is out of sync with the central repository
+# - Teams consuming the central spec (ATF, UI) need to be notified of changes
+#
+# Hub-specific notes:
+# - Uses a static spec (no build/generation needed)
+# - Compares galaxy_ng/app/static/galaxy.json → aap-openapi-specs/galaxy.json
+# - Uses oasdiff for structured API comparison (consistent with openapi_schema_check.yml)
+#
+
+name: OpenAPI Spec Drift Detection from Central Repo
+
+on:
+  pull_request:
+    branches: [main, 'stable-*']
+  push:
+    branches: [main, 'stable-*']
+  workflow_dispatch:
+
+jobs:
+  detect-drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      # Step 1: Checkout galaxy_ng repository
+      - name: Checkout galaxy_ng
+        uses: actions/checkout@v4
+        with:
+          path: galaxy_ng
+
+      # Step 2: Map branch names
+      # Hub branches map to aap-openapi-specs as follows:
+      # - main → devel
+      # - stable-2.6 → stable-2.6
+      # - stable-2.5 → stable-2.5
+      #
+      # Note: For pull_request events, use github.base_ref (target branch).
+      # For push events, use github.ref_name. github.ref_name on PRs returns
+      # the merge ref (e.g., "255/merge") which doesn't exist in other repos.
+      - name: Determine target branch
+        id: branch-map
+        run: |
+          # Use base_ref for PRs (target branch), ref_name for push events
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            SOURCE_BRANCH="${{ github.base_ref }}"
+          else
+            SOURCE_BRANCH="${{ github.ref_name }}"
+          fi
+
+          if [[ "$SOURCE_BRANCH" == "main" ]]; then
+            echo "target_branch=devel" >> $GITHUB_OUTPUT
+            echo "Mapping main → devel"
+          else
+            echo "target_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
+            echo "Mapping $SOURCE_BRANCH → $SOURCE_BRANCH"
+          fi
+
+      # Step 3: Checkout aap-openapi-specs (central repository)
+      - name: Checkout aap-openapi-specs
+        uses: actions/checkout@v4
+        with:
+          repository: ansible-automation-platform/aap-openapi-specs
+          ref: ${{ steps.branch-map.outputs.target_branch }}
+          path: spec-repo
+          token: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+
+      # Step 4: Install oasdiff for structured API comparison
+      - name: Install oasdiff
+        env:
+          INSTALL_DIR: /usr/local/bin
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
+
+      # Step 5: Compare specs using oasdiff (structured mode)
+      - name: Compare specifications
+        id: compare
+        run: |
+          LOCAL_SPEC="galaxy_ng/galaxy_ng/app/static/galaxy.json"
+          CENTRAL_SPEC="spec-repo/galaxy.json"
+
+          echo "Comparing local spec with central repository:"
+          echo "  Local:   $LOCAL_SPEC"
+          echo "  Central: $CENTRAL_SPEC (branch: ${{ steps.branch-map.outputs.target_branch }})"
+
+          # Use the compare script with structured mode (oasdiff)
+          # Exit code 0 = no changes, 1 = changes detected, 2 = error
+          galaxy_ng/.github/scripts/compare_openapi_specs.sh \
+            --structured \
+            "$CENTRAL_SPEC" \
+            "$LOCAL_SPEC" \
+            /tmp/diff_output.md || EXIT_CODE=$?
+
+          # Handle error case
+          if [ "${EXIT_CODE:-0}" = "2" ]; then
+            echo "::error::Failed to compare OpenAPI specs"
+            exit 1
+          fi
+
+      # Step 6: Check for breaking changes
+      - name: Check for breaking changes
+        if: steps.compare.outputs.drift_detected == 'true'
+        id: breaking
+        run: |
+          LOCAL_SPEC="galaxy_ng/galaxy_ng/app/static/galaxy.json"
+          CENTRAL_SPEC="spec-repo/galaxy.json"
+
+          BREAKING_OUTPUT=$(oasdiff breaking \
+            "$CENTRAL_SPEC" \
+            "$LOCAL_SPEC" \
+            --format markdown 2>&1) || true
+
+          # oasdiff breaking outputs a changelog header even when empty
+          # Check if output contains actual breaking change markers (:warning: or :x:)
+          if echo "$BREAKING_OUTPUT" | grep -qE ':(warning|x):'; then
+            echo "has_breaking=true" >> $GITHUB_OUTPUT
+            echo "$BREAKING_OUTPUT" > /tmp/breaking_output.md
+            echo "⚠️ Breaking changes detected"
+          else
+            echo "has_breaking=false" >> $GITHUB_OUTPUT
+            echo "✅ No breaking changes"
+          fi
+
+      # Step 7: Generate drift report using script
+      - name: Generate drift report
+        if: steps.compare.outputs.drift_detected == 'true'
+        id: report
+        run: |
+          # Use the prepare script to generate PR comment body
+          {
+            echo 'body<<EOF'
+            galaxy_ng/.github/scripts/prepare_drift_comment.sh \
+              "${{ steps.breaking.outputs.has_breaking }}" \
+              /tmp/diff_output.md \
+              "${{ steps.branch-map.outputs.target_branch }}" \
+              /tmp/breaking_output.md
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      # Step 8: Post comment on PR (if applicable)
+      # Uses comment-tag to update existing comment instead of creating duplicates
+      - name: Comment on PR
+        if: steps.compare.outputs.drift_detected == 'true' && github.event_name == 'pull_request'
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- openapi-drift-detection -->'
+
+      - name: Create or update PR comment
+        if: steps.compare.outputs.drift_detected == 'true' && github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- openapi-drift-detection -->
+            ${{ steps.report.outputs.body }}
+          edit-mode: replace
+
+      # Step 9: Log for push events
+      - name: Log drift report
+        if: steps.compare.outputs.drift_detected == 'true' && github.event_name == 'push'
+        run: |
+          echo "=== Drift Report ==="
+          galaxy_ng/.github/scripts/prepare_drift_comment.sh \
+            "${{ steps.breaking.outputs.has_breaking }}" \
+            /tmp/diff_output.md \
+            "${{ steps.branch-map.outputs.target_branch }}" \
+            /tmp/breaking_output.md
+
+      # Step 10: Always pass (informational only)
+      - name: Summary
+        run: |
+          if [[ "${{ steps.compare.outputs.drift_detected }}" == "true" ]]; then
+            echo "⚠️ Drift detected but check passed (informational only)"
+            if [[ "${{ steps.breaking.outputs.has_breaking }}" == "true" ]]; then
+              echo "⚠️ Breaking changes were detected - please review carefully"
+            fi
+            echo "Review the drift report above for next steps"
+          else
+            echo "✅ No drift detected - specs are in sync"
+          fi
