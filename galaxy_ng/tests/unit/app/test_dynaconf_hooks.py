@@ -831,11 +831,12 @@ class TestAlterHostnameSettings:
         mock_value.value = value
         return mock_value
 
-    def _create_mock_request(self, headers=None, is_secure=False):
+    def _create_mock_request(self, headers=None, is_secure=False, url="http://example.com/api/"):
         """Helper to create a mock request object."""
         mock_request = Mock()
         mock_request.headers = headers or {}
         mock_request.is_secure.return_value = is_secure
+        mock_request.build_absolute_uri.return_value = url
         return mock_request
 
     def _create_mock_settings(self, is_connected=False):
@@ -1105,7 +1106,8 @@ class TestAlterHostnameSettings:
         """Test that error is raised when connected to resource server without proto."""
         mock_apps.ready = True
         mock_request = self._create_mock_request(
-            headers={"Host": "example.com"}
+            headers={"Host": "example.com"},
+            url="http://example.com/pulp/content/published/foo-bar-1.0.0.tar.gz"
         )
         mock_get_request.return_value = mock_request
         mock_value = self._create_mock_value()
@@ -1125,7 +1127,8 @@ class TestAlterHostnameSettings:
         """Test that error is raised when connected to resource server without host."""
         mock_apps.ready = True
         mock_request = self._create_mock_request(
-            headers={"X-Forwarded-Proto": "https"}
+            headers={"X-Forwarded-Proto": "https"},
+            url="http://example.com/pulp/content/published/foo-bar-1.0.0.tar.gz"
         )
         mock_get_request.return_value = mock_request
         mock_value = self._create_mock_value()
@@ -1144,7 +1147,10 @@ class TestAlterHostnameSettings:
     ):
         """Test that error is raised when connected to resource server without any headers."""
         mock_apps.ready = True
-        mock_request = self._create_mock_request(headers={})
+        mock_request = self._create_mock_request(
+            headers={},
+            url="http://example.com/pulp/content/published/foo-bar-1.0.0.tar.gz"
+        )
         mock_get_request.return_value = mock_request
         mock_value = self._create_mock_value()
         mock_settings = self._create_mock_settings(is_connected=True)
@@ -1165,7 +1171,8 @@ class TestAlterHostnameSettings:
             headers={
                 "X-Forwarded-Proto": "https",
                 "X-Forwarded-Host": "secure.example.com"
-            }
+            },
+            url="http://example.com/pulp/content/published/foo-bar-1.0.0.tar.gz"
         )
         mock_get_request.return_value = mock_request
         mock_value = self._create_mock_value()
@@ -1183,7 +1190,8 @@ class TestAlterHostnameSettings:
         """Test successful operation when connected to resource server with Forwarded header."""
         mock_apps.ready = True
         mock_request = self._create_mock_request(
-            headers={"Forwarded": "proto=https;host=secure.example.com"}
+            headers={"Forwarded": "proto=https;host=secure.example.com"},
+            url="http://example.com/pulp/content/published/foo-bar-1.0.0.tar.gz"
         )
         mock_get_request.return_value = mock_request
         mock_value = self._create_mock_value()
@@ -1192,6 +1200,27 @@ class TestAlterHostnameSettings:
         result = alter_hostname_settings(mock_settings, mock_value, "CONTENT_ORIGIN")
 
         assert result == "https://secure.example.com"
+
+    @patch('galaxy_ng.app.dynaconf_hooks.get_current_request')
+    @patch('galaxy_ng.app.dynaconf_hooks.apps')
+    def test_no_error_for_non_content_url_when_resource_server_connected(
+        self, mock_apps, mock_get_request
+    ):
+        """Test that non-content URLs use fallback even when connected to resource server."""
+        mock_apps.ready = True
+        mock_request = self._create_mock_request(
+            headers={},
+            url="http://example.com/api/galaxy/_ui/v1/namespaces/",
+            is_secure=False
+        )
+        mock_get_request.return_value = mock_request
+        mock_value = self._create_mock_value()
+        mock_settings = self._create_mock_settings(is_connected=True)
+
+        # Should NOT raise, should use fallback
+        result = alter_hostname_settings(mock_settings, mock_value, "CONTENT_ORIGIN")
+
+        assert result == "http://localhost:5001"
 
     # Tests for fallback behavior (not connected to resource server)
 

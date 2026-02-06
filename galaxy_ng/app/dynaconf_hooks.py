@@ -146,8 +146,10 @@ def alter_hostname_settings(
             if not host and forwarded_host:
                 host = forwarded_host
 
-    # When connected to resource server, headers are mandatory
-    if is_resource_server_connected:
+    # When connected to resource server, headers are mandatory for content downloads
+    url_requested = req.build_absolute_uri()
+    is_content_download = "/content/" in url_requested
+    if is_resource_server_connected and is_content_download:
         if not proto or not host:
             # Use Django's SuspiciousOperation for 400 Bad Request
             from django.core.exceptions import SuspiciousOperation
