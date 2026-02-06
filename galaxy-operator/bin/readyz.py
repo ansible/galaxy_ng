@@ -15,7 +15,11 @@ def is_api_healthy(path):
     address = "[::1]" if HAS_IPV6 else "127.0.0.1"
     url = f"http://{address}:8000{path}"
     print(f"Readiness probe: checking {url}")
-    response = requests.get(url, allow_redirects=True)
+    headers = {
+        "X-Forwarded-Proto": "http",
+        "X-Forwarded-Host": f"{address}:8000",
+    }
+    response = requests.get(url, headers=headers, allow_redirects=True)
     data = response.json()
 
     if not data["database_connection"]["connected"]:
