@@ -40,6 +40,8 @@ fi
 # Generate the comment body
 echo "## 📊 OpenAPI Spec Drift Detected"
 echo ""
+echo "_Compares this PR's spec against the centralized spec repository._"
+echo ""
 
 if [ "$HAS_BREAKING" = "true" ]; then
     echo "> [!CAUTION]"
