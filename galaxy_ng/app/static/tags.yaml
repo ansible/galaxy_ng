@@ -351,3 +351,336 @@
   - Tasks
 "v3_tasks_get_path_pulp_id":
   - Tasks
+# New endpoint tags to add to tags.yaml
+
+# Deprecated Collections endpoints
+"deprecated_v3_collections_delete":
+  - Collections
+"deprecated_v3_collections_get_collections":
+  - Collections
+"deprecated_v3_collections_get_namespace_name":
+  - Collections
+"deprecated_v3_collections_patch":
+  - Collections
+"deprecated_v3_collections_versions_delete":
+  - Collections
+"deprecated_v3_collections_versions_get_namespace_name":
+  - Collections
+"deprecated_v3_collections_versions_get_namespace_name_version":
+  - Collections
+
+# Pulp Access Policies
+"pulp_v3_access_policies_get":
+  - Access
+  - Config
+
+# Pulp Collection Versions
+"pulp_v3_content_ansible_collection_versions_get":
+  - Collections
+"pulp_v3_content_ansible_collection_versions_post":
+  - Collections
+
+# Pulp Content
+"pulp_v3_content_get":
+  - Collections
+
+# Pulp Distributions
+"pulp_v3_distributions_ansible_delete":
+  - Collections
+  - Config
+"pulp_v3_distributions_ansible_get_ansible":
+  - Collections
+  - Config
+"pulp_v3_distributions_ansible_get_id":
+  - Collections
+  - Config
+"pulp_v3_distributions_ansible_patch":
+  - Collections
+  - Config
+"pulp_v3_distributions_ansible_post":
+  - Collections
+  - Config
+"pulp_v3_distributions_ansible_put":
+  - Collections
+  - Config
+"pulp_v3_distributions_get":
+  - Collections
+  - Config
+
+# Pulp Docs
+"pulp_v3_docs_api.json_get":
+  - Info
+"pulp_v3_docs_api.yaml_get":
+  - Info
+
+# Pulp Groups
+"pulp_v3_groups_add_role_post":
+  - Access
+"pulp_v3_groups_delete":
+  - Access
+"pulp_v3_groups_get_groups":
+  - Access
+"pulp_v3_groups_get_id":
+  - Access
+"pulp_v3_groups_list_roles_get":
+  - Access
+"pulp_v3_groups_patch":
+  - Access
+"pulp_v3_groups_post":
+  - Access
+"pulp_v3_groups_put":
+  - Access
+"pulp_v3_groups_remove_role_post":
+  - Access
+"pulp_v3_groups_users_delete":
+  - Access
+"pulp_v3_groups_users_get":
+  - Access
+"pulp_v3_groups_users_post":
+  - Access
+
+# Pulp Container Namespaces
+"pulp_v3_pulp_container_namespaces_delete":
+  - Container/Execution Environments
+  - Namespaces
+"pulp_v3_pulp_container_namespaces_get_id":
+  - Container/Execution Environments
+  - Namespaces
+"pulp_v3_pulp_container_namespaces_get_namespaces":
+  - Container/Execution Environments
+  - Namespaces
+"pulp_v3_pulp_container_namespaces_post":
+  - Container/Execution Environments
+  - Namespaces
+
+# Pulp Repositories Ansible
+"pulp_v3_repositories_ansible_add_role_post":
+  - Collections
+  - Access
+"pulp_v3_repositories_ansible_delete":
+  - Collections
+  - Config
+"pulp_v3_repositories_ansible_get_ansible":
+  - Collections
+  - Config
+"pulp_v3_repositories_ansible_get_id":
+  - Collections
+  - Config
+"pulp_v3_repositories_ansible_move_collection_version_post":
+  - Collections
+"pulp_v3_repositories_ansible_patch":
+  - Collections
+  - Config
+"pulp_v3_repositories_ansible_post":
+  - Collections
+  - Config
+"pulp_v3_repositories_ansible_put":
+  - Collections
+  - Config
+
+# Pulp Repositories Container
+"pulp_v3_repositories_container_container_push_get_container_push":
+  - Container/Execution Environments
+"pulp_v3_repositories_container_container_push_get_id":
+  - Container/Execution Environments
+"pulp_v3_repositories_container_container_push_patch":
+  - Container/Execution Environments
+"pulp_v3_repositories_container_container_push_put":
+  - Container/Execution Environments
+
+# Pulp Roles
+"pulp_v3_roles_delete":
+  - Access
+"pulp_v3_roles_get_id":
+  - Access
+"pulp_v3_roles_get_roles":
+  - Access
+"pulp_v3_roles_patch":
+  - Access
+"pulp_v3_roles_post":
+  - Access
+"pulp_v3_roles_put":
+  - Access
+
+# Pulp Users
+"pulp_v3_users_delete":
+  - Access
+"pulp_v3_users_get_id":
+  - Access
+"pulp_v3_users_get_users":
+  - Access
+"pulp_v3_users_patch":
+  - Access
+"pulp_v3_users_post":
+  - Access
+"pulp_v3_users_put":
+  - Access
+
+# Legacy V1 Namespaces
+"v1_namespaces_delete":
+  - Namespaces
+"v1_namespaces_get_id":
+  - Namespaces
+"v1_namespaces_get_namespaces":
+  - Namespaces
+"v1_namespaces_post":
+  - Namespaces
+
+# UI V1 AI Deny Index
+"v1_ui_ai_deny_index_delete":
+  - Config
+"v1_ui_ai_deny_index_get":
+  - Config
+
+# UI V1 Collection Versions
+"v1_ui_collection_versions_get_collection_versions":
+  - Collections
+"v1_ui_collection_versions_get_namespace_name_version":
+  - Collections
+
+# UI V1 Controllers
+"v1_ui_controllers_get":
+  - Config
+
+# UI V1 Distributions
+"v1_ui_distributions_get_distributions":
+  - Collections
+  - Config
+"v1_ui_distributions_get_id":
+  - Collections
+  - Config
+
+# UI V1 Groups
+"v1_ui_groups_delete":
+  - Access
+"v1_ui_groups_get_groups":
+  - Access
+"v1_ui_groups_get_id":
+  - Access
+"v1_ui_groups_post":
+  - Access
+"v1_ui_groups_users_delete_id_user_id":
+  - Access
+"v1_ui_groups_users_get_id":
+  - Access
+"v1_ui_groups_users_post_id":
+  - Access
+
+# UI V1 Me
+"v1_ui_me_get":
+  - Access
+"v1_ui_me_put":
+  - Access
+
+# UI V1 My Distributions
+"v1_ui_my_distributions_get":
+  - Collections
+  - Access
+
+# UI V1 Tags/Roles
+"v1_ui_tags_roles_get":
+  - Collections
+
+# UI V1 Users
+"v1_ui_users_delete":
+  - Access
+"v1_ui_users_get_id":
+  - Access
+"v1_ui_users_get_users":
+  - Access
+"v1_ui_users_patch":
+  - Access
+"v1_ui_users_post":
+  - Access
+"v1_ui_users_put":
+  - Access
+
+# UI V2 Groups
+"v2_ui_groups_delete":
+  - Access
+"v2_ui_groups_get_groups":
+  - Access
+"v2_ui_groups_get_id":
+  - Access
+"v2_ui_groups_patch":
+  - Access
+"v2_ui_groups_post":
+  - Access
+"v2_ui_groups_put":
+  - Access
+
+# UI V2 Organizations
+"v2_ui_organizations_delete":
+  - Access
+"v2_ui_organizations_get_id":
+  - Access
+"v2_ui_organizations_get_organizations":
+  - Access
+"v2_ui_organizations_patch":
+  - Access
+"v2_ui_organizations_post":
+  - Access
+"v2_ui_organizations_put":
+  - Access
+
+# UI V2 Role Definitions
+"v2_ui_role_definitions_delete":
+  - Access
+"v2_ui_role_definitions_get":
+  - Access
+"v2_ui_role_definitions_patch":
+  - Access
+"v2_ui_role_definitions_put":
+  - Access
+
+# UI V2 Teams
+"v2_ui_teams_delete":
+  - Access
+"v2_ui_teams_get_id":
+  - Access
+"v2_ui_teams_get_teams":
+  - Access
+"v2_ui_teams_patch":
+  - Access
+"v2_ui_teams_post":
+  - Access
+"v2_ui_teams_put":
+  - Access
+
+# UI V2 Users
+"v2_ui_users_delete":
+  - Access
+"v2_ui_users_get_id":
+  - Access
+"v2_ui_users_get_users":
+  - Access
+"v2_ui_users_patch":
+  - Access
+"v2_ui_users_post":
+  - Access
+"v2_ui_users_put":
+  - Access
+
+# V3 Collections
+"v3_all_get_path":
+  - Collections
+"v3_all_get_path_2":
+  - Collections
+"v3_collection_versions_all_get":
+  - Collections
+"v3_collections_all_get":
+  - Collections
+"v3_collections_versions_move_post":
+  - Collections
+
+# V3 OpenAPI
+"v3_openapi.json_get":
+  - Info
+"v3_openapi.yaml_get":
+  - Info
+
+# V3 Tasks
+"v3_tasks_get_pk":
+  - Tasks
+"v3_tasks_get_tasks":
+  - Tasks

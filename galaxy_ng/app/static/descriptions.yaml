@@ -1,38 +1,105 @@
 "deprecated_ansible_collections_post_upload": >-
   Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact.
 "deprecated_feature_flags_state_get": >-
-  DEPRECATED: Use /api/galaxy/feature_flags/states/ instead. Get client configuration
+  Deprecated. Superseded by `/api/galaxy/feature_flags/states/`. Get client configuration
 "deprecated_v3_ansible_content_collections_artifacts_get_download": >-
-  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`.
-  Download collection artifact.
+  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`. Download collection artifact.
 "deprecated_v3_artifacts_collections_post": >-
   Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact.
+"deprecated_v3_collections_delete": >-
+  Deprecated. Delete collection by namespace and name
+"deprecated_v3_collections_get_collections": >-
+  Deprecated. List collections
+"deprecated_v3_collections_get_namespace_name": >-
+  Deprecated. Get collection by namespace and name
+"deprecated_v3_collections_patch": >-
+  Deprecated. Update collection by namespace and name
 "deprecated_v3_collections_post": >-
   Deprecated. Superseded by `/api/galaxy/v3/artifacts/collections/`. Upload collection artifact.
+"deprecated_v3_collections_versions_delete": >-
+  Deprecated. Delete collection version
+"deprecated_v3_collections_versions_get_namespace_name": >-
+  Deprecated. List collection versions
+"deprecated_v3_collections_versions_get_namespace_name_version": >-
+  Deprecated. Get collection version
 "deprecated_v3_content_collections_artifacts_get_download": >-
-  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`.
-  Download collection artifact.
+  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/artifacts/{filename}`. Download collection artifact.
 "deprecated_v3_get": >-
-  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/published/collections/`. Returns 302
-  redirect. Discover available API versions and endpoints.
+  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/content/published/collections/`. Returns 302 redirect. Discover available API versions and endpoints.
 "deprecated_v3_imports_collections_get": >-
-  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/imports/collections/{task}/`. Returns 302 redirect.
-  Get async task status.
+  Deprecated. Superseded by `/api/galaxy/v3/plugin/ansible/imports/collections/{task}/`. Returns 302 redirect. Get async task status.
 "feature_flags_states_get_id": >-
   Get details of a specific feature flag by ID
 "feature_flags_states_get_states": >-
-  Get list of feature flags and their states. Use this instead of the deprecated /api/galaxy/feature_flags_state/
-  endpoint
+  Get list of feature flags and their states. Use this instead of the deprecated /api/galaxy/feature_flags_state/ endpoint
+"pulp_v3_access_policies_get": >-
+  List access policies (tech preview)
 "pulp_v3_content_ansible_collection_signatures_get_collection_sig": >-
   List collection signatures
 "pulp_v3_content_ansible_collection_signatures_get_pulp_id": >-
   Get collection signature by pulp_id
 "pulp_v3_content_ansible_collection_signatures_post": >-
   Create collection signature
+"pulp_v3_content_ansible_collection_versions_get": >-
+  List Ansible collection versions
+"pulp_v3_content_ansible_collection_versions_post": >-
+  Create collection version
 "pulp_v3_content_ansible_namespaces_avatar": >-
   Get namespace avatar
 "pulp_v3_content_ansible_namespaces_get": >-
   List namespaces content
+"pulp_v3_content_get": >-
+  List all content types
+"pulp_v3_distributions_ansible_delete": >-
+  Delete Ansible distribution
+"pulp_v3_distributions_ansible_get_ansible": >-
+  List Ansible distributions
+"pulp_v3_distributions_ansible_get_id": >-
+  Get Ansible distribution by ID
+"pulp_v3_distributions_ansible_patch": >-
+  Partially update Ansible distribution
+"pulp_v3_distributions_ansible_post": >-
+  Create Ansible distribution
+"pulp_v3_distributions_ansible_put": >-
+  Update Ansible distribution
+"pulp_v3_distributions_get": >-
+  List all distributions
+"pulp_v3_docs_api.json_get": >-
+  Get full Pulp OpenAPI specification in JSON format
+"pulp_v3_docs_api.yaml_get": >-
+  Get full Pulp OpenAPI specification in YAML format
+"pulp_v3_groups_add_role_post": >-
+  Add role to group
+"pulp_v3_groups_delete": >-
+  Delete group
+"pulp_v3_groups_get_groups": >-
+  List groups
+"pulp_v3_groups_get_id": >-
+  Get group by ID
+"pulp_v3_groups_list_roles_get": >-
+  List roles assigned to group
+"pulp_v3_groups_patch": >-
+  Partially update group
+"pulp_v3_groups_post": >-
+  Create group
+"pulp_v3_groups_put": >-
+  Update group
+"pulp_v3_groups_remove_role_post": >-
+  Remove role from group
+"pulp_v3_groups_users_delete": >-
+  Remove user from group
+"pulp_v3_groups_users_get": >-
+  List group users.
+"pulp_v3_groups_users_post": >-
+  Add user to group
+"pulp_v3_pulp_container_namespaces_delete": >-
+  Delete container namespace
+"pulp_v3_pulp_container_namespaces_get_id": >-
+  Get container namespace by ID
+"pulp_v3_pulp_container_namespaces_get_namespaces": >-
+  List container namespaces
+"pulp_v3_pulp_container_namespaces_post": >-
+  Create container namespace
 "pulp_v3_remotes_ansible_collection_delete": >-
   Delete collection remote
 "pulp_v3_remotes_ansible_collection_get_collection": >-
@@ -45,22 +112,82 @@
   Create collection remote
 "pulp_v3_remotes_ansible_collection_put": >-
   Update collection remote
+"pulp_v3_repositories_ansible_add_role_post": >-
+  Add role to Ansible repository
+"pulp_v3_repositories_ansible_delete": >-
+  Delete Ansible repository
+"pulp_v3_repositories_ansible_get_ansible": >-
+  List Ansible repositories
+"pulp_v3_repositories_ansible_get_id": >-
+  Get Ansible repository by ID
+"pulp_v3_repositories_ansible_move_collection_version_post": >-
+  Trigger an asynchronous task to move collection versions
+"pulp_v3_repositories_ansible_patch": >-
+  Partially update Ansible repository
+"pulp_v3_repositories_ansible_post": >-
+  Create Ansible repository
+"pulp_v3_repositories_ansible_put": >-
+  Update Ansible repository
 "pulp_v3_repositories_ansible_sign": >-
   Sign ansible repository collections
 "pulp_v3_repositories_ansible_sync": >-
   Sync ansible repository from remote
+"pulp_v3_repositories_container_container_push_get_container_push": >-
+  List container push repositories
+"pulp_v3_repositories_container_container_push_get_id": >-
+  Get container push repository by ID
+"pulp_v3_repositories_container_container_push_patch": >-
+  Partially update container push repository
+"pulp_v3_repositories_container_container_push_put": >-
+  Update container push repository
+"pulp_v3_roles_delete": >-
+  Delete role
+"pulp_v3_roles_get_id": >-
+  Get role by ID
+"pulp_v3_roles_get_roles": >-
+  List roles
+"pulp_v3_roles_patch": >-
+  Partially update role
+"pulp_v3_roles_post": >-
+  Create role
+"pulp_v3_roles_put": >-
+  Update role
 "pulp_v3_signing_services_get_pulp_id": >-
   Get signing service by pulp_id
 "pulp_v3_signing_services_get_signing_services": >-
   List signing services
 "pulp_v3_status_get": >-
   Check system health
+"pulp_v3_users_delete": >-
+  Delete user
+"pulp_v3_users_get_id": >-
+  Get user by ID
+"pulp_v3_users_get_users": >-
+  List users
+"pulp_v3_users_patch": >-
+  Partially update user
+"pulp_v3_users_post": >-
+  Create user
+"pulp_v3_users_put": >-
+  Update user
 "root_get_api": >-
   Get API root endpoints
 "root_get_galaxy": >-
   Get Galaxy API root endpoints
 "token_get": >-
   Get authentication token
+"v1_namespaces_delete": >-
+  Delete legacy namespace
+"v1_namespaces_get_id": >-
+  Get legacy namespace by ID
+"v1_namespaces_get_namespaces": >-
+  List legacy namespaces
+"v1_namespaces_post": >-
+  Create legacy namespace
+"v1_ui_ai_deny_index_delete": >-
+  Remove entry from AI deny index
+"v1_ui_ai_deny_index_get": >-
+  List AI deny index entries
 "v1_ui_auth_login_get": >-
   Get login page
 "v1_ui_auth_login_post": >-
@@ -77,6 +204,16 @@
   Sign specific collection
 "v1_ui_collection_signing_post_path_namespace_collection_version": >-
   Sign specific collection version
+"v1_ui_collection_versions_get_collection_versions": >-
+  List collection versions
+"v1_ui_collection_versions_get_namespace_name_version": >-
+  Get collection version
+"v1_ui_controllers_get": >-
+  List available controllers
+"v1_ui_distributions_get_distributions": >-
+  List distributions
+"v1_ui_distributions_get_id": >-
+  Get distribution by ID
 "v1_ui_execution_environments_registries_delete": >-
   Delete execution environment registry
 "v1_ui_execution_environments_registries_get_id": >-
@@ -101,10 +238,30 @@
   Update execution environment remote
 "v1_ui_feature_flags_get": >-
   Get feature flags
+"v1_ui_groups_delete": >-
+  Delete group
+"v1_ui_groups_get_groups": >-
+  List groups
+"v1_ui_groups_get_id": >-
+  Get group by ID
+"v1_ui_groups_post": >-
+  Create group
+"v1_ui_groups_users_delete_id_user_id": >-
+  Remove user from group
+"v1_ui_groups_users_get_id": >-
+  List group users
+"v1_ui_groups_users_post_id": >-
+  Add user to group
 "v1_ui_imports_collections_get_collections": >-
   List collection import tasks
 "v1_ui_imports_collections_get_task_id": >-
   Get collection import task by id
+"v1_ui_me_get": >-
+  Get current user profile
+"v1_ui_me_put": >-
+  Update current user profile
+"v1_ui_my_distributions_get": >-
+  List distributions accessible to current user
 "v1_ui_my_namespaces_delete": >-
   Delete owned namespace
 "v1_ui_my_namespaces_get_my_namespaces": >-
@@ -163,8 +320,82 @@
   Get collections by tag
 "v1_ui_tags_get": >-
   List collection tags
+"v1_ui_tags_roles_get": >-
+  List role tags
+"v1_ui_users_delete": >-
+  Delete user
+"v1_ui_users_get_id": >-
+  Get user by ID
+"v1_ui_users_get_users": >-
+  List users
+"v1_ui_users_patch": >-
+  Partially update user
+"v1_ui_users_post": >-
+  Create user
+"v1_ui_users_put": >-
+  Update user
+"v2_ui_groups_delete": >-
+  Delete group
+"v2_ui_groups_get_groups": >-
+  List groups
+"v2_ui_groups_get_id": >-
+  Get group by ID
+"v2_ui_groups_patch": >-
+  Partially update group
+"v2_ui_groups_post": >-
+  Create group
+"v2_ui_groups_put": >-
+  Update group
+"v2_ui_organizations_delete": >-
+  Delete organization
+"v2_ui_organizations_get_id": >-
+  Get organization by ID
+"v2_ui_organizations_get_organizations": >-
+  List organizations
+"v2_ui_organizations_patch": >-
+  Partially update organization
+"v2_ui_organizations_post": >-
+  Create organization
+"v2_ui_organizations_put": >-
+  Update organization
+"v2_ui_role_definitions_delete": >-
+  Delete role definition
+"v2_ui_role_definitions_get": >-
+  Get role definition by ID
+"v2_ui_role_definitions_patch": >-
+  Partially update role definition
+"v2_ui_role_definitions_put": >-
+  Update role definition
+"v2_ui_teams_delete": >-
+  Delete team
+"v2_ui_teams_get_id": >-
+  Get team by ID
+"v2_ui_teams_get_teams": >-
+  List teams
+"v2_ui_teams_patch": >-
+  Partially update team
+"v2_ui_teams_post": >-
+  Create team
+"v2_ui_teams_put": >-
+  Update team
+"v2_ui_users_delete": >-
+  Delete user
+"v2_ui_users_get_id": >-
+  Get user by ID
+"v2_ui_users_get_users": >-
+  List users
+"v2_ui_users_patch": >-
+  Partially update user
+"v2_ui_users_post": >-
+  Create user
+"v2_ui_users_put": >-
+  Update user
+"v3_all_get_path": >-
+  List all collection versions for content path
+"v3_all_get_path_2": >-
+  List all collections for content path
 "v3_ansible_client_configuration_get": >-
-  Get ansible client configuration
+  Get Ansible client configuration
 "v3_ansible_content_collections_all_collections_get": >-
   List all collections across distributions
 "v3_ansible_content_collections_all_versions_get": >-
@@ -213,8 +444,14 @@
   Create authentication token
 "v3_client_configuration_get": >-
   Get client configuration
+"v3_collection_versions_all_get": >-
+  List all collection versions
+"v3_collections_all_get": >-
+  List all collections
 "v3_collections_post": >-
   Upload collection
+"v3_collections_versions_move_post": >-
+  Remove content from source repo and add to destination repo. Creates new RepositoryVersion of source repo without content included. Creates new RepositoryVersion of destination repo with content included.
 "v3_config_get": >-
   Get repository configuration
 "v3_config_put": >-
@@ -253,6 +490,10 @@
   Create namespace
 "v3_namespaces_put": >-
   Update namespace
+"v3_openapi.json_get": >-
+  Get Galaxy OpenAPI specification in JSON format
+"v3_openapi.yaml_get": >-
+  Get Galaxy OpenAPI specification in YAML format
 "v3_search_collection_versions_get": >-
   Search collection versions
 "v3_search_collection_versions_post": >-
@@ -263,4 +504,7 @@
   List tasks in distribution
 "v3_tasks_get_path_pulp_id": >-
   Get task by pulp_id in distribution
-
+"v3_tasks_get_pk": >-
+  Get a pulp task via the transformed v1 integer task id.
+"v3_tasks_get_tasks": >-
+  List tasks
