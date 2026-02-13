@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from orionutils.generator import build_collection, randstr
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from galaxy_ng.tests.integration.constants import USERNAME_PUBLISHER
 from galaxykit.collections import upload_artifact, get_collection_from_repo, get_collection, \

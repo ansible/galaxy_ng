@@ -4,7 +4,7 @@ import pytest
 
 from galaxykit import GalaxyClient
 from galaxykit.collections import upload_artifact, delete_collection
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from galaxykit.utils import wait_for_task as gk_wait_for_task
 from ..utils import wait_for_task, get_client, set_certification

@@ -7,7 +7,8 @@ import subprocess
 
 import pytest
 from orionutils.utils import increment_version
-from pkg_resources import parse_version, Requirement
+from packaging.version import parse as parse_version
+from packaging.requirements import Requirement
 
 from galaxykit.collections import delete_collection
 from galaxykit.groups import get_group_id

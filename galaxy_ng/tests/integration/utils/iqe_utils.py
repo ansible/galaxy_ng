@@ -8,7 +8,7 @@ from json import JSONDecodeError
 from typing import Optional
 from unittest.mock import patch
 
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_POLLING
 from galaxy_ng.tests.integration.constants import POLLING_MAX_ATTEMPTS
