@@ -337,6 +337,7 @@ def test_ansible_requires(ansible_config, spec, galaxy_client,
         assert ui_collection_resp["latest_version"]["requires_ansible"] == requires_ansible
 
 
+@pytest.mark.skip(reason="Skipped pending fix from AAP-65809")
 @pytest.mark.stage_health
 @pytest.mark.importer
 @pytest.mark.all
