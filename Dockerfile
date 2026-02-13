@@ -54,7 +54,7 @@ RUN set -ex; \
     install -dm 0700 -o galaxy /etc/pulp/gnupg && \
     pip3.12 install --config-settings editable_mode=compat --no-deps --editable /app && \
     chown -R galaxy ${VIRTUAL_ENV} && \
-    PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
+    PULP_REDIRECT_TO_OBJECT_STORAGE=false PULP_CONTENT_ORIGIN=x django-admin collectstatic && \
     python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > /tmp/database_fields.symmetric.key && \
     cd galaxy_ng && \
     PULP_DB_ENCRYPTION_KEY=/tmp/database_fields.symmetric.key PULP_SETTINGS=/etc/pulp/setings.py django-admin compilemessages && \
