@@ -13,7 +13,9 @@ aiofiles==24.1.0
 aiohappyeyeballs==2.6.1
     # via aiohttp
 aiohttp==3.13.3
-    # via pulpcore
+    # via
+    #   galaxy-ng (setup.py)
+    #   pulpcore
 aiosignal==1.4.0
     # via aiohttp
 ansible-builder==3.1.1
@@ -246,7 +248,6 @@ mccabe==0.7.0
 multidict==6.4.4
     # via
     #   aiohttp
-    #   pulp-glue
     #   yarl
 mypy-extensions==1.1.0
     # via black
@@ -280,7 +281,7 @@ opentelemetry-sdk==1.30.0
     #   pulpcore
 opentelemetry-semantic-conventions==0.51b0
     # via opentelemetry-sdk
-packaging==24.2
+packaging==23.2
     # via
     #   ansible-builder
     #   ansible-compat
@@ -324,9 +325,9 @@ pulp-ansible==0.28.4
     # via galaxy-ng (setup.py)
 pulp-container==2.26.5
     # via galaxy-ng (setup.py)
-pulp-glue==0.32.3
+pulp-glue==0.25.4
     # via pulpcore
-pulpcore==3.73.22
+pulpcore==3.73.25
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible

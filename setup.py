@@ -99,7 +99,7 @@ django_ansible_base_dependency = (
 
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
-    "pulpcore>=3.73.15,<3.74",
+    "pulpcore>=3.73.22,<3.74",
     "pulp_ansible>=0.28.4,<0.29",
     "pulp-container>=2.26.0,<2.27",
     "django>=4.2.28,<4.3",
@@ -117,7 +117,8 @@ requirements = [
     "django-crum==0.7.9",
     "django-automated-logging~=6.2",
     "django-storages[azure,boto3,s3]",
-    "aiodns<3.2.0",  # 3.2.0 has a breaking API change that's incompatible with aiohttp 3.10.11
+    "aiohttp>=3.13.3",
+    "aiodns<3.2.0",  # 3.2.0 has a breaking API change that's incompatible with aiohttp
 ]
 
 
