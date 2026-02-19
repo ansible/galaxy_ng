@@ -119,6 +119,7 @@ requirements = [
     "django-storages[azure,boto3,s3]",
     "aiohttp>=3.13.3",
     "aiodns<3.2.0",  # 3.2.0 has a breaking API change that's incompatible with aiohttp
+    "setuptools<=81",  # declare here to ensure it's included in the RPM system
 ]
 
 
