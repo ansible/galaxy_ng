@@ -44,7 +44,7 @@ jobs:
           echo "Found tickets: $ALL_TICKETS"
 
       - name: 'Post reminder comment'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           TICKETS: ${{ steps.extract.outputs.tickets }}
           HAS_AAP: ${{ steps.extract.outputs.has_aap }}
