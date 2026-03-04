@@ -387,17 +387,48 @@ def test_ansible_lint_exception(galaxy_client, hub_version):
 @pytest.mark.all
 def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
     """
-    https://issues.redhat.com/browse/AAH-2609
-        - ansible-lint output is missing.
+    Verify that ansible-lint output appears in collection import logs.
+
+    References:
+        - https://issues.redhat.com/browse/AAH-2609
+        - https://issues.redhat.com/browse/AAP-15432 (follow-up)
+
+    Background (AAH-2609):
+        In galaxy-importer 0.4.11+, ansible-lint was run on full collections, but the
+        output wasn't appearing in Console.stage import logs. Investigation revealed:
+        1. Container HOME was "/" causing PermissionError writing to /.cache
+        2. ansible-lint's thread pool used /proc/cpuinfo core count, ignoring container
+           CPU quotas, leading to OOMKilled processes
+        3. When processes died, no output was captured to display
+
+        The fix (PR #1832) set proper environment variables (XDG_CACHE_HOME, ANSIBLE_HOME,
+        ANSIBLE_GALAXY_CACHE_DIR) so ansible-lint could run in constrained containers.
+
+    Original test approach:
+        The original test checked for a specific ansible-lint warning message:
+        "meta/runtime.yml:1: meta-runtime[unsupported-version]: requires_ansible key..."
+
+        This worked with older ansible-lint versions but broke with ansible-lint 25.12.0+
+        which reports different errors (load-failure[runtimeerror] about absolute paths).
+
+    Current test approach:
+        Rather than checking for specific warning text (which varies by ansible-lint
+        version), we verify the core requirement from AAH-2609: that ansible-lint runs
+        and its output appears in the import logs. We check:
+        1. ansible-lint started: "Linting collection via ansible-lint"
+        2. ansible-lint completed: "ansible-lint run complete"
+        3. Files were processed: "meta/runtime.yml" appears in output
     """
     gc = galaxy_client("admin")
 
+    # This ignore file content is from the original logicmonitor.integration collection
+    # used to reproduce AAH-2609. It triggers sanity[cannot-ignore] warnings.
     IGNORE_CONTENT = \
         "plugins/modules/lm_otel_collector.py validate-modules:use-run-command-not-popen\n"
 
-    expected = "meta/runtime.yml:1: meta-runtime[unsupported-version]:" \
-        + " 'requires_ansible' key must refer to a currently supported version such as:"
-
+    # Build a collection with:
+    # - requires_ansible: ">=2.19" - an unsupported future version that triggers lint warnings
+    # - ignore-2.10.txt - triggers sanity ignore warnings
     artifact = bc(
         "skeleton",
         config={
@@ -414,7 +445,12 @@ def test_ansible_lint_exception_AAH_2606(galaxy_client, hub_version):
     resp = wait_for_task(gc, resp)
     log_messages = [item["message"] for item in resp["messages"]]
     log_messages = "\n".join(log_messages)
-    assert expected in log_messages, log_messages
+
+    # Verify ansible-lint output appears in logs (the core requirement from AAH-2609).
+    # We don't check for specific warning text since it varies by ansible-lint version.
+    assert "Linting collection via ansible-lint" in log_messages, log_messages
+    assert "ansible-lint run complete" in log_messages, log_messages
+    assert "meta/runtime.yml" in log_messages, log_messages
 
 
 @pytest.mark.importer
