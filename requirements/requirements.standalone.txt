@@ -74,12 +74,13 @@ click==8.1.8
     # via
     #   black
     #   pulpcore
-cryptography==45.0.4
+cryptography==46.0.5
     # via
     #   ansible-core
     #   ansible-lint
     #   azure-storage-blob
     #   django-ansible-base
+    #   galaxy-ng (setup.py)
     #   pulpcore
     #   pyjwt
     #   pyopenssl
@@ -302,8 +303,10 @@ pathspec==0.12.1
     #   yamllint
 pbr==7.0.3
     # via bindep
-pillow==11.3.0
-    # via pulp-ansible
+pillow==12.1.1
+    # via
+    #   galaxy-ng (setup.py)
+    #   pulp-ansible
 platformdirs==4.5.1
     # via black
 prometheus-client==0.24.0
@@ -321,13 +324,13 @@ psycopg[binary]==3.2.13
     # via pulpcore
 psycopg-binary==3.2.13
     # via psycopg
-pulp-ansible==0.28.4
+pulp-ansible==0.28.5
     # via galaxy-ng (setup.py)
 pulp-container==2.26.5
     # via galaxy-ng (setup.py)
 pulp-glue==0.25.4
     # via pulpcore
-pulpcore==3.73.25
+pulpcore==3.73.27
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -353,8 +356,10 @@ pyjwt[crypto]==2.10.1
     #   django-ansible-base
     #   pulp-container
     #   social-auth-core
-pyopenssl==25.1.0
-    # via pulpcore
+pyopenssl==25.3.0
+    # via
+    #   galaxy-ng (setup.py)
+    #   pulpcore
 pyparsing==3.2.1
     # via
     #   drf-access-policy

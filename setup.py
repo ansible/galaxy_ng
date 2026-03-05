@@ -99,8 +99,8 @@ django_ansible_base_dependency = (
 
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
-    "pulpcore>=3.73.22,<3.74",
-    "pulp_ansible>=0.28.4,<0.29",
+    "pulpcore>=3.73.27,<3.74",
+    "pulp_ansible>=0.28.5,<0.29",
     "pulp-container>=2.26.0,<2.27",
     "django>=4.2.28,<4.3",
     "django-prometheus>=2.0.0",
@@ -120,6 +120,9 @@ requirements = [
     "aiohttp>=3.13.3",
     "aiodns<3.2.0",  # 3.2.0 has a breaking API change that's incompatible with aiohttp
     "setuptools<=81",  # declare here to ensure it's included in the RPM system
+    "pillow>=12.1.1",  # minimum version enforced to address AAP-65505, AAP-65509, AAP-65510
+    "cryptography>=46.0.5",  # minimum version enforced to address AAP-65409
+    "pyopenssl>=25.3.0",  # bumped to allow cryptography>=46.0.5
 ]
 
 
