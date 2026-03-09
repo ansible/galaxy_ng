@@ -286,6 +286,15 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
     data.update(configure_authentication_backends(settings, data))
     data.update(configure_authentication_classes(settings, data))
 
+    # When deployed as part of AAP (RESOURCE_SERVER__URL is set), enforce JWT-only
+    # authentication. This ensures all requests go through the gateway and prevents
+    # direct API access to Hub bypassing the platform's authentication.
+    if settings.get("RESOURCE_SERVER__URL", None):
+        jwt_only = ["ansible_base.jwt_consumer.hub.auth.HubJWTAuth"]
+        data["GALAXY_AUTHENTICATION_CLASSES"] = jwt_only
+        data["ANSIBLE_AUTHENTICATION_CLASSES"] = jwt_only
+        data["REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES"] = jwt_only
+
     # When the resource server is configured, local resource management is disabled.
     data["IS_CONNECTED_TO_RESOURCE_SERVER"] = settings.get("RESOURCE_SERVER__URL") is not None
 
