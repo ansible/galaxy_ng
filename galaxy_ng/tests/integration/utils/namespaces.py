@@ -125,6 +125,31 @@ def cleanup_namespace_gk(name, gc_admin):
         assert resp['meta']['count'] == 0
 
 
+def delete_namespace(gc, namespace_name, cascade=False):
+    """Delete a namespace with trailing slash to avoid APPEND_SLASH issues on Django 5.2+."""
+    if cascade:
+        from galaxykit.collections import delete_collection
+        collections = set()
+        next_url = (
+            f"v3/plugin/ansible/search/collection-versions/"
+            f"?namespace={namespace_name}&is_highest=true"
+        )
+        while next_url:
+            resp = gc.get(next_url)
+            for collection in resp["data"]:
+                collections.add((
+                    collection["repository"]["name"],
+                    collection["collection_version"]["namespace"],
+                    collection["collection_version"]["name"],
+                ))
+            if resp["links"]["next"] is None:
+                break
+            next_url = resp["links"]["next"]
+        for collection in collections:
+            delete_collection(gc, collection[1], collection[2], repository=collection[0])
+    return gc.delete(f"_ui/v1/namespaces/{namespace_name}/", parse_json=False)
+
+
 def create_namespace(namespace_name, gc=None):
     """ Make a namespace for testing if it does not exist."""
     assert gc is not None, "api_client is a required param"

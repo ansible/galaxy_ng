@@ -27,7 +27,7 @@ from ansible.galaxy.token import GalaxyToken
 from ansible.galaxy.token import KeycloakToken
 
 from galaxykit.groups import delete_group
-from galaxykit.namespaces import delete_namespace, delete_v1_namespace
+from galaxykit.namespaces import delete_v1_namespace
 from galaxykit.users import delete_user
 from galaxykit.utils import GalaxyClientError
 
@@ -424,6 +424,7 @@ def galaxy_stage_ansible_user_cleanup(gc, u):
         delete_group(gc_admin, group)
 
     with contextlib.suppress(GalaxyClientError):
+        from galaxy_ng.tests.integration.utils.namespaces import delete_namespace
         delete_namespace(gc_admin, github_user_username.replace("-", "_"), cascade=True)
 
     with contextlib.suppress(ValueError):

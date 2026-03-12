@@ -11,7 +11,7 @@ from galaxykit.containers import add_owner_to_ee
 from galaxykit.containers import create_container
 from galaxykit.containers import delete_container
 from galaxykit.groups import create_group
-from galaxykit.namespaces import delete_namespace
+from galaxy_ng.tests.integration.utils.namespaces import delete_namespace
 from galaxykit.registries import create_registry
 from galaxykit.registries import delete_registry
 from galaxykit.remotes import community_remote_config

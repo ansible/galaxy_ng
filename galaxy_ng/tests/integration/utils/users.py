@@ -26,7 +26,7 @@ def delete_group(groupname, api_client=None):
     gid = ginfo['id']
 
     if isinstance(api_client, UIClient):
-        rr = api_client.delete(f'_ui/v1/groups/{gid}')
+        rr = api_client.delete(f'_ui/v1/groups/{gid}/')
         assert rr.status_code == 204
         return
 
@@ -79,7 +79,7 @@ def delete_user(username, api_client=None):
     uid = uinfo['id']
 
     if isinstance(api_client, UIClient):
-        rr = api_client.delete(f'_ui/v1/users/{uid}')
+        rr = api_client.delete(f'_ui/v1/users/{uid}/')
         assert rr.status_code == 204
         return
 

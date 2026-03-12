@@ -155,7 +155,7 @@ services:
 
   # standalone
   standalone-postgres:
-    image: "postgres:13"
+    image: "postgres:16"
     ports:
       - '5433:5432'
     environment:
@@ -421,7 +421,7 @@ services:
       retries: 5
 
   insights-postgres:
-    image: "postgres:13"
+    image: "postgres:16"
     ports:
       - '8432:5432'
     environment:
@@ -437,7 +437,7 @@ services:
     # command: ["postgres", "-c", "log_statement=ddl", "-c", "log_destination=stderr"]
 
   load-sync-data:
-    image: "postgres:13"
+    image: "postgres:16"
     depends_on:
       insights-postgres:
         condition: service_healthy

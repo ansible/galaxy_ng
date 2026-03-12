@@ -99,10 +99,10 @@ django_ansible_base_dependency = (
 
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
-    "pulpcore>=3.73.27,<3.74",
+    "pulpcore>=3.73.28,<3.74",
     "pulp_ansible>=0.28.5,<0.29",
-    "pulp-container>=2.26.0,<2.27",
-    "django>=4.2.28,<4.3",
+    "pulp-container>=2.26.7,<2.27",
+    "django>=5.2.12,<5.3",
     "django-prometheus>=2.0.0",
     "social-auth-core>=4.4.2",
     "social-auth-app-django>=5.2.0",

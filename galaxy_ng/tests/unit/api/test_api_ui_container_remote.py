@@ -169,12 +169,13 @@ class TestContainerRemote(BaseTestCase):
         remote_pk = response.data['id']
 
         # 3
+        registry_pk = registry.pk
         registry.delete()
 
         # connection has been deleted
         self.assertFalse(
             models.container.ContainerRegistryRepos.objects.filter(
-                registry=registry,
+                registry__pk=registry_pk,
                 repository_remote__pk=remote_pk
             ).exists()
         )

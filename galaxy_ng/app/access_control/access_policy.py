@@ -181,7 +181,6 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         private_q = Q(**{f"{field_name}private": False})
         if is_generic:
             private_q = Q(**{f"{field_name}ansible_ansiblerepository__private": False})
-            qs = qs.select_related(f"{field_name}ansible_ansiblerepository")
 
         if user.is_anonymous:
             qs = qs.filter(private_q)

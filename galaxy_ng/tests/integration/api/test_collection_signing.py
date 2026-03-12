@@ -6,7 +6,6 @@ See: https://issues.redhat.com/browse/AAH-312
 import logging
 import os
 import tarfile
-import time
 from tempfile import TemporaryDirectory
 
 import pytest
@@ -14,7 +13,6 @@ import requests
 
 from orionutils.generator import build_collection
 
-from galaxy_ng.tests.integration.constants import SLEEP_SECONDS_ONETIME
 from galaxy_ng.tests.integration.utils import (
     build_collection as galaxy_build_collection,
     get_all_collections_by_repo,
@@ -64,9 +62,8 @@ def sign_on_demand(gc, signing_service, sign_url=None, **payload):
     '''
     resp = gc.post(sign_url, body=sign_payload)
     log.info("Sign Task: %s", resp)
-    # FIXME(rochacbruno): pulp tasks do not seem to accept token auth, so no way
-    #       to check task progress
-    time.sleep(SLEEP_SECONDS_ONETIME)
+    result = wait_for_task(gc, resp, task_id=resp["task_id"])
+    assert result["state"] == "completed", result
     return resp
 
 
@@ -207,9 +204,6 @@ def test_collection_sign_on_demand(flags, galaxy_client, settings, sign_url):
         "version": artifact.version,
     }
     sign_on_demand(gc, signing_service, sign_url.format(**sign_payload), **sign_payload)
-
-    # wait for async jobs to settle ...
-    time.sleep(30)
 
     # Assert that the collection is signed on v3 api
     collection = get_collection_from_repo(gc, "staging",
@@ -497,8 +491,7 @@ def test_upload_signature(require_auth, flags, galaxy_client, settings):
                 auth=("admin", "admin"),
             )
         assert "task" in response.json()
-
-    time.sleep(SLEEP_SECONDS_ONETIME)  # wait for the task to finish
+        wait_for_task(gc, response.json())
 
     # Assert that the collection is signed on v3 api
     collection = get_collection_from_repo(gc, "staging",

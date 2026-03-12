@@ -73,7 +73,7 @@ class Command(BaseCommand):
         if finished_before:
             finished_before_dt = django_timezone.make_aware(
                 finished_before,
-                timezone=django_timezone.utc
+                timezone=timezone.utc
             )
 
         states = ("completed", "failed", "skipped", "canceled")
