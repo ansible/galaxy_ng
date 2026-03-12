@@ -180,7 +180,17 @@ class CollectionArtifactDownloadView(api_base.APIView):
             )
 
         if settings.get("ANSIBLE_COLLECT_DOWNLOAD_COUNT", False):
-            pulp_ansible_views.CollectionArtifactDownloadView.count_download(filename)
+            # Extract namespace and name from filename (format: namespace-name-version.tar.gz)
+            filename_base = filename.replace('.tar.gz', '')
+            parts = filename_base.split('-')
+            if len(parts) >= 3:
+                # namespace-name-version format
+                namespace = parts[0]
+                name = '-'.join(parts[1:-1])
+                pulp_ansible_views.CollectionArtifactDownloadView.count_download(namespace, name)
+            else:
+                # Fallback if parsing fails - log a warning
+                log.warning(f"Unable to parse namespace and name from filename: {filename}")
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:  # noqa: SIM300
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(
