@@ -27,7 +27,7 @@ jobs:
           SOURCE_BRANCH="${{ github.event.inputs.source_branch || 'main' }}"
           TARGET_BRANCH="${{ github.event.inputs.target_branch || 'main' }}"
 
-          export GH_TOKEN=${{ secrets.AAP_ORG_FG_SCHMIDTD_RW_ACTIONS }}
+          export GH_TOKEN=${{ secrets.AAP_ORG_FG_ANSIBLE_CICD_BOT_ACTIONS_REPO_READ }}
           gh repo clone ansible-automation-platform/galaxy_ng
           cd galaxy_ng
           git checkout $SOURCE_BRANCH
