@@ -865,6 +865,17 @@ def configure_legacy_roles(settings: Dynaconf) -> dict[str, Any]:
 
 def validate(settings: Dynaconf) -> None:
     """Validate the configuration, raise ValidationError if invalid"""
+
+    # Keep DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND in sync so that
+    # pulpcore's storage validator (which AND's both keys) passes when only one
+    # of the two settings is explicitly configured.
+    storages_backend = settings.get("STORAGES.default.BACKEND", None)
+    dfs = settings.get("DEFAULT_FILE_STORAGE", None)
+    if storages_backend and storages_backend != dfs:
+        settings.set("DEFAULT_FILE_STORAGE", storages_backend)
+    elif dfs and dfs != storages_backend:
+        settings.set("STORAGES.default.BACKEND", dfs)
+
     settings.validators.register(
         Validator(
             "GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL",
