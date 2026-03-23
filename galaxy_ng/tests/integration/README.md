@@ -5,7 +5,7 @@ Based on running docker compose stack deployment mode (standalone, community, in
 Install `integration_requirements.txt` in your virtual env
 ```
 python3 -m venv gng_int_testing
-source gng_testing/bin/activate
+source gng_int_testing/bin/activate
 pip install -r integration_requirements.txt
 ```
 
