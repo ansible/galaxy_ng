@@ -45,6 +45,8 @@ DAB_SERVICE_BACKED_REDIRECT = (
     "ansible_base.resource_registry.utils.service_backed_sso_pipeline.redirect_to_resource_server"
 )
 
+_STORAGES_DEFAULT_BACKEND_KEY = "STORAGES.default.BACKEND"
+
 
 def _parse_forwarded_header(forwarded_header: str) -> tuple[str | None, str | None]:
     """Parse RFC 7239 Forwarded header to extract proto and host.
@@ -297,6 +299,20 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
 
     # When the resource server is configured, local resource management is disabled.
     data["IS_CONNECTED_TO_RESOURCE_SERVER"] = settings.get("RESOURCE_SERVER__URL") is not None
+
+    # Sync DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND in the data dict.
+    # configure_dab_required_settings (above) copied all settings into data,
+    # including the pulpcore default FileSystem for STORAGES.  If the deployer
+    # only set DEFAULT_FILE_STORAGE (e.g. to S3), STORAGES in data still has
+    # the wrong value.  Fix it here, after DAB but before validate/dynamic.
+    _sb = data.get("STORAGES", {}).get("default", {}).get("BACKEND") or settings.get(
+        "STORAGES.default.BACKEND", None
+    )
+    _dfs = data.get("DEFAULT_FILE_STORAGE") or settings.get("DEFAULT_FILE_STORAGE", None)
+    resolved_storages, resolved_dfs = _resolve_storage_backend(_sb, _dfs)
+    if resolved_storages is not None:
+        data.setdefault("STORAGES", {}).setdefault("default", {})["BACKEND"] = resolved_storages
+        data["DEFAULT_FILE_STORAGE"] = resolved_dfs
 
     # This must go last, so that all the default settings are loaded before dynamic and validation
     if run_dynamic:
@@ -863,18 +879,50 @@ def configure_legacy_roles(settings: Dynaconf) -> dict[str, Any]:
     return data
 
 
+def _resolve_storage_backend(storages_backend, dfs):
+    """Determine the correct storage backend when the two settings disagree.
+
+    Both DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND always carry a
+    value (pulpcore defaults them to FileSystem).  When a deployer sets only
+    one of the two, the other retains the default.  This helper picks the
+    user-configured (non-default) value so the pair can be kept in sync.
+
+    Returns a (resolved_storages_backend, resolved_dfs) tuple, or
+    (None, None) when no sync is needed (values already agree or are both
+    absent).
+    """
+    PULP_DEFAULT = "pulpcore.app.models.storage.FileSystem"
+
+    if not storages_backend and not dfs:
+        return None, None
+    if storages_backend == dfs:
+        return None, None
+
+    # Prefer the value that was explicitly changed from the default.
+    # If neither is the default (both were explicitly set to different
+    # non-default values), prefer STORAGES (the modern Django setting).
+    if dfs and dfs != PULP_DEFAULT and (not storages_backend or storages_backend == PULP_DEFAULT):
+        return dfs, dfs
+    if storages_backend and storages_backend != PULP_DEFAULT and (not dfs or dfs == PULP_DEFAULT):
+        return storages_backend, storages_backend
+    # Both non-default but different - prefer STORAGES
+    if storages_backend:
+        return storages_backend, storages_backend
+    return dfs, dfs
+
+
 def validate(settings: Dynaconf) -> None:
     """Validate the configuration, raise ValidationError if invalid"""
 
     # Keep DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND in sync so that
     # pulpcore's storage validator (which AND's both keys) passes when only one
     # of the two settings is explicitly configured.
-    storages_backend = settings.get("STORAGES.default.BACKEND", None)
+    storages_backend = settings.get(_STORAGES_DEFAULT_BACKEND_KEY, None)
     dfs = settings.get("DEFAULT_FILE_STORAGE", None)
-    if storages_backend and storages_backend != dfs:
-        settings.set("DEFAULT_FILE_STORAGE", storages_backend)
-    elif dfs and dfs != storages_backend:
-        settings.set("STORAGES.default.BACKEND", dfs)
+    resolved_storages, resolved_dfs = _resolve_storage_backend(storages_backend, dfs)
+    if resolved_storages is not None:
+        settings.set(_STORAGES_DEFAULT_BACKEND_KEY, resolved_storages)
+        settings.set("DEFAULT_FILE_STORAGE", resolved_dfs)
 
     settings.validators.register(
         Validator(

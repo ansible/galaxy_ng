@@ -15,6 +15,7 @@ from galaxy_ng.app.dynaconf_hooks import (
     configure_dynamic_settings,
     validate,
     _parse_forwarded_header,
+    _resolve_storage_backend,
     alter_hostname_settings,
     read_settings_from_cache_or_db,
 )
@@ -1858,6 +1859,43 @@ class TestReadSettingsFromCacheOrDb:
         assert metadata.loader == "hooking"
 
 
+class TestResolveStorageBackend:
+    """Test _resolve_storage_backend picks the user-configured value."""
+
+    PULP_DEFAULT = "pulpcore.app.models.storage.FileSystem"
+    S3 = "storages.backends.s3boto3.S3Boto3Storage"
+    AZURE = "storages.backends.azure_storage.AzureStorage"
+
+    def test_both_none(self):
+        assert _resolve_storage_backend(None, None) == (None, None)
+
+    def test_both_equal(self):
+        assert _resolve_storage_backend(self.S3, self.S3) == (None, None)
+
+    def test_both_default(self):
+        assert _resolve_storage_backend(self.PULP_DEFAULT, self.PULP_DEFAULT) == (None, None)
+
+    def test_only_dfs_set(self):
+        """DEFAULT_FILE_STORAGE set, STORAGES absent → use DFS."""
+        assert _resolve_storage_backend(None, self.S3) == (self.S3, self.S3)
+
+    def test_only_storages_set(self):
+        """STORAGES set, DEFAULT_FILE_STORAGE absent → use STORAGES."""
+        assert _resolve_storage_backend(self.S3, None) == (self.S3, self.S3)
+
+    def test_dfs_s3_storages_default(self):
+        """Real-world: deployer sets DEFAULT_FILE_STORAGE=S3, STORAGES still default."""
+        assert _resolve_storage_backend(self.PULP_DEFAULT, self.S3) == (self.S3, self.S3)
+
+    def test_storages_s3_dfs_default(self):
+        """Deployer sets STORAGES=S3, DEFAULT_FILE_STORAGE still default."""
+        assert _resolve_storage_backend(self.S3, self.PULP_DEFAULT) == (self.S3, self.S3)
+
+    def test_both_non_default_differ(self):
+        """Both explicitly set to different non-default values → STORAGES wins."""
+        assert _resolve_storage_backend(self.S3, self.AZURE) == (self.S3, self.S3)
+
+
 class TestValidateStorageSync:
     """Test that validate() syncs DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND.
 
@@ -1906,12 +1944,23 @@ class TestValidateStorageSync:
         """When both are set but differ, STORAGES.default.BACKEND wins."""
         settings = self._make_settings(**{
             "STORAGES.default.BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "DEFAULT_FILE_STORAGE": "pulpcore.app.models.storage.FileSystem",
+            "DEFAULT_FILE_STORAGE": "storages.backends.azure_storage.AzureStorage",
             "AUTHENTICATION_BACKEND_PRESET": "local",
         })
         validate(settings)
         assert settings["DEFAULT_FILE_STORAGE"] == \
             "storages.backends.s3boto3.S3Boto3Storage"
+
+    def test_dfs_s3_with_storages_default_syncs_correctly(self):
+        """Real-world bug: DFS=S3 but STORAGES=FileSystem (default) → both become S3."""
+        settings = self._make_settings(**{
+            "STORAGES.default.BACKEND": "pulpcore.app.models.storage.FileSystem",
+            "DEFAULT_FILE_STORAGE": "storages.backends.s3boto3.S3Boto3Storage",
+            "AUTHENTICATION_BACKEND_PRESET": "local",
+        })
+        validate(settings)
+        assert settings["DEFAULT_FILE_STORAGE"] == "storages.backends.s3boto3.S3Boto3Storage"
+        assert settings["STORAGES.default.BACKEND"] == "storages.backends.s3boto3.S3Boto3Storage"
 
     def test_neither_set_no_error(self):
         """When neither storage setting is configured, validate should not error."""
