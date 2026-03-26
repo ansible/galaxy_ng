@@ -45,8 +45,6 @@ DAB_SERVICE_BACKED_REDIRECT = (
     "ansible_base.resource_registry.utils.service_backed_sso_pipeline.redirect_to_resource_server"
 )
 
-_STORAGES_DEFAULT_BACKEND_KEY = "STORAGES.default.BACKEND"
-
 
 def _parse_forwarded_header(forwarded_header: str) -> tuple[str | None, str | None]:
     """Parse RFC 7239 Forwarded header to extract proto and host.
@@ -895,7 +893,12 @@ def _resolve_storage_backend(storages_backend, dfs):
 
     if not storages_backend and not dfs:
         return None, None
-    if storages_backend == dfs:
+
+    # Treat None (not explicitly set) as the pulp default for comparison,
+    # since an absent value means the default is in effect.
+    effective_sb = storages_backend or PULP_DEFAULT
+    effective_dfs = dfs or PULP_DEFAULT
+    if effective_sb == effective_dfs:
         return None, None
 
     # Prefer the value that was explicitly changed from the default.
@@ -917,11 +920,19 @@ def validate(settings: Dynaconf) -> None:
     # Keep DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND in sync so that
     # pulpcore's storage validator (which AND's both keys) passes when only one
     # of the two settings is explicitly configured.
-    storages_backend = settings.get(_STORAGES_DEFAULT_BACKEND_KEY, None)
+    # Read STORAGES as a full dict and extract the nested value rather than
+    # using dot notation, so the same code path works for both reads and writes.
+    storages = settings.get("STORAGES", {})
+    storages_backend = storages.get("default", {}).get("BACKEND") if storages else None
     dfs = settings.get("DEFAULT_FILE_STORAGE", None)
     resolved_storages, resolved_dfs = _resolve_storage_backend(storages_backend, dfs)
     if resolved_storages is not None:
-        settings.set(_STORAGES_DEFAULT_BACKEND_KEY, resolved_storages)
+        # Avoid settings.set() with dot notation (e.g. "STORAGES.default.BACKEND")
+        # because Dynaconf rebuilds the entire STORAGES dict, dropping sibling
+        # keys like "staticfiles" that Django requires for migrations.
+        # Instead, mutate the full dict and write it back in one call.
+        storages.setdefault("default", {})["BACKEND"] = resolved_storages
+        settings.set("STORAGES", storages)
         settings.set("DEFAULT_FILE_STORAGE", resolved_dfs)
 
     settings.validators.register(

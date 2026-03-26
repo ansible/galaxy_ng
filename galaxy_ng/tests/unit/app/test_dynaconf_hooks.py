@@ -1911,10 +1911,10 @@ class TestValidateStorageSync:
 
     def test_storages_backend_syncs_to_default_file_storage(self):
         """When only STORAGES.default.BACKEND is set, DEFAULT_FILE_STORAGE should be synced."""
-        settings = self._make_settings(**{
-            "STORAGES.default.BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "AUTHENTICATION_BACKEND_PRESET": "local",
-        })
+        settings = self._make_settings(
+            STORAGES={"default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"}},
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
         validate(settings)
         assert settings["DEFAULT_FILE_STORAGE"] == "storages.backends.s3boto3.S3Boto3Storage"
 
@@ -1925,42 +1925,43 @@ class TestValidateStorageSync:
             AUTHENTICATION_BACKEND_PRESET="local",
         )
         validate(settings)
-        assert settings["STORAGES.default.BACKEND"] == \
+        assert settings["STORAGES"]["default"]["BACKEND"] == \
             "storages.backends.azure_storage.AzureStorage"
 
     def test_both_set_consistently_no_change(self):
         """When both are set to the same value, neither should be modified."""
         backend = "storages.backends.s3boto3.S3Boto3Storage"
-        settings = self._make_settings(**{
-            "STORAGES.default.BACKEND": backend,
-            "DEFAULT_FILE_STORAGE": backend,
-            "AUTHENTICATION_BACKEND_PRESET": "local",
-        })
+        settings = self._make_settings(
+            STORAGES={"default": {"BACKEND": backend}},
+            DEFAULT_FILE_STORAGE=backend,
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
         validate(settings)
-        assert settings["STORAGES.default.BACKEND"] == backend
+        assert settings["STORAGES"]["default"]["BACKEND"] == backend
         assert settings["DEFAULT_FILE_STORAGE"] == backend
 
     def test_storages_backend_takes_precedence_when_both_differ(self):
         """When both are set but differ, STORAGES.default.BACKEND wins."""
-        settings = self._make_settings(**{
-            "STORAGES.default.BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "DEFAULT_FILE_STORAGE": "storages.backends.azure_storage.AzureStorage",
-            "AUTHENTICATION_BACKEND_PRESET": "local",
-        })
+        settings = self._make_settings(
+            STORAGES={"default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"}},
+            DEFAULT_FILE_STORAGE="storages.backends.azure_storage.AzureStorage",
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
         validate(settings)
         assert settings["DEFAULT_FILE_STORAGE"] == \
             "storages.backends.s3boto3.S3Boto3Storage"
 
     def test_dfs_s3_with_storages_default_syncs_correctly(self):
         """Real-world bug: DFS=S3 but STORAGES=FileSystem (default) → both become S3."""
-        settings = self._make_settings(**{
-            "STORAGES.default.BACKEND": "pulpcore.app.models.storage.FileSystem",
-            "DEFAULT_FILE_STORAGE": "storages.backends.s3boto3.S3Boto3Storage",
-            "AUTHENTICATION_BACKEND_PRESET": "local",
-        })
+        settings = self._make_settings(
+            STORAGES={"default": {"BACKEND": "pulpcore.app.models.storage.FileSystem"}},
+            DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage",
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
         validate(settings)
         assert settings["DEFAULT_FILE_STORAGE"] == "storages.backends.s3boto3.S3Boto3Storage"
-        assert settings["STORAGES.default.BACKEND"] == "storages.backends.s3boto3.S3Boto3Storage"
+        assert settings["STORAGES"]["default"]["BACKEND"] == \
+            "storages.backends.s3boto3.S3Boto3Storage"
 
     def test_neither_set_no_error(self):
         """When neither storage setting is configured, validate should not error."""
@@ -1969,4 +1970,22 @@ class TestValidateStorageSync:
         )
         validate(settings)
         assert settings.get("DEFAULT_FILE_STORAGE") is None
-        assert settings.get("STORAGES.default.BACKEND") is None
+        assert settings.get("STORAGES") is None
+
+    def test_staticfiles_key_preserved(self):
+        """Syncing STORAGES.default.BACKEND must not drop the staticfiles key."""
+        settings = self._make_settings(
+            STORAGES={
+                "default": {"BACKEND": "pulpcore.app.models.storage.FileSystem"},
+                "staticfiles": {
+                    "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+                },
+            },
+            DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage",
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
+        validate(settings)
+        assert settings["STORAGES"]["default"]["BACKEND"] == \
+            "storages.backends.s3boto3.S3Boto3Storage"
+        assert settings["STORAGES"]["staticfiles"]["BACKEND"] == \
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
