@@ -33,4 +33,4 @@ jobs:
           git checkout $SOURCE_BRANCH
           git status
 
-          git push https://${{ secrets.FAO_TOKEN }}@github.com/ansible/galaxy_ng.git ${SOURCE_BRANCH}:${TARGET_BRANCH} --force
+          git push https://${{ secrets.ANSIBLE_FG_AAP_HUB_CI_BOT_ACTIONS }}@github.com/ansible/galaxy_ng.git ${SOURCE_BRANCH}:${TARGET_BRANCH} --force
