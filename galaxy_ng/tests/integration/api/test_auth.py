@@ -3,6 +3,7 @@
 See: https://github.com/ansible/galaxy-dev/issues/149
 
 """
+import os
 import pytest
 from packaging.version import parse as parse_version
 
@@ -91,7 +92,11 @@ def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
     remove_from_cache("admin")
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
-    assert ctx.value.response.status_code == 401
+
+    if os.environ.get("PULP_RESOURCE_SERVER__URL"):
+        assert ctx.value.response.status_code == 403
+    else:
+        assert ctx.value.response.status_code == 401
     remove_from_cache("admin")
 
 
@@ -127,7 +132,11 @@ def test_gateway_token_auth(galaxy_client):
 
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
-    assert ctx.value.response.status_code == 401
+
+    if os.environ.get("PULP_RESOURCE_SERVER__URL"):
+        assert ctx.value.response.status_code == 403
+    else:
+        assert ctx.value.response.status_code == 401
 
 
 @pytest.mark.deployment_standalone
