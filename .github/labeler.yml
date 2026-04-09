@@ -13,3 +13,7 @@ backport-2.5:
 backport-2.6:
 - changed-files:
   - any-glob-to-any-file: 'galaxy_ng/app/**/*'
+
+backport-2.7:
+- changed-files:
+  - any-glob-to-any-file: 'galaxy_ng/app/**/*'
