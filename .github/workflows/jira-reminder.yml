@@ -23,11 +23,11 @@ jobs:
           COMBINED="${PR_TITLE}
           ${PR_BODY}"
 
-          # Extract AAP and ANSTRAT ticket IDs (case insensitive)
-          TICKETS=$(echo "$COMBINED" | grep -oEi '(AAP|ANSTRAT)-[0-9]+' | tr '[:lower:]' '[:upper:]' | sort -u | tr '\n' ' ')
+          # Extract AAP ticket IDs (case insensitive)
+          TICKETS=$(echo "$COMBINED" | grep -oEi 'AAP-[0-9]+' | tr '[:lower:]' '[:upper:]' | sort -u | tr '\n' ' ')
 
           # Also extract Jira URLs and get ticket IDs from them
-          URL_TICKETS=$(echo "$COMBINED" | grep -oEi 'https?://[^/]*atlassian\.net/browse/(AAP|ANSTRAT)-[0-9]+' | grep -oEi '(AAP|ANSTRAT)-[0-9]+' | tr '[:lower:]' '[:upper:]' | sort -u | tr '\n' ' ')
+          URL_TICKETS=$(echo "$COMBINED" | grep -oEi 'https?://(issues\.redhat\.com|[^/]*atlassian\.net)/browse/AAP-[0-9]+' | grep -oEi 'AAP-[0-9]+' | tr '[:lower:]' '[:upper:]' | sort -u | tr '\n' ' ')
 
           # Combine and deduplicate
           ALL_TICKETS=$(echo "$TICKETS $URL_TICKETS" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | xargs)
@@ -58,34 +58,29 @@ jobs:
             if (tickets) {
               const ticketList = tickets.split(' ').filter(t => t);
               const ticketLinks = ticketList.map(t =>
-                `- [${t}](https://issues.redhat.com/browse/${t})`
+                `- [${t}](https://redhat.atlassian.net/browse/${t})`
               ).join('\n');
-              ticketSection = `
-
-            **Associated Jira ticket(s):**
-            ${ticketLinks}`;
+              ticketSection = `\n\n**Associated Jira ticket(s):**\n${ticketLinks}`;
             } else {
-              ticketSection = `
-
-            **Note:** No Jira ticket was detected in this PR. If this change is associated with a Jira ticket, please update the ticket status manually.`;
+              ticketSection = '\n\n**Note:** No Jira ticket was detected in this PR. If this change is associated with a Jira ticket, please update the ticket status manually.';
             }
 
             let backportSection = '';
             if (hasAap) {
-              backportSection = `
-
-            **Backport Reminder:** If this AAP ticket requires backporting to stable branches, please create the appropriate backport issue(s) from the parent Jira issue using the **"Create backport issue"** automation (found under **More → Create backport issue** in Jira).`;
+              backportSection = '\n\n**Backport Reminder:** If this AAP ticket requires backporting to stable branches, please create the appropriate backport issue(s) from the parent Jira issue using the **"Create backport issue"** automation (found under the ⚡ icon in Jira).';
             }
 
-            const body = `> [!NOTE]
-            > **Jira Ticket Reminder**
-
-            👋 @${prAuthor}, this PR has been merged! 🎉
-
-            **Reminder:** Please ensure the associated Jira ticket is moved to the appropriate status (e.g., "Release Pending" or "Closed").${ticketSection}${backportSection}
-
-            ---
-            <sub>This is an automated reminder. Please update Jira to keep our tracking accurate.</sub>`;
+            const body = [
+              '> [!NOTE]',
+              '> **Jira Ticket Reminder**',
+              '',
+              `👋 @${prAuthor}, this PR has been merged! 🎉`,
+              '',
+              `**Reminder:** Please ensure the associated Jira ticket is moved to the appropriate status (e.g., "Release Pending" or "Closed").${ticketSection}${backportSection}`,
+              '',
+              '---',
+              '<sub>This is an automated reminder. Please update Jira to keep our tracking accurate.</sub>'
+            ].join('\n');
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
