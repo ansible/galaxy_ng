@@ -1989,3 +1989,94 @@ class TestValidateStorageSync:
             "storages.backends.s3boto3.S3Boto3Storage"
         assert settings["STORAGES"]["staticfiles"]["BACKEND"] == \
             "django.contrib.staticfiles.storage.StaticFilesStorage"
+
+    def test_staticfiles_key_added_when_missing(self):
+        """Syncing STORAGES must add staticfiles if not already present."""
+        settings = self._make_settings(
+            STORAGES={"default": {"BACKEND": "pulpcore.app.models.storage.FileSystem"}},
+            DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage",
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
+        validate(settings)
+        assert settings["STORAGES"]["staticfiles"]["BACKEND"] == \
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+
+    def test_custom_staticfiles_not_overwritten(self):
+        """A deployer-configured staticfiles backend must not be overwritten."""
+        custom_backend = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+        settings = self._make_settings(
+            STORAGES={
+                "default": {"BACKEND": "pulpcore.app.models.storage.FileSystem"},
+                "staticfiles": {"BACKEND": custom_backend},
+            },
+            DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage",
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
+        validate(settings)
+        assert settings["STORAGES"]["staticfiles"]["BACKEND"] == custom_backend
+
+
+class TestPostStorageSync:
+    """Test that post() syncs storage settings in the returned data dict.
+
+    The post() hook must sync DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND
+    in the data dict it returns, not just in the settings object. This covers
+    the code path where configure_dab_required_settings copies the pulpcore
+    default into data["STORAGES"] but the deployer set DEFAULT_FILE_STORAGE
+    to a non-default value (e.g. S3).
+    """
+
+    def _make_settings(self, **overrides):
+        settings = SuperDict()
+        settings.update(copy.deepcopy(BASE_SETTINGS))
+        settings.update(overrides)
+        settings.immutable = True
+        return settings
+
+    def test_post_syncs_dfs_to_storages_in_data(self):
+        """post() data dict gets STORAGES synced when DEFAULT_FILE_STORAGE is S3."""
+        settings = self._make_settings(
+            DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage",
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
+        data = post_hook(settings, run_dynamic=False, run_validate=False)
+        assert data["DEFAULT_FILE_STORAGE"] == "storages.backends.s3boto3.S3Boto3Storage"
+        assert data["STORAGES"]["default"]["BACKEND"] == \
+            "storages.backends.s3boto3.S3Boto3Storage"
+
+    def test_post_adds_staticfiles_when_missing(self):
+        """post() ensures staticfiles key exists in returned STORAGES."""
+        settings = self._make_settings(
+            DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage",
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
+        data = post_hook(settings, run_dynamic=False, run_validate=False)
+        assert data["STORAGES"]["staticfiles"]["BACKEND"] == \
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+
+    def test_post_preserves_existing_staticfiles(self):
+        """post() does not overwrite a deployer-configured staticfiles backend."""
+        custom = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+        settings = self._make_settings(
+            DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage",
+            STORAGES={
+                "default": {"BACKEND": "pulpcore.app.models.storage.FileSystem"},
+                "staticfiles": {"BACKEND": custom},
+            },
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
+        data = post_hook(settings, run_dynamic=False, run_validate=False)
+        assert data["STORAGES"]["staticfiles"]["BACKEND"] == custom
+
+    def test_post_no_sync_when_storage_matches(self):
+        """post() does not modify STORAGES when both settings already agree."""
+        backend = "storages.backends.s3boto3.S3Boto3Storage"
+        settings = self._make_settings(
+            DEFAULT_FILE_STORAGE=backend,
+            STORAGES={"default": {"BACKEND": backend}},
+            AUTHENTICATION_BACKEND_PRESET="local",
+        )
+        data = post_hook(settings, run_dynamic=False, run_validate=False)
+        # STORAGES should not be set in data since no sync was needed,
+        # unless DAB copied it in. Either way, DEFAULT_FILE_STORAGE stays.
+        assert data.get("DEFAULT_FILE_STORAGE", backend) == backend

@@ -309,7 +309,16 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
     _dfs = data.get("DEFAULT_FILE_STORAGE") or settings.get("DEFAULT_FILE_STORAGE", None)
     resolved_storages, resolved_dfs = _resolve_storage_backend(_sb, _dfs)
     if resolved_storages is not None:
-        data.setdefault("STORAGES", {}).setdefault("default", {})["BACKEND"] = resolved_storages
+        # Preserve sibling keys (e.g. "staticfiles") by reading the existing
+        # STORAGES dict from data or settings before mutating.
+        storages = data.get("STORAGES") or settings.get("STORAGES", {})
+        storages.setdefault("default", {})["BACKEND"] = resolved_storages
+        # Dynaconf/pulpcore may not include Django's implicit "staticfiles" default.
+        # Ensure it's present so Django's staticfiles.E005 check passes.
+        storages.setdefault("staticfiles", {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        })
+        data["STORAGES"] = storages
         data["DEFAULT_FILE_STORAGE"] = resolved_dfs
 
     # This must go last, so that all the default settings are loaded before dynamic and validation
@@ -932,6 +941,9 @@ def validate(settings: Dynaconf) -> None:
         # keys like "staticfiles" that Django requires for migrations.
         # Instead, mutate the full dict and write it back in one call.
         storages.setdefault("default", {})["BACKEND"] = resolved_storages
+        storages.setdefault("staticfiles", {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        })
         settings.set("STORAGES", storages)
         settings.set("DEFAULT_FILE_STORAGE", resolved_dfs)
 
