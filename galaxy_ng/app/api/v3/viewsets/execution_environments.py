@@ -74,7 +74,12 @@ class ManifestFilter(filterset.FilterSet):
 
     def filter_child_manifests(self, queryset, name, value):
         if value:
-            return queryset.annotate(num_parents=Count("manifest_lists")).exclude(num_parents__gt=0)
+            return queryset.annotate(
+                num_parents=Count(
+                    "manifest_lists",
+                    filter=Q(manifest_lists__image_manifest__in=queryset),
+                )
+            ).exclude(num_parents__gt=0)
         else:
             return queryset
 
