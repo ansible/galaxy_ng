@@ -99,9 +99,10 @@ django_ansible_base_dependency = (
 
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
-    "pulpcore>=3.73.28,<3.74",
-    "pulp_ansible>=0.28.5,<0.29",
-    "pulp-container>=2.26.7,<2.27",
+    "pulpcore>=3.105.2,<3.106",
+    "pulp_ansible>=0.29.6,<0.30",
+    "pulp-container>=2.27.6,<2.28",
+    "pyjwt[crypto]>=2.12.0",  # minimum version enforced to address: AAP-68406
     "django>=5.2.12,<5.3",
     "django-prometheus>=2.0.0",
     "social-auth-core>=4.4.2",
@@ -118,11 +119,13 @@ requirements = [
     "django-automated-logging~=6.2",
     "django-storages[azure,boto3,s3]",
     "aiohttp>=3.13.3",
-    "aiodns<3.2.0",  # 3.2.0 has a breaking API change that's incompatible with aiohttp
+    "aiodns>=3.3.0,<3.7",  # aligned with pulpcore; >=3.3 required to fix hanging issue
     "setuptools<=81",  # declare here to ensure it's included in the RPM system
     "pillow>=12.1.1",  # minimum version enforced to address AAP-65505, AAP-65509, AAP-65510
     "cryptography>=46.0.5",  # minimum version enforced to address AAP-65409
     "pyopenssl>=25.3.0",  # bumped to allow cryptography>=46.0.5
+    "black>=26.3.1",  # minimum version enforced for AAP-68431, AAP-68430, AAP-68421
+    "ansible-lint>=26.1.1",  # minimum version enforced for AAP-68431, AAP-68430, AAP-68421
 ]
 
 

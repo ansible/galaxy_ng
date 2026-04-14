@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('ansible', '0018_fix_collection_relative_path'),
         ('galaxy', '0002_add_synclist_20200330_squashed'),
-        ('core', '0032_export_to_chunks'),
+        ('core', '0091_systemid'),
     ]
 
     operations = [

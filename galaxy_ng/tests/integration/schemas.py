@@ -477,7 +477,6 @@ schema_task_detail = {
         'started_at',
         'state',
         'task_group',
-        'worker'
     ],
     'properties': {
         'child_tasks': {'type': 'array'},
@@ -494,7 +493,6 @@ schema_task_detail = {
         'started_at': {'type': ['string', 'null']},
         'state': {'type': 'string'},
         'task_group': {'type': ['string', 'null']},
-        'worker': {'type': ['string', 'null']},
     }
 }
 

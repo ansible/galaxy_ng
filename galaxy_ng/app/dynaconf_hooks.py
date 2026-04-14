@@ -299,6 +299,11 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
     data["IS_CONNECTED_TO_RESOURCE_SERVER"] = settings.get("RESOURCE_SERVER__URL") is not None
 
     # Sync DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND in the data dict.
+    # NOTE: As of pulpcore 3.85+, DEFAULT_FILE_STORAGE is no longer read by
+    # pulpcore — only STORAGES is used.  This shim exists solely for backwards
+    # compatibility with deployer configurations that still set
+    # PULP_DEFAULT_FILE_STORAGE.  It translates the legacy setting into the
+    # STORAGES dict so pulpcore picks it up.
     # configure_dab_required_settings (above) copied all settings into data,
     # including the pulpcore default FileSystem for STORAGES.  If the deployer
     # only set DEFAULT_FILE_STORAGE (e.g. to S3), STORAGES in data still has
@@ -888,6 +893,10 @@ def configure_legacy_roles(settings: Dynaconf) -> dict[str, Any]:
 
 def _resolve_storage_backend(storages_backend, dfs):
     """Determine the correct storage backend when the two settings disagree.
+
+    NOTE: As of pulpcore 3.85+, DEFAULT_FILE_STORAGE is no longer read by
+    pulpcore — only STORAGES is used.  This function exists for backwards
+    compatibility with deployer configs that still set DEFAULT_FILE_STORAGE.
 
     Both DEFAULT_FILE_STORAGE and STORAGES.default.BACKEND always carry a
     value (pulpcore defaults them to FileSystem).  When a deployer sets only

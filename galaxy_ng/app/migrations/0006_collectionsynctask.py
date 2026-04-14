@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0042_rbac_for_tasks'),
+        ('core', '0091_systemid'),
         ('ansible', '0021_rename_role_remote'),
         ('galaxy', '0004_rbac'),
     ]

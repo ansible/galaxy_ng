@@ -557,7 +557,6 @@ def legacy_role_import(
 
     logger.info('')
     logger.info('Import completed')
-    return this_role
 
 
 def legacy_sync_from_upstream(

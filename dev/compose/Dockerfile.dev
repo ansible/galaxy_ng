@@ -6,6 +6,10 @@ FROM base_img
 ARG GNUPGHOME
 ENV GNUPGHOME="${GNUPGHOME}"
 
+# gunicorn 25+ creates a control socket in the working directory by default;
+# /app is a host-mounted source tree not writable by the galaxy user.
+ENV GUNICORN_CMD_ARGS="--no-control-socket"
+
 USER root
 RUN LANG=C dnf -y --disableplugin=subscription-manager install nc
 

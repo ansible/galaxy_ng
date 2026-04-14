@@ -11,7 +11,7 @@ def _gen_secret():
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0075_rbaccontentguard'),
+        ('core', '0091_systemid'),
         ('galaxy', '0023_auto_20210903_1906'),
     ]
 
