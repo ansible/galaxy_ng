@@ -3,7 +3,6 @@
 See: https://github.com/ansible/galaxy-dev/issues/149
 
 """
-import os
 import pytest
 from packaging.version import parse as parse_version
 
@@ -82,7 +81,7 @@ def test_auth_exception(galaxy_client, ansible_config):
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
-def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
+def test_gateway_auth_admin_gateway_sessionid(galaxy_client, ansible_config):
     """Test whether admin can not access collections page using invalid gateway_sessionid."""
     gc = galaxy_client("admin")
     alt_cookies = gc.gw_client.cookies
@@ -93,7 +92,8 @@ def test_gateway_auth_admin_gateway_sessionid(galaxy_client):
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
 
-    if os.environ.get("PULP_RESOURCE_SERVER__URL"):
+    hub_version = get_hub_version(ansible_config)
+    if parse_version(hub_version) >= parse_version("4.12.0dev"):
         assert ctx.value.response.status_code == 403
     else:
         assert ctx.value.response.status_code == 401
@@ -121,7 +121,7 @@ def test_gateway_create_ns_csrftoken(galaxy_client):
 @pytest.mark.deployment_standalone
 @pytest.mark.galaxyapi_smoke
 @pytest.mark.skipif(not aap_gateway(), reason="This test only runs if AAP Gateway is deployed")
-def test_gateway_token_auth(galaxy_client):
+def test_gateway_token_auth(galaxy_client, ansible_config):
     """Test whether normal auth is required and works to access APIs.
 
     Also tests the settings for user profiles used for testing.
@@ -133,7 +133,8 @@ def test_gateway_token_auth(galaxy_client):
     with pytest.raises(GalaxyClientError) as ctx:
         gc.get("v3/plugin/ansible/content/published/collections/index/", relogin=False)
 
-    if os.environ.get("PULP_RESOURCE_SERVER__URL"):
+    hub_version = get_hub_version(ansible_config)
+    if parse_version(hub_version) >= parse_version("4.12.0dev"):
         assert ctx.value.response.status_code == 403
     else:
         assert ctx.value.response.status_code == 401
