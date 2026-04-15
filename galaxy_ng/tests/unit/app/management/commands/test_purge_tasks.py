@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.db import connection
 from django.test import TestCase
 
 from pulpcore.plugin.models import Task
@@ -30,14 +31,23 @@ class TestPurgeTasksCommand(TestCase):
             _datetime = datetime.now(timezone.utc) - timedelta(days=days)
 
         rand_str = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        created_pks = []
         for i in range(tasks):
             task = Task.objects.create(
                 name=f"custom.task.{i}.{rand_str}",
-                pulp_created=_datetime,
                 state=state,
             )
-            task.pulp_created = _datetime
-            task.save()
+            created_pks.append(task.pk)
+        # pulpcore 3.105+ has DB triggers that force pulp_created=clock_timestamp()
+        # on INSERT and prevent UPDATE of pulp_created. Use session_replication_role
+        # to temporarily disable all triggers so we can backdate tasks for testing.
+        with connection.cursor() as cursor:
+            cursor.execute("SET session_replication_role = 'replica'")
+        try:
+            Task.objects.filter(pk__in=created_pks).update(pulp_created=_datetime)
+        finally:
+            with connection.cursor() as cursor:
+                cursor.execute("SET session_replication_role = 'origin'")
 
     def _assert_tasks(self, num_tasks: int):
         self.assertEqual(Task.objects.count(), num_tasks)

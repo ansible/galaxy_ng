@@ -155,7 +155,7 @@ def _create_pulp_namespace(galaxy_ns_pk, download_logo):
 
         repos = [x.repository for x in repo_content_qs]
 
-        return dispatch(
+        dispatch(
             _add_namespace_metadata_to_repos,
             kwargs={
                 "namespace_pk": metadata.pk,

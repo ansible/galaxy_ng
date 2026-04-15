@@ -71,7 +71,6 @@ class TestUiTaskListViewSet(BaseTestCase):
             'started_at',
             'state',
             'error',
-            'worker',
             'parent_task',
             'child_tasks',
             'progress_reports',

@@ -8,7 +8,7 @@ import galaxy_ng.app.access_control.mixins
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0061_call_handle_artifact_checksums_command'),
+        ('core', '0091_systemid'),
         ('container', '0018_containerdistribution_description'),
         ('galaxy', '0015_containerdistroreadme'),
     ]

@@ -23,13 +23,16 @@ for item in "${SRC_PATH_LIST[@]}"; do
             pip3.12 install --config-settings editable_mode=compat --no-cache-dir --editable "$src_path" >/dev/null
         fi
 
-        # if running as root user, set permissions on /src/${item} to be owned by user named galaxy
+        # if running as root user, fix ownership on build artifacts created by pip
+        # so the non-root galaxy user can read them. Only target pip-generated
+        # directories, NOT the entire source tree (which is host-mounted).
         if [[ "$(id -u)" -eq 0 ]]; then
             if id -u galaxy >/dev/null 2>&1; then
-                echo "Setting ownership of ${src_path} to user galaxy."
-                chown -R galaxy:galaxy "$src_path"
-            else
-                echo "WARNING: User 'galaxy' not found. Skipping permission changes for ${src_path}."
+                for artifact_dir in "${src_path}/"*.egg-info "${src_path}/build" "${src_path}/"__pycache__; do
+                    if [[ -e "$artifact_dir" ]]; then
+                        chown -R galaxy:galaxy "$artifact_dir"
+                    fi
+                done
             fi
         fi
 

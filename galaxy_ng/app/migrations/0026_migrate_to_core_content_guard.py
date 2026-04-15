@@ -27,7 +27,7 @@ def replace_content_guard(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0087_taskschedule'),
+        ('core', '0091_systemid'),
         ('galaxy', '0025_add_content_guard_to_distributions'),
     ]
 

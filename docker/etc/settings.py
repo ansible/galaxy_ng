@@ -4,6 +4,10 @@
 import os
 
 
+# The dynaconf_hooks shim translates this into the STORAGES dict
+# that pulpcore 3.85+ requires. Kept as DEFAULT_FILE_STORAGE so that
+# env var overrides (e.g. PULP_DEFAULT_FILE_STORAGE in standalone)
+# continue to work via the shim's resolution logic.
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_DEFAULT_ACL = None
 

@@ -424,7 +424,12 @@ class TestCreatePulpNamespace(TestCase):
                 exclusive_resources=[repo_content.repository]
             )
 
-            self.assertIsNotNone(result)
+            # _create_pulp_namespace no longer returns a value — pulpcore 3.85+
+            # changed Task.result to a JSONField, so task functions can only return
+            # JSON-serializable values. The old code returned dispatch() (a Task
+            # model instance), which is not serializable. The inner dispatch is
+            # fire-and-forget so returning None is correct.
+            self.assertIsNone(result)
 
     @patch('galaxy_ng.app.tasks.namespaces.Namespace.objects.get')
     @patch('galaxy_ng.app.tasks.namespaces._download_avatar')
