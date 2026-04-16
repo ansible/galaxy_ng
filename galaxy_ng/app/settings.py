@@ -266,7 +266,7 @@ REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES = [
 GALAXY_DEPLOYMENT_MODE = 'standalone'
 
 # When enabled, restricts access to OpenAPI spec, Swagger UI and redoc docs
-GALAXY_API_SPEC_REQUIRE_AUTHENTICATION = False
+GALAXY_API_SPEC_REQUIRE_AUTHENTICATION = True
 
 # Dictionary with True|False values for the application to turn on/off features
 GALAXY_FEATURE_FLAGS = {
