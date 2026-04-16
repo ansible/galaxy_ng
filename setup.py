@@ -126,6 +126,9 @@ requirements = [
     "pyopenssl>=25.3.0",  # bumped to allow cryptography>=46.0.5
     "black>=26.3.1",  # minimum version enforced for AAP-68431, AAP-68430, AAP-68421
     "ansible-lint>=26.1.1",  # minimum version enforced for AAP-68431, AAP-68430, AAP-68421
+    # Needed for compatibility with DAB:
+    # https://github.com/ansible-automation-platform/django-ansible-base/blob/stable-2.7/requirements/requirements.in#L7
+    "djangorestframework<3.16",
 ]
 
 
