@@ -100,9 +100,11 @@ class GalaxyStatements:
         if not statements and default is None:
             return None
 
-        return MockPulpAccessPolicy({
-            "statements": statements,
-        })
+        return MockPulpAccessPolicy(
+            {
+                "statements": statements,
+            }
+        )
 
 
 GALAXY_STATEMENTS = GalaxyStatements()
@@ -173,7 +175,8 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         if user.has_perm("ansible.view_ansiblerepository"):
             return qs
         view_perm = Permission.objects.get(
-            content_type__app_label="ansible", codename="view_ansiblerepository")
+            content_type__app_label="ansible", codename="view_ansiblerepository"
+        )
 
         if field_name:
             field_name = field_name + "__"
@@ -186,24 +189,18 @@ class AccessPolicyBase(AccessPolicyFromSettings):
             qs = qs.filter(private_q)
         else:
             user_roles = UserRole.objects.filter(user=user, role__permissions=view_perm).filter(
-                object_id=OuterRef("repo_pk_str"))
+                object_id=OuterRef("repo_pk_str")
+            )
 
             group_roles = GroupRole.objects.filter(
-                group__in=user.groups.all(),
-                role__permissions=view_perm
-            ).filter(
-                object_id=OuterRef("repo_pk_str"))
+                group__in=user.groups.all(), role__permissions=view_perm
+            ).filter(object_id=OuterRef("repo_pk_str"))
 
-            qs = qs.annotate(
-                repo_pk_str=Cast(f"{field_name}pk", output_field=CharField())
-            ).annotate(
-                has_user_role=Exists(user_roles)
-            ).annotate(
-                has_group_roles=Exists(group_roles)
-            ).filter(
-                private_q
-                | Q(has_user_role=True)
-                | Q(has_group_roles=True)
+            qs = (
+                qs.annotate(repo_pk_str=Cast(f"{field_name}pk", output_field=CharField()))
+                .annotate(has_user_role=Exists(user_roles))
+                .annotate(has_group_roles=Exists(group_roles))
+                .filter(private_q | Q(has_user_role=True) | Q(has_group_roles=True))
             )
 
         return qs
@@ -218,10 +215,7 @@ class AccessPolicyBase(AccessPolicyFromSettings):
             my_synclists = my_synclists.values_list("distribution", flat=True)
             qs = qs.exclude(Q(base_path__endswith="-synclist") & ~Q(pk__in=my_synclists))
         return self.scope_by_view_repository_permissions(
-            view,
-            qs,
-            field_name="repository",
-            is_generic=True
+            view, qs, field_name="repository", is_generic=True
         )
 
     # if not defined, defaults to parent qs of None breaking Group Detail
@@ -245,13 +239,7 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         view the collections here.
         """
 
-        path = view.kwargs.get(
-            "distro_base_path",
-            view.kwargs.get(
-                "path",
-                None
-            )
-        )
+        path = view.kwargs.get("distro_base_path", view.kwargs.get("path", None))
 
         if path:
             distro = ansible_models.AnsibleDistribution.objects.get(base_path=path)
@@ -275,13 +263,13 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         # could be a collection or could be a collectionversion ...
         obj = view.get_object()
         model_name = obj.__class__.__name__
-        if model_name == 'Collection':
+        if model_name == "Collection":
             collection = obj
-        elif model_name == 'CollectionVersion':
+        elif model_name == "CollectionVersion":
             collection = obj.collection
         else:
             raise Exception(
-                f'model type {model_name} is not suitable for v3_can_destroy_collections'
+                f"model type {model_name} is not suitable for v3_can_destroy_collections"
             )
         namespace = models.Namespace.objects.get(name=collection.namespace)
 
@@ -307,7 +295,7 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         if is_github_social_auth:
             return True
 
-        if request.user.has_perm('galaxy.view_user'):  # noqa: SIM103
+        if request.user.has_perm("galaxy.view_user"):  # noqa: SIM103
             return True
 
         return False
@@ -370,6 +358,47 @@ class AccessPolicyBase(AccessPolicyFromSettings):
             request.user.has_perm(permission, repo) for repo in repos_to_check
         )
 
+    def v3_can_copy_or_move(self, request, view, action, permission):
+        """
+        Check if the user has model or object-level permissions
+        on the source and destination repositories for v3 move/copy endpoints.
+
+        Used by CollectionViewSet for move_content and copy_content actions.
+        Repos resolved from kwargs['source_path'] and kwargs['dest_path'].
+        """
+        if request.user.has_perm(permission):
+            return True
+
+        # Get source and dest repos from view kwargs
+        try:
+            src_repo = ansible_models.AnsibleDistribution.objects.get(
+                base_path=view.kwargs["source_path"]
+            ).repository
+            dest_repo = ansible_models.AnsibleDistribution.objects.get(
+                base_path=view.kwargs["dest_path"]
+            ).repository
+        except (ansible_models.AnsibleDistribution.DoesNotExist, AttributeError, KeyError):
+            # If we can't get repos deny access
+            return False
+
+        # Cache repos on view to avoid duplicate queries in get_repos()
+        view._src_repo = src_repo
+        view._dest_repo = dest_repo
+
+        # Cast repos for permission checking (permissions require concrete AnsibleRepository type)
+        try:
+            if src_repo is None or dest_repo is None:
+                return False
+            src_repo_cast = src_repo.cast()
+            dest_repo_cast = dest_repo.cast()
+        except (AttributeError, TypeError):
+            return False
+
+        # Check permission on both source and destination repos
+        return request.user.has_perm(permission, src_repo_cast) and request.user.has_perm(
+            permission, dest_repo_cast
+        )
+
     def _get_rh_identity(self, request):
         if not isinstance(request.auth, dict):
             log.debug("No request rh_identity request.auth found for request %s", request)
@@ -404,9 +433,7 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         collection = view.get_object()
         namespace = models.Namespace.objects.get(name=collection.namespace)
         return has_model_or_object_permissions(
-            request.user,
-            "galaxy.upload_to_namespace",
-            namespace
+            request.user, "galaxy.upload_to_namespace", namespace
         )
 
     def can_create_collection(self, request, view, permission):
@@ -417,9 +444,7 @@ class AccessPolicyBase(AccessPolicyFromSettings):
             raise NotFound(_("Namespace in filename not found."))
 
         can_upload_to_namespace = has_model_or_object_permissions(
-            request.user,
-            "galaxy.upload_to_namespace",
-            namespace
+            request.user, "galaxy.upload_to_namespace", namespace
         )
 
         if not can_upload_to_namespace:
@@ -438,9 +463,7 @@ class AccessPolicyBase(AccessPolicyFromSettings):
             # repo contents.
             elif pipeline is None:
                 return has_model_or_object_permissions(
-                    request.user,
-                    "ansible.modify_ansible_repo_content",
-                    repo
+                    request.user, "ansible.modify_ansible_repo_content", repo
                 )
 
             # if pipeline is anything other staging, reject the request.
@@ -453,19 +476,17 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         # Repository is required on the CollectionSign payload
         # Assumed that if user can modify repo they can sign everything in it
         repository = view.get_repository(request)
-        can_modify_repo = request.user.has_perm('ansible.modify_ansible_repo_content', repository)
+        can_modify_repo = request.user.has_perm("ansible.modify_ansible_repo_content", repository)
 
         # Payload can optionally specify a namespace to filter its contents
         # Assumed that if user has access to modify namespace they can sign its contents.
-        if namespace := request.data.get('namespace'):
+        if namespace := request.data.get("namespace"):
             try:
                 namespace = models.Namespace.objects.get(name=namespace)
             except models.Namespace.DoesNotExist:
-                raise NotFound(_('Namespace not found.'))
+                raise NotFound(_("Namespace not found."))
             return can_modify_repo and has_model_or_object_permissions(
-                request.user,
-                "galaxy.upload_to_namespace",
-                namespace
+                request.user, "galaxy.upload_to_namespace", namespace
             )
 
         # the other filtering options are content_units and name/version
@@ -526,15 +547,22 @@ class AccessPolicyBase(AccessPolicyFromSettings):
             return True
 
         for cv in data["collection_versions"]:
-            sig_exists = repo_version.get_content(
-                ansible_models.CollectionVersionSignature.objects
-            ).filter(signed_collection=cv).exists()
+            sig_exists = (
+                repo_version.get_content(ansible_models.CollectionVersionSignature.objects)
+                .filter(signed_collection=cv)
+                .exists()
+            )
 
             if not sig_exists:
-                raise ValidationError(detail={"collection_versions": _(
-                    "Signatures are required in order to add collections into any 'approved'"
-                    "repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
-                )})
+                raise ValidationError(
+                    detail={
+                        "collection_versions": _(
+                            "Signatures are required in order to add collections into any "
+                            "'approved' repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL "
+                            "is enabled."
+                        )
+                    }
+                )
 
         return True
 
@@ -579,10 +607,12 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         ):
             raise ValidationError(
                 detail={
-                    'requirements_file':
-                        _('Syncing content from galaxy.ansible.com without specifying a '
-                          'requirements file is not allowed.')
-                })
+                    "requirements_file": _(
+                        "Syncing content from galaxy.ansible.com without specifying a "
+                        "requirements file is not allowed."
+                    )
+                }
+            )
         return True
 
     def is_local_resource_management_disabled(self, request, view, action) -> bool:
@@ -614,14 +644,10 @@ class AIDenyIndexAccessPolicy(AccessPolicyBase):
         has_permission = False
         if isinstance(obj, models.Namespace):
             has_permission = has_model_or_object_permissions(
-                request.user,
-                "galaxy.change_namespace",
-                obj
+                request.user, "galaxy.change_namespace", obj
             )
         elif isinstance(obj, LegacyNamespace):
-            has_permission = LegacyAccessPolicy().is_namespace_owner(
-                request, view, permission
-            )
+            has_permission = LegacyAccessPolicy().is_namespace_owner(request, view, permission)
         return has_permission
 
 
@@ -798,28 +824,28 @@ class LegacyAccessPolicy(AccessPolicyBase):
 
         namespace = None
         github_user = None
-        kwargs = request.parser_context['kwargs']
+        kwargs = request.parser_context["kwargs"]
 
         # enumerate the related namespace for this request
-        if '/imports/' in request.META['PATH_INFO']:
-            github_user = request.data['github_user']
+        if "/imports/" in request.META["PATH_INFO"]:
+            github_user = request.data["github_user"]
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
-        elif '/removerole/' in request.META['PATH_INFO']:
+        elif "/removerole/" in request.META["PATH_INFO"]:
 
-            github_user = request.query_params['github_user']
+            github_user = request.query_params["github_user"]
             namespace = LegacyNamespace.objects.filter(name=github_user).first()
 
-        elif '/roles/' in request.META['PATH_INFO']:
+        elif "/roles/" in request.META["PATH_INFO"]:
             roleid = kwargs.get("id", kwargs.get("pk"))
             role = LegacyRole.objects.filter(id=roleid).first()
             namespace = role.namespace
 
-        elif '/namespaces/' in request.META['PATH_INFO']:
-            ns_id = kwargs['pk']
+        elif "/namespaces/" in request.META["PATH_INFO"]:
+            ns_id = kwargs["pk"]
             namespace = LegacyNamespace.objects.filter(id=ns_id).first()
 
-        elif '/ai_deny_index/' in request.META["PATH_INFO"]:
+        elif "/ai_deny_index/" in request.META["PATH_INFO"]:
             ns_name = kwargs.get("reference", request.data.get("reference"))
             namespace = LegacyNamespace.objects.filter(name=ns_name).first()
 

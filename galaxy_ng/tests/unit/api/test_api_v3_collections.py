@@ -1,6 +1,7 @@
 import uuid
 import logging
 
+from unittest import mock
 from unittest.case import skip
 from uuid import uuid4
 
@@ -19,6 +20,7 @@ from pulp_ansible.app.galaxy.v3.views import get_collection_dependents, get_uniq
 from rest_framework import status
 
 from galaxy_ng.app import models
+from galaxy_ng.app.api.v3.viewsets.collection import CollectionRepositoryMixing
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.tests.constants import TEST_COLLECTION_CONFIGS
 
@@ -323,3 +325,87 @@ class TestCollectionViewsets(BaseTestCase):
     #     for field in ('manifest', 'files'):
     #         with self.subTest(field=field):
     #             self.assertNotIn(field, response.data[0])
+
+
+@override_settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value)
+class TestCollectionRepositoryMixing(BaseTestCase):
+    """Test CollectionRepositoryMixing get_repos method."""
+
+    def setUp(self):
+        """Set up test data."""
+        super().setUp()
+
+        # Use unique names to avoid conflicts with other tests
+        unique_id = uuid4().hex[:8]
+        staging_name = f"staging-{unique_id}"
+        published_name = f"published-{unique_id}"
+
+        # Create mock repositories
+        self.staging_repo = AnsibleRepository.objects.create(name=staging_name)
+        self.published_repo = AnsibleRepository.objects.create(name=published_name)
+
+        # Create distributions
+        AnsibleDistribution.objects.create(
+            name=staging_name,
+            base_path=staging_name,
+            repository=self.staging_repo
+        )
+        AnsibleDistribution.objects.create(
+            name=published_name,
+            base_path=published_name,
+            repository=self.published_repo
+        )
+
+        # Create a minimal mixin instance
+        self.mixin = CollectionRepositoryMixing()
+        self.mixin.kwargs = {
+            'source_path': staging_name,
+            'dest_path': published_name,
+            'namespace': 'test',
+            'name': 'collection',
+            'version': '1.0.0',
+        }
+
+    def test_get_repos_without_cache(self):
+        """Test get_repos() fetches from database when no cache exists."""
+        src_repo, dest_repo = self.mixin.get_repos()
+
+        self.assertEqual(src_repo.pk, self.staging_repo.pk)
+        self.assertEqual(dest_repo.pk, self.published_repo.pk)
+
+    def test_get_repos_with_cache(self):
+        """Test get_repos() returns cached repos when cache exists."""
+        # Set up cache on the mixin instance
+        self.mixin._src_repo = self.staging_repo
+        self.mixin._dest_repo = self.published_repo
+
+        # Mock the database query to ensure it's NOT called
+        with mock.patch.object(
+            AnsibleDistribution.objects, 'get'
+        ) as mock_get:
+            src_repo, dest_repo = self.mixin.get_repos()
+
+            # Assert cache was used (no DB queries)
+            mock_get.assert_not_called()
+
+            # Assert correct repos returned
+            self.assertEqual(src_repo.pk, self.staging_repo.pk)
+            self.assertEqual(dest_repo.pk, self.published_repo.pk)
+
+    def test_get_repos_cache_performance(self):
+        """Test that cache reduces database queries."""
+        # First call - should hit database
+        with self.assertNumQueries(4):  # Two distributions + two repository FK lookups
+            src_repo1, dest_repo1 = self.mixin.get_repos()
+
+        # Manually set cache (simulating access policy setting it)
+        self.mixin._src_repo = src_repo1
+        self.mixin._dest_repo = dest_repo1
+
+        # Second call with cache - should NOT hit database
+        with self.assertNumQueries(0):
+            src_repo2, dest_repo2 = self.mixin.get_repos()
+
+        # Verify same repos returned
+        self.assertEqual(src_repo1.pk, src_repo2.pk)
+        self.assertEqual(dest_repo1.pk, dest_repo2.pk)

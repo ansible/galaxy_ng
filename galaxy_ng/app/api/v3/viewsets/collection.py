@@ -251,6 +251,10 @@ class CollectionRepositoryMixing:
 
     def get_repos(self):
         """Get src and dest repos."""
+        # Check for cached repos from access policy to avoid duplicate queries
+        if hasattr(self, '_src_repo') and hasattr(self, '_dest_repo'):
+            return self._src_repo, self._dest_repo
+
         try:
             src_repo = AnsibleDistribution.objects.get(
                 base_path=self.kwargs['source_path']).repository

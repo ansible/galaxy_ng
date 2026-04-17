@@ -11,7 +11,7 @@ _collection_statements = [
         "action": "list",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "v3_can_view_repo_content"
+        "condition": "v3_can_view_repo_content",
     },
     {
         "action": "list",
@@ -39,13 +39,13 @@ _collection_statements = [
     },
     {
         "action": ["download"],
-        "principal": 'authenticated',
+        "principal": "authenticated",
         "effect": "allow",
-        "condition": "v3_can_view_repo_content"
+        "condition": "v3_can_view_repo_content",
     },
     {
         "action": ["download"],
-        "principal": 'anonymous',
+        "principal": "anonymous",
         "effect": "allow",
         "condition": ["unauthenticated_collection_download_enabled", "v3_can_view_repo_content"],
     },
@@ -59,21 +59,23 @@ _collection_statements = [
         "action": "update",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": ["can_update_collection", "v3_can_view_repo_content"]
+        "condition": ["can_update_collection", "v3_can_view_repo_content"],
     },
     {
         "action": ["copy_content", "move_content"],
         "principal": "authenticated",
         "effect": "allow",
         "condition": [
-            "has_model_perms:ansible.modify_ansible_repo_content", "v3_can_view_repo_content"]
+            "v3_can_copy_or_move:ansible.modify_ansible_repo_content",
+            "v3_can_view_repo_content",
+        ],
     },
     {
         "action": "sign",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": ["can_sign_collections", "v3_can_view_repo_content"]
-    }
+        "condition": ["can_sign_collections", "v3_can_view_repo_content"],
+    },
 ]
 
 _group_role_statements = [
@@ -88,7 +90,7 @@ _group_role_statements = [
         "effect": "allow",
         "condition": [
             "has_model_perms:galaxy.delete_group",
-        ]
+        ],
     },
     {
         "action": "create",
@@ -96,7 +98,7 @@ _group_role_statements = [
         "effect": "allow",
         "condition": [
             "has_model_perms:galaxy.add_group",
-        ]
+        ],
     },
     {
         "action": ["update", "partial_update"],
@@ -104,7 +106,7 @@ _group_role_statements = [
         "effect": "allow",
         "condition": [
             "has_model_perms:galaxy.update_group",
-        ]
+        ],
     },
 ]
 
@@ -114,7 +116,7 @@ _group_statements = [
         "action": ["create", "destroy", "update", "partial_update"],
         "principal": "*",
         "effect": "deny",
-        "condition": "is_local_resource_management_disabled"
+        "condition": "is_local_resource_management_disabled",
     },
 ]
 
@@ -131,49 +133,35 @@ _user_statements = [
         "effect": "allow",
         "condition": ["v3_can_view_users"],
     },
-    {
-        "action": "destroy",
-        "principal": "*",
-        "effect": "deny",
-        "condition": ["user_is_superuser"]
-    },
-    {
-        "action": "destroy",
-        "principal": "*",
-        "effect": "deny",
-        "condition": ["is_current_user"]
-    },
+    {"action": "destroy", "principal": "*", "effect": "deny", "condition": ["user_is_superuser"]},
+    {"action": "destroy", "principal": "*", "effect": "deny", "condition": ["is_current_user"]},
     {
         "action": "destroy",
         "principal": "*",
         "effect": "allow",
-        "condition": "has_model_perms:galaxy.delete_user"
+        "condition": "has_model_perms:galaxy.delete_user",
     },
     {
         "action": "create",
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:galaxy.add_user"
+        "condition": "has_model_perms:galaxy.add_user",
     },
     {
         "action": ["update", "partial_update"],
         "principal": "authenticated",
         "effect": "allow",
-        "condition": "has_model_perms:galaxy.change_user"
+        "condition": "has_model_perms:galaxy.change_user",
     },
     {
         "action": ["create", "destroy", "update", "partial_update"],
         "principal": "*",
         "effect": "deny",
-        "condition": "is_local_resource_management_disabled"
+        "condition": "is_local_resource_management_disabled",
     },
 ]
 _deny_all = [
-    {
-        "principal": "*",
-        "action": "*",
-        "effect": "deny"
-    },
+    {"principal": "*", "action": "*", "effect": "deny"},
 ]
 
 _read_only = [
@@ -185,8 +173,7 @@ _read_only = [
 ]
 
 STANDALONE_STATEMENTS = {
-    'CollectionViewSet': _collection_statements,
-
+    "CollectionViewSet": _collection_statements,
     "AppRootViewSet": [
         {
             "action": ["retrieve"],
@@ -194,8 +181,7 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
     ],
-
-    'AIDenyIndexView': [
+    "AIDenyIndexView": [
         {
             "action": ["ai-deny-index-list"],
             "principal": "*",
@@ -208,8 +194,7 @@ STANDALONE_STATEMENTS = {
             "condition": "can_edit_ai_deny_index",
         },
     ],
-
-    'NamespaceViewSet': [
+    "NamespaceViewSet": [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
@@ -219,73 +204,69 @@ STANDALONE_STATEMENTS = {
             "action": ["list", "retrieve"],
             "principal": "anonymous",
             "effect": "allow",
-            "condition": ["unauthenticated_collection_access_enabled"]
+            "condition": ["unauthenticated_collection_access_enabled"],
         },
         {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:galaxy.delete_namespace"
+            "condition": "has_model_or_obj_perms:galaxy.delete_namespace",
         },
         {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.add_namespace"
+            "condition": "has_model_perms:galaxy.add_namespace",
         },
         {
             "action": ["update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_or_obj_perms:galaxy.change_namespace"
+            "condition": "has_model_or_obj_perms:galaxy.change_namespace",
         },
     ],
-    'CollectionRemoteViewSet': [
-        {
-            "action": ["list", "retrieve"],
-            "principal": "authenticated",
-            "effect": "allow"
-        },
+    "CollectionRemoteViewSet": [
+        {"action": ["list", "retrieve"], "principal": "authenticated", "effect": "allow"},
         {
             "action": ["sync", "update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.change_collectionremote"
-        }
+            "condition": "has_model_perms:ansible.change_collectionremote",
+        },
     ],
-    'UserViewSet': _user_statements,
-    'MyUserViewSet': [
+    "UserViewSet": _user_statements,
+    "MyUserViewSet": [
         {
             "action": ["retrieve"],
             "principal": "anonymous",
             "effect": "allow",
-            "condition": "unauthenticated_collection_access_enabled"
+            "condition": "unauthenticated_collection_access_enabled",
         },
         {
             "action": ["retrieve", "update", "partial_update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "is_current_user"
+            "condition": "is_current_user",
         },
         {
             "action": ["create", "destroy", "update", "partial_update"],
             "principal": "*",
             "effect": "deny",
-            "condition": "is_local_resource_management_disabled"
+            "condition": "is_local_resource_management_disabled",
         },
     ],
     #  disable synclists for on prem installations
-    'SyncListViewSet': _deny_all,
+    "SyncListViewSet": _deny_all,
     #  disable synclists for on prem installations
-    'MySyncListViewSet': _deny_all,
-    'TaskViewSet': [
+    "MySyncListViewSet": _deny_all,
+    "TaskViewSet": [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
         },
     ],
-    'TagViewSet': [
+    "TagViewSet": [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
@@ -295,36 +276,24 @@ STANDALONE_STATEMENTS = {
     # LoginView, LogoutView and TokenView are all views instead of viewsets.
     # At the moment, DRF access policy doesn't seem to be able to correctly
     # determine the action for views, so we have to resort to using *
-    'LoginView': [
+    "LoginView": [
         {
-            "action": ['*'],
+            "action": ["*"],
             "principal": "*",
             "effect": "allow",
         }
     ],
-    'LogoutView': [
-        {
-            "action": ['*'],
-            "principal": "*",
-            "effect": "allow"
-        }
-    ],
-    'TokenView': [
-        {
-            "action": ['*'],
-            "principal": "authenticated",
-            "effect": "allow"
-        }
-    ],
-    'GroupViewSet': _group_statements,
-    'DistributionViewSet': [
+    "LogoutView": [{"action": ["*"], "principal": "*", "effect": "allow"}],
+    "TokenView": [{"action": ["*"], "principal": "authenticated", "effect": "allow"}],
+    "GroupViewSet": _group_statements,
+    "DistributionViewSet": [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
         },
     ],
-    'MyDistributionViewSet': [
+    "MyDistributionViewSet": [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
@@ -333,7 +302,7 @@ STANDALONE_STATEMENTS = {
     ],
     # TODO(newswangerd): More specific permissions will be required here when pulp_container
     # RBAC is added
-    'ContainerRepositoryViewSet': [
+    "ContainerRepositoryViewSet": [
         {
             "action": ["list", "retrieve"],
             "principal": "authenticated",
@@ -346,11 +315,10 @@ STANDALONE_STATEMENTS = {
             "condition": "has_model_perms:container.delete_containerrepository",
         },
     ],
-
     # The container readme can't just use the ContainerRepository access policies
     # because the readme viewset returns a readme object and not a container
     # repository object, which breaks has_model_or_obj_perms.
-    'ContainerReadmeViewset': [
+    "ContainerReadmeViewset": [
         {
             "action": ["retrieve"],
             "principal": "authenticated",
@@ -360,18 +328,19 @@ STANDALONE_STATEMENTS = {
             "action": ["update"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": ("has_container_namespace_perms:"
-                          "container.namespace_change_containerdistribution")
+            "condition": (
+                "has_container_namespace_perms:"
+                "container.namespace_change_containerdistribution"
+            ),
         },
     ],
-
-    'ContainerRegistryRemoteViewSet': [
+    "ContainerRegistryRemoteViewSet": [
         # prevents deletion of registry
         {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.delete_containerregistryremote"
+            "condition": "has_model_perms:galaxy.delete_containerregistryremote",
         },
         # allows authenticated users to VIEW registries
         {
@@ -384,37 +353,24 @@ STANDALONE_STATEMENTS = {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.add_containerregistryremote"
+            "condition": "has_model_perms:galaxy.add_containerregistryremote",
         },
+        # allows users with model change permissions to sync, update, and index registries
         {
-            "action": "sync",
+            "action": ["sync", "update", "index_execution_environments"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:galaxy.change_containerregistryremote"
-        },
-        # allows users with model create permissions to update registries
-        {
-            "action": "update",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.change_containerregistryremote"
-        },
-        {
-            "action": "index_execution_environments",
-            "principal": "authenticated",
-            "effect": "allow",
-            "condition": "has_model_perms:galaxy.change_containerregistryremote"
+            "condition": "has_model_perms:galaxy.change_containerregistryremote",
         },
     ],
-
-    'ContainerRemoteViewSet': [
+    "ContainerRemoteViewSet": [
         # The permissions for creating namespaces are used as a proxy for creating containers,
         # so allow users to create container remotes if they have create namespace permissions.
         {
             "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:container.add_containernamespace"
+            "condition": "has_model_perms:container.add_containernamespace",
         },
         {
             "action": ["list", "retrieve"],
@@ -428,13 +384,13 @@ STANDALONE_STATEMENTS = {
             "action": "update",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_distro_permission:container.change_containerdistribution"
+            "condition": "has_distro_permission:container.change_containerdistribution",
         },
         {
             "action": "sync",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_distro_permission:container.change_containerdistribution"
+            "condition": "has_distro_permission:container.change_containerdistribution",
         },
     ],
 }
